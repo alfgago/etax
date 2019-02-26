@@ -17,15 +17,16 @@ class CreateProductsTable extends Migration
             $table->bigIncrements('id');
           
             $table->unsignedBigInteger('company_id');
-            //$table->unsignedBigInteger('categoria_product_id');
+            $table->unsignedBigInteger('product_category_id')->nullable();
+          
             $table->string('code');
             $table->string('name');
             $table->string('measure_unit');
             $table->double('unit_price');
             $table->string('description')->nullable();
             $table->boolean('is_catalogue')->default(false);
-            $table->string('product_type');
-            $table->string('iva_type');
+            $table->string('default_iva_type');
+            $table->string('product_category_code')->nullable();
           
             $table->timestamps();
         });

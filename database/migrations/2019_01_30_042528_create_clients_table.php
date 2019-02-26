@@ -34,7 +34,8 @@ class CreateClientsTable extends Migration
             $table->string('zip')->nullable();
             $table->string('address')->nullable();
             $table->string('phone')->nullable();
-            $table->boolean('es_exento');
+            $table->boolean('es_exento')->default(false);
+            $table->string('billing_emails')->nullable();
           
             $table->timestamps();
         });

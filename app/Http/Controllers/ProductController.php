@@ -45,21 +45,21 @@ class ProductController extends Controller
           'measure_unit' => 'required',
           'unit_price' => 'required',
           'product_type' => 'required',
-          'iva_type' => 'required',
+          'default_iva_type' => 'required',
         ]);
       
         $product = new Product();
         $empresa = Company::first();
         $product->empresa_id = $empresa->id;
       
-        $product->codigo = $request->codigo;
-        $product->nombre = $request->nombre;
-        $product->unidad_medicion = $request->unidad_medicion;
-        $product->precio_unitario = $request->precio_unitario;
-        $product->descripcion = $request->descripcion;
-        $product->tipo_product = $request->tipo_product;
-        $product->tipo_iva_defecto = $request->tipo_iva_defecto;
-        $product->es_catalogo = true;
+        $product->code = $request->code;
+        $product->name = $request->name;
+        $product->product_category_code = $request->product_category_code;
+        $product->measure_unit = $request->measure_unit;
+        $product->unit_price = $request->unit_price;
+        $product->description = $request->description;
+        $product->default_iva_type = $request->default_iva_type;
+        $product->is_catalogue = true;
       
         $product->save();
       
@@ -97,26 +97,25 @@ class ProductController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {
+    {      
         $request->validate([
-          'codigo' => 'required',
-          'nombre' => 'required',
-          'unidad_medicion' => 'required',
-          'precio_unitario' => 'required',
-          'tipo_product' => 'required',
-          'tipo_iva_defecto' => 'required',
+          'code' => 'required',
+          'name' => 'required',
+          'measure_unit' => 'required',
+          'unit_price' => 'required',
+          'product_type' => 'required',
+          'default_iva_type' => 'required',
         ]);
       
         $product = Product::findOrFail($id);
       
-        $product->codigo = $request->codigo;
-        $product->nombre = $request->nombre;
-        $product->unidad_medicion = $request->unidad_medicion;
-        $product->precio_unitario = $request->precio_unitario;
-        $product->descripcion = $request->descripcion;
-        $product->tipo_product = $request->tipo_product;
-        $product->tipo_iva_defecto = $request->tipo_iva_defecto;
-        $product->es_catalogo = true;
+        $product->code = $request->code;
+        $product->name = $request->name;
+        $product->measure_unit = $request->measure_unit;
+        $product->unit_price = $request->unit_price;
+        $product->description = $request->description;
+        $product->default_iva_type = $request->default_iva_type;
+        $product->is_catalogue = true;
       
         $product->save();
       

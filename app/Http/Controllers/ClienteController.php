@@ -14,7 +14,10 @@ class ClientController extends Controller
      */
     public function index()
     {
-        //
+        $clientes = Client::all();
+        return view('Client/index', [
+          'clientes' => $clientes
+        ]);
     }
 
     /**
@@ -24,7 +27,7 @@ class ClientController extends Controller
      */
     public function create()
     {
-        //
+        return view("Client/create");
     }
 
     /**
@@ -35,7 +38,41 @@ class ClientController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+          'tipo_persona' => 'required',
+          'id_number' => 'required',
+          'code' => 'required',
+          'first_name' => 'required',
+          'email' => 'required',
+          'country' => 'required'
+        ]);
+      
+        $cliente = new Client();
+        $empresa = Company::first();
+        $cliente->empresa_id = $empresa->id;
+      
+        $cliente->tipo_persona = $request->tipo_persona;
+        $cliente->id_number = $request->id_number;
+        $cliente->code = $request->code;
+        $cliente->first_name = $request->first_name;
+        $cliente->last_name = $request->last_name;
+        $cliente->last_name2 = $request->last_name2;
+        $cliente->is_emisor = $request->is_emisor;
+        $cliente->is_receptor = $request->is_receptor;
+        $cliente->country = $request->country;
+        $cliente->state = $request->state;
+        $cliente->city = $request->city;
+        $cliente->district = $request->district;
+        $cliente->neighborhood = $request->neighborhood;
+        $cliente->zip = $request->zip;
+        $cliente->address = $request->address;
+        $cliente->phone = $request->phone;
+        $cliente->es_exento = $request->es_exento;
+        $cliente->billing_emails = $request->billing_emails;
+      
+        $cliente->save();
+      
+        return redirect('/clientes');
     }
 
     /**
@@ -44,7 +81,7 @@ class ClientController extends Controller
      * @param  \App\Client  $client
      * @return \Illuminate\Http\Response
      */
-    public function show(Client $client)
+    public function show($id)
     {
         //
     }
@@ -55,9 +92,10 @@ class ClientController extends Controller
      * @param  \App\Client  $client
      * @return \Illuminate\Http\Response
      */
-    public function edit(Client $client)
+    public function edit($id)
     {
-        //
+        $cliente = Client::findOrFail($id);
+        return view('Client/edit', compact('cliente') );
     }
 
     /**
@@ -67,9 +105,41 @@ class ClientController extends Controller
      * @param  \App\Client  $client
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Client $client)
+    public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+          'tipo_persona' => 'required',
+          'id_number' => 'required',
+          'code' => 'required',
+          'first_name' => 'required',
+          'email' => 'required',
+          'country' => 'required'
+        ]);
+      
+        $cliente = Client::findOrFail($id);
+      
+        $cliente->tipo_persona = $request->tipo_persona;
+        $cliente->id_number = $request->id_number;
+        $cliente->code = $request->code;
+        $cliente->first_name = $request->first_name;
+        $cliente->last_name = $request->last_name;
+        $cliente->last_name2 = $request->last_name2;
+        $cliente->is_emisor = $request->is_emisor;
+        $cliente->is_receptor = $request->is_receptor;
+        $cliente->country = $request->country;
+        $cliente->state = $request->state;
+        $cliente->city = $request->city;
+        $cliente->district = $request->district;
+        $cliente->neighborhood = $request->neighborhood;
+        $cliente->zip = $request->zip;
+        $cliente->address = $request->address;
+        $cliente->phone = $request->phone;
+        $cliente->es_exento = $request->es_exento;
+        $cliente->billing_emails = $request->billing_emails;
+      
+        $cliente->save();
+      
+        return redirect('/clientes');
     }
 
     /**
@@ -78,8 +148,9 @@ class ClientController extends Controller
      * @param  \App\Client  $client
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Client $client)
+    public function destroy($id)
     {
-        //
+        Client::find($id)->delete();
+        return redirect('/clientes');
     }
 }

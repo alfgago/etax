@@ -21,19 +21,29 @@
             </h3>
           </div>
 
+          $product->code = $request->code;
+        $product->name = $request->name;
+        $product->measure_unit = $request->measure_unit;
+        $product->unit_price = $request->unit_price;
+        $product->description = $request->description;
+        $product->default_iva_type = $request->default_iva_type;
+        $product->is_catalogue = true;
+          
+          <input type="hidden" class="form-control" name="is_catalogue" id="is_catalogue" value="true" required>
+          
           <div class="form-group col-md-6">
-            <label for="codigo">Código</label>
-            <input type="text" class="form-control" name="codigo" id="codigo" value="" required>
+            <label for="code">Código</label>
+            <input type="text" class="form-control" name="code" id="codigo" value="" required>
           </div>
           
           <div class="form-group col-md-6">
-            <label for="nombre">Nombre</label>
-            <input type="text" class="form-control" name="nombre" id="nombre" value="" required>
+            <label for="name">Nombre</label>
+            <input type="text" class="form-control" name="name" id="nombre" value="" required>
           </div>
           
           <div class="form-group col-md-6">
-            <label for="unidad_medicion">Unidad de medición</label>
-            <select class="form-control" name="unidad_medicion" id="unidad_medicion" value="" required>
+            <label for="measure_unit">Unidad de medición</label>
+            <select class="form-control" name="measure_unit" id="unidad_medicion" value="" required>
               @foreach ( \App\Variables::unidadesMedicion() as $unidad )
                 <option value="{{ $unidad['codigo'] }}" >{{ $unidad['nombre'] }}</option>
               @endforeach
@@ -42,18 +52,18 @@
           </div>
           
           <div class="form-group col-md-6">
-            <label for="precio_unitario">Precio unitario por defecto</label>
-            <input type="text" class="form-control" name="precio_unitario" id="precio_unitario" value="" required>
+            <label for="unit_price">Precio unitario por defecto</label>
+            <input type="text" class="form-control" name="unit_price" id="precio_unitario" value="" required>
           </div>
           
           <div class="form-group col-md-12">
-            <label for="descripcion">Descripción</label>
-            <textarea class="form-control" name="descripcion" id="descripcion" value="" ></textarea>
+            <label for="description">Descripción</label>
+            <textarea class="form-control" name="description" id="descripcion" value="" ></textarea>
           </div>
           
           <div class="form-group col-md-6">
-            <label for="tipo_producto">Tipo de producto</label>
-            <select class="form-control" name="tipo_producto" id="tipo_producto" required>
+            <label for="product_category_code">Tipo de producto</label>
+            <select class="form-control" name="product_category_code" id="tipo_producto" required>
               @foreach ( \App\Variables::tiposRepercutidos() as $tipo )
                 <option value="{{ $tipo['nombre'] }}" attr-iva="{{ $tipo['codigo_iva'] }}" >{{ $tipo['nombre'] }}</option>
               @endforeach
@@ -61,8 +71,8 @@
           </div>
           
           <div class="form-group col-md-6">
-            <label for="tipo_iva_defecto">Tipo de IVA</label>
-            <select class="form-control" name="tipo_iva_defecto" id="tipo_iva" required>
+            <label for="default_iva_type">Tipo de IVA</label>
+            <select class="form-control" name="default_iva_type" id="tipo_iva" required>
               @foreach ( \App\Variables::tiposIVARepercutidos() as $tipo )
                 <option value="{{ $tipo['codigo'] }}" attr-iva="{{ $tipo['porcentaje'] }}">{{ $tipo['nombre'] }}</option>
               @endforeach
@@ -71,7 +81,7 @@
 
         </div>
 
-        <button type="submit" class="btn btn-primary">Crear factura</button>
+        <button type="submit" class="btn btn-primary">Crear producto</button>
 
         @if ($errors->any())
           <ul>

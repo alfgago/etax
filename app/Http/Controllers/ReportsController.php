@@ -3,12 +3,9 @@
 namespace App\Http\Controllers;
 
 use \Carbon\Carbon;
-use App\LineaFacturaEmitida;
-use App\LineaFacturaRecibida;
-use App\FacturaEmitida;
-use App\FacturaRecibida;
-use App\Empresa;
-use App\CalculosFacturacion;
+use App\Company;
+use App\User;
+use App\CalculatedTax;
 use Illuminate\Http\Request;
 
 class ReportsController extends Controller
@@ -24,15 +21,12 @@ class ReportsController extends Controller
       $from = Carbon::now()->startOfMonth();
       $to = Carbon::now()->endOfMonth();
       
-      $calculosAcumulados = CalculosFacturacion::calcularFacturacion( $fromAcumulado, $toAcumulado, 0, 0 );
-      /*$calculosAnterior = CalculosFacturacion::calcularFacturacion( $fromAnterior, $toAnterior, -$calculosAcumulados->liquidacion, $calculosAcumulados->prorrata );
-      $calculos = CalculosFacturacion::calcularFacturacion( $from, $to, -$calculosAnterior->liquidacion, $calculosAcumulados->prorrata );*/
-      
-      $calculosAnterior = CalculosFacturacion::calcularFacturacion( $fromAnterior, $toAnterior, 0, $calculosAcumulados->prorrata );
-      $calculos = CalculosFacturacion::calcularFacturacion( $from, $to, 0, $calculosAcumulados->prorrata );
+      $calculosAcumulados = CalculatedTax::calcularFacturacion( $fromAcumulado, $toAcumulado, 0, 0 );
+      $calculosAnterior = CalculatedTax::calcularFacturacion( $fromAnterior, $toAnterior, 0, $calculosAcumulados->prorrata );
+      $calculos = CalculatedTax::calcularFacturacion( $from, $to, 0, $calculosAcumulados->prorrata );
       
       return view('/dashboard', compact('calculos', 'calculosAnterior', 'calculosAcumulados'));
-      
+
     }
   
 }
