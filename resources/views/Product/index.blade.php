@@ -23,22 +23,26 @@
             </tr>
           </thead>
           <tbody>
-            @if ( $productos->count() )
-              @foreach ( $productos as $producto )
+            @if ( $products->count() )
+              @foreach ( $products as $producto )
                 <tr>
-                  <td>{{ $producto->codigo }}</td>
-                  <td>{{ $producto->nombre }}</td>
+                  <td>{{ $producto->code }}</td>
+                  <td>{{ $producto->name }}</td>
                   <td>{{ $producto->getUnidadMedicionName() }}</td>
-                  <td>{{ $producto->precio_unitario }}</td>
-                  <td>{{ $producto->tipo_producto }}</td>
+                  <td>{{ $producto->unit_price }}</td>
+                  <td>{{ $producto->productCategory->name }}</td>
                   <td>{{ $producto->getTipoIVAName() }} </td>
                   
                   <td> 
-                    <a href="/productos/{{ $producto->id }}/edit" title="Editar producto" class="icon-holder"><i class="c-light-blue-500 ti-pencil"></i> </a>
-                    <form class="inline-form" method="POST" action="/productos/{{ $producto->id }}">
+                    <a href="/productos/{{ $producto->id }}/edit" title="Editar producto" class="text-success mr-2"> 
+                      <i class="nav-icon i-Pen-2 font-weight-bold"></i> 
+                    </a>
+                    <form class="inline-form" method="POST" action="/productos/{{ $producto->id }}" style="display: inline-block;">
                       @csrf
                       @method('delete')
-                      <button title="Eliminar producto" type="submit" class="icon-holder"><i class="c-light-blue-500 ti-trash"></i> </button>
+                      <button type="submit" class="text-danger mr-2"  title="Eliminar producto" style="display: inline-block; background: none; border: 0;">
+                        <i class="nav-icon i-Close-Window font-weight-bold"></i>
+                      </button>
                     </form>
                   </td>
                 </tr>

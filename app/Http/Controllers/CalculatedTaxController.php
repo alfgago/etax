@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\CalculatedTaxes;
+use App\CalculatedTax;
 use Illuminate\Http\Request;
 
-class CalculatedTaxesController extends Controller
+class CalculatedTaxController extends Controller
 {
     /**
      * Display a listing of the resource.

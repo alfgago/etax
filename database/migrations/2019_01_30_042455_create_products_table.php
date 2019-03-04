@@ -26,7 +26,6 @@ class CreateProductsTable extends Migration
             $table->string('description')->nullable();
             $table->boolean('is_catalogue')->default(false);
             $table->string('default_iva_type');
-            $table->string('product_category_code')->nullable();
           
             $table->timestamps();
         });

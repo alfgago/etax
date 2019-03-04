@@ -18,7 +18,7 @@
                 <div class="card o-hidden flex-row mb-4 d-flex">
                     <div class="list-thumb d-flex">
                         <!-- TUMBNAIL -->
-                        <img src="{{asset('assets/images/products/headphone-1.jpg')}}" alt="">
+                        <img src="" alt="">
                     </div>
                     <div class="flex-grow-1 pl-2 d-flex">
                         <div class="card-body align-self-center d-flex flex-column justify-content-between align-items-lg-center flex-lg-row">
@@ -43,7 +43,7 @@
                 <div class="card o-hidden flex-row mb-4 d-flex">
                     <div class="list-thumb d-flex">
                         <!-- TUMBNAIL -->
-                        <img src="{{asset('assets/images/products/headphone-2.jpg')}}" alt="">
+                        <img src="" alt="">
                     </div>
                     <div class="flex-grow-1 pl-2 d-flex">
                         <div class="card-body align-self-center d-flex flex-column justify-content-between align-items-lg-center flex-lg-row">
@@ -68,7 +68,7 @@
                 <div class="card o-hidden flex-row mb-4 d-flex">
                     <div class="list-thumb d-flex">
                         <!-- TUMBNAIL -->
-                        <img src="{{asset('assets/images/products/headphone-3.jpg')}}" alt="">
+                        <img src="" alt="">
                     </div>
                     <div class="flex-grow-1 pl-2 d-flex">
                         <div class="card-body align-self-center d-flex flex-column justify-content-between align-items-lg-center flex-lg-row">
@@ -93,7 +93,7 @@
                 <div class="card o-hidden flex-row mb-4 d-flex">
                     <div class="list-thumb d-flex">
                         <!-- TUMBNAIL -->
-                        <img src="{{asset('assets/images/products/headphone-4.jpg')}}" alt="">
+                        <img src="" alt="">
                     </div>
                     <div class="flex-grow-1 pl-2 d-flex">
                         <div class="card-body align-self-center d-flex flex-column justify-content-between align-items-lg-center flex-lg-row">

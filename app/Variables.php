@@ -28,7 +28,7 @@ class Variables
       ['nombre'=>'Exenciones autoconsumo', 'codigo'=>'240', 'porcentaje'=>'0'],
       ['nombre'=>'Exenciones subjetivas', 'codigo'=>'250', 'porcentaje'=>'0'],
       ['nombre'=>'Ventas a no sujetos', 'codigo'=>'260', 'porcentaje'=>'0'],
-      ['nombre'=>'Rectificaciones exentas', 'codigo'=>'299', 'porcentaje'=>'0'],
+      ['nombre'=>'Reclasificaciones exentas', 'codigo'=>'299', 'porcentaje'=>'0'],
     ];
 
     return $lista;
@@ -37,7 +37,7 @@ class Variables
    public static function tiposRepercutidos() {
     $lista = [
       ['nombre'=>'Bienes generales', 'codigo_iva'=>'103'],
-      ['nombre'=>'Exportaciones', 'codigo_iva'=>'150'],
+      ['nombre'=>'Exportaciones/Importaciones', 'codigo_iva'=>'150'],
       ['nombre'=>'Servicios profesionales', 'codigo_iva'=>'103'],
       ['nombre'=>'Autoconsumo de servicios', 'codigo_iva'=>'123'],
       ['nombre'=>'Canasta básica', 'codigo_iva'=>'101'],
@@ -66,15 +66,15 @@ class Variables
       ['nombre'=>'Importaciones al 2%', 'codigo'=>'52', 'porcentaje'=>'2'],
       ['nombre'=>'Importaciones al 13%', 'codigo'=>'53', 'porcentaje'=>'13'],
       ['nombre'=>'Importaciones al 4%', 'codigo'=>'54', 'porcentaje'=>'4'],
-      ['nombre'=>'IVA soportado 100% deducible al 1%', 'codigo'=>'61', 'porcentaje'=>'1'],
-      ['nombre'=>'IVA soportado 100% deducible al 2%', 'codigo'=>'62', 'porcentaje'=>'2'],
-      ['nombre'=>'IVA soportado 100% deducible al 13%', 'codigo'=>'63', 'porcentaje'=>'13'],
-      ['nombre'=>'IVA soportado 100% deducible al 4%', 'codigo'=>'64', 'porcentaje'=>'4'],
+      ['nombre'=>'IVA soportado 100% deducible al 1% por destino', 'codigo'=>'61', 'porcentaje'=>'1'],
+      ['nombre'=>'IVA soportado 100% deducible al 2% por destino', 'codigo'=>'62', 'porcentaje'=>'2'],
+      ['nombre'=>'IVA soportado 100% deducible al 13% por destino', 'codigo'=>'63', 'porcentaje'=>'13'],
+      ['nombre'=>'IVA soportado 100% deducible al 4% por destino', 'codigo'=>'64', 'porcentaje'=>'4'],
       ['nombre'=>'IVA no deducible por origen', 'codigo'=>'70', 'porcentaje'=>'0'],
       ['nombre'=>'IVA no deducible por destino', 'codigo'=>'77', 'porcentaje'=>'0'],
       ['nombre'=>'IVA de bienes de capital', 'codigo'=>'80', 'porcentaje'=>'13'],
       ['nombre'=>'IVA por pagos anticipados', 'codigo'=>'90', 'porcentaje'=>'13'],
-      ['nombre'=>'Rectificaciones', 'codigo'=>'99', 'porcentaje'=>'13'],
+      ['nombre'=>'Reclasificaciones', 'codigo'=>'99', 'porcentaje'=>'13'],
     ];
 
     return $lista;
@@ -83,8 +83,10 @@ class Variables
    public static function tiposSoportados() {
     $lista = [
       ['nombre'=>'Bienes generales', 'codigo_iva'=>'3'],
+      ['nombre'=>'Exportaciones/Importaciones', 'codigo_iva'=>'13'],
       ['nombre'=>'Servicios profesionales', 'codigo_iva'=>'3'],
       ['nombre'=>'Canasta básica', 'codigo_iva'=>'1'],
+      ['nombre'=>'Servicios médicos', 'codigo_iva'=>'4'],
       ['nombre'=>'Medicamentos', 'codigo_iva'=>'2'],
       ['nombre'=>'Turismo', 'codigo_iva'=>'77'],
       ['nombre'=>'Libros', 'codigo_iva'=>'70'],

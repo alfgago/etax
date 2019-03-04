@@ -36,7 +36,7 @@ class Bill extends Model
     public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $is_exempt )
     {
       return BillItem::create([
-        'factura_emitida_id' => $this->id,
+        'bill_id' => $this->id,
         'item_number' => $item_number,
         'code' => $code,
         'name' => $name,
@@ -58,9 +58,9 @@ class Bill extends Model
     public function addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $is_exempt )
     {
       if( $item_id ){
-        $item = InvoiceItem::find($item_id);
+        $item = BillItem::find($item_id);
         //Revisa que la linea exista y pertenece a la factura actual. Asegura que si el ID se cambia en frontend, no se actualice.
-        if( $item && $item->invoice_id == $this->id ) {
+        if( $item && $item->bill_id == $this->id ) {
           $item->item_number = $item_number;
           $item->code = $code;
           $item->name = $name;

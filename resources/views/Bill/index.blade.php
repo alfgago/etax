@@ -14,30 +14,33 @@
             <tr>
               <th>ID</th>
               <th>Proveedor</th>
-              <th>Fecha</th>
               <th>Subtotal</th>
               <th>Monto IVA</th>
               <th>Total</th>
               <th>Notas</th>
+              <th>F. Generada</th>
+              <th>F. Vencimiento</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            @if ( $facturas->count() )
-              @foreach ( $facturas as $factura )
+            @if ( $bills->count() )
+              @foreach ( $bills as $bill )
                 <tr>
-                  <td>{{ $factura->id }}</td>
-                  <td>{{ $factura->proveedor }}</td>
-                  <td>{{ $factura->fecha_recibida }}</td>
-                  <td>{{ $factura->subtotal }}</td>
-                  <td>{{ $factura->monto_iva }}</td>
-                  <td>{{ $factura->total }}</td>
-                  <td>{{ $factura->notas }}</td>
+                  <td>{{ $bill->id }}</td>
+                  <td>{{ $bill->provider }}</td>
+                  <td>{{ $bill->subtotal }}</td>
+                  <td>{{ $bill->iva_amount }}</td>
+                  <td>{{ $bill->total }}</td>
+                  <td>{{ $bill->description }}</td>
+                  <td>{{ $bill->generatedDate()->format('d/m/Y') }}</td>
+                  <td>{{ $bill->dueDate()->format('d/m/Y') }}</td>
+                  
                   <td> 
-                    <a href="/facturas-recibidas/{{ $factura->id }}/edit" title="Editar factura" class="text-success mr-2"> 
+                    <a href="/facturas-recibidas/{{ $bill->id }}/edit" title="Editar factura" class="text-success mr-2"> 
                       <i class="nav-icon i-Pen-2 font-weight-bold"></i> 
                     </a>
-                    <form class="inline-form" method="POST" action="/facturas-recibidas/{{ $factura->id }}" style="display: inline-block;">
+                    <form class="inline-form" method="POST" action="/facturas-recibidas/{{ $bill->id }}" style="display: inline-block;">
                       @csrf
                       @method('delete')
                       <button type="submit" class="text-danger mr-2" style="display: inline-block; background: none; border: 0;">
@@ -51,7 +54,7 @@
 
           </tbody>
         </table>
-        <a type="submit" class="btn btn-primary" href="/facturas-recibidas/create">Crear factura nueva</a>
+        <a type="submit" class="btn btn-primary" href="/facturas-recibidas/create">Ingresar factura nueva</a>
       </div>  
     </div>  
   </div>  

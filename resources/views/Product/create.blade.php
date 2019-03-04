@@ -20,14 +20,6 @@
               Información de producto
             </h3>
           </div>
-
-          $product->code = $request->code;
-        $product->name = $request->name;
-        $product->measure_unit = $request->measure_unit;
-        $product->unit_price = $request->unit_price;
-        $product->description = $request->description;
-        $product->default_iva_type = $request->default_iva_type;
-        $product->is_catalogue = true;
           
           <input type="hidden" class="form-control" name="is_catalogue" id="is_catalogue" value="true" required>
           
@@ -62,10 +54,10 @@
           </div>
           
           <div class="form-group col-md-6">
-            <label for="product_category_code">Tipo de producto</label>
-            <select class="form-control" name="product_category_code" id="tipo_producto" required>
-              @foreach ( \App\Variables::tiposRepercutidos() as $tipo )
-                <option value="{{ $tipo['nombre'] }}" attr-iva="{{ $tipo['codigo_iva'] }}" >{{ $tipo['nombre'] }}</option>
+            <label for="product_category_id">Tipo de producto</label>
+            <select class="form-control" name="product_category_id" id="tipo_producto" required>
+              @foreach ( \App\ProductCategory::all() as $tipo )
+                <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" >{{ $tipo['name'] }}</option>
               @endforeach
             </select>
           </div>
@@ -99,7 +91,10 @@
 @endsection
 
 @section('footer-scripts')
-<script src="/js/form-facturas.js"></script>
+<script src="/assets/js/vendor/pickadate/picker.js"></script>
+<script src="/assets/js/vendor/pickadate/picker.date.js"></script>
+<script src="/assets/js/vendor/pickadate/picker.time.js"></script>
+<script src="/assets/js/form-facturas.js"></script>
 <script>
 $('#tipo_iva').val(103);
 </script>

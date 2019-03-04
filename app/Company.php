@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Company extends Model
 {
     protected $table = 'companies';
+    protected $guarded = [];
   
     //Relación con facturas emitidas
     public function facturasEmitidas()

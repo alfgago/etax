@@ -42,43 +42,43 @@ class BillController extends Controller
     {
       
         $bill = new Bill();
-        $empresa = Company::first();
-        $bill->empresa_id = $empresa->id;
+        $company = Company::first();
+        $bill->company_id = $company->id;
       
         //Datos generales y para Hacienda
-        $invoice->document_type = "01";
-        $invoice->invoice_key = "50601021900310270242900100001010000000162174804809";
-        $invoice->reference_number = $company->reference_number + 1;
+        $bill->document_type = "01";
+        $bill->document_key = "50601021900310270242900100001010000000162174804809";
+        $bill->reference_number = $company->reference_number + 1;
         $numero_doc = ((int)$company->document_number) + 1;
-        $invoice->document_number = str_pad($numero_doc, 20, '0', STR_PAD_LEFT);
-        $invoice->sale_condition = $request->sale_condition;
-        $invoice->payment_type = $request->payment_type;
-        $invoice->credit_time = $request->credit_time;
-        $invoice->buy_order = $request->buy_order;
-        $invoice->other_reference = $request->other_reference;
-        $invoice->hacienda_status = "01";
-        $invoice->payment_status = "01";
-        $invoice->payment_receipt = "VOUCHER-123451234512345";
-        $invoice->generation_method = "M";
+        $bill->document_number = str_pad($numero_doc, 20, '0', STR_PAD_LEFT);
+        $bill->sale_condition = $request->sale_condition;
+        $bill->payment_type = $request->payment_type;
+        $bill->credit_time = $request->credit_time;
+        $bill->buy_order = $request->buy_order;
+        $bill->other_reference = $request->other_reference;
+        $bill->hacienda_status = "01";
+        $bill->payment_status = "01";
+        $bill->payment_receipt = "VOUCHER-123451234512345";
+        $bill->generation_method = "M";
       
         //Datos de proveedor
-        $bill->proveedor = $request->proveedor;
+        $bill->provider = $request->provider;
         
         //Datos de factura
-        $invoice->description = $request->description;
-        $invoice->subtotal = $request->subtotal;
-        $invoice->currency = $request->currency;
-        $invoice->currency_rate = $request->currency_rate;
-        $invoice->total = $request->total;
-        $invoice->iva_amount = $request->iva_amount;
+        $bill->description = $request->description;
+        $bill->subtotal = $request->subtotal;
+        $bill->currency = $request->currency;
+        $bill->currency_rate = $request->currency_rate;
+        $bill->total = $request->total;
+        $bill->iva_amount = $request->iva_amount;
 
         //Fechas
         $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
-        $invoice->generated_date = $fecha;
+        $bill->generated_date = $fecha;
         $fechaV = Carbon::createFromFormat('d/m/Y', $request->due_date );
-        $invoice->due_date = $fechaV;
+        $bill->due_date = $fechaV;
       
-        $invoice->save();
+        $bill->save();
 
         foreach($request->items as $item){
           $item_number = $item['item_number'];
@@ -96,10 +96,10 @@ class BillController extends Controller
           $iva_percentage = $item['iva_percentage'];
           $is_exempt = false;
           
-          $invoice->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $is_exempt );
+          $bill->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $is_exempt );
         }
       
-        return redirect('/bills');
+        return redirect('/facturas-recibidas');
     }
 
     /**
@@ -122,6 +122,12 @@ class BillController extends Controller
     public function edit($id)
     {
         $bill = Bill::findOrFail($id);
+      
+        //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
+        if( $bill->generation_method != 'M' ){
+          return redirect('/facturas-recibidas');
+        }  
+      
         return view('Bill/edit', compact('bill') );
     }
 
@@ -138,49 +144,46 @@ class BillController extends Controller
         $bill = Bill::findOrFail($id);
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
-        if( $bill->metodo_generacion != 'M' ){
-          return redirect('/bills');
+        if( $bill->generation_method != 'M' ){
+          return redirect('/facturas-recibidas');
         }
       
-        $empresa = $bill->empresa;
+        $company = $bill->company;
       
         //Datos generales y para Hacienda
-        $bill->tipo_documento = "01";
-        $bill->clave_factura = "50601021900310270242900100001010000000162174804809";
-        //$bill->correos_envio = $request->correos_envio;
-        $invoice->sale_condition = $request->sale_condition;
-        $invoice->payment_type = $request->payment_type;
-        $invoice->credit_time = $request->credit_time;
-        $invoice->buy_order = $request->buy_order;
-        $invoice->other_reference = $request->other_reference;
-        $invoice->hacienda_status = "01";
-        $invoice->payment_status = "01";
-        $invoice->payment_receipt = "VOUCHER-123451234512345";
-        $invoice->generation_method = "M";
+        $bill->sale_condition = $request->sale_condition;
+        $bill->payment_type = $request->payment_type;
+        $bill->credit_time = $request->credit_time;
+        $bill->buy_order = $request->buy_order;
+        $bill->other_reference = $request->other_reference;
+        $bill->hacienda_status = "01";
+        $bill->payment_status = "01";
+        $bill->payment_receipt = "VOUCHER-123451234512345";
+        $bill->generation_method = "M";
       
         //Datos de proveedor
-        $bill->proveedor = $request->proveedor;
+        $bill->provider = $request->provider;
+        $bill->send_emails = $request->send_emails;
         
         //Datos de factura
-        $invoice->description = $request->description;
-        $invoice->subtotal = $request->subtotal;
-        $invoice->currency = $request->currency;
-        $invoice->currency_rate = $request->currency_rate;
-        $invoice->total = $request->total;
-        $invoice->iva_amount = $request->iva_amount;
+        $bill->description = $request->description;
+        $bill->subtotal = $request->subtotal;
+        $bill->currency = $request->currency;
+        $bill->currency_rate = $request->currency_rate;
+        $bill->total = $request->total;
+        $bill->iva_amount = $request->iva_amount;
 
         //Fechas
         $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
-        $invoice->generated_date = $fecha;
+        $bill->generated_date = $fecha;
         $fechaV = Carbon::createFromFormat('d/m/Y', $request->due_date );
-        $invoice->due_date = $fechaV;
+        $bill->due_date = $fechaV;
       
         $bill->save();
       
         //Recorre las items de factura y las guarda
         $lids = array();
         foreach($request->items as $item) {
-          
           $item_id = $item['id'] ? $item['id'] : 0;
           $item_number = $item['item_number'];
           $code = $item['code'];
@@ -197,18 +200,18 @@ class BillController extends Controller
           $iva_percentage = $item['iva_percentage'];
           $is_exempt = false;
           
-          $item_modificado = $invoice->addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $is_exempt );
+          $item_modificado = $bill->addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $is_exempt );
 
           array_push( $lids, $item_modificado->id );
         }
       
-        foreach ( $invoice->items as $item ) {
+        foreach ( $bill->items as $item ) {
           if( !in_array( $item->id, $lids ) ) {
             $item->delete();
           }
         }
       
-        return redirect('/bills');
+        return redirect('/facturas-recibidas');
     }
 
     /**
@@ -224,6 +227,6 @@ class BillController extends Controller
           $linea->delete();
         }
         $bill->delete();
-        return redirect('/bills');
+        return redirect('/facturas-recibidas');
     }
 }

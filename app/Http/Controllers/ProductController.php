@@ -44,17 +44,17 @@ class ProductController extends Controller
           'name' => 'required',
           'measure_unit' => 'required',
           'unit_price' => 'required',
-          'product_type' => 'required',
+          'product_category_id' => 'required',
           'default_iva_type' => 'required',
         ]);
       
         $product = new Product();
-        $empresa = Company::first();
-        $product->empresa_id = $empresa->id;
+        $company = Company::first();
+        $product->company_id = $company->id;
       
         $product->code = $request->code;
         $product->name = $request->name;
-        $product->product_category_code = $request->product_category_code;
+        $product->product_category_id = $request->product_category_id;
         $product->measure_unit = $request->measure_unit;
         $product->unit_price = $request->unit_price;
         $product->description = $request->description;
@@ -63,7 +63,7 @@ class ProductController extends Controller
       
         $product->save();
       
-        return redirect('/products');
+        return redirect('/productos');
     }
 
     /**
@@ -103,7 +103,7 @@ class ProductController extends Controller
           'name' => 'required',
           'measure_unit' => 'required',
           'unit_price' => 'required',
-          'product_type' => 'required',
+          'product_category_id' => 'required',
           'default_iva_type' => 'required',
         ]);
       
@@ -111,6 +111,7 @@ class ProductController extends Controller
       
         $product->code = $request->code;
         $product->name = $request->name;
+        $product->product_category_id = $request->product_category_id;
         $product->measure_unit = $request->measure_unit;
         $product->unit_price = $request->unit_price;
         $product->description = $request->description;
@@ -131,6 +132,6 @@ class ProductController extends Controller
     public function destroy($id)
     {
         Product::find($id)->delete();
-        return redirect('/products');
+        return redirect('/productos');
     }
 }

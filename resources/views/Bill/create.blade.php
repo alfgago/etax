@@ -50,8 +50,8 @@
                 </div>
 
                 <div class="form-group col-md-12">
-                  <label for="proveedor">Nombre</label>
-                  <input type="text" class="form-control" name="proveedor" id="proveedor" placeholder="" required>
+                  <label for="provider">Nombre</label>
+                  <input type="text" class="form-control" name="provider" id="proveedor" placeholder="" required>
                 </div>
                 
                 <div class="form-group col-md-4">
@@ -85,9 +85,9 @@
                 </div>
 
                   <div class="form-group col-md-6">
-                    <label for="fecha_recibida">Fecha</label>
+                    <label for="generated_date">Fecha</label>
                     <div class="input-group">
-                      <input id="fecha_recibida" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="fecha_recibida" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
+                      <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
                       <div class="input-group-append">
                         <button class="btn btn-secondary" type="button">
                             <i class="icon-regular i-Calendar-4"></i>
@@ -109,9 +109,9 @@
                   </div>
 
                   <div class="form-group col-md-6">
-                    <label for="fecha_vencimiento">Fecha de vencimiento</label>
+                    <label for="due_date">Fecha de vencimiento</label>
                     <div class="input-group">
-                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="fecha_vencimiento" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
+                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
                       <div class="input-group-append">
                         <button class="btn btn-secondary" type="button">
                             <i class="icon-regular i-Calendar-4"></i>
@@ -123,9 +123,9 @@
                   <div class="form-group col-md-6"></div>
 
                   <div class="form-group col-md-6">
-                    <label for="condicion_venta">Condición de venta</label>
+                    <label for="sale_condition">Condición de venta</label>
                     <div class="input-group">
-                      <select id="condicion_venta" name="condicion_venta" class="form-control" required>
+                      <select id="condicion_venta" name="sale_condition" class="form-control" required>
                         <option selected value="01">Contado</option>
                         <option value="02">Crédito</option>
                         <option value="03">Consignación</option>
@@ -138,9 +138,9 @@
                   </div>
 
                   <div class="form-group col-md-6">
-                    <label for="medio_pago">Método de pago</label>
+                    <label for="payment_type">Método de pago</label>
                     <div class="input-group">
-                      <select id="medio_pago" name="medio_pago" class="form-control" required>
+                      <select id="medio_pago" name="payment_type" class="form-control" required>
                         <option value="01" selected>Efectivo</option>
                         <option value="02">Tarjeta</option>
                         <option value="03">Cheque</option>
@@ -152,26 +152,26 @@
                   </div>
 
                   <div class="form-group col-md-6">
-                    <label for="referencia">Referencia</label>
-                    <input type="text" class="form-control" name="referencia" id="referencia" value="" >
+                    <label for="other_reference">Referencia</label>
+                    <input type="text" class="form-control" name="other_reference" id="referencia" value="" >
                   </div>
 
                   <div class="form-group col-md-6">
-                    <label for="orden_compra">Orden de compra</label>
-                    <input type="text" class="form-control" name="orden_compra" id="orden_compra" value="" >
+                    <label for="buy_order">Orden de compra</label>
+                    <input type="text" class="form-control" name="buy_order" id="orden_compra" value="" >
                   </div>
 
                   <div class="form-group col-md-6">
-                    <label for="moneda">Moneda</label>
-                    <select class="form-control" name="moneda" id="moneda" required>
+                    <label for="currency">Moneda</label>
+                    <select class="form-control" name="currency" id="moneda" required>
                       <option value="crc" selected>CRC</option>
                       <option value="crc">USD</option>
                     </select>
                   </div>
 
                   <div class="form-group col-md-6">
-                    <label for="tipo_cambio">Tipo de cambio</label>
-                    <input type="text" class="form-control" name="tipo_cambio" id="tipo_cambio" value="1.00" required>
+                    <label for="currency_rate">Tipo de cambio</label>
+                    <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="1.00" required>
                   </div>
 
               </div>
@@ -188,10 +188,10 @@
             </div>
 
             <div class="form-group col-md-12">
-              <div class="linea-factura-form form-row">
+              <div class="item-factura-form form-row">
 
                 <input type="hidden" class="form-control" id="lnum" value="">
-                <input type="hidden" class="form-control" id="linea_id" value="">
+                <input type="hidden" class="form-control" id="item_id" value="">
                 
                 <div class="form-group col-md-2">
                   <label for="codigo">Código</label>
@@ -206,8 +206,8 @@
                 <div class="form-group col-md-3">
                   <label for="tipo_producto">Tipo de producto</label>
                   <select class="form-control" id="tipo_producto" >
-                    @foreach ( \App\Variables::tiposSoportados() as $producto )
-                      <option value="{{ $producto['nombre'] }}" codigo="{{ $producto['codigo_iva'] }}" >{{ $producto['nombre'] }}</option>
+                    @foreach ( \App\ProductCategory::all() as $tipo )
+                      <option value="{{ $tipo->id }}" codigo="{{ $tipo->invoice_iva_code }}" >{{ $tipo->name }}</option>
                     @endforeach
                   </select>
                 </div>
@@ -242,7 +242,7 @@
 
                 <div class="form-group col-md-2">
                   <label for="nombre_proveedor">Subtotal</label>
-                  <input type="text" class="form-control" id="linea_subtotal" placeholder="" readonly="true" >
+                  <input type="text" class="form-control" id="item_subtotal" placeholder="" readonly="true" >
                 </div>
 
                 <div class="form-group col-md-2">
@@ -251,16 +251,16 @@
                 </div>
 
                 <div class="form-group col-md-2">
-                  <label for="nombre_proveedor">Total línea</label>
-                  <input type="text" class="form-control" id="linea_total" placeholder="" readonly="true" >
+                  <label for="nombre_proveedor">Total item</label>
+                  <input type="text" class="form-control" id="item_total" placeholder="" readonly="true" >
                 </div>
 
                 <div class="form-group col-md-3">
                   <div class="botones-agregar">
-                    <div onclick="agregarEditarLinea();" class="btn btn-dark btn-sm m-1">Agregar línea</div>
+                    <div onclick="agregarEditarItem();" class="btn btn-dark btn-sm m-1">Agregar linea</div>
                   </div>
                   <div class="botones-editar">
-                    <div onclick="agregarEditarLinea();" class="btn btn-dark btn-sm m-1">Confirmar edición</div>
+                    <div onclick="agregarEditarItem();" class="btn btn-dark btn-sm m-1">Confirmar edición</div>
                     <div onclick="cancelarEdicion();" class="btn btn-danger btn-sm m-1">Cancelar</div>
                   </div>
                 </div>
@@ -268,7 +268,7 @@
               </div>
             </div>
             
-            <div class="form-group col-md-12" id="tabla-lineas-factura" style="display: none;">
+            <div class="form-group col-md-12" id="tabla-items-factura" style="display: none;">
               <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
                 <thead class="thead-dark">
                   <tr>
@@ -306,8 +306,8 @@
             </div>
 
             <div class="form-group col-md-4">
-              <label for="subtotal">Monto IVA </label>
-              <input type="text" class="form-control" name="monto_iva" id="monto_iva" placeholder="" readonly="true" required>
+              <label for="iva_amount">Monto IVA </label>
+              <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
             </div>
 
             <div class="form-group col-md-4">
@@ -316,8 +316,8 @@
             </div>
 
             <div class="form-group col-md-12">
-              <label for="notas">Notas</label>
-              <input type="text" class="form-control" name="notas" id="notas" placeholder="">
+              <label for="description">Notas</label>
+              <input type="text" class="form-control" name="description" id="notas" placeholder="">
             </div>
 
           </div>

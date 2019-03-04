@@ -47,7 +47,7 @@ class InvoiceController extends Controller
 
         //Datos generales y para Hacienda
         $invoice->document_type = "01";
-        $invoice->invoice_key = "50601021900310270242900100001010000000162174804809";
+        $invoice->document_key = "50601021900310270242900100001010000000162174804809";
         $invoice->reference_number = $company->reference_number + 1;
         $numero_doc = ((int)$company->document_number) + 1;
         $invoice->document_number = str_pad($numero_doc, 20, '0', STR_PAD_LEFT);
@@ -65,7 +65,7 @@ class InvoiceController extends Controller
         $invoice->client_name = $request->client_name;
         $invoice->client_id_type = $request->client_id_type;
         $invoice->client_id = $request->client_id;
-        $invoice->client_is_exempt = $request->client_is_exempt;
+        $invoice->client_is_exempt = $request->client_is_exempt ? true : false;
         $invoice->send_emails = $request->send_emails;
         
         //Datos de factura
@@ -103,7 +103,7 @@ class InvoiceController extends Controller
           $invoice->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $is_exempt );
         }
       
-        return redirect('/invoices');
+        return redirect('/facturas-emitidas');
     }
 
     /**
@@ -128,8 +128,8 @@ class InvoiceController extends Controller
         $invoice = Invoice::findOrFail($id);
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
-        if( $invoice->metodo_generacion != 'M' ){
-          return redirect('/invoices');
+        if( $invoice->generation_method != 'M' ){
+          return redirect('/facturas-emitidas');
         }  
       
         return view('Invoice/edit', compact('invoice') );
@@ -148,8 +148,8 @@ class InvoiceController extends Controller
         $invoice = Invoice::findOrFail($id);
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
-        if( $invoice->metodo_generacion != 'M' ){
-          return redirect('/invoices');
+        if( $invoice->generation_method != 'M' ){
+          return redirect('/facturas-emitidas');
         }
       
         $company = $invoice->company; 
@@ -168,8 +168,8 @@ class InvoiceController extends Controller
         //Datos de cliente
         $invoice->client_name = $request->client_name;
         $invoice->client_id_type = $request->client_id_type;
-        $invoice->client_id = $request->client_id;
-        $invoice->client_is_exempt = $request->client_is_exempt;
+        $invoice->client_id_temp = $request->client_id_temp;
+        $invoice->client_is_exempt = $request->client_is_exempt ? true : false;
         $invoice->send_emails = $request->send_emails;
         
         //Datos de factura
@@ -219,7 +219,7 @@ class InvoiceController extends Controller
           }
         }
       
-        return redirect('/invoices');
+        return redirect('/facturas-emitidas');
     }
 
     /**
@@ -235,6 +235,6 @@ class InvoiceController extends Controller
           $item->delete();
         }
         $invoice->delete();
-        return redirect('/invoices');
+        return redirect('/facturas-emitidas');
     }
 }

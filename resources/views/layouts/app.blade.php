@@ -13,6 +13,48 @@
     <link rel="stylesheet" href="{{mix('assets/styles/css/themes/eva.min.css')}}">
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/perfect-scrollbar.css')}}">
     @yield('header-scripts')
+  
+    <style>
+      
+      body, html {
+        font-family: 'Pangram', 'sans-serif' !important;
+        font-weight: 400;
+      }
+      
+      h1, h2, h3, h4, h5, h6, .card-title, .text-title {
+        font-weight: 500;
+      }
+      
+      .ivas-table {
+          font-size: 10px;
+          color: #666
+      }
+
+      .ivas-table th {
+          color: #4C006D;
+          font-size: 11px;
+          font-weight: 400;
+      }
+
+      .ivas-table th, 
+      .ivas-table td {
+          padding: 0.25rem;
+          font-weight: 400;
+      }
+
+      .ivas-table th:first-of-type {
+          text-align: left;
+          max-width: 135px;
+      }
+      
+      .card-title {
+          font-size: 1.2rem;
+          margin-bottom: 1.25rem;
+          border-bottom: #e5e5e5 5px solid;
+          padding-bottom: 1rem;
+      }
+      
+    </style>
 </head>
 
 <body>
@@ -45,6 +87,7 @@
 
     <script src="{{mix('assets/js/common-bundle.js')}}"></script>
     <script src="{{asset('assets/js/es5/script.js')}}"></script>
+  
 
     @yield('footer-scripts')
 </body>

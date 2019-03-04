@@ -12,12 +12,16 @@
 */
 
 Route::get('/', 'ReportsController@dashboard');
-Route::resource('clientes', 'ClienteController');
-Route::resource('productos', 'ProductoController');
-Route::resource('empresas', 'EmpresaController');
-Route::resource('facturas-emitidas', 'FacturaEmitidaController');
-Route::resource('facturas-recibidas', 'FacturaRecibidaController');
+Route::get('/dashboard', 'ReportsController@dashboard');
+Route::resource('clientes', 'ClientController');
+Route::resource('productos', 'ProductController');
+Route::resource('empresas', 'CompanyController');
+Route::resource('facturas-emitidas', 'InvoiceController');
+Route::resource('facturas-recibidas', 'BillController');
 
 Route::get('login', function () {
     return view('login');
 })->name('login');;
+
+Auth::routes();
+Route::get('/dashboard', 'HomeController@index')->name('home');

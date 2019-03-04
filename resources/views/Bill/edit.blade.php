@@ -9,11 +9,11 @@
   <div class="col-md-12">
     <div class="card mb-4">
       <div class="card-body">
-      <form method="POST" action="/facturas-recibidas/{{ $facturaRecibida->id }}">
+      <form method="POST" action="/facturas-recibidas/{{ $bill->id }}">
         @method('patch')
         @csrf
 
-          <input type="hidden" id="current-index" value="{{ count($facturaRecibida->lineas) }}">
+          <input type="hidden" id="current-index" value="{{ count($bill->items) }}">
 
           <div class="form-row">
             <div class="form-group col-md-6 ">
@@ -49,8 +49,8 @@
                 </div>
 
                 <div class="form-group col-md-12">
-                  <label for="nombre_proveedor">Nombre</label>
-                  <input type="text" class="form-control" name="proveedor" id="proveedor" placeholder="" value="{{ $facturaRecibida->proveedor }}" required>
+                  <label for="provider">Nombre</label>
+                  <input type="text" class="form-control" name="provider" id="proveedor" placeholder="" value="{{ $bill->provider }}" required>
                 </div>
                 
                 <div class="form-group col-md-4">
@@ -59,8 +59,8 @@
                 </div>
 
                 <div class="form-group col-md-4">
-                  <label for="correos_envio">Correo electrónico</label>
-                  <input type="text" class="form-control" name="correos_envio" id="correos_envio" placeholder="" >
+                  <label for="send_emails">Correo electrónico</label>
+                  <input type="text" class="form-control" name="send_emails" id="correos_envio" placeholder="" value="{{ $bill->send_emails }}" >
                 </div>
 
                 <div class="form-group col-md-4">
@@ -83,10 +83,10 @@
                   </h3>
                 </div>
 
-                <div class="form-group col-md-6">
-                    <label for="fecha_recibida">Fecha</label>
+                 <div class="form-group col-md-6">
+                    <label for="generated_date">Fecha</label>
                     <div class="input-group">
-                      <input id="fecha_recibida" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="fecha_recibida" required value="{{ $facturaRecibida->fechaRecibida()->format('d/m/Y') }}">
+                      <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ $bill->generatedDate()->format('d/m/Y') }}">
                       <div class="input-group-append">
                         <button class="btn btn-secondary" type="button">
                             <i class="icon-regular i-Calendar-4"></i>
@@ -98,7 +98,7 @@
                   <div class="form-group col-md-6">
                     <label for="hora">Hora</label>
                     <div class="input-group">
-                      <input id="hora" class="form-control input-hora" name="hora" required value="{{ $facturaRecibida->fechaRecibida()->format('g:i A') }}">
+                      <input id="hora" class="form-control input-hora" name="hora" required value="{{ $bill->generatedDate()->format('g:i A') }}">
                       <div class="input-group-append">
                         <button class="btn btn-secondary" type="button">
                             <i class="icon-regular i-Clock"></i>
@@ -108,9 +108,9 @@
                   </div>
 
                   <div class="form-group col-md-6">
-                    <label for="fecha_vencimiento">Fecha de vencimiento</label>
+                    <label for="due_date">Fecha de vencimiento</label>
                     <div class="input-group">
-                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="fecha_vencimiento" required value="{{ $facturaRecibida->fechaVencimiento()->format('d/m/Y') }}">
+                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ $bill->dueDate()->format('d/m/Y') }}">
                       <div class="input-group-append">
                         <button class="btn btn-secondary" type="button">
                             <i class="icon-regular i-Calendar-4"></i>
@@ -118,61 +118,61 @@
                       </div>
                     </div>
                   </div>
+                  
+                  <div class="form-group col-md-6"></div>
 
-                <div class="form-group col-md-6"></div>
+                  <div class="form-group col-md-6">
+                    <label for="sale_condition">Condición de venta</label>
+                    <div class="input-group">
+                      <select id="condicion_venta" name="sale_condition" class="form-control" required value="{{ $bill->sale_condition }}">
+                        <option selected value="01">Contado</option>
+                        <option value="02">Crédito</option>
+                        <option value="03">Consignación</option>
+                        <option value="04">Apartado</option>
+                        <option value="05">Arrendamiento con opción de compra</option>
+                        <option value="06">Arrendamiento en función financiera</option>
+                        <option value="99">Otros</option>
+                      </select>
+                    </div>
+                  </div>
 
-                <div class="form-group col-md-6">
-                  <label for="condicion_venta">Condición de venta</label>
-                  <div class="input-group">
-                    <select id="condicion_venta" name="condicion_venta" class="form-control" required value="{{ $facturaRecibida->condicion_venta }}">
-                      <option value="01" {{ $facturaRecibida->medio_pago == '01' ? 'selected' : '' }}>Contado</option>
-                      <option value="02" {{ $facturaRecibida->medio_pago == '02' ? 'selected' : '' }} >Crédito</option>
-                      <option value="03" {{ $facturaRecibida->medio_pago == '03' ? 'selected' : '' }} >Consignación</option>
-                      <option value="04" {{ $facturaRecibida->medio_pago == '04' ? 'selected' : '' }} >Apartado</option>
-                      <option value="05" {{ $facturaRecibida->medio_pago == '05' ? 'selected' : '' }} >Arrendamiento con opción de compra</option>
-                      <option value="06" {{ $facturaRecibida->medio_pago == '06' ? 'selected' : '' }} >Arrendamiento en función financiera</option>
-                      <option value="99" {{ $facturaRecibida->medio_pago == '99' ? 'selected' : '' }} >Otros</option>
+                  <div class="form-group col-md-6">
+                    <label for="payment_type">Método de pago</label>
+                    <div class="input-group">
+                      <select id="medio_pago" name="payment_type" class="form-control" required value="{{ $bill->payment_type }}">
+                        <option value="01" selected>Efectivo</option>
+                        <option value="02">Tarjeta</option>
+                        <option value="03">Cheque</option>
+                        <option value="04">Transferencia-Depósito Bancario</option>
+                        <option value="05">Recaudado por terceros</option>
+                        <option value="99">Otros</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group col-md-6">
+                    <label for="other_reference">Referencia</label>
+                    <input type="text" class="form-control" name="other_reference" id="referencia" value="{{ $bill->other_reference }}" >
+                  </div>
+
+                  <div class="form-group col-md-6">
+                    <label for="buy_order">Orden de compra</label>
+                    <input type="text" class="form-control" name="buy_order" id="orden_compra" value="{{ $bill->buy_order }}" >
+                  </div>
+
+                  <div class="form-group col-md-6">
+                    <label for="currency">Moneda</label>
+                    <select class="form-control" name="currency" id="moneda" required value="{{ $bill->currency }}">
+                      <option value="crc" selected>CRC</option>
+                      <option value="crc">USD</option>
                     </select>
                   </div>
-                </div>
 
-                <div class="form-group col-md-6">
-                  <label for="medio_pago">Método de pago</label>
-                  <div class="input-group">
-                    <select id="medio_pago" name="medio_pago" class="form-control" required value="{{ $facturaRecibida->medio_pago }}"> 
-                      <option value="01" {{ $facturaRecibida->medio_pago == '01' ? 'selected' : '' }} >Efectivo</option>
-                      <option value="02" {{ $facturaRecibida->medio_pago == '02' ? 'selected' : '' }}>Tarjeta</option>
-                      <option value="03" {{ $facturaRecibida->medio_pago == '03' ? 'selected' : '' }}>Cheque</option>
-                      <option value="04" {{ $facturaRecibida->medio_pago == '04' ? 'selected' : '' }}>Transferencia-Depósito Bancario</option>
-                      <option value="05" {{ $facturaRecibida->medio_pago == '05' ? 'selected' : '' }}>Recaudado por terceros</option>
-                      <option value="99" {{ $facturaRecibida->medio_pago == '99' ? 'selected' : '' }}>Otros</option>
-                    </select>
+                  <div class="form-group col-md-6">
+                    <label for="currency_rate">Tipo de cambio</label>
+                    <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="{{ $bill->currency_rate }}" required >
                   </div>
-                </div>
-
-                <div class="form-group col-md-6">
-                  <label for="referencia">Referencia</label>
-                  <input type="text" class="form-control" name="referencia" id="referencia" required value="{{ $facturaRecibida->referencia }}">
-                </div>
-
-                <div class="form-group col-md-6">
-                  <label for="orden_compra">Orden de compra</label>
-                  <input type="text" class="form-control" name="orden_compra" id="orden_compra" required value="{{ $facturaRecibida->orden_compra }}">
-                </div>
-
-                <div class="form-group col-md-6">
-                  <label for="moneda">Moneda</label>
-                  <select class="form-control" name="moneda" id="moneda" required value="{{ $facturaRecibida->moneda }}">
-                    <option value="crc" selected>CRC</option>
-                    <option value="crc">USD</option>
-                  </select>
-                </div>
-
-                <div class="form-group col-md-6">
-                  <label for="tipo_cambio">Tipo de cambio</label>
-                  <input type="text" class="form-control" name="tipo_cambio" id="tipo_cambio" required value="{{ $facturaRecibida->tipo_cambio }}">
-                </div>
-
+                
               </div>
 
             </div>
@@ -187,10 +187,10 @@
           </div>
 
           <div class="form-group col-md-12">
-            <div class="linea-factura-form form-row">
+            <div class="item-factura-form form-row">
   
               <input type="hidden" class="form-control" id="lnum" value="">
-              <input type="hidden" class="form-control" id="linea_id" value="">
+              <input type="hidden" class="form-control" id="item_id" value="">
               
               <div class="form-group col-md-2">
                 <label for="codigo">Código</label>
@@ -205,8 +205,8 @@
               <div class="form-group col-md-3">
                 <label for="tipo_producto">Tipo de producto</label>
                 <select class="form-control" id="tipo_producto" >
-                  @foreach ( \App\Variables::tiposSoportados() as $producto )
-                    <option value="{{ $producto['nombre'] }}" codigo="{{ $producto['codigo_iva'] }}" >{{ $producto['nombre'] }}</option>
+                  @foreach ( \App\ProductCategory::all() as $tipo )
+                    <option value="{{ $tipo->id }}" codigo="{{ $tipo->invoice_iva_code }}" >{{ $tipo->name }}</option>
                   @endforeach
                 </select>
               </div>
@@ -241,7 +241,7 @@
 
               <div class="form-group col-md-2">
                 <label for="nombre_cliente">Subtotal</label>
-                <input type="text" class="form-control" id="linea_subtotal" placeholder="" readonly="true" >
+                <input type="text" class="form-control" id="item_subtotal" placeholder="" readonly="true" >
               </div>
 
               <div class="form-group col-md-2">
@@ -250,16 +250,16 @@
               </div>
 
               <div class="form-group col-md-2">
-                <label for="nombre_cliente">Total línea</label>
-                <input type="text" class="form-control" id="linea_total" placeholder="" readonly="true" >
+                <label for="nombre_cliente">Total item</label>
+                <input type="text" class="form-control" id="item_total" placeholder="" readonly="true" >
               </div>
 
               <div class="form-group col-md-3">
                 <div class="botones-agregar">
-                  <div onclick="agregarEditarLinea();" class="btn btn-dark btn-sm m-1">Agregar línea</div>
+                  <div onclick="agregarEditarItem();" class="btn btn-dark btn-sm m-1">Agregar linea</div>
                 </div>
                 <div class="botones-editar">
-                  <div onclick="agregarEditarLinea();" class="btn btn-dark btn-sm m-1">Confirmar edición</div>
+                  <div onclick="agregarEditarItem();" class="btn btn-dark btn-sm m-1">Confirmar edición</div>
                   <div onclick="cancelarEdicion();" class="btn btn-danger btn-sm m-1">Cancelar</div>
                 </div>
               </div>
@@ -267,7 +267,7 @@
             </div>
           </div>
 
-          <div class="form-group col-md-12" id="tabla-lineas-factura" style="display: block;">
+          <div class="form-group col-md-12" id="tabla-items-factura" style="display: block;">
             <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
               <thead class="thead-dark">
                 <tr>
@@ -286,45 +286,45 @@
                 </tr>
               </thead>
               <tbody>
-                 @foreach ( $facturaRecibida->lineas as $linea )
-                 <tr class="linea-tabla linea-index-{{ $loop->index }}" index="{{ $loop->index }}" attr-num="{{ $loop->index }}" id="linea-tabla-{{ $loop->index }}">
+                 @foreach ( $bill->items as $item )
+                 <tr class="item-tabla item-index-{{ $loop->index }}" index="{{ $loop->index }}" attr-num="{{ $loop->index }}" id="item-tabla-{{ $loop->index }}">
                     <td><span class="numero-fila">{{ $loop->index+1 }}</span>
-                      <input type="hidden" class='numero' name="lineas[{{ $loop->index }}][numero]" value="{{ $loop->index+1 }}">
-                      <input type="hidden" class="linea_id" name="lineas[{{ $loop->index }}][id]" value="{{ $linea->id }}"> </td>
-                    <td>{{ $linea->codigo }}
-                      <input type="hidden" class='codigo' name="lineas[{{ $loop->index }}][codigo]" value="{{ $linea->codigo }}">
+                      <input type="hidden" class='numero' name="items[{{ $loop->index }}][item_number]" value="{{ $loop->index+1 }}">
+                      <input type="hidden" class="item_id" name="items[{{ $loop->index }}][id]" value="{{ $item->id }}"> </td>
+                    <td>{{ $item->code }}
+                      <input type="hidden" class='codigo' name="items[{{ $loop->index }}][code]" value="{{ $item->code }}">
                     </td>
-                    <td>{{ $linea->nombre }}
-                      <input type="hidden" class='nombre' name="lineas[{{ $loop->index }}][nombre]" value="{{ $linea->nombre }}">
+                    <td>{{ $item->name }}
+                      <input type="hidden" class='nombre' name="items[{{ $loop->index }}][name]" value="{{ $item->name }}">
                     </td>
-                    <td>{{ $linea->tipo_producto }}
-                      <input type="hidden" class='tipo_producto' name="lineas[{{ $loop->index }}][tipo_producto]" value="{{ $linea->tipo_producto }}">
+                    <td>{{ $item->product_type }}
+                      <input type="hidden" class='tipo_producto' name="items[{{ $loop->index }}][product_type]" value="{{ $item->product_type }}">
                     </td>
-                    <td>{{ $linea->cantidad }}
-                      <input type="hidden" class='cantidad' name="lineas[{{ $loop->index }}][cantidad]" value="{{ $linea->cantidad }}">
+                    <td>{{ $item->item_count }}
+                      <input type="hidden" class='cantidad' name="items[{{ $loop->index }}][item_count]" value="{{ $item->item_count }}">
                     </td>
-                    <td>{{ \App\Variables::getUnidadMedicionName($linea->unidad_medicion) }}
-                      <input type="hidden" class='unidad_medicion' name="lineas[{{ $loop->index }}][unidad_medicion]" value="{{ $linea->unidad_medicion }}">
+                    <td>{{ \App\Variables::getUnidadMedicionName($item->measure_unit) }}
+                      <input type="hidden" class='unidad_medicion' name="items[{{ $loop->index }}][measure_unit]" value="{{ $item->measure_unit }}">
                     </td>
-                    <td>{{ $linea->precio_unitario }}
-                      <input type="hidden" class='precio_unitario' name="lineas[{{ $loop->index }}][precio_unitario]" value="{{ $linea->precio_unitario }}">
+                    <td>{{ $item->unit_price }}
+                      <input type="hidden" class='precio_unitario' name="items[{{ $loop->index }}][unit_price]" value="{{ $item->unit_price }}">
                     </td>
-                    <td>{{ \App\Variables::getTipoSoportadoIVAName($linea->tipo_iva) }}
-                      <input type="hidden" class='tipo_iva' name="lineas[{{ $loop->index }}][tipo_iva]" value="{{ $linea->tipo_iva }}">
+                    <td>{{ \App\Variables::getTipoSoportadoIVAName($item->iva_type) }}
+                      <input type="hidden" class='tipo_iva' name="items[{{ $loop->index }}][iva_type]" value="{{ $item->iva_type }}">
                     </td>
-                    <td>{{ $linea->subtotal }}
-                      <input class="subtotal" type="hidden" name="lineas[{{ $loop->index }}][subtotal]" value="{{ $linea->subtotal }}">
+                    <td>{{ $item->subtotal }}
+                      <input class="subtotal" type="hidden" name="items[{{ $loop->index }}][subtotal]" value="{{ $item->subtotal }}">
                     </td>
-                    <td>{{ $linea->porc_iva }}
-                      <input class="porc_iva" type="hidden" name="lineas[{{ $loop->index }}][porc_iva]" value="{{ $linea->porc_iva }}">
+                    <td>{{ $item->iva_percentage }}
+                      <input class="porc_iva" type="hidden" name="items[{{ $loop->index }}][iva_percentage]" value="{{ $item->iva_percentage }}">
                     </td>
                     <td>
-                      {{ $linea->total }}
-                      <input class="total" type="hidden" name="lineas[{{ $loop->index }}][total]" value="{{ $linea->total }}">
+                      {{ $item->total }}
+                      <input class="total" type="hidden" name="items[{{ $loop->index }}][total]" value="{{ $item->total }}">
                     </td>
                     <td class='acciones'>
-                      <span title='Editar linea' class='btn-editar-linea text-success mr-2' onclick='cargarFormLinea({{ $loop->index }});'><i class='nav-icon i-Pen-2'></i> </span> 
-                      <span title='Eliminar linea' class='btn-eliminar-linea text-danger mr-2' onclick='eliminarLinea({{ $loop->index }});' ><i class='nav-icon i-Close-Window'></i> </span> 
+                      <span title='Editar linea' class='btn-editar-item text-success mr-2' onclick='cargarFormItem({{ $loop->index }});'><i class='nav-icon i-Pen-2'></i> </span> 
+                      <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ $loop->index }});' ><i class='nav-icon i-Close-Window'></i> </span> 
                     </td>
                 </tr>
                 @endforeach
@@ -346,8 +346,8 @@
           </div>
 
           <div class="form-group col-md-4">
-            <label for="subtotal">Monto IVA </label>
-            <input type="text" class="form-control" name="monto_iva" id="monto_iva" placeholder="" readonly="true" required>
+            <label for="iva_amount">Monto IVA </label>
+            <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
           </div>
 
           <div class="form-group col-md-4">
@@ -356,8 +356,8 @@
           </div>
 
           <div class="form-group col-md-12">
-            <label for="notas">Notas</label>
-            <input type="text" class="form-control" name="notas" id="notas" placeholder="" value="{{ $facturaRecibida->notas }}">
+            <label for="description">Notas</label>
+            <input type="text" class="form-control" name="description" id="notas" placeholder="" value="{{ $bill->description }}">
           </div>
 
         </div>
@@ -389,7 +389,7 @@ $(document).ready(function(){
   var subtotal = 0;
   var monto_iva = 0;
   var total = 0;
-  $('.linea-tabla').each(function(){
+  $('.item-tabla').each(function(){
     var s = parseFloat($(this).find('.subtotal').val());
     var m = parseFloat($(this).find('.porc_iva').val()) / 100;
     var t = parseFloat($(this).find('.total').val());

@@ -247,7 +247,7 @@ select.form-control {
     }
 }
 
-.linea-factura-form.form-row {
+.item-factura-form.form-row {
     margin: 0;
     padding: 15px;
     border: 2px solid #5b5164;
@@ -267,14 +267,14 @@ form .form-row:first-of-type h3 {
     border-top: 0;
 }
 
-.linea-factura-form .botones-editar {
+.item-factura-form .botones-editar {
   display: none;
 }
 
-.linea-factura-form.editando .botones-editar {
+.item-factura-form.editando .botones-editar {
   display: block;
 }
 
-.linea-factura-form.editando .botones-agregar {
+.item-factura-form.editando .botones-agregar {
   display: none;
 }

@@ -76,7 +76,7 @@ module.exports = __webpack_require__(42);
 /***/ 42:
 /***/ (function(module, exports) {
 
-window.calcularSubtotalLinea = function () {
+window.calcularSubtotalItem = function () {
 
   var precio_unitario = parseFloat($('#precio_unitario').val());
   var cantidad = parseInt($('#cantidad').val());
@@ -84,16 +84,16 @@ window.calcularSubtotalLinea = function () {
 
   if (precio_unitario && cantidad) {
     var subtotal = cantidad * precio_unitario;
-    $('#linea_subtotal').val(subtotal);
+    $('#item_subtotal').val(subtotal);
     if (porc_iva) {
-      $('#linea_total').val(subtotal + subtotal * (porc_iva / 100));
+      $('#item_total').val(subtotal + subtotal * (porc_iva / 100));
     } else {
-      $('#linea_subtotal').val(subtotal);
-      $('#linea_total').val(subtotal);
+      $('#item_subtotal').val(subtotal);
+      $('#item_total').val(subtotal);
     }
   } else {
-    $('#linea_subtotal').val(0);
-    $('#linea_total').val(0);
+    $('#item_subtotal').val(0);
+    $('#item_total').val(0);
   }
 };
 
@@ -117,13 +117,13 @@ window.presetTipoIVA = function () {
   }
 };
 
-window.agregarEditarLinea = function () {
+window.agregarEditarItem = function () {
 
-  //Si esta editando, usa lnum y linea_id para identificar la fila.
+  //Si esta editando, usa lnum y item_id para identificar la fila.
   var lnum = $('#lnum').val() ? $('#lnum').val() : '';
-  var linea_id = $('#linea_id').val() ? $('#linea_id').val() : '';
+  var item_id = $('#item_id').val() ? $('#item_id').val() : '';
 
-  var numero = parseInt($('.linea-tabla:last-of-type').attr('attr-num')) + 1;
+  var numero = parseInt($('.item-tabla:last-of-type').attr('attr-num')) + 1;
   var index = parseInt($('#current-index').val()) + 1;
   var codigo = $('#codigo').val();
   var nombre = $('#nombre').val();
@@ -135,50 +135,50 @@ window.agregarEditarLinea = function () {
   var razon_descuento = '';
   var tipo_iva = $('#tipo_iva').val();
   var porc_iva = $('#porc_iva').val();
-  var subtotal = $('#linea_subtotal').val();
-  var total = $('#linea_total').val();
+  var subtotal = $('#item_subtotal').val();
+  var total = $('#item_total').val();
 
   //Se asegura de que los campos hayan sido llenados
   if (subtotal && codigo && nombre && precio_unitario && cantidad) {
 
     //Crear el ID de la fila.
-    var lineaExistente = false;
+    var itemExistente = false;
     if (lnum && lnum !== '') {
       numero = lnum;
-      lineaExistente = $('#linea-tabla-' + numero);
-      index = lineaExistente.attr('index');
-      lineaExistente.html("");
+      itemExistente = $('#item-tabla-' + numero);
+      index = itemExistente.attr('index');
+      itemExistente.html("");
     }
-    var row_id = "linea-tabla-" + numero;
+    var row_id = "item-tabla-" + numero;
 
     //Crea la fila en la tabla
-    var htmlCols = "<td><span class='numero-fila'>" + (numero + 1) + "</span><input type='hidden' class='numero' name='lineas[" + index + "][numero]' value='" + (numero + 1) + "'> <input class='linea_id' type='hidden' name='lineas[" + index + "][id]' value='" + linea_id + "'> </td>";
-    htmlCols += "<td>" + codigo + " <input type='hidden' class='codigo' name='lineas[" + index + "][codigo]' value='" + codigo + "'></td>";
-    htmlCols += "<td>" + nombre + " <input type='hidden' class='nombre' name='lineas[" + index + "][nombre]' value='" + nombre + "'></td>";
-    htmlCols += "<td>" + tipo_producto + " <input type='hidden' class='tipo_producto' name='lineas[" + index + "][tipo_producto]' value='" + tipo_producto + "'></td>";
-    htmlCols += "<td>" + cantidad + " <input type='hidden' class='cantidad' name='lineas[" + index + "][cantidad]' value='" + cantidad + "'></td>";
-    htmlCols += "<td>" + unidad_medicion + " <input type='hidden' class='unidad_medicion' name='lineas[" + index + "][unidad_medicion]' value='" + unidad_medicion + "'></td>";
-    htmlCols += "<td>" + precio_unitario + " <input type='hidden' class='precio_unitario' name='lineas[" + index + "][precio_unitario]' value='" + precio_unitario + "'></td>";
-    htmlCols += "<td>" + tipo_iva + " <input type='hidden' class='tipo_iva' name='lineas[" + index + "][tipo_iva]' value='" + tipo_iva + "'></td>";
-    htmlCols += "<td>" + subtotal + " <input class='subtotal' type='hidden' name='lineas[" + index + "][subtotal]' value='" + subtotal + "'></td>";
-    htmlCols += "<td>" + porc_iva + " <input class='porc_iva' type='hidden' name='lineas[" + index + "][porc_iva]' value='" + porc_iva + "'></td>";
-    htmlCols += "<td>" + total + " <input class='total' type='hidden' name='lineas[" + index + "][total]' value='" + total + "'></td>";
-    htmlCols += "<td class='acciones'><span class='btn-editar-linea text-success mr-2' title='Editar linea' onclick='cargarFormLinea(" + index + ");'><i class='nav-icon i-Pen-2'></i> </span> <span title='Eliminar linea' onclick='eliminarLinea(" + index + ");' class='btn-eliminar-linea text-danger mr-2'><i class='nav-icon i-Close-Window'></i> </span> </td>";
+    var htmlCols = "<td><span class='numero-fila'>" + (numero + 1) + "</span><input type='hidden' class='numero' name='items[" + index + "][item_number]' value='" + (numero + 1) + "'> <input class='item_id' type='hidden' name='items[" + index + "][id]' value='" + item_id + "'> </td>";
+    htmlCols += "<td>" + codigo + " <input type='hidden' class='codigo' name='items[" + index + "][code]' value='" + codigo + "'></td>";
+    htmlCols += "<td>" + nombre + " <input type='hidden' class='nombre' name='items[" + index + "][name]' value='" + nombre + "'></td>";
+    htmlCols += "<td>" + tipo_producto + " <input type='hidden' class='tipo_producto' name='items[" + index + "][product_type]' value='" + tipo_producto + "'></td>";
+    htmlCols += "<td>" + cantidad + " <input type='hidden' class='cantidad' name='items[" + index + "][item_count]' value='" + cantidad + "'></td>";
+    htmlCols += "<td>" + unidad_medicion + " <input type='hidden' class='unidad_medicion' name='items[" + index + "][measure_unit]' value='" + unidad_medicion + "'></td>";
+    htmlCols += "<td>" + precio_unitario + " <input type='hidden' class='precio_unitario' name='items[" + index + "][unit_price]' value='" + precio_unitario + "'></td>";
+    htmlCols += "<td>" + tipo_iva + " <input type='hidden' class='tipo_iva' name='items[" + index + "][iva_type]' value='" + tipo_iva + "'></td>";
+    htmlCols += "<td>" + subtotal + " <input class='subtotal' type='hidden' name='items[" + index + "][subtotal]' value='" + subtotal + "'></td>";
+    htmlCols += "<td>" + porc_iva + " <input class='porc_iva' type='hidden' name='items[" + index + "][iva_percentage]' value='" + porc_iva + "'></td>";
+    htmlCols += "<td>" + total + " <input class='total' type='hidden' name='items[" + index + "][total]' value='" + total + "'></td>";
+    htmlCols += "<td class='acciones'><span class='btn-editar-item text-success mr-2' title='Editar linea' onclick='cargarFormItem(" + index + ");'><i class='nav-icon i-Pen-2'></i> </span> <span title='Eliminar linea' onclick='eliminarItem(" + index + ");' class='btn-eliminar-item text-danger mr-2'><i class='nav-icon i-Close-Window'></i> </span> </td>";
 
-    if (!lineaExistente) {
-      var htmlRow = "<tr class='linea-tabla linea-index-" + index + "' index='" + index + "' attr-num='" + numero + "' id='" + row_id + "' > " + htmlCols + "</tr>";
-      $('#tabla-lineas-factura tbody').append(htmlRow);
+    if (!itemExistente) {
+      var htmlRow = "<tr class='item-tabla item-index-" + index + "' index='" + index + "' attr-num='" + numero + "' id='" + row_id + "' > " + htmlCols + "</tr>";
+      $('#tabla-items-factura tbody').append(htmlRow);
     } else {
-      lineaExistente.append(htmlCols);
+      itemExistente.append(htmlCols);
     }
 
-    $('#tabla-lineas-factura').show();
+    $('#tabla-items-factura').show();
 
     //Limpia los datos del formulario
-    limpiarFormLinea();
+    limpiarFormItem();
 
     //Recalcula números para asegurar que no haya vacíos
-    recalcularNumerosLinea();
+    recalcularNumerosItem();
 
     //Calcula total de factura
     calcularTotalFactura();
@@ -187,60 +187,60 @@ window.agregarEditarLinea = function () {
     $('#current-index').val(index);
 
     //Si estaba editando, quita la clase
-    $('.linea-factura-form').removeClass('editando');
+    $('.item-factura-form').removeClass('editando');
   } else {
-    alert('Debe completar los datos de la linea antes de guardarla');
+    alert('Debe completar los datos de la item antes de guardarla');
   }
 };
 
-//Se encarga de limpiar el formulario de "Agregar lineas"
-window.limpiarFormLinea = function () {
-  $('.linea-factura-form input, .linea-factura-form select').val('');
+//Se encarga de limpiar el formulario de "Agregar items"
+window.limpiarFormItem = function () {
+  $('.item-factura-form input, .item-factura-form select').val('');
   $('#tipo_producto').val('Bienes generales').change();
   $('#unidad_medicion').val(1);
   $('#cantidad').val(1);
 };
 
-//Carga la linea para ser editada
-window.cargarFormLinea = function (index) {
+//Carga la item para ser editada
+window.cargarFormItem = function (index) {
 
-  $('.linea-factura-form').addClass('editando');
+  $('.item-factura-form').addClass('editando');
 
-  var linea = $('.linea-index-' + index);
-  $('#lnum').val(linea.attr('attr-num'));
-  $('#linea_id').val(linea.find('.linea_id ').val());
-  $('#codigo').val(linea.find('.codigo ').val());
-  $('#nombre').val(linea.find('.nombre ').val());
-  $('#tipo_producto').val(linea.find('.tipo_producto ').val());
-  $('#cantidad').val(linea.find('.cantidad ').val());
-  $('#unidad_medicion').val(linea.find('.unidad_medicion ').val());
-  $('#precio_unitario').val(linea.find('.precio_unitario ').val());
-  $('#tipo_iva').val(linea.find('.tipo_iva ').val());
-  $('#linea_subtotal').val(linea.find('.subtotal ').val());
-  $('#porc_iva').val(linea.find('.porc_iva ').val());
+  var item = $('.item-index-' + index);
+  $('#lnum').val(item.attr('attr-num'));
+  $('#item_id').val(item.find('.item_id ').val());
+  $('#codigo').val(item.find('.codigo ').val());
+  $('#nombre').val(item.find('.nombre ').val());
+  $('#tipo_producto').val(item.find('.tipo_producto ').val());
+  $('#cantidad').val(item.find('.cantidad ').val());
+  $('#unidad_medicion').val(item.find('.unidad_medicion ').val());
+  $('#precio_unitario').val(item.find('.precio_unitario ').val());
+  $('#tipo_iva').val(item.find('.tipo_iva ').val());
+  $('#item_subtotal').val(item.find('.subtotal ').val());
+  $('#porc_iva').val(item.find('.porc_iva ').val());
 
-  calcularSubtotalLinea();
+  calcularSubtotalItem();
 };
 
 //Acción para cancelar la edición
 window.cancelarEdicion = function () {
-  $('.linea-factura-form').removeClass('editando');
-  limpiarFormLinea();
+  $('.item-factura-form').removeClass('editando');
+  limpiarFormItem();
 };
 
-//Elimina la linea
-window.eliminarLinea = function (index) {
-  $('.linea-index-' + index).remove();
-  recalcularNumerosLinea();
+//Elimina la item
+window.eliminarItem = function (index) {
+  $('.item-index-' + index).remove();
+  recalcularNumerosItem();
   calcularTotalFactura();
 };
 
 //Recalcula números para asegurar que no haya vacíos
-window.recalcularNumerosLinea = function () {
+window.recalcularNumerosItem = function () {
   $i = 0;
-  $('.linea-tabla').each(function () {
+  $('.item-tabla').each(function () {
     $(this).attr('attr-num', $i);
-    $(this).attr('id', 'linea-tabla-' + $i);
+    $(this).attr('id', 'item-tabla-' + $i);
     $(this).find('.numero-fila').text($i + 1);
     $i++;
   });
@@ -250,7 +250,7 @@ window.calcularTotalFactura = function () {
   var subtotal = 0;
   var monto_iva = 0;
   var total = 0;
-  $('.linea-tabla').each(function () {
+  $('.item-tabla').each(function () {
     var s = parseFloat($(this).find('.subtotal').val());
     var m = parseFloat($(this).find('.porc_iva').val()) / 100;
     var t = parseFloat($(this).find('.total').val());
@@ -267,18 +267,18 @@ window.calcularTotalFactura = function () {
 $(document).ready(function () {
 
   $('#cantidad, #precio_unitario').on('keyup', function () {
-    calcularSubtotalLinea();
+    calcularSubtotalItem();
   });
 
   $('#tipo_iva').on('change', function () {
     presetPorcentaje();
-    calcularSubtotalLinea();
+    calcularSubtotalItem();
   });
 
   $('#tipo_producto').on('change', function () {
     presetTipoIVA();
     presetPorcentaje();
-    calcularSubtotalLinea();
+    calcularSubtotalItem();
   });
 
   $('#cliente_exento').on('change', function () {
@@ -289,11 +289,11 @@ $(document).ready(function () {
     } else {
       presetTipoIVA();
       presetPorcentaje();
-      calcularSubtotalLinea();
+      calcularSubtotalItem();
       $('#tipo_iva').prop('readonly', false);
     }
 
-    calcularSubtotalLinea();
+    calcularSubtotalItem();
     calcularTotalFactura();
   });
 
