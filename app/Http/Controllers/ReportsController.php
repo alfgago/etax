@@ -10,6 +10,17 @@ use Illuminate\Http\Request;
 
 class ReportsController extends Controller
 {
+  
+     /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+  
     public function dashboard() {
       
       $anterior = CalculatedTax::calcularFacturacionPorMesAno( -1, 2018, 0, 0 );
@@ -31,7 +42,7 @@ class ReportsController extends Controller
       $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, 2019, 0, $anterior->prorrata );
       
       
-      return view('/dashboard', compact( 'anterior', 'acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd'));
+      return view('/dashboard/index', compact( 'anterior', 'acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd'));
 
     }
   

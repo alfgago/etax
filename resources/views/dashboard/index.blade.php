@@ -1,4 +1,15 @@
-@extends('layouts/app') @section('title') Dashboard eTAX @endsection @section('content')
+@extends('layouts/app') 
+
+@section('title') Dashboard @endsection 
+
+@section('header-scripts')
+
+<script src="{{asset('assets/js/vendor/echarts.min.js')}}"></script>
+<script src="{{asset('assets/js/es5/echart.options.min.js')}}"></script>
+
+@endsection
+
+@section('content')
 
 <style>
   
@@ -15,101 +26,22 @@
       
       
       <div class="col-lg-2 col-md-12 mb-4">
-            <div class="card fullh">
-              <div class="card-body text-left">
-                  <div class="card-title">Liquidación del mes</div>
-                  <p class="text-small text-muted m-0">Saldo de IVA de febrero</p>
-                  <p class="text-20 mb-3 text-muted"><i class="text-success i-Coins"></i> ₡{{ $f->balance_real }} </p>
-                  <p class="text-12 text-muted m-0 p-2 border-bottom"><strong> + ₡{{ $f->total_invoice_iva }} </strong> IVA emitido</p>
-                  <p class="text-12 text-muted m-0 p-2 border-bottom"><strong>- ₡{{ $f->deductable_iva_real }}</strong> IVA deducible</p>
-              </div>
-            </div>
+        @include('dashboard.widgets.liquidacion-periodo', ['titulo' => 'Liquidación del mes', 'mes' => 'Febrero', 'data' => $f])
       </div>
       
       <div class="col-lg-2 col-md-12 mb-4">
-            <div class="card o-hidden fullh ">
-                <div class="card-body text-left">
-                    <div class="card-title">Movimiento del mes actual</div>
-                    <div class="content" style="max-width: 100%;">
-                        <p class="text-muted mt-2 mb-0">Ventas</p>
-                        <p class="text-primary text-20 mb-2">₡{{ $f->invoices_subtotal }}</p>
-                    </div>
-                    <div class="content" style="max-width: 100%;">
-                        <p class="text-muted mt-2 mb-0">Facturas emitidas</p>
-                        <p class="text-primary text-20 mb-2 border-bottom" >{{ $f->count_invoices }}</p>
-                    </div>
-                    <div class="content" style="max-width: 100%;">
-                        <p class="text-muted mt-2 mb-0">Gastos e inversiones</p>
-                        <p class="text-primary text-20 mb-2">₡{{ $f->bills_subtotal }}</p>
-                    </div>
-                    <div class="content" style="max-width: 100%;">
-                        <p class="text-muted mt-2 mb-0">Facturas recibidas</p>
-                        <p class="text-primary text-20 mb-2">{{ $f->count_bills }}</p>
-                    </div>
-                </div>
-            </div>
+        @include('dashboard.widgets.movimiento-periodo', ['titulo' => 'Movimiento del mes actual', 'data' => $f])
       </div>
       
       <div class="col-lg-8 col-md-12 mb-4">
-        <div class="card ">
-          <div class="card-body">
-            <div class="card-title">Resumen de IVA del periodo actual</div>
-            <div id="echartBar" style="height: 300px;"></div>
-          </div>
-        </div>
+        @include('dashboard.widgets.grafico-mensual', ['titulo' => 'Resumen de IVA del periodo actual'])
       </div>
 
       <div class="col-md-4 mb-4">
-          <div class="card o-hidden ">
-
-              <div class="card-body">
-                  <div class="card-title">Ventas del periodo actual</div>
-                  <span class="text-26 text-muted">₡{{ $acumulado->invoices_subtotal }}</span>
-                  <p class="text-small text-muted m-0"></p>
-                  <div id="chart-invoices" style="height: 65px;"></div>
-                  <div class="d-flex justify-content-between mt-4">
-                      <div class="flex-grow-1" style="flex:;">
-                          &nbsp;
-                      </div>
-                      <div class="flex-grow-1" style="flex:;">
-                          <span class="text-small">IVA emitido</span>
-                          <h5 class="m-0 font-weight-bold text-muted">₡{{ $acumulado->total_invoice_iva }}</h5>
-                      </div>
-                      <div class="flex-grow-1" style="flex:;">
-                          <span class="text-small">Total de facturas emitidas</span>
-                          <h5 class="m-0 font-weight-bold text-muted">{{ $acumulado->count_invoices }}</h5>
-                      </div>
-                  </div>
-              </div>
-
-          </div>
+        @include('dashboard.widgets.ventas-periodo', ['titulo' => 'Ventas del periodo actual', 'data' => $acumulado])
       </div>
       <div class="col-md-4 mb-4">
-
-          <div class="card o-hidden ">
-
-              <div class="card-body">
-                  <div class="card-title">Compras del periodo actual</div>
-                  <span class="text-26 text-muted">₡{{ $acumulado->bills_subtotal }}</span>
-                  <p class="text-small text-muted m-0"></p>
-                  <div id="chart-bills" style="height: 65px;"></div>
-                  <div class="d-flex justify-content-between mt-4">
-                      <div class="flex-grow-1" style="flex:;">
-                          &nbsp;
-                      </div>
-                      <div class="flex-grow-1" style="flex:;">
-                          <span class="text-small">IVA Deducible</span>
-                          <h5 class="m-0 font-weight-bold text-muted">₡{{ $acumulado->deductable_iva_real }}</h5>
-                      </div>
-                      <div class="flex-grow-1" style="flex:;" >
-                          <span class="text-small">Total de facturas recibidas</span>
-                          <h5 class="m-0 font-weight-bold text-muted">{{ $acumulado->count_bills }}</h5>
-                      </div>
-                  </div>
-              </div>
-
-          </div>
-
+        @include('dashboard.widgets.compras-periodo', ['titulo' => 'Ventas del periodo actual', 'data' => $acumulado])
       </div>
 
       <div class="col-md-4 mb-4">
@@ -186,6 +118,18 @@
       </div>
           
         </div>
+      </div>
+      
+      <div class="col-md-4 mb-4">
+        @include('dashboard.widgets.cuentas-contables', ['titulo' => 'Cuentas contables de enero', 'data' => $e])
+      </div>
+      
+      <div class="col-md-4 mb-4">
+        @include('dashboard.widgets.cuentas-contables', ['titulo' => 'Cuentas contables de febrero', 'data' => $f])
+      </div>
+      
+      <div class="col-md-4 mb-4">
+        @include('dashboard.widgets.cuentas-contables', ['titulo' => 'Cuentas contables acumuladas', 'data' => $acumulado])
       </div>
 
       <div class="col-lg-12 col-md-12">
@@ -390,8 +334,6 @@
 </div>
 
 @endsection @section('footer-scripts')
-<script src="{{asset('assets/js/vendor/echarts.min.js')}}"></script>
-<script src="{{asset('assets/js/es5/echart.options.min.js')}}"></script>
 
 <script>
   'use strict';
@@ -408,116 +350,9 @@
     return target;
   };
   
-  function initBarChart(){
-    var $tituloRepercutido = "IVA emitido";
-    var $tituloSoportado = "IVA recibido";
-    var $tituloDeducible = "IVA deducible";
-    var $tituloSaldo = "Saldo de IVA";
-    
-    var echartElemBar = document.getElementById('echartBar');
-    if (echartElemBar) {
-      var echartBar = echarts.init(echartElemBar);
-      echartBar.setOption({
-        legend: {
-          borderRadius: 0,
-          orient: 'horizontal',
-          x: 'left',
-          data: [$tituloRepercutido, $tituloSoportado, $tituloSaldo]
-        },
-        grid: {
-          left: '8px',
-          right: '8px',
-          bottom: '0',
-          containLabel: true
-        },
-        tooltip: {
-          show: true,
-          backgroundColor: 'rgba(0, 0, 0, .8)'
-        },
-        xAxis: [{
-          type: 'category',
-          data: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'],
-          axisTick: {
-            alignWithLabel: true
-          },
-          splitLine: {
-            show: false
-          },
-          axisLine: {
-            show: true
-          }
-        }],
-        yAxis: [{
-          type: 'value',
-          axisLabel: {
-            formatter: '₡{value}'
-          },
-          axisLine: {
-            show: false
-          },
-          splitLine: {
-            show: true,
-            interval: 'auto'
-          }
-        }],
-
-        series: [{
-          name: $tituloRepercutido,
-          data: [{{ $e->total_invoice_iva }}, {{ $f->total_invoice_iva }}, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          label: {
-            show: false,
-            color: 'red'
-          },
-          type: 'bar',
-          barGap: 0,
-          color: '#274FAB',
-          smooth: true
-
-        }, {
-          name: $tituloSoportado,
-          data: [{{ $e->total_bill_iva }}, {{ $f->total_bill_iva }}, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          label: {
-            show: false,
-            color: 'red'
-          },
-          type: 'bar',
-          color: '#77A1ED',
-          smooth: true
-          
-        }, {
-          name: $tituloDeducible,
-          data: [{{ $e->deductable_iva_real }}, {{ $f->deductable_iva_real }}, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          label: {
-            show: false,
-            color: 'red'
-          },
-          type: 'bar',
-          color: '#814bb5',
-          smooth: true
-        }, {
-          name: $tituloSaldo,
-          data: [{{ $e->balance_real }}, {{ $f->balance_real }}, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          label: {
-            show: false,
-            color: 'red'
-          },
-          type: 'bar',
-          color: '#F1BD45',
-          smooth: true
-        }]
-      });
-      $(window).on('resize', function() {
-        setTimeout(function() {
-          echartBar.resize();
-        }, 500);
-      });
-    }
-  }
+  
 
   $(document).ready(function() {
-    // Chart in Dashboard version 1
-    
-    initBarChart();
     
     // Chart in Dashboard version 1
       var echartElemPie = document.getElementById('echartPie');

@@ -2,7 +2,7 @@
     position: relative;
     margin-bottom: 10px;
     label {
-        font-size: 12px;
+        font-size: 16px;
         color: $gray-600;
         margin-bottom: 4px;
     }
@@ -28,6 +28,17 @@
 
 select.form-control {
     
+}
+
+.inline-form {
+  display: inline-block;
+}
+
+.inline-form button {
+  display: inline-block; 
+  background: none; 
+  border: 0;
+  cursor: pointer;
 }
 
 .input-group {

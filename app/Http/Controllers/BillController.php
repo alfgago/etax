@@ -9,6 +9,17 @@ use Illuminate\Http\Request;
 
 class BillController extends Controller
 {
+  
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+  
     /**
      * Display a listing of the resource.
      *
@@ -16,7 +27,8 @@ class BillController extends Controller
      */
     public function index()
     {
-        $bills = Bill::all();
+        $current_company = auth()->user()->companies->first()->id;
+        $bills = Bill::where('company_id', $current_company)->get();
         return view('Bill/index', [
           'bills' => $bills
         ]);
@@ -42,7 +54,7 @@ class BillController extends Controller
     {
       
         $bill = new Bill();
-        $company = Company::first();
+        $company = auth()->user()->companies->first();
         $bill->company_id = $company->id;
       
         //Datos generales y para Hacienda
@@ -110,7 +122,7 @@ class BillController extends Controller
      */
     public function show(Bill $bill)
     {
-        //
+        $this->authorize('update', $bill);
     }
 
     /**
@@ -122,6 +134,7 @@ class BillController extends Controller
     public function edit($id)
     {
         $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
         if( $bill->generation_method != 'M' ){
@@ -142,6 +155,7 @@ class BillController extends Controller
     {
       
         $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
         if( $bill->generation_method != 'M' ){
@@ -223,6 +237,8 @@ class BillController extends Controller
     public function destroy($id)
     {
         $bill = Bill::find($id);
+        $this->authorize('update', $bill);
+        
         foreach ( $bill->lineas as $linea ) {
           $linea->delete();
         }

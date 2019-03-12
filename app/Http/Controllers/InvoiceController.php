@@ -9,6 +9,17 @@ use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
+  
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+  
     /**
      * Display a listing of the resource.
      *
@@ -16,7 +27,8 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        $invoices = Invoice::all();
+        $current_company = auth()->user()->companies->first()->id;
+        $invoices = Invoice::where('company_id', $current_company)->get();
         return view('Invoice/index', [
           'invoices' => $invoices
         ]);
@@ -42,7 +54,7 @@ class InvoiceController extends Controller
     {
       
         $invoice = new Invoice();
-        $company = Company::first();
+        $company = auth()->user()->companies->first();
         $invoice->company_id = $company->id;
 
         //Datos generales y para Hacienda
@@ -126,6 +138,7 @@ class InvoiceController extends Controller
     public function edit($id)
     {
         $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
         if( $invoice->generation_method != 'M' ){
@@ -146,6 +159,7 @@ class InvoiceController extends Controller
     {
         
         $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
         if( $invoice->generation_method != 'M' ){
@@ -231,6 +245,8 @@ class InvoiceController extends Controller
     public function destroy($id)
     {
         $invoice = Invoice::find($id);
+        $this->authorize('update', $invoice);
+        
         foreach ( $invoice-items as $item ) {
           $item->delete();
         }

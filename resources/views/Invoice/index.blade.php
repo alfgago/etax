@@ -37,14 +37,15 @@
                   <td>{{ $invoice->generatedDate()->format('d/m/Y') }}</td>
                   <td>{{ $invoice->dueDate()->format('d/m/Y') }}</td>
                   
+                  
                   <td> 
                     <a href="/facturas-emitidas/{{ $invoice->id }}/edit" title="Editar factura" class="text-success mr-2"> 
                       <i class="nav-icon i-Pen-2 font-weight-bold"></i> 
                     </a>
-                    <form class="inline-form" method="POST" action="/facturas-emitidas/{{ $invoice->id }}" style="display: inline-block;">
+                    <form class="inline-form" method="POST" action="/facturas-emitidas/{{ $invoice->id }}" >
                       @csrf
                       @method('delete')
-                      <button type="submit" class="text-danger mr-2" style="display: inline-block; background: none; border: 0;">
+                      <button type="submit" class="text-danger mr-2" >
                         <i class="nav-icon i-Close-Window font-weight-bold"></i>
                       </button>
                     </form>

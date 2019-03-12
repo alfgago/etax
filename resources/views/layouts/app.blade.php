@@ -12,6 +12,9 @@
 
     <link rel="stylesheet" href="{{mix('assets/styles/css/themes/eva.min.css')}}">
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/perfect-scrollbar.css')}}">
+  
+    <script src="{{mix('assets/js/common-bundle.js')}}"></script>
+  
     @yield('header-scripts')
   
     <style>
@@ -85,7 +88,8 @@
       @include('layouts.search')
     <!-- ============ Search UI End ============= -->
 
-    <script src="{{mix('assets/js/common-bundle.js')}}"></script>
+    <script src="/assets/js/ubicacion.js"></script>
+    <script src="/assets/js/vendor/tagging.min.js"></script>
     <script src="{{asset('assets/js/es5/script.js')}}"></script>
   
 

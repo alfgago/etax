@@ -24,4 +24,3 @@ Route::get('login', function () {
 })->name('login');;
 
 Auth::routes();
-Route::get('/dashboard', 'HomeController@index')->name('home');

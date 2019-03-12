@@ -2,11 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Company;
 use App\Client;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
+  
+     /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+  
     /**
      * Display a listing of the resource.
      *
@@ -14,9 +26,11 @@ class ClientController extends Controller
      */
     public function index()
     {
-        $clientes = Client::all();
+        $current_company = auth()->user()->companies->first()->id;
+        $clients = Client::where('company_id', $current_company)->get();
+        
         return view('Client/index', [
-          'clientes' => $clientes
+          'clients' => $clients
         ]);
     }
 
@@ -38,6 +52,7 @@ class ClientController extends Controller
      */
     public function store(Request $request)
     {
+        
         $request->validate([
           'tipo_persona' => 'required',
           'id_number' => 'required',
@@ -48,8 +63,8 @@ class ClientController extends Controller
         ]);
       
         $cliente = new Client();
-        $empresa = Company::first();
-        $cliente->empresa_id = $empresa->id;
+        $company = auth()->user()->companies->first();
+        $cliente->company_id = $company->id;
       
         $cliente->tipo_persona = $request->tipo_persona;
         $cliente->id_number = $request->id_number;
@@ -57,8 +72,7 @@ class ClientController extends Controller
         $cliente->first_name = $request->first_name;
         $cliente->last_name = $request->last_name;
         $cliente->last_name2 = $request->last_name2;
-        $cliente->is_emisor = $request->is_emisor;
-        $cliente->is_receptor = $request->is_receptor;
+        $cliente->emisor_receptor = $request->emisor_receptor;
         $cliente->country = $request->country;
         $cliente->state = $request->state;
         $cliente->city = $request->city;
@@ -69,6 +83,7 @@ class ClientController extends Controller
         $cliente->phone = $request->phone;
         $cliente->es_exento = $request->es_exento;
         $cliente->billing_emails = $request->billing_emails;
+        $cliente->email = $request->email;
       
         $cliente->save();
       
@@ -95,6 +110,8 @@ class ClientController extends Controller
     public function edit($id)
     {
         $cliente = Client::findOrFail($id);
+        $this->authorize('update', $cliente);
+        
         return view('Client/edit', compact('cliente') );
     }
 
@@ -117,6 +134,7 @@ class ClientController extends Controller
         ]);
       
         $cliente = Client::findOrFail($id);
+        $this->authorize('update', $cliente);
       
         $cliente->tipo_persona = $request->tipo_persona;
         $cliente->id_number = $request->id_number;
@@ -150,7 +168,10 @@ class ClientController extends Controller
      */
     public function destroy($id)
     {
-        Client::find($id)->delete();
+        $cliente = Client::find($id);
+        $this->authorize('update', $cliente);
+        $cliente->delete();
+        
         return redirect('/clientes');
     }
 }

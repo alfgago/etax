@@ -8,6 +8,17 @@ use Illuminate\Http\Request;
 
 class ProviderController extends Controller
 {
+  
+     /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+  
     /**
      * Display a listing of the resource.
      *
@@ -15,7 +26,8 @@ class ProviderController extends Controller
      */
     public function index()
     {
-        $providers = Provider:all();
+        $current_company = auth()->user()->companies->first()->id;
+        $providers = Provider::where('company_id', $current_company)->get();
         return view('Provider/index', [
           'providers' => $providers
         ]);
@@ -49,8 +61,8 @@ class ProviderController extends Controller
         ]);
       
         $provider = new Provider();
-        $empresa = Company::first();
-        $provider->empresa_id = $empresa->id;
+        $company = auth()->user()->companies->first();
+        $provider->company_id = $company->id;
       
         $provider->code = $request->code;
         $provider->name = $request->name;
@@ -85,6 +97,7 @@ class ProviderController extends Controller
     public function edit($id)
     {
         $provider = Provider::findOrFail($id);
+        $this->authorize('update', $provider);
         return view('Provider/edit', compact('provider') );
     }
 
@@ -107,6 +120,7 @@ class ProviderController extends Controller
         ]);
       
         $provider = Provider::findOrFail($id);
+        $this->authorize('update', $provider);
       
         $provider->code = $request->code;
         $provider->name = $request->name;
@@ -129,7 +143,10 @@ class ProviderController extends Controller
      */
     public function destroy($id)
     {
-        Provider::find($id)->delete();
+        $provider = Provider::findOrFail($id);
+        $this->authorize('update', $provider);
+        $provider->delete();
+        
         return redirect('/providers');
     }
 }

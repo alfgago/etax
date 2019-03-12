@@ -8,6 +8,17 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+  
+     /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+  
     /**
      * Display a listing of the resource.
      *
@@ -15,7 +26,9 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::where('is_catalogue', 1)->get();
+        $current_company = auth()->user()->companies->first()->id;
+        $products = Product::where('company_id', $current_company)->where('is_catalogue', 1)->get();
+        
         return view('Product/index', [
           'products' => $products
         ]);
@@ -49,7 +62,7 @@ class ProductController extends Controller
         ]);
       
         $product = new Product();
-        $company = Company::first();
+        $company = auth()->user()->companies->first();
         $product->company_id = $company->id;
       
         $product->code = $request->code;
@@ -86,6 +99,8 @@ class ProductController extends Controller
     public function edit($id)
     {
         $product = Product::findOrFail($id);
+        $this->authorize('update', $product);
+        
         return view('Product/edit', compact('product') );
     }
 
@@ -108,6 +123,7 @@ class ProductController extends Controller
         ]);
       
         $product = Product::findOrFail($id);
+        $this->authorize('update', $product);
       
         $product->code = $request->code;
         $product->name = $request->name;
@@ -131,7 +147,10 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        Product::find($id)->delete();
+        $product = Product::findOrFail($id);
+        $this->authorize('update', $product);
+        $product->delete();
+        
         return redirect('/productos');
     }
 }

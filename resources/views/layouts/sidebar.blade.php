@@ -10,7 +10,7 @@
                 <div class="triangle"></div>
             </li>
             <li class="nav-item {{ request()->is('clientes/*') || request()->is('clientes') ? 'active' : '' }}" >
-                <a class="nav-item-hold" href="/">
+                <a class="nav-item-hold" href="/clientes">
                     <i class="nav-icon i-Professor"></i>
                     <span class="nav-text">Clientes</span>
                 </a>

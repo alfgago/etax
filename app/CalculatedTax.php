@@ -203,14 +203,15 @@ class CalculatedTax extends Model
       $denumeradorProrrata = $invoicesSubtotal;
       
       if( $invoicesSubtotal > 0 ){
-        //Calcula prorrata
-        $prorrata = $numeradorProrrata / $denumeradorProrrata;
         
         //Define los ratios por tipo para calclo de prorrata
         $ratio1 = $sumaRepercutido1 / $numeradorProrrata;
         $ratio2 = $sumaRepercutido2 / $numeradorProrrata;
         $ratio3 = $sumaRepercutido3 / $numeradorProrrata;
         $ratio4 = $sumaRepercutido4 / $numeradorProrrata;
+        
+        //Calcula prorrata
+        $prorrata = $numeradorProrrata / $denumeradorProrrata;
         
         //Calcula el total deducible y no deducible en base a los ratios y los montos de facturas recibidas.
         //$subtotalParaCFDP = $billsSubtotal - $ivaSoportado100Deducible - $ivaSoportadoNoDeducible;
@@ -264,8 +265,66 @@ class CalculatedTax extends Model
       $calculos->ratio3 = number_format($ratio3, 2);
       $calculos->ratio4 = number_format($ratio4, 2);
       $calculos->ratio_ex = number_format($ratioEx, 2);
+      
+      /**Calculos de Cuentas contables**/
+      
+      //Créditos
+      $calculos->cc_adquisiciones = $calculos->b1 + $calculos->b2 + $calculos->b3 + $calculos->b4 + 
+                                    $calculos->b51 + $calculos->b52 + $calculos->b53 + $calculos->b54 + 
+                                    $calculos->b61 + $calculos->b62 + $calculos->b63 + $calculos->b64 + 
+                                    $calculos->b70 + $calculos->b77;
+      $calculos->cc_anticipos = $calculos->b90;
+      $calculos->cc_adq_capital = $calculos->b80;
+
+      $calculos->cc_hpcfe_adquisiciones = $calculos->i1 + $calculos->i2 + $calculos->i3 + $calculos->i4 + 
+                            $calculos->i51 + $calculos->i52 + $calculos->i53 + $calculos->i54 + 
+                            $calculos->i61 + $calculos->i62 + $calculos->i63 + $calculos->i64;
+      $calculos->cc_hpcfe_adquisiciones_no_deducibles = $calculos->i70 + $calculos->i77;
+      $calculos->cc_hpcfe_anticipos = $calculos->i90;
+      $calculos->cc_hpcfe_adq_capital = $calculos->i80;
+      
+      $calculos->cc_bases_credito = $calculos->cc_adquisiciones + $calculos->cc_anticipos + $calculos->cc_adq_capital;
+      $calculos->cc_ivas_credito = $calculos->cc_hpcfe_adquisiciones + $calculos->cc_hpcfe_anticipos + $calculos->cc_hpcfe_adq_capital; //Esta es la Acreedora de IVA
+      
+      //Débitos
+      $calculos->cc_ventas_1 = $calculos->b101 + $calculos->b121;
+      $calculos->cc_ventas_2 = $calculos->b102 + $calculos->b122;
+      $calculos->cc_ventas_13 = $calculos->b103 + $calculos->b123;
+      $calculos->cc_ventas_4 = $calculos->b104 + $calculos->b124;
+      $calculos->cc_ventas_13_limite = $calculos->b130;
+      $calculos->cc_anticipos_debito_1 = $calculos->b141;
+      $calculos->cc_anticipos_debito_2 = $calculos->b142;
+      $calculos->cc_anticipos_debito_3 = $calculos->b143;
+      $calculos->cc_anticipos_debito_4 = $calculos->b144;
+      
+      $calculos->cc_hpdfe_1 = $calculos->i101 + $calculos->i121 + $calculos->i141;
+      $calculos->cc_hpdfe_2 = $calculos->i102 + $calculos->i122 + $calculos->i142;
+      $calculos->cc_hpdfe_3 = $calculos->i103 + $calculos->i123 + $calculos->i143 + $calculos->i130;
+      $calculos->cc_hpdfe_4 = $calculos->i104 + $calculos->i124 + $calculos->i144;
+      
+      
+      $calculos->cc_ivas_debito = $calculos->cc_hpdfe_1 + $calculos->cc_hpdfe_2 + $calculos->cc_hpdfe_3 + $calculos->cc_hpdfe_4; //Esta es la Deudora de IVA
+      $calculos->cc_bases_debito = $calculos->cc_ventas_1 + $calculos->cc_ventas_2 + $calculos->cc_ventas_13 + $calculos->cc_ventas_4 + $calculos->cc_ventas_13_limite + 
+                              $calculos->cc_anticipos_debito_1 + $calculos->cc_anticipos_debito_2  + $calculos->cc_anticipos_debito_3 + $calculos->cc_anticipos_debito_4;
+      
+      $calculos->cc_exportaciones = $calculos->b150;
+      $calculos->cc_estado_ong = $calculos->b160;
+      $calculos->cc_exenciones_objetivas_sin_limite = $calculos->b200;
+      $calculos->cc_exenciones_objetivas_con_limite = $calculos->b201;
+      $calculos->cc_exenciones_autoconsumo = $calculos->b240;
+      $calculos->cc_exenciones_subjetivas = $calculos->b250;
+      $calculos->cc_exenciones_no_sujetos = $calculos->b260;
+      
+      $calculos->cc_bases_exentas = $calculos->b200 + $calculos->b201 + $calculos->b240 + $calculos->b250 + $calculos->b260;
+      
+      $calculos->cc_ajuste_saldo = ($calculos->cc_ivas_debito + $calculos->cc_bases_debito) - ($calculos->cc_ivas_credito + $calculos->cc_bases_credito);
 
       return $calculos;
     }
+  
+    /* Quiero que la liquidacion divida cuantos es de bienes de capital deducibles y cuanto es de recibido deducible
+    
+        Se elimina 90, 99, 199, 299, 142, 142, 143, 144
+    */
   
 }
