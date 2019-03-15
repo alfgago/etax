@@ -70,18 +70,21 @@ class CalculatedTax extends Model
   
     //Recibe fecha de inicio y fecha de fin en base a las cuales se desea calcular la prorrata.
     public static function calcularFacturacion( $from, $to, $lastBalance, $lastProrrata ) {
+      $current_company = auth()->user()->companies->first()->id;
       
       $calculos = new CalculatedTax();
       
-      $countBills = Bill::whereBetween('generated_date', [$from, $to])->count();
-      $countInvoices = Invoice::whereBetween('generated_date', [$from, $to])->count();
+      $countBills = Bill::where('company_id', $current_company)->whereBetween('generated_date', [$from, $to])->count();
+      $countInvoices = Invoice::where('company_id', $current_company)->whereBetween('generated_date', [$from, $to])->count();
       
-      $billItems = BillItem::whereHas('bill', function ($query) use ($from, $to){
+      $billItems = BillItem::whereHas('bill', function ($query) use ($from, $to, $current_company){
         $query->whereBetween('generated_date', [$from, $to]);
+        $query->where('company_id', $current_company);
       })->get();
       
-      $invoiceItems = InvoiceItem::whereHas('invoice', function ($query) use ($from, $to){
+      $invoiceItems = InvoiceItem::whereHas('invoice', function ($query) use ($from, $to, $current_company){
         $query->whereBetween('generated_date', [$from, $to]);
+        $query->where('company_id', $current_company);
       })->get();
       
       $countInvoiceItems = count( $invoiceItems );
@@ -124,7 +127,7 @@ class CalculatedTax extends Model
       for ($i = 0; $i < $countInvoiceItems; $i++) {
         $subtotal = $invoiceItems[$i]->subtotal;
         $ivaType = $invoiceItems[$i]->iva_type;
-        $invoiceIva = $subtotal * $invoiceItems[$i]->iva_percentage / 100;
+        $invoiceIva = $invoiceItems[$i]->iva_amount;
         
         $invoicesTotal += $invoiceItems[$i]->total;
         $invoicesSubtotal += $subtotal;
@@ -137,31 +140,31 @@ class CalculatedTax extends Model
         $calculos->$iVar += $invoiceIva;
         
         //Suma los del 1%
-        if( $ivaType == 101 || $ivaType == 121 || $ivaType == 141 ){
+        if( $ivaType == '101' || $ivaType == '121' || $ivaType == '141' ){
           $sumaRepercutido1 += $subtotal;
         }
         
         //Suma los del 2%
-        if( $ivaType == 102 || $ivaType == 122 || $ivaType == 142 ){
+        if( $ivaType == '102' || $ivaType == '122' || $ivaType == '142' ){
           $sumaRepercutido2 += $subtotal;
         }
         
         //Suma los del 13%
-        if( $ivaType == 103 || $ivaType == 123 || $ivaType == 143 || $ivaType == 130 ){
+        if( $ivaType == '103' || $ivaType == '123' || $ivaType == '143' || $ivaType == '130' ){
           $sumaRepercutido3 += $subtotal;
         }
         
         //Suma los del 4%
-        if( $ivaType == 104 || $ivaType == 124 || $ivaType == 144 ){
+        if( $ivaType == '104' || $ivaType == '124' || $ivaType == '144' ){
           $sumaRepercutido4 += $subtotal;
         }
         
         //Suma los del exentos. Estos se suman como si fueran 13 para efectos del cálculo.
-        if( $ivaType == 150 || $ivaType == 160 || $ivaType == 199 ){
+        if( $ivaType == '150' || $ivaType == '160' || $ivaType == '199' ){
           $sumaRepercutido3 += $subtotal;
         }
    
-        if( $ivaType > 199 ){
+        if( $ivaType == '200' || $ivaType == '201' || $ivaType == '240' || $ivaType == '250' || $ivaType == '260' ){
           $sumaRepercutidoEx += $subtotal;
         }
         
@@ -175,17 +178,17 @@ class CalculatedTax extends Model
       for ($i = 0; $i < $countBillItems; $i++) {
         $subtotal = $billItems[$i]->subtotal;
         $ivaType = $billItems[$i]->iva_type;
-        $billIva = $subtotal * $billItems[$i]->iva_percentage / 100;
+        $billIva = $billItems[$i]->iva_amount;
         
         $billsTotal += $billItems[$i]->total;
         $billsSubtotal += $subtotal;
         $totalBillIva += $billIva;
         
-        if( $ivaType == '61' || $ivaType == '62' || $ivaType == '63' || $ivaType == '64' )
+        if( $ivaType == '061' || $ivaType == '062' || $ivaType == '063' || $ivaType == '064' )
         {
           $ivaSoportado100Deducible += $billItems[$i]->subtotal;
         }
-        if( $ivaType == '70' || $ivaType == '77' )
+        if( $ivaType == '070' || $ivaType == '077' )
         {
           $ivaSoportadoNoDeducible+= $billItems[$i]->subtotal;
         }
@@ -268,13 +271,24 @@ class CalculatedTax extends Model
       
       /**Calculos de Cuentas contables**/
       
-      //Créditos
+      //Debe
+      $calculos->cc_compras = $calculos->b001 + $calculos->b002 + $calculos->b003 + $calculos->b004 + 
+                              $calculos->b061 + $calculos->b062 + $calculos->b063 + $calculos->b064 + 
+                              $calculos->i61 + $calculos->i62 + $calculos->i63 + $calculos->i64;       //En este se suma el monto de IVA, pero no se toma en cuenta para prorrata
+      $calculos->cc_importaciones = $calculos->b051 + $calculos->b052 + $calculos->b053 + $calculos->b054;
+      $calculos->cc_propiedades = $calculos->b080;
+      
+      /*$calculos->cc_iva_compras = $calculos->i001 + $calculos->i002 + $calculos->i003 + $calculos->i004;
+      $calculos->cc_iva_importaciones = $calculos->i051 + $calculos->i052 + $calculos->i053 + $calculos->i054;
+      $calculos->cc_iva_propiedades = $calculos->i080;
+      
+      
+      
       $calculos->cc_adquisiciones = $calculos->b1 + $calculos->b2 + $calculos->b3 + $calculos->b4 + 
-                                    $calculos->b51 + $calculos->b52 + $calculos->b53 + $calculos->b54 + 
-                                    $calculos->b61 + $calculos->b62 + $calculos->b63 + $calculos->b64 + 
+                                    + 
+                                     + 
                                     $calculos->b70 + $calculos->b77;
       $calculos->cc_anticipos = $calculos->b90;
-      $calculos->cc_adq_capital = $calculos->b80;
 
       $calculos->cc_hpcfe_adquisiciones = $calculos->i1 + $calculos->i2 + $calculos->i3 + $calculos->i4 + 
                             $calculos->i51 + $calculos->i52 + $calculos->i53 + $calculos->i54 + 
@@ -286,7 +300,7 @@ class CalculatedTax extends Model
       $calculos->cc_bases_credito = $calculos->cc_adquisiciones + $calculos->cc_anticipos + $calculos->cc_adq_capital;
       $calculos->cc_ivas_credito = $calculos->cc_hpcfe_adquisiciones + $calculos->cc_hpcfe_anticipos + $calculos->cc_hpcfe_adq_capital; //Esta es la Acreedora de IVA
       
-      //Débitos
+      //Haber
       $calculos->cc_ventas_1 = $calculos->b101 + $calculos->b121;
       $calculos->cc_ventas_2 = $calculos->b102 + $calculos->b122;
       $calculos->cc_ventas_13 = $calculos->b103 + $calculos->b123;
@@ -317,7 +331,7 @@ class CalculatedTax extends Model
       
       $calculos->cc_bases_exentas = $calculos->b200 + $calculos->b201 + $calculos->b240 + $calculos->b250 + $calculos->b260;
       
-      $calculos->cc_ajuste_saldo = ($calculos->cc_ivas_debito + $calculos->cc_bases_debito) - ($calculos->cc_ivas_credito + $calculos->cc_bases_credito);
+      $calculos->cc_ajuste_saldo = ($calculos->cc_ivas_debito + $calculos->cc_bases_debito) - ($calculos->cc_ivas_credito + $calculos->cc_bases_credito);*/
 
       return $calculos;
     }

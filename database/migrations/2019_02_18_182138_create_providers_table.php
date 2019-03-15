@@ -17,15 +17,13 @@ class CreateProvidersTable extends Migration
             $table->bigIncrements('id');
           
             $table->unsignedBigInteger('company_id');
-            $table->enum('tipo_persona', ['fisica', 'juridica', 'dimex', 'extranjero', 'nite', 'otro']);
+            $table->string('tipo_persona');
             $table->string('id_number');
             $table->string('code');
             $table->string('first_name');
             $table->string('last_name')->nullable();
             $table->string('last_name2')->nullable();
             $table->string('email')->unique();
-            $table->boolean('is_emisor')->default(false);
-            $table->boolean('is_receptor')->default(false);
             $table->string('country');
             $table->string('state')->nullable(); //Provincia
             $table->string('city')->nullable(); //Canton
@@ -38,6 +36,39 @@ class CreateProvidersTable extends Migration
 
             $table->timestamps();
         });
+        
+        $this->demoData();
+    }
+    
+    public function demoData() {
+        
+        $company = \App\Company::first();
+        $faker = Faker\Factory::create();
+        $faker->addProvider(new Faker\Provider\es_ES\Person($faker));
+      
+        for($i = 0; $i < 50; $i++) {
+            $provider = new \App\Provider();
+            $provider->company_id = $company->id;
+            
+            //Datos generales y para Hacienda
+            $provider->tipo_persona = "1";
+            $provider->id_number = $faker->numerify('###########');
+            $provider->code = $faker->lexify('???');
+            $provider->first_name = $faker->firstName;
+            $provider->last_name = $faker->lastName;
+            $provider->last_name2 = $faker->lastName;
+            $provider->email = $faker->freeEmail;
+            $provider->country = "CR";
+            $provider->state = "1";
+            $provider->city = "1";
+            $provider->district = "1";
+            $provider->neighborhood = "";
+            $provider->zip = "";
+            $provider->address = "";
+            $provider->phone = "";
+            
+            $provider->save();
+        }
     }
 
     /**

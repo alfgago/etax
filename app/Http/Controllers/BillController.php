@@ -28,7 +28,7 @@ class BillController extends Controller
     public function index()
     {
         $current_company = auth()->user()->companies->first()->id;
-        $bills = Bill::where('company_id', $current_company)->get();
+        $bills = Bill::where('company_id', $current_company)->orderBy('generated_date', 'DESC')->paginate(10);
         return view('Bill/index', [
           'bills' => $bills
         ]);
@@ -74,7 +74,7 @@ class BillController extends Controller
         $bill->generation_method = "M";
       
         //Datos de proveedor
-        $bill->provider = $request->provider;
+        $bill->provider_id = $request->provider_id;
         
         //Datos de factura
         $bill->description = $request->description;
@@ -176,7 +176,7 @@ class BillController extends Controller
         $bill->generation_method = "M";
       
         //Datos de proveedor
-        $bill->provider = $request->provider;
+        $bill->provider_id = $request->provider_id;
         $bill->send_emails = $request->send_emails;
         
         //Datos de factura

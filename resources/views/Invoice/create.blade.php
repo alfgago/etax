@@ -6,7 +6,7 @@
 
 @section('content') 
 <div class="row">
-  <div class="col-md-12">
+  <div class="col-lg-12 col-xl-10">
     <div class="card mb-4">
       <div class="card-body">
         <form method="POST" action="/facturas-emitidas">
@@ -15,177 +15,145 @@
           
           <input type="hidden" id="current-index" value="0">
 
-          <div class="form-row">
-            <div class="form-group col-md-6 ">
+          <div class="form-row tabbed" id="tab1">
+            <div class="form-group col-md-4 ">
               <div class="form-row">
                 <div class="form-group col-md-12">
                   <h3>
-                    Información de cliente
+                    Cliente
                   </h3>
-                </div>
-
-                <div class="form-group col-md-4">
-                  <label for="client_id_type">Tipo de identificación</label>
-                  <select class="form-control" name="client_id_type" id="tipo_identificacion_cliente" required>
-                    <option value="fisica" selected>Física</option>
-                    <option value="juridica">Jurídica</option>
-                    <option value="extranjero">Cédula extanjero</option>
-                    <option value="dimex">DIMEX</option>
-                    <option value="nite">NITE</option>
-                    <option value="otro">Otro</option>
+                </div>  
+                
+                <div class="form-group col-md-12 with-button">
+                  <label for="cliente">Seleccione el cliente</label>
+                  <select class="form-control" name="client_id" id="client_id" placeholder="" required>
+                    @foreach ( auth()->user()->companies->first()->clients as $cliente )
+                      <option value="{{ $cliente->id }}" >{{ $cliente->id_number }} - {{ $cliente->first_name }}</option>
+                    @endforeach
                   </select>
-                </div>
-
-                <div class="form-group col-md-6">
-                  <label for="client_id_temp">Identificación</label>
-                  <input type="text" class="form-control" name="client_id_temp" id="identificacion_cliente" placeholder="" required>
-                </div>
-
-                <div class="form-group col-md-2">
-                  <label for="btn_buscar_cliente">&nbsp;</label>
-                  <div>
-                    <input type="button" class="btn cur-p btn-dark" name="btn_buscar_cliente" id="btn_buscar_cliente" value="Buscar cliente">
-                  </div>
-                </div>
-
-                <div class="form-group col-md-12">
-                  <label for="client_name">Nombre</label>
-                  <input type="text" class="form-control" name="client_name" id="nombre_cliente" placeholder="" required>
-                </div>
-                
-                <div class="form-group col-md-4">
-                  <label for="code">Código Int.</label>
-                  <input type="text" class="form-control" name="code" id="codigo_cliente" placeholder="">
-                </div>
-
-                <div class="form-group col-md-4">
-                  <label for="send_emails">Correo electrónico</label>
-                  <input type="text" class="form-control" name="send_emails" id="correos_envio" placeholder="" required>
-                </div>
-
-                <div class="form-group col-md-4">
-                  <label for="phone">Teléfono</label>
-                  <input type="text" class="form-control" name="phone" id="telefono" placeholder="">
-                </div>
-                
-                <div class="form-group col-md-12">
-                  <label for="address">Dirección</label>
-                  <input type="text" class="form-control" name="address" id="direccion" placeholder="">
-                </div>
-
-                <div class="form-group col-md-12">
-                  <div class="form-check">
-                   <label for="client_is_exempt" class="form-check-label">
-                   <input class="form-check-input" id="cliente_exento" name="client_is_exempt" type="checkbox"> Cliente exento de IVA
-                 </label>
-                  </div>
                 </div>
               </div>
             </div>
-            <div class="form-group col-md-5 offset-md-1">
+              
+              
+            <div class="form-group col-md-4 offset-md-4">
               <div class="form-row">
+                
                 <div class="form-group col-md-12">
                   <h3>
+                    Moneda
+                  </h3>
+                </div>
+  
+                <div class="form-group col-md-6">
+                  <label for="currency">Divisa</label>
+                  <select class="form-control" name="currency" id="moneda" required>
+                    <option value="crc" selected>CRC</option>
+                    <option value="crc">USD</option>
+                  </select>
+                </div>
+  
+                <div class="form-group col-md-6">
+                  <label for="currency_rate">Tipo de cambio</label>
+                  <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="1.00" required>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group col-md-12">
+              <div class="form-row">
+                <div class="form-group col-md-12">
+                  <h3 style="margin-top:1rem;">
                     Datos generales
                   </h3>
                 </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="generated_date">Fecha</label>
-                    <div class="input-group">
-                      <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
-                      <div class="input-group-append">
-                        <button class="btn btn-secondary" type="button">
-                            <i class="icon-regular i-Calendar-4"></i>
-                        </button>
-                      </div>
+  
+                <div class="form-group col-md-4">
+                  <label for="generated_date">Fecha</label>
+                  <div class="input-group">
+                    <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
+                    <div class="input-group-append">
+                      <button class="btn btn-secondary" type="button">
+                          <i class="icon-regular i-Calendar-4"></i>
+                      </button>
                     </div>
                   </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="hora">Hora</label>
-                    <div class="input-group">
-                      <input id="hora" class="form-control input-hora" name="hora" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('g:i A') }}">
-                      <div class="input-group-append">
-                        <button class="btn btn-secondary" type="button">
-                            <i class="icon-regular i-Clock"></i>
-                        </button>
-                      </div>
+                </div>
+  
+                <div class="form-group col-md-4">
+                  <label for="hora">Hora</label>
+                  <div class="input-group">
+                    <input id="hora" class="form-control input-hora" name="hora" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('g:i A') }}">
+                    <div class="input-group-append">
+                      <button class="btn btn-secondary" type="button">
+                          <i class="icon-regular i-Clock"></i>
+                      </button>
                     </div>
                   </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="due_date">Fecha de vencimiento</label>
-                    <div class="input-group">
-                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
-                      <div class="input-group-append">
-                        <button class="btn btn-secondary" type="button">
-                            <i class="icon-regular i-Calendar-4"></i>
-                        </button>
-                      </div>
+                </div>
+  
+                <div class="form-group col-md-4">
+                  <label for="due_date">Fecha de vencimiento</label>
+                  <div class="input-group">
+                    <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
+                    <div class="input-group-append">
+                      <button class="btn btn-secondary" type="button">
+                          <i class="icon-regular i-Calendar-4"></i>
+                      </button>
                     </div>
                   </div>
-                  
-                  <div class="form-group col-md-6"></div>
-
-                  <div class="form-group col-md-6">
-                    <label for="sale_condition">Condición de venta</label>
-                    <div class="input-group">
-                      <select id="condicion_venta" name="sale_condition" class="form-control" required>
-                        <option selected value="01">Contado</option>
-                        <option value="02">Crédito</option>
-                        <option value="03">Consignación</option>
-                        <option value="04">Apartado</option>
-                        <option value="05">Arrendamiento con opción de compra</option>
-                        <option value="06">Arrendamiento en función financiera</option>
-                        <option value="99">Otros</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="payment_type">Método de pago</label>
-                    <div class="input-group">
-                      <select id="medio_pago" name="payment_type" class="form-control" required>
-                        <option value="01" selected>Efectivo</option>
-                        <option value="02">Tarjeta</option>
-                        <option value="03">Cheque</option>
-                        <option value="04">Transferencia-Depósito Bancario</option>
-                        <option value="05">Recaudado por terceros</option>
-                        <option value="99">Otros</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="other_reference">Referencia</label>
-                    <input type="text" class="form-control" name="other_reference" id="referencia" value="" >
-                  </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="buy_order">Orden de compra</label>
-                    <input type="text" class="form-control" name="buy_order" id="orden_compra" value="" >
-                  </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="currency">Moneda</label>
-                    <select class="form-control" name="currency" id="moneda" required>
-                      <option value="crc" selected>CRC</option>
-                      <option value="crc">USD</option>
+                </div>
+  
+                <div class="form-group col-md-6">
+                  <label for="sale_condition">Condición de venta</label>
+                  <div class="input-group">
+                    <select id="condicion_venta" name="sale_condition" class="form-control" required>
+                      <option selected value="01">Contado</option>
+                      <option value="02">Crédito</option>
+                      <option value="03">Consignación</option>
+                      <option value="04">Apartado</option>
+                      <option value="05">Arrendamiento con opción de compra</option>
+                      <option value="06">Arrendamiento en función financiera</option>
+                      <option value="99">Otros</option>
                     </select>
                   </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="currency_rate">Tipo de cambio</label>
-                    <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="1.00" required>
+                </div>
+  
+                <div class="form-group col-md-6">
+                  <label for="payment_type">Método de pago</label>
+                  <div class="input-group">
+                    <select id="medio_pago" name="payment_type" class="form-control" required>
+                      <option value="01" selected>Efectivo</option>
+                      <option value="02">Tarjeta</option>
+                      <option value="03">Cheque</option>
+                      <option value="04">Transferencia-Depósito Bancario</option>
+                      <option value="05">Recaudado por terceros</option>
+                      <option value="99">Otros</option>
+                    </select>
                   </div>
-
+                </div>
+  
+                <div class="form-group col-md-6">
+                  <label for="other_reference">Referencia</label>
+                  <input type="text" class="form-control" name="other_reference" id="referencia" value="" >
+                </div>
+  
+                <div class="form-group col-md-6">
+                  <label for="buy_order">Orden de compra</label>
+                  <input type="text" class="form-control" name="buy_order" id="orden_compra" value="" >
+                </div>
+                
+                <div class="form-group col-md-12">
+                  <label for="description">Notas</label>
+                  <textarea class="form-control" name="description" id="notas" placeholder=""></textarea>
+                </div>
+                
               </div>
-
             </div>
+            
           </div>
 
-          <div class="form-row">
+          <div class="form-row tabbed" id="tab3">
 
             <div class="form-group col-md-12">
               <h3>
@@ -204,7 +172,7 @@
                   <input type="text" class="form-control" id="codigo" value="">
                 </div>
 
-                <div class="form-group col-md-4">
+                <div class="form-group col-md-3">
                   <label for="nombre">Nombre / Descripción</label>
                   <input type="text" class="form-control" id="nombre" value="">
                 </div>
@@ -227,6 +195,11 @@
                   </select>
                 </div>
 
+                <div class="form-group col-md-1">
+                  <label for="nombre_cliente">% IVA</label>
+                  <input type="text" class="form-control" id="porc_iva" placeholder="13" value="13" readonly>
+                </div>
+
                 <div class="form-group col-md-2">
                   <label for="unidad_medicion">Unidad de medición</label>
                   <select class="form-control" id="unidad_medicion" value="">
@@ -247,13 +220,13 @@
                 </div>
 
                 <div class="form-group col-md-2">
-                  <label for="nombre_cliente">Subtotal</label>
+                  <label for="item_subtotal">Subtotal</label>
                   <input type="text" class="form-control" id="item_subtotal" placeholder="" readonly="true">
                 </div>
 
                 <div class="form-group col-md-2">
-                  <label for="nombre_cliente">Porcentaje IVA</label>
-                  <input type="text" class="form-control" id="porc_iva" placeholder="13" value="13" readonly>
+                  <label for="item_iva">Monto IVA</label>
+                  <input type="text" class="form-control" id="item_iva_amount" placeholder="" >
                 </div>
 
                 <div class="form-group col-md-2">
@@ -300,35 +273,34 @@
           </div>
 
           <div class="form-row">
-            <div class="form-group col-md-12">
-              <h3>
-                Total de factura
-              </h3>
-            </div>
-
-            <div class="form-group col-md-4">
-              <label for="subtotal">Subtotal </label>
-              <input type="text" class="form-control" name="subtotal" id="subtotal" placeholder="" readonly="true" required>
-            </div>
-
-            <div class="form-group col-md-4">
-              <label for="iva_amount">Monto IVA </label>
-              <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
-            </div>
-
-            <div class="form-group col-md-4">
-              <label for="total">Total</label>
-              <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true">
-            </div>
-
-            <div class="form-group col-md-12">
-              <label for="description">Notas</label>
-              <input type="text" class="form-control" name="description" id="notas" placeholder="">
-            </div>
-
+            
+                <div class="form-group col-md-12">
+                  <h3>
+                   Detalle
+                  </h3>
+                </div>
+    
+                <div class="form-group col-md-4">
+                  <label for="subtotal">Subtotal </label>
+                  <input type="text" class="form-control" name="subtotal" id="subtotal" placeholder="" readonly="true" required>
+                </div>
+    
+                <div class="form-group col-md-4">
+                  <label for="iva_amount">Monto IVA </label>
+                  <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
+                </div>
+    
+                <div class="form-group col-md-4">
+                  <label for="total">Total</label>
+                  <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true">
+                </div>
           </div>
-
-          <button type="submit" class="btn btn-primary">Confirmar factura</button>
+          
+          <div class="btn-holder">
+            <button type="submit" class="btn btn-primary">Guardar factura</button>
+            <button type="submit" class="btn btn-primary">Enviar factura electrónica</button>
+            <button type="submit" class="btn btn-primary">Programar factura</button>
+          </div>
 
         </form>
       </div>
@@ -359,3 +331,6 @@
 </script>
 
 @endsection
+
+
+

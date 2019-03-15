@@ -13,6 +13,12 @@ class Bill extends Model
     public function company()
     {
         return $this->belongsTo(Company::class);
+    }  
+    
+    //Relacion con el proveedor
+    public function provider()
+    {
+        return $this->belongsTo(Provider::class);
     }
   
     //Relación con facturas recibidas
@@ -33,7 +39,7 @@ class Bill extends Model
         return Carbon::parse($this->due_date);
     }
   
-    public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $is_exempt )
+    public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $is_exempt )
     {
       return BillItem::create([
         'bill_id' => $this->id,
@@ -50,12 +56,13 @@ class Bill extends Model
         'discount_reason' => $discount_reason,
         'iva_type' => $iva_type,
         'iva_percentage' => $iva_percentage,
+        'iva_amount' => $iva_amount,
         'is_exempt' => $is_exempt,
       ]);
       
     }
   
-    public function addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $is_exempt )
+    public function addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $is_exempt )
     {
       if( $item_id ){
         $item = BillItem::find($item_id);
@@ -74,6 +81,7 @@ class Bill extends Model
           $item->discount_reason = $discount_reason;
           $item->iva_type = $iva_type;
           $item->iva_percentage = $iva_percentage;
+          $item->iva_amount = $iva_amount;
           $item->is_exempt = $is_exempt;
           $item->save();
         }

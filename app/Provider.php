@@ -16,6 +16,10 @@ class Provider extends Model
   public function getFullName() {
     return $this->first_name . " " . $this->last_name . " " . $this->last_name2;
   }
+  
+  public function toString() {
+    return $this->id_number . " - " . $this->getFullName();
+  }  
 
   public function getTipoPersona() {
     $tipoStr = 'Física';

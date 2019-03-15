@@ -28,7 +28,7 @@ class InvoiceController extends Controller
     public function index()
     {
         $current_company = auth()->user()->companies->first()->id;
-        $invoices = Invoice::where('company_id', $current_company)->get();
+        $invoices = Invoice::where('company_id', $current_company)->orderBy('generated_date', 'DESC')->paginate(10);
         return view('Invoice/index', [
           'invoices' => $invoices
         ]);
@@ -74,11 +74,7 @@ class InvoiceController extends Controller
         $invoice->generation_method = "M";
       
         //Datos de cliente
-        $invoice->client_name = $request->client_name;
-        $invoice->client_id_type = $request->client_id_type;
         $invoice->client_id = $request->client_id;
-        $invoice->client_is_exempt = $request->client_is_exempt ? true : false;
-        $invoice->send_emails = $request->send_emails;
         
         //Datos de factura
         $invoice->description = $request->description;
@@ -180,11 +176,7 @@ class InvoiceController extends Controller
         $invoice->generation_method = "M";
       
         //Datos de cliente
-        $invoice->client_name = $request->client_name;
-        $invoice->client_id_type = $request->client_id_type;
-        $invoice->client_id_temp = $request->client_id_temp;
-        $invoice->client_is_exempt = $request->client_is_exempt ? true : false;
-        $invoice->send_emails = $request->send_emails;
+        $invoice->client_id = $request->client_id;
         
         //Datos de factura
         $invoice->description = $request->description;

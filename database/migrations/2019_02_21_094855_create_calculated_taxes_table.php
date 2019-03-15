@@ -20,7 +20,7 @@ class CreateCalculatedTaxesTable extends Migration
             $table->string('month_code');
             $table->string('year');
             $table->boolean('is_cumulative')->default(false);
-            $table->boolean('is_final_calculation')->default(false);
+            $table->boolean('is_final')->default(false);
           
             $table->double('prorrata');
           
@@ -53,40 +53,40 @@ class CreateCalculatedTaxesTable extends Migration
             $table->double('ratio_ex');
           
             //Debitos
-            $table->double('b1')->default(0);
-            $table->double('i1')->default(0);
-            $table->double('b2')->default(0);
-            $table->double('i2')->default(0);
-            $table->double('b3')->default(0);
-            $table->double('i3')->default(0);
-            $table->double('b4')->default(0);
-            $table->double('i4')->default(0);
-            $table->double('b51')->default(0);
-            $table->double('i51')->default(0);
-            $table->double('b52')->default(0);
-            $table->double('i52')->default(0);
-            $table->double('b53')->default(0);
-            $table->double('i53')->default(0);
-            $table->double('b54')->default(0);
-            $table->double('i54')->default(0);
-            $table->double('b61')->default(0);
-            $table->double('i61')->default(0);
-            $table->double('b62')->default(0);
-            $table->double('i62')->default(0);
-            $table->double('b63')->default(0);
-            $table->double('i63')->default(0);
-            $table->double('b64')->default(0);
-            $table->double('i64')->default(0);
-            $table->double('b70')->default(0);
-            $table->double('i70')->default(0);
-            $table->double('b77')->default(0);
-            $table->double('i77')->default(0);
-            $table->double('b80')->default(0);
-            $table->double('i80')->default(0);
-            $table->double('b90')->default(0);
-            $table->double('i90')->default(0);
-            $table->double('b99')->default(0);
-            $table->double('i99')->default(0);
+            $table->double('b001')->default(0);
+            $table->double('i001')->default(0);
+            $table->double('b002')->default(0);
+            $table->double('i002')->default(0);
+            $table->double('b003')->default(0);
+            $table->double('i003')->default(0);
+            $table->double('b004')->default(0);
+            $table->double('i004')->default(0);
+            $table->double('b051')->default(0);
+            $table->double('i051')->default(0);
+            $table->double('b052')->default(0);
+            $table->double('i052')->default(0);
+            $table->double('b053')->default(0);
+            $table->double('i053')->default(0);
+            $table->double('b054')->default(0);
+            $table->double('i054')->default(0);
+            $table->double('b061')->default(0);
+            $table->double('i061')->default(0);
+            $table->double('b062')->default(0);
+            $table->double('i062')->default(0);
+            $table->double('b063')->default(0);
+            $table->double('i063')->default(0);
+            $table->double('b064')->default(0);
+            $table->double('i064')->default(0);
+            $table->double('b070')->default(0);
+            $table->double('i070')->default(0);
+            $table->double('b077')->default(0);
+            $table->double('i077')->default(0);
+            $table->double('b080')->default(0);
+            $table->double('i080')->default(0);
+            $table->double('b090')->default(0);
+            $table->double('i090')->default(0);
+            $table->double('b099')->default(0);
+            $table->double('i099')->default(0);
           
             //Creditos
             $table->double('b101')->default(0);

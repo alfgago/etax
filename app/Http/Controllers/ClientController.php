@@ -27,7 +27,7 @@ class ClientController extends Controller
     public function index()
     {
         $current_company = auth()->user()->companies->first()->id;
-        $clients = Client::where('company_id', $current_company)->get();
+        $clients = Client::where('company_id', $current_company)->paginate(10);
         
         return view('Client/index', [
           'clients' => $clients

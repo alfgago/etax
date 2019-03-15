@@ -17,74 +17,59 @@
           <input type="hidden" id="current-index" value="0">
 
           <div class="form-row">
-            <div class="form-group col-md-6 ">
+            <div class="form-group col-md-4 ">
               <div class="form-row">
                 <div class="form-group col-md-12">
                   <h3>
-                    Información de proveedor
+                    Proveedor
                   </h3>
                 </div>
 
-                <div class="form-group col-md-4">
-                  <label for="tipo_identificacion_proveedor">Tipo de identificación</label>
-                  <select class="form-control" name="tipo_identificacion_proveedor" id="tipo_identificacion_proveedor" >
-                    <option value="fisica" selected>Física</option>
-                    <option value="juridica">Jurídica</option>
-                    <option value="extranjero">Cédula extanjero</option>
-                    <option value="dimex">DIMEX</option>
-                    <option value="nite">NITE</option>
-                    <option value="otro">Otro</option>
+                <div class="form-group col-md-12 with-button">
+                  <label for="provider_id">Seleccione el proveedor</label>
+                  <select class="form-control" name="provider_id" id="proveedor" placeholder="" required>
+                    @foreach ( auth()->user()->companies->first()->providers as $proveedor )
+                      <option value="{{ $proveedor->id }}" >{{ $proveedor->id_number }} - {{ $proveedor->first_name }}</option>
+                    @endforeach
                   </select>
-                </div>
-
-                <div class="form-group col-md-6">
-                  <label for="identificacion_proveedor">Identificación</label>
-                  <input type="text" class="form-control" name="identificacion_proveedor" id="identificacion_proveedor" placeholder="" >
-                </div>
-
-                <div class="form-group col-md-2">
-                  <label for="btn_buscar_proveedor">&nbsp;</label>
-                  <div>
-                    <input type="button" class="btn cur-p btn-dark" name="btn_buscar_proveedor" id="btn_buscar_proveedor" value="Buscar proveedor">
-                  </div>
-                </div>
-
-                <div class="form-group col-md-12">
-                  <label for="provider">Nombre</label>
-                  <input type="text" class="form-control" name="provider" id="proveedor" placeholder="" required>
-                </div>
-                
-                <div class="form-group col-md-4">
-                  <label for="codigo_proveedor">Código Int.</label>
-                  <input type="text" class="form-control" name="codigo_proveedor" id="codigo_proveedor" placeholder="">
-                </div>
-
-                <div class="form-group col-md-4">
-                  <label for="correos_envio">Correo electrónico</label>
-                  <input type="text" class="form-control" name="correos_envio" id="correos_envio" placeholder="" >
-                </div>
-
-                <div class="form-group col-md-4">
-                  <label for="telefono">Teléfono</label>
-                  <input type="text" class="form-control" name="telefono" id="telefono" placeholder="">
-                </div>
-                
-                <div class="form-group col-md-12">
-                  <label for="direccion">Dirección</label>
-                  <input type="text" class="form-control" name="direccion" id="direccion" placeholder="">
                 </div>
                 
               </div>
             </div>
-            <div class="form-group col-md-5 offset-md-1">
+            
+            <div class="form-group col-md-4 offset-md-4">
               <div class="form-row">
                 <div class="form-group col-md-12">
                   <h3>
+                    Moneda
+                  </h3>
+                </div>
+
+                <div class="form-group col-md-6">
+                  <label for="currency">Divisa</label>
+                  <select class="form-control" name="currency" id="moneda" required>
+                    <option value="crc" selected>CRC</option>
+                    <option value="crc">USD</option>
+                  </select>
+                </div>
+
+                <div class="form-group col-md-6">
+                  <label for="currency_rate">Tipo de cambio</label>
+                  <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="1.00" required>
+                </div>
+                
+              </div>
+            </div>
+            
+            <div class="form-group col-md-12">
+              <div class="form-row">
+                <div class="form-group col-md-12">
+                  <h3 style="margin-top:1rem;">
                     Datos generales
                   </h3>
                 </div>
 
-                  <div class="form-group col-md-6">
+                  <div class="form-group col-md-4">
                     <label for="generated_date">Fecha</label>
                     <div class="input-group">
                       <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
@@ -96,7 +81,7 @@
                     </div>
                   </div>
 
-                  <div class="form-group col-md-6">
+                  <div class="form-group col-md-4">
                     <label for="hora">Hora</label>
                     <div class="input-group">
                       <input id="hora" class="form-control input-hora" name="hora" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('g:i A') }}">
@@ -108,7 +93,7 @@
                     </div>
                   </div>
 
-                  <div class="form-group col-md-6">
+                  <div class="form-group col-md-4">
                     <label for="due_date">Fecha de vencimiento</label>
                     <div class="input-group">
                       <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
@@ -161,21 +146,12 @@
                     <input type="text" class="form-control" name="buy_order" id="orden_compra" value="" >
                   </div>
 
-                  <div class="form-group col-md-6">
-                    <label for="currency">Moneda</label>
-                    <select class="form-control" name="currency" id="moneda" required>
-                      <option value="crc" selected>CRC</option>
-                      <option value="crc">USD</option>
-                    </select>
-                  </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="currency_rate">Tipo de cambio</label>
-                    <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="1.00" required>
+                  <div class="form-group col-md-12">
+                    <label for="description">Notas</label>
+                    <textarea class="form-control" name="description" id="notas" placeholder=""></textarea>
                   </div>
 
               </div>
-
             </div>
           </div>
 
@@ -207,7 +183,7 @@
                   <label for="tipo_producto">Tipo de producto</label>
                   <select class="form-control" id="tipo_producto" >
                     @foreach ( \App\ProductCategory::all() as $tipo )
-                      <option value="{{ $tipo->id }}" codigo="{{ $tipo->invoice_iva_code }}" >{{ $tipo->name }}</option>
+                      <option value="{{ $tipo->id }}" codigo="{{ $tipo->bill_iva_code }}" >{{ $tipo->name }}</option>
                     @endforeach
                   </select>
                 </div>
@@ -315,11 +291,6 @@
               <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" >
             </div>
 
-            <div class="form-group col-md-12">
-              <label for="description">Notas</label>
-              <input type="text" class="form-control" name="description" id="notas" placeholder="">
-            </div>
-
           </div>
 
           <button type="submit" class="btn btn-primary">Confirmar factura</button>
@@ -356,7 +327,7 @@
 
 <script>
 $(document).ready(function(){
-  $('#tipo_iva').val(3);
+  $('#tipo_iva').val('003');
 });
 </script>
 

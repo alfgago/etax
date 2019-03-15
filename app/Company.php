@@ -10,16 +10,28 @@ class Company extends Model
     protected $guarded = [];
   
     //Relación con facturas emitidas
-    public function facturasEmitidas()
+    public function invoices()
     {
-        return $this->hasMany('App\FacturaEmitida');
+        return $this->hasMany(Invoice::class);
     }
   
-    //Relación con facturas emitidas
-    public function facturasRecibidas()
+    //Relación con facturas recibidas
+    public function bills()
     {
-        return $this->hasMany('App\FacturaRecibida');
+        return $this->hasMany(Bill::class);
     }
+    
+    //Relación con clientes
+    public function clients()
+    {
+        return $this->hasMany(Client::class);
+    }
+    
+    //Relación con proveedores
+    public function providers()
+    {
+        return $this->hasMany(Provider::class);
+    }    
   
     //Relación con Usuario
     public function owner()

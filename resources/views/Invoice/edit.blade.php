@@ -6,7 +6,7 @@
 
 @section('content') 
 <div class="row">
-  <div class="col-md-12">
+  <div class="col-lg-12 col-xl-10">
     <div class="card mb-4">
       <div class="card-body">
         <form method="POST" action="/facturas-emitidas/{{ $invoice->id }}">
@@ -15,174 +15,142 @@
 
           <input type="hidden" id="current-index" value="{{ count($invoice->items) }}">
           
-          <div class="form-row">
-            <div class="form-group col-md-6 ">
+          <div class="form-row tabbed" id="tab1">
+            <div class="form-group col-md-4 ">
               <div class="form-row">
                 <div class="form-group col-md-12">
                   <h3>
-                    Información de cliente
+                    Cliente
                   </h3>
-                </div>
-
-                <div class="form-group col-md-4">
-                  <label for="client_id_type">Tipo de identificación</label>
-                  <select class="form-control" name="client_id_type" id="tipo_identificacion_cliente" required>
-                    <option value="fisica" {{ $invoice->tipo_identificacion_cliente == 'fisica' ? 'selected' : '' }} >Física</option>
-                    <option value="juridica" {{ $invoice->tipo_identificacion_cliente == 'juridica' ? 'selected' : '' }}>Jurídica</option>
-                    <option value="extranjero" {{ $invoice->tipo_identificacion_cliente == 'extranjero' ? 'selected' : '' }}>Cédula extanjero</option>
-                    <option value="dimex" {{ $invoice->tipo_identificacion_cliente == 'dimex' ? 'selected' : '' }}>DIMEX</option>
-                    <option value="nite" {{ $invoice->tipo_identificacion_cliente == 'nite' ? 'selected' : '' }}>NITE</option>
-                    <option value="otro" {{ $invoice->tipo_identificacion_cliente == 'otro' ? 'selected' : '' }}>Otro</option>
+                </div>  
+                
+                <div class="form-group col-md-12 with-button">
+                  <label for="cliente">Seleccione el cliente</label>
+                  <select class="form-control" name="client_id" id="client_id" placeholder="" required>
+                    <option value=''>-- Seleccione un cliente --</option>
+                    @foreach ( auth()->user()->companies->first()->clients as $cliente )
+                      <option {{ $invoice->client_id == $cliente->id ? 'selected' : '' }} value="{{ $cliente->id }}" >{{ $cliente->id_number }} - {{ $cliente->first_name }}</option>
+                    @endforeach
                   </select>
-                </div>
-
-                <div class="form-group col-md-6">
-                  <label for="client_id_temp">Identificación</label>
-                  <input type="text" class="form-control" name="client_id_temp" id="identificacion_cliente" placeholder="" required value="{{ $invoice->client_id_temp }}">
-                </div>
-
-                <div class="form-group col-md-2">
-                  <label for="btn_buscar_cliente">&nbsp;</label>
-                  <div>
-                    <input type="button" class="btn cur-p btn-dark" name="btn_buscar_cliente" id="btn_buscar_cliente" value="Buscar cliente">
-                  </div>
-                </div>
-
-                <div class="form-group col-md-12">
-                  <label for="client_name">Nombre</label>
-                  <input type="text" class="form-control" name="client_name" id="nombre_cliente" placeholder="" required value="{{ $invoice->client_name }}">
-                </div>
-
-                <div class="form-group col-md-4">
-                  <label for="codigo_cliente">Código Int.</label>
-                  <input type="text" class="form-control" name="codigo_cliente" id="codigo_cliente" placeholder=""  value="{{ $invoice->codigo_cliente }}">
-                </div>
-
-                <div class="form-group col-md-4">
-                  <label for="send_emails">Correo electrónico</label>
-                  <input type="text" class="form-control" name="send_emails" id="correos_envio" placeholder="" required value="{{ $invoice->send_emails }}">
-                </div>
-
-                <div class="form-group col-md-4">
-                  <label for="telefono">Teléfono</label>
-                  <input type="text" class="form-control" name="telefono" id="telefono" placeholder="" value="{{ $invoice->telefono }}">
-                </div>
-
-                <div class="form-group col-md-12">
-                  <label for="direccion">Dirección</label>
-                  <input type="text" class="form-control" name="direccion" id="direccion" placeholder="" value="{{ $invoice->direccion }}">
-                </div>
-
-                <div class="form-group col-md-12">
-                  <div class="form-check">
-                    <label class="form-check-label">
-                   <input class="form-check-input" id="cliente_exento" name="client_is_exempt" type="checkbox"> Cliente exento de IVA
-                 </label>
-                  </div>
                 </div>
               </div>
             </div>
-            <div class="form-group col-md-5 offset-md-1">
+              
+            <div class="form-group col-md-4 offset-md-4">
               <div class="form-row">
+                
                 <div class="form-group col-md-12">
                   <h3>
+                    Moneda
+                  </h3>
+                </div>
+  
+                <div class="form-group col-md-6">
+                  <label for="currency">Divisa</label>
+                  <select class="form-control" name="currency" id="moneda" required>
+                    <option value="crc" {{ $invoice->currency == 'crc' ? 'selected' : '' }}>CRC</option>
+                    <option value="usd" {{ $invoice->currency == 'usd' ? 'selected' : '' }}>USD</option>
+                  </select>
+                </div>
+  
+                <div class="form-group col-md-6">
+                  <label for="currency_rate">Tipo de cambio</label>
+                  <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="{{ $invoice->currency_rate }}" required>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group col-md-12">
+              <div class="form-row">
+                <div class="form-group col-md-12">
+                  <h3 style="margin-top:1rem;">
                     Datos generales
                   </h3>
                 </div>
-
+  
+                <div class="form-group col-md-4">
+                  <label for="generated_date">Fecha</label>
+                  <div class="input-group">
+                    <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ $invoice->generatedDate()->format('d/m/Y') }}">
+                    <div class="input-group-append">
+                      <button class="btn btn-secondary" type="button">
+                          <i class="icon-regular i-Calendar-4"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+  
+                <div class="form-group col-md-4">
+                  <label for="hora">Hora</label>
+                  <div class="input-group">
+                    <input id="hora" class="form-control input-hora" name="hora" required value="{{ $invoice->generatedDate()->format('g:i A') }}">
+                    <div class="input-group-append">
+                      <button class="btn btn-secondary" type="button">
+                          <i class="icon-regular i-Clock"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+  
+                <div class="form-group col-md-4">
+                  <label for="due_date">Fecha de vencimiento</label>
+                  <div class="input-group">
+                    <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ $invoice->dueDate()->format('d/m/Y') }}">
+                    <div class="input-group-append">
+                      <button class="btn btn-secondary" type="button">
+                          <i class="icon-regular i-Calendar-4"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+  
                 <div class="form-group col-md-6">
-                    <label for="generated_date">Fecha</label>
-                    <div class="input-group">
-                      <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ $invoice->generatedDate()->format('d/m/Y') }}">
-                      <div class="input-group-append">
-                        <button class="btn btn-secondary" type="button">
-                            <i class="icon-regular i-Calendar-4"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="hora">Hora</label>
-                    <div class="input-group">
-                      <input id="hora" class="form-control input-hora" name="hora" required value="{{ $invoice->generatedDate()->format('g:i A') }}">
-                      <div class="input-group-append">
-                        <button class="btn btn-secondary" type="button">
-                            <i class="icon-regular i-Clock"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="due_date">Fecha de vencimiento</label>
-                    <div class="input-group">
-                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ $invoice->dueDate()->format('d/m/Y') }}">
-                      <div class="input-group-append">
-                        <button class="btn btn-secondary" type="button">
-                            <i class="icon-regular i-Calendar-4"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="form-group col-md-6"></div>
-
-                  <div class="form-group col-md-6">
-                    <label for="sale_condition">Condición de venta</label>
-                    <div class="input-group">
-                      <select id="condicion_venta" name="sale_condition" class="form-control" required value="{{ $invoice->sale_condition }}">
-                        <option selected value="01">Contado</option>
-                        <option value="02">Crédito</option>
-                        <option value="03">Consignación</option>
-                        <option value="04">Apartado</option>
-                        <option value="05">Arrendamiento con opción de compra</option>
-                        <option value="06">Arrendamiento en función financiera</option>
-                        <option value="99">Otros</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="payment_type">Método de pago</label>
-                    <div class="input-group">
-                      <select id="medio_pago" name="payment_type" class="form-control" required value="{{ $invoice->payment_type }}">
-                        <option value="01" selected>Efectivo</option>
-                        <option value="02">Tarjeta</option>
-                        <option value="03">Cheque</option>
-                        <option value="04">Transferencia-Depósito Bancario</option>
-                        <option value="05">Recaudado por terceros</option>
-                        <option value="99">Otros</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="other_reference">Referencia</label>
-                    <input type="text" class="form-control" name="other_reference" id="referencia" value="{{ $invoice->other_reference }}" >
-                  </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="buy_order">Orden de compra</label>
-                    <input type="text" class="form-control" name="buy_order" id="orden_compra" value="{{ $invoice->buy_order }}" >
-                  </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="currency">Moneda</label>
-                    <select class="form-control" name="currency" id="moneda" required value="{{ $invoice->currency }}">
-                      <option value="crc" selected>CRC</option>
-                      <option value="crc">USD</option>
+                  <label for="sale_condition">Condición de venta</label>
+                  <div class="input-group">
+                    <select id="condicion_venta" name="sale_condition" class="form-control" required>
+                      <option selected value="01">Contado</option>
+                      <option value="02">Crédito</option>
+                      <option value="03">Consignación</option>
+                      <option value="04">Apartado</option>
+                      <option value="05">Arrendamiento con opción de compra</option>
+                      <option value="06">Arrendamiento en función financiera</option>
+                      <option value="99">Otros</option>
                     </select>
                   </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="currency_rate">Tipo de cambio</label>
-                    <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="{{ $invoice->currency_rate }}" required >
+                </div>
+  
+                <div class="form-group col-md-6">
+                  <label for="payment_type">Método de pago</label>
+                  <div class="input-group">
+                    <select id="medio_pago" name="payment_type" class="form-control" required>
+                      <option value="01" selected>Efectivo</option>
+                      <option value="02">Tarjeta</option>
+                      <option value="03">Cheque</option>
+                      <option value="04">Transferencia-Depósito Bancario</option>
+                      <option value="05">Recaudado por terceros</option>
+                      <option value="99">Otros</option>
+                    </select>
                   </div>
+                </div>
+  
+                <div class="form-group col-md-6">
+                  <label for="other_reference">Referencia</label>
+                  <input type="text" class="form-control" name="other_reference" id="referencia" value="{{ $invoice->other_reference }}" >
+                </div>
+  
+                <div class="form-group col-md-6">
+                  <label for="buy_order">Orden de compra</label>
+                  <input type="text" class="form-control" name="buy_order" id="orden_compra" value="{{ $invoice->buy_order }}" >
+                </div>
+                
+                <div class="form-group col-md-12">
+                  <label for="description">Notas</label>
+                  <textarea class="form-control" name="description" id="notas" placeholder="">{{ $invoice->description }}</textarea>
+                </div>
                 
               </div>
-
             </div>
+            
           </div>
 
 
@@ -363,14 +331,13 @@
               <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true">
             </div>
 
-            <div class="form-group col-md-12">
-              <label for="description">Notas</label>
-              <input type="text" class="form-control" name="description" id="notas" placeholder="" value="{{ $invoice->description }}">
-            </div>
-
+          </div>       
+          
+          <div class="btn-holder">
+            <button type="submit" class="btn btn-primary">Guardar factura</button>
+            <button type="submit" class="btn btn-primary">Enviar factura electrónica</button>
+            <button type="submit" class="btn btn-primary">Programar factura</button>
           </div>
-
-          <button type="submit" class="btn btn-primary">Editar factura</button>
 
         </form>
       </div>

@@ -9,10 +9,16 @@
   <div class="col-md-12">
     <div class="card mb-4">
       <div class="card-body">
-      <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        
+        <a type="submit" class="btn btn-primary" href="/facturas-recibidas/create">Ingresar factura nueva</a>
+        <a class="btn btn-primary" href="/facturas-recibidas/create">Importar facturas recibidas</a>
+          
+        <div style="margin: 1rem;"> -- Aqui van filtros de búsqueda por fecha, texto o proveedor --  </div>
+      
+        <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>#</th>
               <th>Proveedor</th>
               <th>Subtotal</th>
               <th>Monto IVA</th>
@@ -27,8 +33,8 @@
             @if ( $bills->count() )
               @foreach ( $bills as $bill )
                 <tr>
-                  <td>{{ $bill->id }}</td>
-                  <td>{{ $bill->provider }}</td>
+                  <td>{{ $bill->reference_number }}</td>
+                  <td>{{ $bill->provider ? $bill->provider->toString() : '-' }}</td>
                   <td>{{ $bill->subtotal }}</td>
                   <td>{{ $bill->iva_amount }}</td>
                   <td>{{ $bill->total }}</td>
@@ -54,7 +60,7 @@
 
           </tbody>
         </table>
-        <a type="submit" class="btn btn-primary" href="/facturas-recibidas/create">Ingresar factura nueva</a>
+        {{ $bills->links() }}
       </div>  
     </div>  
   </div>  

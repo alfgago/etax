@@ -7,28 +7,28 @@ class Variables
   
     public static function tiposIVARepercutidos() {
     $lista = [
-      ['nombre'=>'Ventas al 1%', 'codigo'=>'101', 'porcentaje'=>'1'],
-      ['nombre'=>'Ventas al 2%', 'codigo'=>'102', 'porcentaje'=>'2'],
-      ['nombre'=>'Ventas al 13%', 'codigo'=>'103', 'porcentaje'=>'13'],
-      ['nombre'=>'Ventas al 4%', 'codigo'=>'104', 'porcentaje'=>'4'],
-      ['nombre'=>'Autoconsumo al 1%', 'codigo'=>'121', 'porcentaje'=>'1'],
-      ['nombre'=>'Autoconsumo al 2%', 'codigo'=>'122', 'porcentaje'=>'2'],
-      ['nombre'=>'Autoconsumo al 13%', 'codigo'=>'123', 'porcentaje'=>'13'],
-      ['nombre'=>'Autoconsumo al 4%', 'codigo'=>'124', 'porcentaje'=>'4'],
-      ['nombre'=>'Ventas con límite sobrepasado', 'codigo'=>'130', 'porcentaje'=>'13'],
-      ['nombre'=>'Cobros anticipados al 1%', 'codigo'=>'141', 'porcentaje'=>'1'],
+      ['nombre'=>'Ventas locales de bienes y servicios con derecho a crédito al 1%', 'codigo'=>'101', 'porcentaje'=>'1'],
+      ['nombre'=>'Ventas locales de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'102', 'porcentaje'=>'2'],
+      ['nombre'=>'Ventas locales de bienes y servicios con derecho a crédito al 13%', 'codigo'=>'103', 'porcentaje'=>'13'],
+      ['nombre'=>'Ventas locales de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'104', 'porcentaje'=>'4'],
+      ['nombre'=>'Autoconsumo de bienes y servicios con derecho a crédito al 1%', 'codigo'=>'121', 'porcentaje'=>'1'],
+      ['nombre'=>'Autoconsumo de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'122', 'porcentaje'=>'2'],
+      ['nombre'=>'Autoconsumo de bienes y servicios con derecho a crédito al 13%', 'codigo'=>'123', 'porcentaje'=>'13'],
+      ['nombre'=>'Autoconsumo de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'124', 'porcentaje'=>'4'],
+      ['nombre'=>'Ventas de bienes y servicios con límites sobrepasados al 13%', 'codigo'=>'130', 'porcentaje'=>'13'],
+      /*['nombre'=>'Cobros anticipados al 1%', 'codigo'=>'141', 'porcentaje'=>'1'],
       ['nombre'=>'Cobros anticipados al 2%', 'codigo'=>'142', 'porcentaje'=>'2'],
       ['nombre'=>'Cobros anticipados al 13%', 'codigo'=>'143', 'porcentaje'=>'13'],
-      ['nombre'=>'Cobros anticipados al 4%', 'codigo'=>'144', 'porcentaje'=>'4'],
-      ['nombre'=>'Exportaciones y asimilados', 'codigo'=>'150', 'porcentaje'=>'0'],
-      ['nombre'=>'Operaciones al estado y entes institucionales', 'codigo'=>'160', 'porcentaje'=>'0'],
-      ['nombre'=>'Rectificaciones no exentas', 'codigo'=>'199', 'porcentaje'=>'0'],
-      ['nombre'=>'Exenciones objetivas sin límite', 'codigo'=>'200', 'porcentaje'=>'0'],
-      ['nombre'=>'Exenciones objetivas con límite no sobrepasado', 'codigo'=>'201', 'porcentaje'=>'0'],
-      ['nombre'=>'Exenciones autoconsumo', 'codigo'=>'240', 'porcentaje'=>'0'],
-      ['nombre'=>'Exenciones subjetivas', 'codigo'=>'250', 'porcentaje'=>'0'],
+      ['nombre'=>'Cobros anticipados al 4%', 'codigo'=>'144', 'porcentaje'=>'4'],*/
+      ['nombre'=>'Ventas por exportación con derecho a crédito', 'codigo'=>'150', 'porcentaje'=>'0'],
+      ['nombre'=>'Ventas al Estado e Instituciones con derecho a crédito', 'codigo'=>'160', 'porcentaje'=>'0'],
+      /*['nombre'=>'Rectificaciones no exentas', 'codigo'=>'199', 'porcentaje'=>'0'],*/
+      ['nombre'=>'Ventas sin derecho a crédito por exenciones objetivas', 'codigo'=>'200', 'porcentaje'=>'0'],
+      ['nombre'=>'Ventas sin derecho a crédito por exenciones objetivas con límite no sobrepasado', 'codigo'=>'201', 'porcentaje'=>'0'],
+      ['nombre'=>'Autoconsumo sin derecho a crédito', 'codigo'=>'240', 'porcentaje'=>'0'],
+      ['nombre'=>'Ventas a sujetos exentos', 'codigo'=>'250', 'porcentaje'=>'0'],
       ['nombre'=>'Ventas a no sujetos', 'codigo'=>'260', 'porcentaje'=>'0'],
-      ['nombre'=>'Reclasificaciones exentas', 'codigo'=>'299', 'porcentaje'=>'0'],
+      /*['nombre'=>'Reclasificaciones exentas', 'codigo'=>'299', 'porcentaje'=>'0'],*/
     ];
 
     return $lista;
@@ -58,23 +58,23 @@ class Variables
   
   public static function tiposIVASoportados() {
     $lista = [
-      ['nombre'=>'IVA soportado al 1%', 'codigo'=>'1', 'porcentaje'=>'1'],
-      ['nombre'=>'IVA soportado al 2%', 'codigo'=>'2', 'porcentaje'=>'2'],
-      ['nombre'=>'IVA soportado al 13%', 'codigo'=>'3', 'porcentaje'=>'13'],
-      ['nombre'=>'IVA soportado al 4%', 'codigo'=>'4', 'porcentaje'=>'4'],
-      ['nombre'=>'Importaciones al 1%', 'codigo'=>'51', 'porcentaje'=>'1'],
-      ['nombre'=>'Importaciones al 2%', 'codigo'=>'52', 'porcentaje'=>'2'],
-      ['nombre'=>'Importaciones al 13%', 'codigo'=>'53', 'porcentaje'=>'13'],
-      ['nombre'=>'Importaciones al 4%', 'codigo'=>'54', 'porcentaje'=>'4'],
-      ['nombre'=>'IVA soportado 100% deducible al 1% por destino', 'codigo'=>'61', 'porcentaje'=>'1'],
-      ['nombre'=>'IVA soportado 100% deducible al 2% por destino', 'codigo'=>'62', 'porcentaje'=>'2'],
-      ['nombre'=>'IVA soportado 100% deducible al 13% por destino', 'codigo'=>'63', 'porcentaje'=>'13'],
-      ['nombre'=>'IVA soportado 100% deducible al 4% por destino', 'codigo'=>'64', 'porcentaje'=>'4'],
-      ['nombre'=>'IVA no deducible por origen', 'codigo'=>'70', 'porcentaje'=>'0'],
-      ['nombre'=>'IVA no deducible por destino', 'codigo'=>'77', 'porcentaje'=>'0'],
-      ['nombre'=>'IVA de bienes de capital', 'codigo'=>'80', 'porcentaje'=>'13'],
-      ['nombre'=>'IVA por pagos anticipados', 'codigo'=>'90', 'porcentaje'=>'13'],
-      ['nombre'=>'Reclasificaciones', 'codigo'=>'99', 'porcentaje'=>'13'],
+      ['nombre'=>'Compras locales de bienes y servicios al 1% sin identificación específica', 'codigo'=>'001', 'porcentaje'=>'1'],
+      ['nombre'=>'Compras locales de bienes y servicios al 2% sin identificación específica', 'codigo'=>'002', 'porcentaje'=>'2'],
+      ['nombre'=>'Compras locales de bienes y servicios al 13% sin identificación específica', 'codigo'=>'003', 'porcentaje'=>'13'],
+      ['nombre'=>'Compras locales de bienes y servicios al 4% sin identificación específica', 'codigo'=>'004', 'porcentaje'=>'4'],
+      ['nombre'=>'Importaciones de bienes y servicios al 1% sin identificación específica', 'codigo'=>'051', 'porcentaje'=>'1'],
+      ['nombre'=>'Importaciones de bienes y servicios al 2% sin identificación específica', 'codigo'=>'052', 'porcentaje'=>'2'],
+      ['nombre'=>'Importaciones de bienes y servicios al 13% sin identificación específica', 'codigo'=>'053', 'porcentaje'=>'13'],
+      ['nombre'=>'Importaciones de bienes y servicios al 4% sin identificación específica', 'codigo'=>'054', 'porcentaje'=>'4'],
+      ['nombre'=>'Compras con IVA al 1% de acreditación plena con identificación específica', 'codigo'=>'061', 'porcentaje'=>'1'],
+      ['nombre'=>'Compras con IVA al 2% de acreditación plena con identificación específica', 'codigo'=>'062', 'porcentaje'=>'2'],
+      ['nombre'=>'Compras con IVA al 13% de acreditación plena con identificación específica', 'codigo'=>'063', 'porcentaje'=>'13'],
+      ['nombre'=>'Compras con IVA al 4% de acreditación plena con identificación específica', 'codigo'=>'064', 'porcentaje'=>'4'],
+      ['nombre'=>'Compras con IVA no acreditable desde origen', 'codigo'=>'070', 'porcentaje'=>'0'],
+      ['nombre'=>'Compras con IVA no acreditable por gastos no deducibles', 'codigo'=>'077', 'porcentaje'=>'0'],
+      ['nombre'=>'Compras locales de propiedad, planta y equipo', 'codigo'=>'080', 'porcentaje'=>'13'],
+      /*['nombre'=>'IVA por pagos anticipados', 'codigo'=>'90', 'porcentaje'=>'13'],
+      ['nombre'=>'Reclasificaciones', 'codigo'=>'99', 'porcentaje'=>'13'],*/
     ];
 
     return $lista;

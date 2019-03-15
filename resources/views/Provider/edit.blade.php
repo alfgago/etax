@@ -1,7 +1,7 @@
 @extends('layouts/app')
 
 @section('title') 
-  Crear cliente
+  Editar proveedor
 @endsection
 
 @section('content') 
@@ -10,21 +10,22 @@
     <div class="card mb-4">
       <div class="card-body">
         
-        <form method="POST" action="/clientes">
+        <form method="POST" action="/proveedores/{{ $provider->id }}">
 	
+          @csrf
+          @method('patch') 
+          
           <div class="form-row">
             <div class="form-group col-md-12">
               <h3>
-                Información de cliente
+                Información de proveedor
               </h3>
             </div>
-            
-            @csrf
-            @include( 'Client.form' )
+            @include( 'Provider.form', ['provider' => $provider] )
             
             </div>
           
-            <button type="submit" class="btn btn-primary">Confirmar cliente</button>
+            <button type="submit" class="btn btn-primary">Confirmar edición</button>
           
             @if ($errors->any())
               <ul>

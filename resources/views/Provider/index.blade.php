@@ -1,7 +1,7 @@
 @extends('layouts/app')
 
 @section('title') 
-  Clientes
+  Proveedores
 @endsection
 
 @section('content') 
@@ -10,8 +10,8 @@
     <div class="card mb-4">
       <div class="card-body">
         
-      <a type="submit" class="btn btn-primary" href="/clientes/create">Ingresar cliente nuevo</a>
-      <a class="btn btn-primary" href="/clientes/create">Importar clientes</a>
+      <a type="submit" class="btn btn-primary" href="/proveedores/create">Ingresar proveedor nuevo</a>
+      <a class="btn btn-primary" href="/proveedores/create">Importar proveedores</a>
         
       <div style="margin: 1rem;"> -- Aqui van filtros de búsqueda --  </div>
       
@@ -29,24 +29,24 @@
             
           </thead>
           <tbody>
-            @if ( $clients->count() )
-              @foreach ( $clients as $cliente )
+            @if ( $providers->count() )
+              @foreach ( $providers as $proveedor )
                 <tr>
-                  <td>{{ $cliente->code }}</td>
-                  <td>{{ $cliente->id_number }}</td>
-                  <td>{{ $cliente->getFullName() }}</td>
-                  <td>{{ $cliente->email }}</td>
-                  <td>{{ $cliente->tipo_persona }}</td>
-                  <td>{{ $cliente->es_exento ? 'Si' : 'No' }} </td>
+                  <td>{{ $proveedor->code }}</td>
+                  <td>{{ $proveedor->id_number }}</td>
+                  <td>{{ $proveedor->getFullName() }}</td>
+                  <td>{{ $proveedor->email }}</td>
+                  <td>{{ $proveedor->tipo_persona }}</td>
+                  <td>{{ $proveedor->es_exento ? 'Si' : 'No' }} </td>
                   
                   <td> 
-                    <a href="/clientes/{{ $cliente->id }}/edit" title="Editar cliente" class="text-success mr-2"> 
+                    <a href="/proveedores/{{ $proveedor->id }}/edit" title="Editar proveedor" class="text-success mr-2"> 
                       <i class="nav-icon i-Pen-2 font-weight-bold"></i> 
                     </a>
-                    <form class="inline-form" method="POST" action="/clientes/{{ $cliente->id }}" style="display: inline-block;">
+                    <form class="inline-form" method="POST" action="/proveedores/{{ $proveedor->id }}" style="display: inline-block;">
                       @csrf
                       @method('delete')
-                      <button type="submit" class="text-danger mr-2"  title="Eliminar cliente" style="display: inline-block; background: none; border: 0;">
+                      <button type="submit" class="text-danger mr-2"  title="Eliminar proveedor" style="display: inline-block; background: none; border: 0;">
                         <i class="nav-icon i-Close-Window font-weight-bold"></i>
                       </button>
                     </form>
@@ -57,7 +57,7 @@
 
           </tbody>
         </table>
-        {{ $clients->links() }}
+        {{ $providers->links() }}
       </div>  
     </div>  
   </div>  

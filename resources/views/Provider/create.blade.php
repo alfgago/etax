@@ -1,7 +1,7 @@
 @extends('layouts/app')
 
 @section('title') 
-  Crear cliente
+  Crear proveedor
 @endsection
 
 @section('content') 
@@ -10,21 +10,21 @@
     <div class="card mb-4">
       <div class="card-body">
         
-        <form method="POST" action="/clientes">
+        <form method="POST" action="/proveedores">
 	
           <div class="form-row">
             <div class="form-group col-md-12">
               <h3>
-                Información de cliente
+                Información de proveedor
               </h3>
             </div>
             
             @csrf
-            @include( 'Client.form' )
+            @include( 'Provider.form' )
             
             </div>
           
-            <button type="submit" class="btn btn-primary">Confirmar cliente</button>
+            <button type="submit" class="btn btn-primary">Confirmar proveedor</button>
           
             @if ($errors->any())
               <ul>

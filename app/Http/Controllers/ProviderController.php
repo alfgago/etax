@@ -27,7 +27,7 @@ class ProviderController extends Controller
     public function index()
     {
         $current_company = auth()->user()->companies->first()->id;
-        $providers = Provider::where('company_id', $current_company)->get();
+        $providers = Provider::where('company_id', $current_company)->paginate(10);
         return view('Provider/index', [
           'providers' => $providers
         ]);
@@ -52,25 +52,33 @@ class ProviderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+          'tipo_persona' => 'required',
+          'id_number' => 'required',
           'code' => 'required',
-          'name' => 'required',
-          'measure_unit' => 'required',
-          'unit_price' => 'required',
-          'provider_type' => 'required',
-          'default_iva_type' => 'required',
+          'first_name' => 'required',
+          'email' => 'required',
+          'country' => 'required'
         ]);
       
         $provider = new Provider();
         $company = auth()->user()->companies->first();
         $provider->company_id = $company->id;
       
+        $provider->tipo_persona = $request->tipo_persona;
+        $provider->id_number = $request->id_number;
         $provider->code = $request->code;
-        $provider->name = $request->name;
-        $provider->measure_unit = $request->measure_unit;
-        $provider->unit_price = $request->unit_price;
-        $provider->description = $request->description;
-        $provider->default_iva_type = $request->default_iva_type;
-        $provider->is_catalogue = true;
+        $provider->first_name = $request->first_name;
+        $provider->last_name = $request->last_name;
+        $provider->last_name2 = $request->last_name2;
+        $provider->country = $request->country;
+        $provider->state = $request->state;
+        $provider->city = $request->city;
+        $provider->district = $request->district;
+        $provider->neighborhood = $request->neighborhood;
+        $provider->zip = $request->zip;
+        $provider->address = $request->address;
+        $provider->phone = $request->phone;
+        $provider->email = $request->email;
       
         $provider->save();
       
@@ -111,24 +119,32 @@ class ProviderController extends Controller
     public function update(Request $request, $id)
     {      
         $request->validate([
+          'tipo_persona' => 'required',
+          'id_number' => 'required',
           'code' => 'required',
-          'name' => 'required',
-          'measure_unit' => 'required',
-          'unit_price' => 'required',
-          'provider_type' => 'required',
-          'default_iva_type' => 'required',
+          'first_name' => 'required',
+          'email' => 'required',
+          'country' => 'required'
         ]);
       
         $provider = Provider::findOrFail($id);
         $this->authorize('update', $provider);
       
+        $provider->tipo_persona = $request->tipo_persona;
+        $provider->id_number = $request->id_number;
         $provider->code = $request->code;
-        $provider->name = $request->name;
-        $provider->measure_unit = $request->measure_unit;
-        $provider->unit_price = $request->unit_price;
-        $provider->description = $request->description;
-        $provider->default_iva_type = $request->default_iva_type;
-        $provider->is_catalogue = true;
+        $provider->first_name = $request->first_name;
+        $provider->last_name = $request->last_name;
+        $provider->last_name2 = $request->last_name2;
+        $provider->country = $request->country;
+        $provider->state = $request->state;
+        $provider->city = $request->city;
+        $provider->district = $request->district;
+        $provider->neighborhood = $request->neighborhood;
+        $provider->zip = $request->zip;
+        $provider->address = $request->address;
+        $provider->phone = $request->phone;
+        $provider->email = $request->email;
       
         $provider->save();
       

@@ -21,7 +21,7 @@
                 Información de cliente
               </h3>
             </div>
-            @include( 'Client.form.client-form', ['client' => $client] )
+            @include( 'Client.form', ['client' => $client] )
             
             </div>
           

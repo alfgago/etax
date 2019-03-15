@@ -17,6 +17,10 @@ class CreateBooksTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('company_id');
           
+            $table->string('month_code');
+            $table->string('year');
+            $table->boolean('is_final')->default(false);
+            
             
           
             $table->timestamps();

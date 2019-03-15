@@ -10,7 +10,12 @@
     <div class="card mb-4">
       <div class="card-body">
         
-      <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <a type="submit" class="btn btn-primary" href="/productos/create">Ingresar producto nuevo</a>
+        <a class="btn btn-primary" href="/productos/create">Importar productos</a>
+          
+        <div style="margin: 1rem;"> -- Aqui van filtros de búsqueda --  </div>
+        
+        <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
           <thead>
             <tr>
               <th>Código</th>
@@ -51,7 +56,7 @@
 
           </tbody>
         </table>
-        <a type="submit" class="btn btn-primary" href="/productos/create">Crear producto nuevo</a>
+        {{ $products->links() }}
       </div>  
     </div>  
   </div>  

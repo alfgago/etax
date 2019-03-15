@@ -18,12 +18,12 @@ class CreateBillsTable extends Migration
             $table->bigIncrements('id');
           
             $table->unsignedBigInteger('company_id');
-            $table->string('provider');
+            $table->unsignedBigInteger('provider_id')->nullable();
           
             //Tipo de documento de referencia. 01 Factura electrónica, 02 Nota de débito electrónica, 03 nota de crédito electrónica, 04 Tiquete electrónico, 05 Nota de despacho, 06 Contrato, 07 Procedimiento, 08 Comprobante emitido en contigencia, 99 Otros
             $table->string('document_type');
           
-            $table->string('document_key');
+            $table->string('document_key')->nullable();
           
             $table->integer('reference_number');
             $table->string('document_number');
@@ -77,10 +77,11 @@ class CreateBillsTable extends Migration
             $table->integer('item_count');
             $table->double('unit_price');
             $table->double('subtotal');
+            $table->double('iva_amount');
             $table->double('total');
             $table->double('discount_percentage')->default(0);
             $table->double('discount_reason')->nullable();
-            $table->double('iva_type');
+            $table->string('iva_type');
             $table->double('iva_percentage');
             $table->boolean('is_exempt')->default(false);
           
@@ -101,12 +102,13 @@ class CreateBillsTable extends Migration
             $bill->company_id = $company->id;
             //Datos generales y para Hacienda
             $bill->document_type = "01";
-            $bill->document_key = "50601021900310270242900100001010000000162174804809";
+            $bill->document_key = "";
             $bill->reference_number = $company->last_bill_ref_number + 1;
             
-            $bill->document_number = $faker->numerify('##################');
+            $numero_doc = ((int)$company->last_document) + 1001;
+            $bill->document_number = str_pad($numero_doc, 20, '0', STR_PAD_LEFT);
 
-            $bill->sale_condition = $faker->randomElement(array('01','02','03','04','05','99'));
+            $bill->sale_condition = $faker->randomElement(array('01','02'));
             $bill->payment_type = $faker->randomElement(array('01','02','03','04','05','99'));
             $bill->credit_time = 0;
             $bill->buy_order = $faker->lexify('???');
@@ -117,7 +119,7 @@ class CreateBillsTable extends Migration
             $bill->generation_method = "M";
 
             //Datos de cliente
-            $bill->provider = $faker->name;
+            $bill->provider_id = $faker->numberBetween(1,50);
 
             //Datos de factura
             $bill->description = $faker->sentence;
@@ -156,7 +158,7 @@ class CreateBillsTable extends Migration
               $discount_reason = '';
               $is_exempt = false;
 
-              $bill->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $is_exempt );
+              $bill->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $is_exempt );
               
               $sumTotal = $sumTotal + $total;
               $sumSubtotal = $sumSubtotal + $subtotal;

@@ -81,19 +81,42 @@ window.calcularSubtotalItem = function () {
   var precio_unitario = parseFloat($('#precio_unitario').val());
   var cantidad = parseInt($('#cantidad').val());
   var porc_iva = parseFloat($('#porc_iva').val());
+  var monto_iva = parseFloat($('#item_iva_amount').val());
 
   if (precio_unitario && cantidad) {
     var subtotal = cantidad * precio_unitario;
     $('#item_subtotal').val(subtotal);
     if (porc_iva) {
-      $('#item_total').val(subtotal + subtotal * (porc_iva / 100));
+      monto_iva = subtotal * porc_iva / 100;
+      $('#item_iva_amount').val(monto_iva);
+      $('#item_total').val(subtotal + monto_iva);
     } else {
-      $('#item_subtotal').val(subtotal);
       $('#item_total').val(subtotal);
     }
   } else {
     $('#item_subtotal').val(0);
     $('#item_total').val(0);
+    $('#item_iva_amount').val(0);
+  }
+};
+
+window.calcularConIvaManual = function () {
+
+  var precio_unitario = parseFloat($('#precio_unitario').val());
+  var cantidad = parseInt($('#cantidad').val());
+  var monto_iva = parseFloat($('#item_iva_amount').val());
+
+  if (precio_unitario && cantidad) {
+    var subtotal = cantidad * precio_unitario;
+    $('#item_subtotal').val(subtotal);
+    if (monto_iva) {
+      $('#item_total').val(subtotal + monto_iva);
+    } else {
+      $('#item_total').val(subtotal);
+    }
+  } else {
+    $('#item_subtotal').val(0);
+    $('#item_total').val(monto_iva);
   }
 };
 
@@ -279,6 +302,14 @@ $(document).ready(function () {
     presetTipoIVA();
     presetPorcentaje();
     calcularSubtotalItem();
+  });
+
+  $('#item_iva_amount').on('change', function () {
+    calcularConIvaManual();
+  });
+
+  $('#item_iva_amount').on('click', function () {
+    alert('Puede cambiar el monto de IVA manualmente, pero se recomienda utilizar el monto calculado automáticamente.');
   });
 
   $('#cliente_exento').on('change', function () {

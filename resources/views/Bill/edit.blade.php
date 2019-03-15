@@ -16,66 +16,52 @@
           <input type="hidden" id="current-index" value="{{ count($bill->items) }}">
 
           <div class="form-row">
-            <div class="form-group col-md-6 ">
+            <div class="form-group col-md-4 ">
               <div class="form-row">
                 <div class="form-group col-md-12">
                   <h3>
-                    Información de proveedor
+                    Proveedor
                   </h3>
                 </div>
 
-                <div class="form-group col-md-4">
-                  <label for="tipo_identificacion_proveedor">Tipo de identificación</label>
-                  <select class="form-control" name="tipo_identificacion_proveedor" id="tipo_identificacion_proveedor" >
-                    <option value="fisica" selected>Física</option>
-                    <option value="juridica">Jurídica</option>
-                    <option value="extranjero">Cédula extanjero</option>
-                    <option value="dimex">DIMEX</option>
-                    <option value="nite">NITE</option>
-                    <option value="otro">Otro</option>
+                <div class="form-group col-md-12 with-button">
+                  <label for="provider_id">Seleccione el cliente</label>
+                  <select class="form-control" name="provider_id" id="proveedor" placeholder="" required>
+                    <option value=''>-- Seleccione el proveedor --</option>
+                    @foreach ( auth()->user()->companies->first()->providers as $proveedor )
+                      <option {{ $bill->provider_id == $proveedor->id ? 'selected' : '' }} value="{{ $proveedor->id }}" >{{ $proveedor->id_number }} - {{ $proveedor->first_name }}</option>
+                    @endforeach
                   </select>
-                </div>
-
-                <div class="form-group col-md-6">
-                  <label for="identificacion_proveedor">Identificación</label>
-                  <input type="text" class="form-control" name="identificacion_proveedor" id="identificacion_proveedor" placeholder="" >
-                </div>
-
-                <div class="form-group col-md-2">
-                  <label for="btn_buscar_proveedor">&nbsp;</label>
-                  <div>
-                    <input type="button" class="btn cur-p btn-dark" name="btn_buscar_proveedor" id="btn_buscar_proveedor" value="Buscar proveedor">
-                  </div>
-                </div>
-
-                <div class="form-group col-md-12">
-                  <label for="provider">Nombre</label>
-                  <input type="text" class="form-control" name="provider" id="proveedor" placeholder="" value="{{ $bill->provider }}" required>
-                </div>
-                
-                <div class="form-group col-md-4">
-                  <label for="codigo_proveedor">Código Int.</label>
-                  <input type="text" class="form-control" name="codigo_proveedor" id="codigo_proveedor" placeholder="">
-                </div>
-
-                <div class="form-group col-md-4">
-                  <label for="send_emails">Correo electrónico</label>
-                  <input type="text" class="form-control" name="send_emails" id="correos_envio" placeholder="" value="{{ $bill->send_emails }}" >
-                </div>
-
-                <div class="form-group col-md-4">
-                  <label for="telefono">Teléfono</label>
-                  <input type="text" class="form-control" name="telefono" id="telefono" placeholder="">
-                </div>
-                
-                <div class="form-group col-md-12">
-                  <label for="direccion">Dirección</label>
-                  <input type="text" class="form-control" name="direccion" id="direccion" placeholder="">
                 </div>
                 
               </div>
             </div>
-            <div class="form-group col-md-5 offset-md-1">
+            
+            <div class="form-group col-md-4 offset-md-4">
+              <div class="form-row">
+                
+                <div class="form-group col-md-12">
+                  <h3>
+                    Moneda
+                  </h3>
+                </div>
+  
+                <div class="form-group col-md-6">
+                  <label for="currency">Divisa</label>
+                  <select class="form-control" name="currency" id="moneda" required>
+                    <option value="crc" {{ $bill->currency == 'crc' ? 'selected' : '' }}>CRC</option>
+                    <option value="usd" {{ $bill->currency == 'usd' ? 'selected' : '' }}>USD</option>
+                  </select>
+                </div>
+  
+                <div class="form-group col-md-6">
+                  <label for="currency_rate">Tipo de cambio</label>
+                  <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="{{ $bill->currency_rate }}" required>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group col-md-12">
               <div class="form-row">
                 <div class="form-group col-md-12">
                   <h3>
@@ -83,7 +69,7 @@
                   </h3>
                 </div>
 
-                 <div class="form-group col-md-6">
+                 <div class="form-group col-md-4">
                     <label for="generated_date">Fecha</label>
                     <div class="input-group">
                       <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ $bill->generatedDate()->format('d/m/Y') }}">
@@ -95,7 +81,7 @@
                     </div>
                   </div>
 
-                  <div class="form-group col-md-6">
+                  <div class="form-group col-md-4">
                     <label for="hora">Hora</label>
                     <div class="input-group">
                       <input id="hora" class="form-control input-hora" name="hora" required value="{{ $bill->generatedDate()->format('g:i A') }}">
@@ -107,7 +93,7 @@
                     </div>
                   </div>
 
-                  <div class="form-group col-md-6">
+                  <div class="form-group col-md-4">
                     <label for="due_date">Fecha de vencimiento</label>
                     <div class="input-group">
                       <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ $bill->dueDate()->format('d/m/Y') }}">
@@ -160,17 +146,9 @@
                     <input type="text" class="form-control" name="buy_order" id="orden_compra" value="{{ $bill->buy_order }}" >
                   </div>
 
-                  <div class="form-group col-md-6">
-                    <label for="currency">Moneda</label>
-                    <select class="form-control" name="currency" id="moneda" required value="{{ $bill->currency }}">
-                      <option value="crc" selected>CRC</option>
-                      <option value="crc">USD</option>
-                    </select>
-                  </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="currency_rate">Tipo de cambio</label>
-                    <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="{{ $bill->currency_rate }}" required >
+                  <div class="form-group col-md-12">
+                    <label for="description">Notas</label>
+                    <input type="text" class="form-control" name="description" id="notas" placeholder="" value="{{ $bill->description }}">
                   </div>
                 
               </div>
@@ -206,7 +184,7 @@
                 <label for="tipo_producto">Tipo de producto</label>
                 <select class="form-control" id="tipo_producto" >
                   @foreach ( \App\ProductCategory::all() as $tipo )
-                    <option value="{{ $tipo->id }}" codigo="{{ $tipo->invoice_iva_code }}" >{{ $tipo->name }}</option>
+                    <option value="{{ $tipo->id }}" codigo="{{ $tipo->bill_iva_code }}" >{{ $tipo->name }}</option>
                   @endforeach
                 </select>
               </div>
@@ -353,11 +331,6 @@
           <div class="form-group col-md-4">
             <label for="total">Total</label>
             <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" >
-          </div>
-
-          <div class="form-group col-md-12">
-            <label for="description">Notas</label>
-            <input type="text" class="form-control" name="description" id="notas" placeholder="" value="{{ $bill->description }}">
           </div>
 
         </div>

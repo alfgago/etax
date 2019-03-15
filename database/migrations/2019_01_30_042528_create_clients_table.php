@@ -38,6 +38,42 @@ class CreateClientsTable extends Migration
           
             $table->timestamps();
         });
+        
+        $this->demoData();
+    }
+    
+    public function demoData() {
+        
+        $company = \App\Company::first();
+        $faker = Faker\Factory::create();
+        $faker->addProvider(new Faker\Provider\es_ES\Person($faker));
+      
+        for($i = 0; $i < 50; $i++) {
+            $client = new \App\Client();
+            $client->company_id = $company->id;
+            
+            //Datos generales y para Hacienda
+            $client->tipo_persona = "1";
+            $client->id_number = $faker->numerify('###########');
+            $client->code = $faker->lexify('???');
+            $client->first_name = $faker->firstName;
+            $client->last_name = $faker->lastName;
+            $client->last_name2 = $faker->lastName;
+            $client->email = $faker->freeEmail;
+            $client->emisor_receptor = "ambos";
+            $client->country = "CR";
+            $client->state = "1";
+            $client->city = "1";
+            $client->district = "1";
+            $client->neighborhood = "";
+            $client->zip = "";
+            $client->address = "";
+            $client->phone = "";
+            $client->es_exento = false;
+            $client->billing_emails = $client->email;
+            
+            $client->save();
+        }
     }
 
     /**

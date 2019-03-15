@@ -14,6 +14,7 @@
 Route::get('/', 'ReportsController@dashboard');
 Route::get('/dashboard', 'ReportsController@dashboard');
 Route::resource('clientes', 'ClientController');
+Route::resource('proveedores', 'ProviderController');
 Route::resource('productos', 'ProductController');
 Route::resource('empresas', 'CompanyController');
 Route::resource('facturas-emitidas', 'InvoiceController');

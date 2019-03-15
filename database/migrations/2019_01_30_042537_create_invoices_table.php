@@ -23,7 +23,7 @@ class CreateInvoicesTable extends Migration
             //Tipo de documento de referencia. 01 Factura electrónica, 02 Nota de débito electrónica, 03 nota de crédito electrónica, 04 Tiquete electrónico, 05 Nota de despacho, 06 Contrato, 07 Procedimiento, 08 Comprobante emitido en contigencia, 99 Otros
             $table->string('document_type');
           
-            $table->string('document_key');
+            $table->string('document_key')->nullable();
           
             $table->integer('reference_number');
             $table->string('document_number');
@@ -55,12 +55,6 @@ class CreateInvoicesTable extends Migration
             $table->boolean('is_exempt')->default(false);
             $table->boolean('is_void')->default(false);
           
-            //Estos se usan en caso de no haber un cliente registrado.
-            $table->string('client_id_type');
-            $table->string('client_id_temp');
-            $table->string('client_name');
-            $table->string('client_is_exempt')->default(false);
-          
             $table->string('generation_method');
             $table->string('other_reference')->nullable();
           
@@ -80,10 +74,11 @@ class CreateInvoicesTable extends Migration
             $table->integer('item_count');
             $table->double('unit_price');
             $table->double('subtotal');
+            $table->double('iva_amount');
             $table->double('total');
             $table->double('discount_percentage')->default(0);
             $table->double('discount_reason')->nullable();
-            $table->double('iva_type');
+            $table->string('iva_type');
             $table->double('iva_percentage');
             $table->boolean('is_exempt')->default(false);
           
@@ -104,7 +99,7 @@ class CreateInvoicesTable extends Migration
             $invoice->company_id = $company->id;
             //Datos generales y para Hacienda
             $invoice->document_type = "01";
-            $invoice->document_key = "50601021900310270242900100001010000000162174804809";
+            $invoice->document_key = "";
             $invoice->reference_number = $company->last_invoice_ref_number + 1;
             $numero_doc = ((int)$company->last_document) + 1;
             $invoice->document_number = str_pad($numero_doc, 20, '0', STR_PAD_LEFT);
@@ -120,10 +115,11 @@ class CreateInvoicesTable extends Migration
             $invoice->generation_method = "M";
 
             //Datos de cliente
-            $invoice->client_name = $faker->name;
+            /*$invoice->client_name = $faker->name;
             $invoice->client_id_type = 'F';
             $invoice->client_id = $faker->numerify('1-####-####');
-            $invoice->client_is_exempt = false;
+            $invoice->client_is_exempt = false;*/
+            $invoice->client_id = $faker->numberBetween(1,50);
             $invoice->send_emails = $faker->companyEmail;
 
             //Datos de factura
@@ -163,7 +159,7 @@ class CreateInvoicesTable extends Migration
               $discount_reason = '';
               $is_exempt = false;
 
-              $invoice->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $is_exempt );
+              $invoice->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $is_exempt );
               
               $sumTotal = $sumTotal + $total;
               $sumSubtotal = $sumSubtotal + $subtotal;

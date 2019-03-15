@@ -179,6 +179,8 @@
 		      "tag-char": "@"
 		    });
 		    
+		    toggleApellidos();
+		    
 		    //Revisa si tiene estado, canton y distrito marcados.
 		    @if( @$client->state )
 		    	$('#state').val( {{ $client->state }} );

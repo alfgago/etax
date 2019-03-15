@@ -22,9 +22,6 @@
   <div class="col-md-12">
     <div class="row">
       
-      
-      
-      
       <div class="col-lg-2 col-md-12 mb-4">
         @include('dashboard.widgets.liquidacion-periodo', ['titulo' => 'Liquidación del mes', 'mes' => 'Febrero', 'data' => $f])
       </div>
@@ -120,17 +117,7 @@
         </div>
       </div>
       
-      <div class="col-md-4 mb-4">
-        @include('dashboard.widgets.cuentas-contables', ['titulo' => 'Cuentas contables de enero', 'data' => $e])
-      </div>
-      
-      <div class="col-md-4 mb-4">
-        @include('dashboard.widgets.cuentas-contables', ['titulo' => 'Cuentas contables de febrero', 'data' => $f])
-      </div>
-      
-      <div class="col-md-4 mb-4">
-        @include('dashboard.widgets.cuentas-contables', ['titulo' => 'Cuentas contables acumuladas', 'data' => $acumulado])
-      </div>
+
 
       <div class="col-lg-12 col-md-12">
           <div class="card o-hidden mb-4">
