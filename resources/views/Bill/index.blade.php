@@ -4,14 +4,14 @@
   Facturas recibidas
 @endsection
 
+@section('breadcrumb-buttons')
+    <a type="submit" class="btn btn-primary" href="/facturas-recibidas/create">Ingresar factura nueva</a>
+    <div onclick="abrirPopup('importar-popup');" class="btn btn-primary">Importar facturas recibidas</div>
+@endsection 
+
 @section('content') 
 <div class="row">
   <div class="col-md-12">
-    <div class="card mb-4">
-      <div class="card-body">
-        
-        <a type="submit" class="btn btn-primary" href="/facturas-recibidas/create">Ingresar factura nueva</a>
-        <a class="btn btn-primary" href="/facturas-recibidas/create">Importar facturas recibidas</a>
           
         <div style="margin: 1rem;"> -- Aqui van filtros de búsqueda por fecha, texto o proveedor --  </div>
       
@@ -35,9 +35,9 @@
                 <tr>
                   <td>{{ $bill->reference_number }}</td>
                   <td>{{ $bill->provider ? $bill->provider->toString() : '-' }}</td>
-                  <td>{{ $bill->subtotal }}</td>
-                  <td>{{ $bill->iva_amount }}</td>
-                  <td>{{ $bill->total }}</td>
+                  <td>{{ number_format( $bill->subtotal, 2 ) }}</td>
+                  <td>{{ number_format( $bill->iva_amount, 2 ) }}</td>
+                  <td>{{ number_format( $bill->total, 2 ) }}</td>
                   <td>{{ $bill->description }}</td>
                   <td>{{ $bill->generatedDate()->format('d/m/Y') }}</td>
                   <td>{{ $bill->dueDate()->format('d/m/Y') }}</td>
@@ -61,8 +61,9 @@
           </tbody>
         </table>
         {{ $bills->links() }}
-      </div>  
-    </div>  
   </div>  
 </div>
+
+@include( 'Bill.import' )
+
 @endsection

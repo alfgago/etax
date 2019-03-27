@@ -158,6 +158,7 @@ window.agregarEditarItem = function () {
   var razon_descuento = '';
   var tipo_iva = $('#tipo_iva').val();
   var porc_iva = $('#porc_iva').val();
+  var monto_iva = $('#item_iva_amount').val();
   var subtotal = $('#item_subtotal').val();
   var total = $('#item_total').val();
 
@@ -184,9 +185,9 @@ window.agregarEditarItem = function () {
     htmlCols += "<td>" + precio_unitario + " <input type='hidden' class='precio_unitario' name='items[" + index + "][unit_price]' value='" + precio_unitario + "'></td>";
     htmlCols += "<td>" + tipo_iva + " <input type='hidden' class='tipo_iva' name='items[" + index + "][iva_type]' value='" + tipo_iva + "'></td>";
     htmlCols += "<td>" + subtotal + " <input class='subtotal' type='hidden' name='items[" + index + "][subtotal]' value='" + subtotal + "'></td>";
-    htmlCols += "<td>" + porc_iva + " <input class='porc_iva' type='hidden' name='items[" + index + "][iva_percentage]' value='" + porc_iva + "'></td>";
+    htmlCols += "<td>" + monto_iva + " <input class='porc_iva' type='hidden' name='items[" + index + "][iva_percentage]' value='" + porc_iva + "'> <input class='monto_iva' type='hidden' name='items[" + index + "][iva_amount]' value='" + monto_iva + "'> </td>";
     htmlCols += "<td>" + total + " <input class='total' type='hidden' name='items[" + index + "][total]' value='" + total + "'></td>";
-    htmlCols += "<td class='acciones'><span class='btn-editar-item text-success mr-2' title='Editar linea' onclick='cargarFormItem(" + index + ");'><i class='nav-icon i-Pen-2'></i> </span> <span title='Eliminar linea' onclick='eliminarItem(" + index + ");' class='btn-eliminar-item text-danger mr-2'><i class='nav-icon i-Close-Window'></i> </span> </td>";
+    htmlCols += "<td class='acciones'><span class='btn-editar-item text-success mr-2' title='Editar linea' onclick='abrirPopup(\"linea-popup\");cargarFormItem(" + index + ");'><i class='nav-icon i-Pen-2'></i> </span> <span title='Eliminar linea' onclick='eliminarItem(" + index + ");' class='btn-eliminar-item text-danger mr-2'><i class='nav-icon i-Close-Window'></i> </span> </td>";
 
     if (!itemExistente) {
       var htmlRow = "<tr class='item-tabla item-index-" + index + "' index='" + index + "' attr-num='" + numero + "' id='" + row_id + "' > " + htmlCols + "</tr>";
@@ -211,6 +212,8 @@ window.agregarEditarItem = function () {
 
     //Si estaba editando, quita la clase
     $('.item-factura-form').removeClass('editando');
+
+    cerrarPopup('linea-popup');
   } else {
     alert('Debe completar los datos de la item antes de guardarla');
   }
@@ -219,9 +222,11 @@ window.agregarEditarItem = function () {
 //Se encarga de limpiar el formulario de "Agregar items"
 window.limpiarFormItem = function () {
   $('.item-factura-form input, .item-factura-form select').val('');
-  $('#tipo_producto').val('Bienes generales').change();
+  $('#tipo_producto').val(1).change();
   $('#unidad_medicion').val(1);
   $('#cantidad').val(1);
+  $('#discount_type').val('01');
+  $('#discount').val(0);
 };
 
 //Carga la item para ser editada
@@ -241,8 +246,9 @@ window.cargarFormItem = function (index) {
   $('#tipo_iva').val(item.find('.tipo_iva ').val());
   $('#item_subtotal').val(item.find('.subtotal ').val());
   $('#porc_iva').val(item.find('.porc_iva ').val());
+  $('#item_iva_amount').val(item.find('.monto_iva ').val());
 
-  calcularSubtotalItem();
+  calcularConIvaManual();
 };
 
 //Acción para cancelar la edición

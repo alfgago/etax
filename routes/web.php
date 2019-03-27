@@ -11,8 +11,26 @@
 |
 */
 
+
+// Rutas de exportación
+Route::get('clientes/exportar', 'ClientController@export');
+Route::get('proveedores/exportar', 'ProviderController@export');
+Route::get('facturas-emitidas/exportar', 'InvoiceController@export');
+Route::get('facturas-recibidas/exportar', 'BillController@export');
+
+// Rutas de importación
+Route::post('clientes/importar', 'ClientController@import');
+Route::post('proveedores/importar', 'ProviderController@import');
+Route::post('facturas-emitidas/importar', 'InvoiceController@import');
+Route::post('facturas-recibidas/importar', 'BillController@import');
+
+// Rutas de reportes
 Route::get('/', 'ReportsController@dashboard');
 Route::get('/dashboard', 'ReportsController@dashboard');
+Route::get('/reportes', 'ReportsController@reports');
+Route::get('/reportes/cuentas-contables', 'ReportsController@ccReport');
+
+// Rutas autogeneradas de CRUD
 Route::resource('clientes', 'ClientController');
 Route::resource('proveedores', 'ProviderController');
 Route::resource('productos', 'ProductController');
@@ -25,3 +43,4 @@ Route::get('login', function () {
 })->name('login');;
 
 Auth::routes();
+

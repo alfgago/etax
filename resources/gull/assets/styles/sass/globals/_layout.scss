@@ -9,11 +9,14 @@
     padding: 2rem  2rem 0;
     position: relative;
     min-height: calc(100vh - #{$topbar-height});
-    background: lighten($gray-100, 1);
+    background: $white;
+    padding-left: 6rem;
     &.sidenav-open {
         width: calc(100% - #{$sidebar-left-width});
     }
 }
+
+
 
 //SIDEBAR =======
 

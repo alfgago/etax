@@ -1,5 +1,11 @@
+body, html {
+  font-family: 'Pangram', 'sans-serif' !important;
+  font-weight: 400;
+}
+
 h1, h2, h3, h4, h5, h6, .card-title, .text-title {
   color: $heading;
+  font-weight: 500;
 }
 
 @for $i from 10 through 78 {

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Client extends Model
 {
+  protected $guarded = [];
   
   //Relacion con la empresa
   public function company()

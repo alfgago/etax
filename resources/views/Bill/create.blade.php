@@ -5,10 +5,8 @@
 @endsection
 
 @section('content') 
-<div class="row">
+<div class="row form-container">
   <div class="col-md-12">
-    <div class="card mb-4">
-      <div class="card-body">
                           
         <form method="POST" action="/facturas-recibidas">
 
@@ -17,54 +15,85 @@
           <input type="hidden" id="current-index" value="0">
 
           <div class="form-row">
-            <div class="form-group col-md-4 ">
+            <div class="col-md">
+              <div class="form-row">
+                <div class="col-md-6">
+                  <div class="form-row">
+                    <div class="form-group col-md-12">
+                      <h3>
+                        Proveedor
+                      </h3>
+                    </div>
+      
+                    <div class="form-group col-md-12 with-button">
+                      <label for="provider_id">Seleccione el proveedor</label>
+                      <select class="form-control" name="provider_id" id="proveedor" placeholder="" required>
+                        @foreach ( auth()->user()->companies->first()->providers as $proveedor )
+                          <option value="{{ $proveedor->id }}" >{{ $proveedor->id_number }} - {{ $proveedor->first_name }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <div class="form-row">
+                    <div class="form-group col-md-12">
+                      <h3>
+                        Moneda
+                      </h3>
+                    </div>
+      
+                    <div class="form-group col-md-4">
+                      <label for="currency">Divisa</label>
+                      <select class="form-control" name="currency" id="moneda" required>
+                        <option value="crc" selected>CRC</option>
+                        <option value="crc">USD</option>
+                      </select>
+                    </div>
+      
+                    <div class="form-group col-md-8">
+                      <label for="currency_rate">Tipo de cambio</label>
+                      <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="1.00" required>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-row">    
+                <div class="form-group col-md-12">
+                  <h3>
+                    Detalle
+                  </h3>
+                </div>
+                
+                 <div class="form-group col-md-4">
+                  <label for="subtotal">Subtotal </label>
+                  <input type="text" class="form-control" name="subtotal" id="subtotal" placeholder="" readonly="true" required>
+                </div>
+    
+                <div class="form-group col-md-4">
+                  <label for="iva_amount">Monto IVA </label>
+                  <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
+                </div>
+    
+                <div class="form-group col-md-4">
+                  <label for="total">Total</label>
+                  <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" >
+                </div>
+                
+                <div class="form-group col-md-12">
+                  <div onclick="abrirPopup('linea-popup');" class="btn btn-dark btn-agregar">Agregar linea</div>
+                </div>
+    
+              </div>
+              
+            </div>
+            
+            <div class="col-md offset-md-1">
               <div class="form-row">
                 <div class="form-group col-md-12">
                   <h3>
-                    Proveedor
-                  </h3>
-                </div>
-
-                <div class="form-group col-md-12 with-button">
-                  <label for="provider_id">Seleccione el proveedor</label>
-                  <select class="form-control" name="provider_id" id="proveedor" placeholder="" required>
-                    @foreach ( auth()->user()->companies->first()->providers as $proveedor )
-                      <option value="{{ $proveedor->id }}" >{{ $proveedor->id_number }} - {{ $proveedor->first_name }}</option>
-                    @endforeach
-                  </select>
-                </div>
-                
-              </div>
-            </div>
-            
-            <div class="form-group col-md-4 offset-md-4">
-              <div class="form-row">
-                <div class="form-group col-md-12">
-                  <h3>
-                    Moneda
-                  </h3>
-                </div>
-
-                <div class="form-group col-md-6">
-                  <label for="currency">Divisa</label>
-                  <select class="form-control" name="currency" id="moneda" required>
-                    <option value="crc" selected>CRC</option>
-                    <option value="crc">USD</option>
-                  </select>
-                </div>
-
-                <div class="form-group col-md-6">
-                  <label for="currency_rate">Tipo de cambio</label>
-                  <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="1.00" required>
-                </div>
-                
-              </div>
-            </div>
-            
-            <div class="form-group col-md-12">
-              <div class="form-row">
-                <div class="form-group col-md-12">
-                  <h3 style="margin-top:1rem;">
                     Datos generales
                   </h3>
                 </div>
@@ -105,8 +134,6 @@
                     </div>
                   </div>
                   
-                  <div class="form-group col-md-6"></div>
-
                   <div class="form-group col-md-6">
                     <label for="sale_condition">Condición de venta</label>
                     <div class="input-group">
@@ -152,99 +179,19 @@
                   </div>
 
               </div>
+              
             </div>
           </div>
 
-          <div class="form-row">  
+          <div class="form-row" id="tabla-items-factura" style="display: none;">  
 
             <div class="form-group col-md-12">
               <h3>
                 Lineas de factura
               </h3>
             </div>
-
-            <div class="form-group col-md-12">
-              <div class="item-factura-form form-row">
-
-                <input type="hidden" class="form-control" id="lnum" value="">
-                <input type="hidden" class="form-control" id="item_id" value="">
-                
-                <div class="form-group col-md-2">
-                  <label for="codigo">Código</label>
-                  <input type="text" class="form-control" id="codigo" value="" >
-                </div>
-
-                <div class="form-group col-md-4">
-                  <label for="nombre">Nombre / Descripción</label>
-                  <input type="text" class="form-control" id="nombre" value="" >
-                </div>
-
-                <div class="form-group col-md-3">
-                  <label for="tipo_producto">Tipo de producto</label>
-                  <select class="form-control" id="tipo_producto" >
-                    @foreach ( \App\ProductCategory::all() as $tipo )
-                      <option value="{{ $tipo->id }}" codigo="{{ $tipo->bill_iva_code }}" >{{ $tipo->name }}</option>
-                    @endforeach
-                  </select>
-                </div>
-
-                <div class="form-group col-md-3">
-                  <label for="tipo_iva">Tipo de IVA</label>
-                  <select class="form-control" id="tipo_iva" >
-                    @foreach ( \App\Variables::tiposIVASoportados() as $tipo )
-                      <option value="{{ $tipo['codigo'] }}" porcentaje="{{ $tipo['porcentaje'] }}">{{ $tipo['nombre'] }}</option>
-                    @endforeach
-                  </select>
-                </div>
-
-                <div class="form-group col-md-2">
-                  <label for="unidad_medicion">Unidad de medición</label>
-                  <select class="form-control" id="unidad_medicion" value="" >
-                    @foreach ( \App\Variables::unidadesMedicion() as $unidad )
-                      <option value="{{ $unidad['codigo'] }}" >{{ $unidad['nombre'] }}</option>
-                    @endforeach
-                  </select>
-                </div>
-                
-                <div class="form-group col-md-2">
-                  <label for="precio_unitario">Cantidad</label>
-                  <input type="text" class="form-control" id="cantidad" value="1" >
-                </div>
-
-                <div class="form-group col-md-2">
-                  <label for="precio_unitario">Precio unitario</label>
-                  <input type="text" class="form-control" id="precio_unitario" value="" >
-                </div>
-
-                <div class="form-group col-md-2">
-                  <label for="nombre_proveedor">Subtotal</label>
-                  <input type="text" class="form-control" id="item_subtotal" placeholder="" readonly="true" >
-                </div>
-
-                <div class="form-group col-md-2">
-                  <label for="nombre_proveedor">Porcentaje IVA</label>
-                  <input type="text" class="form-control" id="porc_iva" placeholder="13" value="13" readonly>
-                </div>
-
-                <div class="form-group col-md-2">
-                  <label for="nombre_proveedor">Total item</label>
-                  <input type="text" class="form-control" id="item_total" placeholder="" readonly="true" >
-                </div>
-
-                <div class="form-group col-md-3">
-                  <div class="botones-agregar">
-                    <div onclick="agregarEditarItem();" class="btn btn-dark btn-sm m-1">Agregar linea</div>
-                  </div>
-                  <div class="botones-editar">
-                    <div onclick="agregarEditarItem();" class="btn btn-dark btn-sm m-1">Confirmar edición</div>
-                    <div onclick="cancelarEdicion();" class="btn btn-danger btn-sm m-1">Cancelar</div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
             
-            <div class="form-group col-md-12" id="tabla-items-factura" style="display: none;">
+            <div class="form-group col-md-12" >
               <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
                 <thead class="thead-dark">
                   <tr>
@@ -252,12 +199,12 @@
                     <th>Código</th>
                     <th>Nombre</th>
                     <th>Tipo producto</th>
-                    <th>Cantidad</th>
+                    <th>Cant.</th>
                     <th>Unidad</th>
                     <th>Precio unitario</th>
                     <th>Tipo IVA</th>
                     <th>Subtotal</th>
-                    <th>Porc. IVA</th>
+                    <th>IVA</th>
                     <th>Total</th>
                     <th></th>
                   </tr>
@@ -268,32 +215,10 @@
               </table>
             </div>
           </div>
+          
+          @include( 'Bill.form-linea' )
 
-          <div class="form-row">    
-            <div class="form-group col-md-12">
-              <h3>
-                Total de factura
-              </h3>
-            </div>
-            
-             <div class="form-group col-md-4">
-              <label for="subtotal">Subtotal </label>
-              <input type="text" class="form-control" name="subtotal" id="subtotal" placeholder="" readonly="true" required>
-            </div>
-
-            <div class="form-group col-md-4">
-              <label for="iva_amount">Monto IVA </label>
-              <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
-            </div>
-
-            <div class="form-group col-md-4">
-              <label for="total">Total</label>
-              <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" >
-            </div>
-
-          </div>
-
-          <button type="submit" class="btn btn-primary">Confirmar factura</button>
+          <button id="btn-submit" type="submit" class="hidden">Guardar factura</button>
 
           @if ($errors->any())
             <ul>
@@ -304,11 +229,13 @@
           @endif
 
         </form>
-      </div>  
-    </div>  
   </div>  
 </div>
 @endsection
+
+@section('breadcrumb-buttons')
+  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar factura</button>
+@endsection 
 
 @section('header-scripts')
 

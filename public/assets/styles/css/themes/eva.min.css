@@ -1,4 +1,67 @@
 @font-face {
+    font-family: 'Pangram';
+    src: url(/fonts/Pangram-ExtraLight.woff2?a99800febd6f51954e0f903a88db631c) format('woff2'),
+        url(/fonts/Pangram-ExtraLight.woff?1c8bd00fd2520f9e5cd9ad508b4c9ba1) format('woff'),
+        url(/fonts/Pangram-ExtraLight.ttf?48ad403d68c241ccf7a06daff71de3cb) format('truetype');
+    font-weight: 200;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pangram';
+    src: url(/fonts/Pangram-ExtraBold.woff2?cd5fe1699fb92908ea75b8e0af9828ff) format('woff2'),
+        url(/fonts/Pangram-ExtraBold.woff?67986b18eeefb21649c4196a0947046b) format('woff'),
+        url(/fonts/Pangram-ExtraBold.ttf?312dd3de028904279a5f1c8008011666) format('truetype');
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pangram';
+    src: url(/fonts/Pangram-Medium.woff2?388beeb742c3ad1303d9eb35a68d4c8a) format('woff2'),
+        url(/fonts/Pangram-Medium.woff?8b6a0cf932add5d03b954bffb0860feb) format('woff'),
+        url(/fonts/Pangram-Medium.ttf?1ecb86001762a766c0dd528ed20cd44a) format('truetype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pangram';
+    src: url(/fonts/Pangram-Light.woff2?6423f55cd1cfc46d4c4623070cb528a4) format('woff2'),
+        url(/fonts/Pangram-Light.woff?77941073c11ae825a127ede7b5f22eb0) format('woff'),
+        url(/fonts/Pangram-Light.ttf?3d23cdb2dd59c3bf1056abf579336173) format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pangram';
+    src: url(/fonts/Pangram-Black.woff2?4fda426c58dafa6950805c190e28054d) format('woff2'),
+        url(/fonts/Pangram-Black.woff?53503b4cbb44da27ad175c99a986fe29) format('woff'),
+        url(/fonts/Pangram-Black.ttf?f8b549d1949f71afbe75e172718339a0) format('truetype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pangram';
+    src: url(/fonts/Pangram-Regular.woff2?03c976e3344c2e661c22bf32153590be) format('woff2'),
+        url(/fonts/Pangram-Regular.woff?50913fc19e545f0f9748e9b82e472540) format('woff'),
+        url(/fonts/Pangram-Regular.ttf?97ef73884722139319c39fb74bfe391e) format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pangram';
+    src: url(/fonts/Pangram-Bold.woff2?fffc8560865cb8bda2d394039730e4ab) format('woff2'),
+        url(/fonts/Pangram-Bold.woff?243f80c5b0edffb463e640698f7acf98) format('woff'),
+        url(/fonts/Pangram-Bold.ttf?7227615cd04557d668e88dc96aecf50d) format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
   font-family: 'iconsmind';
   src:  url(/fonts/iconsmind.eot?1cd6a624d6a7569e37128c287a443e7e);
   src:  url(/fonts/iconsmind.eot?1cd6a624d6a7569e37128c287a443e7e#iefix) format('embedded-opentype'),
@@ -3509,7 +3572,7 @@ section {
 
 body {
   margin: 0;
-  font-family: "Nunito", sans-serif;
+  font-family: "Pangram", sans-serif;
   font-size: 0.813rem;
   font-weight: 400;
   line-height: 1.5;
@@ -10309,7 +10372,7 @@ button.close {
   z-index: 1070;
   display: block;
   margin: 0;
-  font-family: "Nunito", sans-serif;
+  font-family: "Pangram", sans-serif;
   font-style: normal;
   font-weight: 400;
   line-height: 1.5;
@@ -10484,7 +10547,7 @@ button.close {
   z-index: 1060;
   display: block;
   max-width: 276px;
-  font-family: "Nunito", sans-serif;
+  font-family: "Pangram", sans-serif;
   font-style: normal;
   font-weight: 400;
   line-height: 1.5;
@@ -16132,6 +16195,12 @@ a.text-gray-400:focus {
   }
 }
 
+body,
+html {
+  font-family: 'Pangram', 'sans-serif' !important;
+  font-weight: 400;
+}
+
 h1,
 h2,
 h3,
@@ -16141,6 +16210,7 @@ h6,
 .card-title,
 .text-title {
   color: #040106;
+  font-weight: 500;
 }
 
 .text-10 {
@@ -18850,11 +18920,12 @@ h6,
   padding: 2rem  2rem 0;
   position: relative;
   min-height: calc(100vh - 80px);
-  background: #fbfcfc;
+  background: #fff;
+  padding-left: 6rem;
 }
 
 .main-content-wrap.sidenav-open {
-  width: calc(100% - 120px);
+  width: calc(100% - 150px);
 }
 
 .sidebar-left-secondary,
@@ -18867,7 +18938,7 @@ h6,
 }
 
 .sidebar-left {
-  left: calc(-120px - 20px);
+  left: calc(-150px - 20px);
   z-index: 90;
   -webkit-transition: all .24s ease-in-out;
   transition: all .24s ease-in-out;
@@ -18880,7 +18951,7 @@ h6,
 .sidebar-left .navigation-left {
   list-style: none;
   text-align: center;
-  width: 120px;
+  width: 150px;
   height: 100%;
   margin: 0;
   padding: 0;
@@ -18970,7 +19041,7 @@ h6,
 }
 
 .sidebar-left-secondary.open {
-  left: 120px;
+  left: 150px;
 }
 
 .sidebar-left-secondary .childNav {
@@ -19062,7 +19133,7 @@ h6,
 .sidebar-overlay {
   display: none;
   position: fixed;
-  width: calc(100% - 120px - 220px);
+  width: calc(100% - 150px - 220px);
   height: calc(100vh - 80px);
   bottom: 0;
   right: 0;
@@ -19114,11 +19185,11 @@ h6,
   }
 
   .sidebar-left {
-    left: calc(-90px - 20px);
+    left: calc(-100px - 20px);
   }
 
   .sidebar-left .navigation-left {
-    width: 90px;
+    width: 100px;
   }
 
   .sidebar-left .navigation-left .nav-item.active .triangle {
@@ -19135,12 +19206,12 @@ h6,
   }
 
   .sidebar-left-secondary.open {
-    left: 90px;
+    left: 100px;
   }
 
   .sidebar-overlay {
     height: calc(100vh - 70px);
-    width: calc(100% - 90px - 190px);
+    width: calc(100% - 100px - 190px);
   }
 }
 
@@ -19578,6 +19649,9 @@ h6,
   line-height: 1;
   padding-right: .5rem;
   margin: 0;
+  font-weight: 600;
+  border-bottom: 10px solid #ccc;
+  padding-bottom: .5rem;
 }
 
 .breadcrumb ul {
@@ -19612,6 +19686,16 @@ h6,
 
 .breadcrumb ul li a {
   color: #040106;
+}
+
+.breadcrumb-buttons .btn {
+  margin: 0;
+  margin-left: .5rem;
+  font-size: .8rem;
+}
+
+.breadcrumb-buttons {
+  margin-left: 1.5rem;
 }
 
 @media (max-width: 576px) {
@@ -20463,40 +20547,80 @@ table.dataTable-collapse {
   border-collapse: collapse !important;
 }
 
+.ivas-table {
+  font-size: 10px;
+  color: #333;
+}
+
+.ivas-table th {
+  color: #4C006D;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.ivas-table th,
+.ivas-table td {
+  padding: 0.25rem;
+  font-weight: 400;
+}
+
+.ivas-table td {
+  border: 1px solid #dee2e6;
+  vertical-align: middle;
+  color: #000;
+}
+
+.ivas-table th:first-of-type {
+  text-align: left;
+  max-width: 135px;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  margin-bottom: 1.25rem;
+  border-bottom: #e5e5e5 5px solid;
+  padding-bottom: 1rem;
+}
+
 .form-group {
   position: relative;
-  margin-bottom: 10px;
+  margin-bottom: 1rem;
 }
 
 .form-group label {
-  font-size: 16px;
-  color: #501a68;
+  font-size: 14px;
+  color: #1e0a26;
   margin-bottom: 4px;
 }
 
 .form-control {
-  border: initial;
+  border: 1px solid #999;
   outline: initial !important;
   background: #fff;
-  border: 1px solid #bbb;
   color: #1e0a26;
 }
 
 .form-control::-webkit-input-placeholder {
-  color: #bbb;
+  color: #501a68;
 }
 
 .form-control::-ms-input-placeholder {
-  color: #bbb;
+  color: #501a68;
 }
 
 .form-control::placeholder {
-  color: #bbb;
+  color: #501a68;
 }
 
 .form-control.rounded,
 .form-control.form-control-rounded {
   border-radius: 20px;
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+  background: #eee;
+  opacity: 1;
 }
 
 .input-fecha,
@@ -21309,17 +21433,14 @@ table.dataTable-collapse {
   border-radius: 5px;
 }
 
-form h3 {
-  margin: 1rem 0;
-  background: #F0C962;
-  display: inline-block;
-  padding: .25em .5em;
-  border-radius: 5px;
+.row.form-container {
+  max-width: 1200px;
 }
 
-form .form-row:first-of-type h3 {
-  margin-top: 0;
-  border-top: 0;
+form h3 {
+  margin: 1rem 0;
+  border-bottom: 7px solid #F0C962;
+  display: inline-block;
 }
 
 .item-factura-form .botones-editar {
@@ -21332,6 +21453,11 @@ form .form-row:first-of-type h3 {
 
 .item-factura-form.editando .botones-agregar {
   display: none;
+}
+
+.tagging,
+input.type-zone {
+  background: #eee;
 }
 
 .icon-regular {
@@ -22392,7 +22518,7 @@ form .form-row:first-of-type h3 {
 }
 
 .swal2-container .swal2-modal {
-  font-family: "Nunito", sans-serif;
+  font-family: "Pangram", sans-serif;
 }
 
 .swal2-container .swal2-spacer {
@@ -22677,6 +22803,46 @@ img-cropper input[type="file"] {
   top: 2px;
   right: 4px;
   border-radius: 10px;
+}
+
+.popup.is-active {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  opacity: 1;
+}
+
+.popup {
+  display: none;
+  opacity: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-transition: 1s ease all;
+  transition: 1s ease all;
+  background: rgba(0, 0, 0, 0.75);
+  padding: 1rem;
+  z-index: 999;
+}
+
+.popup .popup-container {
+  background: #fff;
+  margin: auto;
+  max-width: 650px;
+  position: relative;
+}
+
+.close-popup {
+  position: absolute;
+  top: .5rem;
+  right: 1rem;
+  font-size: 2rem;
+  color: #000;
+  height: 38px;
+  z-index: 2;
+  cursor: pointer;
 }
 
 .popover {
@@ -23558,7 +23724,7 @@ ngb-rating .half {
 }
 
 .main-header .logo {
-  width: 120px;
+  width: 150px;
   text-align: center;
   font-size: 30px;
   color: #fff;
@@ -24315,6 +24481,10 @@ body {
 
 [tabindex="-1"]:focus {
   outline: none;
+}
+
+.hidden {
+  display: none;
 }
 
 hr {

@@ -4,14 +4,16 @@
   Productos
 @endsection
 
+@section('breadcrumb-buttons')
+        <a type="submit" class="btn btn-primary" href="/productos/create">Ingresar producto nuevo</a>
+        <a class="btn btn-primary" href="/productos/create">Importar productos</a>
+@endsection 
+
 @section('content') 
 <div class="row">
   <div class="col-md-12">
-    <div class="card mb-4">
-      <div class="card-body">
         
-        <a type="submit" class="btn btn-primary" href="/productos/create">Ingresar producto nuevo</a>
-        <a class="btn btn-primary" href="/productos/create">Importar productos</a>
+
           
         <div style="margin: 1rem;"> -- Aqui van filtros de búsqueda --  </div>
         
@@ -57,8 +59,6 @@
           </tbody>
         </table>
         {{ $products->links() }}
-      </div>  
-    </div>  
   </div>  
 </div>
 @endsection

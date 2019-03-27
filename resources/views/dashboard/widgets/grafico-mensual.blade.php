@@ -8,14 +8,16 @@
 <script>
 
 function initBarChart() {
-  var $tituloRepercutido = "IVA emitido ";
-  var $tituloSoportado = "IVA recibido ";
-  var $tituloDeducible = "IVA deducible ";
-  var $tituloSaldo = "Saldo de IVA ";
+  var $tituloRepercutido = " IVA emitido ";
+  var $tituloSoportado = " IVA recibido ";
+  var $tituloDeducible = " IVA acreditable ";
+  var $tituloAsumido = " IVA asumido ";
+  var $tituloSaldo = " Saldo de IVA ";
   
   var dataRepercutidos = [];
   var dataSoportados = [];
   var dataDeducibles = [];
+  var dataAsumidos = [];
   var dataSaldos = [];
   
   
@@ -28,7 +30,7 @@ function initBarChart() {
         borderRadius: 0,
         orient: 'horizontal',
         x: 'left',
-        data: [$tituloRepercutido, $tituloSoportado, $tituloDeducible, $tituloSaldo]
+        data: [$tituloRepercutido, $tituloSoportado, $tituloDeducible, $tituloAsumido, $tituloSaldo]
       },
       grid: {
         left: '8px',
@@ -134,6 +136,28 @@ function initBarChart() {
         },
         type: 'bar',
         color: '#814bb5',
+        smooth: true
+      }, {
+        name: $tituloAsumido,
+        data: [ '{{ $e->cc_no_acreditable }}'.replace(/\,/g,''), 
+                '{{ $f->cc_no_acreditable }}'.replace(/\,/g,''), 
+                '{{ $m->cc_no_acreditable }}'.replace(/\,/g,''), 
+                '{{ $a->cc_no_acreditable }}'.replace(/\,/g,''), 
+                '{{ $y->cc_no_acreditable }}'.replace(/\,/g,''), 
+                '{{ $j->cc_no_acreditable }}'.replace(/\,/g,''), 
+                '{{ $l->cc_no_acreditable }}'.replace(/\,/g,''), 
+                '{{ $g->cc_no_acreditable }}'.replace(/\,/g,''), 
+                '{{ $s->cc_no_acreditable }}'.replace(/\,/g,''), 
+                '{{ $c->cc_no_acreditable }}'.replace(/\,/g,''), 
+                '{{ $n->cc_no_acreditable }}'.replace(/\,/g,''), 
+                '{{ $d->cc_no_acreditable }}'.replace(/\,/g,''), 
+        ],
+        label: {
+          show: false,
+          color: 'red'
+        },
+        type: 'bar',
+        color: '#342686',
         smooth: true
       }, {
         name: $tituloSaldo,

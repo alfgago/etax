@@ -4,14 +4,30 @@
   Facturas emitidas
 @endsection
 
+@section('breadcrumb-buttons')
+    <a class="btn btn-primary" href="/facturas-emitidas/create">Ingresar factura nueva</a>
+    <div onclick="abrirPopup('importar-popup');" class="btn btn-primary">Importar facturas emitidas</div>
+@endsection 
+
 @section('content') 
 <div class="row">
   <div class="col-md-12">
-    <div class="card mb-4">
-      <div class="card-body">
-        
-        <a class="btn btn-primary" href="/facturas-emitidas/create">Ingresar factura nueva</a>
-        <a class="btn btn-primary" href="/facturas-emitidas/create">Importar facturas</a>
+    
+      @if(session()->has('message'))
+          <div class="alert alert-success">
+              {{ session()->get('message') }}
+          </div>
+      @endif
+      
+      @if ($errors->any())
+        <div class="alert alert-danger">
+          <ul>
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
         
       <div style="margin: 1rem;"> -- Aqui van filtros de búsqueda por fecha, texto o cliente --  </div>
         
@@ -35,9 +51,9 @@
                 <tr>
                   <td>{{ $invoice->reference_number }}</td>
                   <td>{{ $invoice->client ? $invoice->client->toString() : '-' }}</td>
-                  <td>{{ $invoice->subtotal }}</td>
-                  <td>{{ $invoice->iva_amount }}</td>
-                  <td>{{ $invoice->total }}</td>
+                  <td>{{ number_format( $invoice->subtotal, 2 ) }}</td>
+                  <td>{{ number_format( $invoice->iva_amount, 2 ) }}</td>
+                  <td>{{ number_format( $invoice->total, 2 ) }}</td>
                   <td>{{ $invoice->description }}</td>
                   <td>{{ $invoice->generatedDate()->format('d/m/Y') }}</td>
                   <td>{{ $invoice->dueDate()->format('d/m/Y') }}</td>
@@ -62,8 +78,9 @@
         {{ $invoices->links() }}
         
         <div style="margin: 1rem;">-- Aqui van opciones para exportar facturas en XML, CSV o formato de Hacienda --</div>  
-      </div>  
-    </div>  
   </div>  
 </div>
+
+@include( 'Invoice.import' )
+
 @endsection

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use \Carbon\Carbon;
 use App\Bill;
 use App\Company;
+use App\Exports\BillExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class BillController extends Controller
@@ -106,9 +108,10 @@ class BillController extends Controller
           $discount_reason = '';
           $iva_type = $item['iva_type'];
           $iva_percentage = $item['iva_percentage'];
+          $iva_amount = $item['iva_amount'];
           $is_exempt = false;
           
-          $bill->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $is_exempt );
+          $bill->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $is_exempt );
         }
       
         return redirect('/facturas-recibidas');
@@ -212,9 +215,10 @@ class BillController extends Controller
           $discount_reason = '';
           $iva_type = $item['iva_type'];
           $iva_percentage = $item['iva_percentage'];
+          $iva_amount = $item['iva_amount'];
           $is_exempt = false;
           
-          $item_modificado = $bill->addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $is_exempt );
+          $item_modificado = $bill->addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $is_exempt );
 
           array_push( $lids, $item_modificado->id );
         }
@@ -239,10 +243,20 @@ class BillController extends Controller
         $bill = Bill::find($id);
         $this->authorize('update', $bill);
         
-        foreach ( $bill->lineas as $linea ) {
+        foreach ( $bill->items as $linea ) {
           $linea->delete();
         }
         $bill->delete();
         return redirect('/facturas-recibidas');
     }
+    
+    public function export() {
+        return Excel::download(new InvoiceExport(), 'documentos-emitidos.xlsx');
+    }
+    
+    public function import() {
+        
+    }      
+    
+    
 }

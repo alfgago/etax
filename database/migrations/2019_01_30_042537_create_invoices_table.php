@@ -44,7 +44,7 @@ class CreateInvoicesTable extends Migration
             $table->enum('payment_type', ['01', '02', '03', '04', '05', '99'])->default('01');
           
             $table->string('buy_order')->nullable();
-            $table->string('send_emails');
+            $table->string('send_emails')->nullable();
             $table->text('description')->nullable();
             $table->string('hacienda_status');
             $table->string('payment_status');
@@ -57,6 +57,8 @@ class CreateInvoicesTable extends Migration
           
             $table->string('generation_method');
             $table->string('other_reference')->nullable();
+            
+            $table->unsignedBigInteger('other_document')->nullable();
           
             $table->timestamps();
         });
@@ -67,25 +69,26 @@ class CreateInvoicesTable extends Migration
             $table->unsignedBigInteger('invoice_id');
             $table->unsignedBigInteger('product_id')->nullable();
             $table->integer('item_number');
-            $table->string('code');
-            $table->string('name');
-            $table->string('product_type');
-            $table->integer('measure_unit');
+            $table->string('code')->nullable();
+            $table->string('name')->nullable();
+            $table->string('product_type')->nullable();
+            $table->integer('measure_unit')->nullable();
             $table->integer('item_count');
             $table->double('unit_price');
             $table->double('subtotal');
             $table->double('iva_amount');
             $table->double('total');
-            $table->double('discount_percentage')->default(0);
+            $table->string('discount_type')->nullable();
+            $table->double('discount')->default(0);
             $table->double('discount_reason')->nullable();
             $table->string('iva_type');
-            $table->double('iva_percentage');
+            $table->double('iva_percentage')->nullable();
             $table->boolean('is_exempt')->default(false);
           
             $table->timestamps();
         });
         
-        $this->demoData();
+        //$this->demoData();
     }
   
     public function demoData() {
@@ -94,7 +97,7 @@ class CreateInvoicesTable extends Migration
         $faker = Faker\Factory::create();
         $faker->addProvider(new Faker\Provider\es_ES\Person($faker));
       
-        for($i = 0; $i < 1000; $i++) {
+        for($i = 0; $i < 3000; $i++) {
             $invoice = new \App\Invoice();
             $invoice->company_id = $company->id;
             //Datos generales y para Hacienda
@@ -104,7 +107,7 @@ class CreateInvoicesTable extends Migration
             $numero_doc = ((int)$company->last_document) + 1;
             $invoice->document_number = str_pad($numero_doc, 20, '0', STR_PAD_LEFT);
 
-            $invoice->sale_condition = $faker->randomElement(array('01','02','03','04','05','99'));
+            $invoice->sale_condition = $faker->randomElement(array('01','02'));
             $invoice->payment_type = $faker->randomElement(array('01','02','03','04','05','99'));
             $invoice->credit_time = 0;
             $invoice->buy_order = $faker->lexify('???');
@@ -171,12 +174,14 @@ class CreateInvoicesTable extends Migration
             $invoice->iva_amount = $sumIva;
 
             //Fechas
-            if( $i < 500 ){
+            if( $i < 1000 ){
               $fecha = $faker->dateTimeBetween($startDate = '2018-09-01 02:00:00', $endDate = '2018-12-31 02:00:00');
-            }else if( $i >= 500 && $i < 750){
+            }else if( $i >= 1000 && $i < 1750){
               $fecha = $faker->dateTimeBetween($startDate = '2019-01-01 02:00:00', $endDate = '2019-01-31 02:00:00');
-            }else{
+            }else if( $i >= 1750 && $i < 2250){
               $fecha = $faker->dateTimeBetween($startDate = '2019-02-01 02:00:00', $endDate = '2019-02-28 02:00:00');
+            }else{
+              $fecha = $faker->dateTimeBetween($startDate = '2019-03-01 02:00:00', $endDate = '2019-03-28 02:00:00');
             }
           
             $invoice->generated_date = Carbon::createFromFormat('d/m/Y g:i A', $fecha->format('d/m/Y g:i A') );

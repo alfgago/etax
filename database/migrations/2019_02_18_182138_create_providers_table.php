@@ -23,7 +23,7 @@ class CreateProvidersTable extends Migration
             $table->string('first_name');
             $table->string('last_name')->nullable();
             $table->string('last_name2')->nullable();
-            $table->string('email')->unique();
+            $table->string('email');
             $table->string('country');
             $table->string('state')->nullable(); //Provincia
             $table->string('city')->nullable(); //Canton
@@ -31,6 +31,7 @@ class CreateProvidersTable extends Migration
             $table->string('neighborhood')->nullable(); //Barrio
             $table->string('zip')->nullable();
             $table->string('address')->nullable();
+            $table->string('phone_area')->nullable();
             $table->string('phone')->nullable();
             $table->boolean('es_exento')->default(false);
 

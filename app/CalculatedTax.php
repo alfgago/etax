@@ -77,12 +77,12 @@ class CalculatedTax extends Model
       $countBills = Bill::where('company_id', $current_company)->whereBetween('generated_date', [$from, $to])->count();
       $countInvoices = Invoice::where('company_id', $current_company)->whereBetween('generated_date', [$from, $to])->count();
       
-      $billItems = BillItem::whereHas('bill', function ($query) use ($from, $to, $current_company){
+      $billItems = BillItem::with('bill')->whereHas('bill', function ($query) use ($from, $to, $current_company){
         $query->whereBetween('generated_date', [$from, $to]);
         $query->where('company_id', $current_company);
       })->get();
       
-      $invoiceItems = InvoiceItem::whereHas('invoice', function ($query) use ($from, $to, $current_company){
+      $invoiceItems = InvoiceItem::with('invoice')->whereHas('invoice', function ($query) use ($from, $to, $current_company){
         $query->whereBetween('generated_date', [$from, $to]);
         $query->where('company_id', $current_company);
       })->get();
@@ -119,6 +119,13 @@ class CalculatedTax extends Model
       $balance = 0;
       $balanceReal = 0;
       
+      $total_proveedores_credito = 0;
+      $total_proveedores_contado = 0;
+      $total_clientes_credito = 0;
+      $total_clientes_contado = 0; 
+      $total_clientes_credito_exp = 0;
+      $total_clientes_contado_exp = 0;
+      
       /**
       *
       *    Recorre todas las facturas emitidas y aumenta los montos corresponsientes.
@@ -132,6 +139,22 @@ class CalculatedTax extends Model
         $invoicesTotal += $invoiceItems[$i]->total;
         $invoicesSubtotal += $subtotal;
         $totalInvoiceIva += $invoiceIva;
+        
+        
+                $tipo_venta = $invoiceItems[$i]->invoice->sale_condition;
+                if( $ivaType == '150' ){
+                  if( $tipo_venta == '01' ) {
+                    $total_clientes_contado_exp += $invoiceItems[$i]->total;
+                  }else {
+                    $total_clientes_credito_exp += $invoiceItems[$i]->total;
+                  }
+                }else{
+                  if( $tipo_venta == '01' ) {
+                    $total_clientes_contado += $invoiceItems[$i]->total;
+                  }else {
+                    $total_clientes_credito += $invoiceItems[$i]->total;
+                  }
+                }
         
         //Suma a las variable según el tipo de IVA que tenga.
         $bVar = "b".$ivaType;
@@ -184,11 +207,15 @@ class CalculatedTax extends Model
         $billsSubtotal += $subtotal;
         $totalBillIva += $billIva;
         
-        if( $ivaType == '061' || $ivaType == '062' || $ivaType == '063' || $ivaType == '064' )
+        if( $ivaType == '041' || $ivaType == '042' || $ivaType == '043' || $ivaType == '044' ||
+            $ivaType == '051' || $ivaType == '052' || $ivaType == '053' || $ivaType == '054' || 
+            $ivaType == '061' || $ivaType == '062' || $ivaType == '063' || $ivaType == '064' || 
+            $ivaType == '071' || $ivaType == '072' || $ivaType == '073' || $ivaType == '074'
+        )
         {
           $ivaSoportado100Deducible += $billItems[$i]->subtotal;
         }
-        if( $ivaType == '070' || $ivaType == '077' )
+        if( $ivaType == '080' || $ivaType == '090' || $ivaType == '097' )
         {
           $ivaSoportadoNoDeducible+= $billItems[$i]->subtotal;
         }
@@ -199,6 +226,13 @@ class CalculatedTax extends Model
         $calculos->$bVar += $subtotal;
         $calculos->$iVar += $billIva;
         
+        //Cuenta contable de proveedor
+        $tipo_venta = $billItems[$i]->bill->sale_condition;
+        if( $tipo_venta == '01' ) {
+          $total_proveedores_contado += $billItems[$i]->total;
+        }else{
+          $total_proveedores_credito += $billItems[$i]->total;
+        }
       }
       
       //Determina numerador y denominador.
@@ -234,111 +268,130 @@ class CalculatedTax extends Model
         $deductableIVAReal = $cfdp * $lastProrrata;
         $balanceReal = -$lastBalance + $totalInvoiceIva - $deductableIVAReal;
         
+      
         //Define los ratios por tipo para guardar
-        $ratio1 = $sumaRepercutido1 / $invoicesSubtotal;
+        /*$ratio1 = $sumaRepercutido1 / $invoicesSubtotal;
         $ratio2 = $sumaRepercutido2 / $invoicesSubtotal;
         $ratio3 = $sumaRepercutido3 / $invoicesSubtotal;
         $ratio4 = $sumaRepercutido4 / $invoicesSubtotal;
-        $ratioEx = $sumaRepercutidoEx / $invoicesSubtotal;
+        $ratioEx = $sumaRepercutidoEx / $invoicesSubtotal;*/
       }
       
       //Guarda la instancia de calculos para no tener que volver a calcular si no hay cambios
-      $calculos->count_invoices = number_format($countInvoices, 0);
-      $calculos->count_bills = number_format($countBills, 0);
-      $calculos->count_invoice_items = number_format($countInvoiceItems, 0);
-      $calculos->count_bill_items = number_format($countBillItems, 0);
-      $calculos->last_prorrata = number_format($lastProrrata, 2);
-      $calculos->last_balance = number_format($lastBalance, 2);
-      $calculos->prorrata = number_format($prorrata, 2);
-      $calculos->non_deductable_iva = number_format($nonDeductableIva, 2);
-      $calculos->deductable_iva = number_format($deductableIva, 2);
-      $calculos->deductable_iva_real = number_format($deductableIVAReal, 2);
-      $calculos->bills_subtotal = number_format($billsSubtotal, 2);
-      $calculos->invoices_subtotal = number_format($invoicesSubtotal, 2);
-      $calculos->invoices_total_exempt = number_format($sumaRepercutidoEx, 2);
-      $calculos->bills_total = number_format($billsTotal, 2);
-      $calculos->invoices_total = number_format($invoicesTotal, 2);
-      $calculos->total_invoice_iva = number_format($totalInvoiceIva, 2);
-      $calculos->total_bill_iva = number_format($totalBillIva, 2);
-      $calculos->balance = number_format($balance, 2);
-      $calculos->balance_real = number_format($balanceReal, 2);
+      $calculos->count_invoices = $countInvoices;
+      $calculos->count_bills = $countBills;
+      $calculos->count_invoice_items = $countInvoiceItems;
+      $calculos->count_bill_items = $countBillItems;
+      $calculos->last_prorrata = $lastProrrata;
+      $calculos->last_balance = $lastBalance;
+      $calculos->prorrata = $prorrata;
+      $calculos->non_deductable_iva = $nonDeductableIva;
+      $calculos->deductable_iva = $deductableIva;
+      $calculos->deductable_iva_real = $deductableIVAReal;
+      $calculos->bills_subtotal = $billsSubtotal;
+      $calculos->invoices_subtotal = $invoicesSubtotal;
+      $calculos->invoices_total_exempt = $sumaRepercutidoEx;
+      $calculos->bills_total = $billsTotal;
+      $calculos->invoices_total = $invoicesTotal;
+      $calculos->total_invoice_iva = $totalInvoiceIva;
+      $calculos->total_bill_iva = $totalBillIva;
+      $calculos->balance = $balance;
+      $calculos->balance_real = $balanceReal;
       
-      $calculos->ratio1 = number_format($ratio1, 2);
-      $calculos->ratio2 = number_format($ratio2, 2);
-      $calculos->ratio3 = number_format($ratio3, 2);
-      $calculos->ratio4 = number_format($ratio4, 2);
-      $calculos->ratio_ex = number_format($ratioEx, 2);
+      $calculos->total_proveedores_credito = $total_proveedores_credito;
+      $calculos->total_proveedores_contado = $total_proveedores_contado;
+      $calculos->total_clientes_credito = $total_clientes_credito;
+      $calculos->total_clientes_contado = $total_clientes_contado; 
+      $calculos->total_clientes_credito_exp = $total_clientes_credito_exp;
+      $calculos->total_clientes_contado_exp = $total_clientes_contado_exp;
       
-      /**Calculos de Cuentas contables**/
+      $calculos->ratio1 = $ratio1;
+      $calculos->ratio2 = $ratio2;
+      $calculos->ratio3 = $ratio3;
+      $calculos->ratio4 = $ratio4;
+      $calculos->ratio_ex = $ratioEx;
+      $calculos->ratio_ex = 0;
       
-      //Debe
-      $calculos->cc_compras = $calculos->b001 + $calculos->b002 + $calculos->b003 + $calculos->b004 + 
-                              $calculos->b061 + $calculos->b062 + $calculos->b063 + $calculos->b064 + 
-                              $calculos->i61 + $calculos->i62 + $calculos->i63 + $calculos->i64;       //En este se suma el monto de IVA, pero no se toma en cuenta para prorrata
-      $calculos->cc_importaciones = $calculos->b051 + $calculos->b052 + $calculos->b053 + $calculos->b054;
-      $calculos->cc_propiedades = $calculos->b080;
-      
-      /*$calculos->cc_iva_compras = $calculos->i001 + $calculos->i002 + $calculos->i003 + $calculos->i004;
-      $calculos->cc_iva_importaciones = $calculos->i051 + $calculos->i052 + $calculos->i053 + $calculos->i054;
-      $calculos->cc_iva_propiedades = $calculos->i080;
-      
-      
-      
-      $calculos->cc_adquisiciones = $calculos->b1 + $calculos->b2 + $calculos->b3 + $calculos->b4 + 
-                                    + 
-                                     + 
-                                    $calculos->b70 + $calculos->b77;
-      $calculos->cc_anticipos = $calculos->b90;
-
-      $calculos->cc_hpcfe_adquisiciones = $calculos->i1 + $calculos->i2 + $calculos->i3 + $calculos->i4 + 
-                            $calculos->i51 + $calculos->i52 + $calculos->i53 + $calculos->i54 + 
-                            $calculos->i61 + $calculos->i62 + $calculos->i63 + $calculos->i64;
-      $calculos->cc_hpcfe_adquisiciones_no_deducibles = $calculos->i70 + $calculos->i77;
-      $calculos->cc_hpcfe_anticipos = $calculos->i90;
-      $calculos->cc_hpcfe_adq_capital = $calculos->i80;
-      
-      $calculos->cc_bases_credito = $calculos->cc_adquisiciones + $calculos->cc_anticipos + $calculos->cc_adq_capital;
-      $calculos->cc_ivas_credito = $calculos->cc_hpcfe_adquisiciones + $calculos->cc_hpcfe_anticipos + $calculos->cc_hpcfe_adq_capital; //Esta es la Acreedora de IVA
-      
-      //Haber
-      $calculos->cc_ventas_1 = $calculos->b101 + $calculos->b121;
-      $calculos->cc_ventas_2 = $calculos->b102 + $calculos->b122;
-      $calculos->cc_ventas_13 = $calculos->b103 + $calculos->b123;
-      $calculos->cc_ventas_4 = $calculos->b104 + $calculos->b124;
-      $calculos->cc_ventas_13_limite = $calculos->b130;
-      $calculos->cc_anticipos_debito_1 = $calculos->b141;
-      $calculos->cc_anticipos_debito_2 = $calculos->b142;
-      $calculos->cc_anticipos_debito_3 = $calculos->b143;
-      $calculos->cc_anticipos_debito_4 = $calculos->b144;
-      
-      $calculos->cc_hpdfe_1 = $calculos->i101 + $calculos->i121 + $calculos->i141;
-      $calculos->cc_hpdfe_2 = $calculos->i102 + $calculos->i122 + $calculos->i142;
-      $calculos->cc_hpdfe_3 = $calculos->i103 + $calculos->i123 + $calculos->i143 + $calculos->i130;
-      $calculos->cc_hpdfe_4 = $calculos->i104 + $calculos->i124 + $calculos->i144;
-      
-      
-      $calculos->cc_ivas_debito = $calculos->cc_hpdfe_1 + $calculos->cc_hpdfe_2 + $calculos->cc_hpdfe_3 + $calculos->cc_hpdfe_4; //Esta es la Deudora de IVA
-      $calculos->cc_bases_debito = $calculos->cc_ventas_1 + $calculos->cc_ventas_2 + $calculos->cc_ventas_13 + $calculos->cc_ventas_4 + $calculos->cc_ventas_13_limite + 
-                              $calculos->cc_anticipos_debito_1 + $calculos->cc_anticipos_debito_2  + $calculos->cc_anticipos_debito_3 + $calculos->cc_anticipos_debito_4;
-      
-      $calculos->cc_exportaciones = $calculos->b150;
-      $calculos->cc_estado_ong = $calculos->b160;
-      $calculos->cc_exenciones_objetivas_sin_limite = $calculos->b200;
-      $calculos->cc_exenciones_objetivas_con_limite = $calculos->b201;
-      $calculos->cc_exenciones_autoconsumo = $calculos->b240;
-      $calculos->cc_exenciones_subjetivas = $calculos->b250;
-      $calculos->cc_exenciones_no_sujetos = $calculos->b260;
-      
-      $calculos->cc_bases_exentas = $calculos->b200 + $calculos->b201 + $calculos->b240 + $calculos->b250 + $calculos->b260;
-      
-      $calculos->cc_ajuste_saldo = ($calculos->cc_ivas_debito + $calculos->cc_bases_debito) - ($calculos->cc_ivas_credito + $calculos->cc_bases_credito);*/
+      $calculos = CalculatedTax::asignarCuentasContables( $calculos );
 
       return $calculos;
     }
-  
-    /* Quiero que la liquidacion divida cuantos es de bienes de capital deducibles y cuanto es de recibido deducible
     
-        Se elimina 90, 99, 199, 299, 142, 142, 143, 144
-    */
+    public static function asignarCuentasContables( $calculos ){
+      /**Calculos de Cuentas contables**/
+      
+      //Debe 1
+        $calculos->cc_compras = $calculos->b001 + $calculos->b002 + $calculos->b003 + $calculos->b004 + 
+                                $calculos->b061 + $calculos->b062 + $calculos->b063 + $calculos->b064; 
+                                
+        $calculos->cc_importaciones = $calculos->b021 + $calculos->b022 + $calculos->b023 + $calculos->b024 +
+                                      $calculos->b031 + $calculos->b032 + $calculos->b033 + $calculos->b034 +
+                                      $calculos->b041 + $calculos->b042 + $calculos->b043 + $calculos->b044 +
+                                      $calculos->b051 + $calculos->b052 + $calculos->b053 + $calculos->b054;
+        
+        $calculos->cc_propiedades = $calculos->b011 + $calculos->b012 + $calculos->b013 + $calculos->b014 + 
+                                    $calculos->b071 + $calculos->b072 + $calculos->b073 + $calculos->b074;
+        
+        $calculos->cc_iva_compras = $calculos->i001 + $calculos->i002 + $calculos->i003 + $calculos->i004 + 
+                                    $calculos->i061 + $calculos->i062 + $calculos->i063 + $calculos->i064;
+                                    
+                                    
+        $calculos->cc_iva_importaciones = $calculos->i021 + $calculos->i022 + $calculos->i023 + $calculos->i024 +
+                                          $calculos->i031 + $calculos->i032 + $calculos->i033 + $calculos->i034 +
+                                          $calculos->i041 + $calculos->i042 + $calculos->i043 + $calculos->i044 +
+                                          $calculos->i051 + $calculos->i052 + $calculos->i053 + $calculos->i054;
+                                          
+        $calculos->cc_iva_propiedades = $calculos->i011 + $calculos->i012 + $calculos->i013 + $calculos->i014 + 
+                                        $calculos->i071 + $calculos->i072 + $calculos->i073 + $calculos->i074;  
+                                      
+        $calculos->cc_compras_sin_derecho = $calculos->b080 + $calculos->b090 + $calculos->b097 + 
+                                $calculos->i080 + $calculos->i090 + $calculos->i097;                                
+        
+      //Haber 1
+        $calculos->cc_proveedores_credito = $calculos->total_proveedores_credito;
+        $calculos->cc_proveedores_contado = $calculos->total_proveedores_contado;
+        
+      //Haber 2 
+        $calculos->cc_ventas_1 = $calculos->b101 + $calculos->b121;
+        $calculos->cc_ventas_2 = $calculos->b102 + $calculos->b122;
+        $calculos->cc_ventas_13 = $calculos->b103 + $calculos->b123;
+        $calculos->cc_ventas_4 = $calculos->b104 + $calculos->b124;
+        $calculos->cc_ventas_exp = $calculos->b150;
+        $calculos->cc_ventas_estado = $calculos->b160;
+        $calculos->cc_ventas_1_iva = $calculos->i101 + $calculos->i121;
+        $calculos->cc_ventas_2_iva = $calculos->i102 + $calculos->i122;
+        $calculos->cc_ventas_13_iva = $calculos->i103 + $calculos->i123 + $calculos->i130;
+        $calculos->cc_ventas_4_iva = $calculos->i104 + $calculos->i124;
+        $calculos->cc_ventas_sin_derecho = $calculos->b200 + $calculos->b201 + $calculos->b240 + $calculos->b250 + $calculos->b260;
+        $calculos->cc_ventas_sum = $calculos->cc_ventas_1 + $calculos->cc_ventas_2 + $calculos->cc_ventas_13 + $calculos->cc_ventas_4 + 
+                                   $calculos->cc_ventas_1_iva + $calculos->cc_ventas_2_iva + $calculos->cc_ventas_13_iva + $calculos->cc_ventas_4_iva + 
+                                   $calculos->cc_ventas_exp + $calculos->cc_ventas_estado + $calculos->cc_ventas_sin_derecho;
+        
+      //Debe 2
+        $calculos->cc_clientes_credito = $calculos->total_clientes_credito;
+        $calculos->cc_clientes_contado = $calculos->total_clientes_contado;  
+        $calculos->cc_clientes_credito_exp = $calculos->total_clientes_credito_exp;
+        $calculos->cc_clientes_contado_exp = $calculos->total_clientes_contado_exp;  
+        $calculos->cc_clientes_sum = $calculos->cc_clientes_credito + $calculos->cc_clientes_contado + $calculos->cc_clientes_credito_exp + $calculos->cc_clientes_contado_exp;
+        
+      //Debe 3 
+        $calculos->cc_iva_emitido_1 = $calculos->i101 + $calculos->i121;
+        $calculos->cc_iva_emitido_2 = $calculos->i102 + $calculos->i122;
+        $calculos->cc_iva_emitido_3 = $calculos->i103 + $calculos->i123;
+        $calculos->cc_iva_emitido_4 = $calculos->i104 + $calculos->i124;
+        $calculos->cc_no_acreditable = $calculos->total_bill_iva - $calculos->deductable_iva_real;
+        $calculos->cc_sum1 = $calculos->cc_iva_emitido_1 + $calculos->cc_iva_emitido_2 + $calculos->cc_iva_emitido_3 + $calculos->cc_iva_emitido_4 + $calculos->cc_no_acreditable;
+      
+      //Haber 3
+        $calculos->cc_deducible_1 = $calculos->total_bill_iva * $calculos->ratio1;
+        $calculos->cc_deducible_2 = $calculos->total_bill_iva * $calculos->ratio2;
+        $calculos->cc_deducible_3 = $calculos->total_bill_iva * $calculos->ratio3;
+        $calculos->cc_deducible_4 = $calculos->total_bill_iva * $calculos->ratio4;
+        $calculos->cc_ajuste_hacienda = $calculos->balance_real;
+        
+        $calculos->cc_sum2 = $calculos->cc_deducible_1 + $calculos->cc_deducible_2 + $calculos->cc_deducible_3 + $calculos->cc_deducible_4 + $calculos->cc_ajuste_hacienda;
+        
+        return $calculos;
+    }
   
 }

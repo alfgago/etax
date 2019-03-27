@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class XmlHacienda extends Model
 {
-    //
+    protected $guarded = [];
 }

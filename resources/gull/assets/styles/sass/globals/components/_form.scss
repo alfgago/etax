@@ -1,33 +1,33 @@
 .form-group {
     position: relative;
-    margin-bottom: 10px;
+    margin-bottom: 1rem;
     label {
-        font-size: 16px;
-        color: $gray-600;
+        font-size: 14px;
+        color: $dark;
         margin-bottom: 4px;
     }
 }
 .form-control {
-    border: initial;
+    border: 1px solid #999;
     outline: initial !important;
     background: $white;
-    border: 1px solid $gray-500;
     color: $dark;
     &::placeholder {
-        color: $gray-500;
+        color: $gray-600;
     }
     &.rounded, &.form-control-rounded {
         border-radius: 20px;
     }
 }
 
-.input-fecha, .input-hora {
-    background: #fff !important;
+.form-control:disabled, 
+.form-control[readonly] {
+    background: #eee;
+    opacity: 1;
 }
 
-
-select.form-control {
-    
+.input-fecha, .input-hora {
+    background: #fff !important;
 }
 
 .inline-form {
@@ -265,17 +265,14 @@ select.form-control {
     border-radius: 5px;
 }
 
-form h3 {
-    margin: 1rem 0;
-    background: $yellow;
-    display: inline-block;
-    padding: .25em .5em;
-    border-radius: 5px;
+.row.form-container {
+    max-width: 1200px;
 }
 
-form .form-row:first-of-type h3 {
-    margin-top: 0;
-    border-top: 0;
+form h3 {
+    margin: 1rem 0;
+    border-bottom: 7px solid #F0C962;
+    display: inline-block;
 }
 
 .item-factura-form .botones-editar {
@@ -288,4 +285,9 @@ form .form-row:first-of-type h3 {
 
 .item-factura-form.editando .botones-agregar {
   display: none;
+}
+
+.tagging,
+input.type-zone {
+    background: #eee;
 }

@@ -82,7 +82,7 @@ class ProviderController extends Controller
       
         $provider->save();
       
-        return redirect('/providers');
+        return redirect('/proveedores');
     }
 
     /**
@@ -148,7 +148,7 @@ class ProviderController extends Controller
       
         $provider->save();
       
-        return redirect('/providers');
+        return redirect('/proveedores');
     }
 
     /**
@@ -163,6 +163,6 @@ class ProviderController extends Controller
         $this->authorize('update', $provider);
         $provider->delete();
         
-        return redirect('/providers');
+        return redirect('/proveedores');
     }
 }

@@ -1,6 +1,6 @@
     <div class="main-header">
             <div class="logo">
-                TAX
+                <img src="{{asset('assets/images/logo-etax.png')}}" class="logo-img">
             </div>
             <style>
             .logo {
@@ -8,14 +8,15 @@
                 font-size: 30px;
                 color: #787fff;
             }
+            
+            .main-header .logo img {
+    width: auto;
+    height: 60px;
+    margin: auto;
+    display: block;
+    padding: 10px;
+}
             </style>
-
-            <div class="d-flex align-items-center">
-                <div class="search-bar">
-                    <input type="text" placeholder="Search">
-                    <i class="search-icon i-Magnifi-Glass1"></i>
-                </div>
-            </div>
 
             <div style="margin: auto"></div>
 

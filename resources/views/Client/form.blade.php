@@ -12,8 +12,8 @@
         <option value="1" {{ @$client->tipo_persona == 1 ? 'selected' : '' }} >Física</option>
         <option value="2" {{ @$client->tipo_persona == 2 ? 'selected' : '' }}>Jurídica</option>
         <option value="3" {{ @$client->tipo_persona == 3 ? 'selected' : '' }}>DIMEX</option>
-        <option value="4" {{ @$client->tipo_persona == 4 ? 'selected' : '' }}>Extranjero</option>
-        <option value="5" {{ @$client->tipo_persona == 5 ? 'selected' : '' }}>NITE</option>
+        <option value="4" {{ @$client->tipo_persona == 5 ? 'selected' : '' }}>NITE</option>
+        <option value="5" {{ @$client->tipo_persona == 4 ? 'selected' : '' }}>Extranjero</option>
         <option value="6" {{ @$client->tipo_persona == 6 ? 'selected' : '' }}>Otro</option>
       </select>
     </div>
@@ -45,7 +45,7 @@
     
     <div class="form-group col-md-4">
       <label for="phone">Teléfono</label>
-      <input type="text" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" required>
+      <input type="text" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" >
     </div>
     
     <div class="form-group col-md-4"></div>
@@ -58,20 +58,20 @@
     </div>
     
     <div class="form-group col-md-4">
-      <label for="state">Provincia *</label>
-      <select class="form-control" name="state" id="state" value="{{ @$client->state }}" required onchange="fillCantones();">
+      <label for="state">Provincia</label>
+      <select class="form-control" name="state" id="state" value="{{ @$client->state }}" onchange="fillCantones();">
       </select>
     </div>
     
     <div class="form-group col-md-4">
-      <label for="city">Canton *</label>
-      <select class="form-control" name="city" id="city" value="{{ @$client->city }}" required onchange="fillDistritos();">
+      <label for="city">Canton</label>
+      <select class="form-control" name="city" id="city" value="{{ @$client->city }}" onchange="fillDistritos();">
       </select>
     </div>
     
     <div class="form-group col-md-4">
-      <label for="district">Distrito *</label>
-      <select class="form-control" name="district" id="district" value="{{ @$client->district }}" required onchange="fillZip();" >
+      <label for="district">Distrito</label>
+      <select class="form-control" name="district" id="district" value="{{ @$client->district }}" onchange="fillZip();" >
       </select>
     </div>
     
@@ -92,10 +92,10 @@
     </div>
     
     <div class="form-group col-md-12">
-      <label for="billing_emails">Correos electrónicos para facturación</label>
+      <label for="billing_emails">Correos electrónicos para facturación</label> {{ @$client->billing_emails }}
       <div class="form-group">
         <div data-no-duplicate="true" data-pre-tags-separator="," data-no-duplicate-text="Correos duplicados" data-type-zone-class="type-zone" 
-          data-tag-box-class="tagging" id="billing_emails" tags-input-name="billing_emails">{{ @$client->billing_emails }}</div>
+          data-tag-box-class="tagging" id="billing_emails" data-tags-input-name="billing_emails">{{ @$client->billing_emails }}</div>
         <p class="text-muted"><small>Ingrese los correos separados por coma. Si lo deja en blanco, por defecto se enviarán las facturas al correo electrónico del cliente.</small> </p>
       </div>
     </div>

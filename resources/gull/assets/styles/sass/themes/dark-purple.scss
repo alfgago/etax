@@ -13,7 +13,7 @@ $cyan:    #9C27B0 !default;
 
 $primary-base: $purple;
 
-$white:    darken(desaturate($primary-base, 40), 25) !default;
+$white:    #fff !default;
 $gray-100: darken(desaturate($primary-base, 40), 20) !default;
 $gray-200: darken(desaturate($primary-base, 40), 15) !default;
 $gray-300: darken(desaturate($primary-base, 40), 10) !default;

@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
 {
+  
+    protected $guarded = [];
+    
     //Relacion con la empresa
     public function company()
     {
@@ -53,7 +56,8 @@ class Invoice extends Model
         'unit_price' => $unit_price,
         'subtotal' => $subtotal,
         'total' => $total,
-        'discount_percentage' => $discount_percentage,
+        'discount_type' => '01',
+        'discount' => $discount_percentage,
         'discount_reason' => $discount_reason,
         'iva_type' => $iva_type,
         'iva_percentage' => $iva_percentage,
@@ -78,7 +82,8 @@ class Invoice extends Model
           $item->unit_price = $unit_price;
           $item->subtotal = $subtotal;
           $item->total = $total;
-          $item->discount_percentage = $discount_percentage;
+          $item->discount_type = '01';
+          $item->discount = $discount_percentage;
           $item->discount_reason = $discount_reason;
           $item->iva_type = $iva_type;
           $item->iva_percentage = $iva_percentage;
@@ -87,7 +92,7 @@ class Invoice extends Model
           $item->save();
         }
       }else {
-        $item = $this->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $is_exempt );
+        $item = $this->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $is_exempt );
       }
       return $item;
     }

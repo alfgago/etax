@@ -60,6 +60,8 @@ class CreateBillsTable extends Migration
           
             $table->string('generation_method');
             $table->string('other_reference')->nullable();
+            
+            $table->unsignedBigInteger('other_document')->nullable();
           
             $table->timestamps();
         });
@@ -70,25 +72,26 @@ class CreateBillsTable extends Migration
             $table->unsignedBigInteger('bill_id');
             $table->unsignedBigInteger('product_id')->nullable();
             $table->integer('item_number');
-            $table->string('code');
-            $table->string('name');
-            $table->string('product_type');
-            $table->integer('measure_unit');
+            $table->string('code')->nullable();
+            $table->string('name')->nullable();
+            $table->string('product_type')->nullable();
+            $table->integer('measure_unit')->nullable();
             $table->integer('item_count');
             $table->double('unit_price');
             $table->double('subtotal');
             $table->double('iva_amount');
             $table->double('total');
-            $table->double('discount_percentage')->default(0);
+            $table->string('discount_type')->nullable();
+            $table->double('discount')->default(0);
             $table->double('discount_reason')->nullable();
             $table->string('iva_type');
-            $table->double('iva_percentage');
+            $table->double('iva_percentage')->nullable();
             $table->boolean('is_exempt')->default(false);
           
             $table->timestamps();
         });
       
-        $this->demoData();
+        //$this->demoData();
     }
   
      public function demoData() {
@@ -97,7 +100,7 @@ class CreateBillsTable extends Migration
         $faker = Faker\Factory::create();
         $faker->addProvider(new Faker\Provider\es_ES\Person($faker));
       
-        for($i = 0; $i < 500; $i++) {
+        for($i = 0; $i < 3000; $i++) {
             $bill = new \App\Bill();
             $bill->company_id = $company->id;
             //Datos generales y para Hacienda
@@ -149,7 +152,7 @@ class CreateBillsTable extends Migration
               
               $measure_unit = '1';
               $item_count = $faker->numberBetween(1, 3);
-              $unit_price = $faker->numberBetween(100, 25000);
+              $unit_price = $faker->numberBetween(100, 10000);
               $subtotal = $item_count*$unit_price;
               
               $iva_amount = $subtotal * $iva_percentage / 100;
@@ -168,14 +171,16 @@ class CreateBillsTable extends Migration
             $bill->total = $sumTotal;
             $bill->subtotal = $sumSubtotal;
             $bill->iva_amount = $sumIva;
-
+            
             //Fechas
-            if( $i < 250 ){
+            if( $i < 1000 ){
               $fecha = $faker->dateTimeBetween($startDate = '2018-09-01 02:00:00', $endDate = '2018-12-31 02:00:00');
-            }else if( $i >= 375 && $i < 500){
+            }else if( $i >= 1000 && $i < 1750){
               $fecha = $faker->dateTimeBetween($startDate = '2019-01-01 02:00:00', $endDate = '2019-01-31 02:00:00');
-            }else{
+            }else if( $i >= 1750 && $i < 2250){
               $fecha = $faker->dateTimeBetween($startDate = '2019-02-01 02:00:00', $endDate = '2019-02-28 02:00:00');
+            }else{
+              $fecha = $faker->dateTimeBetween($startDate = '2019-03-01 02:00:00', $endDate = '2019-03-28 02:00:00');
             }
           
             $bill->generated_date = Carbon::createFromFormat('d/m/Y g:i A', $fecha->format('d/m/Y g:i A') );

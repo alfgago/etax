@@ -4,14 +4,31 @@
   Clientes
 @endsection
 
+@section('breadcrumb-buttons')
+      <a type="submit" class="btn btn-primary" href="/clientes/create">Ingresar cliente nuevo</a>
+      <div onclick="abrirPopup('importar-popup');" class="btn btn-primary">Importar clientes</div>
+@endsection 
+
+
 @section('content') 
 <div class="row">
   <div class="col-md-12">
-    <div class="card mb-4">
-      <div class="card-body">
-        
-      <a type="submit" class="btn btn-primary" href="/clientes/create">Ingresar cliente nuevo</a>
-      <a class="btn btn-primary" href="/clientes/create">Importar clientes</a>
+    
+      @if(session()->has('message'))
+          <div class="alert alert-success">
+              {{ session()->get('message') }}
+          </div>
+      @endif
+      
+      @if ($errors->any())
+        <div class="alert alert-danger">
+          <ul>
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
         
       <div style="margin: 1rem;"> -- Aqui van filtros de búsqueda --  </div>
       
@@ -58,8 +75,9 @@
           </tbody>
         </table>
         {{ $clients->links() }}
-      </div>  
-    </div>  
   </div>  
 </div>
+
+@include( 'Client.import' )
+
 @endsection

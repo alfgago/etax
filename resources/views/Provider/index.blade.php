@@ -4,14 +4,15 @@
   Proveedores
 @endsection
 
+@section('breadcrumb-buttons')        
+      <a type="submit" class="btn btn-primary" href="/proveedores/create">Ingresar proveedor nuevo</a>
+      <a class="btn btn-primary" href="/proveedores/create">Importar proveedores</a>
+@endsection 
+
 @section('content') 
 <div class="row">
   <div class="col-md-12">
-    <div class="card mb-4">
-      <div class="card-body">
-        
-      <a type="submit" class="btn btn-primary" href="/proveedores/create">Ingresar proveedor nuevo</a>
-      <a class="btn btn-primary" href="/proveedores/create">Importar proveedores</a>
+
         
       <div style="margin: 1rem;"> -- Aqui van filtros de búsqueda --  </div>
       
@@ -51,15 +52,13 @@
                       </button>
                     </form>
                   </td>
-                </tr>
+                </tr>d
               @endforeach
             @endif
 
           </tbody>
         </table>
         {{ $providers->links() }}
-      </div>  
-    </div>  
   </div>  
 </div>
 @endsection

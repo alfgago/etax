@@ -7,8 +7,6 @@
 @section('content') 
 <div class="row">
   <div class="col-xl-9 col-lg-12 col-md-12">
-    <div class="card mb-4">
-      <div class="card-body">
         
         <form method="POST" action="/clientes">
 	
@@ -36,8 +34,6 @@
             
         </form>
         
-      </div>  
-    </div>  
   </div>  
 </div>
 @endsection

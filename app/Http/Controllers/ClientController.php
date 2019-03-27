@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Company;
 use App\Client;
+use App\Exports\ClientExport;
+use App\Imports\ClientImport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
@@ -109,10 +112,10 @@ class ClientController extends Controller
      */
     public function edit($id)
     {
-        $cliente = Client::findOrFail($id);
-        $this->authorize('update', $cliente);
+        $client = Client::findOrFail($id);
+        $this->authorize('update', $client);
         
-        return view('Client/edit', compact('cliente') );
+        return view('Client/edit', compact('client') );
     }
 
     /**
@@ -142,8 +145,7 @@ class ClientController extends Controller
         $cliente->first_name = $request->first_name;
         $cliente->last_name = $request->last_name;
         $cliente->last_name2 = $request->last_name2;
-        $cliente->is_emisor = $request->is_emisor;
-        $cliente->is_receptor = $request->is_receptor;
+        $cliente->emisor_receptor = $request->emisor_receptor;
         $cliente->country = $request->country;
         $cliente->state = $request->state;
         $cliente->city = $request->city;
@@ -154,6 +156,10 @@ class ClientController extends Controller
         $cliente->phone = $request->phone;
         $cliente->es_exento = $request->es_exento;
         $cliente->billing_emails = $request->billing_emails;
+        $cliente->email = $request->email;
+      
+        
+        dd($request);
       
         $cliente->save();
       
@@ -174,4 +180,61 @@ class ClientController extends Controller
         
         return redirect('/clientes');
     }
+    
+    public function export() {
+        return Excel::download(new ClientExport(), 'clientes.xlsx');
+    }
+    
+    public function import() {
+        
+        request()->validate([
+          'archivo' => 'required',
+          'tipo_archivo' => 'required',
+        ]);
+      
+        $time_start = $this->microtime_float();
+        
+        $clientes = Excel::toCollection( new ClientImport(), request()->file('archivo') );
+        $company_id = auth()->user()->companies->first()->id;
+        foreach ($clientes[0] as $row){
+            Client::updateOrCreate(
+                [
+                    'id_number' => $row['identificacion'],
+                    'company_id' => $company_id,
+                ],
+                [
+                    'code' => $row['codigo'] ? $row['codigo'] : '',
+                    'company_id' => $company_id,
+                    'tipo_persona' => $row['tipopersona'],
+                    'id_number' => $row['identificacion'],
+                    'first_name' => $row['nombre'],
+                    'last_name' => $row['primerapellido'],
+                    'last_name2' => $row['segundoapellido'],
+                    'email' => $row['correo'],
+                    'billing_emails' => $row['correoscopia'],
+                    'country' => $row['pais'],
+                    'state' => $row['provincia'],
+                    'city' => $row['canton'],
+                    'district' => $row['distrito'],
+                    'neighborhood' => $row['barrio'],
+                    'address' => $row['direccion'],
+                    'phone_area' => $row['areatel'],
+                    'phone' => $row['telefono'],
+                    'es_exento' => $row['exento'],
+                    'emisor_receptor' => $row['emisorreceptor'
+                ],
+            ]);
+            
+        }
+        $time_end = $this->microtime_float();
+        $time = $time_end - $time_start;
+        
+        return redirect('/clientes')->withMessage('Clientes importados exitosamente en '.$time.'s');
+    }
+    
+    private function microtime_float(){
+        list($usec, $sec) = explode(" ", microtime());
+        return ((float) $usec + (float)$sec);
+    }
+    
 }

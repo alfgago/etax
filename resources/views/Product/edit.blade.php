@@ -7,8 +7,6 @@
 @section('content') 
 <div class="row">
   <div class="col-md-12">
-    <div class="card mb-4">
-      <div class="card-body">
         
       <form method="POST" action="/productos/{{ $product->id }}">
         @method('patch')
@@ -74,8 +72,6 @@
         <button type="submit" class="btn btn-primary">Editar factura</button>
 
       </form>
-      </div>  
-    </div>  
   </div>  
 </div>
 @endsection

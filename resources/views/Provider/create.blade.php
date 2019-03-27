@@ -7,8 +7,6 @@
 @section('content') 
 <div class="row">
   <div class="col-xl-9 col-lg-12 col-md-12">
-    <div class="card mb-4">
-      <div class="card-body">
         
         <form method="POST" action="/proveedores">
 	
@@ -24,7 +22,7 @@
             
             </div>
           
-            <button type="submit" class="btn btn-primary">Confirmar proveedor</button>
+            <button id="btn-submit" type="submit" class="hidden btn btn-primary">Confirmar proveedor</button>
           
             @if ($errors->any())
               <ul>
@@ -36,11 +34,13 @@
             
         </form>
         
-      </div>  
-    </div>  
   </div>  
 </div>
 @endsection
+
+@section('breadcrumb-buttons')
+  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar proveedor</button>
+@endsection 
 
 @section('footer-scripts')
 

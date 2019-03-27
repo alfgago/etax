@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Provider extends Model
 {
   
+  protected $guarded = [];
+  
   //Relacion con la empresa
   public function company()
   {

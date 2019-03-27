@@ -57,20 +57,20 @@
     </div>
     
     <div class="form-group col-md-4">
-      <label for="state">Provincia *</label>
-      <select class="form-control" name="state" id="state" value="{{ @$provider->state }}" required onchange="fillCantones();">
+      <label for="state">Provincia</label>
+      <select class="form-control" name="state" id="state" value="{{ @$provider->state }}"  onchange="fillCantones();">
       </select>
     </div>
     
     <div class="form-group col-md-4">
-      <label for="city">Canton *</label>
-      <select class="form-control" name="city" id="city" value="{{ @$provider->city }}" required onchange="fillDistritos();">
+      <label for="city">Canton</label>
+      <select class="form-control" name="city" id="city" value="{{ @$provider->city }}" onchange="fillDistritos();">
       </select>
     </div>
     
     <div class="form-group col-md-4">
-      <label for="district">Distrito *</label>
-      <select class="form-control" name="district" id="district" value="{{ @$provider->district }}" required onchange="fillZip();" >
+      <label for="district">Distrito</label>
+      <select class="form-control" name="district" id="district" value="{{ @$provider->district }}" onchange="fillZip();" >
       </select>
     </div>
     
