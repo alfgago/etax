@@ -24,7 +24,9 @@ mix.combine([
     'resources/gull/assets/js/vendor/jquery-3.3.1.min.js',
     'resources/gull/assets/js/vendor/bootstrap.bundle.min.js',
     'resources/gull/assets/js/vendor/perfect-scrollbar.min.js',
-    'resources/laravel/js/utility.js', 'public/assets/js/etax-utility.js',
+    'resources/gull/assets/js/vendor/select2.min.js',
+    'resources/laravel/js/utility.js', 
+    'public/assets/js/etax-utility.js',
 ], 'public/assets/js/common-bundle.js');
 
 mix.js([

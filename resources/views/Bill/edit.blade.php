@@ -22,12 +22,13 @@
                       <h3>
                         Proveedor
                       </h3>
+                      <div onclick="abrirPopup('nuevo-proveedor-popup');" class="btn btn-agregar btn-agregar-cliente">Nuevo proveedor</div>
                     </div>
 
                     <div class="form-group col-md-12 with-button">
                       <label for="provider_id">Seleccione el cliente</label>
-                      <select class="form-control" name="provider_id" id="proveedor" placeholder="" required>
-                        <option value=''>-- Seleccione el proveedor --</option>
+                      <select class="form-control" name="provider_id" id="provider_id" placeholder="" required>
+                        <option value='' >-- Seleccione un proveedor --</option>
                         @foreach ( auth()->user()->companies->first()->providers as $proveedor )
                           <option {{ $bill->provider_id == $proveedor->id ? 'selected' : '' }} value="{{ $proveedor->id }}" >{{ $proveedor->id_number }} - {{ $proveedor->first_name }}</option>
                         @endforeach
@@ -259,6 +260,7 @@
           </div>
         
           @include( 'Bill.form-linea' )
+          @include( 'Bill.form-nuevo-proveedor' )
         
           <button id="btn-submit" type="submit" class="hidden">Guardar factura</button>
 
@@ -292,10 +294,10 @@ $(document).ready(function(){
   var total = 0;
   $('.item-tabla').each(function(){
     var s = parseFloat($(this).find('.subtotal').val());
-    var m = parseFloat($(this).find('.porc_iva').val()) / 100;
+    var m = parseFloat($(this).find('.monto_iva').val());
     var t = parseFloat($(this).find('.total').val());
     subtotal += s;
-    monto_iva += s*m;	
+    monto_iva += m;	
     total += t;	
   });
 

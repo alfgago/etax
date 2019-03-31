@@ -23,12 +23,13 @@
                       <h3>
                         Cliente
                       </h3>
+                      <div onclick="abrirPopup('nuevo-cliente-popup');" class="btn btn-agregar btn-agregar-cliente">Nuevo cliente</div>
                     </div>  
                     
                     <div class="form-group col-md-12 with-button">
                       <label for="cliente">Seleccione el cliente</label>
-                      <select class="form-control" name="client_id" id="client_id" placeholder="" required>
-                        <option value=''>-- Seleccione un cliente --</option>
+                      <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
+                        <option value='' selected>-- Seleccione un cliente --</option>
                         @foreach ( auth()->user()->companies->first()->clients as $cliente )
                           <option value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
                         @endforeach
@@ -80,7 +81,7 @@
     
                 <div class="form-group col-md-4">
                   <label for="total">Total</label>
-                  <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" >
+                  <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" required>
                 </div>
                 
                 <div class="form-group col-md-12">
@@ -218,11 +219,12 @@
           </div>
           
           @include( 'Invoice.form-linea' )
+          @include( 'Invoice.form-nuevo-cliente' )
 
           <div class="btn-holder hidden">
             <button id="btn-submit" type="submit" class="btn btn-primary">Guardar factura</button>
-            <button type="submit" class="btn btn-primary">Enviar factura electrónica</button>
-            <button type="submit" class="btn btn-primary">Programar factura</button>
+            <button type="submit" class="btn btn-primary" disabled>Enviar factura electrónica</button>
+            <button type="submit" class="btn btn-primary" disabled>Programar factura</button>
           </div>
 
 
@@ -241,8 +243,8 @@
 
 @section('breadcrumb-buttons')
   <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar factura</button>
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Enviar factura electrónica</button>
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Programar envío</button>
+  <button onclick="$('#btn-submit').click();" class="btn btn-primary2" disabled>Enviar factura electrónica</button>
+  <button onclick="$('#btn-submit').click();" class="btn btn-primary2" disabled>Programar envío</button>
 @endsection 
 
 @section('header-scripts')

@@ -24,7 +24,7 @@ class CreateClientsTable extends Migration
             $table->string('last_name')->nullable();
             $table->string('last_name2')->nullable();
             $table->string('email')->nullable();
-            $table->string('emisor_receptor')->default(false);
+            $table->string('emisor_receptor')->default('1');
             $table->string('country')->default('CR');
             $table->string('state')->nullable(); //Provincia
             $table->string('city')->nullable(); //Canton

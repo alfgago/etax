@@ -32,7 +32,7 @@ class CreateInvoicesTable extends Migration
             $table->double('iva_amount');
             $table->double('total');
             $table->string('currency');
-            $table->double('currency_rate');
+            $table->double('currency_rate')->default(1);
 
             //Condiciones de la venta: 01 Contado, 02 Crédito, 03 Consignación, 04 Apartado, 05 Arrendamiento con opción de compra, 06 Arrendamiento en función financiera, 99 Otros
             $table->enum('sale_condition', ['01', '02', '03', '04', '05', '06', '99'])->default('01');
@@ -88,7 +88,7 @@ class CreateInvoicesTable extends Migration
             $table->timestamps();
         });
         
-        //$this->demoData();
+        $this->demoData();
     }
   
     public function demoData() {

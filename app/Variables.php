@@ -7,24 +7,24 @@ class Variables
   
     public static function tiposIVARepercutidos() {
     $lista = [
-      ['nombre'=>'Ventas locales de bienes y servicios con derecho a crédito al 1%', 'codigo'=>'101', 'porcentaje'=>'1'],
-      ['nombre'=>'Ventas locales de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'102', 'porcentaje'=>'2'],
-      ['nombre'=>'Ventas locales de bienes y servicios con derecho a crédito al 13%', 'codigo'=>'103', 'porcentaje'=>'13'],
-      ['nombre'=>'Ventas locales de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'104', 'porcentaje'=>'4'],
+      ['nombre'=>'101 - Ventas locales de bienes y servicios con derecho a crédito al 1%', 'codigo'=>'101', 'porcentaje'=>'1'],
+      ['nombre'=>'102 - Ventas locales de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'102', 'porcentaje'=>'2'],
+      ['nombre'=>'103 - Ventas locales de bienes y servicios con derecho a crédito al 13%', 'codigo'=>'103', 'porcentaje'=>'13'],
+      ['nombre'=>'104 - Ventas locales de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'104', 'porcentaje'=>'4'],
       
-      ['nombre'=>'Autoconsumo de bienes y servicios con derecho a crédito al 1%', 'codigo'=>'121', 'porcentaje'=>'1'],
-      ['nombre'=>'Autoconsumo de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'122', 'porcentaje'=>'2'],
-      ['nombre'=>'Autoconsumo de bienes y servicios con derecho a crédito al 13%', 'codigo'=>'123', 'porcentaje'=>'13'],
-      ['nombre'=>'Autoconsumo de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'124', 'porcentaje'=>'4'],
+      ['nombre'=>'121 - Autoconsumo de bienes y servicios con derecho a crédito al 1%', 'codigo'=>'121', 'porcentaje'=>'1'],
+      ['nombre'=>'121 - Autoconsumo de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'122', 'porcentaje'=>'2'],
+      ['nombre'=>'121 - Autoconsumo de bienes y servicios con derecho a crédito al 13%', 'codigo'=>'123', 'porcentaje'=>'13'],
+      ['nombre'=>'121 - Autoconsumo de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'124', 'porcentaje'=>'4'],
       
-      ['nombre'=>'Ventas de bienes y servicios con límites sobrepasados al 13% con derecho a crédito', 'codigo'=>'130', 'porcentaje'=>'13'],
-      ['nombre'=>'Ventas por exportación con derecho a crédito', 'codigo'=>'150', 'porcentaje'=>'0'],
-      ['nombre'=>'Ventas al Estado e Instituciones con derecho a crédito', 'codigo'=>'160', 'porcentaje'=>'0'],
-      ['nombre'=>'Ventas sin derecho a crédito por exenciones objetivas', 'codigo'=>'200', 'porcentaje'=>'0'],
-      ['nombre'=>'Ventas sin derecho a crédito por exenciones objetivas con límite no sobrepasado', 'codigo'=>'201', 'porcentaje'=>'0'],
-      ['nombre'=>'Autoconsumo sin derecho a crédito', 'codigo'=>'240', 'porcentaje'=>'0'],
-      ['nombre'=>'Ventas a sujetos exentos', 'codigo'=>'250', 'porcentaje'=>'0'],
-      ['nombre'=>'Ventas a no sujetos', 'codigo'=>'260', 'porcentaje'=>'0'],
+      ['nombre'=>'130 - Ventas de bienes y servicios con límites sobrepasados al 13% con derecho a crédito', 'codigo'=>'130', 'porcentaje'=>'13'],
+      ['nombre'=>'150 - Ventas por exportación con derecho a crédito', 'codigo'=>'150', 'porcentaje'=>'0'],
+      ['nombre'=>'160 - Ventas al Estado e Instituciones con derecho a crédito', 'codigo'=>'160', 'porcentaje'=>'0'],
+      ['nombre'=>'200 - Ventas sin derecho a crédito por exenciones objetivas', 'codigo'=>'200', 'porcentaje'=>'0'],
+      ['nombre'=>'201 - Ventas sin derecho a crédito por exenciones objetivas con límite no sobrepasado', 'codigo'=>'201', 'porcentaje'=>'0'],
+      ['nombre'=>'240 - Autoconsumo sin derecho a crédito', 'codigo'=>'240', 'porcentaje'=>'0'],
+      ['nombre'=>'250 - Ventas a sujetos exentos', 'codigo'=>'250', 'porcentaje'=>'0'],
+      ['nombre'=>'260 - Ventas a no sujetos', 'codigo'=>'260', 'porcentaje'=>'0'],
     ];
 
     return $lista;
@@ -55,55 +55,55 @@ class Variables
   public static function tiposIVASoportados() {
     $lista = [
       //Sin identificación específica
-      ['nombre'=>'Compras locales de bienes y servicios con al IVA 1% sin identificación específica', 'codigo'=>'001', 'porcentaje'=>'1'],
-      ['nombre'=>'Compras locales de bienes y servicios con al IVA 2% sin identificación específica', 'codigo'=>'002', 'porcentaje'=>'2'],
-      ['nombre'=>'Compras locales de bienes y servicios con al IVA 13% sin identificación específica ', 'codigo'=>'003', 'porcentaje'=>'13'],
-      ['nombre'=>'Compras locales de bienes y servicios con al IVA 4% sin identificación específica', 'codigo'=>'004', 'porcentaje'=>'4'],
+      ['nombre'=>'001 - Compras locales de bienes y servicios con al IVA 1% sin identificación específica', 'codigo'=>'001', 'porcentaje'=>'1'],
+      ['nombre'=>'002 - Compras locales de bienes y servicios con al IVA 2% sin identificación específica', 'codigo'=>'002', 'porcentaje'=>'2'],
+      ['nombre'=>'003 - Compras locales de bienes y servicios con al IVA 13% sin identificación específica ', 'codigo'=>'003', 'porcentaje'=>'13'],
+      ['nombre'=>'004 - Compras locales de bienes y servicios con al IVA 4% sin identificación específica', 'codigo'=>'004', 'porcentaje'=>'4'],
       
-      ['nombre'=>'Compras locales de propiedad planta y equipo con al IVA 1% sin identificación específica', 'codigo'=>'011', 'porcentaje'=>'1'],
-      ['nombre'=>'Compras locales de propiedad planta y equipo con al IVA 2% sin identificación específica', 'codigo'=>'012', 'porcentaje'=>'2'],
-      ['nombre'=>'Compras locales de propiedad planta y equipo con al IVA 13% sin identificación específica', 'codigo'=>'013', 'porcentaje'=>'13'],
-      ['nombre'=>'Compras locales de propiedad planta y equipo con al IVA 4% sin identificación específica', 'codigo'=>'014', 'porcentaje'=>'4'],
+      ['nombre'=>'011 - Compras locales de propiedad planta y equipo con al IVA 1% sin identificación específica', 'codigo'=>'011', 'porcentaje'=>'1'],
+      ['nombre'=>'012 - Compras locales de propiedad planta y equipo con al IVA 2% sin identificación específica', 'codigo'=>'012', 'porcentaje'=>'2'],
+      ['nombre'=>'013 - Compras locales de propiedad planta y equipo con al IVA 13% sin identificación específica', 'codigo'=>'013', 'porcentaje'=>'13'],
+      ['nombre'=>'014 - Compras locales de propiedad planta y equipo con al IVA 4% sin identificación específica', 'codigo'=>'014', 'porcentaje'=>'4'],
       
-      ['nombre'=>'Importaciones de bienes y servicios con al IVA 1% sin identificación específica', 'codigo'=>'021', 'porcentaje'=>'1'],
-      ['nombre'=>'Importaciones de bienes y servicios con al IVA 2% sin identificación específica', 'codigo'=>'022', 'porcentaje'=>'2'],
-      ['nombre'=>'Importaciones de bienes y servicios con al IVA 13% sin identificación específica', 'codigo'=>'023', 'porcentaje'=>'13'],
-      ['nombre'=>'Importaciones de bienes y servicios con al IVA 4% sin identificación específica', 'codigo'=>'024', 'porcentaje'=>'4'],
+      ['nombre'=>'021 - Importaciones de bienes y servicios con al IVA 1% sin identificación específica', 'codigo'=>'021', 'porcentaje'=>'1'],
+      ['nombre'=>'022 - Importaciones de bienes y servicios con al IVA 2% sin identificación específica', 'codigo'=>'022', 'porcentaje'=>'2'],
+      ['nombre'=>'023 - Importaciones de bienes y servicios con al IVA 13% sin identificación específica', 'codigo'=>'023', 'porcentaje'=>'13'],
+      ['nombre'=>'024 - Importaciones de bienes y servicios con al IVA 4% sin identificación específica', 'codigo'=>'024', 'porcentaje'=>'4'],
       
-      ['nombre'=>'Importaciones de propiedad planta y equipo con al IVA 1% sin identificación específica', 'codigo'=>'031', 'porcentaje'=>'1'],
-      ['nombre'=>'Importaciones de propiedad planta y equipo con al IVA 2% sin identificación específica', 'codigo'=>'032', 'porcentaje'=>'2'],
-      ['nombre'=>'Importaciones de propiedad planta y equipo con al IVA 13% sin identificación específica', 'codigo'=>'033', 'porcentaje'=>'13'],
-      ['nombre'=>'Importaciones de propiedad planta y equipo con al IVA 4% sin identificación específica', 'codigo'=>'034', 'porcentaje'=>'4'],
+      ['nombre'=>'031 - Importaciones de propiedad planta y equipo con al IVA 1% sin identificación específica', 'codigo'=>'031', 'porcentaje'=>'1'],
+      ['nombre'=>'032 - Importaciones de propiedad planta y equipo con al IVA 2% sin identificación específica', 'codigo'=>'032', 'porcentaje'=>'2'],
+      ['nombre'=>'033 - Importaciones de propiedad planta y equipo con al IVA 13% sin identificación específica', 'codigo'=>'033', 'porcentaje'=>'13'],
+      ['nombre'=>'034 - Importaciones de propiedad planta y equipo con al IVA 4% sin identificación específica', 'codigo'=>'034', 'porcentaje'=>'4'],
       
       //Con identificación específica
-      ['nombre'=>'Importaciones de bienes y servicios exentos', 'codigo'=>'040', 'porcentaje'=>'0'],
-      ['nombre'=>'Importaciones con IVA al 1% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'041', 'porcentaje'=>'1'],
-      ['nombre'=>'Importaciones con IVA al 2% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'042', 'porcentaje'=>'2'],
-      ['nombre'=>'Importaciones con IVA al 13% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'043', 'porcentaje'=>'13'],
-      ['nombre'=>'Importaciones con IVA al 4% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'044', 'porcentaje'=>'4'],
+      ['nombre'=>'040 - Importaciones de bienes y servicios exentos', 'codigo'=>'040', 'porcentaje'=>'0'],
+      ['nombre'=>'041 - Importaciones con IVA al 1% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'041', 'porcentaje'=>'1'],
+      ['nombre'=>'042 - Importaciones con IVA al 2% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'042', 'porcentaje'=>'2'],
+      ['nombre'=>'043 - Importaciones con IVA al 13% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'043', 'porcentaje'=>'13'],
+      ['nombre'=>'044 - Importaciones con IVA al 4% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'044', 'porcentaje'=>'4'],
       
-      ['nombre'=>'Importaciones de propiedad planta y equipo exentos', 'codigo'=>'050', 'porcentaje'=>'0'],
-      ['nombre'=>'Importaciones con IVA al 1% de propiedad planta y equipo de acreditación plena con identificación específica', 'codigo'=>'051', 'porcentaje'=>'1'],
-      ['nombre'=>'Importaciones con IVA al 2% de propiedad planta y equipo de acreditación plena con identificación específica', 'codigo'=>'052', 'porcentaje'=>'2'],
-      ['nombre'=>'Importaciones con IVA al 13% de propiedad planta y equipo de acreditación plena con identificación específica', 'codigo'=>'053', 'porcentaje'=>'13'],
-      ['nombre'=>'Importaciones con IVA al 4% de propiedad planta y equipo de acreditación plena con identificación específica', 'codigo'=>'054', 'porcentaje'=>'4'],
+      ['nombre'=>'050 - Importaciones de propiedad planta y equipo exentos', 'codigo'=>'050', 'porcentaje'=>'0'],
+      ['nombre'=>'051 - Importaciones con IVA al 1% de propiedad planta y equipo de acreditación plena con identificación específica', 'codigo'=>'051', 'porcentaje'=>'1'],
+      ['nombre'=>'052 - Importaciones con IVA al 2% de propiedad planta y equipo de acreditación plena con identificación específica', 'codigo'=>'052', 'porcentaje'=>'2'],
+      ['nombre'=>'053 - Importaciones con IVA al 13% de propiedad planta y equipo de acreditación plena con identificación específica', 'codigo'=>'053', 'porcentaje'=>'13'],
+      ['nombre'=>'054 - Importaciones con IVA al 4% de propiedad planta y equipo de acreditación plena con identificación específica', 'codigo'=>'054', 'porcentaje'=>'4'],
       
-      ['nombre'=>'Compras locales de bienes y servicios exentos', 'codigo'=>'060', 'porcentaje'=>'0'],
-      ['nombre'=>'Compras locales con IVA al 1% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'061', 'porcentaje'=>'1'],
-      ['nombre'=>'Compras locales con IVA al 2% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'062', 'porcentaje'=>'2'],
-      ['nombre'=>'Compras locales con IVA al 13% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'063', 'porcentaje'=>'13'],
-      ['nombre'=>'Compras locales con IVA al 4% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'064', 'porcentaje'=>'4'],
+      ['nombre'=>'060 - Compras locales de bienes y servicios exentos', 'codigo'=>'060', 'porcentaje'=>'0'],
+      ['nombre'=>'061 - Compras locales con IVA al 1% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'061', 'porcentaje'=>'1'],
+      ['nombre'=>'062 - Compras locales con IVA al 2% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'062', 'porcentaje'=>'2'],
+      ['nombre'=>'063 - Compras locales con IVA al 13% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'063', 'porcentaje'=>'13'],
+      ['nombre'=>'064 - Compras locales con IVA al 4% de bienes y servicios de acreditación plena con identificación específica', 'codigo'=>'064', 'porcentaje'=>'4'],
       
-      ['nombre'=>'Compras locales de  propiedad planta y equipo exentos.', 'codigo'=>'070', 'porcentaje'=>'0'],
-      ['nombre'=>'Compras locales con IVA al 1% de propiedad planta y equipo de acreditación plena con identificación específica.', 'codigo'=>'071', 'porcentaje'=>'1'],
-      ['nombre'=>'Compras locales con IVA al 2% de propiedad planta y equipo de acreditación plena con identificación específica.', 'codigo'=>'072', 'porcentaje'=>'2'],
-      ['nombre'=>'Compras locales con IVA al 13% de propiedad planta y equipo de acreditación plena con identificación específica.', 'codigo'=>'073', 'porcentaje'=>'13'],
-      ['nombre'=>'Compras locales con IVA al 4% de propiedad planta y equipo de acreditación plena con identificación específica.', 'codigo'=>'074', 'porcentaje'=>'4'],
+      ['nombre'=>'070 - Compras locales de  propiedad planta y equipo exentos.', 'codigo'=>'070', 'porcentaje'=>'0'],
+      ['nombre'=>'071 - Compras locales con IVA al 1% de propiedad planta y equipo de acreditación plena con identificación específica.', 'codigo'=>'071', 'porcentaje'=>'1'],
+      ['nombre'=>'072 - Compras locales con IVA al 2% de propiedad planta y equipo de acreditación plena con identificación específica.', 'codigo'=>'072', 'porcentaje'=>'2'],
+      ['nombre'=>'073 - Compras locales con IVA al 13% de propiedad planta y equipo de acreditación plena con identificación específica.', 'codigo'=>'073', 'porcentaje'=>'13'],
+      ['nombre'=>'074 - Compras locales con IVA al 4% de propiedad planta y equipo de acreditación plena con identificación específica.', 'codigo'=>'074', 'porcentaje'=>'4'],
       
       //No acreditables
-      ['nombre'=>'Compras de bienes y servicios con IVA no acreditable desde origen', 'codigo'=>'080', 'porcentaje'=>'0'],
-      ['nombre'=>'Importaciones de bienes y servicios con IVA no acreditable desde origen', 'codigo'=>'090', 'porcentaje'=>'0'],
-      ['nombre'=>'Compras con IVA no acreditable por gastos no deducibles', 'codigo'=>'097', 'porcentaje'=>'0']
+      ['nombre'=>'080 - Compras de bienes y servicios con IVA no acreditable desde origen', 'codigo'=>'080', 'porcentaje'=>'0'],
+      ['nombre'=>'090 - Importaciones de bienes y servicios con IVA no acreditable desde origen', 'codigo'=>'090', 'porcentaje'=>'0'],
+      ['nombre'=>'097 - Compras con IVA no acreditable por gastos no deducibles', 'codigo'=>'097', 'porcentaje'=>'0']
     ];
 
     return $lista;

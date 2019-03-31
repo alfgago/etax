@@ -60,20 +60,20 @@
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 41);
+/******/ 	return __webpack_require__(__webpack_require__.s = 34);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 41:
+/***/ 34:
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(42);
+module.exports = __webpack_require__(35);
 
 
 /***/ }),
 
-/***/ 42:
+/***/ 35:
 /***/ (function(module, exports) {
 
 window.calcularSubtotalItem = function () {
@@ -281,10 +281,10 @@ window.calcularTotalFactura = function () {
   var total = 0;
   $('.item-tabla').each(function () {
     var s = parseFloat($(this).find('.subtotal').val());
-    var m = parseFloat($(this).find('.porc_iva').val()) / 100;
+    var m = parseFloat($(this).find('.monto_iva').val());
     var t = parseFloat($(this).find('.total').val());
     subtotal += s;
-    monto_iva += s * m;
+    monto_iva += m;
     total += t;
   });
 

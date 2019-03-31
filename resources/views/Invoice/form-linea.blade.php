@@ -12,7 +12,7 @@
     <input type="hidden" class="form-control" id="item_id" value="">
     
     <div class="form-group col-md-6">
-      <label for="codigo">Código</label>
+      <label for="codigo">Código de producto</label>
       <input type="text" class="form-control" id="codigo" value="" >
     </div>
 
@@ -25,7 +25,7 @@
       <label for="tipo_producto">Tipo de producto</label>
       <select class="form-control" id="tipo_producto" >
         @foreach ( \App\ProductCategory::all() as $tipo )
-          <option value="{{ $tipo->id }}" codigo="{{ $tipo->bill_iva_code }}" >{{ $tipo->name }}</option>
+          <option value="{{ $tipo->id }}" codigo="{{ $tipo->invoice_iva_code }}" >{{ $tipo->name }}</option>
         @endforeach
       </select>
     </div>

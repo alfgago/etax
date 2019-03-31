@@ -33,7 +33,7 @@ class InvoiceController extends Controller
     public function index()
     {
         $current_company = auth()->user()->companies->first()->id;
-        $invoices = Invoice::where('company_id', $current_company)->orderBy('generated_date', 'DESC')->paginate(1000);
+        $invoices = Invoice::where('company_id', $current_company)->orderBy('generated_date', 'DESC')->paginate(10);
         return view('Invoice/index', [
           'invoices' => $invoices
         ]);
@@ -75,11 +75,48 @@ class InvoiceController extends Controller
         $invoice->other_reference = $request->other_reference;
         $invoice->hacienda_status = "01";
         $invoice->payment_status = "01";
-        $invoice->payment_receipt = "VOUCHER-123451234512345";
+        $invoice->payment_receipt = "";
         $invoice->generation_method = "M";
       
         //Datos de cliente
-        $invoice->client_id = $request->client_id;
+        
+        if( $request->client_id == '-1' ){
+            $tipo_persona = $request->tipo_persona;
+            $identificacion_cliente = $request->id_number;
+            $codigo_cliente = $request->code;
+            
+            $cliente = Client::firstOrCreate(
+                [
+                    'id_number' => $identificacion_cliente,
+                    'company_id' => $company->id,
+                ],
+                [
+                    'code' => $codigo_cliente ,
+                    'company_id' => $company->id,
+                    'tipo_persona' => $tipo_persona,
+                    'id_number' => $identificacion_cliente
+                ]
+            );
+            $cliente->first_name = $request->first_name;
+            $cliente->last_name = $request->last_name;
+            $cliente->last_name2 = $request->last_name2;
+            $cliente->emisor_receptor = $request->emisor_receptor;
+            $cliente->country = $request->country;
+            $cliente->state = $request->state;
+            $cliente->city = $request->city;
+            $cliente->district = $request->district;
+            $cliente->neighborhood = $request->neighborhood;
+            $cliente->zip = $request->zip;
+            $cliente->address = $request->address;
+            $cliente->phone = $request->phone;
+            $cliente->es_exento = $request->es_exento;
+            $cliente->email = $request->email;
+            $cliente->save();
+                
+            $invoice->client_id = $cliente->id;
+        }else{
+            $invoice->client_id = $request->client_id;
+        }
         
         //Datos de factura
         $invoice->description = $request->description;
@@ -168,7 +205,7 @@ class InvoiceController extends Controller
         $this->authorize('update', $invoice);
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
-        if( $invoice->generation_method != 'M' ){
+        if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' && $invoice->generation_method != 'XML' ){
           return redirect('/facturas-emitidas');
         }
       
@@ -180,13 +217,46 @@ class InvoiceController extends Controller
         $invoice->credit_time = $request->credit_time;
         $invoice->buy_order = $request->buy_order;
         $invoice->other_reference = $request->other_reference;
-        $invoice->hacienda_status = "01";
-        $invoice->payment_status = "01";
-        $invoice->payment_receipt = "VOUCHER-123451234512345";
-        $invoice->generation_method = "M";
       
         //Datos de cliente
-        $invoice->client_id = $request->client_id;
+        
+        if( $request->client_id == '-1' ){
+            $tipo_persona = $request->tipo_persona;
+            $identificacion_cliente = $request->id_number;
+            $codigo_cliente = $request->code;
+            
+            $cliente = Client::firstOrCreate(
+                [
+                    'id_number' => $identificacion_cliente,
+                    'company_id' => $company->id,
+                ],
+                [
+                    'code' => $codigo_cliente ,
+                    'company_id' => $company->id,
+                    'tipo_persona' => $tipo_persona,
+                    'id_number' => $identificacion_cliente
+                ]
+            );
+            $cliente->first_name = $request->first_name;
+            $cliente->last_name = $request->last_name;
+            $cliente->last_name2 = $request->last_name2;
+            $cliente->emisor_receptor = $request->emisor_receptor;
+            $cliente->country = $request->country;
+            $cliente->state = $request->state;
+            $cliente->city = $request->city;
+            $cliente->district = $request->district;
+            $cliente->neighborhood = $request->neighborhood;
+            $cliente->zip = $request->zip;
+            $cliente->address = $request->address;
+            $cliente->phone = $request->phone;
+            $cliente->es_exento = $request->es_exento;
+            $cliente->email = $request->email;
+            $cliente->save();
+                
+            $invoice->client_id = $cliente->id;
+        }else{
+            $invoice->client_id = $request->client_id;
+        }
         
         //Datos de factura
         $invoice->description = $request->description;
@@ -249,6 +319,10 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::find($id);
         $this->authorize('update', $invoice);
+        
+        if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' && $invoice->generation_method != 'XML' ){
+          return redirect('/facturas-emitidas');
+        }
         
         foreach ( $invoice->items as $item ) {
           $item->delete();
@@ -328,6 +402,10 @@ class InvoiceController extends Controller
                 
                 //Datos de factura
                 $invoice->currency = $row['idmoneda'];
+                if( $invoice->currency == 1 ) { $invoice->currency = "CRC"; }
+                if( $invoice->currency == 2 ) { $invoice->currency = "USD"; }
+                    
+                
                 $invoice->currency_rate = $row['tipocambio'];
                 //$invoice->description = $row['description'] ? $row['description'] : '';
               

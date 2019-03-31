@@ -27,6 +27,7 @@ class ProductController extends Controller
     public function index()
     {
         $current_company = auth()->user()->companies->first()->id;
+        
         $products = Product::where('company_id', $current_company)->where('is_catalogue', 1)->paginate(10);
         
         return view('Product/index', [

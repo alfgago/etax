@@ -36,10 +36,10 @@
             <tr>
               <th>#</th>
               <th>Receptor</th>
+              <th>Moneda</th>
               <th>Subtotal</th>
               <th>Monto IVA</th>
               <th>Total</th>
-              <th>Notas</th>
               <th>F. Generada</th>
               <th>F. Vencimiento</th>
               <th>Acciones</th>
@@ -51,10 +51,10 @@
                 <tr>
                   <td>{{ $invoice->reference_number }}</td>
                   <td>{{ $invoice->client ? $invoice->client->toString() : '-' }}</td>
+                  <td>{{ $invoice->currency }}</td>
                   <td>{{ number_format( $invoice->subtotal, 2 ) }}</td>
                   <td>{{ number_format( $invoice->iva_amount, 2 ) }}</td>
                   <td>{{ number_format( $invoice->total, 2 ) }}</td>
-                  <td>{{ $invoice->description }}</td>
                   <td>{{ $invoice->generatedDate()->format('d/m/Y') }}</td>
                   <td>{{ $invoice->dueDate()->format('d/m/Y') }}</td>
                   <td> 

@@ -1,18 +1,16 @@
-<div class="card ">
-          <div class="card-body">
-            <div class="card-title">{{ $titulo }}</div>
-            <div id="echartBar" style="height: 300px;"></div>
-          </div>
-        </div>
+<div class="widget ">
+  <div class="card-title">{{ $titulo }}</div>
+  <div id="echartBar" style="height: 300px;"></div>
+</div>
 
 <script>
 
 function initBarChart() {
-  var $tituloRepercutido = " IVA emitido ";
-  var $tituloSoportado = " IVA recibido ";
+  var $tituloRepercutido = " IVA fact. emitidas ";
+  var $tituloSoportado = " IVA fact. recibidas ";
   var $tituloDeducible = " IVA acreditable ";
-  var $tituloAsumido = " IVA asumido ";
-  var $tituloSaldo = " Saldo de IVA ";
+  var $tituloAsumido = " IVA por ajustar ";
+  var $tituloSaldo = " IVA por pagar ";
   
   var dataRepercutidos = [];
   var dataSoportados = [];
@@ -30,7 +28,7 @@ function initBarChart() {
         borderRadius: 0,
         orient: 'horizontal',
         x: 'left',
-        data: [$tituloRepercutido, $tituloSoportado, $tituloDeducible, $tituloAsumido, $tituloSaldo]
+        data: [ $tituloRepercutido, $tituloSoportado, $tituloDeducible, $tituloAsumido, $tituloSaldo ]
       },
       grid: {
         left: '8px',
@@ -70,18 +68,18 @@ function initBarChart() {
       }],
       series: [{
         name: $tituloRepercutido,
-        data: [ '{{ $e->total_invoice_iva }}'.replace(/\,/g,''), 
-                '{{ $f->total_invoice_iva }}'.replace(/\,/g,''), 
-                '{{ $m->total_invoice_iva }}'.replace(/\,/g,''), 
-                '{{ $a->total_invoice_iva }}'.replace(/\,/g,''), 
-                '{{ $y->total_invoice_iva }}'.replace(/\,/g,''), 
-                '{{ $j->total_invoice_iva }}'.replace(/\,/g,''), 
-                '{{ $l->total_invoice_iva }}'.replace(/\,/g,''), 
-                '{{ $g->total_invoice_iva }}'.replace(/\,/g,''), 
-                '{{ $s->total_invoice_iva }}'.replace(/\,/g,''), 
-                '{{ $c->total_invoice_iva }}'.replace(/\,/g,''), 
-                '{{ $n->total_invoice_iva }}'.replace(/\,/g,''), 
-                '{{ $d->total_invoice_iva }}'.replace(/\,/g,''), 
+        data: [ '{{ number_format( $e->total_invoice_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $f->total_invoice_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $m->total_invoice_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $a->total_invoice_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $y->total_invoice_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $j->total_invoice_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $l->total_invoice_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $g->total_invoice_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $s->total_invoice_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $c->total_invoice_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $n->total_invoice_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $d->total_invoice_iva, 0 ) }}'.replace(/\,/g,''), 
               ],
         label: {
           show: false,
@@ -94,18 +92,18 @@ function initBarChart() {
 
       }, {
         name: $tituloSoportado,
-        data: [ '{{ $e->total_bill_iva }}'.replace(/\,/g,''), 
-                '{{ $f->total_bill_iva }}'.replace(/\,/g,''), 
-                '{{ $m->total_bill_iva }}'.replace(/\,/g,''), 
-                '{{ $a->total_bill_iva }}'.replace(/\,/g,''), 
-                '{{ $y->total_bill_iva }}'.replace(/\,/g,''), 
-                '{{ $j->total_bill_iva }}'.replace(/\,/g,''), 
-                '{{ $l->total_bill_iva }}'.replace(/\,/g,''), 
-                '{{ $g->total_bill_iva }}'.replace(/\,/g,''), 
-                '{{ $s->total_bill_iva }}'.replace(/\,/g,''), 
-                '{{ $c->total_bill_iva }}'.replace(/\,/g,''), 
-                '{{ $n->total_bill_iva }}'.replace(/\,/g,''), 
-                '{{ $d->total_bill_iva }}'.replace(/\,/g,''), 
+        data: [ '{{ number_format( $e->total_bill_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $f->total_bill_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $m->total_bill_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $a->total_bill_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $y->total_bill_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $j->total_bill_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $l->total_bill_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $g->total_bill_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $s->total_bill_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $c->total_bill_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $n->total_bill_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $d->total_bill_iva, 0 ) }}'.replace(/\,/g,''), 
         ],
         label: {
           show: false,
@@ -117,18 +115,18 @@ function initBarChart() {
 
       }, {
         name: $tituloDeducible,
-        data: [ '{{ $e->deductable_iva_real }}'.replace(/\,/g,''), 
-                '{{ $f->deductable_iva_real }}'.replace(/\,/g,''), 
-                '{{ $m->deductable_iva_real }}'.replace(/\,/g,''), 
-                '{{ $a->deductable_iva_real }}'.replace(/\,/g,''), 
-                '{{ $y->deductable_iva_real }}'.replace(/\,/g,''), 
-                '{{ $j->deductable_iva_real }}'.replace(/\,/g,''), 
-                '{{ $l->deductable_iva_real }}'.replace(/\,/g,''), 
-                '{{ $g->deductable_iva_real }}'.replace(/\,/g,''), 
-                '{{ $s->deductable_iva_real }}'.replace(/\,/g,''), 
-                '{{ $c->deductable_iva_real }}'.replace(/\,/g,''), 
-                '{{ $n->deductable_iva_real }}'.replace(/\,/g,''), 
-                '{{ $d->deductable_iva_real }}'.replace(/\,/g,''), 
+        data: [ '{{ number_format( $e->deductable_iva_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $f->deductable_iva_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $m->deductable_iva_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $a->deductable_iva_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $y->deductable_iva_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $j->deductable_iva_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $l->deductable_iva_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $g->deductable_iva_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $s->deductable_iva_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $c->deductable_iva_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $n->deductable_iva_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $d->deductable_iva_real, 0 ) }}'.replace(/\,/g,''), 
         ],
         label: {
           show: false,
@@ -139,18 +137,18 @@ function initBarChart() {
         smooth: true
       }, {
         name: $tituloAsumido,
-        data: [ '{{ $e->cc_no_acreditable }}'.replace(/\,/g,''), 
-                '{{ $f->cc_no_acreditable }}'.replace(/\,/g,''), 
-                '{{ $m->cc_no_acreditable }}'.replace(/\,/g,''), 
-                '{{ $a->cc_no_acreditable }}'.replace(/\,/g,''), 
-                '{{ $y->cc_no_acreditable }}'.replace(/\,/g,''), 
-                '{{ $j->cc_no_acreditable }}'.replace(/\,/g,''), 
-                '{{ $l->cc_no_acreditable }}'.replace(/\,/g,''), 
-                '{{ $g->cc_no_acreditable }}'.replace(/\,/g,''), 
-                '{{ $s->cc_no_acreditable }}'.replace(/\,/g,''), 
-                '{{ $c->cc_no_acreditable }}'.replace(/\,/g,''), 
-                '{{ $n->cc_no_acreditable }}'.replace(/\,/g,''), 
-                '{{ $d->cc_no_acreditable }}'.replace(/\,/g,''), 
+        data: [ '{{ number_format( $e->non_deductable_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $f->non_deductable_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $m->non_deductable_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $a->non_deductable_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $y->non_deductable_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $j->non_deductable_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $l->non_deductable_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $g->non_deductable_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $s->non_deductable_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $c->non_deductable_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $n->non_deductable_iva, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $d->non_deductable_iva, 0 ) }}'.replace(/\,/g,''), 
         ],
         label: {
           show: false,
@@ -161,18 +159,18 @@ function initBarChart() {
         smooth: true
       }, {
         name: $tituloSaldo,
-        data: [ '{{ $e->balance_real }}'.replace(/\,/g,''), 
-                '{{ $f->balance_real }}'.replace(/\,/g,''), 
-                '{{ $m->balance_real }}'.replace(/\,/g,''), 
-                '{{ $a->balance_real }}'.replace(/\,/g,''), 
-                '{{ $y->balance_real }}'.replace(/\,/g,''), 
-                '{{ $j->balance_real }}'.replace(/\,/g,''), 
-                '{{ $l->balance_real }}'.replace(/\,/g,''), 
-                '{{ $g->balance_real }}'.replace(/\,/g,''), 
-                '{{ $s->balance_real }}'.replace(/\,/g,''), 
-                '{{ $c->balance_real }}'.replace(/\,/g,''), 
-                '{{ $n->balance_real }}'.replace(/\,/g,''), 
-                '{{ $d->balance_real }}'.replace(/\,/g,''), 
+        data: [ '{{ number_format( $e->balance_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $f->balance_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $m->balance_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $a->balance_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $y->balance_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $j->balance_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $l->balance_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $g->balance_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $s->balance_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $c->balance_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $n->balance_real, 0 ) }}'.replace(/\,/g,''), 
+                '{{ number_format( $d->balance_real, 0 ) }}'.replace(/\,/g,''), 
         ],
         label: {
           show: false,

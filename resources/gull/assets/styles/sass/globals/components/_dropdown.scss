@@ -90,3 +90,27 @@
         }
     }
 }
+
+
+
+.select2-container .select2-selection--single {
+    height: calc(1.9695rem + 2px);
+    padding: 0.375rem 0.75rem;
+    font-size: 0.813rem;
+    line-height: 1.5;
+    border: 1px solid #999;
+    outline: initial !important;
+    background: #fff;
+    color: #1e0a26;
+}
+
+.select2-container {
+    width: 100% !important;
+    height: auto !important;
+}
+
+.select2-container .select2-selection--single .select2-selection__rendered {
+    height: 100%;
+    line-height: 1.5;
+    padding: 0;
+}

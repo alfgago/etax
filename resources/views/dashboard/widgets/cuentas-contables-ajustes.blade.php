@@ -1,6 +1,6 @@
-<div class="card mb-4">
-  <div class="card-body text-left">
-      <div class="card-title">{{ $titulo }} - Ajuste de periodificación</div>
+<div class="car mb-4">
+  <div class="car-body text-left">
+      <h3 class="card-title">{{ $titulo }} - Ajuste de periodificación</h3>
       <div class="row">
         
         <div class="col-sm-12">
@@ -34,40 +34,71 @@
                 <td>  ₡{{ number_format( $data->cc_iva_emitido_4, 0 ) }} </td>
                 <td>-</td>
               </tr>
+              
               <tr>
-                <th>IVA asumido no acreditable por facturas recibidas:</td>
-                <td>  ₡{{ number_format( $data->cc_no_acreditable, 0 ) }} </td>
+                <th>IVA por fact. recibidas al 1% de bienes y servicios</td>
+                <td>-</td>
+                <td>  ₡{{ number_format( $data->cc_bs_1, 0 ) }} </td>
+              </tr>
+              
+              <tr>
+                <th>IVA por fact. recibidas al 2% de bienes y servicios</td>
+                <td>-</td>
+                <td>  ₡{{ number_format( $data->cc_bs_2, 0 ) }} </td>
+              </tr>
+              
+              <tr>
+                <th>IVA por fact. recibidas al 13% de bienes y servicios</td>
+                <td>-</td>
+                <td>  ₡{{ number_format( $data->cc_bs_3, 0 ) }} </td>
+              </tr>
+              
+              <tr>
+                <th>IVA por fact. recibidas al 4% de bienes y servicios</td>
+                <td>-</td>
+                <td>  ₡{{ number_format( $data->cc_bs_4, 0 ) }} </td>
+              </tr>
+              
+              <tr>
+                <th>IVA por fact. recibidas al 1% de propiedad, planta y equipo</td>
+                <td>-</td>
+                <td>  ₡{{ number_format( $data->cc_ppp_1, 0 ) }} </td>
+              </tr>
+              
+              <tr>
+                <th>IVA por fact. recibidas al 2% de propiedad, planta y equipo</td>
+                <td>-</td>
+                <td>  ₡{{ number_format( $data->cc_ppp_2, 0 ) }} </td>
+              </tr>
+              
+              <tr>
+                <th>IVA por fact. recibidas al 13% de propiedad, planta y equipo</td>
+                <td>-</td>
+                <td>  ₡{{ number_format( $data->cc_ppp_3, 0 ) }} </td>
+              </tr>
+              
+              <tr>
+                <th>IVA por fact. recibidas al 4% de propiedad, planta y equipo</td>
+                <td>-</td>
+                <td>  ₡{{ number_format( $data->cc_ppp_4, 0 ) }} </td>
+              </tr>
+              
+              <tr>
+                <th>IVA por ajustar de bienes y servicios:</td>
+                <td>  ₡{{ number_format( $data->cc_ajuste_bs, 0 ) }} </td>
                 <td>-</td>
               </tr>
               
               <tr>
-                <th>IVA acreditable al 1%</td>
+                <th>IVA por ajustar de propiedad, planta y equipo:</td>
+                <td>  ₡{{ number_format( $data->cc_ajuste_ppp, 0 ) }} </td>
                 <td>-</td>
-                <td>  ₡{{ number_format( $data->cc_deducible_1, 0 ) }} </td>
-              </tr>
-              
-              <tr>
-                <th>IVA acreditable al 2%</td>
-                <td>-</td>
-                <td>  ₡{{ number_format( $data->cc_deducible_2, 0 ) }} </td>
-              </tr>
-              
-              <tr>
-                <th>IVA acreditable al 13%</td>
-                <td>-</td>
-                <td>  ₡{{ number_format( $data->cc_deducible_3, 0 ) }} </td>
-              </tr>
-              
-              <tr>
-                <th>IVA acreditable al 4%</td>
-                <td>-</td>
-                <td>  ₡{{ number_format( $data->cc_deducible_4, 0 ) }} </td>
               </tr>
               
               <tr>
                 <th>IVA por pagar a Hacienda</td>
                 <td>-</td>
-                <td>  ₡{{ number_format( $data->cc_ajuste_hacienda, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->cc_por_pagar, 0 ) }} </td>
               </tr>
               
               <tr class="total">

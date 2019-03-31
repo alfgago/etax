@@ -35,10 +35,10 @@
       <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
           <thead>
             <tr>
-              <th>Código</th>
-              <th>Identificación</th>
-              <th>Nombre</th>
-              <th>Correo</th>
+              <th>@sortablelink('code', 'Código')</th>
+              <th>@sortablelink('id_number', 'Identificación')</th>
+              <th>@sortablelink('first_name', 'Nombre')</th>
+              <th>@sortablelink('email', 'Correo')</th>
               <th>Tipo de persona</th>
               <th>Es exento</th>
               <th></th>
@@ -53,7 +53,7 @@
                   <td>{{ $cliente->id_number }}</td>
                   <td>{{ $cliente->getFullName() }}</td>
                   <td>{{ $cliente->email }}</td>
-                  <td>{{ $cliente->tipo_persona }}</td>
+                  <td>{{ $cliente->getTipoPersona() }}</td>
                   <td>{{ $cliente->es_exento ? 'Si' : 'No' }} </td>
                   
                   <td> 

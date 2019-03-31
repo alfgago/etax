@@ -29,6 +29,7 @@ Route::get('/', 'ReportsController@dashboard');
 Route::get('/dashboard', 'ReportsController@dashboard');
 Route::get('/reportes', 'ReportsController@reports');
 Route::get('/reportes/cuentas-contables', 'ReportsController@ccReport');
+Route::get('/reportes/reporte-ejecutivo', 'ReportsController@reporteEjecutivo');
 
 // Rutas autogeneradas de CRUD
 Route::resource('clientes', 'ClientController');
@@ -37,6 +38,7 @@ Route::resource('productos', 'ProductController');
 Route::resource('empresas', 'CompanyController');
 Route::resource('facturas-emitidas', 'InvoiceController');
 Route::resource('facturas-recibidas', 'BillController');
+
 
 Route::get('login', function () {
     return view('login');

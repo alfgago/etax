@@ -3,10 +3,14 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Kyslik\ColumnSortable\Sortable;
 
 class Client extends Model
 {
+  use Sortable;
+  
   protected $guarded = [];
+  public $sortable = ['code', 'first_name', 'email', 'id_number'];
   
   //Relacion con la empresa
   public function company()
@@ -37,6 +41,7 @@ class Client extends Model
     }else if( $this->tipo_persona == 6 ) {
       $tipoStr = 'Otro';
     }
+    return $tipoStr;
   }
   
 }

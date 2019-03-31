@@ -1,6 +1,6 @@
-<div class="card mb-4">
-  <div class="card-body text-left">
-      <div class="card-title">{{ $titulo }} - Compras e importaciones</div>
+<div class="car mb-4" >
+  <div class="car-body text-left">
+      <h3 class="card-title">{{ $titulo }} - Compras e importaciones</h3>
       <div class="row">
         
         <div class="col-sm-12">

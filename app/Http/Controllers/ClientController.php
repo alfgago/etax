@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use \Carbon\Carbon;
 use App\Company;
 use App\Client;
 use App\Exports\ClientExport;
@@ -30,7 +31,7 @@ class ClientController extends Controller
     public function index()
     {
         $current_company = auth()->user()->companies->first()->id;
-        $clients = Client::where('company_id', $current_company)->paginate(10);
+        $clients = Client::where('company_id', $current_company)->sortable()->paginate(10);
         
         return view('Client/index', [
           'clients' => $clients
@@ -158,9 +159,6 @@ class ClientController extends Controller
         $cliente->billing_emails = $request->billing_emails;
         $cliente->email = $request->email;
       
-        
-        dd($request);
-      
         $cliente->save();
       
         return redirect('/clientes');
@@ -221,9 +219,9 @@ class ClientController extends Controller
                     'phone_area' => $row['areatel'],
                     'phone' => $row['telefono'],
                     'es_exento' => $row['exento'],
-                    'emisor_receptor' => $row['emisorreceptor'
-                ],
-            ]);
+                    'emisor_receptor' => $row['emisorreceptor']
+                ]
+            );
             
         }
         $time_end = $this->microtime_float();

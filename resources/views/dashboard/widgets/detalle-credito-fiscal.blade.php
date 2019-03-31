@@ -1,10 +1,10 @@
-          <div class="card o-hidden mb-4">
-              <div class="card-body">
-                  <div class="card-title">{{ $titulo }}</div>
+          <div class="car o-hidden mb-4">
+              <div class="car-body">
+                  <h3 class="card-title">{{ $titulo }}</h3>
 
                   <div class="table-responsive">
 
-                      <table id="" class="table dataTable-collapse text-center ivas-table">
+                      <table id="" class="table table-striped dataTable-collapse text-center ivas-table">
                           <thead>
                               <tr class="first-header">
                                   <th colspan="1">Concepto</th>

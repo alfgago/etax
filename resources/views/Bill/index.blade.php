@@ -18,13 +18,13 @@
         <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
           <thead>
             <tr>
-              <th>#</th>
+              <th>@sortablelink('reference_number', '#')</th>
               <th>Proveedor</th>
+              <th>Moneda</th>
               <th>Subtotal</th>
               <th>Monto IVA</th>
               <th>Total</th>
-              <th>Notas</th>
-              <th>F. Generada</th>
+              <th>@sortablelink('generated_date', 'F. Generada')</th>
               <th>F. Vencimiento</th>
               <th>Acciones</th>
             </tr>
@@ -35,10 +35,10 @@
                 <tr>
                   <td>{{ $bill->reference_number }}</td>
                   <td>{{ $bill->provider ? $bill->provider->toString() : '-' }}</td>
+                  <td>{{ $bill->currency }}</td>
                   <td>{{ number_format( $bill->subtotal, 2 ) }}</td>
                   <td>{{ number_format( $bill->iva_amount, 2 ) }}</td>
                   <td>{{ number_format( $bill->total, 2 ) }}</td>
-                  <td>{{ $bill->description }}</td>
                   <td>{{ $bill->generatedDate()->format('d/m/Y') }}</td>
                   <td>{{ $bill->dueDate()->format('d/m/Y') }}</td>
                   

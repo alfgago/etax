@@ -6,11 +6,14 @@ use \Carbon\Carbon;
 use App\Company;
 use App\BillItem;
 use Illuminate\Database\Eloquent\Model;
+use Kyslik\ColumnSortable\Sortable;
 
 class Bill extends Model
 {
-  
+    use Sortable;
+    
     protected $guarded = [];
+    public $sortable = ['reference_number', 'generated_date'];
     
     //Relacion con la empresa
     public function company()

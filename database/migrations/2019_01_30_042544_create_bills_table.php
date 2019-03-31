@@ -91,7 +91,7 @@ class CreateBillsTable extends Migration
             $table->timestamps();
         });
       
-        //$this->demoData();
+        $this->demoData();
     }
   
      public function demoData() {

@@ -12,10 +12,18 @@
 .card-header, .card-footer {
     border-color: rgba(0, 0, 0, 0.03);
 }
+
 .card-title {
-    font-size: 1.1rem;
-    margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 7px solid #F0C962;
+  display: inline-block;
 }
+
+.card-title h3 {
+    font-size: 1.42275rem;
+}
+
 .card-img-overlay {
     * {
         position: relative;

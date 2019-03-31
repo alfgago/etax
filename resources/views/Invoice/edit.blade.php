@@ -22,6 +22,7 @@
                       <h3>
                         Cliente
                       </h3>
+                      <div onclick="abrirPopup('nuevo-cliente-popup');" class="btn btn-agregar btn-agregar-cliente">Nuevo cliente</div>
                     </div>  
                     
                     <div class="form-group col-md-12 with-button">
@@ -258,6 +259,7 @@
           </div>
         
           @include( 'Invoice.form-linea' )
+          @include( 'Invoice.form-nuevo-cliente' )
 
           <div class="btn-holder hidden">
             <button id="btn-submit" type="submit" class="btn btn-primary">Guardar factura</button>
@@ -272,8 +274,8 @@
 
 @section('breadcrumb-buttons')
   <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar factura</button>
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Enviar factura electrónica</button>
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Programar envío</button>
+  <button onclick="$('#btn-submit').click();" class="btn btn-primary2" disabled>Enviar factura electrónica</button>
+  <button onclick="$('#btn-submit').click();" class="btn btn-primary2" disabled>Programar envío</button>
 @endsection 
 
 @section('header-scripts')
@@ -297,10 +299,10 @@ $(document).ready(function(){
   var total = 0;
   $('.item-tabla').each(function(){
     var s = parseFloat($(this).find('.subtotal').val());
-    var m = parseFloat($(this).find('.porc_iva').val()) / 100;
+    var m = parseFloat($(this).find('.monto_iva').val());
     var t = parseFloat($(this).find('.total').val());
     subtotal += s;
-    monto_iva += s*m;	
+    monto_iva += m;	
     total += t;	
   });
 

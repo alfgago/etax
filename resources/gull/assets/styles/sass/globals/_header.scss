@@ -8,7 +8,7 @@
     flex-wrap: wrap;
     justify-content: space-between;
     z-index: 100;
-    background: linear-gradient(45deg, #2E2A86 0%, #3f1c84 66%, #4C006D 100%);
+    background: linear-gradient(90deg, #fff 0%, #e5e5e5 100%);
     .menu-toggle {
         width: 90px;
         display: flex;
@@ -53,15 +53,19 @@
     }
 
     .logo {
-        width: $sidebar-left-width;
+        width: auto;
         text-align: center;
         font-size: 30px;
+        height: 80px;
+        padding: 10px 0;
         color: $white;
         img {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto;
+            width: auto;
+            height: 100%;
+            margin: auto;
             display: block;
+            padding: 8.5px 0;
+            padding-left: 1rem;
         }
     }
     .show {

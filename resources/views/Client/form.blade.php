@@ -103,9 +103,9 @@
     <div class="form-group col-md-4">
       <label for="emisor_receptor">Emisor / Receptor</label>
       <select class="form-control" name="emisor_receptor" id="emisor_receptor" >
-        <option value="ambos" {{ @$client->emisor_receptor == 'ambos' ? 'selected' : '' }}>Emisor y receptor</option>
-        <option value="receptor" {{ @$client->emisor_receptor == 'receptor' ? 'selected' : '' }}>Receptor</option>
-        <option value="emisor" {{ @$client->emisor_receptor == 'emisor' ? 'selected' : '' }}>Emisor</option>
+        <option value="ambos" {{ @$client->emisor_receptor == '1' ? 'selected' : '' }}>Emisor y receptor</option>
+        <option value="receptor" {{ @$client->emisor_receptor == '2' ? 'selected' : '' }}>Receptor</option>
+        <option value="emisor" {{ @$client->emisor_receptor == '3' ? 'selected' : '' }}>Emisor</option>
       </select>
     </div>
     

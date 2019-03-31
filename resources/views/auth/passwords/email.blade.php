@@ -15,17 +15,15 @@
                       
                       <div class="form-row">
 
-                        <div class="form-group col-md-12 text-left">
+                        <div class="form-group col-md-12 text-center">
                           <h3>
                             Recuperar contraseña
                           </h3>
                         </div>
 
                         <div class="form-group col-md-12">
-                            <label for="email">{{ __('Correo electrónico') }}</label>
-
                             <div>
-                                <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ old('email') }}" required>
+                                <input placeholder="{{ __('Correo electrónico') }}" id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ old('email') }}" required>
 
                                 @if ($errors->has('email'))
                                     <span class="invalid-feedback" role="alert">
@@ -35,29 +33,31 @@
                             </div>
                         </div>
 
-                        <div class="form-group col-md-12 mb-0">
+                        <div class="form-group col-md-12 text-center ">
                                 <button type="submit" class="btn btn-primary">
                                     {{ __('Enviar correo de recuperación') }}
                                 </button>
                         </div>
                         
-                        <div class="form-group col-md-12 mb-0 button-container">
-                            <span>
-                                No tenés cuenta? 
-                                @if (Route::has('register'))
-                                    <a class="btn btn-link" href="{{ route('register') }}">
-                                        {{ __('Registrate aquí') }}
-                                    </a>
-                                @endif
-                                </span>
-                            <span>
-                              || Te acordaste de tu contraseña? 
-                              @if (Route::has('login'))
-                                  <a class="btn btn-link" href="{{ route('login') }}">
-                                      {{ __('Ingresá aquí') }}
-                                  </a>
-                              @endif
-                              </span>
+                        <div class="form-group col-md-12 button-container text-center">
+                            <div class="inline-block text-left">
+                                <div>
+                                    No tenés cuenta? 
+                                    @if (Route::has('register'))
+                                        <a class="btn btn-link" href="{{ route('register') }}">
+                                            {{ __('Registrate aquí') }}
+                                        </a>
+                                    @endif
+                                    </div>
+                                <div>
+                                  Te acordaste de tu contraseña? 
+                                  @if (Route::has('login'))
+                                      <a class="btn btn-link" href="{{ route('login') }}">
+                                          {{ __('Ingresá aquí') }}
+                                      </a>
+                                  @endif
+                                  </div>
+                              </div>
                         </div>
                         
                       </div>

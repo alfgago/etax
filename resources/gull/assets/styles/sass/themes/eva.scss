@@ -27,7 +27,7 @@ $gray-600: lighten(desaturate($primary-base, 40), 4%) !default;
 $gray-700: darken(desaturate($primary-base, 40), 0%) !default;
 $gray-800: darken(desaturate($primary-base, 40), 8%) !default;
 $gray-900: darken(desaturate($primary-base, 40), 12%) !default;
-$black:    darken($primary-base, 60%) !default;
+$black:    #000 !default;
 
 
 $gradient:      linear-gradient(45deg, #20378C 0%, #3f1c84 66%, #4C006D 100%);

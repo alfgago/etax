@@ -6,3 +6,16 @@ window.abrirPopup = function( id ){
 window.cerrarPopup = function( id ){
 	$('.popup').removeClass('is-active');
 }
+
+$( document ).ready(function() {
+	
+    $('.select-search').select2({
+	  templateResult: function (data, container) {
+	    if (data.element) {
+	      $(container).addClass($(data.element).attr("class"));
+	    }
+	    return data.text;
+	  }
+	});
+	
+});

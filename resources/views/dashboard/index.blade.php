@@ -18,92 +18,44 @@
   }
 
 </style>
+
 <div class="row">
-  <div class="col-md-12">
+  <div class="col-md-8">
+    
     <div class="row">
       
-      <div class="col-lg-4 col-md-12 mb-4">  
-        <div class="row">
-          <div class=" col-md-12 mb-4">
-            @include('dashboard.widgets.liquidacion-periodo', ['titulo' => 'Liquidación del mes', 'mes' => 'Marzo', 'data' => $m])
-          </div>
-          
-          <div class=" col-md-12 mb-4">
-            @include('dashboard.widgets.movimiento-periodo', ['titulo' => 'Movimiento del mes actual', 'data' => $m])
-          </div>
-        </div>
+      <div class="col-lg-12 mb-4">
+        @include('dashboard.widgets.grafico-mensual', ['titulo' => 'Resumen de IVA 2019'])
       </div>
       
-      <div class="col-lg-8 col-md-12 mb-4">
-        @include('dashboard.widgets.grafico-mensual', ['titulo' => 'Resumen de IVA del periodo actual'])
+      <div class="col-lg-6 mb-4">
+        @include('dashboard.widgets.proporcion-porcentajes', ['titulo' => 'Porcentaje de ventas del 2019 por tipo de IVA', 'data' => $acumulado])
       </div>
-
-      <div class="col-md-4 mb-4">
-        @include('dashboard.widgets.ventas-periodo', ['titulo' => 'Ventas del periodo actual', 'data' => $acumulado])
-      </div>
-      <div class="col-md-4 mb-4">
-        @include('dashboard.widgets.compras-periodo', ['titulo' => 'Compras del periodo actual', 'data' => $acumulado])
-      </div>
-
-      <div class="col-md-4 mb-4">
-          <div class="card o-hidden fullh">
-
-              <div class="card-body">
-                  <div class="card-title">Comparativo de liquidación</div>
-                  <div class="d-flex justify-content-between mb-2">
-                      <div class="flex-grow-1" style="flex:1;">
-                          <p class="text-small text-muted m-0">Saldo de IVA del periodo actual</p>
-                          <p class="text-22 mb-3 text-muted"><i class="text-success i-Coins"></i> ₡{{ number_format( $acumulado->balance_real, 2) }} </p>
-                          <p class="text-12 text-muted m-0 p-2 border-bottom"><strong> + ₡{{ number_format( $acumulado->total_invoice_iva, 2) }} </strong> IVA emitido</p>
-                          <p class="text-12 text-muted m-0 p-2 border-bottom"><strong>- ₡{{ number_format( $acumulado->deductable_iva_real, 2) }}</strong> IVA acreditable</p>
-                      </div>
-                      <div class="flex-grow-1" style="flex:1;">
-                          <p class="text-small text-muted m-0">Saldo de IVA del periodo anterior</p>
-                          <p class="text-22 mb-3 text-muted"><i class="text-danger i-Coins" ></i> ₡{{ number_format( $anterior->balance_real, 2) }}</p>
-                          <p class="text-12 text-muted m-0 p-2 border-bottom"><strong> + ₡{{ number_format( $anterior->total_invoice_iva, 2) }} </strong> IVA emitido</p>
-                          <p class="text-12 text-muted m-0 p-2 border-bottom"><strong>- ₡{{ number_format( $anterior->deductable_iva_real, 2) }}</strong> IVA acreditable</p>
-                      </div>
-                  </div>
-              </div>
-          </div>
-      </div>
+      
+      <div class="col-lg-6 mb-4">
         
-      
-      <div class="col-md-4 mb-4">
-        <div class="card ">
-          <div class="card-body">
-            <div class="card-title">Proporción de porcentajes de IVA</div>
-            <div id="echartPie" style="height: 300px;"></div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="col-md-8 mb-4">
-        <div class="row">
-          <div class="col-md-3 mb-4">
-            <div class="card card-icon ">
-              <div class="card-body text-center">
-                <i class="i-Bar-Chart"></i>
-                <p class="text-muted mt-2 mb-2">Prorrata de periodo actual</p>
-                <p class="text-primary text-22 line-height-1 m-0"> {{ number_format( $acumulado->prorrata*100, 2) }}% </p>
-              </div>
-            </div>
-          </div>
-              
-          <div class="col-md-3 mb-4">
-            <div class="card card-icon ">
-              <div class="card-body text-center">
-                <i class="i-Bar-Chart"></i>
-                <p class="text-muted mt-2 mb-2">Prorrata del periodo anterior</p>
-                <p class="text-primary text-22 line-height-1 m-0"> {{ number_format( $anterior->prorrata*100, 2 ) }}% </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        @include('dashboard.widgets.grafico-prorrata', ['titulo' => 'Prorrata operativa vs prorrata estimada', 'data' => $acumulado])
+        
       </div>
       
     </div>
+    
   </div>
+  
+  <div class=" col-md-4 mb-4">
+    <div class="row">
+      
+      <div class="col-lg-12 mb-4">
+        @include('dashboard.widgets.resumen-periodo', ['titulo' => 'Acumulado 2019', 'data' => $acumulado])
+      </div>
+      
+      <div class="col-lg-12 mb-4">
+        @include('dashboard.widgets.resumen-periodo', ['titulo' => 'Marzo 2019', 'data' => $m])
+      </div>
+    </div> 
+   
+  </div>
+  
 </div>
 
 @endsection @section('footer-scripts')
@@ -127,88 +79,6 @@
 
   $(document).ready(function() {
     
-    // Chart in Dashboard version 1
-      var echartElemPie = document.getElementById('echartPie');
-      if (echartElemPie) {
-        var echartPie = echarts.init(echartElemPie);
-        echartPie.setOption({
-          color: ['#274FAB', '#F1BD45', '#77A1ED', '#E065A3', '#6A6AD8'],
-          tooltip: {
-            show: true,
-            backgroundColor: 'rgba(0, 0, 0, .8)'
-          },
-
-          xAxis: [{
-
-            axisLine: {
-              show: false
-            },
-            splitLine: {
-              show: false
-            }
-          }],
-          yAxis: [{
-
-            axisLine: {
-              show: false
-            },
-            splitLine: {
-              show: false
-            }
-          }],
-
-          series: [{
-            name: '',
-            type: 'pie',
-            radius: ['50%', '70%'],
-            data: [
-            @if($acumulado->ratio1)
-              {
-                value: '{{ $acumulado->ratio1*100 }}',
-                name: 'Ventas al 1%'
-              }, 
-            @endif
-            @if($acumulado->ratio2)
-              {
-                value: '{{ $acumulado->ratio2*100 }}',
-                name: 'Ventas al 2%'
-              }, 
-            @endif
-            @if($acumulado->ratio3)
-              {
-                value: '{{ $acumulado->ratio3*100 }}',
-                name: 'Ventas al 13%'
-              }, 
-            @endif
-            @if($acumulado->ratio4)
-              {
-                value: '{{ $acumulado->ratio4*100 }}',
-                name: 'Ventas al 4%'
-              }, 
-            @endif
-            @if($acumulado->ratio_ex)
-              {
-                value: '{{ $acumulado->ratio_ex*100 }}',
-                name: 'No acreditable'
-              }, 
-            @endif
-            ],
-            itemStyle: {
-              emphasis: {
-                shadowBlur: 10,
-                shadowOffsetX: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
-              }
-            }
-          }]
-        });
-        $(window).on('resize', function() {
-          setTimeout(function() {
-            echartPie.resize();
-          }, 500);
-        });
-    }
-
     // Chart in Dashboard version 1
     var chartBills = document.getElementById('chart-bills');
     if (chartBills) {

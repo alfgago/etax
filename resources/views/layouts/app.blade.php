@@ -7,11 +7,13 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
      <!-- CSRF Token -->
      <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title') | Sistema TAX </title>
+    <title>@yield('title') | eTax </title>
   
 
+    <link rel="stylesheet" href="{{asset('assets/styles/vendor/select2.min.css')}}">
     <link rel="stylesheet" href="{{mix('assets/styles/css/themes/eva.min.css')}}?v=2.1">
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/perfect-scrollbar.css')}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
     
     <script src="{{mix('assets/js/common-bundle.js')}}?v=2.1"></script>
   

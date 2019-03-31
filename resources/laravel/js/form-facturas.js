@@ -209,10 +209,10 @@
     var total = 0;
     $('.item-tabla').each(function(){
       var s = parseFloat($(this).find('.subtotal').val());
-      var m = parseFloat($(this).find('.porc_iva').val()) / 100;
+      var m = parseFloat($(this).find('.monto_iva').val());
       var t = parseFloat($(this).find('.total').val());
       subtotal += s;
-      monto_iva += s*m;	
+      monto_iva += m;	
       total += t;	
     });
     
