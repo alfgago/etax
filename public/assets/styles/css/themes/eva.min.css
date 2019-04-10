@@ -18960,6 +18960,13 @@ h6,
   height: 100%;
   margin: 0;
   padding: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 
 .sidebar-left .navigation-left .nav-item {
@@ -18968,9 +18975,7 @@ h6,
   width: 100%;
   color: #fff;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.1);
-  -webkit-box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.15);
-  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.15);
+  padding: 0 .5rem;
   /*&.active .triangle {
                 position: absolute;
                 width: 0;
@@ -18983,8 +18988,8 @@ h6,
             }*/
 }
 
-.sidebar-left .navigation-left .nav-item:nth-of-type(2n) {
-  background: rgba(255, 255, 255, 0.2);
+.sidebar-left .navigation-left .nav-item:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .sidebar-left .navigation-left .nav-item:focus,
@@ -19006,9 +19011,10 @@ h6,
 
 .sidebar-left .navigation-left .nav-item .nav-item-hold {
   width: 100%;
-  padding: 15px 0;
+  padding: 1rem .5rem;
   display: block;
   color: #fff;
+  border-top: 1px solid rgba(0, 0, 0, 0.3);
 }
 
 .sidebar-left .navigation-left .nav-item .nav-item-hold:focus,
@@ -19033,6 +19039,67 @@ h6,
 
 .sidebar-left .navigation-left .nav-item .nav-item-hold a {
   color: #fff;
+}
+
+.sidebar-left .navigation-left .nav-item:first-of-type .nav-item-hold,
+.sidebar-left .navigation-left .nav-item:hover .nav-item-hold {
+  border-top: 1px solid transparent;
+}
+
+.sidebar-left .navigation-left .nav-item .subitems {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  background: #434093;
+  -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+  text-align: left;
+  white-space: nowrap;
+  z-index: 9;
+  opacity: 0;
+  visibility: hidden;
+  -webkit-transition: .5s ease all;
+  transition: .5s ease all;
+  font-size: .95em;
+}
+
+.sidebar-left .navigation-left .nav-item .subitems a {
+  display: block;
+  padding: .7rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  position: relative;
+  color: #fff;
+}
+
+.sidebar-left .navigation-left .nav-item .subitems a:first-of-type {
+  border-top: 0;
+  margin: 0;
+}
+
+.sidebar-left .navigation-left .nav-item .subitems a:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-left .navigation-left .nav-item:hover .subitems {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sidebar-left .navigation-left .nav-item.small-nav a.nav-item-hold {
+  display: block;
+  padding: 1rem .75rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.sidebar-left .navigation-left .nav-item.small-nav a.nav-item-hold .nav-text {
+  display: inline-block;
+}
+
+.sidebar-left .navigation-left .nav-item.small-nav a.nav-item-hold img {
+  max-height: 16px;
+  margin-right: .5rem;
+  margin-bottom: 0;
 }
 
 .sidebar-left-secondary {
@@ -19218,22 +19285,6 @@ h6,
     height: calc(100vh - 70px);
     width: calc(100% - 100px - 190px);
   }
-}
-
-.sidebar-left .navigation-left {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.sidebar-left .navigation-left .nav-item {
-  -webkit-box-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
 }
 
 .sidebar-left .navigation-left .nav-item .nav-item-hold {
@@ -20772,6 +20823,36 @@ small {
 
 [ngbdatepicker] {
   height: 34px;
+}
+
+.input-group.date .input-group-addon {
+  position: relative;
+  height: calc(1.9695rem + 2px);
+  padding: 0.375rem 0.375rem;
+  border: 1px solid #999;
+  border-top-right-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+  border-left: 0;
+  color: #fff;
+  background: #060208;
+}
+
+.bootstrap-datetimepicker-widget table td span {
+  height: auto !important;
+  line-height: 1 !important;
+}
+
+.bootstrap-datetimepicker-widget table td {
+  height: auto !important;
+  line-height: 1 !important;
+}
+
+.bootstrap-datetimepicker-widget a[data-action] {
+  padding: 1px 0 !important;
+}
+
+.bootstrap-datetimepicker-widget button[data-action] {
+  margin: 0 !important;
 }
 
 /* checkbox-custom */

@@ -42,6 +42,7 @@ class CreateBillsTable extends Migration
           
             //Corresponde al medio de pago empleado: 01 Efectivo, 2 Tarjeta, 03 Cheque, 04 Transferencia - depósito bancario, 05 - Recaudado por terceros, 99 Otros
             $table->enum('payment_type', ['01', '02', '03', '04', '05', '99'])->default('01');
+            $table->double('retention_percent')->default(0);
           
             $table->string('buy_order')->nullable();
             $table->string('send_emails')->nullable();
@@ -87,6 +88,7 @@ class CreateBillsTable extends Migration
             $table->string('iva_type');
             $table->double('iva_percentage')->nullable();
             $table->boolean('is_exempt')->default(false);
+            $table->integer('porc_identificacion_plena')->default(13);
           
             $table->timestamps();
         });
@@ -161,7 +163,7 @@ class CreateBillsTable extends Migration
               $discount_reason = '';
               $is_exempt = false;
 
-              $bill->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $is_exempt );
+              $bill->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $is_exempt, 13 );
               
               $sumTotal = $sumTotal + $total;
               $sumSubtotal = $sumSubtotal + $subtotal;
@@ -176,11 +178,11 @@ class CreateBillsTable extends Migration
             if( $i < 1000 ){
               $fecha = $faker->dateTimeBetween($startDate = '2018-09-01 02:00:00', $endDate = '2018-12-31 02:00:00');
             }else if( $i >= 1000 && $i < 1750){
-              $fecha = $faker->dateTimeBetween($startDate = '2019-01-01 02:00:00', $endDate = '2019-01-31 02:00:00');
-            }else if( $i >= 1750 && $i < 2250){
               $fecha = $faker->dateTimeBetween($startDate = '2019-02-01 02:00:00', $endDate = '2019-02-28 02:00:00');
-            }else{
+            }else if( $i >= 1750 && $i < 2250){
               $fecha = $faker->dateTimeBetween($startDate = '2019-03-01 02:00:00', $endDate = '2019-03-28 02:00:00');
+            }else{
+              $fecha = $faker->dateTimeBetween($startDate = '2019-04-01 02:00:00', $endDate = '2019-04-28 02:00:00');
             }
           
             $bill->generated_date = Carbon::createFromFormat('d/m/Y g:i A', $fecha->format('d/m/Y g:i A') );

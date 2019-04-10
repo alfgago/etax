@@ -1,6 +1,6 @@
     <div class="main-header">
             <div class="logo">
-                <img src="{{asset('assets/images/logo-etax-color-mini.png')}}" class="logo-img">
+                <img src="{{asset('assets/images/logo-final-150.png')}}" class="logo-img">
             </div>
             <style>
             .logo {
@@ -55,12 +55,26 @@
                 border: 0;
                 overflow: hidden;
             }
+            
+            .filters select {
+                border: 0;
+                border-bottom: 2px solid #ddd;
+                background: #eee;
+                padding: .25rem;
+                margin-right: .5rem;
+            }
+            
+            .filters label {
+                margin: 0;
+            }
+                        
 
             </style>
 
             <div style="margin: auto"></div>
 
             <div class="header-part-right">
+                
                 <!-- User avatar dropdown -->
                 <div class="dropdown">
                     <div  class="user col align-self-end">

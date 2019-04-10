@@ -43,6 +43,16 @@
       <label for="nombre_cliente">% IVA</label>
       <input type="text" class="form-control" id="porc_iva" placeholder="13" value="13" readonly>
     </div>
+    
+    <div class="form-group col-md-12 hidden" id="field_porc_identificacion_plena">
+      <label for="porc_identificacion_plena">Porcentaje al que saldrá la venta</label>
+      <select class="form-control" id="porc_identificacion_plena" >
+        <option value="1" >1%</option>
+        <option value="2" >2%</option>
+        <option value="13" selected>13%</option>
+        <option value="4" >4%</option>
+      </select>
+    </div>
 
     <div class="form-group col-md-3">
       <label for="unidad_medicion">Unidad de medición</label>

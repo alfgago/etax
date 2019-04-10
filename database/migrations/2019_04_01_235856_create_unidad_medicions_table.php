@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateXmlHaciendasTable extends Migration
+class CreateUnidadMedicionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,8 @@ class CreateXmlHaciendasTable extends Migration
      */
     public function up()
     {
-        Schema::create('xml_haciendas', function (Blueprint $table) {
-            $table->bigIncrements('id');
-          
-            $table->unsignedBigInteger('invoice_id')->nullable();
-            $table->unsignedBigInteger('bill_id')->nullable();
-            $table->string('xml');
-          
+        Schema::create('unidad_medicions', function (Blueprint $table) {
+            $table->increments('id');
             $table->timestamps();
         });
     }
@@ -31,6 +26,6 @@ class CreateXmlHaciendasTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('xml_haciendas');
+        Schema::dropIfExists('unidad_medicions');
     }
 }

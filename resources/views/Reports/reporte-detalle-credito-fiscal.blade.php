@@ -1,0 +1,1 @@
+@include('Reports.widgets.detalle-credito-fiscal', ['titulo' => "Detalle de crédito fiscal $ano"])

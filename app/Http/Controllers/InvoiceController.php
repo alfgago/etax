@@ -7,6 +7,7 @@ use App\Invoice;
 use App\InvoiceItem;
 use App\Company;
 use App\Client;
+use App\CalculatedTax;
 use App\Exports\InvoiceExport;
 use App\Imports\InvoiceImport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -157,6 +158,8 @@ class InvoiceController extends Controller
         $company->last_invoice_ref_number = $invoice->reference_number;
         $company->last_document = $invoice->document_number;
         $company->save();
+        
+        $this->clearInvoiceCache($invoice);
       
         return redirect('/facturas-emitidas');
     }
@@ -305,7 +308,9 @@ class InvoiceController extends Controller
             $item->delete();
           }
         }
-      
+        
+        $this->clearInvoiceCache($invoice);
+          
         return redirect('/facturas-emitidas');
     }
 
@@ -319,6 +324,8 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::find($id);
         $this->authorize('update', $invoice);
+
+        $this->clearInvoiceCache($invoice);
         
         if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' && $invoice->generation_method != 'XML' ){
           return redirect('/facturas-emitidas');
@@ -423,24 +430,24 @@ class InvoiceController extends Controller
             $item = InvoiceItem::firstOrNew(
                 [
                     'invoice_id' => $invoice->id,
-                    'item_number' => $row['numerolinea'],
+                    'item_number' => $row['numerolinea'] ? $row['numerolinea'] : 1,
                 ],
                 [
                 'invoice_id' => $invoice->id,
-                'item_number' => $row['numerolinea'],
+                'item_number' => $row['numerolinea'] ? $row['numerolinea'] : 0,
                 'code' => $row['codigoproducto'],
                 'name' => $row['detalleproducto'],
                 'product_type' => 1,
                 'measure_unit' => $row['unidadmedicion'],
-                'item_count' => $row['cantidad'],
+                'item_count' => $row['cantidad'] ? $row['cantidad'] : 1,
                 'unit_price' => $row['preciounitario'],
                 'subtotal' => $row['subtotallinea'],
                 'total' => $row['totallinea'],
                 'discount_type' => '01',
-                'discount' => $row['montodescuento'],
+                'discount' => $row['montodescuento'] ? $row['montodescuento'] : 0,
                 'discount_reason' => '',
                 'iva_type' => $row['codigoimpuesto'],
-                'iva_amount' => $row['montoiva'],
+                'iva_amount' => $row['montoiva'] ? $row['montoiva'] : 0,
                 ]
             );
             
@@ -452,9 +459,9 @@ class InvoiceController extends Controller
             /**END LINEA DE FACTURA**/
             
             $invoice->generated_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision']);
-            $invoice->due_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision'])->addDays(15);
+            $invoice->due_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision'])->addDays(15);  /////IMPORTANTE CORREGIR ANTES DE PRODUCCION
             
-            
+            $this->clearInvoiceCache($invoice);
             
             $invoice->save();
             
@@ -472,5 +479,11 @@ class InvoiceController extends Controller
         return ((float) $usec + (float)$sec);
     }  
     
+    private function clearInvoiceCache($invoice){
+        $month = $invoice->generatedDate()->month;
+        $year = $invoice->dueDate()->year;
+        CalculatedTax::clearTaxesCache($invoice->company_id, $month, $year);
+        CalculatedTax::clearTaxesCache($invoice->company_id, 0, $year);
+    }
     
 }

@@ -13,9 +13,9 @@ class Variables
       ['nombre'=>'104 - Ventas locales de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'104', 'porcentaje'=>'4'],
       
       ['nombre'=>'121 - Autoconsumo de bienes y servicios con derecho a crédito al 1%', 'codigo'=>'121', 'porcentaje'=>'1'],
-      ['nombre'=>'121 - Autoconsumo de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'122', 'porcentaje'=>'2'],
-      ['nombre'=>'121 - Autoconsumo de bienes y servicios con derecho a crédito al 13%', 'codigo'=>'123', 'porcentaje'=>'13'],
-      ['nombre'=>'121 - Autoconsumo de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'124', 'porcentaje'=>'4'],
+      ['nombre'=>'122 - Autoconsumo de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'122', 'porcentaje'=>'2'],
+      ['nombre'=>'123 - Autoconsumo de bienes y servicios con derecho a crédito al 13%', 'codigo'=>'123', 'porcentaje'=>'13'],
+      ['nombre'=>'124 - Autoconsumo de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'124', 'porcentaje'=>'4'],
       
       ['nombre'=>'130 - Ventas de bienes y servicios con límites sobrepasados al 13% con derecho a crédito', 'codigo'=>'130', 'porcentaje'=>'13'],
       ['nombre'=>'150 - Ventas por exportación con derecho a crédito', 'codigo'=>'150', 'porcentaje'=>'0'],
@@ -283,5 +283,65 @@ class Variables
     
     return "Otros";
   }
+  
+  public static function getMonthName( $month ) {
+      if( $month == 1 ){
+        return "Enero";
+      }else if( $month == 2 ){
+        return "Febrero";
+      }else if( $month == 3 ){
+        return "Marzo";
+      }else if( $month == 4 ){
+        return "Abril";
+      }else if( $month == 5 ){
+        return "Mayo";
+      }else if( $month == 6 ){
+        return "Junio";
+      }else if( $month == 7 ){
+        return "Julio";
+      }else if( $month == 8 ){
+        return "Agosto";
+      }else if( $month == 9 ){
+        return "Setiembre";
+      }else if( $month == 10 ){
+        return "Octubre";
+      }else if( $month == 11 ){
+        return "Noviembre";
+      }else if( $month == 12 ){
+        return "Diciembre";
+      }else if( $month == 0 ){
+        return "Acumulado";
+      }
+  }
+  
+  public static function getMonthCode( $month ) {
+      if( $month == 1 ){
+        return "e";
+      }else if( $month == 2 ){
+        return "f";
+      }else if( $month == 3 ){
+        return "m";
+      }else if( $month == 4 ){
+        return "a";
+      }else if( $month == 5 ){
+        return "y";
+      }else if( $month == 6 ){
+        return "j";
+      }else if( $month == 7 ){
+        return "l";
+      }else if( $month == 8 ){
+        return "g";
+      }else if( $month == 9 ){
+        return "s";
+      }else if( $month == 10 ){
+        return "c";
+      }else if( $month == 11 ){
+        return "n";
+      }else if( $month == 12 ){
+        return "d";
+      }else {
+        return "e";
+      }
+  }  
   
 }

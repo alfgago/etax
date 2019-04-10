@@ -102,37 +102,31 @@
 
                   <div class="form-group col-md-4">
                     <label for="generated_date">Fecha</label>
-                    <div class="input-group">
-                      <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
-                      <div class="input-group-append">
-                        <button class="btn btn-secondary" type="button">
-                            <i class="icon-regular i-Calendar-4"></i>
-                        </button>
-                      </div>
+                    <div class='input-group date inputs-fecha'>
+                        <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
+                        <span class="input-group-addon">
+                          <i class="icon-regular i-Calendar-4"></i>
+                        </span>
                     </div>
                   </div>
 
                   <div class="form-group col-md-4">
                     <label for="hora">Hora</label>
-                    <div class="input-group">
-                      <input id="hora" class="form-control input-hora" name="hora" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('g:i A') }}">
-                      <div class="input-group-append">
-                        <button class="btn btn-secondary" type="button">
-                            <i class="icon-regular i-Clock"></i>
-                        </button>
-                      </div>
+                    <div class='input-group date inputs-hora'>
+                        <input id="hora" class="form-control input-hora" name="hora" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('g:i A') }}">
+                        <span class="input-group-addon">
+                          <i class="icon-regular i-Clock"></i>
+                        </span>
                     </div>
                   </div>
 
                   <div class="form-group col-md-4">
                     <label for="due_date">Fecha de vencimiento</label>
-                    <div class="input-group">
+                    <div class='input-group date inputs-fecha'>
                       <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
-                      <div class="input-group-append">
-                        <button class="btn btn-secondary" type="button">
-                            <i class="icon-regular i-Calendar-4"></i>
-                        </button>
-                      </div>
+                      <span class="input-group-addon">
+                        <i class="icon-regular i-Calendar-4"></i>
+                      </span>
                     </div>
                   </div>
                   
@@ -249,17 +243,15 @@
 
 @section('header-scripts')
 
-<link rel="stylesheet" href="/assets/styles/vendor/pickadate/classic.css">
-<link rel="stylesheet" href="/assets/styles/vendor/pickadate/classic.date.css">
-<link rel="stylesheet" href="/assets/styles/vendor/pickadate/classic.time.css"> 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker-standalone.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
 
 @endsection 
 
 @section('footer-scripts')
 
-<script src="/assets/js/vendor/pickadate/picker.js"></script>
-<script src="/assets/js/vendor/pickadate/picker.date.js"></script>
-<script src="/assets/js/vendor/pickadate/picker.time.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 <script src="/assets/js/form-facturas.js"></script>
 
 <script>
@@ -267,6 +259,5 @@ $(document).ready(function(){
   $('#tipo_iva').val('103');
 });
 </script>
-
 
 @endsection

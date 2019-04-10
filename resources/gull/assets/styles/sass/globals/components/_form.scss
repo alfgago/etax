@@ -58,6 +58,36 @@
     height: 34px;
 }
 
+.input-group.date .input-group-addon {
+position: relative;
+height: calc(1.9695rem + 2px);
+padding: 0.375rem 0.375rem;
+border: 1px solid #999;
+border-top-right-radius: 0.25rem;
+border-bottom-right-radius: 0.25rem;
+border-left: 0;
+color: #fff;
+background: #060208;
+}
+
+.bootstrap-datetimepicker-widget table td span {
+  height: auto !important;
+  line-height: 1 !important;
+}
+
+.bootstrap-datetimepicker-widget table td {
+  height: auto !important;
+  line-height: 1 !important;
+}
+
+.bootstrap-datetimepicker-widget a[data-action] {
+  padding: 1px 0 !important;
+}
+
+.bootstrap-datetimepicker-widget button[data-action] {
+  margin: 0 !important;
+}
+
 
 /* checkbox-custom */
 .checkbox {

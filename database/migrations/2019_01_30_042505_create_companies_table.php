@@ -39,6 +39,10 @@ class CreateCompaniesTable extends Migration
             $table->string('last_document')->default('1000000000000000001');
             $table->integer('last_invoice_ref_number')->default(0);
             $table->integer('last_bill_ref_number')->default(0);
+            $table->integer('tipo_calculo_prorrata')->default(0);
+            
+            $table->integer('workspace_year')->default(2019);
+            $table->string('workspace_month')->default('a');
           
             $table->timestamps();
         });
@@ -61,7 +65,9 @@ class CreateCompaniesTable extends Migration
             'invoice_email' => 'info@5e.cr',
             'country' => 'Costa Rica',
             'address' => 'Pinares, Curridabat',
-            'phone' => '2271-3298'
+            'phone' => '2271-3298',
+            'workspace_year' => '2019',
+            'workspace_month' => '4'
         ]);
     }
 

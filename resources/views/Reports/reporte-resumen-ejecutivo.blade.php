@@ -118,16 +118,16 @@
 						    <div class="row">
 						      
 						      <div class="col-12 mb-8">
-						        @include('dashboard.widgets.grafico-mensual', ['titulo' => 'Resumen de IVA 2019'])
+						        @include('Reports.widgets.grafico-mensual', ['titulo' => "Resumen de IVA $ano"])
 						      </div>
 						      
 						      <div class="col-6 mb-8">
-						        @include('dashboard.widgets.proporcion-porcentajes', ['titulo' => 'Porcentaje de ventas del 2019 por tipo de IVA', 'data' => $acumulado])
+						        @include('Reports.widgets.proporcion-porcentajes', ['titulo' => "Porcentaje de ventas del $ano por tipo de IVA", 'data' => $acumulado])
 						      </div>
 						      
 						      <div class="col-6 mb-8">
 						        
-						        @include('dashboard.widgets.grafico-prorrata', ['titulo' => 'Prorrata operativa vs prorrata estimada', 'data' => $acumulado])
+						        @include('Reports.widgets.grafico-prorrata', ['titulo' => 'Prorrata operativa vs prorrata estimada', 'data' => $acumulado])
 						        
 						      </div>
 						      
@@ -140,11 +140,11 @@
 						    <div class="row">
 						      
 						      <div class="col-6 mb-8">
-						        @include('dashboard.widgets.resumen-periodo', ['titulo' => 'Acumulado 2019', 'data' => $acumulado])
+						        @include('Reports.widgets.resumen-periodo', ['titulo' => "$nombreMes $ano", 'data' => $dataMes])
 						      </div>
 						      
 						      <div class="col-6 mb-8">
-						        @include('dashboard.widgets.resumen-periodo', ['titulo' => 'Marzo 2019', 'data' => $m])
+						        @include('Reports.widgets.resumen-periodo', ['titulo' => "Acumulado $ano", 'data' => $acumulado])
 						      </div>
 						      
 						    </div> 

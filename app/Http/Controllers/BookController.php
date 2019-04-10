@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use \Carbon\Carbon;
+use App\Company;
 use App\CalculatedTax;
+use App\Book;
 use Illuminate\Http\Request;
 
-class CalculatedTaxController extends Controller
+class BookController extends Controller
 {
-  
-     /**
+    
+    /**
      * Create a new controller instance.
      *
      * @return void
@@ -17,8 +20,7 @@ class CalculatedTaxController extends Controller
     {
         $this->middleware('auth');
     }
-  
-  
+    
     /**
      * Display a listing of the resource.
      *
@@ -53,10 +55,10 @@ class CalculatedTaxController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\CalculatedTaxes  $calculatedTaxes
+     * @param  \App\Book  $book
      * @return \Illuminate\Http\Response
      */
-    public function show(CalculatedTaxes $calculatedTaxes)
+    public function show(Book $book)
     {
         //
     }
@@ -64,10 +66,10 @@ class CalculatedTaxController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\CalculatedTaxes  $calculatedTaxes
+     * @param  \App\Book  $book
      * @return \Illuminate\Http\Response
      */
-    public function edit(CalculatedTaxes $calculatedTaxes)
+    public function edit(Book $book)
     {
         //
     }
@@ -76,10 +78,10 @@ class CalculatedTaxController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\CalculatedTaxes  $calculatedTaxes
+     * @param  \App\Book  $book
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, CalculatedTaxes $calculatedTaxes)
+    public function update(Request $request, Book $book)
     {
         //
     }
@@ -87,10 +89,10 @@ class CalculatedTaxController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\CalculatedTaxes  $calculatedTaxes
+     * @param  \App\Book  $book
      * @return \Illuminate\Http\Response
      */
-    public function destroy(CalculatedTaxes $calculatedTaxes)
+    public function destroy(Book $book)
     {
         //
     }

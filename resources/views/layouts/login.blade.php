@@ -83,7 +83,7 @@
     <div class="auth-content">
       
         <div class="auth-logo text-center mb-4">
-          <img src="{{asset('assets/images/logo-etax-color-mini.png')}}" alt="">
+          <img src="{{asset('assets/images/logo-final-150.png')}}" alt="">
         </div>
         @yield('content')
         

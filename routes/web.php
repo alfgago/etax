@@ -28,8 +28,11 @@ Route::post('facturas-recibidas/importar', 'BillController@import');
 Route::get('/', 'ReportsController@dashboard');
 Route::get('/dashboard', 'ReportsController@dashboard');
 Route::get('/reportes', 'ReportsController@reports');
-Route::get('/reportes/cuentas-contables', 'ReportsController@ccReport');
-Route::get('/reportes/reporte-ejecutivo', 'ReportsController@reporteEjecutivo');
+Route::post('/reportes/reporte-dashboard', 'ReportsController@reporteDashboard');
+Route::post('/reportes/cuentas-contables', 'ReportsController@reporteCuentasContables');
+Route::get('/reportes/resumen-ejecutivo', 'ReportsController@reporteEjecutivo');
+Route::post('/reportes/detalle-debito', 'ReportsController@reporteDetalleDebitoFiscal');
+Route::post('/reportes/detalle-credito', 'ReportsController@reporteDetalleCreditoFiscal');
 
 // Rutas autogeneradas de CRUD
 Route::resource('clientes', 'ClientController');

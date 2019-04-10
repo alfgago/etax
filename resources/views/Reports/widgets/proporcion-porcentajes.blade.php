@@ -67,16 +67,16 @@
                 name: 'Ventas al 4%'
               }, 
             @endif
-            @if($acumulado->fake_ratio_ex)
+            @if($acumulado->fake_ratio_exento_sin_credito)
               {
-                value: '{{ number_format( $acumulado->fake_ratio_ex*100, 2) }}',
-                name: 'Ventas exentas sin derecho a credito'
+                value: '{{ number_format( $acumulado->fake_ratio_exento_sin_credito*100, 2) }}',
+                name: 'Exentas sin \n derecho a credito'
               }, 
             @endif
-            @if($acumulado->fake_ratio_ex_c)
+            @if($acumulado->fake_ratio_exento_con_credito)
               {
-                value: '{{ number_format( $acumulado->fake_ratio_ex_c*100, 2) }}',
-                name: 'Ventas exentas con derecho a credito'
+                value: '{{ number_format( $acumulado->fake_ratio_exento_con_credito*100, 2) }}',
+                name: 'Exentas con \n derecho a credito'
               }, 
             @endif
             ],

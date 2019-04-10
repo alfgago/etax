@@ -33,6 +33,8 @@ class CreateUsersTable extends Migration
             $table->string('address');
             $table->string('phone');
             $table->string('image_url');
+            $table->string('security_question');
+            $table->string('security_answer');
           
             $table->rememberToken();
             $table->timestamps();

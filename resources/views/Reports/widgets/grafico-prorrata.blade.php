@@ -4,10 +4,10 @@
     <div id="echartGauge" style="height: 250px;"></div>
     <div class="row comparacion-prorratas">
       <div class="col-lg-12 dif">
-        <div><label>Diferencia en IVA por pagar:</label> <span>₡{{ number_format( abs($acumulado->balance_real - $acumulado->balance), 0) }}</span></div>
+        <div><label>Diferencia en IVA por pagar:</label> <span>₡{{ number_format( abs($acumulado->balance_operativo - $acumulado->balance_estimado), 0) }}</span></div>
       </div>
       <div class="col-lg-6 ope">
-        <div><label>Prorrata operativa:</label> <span>{{ number_format( $acumulado->last_prorrata*100, 2) }}%</span></div>
+        <div><label>Prorrata operativa:</label> <span>{{ number_format( $acumulado->prorrata_operativa*100, 2) }}%</span></div>
       </div>
       <div class="col-lg-6 est">
         <div><label>Prorrata estimada:</label> <span>{{ number_format( $acumulado->prorrata*100, 2) }}%</span></div>
@@ -29,6 +29,16 @@
     // Chart in Dashboard version 1
       var echartElemGauge = document.getElementById('echartGauge');
       if (echartElemGauge) {
+        
+        var diff = {{ abs ($acumulado->prorrata_operativa - $acumulado->prorrata )*100 }};
+        var rango = 40;
+        if( diff > 40 ){
+          rango = 100;
+        }
+        var res = {{ $acumulado->prorrata*100 - $acumulado->prorrata_operativa*100 }};
+        var ratio = 50 / rango;
+        var res = ( parseFloat(res) * ratio ) + 50;
+        
         var echartGauge = echarts.init(echartElemGauge);
         echartGauge.setOption({
           toolbox: {
@@ -40,7 +50,7 @@
               startAngle: 180,
               endAngle: 0,
               center : ['50%', '80%'],
-              radius : 180,
+              radius : 160,
               pointer: {
                 color : 'black',
                 length: '70%'
@@ -59,9 +69,9 @@
                 show: true,
                 formatter: function(v){
                     switch (v+''){
-                        case '0': return '-40%';
+                        case '0': return '-'+rango+'%';
                         case '50': return '0%';
-                        case '100': return '+40%';
+                        case '100': return '+'+rango+'%';
                         default: return '';
                     }
                 },
@@ -79,7 +89,7 @@
                 width: 100,
                 height: 40,
                 offsetCenter: [0, 30],
-                formatter:'{{ number_format( abs ($acumulado->last_prorrata - $acumulado->prorrata )*100 , 2 ) }}%',
+                formatter:'{{ number_format( abs ($acumulado->prorrata_operativa - $acumulado->prorrata )*100 , 2 ) }}%',
                 textStyle: {  
                     color: '#000',
                     fontSize : 18,
@@ -89,7 +99,7 @@
               splitLine: {           
                 show: false
               },
-              data:[{value: {{ $acumulado->prorrata*100 - $acumulado->last_prorrata*100 + 50 }} }]
+              data:[{value: res }]
             }
           ]
         });

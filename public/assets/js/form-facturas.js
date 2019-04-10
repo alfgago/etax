@@ -140,6 +140,18 @@ window.presetTipoIVA = function () {
   }
 };
 
+window.togglePorcentajeIdentificacionPlena = function () {
+  if ('#field_porc_identificacion_plena'.length) {
+    var tipo_iva = parseFloat($('#tipo_iva').val());
+
+    if (tipo_iva >= 40 && tipo_iva <= 74) {
+      $('#field_porc_identificacion_plena').show();
+    } else {
+      $('#field_porc_identificacion_plena').hide();
+    }
+  }
+};
+
 window.agregarEditarItem = function () {
 
   //Si esta editando, usa lnum y item_id para identificar la fila.
@@ -154,6 +166,7 @@ window.agregarEditarItem = function () {
   var cantidad = $('#cantidad').val();
   var unidad_medicion = $('#unidad_medicion').val();
   var precio_unitario = $('#precio_unitario').val();
+  var porc_identificacion_plena = $('#porc_identificacion_plena').val();
   var descuento = '';
   var razon_descuento = '';
   var tipo_iva = $('#tipo_iva').val();
@@ -183,7 +196,7 @@ window.agregarEditarItem = function () {
     htmlCols += "<td>" + cantidad + " <input type='hidden' class='cantidad' name='items[" + index + "][item_count]' value='" + cantidad + "'></td>";
     htmlCols += "<td>" + unidad_medicion + " <input type='hidden' class='unidad_medicion' name='items[" + index + "][measure_unit]' value='" + unidad_medicion + "'></td>";
     htmlCols += "<td>" + precio_unitario + " <input type='hidden' class='precio_unitario' name='items[" + index + "][unit_price]' value='" + precio_unitario + "'></td>";
-    htmlCols += "<td>" + tipo_iva + " <input type='hidden' class='tipo_iva' name='items[" + index + "][iva_type]' value='" + tipo_iva + "'></td>";
+    htmlCols += "<td>" + tipo_iva + " <input type='hidden' class='tipo_iva' name='items[" + index + "][iva_type]' value='" + tipo_iva + "'> <input type='hidden' class='porc_identificacion_plena' name='items[" + index + "][porc_identificacion_plena]' value='" + porc_identificacion_plena + "'></td>";
     htmlCols += "<td>" + subtotal + " <input class='subtotal' type='hidden' name='items[" + index + "][subtotal]' value='" + subtotal + "'></td>";
     htmlCols += "<td>" + monto_iva + " <input class='porc_iva' type='hidden' name='items[" + index + "][iva_percentage]' value='" + porc_iva + "'> <input class='monto_iva' type='hidden' name='items[" + index + "][iva_amount]' value='" + monto_iva + "'> </td>";
     htmlCols += "<td>" + total + " <input class='total' type='hidden' name='items[" + index + "][total]' value='" + total + "'></td>";
@@ -231,7 +244,6 @@ window.limpiarFormItem = function () {
 
 //Carga la item para ser editada
 window.cargarFormItem = function (index) {
-
   $('.item-factura-form').addClass('editando');
 
   var item = $('.item-index-' + index);
@@ -247,7 +259,9 @@ window.cargarFormItem = function (index) {
   $('#item_subtotal').val(item.find('.subtotal ').val());
   $('#porc_iva').val(item.find('.porc_iva ').val());
   $('#item_iva_amount').val(item.find('.monto_iva ').val());
+  $('#porc_identificacion_plena').val(item.find('.porc_identificacion_plena ').val());
 
+  togglePorcentajeIdentificacionPlena();
   calcularConIvaManual();
 };
 
@@ -302,12 +316,14 @@ $(document).ready(function () {
   $('#tipo_iva').on('change', function () {
     presetPorcentaje();
     calcularSubtotalItem();
+    togglePorcentajeIdentificacionPlena();
   });
 
   $('#tipo_producto').on('change', function () {
     presetTipoIVA();
     presetPorcentaje();
     calcularSubtotalItem();
+    togglePorcentajeIdentificacionPlena();
   });
 
   $('#item_iva_amount').on('change', function () {
@@ -334,7 +350,7 @@ $(document).ready(function () {
     calcularTotalFactura();
   });
 
-  $(".input-fecha").pickadate({
+  /*$(".input-fecha").pickadate({
     monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre'],
     weekdaysFull: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
     weekdaysShort: ['D', 'L', 'K', 'M', 'J', 'V', 'S'],
@@ -346,12 +362,43 @@ $(document).ready(function () {
     labelMonthNext: 'Siguiente',
     labelMonthPrev: 'Anterior',
     labelMonthSelect: 'Elegir mes',
-    labelYearSelect: 'Elegir año'
-  });
-
-  $('.input-hora').pickatime({
+    labelYearSelect: 'Elegir año',
+  })
+   $('.input-hora').pickatime({
     interval: 1,
     clear: 'Limpiar'
+  })*/
+
+  $('.inputs-fecha').datetimepicker({
+    format: 'DD/MM/Y',
+    allowInputToggle: true,
+    icons: {
+      time: 'fa fa-clock-o',
+      date: 'fa fa-calendar',
+      up: 'fa fa-chevron-up',
+      down: 'fa fa-chevron-down',
+      previous: 'fa fa-chevron-left',
+      next: 'fa fa-chevron-right',
+      today: 'fa fa-calendar-check-o',
+      clear: 'fa fa-times',
+      close: 'fa fa-calendar-times-o'
+    }
+  });
+
+  $('.inputs-hora').datetimepicker({
+    format: 'h:mm A',
+    allowInputToggle: true,
+    icons: {
+      time: 'fa fa-clock-o',
+      date: 'fa fa-calendar',
+      up: 'fa fa-chevron-up',
+      down: 'fa fa-chevron-down',
+      previous: 'fa fa-chevron-left',
+      next: 'fa fa-chevron-right',
+      today: 'fa fa-calendar-check-o',
+      clear: 'fa fa-times',
+      close: 'fa fa-calendar-times-o'
+    }
   });
 });
 

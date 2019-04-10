@@ -15,23 +15,28 @@
             </thead>
             <tbody>
               <tr>
-                <th>IVA en facturas emitidas al 1%:</td>
+                <th>IVA por facturas emitidas al 1%:</td>
                 <td>  ₡{{ number_format( $data->cc_iva_emitido_1, 0 ) }} </td>
                 <td>-</td>
               </tr>
               <tr>
-                <th>IVA en facturas emitidas al 2%:</td>
+                <th>IVA por facturas emitidas al 2%:</td>
                 <td>  ₡{{ number_format( $data->cc_iva_emitido_2, 0 ) }} </td>
                 <td>-</td>
               </tr>
               <tr>
-                <th>IVA en facturas emitidas al 13%:</td>
+                <th>IVA por facturas emitidas al 13%:</td>
                 <td>  ₡{{ number_format( $data->cc_iva_emitido_3, 0 ) }} </td>
                 <td>-</td>
               </tr>
               <tr>
-                <th>IVA en facturas emitidas al 4%:</td>
+                <th>IVA por facturas emitidas al 4%:</td>
                 <td>  ₡{{ number_format( $data->cc_iva_emitido_4, 0 ) }} </td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <th>Gasto por IVA no acreditable:</td>
+                <td>  ₡{{ number_format( $data->cc_gasto_no_acreditable, 0 ) }} </td>
                 <td>-</td>
               </tr>
               
@@ -95,11 +100,21 @@
                 <td>-</td>
               </tr>
               
+              @if( $data->cc_por_pagar > 0)
               <tr>
                 <th>IVA por pagar a Hacienda</td>
                 <td>-</td>
                 <td>  ₡{{ number_format( $data->cc_por_pagar, 0 ) }} </td>
               </tr>
+              @endif
+              
+              @if( $data->cc_por_pagar < 0)
+              <tr>
+                <th>IVA por cobrar a Hacienda</td>
+                <td>  ₡{{ number_format( abs( $data->cc_por_pagar ) , 0 ) }} </td>
+                <td>-</td>
+              </tr>
+              @endif
               
               <tr class="total">
                 <th>Total:</th>

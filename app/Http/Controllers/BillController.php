@@ -7,6 +7,7 @@ use App\Bill;
 use App\BillItem;
 use App\Company;
 use App\Provider;
+use App\CalculatedTax;
 use App\Exports\BillExport;
 use App\Imports\BillImport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -147,10 +148,13 @@ class BillController extends Controller
           $iva_type = $item['iva_type'];
           $iva_percentage = $item['iva_percentage'];
           $iva_amount = $item['iva_amount'];
+          $porc_identificacion_plena = $item['porc_identificacion_plena'];
           $is_exempt = false;
           
-          $bill->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $is_exempt );
+          $bill->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt );
         }
+        
+        $this->clearBillCache($bill);
       
         return redirect('/facturas-recibidas');
     }
@@ -284,9 +288,10 @@ class BillController extends Controller
           $iva_type = $item['iva_type'];
           $iva_percentage = $item['iva_percentage'];
           $iva_amount = $item['iva_amount'];
+          $porc_identificacion_plena = $item['porc_identificacion_plena'];
           $is_exempt = false;
           
-          $item_modificado = $bill->addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $is_exempt );
+          $item_modificado = $bill->addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt );
 
           array_push( $lids, $item_modificado->id );
         }
@@ -296,7 +301,9 @@ class BillController extends Controller
             $item->delete();
           }
         }
-      
+        
+        $this->clearBillCache($bill);
+        
         return redirect('/facturas-recibidas');
     }
 
@@ -310,6 +317,8 @@ class BillController extends Controller
     {
         $bill = Bill::find($id);
         $this->authorize('update', $bill);
+        
+        $this->clearBillCache($bill);
         
         //Valida que la factura sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
         if( $bill->generation_method != 'M' && $bill->generation_method != 'XLSX' && $bill->generation_method != 'XML' ){
@@ -325,7 +334,7 @@ class BillController extends Controller
     
     
     public function export() {
-        return Excel::download(new BillExport(), 'documentos-emitidos.xlsx');
+        return Excel::download(new BillExport(), 'documentos-recibidos.xlsx');
     }
 
     public function import() {
@@ -365,6 +374,7 @@ class BillController extends Controller
                 [
                     'company_id' => $company->id,
                     'provider_id' => $proveedor->id,
+                    'total' => $row['totaldocumento'],
                     'document_number' => $row['consecutivocomprobante']
                 ]
             );
@@ -416,24 +426,25 @@ class BillController extends Controller
             $item = BillItem::firstOrNew(
                 [
                     'bill_id' => $bill->id,
-                    'item_number' => $row['numerolinea'],
+                    'item_number' => $row['numerolinea'] ? $row['numerolinea'] : 1,
                 ],
                 [
                 'bill_id' => $bill->id,
-                'item_number' => $row['numerolinea'],
+                'item_number' => $row['numerolinea'] ? $row['numerolinea'] : 0,
                 'code' => $row['codigoproducto'],
                 'name' => $row['detalleproducto'],
                 'product_type' => 1,
                 'measure_unit' => $row['unidadmedicion'],
-                'item_count' => $row['cantidad'],
+                'item_count' => $row['cantidad'] ? $row['cantidad'] : 1,
                 'unit_price' => $row['preciounitario'],
                 'subtotal' => $row['subtotallinea'],
                 'total' => $row['totallinea'],
                 'discount_type' => '01',
-                'discount' => $row['montodescuento'],
+                'discount' => $row['montodescuento'] ? $row['montodescuento'] : 0,
                 'discount_reason' => '',
                 'iva_type' => $row['codigoimpuesto'],
-                'iva_amount' => $row['montoiva'],
+                'porc_identificacion_plena' => $row['porcidentificacionplena'] ? $row['porcidentificacionplena'] : 13,
+                'iva_amount' => $row['montoiva'] ? $row['montoiva'] : 0,
                 ]
             );
             
@@ -447,7 +458,7 @@ class BillController extends Controller
             $bill->generated_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision']);
             $bill->due_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision'])->addDays(15);
             
-            
+            $this->clearBillCache($bill);
             
             $bill->save();
             
@@ -464,6 +475,13 @@ class BillController extends Controller
         list($usec, $sec) = explode(" ", microtime());
         return ((float) $usec + (float)$sec);
     }   
+    
+    private function clearBillCache($bill){
+        $month = $bill->generatedDate()->month;
+        $year = $bill->dueDate()->year;
+        CalculatedTax::clearTaxesCache($bill->company_id, $month, $year);
+        CalculatedTax::clearTaxesCache($bill->company_id, 0, $year);
+    }
     
     
 }

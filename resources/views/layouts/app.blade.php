@@ -11,11 +11,18 @@
   
 
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/select2.min.css')}}">
-    <link rel="stylesheet" href="{{mix('assets/styles/css/themes/eva.min.css')}}?v=2.1">
+    <link rel="stylesheet" href="{{mix('assets/styles/css/themes/eva.min.css')}}?v=2.3">
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/perfect-scrollbar.css')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
     
-    <script src="{{mix('assets/js/common-bundle.js')}}?v=2.1"></script>
+    <script src="{{mix('assets/js/common-bundle.js')}}?v=2.3"></script>
+    
+    <style>
+      .inline-form .form-control {
+          display: inline-block;
+          width: auto;
+      }
+    </style>
   
     @yield('header-scripts')
     

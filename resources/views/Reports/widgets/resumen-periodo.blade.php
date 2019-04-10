@@ -19,16 +19,35 @@
         </div>
         <div class="col-md-12 dato-iva acreditable">
             <label><span>IVA acreditable</span></label>
-            <div class="dato">₡{{ number_format( $data->deductable_iva_real, 0 ) }}</div>
+            <div class="dato">₡{{ number_format( $data->iva_deducible_operativo, 0 ) }}</div>
         </div>
         <div class="col-md-12 dato-iva asumido">
             <label><span>IVA por ajustar</span></label>
-            <div class="dato">₡{{ number_format( $data->non_deductable_iva, 0 ) }}</div>
+            <div class="dato">₡{{ number_format( ( $data->iva_no_deducible - $data->iva_acreditable_identificacion_plena ), 0 ) }}</div>
         </div>
-        <div class="col-md-12 dato-iva saldo">
+        
+        @if( $data->iva_acreditable_identificacion_plena > 0)
+        <div class="col-md-12 dato-iva gastado">
+            <label><span style="">Gasto por IVA no acreditable</span></label>
+            <div class="dato">₡{{ number_format( $data->iva_acreditable_identificacion_plena, 0 ) }}</div>
+        </div>
+        @endif
+        
+        @if( $data->balance_operativo > 0)
+          <div class="col-md-12 dato-iva saldo">
             <label><span>IVA por pagar</span></label>
-            <div class="dato">₡{{ number_format( $data->balance_real, 0 ) }}</div>
-        </div>
+            <div class="dato">₡{{ number_format( $data->balance_operativo, 0 ) }}</div>
+          </div>
+        @endif
+        
+        @if( $data->balance_operativo < 0)
+          <div class="col-md-12 dato-iva cobrar">
+            <label><span>IVA por cobrar</span></label>
+            <div class="dato">₡{{ number_format( abs($data->balance_operativo), 0 ) }}</div>
+          </div>
+        @endif
+        
+        
     </div>
  </div>  
  
@@ -91,6 +110,7 @@
     background: #fff;
     padding: .25rem .5rem;
     padding-left: 1rem;
+    font-size: .85em;
 }
 
 .sidebar-dashboard .dato-iva label:after {
@@ -118,14 +138,17 @@
     background: #7B539C;
 }
 
-
 .sidebar-dashboard .dato-iva.asumido label:after {
     background: #332E88;
 }
 
-
+.sidebar-dashboard .dato-iva.cobrar label:after,
 .sidebar-dashboard .dato-iva.saldo label:after {
     background: #EFBF41;
+}
+
+.sidebar-dashboard .dato-iva.gastado label:after {
+    background: #E14A95;
 }
 
 .row.comparacion-prorratas label {

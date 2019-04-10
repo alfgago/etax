@@ -27,7 +27,7 @@
                     
                     <div class="form-group col-md-12 with-button">
                       <label for="cliente">Seleccione el cliente</label>
-                      <select class="form-control" name="client_id" id="client_id" placeholder="" required>
+                      <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
                         <option value=''>-- Seleccione un cliente --</option>
                         @foreach ( auth()->user()->companies->first()->clients as $cliente )
                           <option  {{ $invoice->client_id == $cliente->id ? 'selected' : '' }} value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
@@ -99,39 +99,33 @@
                   </h3>
                 </div>
 
-                 <div class="form-group col-md-4">
+                  <div class="form-group col-md-4">
                     <label for="generated_date">Fecha</label>
-                    <div class="input-group">
-                      <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ $invoice->generatedDate()->format('d/m/Y') }}">
-                      <div class="input-group-append">
-                        <button class="btn btn-secondary" type="button">
-                            <i class="icon-regular i-Calendar-4"></i>
-                        </button>
-                      </div>
+                    <div class='input-group date inputs-fecha'>
+                        <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ $invoice->generatedDate()->format('d/m/Y') }}">
+                        <span class="input-group-addon">
+                          <i class="icon-regular i-Calendar-4"></i>
+                        </span>
                     </div>
                   </div>
 
                   <div class="form-group col-md-4">
                     <label for="hora">Hora</label>
-                    <div class="input-group">
-                      <input id="hora" class="form-control input-hora" name="hora" required value="{{ $invoice->generatedDate()->format('g:i A') }}">
-                      <div class="input-group-append">
-                        <button class="btn btn-secondary" type="button">
-                            <i class="icon-regular i-Clock"></i>
-                        </button>
-                      </div>
+                    <div class='input-group date inputs-hora'>
+                        <input id="hora" class="form-control input-hora" name="hora" required value="{{ $invoice->generatedDate()->format('g:i A') }}">
+                        <span class="input-group-addon">
+                          <i class="icon-regular i-Clock"></i>
+                        </span>
                     </div>
                   </div>
 
                   <div class="form-group col-md-4">
                     <label for="due_date">Fecha de vencimiento</label>
-                    <div class="input-group">
+                    <div class='input-group date inputs-fecha'>
                       <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ $invoice->dueDate()->format('d/m/Y') }}">
-                      <div class="input-group-append">
-                        <button class="btn btn-secondary" type="button">
-                            <i class="icon-regular i-Calendar-4"></i>
-                        </button>
-                      </div>
+                      <span class="input-group-addon">
+                        <i class="icon-regular i-Calendar-4"></i>
+                      </span>
                     </div>
                   </div>
 
@@ -235,6 +229,7 @@
                       </td>
                       <td>{{ \App\Variables::getTipoRepercutidoIVAName($item->iva_type) }}
                         <input type="hidden" class='tipo_iva' name="items[{{ $loop->index }}][iva_type]" value="{{ $item->iva_type }}">
+                        <input type='hidden' class='porc_identificacion_plena' value='0'>
                       </td>
                       <td>{{ $item->subtotal }}
                         <input class="subtotal" type="hidden" name="items[{{ $loop->index }}][subtotal]" value="{{ $item->subtotal }}">
@@ -279,16 +274,18 @@
 @endsection 
 
 @section('header-scripts')
-    <link rel="stylesheet" href="/assets/styles/vendor/pickadate/classic.css">
-    <link rel="stylesheet" href="/assets/styles/vendor/pickadate/classic.date.css">
-    <link rel="stylesheet" href="/assets/styles/vendor/pickadate/classic.time.css">
-@endsection
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker-standalone.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
+
+@endsection 
 
 @section('footer-scripts')
-<script src="/assets/js/vendor/pickadate/picker.js"></script>
-<script src="/assets/js/vendor/pickadate/picker.date.js"></script>
-<script src="/assets/js/vendor/pickadate/picker.time.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 <script src="/assets/js/form-facturas.js"></script>
+
 <script>
 $(document).ready(function(){
   
