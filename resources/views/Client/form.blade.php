@@ -92,7 +92,7 @@
     </div>
     
     <div class="form-group col-md-12">
-      <label for="billing_emails">Correos electrónicos para facturación</label> {{ @$client->billing_emails }}
+      <label for="billing_emails">Correos electrónicos para facturación</label>
       <div class="form-group">
         <div data-no-duplicate="true" data-pre-tags-separator="," data-no-duplicate-text="Correos duplicados" data-type-zone-class="type-zone" 
           data-tag-box-class="tagging" id="billing_emails" data-tags-input-name="billing_emails">{{ @$client->billing_emails }}</div>

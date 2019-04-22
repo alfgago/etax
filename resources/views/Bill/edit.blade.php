@@ -100,6 +100,16 @@
                   </h3>
                 </div>
                 
+                  <div class="form-group col-md-6">
+                    <label for="document_number">Número de documento</label>
+                    <input type="text" class="form-control" name="document_number" id="document_number" value="{{ $bill->document_number }}" required>
+                  </div>
+  
+                  <div class="form-group col-md-6">
+                    <label for="document_key">Clave de factura</label>
+                    <input type="text" class="form-control" name="document_key" id="document_key" value="{{ $bill->document_key }}" >
+                  </div>
+                
                   <div class="form-group col-md-4">
                     <label for="generated_date">Fecha</label>
                     <div class='input-group date inputs-fecha'>
@@ -148,31 +158,42 @@
                 <div class="form-group col-md-6">
                   <label for="payment_type">Método de pago</label>
                   <div class="input-group">
-                    <select id="medio_pago" name="payment_type" class="form-control" required>
-                      <option {{ $bill->sale_condition == '01' ? 'selected' : '' }} value="01" selected>Efectivo</option>
-                      <option {{ $bill->sale_condition == '02' ? 'selected' : '' }} value="02">Tarjeta</option>
-                      <option {{ $bill->sale_condition == '03' ? 'selected' : '' }} value="03">Cheque</option>
-                      <option {{ $bill->sale_condition == '04' ? 'selected' : '' }} value="04">Transferencia-Depósito Bancario</option>
-                      <option {{ $bill->sale_condition == '05' ? 'selected' : '' }} value="05">Recaudado por terceros</option>
-                      <option {{ $bill->sale_condition == '99' ? 'selected' : '' }} value="99">Otros</option>
+                    <select id="medio_pago" name="payment_type" class="form-control" onchange="toggleRetencion();" required>
+                      <option {{ $bill->payment_type == '01' ? 'selected' : '' }} value="01" selected>Efectivo</option>
+                      <option {{ $bill->payment_type == '02' ? 'selected' : '' }} value="02">Tarjeta</option>
+                      <option {{ $bill->payment_type == '03' ? 'selected' : '' }} value="03">Cheque</option>
+                      <option {{ $bill->payment_type == '04' ? 'selected' : '' }} value="04">Transferencia-Depósito Bancario</option>
+                      <option {{ $bill->payment_type == '05' ? 'selected' : '' }} value="05">Recaudado por terceros</option>
+                      <option {{ $bill->payment_type == '99' ? 'selected' : '' }} value="99">Otros</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="form-group col-md-12" id="field-retencion" style="display:none;">
+                  <label for="retention_percent">Porcentaje de retención</label>
+                  <div class="input-group">
+                    <select id="retention_percent" name="retention_percent" class="form-control" required>
+                      <option value="6" {{ $bill->retention_percent == 6 ? 'selected' : '' }}>6%</option>
+                      <option value="3" {{ $bill->retention_percent == 3 ? 'selected' : '' }}>3%</option>
+                      <option value="0" {{ $bill->retention_percent == 0 ? 'selected' : '' }}>Sin retención</option>
                     </select>
                   </div>
                 </div>
 
-                  <div class="form-group col-md-6">
-                    <label for="other_reference">Referencia</label>
-                    <input type="text" class="form-control" name="other_reference" id="referencia" value="{{ $bill->other_reference }}" >
-                  </div>
+                <div class="form-group col-md-6">
+                  <label for="other_reference">Referencia</label>
+                  <input type="text" class="form-control" name="other_reference" id="referencia" value="{{ $bill->other_reference }}" >
+                </div>
 
-                  <div class="form-group col-md-6">
-                    <label for="buy_order">Orden de compra</label>
-                    <input type="text" class="form-control" name="buy_order" id="orden_compra" value="{{ $bill->buy_order }}" >
-                  </div>
+                <div class="form-group col-md-6">
+                  <label for="buy_order">Orden de compra</label>
+                  <input type="text" class="form-control" name="buy_order" id="orden_compra" value="{{ $bill->buy_order }}" >
+                </div>
 
-                  <div class="form-group col-md-12">
-                    <label for="description">Notas</label>
-                    <input type="text" class="form-control" name="description" id="notas" placeholder="" value="{{ $bill->description }}">
-                  </div>
+                <div class="form-group col-md-12">
+                  <label for="description">Notas</label>
+                  <input type="text" class="form-control" name="description" id="notas" placeholder="" value="{{ $bill->description }}">
+                </div>
 
               </div>
             </div>
@@ -242,6 +263,7 @@
                       <td>
                         {{ $item->total }}
                         <input class="total" type="hidden" name="items[{{ $loop->index }}][total]" value="{{ $item->total }}">
+                        <input class="is_identificacion_especifica" type="hidden" name="items[{{ $loop->index }}][is_identificacion_especifica]" value="{{ $item->is_identificacion_especifica }}">
                       </td>
                       <td class='acciones'>
                         <span title='Editar linea' class='btn-editar-item text-success mr-2' onclick="abrirPopup('linea-popup'); cargarFormItem({{ $loop->index }});"><i class='nav-icon i-Pen-2'></i> </span> 
@@ -282,6 +304,16 @@
 <script src="/assets/js/form-facturas.js"></script>
 
 <script>
+
+function toggleRetencion() {
+  var metodo = $("#medio_pago").val();
+  if( metodo == '02' ){
+    $("#field-retencion").show();
+  }else {
+    $("#field-retencion").hide();
+  }
+}
+
 $(document).ready(function(){
   
   $('#tipo_iva').val('3');
@@ -301,6 +333,8 @@ $(document).ready(function(){
   $('#subtotal').val(subtotal);
   $('#monto_iva').val(monto_iva);
   $('#total').val(total);
+  
+  toggleRetencion();
   
 });
 </script>

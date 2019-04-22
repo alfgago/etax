@@ -10,12 +10,14 @@ window.cerrarPopup = function( id ){
 $( document ).ready(function() {
 	
     $('.select-search').select2({
-	  templateResult: function (data, container) {
-	    if (data.element) {
-	      $(container).addClass($(data.element).attr("class"));
-	    }
-	    return data.text;
-	  }
-	});
+		  templateResult: function (data, container) {
+		    if (data.element) {
+		      $(container).addClass($(data.element).attr("class"));
+		    }
+		    return data.text;
+		  }
+    });
+    
+	  $('.select2-tags').select2();
 	
 });

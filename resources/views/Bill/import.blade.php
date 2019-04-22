@@ -44,11 +44,12 @@
 			  		<li>SubtotalLinea</li>
 			  		<li>MontoDescuento</li>
 			  		<li>CodigoImpuesto</li>
+			  		<li>PorcIdentificacionPlena</li>
 			  		<li>MontoIVA</li>
 			  		<li>TotalLinea</li>
 			  		<li>TotalDocumento</li>
 			  	</ul>
-			  	* El orden puede variar, mantener nombres de columnas. Debe utilizar una fila por cada linea de factura.
+			  	* El orden puede variar, pero debe mantener nombres de columnas. Debe utilizar una fila por cada linea de factura.
 			  	<br>
 			  	<a href="{{asset('assets/files/PlantillaLineasFacturaRecibida.xlsx')}}" class="btn btn-link" title="Descargar plantilla" download><i class="fa fa-file-excel-o" aria-hidden="true"></i> Descargar plantilla</a>
 			  </div>

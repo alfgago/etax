@@ -5,6 +5,13 @@
 @endsection
 
 @section('content') 
+
+<?php 
+    $company = auth()->user()->companies->first();
+    $numero_doc = ((int)$company->document_number) + 1;
+    $document_number = str_pad($numero_doc, 20, '0', STR_PAD_LEFT);
+?>
+
 <div class="row form-container">
   <div class="col-md-12">
                           
@@ -30,7 +37,7 @@
                       <label for="provider_id">Seleccione el proveedor</label>
                       <select class="form-control select-search" name="provider_id" id="provider_id" placeholder="" required>
                         <option value='' selected>-- Seleccione un proveedor --</option>
-                        @foreach ( auth()->user()->companies->first()->providers as $proveedor )
+                        @foreach ( $company->providers as $proveedor )
                           <option value="{{ $proveedor->id }}" >{{ $proveedor->id_number }} - {{ $proveedor->first_name }}</option>
                         @endforeach
                       </select>
@@ -99,6 +106,16 @@
                     Datos generales
                   </h3>
                 </div>
+
+                <div class="form-group col-md-6">
+                  <label for="document_number">Número de documento</label>
+                  <input type="text" class="form-control" name="document_number" id="document_number" value="" placeholder="" required>
+                </div>
+
+                <div class="form-group col-md-6">
+                  <label for="document_key">Clave de factura</label>
+                  <input type="text" class="form-control" name="document_key" id="document_key" value="" placeholder="" >
+                </div>
                 
                 <div class="form-group col-md-4">
                     <label for="generated_date">Fecha</label>
@@ -148,13 +165,24 @@
                   <div class="form-group col-md-6">
                     <label for="payment_type">Método de pago</label>
                     <div class="input-group">
-                      <select id="medio_pago" name="payment_type" class="form-control" required>
+                      <select id="medio_pago" name="payment_type" class="form-control" onchange="toggleRetencion();" required>
                         <option value="01" selected>Efectivo</option>
                         <option value="02">Tarjeta</option>
                         <option value="03">Cheque</option>
                         <option value="04">Transferencia-Depósito Bancario</option>
                         <option value="05">Recaudado por terceros</option>
                         <option value="99">Otros</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group col-md-12" id="field-retencion" style="display:none;">
+                    <label for="retention_percent">Porcentaje de retención</label>
+                    <div class="input-group">
+                      <select id="retention_percent" name="retention_percent" class="form-control" required>
+                        <option value="6" selected>6%</option>
+                        <option value="3">3%</option>
+                        <option value="0" >Sin retención</option>
                       </select>
                     </div>
                   </div>
@@ -248,9 +276,20 @@
 <script src="/assets/js/form-facturas.js"></script>
 
 <script>
+
 $(document).ready(function(){
   $('#tipo_iva').val('003');
 });
+
+function toggleRetencion() {
+  var metodo = $("#medio_pago").val();
+  if( metodo == '02' ){
+    $("#field-retencion").show();
+  }else {
+    $("#field-retencion").hide();
+  }
+}
+
 </script>
 
 

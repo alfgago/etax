@@ -25,6 +25,7 @@ mix.combine([
     'resources/gull/assets/js/vendor/bootstrap.bundle.min.js',
     'resources/gull/assets/js/vendor/perfect-scrollbar.min.js',
     'resources/gull/assets/js/vendor/select2.min.js',
+    'resources/gull/assets/js/vendor/sweetalert2.min.js',
     'resources/laravel/js/utility.js', 
     'public/assets/js/etax-utility.js',
 ], 'public/assets/js/common-bundle.js');
@@ -32,5 +33,3 @@ mix.combine([
 mix.js([
     'resources/gull/assets/js/script.js',
 ], 'public/assets/js/script.js');
-
-//mix.js('resources/laravel/js/form-facturas.js', 'public/assets/js/form-facturas.js');

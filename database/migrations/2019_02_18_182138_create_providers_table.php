@@ -34,6 +34,8 @@ class CreateProvidersTable extends Migration
             $table->string('phone_area')->nullable();
             $table->string('phone')->nullable();
             $table->boolean('es_exento')->default(false);
+            
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
 
             $table->timestamps();
         });

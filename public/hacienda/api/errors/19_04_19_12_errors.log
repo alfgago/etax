@@ -1,0 +1,37 @@
+[e] 19-04-19 12:04:44 @ File Content Input: 
+[d] 19-04-19 12:04:33 @ Booting up
+[d] 19-04-19 12:04:33 @ Loading all core modules
+[d] 19-04-19 12:04:33 @ Loading module: cala
+[d] 19-04-19 12:04:33 @ Loading in path: ../api/modules/cala/module.php
+[d] 19-04-19 12:04:33 @ Including file: ../api/modules/cala/module.php
+[d] 19-04-19 12:04:33 @ Module was booted too
+[i] 19-04-19 12:04:33 @ Cala was booted...
+[d] 19-04-19 12:04:33 @ Loading module: db
+[d] 19-04-19 12:04:33 @ Loading in path: ../api/modules/db/module.php
+[d] 19-04-19 12:04:33 @ Including file: ../api/modules/db/module.php
+[d] 19-04-19 12:04:33 @ Module was booted too
+[e] 19-04-19 12:04:33 @ Connection failed: php_network_getaddresses: getaddrinfo failed: Name or service not known
+[d] 19-04-19 12:04:33 @ Loading module: users
+[d] 19-04-19 12:04:33 @ Loading in path: ../api/modules/users/module.php
+[d] 19-04-19 12:04:33 @ Including file: ../api/modules/users/module.php
+[d] 19-04-19 12:04:33 @ Module was booted too
+[d] 19-04-19 12:04:33 @ Loading user
+[d] 19-04-19 12:04:33 @ SELECT *
+    FROM users
+     WHERE userName = ''
+[e] 19-04-19 12:04:33 @ DB Connection error: php_network_getaddresses: getaddrinfo failed: Name or service not known
+[d] 19-04-19 12:04:33 @ Loading module: crypto
+[d] 19-04-19 12:04:33 @ Loading in path: ../api/modules/crypto/module.php
+[d] 19-04-19 12:04:33 @ Including file: ../api/modules/crypto/module.php
+[d] 19-04-19 12:04:33 @ Module was booted too
+[d] 19-04-19 12:04:33 @ Loading in path: ../api/contrib/ejemplo/module.php
+[d] 19-04-19 12:04:33 @ Including file: ../api/contrib/ejemplo/module.php
+[d] 19-04-19 12:04:33 @ Module was booted too
+[d] 19-04-19 12:04:33 @ Function found
+[d] 19-04-19 12:04:33 @ Looking for path: hola
+[d] 19-04-19 12:04:33 @ Found path: hola
+[d] 19-04-19 12:04:33 @ Loading in path: ../api/contrib/ejemplo/ejemplo.php
+[d] 19-04-19 12:04:33 @ Including file: ../api/contrib/ejemplo/ejemplo.php
+[d] 19-04-19 12:04:33 @ Module was booted too
+[d] 19-04-19 12:04:33 @ Found function: module_hola
+[d] 19-04-19 12:04:33 @ Finished! Memory used: Mb0.748904<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

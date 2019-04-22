@@ -29,7 +29,7 @@
         @endforeach
       </select>
     </div>
-
+    
     <div class="form-group col-md-11">
       <label for="tipo_iva">Tipo de IVA</label>
       <select class="form-control" id="tipo_iva" >
@@ -43,6 +43,15 @@
       <label for="nombre_cliente">% IVA</label>
       <input type="text" class="form-control" id="porc_iva" placeholder="13" value="13" readonly>
     </div>
+    
+    <div class="form-group col-md-12 inline-form inline-checkbox">
+      <label for="p1">
+        <span>¿Requiere ayuda adicional para elegir el tipo de IVA?</span>
+        <input type="checkbox" class="form-control" id="p1" placeholder="" readonly="true" onchange="toggleAyudaTipoIVa();" >
+      </label>
+    </div>
+    
+    @include( 'Bill.preguntas-ayuda' )
     
     <div class="form-group col-md-12 hidden" id="field_porc_identificacion_plena">
       <label for="porc_identificacion_plena">Porcentaje al que saldrá la venta</label>
@@ -99,6 +108,13 @@
     <div class="form-group col-md-3">
       <label for="nombre_proveedor">Total item</label>
       <input type="text" class="form-control" id="item_total" placeholder="" readonly="true" >
+    </div>
+    
+    <div class="form-group col-md-12 inline-form inline-checkbox hidden">
+      <label for="is_identificacion_especifica">
+        <span>¿Gastos corresponden a compras con identificación específica?</span>
+        <input type="checkbox" class="form-control" id="is_identificacion_especifica" placeholder="" readonly="true" >
+      </label>
     </div>
 
     <div class="form-group col-md-12">

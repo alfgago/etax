@@ -98,6 +98,16 @@
                     Datos generales
                   </h3>
                 </div>
+                
+                  <div class="form-group col-md-6">
+                    <label for="document_number">Número de documento</label>
+                    <input type="text" class="form-control" name="document_number" id="document_number" value="{{ $invoice->document_number }}" required>
+                  </div>
+  
+                  <div class="form-group col-md-6">
+                    <label for="document_key">Clave de factura</label>
+                    <input type="text" class="form-control" name="document_key" id="document_key" value="{{ $invoice->document_key }}" >
+                  </div>
 
                   <div class="form-group col-md-4">
                     <label for="generated_date">Fecha</label>
@@ -241,6 +251,7 @@
                       <td>
                         {{ $item->total }}
                         <input class="total" type="hidden" name="items[{{ $loop->index }}][total]" value="{{ $item->total }}">
+                        <input class="is_identificacion_especifica" type="hidden" name="items[{{ $loop->index }}][is_identificacion_especifica]" value="{{ $item->is_identificacion_especifica }}">
                       </td>
                       <td class='acciones'>
                         <span title='Editar linea' class='btn-editar-item text-success mr-2' onclick="abrirPopup('linea-popup'); cargarFormItem({{ $loop->index }});"><i class='nav-icon i-Pen-2'></i> </span> 
@@ -259,7 +270,6 @@
           <div class="btn-holder hidden">
             <button id="btn-submit" type="submit" class="btn btn-primary">Guardar factura</button>
             <button type="submit" class="btn btn-primary">Enviar factura electrónica</button>
-            <button type="submit" class="btn btn-primary">Programar factura</button>
           </div>
 
         </form>

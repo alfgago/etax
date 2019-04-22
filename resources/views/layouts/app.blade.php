@@ -5,24 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="shortcut icon" type="image/png" href="{{asset('assets/images/favicon.ico')}}"/>
      <!-- CSRF Token -->
-     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title') | eTax </title>
   
 
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/select2.min.css')}}">
-    <link rel="stylesheet" href="{{mix('assets/styles/css/themes/eva.min.css')}}?v=2.3">
-    <link rel="stylesheet" href="{{asset('assets/styles/vendor/perfect-scrollbar.css')}}">
+    <link rel="stylesheet" href="{{asset('assets/styles/vendor/sweetalert2.min.css')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="{{asset('assets/styles/vendor/perfect-scrollbar.css')}}">
+    <link rel="stylesheet" href="{{mix('assets/styles/css/themes/eva.min.css')}}?v=2.5">
     
-    <script src="{{mix('assets/js/common-bundle.js')}}?v=2.3"></script>
-    
-    <style>
-      .inline-form .form-control {
-          display: inline-block;
-          width: auto;
-      }
-    </style>
+    <script src="{{mix('assets/js/common-bundle.js')}}?v=2.4"></script>
   
     @yield('header-scripts')
     

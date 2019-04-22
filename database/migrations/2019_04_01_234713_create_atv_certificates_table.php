@@ -21,8 +21,11 @@ class CreateAtvCertificatesTable extends Migration
             $table->string('password'); 
             $table->string('key_url'); 
             $table->string('pin'); 
+            
             $table->string('generated_date')->nullable();
             $table->string('due_date')->nullable();
+            
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             
             $table->timestamps();
         });

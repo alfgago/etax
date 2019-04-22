@@ -44,6 +44,15 @@
       <input type="text" class="form-control" id="porc_iva" placeholder="13" value="13" readonly>
     </div>
     
+    <div class="form-group col-md-12 inline-form inline-checkbox">
+      <label for="p1">
+        <span>¿Requiere ayuda adicional para elegir el tipo de IVA?</span>
+        <input type="checkbox" class="form-control" id="p1" placeholder="" readonly="true" onchange="toggleAyudaTipoIVa();" >
+      </label>
+    </div>
+    
+    @include( 'Invoice.preguntas-ayuda' )
+    
     <div class="form-group col-md-12 hidden" id="field_porc_identificacion_plena">
       <label for="porc_identificacion_plena">Porcentaje al que saldrá la venta</label>
       <select class="form-control" id="porc_identificacion_plena" >
@@ -99,6 +108,13 @@
     <div class="form-group col-md-3">
       <label for="nombre_proveedor">Total item</label>
       <input type="text" class="form-control" id="item_total" placeholder="" readonly="true" >
+    </div>
+    
+    <div class="form-group col-md-12 inline-form inline-checkbox">
+      <label for="is_identificacion_especifica">
+        <span>¿Asociado a compras con identificación específica?</span>
+        <input type="checkbox" class="form-control" id="is_identificacion_especifica" placeholder="" readonly="true" >
+      </label>
     </div>
 
     <div class="form-group col-md-12">

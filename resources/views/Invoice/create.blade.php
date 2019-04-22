@@ -100,6 +100,16 @@
                   </h3>
                 </div>
 
+                  <div class="form-group col-md-6">
+                    <label for="document_number">Número de documento</label>
+                    <input type="text" class="form-control" name="document_number" id="document_number" value="" required>
+                  </div>
+  
+                  <div class="form-group col-md-6">
+                    <label for="document_key">Clave de factura</label>
+                    <input type="text" class="form-control" name="document_key" id="document_key" value="" >
+                  </div>
+
                   <div class="form-group col-md-4">
                     <label for="generated_date">Fecha</label>
                     <div class='input-group date inputs-fecha'>
@@ -218,7 +228,6 @@
           <div class="btn-holder hidden">
             <button id="btn-submit" type="submit" class="btn btn-primary">Guardar factura</button>
             <button type="submit" class="btn btn-primary" disabled>Enviar factura electrónica</button>
-            <button type="submit" class="btn btn-primary" disabled>Programar factura</button>
           </div>
 
 

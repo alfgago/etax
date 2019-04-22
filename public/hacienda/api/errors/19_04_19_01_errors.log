@@ -1,0 +1,105 @@
+[d] 19-04-19 01:04:12 @ Booting up
+[d] 19-04-19 01:04:12 @ Loading all core modules
+[d] 19-04-19 01:04:12 @ Loading module: cala
+[d] 19-04-19 01:04:12 @ Loading in path: ../api/modules/cala/module.php
+[d] 19-04-19 01:04:12 @ Including file: ../api/modules/cala/module.php
+[d] 19-04-19 01:04:12 @ Module was booted too
+[i] 19-04-19 01:04:12 @ Cala was booted...
+[d] 19-04-19 01:04:12 @ Loading module: db
+[d] 19-04-19 01:04:12 @ Loading in path: ../api/modules/db/module.php
+[d] 19-04-19 01:04:12 @ Including file: ../api/modules/db/module.php
+[d] 19-04-19 01:04:12 @ Module was booted too
+[e] 19-04-19 01:04:12 @ Connection failed: php_network_getaddresses: getaddrinfo failed: Name or service not known
+[d] 19-04-19 01:04:12 @ Loading module: users
+[d] 19-04-19 01:04:12 @ Loading in path: ../api/modules/users/module.php
+[d] 19-04-19 01:04:12 @ Including file: ../api/modules/users/module.php
+[d] 19-04-19 01:04:12 @ Module was booted too
+[d] 19-04-19 01:04:12 @ Loading user
+[d] 19-04-19 01:04:12 @ SELECT *
+    FROM users
+     WHERE userName = ''
+[e] 19-04-19 01:04:12 @ DB Connection error: php_network_getaddresses: getaddrinfo failed: Name or service not known
+[d] 19-04-19 01:04:12 @ Loading module: crypto
+[d] 19-04-19 01:04:12 @ Loading in path: ../api/modules/crypto/module.php
+[d] 19-04-19 01:04:12 @ Including file: ../api/modules/crypto/module.php
+[d] 19-04-19 01:04:12 @ Module was booted too
+[d] 19-04-19 01:04:12 @ Loading in path: ../api/contrib/ejemplo/module.php
+[d] 19-04-19 01:04:12 @ Including file: ../api/contrib/ejemplo/module.php
+[d] 19-04-19 01:04:12 @ Module was booted too
+[d] 19-04-19 01:04:12 @ Function found
+[d] 19-04-19 01:04:12 @ Looking for path: un_usuario
+[d] 19-04-19 01:04:12 @ Found path: un_usuario
+[d] 19-04-19 01:04:12 @ Missing param: nombre
+[d] 19-04-19 01:04:12 @ Finished! Memory used: Mb0.389472<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+[d] 19-04-19 01:04:35 @ Booting up
+[d] 19-04-19 01:04:35 @ Loading all core modules
+[d] 19-04-19 01:04:35 @ Loading module: cala
+[d] 19-04-19 01:04:35 @ Loading in path: ../api/modules/cala/module.php
+[d] 19-04-19 01:04:35 @ Including file: ../api/modules/cala/module.php
+[d] 19-04-19 01:04:35 @ Module was booted too
+[i] 19-04-19 01:04:35 @ Cala was booted...
+[d] 19-04-19 01:04:35 @ Loading module: db
+[d] 19-04-19 01:04:35 @ Loading in path: ../api/modules/db/module.php
+[d] 19-04-19 01:04:35 @ Including file: ../api/modules/db/module.php
+[d] 19-04-19 01:04:35 @ Module was booted too
+[e] 19-04-19 01:04:35 @ Connection failed: php_network_getaddresses: getaddrinfo failed: Name or service not known
+[d] 19-04-19 01:04:35 @ Loading module: users
+[d] 19-04-19 01:04:35 @ Loading in path: ../api/modules/users/module.php
+[d] 19-04-19 01:04:35 @ Including file: ../api/modules/users/module.php
+[d] 19-04-19 01:04:35 @ Module was booted too
+[d] 19-04-19 01:04:35 @ Loading user
+[d] 19-04-19 01:04:35 @ SELECT *
+    FROM users
+     WHERE userName = ''
+[e] 19-04-19 01:04:35 @ DB Connection error: php_network_getaddresses: getaddrinfo failed: Name or service not known
+[d] 19-04-19 01:04:35 @ Loading module: crypto
+[d] 19-04-19 01:04:35 @ Loading in path: ../api/modules/crypto/module.php
+[d] 19-04-19 01:04:35 @ Including file: ../api/modules/crypto/module.php
+[d] 19-04-19 01:04:35 @ Module was booted too
+[d] 19-04-19 01:04:35 @ Loading in path: ../api/contrib/ejemplo/module.php
+[d] 19-04-19 01:04:35 @ Including file: ../api/contrib/ejemplo/module.php
+[d] 19-04-19 01:04:35 @ Module was booted too
+[d] 19-04-19 01:04:35 @ Function found
+[d] 19-04-19 01:04:35 @ Looking for path: un_usuario
+[d] 19-04-19 01:04:35 @ Found path: un_usuario
+[d] 19-04-19 01:04:35 @ Loading in path: ../api/contrib/ejemplo/ejemplo.php
+[d] 19-04-19 01:04:35 @ Including file: ../api/contrib/ejemplo/ejemplo.php
+[d] 19-04-19 01:04:35 @ Module was booted too
+[d] 19-04-19 01:04:35 @ Found function: unUsuario
+[d] 19-04-19 01:04:35 @ Finished! Memory used: Mb0.389872<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+[d] 19-04-19 01:04:38 @ Booting up
+[d] 19-04-19 01:04:38 @ Loading all core modules
+[d] 19-04-19 01:04:38 @ Loading module: cala
+[d] 19-04-19 01:04:38 @ Loading in path: ../api/modules/cala/module.php
+[d] 19-04-19 01:04:38 @ Including file: ../api/modules/cala/module.php
+[d] 19-04-19 01:04:38 @ Module was booted too
+[i] 19-04-19 01:04:38 @ Cala was booted...
+[d] 19-04-19 01:04:38 @ Loading module: db
+[d] 19-04-19 01:04:38 @ Loading in path: ../api/modules/db/module.php
+[d] 19-04-19 01:04:38 @ Including file: ../api/modules/db/module.php
+[d] 19-04-19 01:04:38 @ Module was booted too
+[e] 19-04-19 01:04:38 @ Connection failed: php_network_getaddresses: getaddrinfo failed: Name or service not known
+[d] 19-04-19 01:04:38 @ Loading module: users
+[d] 19-04-19 01:04:38 @ Loading in path: ../api/modules/users/module.php
+[d] 19-04-19 01:04:38 @ Including file: ../api/modules/users/module.php
+[d] 19-04-19 01:04:38 @ Module was booted too
+[d] 19-04-19 01:04:38 @ Loading user
+[d] 19-04-19 01:04:38 @ SELECT *
+    FROM users
+     WHERE userName = ''
+[e] 19-04-19 01:04:38 @ DB Connection error: php_network_getaddresses: getaddrinfo failed: Name or service not known
+[d] 19-04-19 01:04:38 @ Loading module: crypto
+[d] 19-04-19 01:04:38 @ Loading in path: ../api/modules/crypto/module.php
+[d] 19-04-19 01:04:38 @ Including file: ../api/modules/crypto/module.php
+[d] 19-04-19 01:04:38 @ Module was booted too
+[d] 19-04-19 01:04:38 @ Loading in path: ../api/contrib/ejemplo/module.php
+[d] 19-04-19 01:04:38 @ Including file: ../api/contrib/ejemplo/module.php
+[d] 19-04-19 01:04:38 @ Module was booted too
+[d] 19-04-19 01:04:38 @ Function found
+[d] 19-04-19 01:04:38 @ Looking for path: un_usuario
+[d] 19-04-19 01:04:38 @ Found path: un_usuario
+[d] 19-04-19 01:04:38 @ Loading in path: ../api/contrib/ejemplo/ejemplo.php
+[d] 19-04-19 01:04:38 @ Including file: ../api/contrib/ejemplo/ejemplo.php
+[d] 19-04-19 01:04:38 @ Module was booted too
+[d] 19-04-19 01:04:38 @ Found function: unUsuario
+[d] 19-04-19 01:04:38 @ Finished! Memory used: Mb0.389864<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

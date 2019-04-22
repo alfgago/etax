@@ -16,110 +16,110 @@
             <tbody>
               <tr>
                 <th>IVA por facturas emitidas al 1%:</td>
-                <td>  ₡{{ number_format( $data->cc_iva_emitido_1, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_iva_emitido_1, 0 ) }} </td>
                 <td>-</td>
               </tr>
               <tr>
                 <th>IVA por facturas emitidas al 2%:</td>
-                <td>  ₡{{ number_format( $data->cc_iva_emitido_2, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_iva_emitido_2, 0 ) }} </td>
                 <td>-</td>
               </tr>
               <tr>
                 <th>IVA por facturas emitidas al 13%:</td>
-                <td>  ₡{{ number_format( $data->cc_iva_emitido_3, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_iva_emitido_3, 0 ) }} </td>
                 <td>-</td>
               </tr>
               <tr>
                 <th>IVA por facturas emitidas al 4%:</td>
-                <td>  ₡{{ number_format( $data->cc_iva_emitido_4, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_iva_emitido_4, 0 ) }} </td>
                 <td>-</td>
               </tr>
               <tr>
                 <th>Gasto por IVA no acreditable:</td>
-                <td>  ₡{{ number_format( $data->cc_gasto_no_acreditable, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_gasto_no_acreditable, 0 ) }} </td>
                 <td>-</td>
               </tr>
               
               <tr>
                 <th>IVA por fact. recibidas al 1% de bienes y servicios</td>
                 <td>-</td>
-                <td>  ₡{{ number_format( $data->cc_bs_1, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_bs_1, 0 ) }} </td>
               </tr>
               
               <tr>
                 <th>IVA por fact. recibidas al 2% de bienes y servicios</td>
                 <td>-</td>
-                <td>  ₡{{ number_format( $data->cc_bs_2, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_bs_2, 0 ) }} </td>
               </tr>
               
               <tr>
                 <th>IVA por fact. recibidas al 13% de bienes y servicios</td>
                 <td>-</td>
-                <td>  ₡{{ number_format( $data->cc_bs_3, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_bs_3, 0 ) }} </td>
               </tr>
               
               <tr>
                 <th>IVA por fact. recibidas al 4% de bienes y servicios</td>
                 <td>-</td>
-                <td>  ₡{{ number_format( $data->cc_bs_4, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_bs_4, 0 ) }} </td>
               </tr>
               
               <tr>
                 <th>IVA por fact. recibidas al 1% de propiedad, planta y equipo</td>
                 <td>-</td>
-                <td>  ₡{{ number_format( $data->cc_ppp_1, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_ppp_1, 0 ) }} </td>
               </tr>
               
               <tr>
                 <th>IVA por fact. recibidas al 2% de propiedad, planta y equipo</td>
                 <td>-</td>
-                <td>  ₡{{ number_format( $data->cc_ppp_2, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_ppp_2, 0 ) }} </td>
               </tr>
               
               <tr>
                 <th>IVA por fact. recibidas al 13% de propiedad, planta y equipo</td>
                 <td>-</td>
-                <td>  ₡{{ number_format( $data->cc_ppp_3, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_ppp_3, 0 ) }} </td>
               </tr>
               
               <tr>
                 <th>IVA por fact. recibidas al 4% de propiedad, planta y equipo</td>
                 <td>-</td>
-                <td>  ₡{{ number_format( $data->cc_ppp_4, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_ppp_4, 0 ) }} </td>
               </tr>
               
               <tr>
                 <th>IVA por ajustar de bienes y servicios:</td>
-                <td>  ₡{{ number_format( $data->cc_ajuste_bs, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_ajuste_bs, 0 ) }} </td>
                 <td>-</td>
               </tr>
               
               <tr>
                 <th>IVA por ajustar de propiedad, planta y equipo:</td>
-                <td>  ₡{{ number_format( $data->cc_ajuste_ppp, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_ajuste_ppp, 0 ) }} </td>
                 <td>-</td>
               </tr>
               
-              @if( $data->cc_por_pagar > 0)
+              @if( $data->book->cc_por_pagar > 0)
               <tr>
                 <th>IVA por pagar a Hacienda</td>
                 <td>-</td>
-                <td>  ₡{{ number_format( $data->cc_por_pagar, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_por_pagar, 0 ) }} </td>
               </tr>
               @endif
               
-              @if( $data->cc_por_pagar < 0)
+              @if( $data->book->cc_por_pagar < 0)
               <tr>
                 <th>IVA por cobrar a Hacienda</td>
-                <td>  ₡{{ number_format( abs( $data->cc_por_pagar ) , 0 ) }} </td>
+                <td>  ₡{{ number_format( abs( $data->book->cc_por_pagar ) , 0 ) }} </td>
                 <td>-</td>
               </tr>
               @endif
               
               <tr class="total">
                 <th>Total:</th>
-                <td>  ₡{{ number_format( $data->cc_sum1, 0 ) }} </td>
-                <td>  ₡{{ number_format( $data->cc_sum2, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_sum1, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_sum2, 0 ) }} </td>
               </tr>
             </tbody>
           </table>

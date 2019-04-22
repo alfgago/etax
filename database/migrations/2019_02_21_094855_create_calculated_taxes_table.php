@@ -17,43 +17,73 @@ class CreateCalculatedTaxesTable extends Migration
             $table->bigIncrements('id');
           
             $table->unsignedBigInteger('company_id');
-            $table->unsignedBigInteger('book_id')->nullable();
             
-            $table->string('month');
-            $table->string('year');
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             
-            $table->boolean('is_cumulative')->default(false);
-            $table->boolean('is_final')->default(false);
-          
-            $table->double('prorrata');
-          
-            $table->double('count_invoices');
-            $table->double('count_invoice_items');
-            $table->double('count_bills');
-            $table->double('count_bill_items');
-          
-            $table->double('invoices_total');
-            $table->double('bills_total');
-          
-            $table->double('invoices_subtotal');
-            $table->double('bills_subtotal');
-          
-            $table->double('invoices_total_exempt');
-            $table->double('deductable_iva');
-            $table->double('non_deductable_iva');
-            $table->double('total_invoice_iva');
-            $table->double('total_bill_iva');
-            $table->double('balance');
-            $table->double('balance_real');
-            $table->double('iva_deducible_anterior');
-            $table->double('last_prorrata');
-            $table->double('last_balance');
-          
-            $table->double('ratio1');
-            $table->double('ratio2');
-            $table->double('ratio3');
-            $table->double('ratio4');
-          
+            $table->integer('month');
+            $table->integer('year');
+            
+            $table->boolean('is_rectification')->default(false);
+            $table->boolean('is_closed')->default(false);
+            $table->boolean('is_final')->default(true);
+            
+            $table->double('count_invoices')->nullable();
+            $table->double('count_bills')->nullable();
+            
+            $table->double('invoices_total')->nullable();
+            $table->double('invoices_subtotal')->nullable();
+            $table->double('total_invoice_iva')->nullable();
+            $table->double('total_clientes_contado_exp')->nullable();
+            $table->double('total_clientes_credito_exp')->nullable();
+            $table->double('total_clientes_contado')->nullable();
+            $table->double('total_clientes_credito')->nullable();
+            $table->double('sum_repercutido1')->nullable();
+            $table->double('sum_repercutido2')->nullable();
+            $table->double('sum_repercutido3')->nullable();
+            $table->double('sum_repercutido4')->nullable();
+            $table->double('sum_repercutido_exento_con_credito')->nullable();
+            $table->double('sum_repercutido_exento_sin_credito')->nullable();
+            
+            $table->double('bills_total')->nullable();
+            $table->double('bills_subtotal')->nullable();
+            $table->double('total_bill_iva')->nullable();
+            $table->double('bases_identificacion_plena')->nullable();
+            $table->double('bases_no_deducibles')->nullable();
+            $table->double('iva_acreditable_identificacion_plena')->nullable();
+            $table->double('iva_no_acreditable_identificacion_plena')->nullable();
+            $table->double('total_proveedores_contado')->nullable();
+            $table->double('total_proveedores_credito')->nullable();
+            $table->double('iva_retenido')->nullable();
+            
+            $table->double('numerador_prorrata')->nullable();
+            $table->double('denumerador_prorrata')->nullable();
+            $table->double('prorrata')->nullable();
+            $table->double('prorrata_operativa')->nullable();
+            $table->double('subtotal_para_cfdp')->nullable();
+            $table->double('cfdp')->nullable();
+            $table->double('iva_deducible_estimado')->nullable();
+            $table->double('balance_estimado')->nullable();
+            $table->double('iva_deducible_operativo')->nullable();
+            $table->double('balance_operativo')->nullable();
+            $table->double('iva_no_deducible')->nullable();
+            $table->double('iva_por_cobrar')->nullable();
+            $table->double('iva_por_pagar')->nullable();
+            $table->double('ratio1')->nullable();
+            $table->double('ratio2')->nullable();
+            $table->double('ratio3')->nullable();
+            $table->double('ratio4')->nullable();
+            $table->double('fake_ratio1')->nullable();
+            $table->double('fake_ratio2')->nullable();
+            $table->double('fake_ratio3')->nullable();
+            $table->double('fake_ratio4')->nullable();
+            $table->double('fake_ratio_exento_sin_credito')->nullable();
+            $table->double('fake_ratio_exento_con_credito')->nullable();
+            $table->double('bases_ventas_con_identificacion')->nullable();
+            $table->double('ivas_ventas_con_identificacion')->nullable();
+            
+            $table->double('saldo_favor')->nullable();
+            $table->double('saldo_favor_anterior')->nullable();
+
             //Debitos
             $table->double('b001')->default(0);
             $table->double('i001')->default(0);
@@ -204,6 +234,6 @@ class CreateCalculatedTaxesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('calculated_taxes');
+        Schema::dropIfExists('calculated_taxes')->nullable();
     }
 }

@@ -1,15 +1,15 @@
 
-<div class="widget ">
+<div class="widget text-center ">
     <div class="card-title"> {{ $titulo }} </div>
-    <div id="echartGauge" style="height: 250px;"></div>
+    <div id="echartGauge" style="height: 180px;"></div>
     <div class="row comparacion-prorratas">
       <div class="col-lg-12 dif">
         <div><label>Diferencia en IVA por pagar:</label> <span>₡{{ number_format( abs($acumulado->balance_operativo - $acumulado->balance_estimado), 0) }}</span></div>
       </div>
-      <div class="col-lg-6 ope">
+      <div class="col-lg-12 ope">
         <div><label>Prorrata operativa:</label> <span>{{ number_format( $acumulado->prorrata_operativa*100, 2) }}%</span></div>
       </div>
-      <div class="col-lg-6 est">
+      <div class="col-lg-12 est">
         <div><label>Prorrata estimada:</label> <span>{{ number_format( $acumulado->prorrata*100, 2) }}%</span></div>
       </div>
     </div>
@@ -49,17 +49,17 @@
               type:'gauge',
               startAngle: 180,
               endAngle: 0,
-              center : ['50%', '80%'],
-              radius : 160,
+              center : ['50%', '70%'],
+              radius : 120,
               pointer: {
                 color : 'black',
-                length: '70%'
+                length: '65%'
               },
               axisLine: {            
                 show: true,        
                 lineStyle: {       
                     color: [[100/6*1/100, '#E75D2F'], [100/6*2/100, '#F47E67'], [100/6*3/100, '#EFA89C'], [100/6*4/100, '#B2CCDC'], [100/6*5/100, '#6D7ABA'], [100/6*6/100, '#2B52A3']], 
-                    width: '30'
+                    width: '25'
                 }
               },
               axisTick: { 

@@ -8,9 +8,11 @@ use App\InvoiceItem;
 use App\Company;
 use App\Client;
 use App\CalculatedTax;
+use App\Http\Controllers\CacheController;
 use App\Exports\InvoiceExport;
 use App\Imports\InvoiceImport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
@@ -65,10 +67,9 @@ class InvoiceController extends Controller
 
         //Datos generales y para Hacienda
         $invoice->document_type = "01";
-        $invoice->document_key = "50601021900310270242900100001010000000162174804809";
+        $invoice->document_key = $request->document_key;
+        $invoice->document_number = $request->document_number;
         $invoice->reference_number = $company->last_invoice_ref_number + 1;
-        $numero_doc = ((int)$company->last_document) + 1;
-        $invoice->document_number = str_pad($numero_doc, 20, '0', STR_PAD_LEFT);
         $invoice->sale_condition = $request->sale_condition;
         $invoice->payment_type = $request->payment_type;
         $invoice->credit_time = $request->credit_time;
@@ -151,8 +152,9 @@ class InvoiceController extends Controller
           $iva_percentage = $item['iva_percentage'];
           $iva_amount = $item['iva_amount'];
           $is_exempt = false;
+          $isIdentificacion = $item['is_identificacion_especifica'];
           
-          $invoice->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $is_exempt );
+          $invoice->addItem( $fecha->year, $fecha->month, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt );
         }
         
         $company->last_invoice_ref_number = $invoice->reference_number;
@@ -215,6 +217,8 @@ class InvoiceController extends Controller
         $company = $invoice->company; 
       
         //Datos generales y para Hacienda
+        $invoice->document_key = $request->document_key;
+        $invoice->document_number = $request->document_number;
         $invoice->sale_condition = $request->sale_condition;
         $invoice->payment_type = $request->payment_type;
         $invoice->credit_time = $request->credit_time;
@@ -297,8 +301,9 @@ class InvoiceController extends Controller
           $iva_percentage = $item['iva_percentage'];
           $iva_amount = $item['iva_amount'];
           $is_exempt = false;
+          $isIdentificacion = $item['is_identificacion_especifica'];
           
-          $item_modificado = $invoice->addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $is_exempt );
+          $item_modificado = $invoice->addEditItem( $item_id, $fecha->year, $fecha->month, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt );
 
           array_push( $lids, $item_modificado->id );
         }
@@ -351,127 +356,166 @@ class InvoiceController extends Controller
       
         $time_start = $this->microtime_float();
         
-        $facturas = Excel::toCollection( new InvoiceImport(), request()->file('archivo') );
+        $collection = Excel::toCollection( new InvoiceImport(), request()->file('archivo') );
         $company = auth()->user()->companies->first();
         
-        foreach ($facturas[0] as $row){
-              
-            //Datos de cliente
-            $nombre_cliente = $row['nombrecliente'];
-            $codigo_cliente = $row['codigocliente'] ? $row['codigocliente'] : '';
-            $tipo_persona = $row['tipoidentificacion'];
-            $identificacion_cliente = $row['identificacionreceptor'];
-            $cliente = Client::firstOrCreate(
-                [
-                    'id_number' => $identificacion_cliente,
-                    'company_id' => $company->id,
-                ],
-                [
-                    'code' => $codigo_cliente ,
-                    'company_id' => $company->id,
-                    'tipo_persona' => str_pad($tipo_persona, 2, '0', STR_PAD_LEFT),
-                    'id_number' => $identificacion_cliente,
-                    'first_name' => $nombre_cliente
-                ]
-            );
-                
-            $invoice = Invoice::firstOrNew(
-                [
-                    'company_id' => $company->id,
-                    'client_id' => $cliente->id,
-                    'document_number' => $row['consecutivocomprobante']
-                ]
-            );
-            
-            if( !$invoice->exists ) {
-                
-                $invoice->company_id = $company->id;
-                $invoice->client_id = $cliente->id;    
+        $i = 0;
         
-                //Datos generales y para Hacienda
-                $invoice->document_type = $row['idtipodocumento'];
-                $invoice->reference_number = $company->last_invoice_ref_number + 1;
-                $invoice->document_number =  $row['consecutivocomprobante'];
-                
-                //Datos generales
-                $invoice->sale_condition = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
-                $invoice->payment_type = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
-                $invoice->credit_time = 0;
-                
-                /*$invoice->buy_order = $row['ordencompra'] ? $row['ordencompra'] : '';
-                $invoice->other_reference = $row['referencia'] ? $row['referencia'] : '';
-                $invoice->other_document = $row['documentoanulado'] ? $row['documentoanulado'] : '';
-                $invoice->hacienda_status = $row['estadohacienda'] ? $row['estadohacienda'] : '01';
-                $invoice->payment_status = $row['estadopago'] ? $row['estadopago'] : '01';
-                $invoice->payment_receipt = $row['comprobantepago'] ? $row['comprobantepago'] : '';*/
-                
-                $invoice->generation_method = "XLSX";
-                
-                //Datos de factura
-                $invoice->currency = $row['idmoneda'];
-                if( $invoice->currency == 1 ) { $invoice->currency = "CRC"; }
-                if( $invoice->currency == 2 ) { $invoice->currency = "USD"; }
+        if( $collection[0]->count() < 5001 ){
+            try {
+                foreach ($collection[0]->chunk(200) as $facturas) {
+                    \DB::transaction(function () use ($facturas, &$company, &$i) {
+                        
+                        $inserts = array();
+                        foreach ($facturas as $row){
+                            $i++;
+                            
+                            //Datos de cliente
+                            $nombre_cliente = $row['nombrecliente'];
+                            $codigo_cliente = $row['codigocliente'] ? $row['codigocliente'] : '';
+                            $tipo_persona = $row['tipoidentificacion'];
+                            $identificacion_cliente = $row['identificacionreceptor'];
+                            
+                            $clientCacheKey = "import-clientes-$identificacion_cliente-".$company->id;
+                            if ( !Cache::has($clientCacheKey) ) {
+                                $clienteCache =  Client::firstOrCreate(
+                                    [
+                                        'id_number' => $identificacion_cliente,
+                                        'company_id' => $company->id,
+                                    ],
+                                    [
+                                        'code' => $codigo_cliente ,
+                                        'company_id' => $company->id,
+                                        'tipo_persona' => str_pad($tipo_persona, 2, '0', STR_PAD_LEFT),
+                                        'id_number' => $identificacion_cliente,
+                                        'first_name' => $nombre_cliente
+                                    ]
+                                );
+                                Cache::put($clientCacheKey, $clienteCache, 30);
+                            }
+                            $cliente = Cache::get($clientCacheKey);
+                            
+                            $invoiceCacheKey = "import-factura-$identificacion_cliente-" . $company->id . "-" . $row['consecutivocomprobante'];
+                            if ( !Cache::has($invoiceCacheKey) ) {
+                            
+                                $invoice = Invoice::firstOrNew(
+                                    [
+                                        'company_id' => $company->id,
+                                        'client_id' => $cliente->id,
+                                        'document_number' => $row['consecutivocomprobante']
+                                    ]
+                                );
+                                
+                                if( !$invoice->exists ) {
+                                    
+                                    $invoice->company_id = $company->id;
+                                    $invoice->client_id = $cliente->id;    
+                            
+                                    //Datos generales y para Hacienda
+                                    $invoice->document_type = $row['idtipodocumento'];
+                                    $invoice->reference_number = $company->last_invoice_ref_number + 1;
+                                    $invoice->document_number =  $row['consecutivocomprobante'];
+                                    
+                                    //Datos generales
+                                    $invoice->sale_condition = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
+                                    $invoice->payment_type = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
+                                    $invoice->credit_time = 0;
+                                    
+                                    /*$invoice->buy_order = $row['ordencompra'] ? $row['ordencompra'] : '';
+                                    $invoice->other_reference = $row['referencia'] ? $row['referencia'] : '';
+                                    $invoice->other_document = $row['documentoanulado'] ? $row['documentoanulado'] : '';
+                                    $invoice->hacienda_status = $row['estadohacienda'] ? $row['estadohacienda'] : '01';
+                                    $invoice->payment_status = $row['estadopago'] ? $row['estadopago'] : '01';
+                                    $invoice->payment_receipt = $row['comprobantepago'] ? $row['comprobantepago'] : '';*/
+                                    
+                                    $invoice->generation_method = "XLSX";
+                                    
+                                    //Datos de factura
+                                    $invoice->currency = $row['idmoneda'];
+                                    if( $invoice->currency == 1 ) { $invoice->currency = "CRC"; }
+                                    if( $invoice->currency == 2 ) { $invoice->currency = "USD"; }
+                                        
+                                    
+                                    $invoice->currency_rate = $row['tipocambio'];
+                                    //$invoice->description = $row['description'] ? $row['description'] : '';
+                                  
+                                    $company->last_invoice_ref_number = $invoice->reference_number;
+                                    
+                                    $invoice->subtotal = 0;
+                                    $invoice->iva_amount = 0;
+                                    $invoice->total = $row['totaldocumento'];
+                                    
+                                    $invoice->save();
+                                }   
+                                Cache::put($invoiceCacheKey, $invoice, 30);
+                            }
+                            $invoice = Cache::get($invoiceCacheKey);
+                            
+                            $invoice->generated_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision']);
+                            $invoice->due_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision'])->addDays(15);  /////IMPORTANTE CORREGIR ANTES DE PRODUCCION
+                            
+                            $year = $invoice->generated_date->year;
+                            $month = $invoice->generated_date->month;
+                          
+                            /**LINEA DE FACTURA**/
+                            $item = InvoiceItem::firstOrNew(
+                                [
+                                    'invoice_id' => $invoice->id,
+                                    'item_number' => $row['numerolinea'] ? $row['numerolinea'] : 1,
+                                ]
+                            );
+                            
+                            if( !$item->exists ) {
+                                $invoice->subtotal = $invoice->subtotal + (float)$row['subtotallinea'];
+                                $invoice->iva_amount = $invoice->iva_amount + (float)$row['montoiva'];
+                                
+                                $inserts[] = [
+                                    'invoice_id' => $invoice->id,
+                                    'company_id' => $company->id,
+                                    'year' => $year,
+                                    'month' => $month,
+                                    'item_number' => $row['numerolinea'] ? $row['numerolinea'] : 0,
+                                    'code' => $row['codigoproducto'],
+                                    'name' => $row['detalleproducto'],
+                                    'product_type' => 1,
+                                    'measure_unit' => $row['unidadmedicion'],
+                                    'item_count' => $row['cantidad'] ? $row['cantidad'] : 1,
+                                    'unit_price' => $row['preciounitario'],
+                                    'subtotal' => $row['subtotallinea'],
+                                    'total' => $row['totallinea'],
+                                    'discount_type' => '01',
+                                    'discount' => $row['montodescuento'] ? $row['montodescuento'] : 0,
+                                    'discount_reason' => '',
+                                    'iva_type' => $row['codigoimpuesto'],
+                                    'iva_amount' => $row['montoiva'] ? $row['montoiva'] : 0,
+                                ];
+                            }
+                            /**END LINEA DE FACTURA**/
+                            $this->clearInvoiceCache($invoice);
+                            $invoice->save();
+                        }
+                        
+                        InvoiceItem::insert($inserts);
+                    });
                     
-                
-                $invoice->currency_rate = $row['tipocambio'];
-                //$invoice->description = $row['description'] ? $row['description'] : '';
-              
-                $company->last_invoice_ref_number = $invoice->reference_number;
-                
-                $invoice->subtotal = 0;
-                $invoice->iva_amount = 0;
-                $invoice->total = $row['totaldocumento'];
-                
-                $invoice->save();
-            }     
-            
-          
-            /**LINEA DE FACTURA**/
-            $item = InvoiceItem::firstOrNew(
-                [
-                    'invoice_id' => $invoice->id,
-                    'item_number' => $row['numerolinea'] ? $row['numerolinea'] : 1,
-                ],
-                [
-                'invoice_id' => $invoice->id,
-                'item_number' => $row['numerolinea'] ? $row['numerolinea'] : 0,
-                'code' => $row['codigoproducto'],
-                'name' => $row['detalleproducto'],
-                'product_type' => 1,
-                'measure_unit' => $row['unidadmedicion'],
-                'item_count' => $row['cantidad'] ? $row['cantidad'] : 1,
-                'unit_price' => $row['preciounitario'],
-                'subtotal' => $row['subtotallinea'],
-                'total' => $row['totallinea'],
-                'discount_type' => '01',
-                'discount' => $row['montodescuento'] ? $row['montodescuento'] : 0,
-                'discount_reason' => '',
-                'iva_type' => $row['codigoimpuesto'],
-                'iva_amount' => $row['montoiva'] ? $row['montoiva'] : 0,
-                ]
-            );
-            
-            if( !$item->exists ) {
-                $invoice->subtotal = $invoice->subtotal + (float)$row['subtotallinea'];
-                $invoice->iva_amount = $invoice->iva_amount + (float)$row['montoiva'];
-                $item->save();
+                }
+            }catch( \ErrorException $ex ){
+                return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila. '.$i.'. Mensaje:' . $ex->getMessage());
+            }catch( \InvalidArgumentException $ex ){
+                return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
+            }catch( \Exception $ex ){
+                return back()->withError( 'Ha ocurrido un error al subir su archivo. Error en la fila. '.$i.'. Mensaje:' . $ex->getMessage());
             }
-            /**END LINEA DE FACTURA**/
             
-            $invoice->generated_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision']);
-            $invoice->due_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision'])->addDays(15);  /////IMPORTANTE CORREGIR ANTES DE PRODUCCION
+            $company->save();
             
-            $this->clearInvoiceCache($invoice);
+            $time_end = $this->microtime_float();
+            $time = $time_end - $time_start;
             
-            $invoice->save();
-            
+            return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente en '.$time.'s.');
+        }else{
+            return redirect('/facturas-emitidas')->withError('Usted tiene un límite de 5000 facturas por archivo.');
         }
-        $company->save();
-        
-        $time_end = $this->microtime_float();
-        $time = $time_end - $time_start;
-        
-        return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente en '.$time.'s');
     }
     
     private function microtime_float(){
@@ -482,8 +526,8 @@ class InvoiceController extends Controller
     private function clearInvoiceCache($invoice){
         $month = $invoice->generatedDate()->month;
         $year = $invoice->dueDate()->year;
-        CalculatedTax::clearTaxesCache($invoice->company_id, $month, $year);
-        CalculatedTax::clearTaxesCache($invoice->company_id, 0, $year);
+        CacheController::clearTaxesCache($invoice->company_id, $month, $year);
+        CacheController::clearTaxesCache($invoice->company_id, 0, $year);
     }
     
 }

@@ -1,7 +1,7 @@
 
-<div class="widget ">
+<div class="widget text-center ">
     <div class="card-title"> {{ $titulo }} </div>
-    <div id="echartPie" style="height: 300px;"></div>
+    <div id="echartPie" style="height: 250px;"></div>
 </div>
 
 <script>

@@ -36,33 +36,40 @@ class ReportsController extends Controller
     
     public function reporteDashboard( Request $request ) {
       
-      $ano = $request->ano ? $request->ano : 2019;
-      $mes = $request->mes ? $request->mes : 1;
-      
-      $prorrataOperativa = $this->getProrrataOperativa($ano);
-      
-      $e = CalculatedTax::calcularFacturacionPorMesAno( 1, 2019, 0, $prorrataOperativa );
-      $f = CalculatedTax::calcularFacturacionPorMesAno( 2, 2019, 0, $prorrataOperativa );
-      $m = CalculatedTax::calcularFacturacionPorMesAno( 3, 2019, 0, $prorrataOperativa );
-      $a = CalculatedTax::calcularFacturacionPorMesAno( 4, 2019, 0, $prorrataOperativa );
-      $y = CalculatedTax::calcularFacturacionPorMesAno( 5, 2019, 0, $prorrataOperativa );
-      $j = CalculatedTax::calcularFacturacionPorMesAno( 6, 2019, 0, $prorrataOperativa );
-      $l = CalculatedTax::calcularFacturacionPorMesAno( 7, 2019, 0, $prorrataOperativa );
-      $g = CalculatedTax::calcularFacturacionPorMesAno( 8, 2019, 0, $prorrataOperativa );
-      $s = CalculatedTax::calcularFacturacionPorMesAno( 9, 2019, 0, $prorrataOperativa );
-      $c = CalculatedTax::calcularFacturacionPorMesAno( 10, 2019, 0, $prorrataOperativa );
-      $n = CalculatedTax::calcularFacturacionPorMesAno( 11, 2019, 0, $prorrataOperativa );
-      $d = CalculatedTax::calcularFacturacionPorMesAno( 12, 2019, 0, $prorrataOperativa );
-
-      $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
-      $nombreMes = Variables::getMonthName($mes);
-      $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
+      try {
+        $ano = $request->ano ? $request->ano : 2019;
+        $mes = $request->mes ? $request->mes : 1;
+        
+        $prorrataOperativa = $this->getProrrataOperativa($ano);
+        
+        $e = CalculatedTax::calcularFacturacionPorMesAno( 1, 2019, 0, $prorrataOperativa );
+        $f = CalculatedTax::calcularFacturacionPorMesAno( 2, 2019, 0, $prorrataOperativa );
+        $m = CalculatedTax::calcularFacturacionPorMesAno( 3, 2019, 0, $prorrataOperativa );
+        $a = CalculatedTax::calcularFacturacionPorMesAno( 4, 2019, 0, $prorrataOperativa );
+        
+        $y = CalculatedTax::calcularFacturacionPorMesAno( 5, 2019, 0, $prorrataOperativa );
+        $j = CalculatedTax::calcularFacturacionPorMesAno( 6, 2019, 0, $prorrataOperativa );
+        $l = CalculatedTax::calcularFacturacionPorMesAno( 7, 2019, 0, $prorrataOperativa );
+        $g = CalculatedTax::calcularFacturacionPorMesAno( 8, 2019, 0, $prorrataOperativa );
+        $s = CalculatedTax::calcularFacturacionPorMesAno( 9, 2019, 0, $prorrataOperativa );
+        $c = CalculatedTax::calcularFacturacionPorMesAno( 10, 2019, 0, $prorrataOperativa );
+        $n = CalculatedTax::calcularFacturacionPorMesAno( 11, 2019, 0, $prorrataOperativa );
+        $d = CalculatedTax::calcularFacturacionPorMesAno( 12, 2019, 0, $prorrataOperativa );
+  
+        $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
+        
+        $nombreMes = Variables::getMonthName($mes);
+        $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
+      } catch( \Exception $ex ) {
+        return $ex->message;
+      }
       
       return view('/Dashboard/reporte-dashboard', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes'));
 
     }
     
     public function reporteCuentasContables( Request $request ) {
+      $time_start = $this->microtime_float();
       
       $ano = $request->ano ? $request->ano : 2019;
       $mes = $request->mes ? $request->mes : 0;
@@ -71,6 +78,9 @@ class ReportsController extends Controller
       
       $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
       $nombreMes = Variables::getMonthName($mes);
+      
+      $time_end = $this->microtime_float();
+      $time = $time_end - $time_start;
       
       return view('/Reports/reporte-cuentas', compact('data', 'ano', 'nombreMes') );
 
@@ -158,10 +168,15 @@ class ReportsController extends Controller
     
     public function getProrrataOperativa($ano){
       $anoAnterior = $ano > 2018 ? $ano-1 : 2018;
-      $anterior = CalculatedTax::calcularFacturacionPorMesAno( -1, $ano-1, 0, 0 );
+      //$anterior = CalculatedTax::calcularFacturacionPorMesAno( -1, $ano-1, 0, 0 );
       $prorrataOperativa = 0.88;
       
       return $prorrataOperativa;
     }
+  
+    private function microtime_float(){
+        list($usec, $sec) = explode(" ", microtime());
+        return ((float) $usec + (float)$sec);
+    }  
   
 }

@@ -4,39 +4,34 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Company extends Model
-{
+class Company extends Model {
+
     protected $table = 'companies';
     protected $guarded = [];
-  
+
     //Relación con facturas emitidas
-    public function invoices()
-    {
+    public function invoices() {
         return $this->hasMany(Invoice::class);
     }
-  
+
     //Relación con facturas recibidas
-    public function bills()
-    {
+    public function bills() {
         return $this->hasMany(Bill::class);
     }
-    
+
     //Relación con clientes
-    public function clients()
-    {
+    public function clients() {
         return $this->hasMany(Client::class);
     }
-    
+
     //Relación con proveedores
-    public function providers()
-    {
+    public function providers() {
         return $this->hasMany(Provider::class);
-    }    
-  
-    //Relación con Usuario
-    public function owner()
-    {
-        return $this->belongsTo('App\User');
     }
-  
+
+    //Relación con Usuario
+    public function owner() {
+        return $this->belongsTo(User::class);
+    }
+
 }

@@ -91,6 +91,81 @@
         margin: auto;
     }
 }
+
+/*****************************
+# Perfil Page Style Start Here
+*****************************/
+      .verticalForm .nav{
+      display: block;
+      }
+      .verticalForm .nav ul{
+      margin: 0;
+      padding:0;
+      list-style: none;
+      }
+      .verticalForm .nav-pills .nav-link {
+      background: #ababab;
+      color: #fff;
+      margin: 6px 0 4px;
+      display: inline-block;
+      position: relative;
+      }
+      .verticalForm .nav-pills .nav-link:hover {
+      color:#fff;
+      background-color: #505050;
+      }
+      .verticalForm .nav-pills .nav-link.active{
+      color: #fff;
+      background-color: #505050;
+      }
+      .verticalForm .tab-pane input,
+      .verticalForm .tab-pane textarea{
+      /*border-radius: 0;
+      background: #eee; */
+      border: 1px solid #999;
+      outline: initial !important;
+      background: #fff;
+      color: #1e0a26;
+      }
+      
+      .companyParent {
+          max-width: 100%;
+          width: 100%;
+          padding-top: 17px;
+      }
+      .companyParent label{
+          max-width: 130px;
+          float: left;
+          width: 100%;
+          padding-right: 10px;
+          margin: 6px 0;
+          text-transform: capitalize;
+          font-weight: 700;
+      }
+      .companyParent .form-group{
+          float:left;
+      }
+      
+      .team_button{
+          display: none !important;
+      }
+      
+      span.help-block {
+          color: #dc3545;
+      }
+      
+      .jconfirm.jconfirm-supervan .jconfirm-box div.jconfirm-title-c {  
+          font-size: 27px !important;    
+      }
+
+
+      body {
+          letter-spacing: .3px;
+          line-height: 1.6;
+          overflow-x:hidden;
+      }
+
+
 @media (max-width: 767px) {
     .user-profile {
         .header-cover {

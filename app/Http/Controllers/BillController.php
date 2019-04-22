@@ -8,6 +8,7 @@ use App\BillItem;
 use App\Company;
 use App\Provider;
 use App\CalculatedTax;
+use App\Http\Controllers\CacheController;
 use App\Exports\BillExport;
 use App\Imports\BillImport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -65,12 +66,12 @@ class BillController extends Controller
       
         //Datos generales y para Hacienda
         $bill->document_type = "01";
-        $bill->document_key = "50601021900310270242900100001010000000162174804809";
-        $bill->reference_number = $company->reference_number + 1;
-        $numero_doc = ((int)$company->document_number) + 1;
-        $bill->document_number = str_pad($numero_doc, 20, '0', STR_PAD_LEFT);
+        $bill->document_key = $request->document_key;
+        $bill->document_number = $request->document_number;
+        $bill->reference_number = $company->last_bill_ref_number + 1;
         $bill->sale_condition = $request->sale_condition;
         $bill->payment_type = $request->payment_type;
+        $bill->retention_percent = $request->retention_percent;
         $bill->credit_time = $request->credit_time;
         $bill->buy_order = $request->buy_order;
         $bill->other_reference = $request->other_reference;
@@ -143,7 +144,7 @@ class BillController extends Controller
           $unit_price = $item['unit_price'];
           $subtotal = $item['subtotal'];
           $total = $item['total'];
-          $discount_percentage = '0';
+          $discount_percentage = 0;
           $discount_reason = '';
           $iva_type = $item['iva_type'];
           $iva_percentage = $item['iva_percentage'];
@@ -151,8 +152,11 @@ class BillController extends Controller
           $porc_identificacion_plena = $item['porc_identificacion_plena'];
           $is_exempt = false;
           
-          $bill->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt );
+          $bill->addItem( $fecha->year, $fecha->month, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt );
         }
+        
+        $company->last_bill_ref_number = $bill->reference_number;
+        $company->save();
         
         $this->clearBillCache($bill);
       
@@ -210,8 +214,11 @@ class BillController extends Controller
         $company = $bill->company;
       
         //Datos generales y para Hacienda
+        $bill->document_key = $request->document_key;
+        $bill->document_number = $request->document_number;
         $bill->sale_condition = $request->sale_condition;
         $bill->payment_type = $request->payment_type;
+        $bill->retention_percent = $request->retention_percent;
         $bill->credit_time = $request->credit_time;
         $bill->buy_order = $request->buy_order;
         $bill->other_reference = $request->other_reference;
@@ -283,7 +290,7 @@ class BillController extends Controller
           $unit_price = $item['unit_price'];
           $subtotal = $item['subtotal'];
           $total = $item['total'];
-          $discount_percentage = '0';
+          $discount_percentage = 0;
           $discount_reason = '';
           $iva_type = $item['iva_type'];
           $iva_percentage = $item['iva_percentage'];
@@ -291,7 +298,7 @@ class BillController extends Controller
           $porc_identificacion_plena = $item['porc_identificacion_plena'];
           $is_exempt = false;
           
-          $item_modificado = $bill->addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt );
+          $item_modificado = $bill->addEditItem( $item_id, $fecha->year, $fecha->month, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt );
 
           array_push( $lids, $item_modificado->id );
         }
@@ -346,129 +353,155 @@ class BillController extends Controller
       
         $time_start = $this->microtime_float();
         
-        $facturas = Excel::toCollection( new BillImport(), request()->file('archivo') );
+        $collection = Excel::toCollection( new BillImport(), request()->file('archivo') );
         $company = auth()->user()->companies->first();
         
-        foreach ($facturas[0] as $row){
-              
-            //Datos de proveedor
-            $codigo_proveedor = $row['codigoproveedor'] ? $row['codigoproveedor'] : '';
-            $nombre_proveedor = $row['nombreproveedor'];
-            $tipo_persona = $row['tipoidentificacion'];
-            $identificacion_proveedor = $row['identificacionproveedor'];
-            $proveedor = Provider::firstOrCreate(
-                [
-                    'id_number' => $identificacion_proveedor,
-                    'company_id' => $company->id,
-                ],
-                [
-                    'code' => $codigo_proveedor ,
-                    'company_id' => $company->id,
-                    'tipo_persona' => str_pad($tipo_persona, 2, '0', STR_PAD_LEFT),
-                    'id_number' => $identificacion_proveedor,
-                    'first_name' => $nombre_proveedor
-                ]
-            );
-                
-            $bill = Bill::firstOrNew(
-                [
-                    'company_id' => $company->id,
-                    'provider_id' => $proveedor->id,
-                    'total' => $row['totaldocumento'],
-                    'document_number' => $row['consecutivocomprobante']
-                ]
-            );
-            
-            if( !$bill->exists ) {
-                
-                $bill->company_id = $company->id;
-                $bill->provider_id = $proveedor->id;    
-        
-                //Datos generales y para Hacienda
-                $bill->document_type = $row['idtipodocumento'];
-                $bill->reference_number = $company->last_bill_ref_number + 1;
-                $bill->document_number =  $row['consecutivocomprobante'];
-                
-                //Datos generales
-                $bill->sale_condition = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
-                $bill->payment_type = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
-                $bill->credit_time = 0;
-                
-                /*$bill->buy_order = $row['ordencompra'] ? $row['ordencompra'] : '';
-                $bill->other_reference = $row['referencia'] ? $row['referencia'] : '';
-                $bill->other_document = $row['documentoanulado'] ? $row['documentoanulado'] : '';
-                $bill->hacienda_status = $row['estadohacienda'] ? $row['estadohacienda'] : '01';
-                $bill->payment_status = $row['estadopago'] ? $row['estadopago'] : '01';
-                $bill->payment_receipt = $row['comprobantepago'] ? $row['comprobantepago'] : '';*/
-                
-                $bill->generation_method = "XLSX";
-                
-                //Datos de factura
-                $bill->currency = $row['idmoneda'];
-                if( $bill->currency == 1 ) { $bill->currency = "CRC"; }
-                if( $bill->currency == 2 ) { $bill->currency = "USD"; }
+        if( $collection[0]->count() < 5001 ){
+            try {
+                foreach ($collection[0]->chunk(200) as $facturas) {
+                    \DB::transaction(function () use ($facturas, &$company) {
+                        
+                        $inserts = array();    
+                        foreach ($facturas[0] as $row){
+                            //Datos de proveedor
+                            $codigo_proveedor = $row['codigoproveedor'] ? $row['codigoproveedor'] : '';
+                            $nombre_proveedor = $row['nombreproveedor'];
+                            $tipo_persona = $row['tipoidentificacion'];
+                            $identificacion_proveedor = $row['identificacionproveedor'];
+                            $proveedor = Provider::firstOrCreate(
+                                [
+                                    'id_number' => $identificacion_proveedor,
+                                    'company_id' => $company->id,
+                                ],
+                                [
+                                    'code' => $codigo_proveedor ,
+                                    'company_id' => $company->id,
+                                    'tipo_persona' => str_pad($tipo_persona, 2, '0', STR_PAD_LEFT),
+                                    'id_number' => $identificacion_proveedor,
+                                    'first_name' => $nombre_proveedor
+                                ]
+                            );
+                                
+                            $bill = Bill::firstOrNew(
+                                [
+                                    'company_id' => $company->id,
+                                    'provider_id' => $proveedor->id,
+                                    'total' => $row['totaldocumento'],
+                                    'document_number' => $row['consecutivocomprobante']
+                                ]
+                            );
+                            
+                            if( !$bill->exists ) {
+                                
+                                $bill->company_id = $company->id;
+                                $bill->provider_id = $proveedor->id;    
+                        
+                                //Datos generales y para Hacienda
+                                $bill->document_type = $row['idtipodocumento'];
+                                $bill->reference_number = $company->last_bill_ref_number + 1;
+                                $bill->document_number =  $row['consecutivocomprobante'];
+                                
+                                //Datos generales
+                                $bill->sale_condition = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
+                                $bill->payment_type = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
+                                $bill->credit_time = 0;
+                                
+                                /*$bill->buy_order = $row['ordencompra'] ? $row['ordencompra'] : '';
+                                $bill->other_reference = $row['referencia'] ? $row['referencia'] : '';
+                                $bill->other_document = $row['documentoanulado'] ? $row['documentoanulado'] : '';
+                                $bill->hacienda_status = $row['estadohacienda'] ? $row['estadohacienda'] : '01';
+                                $bill->payment_status = $row['estadopago'] ? $row['estadopago'] : '01';
+                                $bill->payment_receipt = $row['comprobantepago'] ? $row['comprobantepago'] : '';*/
+                                
+                                $bill->generation_method = "XLSX";
+                                
+                                //Datos de factura
+                                $bill->currency = $row['idmoneda'];
+                                if( $bill->currency == 1 ) { $bill->currency = "CRC"; }
+                                if( $bill->currency == 2 ) { $bill->currency = "USD"; }
+                                    
+                                
+                                $bill->currency_rate = $row['tipocambio'];
+                                //$bill->description = $row['description'] ? $row['description'] : '';
+                              
+                                $company->last_bill_ref_number = $bill->reference_number;
+                                
+                                $bill->generated_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision']);
+                                $bill->due_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision'])->addDays(15);
+                                
+                                $bill->subtotal = 0;
+                                $bill->iva_amount = 0;
+                                $bill->total = $row['totaldocumento'];
+                                
+                                $bill->save();
+                            }     
+                            
+                            $year = $invoice->generated_date->year;
+                            $month = $invoice->generated_date->month;
+                            
+                            /**LINEA DE FACTURA**/
+                            $item = BillItem::firstOrNew(
+                                [
+                                    'bill_id' => $bill->id,
+                                    'item_number' => $row['numerolinea'] ? $row['numerolinea'] : 1,
+                                ]
+                            );
+                            
+                            if( !$item->exists ) {
+                                $bill->subtotal = $bill->subtotal + (float)$row['subtotallinea'];
+                                $bill->iva_amount = $bill->iva_amount + (float)$row['montoiva'];
+                                
+                                $inserts[] = [
+                                    'bill_id' => $bill->id,
+                                    'company_id' => $company->id,
+                                    'year' => $year,
+                                    'month' => $month,
+                                    'item_number' => $row['numerolinea'] ? $row['numerolinea'] : 0,
+                                    'code' => $row['codigoproducto'],
+                                    'name' => $row['detalleproducto'],
+                                    'product_type' => 1,
+                                    'measure_unit' => $row['unidadmedicion'],
+                                    'item_count' => $row['cantidad'] ? $row['cantidad'] : 1,
+                                    'unit_price' => $row['preciounitario'],
+                                    'subtotal' => $row['subtotallinea'],
+                                    'total' => $row['totallinea'],
+                                    'discount_type' => '01',
+                                    'discount' => $row['montodescuento'] ? $row['montodescuento'] : 0,
+                                    'discount_reason' => '',
+                                    'iva_type' => $row['codigoimpuesto'],
+                                    'porc_identificacion_plena' => $row['porcidentificacionplena'] ? $row['porcidentificacionplena'] : 13,
+                                    'iva_amount' => $row['montoiva'] ? $row['montoiva'] : 0,
+                                ];
+                                
+                            }
+                            /**END LINEA DE FACTURA**/
+                            
+                            $this->clearBillCache($bill);
+                            $bill->save();
+                        }
+                        
+                        BillItem::insert($inserts);
+                    });
                     
-                
-                $bill->currency_rate = $row['tipocambio'];
-                //$bill->description = $row['description'] ? $row['description'] : '';
-              
-                $company->last_bill_ref_number = $bill->reference_number;
-                
-                $bill->subtotal = 0;
-                $bill->iva_amount = 0;
-                $bill->total = $row['totaldocumento'];
-                
-                $bill->save();
-            }     
-            
-          
-            /**LINEA DE FACTURA**/
-            $item = BillItem::firstOrNew(
-                [
-                    'bill_id' => $bill->id,
-                    'item_number' => $row['numerolinea'] ? $row['numerolinea'] : 1,
-                ],
-                [
-                'bill_id' => $bill->id,
-                'item_number' => $row['numerolinea'] ? $row['numerolinea'] : 0,
-                'code' => $row['codigoproducto'],
-                'name' => $row['detalleproducto'],
-                'product_type' => 1,
-                'measure_unit' => $row['unidadmedicion'],
-                'item_count' => $row['cantidad'] ? $row['cantidad'] : 1,
-                'unit_price' => $row['preciounitario'],
-                'subtotal' => $row['subtotallinea'],
-                'total' => $row['totallinea'],
-                'discount_type' => '01',
-                'discount' => $row['montodescuento'] ? $row['montodescuento'] : 0,
-                'discount_reason' => '',
-                'iva_type' => $row['codigoimpuesto'],
-                'porc_identificacion_plena' => $row['porcidentificacionplena'] ? $row['porcidentificacionplena'] : 13,
-                'iva_amount' => $row['montoiva'] ? $row['montoiva'] : 0,
-                ]
-            );
-            
-            if( !$item->exists ) {
-                $bill->subtotal = $bill->subtotal + (float)$row['subtotallinea'];
-                $bill->iva_amount = $bill->iva_amount + (float)$row['montoiva'];
-                $item->save();
+                }
+            }catch( \ErrorException $ex ){
+                return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Mensaje:' . $ex->getMessage());
+            }catch( \InvalidArgumentException $ex ){
+                return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
+            }catch( \Exception $ex ){
+                return back()->withError( 'Ha ocurrido un error al subir su archivo. Error en la fila. Mensaje:' . $ex->getMessage());
             }
-            /**END LINEA DE FACTURA**/
-            
-            $bill->generated_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision']);
-            $bill->due_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision'])->addDays(15);
-            
-            $this->clearBillCache($bill);
-            
-            $bill->save();
-            
-        }
+        
         $company->save();
         
         $time_end = $this->microtime_float();
         $time = $time_end - $time_start;
         
         return redirect('/facturas-recibidas')->withMessage('Facturas importados exitosamente en '.$time.'s');
+        }else{
+            return redirect('/facturas-emitidas')->withError('Usted tiene un límite de 5000 facturas por archivo.');
+        }
+        
     }
     
     private function microtime_float(){
@@ -479,8 +512,8 @@ class BillController extends Controller
     private function clearBillCache($bill){
         $month = $bill->generatedDate()->month;
         $year = $bill->dueDate()->year;
-        CalculatedTax::clearTaxesCache($bill->company_id, $month, $year);
-        CalculatedTax::clearTaxesCache($bill->company_id, 0, $year);
+        CacheController::clearTaxesCache($bill->company_id, $month, $year);
+        CacheController::clearTaxesCache($bill->company_id, 0, $year);
     }
     
     

@@ -118,6 +118,7 @@
           },
           success : function( response ) {
             $('#reporte-container').html(response);
+            clearEmptyRows();
           },
           async: true
         });  
@@ -133,6 +134,10 @@
   }
   
   $( document ).ready(function() {
+    clearEmptyRows();
+  });
+  
+  function clearEmptyRows() {
     $(".ivas-table tbody tr").each( function(){
     	var contenido =  $(this).find('td').text().replace(/[^0-9]/gi, '');
     	var number = parseInt(contenido);
@@ -140,8 +145,7 @@
     		$(this).hide();
         }
     });
-  });
-  
+  }
 
   
 </script>

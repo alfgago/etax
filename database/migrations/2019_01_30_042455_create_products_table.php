@@ -26,6 +26,8 @@ class CreateProductsTable extends Migration
             $table->string('description')->nullable();
             $table->boolean('is_catalogue')->default(false);
             $table->string('default_iva_type');
+            
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
           
             $table->timestamps();
         });

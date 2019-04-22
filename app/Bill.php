@@ -45,10 +45,13 @@ class Bill extends Model
         return Carbon::parse($this->due_date);
     }
   
-    public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt )
+    public function addItem( $year, $month, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt )
     {
       return BillItem::create([
         'bill_id' => $this->id,
+        'company_id' => $this->company_id,
+        'year' => $year,
+        'month' => $month,
         'item_number' => $item_number,
         'code' => $code,
         'name' => $name,
@@ -70,12 +73,15 @@ class Bill extends Model
       
     }
   
-    public function addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt )
+    public function addEditItem( $item_id, $year, $month, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt )
     {
       if( $item_id ){
         $item = BillItem::find($item_id);
         //Revisa que la linea exista y pertenece a la factura actual. Asegura que si el ID se cambia en frontend, no se actualice.
         if( $item && $item->bill_id == $this->id ) {
+          $item->company_id = $this->company_id;
+          $item->year = $year;
+          $item->month = $month;
           $item->item_number = $item_number;
           $item->code = $code;
           $item->name = $name;
@@ -96,7 +102,7 @@ class Bill extends Model
           $item->save();
         }
       }else {
-        $item = $this->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt );
+        $item = $this->addItem( $item_number, $year, $month, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt );
       }
       return $item;
     }

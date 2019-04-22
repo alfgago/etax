@@ -19,17 +19,11 @@
           </div>
       @endif
       
-      @if ($errors->any())
-        <div class="alert alert-danger">
-          <ul>
-            @foreach ($errors->all() as $error)
-              <li>{{ $error }}</li>
-            @endforeach
-          </ul>
-        </div>
+      @if(session()->has('error'))
+          <div class="alert alert-danger">
+              {{ session()->get('error') }}
+          </div>
       @endif
-        
-      <div style="margin: 1rem;"> -- Aqui van filtros de búsqueda por fecha, texto o cliente --  </div>
         
       <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
           <thead>

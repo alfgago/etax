@@ -167,6 +167,7 @@ window.agregarEditarItem = function () {
   var unidad_medicion = $('#unidad_medicion').val();
   var precio_unitario = $('#precio_unitario').val();
   var porc_identificacion_plena = $('#porc_identificacion_plena').val();
+  var is_identificacion_especifica = $('#is_identificacion_especifica:checked').length;
   var descuento = '';
   var razon_descuento = '';
   var tipo_iva = $('#tipo_iva').val();
@@ -199,7 +200,7 @@ window.agregarEditarItem = function () {
     htmlCols += "<td>" + tipo_iva + " <input type='hidden' class='tipo_iva' name='items[" + index + "][iva_type]' value='" + tipo_iva + "'> <input type='hidden' class='porc_identificacion_plena' name='items[" + index + "][porc_identificacion_plena]' value='" + porc_identificacion_plena + "'></td>";
     htmlCols += "<td>" + subtotal + " <input class='subtotal' type='hidden' name='items[" + index + "][subtotal]' value='" + subtotal + "'></td>";
     htmlCols += "<td>" + monto_iva + " <input class='porc_iva' type='hidden' name='items[" + index + "][iva_percentage]' value='" + porc_iva + "'> <input class='monto_iva' type='hidden' name='items[" + index + "][iva_amount]' value='" + monto_iva + "'> </td>";
-    htmlCols += "<td>" + total + " <input class='total' type='hidden' name='items[" + index + "][total]' value='" + total + "'></td>";
+    htmlCols += "<td>" + total + " <input class='total' type='hidden' name='items[" + index + "][total]' value='" + total + "'> <input class='is_identificacion_especifica' type='hidden' name='items[" + index + "][is_identificacion_especifica]' value='" + is_identificacion_especifica + "'> </td>";
     htmlCols += "<td class='acciones'><span class='btn-editar-item text-success mr-2' title='Editar linea' onclick='abrirPopup(\"linea-popup\");cargarFormItem(" + index + ");'><i class='nav-icon i-Pen-2'></i> </span> <span title='Eliminar linea' onclick='eliminarItem(" + index + ");' class='btn-eliminar-item text-danger mr-2'><i class='nav-icon i-Close-Window'></i> </span> </td>";
 
     if (!itemExistente) {
@@ -235,9 +236,12 @@ window.agregarEditarItem = function () {
 //Se encarga de limpiar el formulario de "Agregar items"
 window.limpiarFormItem = function () {
   $('.item-factura-form input, .item-factura-form select').val('');
+  $('.item-factura-form input[type=checkbox]').prop('checked', false);
+
   $('#tipo_producto').val(1).change();
   $('#unidad_medicion').val(1);
   $('#cantidad').val(1);
+  $('#porc_identificacion_plena').val(1);
   $('#discount_type').val('01');
   $('#discount').val(0);
 };
@@ -260,6 +264,12 @@ window.cargarFormItem = function (index) {
   $('#porc_iva').val(item.find('.porc_iva ').val());
   $('#item_iva_amount').val(item.find('.monto_iva ').val());
   $('#porc_identificacion_plena').val(item.find('.porc_identificacion_plena ').val());
+
+  if (parseInt(item.find('.is_identificacion_especifica').val())) {
+    $('#is_identificacion_especifica').prop('checked', true);
+  } else {
+    $('#is_identificacion_especifica').prop('checked', false);
+  }
 
   togglePorcentajeIdentificacionPlena();
   calcularConIvaManual();

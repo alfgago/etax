@@ -27,9 +27,11 @@
 .popup .popup-container {
     background: #fff;
     margin: auto;
-    max-width: 650px;
+    max-width: 675px;
     position: relative;
     padding: 15px;
+    max-height: 100%;
+    overflow-y: auto;
 }
 
 .close-popup {

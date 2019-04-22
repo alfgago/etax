@@ -36,6 +36,8 @@ class CreateClientsTable extends Migration
             $table->string('phone')->nullable();
             $table->boolean('es_exento')->default(false);
             $table->string('billing_emails')->nullable();
+            
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
           
             $table->timestamps();
         });

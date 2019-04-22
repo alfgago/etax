@@ -4,23 +4,23 @@ namespace App\Exports;
 
 use App\Invoice;
 use App\InvoiceItem;
-use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\FromQuery;
 
-class InvoiceExport implements FromCollection, WithHeadings, WithMapping
+class InvoiceExport implements WithHeadings, WithMapping, FromQuery
 {
-
+    
     /**
     * @return \Illuminate\Support\Collection
     */
-    public function collection()
+    public function query()
     {
         $current_company = auth()->user()->companies->first()->id;
         
-        $invoiceItems = InvoiceItem::with(['invoice', 'invoice.client'])->whereHas('invoice', function ($query) use ($current_company){
+        $invoiceItems = InvoiceItem::query()->with(['invoice', 'invoice.client'])->whereHas('invoice', function ($query) use ($current_company){
             $query->where('company_id', $current_company);
-        })->get();
+        });
         
         return $invoiceItems;
     }

@@ -23,7 +23,7 @@ class InvoiceImport implements WithHeadingRow, WithBatchInserts, WithChunkReadin
     
     public function chunkSize(): int
     {
-        return 1000;
+        return 500;
     }  
     
 }

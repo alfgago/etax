@@ -7,7 +7,7 @@
                     <img src="{{asset('assets/images/iconos/dashb.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Escritorio</span>
                 </a>
-                <div class="triangle"></div>
+                
             </li>
             
             <li class="nav-item {{ request()->is('facturas-emitidas/*') || request()->is('facturas-emitidas') ? 'active' : '' }}" >
@@ -15,12 +15,15 @@
                     <img src="{{asset('assets/images/iconos/fact-emi.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Facturas emitidas</span>
                 </a>
-                <div class="triangle"></div>
+                
                 
                 <div class="subitems">
                     <a href="/facturas-emitidas">Ver todas</a>
-                    <a href="/facturas-emitidas/create">Crear factura emitida</a>
+                    <a href="/facturas-emitidas/emitir">Crear factura electrónica</a>
+                    <a href="/facturas-emitidas/create">Crear tiquete electrónico</a>
+                    <a href="/facturas-emitidas/create">Crear nota de débito</a>
                     <a href="/facturas-emitidas/#">Importar facturas</a>
+                    <a href="/facturas-emitidas/create">Registrar factura existente</a>
                 </div>
                 
             </li>
@@ -30,21 +33,22 @@
                     <img src="{{asset('assets/images/iconos/fact-reci.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Facturas recibidas</span>
                 </a>
-                <div class="triangle"></div>
+                
                 
                 <div class="subitems">
                     <a href="/facturas-recibidas">Ver todas</a>
-                    <a href="/facturas-recibidas/create">Crear factura recibida</a>
+                    <a href="/facturas-recibidas/create">Aceptación de facturas recibidas</a>
+                    <a href="/facturas-recibidas/create">Registrar factura recibida</a>
                     <a href="/facturas-recibidas/#">Importar facturas</a>
                 </div>
             </li>
             
             <li class="nav-item small-nav {{ request()->is('reportes/*') || request()->is('reportes') ? 'active' : '' }}" >
-                <a class="nav-item-hold" href="#">
+                <a class="nav-item-hold" href="/cierres">
                     <img src="{{asset('assets/images/iconos/report.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Cierres de mes</span>
                 </a>
-                <div class="triangle"></div>
+                
             </li>
             
             <li class="nav-item small-nav {{ request()->is('clientes/*') || request()->is('clientes') ? 'active' : '' }}" >
@@ -52,7 +56,7 @@
                     <img src="{{asset('assets/images/iconos/cliente.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Clientes</span>
                 </a>
-                <div class="triangle"></div>
+                
                 
                 <div class="subitems">
                     <a href="/clientes">Ver todos</a>
@@ -65,7 +69,7 @@
                     <img src="{{asset('assets/images/iconos/prove.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Proveedores</span>
                 </a>
-                <div class="triangle"></div>
+                
                 
                 <div class="subitems">
                     <a href="/proveedores">Ver todos</a>
@@ -78,7 +82,7 @@
                     <img src="{{asset('assets/images/iconos/produ.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Productos</span>
                 </a>
-                <div class="triangle"></div>
+                
                 
                 <div class="subitems">
                     <a href="/productos">Ver todos</a>
@@ -91,11 +95,9 @@
                     <img src="{{asset('assets/images/iconos/report.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Reportes</span>
                 </a>
-                <div class="triangle"></div>
+                
             </li>
           </ul>
       </div>
-
-      <div class="sidebar-overlay"></div>
   </div>
   <!--=============== Left side End ================-->
