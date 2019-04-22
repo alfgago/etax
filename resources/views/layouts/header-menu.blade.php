@@ -35,7 +35,7 @@
                         <i class="i-Lock-User mr-1"></i> {{Auth::user()->first_name.' '.Auth::user()->last_name.' '.Auth::user()->last_name2}}
                     </div>
                     <a class="dropdown-item" href="/" >Perfil de usuario</a>                    
-                    <a class="dropdown-item" href="/empresas/{{ session('current_company') }}/edit">Configuración de empresa</a>           
+                    <a class="dropdown-item" href="/empresas/editar">Configuración de empresa</a>           
                     <a class="dropdown-item" href="/">Cambiar plan</a>                    
                     @can('plan-create')
                     <a class="dropdown-item" href="/plans">Planes de suscripción</a>

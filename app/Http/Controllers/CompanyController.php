@@ -190,7 +190,7 @@ class CompanyController extends Controller {
             abort(401);
         }
         
-        return view('Company.edit_team', compact('company', 'users', 'team'))->withTeam($team);
+        return view('Company.edit-team', compact('company', 'users', 'team'))->withTeam($team);
     }
     
     /**

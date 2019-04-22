@@ -52,7 +52,7 @@ Route::put('update-profile/{user}', 'UserController@update_profile')->name('user
 Route::get('/empresas/editar', 'CompanyController@edit')->name('Company.edit');
 Route::get('/empresas/configuracion', 'CompanyController@editConfiguracion')->name('Company.edit_config');
 Route::get('/empresas/certificado', 'CompanyController@editCertificate')->name('Company.edit_cert');
-Route::get('/empresas/equipo', 'CompanyController@equipo')->name('Company.team');
+Route::get('/empresas/equipo', 'CompanyController@editTeam')->name('Company.team');
 Route::patch('update/{id}', 'CompanyController@update')->name('Company.update');
 Route::patch('update-configuracion/{id}', 'CompanyController@updateConfig')->name('Company.update_config');
 Route::patch('update-certificado/{id}', 'CompanyController@updateCertificado')->name('Company.update_cert');
