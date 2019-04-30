@@ -192,6 +192,13 @@
               cerrarPopup('nuevo-proveedor-popup');
       	}
       }
+      
+      $(document).ready(function(){
+		    
+		  	fillProvincias();
+		    toggleApellidos();
+		    
+		  });
       		  
 		</script>
 		

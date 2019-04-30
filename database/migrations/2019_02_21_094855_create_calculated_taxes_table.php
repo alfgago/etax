@@ -55,6 +55,11 @@ class CreateCalculatedTaxesTable extends Migration
             $table->double('total_proveedores_credito')->nullable();
             $table->double('iva_retenido')->nullable();
             
+            $table->double('bills_subtotal1');
+            $table->double('bills_subtotal2');
+            $table->double('bills_subtotal3');
+            $table->double('bills_subtotal4');
+            
             $table->double('numerador_prorrata')->nullable();
             $table->double('denumerador_prorrata')->nullable();
             $table->double('prorrata')->nullable();
@@ -94,6 +99,9 @@ class CreateCalculatedTaxesTable extends Migration
             $table->double('b004')->default(0);
             $table->double('i004')->default(0);
             
+            $table->double('b008')->default(0);
+            $table->double('i008')->default(0);
+            
             $table->double('b011')->default(0);
             $table->double('i011')->default(0);
             $table->double('b012')->default(0);
@@ -102,6 +110,9 @@ class CreateCalculatedTaxesTable extends Migration
             $table->double('i013')->default(0);
             $table->double('b014')->default(0);
             $table->double('i014')->default(0);
+            
+            $table->double('b018')->default(0);
+            $table->double('i018')->default(0);
             
             $table->double('b021')->default(0);
             $table->double('i021')->default(0);
@@ -112,6 +123,9 @@ class CreateCalculatedTaxesTable extends Migration
             $table->double('b024')->default(0);
             $table->double('i024')->default(0);
             
+            $table->double('b028')->default(0);
+            $table->double('i028')->default(0);
+            
             $table->double('b031')->default(0);
             $table->double('i031')->default(0);
             $table->double('b032')->default(0);
@@ -120,6 +134,9 @@ class CreateCalculatedTaxesTable extends Migration
             $table->double('i033')->default(0);
             $table->double('b034')->default(0);
             $table->double('i034')->default(0);
+            
+            $table->double('b038')->default(0);
+            $table->double('i038')->default(0);
             
             $table->double('b040')->default(0);
             $table->double('i040')->default(0);
@@ -132,6 +149,9 @@ class CreateCalculatedTaxesTable extends Migration
             $table->double('b044')->default(0);
             $table->double('i044')->default(0);
             
+            $table->double('b048')->default(0);
+            $table->double('i048')->default(0);
+            
             $table->double('b050')->default(0);
             $table->double('i050')->default(0);
             $table->double('b051')->default(0);
@@ -142,6 +162,9 @@ class CreateCalculatedTaxesTable extends Migration
             $table->double('i053')->default(0);
             $table->double('b054')->default(0);
             $table->double('i054')->default(0);
+            
+            $table->double('b058')->default(0);
+            $table->double('i058')->default(0);
             
             $table->double('b060')->default(0);
             $table->double('i060')->default(0);
@@ -154,6 +177,9 @@ class CreateCalculatedTaxesTable extends Migration
             $table->double('b064')->default(0);
             $table->double('i064')->default(0);
             
+            $table->double('b068')->default(0);
+            $table->double('i068')->default(0);
+            
             $table->double('b070')->default(0);
             $table->double('i070')->default(0);
             $table->double('b071')->default(0);
@@ -165,12 +191,19 @@ class CreateCalculatedTaxesTable extends Migration
             $table->double('b074')->default(0);
             $table->double('i074')->default(0);
             
+            $table->double('b078')->default(0);
+            $table->double('i078')->default(0);
+            
             $table->double('b080')->default(0);
             $table->double('i080')->default(0);
             $table->double('b090')->default(0);
             $table->double('i090')->default(0);
             $table->double('b097')->default(0);
             $table->double('i097')->default(0);
+            $table->double('b098')->default(0);
+            $table->double('i098')->default(0);
+            $table->double('b099')->default(0);
+            $table->double('i099')->default(0);
           
             //Creditos
             $table->double('b101')->default(0);
@@ -181,6 +214,11 @@ class CreateCalculatedTaxesTable extends Migration
             $table->double('i103')->default(0);
             $table->double('b104')->default(0);
             $table->double('i104')->default(0);
+            
+            $table->double('b114')->default(0);
+            $table->double('i114')->default(0);
+            $table->double('b118')->default(0);
+            $table->double('i118')->default(0);
             
             $table->double('b121')->default(0);
             $table->double('i121')->default(0);
@@ -193,6 +231,9 @@ class CreateCalculatedTaxesTable extends Migration
             
             $table->double('b130')->default(0);
             $table->double('i130')->default(0);
+            $table->double('b140')->default(0);
+            $table->double('i140')->default(0);
+            
             $table->double('b141')->default(0);
             $table->double('i141')->default(0);
             $table->double('b142')->default(0);
@@ -216,6 +257,9 @@ class CreateCalculatedTaxesTable extends Migration
             
             $table->double('b240')->default(0);
             $table->double('i240')->default(0);
+            
+            $table->double('b245')->default(0);
+            $table->double('i245')->default(0);
             
             $table->double('b250')->default(0);
             $table->double('i250')->default(0);

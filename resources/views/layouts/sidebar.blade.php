@@ -19,9 +19,9 @@
                 
                 <div class="subitems">
                     <a href="/facturas-emitidas">Ver todas</a>
-                    <a href="/facturas-emitidas/emitir">Crear factura electrónica</a>
-                    <a href="/facturas-emitidas/create">Crear tiquete electrónico</a>
-                    <a href="/facturas-emitidas/create">Crear nota de débito</a>
+                    <a href="/facturas-emitidas/emitir-factura">Crear factura electrónica</a>
+                    <a href="/facturas-emitidas/emitir-tiquete">Crear tiquete electrónico</a>
+                    <a href="/facturas-emitidas/emitir-factura">Crear nota de débito</a>
                     <a href="/facturas-emitidas/#">Importar facturas</a>
                     <a href="/facturas-emitidas/create">Registrar factura existente</a>
                 </div>

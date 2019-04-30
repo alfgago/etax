@@ -38,7 +38,6 @@
           <label>Filtrar por fecha</label>
           <div class="periodo-selects">
             <select class="form-control" id="input-ano" name="input-ano">
-                <option value="2018">2018</option>
                 <option selected value="2019">2019</option>
             </select>
             <select class="form-control" id="input-mes" name="input-mes">

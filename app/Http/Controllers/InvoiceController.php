@@ -35,8 +35,8 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        $current_company = auth()->user()->companies->first()->id;
-        $invoices = Invoice::where('company_id', $current_company)->orderBy('generated_date', 'DESC')->paginate(10);
+        $current_company = currentCompany();
+        $invoices = Invoice::where('company_id', $current_company)->where('is_void', false)->where('is_totales', false)->with('client')->orderBy('generated_date', 'DESC')->paginate(10);
         return view('Invoice/index', [
           'invoices' => $invoices
         ]);
@@ -49,7 +49,27 @@ class InvoiceController extends Controller
      */
     public function create()
     {
-        return view("Invoice/create");
+        return view("Invoice/create-factura-manual");
+    }
+
+    /**
+     * Muestra el formulario para emitir facturas
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function emitFactura()
+    {
+        return view("Invoice/create-factura", ['document_type' => '01']);
+    }
+    
+    /**
+     * Muestra el formulario para emitir tiquetes electrónicos
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function emitTiquete()
+    {
+        return view("Invoice/create-factura", ['document_type' => '04']);
     }
 
     /**
@@ -60,108 +80,57 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
-      
         $invoice = new Invoice();
-        $company = auth()->user()->companies->first();
+        $company = currentCompanyModel();
         $invoice->company_id = $company->id;
 
         //Datos generales y para Hacienda
         $invoice->document_type = "01";
-        $invoice->document_key = $request->document_key;
-        $invoice->document_number = $request->document_number;
-        $invoice->reference_number = $company->last_invoice_ref_number + 1;
-        $invoice->sale_condition = $request->sale_condition;
-        $invoice->payment_type = $request->payment_type;
-        $invoice->credit_time = $request->credit_time;
-        $invoice->buy_order = $request->buy_order;
-        $invoice->other_reference = $request->other_reference;
         $invoice->hacienda_status = "01";
         $invoice->payment_status = "01";
         $invoice->payment_receipt = "";
         $invoice->generation_method = "M";
-      
-        //Datos de cliente
+        $invoice->reference_number = $company->last_invoice_ref_number + 1;
         
-        if( $request->client_id == '-1' ){
-            $tipo_persona = $request->tipo_persona;
-            $identificacion_cliente = $request->id_number;
-            $codigo_cliente = $request->code;
-            
-            $cliente = Client::firstOrCreate(
-                [
-                    'id_number' => $identificacion_cliente,
-                    'company_id' => $company->id,
-                ],
-                [
-                    'code' => $codigo_cliente ,
-                    'company_id' => $company->id,
-                    'tipo_persona' => $tipo_persona,
-                    'id_number' => $identificacion_cliente
-                ]
-            );
-            $cliente->first_name = $request->first_name;
-            $cliente->last_name = $request->last_name;
-            $cliente->last_name2 = $request->last_name2;
-            $cliente->emisor_receptor = $request->emisor_receptor;
-            $cliente->country = $request->country;
-            $cliente->state = $request->state;
-            $cliente->city = $request->city;
-            $cliente->district = $request->district;
-            $cliente->neighborhood = $request->neighborhood;
-            $cliente->zip = $request->zip;
-            $cliente->address = $request->address;
-            $cliente->phone = $request->phone;
-            $cliente->es_exento = $request->es_exento;
-            $cliente->email = $request->email;
-            $cliente->save();
-                
-            $invoice->client_id = $cliente->id;
-        }else{
-            $invoice->client_id = $request->client_id;
-        }
-        
-        //Datos de factura
-        $invoice->description = $request->description;
-        $invoice->subtotal = $request->subtotal;
-        $invoice->currency = $request->currency;
-        $invoice->currency_rate = $request->currency_rate;
-        $invoice->total = $request->total;
-        $invoice->iva_amount = $request->iva_amount;
-
-        //Fechas
-        $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
-        $invoice->generated_date = $fecha;
-        $fechaV = Carbon::createFromFormat('d/m/Y', $request->due_date );
-        $invoice->due_date = $fechaV;
-      
-        $invoice->save();
-      
-        foreach($request->items as $item){
-          $item_number = $item['item_number'];
-          $code = $item['code'];
-          $name = $item['name'];
-          $product_type = $item['product_type'];
-          $measure_unit = $item['measure_unit'];
-          $item_count = $item['item_count'];
-          $unit_price = $item['unit_price'];
-          $subtotal = $item['subtotal'];
-          $total = $item['total'];
-          $discount_percentage = '0';
-          $discount_reason = '';
-          $iva_type = $item['iva_type'];
-          $iva_percentage = $item['iva_percentage'];
-          $iva_amount = $item['iva_amount'];
-          $is_exempt = false;
-          $isIdentificacion = $item['is_identificacion_especifica'];
-          
-          $invoice->addItem( $fecha->year, $fecha->month, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt );
-        }
+        $invoice->setInvoiceData($request);
         
         $company->last_invoice_ref_number = $invoice->reference_number;
         $company->last_document = $invoice->document_number;
         $company->save();
         
-        $this->clearInvoiceCache($invoice);
+        clearInvoiceCache($invoice);
+      
+        return redirect('/facturas-emitidas');
+    }
+    
+    /**
+     * Envía la factura electrónica a Hacienda
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function sendHacienda(Request $request)
+    {
+        $invoice = new Invoice();
+        $company = currentCompanyModel();
+        $invoice->company_id = $company->id;
+
+        //Datos generales y para Hacienda
+        $invoice->document_type = "01";
+        $invoice->payment_status = "01";
+        $invoice->payment_receipt = "";
+        $invoice->generation_method = "ETAX";
+        $invoice->reference_number = $company->last_invoice_ref_number + 1;
+        
+        $invoice->setInvoiceData($request);
+        
+        dd($invoice);
+        
+        $company->last_invoice_ref_number = $invoice->reference_number;
+        $company->last_document = $invoice->document_number;
+        $company->save();
+        
+        clearInvoiceCache($invoice);
       
         return redirect('/facturas-emitidas');
     }
@@ -189,7 +158,7 @@ class InvoiceController extends Controller
         $this->authorize('update', $invoice);
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
-        if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' && $invoice->generation_method != 'XML' ){
+        if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
           return redirect('/facturas-emitidas');
         }  
       
@@ -210,111 +179,13 @@ class InvoiceController extends Controller
         $this->authorize('update', $invoice);
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
-        if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' && $invoice->generation_method != 'XML' ){
+        if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
           return redirect('/facturas-emitidas');
         }
       
-        $company = $invoice->company; 
-      
-        //Datos generales y para Hacienda
-        $invoice->document_key = $request->document_key;
-        $invoice->document_number = $request->document_number;
-        $invoice->sale_condition = $request->sale_condition;
-        $invoice->payment_type = $request->payment_type;
-        $invoice->credit_time = $request->credit_time;
-        $invoice->buy_order = $request->buy_order;
-        $invoice->other_reference = $request->other_reference;
-      
-        //Datos de cliente
+        $invoice->setInvoiceData($request);
         
-        if( $request->client_id == '-1' ){
-            $tipo_persona = $request->tipo_persona;
-            $identificacion_cliente = $request->id_number;
-            $codigo_cliente = $request->code;
-            
-            $cliente = Client::firstOrCreate(
-                [
-                    'id_number' => $identificacion_cliente,
-                    'company_id' => $company->id,
-                ],
-                [
-                    'code' => $codigo_cliente ,
-                    'company_id' => $company->id,
-                    'tipo_persona' => $tipo_persona,
-                    'id_number' => $identificacion_cliente
-                ]
-            );
-            $cliente->first_name = $request->first_name;
-            $cliente->last_name = $request->last_name;
-            $cliente->last_name2 = $request->last_name2;
-            $cliente->emisor_receptor = $request->emisor_receptor;
-            $cliente->country = $request->country;
-            $cliente->state = $request->state;
-            $cliente->city = $request->city;
-            $cliente->district = $request->district;
-            $cliente->neighborhood = $request->neighborhood;
-            $cliente->zip = $request->zip;
-            $cliente->address = $request->address;
-            $cliente->phone = $request->phone;
-            $cliente->es_exento = $request->es_exento;
-            $cliente->email = $request->email;
-            $cliente->save();
-                
-            $invoice->client_id = $cliente->id;
-        }else{
-            $invoice->client_id = $request->client_id;
-        }
-        
-        //Datos de factura
-        $invoice->description = $request->description;
-        $invoice->subtotal = $request->subtotal;
-        $invoice->currency = $request->currency;
-        $invoice->currency_rate = $request->currency_rate;
-        $invoice->total = $request->total;
-        $invoice->iva_amount = $request->iva_amount;
-
-        //Fechas
-        $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
-        $invoice->generated_date = $fecha;
-        $fechaV = Carbon::createFromFormat('d/m/Y', $request->due_date );
-        $invoice->due_date = $fechaV;
-      
-        $invoice->save();
-      
-        //Recorre las items de factura y las guarda
-        $lids = array();
-        foreach($request->items as $item) {
-          
-          $item_id = $item['id'] ? $item['id'] : 0;
-          $item_number = $item['item_number'];
-          $code = $item['code'];
-          $name = $item['name'];
-          $product_type = $item['product_type'];
-          $measure_unit = $item['measure_unit'];
-          $item_count = $item['item_count'];
-          $unit_price = $item['unit_price'];
-          $subtotal = $item['subtotal'];
-          $total = $item['total'];
-          $discount_percentage = '0';
-          $discount_reason = '';
-          $iva_type = $item['iva_type'];
-          $iva_percentage = $item['iva_percentage'];
-          $iva_amount = $item['iva_amount'];
-          $is_exempt = false;
-          $isIdentificacion = $item['is_identificacion_especifica'];
-          
-          $item_modificado = $invoice->addEditItem( $item_id, $fecha->year, $fecha->month, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt );
-
-          array_push( $lids, $item_modificado->id );
-        }
-      
-        foreach ( $invoice->items as $item ) {
-          if( !in_array( $item->id, $lids ) ) {
-            $item->delete();
-          }
-        }
-        
-        $this->clearInvoiceCache($invoice);
+        clearInvoiceCache($invoice);
           
         return redirect('/facturas-emitidas');
     }
@@ -330,16 +201,11 @@ class InvoiceController extends Controller
         $invoice = Invoice::find($id);
         $this->authorize('update', $invoice);
 
-        $this->clearInvoiceCache($invoice);
+        clearInvoiceCache($invoice);
         
-        if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' && $invoice->generation_method != 'XML' ){
-          return redirect('/facturas-emitidas');
-        }
+        $invoice->is_void = true;
+        $invoice->save();
         
-        foreach ( $invoice->items as $item ) {
-          $item->delete();
-        }
-        $invoice->delete();
         return redirect('/facturas-emitidas');
     }
     
@@ -357,7 +223,7 @@ class InvoiceController extends Controller
         $time_start = $this->microtime_float();
         
         $collection = Excel::toCollection( new InvoiceImport(), request()->file('archivo') );
-        $company = auth()->user()->companies->first();
+        $company = currentCompany();
         
         $i = 0;
         
@@ -491,7 +357,7 @@ class InvoiceController extends Controller
                                 ];
                             }
                             /**END LINEA DE FACTURA**/
-                            $this->clearInvoiceCache($invoice);
+                            clearInvoiceCache($invoice);
                             $invoice->save();
                         }
                         
@@ -523,11 +389,6 @@ class InvoiceController extends Controller
         return ((float) $usec + (float)$sec);
     }  
     
-    private function clearInvoiceCache($invoice){
-        $month = $invoice->generatedDate()->month;
-        $year = $invoice->dueDate()->year;
-        CacheController::clearTaxesCache($invoice->company_id, $month, $year);
-        CacheController::clearTaxesCache($invoice->company_id, 0, $year);
-    }
+
     
 }

@@ -84,6 +84,8 @@ class CreateCompaniesTable extends Migration
                 'company_id' => 1
             ]    
         );
+        $team->company_id = 1;
+        $team->save();
         
         $user->attachTeam($team);
 

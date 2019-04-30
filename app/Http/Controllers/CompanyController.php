@@ -9,9 +9,11 @@ use App\User;
 use App\AtvCertificate;
 use App\Team;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Http\File;
+use Illuminate\Support\Facades\Storage;
 
 class CompanyController extends Controller {
-
+    
     use SoftDeletes;
 
     /**
@@ -259,6 +261,47 @@ class CompanyController extends Controller {
         $company->save();
 
         return redirect()->route('Company.edit_config')->with('success', 'La configuración de la empresa ha sido actualizada.');
+    }
+    
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Company  $empresa
+     * @return \Illuminate\Http\Response
+     */
+     public function updateCertificado(Request $request, $id) {
+
+        $company = Company::find($id);
+        $this->authorize('update', $company);
+        
+        if (!$company) {
+            abort(404);
+        }
+        
+        
+        if (Storage::exists("empresa-$id/cert.p12")) {
+            Storage::delete("empresa-$id/cert.p12");
+        }
+        
+        $path = \Storage::putFileAs(
+            "empresa-$id", $request->file('cert'), "cert.p12"
+        );
+        
+        $cert = AtvCertificate::firstOrNew(
+            [
+                'company_id' => $id,
+            ]
+        );
+
+        $cert->user = $request->user;
+        $cert->password = $request->password;
+        $cert->key_url = $path;
+        $cert->pin = $request->pin;
+        
+        $cert->save();
+        
+        return redirect()->route('Company.edit_cert')->with('success', 'El certificado ATV ha sido actualizado.');
     }
 
     /**

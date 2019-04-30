@@ -1,21 +1,14 @@
 @extends('layouts/app')
 
 @section('title') 
-  Crear factura recibida
+  Crear factura emitida
 @endsection
 
 @section('content') 
-
-<?php 
-    $company = auth()->user()->companies->first();
-    $numero_doc = ((int)$company->document_number) + 1;
-    $document_number = str_pad($numero_doc, 20, '0', STR_PAD_LEFT);
-?>
-
 <div class="row form-container">
   <div class="col-md-12">
                           
-        <form method="POST" action="/facturas-recibidas">
+        <form method="POST" action="/facturas-emitidas">
 
           @csrf
           
@@ -28,17 +21,17 @@
                   <div class="form-row">
                     <div class="form-group col-md-12">
                       <h3>
-                        Proveedor
+                        Cliente
                       </h3>
-                      <div onclick="abrirPopup('nuevo-proveedor-popup');" class="btn btn-agregar btn-agregar-cliente">Nuevo proveedor</div>
-                    </div>
-      
+                      <div onclick="abrirPopup('nuevo-cliente-popup');" class="btn btn-agregar btn-agregar-cliente">Nuevo cliente</div>
+                    </div>  
+                    
                     <div class="form-group col-md-12 with-button">
-                      <label for="provider_id">Seleccione el proveedor</label>
-                      <select class="form-control select-search" name="provider_id" id="provider_id" placeholder="" required>
-                        <option value='' selected>-- Seleccione un proveedor --</option>
-                        @foreach ( $company->providers as $proveedor )
-                          <option value="{{ $proveedor->id }}" >{{ $proveedor->id_number }} - {{ $proveedor->first_name }}</option>
+                      <label for="cliente">Seleccione el cliente</label>
+                      <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
+                        <option value='' selected>-- Seleccione un cliente --</option>
+                        @foreach ( auth()->user()->companies->first()->clients as $cliente )
+                          <option value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
                         @endforeach
                       </select>
                     </div>
@@ -88,7 +81,7 @@
     
                 <div class="form-group col-md-4">
                   <label for="total">Total</label>
-                  <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" >
+                  <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" required>
                 </div>
                 
                 <div class="form-group col-md-12">
@@ -107,17 +100,17 @@
                   </h3>
                 </div>
 
-                <div class="form-group col-md-6">
-                  <label for="document_number">Número de documento</label>
-                  <input type="text" class="form-control" name="document_number" id="document_number" value="" placeholder="" required>
-                </div>
+                  <div class="form-group col-md-6">
+                    <label for="document_number">Número de documento</label>
+                    <input type="text" class="form-control" name="document_number" id="document_number" value="" required>
+                  </div>
+  
+                  <div class="form-group col-md-6">
+                    <label for="document_key">Clave de factura</label>
+                    <input type="text" class="form-control" name="document_key" id="document_key" value="" >
+                  </div>
 
-                <div class="form-group col-md-6">
-                  <label for="document_key">Clave de factura</label>
-                  <input type="text" class="form-control" name="document_key" id="document_key" value="" placeholder="" >
-                </div>
-                
-                <div class="form-group col-md-4">
+                  <div class="form-group col-md-4">
                     <label for="generated_date">Fecha</label>
                     <div class='input-group date inputs-fecha'>
                         <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
@@ -165,13 +158,24 @@
                   <div class="form-group col-md-6">
                     <label for="payment_type">Método de pago</label>
                     <div class="input-group">
-                      <select id="medio_pago" name="payment_type" class="form-control"  required>
+                      <select id="medio_pago" name="payment_type" class="form-control" onchange="toggleRetencion();" required>
                         <option value="01" selected>Efectivo</option>
                         <option value="02">Tarjeta</option>
                         <option value="03">Cheque</option>
                         <option value="04">Transferencia-Depósito Bancario</option>
                         <option value="05">Recaudado por terceros</option>
                         <option value="99">Otros</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group col-md-12" id="field-retencion" style="display:none;">
+                    <label for="retention_percent">Porcentaje de retención</label>
+                    <div class="input-group">
+                      <select id="retention_percent" name="retention_percent" class="form-control" required>
+                        <option value="6" selected>6%</option>
+                        <option value="3">3%</option>
+                        <option value="0" >Sin retención</option>
                       </select>
                     </div>
                   </div>
@@ -229,10 +233,14 @@
             </div>
           </div>
           
-          @include( 'Bill.form-linea' )
-          @include( 'Bill.form-nuevo-proveedor' )
+          @include( 'Invoice.form-linea' )
+          @include( 'Invoice.form-nuevo-cliente' )
 
-          <button id="btn-submit" type="submit" class="hidden">Guardar factura</button>
+          <div class="btn-holder hidden">
+            <button id="btn-submit" type="submit" class="btn btn-primary">Guardar factura</button>
+            <button type="submit" class="btn btn-primary" disabled>Enviar factura electrónica</button>
+          </div>
+
 
           @if ($errors->any())
             <ul>
@@ -249,6 +257,7 @@
 
 @section('breadcrumb-buttons')
   <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar factura</button>
+  <button onclick="$('#btn-submit').click();" class="btn btn-primary2" disabled>Enviar factura electrónica</button>
 @endsection 
 
 @section('header-scripts')
@@ -265,12 +274,18 @@
 <script src="/assets/js/form-facturas.js?v=1"></script>
 
 <script>
-
 $(document).ready(function(){
-  $('#tipo_iva').val('003');
+  $('#tipo_iva').val('103');
 });
 
+function toggleRetencion() {
+  var metodo = $("#medio_pago").val();
+  if( metodo == '02' ){
+    $("#field-retencion").show();
+  }else {
+    $("#field-retencion").hide();
+  }
+}
 </script>
-
 
 @endsection

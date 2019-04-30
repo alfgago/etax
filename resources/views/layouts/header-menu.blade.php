@@ -1,6 +1,6 @@
 <div class="main-header">
     <div class="logo">
-        <img src="{{asset('assets/images/logo-final-150.png')}}" class="logo-img">
+        <a title="Volver al escritorio" href="/"><img src="{{asset('assets/images/logo-final-150.png')}}" class="logo-img"></a>
     </div>
     <div class="menu-toggle">
         <div></div>

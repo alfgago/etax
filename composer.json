@@ -8,6 +8,7 @@
         "php": "^7.1.3",
         "fideloper/proxy": "^4.0",
         "fzaninotto/faker": "^1.8",
+        "guzzlehttp/guzzle": "^6.3",
         "kyslik/column-sortable": "^5.8",
         "laracasts/flash": "^3.0",
         "laravel/framework": "5.8.*",
@@ -28,7 +29,8 @@
     },
     "autoload": {
         "files": [
-            "app/Helpers/Helper.php"
+            "app/Helpers/Helper.php",
+            "app/Helpers/CacheHelper.php"
         ],
         "classmap": [
             "database/seeds",

@@ -4,86 +4,81 @@
     <div class="form-group col-md-4 pregs p1-1 end-0">
       <label>¿Es una venta o un autoconsumo?</label>
       <select class="form-control" id="p2" onchange="onChangeAyuda('p2');" >
-          <option value="1">Venta</option>
+          <option value="1">Venta local</option>
+          <option value="150">Exportación o venta a zona franca</option>
           <option value="2">Autoconsumo</option>
       </select>
     </div>
     
-    <div class="form-group col-md-4 pregs p2-1" >
-      <label>¿Es venta local o exportación?</label>
+    <div class="form-group col-md-4 pregs p2-1">
+      <label>¿Es una venta sujeta al IVA?</label>
       <select class="form-control" id="p3" onchange="onChangeAyuda('p3');">
-          <option value="1">Venta local</option>
-          <option value="150">Exportación</option>
+          <option value="1">Sí</option>
+          <option value="2">No</option>
       </select>
     </div>
     
     <div class="form-group col-md-4 pregs p3-1">
-      <label>¿Es al estado?</label>
+      <label >¿Es una venta exenta?</label>
       <select class="form-control" id="p4" onchange="onChangeAyuda('p4');">
           <option value="1">No</option>
           <option value="2">Sí</option>
       </select>
     </div>
     
-    <div class="form-group col-md-4 pregs p4-1">
-      <label>¿Es a una institución con exención especial?</label>
+    <div class="form-group col-md-8 pregs p4-1">
+      <label>Indique la tarifa de la venta</label>
       <select class="form-control" id="p5" onchange="onChangeAyuda('p5');">
-          <option value="1">No</option>
-          <option value="2">Sí</option>
-      </select>
-    </div>
-    
-    <div class="form-group col-md-4 pregs p5-1">
-      <label >¿Es un producto de canasta básica?</label>
-      <select class="form-control" id="p6" onchange="onChangeAyuda('p6');">
-          <option value="1">No</option>
-          <option value="101">Sí</option>
-      </select>
-    </div>
-    
-    <div class="form-group col-md-4 pregs p6-1">
-      <label style="padding-top:1.3em;">¿Tiene tarifa diferenciada?</label>
-      <select class="form-control" id="p7" onchange="onChangeAyuda('p7');">
-          <option value="103">No</option>
-          <option value="2">Sí</option>
-      </select>
-    </div>
-    
-    <div class="form-group col-md-8 pregs p7-2">
-      <label>Indique el sector de actividad</label>
-      <select class="form-control" id="p8" onchange="onChangeAyuda('p8');">
-          <option value="104">Servicios médicos</option>
-          <option value="102">Servicios de educación</option>
-          <option value="201">Arrendamiento de inmuebles inferiores a 1.5 salarios base</option>
-          <option value="130">Arrendamiento de inmuebles superiores a 1.5 salarios base</option>
-          <option value="201">Servicios de electricidad y agua</option>
-      </select>
-    </div>
-    
-    <div class="form-group col-md-4 pregs p2-2">
-      <label>Indique la tarifa o si no pagó IVA</label>
-      <select class="form-control" id="p9" onchange="onChangeAyuda('p9');" >
-          <option value="123">13%</option>
-          <option value="121">1%</option>
-          <option value="122">2%</option>
-          <option value="124">4%</option>
-          <option value="240">No se pagó IVA en la compra</option>
+          <option value="103">13% - Tarifa general</option>
+          <option value="101">1% - Canasta básica</option>
+          <option value="102">2% - Educación privada o venta de medicamentos</option>
+          <option value="104">4% - Servicios de salud o venta de tiquetes aéreos</option>
+          <option value="130">13% - Arrendamiento de inmuebles superiores a 1.5 salarios base</option>
       </select>
     </div>
     
     <div class="form-group col-md-4 pregs p4-2">
-      <label>¿Tiene derecho a crédito?</label>
-      <select class="form-control" id="p10" onchange="onChangeAyuda('p10');" >
-          <option value="160">Sí</option>
-          <option value="260">No</option>
+      <label>¿Da derecho a crédito fiscal?</label>
+      <select class="form-control" id="p6" onchange="onChangeAyuda('p6');" >
+          <option value="2">No</option>
+          <option value="160">Sí (Ventas al estado)</option>
       </select>
     </div>
     
-    <div class="form-group col-md-4 pregs p5-2">
-      <label>¿Tiene derecho a crédito?</label>
-      <select class="form-control" id="p11" onchange="onChangeAyuda('p11');" >
-          <option value="250">Sí</option>
-          <option value="200">No</option>
+    <div class="form-group col-md-8 pregs p6-2">
+      <label>Indique el tipo de venta</label>
+      <select class="form-control" id="p7" onchange="onChangeAyuda('p7');" >
+          <option value="201">Arrendamiento de inmuebles inferior a 1.5 salarios base</option>
+          <option value="201">Venta de servicios de electricidad con consumo inferior a 280Kw</option>
+          <option value="201">Venta de servicios de agua con consumo inferior a 30m3</option>
+          <option value="200">Otras ventas exentas</option>
+          <option value="245">Ventas locales con tarifa transitoria</option>
+      </select>
+    </div>
+    
+    <div class="form-group col-md-4 pregs p2-2">
+      <label>¿Se aplicó crédito fiscal en la compra?</label>
+      <select class="form-control" id="p8" onchange="onChangeAyuda('p8');">
+          <option value="1">Sí</option>
+          <option value="240">No</option>
+      </select>
+    </div>
+    
+    <div class="form-group col-md-8 pregs p6-1">
+      <label>Indique la tarifa de la venta</label>
+      <select class="form-control" id="p8" onchange="onChangeAyuda('p8');">
+          <option value="123">13% - Tarifa general</option>
+          <option value="121">1% - Canasta básica</option>
+          <option value="122">2% - Educación privada o venta de medicamentos</option>
+          <option value="124">4% - Servicios de salud o venta de tiquetes aéreos</option>
+      </select>
+    </div>
+    
+    <div class="form-group col-md-4 pregs p3-2">
+      <label >¿Da derecho a crédito fiscal?</label>
+      <select class="form-control" id="p9" onchange="onChangeAyuda('p9');">
+          <option value="160">Sí</option>
+          <option value="260">No</option>
       </select>
     </div>
     

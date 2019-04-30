@@ -58,6 +58,7 @@ class CreateBillsTable extends Migration
           
             $table->boolean('is_exempt')->default(false);
             $table->boolean('is_void')->default(false);
+            $table->boolean('is_totales')->default(false);
           
             //Estado de aceptación de la factura: 01 Pendiente, 02 Aceptada, 03 Rechazada, 04 Anulada, 05 Parcial
             $table->enum('status', ['01', '02', '03', '04', '05'])->default('01');
@@ -66,6 +67,10 @@ class CreateBillsTable extends Migration
             $table->string('other_reference')->nullable();
             
             $table->unsignedBigInteger('other_document')->nullable();
+            
+            $table->integer('month');
+            $table->integer('year');
+            $table->index(['year', 'month']);
           
             $table->timestamps();
         });
@@ -105,7 +110,7 @@ class CreateBillsTable extends Migration
             $table->timestamps();
         });
       
-        $this->demoData();
+        //$this->demoData();
     }
   
      public function demoData() {

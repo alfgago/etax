@@ -24,7 +24,7 @@ class TeamworkSetupTables extends Migration
         {
             $table->bigIncrements('id')->unsigned();
             $table->unsignedBigInteger('owner_id')->nullable();
-            $table->unsignedBigInteger('company_id')->unique();
+            $table->unsignedBigInteger('company_id')->nullable();
             $table->string('name')->unique();
             $table->string( 'slug' )->unique();
             $table->timestamps();

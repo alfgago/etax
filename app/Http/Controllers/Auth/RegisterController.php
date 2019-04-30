@@ -72,7 +72,9 @@ use RegistersUsers;
                     'password' => Hash::make($data['password']),
         ]);
 
-        $user->assignRole(array('Admin'));
+        //$user->assignRole(array('Admin'));
+        
+        $user->addCompany();
 
         /* Old Code
          * If user is registering from invitation,it is added as normal user else as admin user
@@ -83,6 +85,7 @@ use RegistersUsers;
           $user->assignRole(array('Admin'));
           }
          */
+         
         return $user;
     }
 

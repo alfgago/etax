@@ -21753,6 +21753,16 @@ input.type-zone {
   margin-top: 5px;
 }
 
+.ayuda-cont .form-group label {
+  height: 28px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: end;
+      -ms-flex-align: end;
+          align-items: flex-end;
+}
+
 .icon-regular {
   font-size: 18px;
   -webkit-font-smoothing: subpixel-antialiased;

@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class AtvCertificate extends Model
 {
@@ -16,5 +17,10 @@ class AtvCertificate extends Model
         'generated_date',
         'due_date'
     ];
+    
+    
+    public function certificateExists() {
+        return Storage::exists( $this->key_url );
+    }
     
 }

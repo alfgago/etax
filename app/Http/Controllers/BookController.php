@@ -30,12 +30,18 @@ class BookController extends Controller
      */
     public function index()
     {
-        $current_company = auth()->user()->companies->first()->id;
+        $current_company = currentCompany();
         $books = CalculatedTax::where([ 
             ['company_id', $current_company],
             ['month', '!=', 0],
             ['month', '!=', -1]
-        ])->orderBy('month', 'DESC')->orderBy('year', 'DESC')->orderBy('created_at', 'DESC')->paginate(10);
+        ])->orderBy('month', 'DESC')->orderBy('year', 'DESC')->orderBy('created_at', 'DESC')->get();
+        
+        foreach ( $books as $book ) {
+            if( ! $book->is_closed ) {
+                $book = CalculatedTax::calcularFacturacionPorMesAno( $book->month, $book->year, 0, $book->saldo_favor_anterior );
+            }
+        }
         
         return view('Book/index', [
           'books' => $books
@@ -51,17 +57,29 @@ class BookController extends Controller
      */
     public function close(Request $request, $id)
     {      
-        $current_company = auth()->user()->companies->first()->id;  
+        $current_company = currentCompany();  
         $calc = CalculatedTax::findOrFail($id);
         $this->authorize('update', $calc);
-      
-        $calc->is_closed = true;
-      
-        $calc->save();
         
         $mes = $calc->month;
         $ano = $calc->year;
-        CacheController::clearCierreCache($current_company, $mes, $ano);
+        
+        $prevOpenBooks = CalculatedTax::where([ 
+            ['company_id', $current_company],
+            ['is_closed', false],
+            ['year', $ano],
+            ['month', '<', $mes],
+            ['month', '!=', 0],
+            ['month', '!=', -1]
+        ])->count();
+        
+        if( $prevOpenBooks ) {
+          return redirect()->back()->with('error', "Debe cerrar los asientos anteriores antes de cerrar el $mes/$ano." );
+        }
+      
+        $calc->is_closed = true;
+        $calc->save();
+        clearCierreCache($current_company, $mes, $ano);
         $cacheKey = "cache-estadoCierre-$current_company-$mes-$ano";
         Cache::forever( $cacheKey, true );
       
@@ -77,7 +95,7 @@ class BookController extends Controller
      */
     public function openForRectification(Request $request, $id)
     {      
-        $current_company = auth()->user()->companies->first()->id;  
+        $current_company = currentCompany();
         $calc = CalculatedTax::findOrFail( $id );
         $this->authorize('update', $calc);
           
@@ -99,8 +117,8 @@ class BookController extends Controller
             $mes = $calc->month;
             $ano = $calc->year;
             
-            CacheController::clearCierreCache($current_company, $mes, $ano);
-            CacheController::clearTaxesCache($current_company, $mes, $ano);
+            clearCierreCache($current_company, $mes, $ano);
+            clearTaxesCache($current_company, $mes, $ano);
             $cacheKey = "cache-estadoCierre-$current_company-$mes-$ano";
             Cache::forever( $cacheKey, false );
         }

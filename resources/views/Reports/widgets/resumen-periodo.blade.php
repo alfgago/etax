@@ -41,10 +41,10 @@
         
         <div class="col-md-12 dato-iva asumido">
             <label><span>IVA por ajustar</span></label>
-            <div class="dato">₡{{ number_format( ( $data->iva_no_deducible - $data->iva_acreditable_identificacion_plena ), 0 ) }}</div>
+            <div class="dato">₡{{ number_format( ( $data->iva_no_deducible ), 0 ) }}</div>
         </div>
         
-        @if( $data->iva_acreditable_identificacion_plena > 0)
+        @if( $data->iva_no_acreditable_identificacion_plena > 0)
         <div class="col-md-12 dato-iva gastado">
             <label><span style="">Gasto por IVA no acreditable</span></label>
             <div class="dato">₡{{ number_format( $data->iva_no_acreditable_identificacion_plena, 0 ) }}</div>
@@ -61,7 +61,7 @@
         @endif  
         
         @if( $data->month != 0)
-            @if( $data->saldo_favor_anterior > 0)
+            @if( $data->saldo_favor_anterior > 0 )
             <div class="col-md-12 dato-iva anterior">
                 <label><span style="">IVA a favor periodo anterior</span></label>
                 <div class="dato">₡{{ number_format( $data->saldo_favor_anterior, 0 ) }}</div>
@@ -70,7 +70,6 @@
         @endif 
     </div>
  </div>  
- 
  
  <style>
      
@@ -191,7 +190,7 @@
 }
 
 .sidebar-dashboard .dato-iva.gastado label:after {
-    background: #E14A95;
+    background: #E75D2F;
 }
 
 .sidebar-dashboard .dato-iva.retenido label:after {

@@ -33,5 +33,19 @@ class Company extends Model {
     public function owner() {
         return $this->belongsTo(User::class);
     }
+    
+    //Relación con Certificado
+    public function atv() {
+        return $this->hasOne(AtvCertificate::class);
+    }
+    
+    //Revisa si el certificado existe
+    public function certificateExists() {
+        if( $this->atv ){
+            return $this->atv->certificateExists();
+        }else {
+            return false;
+        }
+    }
 
 }

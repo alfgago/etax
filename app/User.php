@@ -47,8 +47,27 @@ class User extends Authenticatable {
 
     public function addCompany() {
         $company = Company::create([
-                    'user_id' => $this->id
+                    'user_id' => $this->id,
+                    'type' => 'juridica'
         ]);
+        
+        
+        $team = Team::create(
+            [
+                'name' => "Empresa " . $company->id . "-" . $this->id,
+                'slug' => "slug_" . $company->id . "-" . $this->id,
+                'owner_id' => $this->id,
+                'company_id' => $company->id
+            ]    
+        );
+        $team->company_id = $company->id;
+        $team->save();
+        
+        $this->attachTeam($team);
+        
+        session(['current_company' => $company->id]);
+        
+        return $company;
     }
 
     public function getUserData($email) {

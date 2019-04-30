@@ -1,7 +1,19 @@
 @extends('layouts/app')
 
+<?php 
+  $tipoHacienda = "FE";
+  $titulo = "Factura electrónica";
+  if($document_type == "01"){
+    $tipoHacienda = "FE";
+    $titulo = "factura electrónica";
+  }else if($document_type == "04"){
+    $tipoHacienda = "TE";
+    $titulo = "tiquete electrónico";
+  }
+
+?>
 @section('title') 
-  Crear factura emitida
+  Enviar {{ $titulo }}
 @endsection
 
 @section('content') 
@@ -11,6 +23,10 @@
         <form method="POST" action="/facturas-emitidas">
 
           @csrf
+          
+          @if( ! @currentCompanyModel()->certificateExists() )
+            <div class="alert alert-warning">Usted aún no ha subido su certificado ATV, requerido para la facturación electrónica. Para subirlo ingrese a <a href="http://app.calculodeiva.com/empresas/certificado">este enlace</a>.</div>
+          @endif
           
           <input type="hidden" id="current-index" value="0">
 
@@ -110,7 +126,7 @@
                     <input type="text" class="form-control" name="document_key" id="document_key" value="" >
                   </div>
 
-                  <div class="form-group col-md-4">
+                  <div class="form-group col-md-4 hidden">
                     <label for="generated_date">Fecha</label>
                     <div class='input-group date inputs-fecha'>
                         <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
@@ -120,7 +136,7 @@
                     </div>
                   </div>
 
-                  <div class="form-group col-md-4">
+                  <div class="form-group col-md-4 hidden">
                     <label for="hora">Hora</label>
                     <div class='input-group date inputs-hora'>
                         <input id="hora" class="form-control input-hora" name="hora" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('g:i A') }}">
@@ -130,10 +146,10 @@
                     </div>
                   </div>
 
-                  <div class="form-group col-md-4">
+                  <div class="form-group col-md-6">
                     <label for="due_date">Fecha de vencimiento</label>
                     <div class='input-group date inputs-fecha'>
-                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
+                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->addDays(3)->format('d/m/Y') }}">
                       <span class="input-group-addon">
                         <i class="icon-regular i-Calendar-4"></i>
                       </span>
@@ -165,6 +181,17 @@
                         <option value="04">Transferencia-Depósito Bancario</option>
                         <option value="05">Recaudado por terceros</option>
                         <option value="99">Otros</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group col-md-12" id="field-retencion" style="display:none;">
+                    <label for="retention_percent">Porcentaje de retención</label>
+                    <div class="input-group">
+                      <select id="retention_percent" name="retention_percent" class="form-control" required>
+                        <option value="6" selected>6%</option>
+                        <option value="3">3%</option>
+                        <option value="0" >Sin retención</option>
                       </select>
                     </div>
                   </div>
@@ -226,18 +253,8 @@
           @include( 'Invoice.form-nuevo-cliente' )
 
           <div class="btn-holder hidden">
-            <button id="btn-submit" type="submit" class="btn btn-primary">Guardar factura</button>
-            <button type="submit" class="btn btn-primary" disabled>Enviar factura electrónica</button>
+            <button id="btn-submit" type="submit" class="btn btn-primary" disabled>Enviar factura electrónica</button>
           </div>
-
-
-          @if ($errors->any())
-            <ul>
-              @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-              @endforeach
-            </ul>
-          @endif
 
         </form>
   </div>  
@@ -245,9 +262,7 @@
 @endsection
 
 @section('breadcrumb-buttons')
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar factura</button>
   <button onclick="$('#btn-submit').click();" class="btn btn-primary2" disabled>Enviar factura electrónica</button>
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary2" disabled>Programar envío</button>
 @endsection 
 
 @section('header-scripts')
@@ -261,12 +276,22 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
-<script src="/assets/js/form-facturas.js"></script>
+<script src="/assets/js/form-facturas.js?v=1"></script>
 
 <script>
 $(document).ready(function(){
   $('#tipo_iva').val('103');
 });
+
+function toggleRetencion() {
+  var metodo = $("#medio_pago").val();
+  if( metodo == '02' ){
+    $("#field-retencion").show();
+  }else {
+    $("#field-retencion").hide();
+  }
+}
+
 </script>
 
 @endsection

@@ -24,7 +24,7 @@ class BillController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth', ['except' => ['receiveEmailBills']] );
     }
   
     /**
@@ -34,8 +34,8 @@ class BillController extends Controller
      */
     public function index()
     {
-        $current_company = auth()->user()->companies->first()->id;
-        $bills = Bill::where('company_id', $current_company)->with('provider')->sortable(['generated_date' => 'desc'])->paginate(10);
+        $current_company = currentCompany();
+        $bills = Bill::where('company_id', $current_company)->where('is_void', false)->with('provider')->sortable(['generated_date' => 'desc'])->paginate(10);
         return view('Bill/index', [
           'bills' => $bills
         ]);
@@ -61,104 +61,23 @@ class BillController extends Controller
     {
       
         $bill = new Bill();
-        $company = auth()->user()->companies->first();
+        $company = currentCompanyModel();
         $bill->company_id = $company->id;
-      
+
         //Datos generales y para Hacienda
         $bill->document_type = "01";
-        $bill->document_key = $request->document_key;
-        $bill->document_number = $request->document_number;
-        $bill->reference_number = $company->last_bill_ref_number + 1;
-        $bill->sale_condition = $request->sale_condition;
-        $bill->payment_type = $request->payment_type;
-        $bill->retention_percent = $request->retention_percent;
-        $bill->credit_time = $request->credit_time;
-        $bill->buy_order = $request->buy_order;
-        $bill->other_reference = $request->other_reference;
         $bill->hacienda_status = "01";
         $bill->payment_status = "01";
         $bill->payment_receipt = "";
         $bill->generation_method = "M";
-      
-        //Datos de proveedor
-        if( $request->provider_id == '-1' ){
-            $tipo_persona = $request->tipo_persona;
-            $identificacion_provider = $request->id_number;
-            $codigo_provider = $request->code;
-            
-            $provider = Provider::firstOrCreate(
-                [
-                    'id_number' => $identificacion_provider,
-                    'company_id' => $company->id,
-                ],
-                [
-                    'code' => $codigo_provider ,
-                    'company_id' => $company->id,
-                    'tipo_persona' => $tipo_persona,
-                    'id_number' => $identificacion_provider
-                ]
-            );
-            $provider->first_name = $request->first_name;
-            $provider->last_name = $request->last_name;
-            $provider->last_name2 = $request->last_name2;
-            $provider->country = $request->country;
-            $provider->state = $request->state;
-            $provider->city = $request->city;
-            $provider->district = $request->district;
-            $provider->neighborhood = $request->neighborhood;
-            $provider->zip = $request->zip;
-            $provider->address = $request->address;
-            $provider->phone = $request->phone;
-            $provider->es_exento = $request->es_exento;
-            $provider->email = $request->email;
-            $provider->save();
-                
-            $bill->provider_id = $provider->id;
-        }else{
-            $bill->provider_id = $request->provider_id;
-        }
+        $bill->reference_number = $company->last_bill_ref_number + 1;
         
-        //Datos de factura
-        $bill->description = $request->description;
-        $bill->subtotal = $request->subtotal;
-        $bill->currency = $request->currency;
-        $bill->currency_rate = $request->currency_rate;
-        $bill->total = $request->total;
-        $bill->iva_amount = $request->iva_amount;
-
-        //Fechas
-        $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
-        $bill->generated_date = $fecha;
-        $fechaV = Carbon::createFromFormat('d/m/Y', $request->due_date );
-        $bill->due_date = $fechaV;
-      
-        $bill->save();
-
-        foreach($request->items as $item){
-          $item_number = $item['item_number'];
-          $code = $item['code'];
-          $name = $item['name'];
-          $product_type = $item['product_type'];
-          $measure_unit = $item['measure_unit'];
-          $item_count = $item['item_count'];
-          $unit_price = $item['unit_price'];
-          $subtotal = $item['subtotal'];
-          $total = $item['total'];
-          $discount_percentage = 0;
-          $discount_reason = '';
-          $iva_type = $item['iva_type'];
-          $iva_percentage = $item['iva_percentage'];
-          $iva_amount = $item['iva_amount'];
-          $porc_identificacion_plena = $item['porc_identificacion_plena'];
-          $is_exempt = false;
-          
-          $bill->addItem( $fecha->year, $fecha->month, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt );
-        }
+        $bill->setBillData($request);
         
         $company->last_bill_ref_number = $bill->reference_number;
         $company->save();
         
-        $this->clearBillCache($bill);
+        clearBillCache($bill);
       
         return redirect('/facturas-recibidas');
     }
@@ -186,7 +105,7 @@ class BillController extends Controller
         $this->authorize('update', $bill);
       
         //Valida que la factura recibida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
-        if( $bill->generation_method != 'M' && $bill->generation_method != 'XLSX' && $bill->generation_method != 'XML' ){
+        if( $bill->generation_method != 'M' && $bill->generation_method != 'XLSX' ){
           return redirect('/facturas-recibidas');
         }  
       
@@ -202,114 +121,17 @@ class BillController extends Controller
      */
     public function update(Request $request, $id)
     {
-      
         $bill = Bill::findOrFail($id);
         $this->authorize('update', $bill);
       
-        //Valida que la factura recibida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
-        if( $bill->generation_method != 'M' && $bill->generation_method != 'XLSX' && $bill->generation_method != 'XML' ){
-          return redirect('/facturas-recibidas');
-        } 
-      
-        $company = $bill->company;
-      
-        //Datos generales y para Hacienda
-        $bill->document_key = $request->document_key;
-        $bill->document_number = $request->document_number;
-        $bill->sale_condition = $request->sale_condition;
-        $bill->payment_type = $request->payment_type;
-        $bill->retention_percent = $request->retention_percent;
-        $bill->credit_time = $request->credit_time;
-        $bill->buy_order = $request->buy_order;
-        $bill->other_reference = $request->other_reference;
-      
-        //Datos de proveedor
-        if( $request->provider_id == '-1' ){
-            $tipo_persona = $request->tipo_persona;
-            $identificacion_provider = $request->id_number;
-            $codigo_provider = $request->code;
-            
-            $provider = Provider::firstOrCreate(
-                [
-                    'id_number' => $identificacion_provider,
-                    'company_id' => $company->id,
-                ],
-                [
-                    'code' => $codigo_provider ,
-                    'company_id' => $company->id,
-                    'tipo_persona' => $tipo_persona,
-                    'id_number' => $identificacion_provider
-                ]
-            );
-            $provider->first_name = $request->first_name;
-            $provider->last_name = $request->last_name;
-            $provider->last_name2 = $request->last_name2;
-            $provider->country = $request->country;
-            $provider->state = $request->state;
-            $provider->city = $request->city;
-            $provider->district = $request->district;
-            $provider->neighborhood = $request->neighborhood;
-            $provider->zip = $request->zip;
-            $provider->address = $request->address;
-            $provider->phone = $request->phone;
-            $provider->es_exento = $request->es_exento;
-            $provider->email = $request->email;
-            $provider->save();
-                
-            $bill->provider_id = $provider->id;
-        }else{
-            $bill->provider_id = $request->provider_id;
+        //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
+        if( $bill->generation_method != 'M' && $bill->generation_method != 'XLSX' ){
+          return redirect('/facturas-emitidas');
         }
+      
+        $bill->setBillData($request);
         
-        //Datos de factura
-        $bill->description = $request->description;
-        $bill->subtotal = $request->subtotal;
-        $bill->currency = $request->currency;
-        $bill->currency_rate = $request->currency_rate;
-        $bill->total = $request->total;
-        $bill->iva_amount = $request->iva_amount;
-
-        //Fechas
-        $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
-        $bill->generated_date = $fecha;
-        $fechaV = Carbon::createFromFormat('d/m/Y', $request->due_date );
-        $bill->due_date = $fechaV;
-      
-        $bill->save();
-      
-        //Recorre las items de factura y las guarda
-        $lids = array();
-        foreach($request->items as $item) {
-          $item_id = $item['id'] ? $item['id'] : 0;
-          $item_number = $item['item_number'];
-          $code = $item['code'];
-          $name = $item['name'];
-          $product_type = $item['product_type'];
-          $measure_unit = $item['measure_unit'];
-          $item_count = $item['item_count'];
-          $unit_price = $item['unit_price'];
-          $subtotal = $item['subtotal'];
-          $total = $item['total'];
-          $discount_percentage = 0;
-          $discount_reason = '';
-          $iva_type = $item['iva_type'];
-          $iva_percentage = $item['iva_percentage'];
-          $iva_amount = $item['iva_amount'];
-          $porc_identificacion_plena = $item['porc_identificacion_plena'];
-          $is_exempt = false;
-          
-          $item_modificado = $bill->addEditItem( $item_id, $fecha->year, $fecha->month, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt );
-
-          array_push( $lids, $item_modificado->id );
-        }
-      
-        foreach ( $bill->items as $item ) {
-          if( !in_array( $item->id, $lids ) ) {
-            $item->delete();
-          }
-        }
-        
-        $this->clearBillCache($bill);
+        clearBillCache($bill);
         
         return redirect('/facturas-recibidas');
     }
@@ -325,17 +147,11 @@ class BillController extends Controller
         $bill = Bill::find($id);
         $this->authorize('update', $bill);
         
-        $this->clearBillCache($bill);
+        clearBillCache($bill);
         
-        //Valida que la factura sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
-        if( $bill->generation_method != 'M' && $bill->generation_method != 'XLSX' && $bill->generation_method != 'XML' ){
-          return redirect('/facturas-recibidas');
-        } 
+        $bill->is_void = true;
+        $bill->save();
         
-        foreach ( $bill->items as $linea ) {
-          $linea->delete();
-        }
-        $bill->delete();
         return redirect('/facturas-recibidas');
     }
     
@@ -354,7 +170,7 @@ class BillController extends Controller
         $time_start = $this->microtime_float();
         
         $collection = Excel::toCollection( new BillImport(), request()->file('archivo') );
-        $company = auth()->user()->companies->first();
+        $company = currentCompany();
         
         if( $collection[0]->count() < 5001 ){
             try {
@@ -476,7 +292,7 @@ class BillController extends Controller
                             }
                             /**END LINEA DE FACTURA**/
                             
-                            $this->clearBillCache($bill);
+                            clearBillCache($bill);
                             $bill->save();
                         }
                         
@@ -504,17 +320,23 @@ class BillController extends Controller
         
     }
     
+    public function receiveEmailBills(Request $request) {
+        $file = $request->file('attachment1');
+        
+        $path = \Storage::putFile(
+            "correos", $file
+        );
+        
+        return response()->json([
+            'path' => $path,
+            'success' => 'Exito',
+            'error' => 'Resource not found'
+        ], 200);
+    }
+    
     private function microtime_float(){
         list($usec, $sec) = explode(" ", microtime());
         return ((float) $usec + (float)$sec);
     }   
-    
-    private function clearBillCache($bill){
-        $month = $bill->generatedDate()->month;
-        $year = $bill->dueDate()->year;
-        CacheController::clearTaxesCache($bill->company_id, $month, $year);
-        CacheController::clearTaxesCache($bill->company_id, 0, $year);
-    }
-    
     
 }

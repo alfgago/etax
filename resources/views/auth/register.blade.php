@@ -67,8 +67,14 @@
           <input placeholder="{{ __('Confirmar Contraseña') }}" id="password-confirm" type="password" class="form-control" name="password_confirmation" required>
         </div>
       </div>
-
-      <div class="form-group col-md-12 button-container ">
+      
+      <div class="form-group col-md-12 text-center">
+        <div class="description">
+            Al registrarse y utilizar eTax en cualquier momento, está confirmando que acepta nuestros <a target="_blank" href="https://etaxcr.com/terminos-y-condiciones">Términos y condiciones</a>
+        </div>
+      </div>
+      
+      <div class="form-group col-md-12 text-center">
           <button type="submit" class="btn btn-primary">{{ __('Confirmar cuenta') }} </button>
       </div>
       

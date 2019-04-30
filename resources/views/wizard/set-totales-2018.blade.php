@@ -1,42 +1,23 @@
 @extends('layouts/app')
 
 @section('title') 
-  Editar factura emitida
+  Totales de ventas 2018
 @endsection
 
 @section('content') 
 <div class="row form-container">
   <div class="col-md-12">
-      <form method="POST" action="/facturas-emitidas/{{ $invoice->id }}">
-        @method('patch')
-        @csrf
+        
+        <h2 style="color: red;">Esta pantalla es utilizada únicamente para calcular la prorrata operativa del año 2018.</h2>
+        
+        <form method="POST" action="/update-totales-2018">
 
-          <input type="hidden" id="current-index" value="{{ count($invoice->items) }}">
+          @csrf
 
           <div class="form-row">
-            <div class="col-md">
-              <div class="form-row">
-                <div class="col-md-6">
-                  <div class="form-row">
-                    <div class="form-group col-md-12">
-                      <h3>
-                        Cliente
-                      </h3>
-                      <div onclick="abrirPopup('nuevo-cliente-popup');" class="btn btn-agregar btn-agregar-cliente">Nuevo cliente</div>
-                    </div>  
-                    
-                    <div class="form-group col-md-12 with-button">
-                      <label for="cliente">Seleccione el cliente</label>
-                      <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
-                        <option value=''>-- Seleccione un cliente --</option>
-                        @foreach ( auth()->user()->companies->first()->clients as $cliente )
-                          <option  {{ $invoice->client_id == $cliente->id ? 'selected' : '' }} value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
-                        @endforeach
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                    
+            <div class="col-md-12">
+              <div class="form-row hidden">
+                
                 <div class="col-md-6">
                   <div class="form-row">
                     <div class="form-group col-md-12">
@@ -48,71 +29,71 @@
                     <div class="form-group col-md-4">
                       <label for="currency">Divisa</label>
                       <select class="form-control" name="currency" id="moneda" required>
-                        <option value="crc" {{ $invoice->currency == 'crc' ? 'selected' : '' }}>CRC</option>
-                        <option value="usd" {{ $invoice->currency == 'usd' ? 'selected' : '' }}>USD</option>
+                        <option value="crc" selected>CRC</option>
+                        <option value="crc">USD</option>
                       </select>
                     </div>
-  
+      
                     <div class="form-group col-md-8">
                       <label for="currency_rate">Tipo de cambio</label>
-                      <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="{{ $invoice->currency_rate }}" required>
+                      <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="1.00" required>
                     </div>
                   </div>
                 </div>
-              </div>  
-
+              </div>
+              
               <div class="form-row">    
                 <div class="form-group col-md-12">
                   <h3>
-                    Total de factura
+                    Detalle
                   </h3>
                 </div>
-      
+                
                  <div class="form-group col-md-4">
-                  <label for="subtotal">Subtotal </label>
-                  <input type="text" class="form-control" name="subtotal" id="subtotal" placeholder="" readonly="true" required>
+                  <label for="subtotal">Total </label>
+                  <input type="text" class="form-control" name="subtotal" id="subtotal" placeholder="" readonly="true" required value="{{ @$totales->subtotal }}">
                 </div>
-      
-                <div class="form-group col-md-4">
+    
+                <div class="form-group col-md-4 hidden">
                   <label for="iva_amount">Monto IVA </label>
-                  <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
+                  <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required value="{{ @$totales->monto_iva }}">
                 </div>
-      
-                <div class="form-group col-md-4">
+    
+                <div class="form-group col-md-4 hidden">
                   <label for="total">Total</label>
-                  <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" >
+                  <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" required value="{{ @$totales->total }}">
                 </div>
                 
                 <div class="form-group col-md-12">
                   <div onclick="abrirPopup('linea-popup');" class="btn btn-dark btn-agregar">Agregar linea</div>
                 </div>
-      
+    
               </div>
-                
+              
             </div>
             
-            <div class="col-md offset-md-1">  
+            <div class="col-md offset-md-1 hidden">
               <div class="form-row">
                 <div class="form-group col-md-12">
                   <h3>
                     Datos generales
                   </h3>
                 </div>
-                
+
                   <div class="form-group col-md-6">
                     <label for="document_number">Número de documento</label>
-                    <input type="text" class="form-control" name="document_number" id="document_number" value="{{ $invoice->document_number }}" required>
+                    <input type="text" class="form-control" name="document_number" id="document_number" value="TOTALES2018" required>
                   </div>
   
                   <div class="form-group col-md-6">
                     <label for="document_key">Clave de factura</label>
-                    <input type="text" class="form-control" name="document_key" id="document_key" value="{{ $invoice->document_key }}" >
+                    <input type="text" class="form-control" name="document_key" id="document_key" value="" >
                   </div>
 
                   <div class="form-group col-md-4">
                     <label for="generated_date">Fecha</label>
                     <div class='input-group date inputs-fecha'>
-                        <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ $invoice->generatedDate()->format('d/m/Y') }}">
+                        <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="12/12/2018">
                         <span class="input-group-addon">
                           <i class="icon-regular i-Calendar-4"></i>
                         </span>
@@ -122,7 +103,7 @@
                   <div class="form-group col-md-4">
                     <label for="hora">Hora</label>
                     <div class='input-group date inputs-hora'>
-                        <input id="hora" class="form-control input-hora" name="hora" required value="{{ $invoice->generatedDate()->format('g:i A') }}">
+                        <input id="hora" class="form-control input-hora" name="hora" required value="10:00 AM">
                         <span class="input-group-addon">
                           <i class="icon-regular i-Clock"></i>
                         </span>
@@ -132,81 +113,82 @@
                   <div class="form-group col-md-4">
                     <label for="due_date">Fecha de vencimiento</label>
                     <div class='input-group date inputs-fecha'>
-                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ $invoice->dueDate()->format('d/m/Y') }}">
+                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="12/12/2018">
                       <span class="input-group-addon">
                         <i class="icon-regular i-Calendar-4"></i>
                       </span>
                     </div>
                   </div>
+                  
+                  <div class="form-group col-md-6">
+                    <label for="sale_condition">Condición de venta</label>
+                    <div class="input-group">
+                      <select id="condicion_venta" name="sale_condition" class="form-control" required>
+                        <option selected value="01">Contado</option>
+                        <option value="02">Crédito</option>
+                        <option value="03">Consignación</option>
+                        <option value="04">Apartado</option>
+                        <option value="05">Arrendamiento con opción de compra</option>
+                        <option value="06">Arrendamiento en función financiera</option>
+                        <option value="99">Otros</option>
+                      </select>
+                    </div>
+                  </div>
 
                   <div class="form-group col-md-6">
-                  <label for="sale_condition">Condición de venta</label>
-                  <div class="input-group">
-                    <select id="condicion_venta" name="sale_condition" class="form-control" required>
-                      <option {{ $invoice->sale_condition == '01' ? 'selected' : '' }} value="01">Contado</option>
-                      <option {{ $invoice->sale_condition == '02' ? 'selected' : '' }} value="02">Crédito</option>
-                      <option {{ $invoice->sale_condition == '03' ? 'selected' : '' }} value="03">Consignación</option>
-                      <option {{ $invoice->sale_condition == '04' ? 'selected' : '' }} value="04">Apartado</option>
-                      <option {{ $invoice->sale_condition == '05' ? 'selected' : '' }} value="05">Arrendamiento con opción de compra</option>
-                      <option {{ $invoice->sale_condition == '06' ? 'selected' : '' }} value="06">Arrendamiento en función financiera</option>
-                      <option {{ $invoice->sale_condition == '99' ? 'selected' : '' }} value="99">Otros</option>
-                    </select>
+                    <label for="payment_type">Método de pago</label>
+                    <div class="input-group">
+                      <select id="medio_pago" name="payment_type" class="form-control" onchange="toggleRetencion();" required>
+                        <option value="01" selected>Efectivo</option>
+                        <option value="02">Tarjeta</option>
+                        <option value="03">Cheque</option>
+                        <option value="04">Transferencia-Depósito Bancario</option>
+                        <option value="05">Recaudado por terceros</option>
+                        <option value="99">Otros</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
-  
-                <div class="form-group col-md-6">
-                  <label for="payment_type">Método de pago</label>
-                  <div class="input-group">
-                    <select id="medio_pago" name="payment_type" class="form-control" onchange="toggleRetencion();" required>
-                      <option {{ $invoice->payment_type == '01' ? 'selected' : '' }} value="01" selected>Efectivo</option>
-                      <option {{ $invoice->payment_type == '02' ? 'selected' : '' }} value="02">Tarjeta</option>
-                      <option {{ $invoice->payment_type == '03' ? 'selected' : '' }} value="03">Cheque</option>
-                      <option {{ $invoice->payment_type == '04' ? 'selected' : '' }} value="04">Transferencia-Depósito Bancario</option>
-                      <option {{ $invoice->payment_type == '05' ? 'selected' : '' }} value="05">Recaudado por terceros</option>
-                      <option {{ $invoice->payment_type == '99' ? 'selected' : '' }} value="99">Otros</option>
-                    </select>
+                  
+                  <div class="form-group col-md-12" id="field-retencion" style="display:none;">
+                    <label for="retention_percent">Porcentaje de retención</label>
+                    <div class="input-group">
+                      <select id="retention_percent" name="retention_percent" class="form-control" required>
+                        <option value="6" >6%</option>
+                        <option value="3" >3%</option>
+                        <option value="0" selected>Sin retención</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
-                
-                <div class="form-group col-md-12" id="field-retencion" style="display:none;">
-                  <label for="retention_percent">Porcentaje de retención</label>
-                  <div class="input-group">
-                    <select id="retention_percent" name="retention_percent" class="form-control" required>
-                      <option value="6" {{ $invoice->retention_percent == 6 ? 'selected' : '' }}>6%</option>
-                      <option value="3" {{ $invoice->retention_percent == 3 ? 'selected' : '' }}>3%</option>
-                      <option value="0" {{ $invoice->retention_percent == 0 ? 'selected' : '' }}>Sin retención</option>
-                    </select>
-                  </div>
-                </div>
 
                   <div class="form-group col-md-6">
                     <label for="other_reference">Referencia</label>
-                    <input type="text" class="form-control" name="other_reference" id="referencia" value="{{ $invoice->other_reference }}" >
+                    <input type="text" class="form-control" name="other_reference" id="referencia" value="" >
                   </div>
 
                   <div class="form-group col-md-6">
                     <label for="buy_order">Orden de compra</label>
-                    <input type="text" class="form-control" name="buy_order" id="orden_compra" value="{{ $invoice->buy_order }}" >
+                    <input type="text" class="form-control" name="buy_order" id="orden_compra" value="" >
                   </div>
 
                   <div class="form-group col-md-12">
                     <label for="description">Notas</label>
-                    <input type="text" class="form-control" name="description" id="notas" placeholder="" value="{{ $invoice->description }}">
+                    <textarea class="form-control" name="description" id="notas" placeholder="">Sumatoria de ventas 2018</textarea>
                   </div>
 
               </div>
+              
             </div>
           </div>
 
-          <div class="form-row" id="tabla-items-factura" >  
-
+          <div class="form-row" id="tabla-items-factura" style="{{ count(@$totales->items) ? '' : 'display:none;'}}">  
+            <input type="hidden" id="current-index" value="{{ count(@$totales->items) }}">
             <div class="form-group col-md-12">
               <h3>
-                Lineas de factura
+                Lineas por tipo de IVA
               </h3>
             </div>
-  
-            <div class="form-group col-md-12">
+            
+            <div class="form-group col-md-12" >
               <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
                 <thead class="thead-dark">
                   <tr>
@@ -218,14 +200,14 @@
                     <th>Unidad</th>
                     <th>Precio unitario</th>
                     <th>Tipo IVA</th>
-                    <th>Subtotal</th>
+                    <th>Total</th>
                     <th>IVA</th>
                     <th>Total</th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                   @foreach ( $invoice->items as $item )
+                   @foreach ( $totales->items as $item )
                    <tr class="item-tabla item-index-{{ $loop->index }}" index="{{ $loop->index }}" attr-num="{{ $loop->index }}" id="item-tabla-{{ $loop->index }}">
                       <td><span class="numero-fila">{{ $loop->index+1 }}</span>
                         <input type="hidden" class='numero' name="items[{{ $loop->index }}][item_number]" value="{{ $loop->index+1 }}">
@@ -274,13 +256,11 @@
               </table>
             </div>
           </div>
-        
-          @include( 'Invoice.form-linea' )
-          @include( 'Invoice.form-nuevo-cliente' )
+          
+          @include( 'wizard.form-linea' )
 
           <div class="btn-holder hidden">
-            <button id="btn-submit" type="submit" class="btn btn-primary">Guardar factura</button>
-            <button type="submit" class="btn btn-primary">Enviar factura electrónica</button>
+            <button id="btn-submit" type="submit" class="btn btn-primary">Guardar totales</button>
           </div>
 
         </form>
@@ -289,8 +269,7 @@
 @endsection
 
 @section('breadcrumb-buttons')
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar factura</button>
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary2" disabled>Enviar factura electrónica</button>
+  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar totales</button>
 @endsection 
 
 @section('header-scripts')
@@ -304,40 +283,33 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
-<script src="/assets/js/form-facturas.js?v=1"></script>
+<script src="/assets/js/form-facturas.js"></script>
 
 <script>
 $(document).ready(function(){
-  
   $('#tipo_iva').val('103');
-  
-  var subtotal = 0;
-  var monto_iva = 0;
-  var total = 0;
-  $('.item-tabla').each(function(){
-    var s = parseFloat($(this).find('.subtotal').val());
-    var m = parseFloat($(this).find('.monto_iva').val());
-    var t = parseFloat($(this).find('.total').val());
-    subtotal += s;
-    monto_iva += m;	
-    total += t;	
-  });
-
-  $('#subtotal').val(subtotal);
-  $('#monto_iva').val(monto_iva);
-  $('#total').val(total);
-  
-  toggleRetencion();
 });
-
-function toggleRetencion() {
-  var metodo = $("#medio_pago").val();
-  if( metodo == '02' ){
-    $("#field-retencion").show();
-  }else {
-    $("#field-retencion").hide();
-  }
-}
 </script>
+
+<style>
+  div#tabla-items-factura th:nth-of-type(2),
+  div#tabla-items-factura td:nth-of-type(2),
+  div#tabla-items-factura th:nth-of-type(3),
+  div#tabla-items-factura td:nth-of-type(3),
+  div#tabla-items-factura th:nth-of-type(4),
+  div#tabla-items-factura td:nth-of-type(4),
+  div#tabla-items-factura th:nth-of-type(5),
+  div#tabla-items-factura td:nth-of-type(5),
+  div#tabla-items-factura th:nth-of-type(6),
+  div#tabla-items-factura td:nth-of-type(6),
+  div#tabla-items-factura th:nth-of-type(10),
+  div#tabla-items-factura td:nth-of-type(10),
+  div#tabla-items-factura th:nth-of-type(11),
+  div#tabla-items-factura td:nth-of-type(11),
+  div#tabla-items-factura th:nth-of-type(7),
+  div#tabla-items-factura td:nth-of-type(7) {
+      display: none;
+  }
+</style>
 
 @endsection

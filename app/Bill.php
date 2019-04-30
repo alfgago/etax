@@ -44,14 +44,117 @@ class Bill extends Model
     {
         return Carbon::parse($this->due_date);
     }
+    
+    /**
+    * Asigna los datos de la factura segun el request recibido
+    **/
+    public function setBillData($request) {
+      
+      $this->document_key = $request->document_key;
+      $this->document_number = $request->document_number;
+      $this->sale_condition = $request->sale_condition;
+      $this->payment_type = $request->payment_type;
+      $this->credit_time = $request->credit_time;
+      $this->buy_order = $request->buy_order;
+      $this->other_reference = $request->other_reference;
+    
+      //Datos de proveedor
+      if( $request->provider_id == '-1' ){
+          $tipo_persona = $request->tipo_persona;
+          $identificacion_provider = $request->id_number;
+          $codigo_provider = $request->code;
+          
+          $provider = Provider::firstOrCreate(
+              [
+                  'id_number' => $identificacion_provider,
+                  'company_id' => $this->company_id,
+              ],
+              [
+                  'code' => $codigo_provider ,
+                  'company_id' => $this->company_id,
+                  'tipo_persona' => $tipo_persona,
+                  'id_number' => $identificacion_provider
+              ]
+          );
+          $provider->first_name = $request->first_name;
+          $provider->last_name = $request->last_name;
+          $provider->last_name2 = $request->last_name2;
+          $provider->country = $request->country;
+          $provider->state = $request->state;
+          $provider->city = $request->city;
+          $provider->district = $request->district;
+          $provider->neighborhood = $request->neighborhood;
+          $provider->zip = $request->zip;
+          $provider->address = $request->address;
+          $provider->phone = $request->phone;
+          $provider->es_exento = $request->es_exento;
+          $provider->email = $request->email;
+          $provider->save();
+              
+          $this->provider_id = $provider->id;
+      }else{
+          $this->provider_id = $request->provider_id;
+      }
+      
+      //Datos de factura
+      $this->description = $request->description;
+      $this->subtotal = $request->subtotal;
+      $this->currency = $request->currency;
+      $this->currency_rate = $request->currency_rate;
+      $this->total = $request->total;
+      $this->iva_amount = $request->iva_amount;
+
+      //Fechas
+      $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
+      $this->generated_date = $fecha;
+      $fechaV = Carbon::createFromFormat('d/m/Y', $request->due_date );
+      $this->due_date = $fechaV;
+      
+      $this->year = $fecha->year;
+      $this->month = $fecha->month;
+    
+      $this->save();
+    
+      $lids = array();
+      foreach($request->items as $item) {
+        $item_id = $item['id'] ? $item['id'] : 0;
+        $item_number = $item['item_number'];
+        $code = $item['code'];
+        $name = $item['name'];
+        $product_type = $item['product_type'];
+        $measure_unit = $item['measure_unit'];
+        $item_count = $item['item_count'];
+        $unit_price = $item['unit_price'];
+        $subtotal = $item['subtotal'];
+        $total = $item['total'];
+        $discount_percentage = '0';
+        $discount_reason = '';
+        $iva_type = $item['iva_type'];
+        $iva_percentage = $item['iva_percentage'];
+        $iva_amount = $item['iva_amount'];
+        $is_exempt = false;
+        $isIdentificacion = $item['is_identificacion_especifica'];
+        $item_modificado = $this->addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt );
+        array_push( $lids, $item_modificado->id );
+      }
+      
+      foreach ( $this->items as $item ) {
+        if( !in_array( $item->id, $lids ) ) {
+          $item->delete();
+        }
+      }
+      
+      return $this;
+      
+    }
   
-    public function addItem( $year, $month, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt )
+    public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt )
     {
       return BillItem::create([
         'bill_id' => $this->id,
         'company_id' => $this->company_id,
-        'year' => $year,
-        'month' => $month,
+        'year' => $this->year,
+        'month' => $this->month,
         'item_number' => $item_number,
         'code' => $code,
         'name' => $name,
@@ -73,15 +176,15 @@ class Bill extends Model
       
     }
   
-    public function addEditItem( $item_id, $year, $month, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt )
+    public function addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt )
     {
       if( $item_id ){
         $item = BillItem::find($item_id);
         //Revisa que la linea exista y pertenece a la factura actual. Asegura que si el ID se cambia en frontend, no se actualice.
         if( $item && $item->bill_id == $this->id ) {
           $item->company_id = $this->company_id;
-          $item->year = $year;
-          $item->month = $month;
+          $item->year = $this->year;
+          $item->month = $this->month;
           $item->item_number = $item_number;
           $item->code = $code;
           $item->name = $name;
@@ -102,7 +205,7 @@ class Bill extends Model
           $item->save();
         }
       }else {
-        $item = $this->addItem( $item_number, $year, $month, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt );
+        $item = $this->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt );
       }
       return $item;
     }

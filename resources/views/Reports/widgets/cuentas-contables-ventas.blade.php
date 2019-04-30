@@ -34,6 +34,11 @@
                 <td>-</td>
               </tr>
               <tr>
+                <th>IVA retenido por pagos con tarjeta de crédito:</td>
+                <td>  ₡{{ number_format( $data->book->cc_retenido, 0 ) }} </td>
+                <td>-</td>
+              </tr>
+              <tr>
                 <th>Ventas locales de bienes y servicios con derecho a crédito 1%</td>
                 <td>-</td>
                 <td>  ₡{{ number_format( $data->book->cc_ventas_1, 0 ) }} </td>

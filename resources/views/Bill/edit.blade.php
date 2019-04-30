@@ -158,24 +158,13 @@
                 <div class="form-group col-md-6">
                   <label for="payment_type">Método de pago</label>
                   <div class="input-group">
-                    <select id="medio_pago" name="payment_type" class="form-control" onchange="toggleRetencion();" required>
+                    <select id="medio_pago" name="payment_type" class="form-control" required>
                       <option {{ $bill->payment_type == '01' ? 'selected' : '' }} value="01" selected>Efectivo</option>
                       <option {{ $bill->payment_type == '02' ? 'selected' : '' }} value="02">Tarjeta</option>
                       <option {{ $bill->payment_type == '03' ? 'selected' : '' }} value="03">Cheque</option>
                       <option {{ $bill->payment_type == '04' ? 'selected' : '' }} value="04">Transferencia-Depósito Bancario</option>
                       <option {{ $bill->payment_type == '05' ? 'selected' : '' }} value="05">Recaudado por terceros</option>
                       <option {{ $bill->payment_type == '99' ? 'selected' : '' }} value="99">Otros</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div class="form-group col-md-12" id="field-retencion" style="display:none;">
-                  <label for="retention_percent">Porcentaje de retención</label>
-                  <div class="input-group">
-                    <select id="retention_percent" name="retention_percent" class="form-control" required>
-                      <option value="6" {{ $bill->retention_percent == 6 ? 'selected' : '' }}>6%</option>
-                      <option value="3" {{ $bill->retention_percent == 3 ? 'selected' : '' }}>3%</option>
-                      <option value="0" {{ $bill->retention_percent == 0 ? 'selected' : '' }}>Sin retención</option>
                     </select>
                   </div>
                 </div>
@@ -301,7 +290,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
-<script src="/assets/js/form-facturas.js"></script>
+<script src="/assets/js/form-facturas.js?v=1"></script>
 
 <script>
 

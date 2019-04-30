@@ -33,33 +33,41 @@
         <div class="col-9">
           <div class="tab-content">       
 						
-						<form method="POST" action="{{ route('Company.update_cert', ['id' => $company->id]) }}">
-						
-						  @csrf
-						  @method('patch') 
-						  
-						  <div class="form-row">
-						  	
-						    <div class="form-group col-md-12">
-						      <h3>
-						        Certificado digital
-						      </h3>
-						    </div>
+			<form method="POST" action="{{ route('Company.update_cert', ['id' => $company->id]) }}" enctype="multipart/form-data">
+			    
+    		 <div class="alert alert-success"> 
+    		     @if( @$certificate->key_url )
+    		     
+    		         Usted ya subió su certificado ATV. Cualquier edición en esta pantalla requerirá que lo suba nuevamente.
+    		     
+    		     @endif
+    		 </div>
+			
+			  @csrf
+			  @method('patch') 
+			  
+			  <div class="form-row">
+			  	
+			    <div class="form-group col-md-12">
+			      <h3>
+			        Certificado digital
+			      </h3>
+			    </div>
 						    
-                <div class="form-group{{ $errors->has('user_name') ? ' has-error' : '' }} col-md-6">
+                <div class="form-group col-md-6">
                     <label for="user">Usuario ATV</label>
                     <input type="text" class="form-control" name="user" id="user" value="{{ @$certificate->user }}" required>
                 </div>
-                <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }} col-md-6">
+                <div class="form-group col-md-6">
                     <label for="password">Contraseña ATV</label>
                     <input type="password" class="form-control" name="password" id="password" value="{{ @$certificate->password }}" required>
                 </div>
                 
                 <div class="form-group col-md-6">
-                    <label for="key_url">Llave criptográfica</label>
-                      <div class="fallback">
-									      <input name="key_url" type="file" multiple="false">
-									  </div>
+                    <label for="cert">Llave criptográfica</label>
+                    <div class="fallback">
+    				    <input name="cert" type="file" multiple="false">
+    				</div>
                 </div>
                 
                 <div class="form-group col-md-6">
@@ -67,11 +75,11 @@
                     <input type="text" class="form-control" name="pin" id="pin" value="{{ @$certificate->pin }}" required>
                 </div>
 						    
-						    <button id="btn-submit" type="submit" class="hidden btn btn-primary">Guardar información</button>          
-						    
-						  </div>
-						  
-						</form>
+			    <button id="btn-submit" type="submit" class="hidden btn btn-primary">Guardar información</button>          
+			    
+			  </div>
+			  
+			</form>
 
           </div>
         </div>

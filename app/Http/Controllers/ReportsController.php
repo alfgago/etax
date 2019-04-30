@@ -42,26 +42,25 @@ class ReportsController extends Controller
         
         $prorrataOperativa = $this->getProrrataOperativa($ano);
         
-        $e = CalculatedTax::calcularFacturacionPorMesAno( 1, 2019, 0, $prorrataOperativa );
-        $f = CalculatedTax::calcularFacturacionPorMesAno( 2, 2019, 0, $prorrataOperativa );
-        $m = CalculatedTax::calcularFacturacionPorMesAno( 3, 2019, 0, $prorrataOperativa );
-        $a = CalculatedTax::calcularFacturacionPorMesAno( 4, 2019, 0, $prorrataOperativa );
+        $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
+        $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
+        $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0, $prorrataOperativa );
+        $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0, $prorrataOperativa );
+        $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0, $prorrataOperativa );
+        $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0, $prorrataOperativa );
+        $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0, $prorrataOperativa );
+        $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0, $prorrataOperativa );
+        $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0, $prorrataOperativa );
+        $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0, $prorrataOperativa );
+        $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0, $prorrataOperativa );
+        $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, $prorrataOperativa );
         
-        $y = CalculatedTax::calcularFacturacionPorMesAno( 5, 2019, 0, $prorrataOperativa );
-        $j = CalculatedTax::calcularFacturacionPorMesAno( 6, 2019, 0, $prorrataOperativa );
-        $l = CalculatedTax::calcularFacturacionPorMesAno( 7, 2019, 0, $prorrataOperativa );
-        $g = CalculatedTax::calcularFacturacionPorMesAno( 8, 2019, 0, $prorrataOperativa );
-        $s = CalculatedTax::calcularFacturacionPorMesAno( 9, 2019, 0, $prorrataOperativa );
-        $c = CalculatedTax::calcularFacturacionPorMesAno( 10, 2019, 0, $prorrataOperativa );
-        $n = CalculatedTax::calcularFacturacionPorMesAno( 11, 2019, 0, $prorrataOperativa );
-        $d = CalculatedTax::calcularFacturacionPorMesAno( 12, 2019, 0, $prorrataOperativa );
-  
         $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
         
         $nombreMes = Variables::getMonthName($mes);
         $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
-      } catch( \Exception $ex ) {
-        return $ex->message;
+      }catch( \Exception $ex ){
+          
       }
       
       return view('/Dashboard/reporte-dashboard', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes'));
@@ -166,10 +165,21 @@ class ReportsController extends Controller
 
     }
     
-    public function getProrrataOperativa($ano){
+    public function getProrrataOperativa( $ano ){
       $anoAnterior = $ano > 2018 ? $ano-1 : 2018;
-      //$anterior = CalculatedTax::calcularFacturacionPorMesAno( -1, $ano-1, 0, 0 );
-      $prorrataOperativa = 0.88;
+      $company = currentCompanyModel();
+      
+      if($anoAnterior == 2018) {
+        if( $company->first_prorrata_type == 1 ){
+          $prorrataOperativa = $company->first_prorrata ? currentCompanyModel()->first_prorrata / 100 : 1;
+        }else {
+          $anterior = CalculatedTax::getProrrataPeriodoAnterior( $anoAnterior );
+          $prorrataOperativa = $anterior->prorrata;
+        }
+      }else{
+        $anterior = CalculatedTax::getProrrataPeriodoAnterior( $anoAnterior );
+        $prorrataOperativa = $anterior->prorrata;
+      }
       
       return $prorrataOperativa;
     }

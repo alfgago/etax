@@ -57,6 +57,17 @@ Route::patch('update/{id}', 'CompanyController@update')->name('Company.update');
 Route::patch('update-configuracion/{id}', 'CompanyController@updateConfig')->name('Company.update_config');
 Route::patch('update-certificado/{id}', 'CompanyController@updateCertificado')->name('Company.update_cert');
 
+// Rutas de facturación
+Route::get('/facturas-emitidas/emitir-factura', 'InvoiceController@emitFactura')->name('Invoice.emit_01');
+Route::get('/facturas-emitidas/emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
+Route::post('/facturas-emitidas/enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
+
+// Rutas de Wizard
+Route::get('wizard', 'WizardController@index')->name('Wizard.index');
+Route::get('editar-totales-2018', 'WizardController@setTotales2018')->name('Wizard.edit_2018');
+Route::post('update-totales-2018', 'WizardController@storeTotales2018')->name('Wizard.update_2018');
+
+
 // Rutas autogeneradas de CRUD
 Route::resource('clientes', 'ClientController');
 Route::resource('proveedores', 'ProviderController');

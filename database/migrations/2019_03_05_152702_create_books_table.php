@@ -48,6 +48,7 @@ class CreateBooksTable extends Migration
             $table->double('cc_clientes_credito_exp')->nullable();
             $table->double('cc_clientes_contado_exp')->nullable();
             $table->double('cc_clientes_sum')->nullable();
+            $table->double('cc_retenido')->nullable();
             
             $table->double('cc_ppp_1')->nullable();
             $table->double('cc_ppp_2')->nullable();

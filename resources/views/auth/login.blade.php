@@ -35,7 +35,7 @@
             <strong>{{ $errors->first('password') }}</strong>
         </span> 
         @endif
-      </div>
+        </div>
     </div>
 
     <div class="form-group col-md-12">
@@ -43,6 +43,12 @@
           <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old( 'remember') ? 'checked' : '' }}>
 
           <label class="form-check-label" for="remember"> {{ __('Recordarme') }} </label>
+        </div>
+    </div>
+    
+    <div class="form-group col-md-12 text-center">
+        <div class="description">
+          Al iniciar sesión y utilizar eTax en cualquier momento, está confirmando que acepta nuestros <a target="_blank" href="https://etaxcr.com/terminos-y-condiciones">Términos y condiciones</a>
         </div>
     </div>
 
