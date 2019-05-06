@@ -5,7 +5,9 @@
 @endsection
 
 @section('breadcrumb-buttons')
-    <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar configuración avanzada</button>
+
+	<button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar configuración avanzada</button>
+
 @endsection
 
 @section('content')

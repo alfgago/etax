@@ -19,15 +19,15 @@ class CreateSubscriptionPlansTable extends Migration
             $table->string('plan_type');
             $table->string('plan_name');
             $table->string('plan_slug');
-            $table->string('no_of_companies');
-            $table->string('no_of_admin_user');
-            $table->string('no_of_invited_user');
-            $table->string('no_of_invoices');
-            $table->string('no_of_bills');
+            $table->string('no_of_companies')->nullable();
+            $table->string('no_of_admin_user')->nullable();
+            $table->string('no_of_invited_user')->nullable();
+            $table->string('no_of_invoices')->nullable();
+            $table->string('no_of_bills')->nullable();
             $table->string('chat_support');
             $table->string('ticket_sla');
-            $table->string('calls_per_month');
-            $table->string('additional_call_rates');
+            $table->string('calls_per_month')->nullable();
+            $table->string('additional_call_rates')->nullable();
             $table->string('initial_setup_virtual');
             $table->string('initial_setup_meeting');
             $table->string('multicurrency');
@@ -39,9 +39,9 @@ class CreateSubscriptionPlansTable extends Migration
             $table->string('monthly_price');
             $table->string('annual_price');
             $table->string('status');
-            
-            $table->softDeletes();
+                        
             $table->timestamps();
+			$table->softDeletes();
         });
     }
 

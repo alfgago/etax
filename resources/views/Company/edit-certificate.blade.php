@@ -5,7 +5,8 @@
 @endsection
 
 @section('breadcrumb-buttons')
-    <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar certificado</button>
+<button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar certificado</button>
+
 @endsection
 
 @section('content')

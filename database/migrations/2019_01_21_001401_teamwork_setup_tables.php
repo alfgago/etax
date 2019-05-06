@@ -24,16 +24,17 @@ class TeamworkSetupTables extends Migration
         {
             $table->bigIncrements('id')->unsigned();
             $table->unsignedBigInteger('owner_id')->nullable();
-            $table->unsignedBigInteger('company_id')->nullable();
+            $table->unsignedBigInteger('company_id')->unique()->nullable();
             $table->string('name')->unique();
-            $table->string( 'slug' )->unique();
+            $table->string( 'slug' )->unique()->nullable();			
             $table->timestamps();
+			$table->softDeletes();
         } );
 
         Schema::create( \Config::get( 'teamwork.team_user_table' ), function ( Blueprint $table )
         {
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('team_id');
+            $table->unsignedBigInteger('team_id');			
             $table->timestamps();
 
             $table->foreign( 'user_id' )
@@ -54,7 +55,8 @@ class TeamworkSetupTables extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('team_id');
             $table->enum('type', ['invite', 'request']);
-            $table->string('email');
+            $table->string('role')->nullable();
+			$table->string('email');
             $table->string('accept_token');
             $table->string('deny_token');
             $table->timestamps();

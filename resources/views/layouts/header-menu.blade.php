@@ -34,7 +34,7 @@
                     <div class="dropdown-header">
                         <i class="i-Lock-User mr-1"></i> {{Auth::user()->first_name.' '.Auth::user()->last_name.' '.Auth::user()->last_name2}}
                     </div>
-                    <a class="dropdown-item" href="/" >Perfil de usuario</a>                    
+                    <a class="dropdown-item" href="/usuario/overview">Perfil</a>                     
                     <a class="dropdown-item" href="/empresas/editar">Configuración de empresa</a>           
                     <a class="dropdown-item" href="/">Cambiar plan</a>                    
                     @can('plan-create')
@@ -55,4 +55,39 @@
     </div>
 
 </div>
-        <!-- header top menu end -->
+<script>
+    function companyChange($redirect = false) {
+
+        var sel = $('#company_change').val();
+        var is_edit = $('#is-company-edit').val();
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        jQuery.ajax({
+            url: "{{ url('/change-company') }}",
+            method: 'post',
+            data: {
+                id: sel, is_edit
+            },
+            success: function (result) {
+                if ($redirect) {
+
+                    if (typeof is_edit === 'undefined') {
+                        window.location.href = window.location.href;
+                    } else {
+                        window.location.href = result;
+                    }
+                }
+
+            }});
+
+    }
+
+    $(document).ready(function () {
+        companyChange();
+    });
+</script>
+

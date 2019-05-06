@@ -31,7 +31,7 @@ Edit team {{$team->name}}
         <div class="col-xs-6 col-sm-6 col-md-6">
             <div class="form-group">
                 <strong>Name *</strong>
-                {!! Form::text('name', $team->name, array('placeholder' => 'Name','class' => 'form-control')) !!}
+                <input type="text" name="name" class="form-control" placeholder="Name" value="{{$team->name}}">                
             </div>        
         </div>
 

@@ -26,8 +26,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $current_company = auth()->user()->companies->first()->id;
-        
+        $current_company = currentCompany();
+
         $products = Product::where('company_id', $current_company)->where('is_catalogue', 1)->paginate(10);
         
         return view('Product/index', [
@@ -63,7 +63,7 @@ class ProductController extends Controller
         ]);
       
         $product = new Product();
-        $company = auth()->user()->companies->first();
+        $company = currentCompanyModel();
         $product->company_id = $company->id;
       
         $product->code = $request->code;

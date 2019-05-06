@@ -110,7 +110,7 @@ class CreateBillsTable extends Migration
             $table->timestamps();
         });
       
-        //$this->demoData();
+        $this->demoData();
     }
   
      public function demoData() {
@@ -169,6 +169,9 @@ class CreateBillsTable extends Migration
             $bill->iva_amount = $request->iva_amount;
             */
 
+            $bill->year = $generated_date->year;
+            $bill->month = $generated_date->month;
+        
             $bill->save();
 
             $sumTotal = 0;
@@ -217,8 +220,8 @@ class CreateBillsTable extends Migration
                     'iva_percentage' => $iva_percentage,
                     'iva_amount' => $iva_amount,
                     'is_exempt' => false,
-                    'year' => $generated_date->year,
-                    'month' => $generated_date->month
+                    'year' => $bill->year,
+                    'month' => $bill->month
                  ];
               
               $sumTotal = $sumTotal + $total;

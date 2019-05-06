@@ -32,15 +32,6 @@ class UserController extends Controller {
     }
 
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function profile() {
-        return view('users.profile');
-    }
-
-    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
@@ -71,7 +62,6 @@ class UserController extends Controller {
 
         $user = User::create($input);
         $user->assignRole($request->input('roles'));
-
 
         return redirect()->route('users.index')
                         ->with('success', 'User created successfully');
@@ -123,27 +113,114 @@ class UserController extends Controller {
         return redirect()->route('users.index')->withSuccess('User Updated Successfully!');
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update_profile(Request $request, $id) { //die("hi update user");
-        if (isset($request->form_type) && $request->form_type == 'account-form') {
-            $this->validate($request, [
-                'first_name' => 'required',
-                'phone' => 'digits:10|unique:users,phone,' . $id,
-                'address' => 'required',
-                'profile_pic' => 'nullable|image'
-            ]);
+    public function editInformation() {
+        return view('users.edit-information');
+    }
+
+    public function overview() {
+        return view('users.overview');
+    }
+
+    public function editPassword() {
+        return view('users.edit-password');
+    }
+
+    public function companies() {
+
+        $teams = auth()->user()->teams;
+
+        /* Show registered companies list on specific plan */
+        if (isset($_GET['plan'])) {
+            $company_ids = \App\Company::where('plan_no', decrypt($_GET['plan']))->get(['id'])->toArray();
+            $teams = \Mpociot\Teamwork\TeamworkTeam::whereIn('company_id', $company_ids)->get();
         } else {
-            $this->validate($request, [
-                'old_password' => 'required',
-                'password' => 'required|same:confirm_password'
-            ]);
+            /* Show all teams if current user is super admin */
+            if (auth()->user()->roles[0]->name == 'Super Admin') {
+                $teams = \Mpociot\Teamwork\TeamworkTeam::get();
+            }
         }
+
+        $data['class'] = '';
+        $data['url'] = '/empresas/create';
+
+        /* Check subscription plan for users */
+        if (auth()->user()->roles[0]->name != 'Super Admin') {
+
+            $available_companies_count = User::checkCountAvailableCompanies();
+
+            if ($available_companies_count == 0) {
+                $data['url'] = 'javascript:void(0)';
+                $data['class'] = 'no_active_plan_popup';
+            }
+        }
+
+        return view('users.companies', compact('data'))->with('teams', $teams);
+    }
+
+    public function plans() {
+
+        $user_id = auth()->user()->id;
+        $plans = user_subscribed_plans($user_id);
+
+        return view('users.subscribed-plans', compact('plans'));
+    }
+
+    public function invitedUsersList() {
+
+        if (!isset($_GET['plan']) || !isset($_GET['type'])) {
+            abort(404);
+        }
+
+        if (($_GET['type'] != 'admin') && ($_GET['type'] != 'readonly')) {
+            abort(404);
+        }
+
+        $companies = \App\Company::where('plan_no', decrypt($_GET['plan']))->get(['id']);
+
+        $teams = \App\Team::whereIn('company_id', array_column($companies->toArray(), 'id'))->get(['id']);
+
+        $team_ids = !empty($teams->toArray()) ? array_column($teams->toArray(), 'id') : array();
+
+        $pending_invites_users = \App\TeamInvitation::whereIn('team_id', $team_ids)->where(array('user_id' => auth()->user()->id, 'role' => $_GET['type']))->with('team')->get()->toArray();
+
+        if ($_GET['type'] == 'admin') {
+            $accepted_invites_users = \App\PlansInvitation::where(array('plan_no' => decrypt($_GET['plan']), 'is_admin' => '1'))->with(array('user', 'company'))->get()->toArray();
+        } else {
+            $accepted_invites_users = \App\PlansInvitation::where(array('plan_no' => decrypt($_GET['plan']), 'is_read_only' => '1'))->with(array('user', 'company'))->get()->toArray();
+        }
+
+        $users_details = array_merge($pending_invites_users, $accepted_invites_users);
+
+        return view('users.invited-users-list', compact('users_details'));
+    }
+
+    public function updateInformation(Request $request, $id) {
+
+        $this->validate($request, [
+            'first_name' => 'required',
+            'phone' => 'digits:10|unique:users,phone,' . $id,
+            'address' => 'required',
+            'profile_pic' => 'nullable|image'
+        ]);
+
+        $user = User::find($id);
+        $input = $request->all();
+
+        if ($request->profile_pic != null) {
+            $input['image'] = time() . '.' . $request->profile_pic->getClientOriginalExtension();
+            $request->profile_pic->move(public_path('profile_pics'), $input['image']);
+        }
+
+        $user->update($input);
+        return redirect()->back()->with('success', 'Profile information updated successfully');
+    }
+
+    public function updatePassword(Request $request, $id) {
+
+        $this->validate($request, [
+            'old_password' => 'required',
+            'password' => 'required|same:confirm_password'
+        ]);
 
         $user = User::find($id);
         $input = $request->all();
@@ -160,18 +237,8 @@ class UserController extends Controller {
             $input = array_except($input, array('password'));
         }
 
-        if ($request->profile_pic != null) {
-            $input['image'] = time() . '.' . $request->profile_pic->getClientOriginalExtension();
-            $request->profile_pic->move(public_path('profile_pics'), $input['image']);
-        }
-
-        //$name_arr = explode(" ", $input['full_name']);
-        //$input['first_name'] = isset($name_arr[0]) ? $name_arr[0] : null;
-        //$input['last_name'] = isset($name_arr[1]) ? $name_arr[1] : null;
-        // print_R($user);
-        // print_R($input); die();
         $user->update($input);
-        return redirect()->back()->with('success', 'Profile information updated successfully');
+        return redirect()->back()->with('success', 'Profile password updated successfully');
     }
 
     /**

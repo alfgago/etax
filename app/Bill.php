@@ -115,6 +115,8 @@ class Bill extends Model
     
       $this->save();
     
+      dd($this);
+    
       $lids = array();
       foreach($request->items as $item) {
         $item_id = $item['id'] ? $item['id'] : 0;

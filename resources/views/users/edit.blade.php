@@ -17,62 +17,70 @@ Edit User
 </div>
 @endif
 
+<form method="POST" action="{{ route('users.update', $user->id) }}">
 
-{!! Form::model($user, ['method' => 'PATCH','route' => ['users.update', $user->id]]) !!}
-<div class="row">
+    @csrf
+    @method('patch') 
 
-    <div class="form-group col-md-12">
-        <h3>
-            User Information
-        </h3>
-    </div>
+    <div class="row">
 
-    <div class="col-xs-6 col-sm-6 col-md-6">
-        <div class="form-group">
-            <strong>First Name *</strong>
-            {!! Form::text('first_name', $user->first_name, array('placeholder' => 'First Name','class' => 'form-control')) !!}
-        </div>        
-    </div>
-    
-    <div class="col-xs-6 col-sm-6 col-md-6">
-        <div class="form-group">
-            <strong>Last Name</strong>
-            {!! Form::text('last_name', $user->last_name, array('placeholder' => 'Last Name','class' => 'form-control')) !!}
-        </div>        
-    </div>
-    
-    <div class="col-xs-6 col-sm-6 col-md-6">
-        <div class="form-group">
-            <strong>Email *</strong>
-            {!! Form::text('email', $user->email, array('placeholder' => 'Email','class' => 'form-control')) !!}
-        </div>        
-    </div>
-    
-    <div class="col-xs-6 col-sm-6 col-md-6">
-        <div class="form-group">
-            <strong>Password</strong>
-            {!! Form::password('password', array('placeholder' => 'Password','class' => 'form-control')) !!}
-        </div>        
-    </div>
-    
-    <div class="col-xs-6 col-sm-6 col-md-6">
-        <div class="form-group">
-            <strong>Confirm Password</strong>
-            {!! Form::password('confirm_password', array('placeholder' => 'Confirm Password','class' => 'form-control')) !!}
-        </div>        
-    </div>
+        <div class="form-group col-md-12">
+            <h3>
+                User Information
+            </h3>
+        </div>
 
-    <div class="col-xs-6 col-sm-6 col-md-6">
-        <div class="form-group">
-            <strong>Role *</strong>
-            {!! Form::select('roles', array_merge(['' => 'Select Role'], $roles),$userRole, array('class' => 'form-control')) !!}
-        </div>        
-    </div>
+        <div class="col-xs-6 col-sm-6 col-md-6">
+            <div class="form-group">
+                <strong>First Name *</strong>
+                <input type="text" placeholder="First Name" name="first_name" class="form-control" value="{{$user->first_name}}">                
+            </div>        
+        </div>
 
-    <div class="col-xs-12 col-sm-12 col-md-12">
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <div class="col-xs-6 col-sm-6 col-md-6">
+            <div class="form-group">
+                <strong>Last Name</strong>
+                <input type="text" placeholder="Last Name" name="last_name" class="form-control" value="{{$user->last_name}}">                
+            </div>        
+        </div>
+
+        <div class="col-xs-6 col-sm-6 col-md-6">
+            <div class="form-group">
+                <strong>Email *</strong>
+                <input type="text" placeholder="Email" name="email" class="form-control" value="{{$user->email}}">                
+            </div>        
+        </div>
+
+        <div class="col-xs-6 col-sm-6 col-md-6">
+            <div class="form-group">
+                <strong>Password</strong>
+                <input type="password" placeholder="Password" name="password" class="form-control">                
+            </div>        
+        </div>
+
+        <div class="col-xs-6 col-sm-6 col-md-6">
+            <div class="form-group">
+                <strong>Confirm Password</strong>
+                <input type="password" placeholder="Confirm Password" name="confirm_password" class="form-control">                
+            </div>        
+        </div>
+
+        <div class="col-xs-6 col-sm-6 col-md-6">
+            <div class="form-group">
+                <strong>Role *</strong>
+                <select class="form-control" name="roles">
+                    <option value="">Select Role</option>
+                    @foreach($roles as $key => $val)
+                    <option value="{{$key}}" <?php echo (in_array($key, $userRole)) ? 'selected' : ''; ?>>{{$val}}</option>
+                    @endforeach
+                </select>                
+            </div>        
+        </div>
+
+        <div class="col-xs-12 col-sm-12 col-md-12">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
     </div>
-</div>
-{!! Form::close() !!}
+</form>
 
 @endsection

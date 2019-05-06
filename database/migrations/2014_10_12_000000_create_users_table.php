@@ -20,21 +20,21 @@ class CreateUsersTable extends Migration
             $table->string('first_name');
             $table->string('last_name')->nullable();
             $table->string('last_name2')->nullable();
-            $table->string('id_number');
+            $table->string('id_number')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('country');
-            $table->string('state'); //Provincia
-            $table->string('city'); //Canton
-            $table->string('district'); //Distrito
-            $table->string('neighborhood'); //Barrio
+            $table->string('country')->nullable();
+            $table->string('state')->nullable(); //Provincia
+            $table->string('city')->nullable(); //Canton
+            $table->string('district')->nullable(); //Distrito
+            $table->string('neighborhood')->nullable(); //Barrio
             $table->string('zip')->nullable();
-            $table->string('address');
-            $table->string('phone');
-            $table->string('image_url');
-            $table->string('security_question');
-            $table->string('security_answer');
+            $table->string('address')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('image_url')->nullable();
+            $table->string('security_question')->nullable();
+            $table->string('security_answer')->nullable();
           
             $table->rememberToken();
             $table->timestamps();

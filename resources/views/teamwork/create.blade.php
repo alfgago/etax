@@ -17,8 +17,8 @@ Create Teams
 </div>
 @endif
 
-
-{!! Form::open(array('route' => 'teams.store','method'=>'POST')) !!}
+<form method="POST" action="{{route('teams.store')}}">
+@csrf
 <div class="row">
 
     <div class="form-group col-md-12">
@@ -30,7 +30,7 @@ Create Teams
     <div class="col-xs-6 col-sm-6 col-md-6">
         <div class="form-group">
             <strong>Name *</strong>
-            {!! Form::text('name', null, array('placeholder' => 'Name','class' => 'form-control')) !!}
+            <input type="text" name="name" class="form-control" placeholder="Name" value="{{old('name')}}">            
         </div>        
     </div>
     
@@ -38,6 +38,6 @@ Create Teams
         <button type="submit" class="btn btn-primary">Submit</button>
     </div>
 </div>
-{!! Form::close() !!}
+</form>
 
 @endsection

@@ -16,7 +16,7 @@ class BillExport implements FromCollection, WithHeadings, WithMapping
     */
     public function collection()
     {
-        $current_company = auth()->user()->companies->first()->id;
+        $current_company = currentCompany();
         
         $billItems = BillItem::with(['bill', 'bill.provider'])->whereHas('bill', function ($query) use ($current_company){
             $query->where('company_id', $current_company);

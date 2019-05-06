@@ -16,7 +16,7 @@ class CreateCompaniesTable extends Migration
         Schema::create('companies', function (Blueprint $table) {
             $table->bigIncrements('id');
           
-            $table->unsignedBigInteger('plan_id')->nullable();
+            $table->string('plan_no')->nullable();
             $table->unsignedBigInteger('user_id');
             
             $table->enum('type', ['fisica', 'juridica', 'dimex', 'extranjero', 'nite', 'otro']); 
@@ -51,8 +51,10 @@ class CreateCompaniesTable extends Migration
             $table->integer('prorrata_type')->default(1); // 1 = Ingresar facturas, 2 = Ingresar totales, 3 = Manual 
             $table->integer('first_prorrata_type')->default(1); // 1 = Ingresar facturas, 2 = Ingresar totales, 3 = Manual 
             $table->boolean('use_invoicing')->default(true);
-          
+			$table->string('deactivation_token')->nullable();
+
             $table->timestamps();
+			$table->softDeletes();
         });
         
         $user = App\User::create([
@@ -84,7 +86,7 @@ class CreateCompaniesTable extends Migration
                 'company_id' => 1
             ]    
         );
-        $team->company_id = 1;
+		$team->company_id = 1;
         $team->save();
         
         $user->attachTeam($team);

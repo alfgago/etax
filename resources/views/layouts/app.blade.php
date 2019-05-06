@@ -54,6 +54,8 @@
     <script src="/assets/js/ubicacion.js"></script>
     <script src="/assets/js/vendor/tagging.min.js"></script>
     <script src="{{asset('assets/js/es5/script.js')}}"></script>
+    <script src="{{asset('assets/js/jquery-confirm.js')}}"></script>
+    <script src="{{asset('assets/js/custom.js')}}"></script>
   
 
     @yield('footer-scripts')

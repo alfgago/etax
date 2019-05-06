@@ -30,7 +30,7 @@
                       <label for="cliente">Seleccione el cliente</label>
                       <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
                         <option value='' selected>-- Seleccione un cliente --</option>
-                        @foreach ( auth()->user()->companies->first()->clients as $cliente )
+                        @foreach ( currentCompanyModel()->clients as $cliente )
                           <option value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
                         @endforeach
                       </select>

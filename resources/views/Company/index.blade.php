@@ -54,8 +54,8 @@ company Management
                     <td>{{ $user->id_number }} </td>
                     <td>
                         @can('user-edit')
-                        <a href="{{route('empresas.edit',$user->id)}}" title="Edit" class="text-success mr-2">
-                            <i class="nav-icon i-Pen-2 font-weight-bold"></i>
+                        <a href="{{route('Company.edit')}}" title="Edit" class="text-success mr-2">
+                           <i class="nav-icon i-Pen-2 font-weight-bold"></i>
                         </a>
                         @endcan
                         @can('user-delete')

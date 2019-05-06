@@ -7,6 +7,8 @@ use App\Company;
 use App\User;
 use App\CalculatedTax;
 use App\Variables;
+use App\PlansInvitation;
+use Mpociot\Teamwork\Facades\Teamwork;
 use Illuminate\Http\Request;
 
 class ReportsController extends Controller
@@ -24,6 +26,29 @@ class ReportsController extends Controller
   
     public function dashboard() {
       
+        /* Logic for New User Invite */
+        $token = session('invite_token');
+
+        if ($token) {
+            $invite = Teamwork::getInviteFromAcceptToken($token);
+
+            if ($invite) {
+                Teamwork::acceptInvite($invite);
+
+                /* Add entry in plan invitations table */                
+                $team = \App\Team::findOrFail($invite->team_id);
+                $company = Company::find($team->company_id);
+
+                $is_admin = ($invite->role == 'admin') ? '1' : '0';
+                $is_readonly = ($invite->role == 'readonly') ? '1' : '0';
+                PlansInvitation::create(['plan_no' => $company->plan_no, 'company_id' => $company->id, 'user_id' => auth()->user()->id, 'is_admin' => $is_admin, 'is_read_only' => $is_readonly]);
+                /* Ends here */
+
+                return redirect()->route('User.companies')->with('success', 'Invitation has been accepted.');
+            }
+        }
+        /* Logic Ends Here */
+
       return view('/Dashboard/index');
 
     }
@@ -184,6 +209,33 @@ class ReportsController extends Controller
       return $prorrataOperativa;
     }
   
+    /** @author Akhil Bansal
+     * This Method is used to switch companies workspaces
+     * @param Request $request 
+     * @return $url
+     */
+    public function changeCompany(Request $request) {
+
+        if (!$request->ajax()) {
+            abort(403);
+        }
+
+        $company_id_no = $request->id;
+        $company = Company::where('id_number', trim($company_id_no))->first();
+
+        $url = '/';
+
+        if (!empty($company)) {
+            session(['current_company' => $company->id]);
+
+            $team = \App\Team::where('company_id', $company->id)->first();
+
+            $url = ($request->is_edit == 1) ? '/empresas/' . $company->id . '/edit' : (($request->is_edit == 3) ? '/companies/permissions/' . $team->id : '/empresas/company-profile/' . $company->id);
+        }
+
+        return $url;
+    }
+
     private function microtime_float(){
         list($usec, $sec) = explode(" ", microtime());
         return ((float) $usec + (float)$sec);

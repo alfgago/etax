@@ -5,7 +5,7 @@ Team Members of company "{{$team->name}}"
 @endsection
 
 @section('breadcrumb-buttons')
-<a class="btn btn-primary" href="{{route('teams.index')}}">Back</a>
+<a class="btn btn-primary" href="{{route('User.companies')}}">Back</a>
 @if(auth()->user()->isOwnerOfTeam($team))
 <a class="btn btn-warning" href="{{route('teams.members.assign_permissions', $team)}}">Manage Users Permissions</a>
 @endif
@@ -110,7 +110,7 @@ Team Members of company "{{$team->name}}"
                             <div class="col-xs-6 col-sm-6 col-md-6">
                                 <div class="form-group {{ $errors->has('email') ? ' has-error' : '' }}">
                                     <strong>E-Mail Address *</strong>
-                                    {!! Form::text('email', old('email'), array('placeholder' => 'E-Mail Address','class' => 'form-control','required')) !!}
+                                    <input type="text" name="email" placeholder="E-Mail Address" class="form-control" value="{{old('email')}}" required>                                    
 
                                     @if ($errors->has('email'))
                                     <span class="help-block">

@@ -40,6 +40,16 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function create() {
+
+        if (auth()->user()->roles[0]->name != 'Super Admin') {
+            /* Not able to create company if dont have any active plan */
+            $available_companies_count = User::checkCountAvailableCompanies();
+
+            if ($available_companies_count == 0) {
+                abort(403);
+            }
+        }
+
         return view('Company.create');
     }
 
@@ -79,29 +89,22 @@ class CompanyController extends Controller {
         $company->email = $request->email;
         $company->default_currency = !empty($request->default_currency) ? $request->default_currency : 'crc';
 
+        /* Add company to a plan */
+        $company->plan_no = (auth()->user()->roles[0]->name != 'Super Admin') ? get_current_user_subscriptions()[0] : '0';
+
         $company->save();
 
         /* Add Company to Team */
-        $teamModel = config('teamwork.team_model');
-
-        /*$team_id = \DB::table('teams')->insertGetId([
-            'name' => $request->name,
-            'owner_id' => $id,
-            'company_id' => $company->id
-        ]);
-        $team = $teamModel::findOrFail($team_id);*/
-        
-        $team = Team::firstOrCreate(
-            [
-                'name' => $request->name,
-                'owner_id' => $id,
-                'company_id' => $company->id
-            ]    
+        $team = Team::firstOrCreate([
+                    'name' => $request->name,
+                    'owner_id' => $id,
+                    'company_id' => $company->id
+                        ]
         );
 
         auth()->user()->attachTeam($team);
 
-        return redirect()->route('teams.index')->with('success', 'Company added successfully');
+        return redirect()->route('User.companies')->with('success', 'Company added successfully');
     }
 
     /**
@@ -122,13 +125,27 @@ class CompanyController extends Controller {
      */
     public function edit() {
 
+        if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+            $company = Company::find($_GET['id']);
+
+            if ($company) {
+                session(['current_company' => $company->id]);
+            }
+        }
+
         $company = currentCompanyModel();
 
         if (!$company) {
             abort(404);
         }
-        
-        return view('Company.edit', compact('company'));
+
+        $users = User::with(['roles' => function($q) {
+                        $q->where('name', 'admin');
+                    }])->get();
+        $team = Team::where('company_id', $company->id)->first();
+
+        $certificate = AtvCertificate::where('company_id', $company->id)->first();
+        return view('Company.edit', compact('company', 'users', 'certificate', 'team'))->withTeam($team);
     }
     
     /**
@@ -202,15 +219,29 @@ class CompanyController extends Controller {
      * @param  \App\Company  $empresa
      * @return \Illuminate\Http\Response
      */
-     public function update(Request $request, $id) {
+    public function update(Request $request, $id) {
 
         $company = Company::find($id);
         $this->authorize('update', $company);
-        
+
         if (!$company) {
             abort(404);
         }
-        
+
+        $team = Team::where('company_id', $company->id)->first();
+
+        /* Only owner of company or user invited as admin for that company can edit company details */
+        if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) && get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
+            abort(403);
+        }
+
+        $team = Team::where('company_id', $company->id)->first();
+
+        /* Only owner of company or user invited as admin for that company can edit company details */
+        if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) && get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
+            abort(403);
+        }
+
         $company->type = $request->type;
         $company->id_number = $request->id_number;
         $company->business_name = $request->business_name;
@@ -221,15 +252,18 @@ class CompanyController extends Controller {
         $company->email = $request->email;
         $company->invoice_email = $request->invoice_email;
         $company->country = $request->country;
-        $company->state = $request->state;
-        $company->city = $request->city;
-        $company->district = $request->district;
+        $company->state = ($request->state != '0') ? $request->state : NULL;
+        $company->city = ($request->city != '0') ? $request->city : NULL;
+        $company->district = ($request->district != '0') ? $request->district : NULL;
         $company->neighborhood = $request->neighborhood;
         $company->zip = $request->zip;
         $company->address = $request->address;
         $company->phone = $request->phone;
-        
         $company->save();
+
+        //Update Team name based on company
+        $team->name = $request->name;
+        $team->save();
 
         return redirect()->route('Company.edit')->with('success', 'La información de la empresa ha sido actualizada.');
     }
@@ -241,15 +275,23 @@ class CompanyController extends Controller {
      * @param  \App\Company  $empresa
      * @return \Illuminate\Http\Response
      */
-     public function updateConfig(Request $request, $id) {
+    public function updateConfig(Request $request, $id) {
 
         $company = Company::find($id);
-        $this->authorize('update', $company);
-        
+
         if (!$company) {
             abort(404);
         }
-        
+
+        $this->authorize('update', $company);
+
+        $team = Team::where('company_id', $company->id)->first();
+
+        /* Only owner of company or user invited as admin for that company can edit company details */
+        if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) && get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
+            abort(403);
+        }
+
         $company->default_currency = $request->default_currency;
         $company->default_invoice_notes = $request->default_invoice_notes;
         $company->default_vat_code = $request->default_vat_code;
@@ -257,12 +299,12 @@ class CompanyController extends Controller {
         $company->first_prorrata = $request->first_prorrata;
         $company->first_prorrata_type = $request->first_prorrata_type;
         $company->use_invoicing = $request->use_invoicing;
-        
+
         $company->save();
 
         return redirect()->route('Company.edit_config')->with('success', 'La configuración de la empresa ha sido actualizada.');
     }
-    
+
     /**
      * Update the specified resource in storage.
      *
@@ -270,16 +312,22 @@ class CompanyController extends Controller {
      * @param  \App\Company  $empresa
      * @return \Illuminate\Http\Response
      */
-     public function updateCertificado(Request $request, $id) {
+    public function updateCertificado(Request $request, $id) {
 
         $company = Company::find($id);
         $this->authorize('update', $company);
-        
+
         if (!$company) {
             abort(404);
         }
-        
-        
+
+        $team = Team::where('company_id', $company->id)->first();
+
+        /* Only owner of company or user invited as admin for that company can edit company details */
+        if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) && get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
+            abort(403);
+        }
+
         if (Storage::exists("empresa-$id/cert.p12")) {
             Storage::delete("empresa-$id/cert.p12");
         }
@@ -305,75 +353,12 @@ class CompanyController extends Controller {
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Company  $empresa
-     * @return \Illuminate\Http\Response
-     */
-   /* public function update_company(Request $request, $id) {
-
-        $company = Company::find($id);
-
-        if (!$company) {
-            abort(404);
-        }
-
-        $input = $request->all();
-
-        $cert_exist = AtvCertificate::where('company_id', $id)->first();
-
-        if ($cert_exist) {
-            $cert_exist->user = !empty($input['user_name']) ? $input['user_name'] : $cert_exist->user;
-            $cert_exist->password = !empty($input['password']) ? $input['password'] : $cert_exist->password;
-            $cert_exist->pin = !empty($input['pin']) ? $input['pin'] : $cert_exist->pin;
-            $cert_exist->generated_date = !empty($input['generated_date']) ? $input['generated_date'] : $cert_exist->generated_date;
-            $cert_exist->due_date = !empty($input['due_date']) ? $input['due_date'] : $cert_exist->due_date;
-
-            if ($request->key_url != null) {
-                $image = time() . '.' . $request->key_url->getClientOriginalExtension();
-                $request->key_url->move(public_path('atv_certificates'), $image);
-
-                $cert_exist->key_url = $image;
-            }
-
-            $cert_exist->save();
-        } else {
-
-            if (!empty($input['user_name']) && !empty($input['password']) && !empty($input['pin'])) {
-                $cert_data['company_id'] = $id;
-                $cert_data['user'] = !empty($input['user_name']) ? $input['user_name'] : null;
-                $cert_data['password'] = !empty($input['password']) ? $input['password'] : null;
-                $cert_data['pin'] = !empty($input['pin']) ? $input['pin'] : null;
-                $cert_data['generated_date'] = !empty($input['generated_date']) ? $input['generated_date'] : null;
-                $cert_data['due_date'] = !empty($input['due_date']) ? $input['due_date'] : null;
-
-                if ($request->key_url != null) {
-                    $image = time() . '.' . $request->key_url->getClientOriginalExtension();
-                    $request->key_url->move(public_path('atv_certificates'), $image);
-
-                    $cert_data['key_url'] = $image;
-                }
-
-                AtvCertificate::create($cert_data);
-            }
-        }
-
-        unset($input['user_name'], $input['password'], $input['pin'], $input['key_url']);
-        $company->update($input);
-
-        //Update Team name based on company
-        \DB::table('teams')->where(array('company_id' => $id))->update(array('name' => $input['name']));
-        return redirect()->route('teams.index')->with('success', 'Company information updated successfully');
-    }*/
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param  \App\Company  $empresa
      * @return \Illuminate\Http\Response
      */
-    public function destroy() {
+    public function destroy($id) {
         $post = Company::where('id', $id)->first();
 
         if ($post != null) {
@@ -383,12 +368,7 @@ class CompanyController extends Controller {
 
         return redirect()->route('empresas.index')->with(['message' => 'Wrong ID!!']);
     }
-    
-    /** @author Akhil Bansal
-     * This Method is used to switch companies workspaces
-     * @param Request $request 
-     * @return $url
-    */
+
     public function changeCompany(Request $request) {
 
         if (!$request->ajax()) {
@@ -403,12 +383,42 @@ class CompanyController extends Controller {
         if (!empty($company)) {
             session(['current_company' => $company->id]);
 
-            $team = \DB::table('teams')->where('company_id', $company->id)->first();
+            $team = Team::where('company_id', $company->id)->first();
 
             $url = ($request->is_edit == 1) ? '/empresas/' . $company->id . '/edit' : (($request->is_edit == 3) ? '/companies/permissions/' . $team->id : '/empresas/company-profile/' . $company->id);
         }
 
         return $url;
+    }
+
+    public function confirmCompanyDeactivation($token) {
+
+        $company = Company::where('deactivation_token', $token)->first();
+
+        if ($company) {
+
+            /* Check Token validity for 24 Hours */
+            if (!token_expired($token)) {
+                if ($company->user_id == auth()->user()->id) {
+                    if (empty($company->deleted_at)) {
+                        $company->deactivation_token = null;
+                        $company->save();
+                        $company->delete();
+                        Team::where('company_id', $company->id)->delete();
+                        session(['current_company' => '']);
+                        return redirect()->route('User.companies')->with('success', 'Company deactivated successfully.');
+                    } else {
+                        return redirect()->route('User.companies')->withErrors(['error' => 'Company already deactivated.']);
+                    }
+                } else {
+                    return redirect()->route('User.companies')->withErrors(['error' => 'You are not authorize to deactivate this company.']);
+                }
+            } else {
+                return redirect()->route('User.companies')->withErrors(['error' => 'Link has been Expired.']);
+            }
+        } else {
+            return redirect()->route('User.companies')->withErrors(['error' => 'Invalid Link or Company already deactivated.']);
+        }
     }
 
 }

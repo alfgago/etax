@@ -85,7 +85,7 @@
           
         </table>
         
-        {{ $books->links() }}
+        
         
   </div>  
 </div>

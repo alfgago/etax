@@ -110,7 +110,7 @@ class CreateInvoicesTable extends Migration
             $table->timestamps();
         });
         
-        //$this->demoData();
+        $this->demoData();
     }
   
     public function demoData() {
@@ -173,6 +173,9 @@ class CreateInvoicesTable extends Migration
                 $invoice->iva_amount = $request->iva_amount;
                 */
     
+                $invoice->year = $generated_date->year;
+                $invoice->month = $generated_date->month;
+            
                 $invoice->save();
     
                 $sumTotal = 0;
@@ -222,8 +225,8 @@ class CreateInvoicesTable extends Migration
                     'iva_amount' => $iva_amount,
                     'is_exempt' => false,
                     'is_identificacion_especifica' => false,
-                    'year' => $generated_date->year,
-                    'month' => $generated_date->month
+                    'year' => $invoice->year,
+                    'month' => $invoice->month
                  ];
                   
                   $sumTotal = $sumTotal + $total;

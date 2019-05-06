@@ -30,7 +30,7 @@ class ClientController extends Controller
      */
     public function index()
     {
-        $current_company = auth()->user()->companies->first()->id;
+        $current_company = currentCompany();    
         $clients = Client::where('company_id', $current_company)->sortable()->paginate(10);
         
         return view('Client/index', [
@@ -67,7 +67,7 @@ class ClientController extends Controller
         ]);
       
         $cliente = new Client();
-        $company = auth()->user()->companies->first();
+        $current_company = currentCompanyModel();    
         $cliente->company_id = $company->id;
       
         $cliente->tipo_persona = $request->tipo_persona;
@@ -193,7 +193,7 @@ class ClientController extends Controller
         $time_start = $this->microtime_float();
         
         $clientes = Excel::toCollection( new ClientImport(), request()->file('archivo') );
-        $company_id = auth()->user()->companies->first()->id;
+        $company_id = $company_id = currentCompany();  
         foreach ($clientes[0] as $row){
             Client::updateOrCreate(
                 [

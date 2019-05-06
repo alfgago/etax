@@ -13,7 +13,7 @@ class ClientExport implements FromCollection, WithHeadings
     */
     public function collection()
     {
-        $current_company = auth()->user()->companies->first()->id;
+        $current_company = currentCompany();
         $clients = Client::select( \DB::raw(
             "code, tipo_persona, id_number, first_name, last_name, last_name2, email, billing_emails, country, 
             state, city, district, neighborhood, address, phone_area, phone, es_exento, emisor_receptor"

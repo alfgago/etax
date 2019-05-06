@@ -14,11 +14,13 @@ class Plan extends Model {
         'plan_type',
         'plan_name',
         'plan_slug',
+        'no_of_companies',
         'no_of_admin_user',
-        'no_of_normal_user',
+        'no_of_invited_user',
         'no_of_invoices',
         'no_of_bills',
         'chat_support',
+        'ticket_sla',
         'calls_per_month',
         'additional_call_rates',
         'initial_setup_virtual',
@@ -30,9 +32,7 @@ class Plan extends Model {
         'basic_report',
         'custom_report',
         'monthly_price',
-        'quaterly_price',
-        'half_yearly_price',
-        'annual_price',
+        'annual_price'
     ];
 
 }

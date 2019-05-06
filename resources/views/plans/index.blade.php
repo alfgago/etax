@@ -4,8 +4,11 @@
 Subscription Plans
 @endsection
 
-@section('breadcrumb-buttons')        
-<a type="submit" class="btn btn-primary" href="/plans/create">Create Subscription Plan</a>      
+@section('breadcrumb-buttons')
+@if(auth()->user()->roles[0]->name == 'Super Admin')
+<a class="btn btn-primary" href="/plans/create">Crear plan de suscripción</a>
+<a class="btn btn-warning" href="/show-plans">Agregar miembro</a>
+@endif
 @endsection 
 
 @section('content') 
@@ -26,18 +29,17 @@ Subscription Plans
                 @endforeach
             </ul>
         </div>
-        @endif
+        @endif        
 
-        <div style="margin: 1rem;"> -- Here are search filters --  </div>
-        
         <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
 
             <thead>
                 <tr>
-                    <th>Plan Name</th>                    
-                    <th>Monthly Price</th>
-                    <th>Quaterly Price</th>
-                    <th>Half Yearly Price</th>
+                    <th>Plan Name</th>
+                    <th>No. of Companies</th>
+                    <th>No. of Invited admins</th>
+                    <th>No. of Invited read-only users</th>
+                    <th>Monthly Price</th>                    
                     <th>Annual Price</th>                              
                     <th>Actions</th>
                 </tr>
@@ -46,11 +48,12 @@ Subscription Plans
                 @if ( $data->count() )
                 @foreach ( $data as $row )
                 <tr>
-                    <td>{{ $row->plan_name }}</td>                    
-                    <td>{{ number_format( $row->monthly_price) }}</td>
-                    <td>{{ number_format( $row->quaterly_price) }}</td>
-                    <td>{{ number_format( $row->half_yearly_price) }}</td>
-                    <td>{{ number_format( $row->annual_price ) }}</td>                                  
+                    <td>{{ ucfirst($row->plan_type).'-'.$row->plan_name }}</td>
+                    <td>{{ !is_null($row->no_of_companies) ? $row->no_of_companies:'Unlimited' }}</td>
+                    <td>{{ !is_null($row->no_of_admin_user) ? $row->no_of_admin_user:'Unlimited' }}</td>
+                    <td>{{ !is_null($row->no_of_invited_user) ? $row->no_of_invited_user:'Unlimited' }}</td>
+                    <td>{{ '$'.number_format( $row->monthly_price) }}</td>                    
+                    <td>{{ '$'.number_format( $row->annual_price ) }}</td>                                  
                     <td>
                         <a href="/plans/{{ $row->id }}" title="View Plan" class="text-primary mr-2"> 
                             <i class="nav-icon i-Eye font-weight-bold"></i> 

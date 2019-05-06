@@ -16,7 +16,7 @@ class InvoiceExport implements WithHeadings, WithMapping, FromQuery
     */
     public function query()
     {
-        $current_company = auth()->user()->companies->first()->id;
+        $current_company = currentCompany();
         
         $invoiceItems = InvoiceItem::query()->with(['invoice', 'invoice.client'])->whereHas('invoice', function ($query) use ($current_company){
             $query->where('company_id', $current_company);

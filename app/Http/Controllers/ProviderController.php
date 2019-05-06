@@ -30,7 +30,7 @@ class ProviderController extends Controller
      */
     public function index()
     {
-        $current_company = auth()->user()->companies->first()->id;
+        $current_company = currentCompany();    
         $providers = Provider::where('company_id', $current_company)->paginate(10);
         return view('Provider/index', [
           'providers' => $providers
@@ -65,7 +65,7 @@ class ProviderController extends Controller
         ]);
       
         $provider = new Provider();
-        $company = auth()->user()->companies->first();
+        $company = currentCompanyModel();    
         $provider->company_id = $company->id;
       
         $provider->tipo_persona = $request->tipo_persona;
@@ -184,7 +184,7 @@ class ProviderController extends Controller
         $time_start = $this->microtime_float();
         
         $proveedors = Excel::toCollection( new ProviderImport(), request()->file('archivo') );
-        $company_id = auth()->user()->companies->first()->id;
+        $company_id = currentCompany(); 
         foreach ($proveedors[0] as $row){
             Provider::updateOrCreate(
                 [

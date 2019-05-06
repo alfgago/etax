@@ -17,8 +17,9 @@ Create Role
 </div>
 @endif
 
+<form method="POST" action="{{route('roles.store')}}">
+@csrf
 
-{!! Form::open(array('route' => 'roles.store','method'=>'POST')) !!}
 <div class="row">
 
     <div class="form-group col-md-12">
@@ -30,7 +31,7 @@ Create Role
     <div class="col-xs-12 col-sm-12 col-md-12">
         <div class="form-group">
             <strong>Role Name *</strong>
-            {!! Form::text('name', null, array('placeholder' => 'Name','class' => 'form-control')) !!}
+            <input type="text" name="name" class="form-control" placeholder="Name" value="{{old('name')}}">           
         </div>        
     </div>
 
@@ -39,7 +40,8 @@ Create Role
             <strong>Permission *</strong>
             <br/>
             @foreach($permission as $value)
-            <label>{{ Form::checkbox('permission[]', $value->id, false, array('class' => 'name')) }}
+            <label>
+                <input type="checkbox" name="permission[]" class="name" value="{{$value->id}}">                               
                 {{ $value->name }}</label>
             <br/>
             @endforeach
@@ -50,7 +52,7 @@ Create Role
         <button type="submit" class="btn btn-primary">Submit</button>
     </div>
 </div>
-{!! Form::close() !!}
+</form>
 
 @endsection
 

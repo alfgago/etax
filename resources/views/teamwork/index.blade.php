@@ -6,7 +6,7 @@ Companies
 
 @section('breadcrumb-buttons')
 @can('team-create')
-<a type="submit" class="btn btn-primary" href="/empresas/create">Create New Company</a>
+<a type="submit" class="btn btn-primary {{$data['class']}}" href="{{$data['url']}}">Create New Company</a>
 @endcan
 @endsection
 
@@ -62,16 +62,18 @@ Companies
                     </td>
                     <td>
                         @if(!auth()->user()->isOwnerOfTeam($team))
-                        @if (isExistInTeam($team->id, auth()->user()->id))
-                        <a href="{{route('Company.company_profile', $team->company_id)}}" class="text-primary mr-2" title="View Company Members & Profile">
+                        @if(get_plan_invitation($team->company_id,auth()->user()->id) && get_plan_invitation($team->company_id,auth()->user()->id)->is_read_only == '1')
+                        <a href="{{route('Company.edit', 'id='.$team->company_id)}}" class="text-primary mr-2" title="View Company Members & Profile">
                             <i class="nav-icon i-Eye font-weight-bold"></i>
                         </a>
                         @endif
                         @endif
-                        @if(auth()->user()->isOwnerOfTeam($team))
-                        <a href="{{route('empresas.edit',$team->company_id)}}" title="Edit Company Details" class="text-success mr-2">
+                        @if(auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($team->company_id,auth()->user()->id) && get_plan_invitation($team->company_id,auth()->user()->id)->is_admin == '1'))
+                        <a href="{{route('Company.edit','id='.$team->company_id)}}" title="Edit Company Details" class="text-success mr-2">
                             <i class="nav-icon i-Pen-2 font-weight-bold"></i>
                         </a>
+                        @endif
+                        @if(auth()->user()->isOwnerOfTeam($team))
                         <form class="inline-form" method="POST" action="{{route('teams.destroy', $team)}}" style="display: inline-block;">
                             @csrf
                             @method('delete')
