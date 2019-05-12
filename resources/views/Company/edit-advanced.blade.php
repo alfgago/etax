@@ -69,7 +69,7 @@
 						    
 						    <div class="form-group col-md-6 hidden toggle-types type-3">
 						      <label for="">&nbsp;</label>
-						      <a class="btn btn-primary form-button" href="/facturas-emitidas">Ingrese sus facturas 2018</a>
+						      <a class="btn btn-primary form-button" href="/empresas/set-prorrata-2018-facturas">Ingrese sus facturas 2018</a>
 						    </div>
 						    
 						    <div class="form-group col-md-6">
@@ -133,10 +133,6 @@
 </div>       
 
 @endsection
-
-@section('breadcrumb-buttons')
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar configuración</button>
-@endsection 
 
 @section('footer-scripts')
 

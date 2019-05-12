@@ -29,7 +29,7 @@
                       <label for="provider_id">Seleccione el cliente</label>
                       <select class="form-control select-search" name="provider_id" id="provider_id" placeholder="" required>
                         <option value='' >-- Seleccione un proveedor --</option>
-                        @foreach ( auth()->user()->companies->first()->providers as $proveedor )
+                        @foreach ( currentCompanyModel()->providers as $proveedor )
                           <option {{ $bill->provider_id == $proveedor->id ? 'selected' : '' }} value="{{ $proveedor->id }}" >{{ $proveedor->id_number }} - {{ $proveedor->first_name }}</option>
                         @endforeach
                       </select>
@@ -255,8 +255,8 @@
                         <input class="is_identificacion_especifica" type="hidden" name="items[{{ $loop->index }}][is_identificacion_especifica]" value="{{ $item->is_identificacion_especifica }}">
                       </td>
                       <td class='acciones'>
-                        <span title='Editar linea' class='btn-editar-item text-success mr-2' onclick="abrirPopup('linea-popup'); cargarFormItem({{ $loop->index }});"><i class='nav-icon i-Pen-2'></i> </span> 
-                        <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ $loop->index }});' ><i class='nav-icon i-Close-Window'></i> </span> 
+                        <span title='Editar linea' class='btn-editar-item text-success mr-2' onclick="abrirPopup('linea-popup'); cargarFormItem({{ $loop->index }});"> <i class="fa fa-pencil" aria-hidden="true"></i> </span> 
+                        <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ $loop->index }});' > <i class="fa fa-trash-o" aria-hidden="true"></i> </span> 
                       </td>
                   </tr>
                   @endforeach
@@ -279,29 +279,9 @@
   <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar factura</button>
 @endsection 
 
-@section('header-scripts')
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker-standalone.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
-
-@endsection 
-
 @section('footer-scripts')
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
-<script src="/assets/js/form-facturas.js?v=1"></script>
-
 <script>
-
-function toggleRetencion() {
-  var metodo = $("#medio_pago").val();
-  if( metodo == '02' ){
-    $("#field-retencion").show();
-  }else {
-    $("#field-retencion").hide();
-  }
-}
 
 $(document).ready(function(){
   
@@ -319,9 +299,9 @@ $(document).ready(function(){
     total += t;	
   });
 
-  $('#subtotal').val(subtotal);
-  $('#monto_iva').val(monto_iva);
-  $('#total').val(total);
+  $('#subtotal').val( fixComas(subtotal) );
+  $('#monto_iva').val( fixComas(monto_iva) );
+  $('#total').val( fixComas(total) );
   
   toggleRetencion();
   

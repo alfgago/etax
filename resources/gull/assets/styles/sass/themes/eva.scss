@@ -75,6 +75,5 @@ $theme-colors: (
   dark: $dark
 ) !default;
 
-@import "../../../fonts/iconsmind/iconsmind.css";
 @import "../../vendor/bootstrap/bootstrap.scss";
 @import "../globals/globals.scss";

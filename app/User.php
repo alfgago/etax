@@ -48,16 +48,16 @@ class User extends Authenticatable {
     public function addCompany() {
         $company = Company::create([
                     'user_id' => $this->id,
-                    'type' => 'juridica'
+                    'type' => 'J'
         ]);
 
         $team = Team::create(
-                        [
-                            'name' => "Empresa " . $company->id . "-" . $this->id,
-                            'slug' => "slug_" . $company->id . "-" . $this->id,
-                            'owner_id' => $this->id,
-                            'company_id' => $company->id
-                        ]
+            [
+                'name' => "Empresa " . $company->id . "-" . $this->id,
+                'slug' => "slug_" . $company->id . "-" . $this->id,
+                'owner_id' => $this->id,
+                'company_id' => $company->id
+            ]
         );
         $team->company_id = $company->id;
         $team->save();

@@ -241,15 +241,6 @@
             <button type="submit" class="btn btn-primary" disabled>Enviar factura electrónica</button>
           </div>
 
-
-          @if ($errors->any())
-            <ul>
-              @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-              @endforeach
-            </ul>
-          @endif
-
         </form>
   </div>  
 </div>
@@ -260,18 +251,7 @@
   <button onclick="$('#btn-submit').click();" class="btn btn-primary2" disabled>Enviar factura electrónica</button>
 @endsection 
 
-@section('header-scripts')
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker-standalone.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
-
-@endsection 
-
 @section('footer-scripts')
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
-<script src="/assets/js/form-facturas.js?v=1"></script>
 
 <script>
 $(document).ready(function(){

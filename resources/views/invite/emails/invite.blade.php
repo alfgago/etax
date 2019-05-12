@@ -1,5 +1,5 @@
-Hello,
-<p>You have been invited to join team {{$team->name}}</p>
+Hola,
+<p>Usted ha sido invitado a utilizar eTax como usuario autorizado de {{$team->name}}. Para empezar, solo debe aceptar la invitación y crear su cuenta.</p>
 
 <table class="action" align="center" width="100%" cellpadding="0" cellspacing="0">
     <tr>
@@ -10,7 +10,7 @@ Hello,
                         <table border="0" cellpadding="0" cellspacing="0">
                             <tr>
                                 <td>
-                                    <a href="{{ route('invites.accept_invite', $invite->accept_token) }}" class="button button-primary}}">Join Team</a>
+                                    <a href="{{ route('invites.accept_invite', $invite->accept_token) }}" class="button button-primary}}">Aceptar invitación</a>
                                 </td>
                             </tr>
                         </table>

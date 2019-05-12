@@ -1,6 +1,6 @@
 <div class="popup" id="linea-popup">
   <div class="popup-container item-factura-form form-row">
-  	<div title="Cerrar ventana" class="close-popup" onclick="cerrarPopup('linea-popup');cancelarEdicion();"> <i class="nav-icon i-Close"></i>  </div>
+  	<div title="Cerrar ventana" class="close-popup" onclick="cerrarPopup('linea-popup');cancelarEdicion();"> <i class="fa fa-times" aria-hidden="true"></i> </div>
 
     <div class="form-group col-md-12">
       <h3>

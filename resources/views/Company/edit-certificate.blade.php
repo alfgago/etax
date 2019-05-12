@@ -5,8 +5,7 @@
 @endsection
 
 @section('breadcrumb-buttons')
-<button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar certificado</button>
-
+    <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar certificado</button>
 @endsection
 
 @section('content')
@@ -36,14 +35,12 @@
 						
 			<form method="POST" action="{{ route('Company.update_cert', ['id' => $company->id]) }}" enctype="multipart/form-data">
 			    
+			 @if( @$certificate->key_url )
     		 <div class="alert alert-success"> 
-    		     @if( @$certificate->key_url )
-    		     
-    		         Usted ya subió su certificado ATV. Cualquier edición en esta pantalla requerirá que lo suba nuevamente.
-    		     
-    		     @endif
+		         Usted ya subió su certificado ATV. Cualquier edición en esta pantalla requerirá que lo suba nuevamente.
     		 </div>
-			
+			 @endif
+			 
 			  @csrf
 			  @method('patch') 
 			  
@@ -90,10 +87,6 @@
 </div>       
 
 @endsection
-
-@section('breadcrumb-buttons')
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar certificado</button>
-@endsection 
 
 @section('footer-scripts')
 

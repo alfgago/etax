@@ -19,7 +19,7 @@ class CreateCompaniesTable extends Migration
             $table->string('plan_no')->nullable();
             $table->unsignedBigInteger('user_id');
             
-            $table->enum('type', ['fisica', 'juridica', 'dimex', 'extranjero', 'nite', 'otro']); 
+            $table->enum('type', ['F', 'J', 'D', 'E', 'N', 'O']); 
             $table->string('id_number')->nullable(); 
             $table->string('business_name')->nullable(); 
             $table->string('activities')->nullable(); 
@@ -43,7 +43,7 @@ class CreateCompaniesTable extends Migration
             //Advanced config
             $table->string('default_currency')->default('crc');
             $table->string('default_invoice_notes')->nullable();
-            $table->string('default_vat_code')->nullable();
+            $table->string('default_vat_code')->default(103);
             $table->string('last_document')->default('1000000000000000001');
             $table->integer('last_invoice_ref_number')->default(0);
             $table->integer('last_bill_ref_number')->default(0);
@@ -68,7 +68,7 @@ class CreateCompaniesTable extends Migration
       
         $company = App\Company::create([
             'user_id' => $user->id,
-            'type' => 'juridica',
+            'type' => 'J',
             'id_number' => '3-102-702429',
             'business_name' => '5E Sociedad de Responsabilidad Limitada',
             'name' => '5E Labs',

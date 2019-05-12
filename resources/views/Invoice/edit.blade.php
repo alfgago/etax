@@ -290,14 +290,6 @@
 
 @section('breadcrumb-buttons')
   <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar factura</button>
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary2" disabled>Enviar factura electrónica</button>
-@endsection 
-
-@section('header-scripts')
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker-standalone.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
-
 @endsection 
 
 @section('footer-scripts')

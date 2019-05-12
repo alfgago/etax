@@ -140,7 +140,7 @@
         htmlCols += "<td>"+ fixComas(subtotal) +" <input class='subtotal' type='hidden' name='items["+index+"][subtotal]' value='"+subtotal+"'></td>";
         htmlCols += "<td>"+ fixComas(monto_iva) +" <input class='porc_iva' type='hidden' name='items["+index+"][iva_percentage]' value='"+porc_iva+"'> <input class='monto_iva' type='hidden' name='items["+index+"][iva_amount]' value='"+monto_iva+"'> </td>";
         htmlCols += "<td>"+ fixComas(total) +" <input class='total' type='hidden' name='items["+index+"][total]' value='"+total+"'> <input class='is_identificacion_especifica' type='hidden' name='items["+index+"][is_identificacion_especifica]' value='"+is_identificacion_especifica+"'> </td>";
-        htmlCols += "<td class='acciones'><span class='btn-editar-item text-success mr-2' title='Editar linea' onclick='abrirPopup(\"linea-popup\");cargarFormItem("+index+");'><i class='nav-icon i-Pen-2'></i> </span> <span title='Eliminar linea' onclick='eliminarItem("+index+");' class='btn-eliminar-item text-danger mr-2'><i class='nav-icon i-Close-Window'></i> </span> </td>";
+        htmlCols += "<td class='acciones'><span class='btn-editar-item text-success mr-2' title='Editar linea' onclick='abrirPopup(\"linea-popup\");cargarFormItem("+index+");'> <i class='fa fa-pencil' aria-hidden='true'></i> </span> <span title='Eliminar linea' onclick='eliminarItem("+index+");' class='btn-eliminar-item text-danger mr-2'> <i class='fa fa-trash-o' aria-hidden='true'></i> </span> </td>";
 
       
       if( !itemExistente ) {
@@ -263,103 +263,94 @@
     numero = parseFloat(numero);
     return numero.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2});
   }
+  
+  window.toggleRetencion = function() {
+    var metodo = $("#medio_pago").val();
+    if( metodo == '02' ){
+      $("#field-retencion").show();
+    }else {
+      $("#field-retencion").hide();
+    }
+  }
 
 $( document ).ready(function() {
 
-  $('#cantidad, #precio_unitario').on('keyup', function(){
-    calcularSubtotalItem();
-  });
-
-  $('#tipo_iva').on('change', function(){
-    presetPorcentaje();
-    calcularSubtotalItem();
-    togglePorcentajeIdentificacionPlena();
-  });
-
-  $('#tipo_producto').on('change', function(){
-    presetTipoIVA();
-    presetPorcentaje();
-    calcularSubtotalItem();
-    togglePorcentajeIdentificacionPlena();
-  });
+  if( $("#tabla-items-factura").length ) {
   
-  $('#item_iva_amount').on('change', function(){
-    calcularConIvaManual();
-  });
+    $('#cantidad, #precio_unitario').on('keyup', function(){
+      calcularSubtotalItem();
+    });
   
-  $('#item_iva_amount').on('click', function(){
-    alert('Puede cambiar el monto de IVA manualmente, pero se recomienda utilizar el monto calculado automáticamente.');
-  });
+    $('#tipo_iva').on('change', function(){
+      presetPorcentaje();
+      calcularSubtotalItem();
+      togglePorcentajeIdentificacionPlena();
+    });
   
-  $('#cliente_exento').on('change', function(){
-
-    if( $('#cliente_exento:checked').length ){
-      $('#tipo_iva').val('260');
-      $('#tipo_iva').prop('readonly', true);
-    }else{
+    $('#tipo_producto').on('change', function(){
       presetTipoIVA();
       presetPorcentaje();
       calcularSubtotalItem();
-      $('#tipo_iva').prop('readonly', false);
-    }
-
-    calcularSubtotalItem();
-    calcularTotalFactura();
-
-  });
-
-
-  /*$(".input-fecha").pickadate({
-    monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-    weekdaysFull: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-    weekdaysShort: ['D', 'L', 'K', 'M', 'J', 'V', 'S'],
-    formatSubmit: 'dd/mm/yyyy',
-    format: 'dd/mm/yyyy',
-    today: 'Hoy',
-    clear: 'Limpiar',
-    close: 'Cerrar',
-    labelMonthNext: 'Siguiente',
-    labelMonthPrev: 'Anterior',
-    labelMonthSelect: 'Elegir mes',
-    labelYearSelect: 'Elegir año',
-  })
-
-  $('.input-hora').pickatime({
-    interval: 1,
-    clear: 'Limpiar'
-  })*/
+      togglePorcentajeIdentificacionPlena();
+    });
+    
+    $('#item_iva_amount').on('change', function(){
+      calcularConIvaManual();
+    });
+    
+    $('#item_iva_amount').on('click', function(){
+      alert('Puede cambiar el monto de IVA manualmente, pero se recomienda utilizar el monto calculado automáticamente.');
+    });
+    
+    $('#cliente_exento').on('change', function(){
   
-$('.inputs-fecha').datetimepicker({
-      format: 'DD/MM/Y',
-      allowInputToggle: true,
-      icons : {
-            time: 'fa fa-clock-o',
-            date: 'fa fa-calendar',
-            up: 'fa fa-chevron-up',
-            down: 'fa fa-chevron-down',
-            previous: 'fa fa-chevron-left',
-            next: 'fa fa-chevron-right',
-            today: 'fa fa-calendar-check-o',
-            clear: 'fa fa-times',
-            close: 'fa fa-calendar-times-o'
+      if( $('#cliente_exento:checked').length ){
+        $('#tipo_iva').val('260');
+        $('#tipo_iva').prop('readonly', true);
+      }else{
+        presetTipoIVA();
+        presetPorcentaje();
+        calcularSubtotalItem();
+        $('#tipo_iva').prop('readonly', false);
       }
-});
-
-$('.inputs-hora').datetimepicker({
-      format: 'h:mm A',
-      allowInputToggle: true,
-      icons : {
-            time: 'fa fa-clock-o',
-            date: 'fa fa-calendar',
-            up: 'fa fa-chevron-up',
-            down: 'fa fa-chevron-down',
-            previous: 'fa fa-chevron-left',
-            next: 'fa fa-chevron-right',
-            today: 'fa fa-calendar-check-o',
-            clear: 'fa fa-times',
-            close: 'fa fa-calendar-times-o'
-      }
-});
-
-
+  
+      calcularSubtotalItem();
+      calcularTotalFactura();
+  
+    });
+    
+    $('.inputs-fecha').datetimepicker({
+          format: 'DD/MM/Y',
+          allowInputToggle: true,
+          icons : {
+                time: 'fa fa-clock-o',
+                date: 'fa fa-calendar',
+                up: 'fa fa-chevron-up',
+                down: 'fa fa-chevron-down',
+                previous: 'fa fa-chevron-left',
+                next: 'fa fa-chevron-right',
+                today: 'fa fa-calendar-check-o',
+                clear: 'fa fa-times',
+                close: 'fa fa-calendar-times-o'
+          }
+    });
+    
+    $('.inputs-hora').datetimepicker({
+          format: 'h:mm A',
+          allowInputToggle: true,
+          icons : {
+                time: 'fa fa-clock-o',
+                date: 'fa fa-calendar',
+                up: 'fa fa-chevron-up',
+                down: 'fa fa-chevron-down',
+                previous: 'fa fa-chevron-left',
+                next: 'fa fa-chevron-right',
+                today: 'fa fa-calendar-check-o',
+                clear: 'fa fa-times',
+                close: 'fa fa-calendar-times-o'
+          }
+    });
+    
+  }
+  
 });

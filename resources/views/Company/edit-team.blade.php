@@ -32,7 +32,7 @@
                         <div class="col-md-12 col-sm-12">
                             <h3 class="card-title">Miembros de "{{$team->name}}"</h3>
                             @if(auth()->user()->isOwnerOfTeam($team))
-                            <a class="btn btn-warning pull-right" href="{{route('teams.members.assign_permissions', $team)}}">Manage Users Permissions</a>
+                                <a class="btn btn-sm btn-primary pull-right m-0" href="{{route('teams.members.assign_permissions', $team)}}">Editar permisos de usuario</a>
                             @endif
                             <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
                                 <thead>
@@ -44,26 +44,26 @@
                                 </thead>
                                 <tbody>
                                     @if ( $team->users->count() )
-                                    @foreach($team->users AS $user)
-                                    <tr>
-                                        <td>{{$user->first_name.' '.$user->last_name.' '.$user->last_name2}}</td>
-                                        <td>{{$user->email}}</td>
-                                        <td>
-                                            @if(auth()->user()->isOwnerOfTeam($team))
-                                            @if(auth()->user()->getKey() !== $user->getKey())
-                                            <form style="display: inline-block;" action="{{route('teams.members.destroy', [$team, $user])}}" method="post">
-                                                {!! csrf_field() !!}
-                                                @method('delete')
-
-                                                <button type="submit" class="text-danger mr-2" title="Eliminar" style="display: inline-block; background: none; border: 0;">
-                                                    <a href="javascript:void(0)"><i class="nav-icon i-Close-Window font-weight-bold"></i></a>
-                                                </button>                                                    
-                                            </form>
-                                            @endif
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    @endforeach
+                                        @foreach($team->users AS $user)
+                                        <tr>
+                                            <td>{{$user->first_name.' '.$user->last_name.' '.$user->last_name2}}</td>
+                                            <td>{{$user->email}}</td>
+                                            <td>
+                                                @if(auth()->user()->isOwnerOfTeam($team))
+                                                    @if(auth()->user()->getKey() !== $user->getKey())
+                                                    <form style="display: inline-block;" action="{{route('teams.members.destroy', [$team, $user])}}" method="post">
+                                                        @csrf
+                                                        @method('delete')
+        
+                                                        <button type="submit" class="text-danger mr-2" title="Eliminar" style="display: inline-block; background: none; border: 0;">
+                                                            <i class="fa fa-ban" aria-hidden="true"></i>
+                                                        </button>                                                    
+                                                    </form>
+                                                    @endif
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        @endforeach
                                     @endif
                                 </tbody>
                             </table>
@@ -145,7 +145,7 @@
 
                                                 <div class="form-group">
                                                     <div class="col-md-6 col-md-offset-4">
-                                                        <button type="submit" class="btn btn-primary"><i class="fa fa-btn fa-envelope-o"></i>Enviar invitación</button>
+                                                        <button type="submit" class="btn btn-sm btn-primary"><i class="fa fa-btn fa-envelope-o"></i>Enviar invitación</button>
                                                     </div>
                                                 </div>
                                             </div>

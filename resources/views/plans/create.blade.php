@@ -1,23 +1,17 @@
 @extends('layouts/app')
 
 @section('title') 
-Create Subscription Plan
+    Crear plan de suscripción
 @endsection
 
 @section('content') 
-
-@if (count($errors) > 0)
-<div class="alert alert-danger">
-    <strong>Whoops!</strong> There were some problems with your input.<br><br>    
-</div>
-@endif
 
 <form method="POST" action="{{route('plans.store')}}">
     @csrf
     <div class="row">
 
         <div class="form-group col-md-12">
-            <h3>PLAN DETAILS</h3>
+            <h3>Detalles del plan</h3>
         </div>
 
         <div class="form-group col-md-6">

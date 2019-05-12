@@ -6,12 +6,6 @@ Edit Subscription Plan
 
 @section('content') 
 
-@if (count($errors) > 0)
-<div class="alert alert-danger">
-    <strong>Whoops!</strong> There were some problems with your input.<br><br>    
-</div>
-@endif
-
 <form method="POST" action="{{route('plans.update',$plan->id)}}">
     @csrf
     @method('patch')

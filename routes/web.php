@@ -49,10 +49,13 @@ Route::get('/empresas/editar', 'CompanyController@edit')->name('Company.edit');
 Route::get('/empresas/configuracion', 'CompanyController@editConfiguracion')->name('Company.edit_config');
 Route::get('/empresas/certificado', 'CompanyController@editCertificate')->name('Company.edit_cert');
 Route::get('/empresas/equipo', 'CompanyController@editTeam')->name('Company.team');
-Route::patch('update/{id}', 'CompanyController@update')->name('Company.update');
-Route::patch('update-configuracion/{id}', 'CompanyController@updateConfig')->name('Company.update_config');
-Route::patch('update-certificado/{id}', 'CompanyController@updateCertificado')->name('Company.update_cert');
+Route::patch('/empresas/update/{id}', 'CompanyController@update')->name('Company.update');
+Route::patch('/empresas/update-configuracion/{id}', 'CompanyController@updateConfig')->name('Company.update_config');
+Route::patch('/empresas/update-certificado/{id}', 'CompanyController@updateCertificado')->name('Company.update_cert');
 Route::get('/empresas/company-profile/{id}', 'CompanyController@company_profile')->name('Company.company_profile');
+Route::get('/empresas/set-prorrata-2018-facturas', 'CompanyController@setProrrata2018PorFacturas')->name('Company.set_prorrata_2018_facturas');
+
+
 
 // Rutas de facturación
 Route::get('/facturas-emitidas/emitir-factura', 'InvoiceController@emitFactura')->name('Invoice.emit_01');
@@ -60,9 +63,10 @@ Route::get('/facturas-emitidas/emitir-tiquete', 'InvoiceController@emitTiquete')
 Route::post('/facturas-emitidas/enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
 
 // Rutas de Wizard
-Route::get('wizard', 'WizardController@index')->name('Wizard.index');
-Route::get('editar-totales-2018', 'WizardController@setTotales2018')->name('Wizard.edit_2018');
-Route::post('update-totales-2018', 'WizardController@storeTotales2018')->name('Wizard.update_2018');
+Route::get('/wizard', 'WizardController@index')->name('Wizard.index');
+Route::get('/editar-totales-2018', 'WizardController@setTotales2018')->name('Wizard.edit_2018');
+Route::post('/update-totales-2018', 'WizardController@storeTotales2018')->name('Wizard.update_2018');
+Route::post('/update-wizard', 'WizardController@updateWizard')->name('Wizard.update_wizard');
 
 // Rutas de usuario
 Route::get('/usuario/overview', 'UserController@overview')->name('User.overview');

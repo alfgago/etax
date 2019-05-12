@@ -42,13 +42,13 @@
                   
                   <td> 
                     <a href="/productos/{{ $producto->id }}/edit" title="Editar producto" class="text-success mr-2"> 
-                      <i class="nav-icon i-Pen-2 font-weight-bold"></i> 
+                      <i class="fa fa-pencil" aria-hidden="true"></i>
                     </a>
                     <form class="inline-form" method="POST" action="/productos/{{ $producto->id }}" style="display: inline-block;">
                       @csrf
                       @method('delete')
                       <button type="submit" class="text-danger mr-2"  title="Eliminar producto" style="display: inline-block; background: none; border: 0;">
-                        <i class="nav-icon i-Close-Window font-weight-bold"></i>
+                        <i class="fa fa-trash-o" aria-hidden="true"></i>
                       </button>
                     </form>
                   </td>

@@ -272,18 +272,7 @@
   <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar totales</button>
 @endsection 
 
-@section('header-scripts')
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker-standalone.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
-
-@endsection 
-
 @section('footer-scripts')
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
-<script src="/assets/js/form-facturas.js"></script>
 
 <script>
 $(document).ready(function(){

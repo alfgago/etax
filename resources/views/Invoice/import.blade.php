@@ -1,6 +1,6 @@
-<div class="popup" id="importar-popup">
+<div class="popup" id="importar-emitidas-popup">
   <div class="popup-container item-factura-form form-row">
-  	<div title="Cerrar ventana" class="close-popup" onclick="cerrarPopup('importar-popup');"> <i class="nav-icon i-Close"></i>  </div>
+  	<div title="Cerrar ventana" class="close-popup" onclick="cerrarPopup('importar-emitidas-popup');"> <i class="fa fa-times" aria-hidden="true"></i> </div>
 		<form method="POST" action="/facturas-emitidas/importar" enctype="multipart/form-data">
 			
 			@csrf

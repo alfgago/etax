@@ -22,7 +22,7 @@
                     <a href="/facturas-emitidas/emitir-factura">Crear factura electrónica</a>
                     <a href="/facturas-emitidas/emitir-tiquete">Crear tiquete electrónico</a>
                     <a href="/facturas-emitidas/emitir-factura">Crear nota de débito</a>
-                    <a href="/facturas-emitidas/#">Importar facturas</a>
+                    <a href="#" onclick="abrirPopup('importar-emitidas-popup');">Importar facturas</a>
                     <a href="/facturas-emitidas/create">Registrar factura existente</a>
                 </div>
                 
@@ -39,7 +39,7 @@
                     <a href="/facturas-recibidas">Ver todas</a>
                     <a href="/facturas-recibidas/create">Aceptación de facturas recibidas</a>
                     <a href="/facturas-recibidas/create">Registrar factura recibida</a>
-                    <a href="/facturas-recibidas/#">Importar facturas</a>
+                    <a href="#" onclick="abrirPopup('importar-recibidas-popup');">Importar facturas</a>
                 </div>
             </li>
             

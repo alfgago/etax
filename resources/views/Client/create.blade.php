@@ -22,21 +22,17 @@
             
             </div>
           
-            <button type="submit" class="btn btn-primary">Confirmar cliente</button>
-          
-            @if ($errors->any())
-              <ul>
-                @foreach ($errors->all() as $error)
-                  <li>{{ $error }}</li>
-                @endforeach
-              </ul>
-            @endif
+            <button id="btn-submit" type="submit" class="hidden">Guardar cliente</button>
             
         </form>
         
   </div>  
 </div>
 @endsection
+
+@section('breadcrumb-buttons')
+  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar cliente</button>
+@endsection 
 
 @section('footer-scripts')
 

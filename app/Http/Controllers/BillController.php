@@ -12,6 +12,7 @@ use App\Http\Controllers\CacheController;
 use App\Exports\BillExport;
 use App\Imports\BillImport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 
 class BillController extends Controller
@@ -35,7 +36,7 @@ class BillController extends Controller
     public function index()
     {
         $current_company = currentCompany();
-        $bills = Bill::where('company_id', $current_company)->where('is_void', false)->with('provider')->sortable(['generated_date' => 'desc'])->paginate(10);
+        $bills = Bill::where('company_id', $current_company)->where('is_void', false)->with('provider')->orderBy('generated_date', 'DESC')->orderBy('reference_number', 'DESC')->sortable(['generated_date' => 'desc'])->paginate(10);
         return view('Bill/index', [
           'bills' => $bills
         ]);
@@ -121,6 +122,7 @@ class BillController extends Controller
      */
     public function update(Request $request, $id)
     {
+        
         $bill = Bill::findOrFail($id);
         $this->authorize('update', $bill);
       
@@ -169,92 +171,123 @@ class BillController extends Controller
       
         $time_start = $this->microtime_float();
         
-        $collection = Excel::toCollection( new BillImport(), request()->file('archivo') );
-        $company = currentCompany();
+        try {
+            $collection = Excel::toCollection( new BillImport(), request()->file('archivo') );
+        }catch( \Exception $ex ){
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.' );
+        }catch( \Throwable $ex ){
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.' );
+        }
         
-        if( $collection[0]->count() < 5001 ){
+        $company = currentCompanyModel();
+        
+        if( $collection[0]->count() < 2501 ){
             try {
                 foreach ($collection[0]->chunk(200) as $facturas) {
-                    \DB::transaction(function () use ($facturas, &$company) {
+                    \DB::transaction(function () use ($facturas, &$company, &$i) {
                         
-                        $inserts = array();    
-                        foreach ($facturas[0] as $row){
+                        $inserts = array();
+                        foreach ($facturas as $row){
+                            $i++;
+                            
                             //Datos de proveedor
-                            $codigo_proveedor = $row['codigoproveedor'] ? $row['codigoproveedor'] : '';
                             $nombre_proveedor = $row['nombreproveedor'];
+                            $codigo_proveedor = $row['codigoproveedor'] ? $row['codigoproveedor'] : '';
                             $tipo_persona = $row['tipoidentificacion'];
                             $identificacion_proveedor = $row['identificacionproveedor'];
-                            $proveedor = Provider::firstOrCreate(
-                                [
-                                    'id_number' => $identificacion_proveedor,
-                                    'company_id' => $company->id,
-                                ],
-                                [
-                                    'code' => $codigo_proveedor ,
-                                    'company_id' => $company->id,
-                                    'tipo_persona' => str_pad($tipo_persona, 2, '0', STR_PAD_LEFT),
-                                    'id_number' => $identificacion_proveedor,
-                                    'first_name' => $nombre_proveedor
-                                ]
-                            );
-                                
-                            $bill = Bill::firstOrNew(
-                                [
-                                    'company_id' => $company->id,
-                                    'provider_id' => $proveedor->id,
-                                    'total' => $row['totaldocumento'],
-                                    'document_number' => $row['consecutivocomprobante']
-                                ]
-                            );
                             
-                            if( !$bill->exists ) {
+                            $providerCacheKey = "import-proveedors-$identificacion_proveedor-".$company->id;
+                            if ( !Cache::has($providerCacheKey) ) {
+                                $proveedorCache =  Provider::firstOrCreate(
+                                    [
+                                        'id_number' => $identificacion_proveedor,
+                                        'company_id' => $company->id,
+                                    ],
+                                    [
+                                        'code' => $codigo_proveedor ,
+                                        'company_id' => $company->id,
+                                        'tipo_persona' => str_pad($tipo_persona, 2, '0', STR_PAD_LEFT),
+                                        'id_number' => $identificacion_proveedor,
+                                        'first_name' => $nombre_proveedor
+                                    ]
+                                );
+                                Cache::put($providerCacheKey, $proveedorCache, 30);
+                            }
+                            $proveedor = Cache::get($providerCacheKey);
+                            
+                            $billCacheKey = "import-factura-$identificacion_proveedor-" . $company->id . "-" . $row['consecutivocomprobante'];
+                            if ( !Cache::has($billCacheKey) ) {
+                            
+                                $bill = Bill::firstOrNew(
+                                    [
+                                        'company_id' => $company->id,
+                                        'provider_id' => $proveedor->id,
+                                        'document_number' => $row['consecutivocomprobante']
+                                    ]
+                                );
                                 
-                                $bill->company_id = $company->id;
-                                $bill->provider_id = $proveedor->id;    
-                        
-                                //Datos generales y para Hacienda
-                                $bill->document_type = $row['idtipodocumento'];
-                                $bill->reference_number = $company->last_bill_ref_number + 1;
-                                $bill->document_number =  $row['consecutivocomprobante'];
-                                
-                                //Datos generales
-                                $bill->sale_condition = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
-                                $bill->payment_type = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
-                                $bill->credit_time = 0;
-                                
-                                /*$bill->buy_order = $row['ordencompra'] ? $row['ordencompra'] : '';
-                                $bill->other_reference = $row['referencia'] ? $row['referencia'] : '';
-                                $bill->other_document = $row['documentoanulado'] ? $row['documentoanulado'] : '';
-                                $bill->hacienda_status = $row['estadohacienda'] ? $row['estadohacienda'] : '01';
-                                $bill->payment_status = $row['estadopago'] ? $row['estadopago'] : '01';
-                                $bill->payment_receipt = $row['comprobantepago'] ? $row['comprobantepago'] : '';*/
-                                
-                                $bill->generation_method = "XLSX";
-                                
-                                //Datos de factura
-                                $bill->currency = $row['idmoneda'];
-                                if( $bill->currency == 1 ) { $bill->currency = "CRC"; }
-                                if( $bill->currency == 2 ) { $bill->currency = "USD"; }
+                                if( !$bill->exists ) {
                                     
-                                
-                                $bill->currency_rate = $row['tipocambio'];
-                                //$bill->description = $row['description'] ? $row['description'] : '';
-                              
-                                $company->last_bill_ref_number = $bill->reference_number;
-                                
-                                $bill->generated_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision']);
-                                $bill->due_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision'])->addDays(15);
-                                
-                                $bill->subtotal = 0;
-                                $bill->iva_amount = 0;
-                                $bill->total = $row['totaldocumento'];
-                                
-                                $bill->save();
-                            }     
+                                    $bill->company_id = $company->id;
+                                    $bill->provider_id = $proveedor->id;    
                             
-                            $year = $invoice->generated_date->year;
-                            $month = $invoice->generated_date->month;
+                                    //Datos generales y para Hacienda
+                                    $tipoDocumento = $row['idtipodocumento'];
+                                    if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' 
+                                        || $tipoDocumento == '05' || $tipoDocumento == '06' || $tipoDocumento == '07' || $tipoDocumento == '08' || $tipoDocumento == '99' ) {
+                                        $bill->document_type = $tipoDocumento;    
+                                    } else {
+                                       $bill->document_type = '01'; 
+                                    }
+                                    
+                                    
+                                    $bill->reference_number = $company->last_bill_ref_number + 1;
+                                    $bill->document_number =  $row['consecutivocomprobante'];
+                                    
+                                    //Datos generales
+                                    $bill->sale_condition = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
+                                    $bill->payment_type = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
+                                    $bill->credit_time = 0;
+                                    
+                                    /*$bill->buy_order = $row['ordencompra'] ? $row['ordencompra'] : '';
+                                    $bill->other_reference = $row['referencia'] ? $row['referencia'] : '';
+                                    $bill->other_document = $row['documentoanulado'] ? $row['documentoanulado'] : '';
+                                    $bill->hacienda_status = $row['estadohacienda'] ? $row['estadohacienda'] : '01';
+                                    $bill->payment_status = $row['estadopago'] ? $row['estadopago'] : '01';
+                                    $bill->payment_receipt = $row['comprobantepago'] ? $row['comprobantepago'] : '';*/
+                                    
+                                    $bill->generation_method = "XLSX";
+                                    
+                                    //Datos de factura
+                                    $bill->currency = $row['idmoneda'];
+                                    if( $bill->currency == 1 ) { $bill->currency = "CRC"; }
+                                    if( $bill->currency == 2 ) { $bill->currency = "USD"; }
+                                        
+                                    
+                                    $bill->currency_rate = $row['tipocambio'];
+                                    //$bill->description = $row['description'] ? $row['description'] : '';
+                                  
+                                    $company->last_bill_ref_number = $bill->reference_number;
+                                    
+                                    $bill->subtotal = 0;
+                                    $bill->iva_amount = 0;
+                                    $bill->total = $row['totaldocumento'];
+                                    
+                                    $bill->save();
+                                }   
+                                Cache::put($billCacheKey, $bill, 30);
+                            }
+                            $bill = Cache::get($billCacheKey);
                             
+                            $bill->generated_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision']);
+                            $bill->due_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision'])->addDays(15);  /////IMPORTANTE CORREGIR ANTES DE PRODUCCION
+                            
+                            $year = $bill->generated_date->year;
+                            $month = $bill->generated_date->month;
+                            
+                            $bill->year = $year;
+                            $bill->month = $month;
+                          
                             /**LINEA DE FACTURA**/
                             $item = BillItem::firstOrNew(
                                 [
@@ -285,13 +318,10 @@ class BillController extends Controller
                                     'discount' => $row['montodescuento'] ? $row['montodescuento'] : 0,
                                     'discount_reason' => '',
                                     'iva_type' => $row['codigoimpuesto'],
-                                    'porc_identificacion_plena' => $row['porcidentificacionplena'] ? $row['porcidentificacionplena'] : 13,
                                     'iva_amount' => $row['montoiva'] ? $row['montoiva'] : 0,
                                 ];
-                                
                             }
                             /**END LINEA DE FACTURA**/
-                            
                             clearBillCache($bill);
                             $bill->save();
                         }
@@ -301,11 +331,13 @@ class BillController extends Controller
                     
                 }
             }catch( \ErrorException $ex ){
-                return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Mensaje:' . $ex->getMessage());
+                return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila. '.$i.'. Mensaje:' . $ex->getMessage());
             }catch( \InvalidArgumentException $ex ){
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
             }catch( \Exception $ex ){
-                return back()->withError( 'Ha ocurrido un error al subir su archivo. Error en la fila. Mensaje:' . $ex->getMessage());
+                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i.'. Mensaje:' . $ex->getMessage());
+            }catch( \Throwable $ex ){
+                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i.'. Mensaje:' . $ex->getMessage());
             }
         
         $company->save();
@@ -315,7 +347,7 @@ class BillController extends Controller
         
         return redirect('/facturas-recibidas')->withMessage('Facturas importados exitosamente en '.$time.'s');
         }else{
-            return redirect('/facturas-emitidas')->withError('Usted tiene un límite de 5000 facturas por archivo.');
+            return redirect('/facturas-emitidas')->withError('Usted tiene un límite de 2500 facturas por archivo.');
         }
         
     }

@@ -11,18 +11,6 @@
 @section('content') 
 <div class="row">
   <div class="col-md-12">
-      
-      @if(session()->has('message'))
-          <div class="alert alert-success">
-              {{ session()->get('message') }}
-          </div>
-      @endif
-      
-      @if(session()->has('error'))
-          <div class="alert alert-danger">
-              {{ session()->get('error') }}
-          </div>
-      @endif
     
         <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
           <thead>
@@ -89,7 +77,5 @@
         
   </div>  
 </div>
-
-@include( 'Provider.import' )
 
 @endsection

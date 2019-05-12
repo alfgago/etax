@@ -6,25 +6,13 @@
 
 @section('breadcrumb-buttons')
     <a type="submit" class="btn btn-primary" href="/facturas-recibidas/create">Ingresar factura nueva</a>
-    <div onclick="abrirPopup('importar-popup');" class="btn btn-primary">Importar facturas recibidas</div>
+    <div onclick="abrirPopup('importar-recibidas-popup');" class="btn btn-primary">Importar facturas recibidas</div>
 @endsection 
 
 @section('content') 
 <div class="row">
   <div class="col-md-12">
           
-        @if(session()->has('message'))
-          <div class="alert alert-success">
-              {{ session()->get('message') }}
-          </div>
-        @endif
-        
-        @if(session()->has('error'))
-          <div class="alert alert-danger">
-              {{ session()->get('error') }}
-          </div>
-        @endif
-      
         <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
           <thead>
             <tr>
@@ -54,13 +42,13 @@
                   
                   <td> 
                     <a href="/facturas-recibidas/{{ $bill->id }}/edit" title="Editar factura" class="text-success mr-2"> 
-                      <i class="nav-icon i-Pen-2 font-weight-bold"></i> 
+                      <i class="fa fa-pencil" aria-hidden="true"></i>
                     </a>
                     <form class="inline-form" method="POST" action="/facturas-recibidas/{{ $bill->id }}" style="display: inline-block;">
                       @csrf
                       @method('delete')
-                      <button type="submit" class="text-danger mr-2" style="display: inline-block; background: none; border: 0;">
-                        <i class="nav-icon i-Close-Window font-weight-bold"></i>
+                      <button type="submit" class="text-danger mr-2" title="Anular factura" style="display: inline-block; background: none; border: 0;">
+                        <i class="fa fa-ban" aria-hidden="true"></i>
                       </button>
                     </form>
                   </td>
@@ -73,7 +61,5 @@
         {{ $bills->links() }}
   </div>  
 </div>
-
-@include( 'Bill.import' )
 
 @endsection

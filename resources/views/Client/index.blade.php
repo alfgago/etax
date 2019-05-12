@@ -13,22 +13,6 @@
 @section('content') 
 <div class="row">
   <div class="col-md-12">
-    
-      @if(session()->has('message'))
-          <div class="alert alert-success">
-              {{ session()->get('message') }}
-          </div>
-      @endif
-      
-      @if ($errors->any())
-        <div class="alert alert-danger">
-          <ul>
-            @foreach ($errors->all() as $error)
-              <li>{{ $error }}</li>
-            @endforeach
-          </ul>
-        </div>
-      @endif
         
       <div style="margin: 1rem;"> -- Aqui van filtros de búsqueda --  </div>
       
@@ -58,13 +42,13 @@
                   
                   <td> 
                     <a href="/clientes/{{ $cliente->id }}/edit" title="Editar cliente" class="text-success mr-2"> 
-                      <i class="nav-icon i-Pen-2 font-weight-bold"></i> 
+                      <i class="fa fa-pencil" aria-hidden="true"></i>
                     </a>
                     <form class="inline-form" method="POST" action="/clientes/{{ $cliente->id }}" style="display: inline-block;">
                       @csrf
                       @method('delete')
                       <button type="submit" class="text-danger mr-2"  title="Eliminar cliente" style="display: inline-block; background: none; border: 0;">
-                        <i class="nav-icon i-Close-Window font-weight-bold"></i>
+                        <i class="fa fa-trash-o" aria-hidden="true"></i>
                       </button>
                     </form>
                   </td>

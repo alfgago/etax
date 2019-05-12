@@ -71,27 +71,19 @@
 
         </div>
 
-        <button type="submit" class="btn btn-primary">Crear producto</button>
-
-        @if ($errors->any())
-          <ul>
-            @foreach ($errors->all() as $error)
-              <li>{{ $error }}</li>
-            @endforeach
-          </ul>
-        @endif
+        <button id="btn-submit" type="submit" class="hidden">Guardar producto</button>
         
       </form> 
   </div>  
 </div>
 @endsection
 
+@section('breadcrumb-buttons')
+  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar producto</button>
+@endsection 
+
 @section('footer-scripts')
-<script src="/assets/js/vendor/pickadate/picker.js"></script>
-<script src="/assets/js/vendor/pickadate/picker.date.js"></script>
-<script src="/assets/js/vendor/pickadate/picker.time.js"></script>
-<script src="/assets/js/form-facturas.js"></script>
-<script>
-$('#tipo_iva').val(103);
-</script>
+  <script>
+    $('#tipo_iva').val(103);
+  </script>
 @endsection

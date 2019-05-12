@@ -48,19 +48,19 @@
 						    
 						    <div class="form-group col-md-4">
 						      <label for="tipo_persona">Tipo de persona *</label>
-						      <select class="form-control" name="type" id="type" required onclick="toggleApellidos();">
-						        <option value="1" {{ @$company->tipo_persona == 1 ? 'selected' : '' }} >Física</option>
-						        <option value="2" {{ @$company->tipo_persona == 2 ? 'selected' : '' }}>Jurídica</option>
-						        <option value="3" {{ @$company->tipo_persona == 3 ? 'selected' : '' }}>DIMEX</option>
-						        <option value="4" {{ @$company->tipo_persona == 5 ? 'selected' : '' }}>NITE</option>
-						        <option value="5" {{ @$company->tipo_persona == 4 ? 'selected' : '' }}>Extranjero</option>
-						        <option value="6" {{ @$company->tipo_persona == 6 ? 'selected' : '' }}>Otro</option>
+						      <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();">
+						        <option value="F" {{ @$company->type == 'F' ? 'selected' : '' }} >Física</option>
+						        <option value="J" {{ @$company->type == 'J' ? 'selected' : '' }}>Jurídica</option>
+						        <option value="D" {{ @$company->type == 'D' ? 'selected' : '' }}>DIMEX</option>
+						        <option value="N" {{ @$company->type == 'N' ? 'selected' : '' }}>NITE</option>
+						        <option value="E" {{ @$company->type == 'E' ? 'selected' : '' }}>Extranjero</option>
+						        <option value="O" {{ @$company->type == 'O' ? 'selected' : '' }}>Otro</option>
 						      </select>
 						    </div>
 						    
 						    <div class="form-group col-md-4">
 						      <label for="id_number">Número de identificación *</label>
-						      <input type="text" class="form-control" name="id_number" id="id_number" value="{{ @$company->id_number }}" required>
+						      <input type="text" class="form-control" name="id_number" id="id_number" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);">
 						    </div>
 						    
 						    <div class="form-group col-md-4">
@@ -162,56 +162,6 @@
 @section('footer-scripts')
 	
 	<script>
-	
-	  function toggleApellidos() {
-	    var tipoPersona = $('#tipo_persona').val();
-	    if( tipoPersona == 2 ){
-	      $('#last_name, #last_name2').val('');
-	      $('#last_name, #last_name2').attr('readonly', 'true');
-	    }else{
-	      $('#last_name, #last_name2').removeAttr('readonly');
-	    }
-	  }
-	  
-	  function fillProvincias() {
-	    if( $('#country').val() == 'CR' ) {
-	      var sel = $('#state');
-	      sel.html("");
-	      sel.append( "<option val='0' selected>-- Seleccione una provincia --</option>" );
-	      $.each(provincias, function(i, val) {
-	        sel.append( "<option value='"+i+"'>"+ provincias[i]["Nombre"] +"</option>" );
-	      });
-	    }
-	  }
-	  
-	  function fillCantones() {
-	    var provincia = $('#state').val();
-	    var sel = $('#city');
-	    sel.html("");
-	    sel.append( "<option val='0' selected>-- Seleccione un cantón --</option>" );
-	    $.each(cantones, function(i, val) {
-	      if( provincia == cantones[i]["Provincia"] ){
-	         sel.append( "<option value='"+i+"'>"+ cantones[i]["Nombre"] +"</option>" );
-	      }
-	    });
-	  }
-	  
-	  function fillDistritos() {
-	    var canton = $('#city').val();
-	    var sel = $('#district');
-	    sel.html("");
-	    sel.append( "<option val='0' selected>-- Seleccione un distrito --</option>" );
-	    $.each(distritos, function(i, val) {
-	      if( canton == distritos[i]["Canton"] ){
-	         sel.append( "<option value='"+i+"'>"+ distritos[i]["Nombre"] +"</option>" );
-	      }
-	    });
-	  }
-	  
-	  function fillZip() {
-	    var distrito = $('#district').val();
-	    var sel = $('#zip').val(distrito);
-	  }
 	  
 	  $(document).ready(function(){
 	    
@@ -227,13 +177,13 @@
 	    
 	    //Revisa si tiene estado, canton y distrito marcados.
 	    @if( @$company->state )
-	    	$('#state').val( {{ $company->state }} );
+	    	$('#state').val( "{{ $company->state }}" );
 	    	fillCantones();
 	    	@if( @$company->city )
-		    	$('#city').val( {{ $company->city }} );
+		    	$('#city').val( "{{ $company->city }}" );
 		    	fillDistritos();
 		    	@if( @$company->district )
-			    	$('#district').val( {{ $company->district }} );
+			    	$('#district').val( "{{ $company->district }}" );
 			    	fillZip();
 			    @endif
 		    @endif

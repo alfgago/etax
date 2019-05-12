@@ -8,31 +8,22 @@
 <div class="row">
   <div class="col-xl-9 col-lg-12 col-md-12">
         
-        <form method="POST" action="/proveedores">
-	
-          <div class="form-row">
-            <div class="form-group col-md-12">
-              <h3>
-                Información de proveedor
-              </h3>
-            </div>
-            
-            @csrf
-            @include( 'Provider.form' )
-            
-            </div>
+      <form method="POST" action="/proveedores">
+
+        <div class="form-row">
+          <div class="form-group col-md-12">
+            <h3>
+              Información de proveedor
+            </h3>
+          </div>
           
-            <button id="btn-submit" type="submit" class="hidden btn btn-primary">Confirmar proveedor</button>
+          @csrf
+          @include( 'Provider.form' )
           
-            @if ($errors->any())
-              <ul>
-                @foreach ($errors->all() as $error)
-                  <li>{{ $error }}</li>
-                @endforeach
-              </ul>
-            @endif
-            
-        </form>
+          </div>
+        
+          <button id="btn-submit" type="submit" class="hidden">Guardar proveedor</button>
+      </form>
         
   </div>  
 </div>

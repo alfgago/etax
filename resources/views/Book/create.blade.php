@@ -23,14 +23,6 @@
             </div>
           
             <button id="btn-submit" type="submit" class="hidden btn btn-primary">Confirmar proveedor</button>
-          
-            @if ($errors->any())
-              <ul>
-                @foreach ($errors->all() as $error)
-                  <li>{{ $error }}</li>
-                @endforeach
-              </ul>
-            @endif
             
         </form>
         

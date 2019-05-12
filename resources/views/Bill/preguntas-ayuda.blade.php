@@ -241,37 +241,7 @@
   </div>
 </div>
 
-<style>
-  
-  .ayuda-cont {
-    background: #f5f5f5;
-    padding: 10px 15px !important;
-    padding-bottom: 0 !important;
-    border: 1px solid #999;
-    margin-top: -.5rem;
-    margin-bottom: .5rem;
-  }
-  
-  .ayuda-cont .form-group label {
-      font-size: 11px;
-      line-height: 1.3;
-  }
-  
-  .pregs {
-    display: none;
-    margin-bottom: .5rem;
-  }
-  
-  #recomendacion {
-    margin-bottom: .5rem;
-    padding: 5px 15px;
-    font-size: 10px;
-    background: #fff;
-    color: #2b53d5;
-    border: dotted 1px;
-  }
-  
-</style>
+
 
 
 <script>

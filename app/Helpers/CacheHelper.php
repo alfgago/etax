@@ -41,4 +41,30 @@ if (!function_exists('clearCierreCache')) {
     
 }
 
+if (!function_exists('clearLastTaxesCache')) {  
+	
+    function clearLastTaxesCache($current_company, $anoAnterior){
+      	$cacheKey = "cache-lasttaxes-$current_company-0-$anoAnterior";
+      	Cache::forget($cacheKey);
+      	
+      	$year = $anoAnterior+1;
+      	
+        clearTaxesCache($current_company, 1, $year);
+        clearTaxesCache($current_company, 2, $year);
+        clearTaxesCache($current_company, 3, $year);
+        clearTaxesCache($current_company, 4, $year);
+        clearTaxesCache($current_company, 5, $year);
+        clearTaxesCache($current_company, 6, $year);
+        clearTaxesCache($current_company, 7, $year);
+        clearTaxesCache($current_company, 8, $year);
+        clearTaxesCache($current_company, 9, $year);
+        clearTaxesCache($current_company, 10, $year);
+        clearTaxesCache($current_company, 11, $year);
+        clearTaxesCache($current_company, 12, $year);
+        clearTaxesCache($current_company, 0, $year);
+      	
+    }
+    
+}
+
 ?>

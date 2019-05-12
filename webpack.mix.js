@@ -14,7 +14,6 @@ const mix = require('laravel-mix');
 mix
 /* CSS */
     .js('resources/laravel/js/app.js', 'public/assets/js/app.js')
-    .js('resources/laravel/js/form-facturas.js', 'public/assets/js/form-facturas.js')
     .sass('resources/gull/assets/styles/sass/themes/eva.scss', 'public/assets/styles/css/themes/eva.min.css')
 
 /* JS */
@@ -26,7 +25,9 @@ mix.combine([
     'resources/gull/assets/js/vendor/perfect-scrollbar.min.js',
     'resources/gull/assets/js/vendor/select2.min.js',
     'resources/gull/assets/js/vendor/sweetalert2.min.js',
-    'resources/laravel/js/utility.js', 
+    'resources/gull/assets/js/vendor/toastr.min.js',
+    'resources/laravel/js/custom.js', 
+    'resources/laravel/js/form-facturas.js', 
     'public/assets/js/etax-utility.js',
 ], 'public/assets/js/common-bundle.js');
 

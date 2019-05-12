@@ -3,11 +3,6 @@
 <div class="form-group col-md-4">
     <label for="code">Nombre *</label>
     <input type="text" class="form-control" name="name" id="name" value="{{ old('name') }}" required>
-    @if ($errors->has('name'))
-    <span class="help-block">
-        <strong>{{ $errors->first('name') }}</strong>
-    </span>
-    @endif
 </div>
 
 <div class="form-group col-md-4">
@@ -21,21 +16,11 @@
         <option value="nite" <?php echo (old('tipo_persona') == 'nite') ? 'selected' : ''; ?>>Extranjero</option>
         <option value="otro" <?php echo (old('tipo_persona') == 'otro') ? 'selected' : ''; ?>>Otro</option>
     </select>
-    @if ($errors->has('tipo_persona'))
-    <span class="help-block">
-        <strong>{{ $errors->first('tipo_persona') }}</strong>
-    </span>
-    @endif
 </div>
 
 <div class="form-group col-md-4">
     <label for="id_number">Número de identificación *</label>
     <input type="text" class="form-control" name="id_number" id="id_number" value="{{ old('id_number') }}" required>
-    @if ($errors->has('id_number'))
-    <span class="help-block">
-        <strong>{{ $errors->first('id_number') }}</strong>
-    </span>
-    @endif
 </div>
 
 <div class="form-group col-md-4">
@@ -117,56 +102,6 @@
 
 <script>
 
-    function toggleApellidos() {
-    var tipoPersona = $('#tipo_persona').val();
-    if (tipoPersona == 2){
-    $('#last_name, #last_name2').val('');
-    $('#last_name, #last_name2').attr('readonly', 'true');
-    } else{
-    $('#last_name, #last_name2').removeAttr('readonly');
-    }
-    }
-
-    function fillProvincias() {
-    if ($('#country').val() == 'CR') {
-    var sel = $('#state');
-    sel.html("");
-    sel.append("<option value='0' selected>-- Seleccione una provincia --</option>");
-    $.each(provincias, function(i, val) {
-    sel.append("<option value='" + i + "'>" + provincias[i]["Nombre"] + "</option>");
-    });
-    }
-    }
-
-    function fillCantones() {
-    var provincia = $('#state').val();
-    var sel = $('#city');
-    sel.html("");
-    sel.append("<option value='0' selected>-- Seleccione un cantón --</option>");
-    $.each(cantones, function(i, val) {
-    if (provincia == cantones[i]["Provincia"]){
-    sel.append("<option value='" + i + "'>" + cantones[i]["Nombre"] + "</option>");
-    }
-    });
-    }
-
-    function fillDistritos() {
-    var canton = $('#city').val();
-    var sel = $('#district');
-    sel.html("");
-    sel.append("<option value='0' selected>-- Seleccione un distrito --</option>");
-    $.each(distritos, function(i, val) {
-    if (canton == distritos[i]["Canton"]){
-    sel.append("<option value='" + i + "'>" + distritos[i]["Nombre"] + "</option>");
-    }
-    });
-    }
-
-    function fillZip() {
-    var distrito = $('#district').val();
-    var sel = $('#zip').val(distrito);
-    }
-
     $(document).ready(function(){
 
     fillProvincias();
@@ -176,20 +111,22 @@
             "edit-on-delete": false,
             "tag-char": "@"
     });
+    
     toggleApellidos();
+    
     //Revisa si tiene estado, canton y distrito marcados.
     @if (@old('state'))
-            $('#state').val({{ old('state') }});
-    fillCantones();
-    @if (@old('city'))
+        $('#state').val({{ old('state') }});
+        fillCantones();
+        @if (@old('city'))
             $('#city').val({{ old('city') }});
-    fillDistritos();
-    @if (@old('district'))
-            $('#district').val({{ old('district') }});
-    fillZip();
+            fillDistritos();
+            @if (@old('district'))
+                $('#district').val({{ old('district') }});
+                fillZip();
+            @endif
+	    @endif
     @endif
-            @endif
-            @endif
 
     });
 

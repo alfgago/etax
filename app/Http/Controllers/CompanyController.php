@@ -41,7 +41,7 @@ class CompanyController extends Controller {
      */
     public function create() {
 
-        if (auth()->user()->roles[0]->name != 'Super Admin') {
+        if ( auth()->user()->roles[0]->name != 'Super Admin' ) {
             /* Not able to create company if dont have any active plan */
             $available_companies_count = User::checkCountAvailableCompanies();
 
@@ -235,14 +235,7 @@ class CompanyController extends Controller {
             abort(403);
         }
 
-        $team = Team::where('company_id', $company->id)->first();
-
-        /* Only owner of company or user invited as admin for that company can edit company details */
-        if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) && get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
-            abort(403);
-        }
-
-        $company->type = $request->type;
+        $company->type = $request->tipo_persona;
         $company->id_number = $request->id_number;
         $company->business_name = $request->business_name;
         $company->activities = $request->activities;
@@ -265,7 +258,7 @@ class CompanyController extends Controller {
         $team->name = $request->name;
         $team->save();
 
-        return redirect()->route('Company.edit')->with('success', 'La información de la empresa ha sido actualizada.');
+        return redirect()->route('Company.edit')->withMessage('La información de la empresa ha sido actualizada.');
     }
 
     /**
@@ -301,6 +294,8 @@ class CompanyController extends Controller {
         $company->use_invoicing = $request->use_invoicing;
 
         $company->save();
+        
+        clearLastTaxesCache( $company->id, 2018);
 
         return redirect()->route('Company.edit_config')->with('success', 'La configuración de la empresa ha sido actualizada.');
     }
@@ -389,6 +384,17 @@ class CompanyController extends Controller {
         }
 
         return $url;
+    }
+    
+    public function setProrrata2018PorFacturas() {
+
+        $company = currentCompanyModel();
+        $this->authorize('update', $company);
+
+        $company->first_prorrata_type = 3;
+        $company->save();
+
+        return redirect('/facturas-emitidas')->with('success', 'Empiece calculando su prorrata 2018 ingresando todas sus facturas de dicho periodo.');
     }
 
     public function confirmCompanyDeactivation($token) {

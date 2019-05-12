@@ -1,6 +1,6 @@
 <div class="popup" id="nuevo-proveedor-popup">
   <div class="popup-container nuevo-proveedor-form form-row">
-  	<div title="Cerrar ventana" class="close-popup" onclick="cerrarPopup('nuevo-proveedor-popup');"> <i class="nav-icon i-Close"></i>  </div>
+  	<div title="Cerrar ventana" class="close-popup" onclick="cerrarPopup('nuevo-proveedor-popup');"> <i class="fa fa-times" aria-hidden="true"></i> </div>
 
     <div class="form-group col-md-12">
       <h3>
@@ -18,19 +18,19 @@
     
     <div class="form-group col-md-4">
       <label for="tipo_persona">Tipo de persona *</label>
-      <select class="form-control checkEmpty" name="tipo_persona" id="tipo_persona"  onclick="toggleApellidos();">
-        <option value="1" >Física</option>
-        <option value="2" >Jurídica</option>
-        <option value="3" >DIMEX</option>
-        <option value="4" >NITE</option>
-        <option value="5" >Extranjero</option>
-        <option value="6" >Otro</option>
+      <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();">
+        <option value="F" >Física</option>
+        <option value="J" >Jurídica</option>
+        <option value="D" >DIMEX</option>
+        <option value="N" >NITE</option>
+        <option value="E" >Extranjero</option>
+        <option value="O" >Otro</option>
       </select>
     </div>
     
     <div class="form-group col-md-4">
       <label for="id_number">Número de identificación *</label>
-      <input type="text" class="form-control checkEmpty" name="id_number" id="id_number" >
+      <input type="text" class="form-control checkEmpty" name="id_number" id="id_number" onchange="getJSONCedula(this.value);">
     </div>
     
     <div class="form-group col-md-4">

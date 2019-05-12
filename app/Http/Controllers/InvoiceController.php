@@ -36,7 +36,7 @@ class InvoiceController extends Controller
     public function index()
     {
         $current_company = currentCompany();
-        $invoices = Invoice::where('company_id', $current_company)->where('is_void', false)->where('is_totales', false)->with('client')->orderBy('generated_date', 'DESC')->paginate(10);
+        $invoices = Invoice::where('company_id', $current_company)->where('is_void', false)->where('is_totales', false)->with('client')->orderBy('generated_date', 'DESC')->orderBy('reference_number', 'DESC')->paginate(10);
         return view('Invoice/index', [
           'invoices' => $invoices
         ]);
@@ -222,12 +222,18 @@ class InvoiceController extends Controller
       
         $time_start = $this->microtime_float();
         
-        $collection = Excel::toCollection( new InvoiceImport(), request()->file('archivo') );
-        $company = currentCompany();
+        try {
+            $collection = Excel::toCollection( new InvoiceImport(), request()->file('archivo') );
+        }catch( \Exception $ex ){
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.' );
+        }catch( \Throwable $ex ){
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.' );
+        }
         
+        $company = currentCompanyModel();
         $i = 0;
         
-        if( $collection[0]->count() < 5001 ){
+        if( $collection[0]->count() < 2501 ){
             try {
                 foreach ($collection[0]->chunk(200) as $facturas) {
                     \DB::transaction(function () use ($facturas, &$company, &$i) {
@@ -278,7 +284,14 @@ class InvoiceController extends Controller
                                     $invoice->client_id = $cliente->id;    
                             
                                     //Datos generales y para Hacienda
-                                    $invoice->document_type = $row['idtipodocumento'];
+                                    $tipoDocumento = $row['idtipodocumento'];
+                                    if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' 
+                                        || $tipoDocumento == '05' || $tipoDocumento == '06' || $tipoDocumento == '07' || $tipoDocumento == '08' || $tipoDocumento == '99' ) {
+                                        $bill->document_type = $tipoDocumento;    
+                                    } else {
+                                       $bill->document_type = '01'; 
+                                    }
+                                    
                                     $invoice->reference_number = $company->last_invoice_ref_number + 1;
                                     $invoice->document_number =  $row['consecutivocomprobante'];
                                     
@@ -322,6 +335,9 @@ class InvoiceController extends Controller
                             
                             $year = $invoice->generated_date->year;
                             $month = $invoice->generated_date->month;
+                            
+                            $invoice->year = $year;
+                            $invoice->month = $month;
                           
                             /**LINEA DE FACTURA**/
                             $item = InvoiceItem::firstOrNew(
@@ -380,7 +396,7 @@ class InvoiceController extends Controller
             
             return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente en '.$time.'s.');
         }else{
-            return redirect('/facturas-emitidas')->withError('Usted tiene un límite de 5000 facturas por archivo.');
+            return redirect('/facturas-emitidas')->withError('Usted tiene un límite de 2500 facturas por archivo.');
         }
     }
     

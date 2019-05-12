@@ -81,8 +81,10 @@ class CalculatedTax extends Model
     }
     
     public static function getProrrataPeriodoAnterior($anoAnterior) {
+      
       $currentCompany = currentCompanyModel();
       $currentCompanyId = $currentCompany->id;
+      
       $cacheKey = "cache-lasttaxes-$currentCompanyId-0-$anoAnterior";
       if ( !Cache::has($cacheKey) ) {
         $data = CalculatedTax::firstOrNew(
@@ -112,6 +114,20 @@ class CalculatedTax extends Model
             
         }else {
           if( !$data->is_closed ) {
+              
+              $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $anoAnterior, 0, 100 );
+              $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $anoAnterior, 0, 100 );
+              $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $anoAnterior, 0, 100 );
+              $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $anoAnterior, 0, 100 );
+              $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $anoAnterior, 0, 100 );
+              $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $anoAnterior, 0, 100 );
+              $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $anoAnterior, 0, 100 );
+              $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $anoAnterior, 0, 100 );
+              $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $anoAnterior, 0, 100 );
+              $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $anoAnterior, 0, 100 );
+              $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $anoAnterior, 0, 100 );
+              $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $anoAnterior, 0, 100 );
+            
               $data->resetVars();
               $data->calcularFacturacionAcumulado( $anoAnterior, 1 );
               
@@ -127,6 +143,7 @@ class CalculatedTax extends Model
       }
       
       return Cache::get($cacheKey);
+      
     }
   
     //Recibe fecha de inicio y fecha de fin en base a las cuales se desea calcular la prorrata.

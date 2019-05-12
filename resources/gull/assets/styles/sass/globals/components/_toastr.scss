@@ -1,13 +1,24 @@
-@each $name,
-$value in $theme-colors {
-    .toast-#{$name} {
-        background-color: $value !important;
-    }
+#toast-container>div {
+    opacity: 1;
+    font-size: 1rem;
+    padding: 1.5rem 1.5rem 1.5rem 3.5rem;
 }
 
-// .toast-info {
-//     background-color: #3BAFDA;
-// }
-// .toast-success {
-//     background-color: #3BAFDA;
-// }
+.toast-close-button {
+    position: absolute;
+    top: .25rem;
+    right: .25rem;
+    margin: 0;
+    font-size: 3rem;
+    line-height: 1rem;
+}
+
+.toast-error {
+    background: rgb(184, 86, 73);
+    border: 0;
+}
+
+.toast-success {
+    background: rgb(73, 184, 146);
+    border: 0;
+}
