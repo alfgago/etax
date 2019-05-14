@@ -15931,24 +15931,234 @@ h6,
   overflow: hidden;
 }
 
-.avatar-sm {
-  width: 36px;
-  height: 36px;
+.sidebar-dashboard {
+  color: #000;
+  /*max-width: 380px;*/
 }
 
-.avatar-md {
-  width: 54px;
-  height: 54px;
+.sidebar-dashboard label {
+  margin: 0;
+  font-weight: bold;
+  dispay: block;
+  font-size: 14px;
 }
 
-.avatar-lg {
-  width: 80px;
-  height: 80px;
+.sidebar-dashboard .dato-iva label {
+  position: relative;
+  display: inline-block;
+  font-size: 14px;
+  width: 50%;
+  width: calc(50% + 10px);
 }
 
-.avatar-sm-table {
-  width: 20px;
-  height: 20px;
+.sidebar-dashboard .dato-iva .dato {
+  display: inline-block;
+  font-size: 17px;
+  padding: .25rem .5rem;
+  margin-left: 10px;
+}
+
+.dato-saldo .dato,
+.dato-cobrar .dato,
+.dato-ventas .dato,
+.dato-compras .dato {
+  color: #fff;
+  background: #2852A6;
+  padding: .25rem .5rem;
+  font-size: 17px;
+  margin-bottom: .5rem;
+  background: #999;
+}
+
+.dato-facturas {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.dato-facturas label {
+  margin-right: 1rem;
+}
+
+.dato-facturas .btn {
+  margin-top: 1rem;
+}
+
+.barra-limites {
+  width: 150px;
+  max-width: 100%;
+  position: relative;
+  background: #9fb1cc;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.fill-bar {
+  position: absolute;
+  -webkit-transition: .5s ease all;
+  transition: .5s ease all;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: #5654ad;
+}
+
+.barra-text {
+  position: relative;
+  text-align: center;
+  color: #fff;
+  font-size: 13px;
+  padding: 2.5px;
+  font-weight: bold;
+}
+
+.notificaciones-container {
+  background: #eee;
+  padding: 1rem;
+  border-radius: 5px;
+}
+
+.notificaciones-container .notificacion {
+  padding-bottom: .5rem;
+  margin-bottom: .5rem;
+  border-bottom: 2px solid #ddd;
+}
+
+.notificaciones-container .notificacion .fecha {
+  color: #435ebe;
+  margin-right: .5rem;
+}
+
+/*
+.dato-ventas .dato {
+    background: #7C51A1;
+}
+
+.dato-saldo .dato {
+    background: #EFBF41;
+}
+*/
+
+.dato-saldo .dato,
+.dato-cobrar .dato {
+  background: #333;
+}
+
+.sidebar-dashboard .dato-iva label:before {
+  position: absolute;
+  content: '';
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #ddd;
+  margin-top: -1px;
+}
+
+.sidebar-dashboard .dato-iva label span {
+  position: relative;
+  background: #fff;
+  padding: .25rem .5rem;
+  padding-left: 1rem;
+  font-size: .85em;
+}
+
+.sidebar-dashboard .dato-iva label:after {
+  position: absolute;
+  content: '';
+  top: 0%;
+  left: 0;
+  width: .5rem;
+  height: 100%;
+  background: #ddd;
+  margin-top: -1px;
+}
+
+.sidebar-dashboard .dato-iva.ventas label:after .sidebar-dashboard .dato-iva.compras label:after {
+  /*background: #999;*/
+}
+
+.sidebar-dashboard .dato-iva.emitido label:after {
+  background: #385189;
+}
+
+.sidebar-dashboard .dato-iva.recibido label:after {
+  background: #7E9FD5;
+}
+
+.sidebar-dashboard .dato-iva.acreditable label:after {
+  background: #7B539C;
+}
+
+.sidebar-dashboard .dato-iva.asumido label:after {
+  background: #332E88;
+}
+
+.sidebar-dashboard .dato-iva.cobrar label:after {
+  background: #E14A95;
+}
+
+.sidebar-dashboard .dato-iva.saldo label:after {
+  background: #EFBF41;
+}
+
+.sidebar-dashboard .dato-iva.gastado label:after {
+  background: #E75D2F;
+}
+
+.sidebar-dashboard .dato-iva.retenido label:after {
+  background: #EFA89C;
+}
+
+.sidebar-dashboard .dato-iva.anterior label:after {
+  background: #69cd7c;
+}
+
+.row.comparacion-prorratas label {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.row.comparacion-prorratas {
+  text-align: center;
+  color: #000;
+  font-size: 16px;
+  max-width: 400px;
+  margin: auto;
+}
+
+.row.comparacion-prorratas > div {
+  padding: .0 .5rem;
+}
+
+.row.comparacion-prorratas > div.dif {
+  border-bottom: 0;
+}
+
+.row.comparacion-prorratas > div.ope {
+  border-right: 0;
+}
+
+.row.comparacion-prorratas span {
+  margin-left: 10px;
+}
+
+.row.comparacion-prorratas .dif span {
+  background: #333;
+  display: inline-block;
+  color: #fff;
+  padding: .25rem .5rem;
+  font-size: 17px;
+  margin-left: 10px;
+}
+
+.row.comparacion-prorratas > div.dif {
+  margin-bottom: .5rem;
+  padding-bottom: .5rem;
+  margin-top: .5rem;
+  border-bottom: 2px solid #ddd;
 }
 
 .border-bottom-primary {
@@ -16445,21 +16655,45 @@ html [type="button"],
   font-size: 1.2em;
   margin-top: 1rem;
   -webkit-appearance: initial;
+  -webkit-box-shadow: 3px 3px #d5d5d5;
+          box-shadow: 3px 3px #d5d5d5;
 }
 
 .btn-primary:focus,
 .btn-primary:hover,
 .btn-primary:active {
   outline: none;
-  background: #15408E;
   color: #fff;
-  -webkit-box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.15);
-          box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.15);
+  background-color: #0d295c;
+  border-color: #15408E;
+  -webkit-box-shadow: 0 0 #d5d5d5 !important;
+          box-shadow: 0 0 #d5d5d5 !important;
 }
 
 .btn-secondary {
   color: #1e0a26;
   background-color: #eee;
+}
+
+.btn-secondary {
+  outline: none;
+  font-size: .8rem;
+  display: inline-block !important;
+  background: #fff !important;
+  border-color: #15408E !important;
+  color: #15408E !important;
+  -webkit-transition: .25s ease all;
+  transition: .25s ease all;
+  -webkit-box-shadow: 3px 3px #d5d5d5;
+          box-shadow: 3px 3px #d5d5d5;
+}
+
+.btn-secondary:hover {
+  background: #f5f5f5;
+  border-color: #15408E;
+  color: #15408E;
+  -webkit-box-shadow: 0 0 #d5d5d5;
+          box-shadow: 0 0 #d5d5d5;
 }
 
 .input-group-append .btn-secondary {
@@ -16485,6 +16719,11 @@ html [type="button"],
   vertical-align: middle;
   margin: 0 2px;
   -webkit-font-smoothing: subpixel-antialiased;
+}
+
+.btn.btn-sm,
+.btn-group-sm > .btn {
+  font-size: 0.8rem;
 }
 
 .btn-facebook {
@@ -16618,6 +16857,21 @@ html [type="button"],
 .btn.btn-outline-light.btn-svg:focus {
   -webkit-box-shadow: none !important;
           box-shadow: none !important;
+}
+
+.quicklinks {
+  margin-bottom: 2rem;
+  margin-left: -.25rem;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.quicklinks .btn {
+  margin: 0 .25rem;
+  font-size: .8rem;
+  -webkit-box-shadow: 3px 3px #d5d5d5;
+          box-shadow: 3px 3px #d5d5d5;
 }
 
 .btn-primary .btn-spinner {
@@ -17271,6 +17525,12 @@ ngb-tabset.p-0 .tab-content {
   height: 100%;
   line-height: 1.5;
   padding: 0;
+}
+
+.toggle-vista.filters {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 
 table.dataTable-collapse {
@@ -19773,6 +20033,10 @@ img-cropper input[type="file"] {
   cursor: pointer;
 }
 
+.close-popup i.fa {
+  font-size: 2rem !important;
+}
+
 .popover {
   border: none;
   -webkit-box-shadow: 0 4px 20px 1px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.08);
@@ -20758,6 +21022,10 @@ ngb-rating .half {
   margin: auto;
   display: block;
   padding: 10px;
+}
+
+.breadcrumb {
+  position: relative;
 }
 
 .cols-excel {

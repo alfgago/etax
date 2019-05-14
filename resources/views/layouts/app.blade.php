@@ -15,9 +15,9 @@
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/toastr.min.css')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/perfect-scrollbar.css')}}">
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=1.07">
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=1.17">
     
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=1.07"></script>
+    <script src="{{asset('assets/js/common-bundle.js')}}?v=1.13"></script>
   
     @yield('header-scripts')
     
@@ -54,8 +54,6 @@
     <script src="/assets/js/ubicacion.js"></script>
     <script src="/assets/js/vendor/tagging.min.js"></script>
     <script src="{{asset('assets/js/es5/script.js')}}"></script>
-    <script src="{{asset('assets/js/jquery-confirm.js')}}"></script>
-    <script src="{{asset('assets/js/custom.js')}}"></script>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker-standalone.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
@@ -74,14 +72,6 @@
         </script>
     @endif
   
-  
-  <style>
-    
-    .close-popup i.fa {
-        font-size: 2rem !important;
-    }
-    
-  </style>
 
     @yield('footer-scripts')
     

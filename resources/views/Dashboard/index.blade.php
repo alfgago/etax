@@ -39,6 +39,16 @@
       </div>
     </form>
   </div>
+  
+  <div class="toggle-vista filters">
+    <label>Vista de dashboard</label>
+    <div class="">
+      <select id="input-vista" name="input-vista" onchange="loadReportes();">
+        <option value="basica" selected> Vista básica</option>
+        <option value="gerencial"> Vista avanzada</option>
+      </select>
+    </div>
+  </div>
 @endsection 
 
 @section('content')
@@ -54,6 +64,7 @@
 
 <script>
   function loadReportes() {
+    var vista = $("#input-vista").val();
     var mes = $("#input-mes").val();
     var ano = $("#input-ano").val();
       		  
@@ -64,6 +75,7 @@
       data : {
         mes : mes,
   		  ano : ano,
+  		  vista : vista,
   		  _token: '{{ csrf_token() }}'
       },
       success : function( response ) {
@@ -78,5 +90,6 @@
   });
   
 </script>
+
 
 @endsection

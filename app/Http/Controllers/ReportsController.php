@@ -26,31 +26,29 @@ class ReportsController extends Controller
   
     public function dashboard() {
       
-        /* Logic for New User Invite */
-        $token = session('invite_token');
+      /* Logic for New User Invite */
+      $token = session('invite_token');
+      if ($token) {
+          $invite = Teamwork::getInviteFromAcceptToken($token);
+          if ($invite) {
+              Teamwork::acceptInvite($invite);
+              /* Add entry in plan invitations table */                
+              $team = \App\Team::findOrFail($invite->team_id);
+              $company = Company::find($team->company_id);
 
-        if ($token) {
-            $invite = Teamwork::getInviteFromAcceptToken($token);
+              $is_admin = ($invite->role == 'admin') ? '1' : '0';
+              $is_readonly = ($invite->role == 'readonly') ? '1' : '0';
+              PlansInvitation::create(['plan_no' => $company->plan_no, 'company_id' => $company->id, 'user_id' => auth()->user()->id, 'is_admin' => $is_admin, 'is_read_only' => $is_readonly]);
 
-            if ($invite) {
-                Teamwork::acceptInvite($invite);
-
-                /* Add entry in plan invitations table */                
-                $team = \App\Team::findOrFail($invite->team_id);
-                $company = Company::find($team->company_id);
-
-                $is_admin = ($invite->role == 'admin') ? '1' : '0';
-                $is_readonly = ($invite->role == 'readonly') ? '1' : '0';
-                PlansInvitation::create(['plan_no' => $company->plan_no, 'company_id' => $company->id, 'user_id' => auth()->user()->id, 'is_admin' => $is_admin, 'is_read_only' => $is_readonly]);
-                /* Ends here */
-
-                return redirect()->route('User.companies')->with('success', 'Invitation has been accepted.');
-            }
-        }
-        /* Logic Ends Here */
+              return redirect()->route('User.companies')->with('success', 'La invitación ha sido enviada.');
+          }
+      }
+      
+      if( ! currentCompanyModel()->wizard_finished ) {
+        return redirect('/wizard');
+      }
 
       return view('/Dashboard/index');
-
     }
     
     public function reports() {
@@ -88,8 +86,12 @@ class ReportsController extends Controller
           
       }
       
-      return view('/Dashboard/reporte-dashboard', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes'));
-
+      if( !$request->vista || $request->vista == 'basica' ){
+        return view('/Dashboard/dashboard-basico', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes'));
+      } else {
+        return view('/Dashboard/dashboard-gerencial', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes'));
+      }
+      
     }
     
     public function reporteCuentasContables( Request $request ) {

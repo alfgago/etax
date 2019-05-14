@@ -1,0 +1,231 @@
+  
+.sidebar-dashboard {
+    color: #000;
+    /*max-width: 380px;*/
+}
+
+.sidebar-dashboard label {
+    margin: 0;
+    font-weight: bold;
+    dispay: block;
+    font-size: 14px;
+
+}
+
+.sidebar-dashboard .dato-iva label {
+    position: relative;
+    display: inline-block;
+    font-size: 14px;
+    width: 50%;
+    width: calc(50% + 10px);
+}
+
+.sidebar-dashboard .dato-iva .dato {
+    display: inline-block;
+    font-size: 17px;
+    padding: .25rem .5rem;
+    margin-left: 10px;
+}
+
+.dato-saldo .dato,
+.dato-cobrar .dato,
+.dato-ventas .dato,
+.dato-compras .dato {
+    color: #fff;
+    background: #2852A6;
+    padding: .25rem .5rem;
+    font-size: 17px;
+    margin-bottom: .5rem;
+    background: #999;
+}
+
+.dato-facturas {
+    display: flex;
+}
+
+.dato-facturas label {
+  margin-right: 1rem;
+}
+
+.dato-facturas .btn {
+    margin-top: 1rem;
+}
+
+.barra-limites {
+    width: 150px;
+    max-width: 100%;
+    position: relative;
+    background: #9fb1cc;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.fill-bar {
+    position: absolute;
+    transition: .5s ease all;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: #5654ad;
+}
+
+.barra-text {
+    position: relative;
+    text-align: center;
+    color: #fff;
+    font-size: 13px;
+    padding: 2.5px;
+    font-weight: bold;
+}
+
+.notificaciones-container {
+    background: #eee;
+    padding: 1rem;
+    border-radius: 5px;
+}
+
+.notificaciones-container .notificacion {
+    padding-bottom: .5rem;
+    margin-bottom: .5rem;
+    border-bottom: 2px solid #ddd;
+}
+
+.notificaciones-container .notificacion .fecha {
+    color: #435ebe;
+    margin-right: .5rem;
+}
+
+/*
+.dato-ventas .dato {
+    background: #7C51A1;
+}
+
+.dato-saldo .dato {
+    background: #EFBF41;
+}
+*/
+
+.dato-saldo .dato,
+.dato-cobrar .dato {
+    background: #333;
+}
+
+
+.sidebar-dashboard .dato-iva label:before {
+    position: absolute;
+    content: '';
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #ddd;
+    margin-top: -1px
+}
+
+.sidebar-dashboard .dato-iva label span {
+    position: relative;
+    background: #fff;
+    padding: .25rem .5rem;
+    padding-left: 1rem;
+    font-size: .85em;
+}
+
+.sidebar-dashboard .dato-iva label:after {
+    position: absolute;
+    content: '';
+    top: 0%;
+    left: 0;
+    width: .5rem;
+    height: 100%;
+    background: #ddd;
+    margin-top: -1px
+}
+
+.sidebar-dashboard .dato-iva.ventas label:after
+.sidebar-dashboard .dato-iva.compras label:after {
+    /*background: #999;*/
+}
+
+.sidebar-dashboard .dato-iva.emitido label:after {
+    background: #385189;
+}
+
+.sidebar-dashboard .dato-iva.recibido label:after {
+    background: #7E9FD5;
+}
+
+
+.sidebar-dashboard .dato-iva.acreditable label:after {
+    background: #7B539C;
+}
+
+.sidebar-dashboard .dato-iva.asumido label:after {
+    background: #332E88;
+}
+
+.sidebar-dashboard .dato-iva.cobrar label:after {
+   background: #E14A95; 
+}
+
+.sidebar-dashboard .dato-iva.saldo label:after {
+    background: #EFBF41;
+}
+
+.sidebar-dashboard .dato-iva.gastado label:after {
+    background: #E75D2F;
+}
+
+.sidebar-dashboard .dato-iva.retenido label:after {
+    background: #EFA89C;
+}
+
+.sidebar-dashboard .dato-iva.anterior label:after {
+    background: #69cd7c;
+}
+
+.row.comparacion-prorratas label {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.row.comparacion-prorratas {
+    text-align: center;
+    color: #000;
+    font-size: 16px;
+    max-width: 400px;
+    margin: auto;
+}
+
+.row.comparacion-prorratas > div {
+    padding: .0 .5rem;
+}
+
+.row.comparacion-prorratas > div.dif {
+    border-bottom: 0;
+}
+
+.row.comparacion-prorratas > div.ope {
+    border-right: 0;
+}
+
+.row.comparacion-prorratas span {
+    margin-left: 10px;
+}
+
+.row.comparacion-prorratas .dif span {
+    background: #333;
+    display: inline-block;
+    color: #fff;
+    padding: .25rem .5rem;
+    font-size: 17px;
+    margin-left: 10px;
+}
+
+.row.comparacion-prorratas > div.dif {
+    margin-bottom: .5rem;
+    padding-bottom: .5rem;
+    margin-top: .5rem;
+    border-bottom: 2px solid #ddd;
+}

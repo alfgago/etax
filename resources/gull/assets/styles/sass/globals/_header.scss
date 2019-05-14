@@ -159,6 +159,10 @@
     padding: 10px;
 }
 
+.breadcrumb {
+    position: relative;
+}
+
 .cols-excel {
     list-style-type: upper-alpha;
     display: flex;
@@ -201,6 +205,8 @@
 .filters label {
     margin: 0;
 }
+
+
      
 
 @media (max-width: 991px) {

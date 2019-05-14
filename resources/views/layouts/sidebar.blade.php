@@ -12,34 +12,47 @@
             
             <li class="nav-item {{ request()->is('facturas-emitidas/*') || request()->is('facturas-emitidas') ? 'active' : '' }}" >
                 <a class="nav-item-hold" href="/facturas-emitidas">
-                    <img src="{{asset('assets/images/iconos/fact-emi.png')}}" class="sidemenu-icon">
-                    <span class="nav-text">Facturas emitidas</span>
+                    <img src="{{asset('assets/images/iconos/ventas.png')}}" class="sidemenu-icon">
+                    <span class="nav-text">Ventas</span>
                 </a>
                 
                 
                 <div class="subitems">
                     <a href="/facturas-emitidas">Ver todas</a>
-                    <a href="/facturas-emitidas/emitir-factura">Crear factura electrónica</a>
-                    <a href="/facturas-emitidas/emitir-tiquete">Crear tiquete electrónico</a>
-                    <a href="/facturas-emitidas/emitir-factura">Crear nota de débito</a>
-                    <a href="#" onclick="abrirPopup('importar-emitidas-popup');">Importar facturas</a>
                     <a href="/facturas-emitidas/create">Registrar factura existente</a>
+                    <a href="#" onclick="abrirPopup('importar-emitidas-popup');">Importar facturas</a>
+                    <a href="#">Validar facturas</a>
                 </div>
                 
             </li>
             
             <li class="nav-item {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
                 <a class="nav-item-hold" href="/facturas-recibidas">
-                    <img src="{{asset('assets/images/iconos/fact-reci.png')}}" class="sidemenu-icon">
-                    <span class="nav-text">Facturas recibidas</span>
+                    <img src="{{asset('assets/images/iconos/compras.png')}}" class="sidemenu-icon">
+                    <span class="nav-text">Compras</span>
+                </a>
+                
+                <div class="subitems">
+                    <a href="/facturas-recibidas">Ver todas</a>
+                    <a href="/facturas-recibidas/create">Registrar factura recibida</a>
+                    <a href="#" onclick="abrirPopup('importar-recibidas-popup');">Importar facturas</a>
+                    <a href="#">Validar facturas</a>
+                </div>
+            </li>
+            
+            <li class="nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
+                <a class="nav-item-hold" href="/facturas-recibidas">
+                    <img src="{{asset('assets/images/iconos/facturacion.png')}}" class="sidemenu-icon">
+                    <span class="nav-text">Facturación</span>
                 </a>
                 
                 
                 <div class="subitems">
-                    <a href="/facturas-recibidas">Ver todas</a>
+                    <a href="/facturas-emitidas">Ver documentos emitidos</a>
+                    <a href="/facturas-emitidas/emitir-factura">Emitir factura electrónica</a>
+                    <a href="/facturas-emitidas/emitir-tiquete">Emitir tiquete electrónico</a>
+                    <a href="/facturas-emitidas/emitir-factura">Emitir nota de débito</a>
                     <a href="/facturas-recibidas/create">Aceptación de facturas recibidas</a>
-                    <a href="/facturas-recibidas/create">Registrar factura recibida</a>
-                    <a href="#" onclick="abrirPopup('importar-recibidas-popup');">Importar facturas</a>
                 </div>
             </li>
             
@@ -47,6 +60,14 @@
                 <a class="nav-item-hold" href="/cierres">
                     <img src="{{asset('assets/images/iconos/report.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Cierres de mes</span>
+                </a>
+                
+            </li>
+            
+            <li class="nav-item small-nav {{ request()->is('reportes/*') || request()->is('reportes') ? 'active' : '' }}" >
+                <a class="nav-item-hold" href="/reportes">
+                    <img src="{{asset('assets/images/iconos/report.png')}}" class="sidemenu-icon">
+                    <span class="nav-text">Reportes</span>
                 </a>
                 
             </li>
@@ -89,13 +110,6 @@
                     <a href="/productos/create">Crear producto</a>
                     <a href="/productos/#">Importar productos</a>
                 </div>
-            </li>
-            <li class="nav-item small-nav {{ request()->is('reportes/*') || request()->is('reportes') ? 'active' : '' }}" >
-                <a class="nav-item-hold" href="/reportes">
-                    <img src="{{asset('assets/images/iconos/report.png')}}" class="sidemenu-icon">
-                    <span class="nav-text">Reportes</span>
-                </a>
-                
             </li>
           </ul>
       </div>

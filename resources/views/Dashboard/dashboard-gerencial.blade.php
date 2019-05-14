@@ -2,7 +2,6 @@
     
   <div class="row">
     
-    
     <div class="col-lg-12 mb-4">
       @include('Reports.widgets.grafico-mensual', ['titulo' => "Resumen de IVA $ano"])
     </div>
@@ -15,7 +14,6 @@
       @include('Reports.widgets.resumen-periodo', ['titulo' => "Acumulado $ano", 'data' => $acumulado])
     </div>
 
-    
   </div>
   
 </div>

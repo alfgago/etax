@@ -52,6 +52,8 @@ class CreateCompaniesTable extends Migration
             $table->integer('first_prorrata_type')->default(1); // 1 = Ingresar facturas, 2 = Ingresar totales, 3 = Manual 
             $table->boolean('use_invoicing')->default(true);
 			$table->string('deactivation_token')->nullable();
+			
+			$table->boolean('wizard_finished')->default(false);
 
             $table->timestamps();
 			$table->softDeletes();

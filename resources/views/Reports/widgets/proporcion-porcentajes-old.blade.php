@@ -1,11 +1,7 @@
 
-<div class="widget card-porcentajes">
+<div class="widget text-center ">
     <div class="card-title"> {{ $titulo }} </div>
-    @if( $data->count_invoices  )
-      <div id="echartPie" style="height: 12.5rem; max-width: 25rem;"></div>
-    @else
-      <div class="descripcion">La empresa aún no registra ventas durante el año. Empiece ingresando sus facturas de venta o emitiéndolas por medio de eTax</div>
-    @endif
+    <div id="echartPie" style="height: 250px;"></div>
 </div>
 
 <script>
@@ -22,12 +18,9 @@
             show: true,
             backgroundColor: 'rgba(0, 0, 0, .8)'
           },
-          legend: {
-              orient: 'vertical',
-              right: 0,
-              top: 0,
-          },
+
           xAxis: [{
+
             axisLine: {
               show: false
             },
@@ -48,51 +41,44 @@
           series: [{
             name: '',
             type: 'pie',
-            radius: ['45%', '65%'],
-            center : ['30%', '40%'],
-            labelLine: {
-                normal: {
-                    show: false
-                }
-            },
-            label: {
-                normal: {
-                    show: false,
-                    position: 'center'
-                },
-            },
+            radius: ['50%', '70%'],
             data: [
-            
+            @if($acumulado->fake_ratio1)
               {
                 value: '{{ number_format( $acumulado->fake_ratio1*100, 2) }}',
                 name: 'Ventas al 1%'
               }, 
-            
+            @endif
+            @if($acumulado->fake_ratio2)
               {
                 value: '{{ number_format( $acumulado->fake_ratio2*100, 2) }}',
                 name: 'Ventas al 2%'
               }, 
-            
+            @endif
+            @if($acumulado->fake_ratio3)
               {
                 value: '{{ number_format( $acumulado->fake_ratio3*100, 2) }}',
                 name: 'Ventas al 13%'
               }, 
-            
+            @endif
+            @if($acumulado->fake_ratio4)
               {
                 value: '{{ number_format( $acumulado->fake_ratio4*100, 2) }}',
                 name: 'Ventas al 4%'
               }, 
-            
+            @endif
+            @if($acumulado->fake_ratio_exento_sin_credito)
               {
                 value: '{{ number_format( $acumulado->fake_ratio_exento_sin_credito*100, 2) }}',
                 name: 'Exentas sin \n derecho a credito'
               }, 
-            
+            @endif
+            @if($acumulado->fake_ratio_exento_con_credito)
               {
                 value: '{{ number_format( $acumulado->fake_ratio_exento_con_credito*100, 2) }}',
                 name: 'Exentas con \n derecho a credito'
               }, 
-            
+            @endif
             ],
             itemStyle: {
               emphasis: {

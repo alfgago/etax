@@ -55,8 +55,6 @@ Route::patch('/empresas/update-certificado/{id}', 'CompanyController@updateCerti
 Route::get('/empresas/company-profile/{id}', 'CompanyController@company_profile')->name('Company.company_profile');
 Route::get('/empresas/set-prorrata-2018-facturas', 'CompanyController@setProrrata2018PorFacturas')->name('Company.set_prorrata_2018_facturas');
 
-
-
 // Rutas de facturación
 Route::get('/facturas-emitidas/emitir-factura', 'InvoiceController@emitFactura')->name('Invoice.emit_01');
 Route::get('/facturas-emitidas/emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');

@@ -29,11 +29,21 @@ class CalculatedTax extends Model
         return $this->hasOne(Book::class, 'calculated_tax_id');
     }
     
+    
+    /**
+     * Calcula y devuelve los datos del mes para dashboard y reportes
+     *
+     * @param  int $month
+     * @param  int $year
+     * @param  int $lastBalance
+     * @param  int $prorrataOperativa
+     * @return App\CalculatedTax
+     */
     public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa ) {
       
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
-      //if ( !Cache::has($cacheKey) ) {
+      if ( !Cache::has($cacheKey) ) {
           
           //Busca el calculo del mes en Base de Datos.
           $data = CalculatedTax::firstOrNew(
@@ -75,76 +85,12 @@ class CalculatedTax extends Model
             
           Cache::put($cacheKey, $data, now()->addDays(120));
           
-      //}
+      }
       return Cache::get($cacheKey);
       
     }
     
-    public static function getProrrataPeriodoAnterior($anoAnterior) {
-      
-      $currentCompany = currentCompanyModel();
-      $currentCompanyId = $currentCompany->id;
-      
-      $cacheKey = "cache-lasttaxes-$currentCompanyId-0-$anoAnterior";
-      if ( !Cache::has($cacheKey) ) {
-        $data = CalculatedTax::firstOrNew(
-            [
-                'company_id' => $currentCompanyId,
-                'month' => 0,
-                'year' => $anoAnterior,
-                'is_final' => true,
-            ]
-        );
-        
-        if($anoAnterior == 2018 && $currentCompany->first_prorrata_type == 2 ){
-          
-          if( !$data->is_closed ) {
-              
-              $data->resetVars();
-              $data->calcularFacturacion( 12, $anoAnterior, 0, 1 );
-              
-              if( $data->count_invoices || $data->count_bills || $data->id ) {
-                $data->save();
-                $book = Book::calcularAsientos( $data );
-                $book->save();
-                $data->book = $book;
-              }
-              
-            }
-            
-        }else {
-          if( !$data->is_closed ) {
-              
-              $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $anoAnterior, 0, 100 );
-              $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $anoAnterior, 0, 100 );
-              $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $anoAnterior, 0, 100 );
-              $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $anoAnterior, 0, 100 );
-              $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $anoAnterior, 0, 100 );
-              $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $anoAnterior, 0, 100 );
-              $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $anoAnterior, 0, 100 );
-              $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $anoAnterior, 0, 100 );
-              $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $anoAnterior, 0, 100 );
-              $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $anoAnterior, 0, 100 );
-              $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $anoAnterior, 0, 100 );
-              $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $anoAnterior, 0, 100 );
-            
-              $data->resetVars();
-              $data->calcularFacturacionAcumulado( $anoAnterior, 1 );
-              
-              if( $data->count_invoices || $data->count_bills ) {
-                $data->save();
-                $book = Book::calcularAsientos( $data );
-                $book->save();
-                $data->book = $book;
-              }
-          }
-        }
-        Cache::put($cacheKey, $data, now()->addDays(120));
-      }
-      
-      return Cache::get($cacheKey);
-      
-    }
+    
   
     //Recibe fecha de inicio y fecha de fin en base a las cuales se desea calcular la prorrata.
     public function calcularFacturacion( $month, $year, $lastBalance, $prorrataOperativa ) {
@@ -564,6 +510,72 @@ class CalculatedTax extends Model
       
       $this->saldo_favor = $saldoFavor;
       $this->saldo_favor_anterior = $lastBalance;
+      
+    }
+    
+    public static function getProrrataPeriodoAnterior($anoAnterior) {
+      
+      $currentCompany = currentCompanyModel();
+      $currentCompanyId = $currentCompany->id;
+      
+      $cacheKey = "cache-lasttaxes-$currentCompanyId-0-$anoAnterior";
+      if ( !Cache::has($cacheKey) ) {
+        $data = CalculatedTax::firstOrNew(
+            [
+                'company_id' => $currentCompanyId,
+                'month' => 0,
+                'year' => $anoAnterior,
+                'is_final' => true,
+            ]
+        );
+        
+        if($anoAnterior == 2018 && $currentCompany->first_prorrata_type == 2 ){
+          
+          if( !$data->is_closed ) {
+              
+              $data->resetVars();
+              $data->calcularFacturacion( 12, $anoAnterior, 0, 1 );
+              
+              if( $data->count_invoices || $data->count_bills || $data->id ) {
+                $data->save();
+                $book = Book::calcularAsientos( $data );
+                $book->save();
+                $data->book = $book;
+              }
+              
+            }
+            
+        }else {
+          if( !$data->is_closed ) {
+              
+              $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $anoAnterior, 0, 100 );
+              $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $anoAnterior, 0, 100 );
+              $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $anoAnterior, 0, 100 );
+              $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $anoAnterior, 0, 100 );
+              $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $anoAnterior, 0, 100 );
+              $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $anoAnterior, 0, 100 );
+              $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $anoAnterior, 0, 100 );
+              $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $anoAnterior, 0, 100 );
+              $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $anoAnterior, 0, 100 );
+              $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $anoAnterior, 0, 100 );
+              $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $anoAnterior, 0, 100 );
+              $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $anoAnterior, 0, 100 );
+            
+              $data->resetVars();
+              $data->calcularFacturacionAcumulado( $anoAnterior, 1 );
+              
+              if( $data->count_invoices || $data->count_bills ) {
+                $data->save();
+                $book = Book::calcularAsientos( $data );
+                $book->save();
+                $data->book = $book;
+              }
+          }
+        }
+        Cache::put($cacheKey, $data, now()->addDays(120));
+      }
+      
+      return Cache::get($cacheKey);
       
     }
     

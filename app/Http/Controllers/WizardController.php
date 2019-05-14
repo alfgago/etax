@@ -144,6 +144,8 @@ class WizardController extends Controller
         $company->first_prorrata_type = $request->first_prorrata_type;
         $company->use_invoicing = $request->use_invoicing;
         
+        $company->wizard_finished = true;
+        
         $company->save();
         //Update Team name based on company
         $team->name = $request->name;
