@@ -196,31 +196,53 @@ class BillController extends Controller
                             $i++;
                             
                             //Datos de proveedor
-                            $nombre_proveedor = $row['nombreproveedor'];
-                            $codigo_proveedor = $row['codigoproveedor'] ? $row['codigoproveedor'] : '';
-                            $tipo_persona = $row['tipoidentificacion'];
-                            $identificacion_proveedor = $row['identificacionproveedor'];
+                            $nombreProveedor = $row['nombreproveedor'];
+                            $codigoProveedor = $row['codigoproveedor'] ? $row['codigoproveedor'] : '';
+                            $tipoPersona = $row['tipoidentificacion'];
+                            $identificacionProveedor = $row['identificacionproveedor'];
+                            $consecutivoComprobante = $row['consecutivocomprobante'];
+                            $condicionVenta = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
+                            $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
                             
-                            $providerCacheKey = "import-proveedors-$identificacion_proveedor-".$company->id;
+                            /*
+                            $ordenCompra = $row['ordencompra'] ? $row['ordencompra'] : '';
+                            $referencia = $row['referencia'] ? $row['referencia'] : '';
+                            $documentoAnulado = $row['documentoanulado'] ? $row['documentoanulado'] : '';
+                            $haciendaStatus = $row['estadohacienda'] ? $row['estadohacienda'] : '';
+                            $estadoPago = $row['estadopago'] ? $row['estadopago'] : '';
+                            $paymentReceipt = $row['comprobantepago'] ? $row['comprobantepago'] : '';
+                            */
+                            
+                            
+                            /*$bill->buy_order = $row['ordencompra'] ? $row['ordencompra'] : '';
+                                    $bill->other_reference = $row['referencia'] ? $row['referencia'] : '';
+                                    $bill->other_document = $row['documentoanulado'] ? $row['documentoanulado'] : '';
+                                    $bill->hacienda_status = $row['estadohacienda'] ? $row['estadohacienda'] : '01';
+                                    $bill->payment_status = $row['estadopago'] ? $row['estadopago'] : '01';
+                                    $bill->payment_receipt = $row['comprobantepago'] ? $row['comprobantepago'] : '';*/
+                            
+                            $numeroLinea = $row['numerolinea'] ? $row['numerolinea'] : 0;
+                            
+                            $providerCacheKey = "import-proveedors-$identificacionProveedor-".$company->id;
                             if ( !Cache::has($providerCacheKey) ) {
                                 $proveedorCache =  Provider::firstOrCreate(
                                     [
-                                        'id_number' => $identificacion_proveedor,
+                                        'id_number' => $identificacionProveedor,
                                         'company_id' => $company->id,
                                     ],
                                     [
-                                        'code' => $codigo_proveedor ,
+                                        'code' => $codigoProveedor ,
                                         'company_id' => $company->id,
-                                        'tipo_persona' => str_pad($tipo_persona, 2, '0', STR_PAD_LEFT),
-                                        'id_number' => $identificacion_proveedor,
-                                        'first_name' => $nombre_proveedor
+                                        'tipo_persona' => str_pad($tipoPersona, 2, '0', STR_PAD_LEFT),
+                                        'id_number' => $identificacionProveedor,
+                                        'first_name' => $nombreProveedor
                                     ]
                                 );
                                 Cache::put($providerCacheKey, $proveedorCache, 30);
                             }
                             $proveedor = Cache::get($providerCacheKey);
                             
-                            $billCacheKey = "import-factura-$identificacion_proveedor-" . $company->id . "-" . $row['consecutivocomprobante'];
+                            $billCacheKey = "import-factura-$identificacionProveedor-" . $company->id . "-" . $row['consecutivocomprobante'];
                             if ( !Cache::has($billCacheKey) ) {
                             
                                 $bill = Bill::firstOrNew(
@@ -247,11 +269,11 @@ class BillController extends Controller
                                     
                                     
                                     $bill->reference_number = $company->last_bill_ref_number + 1;
-                                    $bill->document_number =  $row['consecutivocomprobante'];
+                                    $bill->document_number =  $consecutivoComprobante;
                                     
                                     //Datos generales
-                                    $bill->sale_condition = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
-                                    $bill->payment_type = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
+                                    $bill->sale_condition = $condicionVenta;
+                                    $bill->payment_type = $metodoPago;
                                     $bill->credit_time = 0;
                                     
                                     /*$bill->buy_order = $row['ordencompra'] ? $row['ordencompra'] : '';
@@ -310,7 +332,7 @@ class BillController extends Controller
                                     'company_id' => $company->id,
                                     'year' => $year,
                                     'month' => $month,
-                                    'item_number' => $row['numerolinea'] ? $row['numerolinea'] : 0,
+                                    'item_number' => $numeroLinea,
                                     'code' => $row['codigoproducto'],
                                     'name' => $row['detalleproducto'],
                                     'product_type' => 1,
@@ -345,19 +367,17 @@ class BillController extends Controller
                 return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i.'. Mensaje:' . $ex->getMessage());
             }
         
-        $company->save();
-        
-        $time_end = $this->microtime_float();
-        $time = $time_end - $time_start;
-        
-        return redirect('/facturas-recibidas')->withMessage('Facturas importados exitosamente en '.$time.'s');
+            $company->save();
+            
+            $time_end = $this->microtime_float();
+            $time = $time_end - $time_start;
+            
+            return redirect('/facturas-recibidas')->withMessage('Facturas importados exitosamente en '.$time.'s');
         }else{
             return redirect('/facturas-emitidas')->withError('Usted tiene un límite de 2500 facturas por archivo.');
         }
         
     }
-    
-    
     
     public function receiveEmailBills(Request $request) {
         $file = $request->file('attachment1');
