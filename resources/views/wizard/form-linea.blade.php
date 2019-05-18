@@ -34,7 +34,7 @@
       <label for="tipo_iva">Tipo de IVA</label>
       <select class="form-control" id="tipo_iva" >
         @foreach ( \App\Variables::tiposIVARepercutidos() as $tipo )
-          <option value="{{ $tipo['codigo'] }}" porcentaje="{{ $tipo['porcentaje'] }}">{{ $tipo['nombre'] }}</option>
+          <option value="{{ $tipo['codigo'] }}" porcentaje="{{ $tipo['porcentaje'] }}" class="{{ @$tipo['hideMasiva'] ? 'hidden' : '' }}">{{ $tipo['nombre'] }}</option>
         @endforeach
       </select>
     </div>
@@ -111,7 +111,7 @@
     </div>
     
     <div class="form-group col-md-12 inline-form inline-checkbox hidden">
-      <label for="is_identificacion_especifica">
+      <label for="is_identificacion_especifica" class="hidden">
         <span>¿Asociado a compras con identificación específica?</span>
         <input type="checkbox" class="form-control" id="is_identificacion_especifica" placeholder="" readonly="true" >
       </label>

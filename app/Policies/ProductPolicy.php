@@ -26,7 +26,7 @@ class ProductPolicy
      * 
      */
     public function update(User $user, Product $product) {
-        $current_company = $user->companies->first()->id;
+        $current_company = currentCompany();
         return $product->company_id == $current_company;
     }
     

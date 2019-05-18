@@ -16,11 +16,11 @@ class CreateCompaniesTable extends Migration
         Schema::create('companies', function (Blueprint $table) {
             $table->bigIncrements('id');
           
-            $table->string('plan_no')->nullable();
             $table->unsignedBigInteger('user_id');
+            $table->string('plan_no')->nullable();
             
             $table->enum('type', ['F', 'J', 'D', 'E', 'N', 'O']); 
-            $table->string('id_number')->nullable(); 
+            $table->string('id_number')->unique()->nullable(); 
             $table->string('business_name')->nullable(); 
             $table->string('activities')->nullable(); 
             $table->string('name')->nullable(); 
@@ -83,7 +83,7 @@ class CreateCompaniesTable extends Migration
         
         $team = App\Team::create(
             [
-                'name' => '5E Labs',
+                'name' => '(1) 3-102-702429',
                 'owner_id' => $user->id,
                 'company_id' => 1
             ]    

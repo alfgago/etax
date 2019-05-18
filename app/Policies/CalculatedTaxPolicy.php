@@ -26,7 +26,7 @@ class CalculatedTaxPolicy
      * 
      */
     public function update(User $user, CalculatedTax $calc) {
-        $current_company = $user->companies->first()->id;
+        $current_company = currentCompany();
         return $calc->company_id == $current_company;
     }
     

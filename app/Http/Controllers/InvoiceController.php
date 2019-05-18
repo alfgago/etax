@@ -80,6 +80,12 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
+        
+        $request->validate([
+            'subtotal' => 'required',
+            'items' => 'required',
+        ]);
+        
         $invoice = new Invoice();
         $company = currentCompanyModel();
         $invoice->company_id = $company->id;
@@ -284,7 +290,7 @@ class InvoiceController extends Controller
                                     $invoice->client_id = $cliente->id;    
                             
                                     //Datos generales y para Hacienda
-                                    $tipoDocumento = $row['idtipodocumento'];
+                                    $tipoDocumento = $row['tipodocumento'];
                                     if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' 
                                         || $tipoDocumento == '05' || $tipoDocumento == '06' || $tipoDocumento == '07' || $tipoDocumento == '08' || $tipoDocumento == '99' ) {
                                         $bill->document_type = $tipoDocumento;    
@@ -368,7 +374,7 @@ class InvoiceController extends Controller
                                     'discount_type' => '01',
                                     'discount' => $row['montodescuento'] ? $row['montodescuento'] : 0,
                                     'discount_reason' => '',
-                                    'iva_type' => $row['codigoimpuesto'],
+                                    'iva_type' => $row['codigoetax'],
                                     'iva_amount' => $row['montoiva'] ? $row['montoiva'] : 0,
                                 ];
                             }

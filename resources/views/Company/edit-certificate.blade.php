@@ -14,7 +14,7 @@
   <div class="col-md-12">
   	<div class="tabbable verticalForm">
     	<div class="row">
-        <div class="col-3">
+        <div class="col-sm-3">
             <ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                 <li>
                     <a class="nav-link" aria-selected="false" href="/empresas/editar">Editar perfil de empresa</a>
@@ -30,7 +30,7 @@
                 </li>
             </ul>
         </div>
-        <div class="col-9">
+        <div class="col-sm-9">
           <div class="tab-content">       
 						
 			<form method="POST" action="{{ route('Company.update_cert', ['id' => $company->id]) }}" enctype="multipart/form-data">

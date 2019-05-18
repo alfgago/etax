@@ -2,9 +2,9 @@ html [type="button"], .btn[type="button"] {
     -webkit-appearance: none !important;
 }
 .btn {
-    border-radius: 5px;
+    border-radius: 0.33rem;
     &.rounded, &.btn-rounded {
-        border-radius: 40px;
+        border-radius: 2.66rem;
     }
 }
 
@@ -16,7 +16,7 @@ html [type="button"], .btn[type="button"] {
     font-size: 1.2em;
     margin-top: 1rem;
     -webkit-appearance: initial;
-    box-shadow: 3px 3px #d5d5d5;
+    box-shadow: 0.2rem 0.2rem #d5d5d5;
     &:focus, &:hover, &:active {
         outline: none;
         color: $white;
@@ -39,7 +39,7 @@ html [type="button"], .btn[type="button"] {
     border-color: #15408E !important;
     color: #15408E !important;
     transition: .25s ease all;
-    box-shadow: 3px 3px #d5d5d5;
+    box-shadow: 0.2rem 0.2rem #d5d5d5;
 }
 
 .btn-secondary:hover {
@@ -50,24 +50,24 @@ html [type="button"], .btn[type="button"] {
 }
 
 .input-group-append .btn-secondary {
-  border: 1px solid $gray-300 !important;
+  border: 0.0666rem solid $gray-300 !important;
   height: 100% !important;
 }
 
 .btn-icon {
-    width: 34px;
-    height: 34px;
+    width: 2.25rem;
+    height: 2.25rem;
     padding: 0;
     [class^="i-"], .icon {
         vertical-align: middle;
-        margin: 0 2px;
+        margin: 0 0.133rem;
         -webkit-font-smoothing: subpixel-antialiased;
     }
 }
 .btn-icon-text {
     [class^="i-"], .icon {
         vertical-align: middle;
-        margin: 0 2px;
+        margin: 0 0.133rem;
         -webkit-font-smoothing: subpixel-antialiased;
     }
 }
@@ -158,8 +158,8 @@ html [type="button"], .btn[type="button"] {
     height: 1em;
     background: transparent;
     border-radius: 50%;
-    margin: 0 16px 0 0;
-    border: 2px solid transparent;
+    margin: 0 1rem 0 0;
+    border: 0.133rem solid transparent;
 }
 .btn-checkbox {
     .checkbox {
@@ -182,15 +182,17 @@ html [type="button"], .btn[type="button"] {
 }
 
 .quicklinks {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   margin-left: -.25rem;
   display: flex;
+  flex-wrap: wrap;
 }
 
 .quicklinks .btn {
   margin: 0 .25rem;
+  margin-bottom: .5rem;
   font-size: .8rem;
-  box-shadow: 3px 3px #d5d5d5;
+  box-shadow: 0.2rem 0.2rem #d5d5d5;
 }
 
 @each $name, $value in $theme-colors {

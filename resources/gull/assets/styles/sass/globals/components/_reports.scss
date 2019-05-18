@@ -1,30 +1,30 @@
   
 .sidebar-dashboard {
     color: #000;
-    /*max-width: 380px;*/
+    /*max-width: 35.25rem;*/
 }
 
 .sidebar-dashboard label {
     margin: 0;
     font-weight: bold;
     dispay: block;
-    font-size: 14px;
+    font-size: 0.875rem;
 
 }
 
 .sidebar-dashboard .dato-iva label {
     position: relative;
     display: inline-block;
-    font-size: 14px;
+    font-size: 0.875rem;
     width: 50%;
-    width: calc(50% + 10px);
+    width: calc(50% + 0.66rem);
 }
 
 .sidebar-dashboard .dato-iva .dato {
     display: inline-block;
-    font-size: 17px;
+    font-size: 1.05rem;
     padding: .25rem .5rem;
-    margin-left: 10px;
+    margin-left: 0.66rem;
 }
 
 .dato-saldo .dato,
@@ -34,7 +34,7 @@
     color: #fff;
     background: #2852A6;
     padding: .25rem .5rem;
-    font-size: 17px;
+    font-size: 1.05rem;
     margin-bottom: .5rem;
     background: #999;
 }
@@ -52,11 +52,12 @@
 }
 
 .barra-limites {
-    width: 150px;
+    width: 10rem;
+    height: 1.67rem;
     max-width: 100%;
     position: relative;
     background: #9fb1cc;
-    border-radius: 15px;
+    border-radius: 1rem;
     overflow: hidden;
 }
 
@@ -74,7 +75,7 @@
     position: relative;
     text-align: center;
     color: #fff;
-    font-size: 13px;
+    font-size: 0.85rem;
     padding: 2.5px;
     font-weight: bold;
 }
@@ -82,18 +83,50 @@
 .notificaciones-container {
     background: #eee;
     padding: 1rem;
-    border-radius: 5px;
+    border-radius: 0.33rem;
+    font-size: 0.8rem;
 }
 
 .notificaciones-container .notificacion {
     padding-bottom: .5rem;
     margin-bottom: .5rem;
-    border-bottom: 2px solid #ddd;
+    border-bottom: 0.133rem solid #ddd;
 }
 
 .notificaciones-container .notificacion .fecha {
     color: #435ebe;
     margin-right: .5rem;
+}
+
+.cols-excel {
+    list-style-type: upper-alpha;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.6785rem;
+    padding-left: 1rem;
+}
+
+.cols-excel li {
+    width: 34.33%;
+    padding-right: 1rem;
+}
+
+.iframe-container {
+    position: relative;
+    width: 67.67rem;
+    max-width: 100%;
+    padding-bottom: 1490px;
+    overflow: hidden;
+}
+
+.iframe-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    overflow: hidden;
 }
 
 /*
@@ -118,9 +151,9 @@
     top: 50%;
     left: 0;
     width: 100%;
-    height: 2px;
+    height: 0.133rem;
     background: #ddd;
-    margin-top: -1px
+    margin-top: -0.0666rem
 }
 
 .sidebar-dashboard .dato-iva label span {
@@ -128,7 +161,7 @@
     background: #fff;
     padding: .25rem .5rem;
     padding-left: 1rem;
-    font-size: .85em;
+    font-size: 1rem;
 }
 
 .sidebar-dashboard .dato-iva label:after {
@@ -139,7 +172,7 @@
     width: .5rem;
     height: 100%;
     background: #ddd;
-    margin-top: -1px
+    margin-top: -0.0666rem
 }
 
 .sidebar-dashboard .dato-iva.ventas label:after
@@ -185,7 +218,7 @@
 }
 
 .row.comparacion-prorratas label {
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: bold;
     margin: 0;
 }
@@ -193,7 +226,7 @@
 .row.comparacion-prorratas {
     text-align: center;
     color: #000;
-    font-size: 16px;
+    font-size: 1rem;
     max-width: 400px;
     margin: auto;
 }
@@ -211,7 +244,7 @@
 }
 
 .row.comparacion-prorratas span {
-    margin-left: 10px;
+    margin-left: 0.66rem;
 }
 
 .row.comparacion-prorratas .dif span {
@@ -219,13 +252,13 @@
     display: inline-block;
     color: #fff;
     padding: .25rem .5rem;
-    font-size: 17px;
-    margin-left: 10px;
+    font-size: 1.05rem;
+    margin-left: 0.66rem;
 }
 
 .row.comparacion-prorratas > div.dif {
     margin-bottom: .5rem;
     padding-bottom: .5rem;
     margin-top: .5rem;
-    border-bottom: 2px solid #ddd;
+    border-bottom: 0.133rem solid #ddd;
 }

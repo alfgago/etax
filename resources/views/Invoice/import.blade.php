@@ -20,11 +20,11 @@
 		  </div>
 		  
 		  <div class="form-group col-md-12 toggle-xlsx">
-			  <div class="description">
+			  <div class="descripcion">
 			  	Las columnas requeridas para importación de facturas son: <br>
 			  	
 			  	<ul class="cols-excel">
-			  		<li>IdTipoDocumento</li>
+			  		<li>TipoDocumento</li>
 			  		<li>ConsecutivoComprobante</li>
 			  		<li>IdMoneda</li>
 			  		<li>TipoCambio</li>
@@ -35,7 +35,6 @@
 			  		<li>IdentificacionReceptor</li>
 			  		<li>CondicionVenta</li>
 			  		<li>MetodoPago</li>
-			  		<li>NumeroLinea</li>
 			  		<li>DetalleProducto</li>
 			  		<li>CodigoProducto</li>
 			  		<li>Cantidad</li>
@@ -43,13 +42,13 @@
 			  		<li>PrecioUnitario</li>
 			  		<li>SubtotalLinea</li>
 			  		<li>MontoDescuento</li>
-			  		<li>CodigoImpuesto</li>
 			  		<li>MontoIVA</li>
 			  		<li>TotalLinea</li>
 			  		<li>TotalDocumento</li>
+			  		<li>CodigoEtax</li>
 			  	</ul>
 			  	* El orden puede variar, mantener nombres de columnas. Debe utilizar una fila por cada linea de factura.
-			  	* Máximo de 5000 lineas por archivo.
+			  	* Máximo de 2500 lineas por archivo.
 			  	<br>
 			  	<a href="{{asset('assets/files/PlantillaLineasFacturaEmitida.xlsx')}}" class="btn btn-link" title="Descargar plantilla" download><i class="fa fa-file-excel-o" aria-hidden="true"></i> Descargar plantilla</a>
 			  </div>
@@ -65,7 +64,7 @@
 			</div>
 			
 			<div class="form-group col-md-12 toggle-xml">
-		    <div classs="description">
+		    <div class="descripcion">
 		    	Arrastre los archivos XML de Hacienda que haya generado desde sistemas de facturación externos. <br>
 		    	
 		    	* Utilice el formato 4.2 si su factura fue emitida antes del 1 de Julio del 2018.
@@ -94,17 +93,3 @@
 		</form>
   </div>
 </div>
-
-
-<script>
-	
-	function toggleTiposImportacion() {
-		var tipo = $("#tipo_archivo").val();
-		
-		$(".toggle-xml, .toggle-xlsx").hide();
-		$(".toggle-"+tipo).show();
-		
-	}
-	toggleTiposImportacion();
-	
-</script>

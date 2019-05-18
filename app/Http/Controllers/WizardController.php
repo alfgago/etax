@@ -101,6 +101,10 @@ class WizardController extends Controller
      */
     public function updateWizard(Request $request)
     {
+      
+        $request->validate([
+            'id_number' => 'required|unique:companies',
+        ]);
         
         $company = currentCompanyModel();
         $invoice = Invoice::firstOrNew(
@@ -147,9 +151,6 @@ class WizardController extends Controller
         $company->wizard_finished = true;
         
         $company->save();
-        //Update Team name based on company
-        $team->name = $request->name;
-        $team->save();
         
         clearLastTaxesCache( $company->id, 2018);
         
