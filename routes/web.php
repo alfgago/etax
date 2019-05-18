@@ -40,25 +40,31 @@ Route::post('/reportes/detalle-debito', 'ReportsController@reporteDetalleDebitoF
 Route::post('/reportes/detalle-credito', 'ReportsController@reporteDetalleCreditoFiscal');
 
 //Cierres de mes
-Route::get('/cierres', 'BookController@index');
-Route::patch('/cierres/cerrar-mes/{id}', 'BookController@close');
-Route::patch('/cierres/abrir-rectificacion/{id}', 'BookController@openForRectification');
+Route::prefix('cierres')->group(function() {
+    Route::get('/', 'BookController@index');
+    Route::patch('cerrar-mes/{id}', 'BookController@close');
+    Route::patch('abrir-rectificacion/{id}', 'BookController@openForRectification');
+});
 
 // Rutas de empresa
-Route::get('/empresas/editar', 'CompanyController@edit')->name('Company.edit');
-Route::get('/empresas/configuracion', 'CompanyController@editConfiguracion')->name('Company.edit_config');
-Route::get('/empresas/certificado', 'CompanyController@editCertificate')->name('Company.edit_cert');
-Route::get('/empresas/equipo', 'CompanyController@editTeam')->name('Company.team');
-Route::patch('/empresas/update/{id}', 'CompanyController@update')->name('Company.update');
-Route::patch('/empresas/update-configuracion/{id}', 'CompanyController@updateConfig')->name('Company.update_config');
-Route::patch('/empresas/update-certificado/{id}', 'CompanyController@updateCertificado')->name('Company.update_cert');
-Route::get('/empresas/company-profile/{id}', 'CompanyController@company_profile')->name('Company.company_profile');
-Route::get('/empresas/set-prorrata-2018-facturas', 'CompanyController@setProrrata2018PorFacturas')->name('Company.set_prorrata_2018_facturas');
+Route::prefix('empresas')->group(function() {
+    Route::get('editar', 'CompanyController@edit')->name('Company.edit');
+    Route::get('configuracion', 'CompanyController@editConfiguracion')->name('Company.edit_config');
+    Route::get('certificado', 'CompanyController@editCertificate')->name('Company.edit_cert');
+    Route::get('equipo', 'CompanyController@editTeam')->name('Company.team');
+    Route::patch('update/{id}', 'CompanyController@update')->name('Company.update');
+    Route::patch('update-configuracion/{id}', 'CompanyController@updateConfig')->name('Company.update_config');
+    Route::patch('update-certificado/{id}', 'CompanyController@updateCertificado')->name('Company.update_cert');
+    Route::get('company-profile/{id}', 'CompanyController@company_profile')->name('Company.company_profile');
+    Route::get('set-prorrata-2018-facturas', 'CompanyController@setProrrata2018PorFacturas')->name('Company.set_prorrata_2018_facturas');
+});
 
 // Rutas de facturación
-Route::get('/facturas-emitidas/emitir-factura', 'InvoiceController@emitFactura')->name('Invoice.emit_01');
-Route::get('/facturas-emitidas/emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
-Route::post('/facturas-emitidas/enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
+Route::prefix('facturas-emitidas')->group(function() {
+    Route::get('emitir-factura', 'InvoiceController@emitFactura')->name('Invoice.emit_01');
+    Route::get('emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
+    Route::post('enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
+});
 
 // Rutas de Wizard
 Route::get('/wizard', 'WizardController@index')->name('Wizard.index');
@@ -67,14 +73,18 @@ Route::post('/update-totales-2018', 'WizardController@storeTotales2018')->name('
 Route::post('/update-wizard', 'WizardController@updateWizard')->name('Wizard.update_wizard');
 
 // Rutas de usuario
-Route::get('/usuario/overview', 'UserController@overview')->name('User.overview');
-Route::get('/usuario/general', 'UserController@editInformation')->name('User.edit_information');
-Route::get('/usuario/seguridad', 'UserController@editPassword')->name('User.edit_password');
+Route::prefix('usuario')->group(function() {
+    Route::get('overview', 'UserController@overview')->name('User.overview');
+    Route::get('general', 'UserController@editInformation')->name('User.edit_information');
+    Route::get('seguridad', 'UserController@editPassword')->name('User.edit_password');
+    Route::get('planes', 'UserController@plans')->name('User.plans');
+    Route::get('empresas', 'UserController@companies')->name('User.companies');
+    Route::get('usuarios-invitados', 'UserController@invitedUsersList')->name('User.invited-users-list');
+
+});
+
 Route::patch('update-infomation/{id}', 'UserController@updateInformation')->name('User.update_information');
 Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
-Route::get('/usuario/planes', 'UserController@plans')->name('User.plans');
-Route::get('/usuario/empresas', 'UserController@companies')->name('User.companies');
-Route::get('/usuario/usuarios-invitados', 'UserController@invitedUsersList')->name('User.invited-users-list');
 
 // Rutas autogeneradas de CRUD
 Route::resource('clientes', 'ClientController');
