@@ -103,6 +103,11 @@ class WizardController extends Controller
     public function updateWizard(Request $request)
     {
         try {
+
+          $request->validate([
+              'id_number' => 'required|unique:companies',
+          ]);
+          
             $company = currentCompanyModel();
             $invoice = Invoice::firstOrNew(
                 [

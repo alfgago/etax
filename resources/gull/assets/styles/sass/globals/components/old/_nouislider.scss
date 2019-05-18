@@ -1,19 +1,19 @@
 .slider-default {
     background: #FAFAFA !important;
-    border-radius: 15px !important;
+    border-radius: 1rem !important;
     border: 0px solid #D3D3D3 !important;
-    box-shadow: inset 0 1px 1px #F0F0F0, 0 3px 6px -5px #BBB;
-    height: 10px !important;
+    box-shadow: inset 0 0.0666rem 0.0666rem #F0F0F0, 0 0.2rem 0.4rem -5px #BBB;
+    height: 0.66rem !important;
     .noUi-value-horizontal {
         display: none;
     }
     .noUi-handle {
-        width: 20px !important;
-        height: 20px !important;
+        width: 1.33rem !important;
+        height: 1.33rem !important;
         left: -5px !important;
         top: -5px !important;
         border-radius: 50%;
-        border: 5px solid $primary;
+        border: 0.33rem solid $primary;
         box-shadow: none;
         cursor: pointer;
     }
@@ -22,19 +22,19 @@
         content: none !important;
         display: block;
         position: absolute;
-        height: 14px;
-        width: 1px;
+        height: 0.875rem;
+        width: 0.0666rem;
         background: #E8E7E6;
-        left: 14px;
-        top: 6px;
+        left: 0.875rem;
+        top: 0.4rem;
     }
     .noUi-handle:focus {
         outline: none;
     }
     .noUi-connect {
         background: $primary;
-        border-radius: 15px !important;
-        box-shadow: inset 0 0 3px rgba(51, 51, 51, .45);
+        border-radius: 1rem !important;
+        box-shadow: inset 0 0 0.2rem rgba(51, 51, 51, .45);
         -webkit-transition: background 450ms;
         transition: background 450ms;
     }
@@ -43,14 +43,14 @@
 // square
 .square-default {
     background: #FAFAFA !important;
-    border-radius: 15px !important;
+    border-radius: 1rem !important;
     border: 0px solid #D3D3D3 !important;
-    box-shadow: inset 0 1px 1px #F0F0F0, 0 3px 6px -5px #BBB;
-    height: 10px !important;
+    box-shadow: inset 0 0.0666rem 0.0666rem #F0F0F0, 0 0.2rem 0.4rem -5px #BBB;
+    height: 0.66rem !important;
     .noUi-handle {
-        width: 20px !important;
-        height: 20px !important;
-        border: 5px solid $primary;
+        width: 1.33rem !important;
+        height: 1.33rem !important;
+        border: 0.33rem solid $primary;
         box-shadow: none;
         cursor: pointer;
     }
@@ -59,19 +59,19 @@
         content: " " !important;
         display: none;
         position: absolute;
-        height: 14px;
-        width: 1px;
+        height: 0.875rem;
+        width: 0.0666rem;
         background: #E8E7E6;
-        left: 14px;
-        top: 6px;
+        left: 0.875rem;
+        top: 0.4rem;
     }
     .noUi-handle:focus {
         outline: none;
     }
     .noUi-connect {
         background: $primary;
-        border-radius: 15px !important;
-        box-shadow: inset 0 0 3px rgba(51, 51, 51, .45);
+        border-radius: 1rem !important;
+        box-shadow: inset 0 0 0.2rem rgba(51, 51, 51, .45);
         -webkit-transition: background 450ms;
         transition: background 450ms;
     }
@@ -84,7 +84,7 @@ $value in $theme-colors {
             background: $value;
         }
         .noUi-handle {
-            border: 5px solid $value;
+            border: 0.33rem solid $value;
         }
     }
 }
@@ -94,37 +94,37 @@ $value in $theme-colors {
         background: #3FB8AF;
     }
     .noUi-handle {
-        border: 5px solid #B2DFDB;
+        border: 0.33rem solid #B2DFDB;
     }
 }
 
 .slider-extra-large {
-    height: 14px !important;
+    height: 0.875rem !important;
     .noUi-handle {
-        width: 28px !important;
-        height: 28px !important;
+        width: 1.85rem !important;
+        height: 1.85rem !important;
         top: -7px !important;
     }
 }
 
 .slider-large {
-    height: 12px !important;
+    height: 0.8rem !important;
     .noUi-handle {
-        width: 24px !important;
-        height: 24px !important;
+        width: 1.6rem !important;
+        height: 1.6rem !important;
         top: -6px !important;
     }
 }
 
 .slider-small {
-    height: 6px !important;
+    height: 0.4rem !important;
     .noUi-handle {
         top: -7px !important;
     }
 }
 
 .slider-extra-small {
-    height: 3px !important;
+    height: 0.2rem !important;
     .noUi-handle {
         top: -8px !important;
     }
@@ -161,6 +161,6 @@ $value in $theme-colors {
 }
 
 .noUi-vertical {
-    width: 10px !important;
-    height: 150px !important;
+    width: 0.66rem !important;
+    height: 10rem !important;
 }

@@ -1,10 +1,10 @@
 /* Tagging Basic Style */
 .tagging {
-	border: 1px solid $gray-300;
+	border: 0.0666rem solid $gray-300;
 	font-size: 1em;
 	height: auto;
-    padding: 10px 10px 15px;
-    border-radius: 4px;
+    padding: 0.66rem 0.66rem 1rem;
+    border-radius: 0.266rem;
 }
 
 .tagging.editable {
@@ -13,21 +13,21 @@
 
 .tag {
 	background: none repeat scroll 0 0 $primary;
-	border-radius: 2px;
+	border-radius: 0.133rem;
 	color: white;
 	cursor: default;
 	display: inline-block;
 	position: relative;
 	white-space: nowrap;
-	padding: 4px 20px 4px 0;
-	margin: 5px 10px 0 0;
+	padding: 0.266rem 1.33rem 0.266rem 0;
+	margin: 0.33rem 0.66rem 0 0;
 }
 
 .tag span {
 	background: none repeat scroll 0 0 darken($primary, 5);
-	border-radius: 2px 0 0 2px;
-	margin-right: 5px;
-	padding: 5px 10px 5px;
+	border-radius: 0.133rem 0 0 0.133rem;
+	margin-right: 0.33rem;
+	padding: 0.33rem 0.66rem 0.33rem;
 }
 
 .tag .tag-i {
@@ -37,10 +37,10 @@
 	height: 0;
 	line-height: 0.1em;
 	position: absolute;
-	right: 5px;
+	right: 0.33rem;
 	top: 0.7em;
 	text-align: center;
-	width: 10px;
+	width: 0.66rem;
 }
 
 .tag .tag-i:hover {
@@ -52,7 +52,7 @@
 	border: 0 none;
 	height: auto;
 	width: auto;
-	min-width: 20px;
+	min-width: 1.33rem;
 	display: inline-block;
 }
 

@@ -6,9 +6,9 @@
 
 @section('header-scripts')
 
-
 <style>
-	
+    
+    	
 .wizard-container {
     position: fixed;
     display: flex;
@@ -20,7 +20,7 @@
 }
 
 .wizard-popup {
-    max-width: 750px;
+    max-width: 48rem;
     height: auto;
     margin: auto;
     margin-top: 4rem;
@@ -45,7 +45,7 @@
 .wizard-popup .form-container {
     background: #fff;
     padding: 2rem;
-    border-radius: 15px;
+    border-radius: 1rem;
     max-height: calc(95vh - 11.5rem);
     height: auto;
     margin-right: 12rem;
@@ -118,16 +118,16 @@
     z-index: 1;
     transition: .5s ease all;
     margin-right: 6rem;
-    border: 3px solid #fff;
+    border: 0.2rem solid #fff;
 }
 
 .wizard-steps .step-btn:before {
     position: absolute;
     content: '';
-    width: 7px;
+    width: 0.45rem;
     height: 5rem;
     bottom: 50%;
-    left: 20.0px;
+    left: 1.37rem;
     background: #eee;
     display: flex;
     justify-content: center;
@@ -137,7 +137,7 @@
     font-weight: bold;
     z-index: 0;
     transition: .5s ease all;
-    border: 2px solid #fff;
+    border: 0.133rem solid #fff;
 }
 
 .wizard-steps .step-btn:first-of-type:before {
@@ -199,9 +199,9 @@
     margin: 0;
     padding: 0.25rem 0.5rem;
     font-size: 0.9rem;
-    height: calc(1.9695rem + 2px);
+    height: calc(1.9695rem + 0.133rem);
 }
-	
+    
 </style>
 
 @endsection

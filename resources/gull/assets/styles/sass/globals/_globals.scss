@@ -9,7 +9,6 @@
 @import 'views/views';
 
 html {
-    font-size: 16px;
     background: $gradient;
 }
 
@@ -40,7 +39,7 @@ hr {
     margin-top: 2rem;
     margin-bottom: 2rem;
     border: 0;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-top: 0.0666rem solid rgba(0, 0, 0, 0.1);
     height: 0;
 }
 
@@ -84,7 +83,7 @@ a:hover {
 }
 
 blockquote {
-    border-left: 2px solid $gray-200;
+    border-left: 0.133rem solid $gray-200;
     padding-left: 1rem;
     margin-bottom: 1rem;
     font-size: 1.01625rem;
@@ -103,6 +102,10 @@ blockquote {
     margin-bottom: 2rem;
 }
 
+.descripcion, .description {
+    font-size: .8rem;
+}
+
 @for $i from 1 through 5 {
     .line-height-#{$i} {
         line-height: #{$i};
@@ -116,11 +119,11 @@ blockquote {
     left: 0;
     right: 0;
     margin: auto;
-    top: calc(50% - 150px);
+    top: calc(50% - 10rem);
     .big-bubble {
-        height: 280px;
-        width: 280px;
-        margin: 0 auto 20px;
+        height: 18.66rem;
+        width: 18.66rem;
+        margin: 0 auto 1.33rem;
         text-align: center;
         background: $primary;
         display: flex;
@@ -145,15 +148,15 @@ blockquote {
     background: #ffffff;
     .loader {
         position: absolute;
-        top: calc(50vh - 50px);
+        top: calc(50vh - 3.37rem);
         left: 0;
         right: 0;
         margin: auto;
     }
     .logo {
         display: inline-block !important;
-        width: 80px;
-        height: 80px;
+        width: 5.25rem;
+        height: 5.25rem;
     }
 }
 
@@ -163,22 +166,22 @@ blockquote {
     background-color: $gray-200;
     width: 100%;
     text-align: center;
-    margin-right: 10px;
-    margin-bottom: 10px;
+    margin-right: 0.66rem;
+    margin-bottom: 0.66rem;
 }
 
 .preview-lg {
     width: 200px;
-    height: 150px;
+    height: 10rem;
 }
 
 .preview-md {
-    width: 150px;
+    width: 10rem;
     height: 120px;
 }
 
 .preview-sm {
-    width: 100px;
+    width: 14.666rem;
     height: 75px;
 }
 
@@ -190,7 +193,7 @@ blockquote {
 
 .fa {
     display: inline-block;
-    font: normal normal normal 14px/1 FontAwesome !important;
+    font: normal normal normal 0.875rem/1 FontAwesome !important;
     font-size: inherit;
     text-rendering: auto;
     -webkit-font-smoothing: antialiased;
@@ -210,10 +213,10 @@ blockquote {
         font-weight: 700;
         line-height: 1;
         color: #000;
-        text-shadow: 0 1px 0 #fff;
+        text-shadow: 0 0.0666rem 0 #fff;
         opacity: .5;
         position: absolute;
         top: 0;
-        right: 5px;
+        right: 0.33rem;
     }
 }

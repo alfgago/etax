@@ -1,5 +1,5 @@
 .chat-sidebar-container {
-    height: calc(100vh - 140px);
+    height: calc(100vh - 12.66rem);
     min-height: unset;
     .chat-topbar {
         height: 52px;
@@ -8,20 +8,20 @@
         .chat-content {
             padding: 1.5rem 1.5rem 0;
             position: relative;
-            height: calc(100vh - 335px);
+            height: calc(100vh - 345px);
             .message {
                 position: relative;
                 background: $gray-100;
-                border-radius: 10px;
+                border-radius: 0.66rem;
                 padding: 1rem;
                 &:before {
                     position: absolute;
                     content: "";
-                    top: 14px;
+                    top: 0.875rem;
                     right: -5px;
                     background: transparent;
                     border-style: solid;
-                    border-width: 0 10px 10px 0px;
+                    border-width: 0 0.66rem 0.66rem 0px;
                     border-color: transparent transparent $gray-100 transparent;
                     transform: rotate(-135deg);
                 }
@@ -47,12 +47,12 @@
             position: absolute;
             left: 0;
             right: 0;
-            top: calc(50% - 10px);
+            top: calc(50% - 0.66rem);
         
         }
     }
     .chat-sidebar-wrap {
-        width: 260px;
+        width: 17.33rem;
         .contacts-scrollable {
             position: relative;
             height: calc(100vh - 190px);
@@ -66,10 +66,10 @@
                 &:before {
                     position: absolute;
                     content: "";
-                    width: 8px;
-                    height: 8px;
-                    top: calc(50% - 4px);
-                    right: 30px;
+                    width: 5.53rem;
+                    height: 5.53rem;
+                    top: calc(50% - 0.266rem);
+                    right: 2rem;
                     background: $light;
                     border-radius: 50%;
                 }

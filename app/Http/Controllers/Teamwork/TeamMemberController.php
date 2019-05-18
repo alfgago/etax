@@ -179,15 +179,6 @@ class TeamMemberController extends Controller {
                 \App\TeamInvitation::where('id', $invite->id)->update(['role' => $request->role]);
             });
 
-            /* Old Code
-              Teamwork::inviteToTeam($request->email, $team, function( $invite ) use ($path) {
-              Mail::send($path, ['team' => $invite->team, 'invite' => $invite], function ($m) use ($invite) {
-              $m->to($invite->email)->subject('Invitation to join team ' . $invite->team->name);
-              });
-              // Send email to user
-              flash('User ' . $invite->email . ' has been invited.')->success()->important();
-              });
-             */
         } else {
             flash($request->email . 'address is already invited to the team pending for acceptance.')->error()->important();
             return redirect()->back()->withErrors(['email' => $request->email . ' is already invited to the team and is pending for acceptance.']);

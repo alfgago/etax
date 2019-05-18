@@ -1,11 +1,11 @@
 @each $name, $value in $theme-colors {
     .border-bottom-#{$name} {
-        border-bottom: 1px solid $value;
+        border-bottom: 0.0666rem solid $value;
     }
 }
 
 @each $name, $value in $theme-colors {
     .border-bottom-dotted-#{$name} {
-        border-bottom: 1px dotted $value;
+        border-bottom: 0.0666rem dotted $value;
     }
 }

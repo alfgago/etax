@@ -15,9 +15,9 @@
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/toastr.min.css')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/perfect-scrollbar.css')}}">
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=1.17">
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=1.35">
     
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=1.13"></script>
+    <script src="{{asset('assets/js/common-bundle.js')}}?v=1.35"></script>
   
     @yield('header-scripts')
     
@@ -71,12 +71,40 @@
           toastr.error( "{{ session()->get('error') }}" );
         </script>
     @endif
+    
+    @if (count($errors) > 0)
+      <script>
+        @foreach ($errors->all() as $error)
+          toastr.error( "{{ $error }}" );
+        @endforeach
+      </script>
+    @endif
   
 
     @yield('footer-scripts')
     
     @include( 'Bill.import' )
     @include( 'Invoice.import' )
+    
+    
+
+
+<script>
+	
+	function toggleTiposImportacion() {
+		var tipo = $(".popup.is-active #tipo_archivo").val();
+		if(!tipo) {
+		  tipo = 'xlsx';
+		}
+		
+		$(".toggle-xml, .toggle-xlsx").hide();
+		$(".toggle-"+tipo).show();
+		
+	}
+	toggleTiposImportacion();
+	
+</script>
+    
 </body>
 
 </html>

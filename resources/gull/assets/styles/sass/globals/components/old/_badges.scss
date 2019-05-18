@@ -4,7 +4,7 @@
 @each $name, $value in $theme-colors {
     .badge-outline-#{$name} {
         background: unset;
-        border: 1px solid $value;
+        border: 0.0666rem solid $value;
         color: $value;
     }
 }
@@ -18,8 +18,8 @@
     position: relative;
     .badge {
         position: absolute;
-        top: 2px;
-        right: 4px;
-        border-radius: 10px;
+        top: 0.133rem;
+        right: 0.266rem;
+        border-radius: 0.66rem;
     }
 }

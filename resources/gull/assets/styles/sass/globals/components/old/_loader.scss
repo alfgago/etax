@@ -5,8 +5,8 @@
     height: 1em;
     background: $gray-300;
     border-radius: 50%;
-    margin: 4px auto;
-    border: 2px solid transparent;
+    margin: 0.266rem auto;
+    border: 0.133rem solid transparent;
     animation: glow 1s ease infinite;
 }
 @keyframes glow {
@@ -31,7 +31,7 @@
 // SPINNER
 .spinner {
     display: inline-block;
-    font-size: 10px;
+    font-size: 0.66rem;
     margin: auto;
     text-indent: -9999em;
     width: 4em;
@@ -104,8 +104,8 @@
 // SPINNER BUBBLE
 .spinner-bubble {
     display: inline-block;
-    font-size: 8px;
-    margin: 30px auto;
+    font-size: 5.53rem;
+    margin: 2rem auto;
     width: 1em;
     height: 1em;
     border-radius: 50%;
@@ -192,7 +192,7 @@
 }
 .loader-bubble {
 	display: inline-block;
-	font-size: 6px;
+	font-size: 0.4rem;
 	margin: auto;
 	position: relative;
 	text-indent: -9999em;

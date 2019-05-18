@@ -142,6 +142,8 @@ if (!function_exists('currentCompany')) {
 
     function currentCompany() {
 
+        //=dd(session('current_company'));
+    
         $current_company = session('current_company');
 
         if (!$current_company) {

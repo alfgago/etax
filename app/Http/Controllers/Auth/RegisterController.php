@@ -62,7 +62,7 @@ use RegistersUsers;
      * @return \App\User
      */
     protected function create(array $data) {
-
+        
         $user = User::create([
                     'user_name' => $data['email'],
                     'email' => $data['email'],

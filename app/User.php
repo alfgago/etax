@@ -65,7 +65,7 @@ class User extends Authenticatable {
         $this->attachTeam($team);
 
         session(['current_company' => $company->id]);
-
+        
         return $company;
     }
 
