@@ -6,25 +6,25 @@
 </div>
 
 <div class="form-group col-md-6">
-  <label for="user">Usuario ATV</label>
-  <input type="text" class="form-control" name="user" id="user" value="{{ @$certificate->user }}" >
+  <label for="user">Usuario ATV *</label>
+  <input type="text" class="form-control checkEmpty" name="user" id="user" value="{{ @$certificate->user }}" required>
 </div>
 
 <div class="form-group col-md-6">
-  <label for="password">Contraseña ATV</label>
-  <input type="password" class="form-control" name="password" id="password" value="{{ @$certificate->password }}" >
+  <label for="password">Contraseña ATV *</label>
+  <input type="password" class="form-control checkEmpty" name="password" id="password" value="{{ @$certificate->password }}" required>
 </div>
 
 <div class="form-group col-md-6">
-  <label for="cert">Llave criptográfica</label>
+  <label for="cert">Llave criptográfica *</label>
   <div class="fallback">
-    <input name="cert" type="file" multiple="false">
+    <input name="cert" class="form-control checkEmpty" type="file" multiple="false" required>
   </div>
 </div>
 
 <div class="form-group col-md-6">
-  <label for="pin">PIN de llave criptográfica</label>
-  <input type="text" class="form-control" name="pin" id="pin" value="{{ @$certificate->pin }}" >
+  <label for="pin">PIN de llave criptográfica *</label>
+  <input type="text" class="form-control checkEmpty" name="pin" id="pin" value="{{ @$certificate->pin }}" required>
 </div>
 
 <div class="btn-holder">
