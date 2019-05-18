@@ -14,7 +14,7 @@
   </select>
 </div>
 
-<div class="form-group col-md-6 hidden toggle-types type-1" style="padding-top: 1.5em;">
+<div class="form-group col-md-6 hidden toggle-types type-1" style="padding-top: 1em;">
   <label for="first_prorrata">Digite su prorrata inicial</label>
   <input type="number" class="form-control" name="first_prorrata" id="first_prorrata" step="0.01" min="1" max="100" value="{{ @$company->first_prorrata ? $company->first_prorrata : 100 }}">
 </div>

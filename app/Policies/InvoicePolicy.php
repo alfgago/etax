@@ -26,7 +26,7 @@ class InvoicePolicy
      * 
      */
     public function update(User $user, Invoice $invoice) {
-        $current_company = $user->companies->first()->id;
+        $current_company = currentCompany();
         return $invoice->company_id == $current_company;
     }
     

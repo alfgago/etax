@@ -5,9 +5,9 @@ company Management
 @endsection
 
 @section('breadcrumb-buttons')
-@can('user-create')
-<a type="submit" class="btn btn-primary" href="/empresas/create">Create New company</a>
-@endif
+    @can('user-create')
+    <a type="submit" class="btn btn-primary" href="/empresas/create">Create New company</a>
+    @endif
 @endsection
 
 @section('content')

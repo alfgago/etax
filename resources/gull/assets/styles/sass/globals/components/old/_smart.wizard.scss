@@ -1,7 +1,7 @@
 $lighten-primary: lighten($primary, 20);
 .sw-theme-circles, 
 .sw-theme-dots {
-    border: 1px solid #ddd;
+    border: 0.0666rem solid #ddd;
     padding: 1rem 0;
     overflow: hidden;
     .step-content {
@@ -23,7 +23,7 @@ $lighten-primary: lighten($primary, 20);
 
 .sw-theme-arrows>ul.step-anchor>li>a, 
 .sw-theme-arrows>ul.step-anchor>li>a:hover {
-    padding: 10px 0 10px 45px !important;
+    padding: 0.66rem 0 0.66rem 45px !important;
 }
 .sw-theme-arrows>ul.step-anchor>li.active>a,
 .sw-theme-circles>ul.step-anchor>li.active>a {
@@ -32,7 +32,7 @@ $lighten-primary: lighten($primary, 20);
     background: $primary !important;
 }
 .sw-theme-arrows>ul.step-anchor>li.active>a:after {
-    border-left: 30px solid $primary!important;
+    border-left: 2rem solid $primary!important;
 }
 .sw-theme-arrows>ul.step-anchor>li.done>a,
 .sw-theme-circles>ul.step-anchor>li.done>a,
@@ -42,13 +42,13 @@ $lighten-primary: lighten($primary, 20);
     background: $lighten-primary !important;
 }
 .sw-theme-arrows>ul.step-anchor>li.done>a:after {
-    border-left: 30px solid $lighten-primary !important;
+    border-left: 2rem solid $lighten-primary !important;
 
 }
 
 
 .sw-theme-circles>ul.step-anchor>li>a {
-    padding: 25px 0 !important;
+    padding: 1.67rem 0 !important;
 }
 .sw-theme-circles>ul.step-anchor>li.done>a>small,
 .sw-theme-circles>ul.step-anchor>li.active>a>small {
@@ -57,7 +57,7 @@ $lighten-primary: lighten($primary, 20);
 @media screen and (min-width: 768px) {
     .sw-theme-dots>ul.step-anchor:before {
         top: auto;
-        bottom: 14px;
+        bottom: 0.875rem;
     }
     .sw-theme-dots>ul.step-anchor>li>a:after,
     .sw-theme-dots>ul.step-anchor>li>a:before {
@@ -92,7 +92,7 @@ $lighten-primary: lighten($primary, 20);
     }
 }
 
-@media screen and (max-width: 340px) {
+@media screen and (max-width: 32.66rem) {
     .sw-main{
         .sw-toolbar {
             display: flex;

@@ -12,22 +12,22 @@ class Variables
       ['nombre'=>'103 - Ventas locales de bienes y servicios con derecho a crédito al 13%', 'codigo'=>'103', 'porcentaje'=>'13'],
       ['nombre'=>'104 - Ventas locales de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'104', 'porcentaje'=>'4'],
       
-      ['nombre'=>'114 - Ventas locales con tarifa transitoria del 4% con derecho a crédito  *vigente del 1-07-2020 al 30-06-2021', 'codigo'=>'114', 'porcentaje'=>'4'],
-      ['nombre'=>'118 - Ventas locales con tarifa transitoria del 8% con derecho a crédito  *vigente del 1-07-2021 al 30-06-2021', 'codigo'=>'118', 'porcentaje'=>'8'],
+      ['nombre'=>'114 - Ventas locales con tarifa transitoria del 4% con derecho a crédito  *vigente del 1-07-2020 al 30-06-2021', 'codigo'=>'114', 'porcentaje'=>'4', 'hide'=>true, 'hideMasiva'=>true],
+      ['nombre'=>'118 - Ventas locales con tarifa transitoria del 8% con derecho a crédito  *vigente del 1-07-2021 al 30-06-2021', 'codigo'=>'118', 'porcentaje'=>'8', 'hide'=>true, 'hideMasiva'=>true],
       
-      ['nombre'=>'121 - Autoconsumo de bienes y servicios con derecho a crédito al 1%', 'codigo'=>'121', 'porcentaje'=>'1'],
-      ['nombre'=>'122 - Autoconsumo de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'122', 'porcentaje'=>'2'],
-      ['nombre'=>'123 - Autoconsumo de bienes y servicios con derecho a crédito al 13%', 'codigo'=>'123', 'porcentaje'=>'13'],
-      ['nombre'=>'124 - Autoconsumo de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'124', 'porcentaje'=>'4'],
+      ['nombre'=>'121 - Autoconsumo de bienes y servicios con derecho a crédito al 1%', 'codigo'=>'121', 'porcentaje'=>'1', 'hideMasiva'=>true],
+      ['nombre'=>'122 - Autoconsumo de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'122', 'porcentaje'=>'2', 'hideMasiva'=>true],
+      ['nombre'=>'123 - Autoconsumo de bienes y servicios con derecho a crédito al 13%', 'codigo'=>'123', 'porcentaje'=>'13', 'hideMasiva'=>true],
+      ['nombre'=>'124 - Autoconsumo de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'124', 'porcentaje'=>'4', 'hideMasiva'=>true],
       
-      ['nombre'=>'130 - Ventas de bienes y servicios con límites sobrepasados al 13% con derecho a crédito', 'codigo'=>'130', 'porcentaje'=>'13'],
-      ['nombre'=>'140 - Inversion del sujeto pasivo', 'codigo'=>'140', 'porcentaje'=>'13'],
+      ['nombre'=>'130 - Ventas de bienes y servicios con límites sobrepasados al 13% con derecho a crédito', 'codigo'=>'130', 'porcentaje'=>'13', 'hideMasiva'=>true],
+      ['nombre'=>'140 - Inversion del sujeto pasivo', 'codigo'=>'140', 'porcentaje'=>'13', 'hideMasiva'=>true],
       ['nombre'=>'150 - Ventas por exportación con derecho a crédito', 'codigo'=>'150', 'porcentaje'=>'0'],
       ['nombre'=>'160 - Ventas al Estado e Instituciones con derecho a crédito', 'codigo'=>'160', 'porcentaje'=>'0'],
       ['nombre'=>'200 - Ventas sin derecho a crédito por exenciones objetivas', 'codigo'=>'200', 'porcentaje'=>'0'],
       ['nombre'=>'201 - Ventas sin derecho a crédito por exenciones objetivas con límite no sobrepasado', 'codigo'=>'201', 'porcentaje'=>'0'],
-      ['nombre'=>'240 - Autoconsumo sin derecho a crédito', 'codigo'=>'240', 'porcentaje'=>'0'],
-      ['nombre'=>'245 - Ventas locales con tarifa transitoria del 0% sin derecho a crédito  *vigente del 1-07-2019 al 30-06-2020', 'codigo'=>'245', 'porcentaje'=>'0'],
+      ['nombre'=>'240 - Autoconsumo sin derecho a crédito', 'codigo'=>'240', 'porcentaje'=>'0', 'hideMasiva'=>true],
+      ['nombre'=>'245 - Ventas locales con tarifa transitoria del 0% sin derecho a crédito', 'codigo'=>'245', 'porcentaje'=>'0'], //*vigente del 1-07-2019 al 30-06-2020
       ['nombre'=>'250 - Ventas a sujetos exentos', 'codigo'=>'250', 'porcentaje'=>'0'],
       ['nombre'=>'260 - Ventas a no sujetos', 'codigo'=>'260', 'porcentaje'=>'0'],
     ];

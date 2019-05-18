@@ -1,6 +1,7 @@
 body, html {
   font-family: 'Pangram', 'sans-serif' !important;
   font-weight: 400;
+  font-size: 15px;
 }
 
 h1, h2, h3, h4, h5, h6, .card-title, .text-title {
@@ -21,4 +22,28 @@ h1, h2, h3, h4, h5, h6, .card-title, .text-title {
 
 .text-small {
   font-size: .85rem;
+}
+
+@media only screen and (max-width: 1400px) {
+  body, html {
+    font-size: 14px;
+  }
+}
+
+@media only screen and (max-width: 1280) {
+  body, html {
+    font-size: 13px;
+  }
+}
+
+@media only screen and (max-width: 981px) {
+  body, html {
+    font-size: 12px;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  body, html {
+    font-size: 14px;
+  }
 }

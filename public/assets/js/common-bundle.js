@@ -183,6 +183,7 @@ window.setCedulaJSONResults = function(json) {
 		var lastname1 = json.results[0].lastname1;
 		var lastname2 = json.results[0].lastname2;
         $("#name").val( firstname1 );
+        $("#first_name").val( firstname1 );
         $("#last_name").val( lastname1 );
         $("#last_name2").val( lastname2 );
   }

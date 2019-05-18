@@ -62,7 +62,7 @@ class CompanyController extends Controller {
     public function store(Request $request) {
         $request->validate([
             'tipo_persona' => 'required',
-            'id_number' => 'required',
+            'id_number' => 'required|unique:companies',
             'name' => 'required',
             'email' => 'required',
             'country' => 'required'
@@ -96,7 +96,7 @@ class CompanyController extends Controller {
 
         /* Add Company to Team */
         $team = Team::firstOrCreate([
-                    'name' => $request->name,
+                    'name' => "(".$company->id.") " . $company->id_number,
                     'owner_id' => $id,
                     'company_id' => $company->id
                         ]
@@ -125,16 +125,16 @@ class CompanyController extends Controller {
      */
     public function edit() {
 
-        if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+        /*if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             $company = Company::find($_GET['id']);
 
             if ($company) {
                 session(['current_company' => $company->id]);
             }
-        }
-
+        }*/
+        
         $company = currentCompanyModel();
-
+        
         if (!$company) {
             abort(404);
         }
@@ -220,12 +220,26 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id) {
-
+        
         $company = Company::find($id);
         $this->authorize('update', $company);
 
         if (!$company) {
             abort(404);
+        }
+        
+        $request->validate([
+            'id_number' => 'required',
+            'tipo_persona' => 'required',
+            'name' => 'required',
+            'email' => 'required',
+            'country' => 'required'
+        ]);
+        
+        if( $company->id_number != $request->id_number ) {
+            $request->validate([
+                'id_number' => 'required|unique:companies',
+            ]);
         }
 
         $team = Team::where('company_id', $company->id)->first();
@@ -255,8 +269,8 @@ class CompanyController extends Controller {
         $company->save();
 
         //Update Team name based on company
-        $team->name = $request->name;
-        $team->save();
+        /*$team->name = "(".$company->id.") " . $company->id_number;
+        $team->save();*/
 
         return redirect()->route('Company.edit')->withMessage('La información de la empresa ha sido actualizada.');
     }

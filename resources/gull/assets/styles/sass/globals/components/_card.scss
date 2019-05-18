@@ -1,11 +1,11 @@
 .card {
     // padding: 1rem;
-    border-radius: 15px;
-    box-shadow: 0 4px 20px 1px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.15);
-    // box-shadow: 0 2px 36px -6px rgba(57,55,73,0.25);
+    border-radius: 1rem;
+    box-shadow: 0 0.266rem 1.33rem 0.0666rem rgba(0, 0, 0, 0.1), 0 0.0666rem 0.266rem rgba(0, 0, 0, 0.15);
+    // box-shadow: 0 0.133rem 2.4rem -6px rgba(57,55,73,0.25);
     border: 0;
     &.border-top {
-        box-shadow: 0 4px 15px 0 rgba(0,0,0,.1), 0 1px 2px 0 rgba(0,0,0,.1), inset 0 2px 0 0 $green;
+        box-shadow: 0 0.266rem 1rem 0 rgba(0,0,0,.1), 0 0.0666rem 0.133rem 0 rgba(0,0,0,.1), inset 0 0.133rem 0 0 $green;
     }
 }
 
@@ -16,7 +16,7 @@
 .card-title {
   font-size: 1.2rem;
   margin-bottom: 1.25rem;
-  border-bottom: 7px solid #F0C962;
+  border-bottom: 0.45rem solid #F0C962;
   display: inline-block;
 }
 
@@ -47,8 +47,8 @@
     } 
     .card-footer {
         position: absolute;
-        bottom: 16px;
-        left: 20px;
+        bottom: 1rem;
+        left: 1.33rem;
         border: 0;
         background: transparent;
         [class^="i-"] {
@@ -63,7 +63,7 @@
         padding: 2rem .5rem;
     }
     [class^="i-"] {
-        font-size: 32px;
+        font-size: 2.15rem;
     }
     [class^="i-"], .lead {
         color: $primary;
@@ -75,7 +75,7 @@
         padding: 2rem .5rem;
     }
     [class^="i-"] {
-        font-size: 48px;
+        font-size: 3.2rem;
     }
     [class^="i-"] {
         color: rgba($primary, .6);
@@ -118,8 +118,8 @@
 
 .card-profile-1 {
     .avatar {
-        width: 80px;
-        height: 80px;
+        width: 5.25rem;
+        height: 5.25rem;
         overflow: hidden;
         margin: auto;
         border-radius: 50%;
@@ -130,7 +130,7 @@
     .card-body {
         [class^="i-"] {
             display: block;
-            font-size: 78px;
+            font-size: 5.25rem;
             color:  $primary;
         }
     }
@@ -148,11 +148,11 @@
         align-items: center;
         .icon {
             font-size: 22px;
-            height: 24px;
+            height: 1.6rem;
             display: inline-block;
-            width: 24px;
-            line-height: 24px;
-            margin: 0 8px;
+            width: 1.6rem;
+            line-height: 1.6rem;
+            margin: 0 5.53rem;
             cursor: pointer;
         }
         &:before {
@@ -160,7 +160,7 @@
             content: "";
             top: 0;
             left: 0;
-            width: 1px;
+            width: 0.0666rem;
             height: 100%;
             background: rgba($foreground, .1);
         }
@@ -178,7 +178,7 @@
 .card-socials-simple {
     a {
         display: inline-block;
-        padding: 4px;
+        padding: 0.266rem;
     }
 }
   
@@ -194,9 +194,9 @@ content: '';
     height: 100%;
     top: 0;
     left: 0;
-    border-radius: 5px;
+    border-radius: 0.33rem;
     opacity: 0;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0.33rem 1rem rgba(0, 0, 0, 0.3);
     transition: all .6s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 

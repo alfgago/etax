@@ -2,7 +2,7 @@
     position: fixed;
     width: 100%;
     height: $topbar-height;
-    box-shadow: 0 1px 15px rgba(0,0,0,.15), 0 1px 6px rgba(0,0,0,.15);
+    box-shadow: 0 0.0666rem 1rem rgba(0,0,0,.15), 0 0.0666rem 0.4rem rgba(0,0,0,.15);
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -10,30 +10,34 @@
     z-index: 100;
     background: linear-gradient(90deg, #fff 0%, #e5e5e5 100%);
     .menu-toggle {
-        width: 90px;
+        width: 6rem;
         display: flex;
         flex-direction: column;
         align-items: center;       
         cursor: pointer;
-        margin-right: 12px;
+        margin-right: 0.8rem;
         div {
-            width: 24px;
-            height: 1px;
+            width: 1.6rem;
+            height: 2px;
             background: $foreground;
-            margin: 3px 0;
+            margin: 0.2rem 0;
         }
     }
+
+.dropdown {
+    cursor: pointer;
+}
 
     .search-bar {
         display: flex;
         align-items: center;
         justify-content: left;
         background: $gray-100;
-        border: 1px solid $gray-200;
-        border-radius: 20px;
+        border: 0.0666rem solid $gray-200;
+        border-radius: 1.33rem;
         position: relative;
-        width: 230px;
-        height: 40px;
+        width: 15.33rem;
+        height: 2.66rem;
         input {
             background: transparent;
             border: 0;
@@ -43,11 +47,11 @@
             height: 100%;
             outline: initial!important;
             padding: .5rem 1rem;
-            width: calc(100% - 32px);
+            width: calc(100% - 2.15rem);
         }
         .search-icon {
-            font-size: 18px;
-            width: 24px;
+            font-size: 1.1rem;
+            width: 1.6rem;
             display: inline-block;
         }
     }
@@ -55,16 +59,16 @@
     .logo {
         width: auto;
         text-align: center;
-        font-size: 30px;
-        height: 80px;
-        padding: 10px 0;
+        font-size: 2rem;
+        height: 5.25rem;
+        padding: 0.66rem 0;
         color: $white;
         img {
             width: auto;
             height: 100%;
             margin: auto;
             display: block;
-            padding: 8.5px 0;
+            padding: 0.56rem 0;
             padding-left: 1rem;
         }
     }
@@ -74,15 +78,15 @@
         }
     }
     .header-icon {
-        font-size: 19px;
+        font-size: 1.15rem;
         cursor: pointer;
-        height: 36px;
-        width: 36px;
-        line-height: 36px;
+        height: 2.4rem;
+        width: 2.4rem;
+        line-height: 2.4rem;
         display: inline-block;
         text-align: center;
-        border-radius: 8px;
-        margin: 0 2px;
+        border-radius: 5.53rem;
+        margin: 0 0.133rem;
         color: $white;
         &:hover {
             background: $gray-100;
@@ -98,31 +102,31 @@
         .user {
             margin-right: 2rem;
             img {
-                width: 36px;
-                height: 36px;
+                width: 2rem;
+                height: 2rem;
                 border-radius: 50%;
             }
         }
     }
     .notification-dropdown {
         padding: 0;
-        max-height: 260px;
+        max-height: 17.33rem;
         cursor: pointer;
         .dropdown-item {
             display: flex;
             align-items: center;
             padding: 0;
-            height: 72px;
-            border-bottom: 1px solid $gray-300;
+            height: 4.8rem;
+            border-bottom: 0.0666rem solid $gray-300;
             .notification-icon {
                 background: $gray-200;
                 height: 100%;
-                width: 44px;
+                width: 2.9rem;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 i {
-                    font-size: 18px;
+                    font-size: 1.1rem;
                 }
             }
             .notification-details {
@@ -139,16 +143,16 @@
 
 .logo {
     text-align: center;
-    font-size: 30px;
+    font-size: 2rem;
     color: #787fff;
 }
 
 .main-header .logo {
-    width: 150px;
+    width: 10rem;
     text-align: center;
-    font-size: 30px;
-    height: 80px;
-    padding: 10px 0;
+    font-size: 2rem;
+    height: 5.25rem;
+    padding: 0.66rem 0;
 }
 
 .main-header .logo img {
@@ -156,47 +160,16 @@
     height: 100%;
     margin: auto;
     display: block;
-    padding: 10px;
+    padding: 0.66rem;
 }
 
 .breadcrumb {
     position: relative;
 }
 
-.cols-excel {
-    list-style-type: upper-alpha;
-    display: flex;
-    flex-wrap: wrap;
-    font-size: 11px;
-    padding-left: 1rem;
-}
-
-.cols-excel li {
-    width: 33.33%;
-    padding-right: 1rem;
-}
-
-.iframe-container {
-    position: relative;
-    width: 1000px;
-    max-width: 100%;
-    padding-bottom: 1490px;
-    overflow: hidden;
-}
-
-.iframe-container iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
-    overflow: hidden;
-}
-
 .filters select {
     border: 0;
-    border-bottom: 2px solid #ddd;
+    border-bottom: 0.133rem solid #ddd;
     background: #eee;
     padding: .25rem;
     margin-right: .5rem;
@@ -209,14 +182,14 @@
 
      
 
-@media (max-width: 991px) {
+@media (max-width: 990.0666rem) {
     .main-header {
         .search-bar {
-            width: 180px;
+            width: 12rem;
         }
         .menu-toggle {
-            width: 24px;
-            margin-right: 36px;       
+            width: 1.6rem;
+            margin-right: 2.4rem;       
         }
     }
     
@@ -226,15 +199,12 @@
 @media (max-width: 580px) {
     .main-header {
         height: $topbar-height-mobile;
-        padding: 0 1.5rem;
-        .logo {
-            width: 60px;
-        }
+        padding: 0 .5rem;
         .search-bar {
             display: none;
         }
         .menu-toggle {
-            width: 60px;
+            width: 4rem;
         }
         .header-part-right {
             .user {
@@ -244,7 +214,73 @@
         }
     }
     .notification-dropdown {
-        left: 10px !important;
+        left: 0.66rem !important;
+    }
+    .companyParent label {
+        display: none;
+    }
+    
+        
+    .companyParent label {
+        display: none;
+    }
+    
+    .companyParent .form-control {
+        font-size: .65rem;
+        padding: .25rem;
+    }
+    
+    .main-header .header-part-right .user {
+        margin-left: 0;
+        padding-left: .25rem;
+    }
+    
+    .toggle-vista.filters {
+        position: relative;
+    }
+    
+    .breadcrumb-buttons {
+        margin-left: 0;
+        display: flex;
+        font-size: 0.8rem;
+        margin-top: 1rem;
+    }
+
+    .sidebar-dashboard .dato-iva label {
+        width: 100%;
+        margin-top: .5rem;
+    }
+    
+    .main-header .menu-toggle div {
+        height: 2px;
+    }
+    
+    .main-header .menu-toggle {
+        position: absolute;
+        right: 1rem;
+    }
+    
+    .main-header .header-part-right {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        margin: 0;
+        width: 100%;
+        background: linear-gradient(45deg, #274EAB 0%,#2f006d 100%);
+        box-shadow: 0 0 15px rgba(0,0,0,0.25);
+        padding: 0 1rem;
+    }
+    
+    .dropdown {
+        padding: .25rem;
+        background: #fff;
+        text-align: center;
+        border-radius: 50px;
+    }
+    
+    .dropdown img {
+        position: relative;
+        left: -2px;
     }
 
 }

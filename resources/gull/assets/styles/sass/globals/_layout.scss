@@ -19,8 +19,8 @@
 }
 
 .sidemenu-icon {
-    max-height: 27px;
-    margin-bottom: 6px;
+    max-height: 1.8rem;
+    margin-bottom: 0.4rem;
 }
 
 //SIDEBAR =======
@@ -30,8 +30,8 @@
     position: fixed;
     top: $topbar-height;
     height: calc(100vh - #{$topbar-height});
-    -webkit-box-shadow: 0 4px 20px 1px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.15);
-            box-shadow: 0 4px 20px 1px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.15);
+    -webkit-box-shadow: 0 0.266rem 1.33rem 0.0666rem rgba(0, 0, 0, 0.1), 0 0.0666rem 0.266rem rgba(0, 0, 0, 0.15);
+            box-shadow: 0 0.266rem 1.33rem 0.0666rem rgba(0, 0, 0, 0.1), 0 0.0666rem 0.266rem rgba(0, 0, 0, 0.15);
 }
 
 .sidebar-left {
@@ -86,20 +86,20 @@
                 padding: 1rem .5rem;
                 display: block;
                 color: $white;
-                border-top: 1px solid rgba(0,0,0,0.3);
+                border-top: 0.0666rem solid rgba(0,0,0,0.3);
                 z-index: 2;
                 &:focus, &:active {
                     outline: none;
                 }
                 .nav-icon, .feather {
-                    font-size: 27px;
-                    height: 27px;
-                    width: 27px;
+                    font-size: 1.8rem;
+                    height: 1.8rem;
+                    width: 1.8rem;
                     display: block;
-                    margin: 0 auto 6px;
+                    margin: 0 auto 0.4rem;
                 }
                 .nav-text {
-                    font-size: 13px;
+                    font-size: 0.85rem;
                     display: block;
                     font-weight: 400;
                 }
@@ -109,7 +109,7 @@
             }
             &:first-of-type .nav-item-hold, 
             &:hover .nav-item-hold {
-                //border-top: 1px solid transparent;
+                //border-top: 0.0666rem solid transparent;
             }
             /*&.active .triangle {
                 position: absolute;
@@ -118,7 +118,7 @@
                 right: 0;
                 bottom: 0;
                 border-style: solid;
-                border-width: 0 0 20px 20px;
+                border-width: 0 0 1.33rem 1.33rem;
                 border-color: transparent transparent $white transparent;
             }*/
             .subitems {
@@ -126,19 +126,19 @@
                 left: -100%;
                 top: 0;
                 background: #434093;
-                box-shadow: 0 0 5px rgba(0,0,0,0.15);
+                box-shadow: 0 0 0.33rem rgba(0,0,0,0.15);
                 text-align: left;
                 white-space: nowrap;
                 z-index: 9;
                 opacity: 0;
                 visibility: hidden;
                 transition: .5s ease all;
-                font-size: .95em;
+                font-size: .85em;
                 z-index: 0;
                 a {
                     display: block;
                     padding: .7rem 1rem;
-                    border-top: 1px solid rgba(255,255,255,0.15);
+                    border-top: 0.0666rem solid rgba(255,255,255,0.15);
                     position: relative;
                     color: #fff;
                     &:first-of-type {
@@ -195,7 +195,7 @@
         display: inline-block;
     }
     img {
-        max-height: 16px;
+        max-height: 1rem;
         margin-right: .5rem;
         margin-bottom: 0;
     }
@@ -243,9 +243,9 @@
                 -webkit-box-align: center;
                     -ms-flex-align: center;
                         align-items: center;
-                font-size: 13px;
+                font-size: 0.85rem;
                 cursor: pointer;
-                padding: 12px 24px;
+                padding: 0.8rem 1.6rem;
                 -webkit-transition: .15s all ease-in;
                 -o-transition: .15s all ease-in;
                 transition: .15s all ease-in;
@@ -256,8 +256,8 @@
                     color: $primary;
                 }
                 .nav-icon {
-                    font-size: 18px;
-                    margin-right: 8px;
+                    font-size: 1.1rem;
+                    margin-right: 5.53rem;
                     vertical-align: middle;
                     color: $gray-600;
                 }
@@ -267,11 +267,11 @@
                 }
                 .dd-arrow {
                     margin-left: auto;
-                    font-size: 11px;
+                    font-size: 0.6785rem;
                 }
             }
             .submenu {
-                margin-left: 8px;
+                margin-left: 5.53rem;
             }
         }
     }
@@ -289,7 +289,7 @@
                     }
                 }
                 > .childNav {
-                    max-height: 1000px;
+                    max-height: 67.67rem;
                     overflow: visible;
                 }
             }
@@ -311,7 +311,7 @@
                 -o-transition: all .4s ease-in-out;
                 transition: all .4s ease-in-out;
                 li.nav-item a {
-                    padding: 12px 12px 12px 50px;
+                    padding: 0.8rem 0.8rem 0.8rem 3.37rem;
                 }
             }
         }
@@ -381,11 +381,11 @@
             .nav-item {
                 &.active {
                     .triangle {
-                        border-width: 0 0 24px 24px;
+                        border-width: 0 0 1.6rem 1.6rem;
                     }
                 }
                 .nav-item-hold {
-                    padding: 16px 0;
+                    padding: 1rem 0;
                 }
             }
         }

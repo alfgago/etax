@@ -21,7 +21,7 @@
         .list-thumb {
             img {
                 width: 100%;
-                height: 180px;
+                height: 12rem;
                 object-fit: cover;
             }
         }
@@ -32,7 +32,7 @@
             white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
-            max-width: 300px;
+            max-width: 20rem;
         }
         a {
             color: $foreground
@@ -40,14 +40,14 @@
         .item-badges, 
         .item-actions {
             position: absolute;
-            top: 16px;
+            top: 1rem;
         }
         .item-actions {
-            right: 16px;
+            right: 1rem;
             
         }
         .item-badges {
-            left: 16px;
+            left: 1rem;
         }
         .item-select {
             display: none;
@@ -55,13 +55,13 @@
     }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 990.0666rem) {
     .list-horizontal {
         .list-item {
             .list-thumb {
                 img {
                     height: 100%;
-                    width: 100px;
+                    width: 14.666rem;
                 }
             }
             .item-title {
@@ -75,7 +75,7 @@
     .list-horizontal {
         .list-item {
             .item-title {
-                max-width: 150px;
+                max-width: 10rem;
             }
         }
     }
