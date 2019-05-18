@@ -146,7 +146,7 @@ class WizardController extends Controller
             $company->use_invoicing = $request->use_invoicing;
             $company->wizard_finished = true;
             $company->save();
-            
+
             //Update Team name based on company
             $team->name = $request->name;
             $team->save();
@@ -191,8 +191,9 @@ class WizardController extends Controller
 
             return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar 
                 a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento.');
-        } catch( \Exception $ex ){
-            Log::error("Error en primera configuracion de compañia: $ex");
+        } catch( \Exception $ex ) {
+            Log::error('Error al crear compania: '.$ex->getMessage());
+            return back()->withError('Ha ocurrido un error al registrar la compañía' . $ex->getMessage());
         }
     }
 }
