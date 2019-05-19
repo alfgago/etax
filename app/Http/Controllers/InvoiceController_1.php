@@ -12,11 +12,8 @@ use App\Http\Controllers\CacheController;
 use App\Exports\InvoiceExport;
 use App\Imports\InvoiceImport;
 use Maatwebsite\Excel\Facades\Excel;
-use Yajra\Datatables\Datatables;
-use App\DataTables\InvoicesDataTable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
-
 
 class InvoiceController extends Controller
 {
@@ -38,37 +35,11 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        return view('Invoice/index');
-    }
-    
-    /**
-     * Returns the required ajax data.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function indexData() {
         $current_company = currentCompany();
-
-        $query = Invoice::where('invoices.company_id', $current_company)->where('is_void', false)->where('is_totales', false)->with('client');
-        return datatables()->eloquent( $query )
-            ->orderColumn('reference_number', '-reference_number $1')
-            ->addColumn('actions', function($invoice) {
-                return view('datatables.actions', [
-                    'routeName' => 'facturas-emitidas',
-                    'deleteTitle' => 'Anular factura',
-                    'editTitle' => 'Editar factura',
-                    'deleteIcon' => 'fa fa-ban',
-                    'id' => $invoice->id
-                ])->render();
-            }) 
-            ->editColumn('client', function(Invoice $invoice) {
-                return $invoice->client->fullname;
-            })
-            ->editColumn('generated_date', function(Invoice $invoice) {
-                return $invoice->generatedDate()->format('d/m/Y');
-            })
-            ->rawColumns(['actions'])
-            ->toJson();
+        $invoices = Invoice::where('company_id', $current_company)->where('is_void', false)->where('is_totales', false)->with('client')->orderBy('generated_date', 'DESC')->orderBy('reference_number', 'DESC')->paginate(10);
+        return view('Invoice/index', [
+          'invoices' => $invoices
+        ]);
     }
 
     /**
@@ -255,7 +226,7 @@ class InvoiceController extends Controller
           'tipo_archivo' => 'required',
         ]);
       
-        $time_start = getMicrotime();
+        $time_start = $this->microtime_float();
         
         try {
             $collection = Excel::toCollection( new InvoiceImport(), request()->file('archivo') );
@@ -295,8 +266,7 @@ class InvoiceController extends Controller
                                         'company_id' => $company->id,
                                         'tipo_persona' => str_pad($tipo_persona, 2, '0', STR_PAD_LEFT),
                                         'id_number' => $identificacion_cliente,
-                                        'first_name' => $nombre_cliente,
-                                        'fullname' => "$identificacion_cliente - $nombre_cliente"
+                                        'first_name' => $nombre_cliente
                                     ]
                                 );
                                 Cache::put($clientCacheKey, $clienteCache, 30);
@@ -427,7 +397,7 @@ class InvoiceController extends Controller
             
             $company->save();
             
-            $time_end = getMicrotime();
+            $time_end = $this->microtime_float();
             $time = $time_end - $time_start;
             
             return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente en '.$time.'s.');
@@ -436,5 +406,11 @@ class InvoiceController extends Controller
         }
     }
     
+    private function microtime_float(){
+        list($usec, $sec) = explode(" ", microtime());
+        return ((float) $usec + (float)$sec);
+    }  
+    
+
     
 }

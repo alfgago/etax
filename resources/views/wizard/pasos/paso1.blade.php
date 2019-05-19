@@ -23,7 +23,7 @@
 
 <div class="form-group col-md-4">
   <label for="business_name">Razón Social *</label>
-  <input type="text" class="form-control checkEmpty" name="business_name" id="business_name" value="{{ @$company->business_name }}" required>
+  <input type="text" class="form-control " name="business_name" id="business_name" value="{{ @$company->business_name }}" required>
 </div>
 
 <div class="form-group col-md-4">
@@ -32,8 +32,8 @@
 </div>
 
 <div class="form-group col-md-4">
-  <label for="last_name">Apellido</label>
-  <input type="text" class="form-control" name="last_name" id="last_name" value="{{ @$company->last_name }}" >
+  <label for="last_name">Apellido *</label>
+  <input type="text" class="form-control checkEmpty" name="last_name" id="last_name" value="{{ @$company->last_name }}" >
 </div>
 
 <div class="form-group col-md-4">
@@ -47,8 +47,8 @@
 </div>
 
 <div class="form-group col-md-4">
-  <label for="phone">Teléfono</label>
-  <input type="text" class="form-control" name="phone" id="phone" value="{{ @$company->phone }}" >
+  <label for="phone">Teléfono *</label>
+  <input type="text" class="form-control checkEmpty" name="phone" id="phone" value="{{ @$company->phone }}" >
 </div>
 
 <div class="btn-holder">

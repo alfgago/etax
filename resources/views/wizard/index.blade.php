@@ -7,201 +7,7 @@
 @section('header-scripts')
 
 <style>
-    
-    	
-.wizard-container {
-    position: fixed;
-    display: flex;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9999;
-}
 
-.wizard-popup {
-    max-width: 48rem;
-    height: auto;
-    margin: auto;
-    margin-top: 4rem;
-    position: relative;
-}
-
-.wizard-container:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, #2852A6 0%, #392993 100%);
-    opacity: 0.9;
-}
-
-.wizard-container .btn-holder {
-	display: flex;
-}
-
-.wizard-popup .form-container {
-    background: #fff;
-    padding: 2rem;
-    border-radius: 1rem;
-    max-height: calc(95vh - 11.5rem);
-    height: auto;
-    margin-right: 12rem;
-    overflow-y: auto;
-}
-
-.titulo-bienvenida {
-    padding: 0 2rem;
-    padding-bottom: 1rem;
-}
-
-.titulo-bienvenida h2 {
-    font-size: 2rem;
-    color: #fff;
-    font-weight: bold;
-}
-
-.titulo-bienvenida p {
-    color: #fff;
-}
-
-.breadcrumb {
-    display: none;
-}
-
-.wizard-steps {
-    position: absolute;
-    display: block;
-    counter-reset: step-counter;
-    margin: 0;
-    font-weight: bold;
-    margin-bottom: 1rem;
-    right: 0;
-}
-
-.wizard-steps .step-btn {
-    flex: 1;
-    text-align: center;
-    position: relative;
-    margin: auto;
-    margin-bottom: 1.5rem;
-}
-
-.wizard-steps .step-btn span {
-    position: absolute;
-    text-align: left;
-    color: #fff;
-    top: 50%;
-    transform: translateY(-50%);
-    line-height: 1.5;
-    font-weight: 400;
-}
-
-.wizard-steps .step-btn:after {
-    position: relative;
-    content: counter(step-counter);
-    counter-increment: step-counter;
-    width: 3rem;
-    height: 3rem;
-    top: 0;
-    left: 0;
-    background: #eee;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.5rem;
-    color: #333;
-    font-weight: bold;
-    z-index: 1;
-    transition: .5s ease all;
-    margin-right: 6rem;
-    border: 0.2rem solid #fff;
-}
-
-.wizard-steps .step-btn:before {
-    position: absolute;
-    content: '';
-    width: 0.45rem;
-    height: 5rem;
-    bottom: 50%;
-    left: 1.37rem;
-    background: #eee;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.5rem;
-    color: #eee;
-    font-weight: bold;
-    z-index: 0;
-    transition: .5s ease all;
-    border: 0.133rem solid #fff;
-}
-
-.wizard-steps .step-btn:first-of-type:before {
-    display: none;
-}
-
-.wizard-steps .step-btn.is-active:after,
-.wizard-steps .step-btn.is-active:before,
-.step2-selected .step1:before,
-.step2-selected .step1:after,
-.step3-selected .step1:before,
-.step3-selected .step1:after,
-.step3-selected .step2:before,
-.step3-selected .step2:after,
-.step4-selected .step1:before,
-.step4-selected .step1:after,
-.step4-selected .step2:before,
-.step4-selected .step2:after,
-.step4-selected .step3:before,
-.step4-selected .step3:after,
-.step5-selected .step1:before,
-.step5-selected .step1:after,
-.step5-selected .step2:before,
-.step5-selected .step2:after,
-.step5-selected .step3:before,
-.step5-selected .step3:after,
-.step5-selected .step4:before,
-.step5-selected .step4:after{
-    background: #F0C962;
-    color: #333;
-}
-
-.wizard-form .step-section {
-	display: none;	
-}
-
-.wizard-form .step-section.is-active {
-	display: block;
-}
-
-.wizard-container .btn-holder {
-	display: block;
-	width: 100%;
-}
-
-.wizard-container .btn-holder .btn-next {
-    float: right;
-}
-
-.wizard-container .btn-holder .btn-prev {
-    float: left;
-    background: #fff;
-    border-color: #15408E;
-    color: #15408E;
-}
-
-.form-button {
-    display: block;
-    margin: 0;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.9rem;
-    height: calc(1.9695rem + 0.133rem);
-}
-    
 </style>
 
 @endsection
@@ -225,8 +31,7 @@
     
     <div class="form-container">
     
-	    <form method="POST" action="/update-wizard" class="wizard-form">
-	
+	    <form method="POST" action="/update-wizard" class="wizard-form" enctype="multipart/form-data">
 	        @csrf
 				
 			<div class="step-section step1 is-active">
@@ -287,51 +92,16 @@
     function checkEmptyFields(id) {
         var allow = true;
         $('.'+id+' .checkEmpty').each( function() {
-    		if( $(this).val() && $(this).val() != "" ){  $(this).removeClass('isEmptyRequired'); }
-    		else{ $(this).addClass('isEmptyRequired'); allow = false; }
+    		if( $(this).val() && $(this).val() != "" ) {
+    		    $(this).removeClass('isEmptyRequired');
+    		}
+    		else {
+    		    $(this).addClass('isEmptyRequired');
+    		    allow = false;
+    		}
     	});
     	return allow;
     }
-  
-    /*function saveDatosBasicos() {
-        var allow1 = checkEmptyFields('step1');
-        var allow2 = checkEmptyFields('step2');
-          	
-        if( allow1 && allow2 )	{
-            jQuery.ajax({
-                url: "/empresas/update/{{ currentCompany() }}",
-                type: 'POST',
-                cache: false,
-                data : {
-                    tipo_persona: $("#tipo_persona").val(),
-                    id_number: $("#id_number").val(),
-                    business_name: $("#business_name").val(),
-                    name: $("#name").val(),
-                    last_name: $("#last_name").val(),
-                    last_name2: $("#last_name2").val(),
-                    email: $("#email").val(),
-                    phone: $("#phone").val(),
-                    country: $("#country").val(),
-                    state: $("#state").val(),
-                    city: $("#city").val(),
-                    district: $("#district").val(),
-                    neighborhood: $("#neighborhood").val(),
-                    zip: $("#zip").val(),
-                    address: $("#address").val(),
-                    phone: $("#phone").val(),
-                    _method: 'patch',
-                    _token: '{{ csrf_token() }}'
-                },
-                success : function( response ) {
-                    console.log('SUCCESS BASICOS');
-                },
-                error : function( response ) {
-                    console.log('ERROR BASICOS' + response);
-                },
-                async: true
-            });  
-        }
-    }*/
     
     function toggleTipoProrrata() {
 	  var metodo = $("#first_prorrata_type").val();

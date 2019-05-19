@@ -82,7 +82,7 @@
                 <div class="subitems">
                     <a href="/clientes">Ver todos</a>
                     <a href="/clientes/create">Crear cliente</a>
-                    <a href="/clientes/#">Importar clientes</a>
+                    <a href="#" onclick="abrirPopup('importar-clientes-popup');">Importar clientes</a>
                 </div>
             </li>
             <li class="nav-item small-nav {{ request()->is('proveedores/*') || request()->is('proveedores') ? 'active' : '' }}" >
@@ -95,7 +95,7 @@
                 <div class="subitems">
                     <a href="/proveedores">Ver todos</a>
                     <a href="/proveedores/create">Crear proveedor</a>
-                    <a href="/proveedores/#">Importar proveedores</a>
+                    <a href="#" onclick="abrirPopup('importar-proveedores-popup');">Importar proveedores</a>
                 </div>
             </li>
             <li class="nav-item small-nav {{ request()->is('productos/*') || request()->is('productos') ? 'active' : '' }}" >
@@ -108,7 +108,7 @@
                 <div class="subitems">
                     <a href="/productos">Ver todos</a>
                     <a href="/productos/create">Crear producto</a>
-                    <a href="/productos/#">Importar productos</a>
+                    <a href="#" onclick="abrirPopup('importar-productos-popup');">Importar productos</a>
                 </div>
             </li>
           </ul>

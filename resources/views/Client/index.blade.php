@@ -6,62 +6,59 @@
 
 @section('breadcrumb-buttons')
       <a type="submit" class="btn btn-primary" href="/clientes/create">Ingresar cliente nuevo</a>
-      <div onclick="abrirPopup('importar-popup');" class="btn btn-primary">Importar clientes</div>
+      <div onclick="abrirPopup('importar-clientes-popup');" class="btn btn-primary">Importar clientes</div>
 @endsection 
 
 
 @section('content') 
 <div class="row">
   <div class="col-md-12">
-        
-      <div style="margin: 1rem;"> -- Aqui van filtros de búsqueda --  </div>
       
-      <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+      <table id="client-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
-              <th>@sortablelink('code', 'Código')</th>
-              <th>@sortablelink('id_number', 'Identificación')</th>
-              <th>@sortablelink('first_name', 'Nombre')</th>
-              <th>@sortablelink('email', 'Correo')</th>
+              <th>Código</th>
+              <th data-priority="2">Identificación</th>
+              <th data-priority="1">Nombre</th>
+              <th data-priority="1">Apellido</th>
+              <th>Correo</th>
               <th>Tipo de persona</th>
               <th>Es exento</th>
-              <th></th>
+              <th data-priority="1">Acciones</th>
             </tr>
             
           </thead>
           <tbody>
-            @if ( $clients->count() )
-              @foreach ( $clients as $cliente )
-                <tr>
-                  <td>{{ $cliente->code }}</td>
-                  <td>{{ $cliente->id_number }}</td>
-                  <td>{{ $cliente->getFullName() }}</td>
-                  <td>{{ $cliente->email }}</td>
-                  <td>{{ $cliente->getTipoPersona() }}</td>
-                  <td>{{ $cliente->es_exento ? 'Si' : 'No' }} </td>
-                  
-                  <td> 
-                    <a href="/clientes/{{ $cliente->id }}/edit" title="Editar cliente" class="text-success mr-2"> 
-                      <i class="fa fa-pencil" aria-hidden="true"></i>
-                    </a>
-                    <form class="inline-form" method="POST" action="/clientes/{{ $cliente->id }}" style="display: inline-block;">
-                      @csrf
-                      @method('delete')
-                      <button type="submit" class="text-danger mr-2"  title="Eliminar cliente" style="display: inline-block; background: none; border: 0;">
-                        <i class="fa fa-trash-o" aria-hidden="true"></i>
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-              @endforeach
-            @endif
-
           </tbody>
-        </table>
-        {{ $clients->links() }}
+      </table>
   </div>  
 </div>
 
-@include( 'Client.import' )
+@endsection
 
+@section('footer-scripts')
+<script>
+  
+$(function() {
+  $('#client-table').DataTable({
+    processing: true,
+    serverSide: true,
+    ajax: "{{ route('Client.data') }}",
+    columns: [
+      { data: 'code', name: 'code' },
+      { data: 'id_number', name: 'id_number' },
+      { data: 'nombreC', name: 'first_name' },
+      { data: 'last_name', name: 'last_name', 'visible': false },
+      { data: 'email', name: 'email' },
+      { data: 'tipo_persona', name: 'tipo_persona' },
+      { data: 'es_exento', name: 'es_exento' },
+      { data: 'actions', name: 'actions', orderable: false, searchable: false },
+    ],
+    language: {
+      url: "/lang/datatables-es_ES.json",
+    },
+  });
+});
+  
+</script>
 @endsection
