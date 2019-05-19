@@ -19,8 +19,7 @@
 @section('content') 
 <div class="row form-container">
   <div class="col-md-12">
-                          
-        <form method="POST" action="/facturas-emitidas">
+      <form method="POST" action="/facturas-emitidas">
 
           @csrf
           
@@ -65,14 +64,14 @@
                     <div class="form-group col-md-4">
                       <label for="currency">Divisa</label>
                       <select class="form-control" name="currency" id="moneda" required>
-                        <option value="crc" selected>CRC</option>
-                        <option value="crc">USD</option>
+                        <option value="crc"  data-rate="{{$rate}}" selected>CRC</option>
+                        <option value="usd"  data-rate="{{$rate}}">USD</option>
                       </select>
                     </div>
       
                     <div class="form-group col-md-8">
                       <label for="currency_rate">Tipo de cambio</label>
-                      <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="1.00" required>
+                      <input type="text" class="form-control" data-rates="{{$rate}}" name="currency_rate" id="tipo_cambio" value="1.00"required>
                     </div>
                   </div>
                 </div>
@@ -256,7 +255,7 @@
             <button id="btn-submit" type="submit" class="btn btn-primary" disabled>Enviar factura electrónica</button>
           </div>
 
-        </form>
+      </form>
   </div>  
 </div>
 @endsection
@@ -270,6 +269,14 @@
 <script>
 $(document).ready(function(){
   $('#tipo_iva').val('103');
+
+  $('#moneda').change(function() {
+    if ($(this).val() == 'usd') {
+      $('#tipo_cambio').val($('#tipo_cambio').data('rates'))
+    } else {
+      $('#tipo_cambio').val('1.00')
+    }
+  });
 });
 
 function toggleRetencion() {

@@ -11,16 +11,19 @@ use App\CalculatedTax;
 use App\Http\Controllers\CacheController;
 use App\Exports\InvoiceExport;
 use App\Imports\InvoiceImport;
+use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\Datatables\Datatables;
 use App\DataTables\InvoicesDataTable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
+use GuzzleHttp\Message\ResponseInterface;
 
 
 class InvoiceController extends Controller
 {
-  
+
     /**
      * Create a new controller instance.
      *
@@ -48,7 +51,6 @@ class InvoiceController extends Controller
      */
     public function indexData() {
         $current_company = currentCompany();
-
         $query = Invoice::where('invoices.company_id', $current_company)->where('is_void', false)->where('is_totales', false)->with('client');
         return datatables()->eloquent( $query )
             ->orderColumn('reference_number', '-reference_number $1')
@@ -88,7 +90,7 @@ class InvoiceController extends Controller
      */
     public function emitFactura()
     {
-        return view("Invoice/create-factura", ['document_type' => '01']);
+        return view("Invoice/create-factura", ['document_type' => '01', 'rate' => $this->get_rates()]);
     }
     
     /**
@@ -209,7 +211,6 @@ class InvoiceController extends Controller
      */
     public function update(Request $request, $id)
     {
-        
         $invoice = Invoice::findOrFail($id);
         $this->authorize('update', $invoice);
       
@@ -435,6 +436,47 @@ class InvoiceController extends Controller
             return redirect('/facturas-emitidas')->withError('Usted tiene un límite de 2500 facturas por archivo.');
         }
     }
-    
-    
+
+    private function microtime_float()
+    {
+        list($usec, $sec) = explode(" ", microtime());
+        return ((float) $usec + (float)$sec);
+    }
+
+    private function get_rates()
+    {
+        try {
+            $value = Cache::remember('usd_rate', '60000', function () {
+                $today = new Carbon();
+                $client = new \GuzzleHttp\Client();
+                $response = $client->get(env('EXCHANGE_URL'),
+                    ['query' => [
+                        'Indicador' => '317',
+                        'FechaInicio' => $today::now()->format('d/m/Y'),
+                        'FechaFinal' => $today::now()->format('d/m/Y'),
+                        'Nombre' => env('NAMEBCCR'),
+                        'SubNiveles' => 'N',
+                        'CorreoElectronico' => env('EMAILBCCR'),
+                        'Token' => env('TOKENBCCR')
+                        ]
+                    ]
+                );
+                $body = $response->getBody()->getContents();
+                $xml = new \SimpleXMLElement($body);
+                $xml->registerXPathNamespace('d', 'urn:schemas-microsoft-com:xml-diffgram-v1');
+                $tables = $xml->xpath('//INGC011_CAT_INDICADORECONOMIC[@d:id="INGC011_CAT_INDICADORECONOMIC1"]');
+                return json_decode($tables[0]->NUM_VALOR);
+            });
+
+            return $value;
+
+        } catch( \Exception $e) {
+            Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: ');
+        } catch (RequestException $e) {
+            Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: '.
+                $e->getResponse()->getReasonPhrase());
+            return null;
+        }
+
+    }
 }
