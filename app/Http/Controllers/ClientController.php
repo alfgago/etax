@@ -30,12 +30,41 @@ class ClientController extends Controller
      */
     public function index()
     {
-        $current_company = currentCompany();    
-        $clients = Client::where('company_id', $current_company)->sortable()->paginate(10);
-        
-        return view('Client/index', [
-          'clients' => $clients
-        ]);
+        return view('Client/index');
+    }
+    
+    /**
+     * Returns the required ajax data.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexData() {
+        $current_company = currentCompany();
+
+        $query = Client::where('company_id', $current_company);
+        return datatables()->eloquent( $query )
+            ->orderColumn('reference_number', '-reference_number $1')
+            ->addColumn('actions', function($client) {
+                return view('datatables.actions', [
+                    'routeName' => 'clientes',
+                    'deleteTitle' => 'Eliminar cliente',
+                    'hideDelete' => true,
+                    'editTitle' => 'Editar cliente',
+                    'deleteIcon' => 'fa fa-trash-o',
+                    'id' => $client->id
+                ])->render();
+            })
+            ->editColumn('es_exento', function(Client $client) {
+                return $client->es_exento ? 'Sí' : 'No';
+            })
+            ->editColumn('tipo_persona', function(Client $client) {
+                return $client->getTipoPersona();
+            })
+            ->addColumn('nombreC', function(Client $client) {
+                return $client->getFullName();
+            })
+            ->rawColumns(['actions'])
+            ->toJson();
     }
 
     /**
@@ -88,6 +117,7 @@ class ClientController extends Controller
         $cliente->es_exento = $request->es_exento;
         $cliente->billing_emails = $request->billing_emails;
         $cliente->email = $request->email;
+        $cliente->fullname = $cliente->toString();
       
         $cliente->save();
       
@@ -158,6 +188,7 @@ class ClientController extends Controller
         $cliente->es_exento = $request->es_exento;
         $cliente->billing_emails = $request->billing_emails;
         $cliente->email = $request->email;
+        $cliente->fullname = $cliente->toString();
       
         $cliente->save();
       
@@ -174,7 +205,7 @@ class ClientController extends Controller
     {
         $cliente = Client::find($id);
         $this->authorize('update', $cliente);
-        $cliente->delete();
+        //$cliente->delete();
         
         return redirect('/clientes');
     }
@@ -190,7 +221,7 @@ class ClientController extends Controller
           'tipo_archivo' => 'required',
         ]);
       
-        $time_start = $this->microtime_float();
+        $time_start = getMicrotime();
         
         $clientes = Excel::toCollection( new ClientImport(), request()->file('archivo') );
         $company_id = $company_id = currentCompany();  
@@ -224,15 +255,11 @@ class ClientController extends Controller
             );
             
         }
-        $time_end = $this->microtime_float();
+        $time_end = getMicrotime();
         $time = $time_end - $time_start;
         
         return redirect('/clientes')->withMessage('Clientes importados exitosamente en '.$time.'s');
     }
     
-    private function microtime_float(){
-        list($usec, $sec) = explode(" ", microtime());
-        return ((float) $usec + (float)$sec);
-    }
     
 }

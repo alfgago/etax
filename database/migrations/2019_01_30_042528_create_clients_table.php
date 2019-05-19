@@ -23,6 +23,7 @@ class CreateClientsTable extends Migration
             $table->string('first_name');
             $table->string('last_name')->nullable();
             $table->string('last_name2')->nullable();
+            $table->string('fullname')->nullable();
             $table->string('email')->nullable();
             $table->string('emisor_receptor')->default('1');
             $table->string('country')->default('CR');
@@ -74,6 +75,7 @@ class CreateClientsTable extends Migration
             $client->phone = "";
             $client->es_exento = false;
             $client->billing_emails = $client->email;
+            $client->fullname = $client->toString();
             
             $client->save();
         }

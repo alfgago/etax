@@ -76,6 +76,14 @@ Route::get('/usuario/planes', 'UserController@plans')->name('User.plans');
 Route::get('/usuario/empresas', 'UserController@companies')->name('User.companies');
 Route::get('/usuario/usuarios-invitados', 'UserController@invitedUsersList')->name('User.invited-users-list');
 
+// Rutas de API data para ajax
+Route::get('/api/invoices', 'InvoiceController@indexData')->name('Invoice.data');
+Route::get('/api/bills', 'BillController@indexData')->name('Bill.data');
+Route::get('/api/clients', 'ClientController@indexData')->name('Client.data');
+Route::get('/api/providers', 'ProviderController@indexData')->name('Provider.data');
+Route::get('/api/products', 'ProductController@indexData')->name('Product.data');
+Route::get('/api/books', 'BookController@indexData')->name('Book.data');
+
 // Rutas autogeneradas de CRUD
 Route::resource('clientes', 'ClientController');
 Route::resource('proveedores', 'ProviderController');

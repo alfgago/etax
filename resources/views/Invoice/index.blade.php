@@ -13,54 +13,57 @@
 <div class="row">
   <div class="col-md-12">
     
-      <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+      <table id="invoice-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
               <th>#</th>
-              <th>Receptor</th>
+              <th data-priority="2">Comprobante</th>
+              <th data-priority="3">Receptor</th>
+              <th>Tipo Doc.</th>
               <th>Moneda</th>
               <th>Subtotal</th>
               <th>Monto IVA</th>
-              <th>Total</th>
-              <th>F. Generada</th>
-              <th>F. Vencimiento</th>
-              <th>Acciones</th>
+              <th data-priority="4">Total</th>
+              <th data-priority="5">F. Generada</th>
+              <th data-priority="1">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            @if ( $invoices->count() )
-              @foreach ( $invoices as $invoice )
-                <tr>
-                  <td>{{ $invoice->reference_number }}</td>
-                  <td>{{ $invoice->client ? $invoice->client->toString() : '-' }}</td>
-                  <td>{{ $invoice->currency }}</td>
-                  <td>{{ number_format( $invoice->subtotal, 2 ) }}</td>
-                  <td>{{ number_format( $invoice->iva_amount, 2 ) }}</td>
-                  <td>{{ number_format( $invoice->total, 2 ) }}</td>
-                  <td>{{ $invoice->generatedDate()->format('d/m/Y') }}</td>
-                  <td>{{ $invoice->dueDate()->format('d/m/Y') }}</td>
-                  <td> 
-                    <a href="/facturas-emitidas/{{ $invoice->id }}/edit" title="Editar factura" class="text-success mr-2"> 
-                      <i class="fa fa-pencil" aria-hidden="true"></i>
-                    </a>
-                    <form class="inline-form" method="POST" action="/facturas-emitidas/{{ $invoice->id }}" >
-                      @csrf
-                      @method('delete')
-                      <button type="submit" class="text-danger mr-2" title="Anular factura" style="display: inline-block; background: none; border: 0;">
-                        <i class="fa fa-ban" aria-hidden="true"></i>
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-              @endforeach
-            @endif
-
           </tbody>
         </table>
-        {{ $invoices->links() }}
         
-        <div style="margin: 1rem;">-- Aqui van opciones para exportar facturas en XML, CSV o formato de Hacienda --</div>  
   </div>  
 </div>
+
+@endsection
+
+@section('footer-scripts')
+
+<script>
+  
+$(function() {
+  $('#invoice-table').DataTable({
+    processing: true,
+    serverSide: true,
+    ajax: "{{ route('Invoice.data') }}",
+    columns: [
+      { data: 'reference_number', name: 'reference_number' },
+      { data: 'document_number', name: 'document_number' },
+      { data: 'client', name: 'client.fullname' },
+      { data: 'document_type', name: 'document_type' },
+      { data: 'currency', name: 'currency', orderable: false, searchable: false },
+      { data: 'subtotal', name: 'subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
+      { data: 'iva_amount', name: 'iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
+      { data: 'total', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
+      { data: 'generated_date', name: 'generated_date' },
+      { data: 'actions', name: 'actions', orderable: false, searchable: false },
+    ],
+    language: {
+      url: "/lang/datatables-es_ES.json",
+    },
+  });
+});
+  
+</script>
 
 @endsection

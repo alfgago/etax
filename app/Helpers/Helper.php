@@ -490,3 +490,11 @@ if (!function_exists('token_expired')) {
     }
 
 }
+
+/* Check token expiration */
+if (!function_exists('get_microtime')) {
+    function getMicrotime(){
+        list($usec, $sec) = explode(" ", microtime());
+        return ((float) $usec + (float)$sec);
+    }
+}
