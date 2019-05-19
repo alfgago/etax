@@ -86,6 +86,14 @@ Route::prefix('usuario')->group(function() {
 Route::patch('update-infomation/{id}', 'UserController@updateInformation')->name('User.update_information');
 Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
 
+// Rutas de API data para ajax
+Route::get('/api/invoices', 'InvoiceController@indexData')->name('Invoice.data');
+Route::get('/api/bills', 'BillController@indexData')->name('Bill.data');
+Route::get('/api/clients', 'ClientController@indexData')->name('Client.data');
+Route::get('/api/providers', 'ProviderController@indexData')->name('Provider.data');
+Route::get('/api/products', 'ProductController@indexData')->name('Product.data');
+Route::get('/api/books', 'BookController@indexData')->name('Book.data');
+
 // Rutas autogeneradas de CRUD
 Route::resource('clientes', 'ClientController');
 Route::resource('proveedores', 'ProviderController');

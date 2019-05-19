@@ -35,11 +35,37 @@ class BillController extends Controller
      */
     public function index()
     {
+        return view('Bill/index');
+    }
+    
+    /**
+     * Returns the required ajax data.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexData() {
         $current_company = currentCompany();
-        $bills = Bill::where('company_id', $current_company)->where('is_void', false)->with('provider')->orderBy('generated_date', 'DESC')->orderBy('reference_number', 'DESC')->sortable(['generated_date' => 'desc'])->paginate(10);
-        return view('Bill/index', [
-          'bills' => $bills
-        ]);
+
+        $query = Bill::where('bills.company_id', $current_company)->where('is_void', false)->where('is_totales', false)->with('provider');
+        return datatables()->eloquent( $query )
+            ->orderColumn('reference_number', '-reference_number $1')
+            ->addColumn('actions', function($bill) {
+                return view('datatables.actions', [
+                    'routeName' => 'facturas-recibidas',
+                    'deleteTitle' => 'Anular factura',
+                    'editTitle' => 'Editar factura',
+                    'deleteIcon' => 'fa fa-ban',
+                    'id' => $bill->id
+                ])->render();
+            }) 
+            ->editColumn('provider', function(Bill $bill) {
+                return $bill->provider->fullname;
+            })
+            ->editColumn('generated_date', function(Bill $bill) {
+                return $bill->generatedDate()->format('d/m/Y');
+            })
+            ->rawColumns(['actions'])
+            ->toJson();
     }
 
     /**
@@ -174,7 +200,7 @@ class BillController extends Controller
           'tipo_archivo' => 'required',
         ]);
       
-        $time_start = $this->microtime_float();
+        $time_start = getMicrotime();
         
         try {
             $collection = Excel::toCollection( new BillImport(), request()->file('archivo') );
@@ -235,7 +261,8 @@ class BillController extends Controller
                                         'company_id' => $company->id,
                                         'tipo_persona' => str_pad($tipoPersona, 2, '0', STR_PAD_LEFT),
                                         'id_number' => $identificacionProveedor,
-                                        'first_name' => $nombreProveedor
+                                        'first_name' => $nombreProveedor,
+                                        'fullname' => "$identificacion_cliente - $nombre_cliente"
                                     ]
                                 );
                                 Cache::put($providerCacheKey, $proveedorCache, 30);
@@ -369,7 +396,7 @@ class BillController extends Controller
         
             $company->save();
             
-            $time_end = $this->microtime_float();
+            $time_end = getMicrotime();
             $time = $time_end - $time_start;
             
             return redirect('/facturas-recibidas')->withMessage('Facturas importados exitosamente en '.$time.'s');
@@ -393,9 +420,5 @@ class BillController extends Controller
         ], 200);
     }
     
-    private function microtime_float(){
-        list($usec, $sec) = explode(" ", microtime());
-        return ((float) $usec + (float)$sec);
-    }   
     
 }

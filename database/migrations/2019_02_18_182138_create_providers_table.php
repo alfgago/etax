@@ -23,6 +23,7 @@ class CreateProvidersTable extends Migration
             $table->string('first_name');
             $table->string('last_name')->nullable();
             $table->string('last_name2')->nullable();
+            $table->string('fullname')->nullable();
             $table->string('email');
             $table->string('country');
             $table->string('state')->nullable(); //Provincia
@@ -69,6 +70,7 @@ class CreateProvidersTable extends Migration
             $provider->zip = "";
             $provider->address = "";
             $provider->phone = "";
+            $provider->fullname = $provider->toString();
             
             $provider->save();
         }

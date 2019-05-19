@@ -92,7 +92,7 @@
                 </div>
                 
                 <div class="form-group col-md-12">
-                  <div onclick="abrirPopup('linea-popup');" class="btn btn-dark btn-agregar">Agregar linea</div>
+                  <div onclick="abrirPopup('linea-popup');" class="btn btn-dark btn-agregar">Agregar línea</div>
                 </div>
     
               </div>
@@ -200,7 +200,7 @@
 
             <div class="form-group col-md-12">
               <h3>
-                Lineas de factura
+                Líneas de factura
               </h3>
             </div>
             

@@ -13,52 +13,44 @@
 <div class="row">
   <div class="col-md-12">
         
-
-          
-        <div style="margin: 1rem;"> -- Aqui van filtros de búsqueda --  </div>
-        
-        <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+         <table id="products-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
               <th>Código</th>
               <th>Nombre</th>
               <th>Unidad de medición</th>
               <th>Precio unitario</th>
-              <th>Tipo de producto</th>
               <th>Tipo de IVA</th>
               <th></th>
             </tr>
           </thead>
-          <tbody>
-            @if ( $products->count() )
-              @foreach ( $products as $producto )
-                <tr>
-                  <td>{{ $producto->code }}</td>
-                  <td>{{ $producto->name }}</td>
-                  <td>{{ $producto->getUnidadMedicionName() }}</td>
-                  <td>{{ $producto->unit_price }}</td>
-                  <td>{{ $producto->productCategory->name }}</td>
-                  <td>{{ $producto->getTipoIVAName() }} </td>
-                  
-                  <td> 
-                    <a href="/productos/{{ $producto->id }}/edit" title="Editar producto" class="text-success mr-2"> 
-                      <i class="fa fa-pencil" aria-hidden="true"></i>
-                    </a>
-                    <form class="inline-form" method="POST" action="/productos/{{ $producto->id }}" style="display: inline-block;">
-                      @csrf
-                      @method('delete')
-                      <button type="submit" class="text-danger mr-2"  title="Eliminar producto" style="display: inline-block; background: none; border: 0;">
-                        <i class="fa fa-trash-o" aria-hidden="true"></i>
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-              @endforeach
-            @endif
-
-          </tbody>
+          <tbody></tbody>
         </table>
-        {{ $products->links() }}
   </div>  
 </div>
+@endsection
+
+@section('footer-scripts')
+<script>
+  
+$(function() {
+  $('#products-table').DataTable({
+    processing: true,
+    serverSide: true,
+    ajax: "{{ route('Product.data') }}",
+    columns: [
+      { data: 'code', name: 'code' },
+      { data: 'name', name: 'name' },
+      { data: 'unidad_medicion', name: 'measure_unit' },
+      { data: 'unit_price', name: 'unit_price', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
+      { data: 'tipo_iva', name: 'default_iva_type' },
+      { data: 'actions', name: 'actions', orderable: false, searchable: false },
+    ],
+    language: {
+      url: "/lang/datatables-es_ES.json",
+    },
+  });
+});
+  
+</script>
 @endsection
