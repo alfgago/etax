@@ -71,7 +71,7 @@ class CreateCompaniesTable extends Migration
         $company = App\Company::create([
             'user_id' => $user->id,
             'type' => 'J',
-            'id_number' => '3-102-702429',
+            'id_number' => '3102702429',
             'business_name' => '5E Sociedad de Responsabilidad Limitada',
             'name' => '5E Labs',
             'email' => 'alfredo@5e.cr',

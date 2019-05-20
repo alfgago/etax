@@ -278,7 +278,7 @@ class CalculatedTax extends Model
           
         for ($i = 0; $i < $countBillItems; $i++) {
           
-          if( ! $billItems[$i]->bill->is_void ) {
+          if( !$billItems[$i]->bill->is_void && $billItems[$i]->bill->is_authorized ) {
           
             $subtotal = $billItems[$i]->subtotal * $billItems[$i]->bill->currency_rate;
             $currentTotal = $billItems[$i]->total * $billItems[$i]->bill->currency_rate;
