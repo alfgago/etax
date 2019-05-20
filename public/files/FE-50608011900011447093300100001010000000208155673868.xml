@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FacturaElectronica xmlns="https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/facturaElectronica" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/facturaElectronica FacturaElectronica_V.4.2.xsd">
+  <Clave>50608011900011447093300100001010000000208155673868</Clave>
+  <NumeroConsecutivo>00100001010000000208</NumeroConsecutivo>
+  <FechaEmision>2019-01-08T18:40:07-06:00</FechaEmision>
+  <Emisor>
+    <Nombre>LUI'S MIGUEL CALDERON SALAZAR</Nombre>
+    <Identificacion>
+      <Tipo>01</Tipo>
+      <Numero>114470933</Numero>
+    </Identificacion>
+    <Ubicacion>
+      <Provincia>1</Provincia>
+      <Canton>09</Canton>
+      <Distrito>03</Distrito>
+      <Barrio>08</Barrio>
+      <OtrasSenas>FORUM 1, EDIFICIO E, SEGUNDO PISO </OtrasSenas>
+    </Ubicacion>
+    <Telefono>
+      <CodigoPais>506</CodigoPais>
+      <NumTelefono>22221212</NumTelefono>
+    </Telefono>
+    <CorreoElectronico>lcalderon@cyberfuel.com</CorreoElectronico>
+  </Emisor>
+  <Receptor>
+    <Nombre>DEMO</Nombre>
+    <Identificacion>
+      <Tipo>02</Tipo>
+      <Numero>3101382838</Numero>
+    </Identificacion>
+  </Receptor>
+  <CondicionVenta>02</CondicionVenta>
+  <PlazoCredito>8</PlazoCredito>
+  <MedioPago>01</MedioPago>
+  <DetalleServicio>
+    <LineaDetalle>
+      <NumeroLinea>1</NumeroLinea>
+      <Codigo>
+        <Tipo>99</Tipo>
+        <Codigo>ACCESORIO-02</Codigo>
+      </Codigo>
+      <Cantidad>1.000</Cantidad>
+      <UnidadMedida>Unid</UnidadMedida>
+      <Detalle>ACCESORIO-02  LAPICERO DE COLOR</Detalle>
+      <PrecioUnitario>1769.9115</PrecioUnitario>
+      <MontoTotal>1769.9115</MontoTotal>
+      <SubTotal>1769.9115</SubTotal>
+      <Impuesto>
+        <Codigo>01</Codigo>
+        <Tarifa>13</Tarifa>
+        <Monto>230.0885</Monto>
+      </Impuesto>
+      <MontoTotalLinea>2000</MontoTotalLinea>
+    </LineaDetalle>
+  </DetalleServicio>
+  <ResumenFactura>
+    <CodigoMoneda>CRC</CodigoMoneda>
+    <TipoCambio>1</TipoCambio>
+    <TotalServGravados>0</TotalServGravados>
+    <TotalServExentos>0</TotalServExentos>
+    <TotalMercanciasGravadas>1769.9115</TotalMercanciasGravadas>
+    <TotalMercanciasExentas>0</TotalMercanciasExentas>
+    <TotalGravado>1769.9115</TotalGravado>
+    <TotalExento>0</TotalExento>
+    <TotalVenta>1769.9115</TotalVenta>
+    <TotalVentaNeta>1769.9115</TotalVentaNeta>
+    <TotalImpuesto>230.0885</TotalImpuesto>
+    <TotalComprobante>2000</TotalComprobante>
+  </ResumenFactura>
+  <Normativa>
+    <NumeroResolucion>DGT-R-48-2016</NumeroResolucion>
+    <FechaResolucion>07-10-2016 08:00:00</FechaResolucion>
+  </Normativa>
+  <Otros>
+    <OtroTexto codigo="">Generado por: www.comprobanteselectronicoscr.com</OtroTexto>
+  </Otros><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="Signature-15972801"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"/><ds:Reference URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/><ds:DigestValue>EA/ouzsTcd8MXwldv0tHdE6Un4556LIW8KzuMSLBzFkXrcjWy4t8aWWELV5FtL+6A5L9fua5RbQwrAybTZ72zA==</ds:DigestValue></ds:Reference><ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#SignedProperties-1230329641"><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>oz7OTflIxrJAdXExH2erKS8/fRE=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>Kuv36fQUL2LINssD4LiiyTuWiRAetP/JH4t4wumZpJQSJbytFVtHbSkzNbqM4kQbeXHQAE6TrmZ/iEHzdK0KsGGP2GD6TfzpZSMW6bvrA5Mls1cIeTyyXMTfA1zA3phPZsSaCi5Bpi2DuLFXeKPriCsifGoHU3/kTG5gkMxxx8IGCOG/7oacvKDqg3GEIeM9mvNkTWPaATc7Lj/AFO3IZmX6UHf+E7ZhryrOYFLMoynIkjIY3Ht21g0OaUznQ6CjTzOwRVSalMgWVEIrycpwd3AGwIM6pFkw62EQvPwTXKNQXNyJzR4KhC7x8TxfsroJSwE/QQgAn8d59v5udGykBg==</ds:SignatureValue><ds:KeyInfo><ds:KeyValue><ds:RSAKeyValue><ds:Modulus>kPURgagQ7v7PSSCcq/i6ow5rtXL7Atyb45tc4BsjF/SPi8Bi/uwN06eEsOpXMFrVa3suJHjzXpRnlqRNHV7VaoHTO1rpskS57InVMLtZMdQ5vu1wT+xiqgFcBr9rI4y74eu85KhiCsXiSoa8CylskoFU4n/D7VbI2bEyGNSZEHGRTIvHlH5Kf0lY1nGziRoDVL8+Lkf05onp17PMCIHX7VhlQqM0tyBeThiTW97GPcAKI+Nu/8YuR0avKFBP/WPIKTiXk26AKzD6AScPrkfRa89imnmCWLk06WN3kciAbtDGC05IPL23NAKwa2iq70tbFeAQy553fNqrzJC4B9dnAw==</ds:Modulus><ds:Exponent>AQAB</ds:Exponent></ds:RSAKeyValue></ds:KeyValue><ds:X509Data><ds:X509IssuerSerial><ds:X509IssuerName>CN=CA PERSONA FISICA - SANDBOX, OU=DGT, O=MINISTERIO DE HACIENDA - SANDBOX, C=CR</ds:X509IssuerName><ds:X509SerialNumber>1527786605653</ds:X509SerialNumber></ds:X509IssuerSerial><ds:X509SubjectName>CN=LUIS MIGUEL CALDERON SALAZAR, OU=CPF, O=PERSONA FISICA, C=CR, 2.5.4.42=#0C0B4C554953204D494755454C, 2.5.4.4=#0C1043414C4445524F4E2053414C415A4152, 2.5.4.5=#13104350462D30312D313434372D30393333</ds:X509SubjectName><ds:X509Certificate>MIIFXzCCA0egAwIBAgIGAWO3LYxVMA0GCSqGSIb3DQEBCwUAMGwxCzAJBgNVBAYTAkNSMSkwJwYDVQQKDCBNSU5JU1RFUklPIERFIEhBQ0lFTkRBIC0gU0FOREJPWDEMMAoGA1UECwwDREdUMSQwIgYDVQQDDBtDQSBQRVJTT05BIEZJU0lDQSAtIFNBTkRCT1gwHhcNMTgwNTMxMTcxMDA1WhcNMjAwNTMwMTcxMDA1WjCBpzEZMBcGA1UEBRMQQ1BGLTAxLTE0NDctMDkzMzEZMBcGA1UEBAwQQ0FMREVST04gU0FMQVpBUjEUMBIGA1UEKgwLTFVJUyBNSUdVRUwxCzAJBgNVBAYTAkNSMRcwFQYDVQQKDA5QRVJTT05BIEZJU0lDQTEMMAoGA1UECwwDQ1BGMSUwIwYDVQQDDBxMVUlTIE1JR1VFTCBDQUxERVJPTiBTQUxBWkFSMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkPURgagQ7v7PSSCcq/i6ow5rtXL7Atyb45tc4BsjF/SPi8Bi/uwN06eEsOpXMFrVa3suJHjzXpRnlqRNHV7VaoHTO1rpskS57InVMLtZMdQ5vu1wT+xiqgFcBr9rI4y74eu85KhiCsXiSoa8CylskoFU4n/D7VbI2bEyGNSZEHGRTIvHlH5Kf0lY1nGziRoDVL8+Lkf05onp17PMCIHX7VhlQqM0tyBeThiTW97GPcAKI+Nu/8YuR0avKFBP/WPIKTiXk26AKzD6AScPrkfRa89imnmCWLk06WN3kciAbtDGC05IPL23NAKwa2iq70tbFeAQy553fNqrzJC4B9dnAwIDAQABo4HKMIHHMB8GA1UdIwQYMBaAFEYj0kRPv1dZIeS/k9Uwm5VM4/eHMB0GA1UdDgQWBBT+PrZFgJmcHLberOQeJZszfwQybTALBgNVHQ8EBAMCBsAwEwYDVR0lBAwwCgYIKwYBBQUHAwQwYwYIKwYBBQUHAQEEVzBVMFMGCCsGAQUFBzAChkdodHRwczovL3BraS5jb21wcm9iYW50ZXNlbGVjdHJvbmljb3MuZ28uY3Ivc3RhZy9pbnRlcm1lZGlhdGUtcGYtcGVtLmNydDANBgkqhkiG9w0BAQsFAAOCAgEAInBzFQilAv1G4KGFyd9+4x5KovaEQhfRaKtrL8AgTfVPG6BZfrs37YjIQsOTh4bxwKVumS07EuYD+PscNmRl+0POA++DA6+aVHt4E7WqOYPXAQ6xa/4wOnPdLYkf3xNVMV9W3Oti5OYEZOdI/BrIEpLyVBvM5m50w1PPg51YKsrCKCm5VYEitGxzDLcsNgscFtkmljADsYrL8BfLhTDN71divAgQh7fc8z2Dx6I1Rq4YXx4KiZa0r0rxkuGSoZ4CQQ5JgCdGnvchF3sHqdgu3HMjfxA2NJ5xktMRWOmIHw021r6S7AfvdLsgJl4zACqGgHLA73ct/hLZIIsW+YTjv4ZbD47AxXhsBWw9glUFndGwQv+0BO6K+gus9swjOjtPIi4CyikjUJS2xJ6Vng339ESuwV+i5GrRETfwYLobJrvw9ikZwwvJLtyno+BkkUlJyW24hi/KMuT/mfmu+27oJdhT6TYAHtHNhyDWgEmYIhSFOGGkatG94odoRzWzxle3xGE6KcRjJmePi62Row4+y3rmcj+TDFlBEOytWEMpqeY0z4hdhNWDAjyb74hf9vl5l7+5kKNZPjmp673WrBkQhHLlaZKFAf4QZXLiyiLtr4t+tOZNacIXaZvTt1Xa3asqTJWEMuYlpiyYJSol6RfY6Cefd0SkfnRsMqi6sAn0UmA=</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xadesv141="http://uri.etsi.org/01903/v1.4.1#" Target="#Signature-15972801"><xades:SignedProperties Id="SignedProperties-1230329641"><xades:SignedSignatureProperties><xades:SigningTime>2019-01-09T00:40:08.000Z</xades:SigningTime><xades:SigningCertificate><xades:Cert><xades:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>f5BmrhPBXOWkeyt0Ps1B2aguKIE=</ds:DigestValue></xades:CertDigest><xades:IssuerSerial><ds:X509IssuerName>CN=CA PERSONA FISICA - SANDBOX, OU=DGT, O=MINISTERIO DE HACIENDA - SANDBOX, C=CR</ds:X509IssuerName><ds:X509SerialNumber>1527786605653</ds:X509SerialNumber></xades:IssuerSerial></xades:Cert></xades:SigningCertificate><xades:SignaturePolicyIdentifier><xades:SignaturePolicyId><xades:SigPolicyId><xades:Identifier>https://www.hacienda.go.cr/ATV/ComprobanteElectronico/docs/esquemas/2016/v4.2/DGT_R_51_2016_Resolucion_de_Obligatoriedad_para_el_Uso_de_los_Comprobantes_Electronicos_V4.2.pdf</xades:Identifier></xades:SigPolicyId><xades:SigPolicyHash><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/><ds:DigestValue>NmI5Njk1ZThkNzI0MmIzMGJmZDAyNDc4YjUwNzkzODM2NTBiOWUxNTBkMmI2YjgzYzZjM2I5NTZlNDQ4OWQzMQ==</ds:DigestValue></xades:SigPolicyHash></xades:SignaturePolicyId></xades:SignaturePolicyIdentifier></xades:SignedSignatureProperties><xades:SignedDataObjectProperties><xades:DataObjectFormat ObjectReference="#r-id-1"><xades:MimeType>text/xml</xades:MimeType></xades:DataObjectFormat></xades:SignedDataObjectProperties></xades:SignedProperties></xades:QualifyingProperties></ds:Object></ds:Signature>
+</FacturaElectronica>

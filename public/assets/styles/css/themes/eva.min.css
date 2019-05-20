@@ -15964,6 +15964,7 @@ h6,
   font-size: 0.875rem;
   width: 50%;
   width: calc(50% + 0.66rem);
+  min-width: 230px;
 }
 
 .sidebar-dashboard .dato-iva .dato {
@@ -17547,6 +17548,10 @@ small {
   height: 100%;
 }
 
+td a {
+  cursor: pointer;
+}
+
 .form-group {
   position: relative;
   margin-bottom: 0.75rem;
@@ -18711,6 +18716,66 @@ input.type-zone {
   font-size: 2rem !important;
 }
 
+.helper {
+  position: absolute !important;
+  display: inline-block;
+  top: -5px !important;
+  left: 100% !important;
+  margin-left: 1px !important;
+  padding: 0 !important;
+  font-size: 1rem !important;
+  color: #fcc6e1 !important;
+  background: #fff !important;
+  cursor: help;
+}
+
+.comparacion-prorratas label,
+.card-title,
+.dato-iva label > span {
+  position: relative;
+}
+
+.comparacion-prorratas label .helper,
+.sidebar-dashboard .dato-iva label span .helper {
+  margin-left: -5px !important;
+}
+
+.tippy-tooltip {
+  background: #fff;
+  color: #5f6889;
+  padding: .5rem;
+  -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+}
+
+.tippy-popper[x-placement^=top] .tippy-arrow {
+  border-top: 8px solid #5f6889;
+}
+
+.tippy-popper[x-placement^=bottom] .tippy-arrow {
+  border-bottom: 8px solid #5f6889;
+}
+
+.tippy-content {
+  text-align: left;
+  font-size: .85rem;
+}
+
+.comparacion-prorratas label {
+  padding-right: .5rem;
+}
+
+.swal2-container .swal2-styled {
+  -webkit-box-shadow: none !important;
+          box-shadow: none !important;
+  border: 0 !important;
+  outline: none !important;
+}
+
+.swal2-container .swal2-styled:not(.swal2-cancel) {
+  background: #d22346 !important;
+}
+
 /* Tagging Basic Style */
 
 .tagging {
@@ -18914,11 +18979,11 @@ ngb-tabset.p-0 .tab-content {
   font-weight: bold;
 }
 
-.titulo-bienvenida p {
+.page-wizard .titulo-bienvenida p {
   color: #fff;
 }
 
-.breadcrumb {
+.page-wizard .breadcrumb {
   display: none;
 }
 

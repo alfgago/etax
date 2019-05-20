@@ -168,6 +168,11 @@
       $('.item-factura-form').removeClass('editando');
       
       cerrarPopup('linea-popup');
+      
+      //Fuerza un reset en la ayuda al marcar preguntas.
+      $('#p1').prop('checked', false);
+      $('#p1').change();
+      
     }else{
       alert('Debe completar los datos de la linea antes de guardarla');
     }

@@ -4,13 +4,31 @@
     <div id="echartGauge" style="height: 180px;"></div>
     <div class="row comparacion-prorratas">
       <div class="col-lg-12 dif">
-        <div><label>Diferencia en IVA por pagar <br> a fin de periodo:</label> <span>₡{{ number_format( abs($acumulado->balance_operativo - $acumulado->balance_estimado), 0) }}</span></div>
+        <div>
+          <label>
+            Liquidación de IVA <br> estimada a fin de año:
+            <span class="helper helper-resumen-mensual" def="helper-resumen-mensual">  <i class="fa fa-question-circle" aria-hidden="true"></i> </span> 
+          </label> 
+            
+          <span>₡{{ number_format( abs($acumulado->balance_operativo - $acumulado->balance_estimado), 0) }}</span>
+        </div>
       </div>
       <div class="col-lg-12 ope">
-        <div><label>Prorrata operativa:</label> <span>{{ number_format( $acumulado->prorrata_operativa*100, 2) }}%</span></div>
+        <div>
+          <label>
+            Prorrata operativa:
+            <span class="helper helper-resumen-mensual" def="helper-resumen-mensual">  <i class="fa fa-question-circle" aria-hidden="true"></i> </span> 
+          </label> <span>{{ number_format( $acumulado->prorrata_operativa*100, 2) }}%</span>
+        </div>
       </div>
       <div class="col-lg-12 est">
-        <div><label>Prorrata estimada:</label> <span>{{ number_format( $acumulado->prorrata*100, 2) }}%</span></div>
+        <div>
+          <label>
+            Prorrata estimada:
+            <span class="helper helper-resumen-mensual" def="helper-resumen-mensual">  <i class="fa fa-question-circle" aria-hidden="true"></i> </span> 
+          </label> 
+          <span>{{ number_format( $acumulado->prorrata*100, 2) }}%</span>
+        </div>
       </div>
     </div>
     

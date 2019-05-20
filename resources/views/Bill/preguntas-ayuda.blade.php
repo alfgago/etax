@@ -250,6 +250,10 @@
     
     if ( $("#p1:checked").length ) {
       $(".ayuda-cont").show();
+      $('.ayuda-cont select').each( function(){
+      	var optVal = $(this).find('option').first().val();
+      	$(this).val(optVal);
+      });
     } else {
        $(".ayuda-cont").hide(); 
     }
