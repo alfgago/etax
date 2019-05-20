@@ -56,9 +56,10 @@ class CreateInvoicesTable extends Migration
             $table->timestamp('generated_date');
             $table->timestamp('due_date');
           
-            $table->boolean('is_exempt')->default(false);
             $table->boolean('is_void')->default(false);
             $table->boolean('is_totales')->default(false);
+            //Cuando se ingresa via XML o Email, tienen que validar que el código eTax esté correcto.
+            $table->boolean('is_code_validated')->default(true);
             
             //Estado de aceptación de la factura: 01 Pendiente, 02 Aceptada, 03 Rechazada, 04 Anulada, 05 Parcial
             $table->enum('status', ['01', '02', '03', '04', '05'])->default('01');

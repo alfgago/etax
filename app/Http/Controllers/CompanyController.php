@@ -73,7 +73,7 @@ class CompanyController extends Controller {
         $company->user_id = $id;
 
         $company->type = $request->tipo_persona;
-        $company->id_number = $request->id_number;
+        $company->id_number = preg_replace("/[^0-9]+/", "", $request->id_number);
         $company->name = $request->name;
         $company->last_name = $request->last_name;
         $company->last_name2 = $request->last_name2;
@@ -250,7 +250,7 @@ class CompanyController extends Controller {
         }
 
         $company->type = $request->tipo_persona;
-        $company->id_number = $request->id_number;
+        $company->id_number = preg_replace("/[^0-9]+/", "", $request->id_number);
         $company->business_name = $request->business_name;
         $company->activities = $request->activities;
         $company->name = $request->name;

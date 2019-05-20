@@ -102,13 +102,15 @@ class WizardController extends Controller
      */
     public function updateWizard(Request $request)
     {
-        try {
-
-          $request->validate([
-              'id_number' => 'required|unique:companies',
-          ]);
+        
+        $company = currentCompanyModel();
+        if( $company->id_number != $request->id_number ) {
+            $request->validate([
+                'id_number' => 'required|unique:companies',
+            ]);
+        }
           
-            $company = currentCompanyModel();
+        try {  
             $invoice = Invoice::firstOrNew(
                 [
                     'company_id' => $company->id,
@@ -126,7 +128,7 @@ class WizardController extends Controller
             }
 
             $company->type = $request->tipo_persona;
-            $company->id_number = $request->id_number;
+            $company->id_number = preg_replace("/[^0-9]+/", "", $request->id_number);
             $company->business_name = $request->business_name;
             $company->activities = $request->activities;
             $company->name = $request->name;
@@ -159,43 +161,41 @@ class WizardController extends Controller
             clearLastTaxesCache($company->id, 2018);
 
             if ($company->use_invoicing) {
-                $id_number = $company->id_number;
-                $id_company = $company->id;
-                if (Storage::exists("empresa-$id_number/cert.p12")) {
-                    Storage::delete("empresa-$id_number/cert.p12");
+                if( $request->file('cert') ) {
+                    $id_number = $company->id_number;
+                    $id_company = $company->id;
+                    if (Storage::exists("empresa-$id_number/cert.p12")) {
+                        Storage::delete("empresa-$id_number/cert.p12");
+                    }
+    
+                    $path = \Storage::putFileAs(
+                        "empresa-$id_number", $request->file('cert'), "cert.p12"
+                    );
+    
+                    $cert = AtvCertificate::firstOrNew(
+                        [
+                            'company_id' => $id_company,
+                        ]
+                    );
+    
+                    $cert->user = $request->user;
+                    $cert->password = $request->password;
+                    $cert->key_url = $path;
+                    $cert->pin = $request->pin;
+    
+                    $cert->save();
                 }
-
-                $path = \Storage::putFileAs(
-                    "empresa-$id_number", $request->file('cert'), "cert.p12"
-                );
-
-                $cert = AtvCertificate::firstOrNew(
-                    [
-                        'company_id' => $id_company,
-                    ]
-                );
-
-                $cert->user = $request->user;
-                $cert->password = $request->password;
-                $cert->key_url = $path;
-                $cert->pin = $request->pin;
-
-                $cert->save();
             }
 
             if ($company->first_prorrata_type == 1) {
-                return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para 
-                    empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
+                return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
             }
 
             if ($company->first_prorrata_type == 2) {
-                return redirect('/editar-totales-2018')->withMessage('La configuración inicial ha sido realizada 
-                    con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo 
-                    anterior.');
+                return redirect('/editar-totales-2018')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
             }
 
-            return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar 
-                a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento.');
+            return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento.');
         } catch( \Exception $ex ) {
             Log::error('Error al crear compania: '.$ex->getMessage());
             return back()->withError('Ha ocurrido un error al registrar la compañía' . $ex->getMessage());
