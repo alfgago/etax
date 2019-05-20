@@ -68,7 +68,7 @@
   margin-left: 1px !important;
   padding: 0 !important;
   font-size: 1rem !important;
-  color: #F66FB3 !important;
+  color: #fcc6e1 !important;
   background: #fff !important;
   cursor: help;
 }
@@ -108,7 +108,12 @@
     padding-right: .5rem;
 }
 
+.swal2-container .swal2-styled{
+    box-shadow: none !important;
+    border: 0 !important;
+    outline: none !important;
+}
+
 .swal2-container .swal2-styled:not(.swal2-cancel) {
-    background: #f01767 !important;
-    outline: none;
+    background: #d22346 !important
 }

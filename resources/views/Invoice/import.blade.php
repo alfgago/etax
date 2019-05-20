@@ -35,6 +35,7 @@
 			  		<li>IdentificacionReceptor</li>
 			  		<li>CondicionVenta</li>
 			  		<li>MetodoPago</li>
+			  		<li>NumeroLinea</li>
 			  		<li>DetalleProducto</li>
 			  		<li>CodigoProducto</li>
 			  		<li>Cantidad</li>

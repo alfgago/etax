@@ -26,8 +26,10 @@ Route::get('facturas-recibidas/exportar', 'BillController@export');
 // Rutas de importación
 Route::post('clientes/importar', 'ClientController@import');
 Route::post('proveedores/importar', 'ProviderController@import');
-Route::post('facturas-emitidas/importar', 'InvoiceController@import');
-Route::post('facturas-recibidas/importar', 'BillController@import');
+Route::post('facturas-emitidas/importarExcel', 'InvoiceController@importExcel');
+Route::post('facturas-emitidas/importarXML', 'InvoiceController@importXML');
+Route::post('facturas-recibidas/importarExcel', 'BillController@importExcel');
+Route::post('facturas-recibidas/importarXML', 'BillController@importXML');
 
 // Rutas de reportes
 Route::get('/', 'ReportsController@dashboard');
@@ -66,6 +68,10 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::post('enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
 });
 
+// Rutas de aceptación de XML
+Route::get('/facturas-recibidas/aceptaciones', 'BillController@indexAccepts')->name('Bill.accepts');
+Route::post('/facturas-recibidas/respondStatus', 'BillController@respondStatus')->name('Bill.respond');
+
 // Rutas de Wizard
 Route::get('/wizard', 'WizardController@index')->name('Wizard.index');
 Route::get('/editar-totales-2018', 'WizardController@setTotales2018')->name('Wizard.edit_2018');
@@ -89,6 +95,7 @@ Route::patch('update-password/{id}', 'UserController@updatePassword')->name('Use
 // Rutas de API data para ajax
 Route::get('/api/invoices', 'InvoiceController@indexData')->name('Invoice.data');
 Route::get('/api/bills', 'BillController@indexData')->name('Bill.data');
+Route::get('/api/billsAccepts', 'BillController@indexDataAccepts')->name('Bill.data_accepts');
 Route::get('/api/clients', 'ClientController@indexData')->name('Client.data');
 Route::get('/api/providers', 'ProviderController@indexData')->name('Provider.data');
 Route::get('/api/products', 'ProductController@indexData')->name('Product.data');

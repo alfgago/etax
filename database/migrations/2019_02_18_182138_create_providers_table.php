@@ -19,7 +19,7 @@ class CreateProvidersTable extends Migration
             $table->unsignedBigInteger('company_id');
             $table->string('tipo_persona');
             $table->string('id_number');
-            $table->string('code');
+            $table->string('code')->default('');
             $table->string('first_name');
             $table->string('last_name')->nullable();
             $table->string('last_name2')->nullable();

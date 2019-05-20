@@ -1,15 +1,13 @@
 @extends('layouts/app')
 
 @section('title') 
-  Editar factura recibida
+  Ver factura recibida
 @endsection
 
 @section('content') 
 <div class="row form-container">
   <div class="col-md-12">
-      <form method="POST" action="/facturas-recibidas/{{ $bill->id }}">
-        @method('patch')
-        @csrf
+      <form method="POST" action="" class="show-form">
 
           <input type="hidden" id="current-index" value="{{ count($bill->items) }}">
 
@@ -22,7 +20,6 @@
                       <h3>
                         Proveedor
                       </h3>
-                      <div onclick="abrirPopup('nuevo-proveedor-popup');" class="btn btn-agregar btn-agregar-cliente">Nuevo proveedor</div>
                     </div>
 
                     <div class="form-group col-md-12 with-button">
@@ -82,10 +79,6 @@
                 <div class="form-group col-md-4">
                   <label for="total">Total</label>
                   <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" >
-                </div>
-                
-                <div class="form-group col-md-12">
-                  <div onclick="abrirPopup('linea-popup');" class="btn btn-dark btn-agregar">Agregar línea</div>
                 </div>
       
               </div>
@@ -265,19 +258,11 @@
             </div>
           </div>
         
-          @include( 'Bill.form-linea' )
-          @include( 'Bill.form-nuevo-proveedor' )
-        
-          <button id="btn-submit" type="submit" class="hidden">Guardar factura</button>
 
         </form>
   </div>  
 </div>
 @endsection
-
-@section('breadcrumb-buttons')
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar factura</button>
-@endsection 
 
 @section('footer-scripts')
 
@@ -307,5 +292,27 @@ $(document).ready(function(){
   
 });
 </script>
+
+<style>
+  
+  td.acciones {
+      display: none;
+  }
+  
+  .table .thead-dark th:last-of-type {
+      display: none;
+  }
+  
+  form.show-form input, 
+  form.show-form select,
+  .select2-selection--single {
+      border: 0 !important;
+      background: #eee !important;
+      cursor: not-allowed;
+      pointer-events: none;
+  }
+  
+</style>
+
 
 @endsection
