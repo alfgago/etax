@@ -3,11 +3,11 @@
 </a>
 
 @if( ! @$hideDelete )
-<form class="inline-form" method="POST" action="/{{$routeName}}/{{ $id }}" >
+<form id="delete-form-{{ $id }}" class="inline-form" method="POST" action="/{{$routeName}}/{{ $id }}" >
   @csrf
   @method('delete')
-  <button type="submit" class="text-danger mr-2" title="{{$deleteTitle}}" style="display: inline-block; background: none; border: 0;">
+  <a type="button" class="text-danger mr-2" title="{{$deleteTitle}}" style="display: inline-block; background: none; border: 0;" onclick="confirmDelete({{ $id }});">
     <i class="{{$deleteIcon}}" aria-hidden="true"></i>
-  </button>
+  </a>
 </form>
 @endif

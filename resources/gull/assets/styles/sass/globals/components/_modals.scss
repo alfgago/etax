@@ -59,3 +59,56 @@
 .close-popup i.fa {
     font-size: 2rem !important;
 }
+
+.helper {
+  position: absolute !important;
+  display: inline-block;
+  top: -5px !important;
+  left: 100% !important;
+  margin-left: 1px !important;
+  padding: 0 !important;
+  font-size: 1rem !important;
+  color: #F66FB3 !important;
+  background: #fff !important;
+  cursor: help;
+}
+
+.comparacion-prorratas label,
+.card-title,
+.dato-iva label > span {
+  position: relative;
+}
+
+.comparacion-prorratas label .helper,
+.sidebar-dashboard .dato-iva label span .helper {
+  margin-left: -5px !important;
+}
+
+.tippy-tooltip {
+  background: #fff;
+  color: #5f6889;
+  padding: .5rem;
+  box-shadow: 0 0 15px rgba(0,0,0,0.15);
+}
+
+.tippy-popper[x-placement^=top] .tippy-arrow {
+  border-top: 8px solid #5f6889;
+}
+
+.tippy-popper[x-placement^=bottom] .tippy-arrow {
+  border-bottom: 8px solid #5f6889;
+}
+
+.tippy-content {
+  text-align: left;
+  font-size: .85rem;
+}
+
+.comparacion-prorratas label {
+    padding-right: .5rem;
+}
+
+.swal2-container .swal2-styled:not(.swal2-cancel) {
+    background: #f01767 !important;
+    outline: none;
+}

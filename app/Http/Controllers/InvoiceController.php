@@ -48,8 +48,9 @@ class InvoiceController extends Controller
      */
     public function indexData() {
         $current_company = currentCompany();
-
-        $query = Invoice::where('invoices.company_id', $current_company)->where('is_void', false)->where('is_totales', false)->with('client');
+        
+        $query = Invoice::where('invoices.company_id', $current_company)
+                ->where('is_void', false)->where('is_totales', false)->with('client');
         return datatables()->eloquent( $query )
             ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($invoice) {

@@ -4,6 +4,8 @@
   Configuración inicial
 @endsection
 
+@section('slug', 'wizard')
+
 @section('header-scripts')
 
 <style>
@@ -31,7 +33,7 @@
     
     <div class="form-container">
     
-	    <form method="POST" action="/update-wizard" class="wizard-form">
+	    <form method="POST" action="/update-wizard" class="wizard-form" enctype="multipart/form-data">
 	
 	        @csrf
 				
@@ -91,8 +93,8 @@
 	}
 
     function checkEmptyFields(id) {
-        var allow = true;
-        $('.'+id+' .checkEmpty').each( function() {
+      var allow = true;
+      $('.'+id+' .checkEmpty').each( function() {
     		if( $(this).val() && $(this).val() != "" ){  $(this).removeClass('isEmptyRequired'); }
     		else{ $(this).addClass('isEmptyRequired'); allow = false; }
     	});
@@ -101,9 +103,9 @@
     
     function toggleTipoProrrata() {
 	  var metodo = $("#first_prorrata_type").val();
-	  $( ".toggle-types" ).hide();
-	  $( ".type-"+metodo ).show();
-	}
+		  $( ".toggle-types" ).hide();
+		  $( ".type-"+metodo ).show();
+		}
     
     $( document ).ready(function() {  
         fillProvincias();
