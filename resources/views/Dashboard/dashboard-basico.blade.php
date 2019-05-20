@@ -70,11 +70,8 @@
         <div class="card-title">Notificaciones</div>
     
         <div class="notificaciones-container">
-          <div class="notificacion"><span class="fecha">21/01/2019</span> Ejemplo de notificación.</div>
-          <div class="notificacion"><span class="fecha">21/01/2019</span> Ejemplo de notificación 2.</div>
-          <div class="notificacion"><span class="fecha">21/01/2019</span> Usted ha recibido una factura nueva por correo electrónico.</div>
-          <div class="notificacion"><span class="fecha">21/01/2019</span> Nueva factura registrada.</div>
-          <div class="notificacion"><span class="fecha">21/01/2019</span> 1500 facturas de compra importadas.</div>
+          <div class="notificacion "><span class="fecha"></span> Usted no tiene notificaciones en este momento.</div>
+          <div class="notificacion hidden"><span class="fecha">21/01/2019</span> 1500 facturas de compra importadas.</div>
         </div>
         
       </div>

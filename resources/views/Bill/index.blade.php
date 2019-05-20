@@ -62,6 +62,23 @@ $(function() {
     },
   });
 });
+
+function confirmDelete( id ) {
+  var formId = "#delete-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea eliminar la factura',
+    text: "Este proceso la eliminará a nivel de cálculo en eTax, sin embargo no hace anulaciones ni revierte aceptaciones ante Hacienda.",
+    type: 'warning',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero eliminarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
   
 </script>
 

@@ -4,6 +4,8 @@
   Configuración inicial
 @endsection
 
+@section('slug', 'wizard')
+
 @section('header-scripts')
 
 <style>
@@ -32,6 +34,7 @@
     <div class="form-container">
     
 	    <form method="POST" action="/update-wizard" class="wizard-form" enctype="multipart/form-data">
+
 	        @csrf
 				
 			<div class="step-section step1 is-active">
@@ -105,9 +108,9 @@
     
     function toggleTipoProrrata() {
 	  var metodo = $("#first_prorrata_type").val();
-	  $( ".toggle-types" ).hide();
-	  $( ".type-"+metodo ).show();
-	}
+		  $( ".toggle-types" ).hide();
+		  $( ".type-"+metodo ).show();
+		}
     
     $( document ).ready(function() {  
         fillProvincias();
