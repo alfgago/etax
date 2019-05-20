@@ -12,7 +12,6 @@
 @section('content') 
 <div class="row">
   <div class="col-md-12">
-    
       <table id="invoice-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
@@ -45,7 +44,10 @@ $(function() {
   $('#invoice-table').DataTable({
     processing: true,
     serverSide: true,
-    ajax: "{{ route('Invoice.data') }}",
+    ajax: {
+      url: "{{ route('Invoice.data') }}",
+      type: 'GET'
+    },
     columns: [
       { data: 'reference_number', name: 'reference_number' },
       { data: 'document_number', name: 'document_number' },
@@ -63,7 +65,25 @@ $(function() {
     },
   });
 });
+
+
+function confirmDelete( id ) {
+  var formId = "#delete-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea anular la factura',
+    text: "Este proceso generará una nota de crédito y no podrá ser revertido.",
+    type: 'warning',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero anularla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
   
+}
+
 </script>
 
 @endsection

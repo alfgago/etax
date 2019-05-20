@@ -80,6 +80,7 @@
       },
       success : function( response ) {
         $('#reporte-container').html(response);
+        initHelpers();
       },
       async: true
     });  

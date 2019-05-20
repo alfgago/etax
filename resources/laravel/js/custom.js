@@ -129,6 +129,27 @@ window.agregarClienteNuevo = function() {
 	}
 }
 
+window.toggleTiposImportacion = function (){
+		var tipo = $(".popup.is-active #tipo_archivo").val();
+		if(!tipo) {
+		  tipo = 'xlsx';
+		}
+		
+		$(".toggle-xml, .toggle-xlsx").hide();
+		$(".toggle-"+tipo).show();
+		
+	}
+	
+window.initHelpers = function (){
+  	$('.helper').each( function() {
+  	  
+  	  var def = $(this).attr('def');
+  	  var helperContent = $('#'+def).html();
+  	  tippy( '.'+def, { arrow: true, interactive: true, content: helperContent } );
+  	  
+  	});
+}
+
 $(document).ready(function() {
 
   $('.select-search').select2({
@@ -141,6 +162,9 @@ $(document).ready(function() {
   });
 
   $('.select2-tags').select2();
+	  
+	toggleTiposImportacion();
+	initHelpers();
 
 });
 
