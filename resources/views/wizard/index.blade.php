@@ -34,7 +34,7 @@
     <div class="form-container">
     
 	    <form method="POST" action="/update-wizard" class="wizard-form" enctype="multipart/form-data">
-	
+
 	        @csrf
 				
 			<div class="step-section step1 is-active">
@@ -93,10 +93,15 @@
 	}
 
     function checkEmptyFields(id) {
-      var allow = true;
-      $('.'+id+' .checkEmpty').each( function() {
-    		if( $(this).val() && $(this).val() != "" ){  $(this).removeClass('isEmptyRequired'); }
-    		else{ $(this).addClass('isEmptyRequired'); allow = false; }
+        var allow = true;
+        $('.'+id+' .checkEmpty').each( function() {
+    		if( $(this).val() && $(this).val() != "" ) {
+    		    $(this).removeClass('isEmptyRequired');
+    		}
+    		else {
+    		    $(this).addClass('isEmptyRequired');
+    		    allow = false;
+    		}
     	});
     	return allow;
     }

@@ -54,14 +54,15 @@ return array(
 
 
                 'mysql' => array(
-                        'driver'    => 'mysql',
-                        'host'      => 'localhost',
-                        'database'  => 'ducfpkkugc',
-                        'username'  => 'ducfpkkugc',
-                        'password'  => 'mht3qS6Vr9',
+                        'driver'    => env('DB_CONNECTION', 'mysql'),
+                        'host'      => env('DB_HOST', 'localhost'),
+                        'database'  => env('DB_DATABASE', 'ducfpkkugc'),
+                        'username'  => env('DB_USERNAME', 'ducfpkkugc'),
+                        'password'  => env('DB_PASSWORD', 'mht3qS6Vr9'),
                         'charset'   => 'utf8mb4',
                         'collation' => 'utf8mb4_unicode_ci',
                         'prefix'    => '',
+                        'strict' => false
                 ),
 
                 'pgsql' => array(
