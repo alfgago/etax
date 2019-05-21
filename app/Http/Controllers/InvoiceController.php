@@ -51,28 +51,11 @@ class InvoiceController extends Controller
      */
     public function indexData() {
         $current_company = currentCompany();
-        
-        $query = Invoice::where('invoices.company_id', $current_company)
-                ->where('is_void', false)->where('is_totales', false)->with('client');
-        return datatables()->eloquent( $query )
-            ->orderColumn('reference_number', '-reference_number $1')
-            ->addColumn('actions', function($invoice) {
-                return view('datatables.actions', [
-                    'routeName' => 'facturas-emitidas',
-                    'deleteTitle' => 'Anular factura',
-                    'editTitle' => 'Editar factura',
-                    'deleteIcon' => 'fa fa-ban',
-                    'id' => $invoice->id
-                ])->render();
-            }) 
-            ->editColumn('client', function(Invoice $invoice) {
-                return $invoice->client->fullname;
-            })
-            ->editColumn('generated_date', function(Invoice $invoice) {
-                return $invoice->generatedDate()->format('d/m/Y');
-            })
-            ->rawColumns(['actions'])
-            ->toJson();
+        $invoices = Invoice::where('company_id', $current_company)->where('is_void', false)->where('is_totales', false)
+            ->with('client')->orderBy('generated_date', 'DESC')->orderBy('reference_number', 'DESC')->paginate(10);
+        return view('Invoice/index', [
+          'invoices' => $invoices
+        ]);
     }
 
     /**
@@ -438,7 +421,7 @@ class InvoiceController extends Controller
             return redirect('/facturas-emitidas')->withError('Usted tiene un límite de 2500 facturas por archivo.');
         }
     }
-
+    
     private function microtime_float()
     {
         list($usec, $sec) = explode(" ", microtime());
