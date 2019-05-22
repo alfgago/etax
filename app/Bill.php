@@ -222,6 +222,7 @@ class Bill extends Model
       if( $metodoGeneracion != "Email" ){
         $company = currentCompanyModel();
       }else{
+        //Si es email, busca por ID del receptor para encontrar la compañia
         $company = Company::where('id_number', $idReceptor)->first();
       }
       
@@ -350,7 +351,6 @@ class Bill extends Model
               'iva_type' => $codigoEtax,
               'iva_amount' => $montoIva,
           ];
-          
       }
       
       clearBillCache($bill);
