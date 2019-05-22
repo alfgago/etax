@@ -10,6 +10,8 @@ use Spatie\Permission\Models\Permission;
 use DB;
 use Hash;
 use Auth;
+require __DIR__.'/../../../vendor/autoload.php';
+use Zendesk\API\HttpClient as ZendeskAPI;
 
 class UserController extends Controller {
 
@@ -240,7 +242,51 @@ class UserController extends Controller {
         $user->update($input);
         return redirect()->back()->with('success', 'Profile password updated successfully');
     }
-
+    /*
+    *Retorna la vista de las consultas de zendesk del usuario
+    *
+    */
+    public function zendesk(){ 
+        $subdomain = "5ecr";
+        $username  = "ali@5e.cr"; // replace this with your registered email
+        $token     = "IozVFmXc4kbXOkeDl60AtN47TrzcVQalrOwXrR4P"; // replace this with your token
+        $client = new ZendeskAPI($subdomain);
+        $client->setAuth('basic', ['username' => $username, 'token' => $token]);
+        // Get all tickets
+        $tickets = $client->tickets()->findAll();
+        $all = json_decode(json_encode($tickets), true);
+        $total = count($all); 
+        $submitter_id = $all['tickets'][0]['submitter_id'];
+        return view('users.zendesk')->with('submitter_id', $submitter_id)
+                                    ->with('total', $total);
+    }
+    /*
+    *
+    *Crear tickets en zendesk
+    * 
+    */
+    public function crear_ticket(){
+        $user_id = auth()->user()->id;
+        return view('users.zendesk_add')->with('user_id', $user_id);
+    }
+    /*
+    *
+    *Consulta de tickets
+    *
+    */
+    public function ver_consultas(){
+        $subdomain = "5ecr";
+        $username  = "ali@5e.cr"; // replace this with your registered email
+        $token     = "IozVFmXc4kbXOkeDl60AtN47TrzcVQalrOwXrR4P"; // replace this with your token
+        $client = new ZendeskAPI($subdomain);
+        $client->setAuth('basic', ['username' => $username, 'token' => $token]);
+        // Get all tickets
+        $tickets = $client->tickets()->findAll();
+        $all = json_decode(json_encode($tickets), true);
+        // $submitter_id = 2;
+        return view('users.zendesk')->with('submitter_id', $submitter_id)
+                                    ->with('total', $total);
+    }
     /**
      * Remove the specified resource from storage.
      *

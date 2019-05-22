@@ -84,6 +84,9 @@ Route::prefix('usuario')->group(function() {
     Route::get('general', 'UserController@editInformation')->name('User.edit_information');
     Route::get('seguridad', 'UserController@editPassword')->name('User.edit_password');
     Route::get('planes', 'UserController@plans')->name('User.plans');
+    Route::get('zendesk', 'UserController@zendesk')->name('User.zendesk');
+    Route::get('crear_ticket', 'UserController@crear_ticket')->name('User.crear_ticket');
+    Route::get('ver_consultas', 'UserController@ver_consultas')->name('User.ver_consultas');
     Route::get('empresas', 'UserController@companies')->name('User.companies');
     Route::get('usuarios-invitados', 'UserController@invitedUsersList')->name('User.invited-users-list');
 

@@ -21,7 +21,8 @@
         "predis/predis": "^1.1",
         "spatie/laravel-permission": "^2.37",
         "yajra/laravel-datatables-buttons": "^4.6",
-        "yajra/laravel-datatables-oracle": "~9.2"
+        "yajra/laravel-datatables-oracle": "~9.2",
+        "zendesk/zendesk_api_client_php": "^2.2"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",

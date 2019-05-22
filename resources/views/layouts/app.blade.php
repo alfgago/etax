@@ -24,6 +24,10 @@
     <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=1.46">
     
     <script src="{{asset('assets/js/common-bundle.js')}}?v=1.39"></script>
+
+    <!-- Start of 5ecr Zendesk Widget script -->
+    <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=1df0685c-1041-4c71-8cff-be57fb59f3c1"> </script>
+    <!-- End of 5ecr Zendesk Widget script -->
   
     @yield('header-scripts')
     
