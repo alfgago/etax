@@ -87,32 +87,39 @@ class CreatePermissionTables extends Migration
 			$table->softDeletes();
         });
 		
-		$roles_arr = array('Super Admin','Admin');
+		$roles_arr = array('Subscriber');
 		
 		foreach($roles_arr as $key => $arr){
 			$role = Spatie\Permission\Models\Role::create([
-            'name' => $arr            
+                'name' => $arr            
 			]);
 		}
 		
-		$permissions_arr = array('role-list','role-create','role-edit','role-delete','product-list','product-create','product-edit','product-delete','user-list','user-create','user-edit','user-delete','permission-list','permission-create','permission-edit','permission-delete','team-list','team-create','team-edit','team-delete','plan-create','plan-edit','plan-delete','plan-list','plan-cancel');
-		
-		$admin_permissions_arr = array('user-list','team-list','team-create','team-edit','team-delete','plan-list','plan-cancel');
-		
-		$super_admin = Spatie\Permission\Models\Role::where('name','Super Admin')->first();
-		$admin = Spatie\Permission\Models\Role::where('name','Admin')->first();
+		$permissions_arr = array(
+		    'admin',
+		    'invoicing',
+		    'billing',
+		    'validation',
+		    'books',
+		    'reports',
+		    'catalogue'
+		);
 		
 		foreach($permissions_arr as $key => $arr){
 			$permission = Spatie\Permission\Models\Permission::create([
-            'name' => $arr            
+                'name' => $arr            
+			]);
+			
+			$permission = App\CompanyPermission::create([
+                'permission' => $arr            
 			]);
 		}
 		
-		$super_admin->syncPermissions($permissions_arr);
-		$admin->syncPermissions($admin_permissions_arr);
+		$subscriber = Spatie\Permission\Models\Role::where('name','Subscriber')->first();
+		$subscriber->syncPermissions($permissions_arr);
 		
 		$user = App\User::find(1);		
-		$user->assignRole(array('Admin'));
+		$user->assignRole(array('Subscriber'));
 					
         app('cache')
             ->store(config('permission.cache.store') != 'default' ? config('permission.cache.store') : null)

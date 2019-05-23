@@ -53,8 +53,8 @@ class User extends Authenticatable {
 
         $team = Team::create(
             [
-                'name' => "Empresa " . $company->id . "-" . $this->id,
-                'slug' => "slug_" . $company->id . "-" . $this->id,
+                'name' => "(" . $company->id . ") -" . $this->id,
+                'slug' => "slug_" . $company->id . "_" . $this->id,
                 'owner_id' => $this->id,
                 'company_id' => $company->id
             ]
@@ -80,30 +80,21 @@ class User extends Authenticatable {
 
         $user_id = auth()->user()->id;
 
-        $query = \App\UserSubscription::query();
-
-        $query->leftJoin('subscription_plans', 'subscription_plans.id', '=', 'user_subscriptions_history.plan_id');
-        $query->where(array('user_subscriptions_history.status' => '1', 'user_id' => $user_id));
-        $query->whereRaw('DATE(start_date) <="' . date('Y-m-d') . '"')->whereRaw('DATE(expiry_date) >="' . date('Y-m-d') . '"');
-
-        $plans = $query->select('user_subscriptions_history.*', 'subscription_plans.plan_type', 'subscription_plans.plan_name', 'subscription_plans.no_of_companies', 'subscription_plans.no_of_invited_user', 'user_subscriptions_history.user_id')->get();
-
-        if (!empty($plans->toArray())) {
-
-            $available_companies = 0;
-            foreach ($plans as $row) {
-                if (is_null($row->no_of_companies)) {//If companies are unlimited
-                    return 'unlimited';
-                } else {
-                    $company_registered_on_plan = \App\Company::where(array('user_id' => $user_id, 'plan_no' => $row->unique_no))->count();
-                    $available_companies += $row->no_of_companies - $company_registered_on_plan;
-                }
+        $subscriptions = Subscription::where('user_id', $user_id)->where('status', '1')->get();
+        
+        $availableCompanies = 0;
+        foreach ($subscriptions as $subscription) {
+            if ( $subscription->num_companies == 0 ) {
+                return -1;
+            } else {
+                $countRegistered = \App\Company::where('user_id', $user_id)->where('subscription_id', $subscription->id)->count();
+                $availableCompanies += $subscription->num_companies - $countRegistered;
             }
-
-            return ($available_companies > 0) ? $available_companies : 0;
-        } else {
-            return 0;
         }
+
+        return $availableCompanies;
+        
+        
     }
 
 }

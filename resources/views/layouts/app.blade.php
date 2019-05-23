@@ -21,9 +21,29 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css" />
     
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=1.46">
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=1.47">
     
     <script src="{{asset('assets/js/common-bundle.js')}}?v=1.39"></script>
+
+    <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=a366a538-e5db-4a02-8c91-e6d7def5fe29"> </script>
+    
+    <script>
+      /*window.zESettings = {
+       webWidget: {
+         authenticate: {
+           chat: {
+             jwtFn: function(callback) { 
+               fetch('/usuario/zendesk-jwt').then(function(res) {
+                  res.text().then(function(jwt) {
+                   callback(jwt);
+                  });
+                });
+              }
+            } 
+          }
+        }
+      };*/
+    </script>
   
     @yield('header-scripts')
     
@@ -68,6 +88,28 @@
     <script src="https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+    
+        
+    
+    <script type="text/javascript">
+    /*
+      window.zESettings = {
+       webWidget: {
+         authenticate: {
+           chat: {
+             jwtFn: function(callback) { 
+               fetch('/usuario/zendesk-jwt').then(function(res) {
+                  res.text().then(function(jwt) {
+                    console.log(jwt);
+                   callback(jwt);
+                  });
+                });
+              }
+            } 
+          }
+        }
+      };*/
+   </script>
     
     @if( session()->has('message') )
         <script>

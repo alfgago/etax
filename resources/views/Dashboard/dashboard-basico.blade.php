@@ -51,14 +51,14 @@
             {{ $empresa->id_number }} {{ $empresa->business_name ? " - ".$empresa->business_name : ''}}
           </div>
           <div class="dato-empresa">
-            <b>Plan actual:</b> Empresarial Pro
+            <b>Plan actual:</b> {{ getCurrentSubscription()->plan->getName() }}
           </div>
           <div class="dato-empresa">
             <b>Facturación electrónica:</b> Habilitada
           </div>
           <div class="dato-empresa mt-3">  
-            <a class="btn btn-secondary btn-sm" href="#">Configurar datos</a>
-            <a class="btn btn-secondary btn-sm" href="#">Cambiar plan</a>
+            <a class="btn btn-secondary btn-sm" href="/empresas/configuracion">Configurar datos</a>
+            <a class="btn btn-secondary btn-sm" href="/usuario/cambiar-plan">Cambiar plan</a>
           </div>
         </div>
         

@@ -77,20 +77,22 @@ Route::get('/wizard', 'WizardController@index')->name('Wizard.index');
 Route::get('/editar-totales-2018', 'WizardController@setTotales2018')->name('Wizard.edit_2018');
 Route::post('/update-totales-2018', 'WizardController@storeTotales2018')->name('Wizard.update_2018');
 Route::post('/update-wizard', 'WizardController@updateWizard')->name('Wizard.update_wizard');
+Route::post('/store-wizard', 'WizardController@createWizard')->name('Wizard.store_wizard');
 
 // Rutas de usuario
 Route::prefix('usuario')->group(function() {
-    Route::get('overview', 'UserController@overview')->name('User.overview');
-    Route::get('general', 'UserController@editInformation')->name('User.edit_information');
+    Route::get('perfil', 'UserController@edit')->name('User.edit');
+    Route::patch('update-perfil', 'UserController@update')->name('User.update');
     Route::get('seguridad', 'UserController@editPassword')->name('User.edit_password');
     Route::get('planes', 'UserController@plans')->name('User.plans');
+    Route::get('cambiar-plan', 'UserController@changePlan')->name('User.cambiar_plan');
+    Route::post('confirmar-plan', 'UserController@confirmPlanChange')->name('User.confirmar_plan');
     Route::get('empresas', 'UserController@companies')->name('User.companies');
     Route::get('usuarios-invitados', 'UserController@invitedUsersList')->name('User.invited-users-list');
-
+    Route::get('zendesk-jwt', 'UserController@zendeskJwt')->name('User.zendesk_jwt');
+    Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
 });
 
-Route::patch('update-infomation/{id}', 'UserController@updateInformation')->name('User.update_information');
-Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
 
 // Rutas de API data para ajax
 Route::get('/api/invoices', 'InvoiceController@indexData')->name('Invoice.data');

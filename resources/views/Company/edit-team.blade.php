@@ -10,27 +10,26 @@
   <div class="col-md-12">
   	<div class="tabbable verticalForm">
     	<div class="row">
-        <div class="col-sm-3">
-            <ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                <li>
-                    <a class="nav-link" aria-selected="false" href="/empresas/editar">Editar perfil de empresa</a>
-                </li>
-                <li>
-                    <a class="nav-link " aria-selected="false" href="/empresas/configuracion">Configuración avanzada</a>
-                </li>
-                <li>
-                    <a class="nav-link " aria-selected="false" href="/empresas/certificado">Certificado digital</a>
-                </li class="active">
-                <li>
-                    <a class="nav-link active" aria-selected="true" href="/empresas/equipo">Equipo de trabajo</a>
-                </li>
-            </ul>
-        </div>
-               <div class="col-sm-9">
-                    <div class="tab-content">       
-
-                        <div class="col-md-12 col-sm-12">
-                            <h3 class="card-title">Miembros de "{{$team->name}}"</h3>
+            <div class="col-sm-3">
+                <ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    <li>
+                        <a class="nav-link" aria-selected="false" href="/empresas/editar">Editar perfil de empresa</a>
+                    </li>
+                    <li>
+                        <a class="nav-link " aria-selected="false" href="/empresas/configuracion">Configuración avanzada</a>
+                    </li>
+                    <li>
+                        <a class="nav-link " aria-selected="false" href="/empresas/certificado">Certificado digital</a>
+                    </li class="active">
+                    <li>
+                        <a class="nav-link active" aria-selected="true" href="/empresas/equipo">Equipo de trabajo</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-sm-9">
+                <div class="tab-content">
+                    <div class="col-md-12 col-sm-12">
+                       <h3 class="card-title">Miembros</h3>
                             @if(auth()->user()->isOwnerOfTeam($team))
                                 <a class="btn btn-sm btn-primary pull-right m-0" href="{{route('teams.members.assign_permissions', $team)}}">Editar permisos de usuario</a>
                             @endif
@@ -49,16 +48,19 @@
                                             <td>{{$user->first_name.' '.$user->last_name.' '.$user->last_name2}}</td>
                                             <td>{{$user->email}}</td>
                                             <td>
-                                                @if(auth()->user()->isOwnerOfTeam($team))
+                                                @if( auth()->user()->isOwnerOfTeam($team) )
                                                     @if(auth()->user()->getKey() !== $user->getKey())
                                                     <form style="display: inline-block;" action="{{route('teams.members.destroy', [$team, $user])}}" method="post">
                                                         @csrf
                                                         @method('delete')
         
-                                                        <button type="submit" class="text-danger mr-2" title="Eliminar" style="display: inline-block; background: none; border: 0;">
+                                                        <button type="submit" class="text-danger mr-2" title="Quitar de equipo" style="display: inline-block; background: none; border: 0;">
                                                             <i class="fa fa-ban" aria-hidden="true"></i>
                                                         </button>                                                    
                                                     </form>
+                                                    
+                                                    @else
+                                                        Admin
                                                     @endif
                                                 @endif
                                             </td>
@@ -107,45 +109,24 @@
 
                                 <div class="car mb-4">
                                     <div class="car-body text-left">
-                                        <h3 class="card-title">Invitar usuarios a "{{$team->name}}"</h3>
+                                        <h3 class="card-title">Invitar usuarios</h3>
 
                                         <form class="form-horizontal" method="post" action="{{route('teams.members.invite', $team)}}">
-                                            {!! csrf_field() !!}
+                                            @csrf
 
                                             <div class="row">
 
                                                 <div class="col-xs-4 col-sm-4 col-md-4">
-                                                    <div class="form-group {{ $errors->has('role') ? ' has-error' : '' }}">
-                                                        <strong>Invite Type *</strong>
-                                                        <select class="form-control" name="role" required>
-                                                            <option value="">Select</option>
-                                                            <option value="admin" {{(old('role') == 'admin') ? 'selected':''}}>Invite as admin</option>
-                                                            <option value="readonly" {{(old('role') == 'readonly') ? 'selected':''}}>Invite as read only user</option>
-                                                        </select>
-                                                        @if ($errors->has('role'))
-                                                        <span class="help-block">
-                                                            <strong>{{ $errors->first('role') }}</strong>
-                                                        </span>
-                                                        @endif
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-xs-4 col-sm-4 col-md-4">
                                                     <div class="form-group {{ $errors->has('email') ? ' has-error' : '' }}">
-                                                        <strong>Correo electrónico *</strong>
+                                                        <label>Correo electrónico *</label>
                                                         <input type="text" name="email" class="form-control" placeholder="Correo electrónico" value="{{old('email')}}" required>                                                        
-
-                                                        @if ($errors->has('email'))
-                                                        <span class="help-block">
-                                                            <strong>{{ $errors->first('email') }}</strong>
-                                                        </span>
-                                                        @endif
                                                     </div>
                                                 </div>
 
                                                 <div class="form-group">
                                                     <div class="col-md-6 col-md-offset-4">
-                                                        <button type="submit" class="btn btn-sm btn-primary"><i class="fa fa-btn fa-envelope-o"></i>Enviar invitación</button>
+                                                        <label>&nbsp;</label>
+                                                        <button type="submit" class="btn btn-sm btn-primary mt-0"><i class="fa fa-btn fa-envelope-o mr-2"></i>Enviar invitación</button>
                                                     </div>
                                                 </div>
                                             </div>

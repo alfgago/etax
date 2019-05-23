@@ -40,20 +40,20 @@ class TeamMemberController extends Controller {
     public function permissions($id) {
         $teamModel = config('teamwork.team_model');
         $team = $teamModel::findOrFail($id);
-
+            
         if (empty($team)) {
-            abort(404);
+            return redirect()->back()->withError('Usted no está autorizado para acceder a esta información');
         }
 
         /* Only owner of company can manage permissions */
         if (!auth()->user()->isOwnerOfTeam($team)) {
-            abort(403);
+            return redirect()->back()->withError('Usted no está autorizado para acceder a esta información');
         }
 
         $permissions = CompanyPermission::get();
 
-        if (empty($permissions->toArray())) {
-            abort(404);
+        if ( empty($permissions->toArray()) ) {
+            return redirect()->back()->withError('Usted no está autorizado para acceder a esta información');
         }
 
         return view('teamwork.members.permissions', compact('permissions'))->withTeam($team);
@@ -65,12 +65,12 @@ class TeamMemberController extends Controller {
         $team = $teamModel::findOrFail($team_id);
 
         if (empty($team)) {
-            abort(404);
+            return redirect()->back()->withError('Usted no está autorizado para actualizar a esta información');
         }
 
         /* Only owner of company can assign permissions */
         if (!auth()->user()->isOwnerOfTeam($team)) {
-            abort(403);
+            return redirect()->back()->withError('Usted no está autorizado para actualizar a esta información');
         }
 
         if (!empty($request->permissions)) {
@@ -106,19 +106,19 @@ class TeamMemberController extends Controller {
 
         /* Only owner of company can delete that company */
         if (!auth()->user()->isOwnerOfTeam($team)) {
-            abort(403);
+            return redirect()->back()->withError('Usted no está autorizado para actualizar a esta información');
         }
 
         $userModel = config('teamwork.user_model');
         $user = $userModel::findOrFail($user_id);
 
         if ($user->getKey() === auth()->user()->getKey()) {
-            abort(403);
+            return redirect()->back()->withError('Usted no está autorizado para actualizar a esta información');
         }
 
         $user->detachTeam($team);
 
-        return redirect()->back()->with('success', 'User has been removed from company successfully.');
+        return redirect()->back()->with('success', 'El usuario ha sido removido del equipo.');
     }
 
     /**
@@ -127,34 +127,34 @@ class TeamMemberController extends Controller {
      * @return $this
      */
     public function invite(Request $request, $team_id) {
-
+        
+        $request->validate([
+          'email' => 'required|email'
+        ]);
+        
         if (empty($request->email)) {
-            return redirect()->back()->withErrors(['email' => 'Please enter email address.']);
+            return redirect()->back()->withErrors(['email' => 'Ingrese un correo válido.']);
         }
-
-        if (empty($request->role)) {
-            return redirect()->back()->withErrors(['role' => 'Please select a type.']);
-        }
-
+        
         $teamModel = config('teamwork.team_model');
         $team = $teamModel::findOrFail($team_id);
 
         /* Only owner of company can invite members to their company */
         if (!auth()->user()->isOwnerOfTeam($team)) {
-            abort(403);
+            return redirect()->back()->withError('Usted no está autorizado para actualizar a esta información');
         }
 
         /* Check plan is active or not */
-        $is_plan_active = \App\Company::isPlanActive();
+        $is_plan_active = currentCompanyModel()->isPlanActive();
 
         if (!$is_plan_active) {
-            return redirect()->back()->withErrors(['limit' => 'Plan is no longer active.']);
+            //return redirect()->back()->withErrors(['limit' => 'Debe renovar el plan antes de continuar.']);
         }
 
         /* Check plan limits */
-        if (plan_invitations_exceeds($team, $request->role)) {
-            return redirect()->back()->withErrors(['limit' => 'Plan limit exceeds to invite users.Please subscribe to another plan.']);
-        }
+        //if (plan_invitations_exceeds($team, $request->role)) {
+            //return redirect()->back()->withErrors(['limit' => 'Usted ha llegado al límite de invitaciones disponibles para su plan.']);
+        //}
 
         if (!Teamwork::hasPendingInvite($request->email, $team)) {
             $userRegistered = auth()->user()->getUserData($request->email);
@@ -162,29 +162,32 @@ class TeamMemberController extends Controller {
             if ($userRegistered) {
                 // already memeber of a team
                 if (isExistInTeam($team->id, $userRegistered->getKey())) {
-                    flash($request->email . ' Already member of the team.')->error()->important();
-                    return redirect()->back()->withErrors(['email' => $request->email . ' Already member of the team.']);
+                    return redirect()->back()->withErrors(['email' => $request->email . ' ya es miembro del equipo.']);
                 }
             }
 
             $is_user_exist = \App\User::where('email', $request->email)->first();
             $path = !empty($is_user_exist) ? 'teams.accept_invite' : 'invites.accept_invite';
-
+            
             Teamwork::inviteToTeam($request->email, $team, function( $invite ) use ($request, $path) {
-
-                Mail::to($request->email)->send(new InviteMail(['team' => $invite->team, 'invite' => $invite, 'path' => $path]));
+                
+                Mail::to($request->email)->send(new InviteMail(
+                    ['team' => $invite->team, 
+                    'invite' => $invite, 
+                    'path' => $path,
+                    'name' => $invite->team->name = currentCompanyModel()->name
+                    ]));
                 // Send email to user
-                flash('User ' . $invite->email . ' has been invited.')->success()->important();
+                flash('User ' . $invite->email . ' ha sido invitado.')->success()->important();
 
                 \App\TeamInvitation::where('id', $invite->id)->update(['role' => $request->role]);
             });
 
         } else {
-            flash($request->email . 'address is already invited to the team pending for acceptance.')->error()->important();
-            return redirect()->back()->withErrors(['email' => $request->email . ' is already invited to the team and is pending for acceptance.']);
+            return redirect()->back()->withErrors(['email' => $request->email . ' ya tiene una invitación pendiente.']);
         }
 
-        return redirect()->back()->with('success', 'Invitation mail has been sent to user successfully.');
+        return redirect()->back()->withMessage('La invitación se ha enviado satisfactoriamente.');
     }
 
     /**
@@ -202,13 +205,17 @@ class TeamMemberController extends Controller {
 
         /* Only owner of company can re-invite members to their company */
         if (!auth()->user()->isOwnerOfTeam($team)) {
-            abort(403);
+            return redirect()->back()->withError('Usted no está autorizado para actualizar a esta información');
         }
 
         $is_user_exist = \App\User::where('email', $invite->email)->first();
         $path = !empty($is_user_exist) ? 'teams.accept_invite' : 'invites.accept_invite';
 
-        Mail::to($invite->email)->send(new InviteMail(['team' => $invite->team, 'invite' => $invite, 'path' => $path]));
+        Mail::to($invite->email)->send(new InviteMail([
+            'team' => $invite->team, 
+            'invite' => $invite, 
+            'path' => $path,
+        ]));
 
         /* Old Code
           Mail::send('teamwork.emails.invite', ['team' => $invite->team, 'invite' => $invite], function ($m) use ($invite) {
@@ -218,8 +225,7 @@ class TeamMemberController extends Controller {
           return redirect(route('teams.members.show', $invite->team));
          */
 
-        flash('User ' . $invite->email . ' has been re-invited.')->success()->important();
-        return redirect()->back()->with('success', 'User ' . $invite->email . ' has been re-invited.');
+        return redirect()->back()->withMessage('Se ha re-enviado invitación a ' . $invite->email . ' satisfactoriamente.');
     }
 
 }
