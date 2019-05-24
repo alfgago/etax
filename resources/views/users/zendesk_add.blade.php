@@ -1,7 +1,7 @@
 @extends('layouts/app')
 
 @section('title')
-Consultas
+Historial de Consultas
 @endsection
 
 @section('content')

@@ -249,9 +249,9 @@ class UserController extends Controller {
     *
     */
     public function consulta_zendesk(){
-        $subdomain = "5ecr";
-        $username  = "ali@5e.cr"; // replace this with your registered email
-        $token     = "IozVFmXc4kbXOkeDl60AtN47TrzcVQalrOwXrR4P"; // replace this with your token
+        $subdomain = "etax";
+        $username  = "agago@etaxcr.com"; // replace this with your registered email
+        $token     = "v1rk6PURKashoSQ0sK6gVXcd7LEIYDp6hEjWti8b"; // replace this with your token
         $client = new ZendeskAPI($subdomain);
         $client->setAuth('basic', ['username' => $username, 'token' => $token]);
         // Get all tickets
@@ -311,9 +311,9 @@ class UserController extends Controller {
         $priority    = ($request->priority) ? $request->priority : 'low';
         $description = ($request->description) ? $request->description : 'No definido por el usuario';
         $name = auth()->user()->last_name;
-        $subdomain = "5ecr";
-        $username = "ali@5e.cr";
-        $token = "IozVFmXc4kbXOkeDl60AtN47TrzcVQalrOwXrR4P";
+        $subdomain = "etax";
+        $username = "agago@etaxcr.com";
+        $token = "v1rk6PURKashoSQ0sK6gVXcd7LEIYDp6hEjWti8b";
         $client = new ZendeskAPI($subdomain);
         $client->setAuth('basic', ['username' => $username, 'token' => $token]);
         $newTicket = $client->tickets()->create(array('type' => $type, 'tags' => array('demo', 'testing', 'api', 'zendesk'), 'subject' => $subject, 'comment' => array('body' => $description), 'requester' => array('locale_id' => '1', 'name' => $name, 'email' => 'ali@5e.cr'), 'priority' => $priority));
