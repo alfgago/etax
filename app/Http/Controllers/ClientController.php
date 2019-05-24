@@ -43,7 +43,7 @@ class ClientController extends Controller
 
         $query = Client::where('company_id', $current_company);
         return datatables()->eloquent( $query )
-            ->orderColumn('reference_number', '-reference_number $1')
+            ->orderColumn('fullname', '-fullname $1')
             ->addColumn('actions', function($client) {
                 return view('datatables.actions', [
                     'routeName' => 'clientes',

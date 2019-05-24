@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+//header('Access-Control-Allow-Origin: *');
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
@@ -12,6 +12,8 @@ use Hash;
 use Auth;
 require __DIR__.'/../../../vendor/autoload.php';
 use Zendesk\API\HttpClient as ZendeskAPI;
+use \Firebase\JWT\JWT;
+use Carbon\Carbon;
 
 class UserController extends Controller {
 
@@ -243,29 +245,50 @@ class UserController extends Controller {
         return redirect()->back()->with('success', 'Profile password updated successfully');
     }
     /*
-    *Retorna la vista de las consultas de zendesk del usuario
+    *Retorna las consultas de zendesk del usuario
     *
     */
-    public function zendesk(){ 
+    public function consulta_zendesk(){
         $subdomain = "5ecr";
         $username  = "ali@5e.cr"; // replace this with your registered email
         $token     = "IozVFmXc4kbXOkeDl60AtN47TrzcVQalrOwXrR4P"; // replace this with your token
         $client = new ZendeskAPI($subdomain);
         $client->setAuth('basic', ['username' => $username, 'token' => $token]);
         // Get all tickets
-        $tickets = $client->tickets()->findAll();
+        $tickets = $client->tickets()->findAll(['per_page' => 25, 'page' => 1]);
         $all = json_decode(json_encode($tickets), true);
-        $total = count($all); 
+        return $all; 
+    }
+    /*
+    *
+    *
+    */
+    public function zendesk(){ 
+        $all = $this->consulta_zendesk();
+        $total = count($all['tickets']); 
         $submitter_id = $all['tickets'][0]['submitter_id'];
+        $organization_id = $all['tickets'][0]['organization_id'];
+        $group_id = $all['tickets'][0]['group_id'];
         return view('users.zendesk')->with('submitter_id', $submitter_id)
-                                    ->with('total', $total);
+                                    ->with('total', $total)
+                                    ->with('group_id', $group_id)
+                                    ->with('organization_id', $organization_id);
+    }
+    /*
+    *
+    *
+    */
+    public function zendeskdetalle($id){ 
+        $tickets = $this->consulta_zendesk();
+        return view('users.zendeskdetalle')->with('tickets', $tickets)
+                                           ->with('id', $id);
     }
     /*
     *
     *Crear tickets en zendesk
     * 
     */
-    public function crear_ticket(){
+    public function crearTicket(){
         $user_id = auth()->user()->id;
         return view('users.zendesk_add')->with('user_id', $user_id);
     }
@@ -275,17 +298,44 @@ class UserController extends Controller {
     *
     */
     public function ver_consultas(){
+        $tickets = $this->consulta_zendesk();
+        return view('users.zendesk_all')->with('tickets', $tickets);
+    }
+    /*
+    *
+    *
+    */
+    public function crearRequest(Request $request){
+        $type        = ($request->type) ? $request->type : 'incident';
+        $subject     = ($request->subject) ? $request->subject : 'No definido por el usuario';
+        $priority    = ($request->priority) ? $request->priority : 'low';
+        $description = ($request->description) ? $request->description : 'No definido por el usuario';
+        $name = auth()->user()->last_name;
         $subdomain = "5ecr";
-        $username  = "ali@5e.cr"; // replace this with your registered email
-        $token     = "IozVFmXc4kbXOkeDl60AtN47TrzcVQalrOwXrR4P"; // replace this with your token
+        $username = "ali@5e.cr";
+        $token = "IozVFmXc4kbXOkeDl60AtN47TrzcVQalrOwXrR4P";
         $client = new ZendeskAPI($subdomain);
         $client->setAuth('basic', ['username' => $username, 'token' => $token]);
-        // Get all tickets
-        $tickets = $client->tickets()->findAll();
-        $all = json_decode(json_encode($tickets), true);
-        // $submitter_id = 2;
-        return view('users.zendesk')->with('submitter_id', $submitter_id)
-                                    ->with('total', $total);
+        $newTicket = $client->tickets()->create(array('type' => $type, 'tags' => array('demo', 'testing', 'api', 'zendesk'), 'subject' => $subject, 'comment' => array('body' => $description), 'requester' => array('locale_id' => '1', 'name' => $name, 'email' => 'ali@5e.cr'), 'priority' => $priority));
+        $user_id = auth()->user()->id;
+        return view('users.zendesk_add')->with('user_id', $user_id);
+    }
+    /*
+    */
+    public function zendeskJwt(){
+        $user = auth()->user();
+        $iat = Carbon::now()->timestamp;
+        $externalId = $user->id;
+        $payload2 = array(
+            'name' => $user->first_name,
+            'email' => $user->email,
+            'iat' => $iat,
+            'external_id' => $externalId
+        );
+        $payload = json_encode($payload2, true);
+        $secret = json_encode('8707438E70BF8AAE575B4A20455DB6B0AEBDCD2781B02C36492518B005B116F4', true);
+        $token = JWT::encode($payload, $secret);
+        return response()->json(['token' => $token]);
     }
     /**
      * Remove the specified resource from storage.

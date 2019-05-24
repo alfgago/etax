@@ -25,9 +25,27 @@
     
     <script src="{{asset('assets/js/common-bundle.js')}}?v=1.39"></script>
 
-    <!-- Start of 5ecr Zendesk Widget script -->
-    <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=1df0685c-1041-4c71-8cff-be57fb59f3c1"> </script>
-    <!-- End of 5ecr Zendesk Widget script -->
+    <!-- Start of etax Zendesk Widget script -->
+    <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=a366a538-e5db-4a02-8c91-e6d7def5fe29"> </script>
+    <!-- End of etax Zendesk Widget script -->
+
+    <script type="text/javascript">
+        /*window.zESettings = {
+            webWidget: {
+                authenticate: {
+                    chat: {
+                        jwtFn: function(callback) { 
+                            fetch('/usuario/zendesk-jwt').then(function(res) {
+                                res.text().then(function(jwt) {
+                                    callback(jwt);
+                                });
+                            });
+                        }
+                    } 
+                }
+            }
+        };*/
+    </script>
   
     @yield('header-scripts')
     

@@ -85,7 +85,10 @@ Route::prefix('usuario')->group(function() {
     Route::get('seguridad', 'UserController@editPassword')->name('User.edit_password');
     Route::get('planes', 'UserController@plans')->name('User.plans');
     Route::get('zendesk', 'UserController@zendesk')->name('User.zendesk');
-    Route::get('crear_ticket', 'UserController@crear_ticket')->name('User.crear_ticket');
+    Route::get('zendesk-jwt', 'UserController@zendeskJwt')->name('User.zendesk_jwt');
+    Route::get('crear-ticket', 'UserController@crearTicket')->name('User.crear_ticket');
+    Route::post('crear-request', 'UserController@crearRequest')->name('User.crear_request');
+    Route::get('zendesk-detalle/{id}', 'UserController@zendeskdetalle')->name('User.zendesk_detalle');
     Route::get('ver_consultas', 'UserController@ver_consultas')->name('User.ver_consultas');
     Route::get('empresas', 'UserController@companies')->name('User.companies');
     Route::get('usuarios-invitados', 'UserController@invitedUsersList')->name('User.invited-users-list');
