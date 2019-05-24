@@ -412,8 +412,8 @@ class BillController extends Controller
             $precioUnitario = (float)$linea['PrecioUnitario'];
             $subtotalLinea = (float)$linea['SubTotal'];
             $totalLinea = (float)$linea['MontoTotalLinea'];
-            $montoDescuento = array_key_exists('MontoDescuento', $linea) ? (float)$linea['MontoDescuento']['Codigo'] : 0;
-            $codigoEtax = '103'; //De momento asume que todo en 4.2 es al 13%.
+            $montoDescuento = array_key_exists('MontoDescuento', $linea) ? $linea['MontoDescuento'] : 0;
+            $codigoEtax = '003'; //De momento asume que todo en 4.2 es al 13%.
             $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
             
             $insert = Bill::importBillRow(

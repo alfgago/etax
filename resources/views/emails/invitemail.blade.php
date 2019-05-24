@@ -1,11 +1,12 @@
 @component('mail::message')
-<strong>Hello!</strong>
-<p>You have been invited to join company {{$content['team']->name}}</p>
+<strong>¡Hola!</strong>
+<p>Usted ha sido invitado a unirse al equipo de empresa: {{ $content['name'] }}</p>
 
 @component('mail::button', ['url' => route($content['path'], $content['invite']->accept_token)])
-Join Now
+ Únase ya
 @endcomponent
 
-Regards,<br>
-{{ config('app.name').' Team' }}
+Si cree que esta invitación le ha llegado por error, ignore este correo.<br>
+
+Saludos de parte de todo el equipo de eTax.
 @endcomponent

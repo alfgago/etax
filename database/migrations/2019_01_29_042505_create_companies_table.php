@@ -17,7 +17,7 @@ class CreateCompaniesTable extends Migration
             $table->bigIncrements('id');
           
             $table->unsignedBigInteger('user_id');
-            $table->string('plan_no')->nullable();
+            $table->unsignedBigInteger('subscription_id')->nullable();
             
             $table->enum('type', ['F', 'J', 'D', 'E', 'N', 'O']); 
             $table->string('id_number')->unique()->nullable(); 

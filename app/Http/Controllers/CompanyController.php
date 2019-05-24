@@ -31,7 +31,7 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request) {
-        abort(404);
+        return redirect('/');
     }
 
     /**
@@ -41,15 +41,12 @@ class CompanyController extends Controller {
      */
     public function create() {
 
-        if ( auth()->user()->roles[0]->name != 'Super Admin' ) {
-            /* Not able to create company if dont have any active plan */
-            $available_companies_count = User::checkCountAvailableCompanies();
+        $available_companies_count = User::checkCountAvailableCompanies();
 
-            if ($available_companies_count == 0) {
-                abort(403);
-            }
+        if ($available_companies_count == 0) {
+            return redirect()->route('User.companies')->withError('Su plan actual no permite más empresas.');
         }
-
+        
         return view('Company.create');
     }
 
@@ -90,7 +87,7 @@ class CompanyController extends Controller {
         $company->default_currency = !empty($request->default_currency) ? $request->default_currency : 'crc';
 
         /* Add company to a plan */
-        $company->plan_no = (auth()->user()->roles[0]->name != 'Super Admin') ? get_current_user_subscriptions()[0] : '0';
+        $company->subscription_id = getCurrentUserSubscriptions()[0]->id;
 
         $company->save();
 
@@ -104,7 +101,7 @@ class CompanyController extends Controller {
 
         auth()->user()->attachTeam($team);
 
-        return redirect()->route('User.companies')->with('success', 'Company added successfully');
+        return redirect()->route('User.companies')->withMessage('La compañía ha sido agregada con éxito');
     }
 
     /**
@@ -114,7 +111,7 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function show(Company $empresa) {
-        abort(404);
+        return redirect('/');
     }
 
     /**
@@ -136,7 +133,7 @@ class CompanyController extends Controller {
         $company = currentCompanyModel();
         
         if (!$company) {
-            abort(404);
+            return redirect('/');
         }
 
         $users = User::with(['roles' => function($q) {
@@ -159,7 +156,7 @@ class CompanyController extends Controller {
         $company = currentCompanyModel();
 
         if (!$company) {
-            abort(404);
+            return redirect('/');
         }
         
         return view('Company.edit-advanced', compact('company'));
@@ -176,7 +173,7 @@ class CompanyController extends Controller {
         $company = currentCompanyModel();
 
         if (!$company) {
-            abort(404);
+            return redirect('/');
         }
 
         $certificate = AtvCertificate::where('company_id', $company->id)->first();
@@ -195,7 +192,7 @@ class CompanyController extends Controller {
         $company = currentCompanyModel();
 
         if (!$company) {
-            abort(404);
+            return redirect('/');
         }
 
         $users = User::with(['roles' => function($q) {
@@ -205,7 +202,7 @@ class CompanyController extends Controller {
         $team = Team::where('company_id', $company->id)->first();
 
         /* Only owner of company can edit that company */
-        if (!auth()->user()->isOwnerOfTeam($team)) {
+        if ( !auth()->user()->isOwnerOfTeam($team) ) {
             abort(401);
         }
         
@@ -225,7 +222,7 @@ class CompanyController extends Controller {
         $this->authorize('update', $company);
 
         if (!$company) {
-            abort(404);
+            return redirect('/');
         }
         
         $request->validate([
@@ -246,7 +243,7 @@ class CompanyController extends Controller {
 
         /* Only owner of company or user invited as admin for that company can edit company details */
         if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) && get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
-            abort(403);
+            return redirect()->back()->withError('Usted no está autorizado para actualizar esta información');
         }
 
         $company->type = $request->tipo_persona;
@@ -287,7 +284,7 @@ class CompanyController extends Controller {
         $company = Company::find($id);
 
         if (!$company) {
-            abort(404);
+            return redirect()->back()->withError('No se ha encontrado una compañía a su nombre.');
         }
 
         $this->authorize('update', $company);
@@ -296,7 +293,7 @@ class CompanyController extends Controller {
 
         /* Only owner of company or user invited as admin for that company can edit company details */
         if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) && get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
-            abort(403);
+            return redirect()->back()->withError('Usted no está autorizado para actualizar esta información');
         }
 
         $company->default_currency = $request->default_currency;
@@ -327,14 +324,14 @@ class CompanyController extends Controller {
         $this->authorize('update', $company);
 
         if (!$company) {
-            abort(404);
+            return redirect()->back()->withError('No se ha encontrado una compañía a su nombre.');
         }
 
         $team = Team::where('company_id', $company->id)->first();
 
         /* Only owner of company or user invited as admin for that company can edit company details */
         if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) && get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
-            abort(403);
+            return redirect()->back()->withError('Usted no está autorizado para actualizar esta información');
         }
 
         if (Storage::exists("empresa-$id/cert.p12")) {
@@ -368,6 +365,8 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function destroy($id) {
+        return redirect()->route('empresas.index')->with('success', 'Company deleted successfully');
+        
         $post = Company::where('id', $id)->first();
 
         if ($post != null) {
@@ -381,7 +380,7 @@ class CompanyController extends Controller {
     public function changeCompany(Request $request) {
 
         if (!$request->ajax()) {
-            abort(403);
+            return redirect()->back()->withError('Ha ocurrido un error, inténtelo de nuevo.');
         }
 
         $company_id_no = $request->id;

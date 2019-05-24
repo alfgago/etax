@@ -16,11 +16,9 @@ class CreatePlansInvitationsTable extends Migration
         Schema::create('plans_invitations', function (Blueprint $table) {
             $table->bigIncrements('id');
 			
-			$table->string('plan_no'); 
-            $table->string('company_id'); 
-            $table->string('user_id');
-			$table->enum('is_admin', ['0', '1']);
-			$table->enum('is_read_only', ['0', '1']);            
+			$table->unsignedBigInteger('subscription_id'); 
+            $table->unsignedBigInteger('company_id'); 
+            $table->unsignedBigInteger('user_id');        
 			
             $table->timestamps();
         });

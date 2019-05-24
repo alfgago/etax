@@ -14,5 +14,11 @@ class Team extends TeamworkTeam {
         'name',
         'company_id'
     ];
+    
+    //Relacion con la empresa
+      public function company()
+      {
+          return $this->belongsTo(Company::class);
+      }
 
 }
