@@ -11,10 +11,9 @@ Información general del perfil
 
 <div class="row">
     <div class="col-md-12">         
-
         <div class="tabbable verticalForm">
             <div class="row">
-                <div class="col-3">
+                <div class="col-sm-3">
                     <ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                         <li class="active">
                             <a class="nav-link active" aria-selected="true" href="/usuario/overview">Visión general</a>
@@ -33,10 +32,9 @@ Información general del perfil
                         </li>
                     </ul>
                 </div>
-                <div class="col-9">
-                    <div class="tab-content p-0">
-
-                        <div class="tab-pane fade show active" role="tabpanel">
+                <div class="col-sm-9">
+                    <div class="tab-content">
+                        <div class="col-md-12 col-sm-12">
                             <h3 class="card-title">Visión general</h3>
 
                             <div class="row">

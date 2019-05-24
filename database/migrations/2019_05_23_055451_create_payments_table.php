@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateUserCompanyPermissionsTable extends Migration
+class CreatePaymentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateUserCompanyPermissionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_company_permissions', function (Blueprint $table) {
+        Schema::create('payments', function (Blueprint $table) {
             $table->bigIncrements('id');
-			$table->unsignedBigInteger('company_id');
-			$table->unsignedBigInteger('user_id');
-			$table->integer('permission_id');            
+            
+            
+            $table->timestamps();
         });
     }
 
@@ -28,6 +28,6 @@ class CreateUserCompanyPermissionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_company_permissions');
+        Schema::dropIfExists('payments');
     }
 }

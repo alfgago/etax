@@ -72,7 +72,7 @@ use RegistersUsers;
                     'password' => Hash::make($data['password']),
         ]);
 
-        $user->assignRole(array('Admin'));
+        $user->assignRole(array('Subscriber'));
         
         $user->addCompany();
 

@@ -38,17 +38,22 @@ class ReportsController extends Controller
 
               $is_admin = ($invite->role == 'admin') ? '1' : '0';
               $is_readonly = ($invite->role == 'readonly') ? '1' : '0';
-              PlansInvitation::create(['plan_no' => $company->plan_no, 'company_id' => $company->id, 'user_id' => auth()->user()->id, 'is_admin' => $is_admin, 'is_read_only' => $is_readonly]);
+              PlansInvitation::create(['subscription_id' => $company->subscription_id, 'company_id' => $company->id, 'user_id' => auth()->user()->id]);
 
               return redirect()->route('User.companies')->with('success', 'La invitación ha sido enviada.');
           }
+      }
+      
+      $subscription = getCurrentSubscription();
+      if( !$subscription ) {
+          return redirect('/usuario/cambiar-plan');
       }
       
       if( ! currentCompanyModel()->wizard_finished ) {
         return redirect('/wizard');
       }
 
-      return view('/Dashboard/index');
+      return view('/Dashboard/index', compact( 'subscription' ) );
     }
     
     public function reports() {

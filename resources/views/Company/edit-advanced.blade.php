@@ -74,7 +74,7 @@
 						    
 						    <div class="form-group col-md-6">
 						      <label for="saldo_favor_2018">Ingrese su saldo a favor acumulado de periodos anteriores</label>
-						      <input type="number" class="form-control" name="saldo_favor_2018" id="saldo_favor_2018" step="0.01" value="0">
+						      <input type="number" class="form-control" name="saldo_favor_2018" id="saldo_favor_2018" step="0.01" value="{{ @$company->saldo_favor_2018 ? $company->saldo_favor_2018 : 0 }}">
 						    </div>
 						    
 						    <div class="form-group col-md-12">

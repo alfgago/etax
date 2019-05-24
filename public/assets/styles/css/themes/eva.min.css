@@ -18447,6 +18447,7 @@ td a {
   max-width: 80rem;
 }
 
+.tab-content h3,
 form h3 {
   margin: 1rem 0;
   border-bottom: 0.45rem solid #F0C962;
