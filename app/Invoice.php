@@ -119,6 +119,8 @@ class Invoice extends Model
     
       $lids = array();
       foreach($request->items as $item) {
+        $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
+        
         $item_id = $item['id'] ? $item['id'] : 0;
         $item_number = $item['item_number'];
         $code = $item['code'];
@@ -130,7 +132,7 @@ class Invoice extends Model
         $subtotal = $item['subtotal'];
         $total = $item['total'];
         $discount_percentage = '0';
-        $discount_reason = '';
+        $discount_reason = "";
         $iva_type = $item['iva_type'];
         $iva_percentage = $item['iva_percentage'];
         $iva_amount = $item['iva_amount'];
@@ -169,7 +171,6 @@ class Invoice extends Model
         'total' => $total,
         'discount_type' => '01',
         'discount' => $discount_percentage,
-        'discount_reason' => $discount_reason,
         'iva_type' => $iva_type,
         'iva_percentage' => $iva_percentage,
         'iva_amount' => $iva_amount,
@@ -200,7 +201,6 @@ class Invoice extends Model
           $item->total = $total;
           $item->discount_type = '01';
           $item->discount = $discount_percentage;
-          $item->discount_reason = $discount_reason;
           $item->iva_type = $iva_type;
           $item->iva_percentage = $iva_percentage;
           $item->iva_amount = $iva_amount;
