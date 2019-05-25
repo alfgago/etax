@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c444024533f14f3087fb473c20058df8",
+    "content-hash": "ae273925a2f1a9fa470d032f256b8abe",
     "packages": [
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -1326,6 +1326,49 @@
                 "storage"
             ],
             "time": "2019-03-30T13:22:34+00:00"
+        },
+        {
+            "name": "lindelea/laravel-aws-elb-support",
+            "version": "v1.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lindelea/laravel-aws-elb-support.git",
+                "reference": "46c5f661f2dbf5891f946663e0e597377c769808"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lindelea/laravel-aws-elb-support/zipball/46c5f661f2dbf5891f946663e0e597377c769808",
+                "reference": "46c5f661f2dbf5891f946663e0e597377c769808",
+                "shasum": ""
+            },
+            "require-dev": {
+                "laravel/framework": "5.1.*|5.2.*|5.3.*|5.4.*|5.5.*|5.6.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Lindelea\\Support\\Aws\\Elb\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Lindelea",
+                    "email": "kgo@lindelin.org",
+                    "role": "Developer"
+                }
+            ],
+            "description": "AWS Elastic Load Balancing support for Laravel 5x",
+            "keywords": [
+                "Elastic Load Balancing",
+                "aws",
+                "elb",
+                "laravel"
+            ],
+            "time": "2018-06-18T01:11:11+00:00"
         },
         {
             "name": "maatwebsite/excel",
