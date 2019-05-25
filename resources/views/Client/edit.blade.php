@@ -34,3 +34,41 @@
 @section('breadcrumb-buttons')
   <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar cliente</button>
 @endsection 
+
+@section('footer-scripts')
+	
+		
+		<script>
+		  
+		  $(document).ready(function(){
+		    
+		  	fillProvincias();
+		  	
+  	    $("#billing_emails").tagging({
+  	      "forbidden-chars":[",",'"',"'","?"],
+  	      "forbidden-chars-text": "Caracter inválido: ",
+  	      "edit-on-delete": false,
+  	      "tag-char": "@"
+  	    });
+		    
+		    toggleApellidos();
+		    
+		    //Revisa si tiene estado, canton y distrito marcados.
+		    @if( @$client->state )
+		    	$('#state').val( {{ $client->state }} );
+		    	fillCantones();
+		    	@if( @$client->city )
+			    	$('#city').val( {{ $client->city }} );
+			    	fillDistritos();
+			    	@if( @$client->district )
+				    	$('#district').val( {{ $client->district }} );
+				    	fillZip();
+				    @endif
+			    @endif
+		    @endif
+		    
+		  });
+		  
+		</script>
+
+@endsection
