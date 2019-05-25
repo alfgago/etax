@@ -75,6 +75,37 @@ class BillController extends Controller
             ->rawColumns(['actions'])
             ->toJson();
     }
+    
+    /**
+     * Despliega las facturas que requieren validación de códigos
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexValidaciones()
+    {
+        $current_company = currentCompany();
+        $bills = Bill::where('company_id', $current_company)->where('is_void', false)->where('is_totales', false)->where('is_code_validated', false)->orderBy('generated_date', 'DESC')->orderBy('reference_number', 'DESC')->paginate(10);
+        return view('Bill/index-validaciones', [
+          'bills' => $bills
+        ]);
+    }
+    
+    public function confirmarValidacion( Request $request, $id )
+    {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+        
+        $tipoIva = $request->tipo_iva;
+        foreach( $bill->items as $item ) {
+            $item->iva_type = $request->tipo_iva;
+            $item->save();
+        }
+        
+        $bill->is_code_validated = true;
+        $bill->save();
+        
+        return redirect('/facturas-recibidas/validaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido validada');
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -300,7 +331,7 @@ class BillController extends Controller
             
             return redirect('/facturas-recibidas')->withMessage('Facturas importados exitosamente en '.$time.'s');
         }else{
-            return redirect('/facturas-emitidas')->withError('Usted tiene un límite de 2500 facturas por archivo.');
+            return redirect('/facturas-recibidas')->withError('Usted tiene un límite de 2500 facturas por archivo.');
         }
         
     }
@@ -335,7 +366,7 @@ class BillController extends Controller
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Mensaje:' . $ex->getMessage());
         }
         
-        return redirect('/facturas-recibidas')->withMessage('Facturas importados exitosamente en '.$time.'s');
+        return redirect('/facturas-recibidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
         
     }
     

@@ -33,8 +33,8 @@ class TeamworkSetupTables extends Migration
 
         Schema::create( \Config::get( 'teamwork.team_user_table' ), function ( Blueprint $table )
         {
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('team_id');			
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('team_id')->nullable();			
             $table->timestamps();
 
             $table->foreign( 'user_id' )
@@ -52,8 +52,8 @@ class TeamworkSetupTables extends Migration
         Schema::create( \Config::get( 'teamwork.team_invites_table' ), function(Blueprint $table)
         {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('team_id');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('team_id')->nullable();
             $table->enum('type', ['invite', 'request']);
             $table->string('role')->nullable();
 			$table->string('email');

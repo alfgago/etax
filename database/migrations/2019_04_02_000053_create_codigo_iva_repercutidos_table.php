@@ -14,7 +14,11 @@ class CreateCodigoIvaRepercutidosTable extends Migration
     public function up()
     {
         Schema::create('codigo_iva_repercutidos', function (Blueprint $table) {
-            $table->increments('id');
+            $table->bigIncrements('id');
+            $table->string('code')->nullable();
+            $table->string('name')->nullable();
+            $table->double('percentage')->nullable();
+            $table->boolean('hidden')->default(false);
             $table->timestamps();
         });
     }

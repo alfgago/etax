@@ -16,16 +16,16 @@ class CreateProductsTable extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->bigIncrements('id');
           
-            $table->unsignedBigInteger('company_id');
+            $table->unsignedBigInteger('company_id')->nullable();
             $table->unsignedBigInteger('product_category_id')->nullable();
           
-            $table->string('code');
-            $table->string('name');
-            $table->string('measure_unit');
-            $table->double('unit_price');
+            $table->string('code')->nullable();
+            $table->string('name')->nullable();
+            $table->string('measure_unit')->nullable();
+            $table->double('unit_price')->nullable();
             $table->string('description')->nullable();
             $table->boolean('is_catalogue')->default(false);
-            $table->string('default_iva_type');
+            $table->string('default_iva_type')->nullable();
             
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
           

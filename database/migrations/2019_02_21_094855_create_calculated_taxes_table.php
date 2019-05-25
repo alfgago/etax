@@ -20,8 +20,8 @@ class CreateCalculatedTaxesTable extends Migration
             
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             
-            $table->integer('month');
-            $table->integer('year');
+            $table->integer('month')->nullable();
+            $table->integer('year')->nullable();
             
             $table->boolean('is_rectification')->default(false);
             $table->boolean('is_closed')->default(false);
@@ -55,10 +55,10 @@ class CreateCalculatedTaxesTable extends Migration
             $table->double('total_proveedores_credito')->nullable();
             $table->double('iva_retenido')->nullable();
             
-            $table->double('bills_subtotal1');
-            $table->double('bills_subtotal2');
-            $table->double('bills_subtotal3');
-            $table->double('bills_subtotal4');
+            $table->double('bills_subtotal1')->nullable();
+            $table->double('bills_subtotal2')->nullable();
+            $table->double('bills_subtotal3')->nullable();
+            $table->double('bills_subtotal4')->nullable();
             
             $table->double('numerador_prorrata')->nullable();
             $table->double('denumerador_prorrata')->nullable();

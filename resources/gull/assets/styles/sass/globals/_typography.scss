@@ -24,15 +24,21 @@ h1, h2, h3, h4, h5, h6, .card-title, .text-title {
   font-size: .85rem;
 }
 
-@media only screen and (max-width: 1400px) {
+@media only screen and (max-width: 1600px) {
   body, html {
     font-size: 14px;
   }
 }
 
-@media only screen and (max-width: 1280) {
+@media only screen and (max-width: 1400px) {
   body, html {
     font-size: 13px;
+  }
+}
+
+@media only screen and (max-width: 1280) {
+  body, html {
+    font-size: 12.5px;
   }
 }
 
