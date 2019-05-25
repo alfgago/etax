@@ -16,9 +16,9 @@ class CreateProductCategoriesTable extends Migration
         Schema::create('product_categories', function (Blueprint $table) {
             $table->bigIncrements('id');
           
-            $table->string('name');
-            $table->string('invoice_iva_code');
-            $table->string('bill_iva_code');
+            $table->string('name')->nullable();
+            $table->string('invoice_iva_code')->nullable();
+            $table->string('bill_iva_code')->nullable();
             $table->integer('order')->default(0);
           
             $table->timestamps();

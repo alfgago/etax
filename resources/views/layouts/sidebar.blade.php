@@ -21,7 +21,7 @@
                     <a href="/facturas-emitidas">Ver todas</a>
                     <a href="/facturas-emitidas/create">Registrar factura existente</a>
                     <a href="#" onclick="abrirPopup('importar-emitidas-popup');">Importar facturas</a>
-                    <a href="#">Validar facturas</a>
+                    <a href="/facturas-emitidas/validaciones">Validar facturas</a>
                 </div>
                 
             </li>
@@ -36,7 +36,7 @@
                     <a href="/facturas-recibidas">Ver todas</a>
                     <a href="/facturas-recibidas/create">Registrar factura recibida</a>
                     <a href="#" onclick="abrirPopup('importar-recibidas-popup');">Importar facturas</a>
-                    <a href="#">Validar facturas</a>
+                    <a href="/facturas-recibidas/validaciones">Validar facturas</a>
                 </div>
             </li>
             

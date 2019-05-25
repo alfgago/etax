@@ -78,6 +78,38 @@ class InvoiceController extends Controller
             ->rawColumns(['actions'])
             ->toJson();
     }
+    
+    
+    /**
+     * Despliega las facturas que requieren validación de códigos
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexValidaciones()
+    {
+        $current_company = currentCompany();
+        $invoices = Invoice::where('company_id', $current_company)->where('is_void', false)->where('is_totales', false)->where('is_code_validated', false)->orderBy('generated_date', 'DESC')->orderBy('reference_number', 'DESC')->paginate(10);
+        return view('Invoice/index-validaciones', [
+          'invoices' => $invoices
+        ]);
+    }
+    
+    public function confirmarValidacion( Request $request, $id )
+    {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        
+        $tipoIva = $request->tipo_iva;
+        foreach( $invoice->items as $item ) {
+            $item->iva_type = $request->tipo_iva;
+            $item->save();
+        }
+        
+        $invoice->is_code_validated = true;
+        $invoice->save();
+        
+        return redirect('/facturas-emitidas/validaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido validada');
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -154,6 +186,8 @@ class InvoiceController extends Controller
      */
     public function sendHacienda(Request $request)
     {
+        return redirect()->back()->withMessage("Funcionalidad de facturación electrónica habilitada muy pronto.");
+        
         $invoice = new Invoice();
         $company = currentCompanyModel();
         $invoice->company_id = $company->id;
@@ -167,7 +201,6 @@ class InvoiceController extends Controller
         
         $invoice->setInvoiceData($request);
         
-        dd($invoice);
         
         $company->last_invoice_ref_number = $invoice->reference_number;
         $company->last_document = $invoice->document_number;
@@ -392,7 +425,7 @@ class InvoiceController extends Controller
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
         }
         
-        return redirect('/facturas-recibidas')->withMessage('Facturas importados exitosamente en '.$time.'s');
+        return redirect('/facturas-emitidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
         
     }
     

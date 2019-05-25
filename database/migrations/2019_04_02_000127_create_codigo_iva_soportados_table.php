@@ -14,7 +14,11 @@ class CreateCodigoIvaSoportadosTable extends Migration
     public function up()
     {
         Schema::create('codigo_iva_soportados', function (Blueprint $table) {
-            $table->increments('id');
+            $table->bigIncrements('id');
+            $table->string('code')->nullable();
+            $table->string('name')->nullable();
+            $table->double('percentage')->nullable();
+            $table->boolean('hidden')->default(false);
             $table->timestamps();
         });
     }

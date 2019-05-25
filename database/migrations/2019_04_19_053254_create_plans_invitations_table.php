@@ -16,9 +16,9 @@ class CreatePlansInvitationsTable extends Migration
         Schema::create('plans_invitations', function (Blueprint $table) {
             $table->bigIncrements('id');
 			
-			$table->unsignedBigInteger('subscription_id'); 
-            $table->unsignedBigInteger('company_id'); 
-            $table->unsignedBigInteger('user_id');        
+			$table->unsignedBigInteger('subscription_id')->nullable(); 
+            $table->unsignedBigInteger('company_id')->nullable(); 
+            $table->unsignedBigInteger('user_id')->nullable();        
 			
             $table->timestamps();
         });
