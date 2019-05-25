@@ -173,6 +173,7 @@ class InvoiceController extends Controller
         $company->last_document = $invoice->document_number;
         $company->save();
         
+        
         clearInvoiceCache($invoice);
       
         return redirect('/facturas-emitidas');

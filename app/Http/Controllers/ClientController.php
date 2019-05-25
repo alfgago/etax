@@ -116,8 +116,13 @@ class ClientController extends Controller
         $cliente->phone = $request->phone;
         $cliente->es_exento = $request->es_exento;
         $cliente->billing_emails = $request->billing_emails;
+        if (is_array ($cliente->billing_emails)) {
+            $cliente->billing_emails = implode(", ",$cliente->billing_emails);
+        }
         $cliente->email = $request->email;
         $cliente->fullname = $cliente->toString();
+        
+       
       
         $cliente->save();
       
@@ -145,6 +150,8 @@ class ClientController extends Controller
     {
         $client = Client::findOrFail($id);
         $this->authorize('update', $client);
+        
+       
         
         return view('Client/edit', compact('client') );
     }
@@ -187,6 +194,9 @@ class ClientController extends Controller
         $cliente->phone = $request->phone;
         $cliente->es_exento = $request->es_exento;
         $cliente->billing_emails = $request->billing_emails;
+        if (is_array ($cliente->billing_emails)) {
+            $cliente->billing_emails = implode(", ",$cliente->billing_emails);
+        }
         $cliente->email = $request->email;
         $cliente->fullname = $cliente->toString();
       

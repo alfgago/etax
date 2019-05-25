@@ -166,6 +166,7 @@
 	  $(document).ready(function(){
 	    
 	  	fillProvincias();
+	  	
 	    $("#billing_emails").tagging({
 	      "forbidden-chars":[",",'"',"'","?"],
 	      "forbidden-chars-text": "Caracter inválido: ",

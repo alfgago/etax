@@ -45,7 +45,7 @@ $(function() {
     processing: true,
     serverSide: true,
     ajax: {
-      url: "{{ route('Invoice.data') }}",
+      url: "/api/invoices",
       type: 'GET'
     },
     columns: [

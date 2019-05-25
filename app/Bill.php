@@ -118,6 +118,7 @@ class Bill extends Model
     
       $lids = array();
       foreach($request->items as $item) {
+        $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
         $item_id = $item['id'] ? $item['id'] : 0;
         $item_number = $item['item_number'];
         $code = $item['code'];
@@ -167,7 +168,6 @@ class Bill extends Model
         'total' => $total,
         'discount_type' => '01',
         'discount' => $discount_percentage,
-        'discount_reason' => $discount_reason,
         'iva_type' => $iva_type,
         'iva_percentage' => $iva_percentage,
         'iva_amount' => $iva_amount,
@@ -197,7 +197,6 @@ class Bill extends Model
           $item->total = $total;
           $item->discount_type = '01';
           $item->discount = $discount_percentage;
-          $item->discount_reason = $discount_reason;
           $item->iva_type = $iva_type;
           $item->iva_percentage = $iva_percentage;
           $item->iva_amount = $iva_amount;
