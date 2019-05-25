@@ -48,6 +48,8 @@ Route::prefix('cierres')->group(function() {
     Route::patch('abrir-rectificacion/{id}', 'BookController@openForRectification');
 });
 
+
+
 // Rutas de empresa
 Route::prefix('empresas')->group(function() {
     Route::get('editar', 'CompanyController@edit')->name('Company.edit');
@@ -66,11 +68,17 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('emitir-factura', 'InvoiceController@emitFactura')->name('Invoice.emit_01');
     Route::get('emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
     Route::post('enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
+    Route::get('validaciones', 'InvoiceController@indexValidaciones')->name('Invoice.validaciones');
+    Route::patch('confirmar-validacion/{id}', 'InvoiceController@confirmarValidacion')->name('Invoice.confirmar_validacion');
 });
 
-// Rutas de aceptación de XML
-Route::get('/facturas-recibidas/aceptaciones', 'BillController@indexAccepts')->name('Bill.accepts');
-Route::post('/facturas-recibidas/respondStatus', 'BillController@respondStatus')->name('Bill.respond');
+// Rutas de facturacion recibida
+Route::prefix('facturas-recibidas')->group(function() {
+    Route::get('aceptaciones', 'BillController@indexAccepts')->name('Bill.accepts');
+    Route::post('respondStatus', 'BillController@respondStatus')->name('Bill.respond');
+    Route::get('validaciones', 'BillController@indexValidaciones')->name('Bill.validaciones');
+    Route::patch('confirmar-validacion/{id}', 'BillController@confirmarValidacion')->name('Bill.confirmar_validacion');
+});
 
 // Rutas de Wizard
 Route::get('/wizard', 'WizardController@index')->name('Wizard.index');

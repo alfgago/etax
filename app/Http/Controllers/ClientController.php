@@ -96,7 +96,7 @@ class ClientController extends Controller
         ]);
       
         $cliente = new Client();
-        $current_company = currentCompanyModel();    
+        $company = currentCompanyModel();    
         $cliente->company_id = $company->id;
       
         $cliente->tipo_persona = $request->tipo_persona;
@@ -224,7 +224,7 @@ class ClientController extends Controller
         $time_start = getMicrotime();
         
         $clientes = Excel::toCollection( new ClientImport(), request()->file('archivo') );
-        $company_id = $company_id = currentCompany();  
+        $company_id = currentCompany();  
         foreach ($clientes[0] as $row){
             Client::updateOrCreate(
                 [
