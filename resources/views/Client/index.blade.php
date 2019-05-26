@@ -43,7 +43,7 @@ $(function() {
   $('#client-table').DataTable({
     processing: true,
     serverSide: true,
-    ajax: "{{ route('Client.data') }}",
+    ajax: "/api/clients",
     columns: [
       { data: 'code', name: 'code' },
       { data: 'id_number', name: 'id_number' },

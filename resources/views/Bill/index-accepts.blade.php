@@ -46,7 +46,7 @@ $(function() {
   $('#bill-table').DataTable({
     processing: true,
     serverSide: true,
-    ajax: "{{ route('Bill.data_accepts') }}",
+    ajax: "/api/billsAccepts",
     columns: [
       { data: 'document_number', name: 'document_number' },
       { data: 'provider', name: 'provider.fullname' },
