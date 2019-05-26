@@ -16,8 +16,8 @@ class CreateCompaniesTable extends Migration
         Schema::create('companies', function (Blueprint $table) {
             $table->bigIncrements('id');
           
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->unsignedBigInteger('subscription_id')->nullable();
+            $table->unsignedBigInteger('user_id')->default(0);;
+            $table->unsignedBigInteger('subscription_id')->default(0);;
             
             $table->enum('type', ['F', 'J', 'D', 'E', 'N', 'O'])->nullable(); 
             $table->string('id_number')->unique()->nullable(); 

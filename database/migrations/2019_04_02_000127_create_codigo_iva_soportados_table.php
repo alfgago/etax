@@ -17,7 +17,7 @@ class CreateCodigoIvaSoportadosTable extends Migration
             $table->bigIncrements('id');
             $table->string('code')->nullable();
             $table->string('name')->nullable();
-            $table->double('percentage')->nullable();
+            $table->double('percentage')->default(0);
             $table->boolean('hidden')->default(false);
             $table->timestamps();
         });

@@ -16,13 +16,13 @@ class CreateProductsTable extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->bigIncrements('id');
           
-            $table->unsignedBigInteger('company_id')->nullable();
-            $table->unsignedBigInteger('product_category_id')->nullable();
+            $table->unsignedBigInteger('company_id')->default(0);;
+            $table->unsignedBigInteger('product_category_id')->default(0);
           
             $table->string('code')->nullable();
             $table->string('name')->nullable();
             $table->string('measure_unit')->nullable();
-            $table->double('unit_price')->nullable();
+            $table->double('unit_price')->default(0);;
             $table->string('description')->nullable();
             $table->boolean('is_catalogue')->default(false);
             $table->string('default_iva_type')->nullable();
