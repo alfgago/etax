@@ -61,7 +61,7 @@
             }
         });
         jQuery.ajax({
-            url: "{{ url('/change-company') }}",
+            url: "/change-company",
             method: 'post',
             data: {
                 id: sel, is_edit

@@ -42,7 +42,7 @@ $(function() {
   $('#provider-table').DataTable({
     processing: true,
     serverSide: true,
-    ajax: "{{ route('Provider.data') }}",
+    ajax: "/api/providers",
     columns: [
       { data: 'code', name: 'code' },
       { data: 'id_number', name: 'id_number' },
