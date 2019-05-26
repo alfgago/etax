@@ -16,15 +16,15 @@ class TeamworkSetupTables extends Migration
     {
         Schema::table( \Config::get( 'teamwork.users_table' ), function ( Blueprint $table )
         {
-            $table->unsignedBigInteger( 'current_team_id' )->nullable();
+            $table->unsignedBigInteger( 'current_team_id' )->default(0);
         } );
 
 
         Schema::create( \Config::get( 'teamwork.teams_table' ), function ( Blueprint $table )
         {
             $table->bigIncrements('id')->unsigned();
-            $table->unsignedBigInteger('owner_id')->nullable();
-            $table->unsignedBigInteger('company_id')->unique()->nullable();
+            $table->unsignedBigInteger('owner_id')->default(0);
+            $table->unsignedBigInteger('company_id')->unique()->default(0);
             $table->string('name')->unique();
             $table->string( 'slug' )->unique()->nullable();			
             $table->timestamps();
@@ -33,8 +33,8 @@ class TeamworkSetupTables extends Migration
 
         Schema::create( \Config::get( 'teamwork.team_user_table' ), function ( Blueprint $table )
         {
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->unsignedBigInteger('team_id')->nullable();			
+            $table->unsignedBigInteger('user_id')->default(0);;
+            $table->unsignedBigInteger('team_id')->default(0);;			
             $table->timestamps();
 
             $table->foreign( 'user_id' )
@@ -52,8 +52,8 @@ class TeamworkSetupTables extends Migration
         Schema::create( \Config::get( 'teamwork.team_invites_table' ), function(Blueprint $table)
         {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->unsignedBigInteger('team_id')->nullable();
+            $table->unsignedBigInteger('user_id')->default(0);
+            $table->unsignedBigInteger('team_id')->default(0);
             $table->enum('type', ['invite', 'request']);
             $table->string('role')->nullable();
 			$table->string('email');

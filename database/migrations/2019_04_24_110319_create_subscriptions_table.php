@@ -15,8 +15,8 @@ class CreateSubscriptionsTable extends Migration
     {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id')->nullable();
-			$table->unsignedBigInteger('plan_id')->nullable();
+            $table->unsignedBigInteger('user_id')->default(0);
+			$table->unsignedBigInteger('plan_id')->default(0);
 			
 			//1 = Activo, 2 = Activo con pago pendiente, 3 = Inactivo, 4 = Cancelado
 			$table->enum('status', ['1', '2', '3', '4'])->default(1);
