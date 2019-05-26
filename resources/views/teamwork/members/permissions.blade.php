@@ -12,22 +12,6 @@ Manage Permission of team members of "{{$team->name}}"
 <div class="row">
     <div class="col-md-12">
 
-        @if($message = Session::get('success'))
-        <div class="alert alert-success">
-            {{$message}}
-        </div>
-        @endif
-
-        @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-        @endif
-
         <form method="POST" action="{{route('teams.members.assign_permissions',$team)}}">
             @csrf
 
