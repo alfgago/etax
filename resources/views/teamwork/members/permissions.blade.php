@@ -5,7 +5,7 @@ Editar permisos de equipo "{{$team->name}}"
 @endsection
 
 @section('breadcrumb-buttons')
-<a class="btn btn-primary" href="equipo">Atrás</a>
+<a class="btn btn-primary" href="/empresas/equipo">Atrás</a>
 @endsection
 
 @section('content')
@@ -19,7 +19,7 @@ Editar permisos de equipo "{{$team->name}}"
 <div class="row">
     <div class="col-md-12">
 
-        <form method="POST" action="/permissions/{{team->id}}">
+        <form method="POST" action="/permissions/{{$team->id}}">
             @csrf
 
             <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">

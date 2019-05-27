@@ -86,6 +86,7 @@ Route::get('/editar-totales-2018', 'WizardController@setTotales2018')->name('Wiz
 Route::post('/update-totales-2018', 'WizardController@storeTotales2018')->name('Wizard.update_2018');
 Route::post('/update-wizard', 'WizardController@updateWizard')->name('Wizard.update_wizard');
 Route::post('/store-wizard', 'WizardController@createWizard')->name('Wizard.store_wizard');
+Route::get('/elegir-plan', 'WizardController@selectPlan')->name('Wizard.select_plan');
 
 // Rutas de usuario
 Route::prefix('usuario')->group(function() {

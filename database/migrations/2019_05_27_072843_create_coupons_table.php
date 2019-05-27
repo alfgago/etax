@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateUnidadMedicionsTable extends Migration
+class CreateCouponsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,12 @@ class CreateUnidadMedicionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('unidad_medicions', function (Blueprint $table) {
-            $table->increments('id');
+        Schema::create('coupons', function (Blueprint $table) {
+            $table->bigIncrements('id');
             
-            $table->integer('number')->default(0);
-            $table->string('code')->nullable();
-            $table->string('name')->nullable();
+            $table->unsignedBigInteger('subscription_id');
+            $table->double('discount_percentage')->default(0);
+            $table->integer('months_duration')->default(1);
             
             $table->timestamps();
         });
@@ -31,6 +31,6 @@ class CreateUnidadMedicionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('unidad_medicions');
+        Schema::dropIfExists('coupons');
     }
 }

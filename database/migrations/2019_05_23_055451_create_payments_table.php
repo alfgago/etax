@@ -15,7 +15,8 @@ class CreatePaymentsTable extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->bigIncrements('id');
-			$table->unsignedBigInteger('subscription_id')->default(0);
+			$table->unsignedBigInteger('subscription_id');
+			$table->unsignedBigInteger('coupon_id')->nullable();
             
             $table->dateTime('payment_date')->nullable();
             $table->integer('payment_status')->default(1); //1: Pendiente, 2: Procesado, 0: Cancelado

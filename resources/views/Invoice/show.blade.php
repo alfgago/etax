@@ -45,8 +45,8 @@
                     <div class="form-group col-md-4">
                       <label for="currency">Divisa</label>
                       <select class="form-control" name="currency" id="moneda" required>
-                        <option value="crc" {{ $invoice->currency == 'crc' ? 'selected' : '' }}>CRC</option>
-                        <option value="usd" {{ $invoice->currency == 'usd' ? 'selected' : '' }}>USD</option>
+                        <option value="CRC" {{ $invoice->currency == 'CRC' ? 'selected' : '' }}>CRC</option>
+                        <option value="USD" {{ $invoice->currency == 'USD' ? 'selected' : '' }}>USD</option>
                       </select>
                     </div>
   

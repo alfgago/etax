@@ -16,6 +16,7 @@
           <thead>
             <tr>
               <th data-priority="2">Comprobante</th>
+              <th data-priority="3">Receptor</th>
               <th>Moneda</th>
               <th>Subtotal</th>
               <th>Monto IVA</th>
@@ -28,6 +29,7 @@
               @foreach ( $invoices as $data )
                 <tr>
                   <td>{{ $data->document_number }}</td>
+                  <td>{{ @$data->client->fullname }}</td>
                   <td>{{ $data->currency }}</td>
                   <td>{{ number_format( $data->subtotal, 2 ) }}</td>
                   <td>{{ number_format( $data->iva_amount, 2 ) }}</td>
