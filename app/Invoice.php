@@ -80,7 +80,7 @@ class Invoice extends Model
           $cliente->first_name = $request->first_name;
           $cliente->last_name = $request->last_name;
           $cliente->last_name2 = $request->last_name2;
-          $cliente->emisor_receptor = $request->emisor_receptor;
+          $cliente->emisor_receptor = 'ambos';
           $cliente->country = $request->country;
           $cliente->state = $request->state;
           $cliente->city = $request->city;
@@ -98,13 +98,17 @@ class Invoice extends Model
           $this->client_id = $request->client_id;
       }
       
+      $request->currency_rate = $request->currency_rate ? $request->currency_rate : 1;
+      
       //Datos de factura
       $this->description = $request->description;
-      $this->subtotal = $request->subtotal;
+      $this->subtotal = floatval( str_replace(",","", $request->subtotal ));
       $this->currency = $request->currency;
-      $this->currency_rate = $request->currency_rate;
-      $this->total = $request->total;
-      $this->iva_amount = $request->iva_amount;
+      $this->currency_rate = floatval( str_replace(",","", $request->currency_rate ));
+      $this->total = floatval( str_replace(",","", $request->total ));
+      $this->iva_amount = floatval( str_replace(",","", $request->iva_amount ));
+      
+      
 
       //Fechas
       $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);

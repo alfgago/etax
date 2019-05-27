@@ -97,6 +97,8 @@ class Bill extends Model
           $this->provider_id = $request->provider_id;
       }
       
+      $request->currency_rate = $request->currency_rate ? $request->currency_rate : 1;
+      
       //Datos de factura
       $this->description = $request->description;
       $this->subtotal = floatval( str_replace(",","", $request->subtotal ));
@@ -214,7 +216,9 @@ class Bill extends Model
           $item->save();
         }
       }else {
-        $item = $this->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt );
+        $item = $this->addItem( 
+          $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, 
+          $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $porc_identificacion_plena, $is_exempt );
       }
       return $item;
     }
