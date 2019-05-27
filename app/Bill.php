@@ -80,7 +80,6 @@ class Bill extends Model
           $provider->first_name = $request->first_name;
           $provider->last_name = $request->last_name;
           $provider->last_name2 = $request->last_name2;
-          $provider->emisor_receptor = 'ambos';
           $provider->country = $request->country;
           $provider->state = $request->state;
           $provider->city = $request->city;
