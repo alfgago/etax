@@ -10,6 +10,7 @@ use App\Variables;
 use App\PlansInvitation;
 use Mpociot\Teamwork\Facades\Teamwork;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ReportsController extends Controller
 {
