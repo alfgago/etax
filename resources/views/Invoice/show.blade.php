@@ -281,9 +281,6 @@
 </div>
 @endsection
 
-@section('breadcrumb-buttons')
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar factura</button>
-@endsection 
 
 @section('footer-scripts')
 
