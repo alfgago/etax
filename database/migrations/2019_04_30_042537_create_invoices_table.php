@@ -112,7 +112,7 @@ class CreateInvoicesTable extends Migration
         });
         
         if ( !app()->environment('production') ) {
-            $this->demoData();
+            //$this->demoData();
         }
     }
   
