@@ -86,7 +86,9 @@ class CalculatedTax extends Model
           Cache::put($cacheKey, $data, now()->addDays(120));
           
       }
-      return Cache::get($cacheKey);
+      
+      $data = Cache::get($cacheKey);
+      return $data;
       
     }
     
