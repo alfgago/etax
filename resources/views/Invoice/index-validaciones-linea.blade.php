@@ -51,6 +51,7 @@
                       <button type="submit" class="text-success mr-2" title="Confirmar código" style="display: inline-block; background: none;">
                       	<i class="fa fa-check mr-2" aria-hidden="true"></i> Confirmar código
                       </button>
+                      
                     </form>
                   </td>
                 </tr>

@@ -40,9 +40,9 @@
                       @method('patch')
                       
                       <div class="input-validate-iva">
-										      <select class="form-control" id="tipo_iva" >
-										        @foreach ( \App\Variables::tiposIVARepercutidos() as $tipo )
-										          <option value="{{ $tipo['codigo'] }}" {{ $tipo['codigo'] == '103' ? 'selected' : '' }}
+										      <select class="form-control" id="tipo_iva" name="tipo_iva" >
+										        @foreach ( \App\Variables::tiposIVASoportados() as $tipo )
+										          <option value="{{ $tipo['codigo'] }}" {{ $tipo['codigo'] == '003' ? 'selected' : '' }}
 										          	porcentaje="{{ $tipo['porcentaje'] }}" class="{{ @$tipo['hide'] ? 'hidden' : '' }}" >{{ $tipo['nombre'] }}</option>
 										        @endforeach
 										      </select>
@@ -50,10 +50,6 @@
 										                      
                       <button type="submit" class="text-success mr-2" title="Confirmar código" style="display: inline-block; background: none;">
                       	<i class="fa fa-check mr-2" aria-hidden="true"></i> Confirmar código
-                      </button>
-                      
-                      <button type="button" class="text-info mr-2" title="Validación por línea de factura" style="display: inline-block; background: none;">
-                      	<i class="fa fa-file-text-o" aria-hidden="true"></i> Validación por línea de factura
                       </button>
                     </form>
                   </td>

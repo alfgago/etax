@@ -53,6 +53,7 @@ class InvoiceController extends Controller
         
         $query = Invoice::where('invoices.company_id', $current_company)
                 ->where('is_void', false)->where('is_totales', false)->with('client');
+                
         return datatables()->eloquent( $query )
             ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($invoice) {
@@ -88,7 +89,12 @@ class InvoiceController extends Controller
     public function indexValidaciones()
     {
         $current_company = currentCompany();
-        $invoices = Invoice::where('company_id', $current_company)->where('is_void', false)->where('is_totales', false)->where('is_code_validated', false)->orderBy('generated_date', 'DESC')->orderBy('reference_number', 'DESC')->paginate(10);
+        $invoices = Invoice::where('company_id', $current_company)
+                    ->where('is_void', false)
+                    ->where('is_totales', false)
+                    ->where('is_code_validated', false)
+                    ->orderBy('generated_date', 'DESC')
+                    ->orderBy('reference_number', 'DESC')->paginate(10);
         return view('Invoice/index-validaciones', [
           'invoices' => $invoices
         ]);
@@ -114,6 +120,23 @@ class InvoiceController extends Controller
         clearInvoiceCache($invoice);
         
         return redirect('/facturas-emitidas/validaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido validada');
+    }
+    
+    /**
+     * Despliega las facturas que requieren validación de códigos
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexValidacionesLinea()
+    {
+        $current_company = currentCompany()->id;
+        $items = InvoiceItem::with('bill')
+                  ->where('company_id', $company)
+                  ->whereNull('iva_type')->paginate(10);
+                  
+        return view('Invoice/index-validaciones-linea', [
+          'invoices' => $invoices
+        ]);
     }
 
     /**
@@ -488,7 +511,7 @@ class InvoiceController extends Controller
             $subtotalLinea = (float)$linea['SubTotal'];
             $totalLinea = (float)$linea['MontoTotalLinea'];
             $montoDescuento = array_key_exists('MontoDescuento', $linea) ? $linea['MontoDescuento'] : 0;
-            $codigoEtax = '003'; //De momento asume que todo en 4.2 es al 13%.
+            $codigoEtax = '103'; //De momento asume que todo en 4.2 es al 13%.
             $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
             
             $insert = Invoice::importInvoiceRow(

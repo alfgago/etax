@@ -70,6 +70,8 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::post('enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
     Route::get('validaciones', 'InvoiceController@indexValidaciones')->name('Invoice.validaciones');
     Route::patch('confirmar-validacion/{id}', 'InvoiceController@confirmarValidacion')->name('Invoice.confirmar_validacion');
+    Route::get('validaciones-linea', 'InvoiceController@indexValidacionesLinea')->name('Invoice.validaciones');
+    Route::patch('confirmar-validacion-linea/{id}', 'InvoiceController@confirmarValidacion')->name('Invoice.confirmar_validacion');
 });
 
 // Rutas de facturacion recibida
