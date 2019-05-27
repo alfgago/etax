@@ -80,7 +80,7 @@ class Invoice extends Model
           $cliente->first_name = $request->first_name;
           $cliente->last_name = $request->last_name;
           $cliente->last_name2 = $request->last_name2;
-          $cliente->emisor_receptor = $request->emisor_receptor;
+          $cliente->emisor_receptor = 'ambos';
           $cliente->country = $request->country;
           $cliente->state = $request->state;
           $cliente->city = $request->city;
