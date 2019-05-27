@@ -84,7 +84,7 @@ class BillController extends Controller
     public function indexValidaciones()
     {
         $current_company = currentCompany();
-        $bills = Bill::where('company_id', $current_company)->where('is_void', false)->where('is_totales', false)->where('is_code_validated', false)->orderBy('generated_date', 'DESC')->orderBy('reference_number', 'DESC')->paginate(10);
+        $bills = Bill::where('company_id', $current_company)->where('is_void', false)->where('is_totales', false)->where('is_code_validated', true)->orderBy('generated_date', 'DESC')->orderBy('reference_number', 'DESC')->paginate(10);
         return view('Bill/index-validaciones', [
           'bills' => $bills
         ]);
