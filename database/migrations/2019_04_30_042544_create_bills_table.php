@@ -20,7 +20,7 @@ class CreateBillsTable extends Migration
             $table->unsignedBigInteger('company_id');
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             
-            $table->unsignedBigInteger('provider_id');
+            $table->unsignedBigInteger('provider_id')->nullable();
             $table->foreign('provider_id')->references('id')->on('providers');
           
             //Tipo de documento de referencia. 01 Factura electrónica, 02 Nota de débito electrónica, 03 nota de crédito electrónica, 04 Tiquete electrónico, 05 Nota de despacho, 06 Contrato, 07 Procedimiento, 08 Comprobante emitido en contigencia, 99 Otros
@@ -92,7 +92,7 @@ class CreateBillsTable extends Migration
             $table->string('code')->default(0);
             $table->string('name')->nullable();
             $table->string('product_type')->nullable();
-            $table->integer('measure_unit')->default(0);
+            $table->string('measure_unit')->nullable();
             $table->integer('item_count')->default(0);
             $table->double('unit_price')->default(0);
             $table->double('subtotal')->default(0);
@@ -100,7 +100,7 @@ class CreateBillsTable extends Migration
             $table->double('total')->default(0);
             $table->string('discount_type')->nullable();
             $table->double('discount')->default(0);
-            $table->double('discount_reason')->default(0);
+            $table->string('discount_reason')->nullable();
             $table->string('iva_type')->nullable();
             $table->double('iva_percentage')->default(0);
             $table->boolean('is_exempt')->default(false);
@@ -113,7 +113,9 @@ class CreateBillsTable extends Migration
             $table->timestamps();
         });
       
-        $this->demoData();
+        if ( !app()->environment('production') ) {
+            $this->demoData();
+        }
     }
   
      public function demoData() {

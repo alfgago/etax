@@ -61,12 +61,13 @@
 		    <label for="archivo">Archivo</label>  
 				<div class="">
 					<div class="fallback">
-				      <input name="archivo" type="file" multiple="false">
+				      <input name="archivo" type="file" multiple="false" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
 				  </div>
+				  <small class="descripcion">Hasta 2500 líneas por archivo.</small>
 				</div>
 			</div>
 			
-			<button type="submit" class="btn btn-primary">Importar facturas</button>s
+			<button type="submit" class="btn btn-primary">Importar facturas</button>
 		</form>	
 			
 	<form method="POST" action="/facturas-emitidas/importarXML" enctype="multipart/form-data" class="toggle-xml">
@@ -93,8 +94,9 @@
 		    <label for="xmls[]">Archivos</label>  
 				<div class="">
 					<div class="fallback">
-				      <input name="xmls[]" type="file" multiple="false">
+				      <input name="xmls[]" type="file" multiple="true" accept=".xml">
 				  </div>
+				  <small class="descripcion">Puede subir hasta 10 archivos XML por intento.</small>
 				</div>
 			</div>
 			

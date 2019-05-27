@@ -144,7 +144,7 @@ if (!function_exists('currentCompany')) {
     
         $current_company = session('current_company');
 
-        if (!$current_company) {
+        if ( !$current_company ) {
             if (auth()->user()->companies->first()) {
                 $company_id = auth()->user()->companies->first()->id;
                 session(['current_company' => $company_id]);
@@ -163,6 +163,12 @@ if (!function_exists('currentCompanyModel')) {
 
         $current_company = currentCompany();
         $company = App\Company::find($current_company);
+        
+        if ( !$company ) {
+            $current_company = auth()->user()->companies->first()->id;
+            session( ['current_company' => $current_company] );
+            $company = App\Company::find($current_company);
+        }
 
         return ( $current_company ) ? $company : false;
     }
@@ -276,7 +282,7 @@ if (!function_exists('getCurrentUserSubscriptions')) {
 if (!function_exists('getCurrentSubscription')) {
 
     function getCurrentSubscription() {
-
+        
         $company = currentCompanyModel();
         $subscription = $company->subscription;
         
