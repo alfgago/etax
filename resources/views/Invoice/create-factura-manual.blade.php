@@ -238,7 +238,6 @@
 
           <div class="btn-holder hidden">
             <button id="btn-submit" type="submit" class="btn btn-primary">Guardar factura</button>
-            <button type="submit" class="btn btn-primary" disabled>Enviar factura electrónica</button>
           </div>
 
         </form>
@@ -248,7 +247,6 @@
 
 @section('breadcrumb-buttons')
   <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar factura</button>
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary2" disabled>Enviar factura electrónica</button>
 @endsection 
 
 @section('footer-scripts')
