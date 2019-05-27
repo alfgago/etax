@@ -32,25 +32,25 @@ Historial de Consultas
                 <div class="row">
                     <div class="form-group col-md-11">
                         <label>Consulta:</label>
-                        <H6><?php echo $tickets['tickets'][$id-1]['subject']; ?></H6>
+                        <H6><?php echo $tickets[0]->subject;  ?></H6>
                     </div>
                     <div class="form-group col-md-11">
                         <label>Respuesta:</label>
-                        <H6><?php echo $tickets['tickets'][$id-1]['description']; ?></H6>
+                        <H6><?php echo $tickets[0]->description; ?></H6>
                     </div>
                     <div class="form-group col-md-11">
                         <label>Creado:</label>
                         <H6><?php
-                            $fecha = substr($tickets['tickets'][$id-1]['created_at'], 0, 10);  
-                            $hora = substr($tickets['tickets'][$id-1]['created_at'], 11, 8);  
+                            $fecha = substr($tickets[0]->created_at, 0, 10);  
+                            $hora = substr($tickets[0]->created_at, 11, 8);  
                             echo $fecha . ' a las ' . $hora; 
                         ?></H6>
                     </div>
                     <div class="form-group col-md-11">
                         <label>Actualizado:</label>
                         <H6><?php
-                            $fecha = substr($tickets['tickets'][$id-1]['updated_at'], 0, 10);  
-                            $hora = substr($tickets['tickets'][$id-1]['updated_at'], 11, 8);  
+                            $fecha = substr($tickets[0]->updated_at, 0, 10);  
+                            $hora = substr($tickets[0]->updated_at, 11, 8);  
                             echo $fecha . ' a las ' . $hora; 
                         ?></H6>
                     </div>

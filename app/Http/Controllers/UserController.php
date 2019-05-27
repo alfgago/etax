@@ -250,14 +250,15 @@ class UserController extends Controller {
     */
     public function consulta_zendesk(){
         $subdomain = "etax";
-        $username  = "agago@etaxcr.com"; // replace this with your registered email
+        $username  = 'agago@etaxcr.com'; // replace this with your registered email
         $token     = "v1rk6PURKashoSQ0sK6gVXcd7LEIYDp6hEjWti8b"; // replace this with your token
         $client = new ZendeskAPI($subdomain);
         $client->setAuth('basic', ['username' => $username, 'token' => $token]);
-        // Get all tickets
-        $tickets = $client->tickets()->findAll(['per_page' => 25, 'page' => 1]);
-        $all = json_decode(json_encode($tickets), true);
-        return $all; 
+        // $tickets = $client->tickets()->findAll(['per_page' => 25, 'page' => 1]);
+        // $all = json_decode(json_encode($tickets), true);
+        $zendesk_id = auth()->user()->zendesk_id;
+        $tickets = $client->users($zendesk_id)->requests()->findAll();
+        return $tickets;
     }
     /*
     *
@@ -279,8 +280,16 @@ class UserController extends Controller {
     *
     */
     public function zendeskdetalle($id){ 
-        $tickets = $this->consulta_zendesk();
-        return view('users.zendeskdetalle')->with('tickets', $tickets)
+        $tickets = (array) $this->consulta_zendesk();
+        $array = array();
+        for ($i=0; $i < count($tickets['requests']); $i++) { 
+            if($tickets['requests'][$i]->id = $id){
+                array_push($array, $tickets['requests'][$i]);
+                $id = $tickets['requests'][$i]->id;
+            }
+        }
+
+        return view('users.zendeskdetalle')->with('tickets', $array)
                                            ->with('id', $id);
     }
     /*
@@ -311,13 +320,14 @@ class UserController extends Controller {
         $priority    = ($request->priority) ? $request->priority : 'low';
         $description = ($request->description) ? $request->description : 'No definido por el usuario';
         $name = auth()->user()->last_name;
+        $email = auth()->user()->email;
         $subdomain = "etax";
         $username = "agago@etaxcr.com";
         $token = "v1rk6PURKashoSQ0sK6gVXcd7LEIYDp6hEjWti8b";
         $client = new ZendeskAPI($subdomain);
         $client->setAuth('basic', ['username' => $username, 'token' => $token]);
-        $newTicket = $client->tickets()->create(array('type' => $type, 'tags' => array('demo', 'testing', 'api', 'zendesk'), 'subject' => $subject, 'comment' => array('body' => $description), 'requester' => array('locale_id' => '1', 'name' => $name, 'email' => 'ali@5e.cr'), 'priority' => $priority));
-        $user_id = auth()->user()->id;
+        $newTicket = $client->tickets()->create(array('type' => $type, 'tags' => array('demo', 'testing', 'api', 'zendesk'), 'subject' => $subject, 'comment' => array('body' => $description), 'requester' => array('locale_id' => '1', 'name' => $name, 'email' => $email), 'priority' => $priority));
+        $user_id = auth()->user()->zendesk_id;
         return view('users.zendesk_add')->with('user_id', $user_id);
     }
     /*

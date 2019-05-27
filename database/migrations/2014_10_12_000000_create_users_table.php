@@ -13,17 +13,18 @@ class CreateUsersTable extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+         Schema::create('users', function (Blueprint $table) {
             $table->bigIncrements('id');
           
-            $table->string('user_name');
-            $table->string('first_name');
+            $table->string('id_number')->nullable()->unique();
+            
+            $table->string('user_name')->nullable();
+            $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('last_name2')->nullable();
-            $table->string('id_number')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->string('country')->nullable();
             $table->string('state')->nullable(); //Provincia
             $table->string('city')->nullable(); //Canton
@@ -35,6 +36,8 @@ class CreateUsersTable extends Migration
             $table->string('image_url')->nullable();
             $table->string('security_question')->nullable();
             $table->string('security_answer')->nullable();
+            
+            $table->string('zendesk_id')->nullable();
           
             $table->rememberToken();
             $table->timestamps();

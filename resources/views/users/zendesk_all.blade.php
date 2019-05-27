@@ -46,30 +46,40 @@ Historial de Consultas
                     </thead>
                     <tbody>
                         @if ( $tickets )
-                            <?php $count = sizeof($tickets['tickets']); ?>
-                            @for ($i=0; $i<$count;$i++)
-                            <?php $id = $tickets['tickets'][$i]['id']; ?>
+                            <?php //var_dump($tickets);die; ?>
+                            <?php 
+                                $array = (array) $tickets;
+                                $count = count($array);
+                                //$result = json_decode($array['requests'][0]->id);
+                                //echo $result;
+                                //var_dump($array['requests'][0]->priority);die;
+                                //echo $array['requests'][0]->priority;die;
+                            ?>
+                            <?php
+                            for ($i=0;$i<count($array['requests']);$i++){
+                                $id = json_decode($array['requests'][0]->id);
+                            ?>
                             <tr data-href="/usuario/zendesk-detalle/{{$id}}">
                                 <td>
-                                    <?php echo $tickets['tickets'][$i]['id'] ?>
+                                    <?php echo json_decode($array['requests'][$i]->id); ?>
                                 </td>
                                 <td>
-                                    <?php echo $tickets['tickets'][$i]['subject'] ?>
+                                    <?php echo $array['requests'][$i]->subject; ?>
                                 </td>
                                 <td>
-                                    <?php echo $tickets['tickets'][$i]['priority'] ?>
+                                    <?php echo $array['requests'][$i]->priority; ?>
                                 </td>
                                 <td>
-                                    <?php echo ($tickets['tickets'][$i]['type']) ? $tickets['tickets'][$i]['type'] : 'No definido' ?>
+                                    <?php echo ($array['requests'][$i]->type) ? $array['requests'][$i]->type : 'No definido' ?>
                                 </td>
                                 <td>
-                                    <?php echo ($tickets['tickets'][$i]['status']) ? $tickets['tickets'][$i]['status'] : 'No definido' ?>
+                                    <?php echo ($array['requests'][$i]->status) ? $array['requests'][$i]->status : 'No definido' ?>
                                 </td>
                                 <td>
-                                    <?php echo substr($tickets['tickets'][$id-1]['updated_at'], 0, 10); ?>
+                                    <?php echo substr($array['requests'][$i]->updated_at, 0, 10); ?>
                                 </td>
                             </tr>
-                            @endfor
+                           <?php } ?>
                         @endif
                     </tbody>
                 </table>

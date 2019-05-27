@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 
+require __DIR__.'/../../../../vendor/autoload.php';
+use Zendesk\API\HttpClient as ZendeskAPI;
+
 class RegisterController extends Controller {
     /*
       |--------------------------------------------------------------------------
@@ -62,7 +65,14 @@ use RegistersUsers;
      * @return \App\User
      */
     protected function create(array $data) {
-        
+        $subdomain = "etax";
+        $username = "agago@etaxcr.com";
+        $token = "v1rk6PURKashoSQ0sK6gVXcd7LEIYDp6hEjWti8b";
+        $client = new ZendeskAPI($subdomain);
+        $client->setAuth('basic', ['username' => $username, 'token' => $token]);
+        $query = $client->users()->create(['name' => $data['first_name'], 'email' => $data['email'], 'phone' => '', 'role' => 'end-user', 'details' => 'User has been created within the register form.']);
+        $zendesk_id = $query->user->id;
+            
         $user = User::create([
                     'user_name' => $data['email'],
                     'email' => $data['email'],
@@ -70,6 +80,7 @@ use RegistersUsers;
                     'last_name' => $data['last_name'],
                     'last_name2' => $data['last_name2'],
                     'password' => Hash::make($data['password']),
+                    'zendesk_id' => $zendesk_id
         ]);
 
         $user->assignRole(array('Admin'));
