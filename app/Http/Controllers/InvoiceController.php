@@ -108,6 +108,11 @@ class InvoiceController extends Controller
         $invoice->is_code_validated = true;
         $invoice->save();
         
+        if( $invoice->year == 2018 ) {
+            clearLastTaxesCache($invoice->company->id, 2018);
+        }
+        clearInvoiceCache($invoice);
+        
         return redirect('/facturas-emitidas/validaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido validada');
     }
 

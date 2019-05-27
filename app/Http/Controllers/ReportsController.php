@@ -198,6 +198,7 @@ class ReportsController extends Controller
     }
     
     public function getProrrataOperativa( $ano ){
+      
       $anoAnterior = $ano > 2018 ? $ano-1 : 2018;
       $company = currentCompanyModel();
       
