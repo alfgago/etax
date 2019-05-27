@@ -88,7 +88,7 @@ class ReportsController extends Controller
         $nombreMes = Variables::getMonthName($mes);
         $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
       }catch( \Exception $ex ){
-          
+          Log::error('Error al cargar dashboard' . $ex->getMessage());
       }
       
       if( !$request->vista || $request->vista == 'basica' ){
