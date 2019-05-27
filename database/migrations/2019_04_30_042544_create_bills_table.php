@@ -114,7 +114,7 @@ class CreateBillsTable extends Migration
         });
       
         if ( !app()->environment('production') ) {
-            $this->demoData();
+            //$this->demoData();
         }
     }
   
