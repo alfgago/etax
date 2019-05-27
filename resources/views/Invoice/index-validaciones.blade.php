@@ -51,10 +51,6 @@
                       <button type="submit" class="text-success mr-2" title="Confirmar código" style="display: inline-block; background: none;">
                       	<i class="fa fa-check mr-2" aria-hidden="true"></i> Confirmar código
                       </button>
-                      
-                      <button type="button" class="text-info mr-2" title="Validación por línea de factura" style="display: inline-block; background: none;">
-                      	<i class="fa fa-file-text-o" aria-hidden="true"></i> Validación por línea de factura
-                      </button>
                     </form>
                   </td>
                 </tr>

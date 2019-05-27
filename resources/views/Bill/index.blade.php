@@ -20,11 +20,11 @@
               <th data-priority="2">Comprobante</th>
               <th data-priority="3">Emisor</th>
               <th>Tipo Doc.</th>
-              <th>Moneda</th>
-              <th>Subtotal</th>
-              <th>Monto IVA</th>
+              <th data-priority="5">Moneda</th>
+              <th data-priority="5">Subtotal</th>
+              <th data-priority="5">Monto IVA</th>
               <th data-priority="4">Total</th>
-              <th data-priority="5">F. Generada</th>
+              <th data-priority="6">F. Generada</th>
               <th data-priority="1">Acciones</th>
             </tr>
           </thead>
