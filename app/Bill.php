@@ -97,6 +97,8 @@ class Bill extends Model
           $this->provider_id = $request->provider_id;
       }
       
+      $request->currency_rate = $request->currency_rate ? $request->currency_rate : 1;
+      
       //Datos de factura
       $this->description = $request->description;
       $this->subtotal = floatval( str_replace(",","", $request->subtotal ));
