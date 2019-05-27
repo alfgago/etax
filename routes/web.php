@@ -48,6 +48,8 @@ Route::prefix('cierres')->group(function() {
     Route::patch('abrir-rectificacion/{id}', 'BookController@openForRectification');
 });
 
+
+
 // Rutas de empresa
 Route::prefix('empresas')->group(function() {
     Route::get('editar', 'CompanyController@edit')->name('Company.edit');
@@ -66,31 +68,39 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('emitir-factura', 'InvoiceController@emitFactura')->name('Invoice.emit_01');
     Route::get('emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
     Route::post('enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
+    Route::get('validaciones', 'InvoiceController@indexValidaciones')->name('Invoice.validaciones');
+    Route::patch('confirmar-validacion/{id}', 'InvoiceController@confirmarValidacion')->name('Invoice.confirmar_validacion');
 });
 
-// Rutas de aceptación de XML
-Route::get('/facturas-recibidas/aceptaciones', 'BillController@indexAccepts')->name('Bill.accepts');
-Route::post('/facturas-recibidas/respondStatus', 'BillController@respondStatus')->name('Bill.respond');
+// Rutas de facturacion recibida
+Route::prefix('facturas-recibidas')->group(function() {
+    Route::get('aceptaciones', 'BillController@indexAccepts')->name('Bill.accepts');
+    Route::post('respondStatus', 'BillController@respondStatus')->name('Bill.respond');
+    Route::get('validaciones', 'BillController@indexValidaciones')->name('Bill.validaciones');
+    Route::patch('confirmar-validacion/{id}', 'BillController@confirmarValidacion')->name('Bill.confirmar_validacion');
+});
 
 // Rutas de Wizard
 Route::get('/wizard', 'WizardController@index')->name('Wizard.index');
 Route::get('/editar-totales-2018', 'WizardController@setTotales2018')->name('Wizard.edit_2018');
 Route::post('/update-totales-2018', 'WizardController@storeTotales2018')->name('Wizard.update_2018');
 Route::post('/update-wizard', 'WizardController@updateWizard')->name('Wizard.update_wizard');
+Route::post('/store-wizard', 'WizardController@createWizard')->name('Wizard.store_wizard');
 
 // Rutas de usuario
 Route::prefix('usuario')->group(function() {
-    Route::get('overview', 'UserController@overview')->name('User.overview');
-    Route::get('general', 'UserController@editInformation')->name('User.edit_information');
+    Route::get('perfil', 'UserController@edit')->name('User.edit');
+    Route::patch('update-perfil', 'UserController@update')->name('User.update');
     Route::get('seguridad', 'UserController@editPassword')->name('User.edit_password');
     Route::get('planes', 'UserController@plans')->name('User.plans');
+    Route::get('cambiar-plan', 'UserController@changePlan')->name('User.cambiar_plan');
+    Route::post('confirmar-plan', 'UserController@confirmPlanChange')->name('User.confirmar_plan');
     Route::get('empresas', 'UserController@companies')->name('User.companies');
     Route::get('usuarios-invitados', 'UserController@invitedUsersList')->name('User.invited-users-list');
-
+    Route::get('zendesk-jwt', 'UserController@zendeskJwt')->name('User.zendesk_jwt');
+    Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
 });
 
-Route::patch('update-infomation/{id}', 'UserController@updateInformation')->name('User.update_information');
-Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
 
 // Rutas de API data para ajax
 Route::get('/api/invoices', 'InvoiceController@indexData')->name('Invoice.data');

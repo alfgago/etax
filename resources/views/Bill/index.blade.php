@@ -44,7 +44,7 @@ $(function() {
   $('#bill-table').DataTable({
     processing: true,
     serverSide: true,
-    ajax: "{{ route('Bill.data') }}",
+    ajax: "/api/bills",
     columns: [
       { data: 'reference_number', name: 'reference_number' },
       { data: 'document_number', name: 'document_number' },

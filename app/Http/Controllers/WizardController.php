@@ -9,6 +9,7 @@ use App\Invoice;
 use App\User;
 use App\AtvCertificate;
 use App\Team;
+use App\Subscription;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Log;
@@ -29,7 +30,14 @@ class WizardController extends Controller
     
     public function index() {
       
-      return view('/wizard/index');
+      $subscriptions = getCurrentUserSubscriptions();
+      if( empty( $subscriptions ) ) {
+          return redirect('/usuario/cambiar-plan');
+      }
+      
+      $subscription = $subscriptions[0];
+      
+      return view('/wizard/index', compact( 'subscription' ) );
 
     }
     
@@ -94,7 +102,7 @@ class WizardController extends Controller
     }
     
     
-      /**
+     /**
      * Guarda los totales por código para el 2018. Se us apara calcular la prorrata operativa inicial si desea usar este metodo
      *
      * @param  \Illuminate\Http\Request  $request
@@ -147,7 +155,7 @@ class WizardController extends Controller
             $company->default_currency = $request->default_currency;
             $company->default_invoice_notes = $request->default_invoice_notes;
             $company->default_vat_code = $request->default_vat_code;
-            $company->last_document = $request->last_document;
+            $company->last_document = $request->last_document ? $request->last_document : 0;
             $company->first_prorrata = $request->first_prorrata;
             $company->first_prorrata_type = $request->first_prorrata_type;
             $company->use_invoicing = $request->use_invoicing;
@@ -155,7 +163,7 @@ class WizardController extends Controller
             $company->save();
 
             //Update Team name based on company
-            $team->name = $request->name;
+            $team->name = $request->id_number . " - " . $request->name;
             $team->save();
 
             clearLastTaxesCache($company->id, 2018);
@@ -201,4 +209,114 @@ class WizardController extends Controller
             return back()->withError('Ha ocurrido un error al registrar la compañía' . $ex->getMessage());
         }
     }
+    
+    /**
+     * Guarda los totales por código para el 2018. Se us apara calcular la prorrata operativa inicial si desea usar este metodo
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function createWizard(Request $request)
+    {
+        
+        $request->validate([
+            'id_number' => 'required|unique:companies',
+        ]);
+        
+          
+        try {  
+            
+            $user = auth()->user();
+            
+            $company = new Company();
+            
+            $company->subscription_id = getCurrentSubscription()->id;
+            $company->user_id = $user->id;
+            $company->type = $request->tipo_persona;
+            $company->id_number = preg_replace("/[^0-9]+/", "", $request->id_number);
+            $company->business_name = $request->business_name;
+            $company->activities = $request->activities;
+            $company->name = $request->name;
+            $company->last_name = $request->last_name;
+            $company->last_name2 = $request->last_name2;
+            $company->email = $request->email;
+            $company->invoice_email = $request->invoice_email;
+            $company->country = $request->country;
+            $company->state = ($request->state != '0') ? $request->state : NULL;
+            $company->city = ($request->city != '0') ? $request->city : NULL;
+            $company->district = ($request->district != '0') ? $request->district : NULL;
+            $company->neighborhood = $request->neighborhood;
+            $company->zip = $request->zip;
+            $company->address = $request->address;
+            $company->phone = $request->phone;
+            $company->default_currency = $request->default_currency;
+            $company->default_invoice_notes = $request->default_invoice_notes;
+            $company->default_vat_code = $request->default_vat_code;
+            $company->last_document = $request->last_document ? $request->last_document : 0;
+            $company->first_prorrata = $request->first_prorrata;
+            $company->first_prorrata_type = $request->first_prorrata_type;
+            $company->use_invoicing = $request->use_invoicing;
+            $company->wizard_finished = true;
+            $company->save();
+            
+            $invoice = Invoice::firstOrNew(
+                [
+                    'company_id' => $company->id,
+                    'is_totales' => true,
+                    'year' => 2018
+                ]
+            );
+
+            $team = new Team();
+    		$team->name = $request->id_number . " - " . $request->name;
+    		$team->owner_id = $user->id;;
+    		$team->company_id = $company->id;;
+            $team->save();
+            $user->attachTeam($team);
+
+            clearLastTaxesCache($company->id, 2018);
+
+            if ($company->use_invoicing) {
+                if( $request->file('cert') ) {
+                    $id_number = $company->id_number;
+                    $id_company = $company->id;
+                    if (Storage::exists("empresa-$id_number/cert.p12")) {
+                        Storage::delete("empresa-$id_number/cert.p12");
+                    }
+    
+                    $path = \Storage::putFileAs(
+                        "empresa-$id_number", $request->file('cert'), "cert.p12"
+                    );
+    
+                    $cert = AtvCertificate::firstOrNew(
+                        [
+                            'company_id' => $id_company,
+                        ]
+                    );
+    
+                    $cert->user = $request->user;
+                    $cert->password = $request->password;
+                    $cert->key_url = $path;
+                    $cert->pin = $request->pin;
+    
+                    $cert->save();
+                }
+            }
+
+            if ($company->first_prorrata_type == 1) {
+                return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
+            }
+
+            if ($company->first_prorrata_type == 2) {
+                return redirect('/editar-totales-2018')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
+            }
+
+            return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento.');
+        } catch( \Exception $ex ) {
+            Log::error('Error al crear compania: '.$ex->getMessage());
+            return back()->withError('Ha ocurrido un error al registrar la compañía' . $ex->getMessage());
+        }
+    }
+    
+    
 }

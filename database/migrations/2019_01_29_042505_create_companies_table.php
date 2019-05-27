@@ -16,10 +16,10 @@ class CreateCompaniesTable extends Migration
         Schema::create('companies', function (Blueprint $table) {
             $table->bigIncrements('id');
           
-            $table->unsignedBigInteger('user_id');
-            $table->string('plan_no')->nullable();
+            $table->unsignedBigInteger('user_id')->default(0);;
+            $table->unsignedBigInteger('subscription_id')->default(0);;
             
-            $table->enum('type', ['F', 'J', 'D', 'E', 'N', 'O']); 
+            $table->enum('type', ['F', 'J', 'D', 'E', 'N', 'O'])->nullable(); 
             $table->string('id_number')->unique()->nullable(); 
             $table->string('business_name')->nullable(); 
             $table->string('activities')->nullable(); 

@@ -7,9 +7,7 @@
 @section('content') 
 <div class="row form-container">
   <div class="col-md-12">
-      <form method="POST" action="/facturas-emitidas/{{ $invoice->id }}">
-        @method('patch')
-        @csrf
+      <form method="POST" action="" class="show-form"> 
 
           <input type="hidden" id="current-index" value="{{ count($invoice->items) }}">
 
@@ -22,7 +20,6 @@
                       <h3>
                         Cliente
                       </h3>
-                      <div onclick="abrirPopup('nuevo-cliente-popup');" class="btn btn-agregar btn-agregar-cliente">Nuevo cliente</div>
                     </div>  
                     
                     <div class="form-group col-md-12 with-button">
@@ -81,10 +78,6 @@
                 <div class="form-group col-md-4">
                   <label for="total">Total</label>
                   <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" >
-                </div>
-                
-                <div class="form-group col-md-12">
-                  <div onclick="abrirPopup('linea-popup');" class="btn btn-dark btn-agregar">Agregar línea</div>
                 </div>
       
               </div>
@@ -265,8 +258,8 @@
                         <input class="is_identificacion_especifica" type="hidden" name="items[{{ $loop->index }}][is_identificacion_especifica]" value="{{ $item->is_identificacion_especifica }}">
                       </td>
                       <td class='acciones'>
-                        <span title='Editar linea' class='btn-editar-item text-success mr-2' onclick="abrirPopup('linea-popup'); cargarFormItem({{ $loop->index }});"> <i class="fa fa-pencil" aria-hidden="true"></i> </span> 
-                        <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ $loop->index }});' > <i class="fa fa-trash-o" aria-hidden="true"></i> </span> 
+                        <span title='Editar linea' class='btn-editar-item text-success mr-2' onclick="abrirPopup('linea-popup'); cargarFormItem({{ $loop->index }});"><i class='nav-icon i-Pen-2'></i> </span> 
+                        <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ $loop->index }});' ><i class='nav-icon i-Close-Window'></i> </span> 
                       </td>
                   </tr>
                   @endforeach
@@ -331,5 +324,27 @@ function toggleRetencion() {
   }
 }
 </script>
+
+<style>
+  
+  td.acciones {
+      display: none;
+  }
+  
+  .table .thead-dark th:last-of-type {
+      display: none;
+  }
+  
+  form.show-form input, 
+  form.show-form select,
+  .select2-selection--single {
+      border: 0 !important;
+      background: #eee !important;
+      cursor: not-allowed;
+      pointer-events: none;
+  }
+  
+</style>
+
 
 @endsection

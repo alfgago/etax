@@ -5,9 +5,9 @@ Empresas
 @endsection
 
 @section('breadcrumb-buttons')
-@can('team-create')
-<a type="submit" class="btn btn-primary {{$data['class']}}" href="{{$data['url']}}">Create New Company</a>
-@endcan
+    @can('admin')
+        <a type="submit" class="btn btn-primary {{$data['class']}}" href="{{$data['url']}}">Registrar otra compañía</a>
+    @endcan
 @endsection
 
 @section('content')
@@ -15,37 +15,18 @@ Empresas
 <div class="row">
     <div class="col-md-12">
 
-        @if($message = Session::get('success'))
-        <div class="alert alert-success">
-            {{$message}}
-        </div>
-        @endif
-
-        @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-        @endif     
-
         <div class="tabbable verticalForm">
             <div class="row">
                 <div class="col-3">
                     <ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                         <li>
-                            <a class="nav-link" aria-selected="false" href="/usuario/overview">Visión general</a>
-                        </li>
-                        <li>
-                            <a class="nav-link" aria-selected="false" href="/usuario/general">Editar información personal</a>
+                            <a class="nav-link" aria-selected="false" href="/usuario/perfil">Editar información personal</a>
                         </li>
                         <li>
                             <a class="nav-link" aria-selected="false" href="/usuario/seguridad">Seguridad</a>
                         </li>
                         <li>
-                            <a class="nav-link" aria-selected="false" href="/usuario/planes">Mis Planes Suscritos</a>
+                            <a class="nav-link" aria-selected="false" href="/usuario/cambiar-plan">Cambiar plan</a>
                         </li>
                         <li class="active">
                             <a class="nav-link active" aria-selected="true" href="/usuario/empresas">Empresas</a>
@@ -62,11 +43,10 @@ Empresas
                             <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
-                                        <th>ID-Number</th>
-                                        <th>Email</th>                                        
-                                        <th>Status</th>
-                                        <th></th>
+                                        <th>Identificación</th>
+                                        <th>Nombre</th>
+                                        <th>Correo</th>   
+                                        <th>Acciones</th>   
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -75,36 +55,17 @@ Empresas
                                     @php $company_detail = get_company_details($team->company_id);  @endphp
                                     @if($company_detail)
                                     <tr>
-                                        <td>{{$team->name}}</td>
                                         <td>{{$company_detail->id_number}}</td>
-                                        <td>{{$company_detail->email}}</td>                                        
+                                        <td>{{$company_detail->name}}</td>
+                                        <td>{{$company_detail->email}}</td>
                                         <td>
-                                            @if(auth()->user()->isOwnerOfTeam($team))
-                                            <span class="label label-success">Owner</span>
-                                            @else
-                                            <span class="label label-primary">Member</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if(!auth()->user()->isOwnerOfTeam($team))
-                                            @if(get_plan_invitation($team->company_id,auth()->user()->id) && get_plan_invitation($team->company_id,auth()->user()->id)->is_read_only == '1')
-                                            <a href="{{route('Company.edit', 'id='.$team->company_id)}}" class="text-primary mr-2" title="View Company Members & Profile">
-                                                <i class="nav-icon i-Eye font-weight-bold"></i>
-                                            </a>
-                                            @endif
-                                            @endif
-                                            @if(auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($team->company_id,auth()->user()->id) && get_plan_invitation($team->company_id,auth()->user()->id)->is_admin == '1'))
-                                            <a href="{{route('Company.edit','id='.$team->company_id)}}" title="Edit Company Details" class="text-success mr-2">
-                                                <i class="nav-icon i-Pen-2 font-weight-bold"></i>
-                                            </a>
-                                            @endif
-                                            @if(auth()->user()->isOwnerOfTeam($team))
-                                            <form class="inline-form" method="POST" action="{{route('teams.destroy', $team)}}" style="display: inline-block;">
-                                                @csrf
-                                                @method('delete')
-                                                <button type="submit" class="text-danger mr-2" title="Delete" style="display: inline-block; background: none; border: 0;">
-                                                    <i class="nav-icon i-Close-Window font-weight-bold"></i>
-                                                </button>
+                                            @if( auth()->user()->isOwnerOfTeam($team) )
+                                            <form id="delete-form-{{ $company_detail->id }}" class="inline-form" method="POST" action="/empresas/{{ $company_detail->id }}" >
+                                              @csrf
+                                              @method('delete')
+                                              <a type="button" class="text-danger mr-2" title="Eliminar empresa" style="display: inline-block; background: none; border: 0;" onclick="confirmDelete({{ $company_detail->id }});">
+                                                <i class="fa fa-ban" aria-hidden="true"></i>
+                                              </a>
                                             </form>
                                             @endif
                                         </td>
@@ -125,5 +86,27 @@ Empresas
 @endsection
 
 @section('footer-scripts')
+
+<script>
+    
+function confirmDelete( id ) {
+  var formId = "#delete-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea desactivar la empresa?',
+    text: "Los datos de la empresa serán guardados durante 12 meses. Si desea recuperarlos o transferirlos a otra cuentas, contacte a soporte.",
+    type: 'warning',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero desactivarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
+    
+</script>
+
 
 @endsection

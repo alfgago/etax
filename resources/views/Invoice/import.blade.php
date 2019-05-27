@@ -1,25 +1,27 @@
 <div class="popup" id="importar-emitidas-popup">
   <div class="popup-container item-factura-form form-row">
   	<div title="Cerrar ventana" class="close-popup" onclick="cerrarPopup('importar-emitidas-popup');"> <i class="fa fa-times" aria-hidden="true"></i> </div>
-		<form method="POST" action="/facturas-emitidas/importar" enctype="multipart/form-data">
+			
+		
+		<div class="form-group col-md-12">
+	    <h3>
+	      Importar facturas emitidas
+	    </h3>
+	  </div>
+		
+		<div class="form-group col-md-12">
+	    <label for="tipo_archivo">Tipo de archivo</label>
+	    <select class="form-control" name="tipo_archivo" id="tipo_archivo" onchange="toggleTiposImportacion()" required>
+	      <option value="xlsx">Excel</option>
+	      <option value="xml">XML de Hacienda</option>
+	    </select>
+	  </div>
+		  
+		<form method="POST" action="/facturas-emitidas/importarExcel" enctype="multipart/form-data" class="toggle-xlsx">
 			
 			@csrf
-			
-			<div class="form-group col-md-12">
-		    <h3>
-		      Importar facturas emitidas
-		    </h3>
-		  </div>
-			
-			<div class="form-group col-md-12">
-		    <label for="tipo_archivo">Tipo de archivo</label>
-		    <select class="form-control" name="tipo_archivo" id="tipo_archivo" onchange="toggleTiposImportacion()" required>
-		      <option value="xlsx">Excel</option>
-		      <option value="xml">XML de Hacienda</option>
-		    </select>
-		  </div>
-		  
-		  <div class="form-group col-md-12 toggle-xlsx">
+		
+		  <div class="form-group col-md-12">
 			  <div class="descripcion">
 			  	Las columnas requeridas para importación de facturas son: <br>
 			  	
@@ -55,7 +57,7 @@
 			  </div>
 		  </div>
 		  
-		  <div class="form-group col-md-12 toggle-xlsx">
+		  <div class="form-group col-md-12">
 		    <label for="archivo">Archivo</label>  
 				<div class="">
 					<div class="fallback">
@@ -63,6 +65,13 @@
 				  </div>
 				</div>
 			</div>
+			
+			<button type="submit" class="btn btn-primary">Importar facturas</button>s
+		</form>	
+			
+	<form method="POST" action="/facturas-emitidas/importarXML" enctype="multipart/form-data" class="toggle-xml">
+			
+			@csrf
 			
 			<div class="form-group col-md-12 toggle-xml">
 		    <div class="descripcion">
@@ -72,7 +81,7 @@
 		    	</div>
 		  </div>
 		  
-		  <div class="form-group col-md-12 toggle-xml">
+		  <div class="form-group col-md-12">
 		    <label for="formato_xml">Formato de XML</label>
 		    <select class="form-control" name="formato_xml" id="formato_xml">
 		      <option value="4.2">4.2</option>
@@ -80,7 +89,7 @@
 		    </select>
 			</div>
 		  
-		  <div class="form-group col-md-12 toggle-xml">
+		  <div class="form-group col-md-12">
 		    <label for="xmls[]">Archivos</label>  
 				<div class="">
 					<div class="fallback">

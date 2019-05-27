@@ -85,7 +85,7 @@
 						    
 						    <div class="form-group col-md-4">
 						      <label for="email">Correo electrónico *</label>
-						      <input type="text" class="form-control" name="email" id="email" value="{{ @$company->email }}" required>
+						      <input type="email" class="form-control" name="email" id="email" value="{{ @$company->email }}" required>
 						    </div>
 						    
 						    <div class="form-group col-md-4">
@@ -93,10 +93,10 @@
 						      <input type="text" class="form-control" name="phone" id="phone" value="{{ @$company->phone }}" >
 						    </div>
 						    
-						    <div class="form-group col-md-12">
-						      <label for="activities">Actividades comerciales *</label> {{ @$company->activities }}
+						    <div class="form-group col-md-12 hidden">
+						      <label for="activities">Actividades comerciales *</label>
 						      <select class="form-control select2-tags" name="activities" id="activities" required multiple>
-						        <option value="1" selected>Actividad 1</option>
+						        <option value="1" selected>General</option>
 						        <option value="2" >Actividad 2</option>
 						        <option value="3" >Actividad 3</option>
 						        <option value="4" >Actividad 4</option>
@@ -166,6 +166,7 @@
 	  $(document).ready(function(){
 	    
 	  	fillProvincias();
+	  	
 	    $("#billing_emails").tagging({
 	      "forbidden-chars":[",",'"',"'","?"],
 	      "forbidden-chars-text": "Caracter inválido: ",

@@ -96,7 +96,7 @@ class ClientController extends Controller
         ]);
       
         $cliente = new Client();
-        $current_company = currentCompanyModel();    
+        $company = currentCompanyModel();    
         $cliente->company_id = $company->id;
       
         $cliente->tipo_persona = $request->tipo_persona;
@@ -116,8 +116,13 @@ class ClientController extends Controller
         $cliente->phone = $request->phone;
         $cliente->es_exento = $request->es_exento;
         $cliente->billing_emails = $request->billing_emails;
+        if (is_array ($cliente->billing_emails)) {
+            $cliente->billing_emails = implode(", ",$cliente->billing_emails);
+        }
         $cliente->email = $request->email;
         $cliente->fullname = $cliente->toString();
+        
+       
       
         $cliente->save();
       
@@ -145,6 +150,8 @@ class ClientController extends Controller
     {
         $client = Client::findOrFail($id);
         $this->authorize('update', $client);
+        
+       
         
         return view('Client/edit', compact('client') );
     }
@@ -187,6 +194,9 @@ class ClientController extends Controller
         $cliente->phone = $request->phone;
         $cliente->es_exento = $request->es_exento;
         $cliente->billing_emails = $request->billing_emails;
+        if (is_array ($cliente->billing_emails)) {
+            $cliente->billing_emails = implode(", ",$cliente->billing_emails);
+        }
         $cliente->email = $request->email;
         $cliente->fullname = $cliente->toString();
       
@@ -224,7 +234,7 @@ class ClientController extends Controller
         $time_start = getMicrotime();
         
         $clientes = Excel::toCollection( new ClientImport(), request()->file('archivo') );
-        $company_id = $company_id = currentCompany();  
+        $company_id = currentCompany();  
         foreach ($clientes[0] as $row){
             Client::updateOrCreate(
                 [

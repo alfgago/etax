@@ -15476,17 +15476,24 @@ h6,
   font-size: .85rem;
 }
 
-@media only screen and (max-width: 1400px) {
+@media only screen and (max-width: 1600px) {
   body,
   html {
     font-size: 14px;
   }
 }
 
-@media only screen and (max-width: 1280) {
+@media only screen and (max-width: 1400px) {
   body,
   html {
     font-size: 13px;
+  }
+}
+
+@media only screen and (max-width: 1280) {
+  body,
+  html {
+    font-size: 12.5px;
   }
 }
 
@@ -18447,6 +18454,7 @@ td a {
   max-width: 80rem;
 }
 
+.tab-content h3,
 form h3 {
   margin: 1rem 0;
   border-bottom: 0.45rem solid #F0C962;

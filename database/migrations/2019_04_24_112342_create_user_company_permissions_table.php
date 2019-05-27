@@ -15,9 +15,9 @@ class CreateUserCompanyPermissionsTable extends Migration
     {
         Schema::create('user_company_permissions', function (Blueprint $table) {
             $table->bigIncrements('id');
-			$table->integer('company_id');
-			$table->integer('user_id');
-			$table->integer('permission_id');            
+			$table->unsignedBigInteger('company_id')->default(0);
+			$table->unsignedBigInteger('user_id')->default(0);
+			$table->integer('permission_id')->default(0);    
         });
     }
 

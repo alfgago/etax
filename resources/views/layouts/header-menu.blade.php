@@ -34,15 +34,9 @@
                     <div class="dropdown-header">
                         <i class="i-Lock-User mr-1"></i> {{Auth::user()->first_name.' '.Auth::user()->last_name.' '.Auth::user()->last_name2}}
                     </div>
-                    <a class="dropdown-item" href="/usuario/overview">Perfil</a>                     
+                    <a class="dropdown-item" href="/usuario/perfil">Perfil</a>                     
                     <a class="dropdown-item" href="/empresas/editar">Configuración de empresa</a>           
-                    <a class="dropdown-item" href="/">Cambiar plan</a>                    
-                    @can('plan-create')
-                    <a class="dropdown-item" href="/plans">Planes de suscripción</a>
-                    @endcan
-                    @can('user-create')
-                    <a class="dropdown-item" href="/users">Gestión de usuarios</a>
-                    @endcan
+                    <a class="dropdown-item" href="/usuario/cambiar-plan">Cambiar plan</a>
                     <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('frm-logout').submit();">
                         Cerrar sesión
                     </a>
@@ -67,7 +61,7 @@
             }
         });
         jQuery.ajax({
-            url: "{{ url('/change-company') }}",
+            url: "/change-company",
             method: 'post',
             data: {
                 id: sel, is_edit

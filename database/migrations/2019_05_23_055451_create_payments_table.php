@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePlansInvitationsTable extends Migration
+class CreatePaymentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,16 @@ class CreatePlansInvitationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('plans_invitations', function (Blueprint $table) {
+        Schema::create('payments', function (Blueprint $table) {
             $table->bigIncrements('id');
-			
 			$table->unsignedBigInteger('subscription_id')->default(0);
-            $table->unsignedBigInteger('company_id')->default(0);
-            $table->unsignedBigInteger('user_id')->default(0);
-			
+            
+            $table->dateTime('payment_date')->nullable();
+            $table->integer('payment_status')->default(1); //1: Pendiente, 2: Procesado, 0: Cancelado
+            $table->string('next_payment_date')->nullable();
+            $table->double('amount')->default(0);
+            $table->string('proof')->nullable();
+            
             $table->timestamps();
         });
     }
@@ -31,6 +34,6 @@ class CreatePlansInvitationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('plans_invitations');
+        Schema::dropIfExists('payments');
     }
 }

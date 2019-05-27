@@ -1,34 +1,25 @@
 @extends('layouts/app')
 
 @section('title')
-Manage Permission of team members of "{{$team->name}}"
+Editar permisos de equipo "{{$team->name}}"
 @endsection
 
 @section('breadcrumb-buttons')
-<a class="btn btn-primary" href="{{route('Company.team')}}">Back</a>
+<a class="btn btn-primary" href="equipo">Atrás</a>
 @endsection
 
 @section('content')
+
+<style>
+    .checkmark:after, .checkmark:before {
+        display: none !important;
+    }
+</style>
+
 <div class="row">
     <div class="col-md-12">
 
-        @if($message = Session::get('success'))
-        <div class="alert alert-success">
-            {{$message}}
-        </div>
-        @endif
-
-        @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-        @endif
-
-        <form method="POST" action="{{route('teams.members.assign_permissions',$team)}}">
+        <form method="POST" action="/permissions/{{team->id}}">
             @csrf
 
             <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">

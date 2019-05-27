@@ -113,7 +113,7 @@ class ProviderController extends Controller
         $provider->address = $request->address;
         $provider->phone = $request->phone;
         $provider->email = $request->email;
-        $provider->fullname = $cliente->toString();
+        $provider->fullname = $provider->toString();
       
         $provider->save();
       
@@ -180,7 +180,7 @@ class ProviderController extends Controller
         $provider->address = $request->address;
         $provider->phone = $request->phone;
         $provider->email = $request->email;
-        $provider->fullname = $cliente->toString();
+        $provider->fullname = $provider->toString();
       
         $provider->save();
       

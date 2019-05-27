@@ -16,9 +16,9 @@ class CreateXmlHaciendasTable extends Migration
         Schema::create('xml_haciendas', function (Blueprint $table) {
             $table->bigIncrements('id');
           
-            $table->unsignedBigInteger('invoice_id')->nullable();
-            $table->unsignedBigInteger('bill_id')->nullable();
-            $table->string('xml');
+            $table->unsignedBigInteger('invoice_id')->default(0);
+            $table->unsignedBigInteger('bill_id')->default(0);
+            $table->string('xml')->nullable();
             
             $table->foreign('invoice_id')->references('id')->on('invoices')->onDelete('cascade');
             $table->foreign('bill_id')->references('id')->on('bills')->onDelete('cascade');

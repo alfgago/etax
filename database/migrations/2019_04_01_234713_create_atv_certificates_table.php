@@ -17,10 +17,10 @@ class CreateAtvCertificatesTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('company_id');
             
-            $table->string('user'); 
-            $table->string('password'); 
-            $table->string('key_url'); 
-            $table->string('pin'); 
+            $table->string('user')->nullable(); 
+            $table->string('password')->nullable(); 
+            $table->string('key_url')->nullable(); 
+            $table->string('pin')->nullable(); 
             
             $table->string('generated_date')->nullable();
             $table->string('due_date')->nullable();

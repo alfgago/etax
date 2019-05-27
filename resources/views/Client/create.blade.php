@@ -35,6 +35,24 @@
 @endsection 
 
 @section('footer-scripts')
-
+		
+		<script>
+		  
+		  $(document).ready(function(){
+		    
+		  	
+  	    $("#billing_emails").tagging({
+  	      "forbidden-chars":[",",'"',"'","?"],
+  	      "forbidden-chars-text": "Caracter inválido: ",
+  	      "edit-on-delete": false,
+  	      "tag-char": "@"
+  	    });
+  	    
+  	    fillProvincias();
+		    
+		    
+		  });
+		  
+		</script>
 
 @endsection
