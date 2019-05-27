@@ -65,7 +65,7 @@ class ReportsController extends Controller
     
     public function reporteDashboard( Request $request ) {
       
-      ///try {
+      try {
         $ano = $request->ano ? $request->ano : 2019;
         $mes = $request->mes ? $request->mes : 1;
         
@@ -88,11 +88,11 @@ class ReportsController extends Controller
         
         $nombreMes = Variables::getMonthName($mes);
         $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
-      /*}catch( \Exception $ex ){
+      }catch( \Exception $ex ){
           Log::error('Error al cargar dashboard' . $ex->getMessage());
       }catch( \Throwable $ex ){
           Log::error('Error al cargar dashboard' . $ex->getMessage());
-      }*/
+      }
       
       if( !$request->vista || $request->vista == 'basica' ){
         return view('/Dashboard/dashboard-basico', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes'));
