@@ -329,8 +329,6 @@ if (!function_exists('user_subscribed_plans')) {
 
         $query = \App\UserSubscription::query();
         
-        dd($query);
-
         $query->leftJoin('subscription_plans', 'subscription_plans.id', '=', 'user_subscriptions_history.plan_id');
         $query->where(array('user_id' => $user_id));
 

@@ -547,6 +547,7 @@ class CalculatedTax extends Model
             
         }else {
           if( !$data->is_closed ) {
+            
               
               $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $anoAnterior, 0, 100 );
               $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $anoAnterior, 0, 100 );
@@ -570,6 +571,7 @@ class CalculatedTax extends Model
                 $book->save();
                 $data->book = $book;
               }
+            
           }
         }
         Cache::put($cacheKey, $data, now()->addDays(120));

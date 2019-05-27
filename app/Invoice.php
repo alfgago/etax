@@ -348,6 +348,10 @@ class Invoice extends Model
           ];
       }
       
+      if( $invoice->year == 2018 ) {
+         clearLastTaxesCache($company->id, 2018);
+      }
+      
       clearInvoiceCache($invoice);
       $invoice->save();
       return $insert;
