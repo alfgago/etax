@@ -162,69 +162,73 @@ class CalculatedTax extends Model
             $ivaType = $invoiceItems[$i]->iva_type;
             $invoiceIva = $invoiceItems[$i]->iva_amount * $invoiceItems[$i]->invoice->currency_rate;
             
-            $invoicesTotal += $currentTotal; //Agrega a sumatoria de totales
-            $invoicesSubtotal += $subtotal;  //Agrega a sumatoria de subtotales
-            $totalInvoiceIva += $invoiceIva; //Agrega a sumatoria de ivas
+            if( ! $ivaType ) {
             
-            $tipoPago = $invoiceItems[$i]->invoice->payment_type;
-            $retenidoLinea = 0;
-            
-            $porcRetencion = $invoiceItems[$i]->invoice->retention_percent;
-            if( $tipoPago == '02' ) {
-              $retenidoLinea = $currentTotal * ($porcRetencion / 100);
-              $ivaRetenido += $retenidoLinea;
-            }
-            
-            $tipo_venta = $invoiceItems[$i]->invoice->sale_condition;
-            if( $ivaType == '150' ){
-              if( $tipo_venta == '01' ) {
-                $totalClientesContadoExp += $currentTotal-$retenidoLinea;
-              }else {
-                $totalClientesCreditoExp += $currentTotal-$retenidoLinea;
+              $invoicesTotal += $currentTotal; //Agrega a sumatoria de totales
+              $invoicesSubtotal += $subtotal;  //Agrega a sumatoria de subtotales
+              $totalInvoiceIva += $invoiceIva; //Agrega a sumatoria de ivas
+              
+              $tipoPago = $invoiceItems[$i]->invoice->payment_type;
+              $retenidoLinea = 0;
+              
+              $porcRetencion = $invoiceItems[$i]->invoice->retention_percent;
+              if( $tipoPago == '02' ) {
+                $retenidoLinea = $currentTotal * ($porcRetencion / 100);
+                $ivaRetenido += $retenidoLinea;
               }
-            }else{
-              if( $tipo_venta == '01' ) {
-                $totalClientesContadoLocal += $currentTotal-$retenidoLinea;
-              }else {
-                $totalClientesCreditoLocal += $currentTotal-$retenidoLinea;
+              
+              $tipo_venta = $invoiceItems[$i]->invoice->sale_condition;
+              if( $ivaType == '150' ){
+                if( $tipo_venta == '01' ) {
+                  $totalClientesContadoExp += $currentTotal-$retenidoLinea;
+                }else {
+                  $totalClientesCreditoExp += $currentTotal-$retenidoLinea;
+                }
+              }else{
+                if( $tipo_venta == '01' ) {
+                  $totalClientesContadoLocal += $currentTotal-$retenidoLinea;
+                }else {
+                  $totalClientesCreditoLocal += $currentTotal-$retenidoLinea;
+                }
               }
-            }
-            
-            //sum a las variable según el tipo de IVA que tenga.
-            $bVar = "b".$ivaType;
-            $iVar = "i".$ivaType;
-            $this->$bVar += $subtotal;
-            $this->$iVar += $invoiceIva;
-            
-            //sum los del 1%
-            if( $ivaType == '101' || $ivaType == '121' || $ivaType == '141' ){
-              $sumRepercutido1 += $subtotal;
-            }
-            
-            //sum los del 2%
-            if( $ivaType == '102' || $ivaType == '122' || $ivaType == '142' ){
-              $sumRepercutido2 += $subtotal;
-            }
-            
-            //sum los del 13%
-            if( $ivaType == '103' || $ivaType == '123' || $ivaType == '143' || $ivaType == '130' || $ivaType == '140' ){
-              $sumRepercutido3 += $subtotal;
-            }
-            
-            //sum los del 4%
-            if( $ivaType == '104' || $ivaType == '124' || $ivaType == '144' || $ivaType == '114' ){
-              $sumRepercutido4 += $subtotal;
-            }
-            //sum los del exentos. Estos se sumn como si fueran 13 para efectos del cálculo.
-            if( $ivaType == '150' || $ivaType == '160' || $ivaType == '199' ){
-              $sumRepercutido3 += $subtotal;
-              $sumRepercutidoExentoConCredito += $subtotal;
-            }
-       
-            if( $ivaType == '200' || $ivaType == '201' || $ivaType == '240' || $ivaType == '250' || $ivaType == '260' || $ivaType == '245' ){
-              $sumRepercutidoExentoSinCredito += $subtotal;
-            }else if( $invoiceItems[$i]->is_identificacion_especifica ) {
-              $basesVentasConIdentificacion += $subtotal;
+              
+              //sum a las variable según el tipo de IVA que tenga.
+              $bVar = "b".$ivaType;
+              $iVar = "i".$ivaType;
+              $this->$bVar += $subtotal;
+              $this->$iVar += $invoiceIva;
+              
+              //sum los del 1%
+              if( $ivaType == '101' || $ivaType == '121' || $ivaType == '141' ){
+                $sumRepercutido1 += $subtotal;
+              }
+              
+              //sum los del 2%
+              if( $ivaType == '102' || $ivaType == '122' || $ivaType == '142' ){
+                $sumRepercutido2 += $subtotal;
+              }
+              
+              //sum los del 13%
+              if( $ivaType == '103' || $ivaType == '123' || $ivaType == '143' || $ivaType == '130' || $ivaType == '140' ){
+                $sumRepercutido3 += $subtotal;
+              }
+              
+              //sum los del 4%
+              if( $ivaType == '104' || $ivaType == '124' || $ivaType == '144' || $ivaType == '114' ){
+                $sumRepercutido4 += $subtotal;
+              }
+              //sum los del exentos. Estos se sumn como si fueran 13 para efectos del cálculo.
+              if( $ivaType == '150' || $ivaType == '160' || $ivaType == '199' ){
+                $sumRepercutido3 += $subtotal;
+                $sumRepercutidoExentoConCredito += $subtotal;
+              }
+         
+              if( $ivaType == '200' || $ivaType == '201' || $ivaType == '240' || $ivaType == '250' || $ivaType == '260' || $ivaType == '245' ){
+                $sumRepercutidoExentoSinCredito += $subtotal;
+              }else if( $invoiceItems[$i]->is_identificacion_especifica ) {
+                $basesVentasConIdentificacion += $subtotal;
+              }
+              
             }
             
           }
@@ -287,82 +291,86 @@ class CalculatedTax extends Model
             $ivaType = $billItems[$i]->iva_type;
             $billIva = $billItems[$i]->iva_amount * $billItems[$i]->bill->currency_rate;
             
-            $billsTotal += $currentTotal;
-            $billsSubtotal += $subtotal;
-            $totalBillIva += $billIva;
+            if( ! $ivaType ) {
             
-            if( $ivaType == '041' || $ivaType == '042' || $ivaType == '043' || $ivaType == '044' ||
-                $ivaType == '051' || $ivaType == '052' || $ivaType == '053' || $ivaType == '054' || 
-                $ivaType == '061' || $ivaType == '062' || $ivaType == '063' || $ivaType == '064' || 
-                $ivaType == '071' || $ivaType == '072' || $ivaType == '073' || $ivaType == '074'
-            )
-            {
-              $basesIdentificacionPlena += $subtotal;
-            }
-            
-            if( $ivaType == '080' || $ivaType == '090' || $ivaType == '097' || $ivaType == '098' || $ivaType == '099' )
-            {
-              $basesNoDeducibles += $subtotal;
-            }
-            
-            if( $ivaType == '040' || $ivaType == '050' || $ivaType == '060' || $ivaType == '070' )
-            {
-              $basesNoDeducibles += $subtotal;
-            }
-            
-            /***SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
-            $porc_plena = $billItems[$i]->porc_identificacion_plena ? $billItems[$i]->porc_identificacion_plena : 0;
-            
-            if( $ivaType == '041' || $ivaType == '051' || $ivaType == '061' || $ivaType == '071' )
-            {
-              $ivaAcreditableIdentificacionPlena += $billIva;
-            }
-            if( $ivaType == '042' || $ivaType == '052' || $ivaType == '062' || $ivaType == '072' )
-            {
-              $menor = 2;
-              if( $porc_plena != 2 ){
-                $menor = $porc_plena < 2 ? 2 : $porc_plena;
-              }
-              $menor_porc = $menor/100;
+              $billsTotal += $currentTotal;
+              $billsSubtotal += $subtotal;
+              $totalBillIva += $billIva;
               
-              $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
-              $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
-            }
-            if( $ivaType == '043' || $ivaType == '053' || $ivaType == '063' || $ivaType == '073' )
-            {
-              $menor = 13;
-              if( $porc_plena != 13 ){
-                $menor = $porc_plena < 13 ? 13 : $porc_plena;
+              if( $ivaType == '041' || $ivaType == '042' || $ivaType == '043' || $ivaType == '044' ||
+                  $ivaType == '051' || $ivaType == '052' || $ivaType == '053' || $ivaType == '054' || 
+                  $ivaType == '061' || $ivaType == '062' || $ivaType == '063' || $ivaType == '064' || 
+                  $ivaType == '071' || $ivaType == '072' || $ivaType == '073' || $ivaType == '074'
+              )
+              {
+                $basesIdentificacionPlena += $subtotal;
               }
-              $menor_porc = $menor/100;
               
-              $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
-              $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
-            }
-            if( $ivaType == '044' || $ivaType == '054' || $ivaType == '064' || $ivaType == '074' )
-            {
-              $menor = 4;
-              if( $porc_plena != 4 ){
-                $menor = $porc_plena < 4 ? 4 : $porc_plena;
+              if( $ivaType == '080' || $ivaType == '090' || $ivaType == '097' || $ivaType == '098' || $ivaType == '099' )
+              {
+                $basesNoDeducibles += $subtotal;
               }
-              $menor_porc = $menor/100;
               
-              $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
-              $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
-            }
-            /***END SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
+              if( $ivaType == '040' || $ivaType == '050' || $ivaType == '060' || $ivaType == '070' )
+              {
+                $basesNoDeducibles += $subtotal;
+              }
+              
+              /***SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
+              $porc_plena = $billItems[$i]->porc_identificacion_plena ? $billItems[$i]->porc_identificacion_plena : 0;
+              
+              if( $ivaType == '041' || $ivaType == '051' || $ivaType == '061' || $ivaType == '071' )
+              {
+                $ivaAcreditableIdentificacionPlena += $billIva;
+              }
+              if( $ivaType == '042' || $ivaType == '052' || $ivaType == '062' || $ivaType == '072' )
+              {
+                $menor = 2;
+                if( $porc_plena != 2 ){
+                  $menor = $porc_plena < 2 ? 2 : $porc_plena;
+                }
+                $menor_porc = $menor/100;
+                
+                $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
+                $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
+              }
+              if( $ivaType == '043' || $ivaType == '053' || $ivaType == '063' || $ivaType == '073' )
+              {
+                $menor = 13;
+                if( $porc_plena != 13 ){
+                  $menor = $porc_plena < 13 ? 13 : $porc_plena;
+                }
+                $menor_porc = $menor/100;
+                
+                $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
+                $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
+              }
+              if( $ivaType == '044' || $ivaType == '054' || $ivaType == '064' || $ivaType == '074' )
+              {
+                $menor = 4;
+                if( $porc_plena != 4 ){
+                  $menor = $porc_plena < 4 ? 4 : $porc_plena;
+                }
+                $menor_porc = $menor/100;
+                
+                $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
+                $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
+              }
+              /***END SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
+              
+              $bVar = "b".$ivaType;
+              $iVar = "i".$ivaType;
+              $this->$bVar += $subtotal;
+              $this->$iVar += $billIva;
+              
+              //Cuenta contable de proveedor
+              $tipoVenta = $billItems[$i]->bill->sale_condition;
+              if( $tipoVenta == '01' ) {
+                $totalProveedoresContado += $currentTotal;
+              }else{
+                $totalProveedoresCredito += $currentTotal;
+              }
             
-            $bVar = "b".$ivaType;
-            $iVar = "i".$ivaType;
-            $this->$bVar += $subtotal;
-            $this->$iVar += $billIva;
-            
-            //Cuenta contable de proveedor
-            $tipoVenta = $billItems[$i]->bill->sale_condition;
-            if( $tipoVenta == '01' ) {
-              $totalProveedoresContado += $currentTotal;
-            }else{
-              $totalProveedoresCredito += $currentTotal;
             }
           
           }  
