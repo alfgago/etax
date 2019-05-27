@@ -15,6 +15,11 @@ class CreateUnidadMedicionsTable extends Migration
     {
         Schema::create('unidad_medicions', function (Blueprint $table) {
             $table->increments('id');
+            
+            $table->integer('number')->default(0);
+            $table->string('code')->nullable();
+            $table->string('name')->nullable();
+            
             $table->timestamps();
         });
     }

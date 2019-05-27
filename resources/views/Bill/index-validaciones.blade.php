@@ -16,6 +16,7 @@
           <thead>
             <tr>
               <th data-priority="2">Comprobante</th>
+              <th data-priority="3">Emisor</th>
               <th>Moneda</th>
               <th>Subtotal</th>
               <th>Monto IVA</th>
@@ -28,12 +29,13 @@
               @foreach ( $bills as $data )
                 <tr>
                   <td>{{ $data->document_number }}</td>
+                  <td>{{ @$data->provider->fullname }}</td>
                   <td>{{ $data->currency }}</td>
                   <td>{{ number_format( $data->subtotal, 2 ) }}</td>
                   <td>{{ number_format( $data->iva_amount, 2 ) }}</td>
                   <td>{{ number_format( $data->total, 2 ) }}</td>
                   <td>
-                    <form class="inline-form validaciones" method="POST" action="/facturas-recibidas/confirmar-validacion/">
+                    <form class="inline-form validaciones" method="POST" action="/facturas-recibidas/confirmar-validacion/{{ $data->id }}">
                       @csrf
                       @method('patch')
                       

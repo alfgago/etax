@@ -18,12 +18,12 @@ class CreateSubscriptionPlansTable extends Migration
             
             $table->string('plan_type')->nullable();
             $table->string('plan_tier')->nullable();
-            $table->integer('num_companies')->nullable();
-            $table->integer('num_users')->nullable();
-            $table->integer('num_invoices')->nullable();
-            $table->integer('num_bills')->nullable();
+            $table->integer('num_companies')->default(0);
+            $table->integer('num_users')->default(0);
+            $table->integer('num_invoices')->default(0);
+            $table->integer('num_bills')->default(0);
             $table->boolean('chat_support')->default(true);
-            $table->integer('ticket_sla')->nullable();
+            $table->integer('ticket_sla')->default(0);
             $table->integer('call_center')->default(true);
             $table->integer('call_center_vip')->default(false);
             $table->boolean('setup_help')->default(false);
@@ -34,9 +34,9 @@ class CreateSubscriptionPlansTable extends Migration
             $table->boolean('basic_reports')->default(true);
             $table->boolean('intermediate_reports')->default(true);
             $table->boolean('advanced_reports')->default(true);
-            $table->double('monthly_price')->nullable();
-            $table->double('six_price')->nullable();
-            $table->double('annual_price')->nullable();
+            $table->double('monthly_price')->default(0);
+            $table->double('six_price')->default(0);
+            $table->double('annual_price')->default(0);
                         
             $table->timestamps();
 			$table->softDeletes();

@@ -15,12 +15,13 @@ class CreatePaymentsTable extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->bigIncrements('id');
-			$table->unsignedBigInteger('subscription_id')->nullable();
+			$table->unsignedBigInteger('subscription_id');
+			$table->unsignedBigInteger('coupon_id')->nullable();
             
             $table->dateTime('payment_date')->nullable();
             $table->integer('payment_status')->default(1); //1: Pendiente, 2: Procesado, 0: Cancelado
             $table->string('next_payment_date')->nullable();
-            $table->double('amount')->nullable();
+            $table->double('amount')->default(0);
             $table->string('proof')->nullable();
             
             $table->timestamps();

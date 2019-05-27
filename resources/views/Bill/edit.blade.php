@@ -49,8 +49,8 @@
                     <div class="form-group col-md-4">
                       <label for="currency">Divisa</label>
                       <select class="form-control" name="currency" id="moneda" required>
-                        <option value="crc" {{ $bill->currency == 'crc' ? 'selected' : '' }}>CRC</option>
-                        <option value="usd" {{ $bill->currency == 'usd' ? 'selected' : '' }}>USD</option>
+                        <option value="CRC" {{ $bill->currency == 'CRC' ? 'selected' : '' }}>CRC</option>
+                        <option value="USD" {{ $bill->currency == 'USD' ? 'selected' : '' }}>USD</option>
                       </select>
                     </div>
   
@@ -105,7 +105,7 @@
                     <input type="text" class="form-control" name="document_number" id="document_number" value="{{ $bill->document_number }}" required>
                   </div>
   
-                  <div class="form-group col-md-6">
+                  <div class="form-group col-md-6 not-required">
                     <label for="document_key">Clave de factura</label>
                     <input type="text" class="form-control" name="document_key" id="document_key" value="{{ $bill->document_key }}" >
                   </div>
@@ -169,12 +169,12 @@
                   </div>
                 </div>
 
-                <div class="form-group col-md-6">
+                <div class="form-group col-md-6 not-required">
                   <label for="other_reference">Referencia</label>
                   <input type="text" class="form-control" name="other_reference" id="referencia" value="{{ $bill->other_reference }}" >
                 </div>
 
-                <div class="form-group col-md-6">
+                <div class="form-group col-md-6 not-required">
                   <label for="buy_order">Orden de compra</label>
                   <input type="text" class="form-control" name="buy_order" id="orden_compra" value="{{ $bill->buy_order }}" >
                 </div>

@@ -184,6 +184,9 @@ class Invoice extends Model
                                  $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt )
     {
       if( $item_id ){
+        
+        
+        
         $item = InvoiceItem::find($item_id);
         //Revisa que la linea exista y pertenece a la factura actual. Asegura que si el ID se cambia en frontend, no se actualice.
         if( $item && $item->invoice_id == $this->id ) {
@@ -322,6 +325,8 @@ class Invoice extends Model
           $invoice->subtotal = $invoice->subtotal + $subtotalLinea;
           $invoice->iva_amount = $invoice->iva_amount + $montoIva;
           
+          $discount_reason = "";
+          
           $insert = [
               'invoice_id' => $invoice->id,
               'company_id' => $company->id,
@@ -338,7 +343,6 @@ class Invoice extends Model
               'total' => $totalLinea,
               'discount_type' => '01',
               'discount' => $montoDescuento,
-              'discount_reason' => '',
               'iva_type' => $codigoEtax,
               'iva_amount' => $montoIva,
           ];

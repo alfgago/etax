@@ -119,6 +119,8 @@ class Bill extends Model
       $lids = array();
       foreach($request->items as $item) {
         $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
+        $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
+        
         $item_id = $item['id'] ? $item['id'] : 0;
         $item_number = $item['item_number'];
         $code = $item['code'];
@@ -136,7 +138,10 @@ class Bill extends Model
         $iva_amount = $item['iva_amount'];
         $is_exempt = false;
         $isIdentificacion = $item['is_identificacion_especifica'];
-        $item_modificado = $this->addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt );
+        $porc_identificacion_plena = $item['porc_identificacion_plena'];
+        $item_modificado = $this->addEditItem( 
+          $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, 
+          $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $porc_identificacion_plena, $is_exempt );
         array_push( $lids, $item_modificado->id );
       }
       
@@ -150,7 +155,9 @@ class Bill extends Model
       
     }
   
-    public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt )
+    public function addItem( 
+      $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, 
+      $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $porc_identificacion_plena, $is_exempt )
     {
       return BillItem::create([
         'bill_id' => $this->id,
@@ -177,7 +184,9 @@ class Bill extends Model
       
     }
   
-    public function addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt )
+    public function addEditItem( 
+      $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, 
+      $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $porc_identificacion_plena, $is_exempt )
     {
       if( $item_id ){
         $item = BillItem::find($item_id);

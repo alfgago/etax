@@ -17,7 +17,7 @@ class CreateInvoicesTable extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->bigIncrements('id');
           
-            $table->unsignedBigInteger('company_id')->nullable();
+            $table->unsignedBigInteger('company_id');
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             
             $table->unsignedBigInteger('client_id')->nullable();
@@ -28,7 +28,7 @@ class CreateInvoicesTable extends Migration
           
             $table->string('document_key')->nullable();
           
-            $table->integer('reference_number')->nullable();
+            $table->integer('reference_number')->default(0);
             $table->string('document_number')->nullable();
           
             $table->double('subtotal')->default(0);
@@ -67,10 +67,10 @@ class CreateInvoicesTable extends Migration
             $table->string('generation_method')->nullable();
             $table->string('other_reference')->nullable();
             
-            $table->unsignedBigInteger('other_document')->nullable();
+            $table->unsignedBigInteger('other_document')->default(0);
           
-            $table->integer('month')->nullable();
-            $table->integer('year')->nullable();
+            $table->integer('month')->default(1);
+            $table->integer('year')->default(2019);
             $table->index(['year', 'month']);
           
             $table->timestamps();
@@ -79,50 +79,43 @@ class CreateInvoicesTable extends Migration
         Schema::create('invoice_items', function (Blueprint $table) {
             $table->bigIncrements('id');
             
-            $table->unsignedBigInteger('invoice_id')->nullable();
+            $table->unsignedBigInteger('invoice_id')->default(0);
             $table->foreign('invoice_id')->references('id')->on('invoices')->onDelete('cascade');
             
-            $table->unsignedBigInteger('company_id')->nullable();
+            $table->unsignedBigInteger('company_id')->default(0);
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             
             $table->unsignedBigInteger('product_id')->nullable();
-            $table->integer('item_number')->nullable();
+            $table->integer('item_number')->default(0);
             $table->string('code')->nullable();
             $table->string('name')->nullable();
             $table->string('product_type')->nullable();
-            $table->integer('measure_unit')->nullable();
-            $table->integer('item_count')->nullable();
-            $table->double('unit_price')->nullable();
-            $table->double('subtotal')->nullable();
-            $table->double('iva_amount')->nullable();
-            $table->double('total')->nullable();
+            $table->string('measure_unit')->nullable();
+            $table->integer('item_count')->default(0);
+            $table->double('unit_price')->default(0);
+            $table->double('subtotal')->default(0);
+            $table->double('iva_amount')->default(0);
+            $table->double('total')->default(0);
             $table->string('discount_type')->nullable();
             $table->double('discount')->default(0);
-            $table->double('discount_reason')->nullable();
+            $table->string('discount_reason')->nullable();
             $table->string('iva_type')->nullable();
-            $table->double('iva_percentage')->nullable();
+            $table->double('iva_percentage')->default(0);
             $table->boolean('is_exempt')->default(false);
             $table->boolean('is_identificacion_especifica')->default(false);
           
-            $table->integer('month')->nullable();
-            $table->integer('year')->nullable();
+            $table->integer('month')->default(1);
+            $table->integer('year')->default(2019);
             $table->index(['year', 'month']);
           
             $table->timestamps();
         });
         
-        $time_start = getMicrotime();
-        $this->demoData();
-        
-        $time_end = getMicrotime();
-        $time = $time_end - $time_start;
-        echo e('tiempo: '.$time);
+        if ( !app()->environment('production') ) {
+            $this->demoData();
+        }
     }
   
-  function getMicrotime(){
-        list($usec, $sec) = explode(" ", microtime());
-        return ((float) $usec + (float)$sec);
-    }
   
     public function demoData() {
         

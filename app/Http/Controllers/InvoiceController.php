@@ -398,6 +398,11 @@ class InvoiceController extends Controller
         request()->validate([
           'xmls' => 'required'
         ]);
+        
+        $count = count(request()->file('xmls'));
+        if( $count > 10 ) {
+            return back()->withError( 'Por favor mantenga el límite de 10 archivos por intento.');
+        }
           
         try {  
             $time_start = getMicrotime();
@@ -407,11 +412,13 @@ class InvoiceController extends Controller
                     $xml = simplexml_load_string( file_get_contents($file) );
                     $json = json_encode( $xml ); // convert the XML string to JSON
                     $arr = json_decode( $json, TRUE );
+                    
+                    $consecutivoComprobante = $arr['NumeroConsecutivo'];
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $arr['Emisor']['Identificacion']['Numero'] ) ) {
                         $this->saveInvoice( $arr, 'XML' );
                     }else{
-                        return back()->withError( 'La factura subida no le pertenece a su compañía actual.' );
+                        return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
                     }
                 }
             }
@@ -419,10 +426,10 @@ class InvoiceController extends Controller
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
         }catch( \Exception $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido:' . $ex->getMessage());
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
         }catch( \Throwable $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido:' . $ex->getMessage());
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido,');
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
         }
         

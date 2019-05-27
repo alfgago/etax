@@ -16,7 +16,7 @@ class CreateClientsTable extends Migration
         Schema::create('clients', function (Blueprint $table) {
             $table->bigIncrements('id');
           
-            $table->unsignedBigInteger('company_id')->nullable();
+            $table->unsignedBigInteger('company_id')->default(0);
             $table->string('tipo_persona')->nullable();
             $table->string('id_number')->nullable();
             $table->string('code')->default('');
@@ -43,7 +43,9 @@ class CreateClientsTable extends Migration
             $table->timestamps();
         });
         
-        $this->demoData();
+        if ( !app()->environment('production') ) {
+            $this->demoData();
+        }
     }
     
     public function demoData() {

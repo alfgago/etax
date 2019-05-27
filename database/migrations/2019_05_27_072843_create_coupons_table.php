@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateUserCompanyPermissionsTable extends Migration
+class CreateCouponsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,14 @@ class CreateUserCompanyPermissionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_company_permissions', function (Blueprint $table) {
+        Schema::create('coupons', function (Blueprint $table) {
             $table->bigIncrements('id');
-			$table->unsignedBigInteger('company_id')->default(0);
-			$table->unsignedBigInteger('user_id')->default(0);
-			$table->integer('permission_id')->default(0);    
+            
+            $table->unsignedBigInteger('subscription_id');
+            $table->double('discount_percentage')->default(0);
+            $table->integer('months_duration')->default(1);
+            
+            $table->timestamps();
         });
     }
 
@@ -28,6 +31,6 @@ class CreateUserCompanyPermissionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_company_permissions');
+        Schema::dropIfExists('coupons');
     }
 }
