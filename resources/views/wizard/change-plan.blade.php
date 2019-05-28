@@ -58,6 +58,8 @@
 	.cuadro-planes .opcion span {
 		position: relative;
 		z-index: 1;
+		-webkit-transition: .5s ease all;
+		-o-transition: .5s ease all;
 		transition: .5s ease all;
     font-size: .9rem;
 	}
@@ -194,43 +196,70 @@
 		}
 		
 		.cuadro-planes .tier > div.titulo {
-    max-width: none;
-    width: 100%;
-}
-
-.cuadro-planes .tier {
-    flex-wrap: wrap;
-}
-
-.cuadro-planes .tier > div {
-    max-width: 30%;
-    width: 30%;
-    flex: auto;
-    margin-right: 1%;
-}
-
-.cuadro-planes .opcion.is-active span:not(.precio) {
-    margin: 0;
-}
-
-.cuadro-planes .opcion span.precio {
-    position: relative;
-    display: block;
-    left: auto;
-    top: auto;
-    text-align: center;
-    border: 0;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    transform: none;
-}
-
-.cuadro-planes .opcion span {
-    display: block;
-}
+		    max-width: none;
+		    width: 100%;
+    		font-size: 1.5rem;
+    		margin-bottom: 0;
+    		padding-bottom: 0;
+		}
+		
+		.cuadro-planes .tier {
+		    -ms-flex-wrap: wrap;
+		        flex-wrap: wrap;
+		}
+		
+		.cuadro-planes .tier > div {
+		    max-width: 30%;
+		    width: 30%;
+		    -webkit-box-flex: 1;
+		        -ms-flex: auto;
+		            flex: auto;
+		    margin-right: 1%;
+		}
+		
+		.cuadro-planes .opcion.is-active span:not(.precio) {
+		    margin: 0;
+		}
+		
+		.cuadro-planes .opcion span.precio {
+		    position: relative;
+		    display: block;
+		    left: auto;
+		    top: auto;
+		    text-align: center;
+		    border: 0;
+		    width: 100%;
+		    margin: 0;
+		    padding: 0;
+		    -webkit-transform: none;
+		        -ms-transform: none;
+		            transform: none;
+		}
+		
+		.cuadro-planes .opcion span {
+		    display: block;
+		}
+		
+		.bigtext {
+		    font-size: 1rem;
+		}
+		
+		.wizard-container .btn-holder {
+		    font-size: .8rem;
+		}
 
 	}
+	
+	@media screen and (max-width: 380px) {
+		.wizard-container .btn-holder a{
+		    font-size: .8rem;
+		}
+		
+		.wizard-container .btn-holder .btn {
+		    width: 100%;
+		}
+	}
+	
 </style>
 
 @endsection
@@ -304,11 +333,12 @@
 			        </div>
 			        
 			        <div class="bigtext">
-			        	Elija el plan de su conveniencia y empiece a calcular el IVA con eTax. Disfrute de una <span>prueba gratis por los próximos 10 días</span>. Válido hasta el 4 de febrero.
+			        	Elija el plan de su conveniencia y empiece a calcular el IVA con eTax. Disfrute de una <span>prueba gratis por los próximos 10 días</span>. Válido hasta el 7 de Junio.
 			        </div>
 			        
 			        <div class="btn-holder">
-  							<button type="submit" id="btn-submit" class="btn btn-primary btn-next" >Confirme su plan e inicie de inmediato</button>
+			        	<a class="btn btn-primary btn-prev" target="_blank" href="https://etaxcr.com/planes">Ver detalle de planes</a>
+  							<button type="submit" id="btn-submit" class="btn btn-primary btn-next" >Confirme su plan</button>
 							</div>
 	
 			      </div>
