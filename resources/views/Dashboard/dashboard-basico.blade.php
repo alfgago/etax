@@ -58,7 +58,6 @@
           </div>
           <div class="dato-empresa mt-3">  
             <a class="btn btn-secondary btn-sm" href="/empresas/configuracion">Configurar datos</a>
-            <a class="btn btn-secondary btn-sm" href="/usuario/cambiar-plan">Cambiar plan</a>
           </div>
         </div>
         
