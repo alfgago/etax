@@ -385,11 +385,12 @@ class InvoiceController extends Controller
                             $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
                             $codigoEtax = $row['codigoetax'];
                             $montoIva = (float)$row['montoiva'];
+                            $totalNeto = 0;
                             
                             $insert = Invoice::importInvoiceRow(
                                 $metodoGeneracion, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
                                 $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
-                                $idMoneda, $tipoCambio, $totalDocumento, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
+                                $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
                                 $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, true
                             );
                             
@@ -487,6 +488,7 @@ class InvoiceController extends Controller
         $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
         $tipoCambio = $arr['ResumenFactura']['TipoCambio'];
         $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
+        $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
         $tipoDocumento = '01';
         $descripcion = $arr['ResumenFactura']['CodigoMoneda'];
         
@@ -517,7 +519,7 @@ class InvoiceController extends Controller
             $insert = Invoice::importInvoiceRow(
                 $metodoGeneracion, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
                 $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
-                $idMoneda, $tipoCambio, $totalDocumento, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
+                $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
                 $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, false
             );
             

@@ -224,7 +224,7 @@ class Invoice extends Model
     public static function importInvoiceRow (
         $metodoGeneracion, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
         $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
-        $idMoneda, $tipoCambio, $totalDocumento, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
+        $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
         $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, $codeValidated
     ) {
       
@@ -357,6 +357,11 @@ class Invoice extends Model
       }
       
       clearInvoiceCache($invoice);
+      
+      if( $totalNeto != 0 ) {
+        $invoice->subtotal = $totalNeto;
+      }
+      
       $invoice->save();
       return $insert;
       

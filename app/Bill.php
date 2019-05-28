@@ -226,7 +226,7 @@ class Bill extends Model
     public static function importBillRow (
         $metodoGeneracion, $idReceptor, $nombreProveedor, $codigoProveedor, $tipoPersona, $identificacionProveedor, $correoProveedor, $telefonoProveedor,
         $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
-        $idMoneda, $tipoCambio, $totalDocumento, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
+        $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
         $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, $isAuthorized, $codeValidated
     ) {
       
@@ -359,13 +359,17 @@ class Bill extends Model
               'total' => $totalLinea,
               'discount_type' => '01',
               'discount' => $montoDescuento,
-              'discount_reason' => '',
               'iva_type' => $codigoEtax,
               'iva_amount' => $montoIva,
           ];
       }
       
       clearBillCache($bill);
+      
+      if( $totalNeto != 0 ) {
+        $bill->subtotal = $totalNeto;
+      }
+      
       $bill->save();
       return $insert;
       
