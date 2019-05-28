@@ -299,13 +299,25 @@ class Invoice extends Model
               $invoice->total = $totalDocumento;
               
               $invoice->save();
+              $company->save();
           }   
           Cache::put($invoiceCacheKey, $invoice, 30);
       }
       $invoice = Cache::get($invoiceCacheKey);
       
-      $invoice->generated_date = Carbon::createFromFormat('d/m/Y', $fechaEmision);
-      $invoice->due_date = Carbon::createFromFormat('d/m/Y', $fechaVencimiento);
+      try{
+        $invoice->generated_date = Carbon::createFromFormat('d/m/Y', $fechaEmision);
+      }catch( \Exception $ex ){
+        $dt =\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($fechaEmision);
+        $invoice->generated_date = Carbon::instance($dt);
+      }
+      
+      try{
+        $invoice->due_date = Carbon::createFromFormat('d/m/Y', $fechaVencimiento);
+      }catch( \Exception $ex ){
+        $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($fechaVencimiento);
+        $invoice->due_date = Carbon::instance($dt);
+      }
       
       $year = $invoice->generated_date->year;
       $month = $invoice->generated_date->month;
@@ -355,7 +367,9 @@ class Invoice extends Model
       }
       
       clearInvoiceCache($invoice);
+      
       $invoice->save();
+      
       return $insert;
       
     }

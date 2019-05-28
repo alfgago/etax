@@ -40,7 +40,7 @@
                 </div>
             </li>
             
-            <li class="nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
+            <li class="hidden nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
                 <a class="nav-item-hold" href="/facturas-recibidas">
                     <img src="{{asset('assets/images/iconos/facturacion.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Facturación</span>
@@ -55,6 +55,40 @@
                     <a href="/facturas-recibidas/aceptaciones">Aceptación de facturas recibidas</a>
                 </div>
             </li>
+            
+            <li title="A partir del 4 de Junio" class="soon nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
+                <a  title="A partir del 4 de Junio" class="nav-item-hold" href="#">
+                    <img src="{{asset('assets/images/iconos/facturacion.png')}}" class="sidemenu-icon">
+                    <span class="nav-text">Facturación</span>
+                </a>
+                
+                <div class="subitems">
+                    <a title="A partir del 4 de Junio" href="#">Ver documentos emitidos</a>
+                    <a title="A partir del 4 de Junio" href="#">Emitir factura electrónica</a>
+                    <a title="A partir del 4 de Junio" href="#">Emitir tiquete electrónico</a>
+                    <a title="A partir del 4 de Junio" href="#">Emitir nota de débito</a>
+                    <a title="A partir del 4 de Junio" href="#">Aceptación de facturas recibidas</a>
+                </div>
+            </li>
+            
+            <style>
+                li.hidden.nav-item.small-nav {
+                    display: none !important;
+                }
+                
+                li.soon.nav-item.small-nav a {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                }
+                
+                li.soon.nav-item.small-nav:before {
+                    background: #a3a1a7 !important;opacity: 1 !important;
+                }
+                
+                li.soon.nav-item.small-nav .subitems a {
+                    background: #787779 !important;opacity: 1 !important;
+                }
+            </style>
             
             <li class="nav-item small-nav {{ request()->is('reportes/*') || request()->is('reportes') ? 'active' : '' }}" >
                 <a class="nav-item-hold" href="/cierres">
