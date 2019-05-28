@@ -315,13 +315,26 @@ class Bill extends Model
               $bill->total = $totalDocumento;
               
               $bill->save();
+              $company->save();
+              
           }   
           Cache::put($billCacheKey, $bill, 30);
       }
       $bill = Cache::get($billCacheKey);
       
-      $bill->generated_date = Carbon::createFromFormat('d/m/Y', $fechaEmision);
-      $bill->due_date = Carbon::createFromFormat('d/m/Y', $fechaVencimiento);
+      try{
+        $bill->generated_date = Carbon::createFromFormat('d/m/Y', $fechaEmision);
+      }catch( \Exception $ex ){
+        $dt =\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($fechaEmision);
+        $bill->generated_date = Carbon::instance($dt);
+      }
+      
+      try{
+        $bill->due_date = Carbon::createFromFormat('d/m/Y', $fechaVencimiento);
+      }catch( \Exception $ex ){
+        $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($fechaVencimiento);
+        $bill->due_date = Carbon::instance($dt);
+      }
       
       $year = $bill->generated_date->year;
       $month = $bill->generated_date->month;
