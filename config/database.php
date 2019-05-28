@@ -113,13 +113,19 @@ return array(
 
         'redis' => array(
 
-                'cluster' => false,
-
+                'client' => 'predis',
+                
                 'default' => array(
-                        'host'     => '127.0.0.1',
-                        'port'     => 6379,
+                        'host'     => env('REDIS_HOST', 'etax-redis.blqt4v.ng.0001.use1.cache.amazonaws.com'),
+                        'port'     => env('REDIS_PORT', '6379'),
                         'database' => 0,
                 ),
+                
+                'cache' => [
+                        'host' => env('REDIS_HOST', 'etax-redis.blqt4v.ng.0001.use1.cache.amazonaws.com'),
+                        'port' => env('REDIS_PORT', '6379'),
+                        'database' => 1,
+                ],
 
         ),
 

@@ -342,7 +342,7 @@ class InvoiceController extends Controller
         $i = 0;
         
         if( $collection[0]->count() < 2501 ){
-            try {
+            //try {
                 foreach ($collection[0]->chunk(200) as $facturas) {
                     \DB::transaction(function () use ($facturas, &$company, &$i) {
                         
@@ -367,6 +367,7 @@ class InvoiceController extends Controller
                             $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
                             $numeroLinea = array_key_exists('numerolinea', $row) ? $row['numerolinea'] : 1;
                             $fechaEmision = $row['fechaemision'];
+                            
                             $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
                             $idMoneda = $row['idmoneda'];
                             $tipoCambio = $row['tipocambio'];
@@ -403,13 +404,13 @@ class InvoiceController extends Controller
                     });
                     
                 }
-            }catch( \ErrorException $ex ){
+            /*}catch( \ErrorException $ex ){
                 return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila. '.$i.'. Mensaje:' . $ex->getMessage());
             }catch( \InvalidArgumentException $ex ){
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
             }catch( \Exception $ex ){
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Error en la fila. '.$i.'. Mensaje:' . $ex->getMessage());
-            }
+            }*/
             
             $company->save();
             
