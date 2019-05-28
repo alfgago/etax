@@ -64,8 +64,8 @@
                     <div class="form-group col-md-4">
                       <label for="currency">Divisa</label>
                       <select class="form-control" name="currency" id="moneda" required>
-                        <option value="crc"  data-rate="{{$rate}}" selected>CRC</option>
-                        <option value="usd"  data-rate="{{$rate}}">USD</option>
+                        <option value="CRC"  data-rate="{{$rate}}" selected>CRC</option>
+                        <option value="USD"  data-rate="{{$rate}}">USD</option>
                       </select>
                     </div>
       
@@ -120,7 +120,7 @@
                     <input type="text" class="form-control" name="document_number" id="document_number" value="" required>
                   </div>
   
-                  <div class="form-group col-md-6">
+                  <div class="form-group col-md-6 not-required">
                     <label for="document_key">Clave de factura</label>
                     <input type="text" class="form-control" name="document_key" id="document_key" value="" >
                   </div>
@@ -195,12 +195,12 @@
                     </div>
                   </div>
 
-                  <div class="form-group col-md-6">
+                  <div class="form-group col-md-6 not-required">
                     <label for="other_reference">Referencia</label>
                     <input type="text" class="form-control" name="other_reference" id="referencia" value="" >
                   </div>
 
-                  <div class="form-group col-md-6">
+                  <div class="form-group col-md-6 not-required">
                     <label for="buy_order">Orden de compra</label>
                     <input type="text" class="form-control" name="buy_order" id="orden_compra" value="" >
                   </div>

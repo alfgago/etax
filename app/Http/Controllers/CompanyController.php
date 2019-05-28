@@ -268,6 +268,8 @@ class CompanyController extends Controller {
         //Update Team name based on company
         /*$team->name = "(".$company->id.") " . $company->id_number;
         $team->save();*/
+        
+
 
         return redirect()->route('Company.edit')->withMessage('La información de la empresa ha sido actualizada.');
     }
@@ -404,6 +406,7 @@ class CompanyController extends Controller {
         $company = currentCompanyModel();
         $this->authorize('update', $company);
 
+        clearLastTaxesCache( $company->id, 2018);
         $company->first_prorrata_type = 3;
         $company->save();
 

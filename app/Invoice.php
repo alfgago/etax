@@ -80,7 +80,7 @@ class Invoice extends Model
           $cliente->first_name = $request->first_name;
           $cliente->last_name = $request->last_name;
           $cliente->last_name2 = $request->last_name2;
-          $cliente->emisor_receptor = $request->emisor_receptor;
+          $cliente->emisor_receptor = 'ambos';
           $cliente->country = $request->country;
           $cliente->state = $request->state;
           $cliente->city = $request->city;
@@ -98,13 +98,17 @@ class Invoice extends Model
           $this->client_id = $request->client_id;
       }
       
+      $request->currency_rate = $request->currency_rate ? $request->currency_rate : 1;
+      
       //Datos de factura
       $this->description = $request->description;
-      $this->subtotal = $request->subtotal;
+      $this->subtotal = floatval( str_replace(",","", $request->subtotal ));
       $this->currency = $request->currency;
-      $this->currency_rate = $request->currency_rate;
-      $this->total = $request->total;
-      $this->iva_amount = $request->iva_amount;
+      $this->currency_rate = floatval( str_replace(",","", $request->currency_rate ));
+      $this->total = floatval( str_replace(",","", $request->total ));
+      $this->iva_amount = floatval( str_replace(",","", $request->iva_amount ));
+      
+      
 
       //Fechas
       $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
@@ -184,6 +188,7 @@ class Invoice extends Model
                                  $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt )
     {
       if( $item_id ){
+        
         $item = InvoiceItem::find($item_id);
         //Revisa que la linea exista y pertenece a la factura actual. Asegura que si el ID se cambia en frontend, no se actualice.
         if( $item && $item->invoice_id == $this->id ) {
@@ -322,6 +327,8 @@ class Invoice extends Model
           $invoice->subtotal = $invoice->subtotal + $subtotalLinea;
           $invoice->iva_amount = $invoice->iva_amount + $montoIva;
           
+          $discount_reason = "";
+          
           $insert = [
               'invoice_id' => $invoice->id,
               'company_id' => $company->id,
@@ -338,10 +345,13 @@ class Invoice extends Model
               'total' => $totalLinea,
               'discount_type' => '01',
               'discount' => $montoDescuento,
-              'discount_reason' => '',
               'iva_type' => $codigoEtax,
               'iva_amount' => $montoIva,
           ];
+      }
+      
+      if( $invoice->year == 2018 ) {
+         clearLastTaxesCache($company->id, 2018);
       }
       
       clearInvoiceCache($invoice);

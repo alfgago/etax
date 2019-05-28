@@ -48,6 +48,7 @@ class InvoiceController extends Controller
 
         $query = Invoice::where('invoices.company_id', $current_company)
                 ->where('is_void', false)->where('is_totales', false)->with('client');
+                
         return datatables()->eloquent( $query )
             ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($invoice) {
@@ -83,7 +84,12 @@ class InvoiceController extends Controller
     public function indexValidaciones()
     {
         $current_company = currentCompany();
-        $invoices = Invoice::where('company_id', $current_company)->where('is_void', false)->where('is_totales', false)->where('is_code_validated', false)->orderBy('generated_date', 'DESC')->orderBy('reference_number', 'DESC')->paginate(10);
+        $invoices = Invoice::where('company_id', $current_company)
+                    ->where('is_void', false)
+                    ->where('is_totales', false)
+                    ->where('is_code_validated', false)
+                    ->orderBy('generated_date', 'DESC')
+                    ->orderBy('reference_number', 'DESC')->paginate(10);
         return view('Invoice/index-validaciones', [
           'invoices' => $invoices
         ]);
@@ -103,8 +109,29 @@ class InvoiceController extends Controller
         $invoice->is_code_validated = true;
         $invoice->save();
         
-        return redirect('/facturas-emitidas/validaciones')
-            ->withMessage( 'La factura '. $invoice->document_number . 'ha sido validada');
+        if( $invoice->year == 2018 ) {
+            clearLastTaxesCache($invoice->company->id, 2018);
+        }
+        clearInvoiceCache($invoice);
+        
+        return redirect('/facturas-emitidas/validaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido validada');
+    }
+    
+    /**
+     * Despliega las facturas que requieren validación de códigos
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexValidacionesLinea()
+    {
+        $current_company = currentCompany()->id;
+        $items = InvoiceItem::with('bill')
+                  ->where('company_id', $company)
+                  ->whereNull('iva_type')->paginate(10);
+                  
+        return view('Invoice/index-validaciones-linea', [
+          'invoices' => $invoices
+        ]);
     }
 
     /**
@@ -309,7 +336,7 @@ class InvoiceController extends Controller
         $i = 0;
         
         if( $collection[0]->count() < 2501 ){
-            try {
+            //try {
                 foreach ($collection[0]->chunk(200) as $facturas) {
                     \DB::transaction(function () use ($facturas, &$company, &$i) {
                         
@@ -334,6 +361,7 @@ class InvoiceController extends Controller
                             $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
                             $numeroLinea = array_key_exists('numerolinea', $row) ? $row['numerolinea'] : 1;
                             $fechaEmision = $row['fechaemision'];
+                            
                             $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
                             $idMoneda = $row['idmoneda'];
                             $tipoCambio = $row['tipocambio'];
@@ -370,13 +398,13 @@ class InvoiceController extends Controller
                     });
                     
                 }
-            }catch( \ErrorException $ex ){
+            /*}catch( \ErrorException $ex ){
                 return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila. '.$i.'. Mensaje:' . $ex->getMessage());
             }catch( \InvalidArgumentException $ex ){
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
             }catch( \Exception $ex ){
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Error en la fila. '.$i.'. Mensaje:' . $ex->getMessage());
-            }
+            }*/
             
             $company->save();
             
@@ -436,6 +464,11 @@ class InvoiceController extends Controller
         request()->validate([
           'xmls' => 'required'
         ]);
+        
+        $count = count(request()->file('xmls'));
+        if( $count > 10 ) {
+            return back()->withError( 'Por favor mantenga el límite de 10 archivos por intento.');
+        }
           
         try {  
             $time_start = getMicrotime();
@@ -445,12 +478,14 @@ class InvoiceController extends Controller
                     $xml = simplexml_load_string( file_get_contents($file) );
                     $json = json_encode( $xml ); // convert the XML string to JSON
                     $arr = json_decode( $json, TRUE );
+                    
+                    $consecutivoComprobante = $arr['NumeroConsecutivo'];
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                     if(preg_replace("/[^0-9]+/", "", $company->id_number) ==
                         preg_replace("/[^0-9]+/", "", $arr['Emisor']['Identificacion']['Numero'])) {
                         $this->saveInvoice( $arr, 'XML' );
                     }else{
-                        return back()->withError( 'La factura subida no le pertenece a su compañía actual.' );
+                        return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
                     }
                 }
             }
@@ -458,10 +493,10 @@ class InvoiceController extends Controller
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
         }catch( \Exception $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido:' . $ex->getMessage());
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
         }catch( \Throwable $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido:' . $ex->getMessage());
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido,');
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
         }
         
@@ -515,7 +550,7 @@ class InvoiceController extends Controller
             $subtotalLinea = (float)$linea['SubTotal'];
             $totalLinea = (float)$linea['MontoTotalLinea'];
             $montoDescuento = array_key_exists('MontoDescuento', $linea) ? $linea['MontoDescuento'] : 0;
-            $codigoEtax = '003'; //De momento asume que todo en 4.2 es al 13%.
+            $codigoEtax = '103'; //De momento asume que todo en 4.2 es al 13%.
             $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
             
             $insert = Invoice::importInvoiceRow(

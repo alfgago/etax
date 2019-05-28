@@ -10,6 +10,7 @@ use App\Variables;
 use App\PlansInvitation;
 use Mpociot\Teamwork\Facades\Teamwork;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ReportsController extends Controller
 {
@@ -88,7 +89,9 @@ class ReportsController extends Controller
         $nombreMes = Variables::getMonthName($mes);
         $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
       }catch( \Exception $ex ){
-          
+          Log::error('Error al cargar dashboard' . $ex->getMessage());
+      }catch( \Throwable $ex ){
+          Log::error('Error al cargar dashboard' . $ex->getMessage());
       }
       
       if( !$request->vista || $request->vista == 'basica' ){
@@ -198,6 +201,7 @@ class ReportsController extends Controller
     }
     
     public function getProrrataOperativa( $ano ){
+      
       $anoAnterior = $ano > 2018 ? $ano-1 : 2018;
       $company = currentCompanyModel();
       

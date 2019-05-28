@@ -25,7 +25,7 @@ class CreateClientsTable extends Migration
             $table->string('last_name2')->nullable();
             $table->string('fullname')->nullable();
             $table->string('email')->nullable();
-            $table->string('emisor_receptor')->default('1');
+            $table->string('emisor_receptor')->default('ambos');
             $table->string('country')->default('CR');
             $table->string('state')->nullable(); //Provincia
             $table->string('city')->nullable(); //Canton
@@ -43,7 +43,9 @@ class CreateClientsTable extends Migration
             $table->timestamps();
         });
         
-        $this->demoData();
+        if ( !app()->environment('production') ) {
+            $this->demoData();
+        }
     }
     
     public function demoData() {
