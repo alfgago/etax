@@ -299,6 +299,8 @@ class BillController extends Controller
                             $montoIva = (float)$row['montoiva'];
                             $totalNeto = 0;
                             
+                            $codigoEtax = str_pad($codigoEtax, 3, '0', STR_PAD_LEFT);
+                            
                             $insert = Bill::importBillRow(
                                 $metodoGeneracion, 0, $nombreProveedor, $codigoProveedor, $tipoPersona, $identificacionProveedor, $correoProveedor, $telefonoProveedor,
                                 $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,

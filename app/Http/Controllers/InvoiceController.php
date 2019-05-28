@@ -367,6 +367,7 @@ class InvoiceController extends Controller
                             $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
                             $numeroLinea = array_key_exists('numerolinea', $row) ? $row['numerolinea'] : 1;
                             $fechaEmision = $row['fechaemision'];
+                            
                             $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
                             $idMoneda = $row['idmoneda'];
                             $tipoCambio = $row['tipocambio'];

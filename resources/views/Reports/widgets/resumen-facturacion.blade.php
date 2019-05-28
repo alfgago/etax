@@ -7,7 +7,7 @@
         $availableInvoices = $company->checkCountAvailableInvoices();
       ?>
       <div class="col-md-12 dato-facturas">
-          <label><span>Facturas emitidas</span></label>
+          <label><span>Facturas de venta</span></label>
           @if( $availableInvoices != -1 )
             <div class="barra-limites emitidas" >
               <div class="fill-bar" data-total="{{ $availableInvoices }}" data-fill="{{ number_format( $data->count_invoices ) }}"></div>
@@ -22,7 +22,7 @@
       </div>
       
       <div class="col-md-12 dato-facturas mt-2">
-          <label><span>Facturas recibidas</span></label>
+          <label><span>Facturas de compra</span></label>
           @if( $availableBills != -1 )
             <div class="barra-limites recibidas">
               <div class="fill-bar" data-total="{{ $availableBills }}" data-fill="{{ number_format( $data->count_bills ) }}"></div>
@@ -36,7 +36,7 @@
           @endif
       </div>
       
-      <div class="col-md-12 dato-facturas">
+      <div class="col-md-12 dato-facturas hidden">
         <a class="btn btn-secondary btn-sm" href="#">Comprar facturas</a>
       </div>
       
