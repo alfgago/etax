@@ -359,5 +359,24 @@ class Invoice extends Model
       return $insert;
       
     }
-    
+
+
+    public function shortDate() {
+        date_default_timezone_set("America/Costa_Rica");
+        $date = date_create();
+        return date_format($date,'dmy');
+    }
+
+    public function getIdFormat($id){
+        $clean="000000".trim(str_replace("-","",$id));
+        return substr($clean, -12);
+    }
+
+    public function getHashFromRef($ref) {
+        $salesId = $ref;
+        if ($salesId === null) {
+            return '';
+        }
+        return substr('0000'.hexdec(substr(sha1($ref.'Factel'.$salesId.'Facthor'), 0, 15)) % 999999999, -8);
+    }
 }

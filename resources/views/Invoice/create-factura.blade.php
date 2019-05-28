@@ -117,12 +117,12 @@
 
                   <div class="form-group col-md-6">
                     <label for="document_number">Número de documento</label>
-                    <input type="text" class="form-control" name="document_number" id="document_number" value="" required>
+                    <input type="text" class="form-control" name="document_number" id="document_number" value="{{$document_number}}" required disabled>
                   </div>
   
                   <div class="form-group col-md-6 not-required">
                     <label for="document_key">Clave de factura</label>
-                    <input type="text" class="form-control" name="document_key" id="document_key" value="" >
+                    <input type="text" class="form-control" name="document_key" id="document_key" value="{{$document_key}}" disabled>
                   </div>
 
                   <div class="form-group col-md-4 hidden">
@@ -252,7 +252,7 @@
           @include( 'Invoice.form-nuevo-cliente' )
 
           <div class="btn-holder hidden">
-            <button id="btn-submit" type="submit" class="btn btn-primary" disabled>Enviar factura electrónica</button>
+            <button id="btn-submit" type="submit" class="btn btn-primary">Enviar factura electrónica</button>
           </div>
 
       </form>
@@ -261,8 +261,8 @@
 @endsection
 
 @section('breadcrumb-buttons')
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary2" disabled>Enviar factura electrónica</button>
-@endsection 
+  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Enviar factura electrónica</button>
+@endsection
 
 @section('footer-scripts')
 
@@ -271,7 +271,7 @@ $(document).ready(function(){
   $('#tipo_iva').val('103');
 
   $('#moneda').change(function() {
-    if ($(this).val() == 'usd') {
+    if ($(this).val() == 'USD') {
       $('#tipo_cambio').val($('#tipo_cambio').data('rates'))
     } else {
       $('#tipo_cambio').val('1.00')

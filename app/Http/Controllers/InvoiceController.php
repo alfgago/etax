@@ -151,7 +151,9 @@ class InvoiceController extends Controller
      */
     public function emitFactura()
     {
-        return view("Invoice/create-factura", ['document_type' => '01', 'rate' => $this->get_rates()]);
+
+        return view("Invoice/create-factura", ['document_type' => '01', 'rate' => $this->get_rates(),
+            'document_number' => $this->getDocReference('01'), 'document_key' => $this->getDocumentKey('01')]);
     }
     
     /**
@@ -172,7 +174,6 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
-        
         $request->validate([
             'subtotal' => 'required',
             'items' => 'required',
@@ -195,8 +196,7 @@ class InvoiceController extends Controller
         $company->last_invoice_ref_number = $invoice->reference_number;
         $company->last_document = $invoice->document_number;
         $company->save();
-        
-        
+
         clearInvoiceCache($invoice);
       
         return redirect('/facturas-emitidas');
@@ -566,5 +566,20 @@ class InvoiceController extends Controller
         }
         
         InvoiceItem::insert($inserts);
+    }
+
+    private function getDocReference($docType) {
+        $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;
+        $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
+
+        return $consecutive;
+    }
+
+    private function getDocumentKey($docType) {
+        $company = currentCompanyModel();
+        $invoice = new Invoice();
+        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
+            '1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
+        return $key;
     }
 }
