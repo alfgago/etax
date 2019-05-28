@@ -189,8 +189,6 @@ class Invoice extends Model
     {
       if( $item_id ){
         
-        
-        
         $item = InvoiceItem::find($item_id);
         //Revisa que la linea exista y pertenece a la factura actual. Asegura que si el ID se cambia en frontend, no se actualice.
         if( $item && $item->invoice_id == $this->id ) {

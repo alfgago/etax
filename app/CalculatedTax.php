@@ -165,6 +165,7 @@ class CalculatedTax extends Model
               $ivaType = $invoiceItems[$i]->iva_type;
               $invoiceIva = $invoiceItems[$i]->iva_amount * $invoiceItems[$i]->invoice->currency_rate;
               
+              $ivaType = $ivaType ? $ivaType : '103';
               
                 $invoicesTotal += $currentTotal; //Agrega a sumatoria de totales
                 $invoicesSubtotal += $subtotal;  //Agrega a sumatoria de subtotales
@@ -298,6 +299,8 @@ class CalculatedTax extends Model
               $currentTotal = $billItems[$i]->total * $billItems[$i]->bill->currency_rate;
               $ivaType = $billItems[$i]->iva_type;
               $billIva = $billItems[$i]->iva_amount * $billItems[$i]->bill->currency_rate;
+              
+              $ivaType = $ivaType ? $ivaType : '003';
               
                 $billsTotal += $currentTotal;
                 $billsSubtotal += $subtotal;
