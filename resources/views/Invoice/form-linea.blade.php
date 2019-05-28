@@ -73,18 +73,18 @@
     </div>
     
     <div class="form-group col-md-3">
-      <label for="precio_unitario">Cantidad</label>
-      <input type="text" class="form-control" id="cantidad" value="1" >
+      <label for="cantidad">Cantidad</label>
+      <input type="number" class="form-control" id="cantidad" value="1"  >
     </div>
 
     <div class="form-group col-md-3">
       <label for="precio_unitario">Precio unitario</label>
-      <input type="text" class="form-control" id="precio_unitario" value="" >
+      <input type="number" class="form-control" id="precio_unitario" value="" number >
     </div>
 
     <div class="form-group col-md-3">
       <label for="item_iva">Monto IVA</label>
-      <input type="text" class="form-control" id="item_iva_amount" placeholder="" >
+      <input type="number" class="form-control" id="item_iva_amount" placeholder="" >
     </div>
 
     <div class="form-group col-md-3">

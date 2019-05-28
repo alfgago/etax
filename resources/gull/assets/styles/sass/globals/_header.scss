@@ -266,7 +266,7 @@
         left: 0;
         margin: 0;
         width: 100%;
-        background: linear-gradient(45deg, #274EAB 0%,#2f006d 100%);
+        background: linear-gradient(45deg, #5533ab 0%, #4744c3 100%);
         box-shadow: 0 0 15px rgba(0,0,0,0.25);
         padding: 0 1rem;
     }
@@ -276,11 +276,19 @@
         background: #fff;
         text-align: center;
         border-radius: 50px;
+        top: 1px;
     }
     
-    .dropdown img {
+    .main-header .header-part-right .user img {
         position: relative;
         left: -2px;
+        height: 1.5rem;
+        width: 1.5rem;
+    }
+    
+    .companyParent {
+        margin-right: 15px;
+        width: auto !important;
     }
 
 }

@@ -450,7 +450,7 @@ toastr.options = {
     }
     
     //Se asegura de que los campos hayan sido llenados
-    if( subtotal && codigo && nombre && precio_unitario && cantidad ){
+    if( subtotal && codigo && nombre && precio_unitario && cantidad && tipo_iva){
       
       //Crear el ID de la fila.
       var itemExistente = false;
@@ -524,6 +524,7 @@ toastr.options = {
       $('#porc_identificacion_plena').val(1);
       $('#discount_type').val('01');
       $('#discount').val(0);
+      $('#tipo_producto').change();
   }
 
   //Carga la item para ser editada

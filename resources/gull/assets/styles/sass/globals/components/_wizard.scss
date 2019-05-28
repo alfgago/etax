@@ -193,3 +193,36 @@
     height: calc(1.9695rem + 0.133rem);
 }
     
+    
+    
+    
+@media (max-width: 580px) {    
+    .wizard-popup {
+        position: relative;
+        width: 100%;
+        height: auto;
+        margin: auto;
+        padding: 1rem;
+        padding-bottom: 3rem;
+    }
+    
+    .wizard-steps {display: none;}
+    
+    .wizard-popup .form-container {
+        width: 100%;
+        max-height: none;
+    }
+    
+    .wizard-popup h3 {
+        margin-top: 0;
+    }
+    
+    .wizard-container {
+        overflow-y: scroll;
+    }
+    
+    .wizard-container:before {
+        position: fixed;
+        opacity: 1;
+    }
+}

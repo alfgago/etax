@@ -192,6 +192,43 @@
 		.cuadro-planes .opcion span.precio {
 		    left: 55%;
 		}
+		
+		.cuadro-planes .tier > div.titulo {
+    max-width: none;
+    width: 100%;
+}
+
+.cuadro-planes .tier {
+    flex-wrap: wrap;
+}
+
+.cuadro-planes .tier > div {
+    max-width: 30%;
+    width: 30%;
+    flex: auto;
+    margin-right: 1%;
+}
+
+.cuadro-planes .opcion.is-active span:not(.precio) {
+    margin: 0;
+}
+
+.cuadro-planes .opcion span.precio {
+    position: relative;
+    display: block;
+    left: auto;
+    top: auto;
+    text-align: center;
+    border: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    transform: none;
+}
+
+.cuadro-planes .opcion span {
+    display: block;
+}
 
 	}
 </style>
