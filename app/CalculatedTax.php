@@ -301,6 +301,8 @@ class CalculatedTax extends Model
               $billIva = $billItems[$i]->iva_amount * $billItems[$i]->bill->currency_rate;
               
               $ivaType = $ivaType ? $ivaType : '003';
+              $ivaType = str_pad($ivaType, 3, '0', STR_PAD_LEFT);
+              
               
                 $billsTotal += $currentTotal;
                 $billsSubtotal += $subtotal;

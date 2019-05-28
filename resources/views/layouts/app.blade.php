@@ -21,9 +21,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css" />
     
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=1.48">
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=2.04">
     
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=1.40"></script>
+    <script src="{{asset('assets/js/common-bundle.js')}}?v=2.03"></script>
 
     <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=a366a538-e5db-4a02-8c91-e6d7def5fe29"> </script>
     
@@ -140,6 +140,16 @@
     @include( 'Provider.import' )
     
     @include('layouts.helper-terms')
+    
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=UA-134999499-1"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-134999499-1');
+      </script>
     
 </body>
 
