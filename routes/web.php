@@ -164,3 +164,5 @@ Route::get('/plans/confirm-cancel-plan/{token}', 'PlanController@confirmCancelPl
 Route::get('show-plans', 'PlanController@show_plans')->name('plans.show-data');
 Route::post('purchase', 'PlanController@purchase')->name('plans.purchase');
 Route::get('plans/switch-plan/{plan}/{newPlan}', 'PlanController@switchPlan')->name('plans.switch-plan');
+
+Route::get('/private/all', 'SubscriptionPlanController@all')->name('subscriptions.all');
