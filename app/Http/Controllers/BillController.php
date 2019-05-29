@@ -297,13 +297,14 @@ class BillController extends Controller
                             $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
                             $codigoEtax = $row['codigoetax'];
                             $montoIva = (float)$row['montoiva'];
+                            $totalNeto = 0;
                             
                             $codigoEtax = str_pad($codigoEtax, 3, '0', STR_PAD_LEFT);
                             
                             $insert = Bill::importBillRow(
                                 $metodoGeneracion, 0, $nombreProveedor, $codigoProveedor, $tipoPersona, $identificacionProveedor, $correoProveedor, $telefonoProveedor,
                                 $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
-                                $idMoneda, $tipoCambio, $totalDocumento, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
+                                $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
                                 $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, true, true
                             );
                             
@@ -422,6 +423,7 @@ class BillController extends Controller
         $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
         $tipoCambio = $arr['ResumenFactura']['TipoCambio'];
         $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
+        $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
         $tipoDocumento = '01';
         $descripcion = $arr['ResumenFactura']['CodigoMoneda'];
         
@@ -452,7 +454,7 @@ class BillController extends Controller
             $insert = Bill::importBillRow(
                 $metodoGeneracion, $numIdReceptor, $nombreProveedor, $codigoProveedor, $tipoPersona, $identificacionProveedor, $correoProveedor, $telefonoProveedor,
                 $claveFactura, $consecutivoComprobante, $condicionVenta, $medioPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
-                $idMoneda, $tipoCambio, $totalDocumento, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
+                $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
                 $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, $authorize, false
             );
             
