@@ -64,6 +64,7 @@ class WizardController extends Controller
             'year' => 2018
           ]
         );
+        clearLastTaxesCache($company_id, 2018);
         return view("wizard/set-totales-2018", compact( 'totales' ) );
     }
     
