@@ -6,30 +6,14 @@ Subscription Plans
 
 @section('breadcrumb-buttons')
 @if(auth()->user()->roles[0]->name == 'Super Admin')
-<a class="btn btn-primary" href="/plans/create">Crear plan de suscripción</a>
+<a class="btn btn-primary" href="/plans/create">Crear plan de suscripciï¿½n</a>
 <a class="btn btn-warning" href="/show-plans">Agregar miembro</a>
 @endif
 @endsection 
 
 @section('content') 
 <div class="row">
-    <div class="col-md-12">
-
-        @if($message = Session::get('success'))
-        <div class="alert alert-success">
-            {{$message}}
-        </div>
-        @endif
-
-        @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-        @endif        
+    <div class="col-md-12">     
 
         <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
 

@@ -16,10 +16,10 @@ class CreateCompaniesTable extends Migration
         Schema::create('companies', function (Blueprint $table) {
             $table->bigIncrements('id');
           
-            $table->unsignedBigInteger('user_id');
-            $table->string('plan_no')->nullable();
+            $table->unsignedBigInteger('user_id')->default(0);;
+            $table->unsignedBigInteger('subscription_id')->default(0);;
             
-            $table->enum('type', ['F', 'J', 'D', 'E', 'N', 'O']); 
+            $table->enum('type', ['F', 'J', 'D', 'E', 'N', 'O'])->nullable(); 
             $table->string('id_number')->unique()->nullable(); 
             $table->string('business_name')->nullable(); 
             $table->string('activities')->nullable(); 
@@ -59,39 +59,43 @@ class CreateCompaniesTable extends Migration
 			$table->softDeletes();
         });
         
-        $user = App\User::create([
-            'user_name' => 'alfgago',
-            'email' => 'alfgago@gmail.com',
-            'first_name' => 'Alfredo',
-            'last_name' => 'Gago',
-            'last_name2' => 'Jiménez',
-            'password' => Hash::make('123456'),
-        ]);
-      
-        $company = App\Company::create([
-            'user_id' => $user->id,
-            'type' => 'J',
-            'id_number' => '3-102-702429',
-            'business_name' => '5E Sociedad de Responsabilidad Limitada',
-            'name' => '5E Labs',
-            'email' => 'alfredo@5e.cr',
-            'invoice_email' => 'info@5e.cr',
-            'country' => 'Costa Rica',
-            'address' => 'Pinares, Curridabat',
-            'phone' => '2271-3298'
-        ]);
+        if ( !app()->environment('production') ) {
         
-        $team = App\Team::create(
-            [
-                'name' => '(1) 3-102-702429',
-                'owner_id' => $user->id,
-                'company_id' => 1
-            ]    
-        );
-		$team->company_id = 1;
-        $team->save();
-        
-        $user->attachTeam($team);
+            $user = App\User::create([
+                'user_name' => 'alfgago',
+                'email' => 'alfgago@gmail.com',
+                'first_name' => 'Alfredo',
+                'last_name' => 'Gago',
+                'last_name2' => 'Jiménez',
+                'password' => Hash::make('123456'),
+            ]);
+          
+            $company = App\Company::create([
+                'user_id' => $user->id,
+                'type' => 'J',
+                'id_number' => '3102702429',
+                'business_name' => '5E Sociedad de Responsabilidad Limitada',
+                'name' => '5E Labs',
+                'email' => 'alfredo@5e.cr',
+                'invoice_email' => 'info@5e.cr',
+                'country' => 'Costa Rica',
+                'address' => 'Pinares, Curridabat',
+                'phone' => '2271-3298'
+            ]);
+            
+            $team = App\Team::create(
+                [
+                    'name' => '(1) 3-102-702429',
+                    'owner_id' => $user->id,
+                    'company_id' => 1
+                ]    
+            );
+    		$team->company_id = 1;
+            $team->save();
+            
+            $user->attachTeam($team);
+            
+        }
 
     }
 

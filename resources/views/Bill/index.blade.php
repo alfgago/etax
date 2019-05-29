@@ -13,53 +13,73 @@
 <div class="row">
   <div class="col-md-12">
           
-        <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <table id="bill-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
-              <th>@sortablelink('reference_number', '#')</th>
-              <th>Proveedor</th>
-              <th>Moneda</th>
-              <th>Subtotal</th>
-              <th>Monto IVA</th>
-              <th>Total</th>
-              <th>@sortablelink('generated_date', 'F. Generada')</th>
-              <th>F. Vencimiento</th>
-              <th>Acciones</th>
+              <th>#</th>
+              <th data-priority="2">Comprobante</th>
+              <th data-priority="3">Emisor</th>
+              <th>Tipo Doc.</th>
+              <th data-priority="5">Moneda</th>
+              <th data-priority="5">Subtotal</th>
+              <th data-priority="5">Monto IVA</th>
+              <th data-priority="4">Total</th>
+              <th data-priority="6">F. Generada</th>
+              <th data-priority="1">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            @if ( $bills->count() )
-              @foreach ( $bills as $bill )
-                <tr>
-                  <td>{{ $bill->reference_number }}</td>
-                  <td>{{ $bill->provider ? $bill->provider->toString() : '-' }}</td>
-                  <td>{{ $bill->currency }}</td>
-                  <td>{{ number_format( $bill->subtotal, 2 ) }}</td>
-                  <td>{{ number_format( $bill->iva_amount, 2 ) }}</td>
-                  <td>{{ number_format( $bill->total, 2 ) }}</td>
-                  <td>{{ $bill->generatedDate()->format('d/m/Y') }}</td>
-                  <td>{{ $bill->dueDate()->format('d/m/Y') }}</td>
-                  
-                  <td> 
-                    <a href="/facturas-recibidas/{{ $bill->id }}/edit" title="Editar factura" class="text-success mr-2"> 
-                      <i class="fa fa-pencil" aria-hidden="true"></i>
-                    </a>
-                    <form class="inline-form" method="POST" action="/facturas-recibidas/{{ $bill->id }}" style="display: inline-block;">
-                      @csrf
-                      @method('delete')
-                      <button type="submit" class="text-danger mr-2" title="Anular factura" style="display: inline-block; background: none; border: 0;">
-                        <i class="fa fa-ban" aria-hidden="true"></i>
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-              @endforeach
-            @endif
-
           </tbody>
         </table>
-        {{ $bills->links() }}
   </div>  
 </div>
+
+@endsection
+
+@section('footer-scripts')
+
+<script>
+  
+$(function() {
+  $('#bill-table').DataTable({
+    processing: true,
+    serverSide: true,
+    ajax: "/api/bills",
+    columns: [
+      { data: 'reference_number', name: 'reference_number' },
+      { data: 'document_number', name: 'document_number' },
+      { data: 'provider', name: 'provider.fullname' },
+      { data: 'document_type', name: 'document_type' },
+      { data: 'currency', name: 'currency', orderable: false, searchable: false },
+      { data: 'subtotal', name: 'subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
+      { data: 'iva_amount', name: 'iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
+      { data: 'total', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
+      { data: 'generated_date', name: 'generated_date' },
+      { data: 'actions', name: 'actions', orderable: false, searchable: false },
+    ],
+    language: {
+      url: "/lang/datatables-es_ES.json",
+    },
+  });
+});
+
+function confirmDelete( id ) {
+  var formId = "#delete-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea eliminar la factura',
+    text: "Este proceso la eliminará a nivel de cálculo en eTax, sin embargo no hace anulaciones ni revierte aceptaciones ante Hacienda.",
+    type: 'warning',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero eliminarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
+  
+</script>
 
 @endsection

@@ -10,6 +10,7 @@ use App\Variables;
 use App\PlansInvitation;
 use Mpociot\Teamwork\Facades\Teamwork;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ReportsController extends Controller
 {
@@ -38,17 +39,22 @@ class ReportsController extends Controller
 
               $is_admin = ($invite->role == 'admin') ? '1' : '0';
               $is_readonly = ($invite->role == 'readonly') ? '1' : '0';
-              PlansInvitation::create(['plan_no' => $company->plan_no, 'company_id' => $company->id, 'user_id' => auth()->user()->id, 'is_admin' => $is_admin, 'is_read_only' => $is_readonly]);
+              PlansInvitation::create(['subscription_id' => $company->subscription_id, 'company_id' => $company->id, 'user_id' => auth()->user()->id]);
 
               return redirect()->route('User.companies')->with('success', 'La invitación ha sido enviada.');
           }
+      }
+      
+      $subscription = getCurrentSubscription();
+      if( !$subscription ) {
+          return redirect('/usuario/cambiar-plan');
       }
       
       if( ! currentCompanyModel()->wizard_finished ) {
         return redirect('/wizard');
       }
 
-      return view('/Dashboard/index');
+      return view('/Dashboard/index', compact( 'subscription' ) );
     }
     
     public function reports() {
@@ -83,7 +89,9 @@ class ReportsController extends Controller
         $nombreMes = Variables::getMonthName($mes);
         $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
       }catch( \Exception $ex ){
-          
+          Log::error('Error al cargar dashboard' . $ex->getMessage());
+      }catch( \Throwable $ex ){
+          Log::error('Error al cargar dashboard' . $ex->getMessage());
       }
       
       if( !$request->vista || $request->vista == 'basica' ){
@@ -193,6 +201,7 @@ class ReportsController extends Controller
     }
     
     public function getProrrataOperativa( $ano ){
+      
       $anoAnterior = $ano > 2018 ? $ano-1 : 2018;
       $company = currentCompanyModel();
       

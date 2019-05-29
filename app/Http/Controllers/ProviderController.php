@@ -30,11 +30,41 @@ class ProviderController extends Controller
      */
     public function index()
     {
-        $current_company = currentCompany();    
-        $providers = Provider::where('company_id', $current_company)->paginate(10);
-        return view('Provider/index', [
-          'providers' => $providers
-        ]);
+        return view('Provider/index');
+    }
+    
+    /**
+     * Returns the required ajax data.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexData() {
+        $current_company = currentCompany();
+
+        $query = Provider::where('company_id', $current_company);
+        return datatables()->eloquent( $query )
+            ->orderColumn('reference_number', '-reference_number $1')
+            ->addColumn('actions', function($proveedor) {
+                return view('datatables.actions', [
+                    'routeName' => 'proveedores',
+                    'deleteTitle' => 'Eliminar proveedor',
+                    'hideDelete' => true,
+                    'editTitle' => 'Editar proveedor',
+                    'deleteIcon' => 'fa fa-trash-o',
+                    'id' => $proveedor->id
+                ])->render();
+            })
+            ->editColumn('es_exento', function(Provider $proveedor) {
+                return $proveedor->es_exento ? 'Sí' : 'No';
+            })
+            ->editColumn('tipo_persona', function(Provider $proveedor) {
+                return $proveedor->getTipoPersona();
+            })
+            ->addColumn('nombreC', function(Provider $proveedor) {
+                return $proveedor->getFullName();
+            })
+            ->rawColumns(['actions'])
+            ->toJson();
     }
 
     /**
@@ -83,6 +113,7 @@ class ProviderController extends Controller
         $provider->address = $request->address;
         $provider->phone = $request->phone;
         $provider->email = $request->email;
+        $provider->fullname = $provider->toString();
       
         $provider->save();
       
@@ -149,6 +180,7 @@ class ProviderController extends Controller
         $provider->address = $request->address;
         $provider->phone = $request->phone;
         $provider->email = $request->email;
+        $provider->fullname = $provider->toString();
       
         $provider->save();
       
@@ -165,7 +197,7 @@ class ProviderController extends Controller
     {
         $provider = Provider::findOrFail($id);
         $this->authorize('update', $provider);
-        $provider->delete();
+        //$provider->delete();
         
         return redirect('/proveedores');
     }
@@ -181,7 +213,7 @@ class ProviderController extends Controller
           'tipo_archivo' => 'required',
         ]);
       
-        $time_start = $this->microtime_float();
+        $time_start = getMicrotime();
         
         $proveedors = Excel::toCollection( new ProviderImport(), request()->file('archivo') );
         $company_id = currentCompany(); 
@@ -214,15 +246,10 @@ class ProviderController extends Controller
             );
             
         }
-        $time_end = $this->microtime_float();
+        $time_end = getMicrotime();
         $time = $time_end - $time_start;
         
         return redirect('/proveedores')->withMessage('Proveedores importados exitosamente en '.$time.'s');
-    }
-    
-    private function microtime_float(){
-        list($usec, $sec) = explode(" ", microtime());
-        return ((float) $usec + (float)$sec);
     }
     
 }

@@ -24,17 +24,17 @@ class CreateInvoicesTable extends Migration
             $table->foreign('client_id')->references('id')->on('clients');
           
             //Tipo de documento de referencia. 01 Factura electrónica, 02 Nota de débito electrónica, 03 nota de crédito electrónica, 04 Tiquete electrónico, 05 Nota de despacho, 06 Contrato, 07 Procedimiento, 08 Comprobante emitido en contigencia, 99 Otros
-            $table->string('document_type');
+            $table->string('document_type')->nullable();
           
             $table->string('document_key')->nullable();
           
-            $table->integer('reference_number');
-            $table->string('document_number');
+            $table->integer('reference_number')->default(0);
+            $table->string('document_number')->nullable();
           
-            $table->double('subtotal');
-            $table->double('iva_amount');
-            $table->double('total');
-            $table->string('currency');
+            $table->double('subtotal')->default(0);
+            $table->double('iva_amount')->default(0);
+            $table->double('total')->default(0);
+            $table->string('currency')->default('01');
             $table->double('currency_rate')->default(1);
 
             //Condiciones de la venta: 01 Contado, 02 Crédito, 03 Consignación, 04 Apartado, 05 Arrendamiento con opción de compra, 06 Arrendamiento en función financiera, 99 Otros
@@ -50,26 +50,27 @@ class CreateInvoicesTable extends Migration
             $table->string('buy_order')->nullable();
             $table->string('send_emails')->nullable();
             $table->text('description')->nullable();
-            $table->string('hacienda_status');
-            $table->string('payment_status');
+            $table->string('hacienda_status')->nullable();
+            $table->string('payment_status')->nullable();
             $table->string('payment_receipt')->nullable();
-            $table->timestamp('generated_date');
-            $table->timestamp('due_date');
+            $table->timestamp('generated_date')->nullable();
+            $table->timestamp('due_date')->nullable();
           
-            $table->boolean('is_exempt')->default(false);
             $table->boolean('is_void')->default(false);
             $table->boolean('is_totales')->default(false);
+            //Cuando se ingresa via XML o Email, tienen que validar que el código eTax esté correcto.
+            $table->boolean('is_code_validated')->default(true);
             
             //Estado de aceptación de la factura: 01 Pendiente, 02 Aceptada, 03 Rechazada, 04 Anulada, 05 Parcial
             $table->enum('status', ['01', '02', '03', '04', '05'])->default('01');
           
-            $table->string('generation_method');
+            $table->string('generation_method')->nullable();
             $table->string('other_reference')->nullable();
             
-            $table->unsignedBigInteger('other_document')->nullable();
+            $table->unsignedBigInteger('other_document')->default(0);
           
-            $table->integer('month');
-            $table->integer('year');
+            $table->integer('month')->default(1);
+            $table->integer('year')->default(2019);
             $table->index(['year', 'month']);
           
             $table->timestamps();
@@ -78,40 +79,43 @@ class CreateInvoicesTable extends Migration
         Schema::create('invoice_items', function (Blueprint $table) {
             $table->bigIncrements('id');
             
-            $table->unsignedBigInteger('invoice_id')->nullable();
+            $table->unsignedBigInteger('invoice_id')->default(0);
             $table->foreign('invoice_id')->references('id')->on('invoices')->onDelete('cascade');
             
-            $table->unsignedBigInteger('company_id');
+            $table->unsignedBigInteger('company_id')->default(0);
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             
             $table->unsignedBigInteger('product_id')->nullable();
-            $table->integer('item_number');
+            $table->integer('item_number')->default(0);
             $table->string('code')->nullable();
             $table->string('name')->nullable();
             $table->string('product_type')->nullable();
-            $table->integer('measure_unit')->nullable();
-            $table->integer('item_count');
-            $table->double('unit_price');
-            $table->double('subtotal');
-            $table->double('iva_amount');
-            $table->double('total');
+            $table->string('measure_unit')->nullable();
+            $table->integer('item_count')->default(0);
+            $table->double('unit_price')->default(0);
+            $table->double('subtotal')->default(0);
+            $table->double('iva_amount')->default(0);
+            $table->double('total')->default(0);
             $table->string('discount_type')->nullable();
             $table->double('discount')->default(0);
-            $table->double('discount_reason')->nullable();
-            $table->string('iva_type');
-            $table->double('iva_percentage')->nullable();
+            $table->string('discount_reason')->nullable();
+            $table->string('iva_type')->nullable();
+            $table->double('iva_percentage')->default(0);
             $table->boolean('is_exempt')->default(false);
             $table->boolean('is_identificacion_especifica')->default(false);
           
-            $table->integer('month');
-            $table->integer('year');
+            $table->integer('month')->default(1);
+            $table->integer('year')->default(2019);
             $table->index(['year', 'month']);
           
             $table->timestamps();
         });
         
-        $this->demoData();
+        if ( !app()->environment('production') ) {
+            $this->demoData();
+        }
     }
+  
   
     public function demoData() {
         
@@ -202,7 +206,6 @@ class CreateInvoicesTable extends Migration
                   $iva_amount = $subtotal * $iva_percentage / 100;
                   $total = $subtotal + $iva_amount;
                   $discount_percentage = '0';
-                  $discount_reason = '';
                   $is_exempt = false;
                   
                   $inserts[] = [
@@ -219,7 +222,6 @@ class CreateInvoicesTable extends Migration
                     'total' => $total,
                     'discount_type' => '01',
                     'discount' => $discount_percentage,
-                    'discount_reason' => $discount_reason,
                     'iva_type' => $iva_type,
                     'iva_percentage' => $iva_percentage,
                     'iva_amount' => $iva_amount,

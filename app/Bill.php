@@ -6,6 +6,7 @@ use \Carbon\Carbon;
 use App\Company;
 use App\BillItem;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Kyslik\ColumnSortable\Sortable;
 
 class Bill extends Model
@@ -96,6 +97,8 @@ class Bill extends Model
           $this->provider_id = $request->provider_id;
       }
       
+      $request->currency_rate = $request->currency_rate ? $request->currency_rate : 1;
+      
       //Datos de factura
       $this->description = $request->description;
       $this->subtotal = floatval( str_replace(",","", $request->subtotal ));
@@ -117,6 +120,9 @@ class Bill extends Model
     
       $lids = array();
       foreach($request->items as $item) {
+        $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
+        $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
+        
         $item_id = $item['id'] ? $item['id'] : 0;
         $item_number = $item['item_number'];
         $code = $item['code'];
@@ -134,7 +140,10 @@ class Bill extends Model
         $iva_amount = $item['iva_amount'];
         $is_exempt = false;
         $isIdentificacion = $item['is_identificacion_especifica'];
-        $item_modificado = $this->addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt );
+        $porc_identificacion_plena = $item['porc_identificacion_plena'];
+        $item_modificado = $this->addEditItem( 
+          $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, 
+          $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $porc_identificacion_plena, $is_exempt );
         array_push( $lids, $item_modificado->id );
       }
       
@@ -147,10 +156,10 @@ class Bill extends Model
       return $this;
       
     }
-    
-    
   
-    public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt )
+    public function addItem( 
+      $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, 
+      $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $porc_identificacion_plena, $is_exempt )
     {
       return BillItem::create([
         'bill_id' => $this->id,
@@ -168,7 +177,6 @@ class Bill extends Model
         'total' => $total,
         'discount_type' => '01',
         'discount' => $discount_percentage,
-        'discount_reason' => $discount_reason,
         'iva_type' => $iva_type,
         'iva_percentage' => $iva_percentage,
         'iva_amount' => $iva_amount,
@@ -178,7 +186,9 @@ class Bill extends Model
       
     }
   
-    public function addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt )
+    public function addEditItem( 
+      $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, 
+      $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $porc_identificacion_plena, $is_exempt )
     {
       if( $item_id ){
         $item = BillItem::find($item_id);
@@ -198,7 +208,6 @@ class Bill extends Model
           $item->total = $total;
           $item->discount_type = '01';
           $item->discount = $discount_percentage;
-          $item->discount_reason = $discount_reason;
           $item->iva_type = $iva_type;
           $item->iva_percentage = $iva_percentage;
           $item->iva_amount = $iva_amount;
@@ -207,8 +216,175 @@ class Bill extends Model
           $item->save();
         }
       }else {
-        $item = $this->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $porc_identificacion_plena, $is_exempt );
+        $item = $this->addItem( 
+          $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, 
+          $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $porc_identificacion_plena, $is_exempt );
       }
       return $item;
+    }
+    
+    public static function importBillRow (
+        $metodoGeneracion, $idReceptor, $nombreProveedor, $codigoProveedor, $tipoPersona, $identificacionProveedor, $correoProveedor, $telefonoProveedor,
+        $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
+        $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
+        $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, $isAuthorized, $codeValidated
+    ) {
+      
+      //Revisa si el método es por correo electrónico. De ser así, usa busca la compañia por cedula.
+      if( $metodoGeneracion != "Email" ){
+        $company = currentCompanyModel();
+      }else{
+        //Si es email, busca por ID del receptor para encontrar la compañia
+        $company = Company::where('id_number', $idReceptor)->first();
+      }
+      
+      if( ! $company ) {
+        return false;
+      }
+      
+      $providerCacheKey = "import-proveedors-$identificacionProveedor-".$company->id;
+      if ( !Cache::has($providerCacheKey) ) {
+          $proveedorCache =  Provider::firstOrCreate(
+              [
+                  'id_number' => $identificacionProveedor,
+                  'company_id' => $company->id,
+              ],
+              [
+                  'code' => $codigoProveedor ,
+                  'company_id' => $company->id,
+                  'tipo_persona' => str_pad($tipoPersona, 2, '0', STR_PAD_LEFT),
+                  'id_number' => $identificacionProveedor,
+                  'first_name' => $nombreProveedor,
+                  'fullname' => "$identificacionProveedor - $nombreProveedor"
+              ]
+          );
+          Cache::put($providerCacheKey, $proveedorCache, 30);
+      }
+      $proveedor = Cache::get($providerCacheKey);
+      
+      $billCacheKey = "import-factura-$identificacionProveedor-" . $company->id . "-" . $consecutivoComprobante;
+      if ( !Cache::has($billCacheKey) ) {
+      
+          $bill = Bill::firstOrNew(
+              [
+                  'company_id' => $company->id,
+                  'provider_id' => $proveedor->id,
+                  'document_number' => $consecutivoComprobante
+              ]
+          );
+          
+          if( !$bill->exists ) {
+              
+              $bill->company_id = $company->id;
+              $bill->provider_id = $proveedor->id;    
+      
+              //Datos generales y para Hacienda
+              if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' 
+                  || $tipoDocumento == '05' || $tipoDocumento == '06' || $tipoDocumento == '07' || $tipoDocumento == '08' || $tipoDocumento == '99' ) {
+                  $bill->document_type = $tipoDocumento;    
+              } else {
+                 $bill->document_type = '01'; 
+              }
+              
+              $bill->reference_number = $company->last_bill_ref_number + 1;
+              $bill->document_number =  $consecutivoComprobante;
+              $bill->document_key =  $claveFactura;
+              
+              //Datos generales
+              $bill->sale_condition = $condicionVenta;
+              $bill->payment_type = $metodoPago;
+              $bill->credit_time = 0;
+              $bill->description = $descripcion;
+              
+              $bill->generation_method = $metodoGeneracion;
+              $bill->is_authorized = $isAuthorized;
+              $bill->is_code_validated = $codeValidated;
+              
+              //Datos de factura
+              $bill->currency = $idMoneda;
+              if( $bill->currency == 1 ) { $bill->currency = "CRC"; }
+              if( $bill->currency == 2 ) { $bill->currency = "USD"; }
+                  
+              $bill->currency_rate = $tipoCambio;
+              //$bill->description = $row['description'] ? $row['description'] : '';
+            
+              $company->last_bill_ref_number = $bill->reference_number;
+              
+              $bill->subtotal = 0;
+              $bill->iva_amount = 0;
+              $bill->total = $totalDocumento;
+              
+              $bill->save();
+              $company->save();
+              
+          }   
+          Cache::put($billCacheKey, $bill, 30);
+      }
+      $bill = Cache::get($billCacheKey);
+      
+      try{
+        $bill->generated_date = Carbon::createFromFormat('d/m/Y', $fechaEmision);
+      }catch( \Exception $ex ){
+        $dt =\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($fechaEmision);
+        $bill->generated_date = Carbon::instance($dt);
+      }
+      
+      try{
+        $bill->due_date = Carbon::createFromFormat('d/m/Y', $fechaVencimiento);
+      }catch( \Exception $ex ){
+        $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($fechaVencimiento);
+        $bill->due_date = Carbon::instance($dt);
+      }
+      
+      $year = $bill->generated_date->year;
+      $month = $bill->generated_date->month;
+      
+      $bill->year = $year;
+      $bill->month = $month;
+    
+      /**LINEA DE FACTURA**/
+      $item = BillItem::firstOrNew(
+          [
+              'bill_id' => $bill->id,
+              'item_number' => $numeroLinea,
+          ]
+      );
+      
+      $insert = false;
+      
+      if( !$item->exists ) {
+          $bill->subtotal = $bill->subtotal + $subtotalLinea;
+          $bill->iva_amount = $bill->iva_amount + $montoIva;
+          
+          $insert = [
+              'bill_id' => $bill->id,
+              'company_id' => $company->id,
+              'year' => $year,
+              'month' => $month,
+              'item_number' => $numeroLinea,
+              'code' => $codigoProducto,
+              'name' => $detalleProducto,
+              'product_type' => 1,
+              'measure_unit' => $unidadMedicion,
+              'item_count' => $cantidad,
+              'unit_price' => $precioUnitario,
+              'subtotal' => $subtotalLinea,
+              'total' => $totalLinea,
+              'discount_type' => '01',
+              'discount' => $montoDescuento,
+              'iva_type' => $codigoEtax,
+              'iva_amount' => $montoIva,
+          ];
+      }
+      
+      clearBillCache($bill);
+      
+      if( $totalNeto != 0 ) {
+        $bill->subtotal = $totalNeto;
+      }
+      
+      $bill->save();
+      return $insert;
+      
     }
 }

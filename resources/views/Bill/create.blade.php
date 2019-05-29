@@ -56,8 +56,8 @@
                     <div class="form-group col-md-4">
                       <label for="currency">Divisa</label>
                       <select class="form-control" name="currency" id="moneda" required>
-                        <option value="crc" selected>CRC</option>
-                        <option value="crc">USD</option>
+                        <option value="CRC" selected>CRC</option>
+                        <option value="USD">USD</option>
                       </select>
                     </div>
       
@@ -92,7 +92,7 @@
                 </div>
                 
                 <div class="form-group col-md-12">
-                  <div onclick="abrirPopup('linea-popup');" class="btn btn-dark btn-agregar">Agregar linea</div>
+                  <div onclick="abrirPopup('linea-popup');" class="btn btn-dark btn-agregar">Agregar línea</div>
                 </div>
     
               </div>
@@ -112,7 +112,7 @@
                   <input type="text" class="form-control" name="document_number" id="document_number" value="" placeholder="" required>
                 </div>
 
-                <div class="form-group col-md-6">
+                <div class="form-group col-md-6 not-required">
                   <label for="document_key">Clave de factura</label>
                   <input type="text" class="form-control" name="document_key" id="document_key" value="" placeholder="" >
                 </div>
@@ -176,12 +176,12 @@
                     </div>
                   </div>
 
-                  <div class="form-group col-md-6">
+                  <div class="form-group col-md-6 not-required">
                     <label for="other_reference">Referencia</label>
                     <input type="text" class="form-control" name="other_reference" id="referencia" value="" >
                   </div>
 
-                  <div class="form-group col-md-6">
+                  <div class="form-group col-md-6 not-required">
                     <label for="buy_order">Orden de compra</label>
                     <input type="text" class="form-control" name="buy_order" id="orden_compra" value="" >
                   </div>
@@ -200,7 +200,7 @@
 
             <div class="form-group col-md-12">
               <h3>
-                Lineas de factura
+                Líneas de factura
               </h3>
             </div>
             

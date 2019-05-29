@@ -141,13 +141,10 @@ if (!function_exists('userCompanies')) {
 if (!function_exists('currentCompany')) {
 
     function currentCompany() {
-
-        //=dd(session('current_company'));
     
         $current_company = session('current_company');
 
-        if (!$current_company) {
-
+        if ( !$current_company ) {
             if (auth()->user()->companies->first()) {
                 $company_id = auth()->user()->companies->first()->id;
                 session(['current_company' => $company_id]);
@@ -166,6 +163,12 @@ if (!function_exists('currentCompanyModel')) {
 
         $current_company = currentCompany();
         $company = App\Company::find($current_company);
+        
+        if ( !$company ) {
+            $current_company = auth()->user()->companies->first()->id;
+            session( ['current_company' => $current_company] );
+            $company = App\Company::find($current_company);
+        }
 
         return ( $current_company ) ? $company : false;
     }
@@ -241,23 +244,19 @@ if (!function_exists('get_current_user_permissions')) {
 }
 
 /* Get current user active subscriptions */
-if (!function_exists('get_current_user_subscriptions')) {
+if (!function_exists('getCurrentUserSubscriptions')) {
 
-    function get_current_user_subscriptions() {
+    function getCurrentUserSubscriptions() {
 
         $user_id = auth()->user()->id;
 
-        $query = \App\UserSubscription::query();
-
-        $query->leftJoin('subscription_plans', 'subscription_plans.id', '=', 'user_subscriptions_history.plan_id');
-        $query->where(array('user_subscriptions_history.status' => '1', 'user_id' => $user_id));
-        $query->whereRaw('DATE(start_date) <="' . date('Y-m-d') . '"')->whereRaw('DATE(expiry_date) >="' . date('Y-m-d') . '"');
-
-        $plans = $query->select('user_subscriptions_history.*', 'subscription_plans.plan_type', 'subscription_plans.plan_name', 'subscription_plans.no_of_companies', 'subscription_plans.no_of_invited_user', 'user_subscriptions_history.user_id')->get();
-
-        if (!empty($plans->toArray())) {
+        $subscriptions = App\Subscription::where('user_id', $user_id)->where('status', '1')->get();
+        
+        return $subscriptions;
+        /*
+        if ( !empty($plans->toArray()) ) {
             $data = array();
-            foreach ($plans as $row) {
+            foreach ($suscriptions as $row) {
 
                 $company_registered_on_plan = \App\Company::where(array('user_id' => $user_id, 'plan_no' => $row->unique_no))->count();
 
@@ -273,7 +272,27 @@ if (!function_exists('get_current_user_subscriptions')) {
             return $data;
         } else {
             return false;
+        }*/
+    }
+
+}
+
+
+/* Get current user active subscriptions */
+if (!function_exists('getCurrentSubscription')) {
+
+    function getCurrentSubscription() {
+        
+        $company = currentCompanyModel();
+        $subscription = $company->subscription;
+        
+        if( ! $subscription ) {
+            $user_id = auth()->user()->id;
+            $subscription = App\Subscription::where('user_id', $user_id)->where('status', '1')->first();
         }
+        
+        return $subscription;
+        
     }
 
 }
@@ -281,13 +300,14 @@ if (!function_exists('get_current_user_subscriptions')) {
 /* Check id plan limit exceeds or not */
 if (!function_exists('is_plan_limit_exceed')) {
 
-    function is_plan_limit_exceed($plan_no, $user_id) {
+    function is_plan_limit_exceed( $plan_id, $user_id) {
 
-        $user_subscription = \App\UserSubscription::where(array('user_id' => $user_id, 'unique_no' => $plan_no))->first();
-        $company_registered_on_plan = \App\Company::where(array('user_id' => $user_id, 'plan_no' => $plan_no))->count();
-        $plan = \App\Plan::find($user_subscription->plan_id);
+        $user_subscription = \App\Subscription::where(array('user_id' => $user_id, 'plan_id' => $plan_id))->first();
+        $company_registered_on_plan = \App\Company::where(array( 'user_id' => $user_id, 'subscription_id' => $user_subscription->id ))->count();
+        
+        $plan = $user_subscription->plan;
 
-        $company_limit_allowed = $plan->no_of_companies;
+        $company_limit_allowed = $plan->num_companies;
 
         if (empty($company_limit_allowed)) {
             return false;
@@ -308,7 +328,7 @@ if (!function_exists('user_subscribed_plans')) {
     function user_subscribed_plans($user_id) {
 
         $query = \App\UserSubscription::query();
-
+        
         $query->leftJoin('subscription_plans', 'subscription_plans.id', '=', 'user_subscriptions_history.plan_id');
         $query->where(array('user_id' => $user_id));
 
@@ -319,6 +339,7 @@ if (!function_exists('user_subscribed_plans')) {
         } else {
             return array();
         }
+        
     }
 
 }
@@ -381,9 +402,9 @@ if (!function_exists('plan_invitations_exceeds')) {
 
     function plan_invitations_exceeds($team, $type) {
 
-        $company = \App\Company::find($team->company_id);
+        $company = $team->company->id;
 
-        $query = \App\UserSubscription::query();
+        $query = \App\Subscription::query();
 
         $query->leftJoin('subscription_plans', 'subscription_plans.id', '=', 'user_subscriptions_history.plan_id');
         $query->where('unique_no', $company->plan_no);
@@ -489,4 +510,12 @@ if (!function_exists('token_expired')) {
         }
     }
 
+}
+
+/* Check token expiration */
+if (!function_exists('get_microtime')) {
+    function getMicrotime(){
+        list($usec, $sec) = explode(" ", microtime());
+        return ((float) $usec + (float)$sec);
+    }
 }

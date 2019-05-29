@@ -12,6 +12,8 @@ use App\Http\Controllers\CacheController;
 use App\Exports\BillExport;
 use App\Imports\BillImport;
 use Maatwebsite\Excel\Facades\Excel;
+use Orchestra\Parser\Xml\Facade as XmlParser;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 
@@ -35,11 +37,74 @@ class BillController extends Controller
      */
     public function index()
     {
+        return view('Bill/index');
+    }
+    
+    /**
+     * Returns the required ajax data.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexData() {
         $current_company = currentCompany();
-        $bills = Bill::where('company_id', $current_company)->where('is_void', false)->with('provider')->orderBy('generated_date', 'DESC')->orderBy('reference_number', 'DESC')->sortable(['generated_date' => 'desc'])->paginate(10);
-        return view('Bill/index', [
+
+        $query = Bill::where('bills.company_id', $current_company)->where('is_void', false)->where('is_authorized', true)->where('is_totales', false)->with('provider');
+        return datatables()->eloquent( $query )
+            ->orderColumn('reference_number', '-reference_number $1')
+            ->addColumn('actions', function($bill) {
+                $hideEdit = false;
+                if( $bill->generation_method != 'M' && $bill->generation_method != 'XLSX' ){
+                    $hideEdit =  true;
+                }
+                return view('datatables.actions', [
+                    'routeName' => 'facturas-recibidas',
+                    'showTitle' => 'Ver factura',
+                    'deleteTitle' => 'Anular factura',
+                    'editTitle' => 'Editar factura',
+                    'deleteIcon' => 'fa fa-ban',
+                    'hideEdit' => $hideEdit,
+                    'id' => $bill->id
+                ])->render();
+            }) 
+            ->editColumn('provider', function(Bill $bill) {
+                return $bill->provider->fullname;
+            })
+            ->editColumn('generated_date', function(Bill $bill) {
+                return $bill->generatedDate()->format('d/m/Y');
+            })
+            ->rawColumns(['actions'])
+            ->toJson();
+    }
+    
+    /**
+     * Despliega las facturas que requieren validación de códigos
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexValidaciones()
+    {
+        $current_company = currentCompany();
+        $bills = Bill::where('company_id', $current_company)->where('is_void', false)->where('is_totales', false)->where('is_code_validated', false)->orderBy('generated_date', 'DESC')->orderBy('reference_number', 'DESC')->paginate(10);
+        return view('Bill/index-validaciones', [
           'bills' => $bills
         ]);
+    }
+    
+    public function confirmarValidacion( Request $request, $id )
+    {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+        
+        $tipoIva = $request->tipo_iva;
+        foreach( $bill->items as $item ) {
+            $item->iva_type = $request->tipo_iva;
+            $item->save();
+        }
+        
+        $bill->is_code_validated = true;
+        $bill->save();
+        
+        return redirect('/facturas-recibidas/validaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido validada');
     }
 
     /**
@@ -94,9 +159,12 @@ class BillController extends Controller
      * @param  \App\Bill  $bill
      * @return \Illuminate\Http\Response
      */
-    public function show(Bill $bill)
+    public function show($id)
     {
+        $bill = Bill::findOrFail($id);
         $this->authorize('update', $bill);
+      
+        return view('Bill/show', compact('bill') );
     }
 
     /**
@@ -113,7 +181,7 @@ class BillController extends Controller
         //Valida que la factura recibida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
         if( $bill->generation_method != 'M' && $bill->generation_method != 'XLSX' ){
           return redirect('/facturas-recibidas');
-        }  
+        } 
       
         return view('Bill/edit', compact('bill') );
     }
@@ -167,14 +235,13 @@ class BillController extends Controller
         return Excel::download(new BillExport(), 'documentos-recibidos.xlsx');
     }
 
-    public function import() {
+    public function importExcel() {
         
         request()->validate([
           'archivo' => 'required',
-          'tipo_archivo' => 'required',
         ]);
       
-        $time_start = $this->microtime_float();
+        $time_start = getMicrotime();
         
         try {
             $collection = Excel::toCollection( new BillImport(), request()->file('archivo') );
@@ -195,162 +262,55 @@ class BillController extends Controller
                         foreach ($facturas as $row){
                             $i++;
                             
+                            $metodoGeneracion = "XLSX";
+                            
                             //Datos de proveedor
                             $nombreProveedor = $row['nombreproveedor'];
                             $codigoProveedor = $row['codigoproveedor'] ? $row['codigoproveedor'] : '';
                             $tipoPersona = $row['tipoidentificacion'];
                             $identificacionProveedor = $row['identificacionproveedor'];
+                            $correoProveedor = '';
+                            $telefonoProveedor = '';
+                                        
+                            //Datos de factura
                             $consecutivoComprobante = $row['consecutivocomprobante'];
+                            $claveFactura = array_key_exists('clavefactura', $row) ? $row['clavefactura'] : '';
                             $condicionVenta = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
                             $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
+                            $numeroLinea = array_key_exists('numerolinea', $row) ? $row['numerolinea'] : 1;
+                            $fechaEmision = $row['fechaemision'];
+                            $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
+                            $idMoneda = $row['idmoneda'];
+                            $tipoCambio = $row['tipocambio'];
+                            $totalDocumento = $row['totaldocumento'];
+                            $tipoDocumento = $row['tipodocumento'];
+                            $descripcion = array_key_exists('descripcion', $row)  ? $row['descripcion'] : '';
                             
-                            /*
-                            $ordenCompra = $row['ordencompra'] ? $row['ordencompra'] : '';
-                            $referencia = $row['referencia'] ? $row['referencia'] : '';
-                            $documentoAnulado = $row['documentoanulado'] ? $row['documentoanulado'] : '';
-                            $haciendaStatus = $row['estadohacienda'] ? $row['estadohacienda'] : '';
-                            $estadoPago = $row['estadopago'] ? $row['estadopago'] : '';
-                            $paymentReceipt = $row['comprobantepago'] ? $row['comprobantepago'] : '';
-                            */
+                            //Datos de linea
+                            $codigoProducto = $row['codigoproducto'];
+                            $detalleProducto = $row['detalleproducto'];
+                            $unidadMedicion = $row['unidadmedicion'];
+                            $cantidad = array_key_exists('cantidad', $row) ? $row['cantidad'] : 1;
+                            $precioUnitario = $row['preciounitario'];
+                            $subtotalLinea = (float)$row['subtotallinea'];
+                            $totalLinea = $row['totallinea'];
+                            $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
+                            $codigoEtax = $row['codigoetax'];
+                            $montoIva = (float)$row['montoiva'];
+                            $totalNeto = 0;
                             
+                            $codigoEtax = str_pad($codigoEtax, 3, '0', STR_PAD_LEFT);
                             
-                            /*$bill->buy_order = $row['ordencompra'] ? $row['ordencompra'] : '';
-                                    $bill->other_reference = $row['referencia'] ? $row['referencia'] : '';
-                                    $bill->other_document = $row['documentoanulado'] ? $row['documentoanulado'] : '';
-                                    $bill->hacienda_status = $row['estadohacienda'] ? $row['estadohacienda'] : '01';
-                                    $bill->payment_status = $row['estadopago'] ? $row['estadopago'] : '01';
-                                    $bill->payment_receipt = $row['comprobantepago'] ? $row['comprobantepago'] : '';*/
-                            
-                            $numeroLinea = $row['numerolinea'] ? $row['numerolinea'] : 0;
-                            
-                            $providerCacheKey = "import-proveedors-$identificacionProveedor-".$company->id;
-                            if ( !Cache::has($providerCacheKey) ) {
-                                $proveedorCache =  Provider::firstOrCreate(
-                                    [
-                                        'id_number' => $identificacionProveedor,
-                                        'company_id' => $company->id,
-                                    ],
-                                    [
-                                        'code' => $codigoProveedor ,
-                                        'company_id' => $company->id,
-                                        'tipo_persona' => str_pad($tipoPersona, 2, '0', STR_PAD_LEFT),
-                                        'id_number' => $identificacionProveedor,
-                                        'first_name' => $nombreProveedor
-                                    ]
-                                );
-                                Cache::put($providerCacheKey, $proveedorCache, 30);
-                            }
-                            $proveedor = Cache::get($providerCacheKey);
-                            
-                            $billCacheKey = "import-factura-$identificacionProveedor-" . $company->id . "-" . $row['consecutivocomprobante'];
-                            if ( !Cache::has($billCacheKey) ) {
-                            
-                                $bill = Bill::firstOrNew(
-                                    [
-                                        'company_id' => $company->id,
-                                        'provider_id' => $proveedor->id,
-                                        'document_number' => $row['consecutivocomprobante']
-                                    ]
-                                );
-                                
-                                if( !$bill->exists ) {
-                                    
-                                    $bill->company_id = $company->id;
-                                    $bill->provider_id = $proveedor->id;    
-                            
-                                    //Datos generales y para Hacienda
-                                    $tipoDocumento = $row['tipodocumento'];
-                                    if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' 
-                                        || $tipoDocumento == '05' || $tipoDocumento == '06' || $tipoDocumento == '07' || $tipoDocumento == '08' || $tipoDocumento == '99' ) {
-                                        $bill->document_type = $tipoDocumento;    
-                                    } else {
-                                       $bill->document_type = '01'; 
-                                    }
-                                    
-                                    
-                                    $bill->reference_number = $company->last_bill_ref_number + 1;
-                                    $bill->document_number =  $consecutivoComprobante;
-                                    
-                                    //Datos generales
-                                    $bill->sale_condition = $condicionVenta;
-                                    $bill->payment_type = $metodoPago;
-                                    $bill->credit_time = 0;
-                                    
-                                    /*$bill->buy_order = $row['ordencompra'] ? $row['ordencompra'] : '';
-                                    $bill->other_reference = $row['referencia'] ? $row['referencia'] : '';
-                                    $bill->other_document = $row['documentoanulado'] ? $row['documentoanulado'] : '';
-                                    $bill->hacienda_status = $row['estadohacienda'] ? $row['estadohacienda'] : '01';
-                                    $bill->payment_status = $row['estadopago'] ? $row['estadopago'] : '01';
-                                    $bill->payment_receipt = $row['comprobantepago'] ? $row['comprobantepago'] : '';*/
-                                    
-                                    $bill->generation_method = "XLSX";
-                                    
-                                    //Datos de factura
-                                    $bill->currency = $row['idmoneda'];
-                                    if( $bill->currency == 1 ) { $bill->currency = "CRC"; }
-                                    if( $bill->currency == 2 ) { $bill->currency = "USD"; }
-                                        
-                                    
-                                    $bill->currency_rate = $row['tipocambio'];
-                                    //$bill->description = $row['description'] ? $row['description'] : '';
-                                  
-                                    $company->last_bill_ref_number = $bill->reference_number;
-                                    
-                                    $bill->subtotal = 0;
-                                    $bill->iva_amount = 0;
-                                    $bill->total = $row['totaldocumento'];
-                                    
-                                    $bill->save();
-                                }   
-                                Cache::put($billCacheKey, $bill, 30);
-                            }
-                            $bill = Cache::get($billCacheKey);
-                            
-                            $bill->generated_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision']);
-                            $bill->due_date = Carbon::createFromFormat('d/m/Y', $row['fechaemision'])->addDays(15);  /////IMPORTANTE CORREGIR ANTES DE PRODUCCION
-                            
-                            $year = $bill->generated_date->year;
-                            $month = $bill->generated_date->month;
-                            
-                            $bill->year = $year;
-                            $bill->month = $month;
-                          
-                            /**LINEA DE FACTURA**/
-                            $item = BillItem::firstOrNew(
-                                [
-                                    'bill_id' => $bill->id,
-                                    'item_number' => $row['numerolinea'] ? $row['numerolinea'] : 1,
-                                ]
+                            $insert = Bill::importBillRow(
+                                $metodoGeneracion, 0, $nombreProveedor, $codigoProveedor, $tipoPersona, $identificacionProveedor, $correoProveedor, $telefonoProveedor,
+                                $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
+                                $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
+                                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, true, true
                             );
                             
-                            if( !$item->exists ) {
-                                $bill->subtotal = $bill->subtotal + (float)$row['subtotallinea'];
-                                $bill->iva_amount = $bill->iva_amount + (float)$row['montoiva'];
-                                
-                                $inserts[] = [
-                                    'bill_id' => $bill->id,
-                                    'company_id' => $company->id,
-                                    'year' => $year,
-                                    'month' => $month,
-                                    'item_number' => $numeroLinea,
-                                    'code' => $row['codigoproducto'],
-                                    'name' => $row['detalleproducto'],
-                                    'product_type' => 1,
-                                    'measure_unit' => $row['unidadmedicion'],
-                                    'item_count' => $row['cantidad'] ? $row['cantidad'] : 1,
-                                    'unit_price' => $row['preciounitario'],
-                                    'subtotal' => $row['subtotallinea'],
-                                    'total' => $row['totallinea'],
-                                    'discount_type' => '01',
-                                    'discount' => $row['montodescuento'] ? $row['montodescuento'] : 0,
-                                    'discount_reason' => '',
-                                    'iva_type' => $row['codigoetax'],
-                                    'iva_amount' => $row['montoiva'] ? $row['montoiva'] : 0,
-                                ];
+                            if( $insert ) {
+                                array_push( $inserts, $insert );
                             }
-                            /**END LINEA DE FACTURA**/
-                            clearBillCache($bill);
-                            $bill->save();
                         }
                         
                         BillItem::insert($inserts);
@@ -369,22 +329,69 @@ class BillController extends Controller
         
             $company->save();
             
-            $time_end = $this->microtime_float();
+            $time_end = getMicrotime();
             $time = $time_end - $time_start;
             
             return redirect('/facturas-recibidas')->withMessage('Facturas importados exitosamente en '.$time.'s');
         }else{
-            return redirect('/facturas-emitidas')->withError('Usted tiene un límite de 2500 facturas por archivo.');
+            return redirect('/facturas-recibidas')->withError('Usted tiene un límite de 2500 facturas por archivo.');
         }
+        
+    }
+    
+    public function importXML() {
+        request()->validate([
+          'xmls' => 'required'
+        ]);
+          
+        try {  
+            $time_start = getMicrotime();
+            $company = currentCompanyModel();
+            if( request()->hasfile('xmls') ) {
+                foreach(request()->file('xmls') as $file) {
+                    $xml = simplexml_load_string( file_get_contents($file) );
+                    $json = json_encode( $xml ); // convert the XML string to JSON
+                    $arr = json_decode( $json, TRUE );
+                    //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $arr['Receptor']['Identificacion']['Numero'] ) ) {
+                        $this->saveBillXML( $arr, 'XML' );
+                    }else{
+                        return back()->withError( 'La factura subida no le pertenece a su compañía actual.' );
+                    }
+                }
+            }
+            $company->save();
+            $time_end = getMicrotime();
+            $time = $time_end - $time_start;
+        }catch( \Exception $ex ){
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Mensaje:' . $ex->getMessage());
+        }catch( \Throwable $ex ){
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Mensaje:' . $ex->getMessage());
+        }
+        
+        return redirect('/facturas-recibidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
         
     }
     
     public function receiveEmailBills(Request $request) {
         $file = $request->file('attachment1');
         
-        $path = \Storage::putFile(
-            "correos", $file
-        );
+        try {  
+            Log::info( "Se recibió una factura por correo electrónico." );
+            $xml = simplexml_load_string( file_get_contents($file) );
+            $json = json_encode( $xml ); // convert the XML string to JSON
+            $arr = json_decode( $json, TRUE );
+            
+            $this->saveBillXML( $arr, 'Email' );
+            
+            $path = \Storage::putFile(
+                "correos", $file
+            );
+        }catch( \Exception $ex ){
+            Log::error( "Hubo un error al guardar la factura. Mensaje:" . $ex->getMessage());
+        }catch( \Throwable $ex ){
+            Log::error( "Hubo un error al guardar la factura. Mensaje:" . $ex->getMessage());
+        }
         
         return response()->json([
             'path' => $path,
@@ -393,9 +400,104 @@ class BillController extends Controller
         ], 200);
     }
     
-    private function microtime_float(){
-        list($usec, $sec) = explode(" ", microtime());
-        return ((float) $usec + (float)$sec);
-    }   
+    
+    public function saveBillXML( $arr, $metodoGeneracion ) {
+        $inserts = array();
+        
+        $claveFactura = $arr['Clave'];
+        $consecutivoComprobante = $arr['NumeroConsecutivo'];
+        $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10))->format('d/m/Y');
+        $fechaVencimiento = $fechaEmision;
+        $nombreProveedor = $arr['Emisor']['Nombre'];
+        $codigoProveedor = '';
+        $tipoPersona = $arr['Emisor']['Identificacion']['Tipo'];
+        $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
+        $correoProveedor = $arr['Emisor']['CorreoElectronico'];
+        $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'];
+        $tipoIdReceptor = $arr['Receptor']['Identificacion']['Tipo'];
+        $numIdReceptor = $arr['Receptor']['Identificacion']['Numero'];
+        $nombreReceptor = $arr['Receptor']['Nombre'];
+        $condicionVenta = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
+        $plazoCredito = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
+        $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
+        $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
+        $tipoCambio = $arr['ResumenFactura']['TipoCambio'];
+        $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
+        $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
+        $tipoDocumento = '01';
+        $descripcion = $arr['ResumenFactura']['CodigoMoneda'];
+        
+        $authorize = true;
+        if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
+            $authorize = false;
+        }
+        
+        $lineas = $arr['DetalleServicio']['LineaDetalle'];
+        //Revisa si es una sola linea. Si solo es una linea, lo hace un array para poder entrar en el foreach.
+        if( array_key_exists( 'NumeroLinea', $lineas ) ) {
+            $lineas = [$arr['DetalleServicio']['LineaDetalle']];
+        }
+        
+        foreach( $lineas as $linea ) {
+            $numeroLinea = $linea['NumeroLinea'];
+            $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] : '';
+            $detalleProducto = $linea['Detalle'];
+            $unidadMedicion = $linea['UnidadMedida'];
+            $cantidad = $linea['Cantidad'];
+            $precioUnitario = (float)$linea['PrecioUnitario'];
+            $subtotalLinea = (float)$linea['SubTotal'];
+            $totalLinea = (float)$linea['MontoTotalLinea'];
+            $montoDescuento = array_key_exists('MontoDescuento', $linea) ? $linea['MontoDescuento'] : 0;
+            $codigoEtax = '003'; //De momento asume que todo en 4.2 es al 13%.
+            $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
+            
+            $insert = Bill::importBillRow(
+                $metodoGeneracion, $numIdReceptor, $nombreProveedor, $codigoProveedor, $tipoPersona, $identificacionProveedor, $correoProveedor, $telefonoProveedor,
+                $claveFactura, $consecutivoComprobante, $condicionVenta, $medioPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
+                $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
+                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, $authorize, false
+            );
+            
+            if( $insert ) {
+                array_push( $inserts, $insert );
+            }
+        }
+        
+        BillItem::insert($inserts);
+    }
+    
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexAccepts()
+    {
+        return view('Bill/index-accepts');
+    }
+    
+    /**
+     * Returns the required ajax data.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexDataAccepts() {
+        $current_company = currentCompany();
+
+        $query = Bill::where('bills.company_id', $current_company)->where('is_void', false)->where('is_authorized', false)->where('is_totales', false)->with('provider');
+        return datatables()->eloquent( $query )
+            ->orderColumn('reference_number', '-reference_number $1')
+            ->addColumn('actions', function($bill) {
+                return view('Bill.ext.accept-actions')->render();
+            }) 
+            ->editColumn('provider', function(Bill $bill) {
+                return $bill->provider->fullname;
+            })
+            ->editColumn('generated_date', function(Bill $bill) {
+                return $bill->generatedDate()->format('d/m/Y');
+            })
+            ->rawColumns(['actions'])
+            ->toJson();
+    }
     
 }

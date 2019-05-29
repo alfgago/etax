@@ -16,15 +16,16 @@ class CreateClientsTable extends Migration
         Schema::create('clients', function (Blueprint $table) {
             $table->bigIncrements('id');
           
-            $table->unsignedBigInteger('company_id');
-            $table->string('tipo_persona');
-            $table->string('id_number');
+            $table->unsignedBigInteger('company_id')->default(0);
+            $table->string('tipo_persona')->nullable();
+            $table->string('id_number')->nullable();
             $table->string('code')->default('');
-            $table->string('first_name');
+            $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('last_name2')->nullable();
+            $table->string('fullname')->nullable();
             $table->string('email')->nullable();
-            $table->string('emisor_receptor')->default('1');
+            $table->string('emisor_receptor')->default('ambos');
             $table->string('country')->default('CR');
             $table->string('state')->nullable(); //Provincia
             $table->string('city')->nullable(); //Canton
@@ -42,7 +43,9 @@ class CreateClientsTable extends Migration
             $table->timestamps();
         });
         
-        $this->demoData();
+        if ( !app()->environment('production') ) {
+            $this->demoData();
+        }
     }
     
     public function demoData() {
@@ -74,6 +77,7 @@ class CreateClientsTable extends Migration
             $client->phone = "";
             $client->es_exento = false;
             $client->billing_emails = $client->email;
+            $client->fullname = $client->toString();
             
             $client->save();
         }

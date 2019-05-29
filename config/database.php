@@ -54,14 +54,15 @@ return array(
 
 
                 'mysql' => array(
-                        'driver'    => 'mysql',
-                        'host'      => 'localhost',
-                        'database'  => 'ducfpkkugc',
-                        'username'  => 'ducfpkkugc',
-                        'password'  => 'mht3qS6Vr9',
+                        'driver'    => env('DB_CONNECTION', 'mysql'),
+                        'host'      => env('DB_HOST', 'localhost'),
+                        'database'  => env('DB_DATABASE', 'ducfpkkugc'),
+                        'username'  => env('DB_USERNAME', 'ducfpkkugc'),
+                        'password'  => env('DB_PASSWORD', 'mht3qS6Vr9'),
                         'charset'   => 'utf8mb4',
                         'collation' => 'utf8mb4_unicode_ci',
                         'prefix'    => '',
+                        'strict' => true
                 ),
 
                 'pgsql' => array(
@@ -112,13 +113,19 @@ return array(
 
         'redis' => array(
 
-                'cluster' => false,
-
+                'client' => 'predis',
+                
                 'default' => array(
-                        'host'     => '127.0.0.1',
-                        'port'     => 6379,
+                        'host'     => env('REDIS_HOST', 'etax-redis.blqt4v.ng.0001.use1.cache.amazonaws.com'),
+                        'port'     => env('REDIS_PORT', '6379'),
                         'database' => 0,
                 ),
+                
+                'cache' => [
+                        'host' => env('REDIS_HOST', 'etax-redis.blqt4v.ng.0001.use1.cache.amazonaws.com'),
+                        'port' => env('REDIS_PORT', '6379'),
+                        'database' => 1,
+                ],
 
         ),
 

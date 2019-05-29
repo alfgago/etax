@@ -18,34 +18,34 @@ class AuthController extends Controller {
      * @return \Illuminate\Http\RedirectResponse
      */
     public function acceptInvite($token) {
-
+        
         $invite = Teamwork::getInviteFromAcceptToken($token);
 
         // check invitation is on pending state or not
         if (!$invite) {
-            flash('Invitation has already been accepted.')->error()->important();
-            return redirect()->route('User.companies')->withErrors(['email' => 'Invitation has already been accepted.']);
+            flash('La invitación ya ha sido aceptada.')->error()->important();
+            return redirect()->route('User.companies')->withErrors(['email' => 'La invitación ya ha sido aceptada.']);
         }
 
         // check valid user acceptance or not
         if ($invite->email != auth()->user()->email) {
-            flash('You are not an authorized user to accept the request please login/signup with valid credentials.')->error()->important();
-            return redirect()->route('User.companies')->withErrors(['email' => 'You are not an authorized user to accept the request please login/signup with valid credentials.']);
+            flash('Este usuario no está autorizado para aceptar la invitación.')->error()->important();
+            return redirect()->route('User.companies')->withErrors(['email' => 'Este usuario no está autorizado para aceptar la invitación.']);
         }
 
         // already memeber of a team
         $userRegistered = auth()->user()->getUserData($invite->email);
         if ($userRegistered) {
             if (isExistInTeam($invite->team_id, $userRegistered->getKey())) {
-                flash('User already member of team.')->warning()->important();
-                return redirect()->route('User.companies')->withErrors(['email' => 'User already member of team.']);
+                flash('Usuario ya es miembro de la organización.')->warning()->important();
+                return redirect()->route('User.companies')->withErrors(['email' => 'Usuario ya es miembro de la organización.']);
             }
         }
 
         // checked user is logged in or not if not then redirected to login first
         if (auth()->check()) {
             Teamwork::acceptInvite($invite);
-            flash('I have accepted.')->success()->important();
+            flash('Se ha aceptado la invitación.')->success()->important();
 
             /* Add entry in plan invitations table */           
             $team = \App\Team::findOrFail($invite->team_id);
@@ -53,10 +53,14 @@ class AuthController extends Controller {
 
             $is_admin = ($invite->role == 'admin') ? '1' : '0';
             $is_readonly = ($invite->role == 'readonly') ? '1' : '0';
-            PlansInvitation::create(['plan_no' => $company->plan_no, 'company_id' => $company->id, 'user_id' => auth()->user()->id, 'is_admin' => $is_admin, 'is_read_only' => $is_readonly]);
+            PlansInvitation::create( [
+                'subscription_id' => $company->subscription_id, 
+                'company_id' => $company->id, 
+                'user_id' => auth()->user()->id
+            ] );
             /* Ends here */
 
-            return redirect()->route('User.companies')->with('success', 'Invitation has been accepted');
+            return redirect()->route('User.companies')->withMessage('La invitación ha sido aceptada.');
         } else {
             session(['invite_token' => $token]);
             return redirect()->to('login');

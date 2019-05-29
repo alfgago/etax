@@ -4,6 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Subscription;
+use App\SubscriptionPlan;
+use Carbon\Carbon;
 
 class Company extends Model {
 
@@ -50,58 +53,67 @@ class Company extends Model {
     public function owner() {
         return $this->belongsTo('App\User');
     }
+    
+    //Relación con el plan
+    public function subscription() {
+        return $this->belongsTo(Subscription::class);
+    }
 
     /* Changes the current selected company to chosen plan. As long as the plan has available company slots. */
-
-    public static function setPlan($plan_no) {
-        $query = \App\UserSubscription::query();
-
-        $query->leftJoin('subscription_plans', 'subscription_plans.id', '=', 'user_subscriptions_history.plan_id');
-        $query->where(array('user_subscriptions_history.status' => '1', 'unique_no' => $plan_no));
-        $query->whereRaw('DATE(start_date) <="' . date('Y-m-d') . '"')->whereRaw('DATE(expiry_date) >="' . date('Y-m-d') . '"');
-
-        $plan = $query->select('user_subscriptions_history.*', 'subscription_plans.plan_type', 'subscription_plans.plan_name', 'subscription_plans.no_of_companies', 'subscription_plans.no_of_invited_user', 'user_subscriptions_history.user_id')->first();
-
+    public function setPlan( $subscription_id ) {
+        $plan = Subscription::findOrFail($subscription_id);
         if ($plan) {
-
-            $company_registered_on_plan = Company::where('plan_no', $plan_no)->count();
-
-            if (($company_registered_on_plan < $plan->no_of_companies) || empty($plan->no_of_companies)) {//If no. of companies is unlimited
-                Company::where('id', currentCompany())->update(array('plan_no' => $plan_no));
-                return true;
-            } else {
-                return false;
-            }
+            
+            if( $plan )
+            
+            $this->subscription_id = $subscription_id;
+            $this->save();
+            return true;
+            
         } else {
             return false;
         }
     }
 
     /* Check if current company's plan has been paid and active */
-
-    public static function isPlanActive() {
-        $current_company_plan = Company::find(currentCompany())->plan_no;
-
-        $user_subscription = \App\UserSubscription::where(array('unique_no' => $current_company_plan))->first();
-
-        if (strtotime(date('Y-m-d')) > strtotime($user_subscription->expiry_date)) {
+    public function isPlanActive() {
+        $subscription = $this->subscription;
+        
+        if (!$subscription) {
             return false;
-        } else {
-            if ($user_subscription->status == '1') {
+        }
+        
+        if ( Carbon::now() > $subscription->next_payment_date ) {
+            
+            /*if( checkPayment() ) {
                 return true;
             } else {
-                return false;
-            }
+                if ( Carbon::now() > $subscription->next_payment_date->addDays(5) ) {
+                    return true;
+                }
+            }*/
+            
+            return false;
+            
         }
+        
+        return true;
     }
 
     /* Returns count of total available bills Current plan bills + bought add-on bills */
-
     public function checkCountAvailableBills() {
 
         try{
             
-            $query = Company::query();
+            $count =  $this->subscription->plan->num_bills;
+            
+            if( !$count ) {
+                return -1;
+            }
+            
+            return $count;
+            
+            /*$query = Company::query();
     
             $query->leftJoin('user_subscriptions_history', 'user_subscriptions_history.unique_no', '=', 'companies.plan_no');
             $query->leftJoin('subscription_plans', 'subscription_plans.id', '=', 'user_subscriptions_history.plan_id');
@@ -121,7 +133,7 @@ class Company extends Model {
                 }
             } else {
                 return 0;
-            }
+            }*/
         }catch( \Exception $ex ){
             return 5000;
         }
@@ -133,7 +145,15 @@ class Company extends Model {
         
         try{
             
-            $query = Company::query();
+            $count = $this->subscription->plan->num_invoices;
+            
+            if( !$count ) {
+                return -1;
+            }
+            
+            return $count;
+            
+            /*$query = Company::query();
     
             $query->leftJoin('user_subscriptions_history', 'user_subscriptions_history.unique_no', '=', 'companies.plan_no');
             $query->leftJoin('subscription_plans', 'subscription_plans.id', '=', 'user_subscriptions_history.plan_id');
@@ -153,7 +173,7 @@ class Company extends Model {
                 }
             } else {
                 return 0;
-            }
+            }*/
         
         }catch( \Exception $ex ){
             return 5000;
@@ -161,7 +181,6 @@ class Company extends Model {
     }
 
     /* Email to deactivate the current company so user can add another one on same plan without deleting the data. */
-
     public static function deactivateCompany() {
 
         $company_id = currentCompany();

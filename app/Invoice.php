@@ -6,6 +6,7 @@ use \Carbon\Carbon;
 use App\Company;
 use App\InvoiceItem;
 use App\Client;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
@@ -79,7 +80,7 @@ class Invoice extends Model
           $cliente->first_name = $request->first_name;
           $cliente->last_name = $request->last_name;
           $cliente->last_name2 = $request->last_name2;
-          $cliente->emisor_receptor = $request->emisor_receptor;
+          $cliente->emisor_receptor = 'ambos';
           $cliente->country = $request->country;
           $cliente->state = $request->state;
           $cliente->city = $request->city;
@@ -97,13 +98,17 @@ class Invoice extends Model
           $this->client_id = $request->client_id;
       }
       
+      $request->currency_rate = $request->currency_rate ? $request->currency_rate : 1;
+      
       //Datos de factura
       $this->description = $request->description;
-      $this->subtotal = $request->subtotal;
+      $this->subtotal = floatval( str_replace(",","", $request->subtotal ));
       $this->currency = $request->currency;
-      $this->currency_rate = $request->currency_rate;
-      $this->total = $request->total;
-      $this->iva_amount = $request->iva_amount;
+      $this->currency_rate = floatval( str_replace(",","", $request->currency_rate ));
+      $this->total = floatval( str_replace(",","", $request->total ));
+      $this->iva_amount = floatval( str_replace(",","", $request->iva_amount ));
+      
+      
 
       //Fechas
       $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
@@ -118,6 +123,8 @@ class Invoice extends Model
     
       $lids = array();
       foreach($request->items as $item) {
+        $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
+        
         $item_id = $item['id'] ? $item['id'] : 0;
         $item_number = $item['item_number'];
         $code = $item['code'];
@@ -129,7 +136,7 @@ class Invoice extends Model
         $subtotal = $item['subtotal'];
         $total = $item['total'];
         $discount_percentage = '0';
-        $discount_reason = '';
+        $discount_reason = "";
         $iva_type = $item['iva_type'];
         $iva_percentage = $item['iva_percentage'];
         $iva_amount = $item['iva_amount'];
@@ -168,7 +175,6 @@ class Invoice extends Model
         'total' => $total,
         'discount_type' => '01',
         'discount' => $discount_percentage,
-        'discount_reason' => $discount_reason,
         'iva_type' => $iva_type,
         'iva_percentage' => $iva_percentage,
         'iva_amount' => $iva_amount,
@@ -182,6 +188,7 @@ class Invoice extends Model
                                  $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt )
     {
       if( $item_id ){
+        
         $item = InvoiceItem::find($item_id);
         //Revisa que la linea exista y pertenece a la factura actual. Asegura que si el ID se cambia en frontend, no se actualice.
         if( $item && $item->invoice_id == $this->id ) {
@@ -199,7 +206,6 @@ class Invoice extends Model
           $item->total = $total;
           $item->discount_type = '01';
           $item->discount = $discount_percentage;
-          $item->discount_reason = $discount_reason;
           $item->iva_type = $iva_type;
           $item->iva_percentage = $iva_percentage;
           $item->iva_amount = $iva_amount;
@@ -211,6 +217,165 @@ class Invoice extends Model
         $item = $this->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt );
       }
       return $item;
+    }
+    
+    public static function importInvoiceRow (
+        $metodoGeneracion, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
+        $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
+        $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
+        $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, $codeValidated
+    ) {
+      
+      $company = currentCompanyModel();
+      
+      $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
+      if ( !Cache::has($clientCacheKey) ) {
+          $clienteCache =  Client::firstOrCreate(
+              [
+                  'id_number' => $identificacionCliente,
+                  'company_id' => $company->id,
+              ],
+              [
+                  'code' => $codigoCliente ,
+                  'company_id' => $company->id,
+                  'tipo_persona' => str_pad($tipoPersona, 2, '0', STR_PAD_LEFT),
+                  'id_number' => $identificacionCliente,
+                  'first_name' => $nombreCliente,
+                  'fullname' => "$identificacionCliente - $nombreCliente"
+              ]
+          );
+          Cache::put($clientCacheKey, $clienteCache, 30);
+      }
+      $cliente = Cache::get($clientCacheKey);
+      
+      $invoiceCacheKey = "import-factura-$nombreCliente-" . $company->id . "-" . $consecutivoComprobante;
+      if ( !Cache::has($invoiceCacheKey) ) {
+      
+          $invoice = Invoice::firstOrNew(
+              [
+                  'company_id' => $company->id,
+                  'client_id' => $cliente->id,
+                  'document_number' => $consecutivoComprobante
+              ]
+          );
+          
+          if( !$invoice->exists ) {
+              
+              $invoice->company_id = $company->id;
+              $invoice->client_id = $cliente->id;    
+      
+              //Datos generales y para Hacienda
+              $tipoDocumento = $tipoDocumento;
+              if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' 
+                  || $tipoDocumento == '05' || $tipoDocumento == '06' || $tipoDocumento == '07' || $tipoDocumento == '08' || $tipoDocumento == '99' ) {
+                  $invoice->document_type = $tipoDocumento;    
+              } else {
+                 $invoice->document_type = '01'; 
+              }
+              
+              $invoice->reference_number = $company->last_invoice_ref_number + 1;
+              $invoice->document_number =  $consecutivoComprobante;
+              
+              //Datos generales
+              $invoice->sale_condition = $condicionVenta;
+              $invoice->payment_type = $metodoPago;
+              $invoice->credit_time = 0;
+              $invoice->description = $descripcion;
+              
+              $invoice->generation_method = $metodoGeneracion;
+              $invoice->is_code_validated = $codeValidated;
+              
+              //Datos de factura
+              $invoice->currency = $idMoneda;
+              if( $invoice->currency == 1 ) { $invoice->currency = "CRC"; }
+              if( $invoice->currency == 2 ) { $invoice->currency = "USD"; }
+              
+              $invoice->currency_rate = $tipoCambio;
+            
+              $company->last_invoice_ref_number = $invoice->reference_number;
+              
+              $invoice->subtotal = 0;
+              $invoice->iva_amount = 0;
+              $invoice->total = $totalDocumento;
+              
+              $invoice->save();
+              $company->save();
+          }   
+          Cache::put($invoiceCacheKey, $invoice, 30);
+      }
+      $invoice = Cache::get($invoiceCacheKey);
+      
+      try{
+        $invoice->generated_date = Carbon::createFromFormat('d/m/Y', $fechaEmision);
+      }catch( \Exception $ex ){
+        $dt =\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($fechaEmision);
+        $invoice->generated_date = Carbon::instance($dt);
+      }
+      
+      try{
+        $invoice->due_date = Carbon::createFromFormat('d/m/Y', $fechaVencimiento);
+      }catch( \Exception $ex ){
+        $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($fechaVencimiento);
+        $invoice->due_date = Carbon::instance($dt);
+      }
+      
+      $year = $invoice->generated_date->year;
+      $month = $invoice->generated_date->month;
+      
+      $invoice->year = $year;
+      $invoice->month = $month;
+    
+      /**LINEA DE FACTURA**/
+      $item = InvoiceItem::firstOrNew(
+          [
+              'invoice_id' => $invoice->id,
+              'item_number' => $numeroLinea,
+          ]
+      );
+      
+      $insert = false;
+      
+      if( !$item->exists ) {
+          $invoice->subtotal = $invoice->subtotal + $subtotalLinea;
+          $invoice->iva_amount = $invoice->iva_amount + $montoIva;
+          
+          $discount_reason = "";
+          
+          $insert = [
+              'invoice_id' => $invoice->id,
+              'company_id' => $company->id,
+              'year' => $year,
+              'month' => $month,
+              'item_number' => $numeroLinea,
+              'code' => $codigoProducto,
+              'name' => $detalleProducto,
+              'product_type' => 1,
+              'measure_unit' => $unidadMedicion,
+              'item_count' => $cantidad,
+              'unit_price' => $precioUnitario,
+              'subtotal' => $subtotalLinea,
+              'total' => $totalLinea,
+              'discount_type' => '01',
+              'discount' => $montoDescuento,
+              'iva_type' => $codigoEtax,
+              'iva_amount' => $montoIva,
+          ];
+      }
+      
+      if( $invoice->year == 2018 ) {
+         clearLastTaxesCache($company->id, 2018);
+      }
+      
+      clearInvoiceCache($invoice);
+      
+      if( $totalNeto != 0 ) {
+        $invoice->subtotal = $totalNeto;
+      }
+      
+      $invoice->save();
+      
+      return $insert;
+      
     }
     
 }

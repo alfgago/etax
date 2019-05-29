@@ -276,6 +276,27 @@ window.agregarClienteNuevo = function() {
 	}
 }
 
+window.toggleTiposImportacion = function (){
+		var tipo = $(".popup.is-active #tipo_archivo").val();
+		if(!tipo) {
+		  tipo = 'xlsx';
+		}
+		
+		$(".toggle-xml, .toggle-xlsx").hide();
+		$(".toggle-"+tipo).show();
+		
+	}
+	
+window.initHelpers = function (){
+  	$('.helper').each( function() {
+  	  
+  	  var def = $(this).attr('def');
+  	  var helperContent = $('#'+def).html();
+  	  tippy( '.'+def, { arrow: true, interactive: true, content: helperContent } );
+  	  
+  	});
+}
+
 $(document).ready(function() {
 
   $('.select-search').select2({
@@ -288,6 +309,9 @@ $(document).ready(function() {
   });
 
   $('.select2-tags').select2();
+	  
+	toggleTiposImportacion();
+	initHelpers();
 
 });
 
@@ -426,7 +450,7 @@ toastr.options = {
     }
     
     //Se asegura de que los campos hayan sido llenados
-    if( subtotal && codigo && nombre && precio_unitario && cantidad ){
+    if( subtotal && codigo && nombre && precio_unitario && cantidad && tipo_iva){
       
       //Crear el ID de la fila.
       var itemExistente = false;
@@ -478,6 +502,11 @@ toastr.options = {
       $('.item-factura-form').removeClass('editando');
       
       cerrarPopup('linea-popup');
+      
+      //Fuerza un reset en la ayuda al marcar preguntas.
+      $('#p1').prop('checked', false);
+      $('#p1').change();
+      
     }else{
       alert('Debe completar los datos de la linea antes de guardarla');
     }
@@ -495,6 +524,7 @@ toastr.options = {
       $('#porc_identificacion_plena').val(1);
       $('#discount_type').val('01');
       $('#discount').val(0);
+      $('#tipo_producto').change();
   }
 
   //Carga la item para ser editada

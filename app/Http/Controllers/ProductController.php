@@ -26,14 +26,40 @@ class ProductController extends Controller
      */
     public function index()
     {
+        return view('Product/index');
+    }
+    
+    /**
+     * Returns the required ajax data.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexData() {
         $current_company = currentCompany();
 
-        $products = Product::where('company_id', $current_company)->where('is_catalogue', 1)->paginate(10);
-        
-        return view('Product/index', [
-          'products' => $products
-        ]);
+        $query = Product::where('company_id', $current_company)->where('is_catalogue', 1);
+        return datatables()->eloquent( $query )
+            ->orderColumn('reference_number', '-reference_number $1')
+            ->addColumn('actions', function($product) {
+                return view('datatables.actions', [
+                    'routeName' => 'productos',
+                    'deleteTitle' => 'Anular producto',
+                    'editTitle' => 'Editar producto',
+                    'hideDelete' => true,
+                    'deleteIcon' => 'fa fa-ban',
+                    'id' => $product->id
+                ])->render();
+            }) 
+            ->editColumn('unidad_medicion', function(Product $product) {
+                return $product->getUnidadMedicionName();
+            })
+            ->editColumn('tipo_iva', function(Product $product) {
+                return $product->getTipoIVAName();
+            })
+            ->rawColumns(['actions'])
+            ->toJson();
     }
+
 
     /**
      * Show the form for creating a new resource.

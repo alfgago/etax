@@ -16,15 +16,16 @@ class CreateProvidersTable extends Migration
         Schema::create('providers', function (Blueprint $table) {
             $table->bigIncrements('id');
           
-            $table->unsignedBigInteger('company_id');
-            $table->string('tipo_persona');
-            $table->string('id_number');
-            $table->string('code');
-            $table->string('first_name');
+            $table->unsignedBigInteger('company_id')->default(0);
+            $table->string('tipo_persona')->nullable();
+            $table->string('id_number')->nullable();
+            $table->string('code')->default('');
+            $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('last_name2')->nullable();
-            $table->string('email');
-            $table->string('country');
+            $table->string('fullname')->nullable();
+            $table->string('email')->nullable();
+            $table->string('country')->nullable();
             $table->string('state')->nullable(); //Provincia
             $table->string('city')->nullable(); //Canton
             $table->string('district')->nullable(); //Distrito
@@ -69,6 +70,7 @@ class CreateProvidersTable extends Migration
             $provider->zip = "";
             $provider->address = "";
             $provider->phone = "";
+            $provider->fullname = $provider->toString();
             
             $provider->save();
         }

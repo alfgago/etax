@@ -116,7 +116,7 @@
     }
     
     //Se asegura de que los campos hayan sido llenados
-    if( subtotal && codigo && nombre && precio_unitario && cantidad ){
+    if( subtotal && codigo && nombre && precio_unitario && cantidad && tipo_iva){
       
       //Crear el ID de la fila.
       var itemExistente = false;
@@ -168,6 +168,11 @@
       $('.item-factura-form').removeClass('editando');
       
       cerrarPopup('linea-popup');
+      
+      //Fuerza un reset en la ayuda al marcar preguntas.
+      $('#p1').prop('checked', false);
+      $('#p1').change();
+      
     }else{
       alert('Debe completar los datos de la linea antes de guardarla');
     }
@@ -185,6 +190,7 @@
       $('#porc_identificacion_plena').val(1);
       $('#discount_type').val('01');
       $('#discount').val(0);
+      $('#tipo_producto').change();
   }
 
   //Carga la item para ser editada

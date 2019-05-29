@@ -26,7 +26,7 @@
                     </div>
 
                     <div class="form-group col-md-12 with-button">
-                      <label for="provider_id">Seleccione el cliente</label>
+                      <label for="provider_id">Seleccione el proveedor</label>
                       <select class="form-control select-search" name="provider_id" id="provider_id" placeholder="" required>
                         <option value='' >-- Seleccione un proveedor --</option>
                         @foreach ( currentCompanyModel()->providers as $proveedor )
@@ -49,8 +49,8 @@
                     <div class="form-group col-md-4">
                       <label for="currency">Divisa</label>
                       <select class="form-control" name="currency" id="moneda" required>
-                        <option value="crc" {{ $bill->currency == 'crc' ? 'selected' : '' }}>CRC</option>
-                        <option value="usd" {{ $bill->currency == 'usd' ? 'selected' : '' }}>USD</option>
+                        <option value="CRC" {{ $bill->currency == 'CRC' ? 'selected' : '' }}>CRC</option>
+                        <option value="USD" {{ $bill->currency == 'USD' ? 'selected' : '' }}>USD</option>
                       </select>
                     </div>
   
@@ -85,7 +85,7 @@
                 </div>
                 
                 <div class="form-group col-md-12">
-                  <div onclick="abrirPopup('linea-popup');" class="btn btn-dark btn-agregar">Agregar linea</div>
+                  <div onclick="abrirPopup('linea-popup');" class="btn btn-dark btn-agregar">Agregar línea</div>
                 </div>
       
               </div>
@@ -105,7 +105,7 @@
                     <input type="text" class="form-control" name="document_number" id="document_number" value="{{ $bill->document_number }}" required>
                   </div>
   
-                  <div class="form-group col-md-6">
+                  <div class="form-group col-md-6 not-required">
                     <label for="document_key">Clave de factura</label>
                     <input type="text" class="form-control" name="document_key" id="document_key" value="{{ $bill->document_key }}" >
                   </div>
@@ -169,12 +169,12 @@
                   </div>
                 </div>
 
-                <div class="form-group col-md-6">
+                <div class="form-group col-md-6 not-required">
                   <label for="other_reference">Referencia</label>
                   <input type="text" class="form-control" name="other_reference" id="referencia" value="{{ $bill->other_reference }}" >
                 </div>
 
-                <div class="form-group col-md-6">
+                <div class="form-group col-md-6 not-required">
                   <label for="buy_order">Orden de compra</label>
                   <input type="text" class="form-control" name="buy_order" id="orden_compra" value="{{ $bill->buy_order }}" >
                 </div>
@@ -192,7 +192,7 @@
 
             <div class="form-group col-md-12">
               <h3>
-                Lineas de factura
+                Líneas de factura
               </h3>
             </div>
   

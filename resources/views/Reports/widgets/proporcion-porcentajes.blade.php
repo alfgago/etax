@@ -1,6 +1,8 @@
 
 <div class="widget card-porcentajes">
-    <div class="card-title"> {{ $titulo }} </div>
+    <div class="card-title"> {{ $titulo }} 
+      <span class="helper helper-proporcion" def="helper-proporcion">  <i class="fa fa-question-circle" aria-hidden="true"></i> </span> 
+    </div>
     @if( $data->count_invoices  )
       <div id="echartPie" style="height: 12.5rem; max-width: 25rem;"></div>
     @else
