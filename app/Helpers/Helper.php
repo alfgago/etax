@@ -147,6 +147,10 @@ if (!function_exists('currentCompany')) {
         $user = auth()->user();
         if ( !$user->companies->count() ) {
             auth()->user()->addCompany();
+        }else {
+            $company_id = auth()->user()->companies->first()->id;
+            session(['current_company' => $company_id]);
+            return $company_id;
         }
 
         if ( !$current_company ) {
