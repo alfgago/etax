@@ -19143,6 +19143,39 @@ ngb-tabset.p-0 .tab-content {
   height: calc(1.9695rem + 0.133rem);
 }
 
+@media (max-width: 580px) {
+  .wizard-popup {
+    position: relative;
+    width: 100%;
+    height: auto;
+    margin: auto;
+    padding: 1rem;
+    padding-bottom: 3rem;
+  }
+
+  .wizard-steps {
+    display: none;
+  }
+
+  .wizard-popup .form-container {
+    width: 100%;
+    max-height: none;
+  }
+
+  .wizard-popup h3 {
+    margin-top: 0;
+  }
+
+  .wizard-container {
+    overflow-y: scroll;
+  }
+
+  .wizard-container:before {
+    position: fixed;
+    opacity: 1;
+  }
+}
+
 .main-header {
   position: fixed;
   width: 100%;
@@ -19460,7 +19493,7 @@ ngb-tabset.p-0 .tab-content {
     left: 0;
     margin: 0;
     width: 100%;
-    background: linear-gradient(45deg, #274EAB 0%, #2f006d 100%);
+    background: linear-gradient(45deg, #5533ab 0%, #4744c3 100%);
     -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.25);
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.25);
     padding: 0 1rem;
@@ -19471,11 +19504,19 @@ ngb-tabset.p-0 .tab-content {
     background: #fff;
     text-align: center;
     border-radius: 50px;
+    top: 1px;
   }
 
-  .dropdown img {
+  .main-header .header-part-right .user img {
     position: relative;
     left: -2px;
+    height: 1.5rem;
+    width: 1.5rem;
+  }
+
+  .companyParent {
+    margin-right: 15px;
+    width: auto !important;
   }
 }
 

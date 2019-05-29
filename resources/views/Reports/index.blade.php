@@ -23,10 +23,7 @@
           <option value="/reportes/detalle-debito" hideClass="#input-mes" type="post" ano="1" mes="1">Detalle de débito fiscal</option>
           <option value="/reportes/detalle-credito" hideClass="#input-mes" type="post" ano="1" mes="1">Detalle de crédito fiscal</option>
           <option value="/reportes/resumen-ejecutivo" hideClass=".opt-acumulado" type="iframe" >Resumen ejecutivo</option>
-          <option type="post">Borrador de presentación de IVA</option>
-          <option type="post">Borrador D-151</option>
-          <option type="post" style="display:none;">Borrador de D-140</option>
-          <option type="post" style="display:none;">Borrador de D-104</option>
+          <option type="post">Borrador de presentación de IVA (Muy pronto)</option>
         </select>
       </div>
       
