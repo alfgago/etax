@@ -143,13 +143,20 @@ if (!function_exists('currentCompany')) {
     function currentCompany() {
     
         $current_company = session('current_company');
+        
+        $user = auth()->user();
+        if ( !$user->companies->count() ) {
+            auth()->user()->addCompany();
+        }
 
         if ( !$current_company ) {
-            if (auth()->user()->companies->first()) {
+            
+            if ($user->companies->first()) {
                 $company_id = auth()->user()->companies->first()->id;
                 session(['current_company' => $company_id]);
                 $current_company = $company_id;
             }
+            
         }
 
         return $current_company;
