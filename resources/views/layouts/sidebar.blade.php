@@ -64,11 +64,11 @@
                 </a>
                 
                 <div class="subitems">
-                    <a title="A partir del 4 de Junio" href="#">Ver documentos emitidos</a>
-                    <a title="A partir del 4 de Junio" href="#">Emitir factura electrónica</a>
-                    <a title="A partir del 4 de Junio" href="#">Emitir tiquete electrónico</a>
-                    <a title="A partir del 4 de Junio" href="#">Emitir nota de débito</a>
-                    <a title="A partir del 4 de Junio" href="#">Aceptación de facturas recibidas</a>
+                    <a title="A partir del 7 de Junio" href="#">Ver documentos emitidos</a>
+                    <a title="A partir del 7 de Junio" href="#">Emitir factura electrónica</a>
+                    <a title="A partir del 7 de Junio" href="#">Emitir tiquete electrónico</a>
+                    <a title="A partir del 7 de Junio" href="#">Emitir nota de débito</a>
+                    <a title="A partir del 7 de Junio" href="#">Aceptación de facturas recibidas</a>
                 </div>
             </li>
             
