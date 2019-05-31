@@ -16,12 +16,12 @@
                     <span class="nav-text">Ventas</span>
                 </a>
                 
-                
                 <div class="subitems">
                     <a href="/facturas-emitidas">Ver todas</a>
                     <a href="/facturas-emitidas/create">Registrar factura existente</a>
                     <a href="#" onclick="abrirPopup('importar-emitidas-popup');">Importar facturas</a>
                     <a href="/facturas-emitidas/validaciones">Validar facturas</a>
+                    <a href="/facturas-emitidas/autorizaciones">Autorizar facturas por email</a>
                 </div>
                 
             </li>
@@ -37,6 +37,7 @@
                     <a href="/facturas-recibidas/create">Registrar factura recibida</a>
                     <a href="#" onclick="abrirPopup('importar-recibidas-popup');">Importar facturas</a>
                     <a href="/facturas-recibidas/validaciones">Validar facturas</a>
+                    <a href="/facturas-recibidas/autorizaciones">Autorizar facturas por email</a>
                 </div>
             </li>
             

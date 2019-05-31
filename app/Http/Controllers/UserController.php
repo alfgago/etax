@@ -17,7 +17,7 @@ use Carbon\Carbon;
 class UserController extends Controller {
 
     function __construct() {
-        
+        $this->middleware('auth');
     }
 
     /**
@@ -148,24 +148,30 @@ class UserController extends Controller {
     }
 
     public function companies() {
-
-        $teams = auth()->user()->teams;
-
-        /* Show registered companies list on specific plan */
-        if ( isset($_GET['plan']) ) {
-            $company_ids = \App\Company::where('subscription_id', decrypt($_GET['plan']))->get(['id'])->toArray();
-            $teams = \Mpociot\Teamwork\TeamworkTeam::whereIn('company_id', $company_ids)->get();
-        } else {
-            //$teams = \Mpociot\Teamwork\TeamworkTeam::get();
-        }
-
+        
         $data['class'] = '';
         $data['url'] = '/empresas/create';
-
-        $available_companies_count = User::checkCountAvailableCompanies();
         
-
-        return view('users.companies', compact('data'))->with('teams', $teams);
+        try {
+        
+            $teams = auth()->user()->teams;
+    
+            /* Show registered companies list on specific plan */
+            if ( isset($_GET['plan']) ) {
+                $company_ids = \App\Company::where('subscription_id', decrypt($_GET['plan']))->get(['id'])->toArray();
+                $teams = \Mpociot\Teamwork\TeamworkTeam::whereIn('company_id', $company_ids)->get();
+            } else {
+                //$teams = \Mpociot\Teamwork\TeamworkTeam::get();
+            }
+    
+            $available_companies_count = User::checkCountAvailableCompanies();
+            
+            return view('users.companies', compact('data'))->with('teams', $teams);
+        
+        }catch( \Throwable $ex ){
+            return view('users.companies');
+        }
+        
     }
 
     public function plans() {

@@ -81,10 +81,10 @@
       <div class="form-group col-md-12 button-container text-center">
         <div class="inline-block text-left">
           <div>
-          Ya tenés cuenta? 
+          ¿Ya tiene cuenta? 
           @if (Route::has('login'))
               <a class="btn btn-link" href="{{ route('login') }}">
-                  {{ __('Ingresá aquí') }}
+                  {{ __('Ingrese aquí') }}
               </a>
           @endif
           </div>

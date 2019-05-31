@@ -15,6 +15,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Orchestra\Parser\Xml\Facade as XmlParser;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 class BillController extends Controller
@@ -48,7 +49,12 @@ class BillController extends Controller
     public function indexData() {
         $current_company = currentCompany();
 
-        $query = Bill::where('bills.company_id', $current_company)->where('is_void', false)->where('is_authorized', true)->where('is_totales', false)->with('provider');
+        $query = Bill::where('bills.company_id', $current_company)
+                ->where('is_void', false)
+                ->where('is_authorized', true)
+                ->where('is_code_validated', true)
+                ->where('is_totales', false)
+                ->with('provider');
         return datatables()->eloquent( $query )
             ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($bill) {
@@ -74,37 +80,6 @@ class BillController extends Controller
             })
             ->rawColumns(['actions'])
             ->toJson();
-    }
-    
-    /**
-     * Despliega las facturas que requieren validación de códigos
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function indexValidaciones()
-    {
-        $current_company = currentCompany();
-        $bills = Bill::where('company_id', $current_company)->where('is_void', false)->where('is_totales', false)->where('is_code_validated', false)->orderBy('generated_date', 'DESC')->orderBy('reference_number', 'DESC')->paginate(10);
-        return view('Bill/index-validaciones', [
-          'bills' => $bills
-        ]);
-    }
-    
-    public function confirmarValidacion( Request $request, $id )
-    {
-        $bill = Bill::findOrFail($id);
-        $this->authorize('update', $bill);
-        
-        $tipoIva = $request->tipo_iva;
-        foreach( $bill->items as $item ) {
-            $item->iva_type = $request->tipo_iva;
-            $item->save();
-        }
-        
-        $bill->is_code_validated = true;
-        $bill->save();
-        
-        return redirect('/facturas-recibidas/validaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido validada');
     }
 
     /**
@@ -318,13 +293,17 @@ class BillController extends Controller
                     
                 }
             }catch( \ErrorException $ex ){
-                return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila. '.$i.'. Mensaje:' . $ex->getMessage());
+                return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila. '.$i);
+                Log::error('Error importando Excel' . $ex->getMessage());
             }catch( \InvalidArgumentException $ex ){
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
+                Log::error('Error importando Excel' . $ex->getMessage());
             }catch( \Exception $ex ){
-                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i.'. Mensaje:' . $ex->getMessage());
+                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i);
+                Log::error('Error importando Excel' . $ex->getMessage());
             }catch( \Throwable $ex ){
-                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i.'. Mensaje:' . $ex->getMessage());
+                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i);
+                Log::error('Error importando Excel' . $ex->getMessage());
             }
         
             $company->save();
@@ -352,11 +331,19 @@ class BillController extends Controller
                     $xml = simplexml_load_string( file_get_contents($file) );
                     $json = json_encode( $xml ); // convert the XML string to JSON
                     $arr = json_decode( $json, TRUE );
+                    
+                    $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
+                    $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+                    $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                    
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $arr['Receptor']['Identificacion']['Numero'] ) ) {
-                        $this->saveBillXML( $arr, 'XML' );
+                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
+                        //Registra el XML. Si todo sale bien, lo guarda en S3
+                        if( $this->saveBillXML( $arr, 'XML' ) ) {
+                            $this->storeXMLRecibido( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
+                        }
                     }else{
-                        return back()->withError( 'La factura subida no le pertenece a su compañía actual.' );
+                        return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
                     }
                 }
             }
@@ -365,8 +352,10 @@ class BillController extends Controller
             $time = $time_end - $time_start;
         }catch( \Exception $ex ){
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Mensaje:' . $ex->getMessage());
+            Log::error('Error importando Excel' . $ex->getMessage());
         }catch( \Throwable $ex ){
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Mensaje:' . $ex->getMessage());
+            Log::error('Error importando Excel' . $ex->getMessage());
         }
         
         return redirect('/facturas-recibidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
@@ -377,27 +366,45 @@ class BillController extends Controller
         $file = $request->file('attachment1');
         
         try {  
-            Log::info( "Se recibió una factura por correo electrónico." );
+            Log::info( "Se recibió una factura de compra por correo electrónico." );
             $xml = simplexml_load_string( file_get_contents($file) );
             $json = json_encode( $xml ); // convert the XML string to JSON
             $arr = json_decode( $json, TRUE );
             
-            $this->saveBillXML( $arr, 'Email' );
+            $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
+            $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+            $consecutivoComprobante = $arr['NumeroConsecutivo'];
             
-            $path = \Storage::putFile(
-                "correos", $file
-            );
+            if( $this->saveBillXML( $arr, 'Email' ) ) {
+                $this->storeXMLRecibido( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
+            }
+            
+            return response()->json([
+                'success' => 'Exito'
+            ], 200);
+            
         }catch( \Exception $ex ){
             Log::error( "Hubo un error al guardar la factura. Mensaje:" . $ex->getMessage());
+            return 500;
         }catch( \Throwable $ex ){
             Log::error( "Hubo un error al guardar la factura. Mensaje:" . $ex->getMessage());
+            return 500;
         }
         
-        return response()->json([
-            'path' => $path,
-            'success' => 'Exito',
-            'error' => 'Resource not found'
-        ], 200);
+    }
+    
+    public function storeXMLRecibido($file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor) {
+        
+        if ( Storage::exists("empresa-$identificacionReceptor/$identificacionEmisor-$consecutivoComprobante.xml")) {
+            Storage::delete("empresa-$identificacionReceptor/$identificacionEmisor-$consecutivoComprobante.xml");
+        }
+        
+        $path = \Storage::putFileAs(
+            "empresa-$identificacionReceptor", $file, "$identificacionEmisor-$consecutivoComprobante.xml"
+        );
+        
+        return $path;
+        
     }
     
     
@@ -415,7 +422,7 @@ class BillController extends Controller
         $correoProveedor = $arr['Emisor']['CorreoElectronico'];
         $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'];
         $tipoIdReceptor = $arr['Receptor']['Identificacion']['Tipo'];
-        $numIdReceptor = $arr['Receptor']['Identificacion']['Numero'];
+        $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
         $nombreReceptor = $arr['Receptor']['Nombre'];
         $condicionVenta = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
         $plazoCredito = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
@@ -452,7 +459,7 @@ class BillController extends Controller
             $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
             
             $insert = Bill::importBillRow(
-                $metodoGeneracion, $numIdReceptor, $nombreProveedor, $codigoProveedor, $tipoPersona, $identificacionProveedor, $correoProveedor, $telefonoProveedor,
+                $metodoGeneracion, $identificacionReceptor, $nombreProveedor, $codigoProveedor, $tipoPersona, $identificacionProveedor, $correoProveedor, $telefonoProveedor,
                 $claveFactura, $consecutivoComprobante, $condicionVenta, $medioPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
                 $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
                 $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, $authorize, false
@@ -464,6 +471,47 @@ class BillController extends Controller
         }
         
         BillItem::insert($inserts);
+        
+        return true;
+    }
+    
+    
+    
+    /**
+     * Despliega las facturas que requieren validación de códigos
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexValidaciones()
+    {
+        $current_company = currentCompany();
+        $bills = Bill::where('company_id', $current_company)
+                        ->where('is_void', false)
+                        ->where('is_totales', false)
+                        ->where('is_code_validated', false)
+                        ->where('is_authorized', true)
+                        ->orderBy('generated_date', 'DESC')
+                        ->orderBy('reference_number', 'DESC')->paginate(10);
+        return view('Bill/index-validaciones', [
+          'bills' => $bills
+        ]);
+    }
+    
+    public function confirmarValidacion( Request $request, $id )
+    {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+        
+        $tipoIva = $request->tipo_iva;
+        foreach( $bill->items as $item ) {
+            $item->iva_type = $request->tipo_iva;
+            $item->save();
+        }
+        
+        $bill->is_code_validated = true;
+        $bill->save();
+        
+        return redirect('/facturas-recibidas/validaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido validada');
     }
     
     /**
@@ -473,7 +521,7 @@ class BillController extends Controller
      */
     public function indexAccepts()
     {
-        return view('Bill/index-accepts');
+        return view('Bill/index-aceptaciones-hacienda');
     }
     
     /**
@@ -484,11 +532,19 @@ class BillController extends Controller
     public function indexDataAccepts() {
         $current_company = currentCompany();
 
-        $query = Bill::where('bills.company_id', $current_company)->where('is_void', false)->where('is_authorized', false)->where('is_totales', false)->with('provider');
+        $query = Bill::where('bills.company_id', $current_company)
+        ->where('is_void', false)
+        ->where('status', '01')
+        ->where('is_totales', false)
+        ->where('is_authorized', true)
+        ->with('provider');
+        
         return datatables()->eloquent( $query )
             ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($bill) {
-                return view('Bill.ext.accept-actions')->render();
+                return view('Bill.ext.accept-actions', [
+                    'id' => $bill->id
+                ])->render();
             }) 
             ->editColumn('provider', function(Bill $bill) {
                 return $bill->provider->fullname;
@@ -498,6 +554,67 @@ class BillController extends Controller
             })
             ->rawColumns(['actions'])
             ->toJson();
+    }
+    
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexAuthorize()
+    {
+        return view('Bill/index-autorizaciones');
+    }
+    
+    /**
+     * Returns the required ajax data.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexDataAuthorize() {
+        $current_company = currentCompany();
+
+        $query = Bill::where('bills.company_id', $current_company)
+        ->where('is_void', false)
+        ->where('is_authorized', false)
+        ->where('is_totales', false)
+        ->with('provider');
+        
+        return datatables()->eloquent( $query )
+            ->orderColumn('reference_number', '-reference_number $1')
+            ->addColumn('actions', function($bill) {
+                return view('Bill.ext.auth-actions', [
+                    'id' => $bill->id
+                ])->render();
+            }) 
+            ->editColumn('provider', function(Bill $bill) {
+                return $bill->provider->fullname;
+            })
+            ->editColumn('generated_date', function(Bill $bill) {
+                return $bill->generatedDate()->format('d/m/Y');
+            })
+            ->rawColumns(['actions'])
+            ->toJson();
+    }
+    
+    public function authorizeBill ( Request $request, $id )
+    {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+        
+        if ( $request->autorizar ) {
+            $bill->is_authorized = true;
+            $bill->save();
+            return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido autorizada');
+        }else {
+            $bill->is_authorized = false;
+            $bill->is_void = true;
+            BillItem::where('bill_id', $bill->id)->delete();
+            $bill->delete();
+            return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido rechazada');
+        }
+        
+        
     }
     
 }
