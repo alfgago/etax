@@ -1,29 +1,30 @@
 @extends('layouts/app')
 
 @section('title') 
-  Facturas recibidas
+  Aceptación de facturas ante Hacienda
 @endsection
 
 @section('breadcrumb-buttons')
-    <a type="submit" class="btn btn-primary" href="/facturas-recibidas/create">Ingresar factura nueva</a>
-    <div onclick="abrirPopup('importar-recibidas-popup');" class="btn btn-primary">Importar facturas recibidas</div>
+    
 @endsection 
 
 @section('content') 
 <div class="row">
   <div class="col-md-12">
+        <div class="descripcion mb-4">
+          Este proceso genera la aceptación o rechazo ante Hacienda.
+        </div>
           
         <table id="bill-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
-              <th data-priority="2">Comprobante</th>
-              <th data-priority="3">Emisor</th>
-              <th>Tipo Doc.</th>
-              <th data-priority="5">Moneda</th>
-              <th data-priority="5">Subtotal</th>
-              <th data-priority="5">Monto IVA</th>
-              <th data-priority="4">Total</th>
-              <th data-priority="6">F. Generada</th>
+              <th>Comprobante</th>
+              <th>Emisor</th>
+              <th>Moneda</th>
+              <th>Subtotal</th>
+              <th>Monto IVA</th>
+              <th>Total</th>
+              <th>F. Generada</th>
               <th data-priority="1">Acciones</th>
             </tr>
           </thead>
@@ -32,6 +33,8 @@
         </table>
   </div>  
 </div>
+
+@include('Bill.import-accepts')
 
 @endsection
 
@@ -43,15 +46,10 @@ $(function() {
   $('#bill-table').DataTable({
     processing: true,
     serverSide: true,
-    ajax: {
-      url: "/api/bills",
-      type: 'GET'
-    },
-    order: [[ 7, 'desc' ]],
+    ajax: "/api/billsAccepts",
     columns: [
       { data: 'document_number', name: 'document_number' },
       { data: 'provider', name: 'provider.fullname' },
-      { data: 'document_type', name: 'document_type' },
       { data: 'currency', name: 'currency', orderable: false, searchable: false },
       { data: 'subtotal', name: 'subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
       { data: 'iva_amount', name: 'iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
@@ -64,23 +62,6 @@ $(function() {
     },
   });
 });
-
-function confirmDelete( id ) {
-  var formId = "#delete-form-"+id;
-  Swal.fire({
-    title: '¿Está seguro que desea eliminar la factura',
-    text: "Este proceso la eliminará a nivel de cálculo en eTax, sin embargo no hace anulaciones ni revierte aceptaciones ante Hacienda. Usted podrá volver a importar la factura via XML o ingreso manual.",
-    type: 'warning',
-    showCloseButton: true,
-    showCancelButton: true,
-    confirmButtonText: 'Sí, quiero eliminarla'
-  }).then((result) => {
-    if (result.value) {
-      $(formId).submit();
-    }
-  })
-  
-}
   
 </script>
 

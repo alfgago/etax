@@ -299,6 +299,7 @@ class Bill extends Model
               $bill->generation_method = $metodoGeneracion;
               $bill->is_authorized = $isAuthorized;
               $bill->is_code_validated = $codeValidated;
+              $bill->is_void = false;
               
               //Datos de factura
               $bill->currency = $idMoneda;

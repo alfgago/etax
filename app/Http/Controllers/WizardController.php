@@ -10,6 +10,7 @@ use App\User;
 use App\AtvCertificate;
 use App\Team;
 use App\Subscription;
+use App\CalculatedTax;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Log;
@@ -64,6 +65,7 @@ class WizardController extends Controller
             'year' => 2018
           ]
         );
+        clearLastTaxesCache($company_id, 2018);
         return view("wizard/set-totales-2018", compact( 'totales' ) );
     }
     
@@ -96,16 +98,28 @@ class WizardController extends Controller
         $invoice->payment_receipt = "";
         $invoice->is_totales = true;
         $invoice->generation_method = "TOTALES";
-        $this->reference_number = 0;
+        $invoice->reference_number = 0;
         
         $invoice->setInvoiceData($request);
+        
+        $invoice->month = 0;
+        
+        foreach($invoice->items as $item) {
+            $item->month = 0;
+            $item->save();
+        }
+        
+        $invoice->save();
         
         $company->first_prorrata_type = 2;
         $company->save();
         
-        clearInvoiceCache($invoice);
+        clearLastTaxesCache($company->id, 2018);
+        clearLastTaxesCache($company->id, 2019);
+        
+        $prorrata = CalculatedTax::getProrrataPeriodoAnterior(2018)->prorrata;
       
-        return redirect('/empresas/configuracion');
+        return redirect('/empresas/configuracion')->withMessage( 'Su prorrata operativa 2018 es de: '. number_format( $prorrata*100, 2) . '%' );
     }
     
     
