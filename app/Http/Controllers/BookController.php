@@ -35,7 +35,7 @@ class BookController extends Controller
             ['company_id', $current_company],
             ['month', '!=', 0],
             ['month', '!=', -1]
-        ])->orderBy('month', 'DESC')->orderBy('year', 'DESC')->orderBy('created_at', 'DESC')->get();
+        ])->orderBy('year', 'DESC')->orderBy('month', 'DESC')->orderBy('created_at', 'DESC')->get();
         
         foreach ( $books as $book ) {
             if( ! $book->is_closed ) {

@@ -44,6 +44,7 @@ class CalculatedTax extends Model
       
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
+      
       if ( !Cache::has($cacheKey) ) {
           
           //Busca el calculo del mes en Base de Datos.
@@ -105,7 +106,7 @@ class CalculatedTax extends Model
       $this->setDatosEmitidos( $month, $year, $currentCompanyId );
       $this->setDatosSoportados( $month, $year, $currentCompanyId );
       $this->setCalculosIVA( $prorrataOperativa, $lastBalance );
-
+      
       return $this;
     }
     
@@ -158,7 +159,7 @@ class CalculatedTax extends Model
           
           try {
           
-            if( ! $invoiceItems[$i]->invoice->is_void ) {
+            if( !$invoiceItems[$i]->invoice->is_void && $invoiceItems[$i]->invoice->is_authorized && $invoiceItems[$i]->invoice->is_code_validated ) {
             
               $subtotal = $invoiceItems[$i]->subtotal * $invoiceItems[$i]->invoice->currency_rate;
               $currentTotal = $invoiceItems[$i]->total * $invoiceItems[$i]->invoice->currency_rate;
@@ -293,7 +294,7 @@ class CalculatedTax extends Model
           
           try {
           
-            if( !$billItems[$i]->bill->is_void && $billItems[$i]->bill->is_authorized ) {
+            if( !$billItems[$i]->bill->is_void && $billItems[$i]->bill->is_authorized && $billItems[$i]->bill->is_code_validated ) {
             
               $subtotal = $billItems[$i]->subtotal * $billItems[$i]->bill->currency_rate;
               $currentTotal = $billItems[$i]->total * $billItems[$i]->bill->currency_rate;
@@ -559,7 +560,7 @@ class CalculatedTax extends Model
           if( !$data->is_closed ) {
               
               $data->resetVars();
-              $data->calcularFacturacion( 12, $anoAnterior, 0, 1 );
+              $data->calcularFacturacion( 0, $anoAnterior, 0, 1 );
               
               if( $data->count_invoices || $data->count_bills || $data->id ) {
                 $data->save();

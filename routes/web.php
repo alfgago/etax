@@ -70,8 +70,8 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::post('enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
     Route::get('validaciones', 'InvoiceController@indexValidaciones')->name('Invoice.validaciones');
     Route::patch('confirmar-validacion/{id}', 'InvoiceController@confirmarValidacion')->name('Invoice.confirmar_validacion');
-    Route::get('validaciones-linea', 'InvoiceController@indexValidacionesLinea')->name('Invoice.validaciones');
-    Route::patch('confirmar-validacion-linea/{id}', 'InvoiceController@confirmarValidacion')->name('Invoice.confirmar_validacion');
+    Route::get('autorizaciones', 'InvoiceController@indexAuthorize')->name('Invoice.validaciones');
+    Route::patch('confirmar-autorizacion/{id}', 'InvoiceController@authorizeInvoice')->name('Invoice.confirmar_validacion');
 });
 
 // Rutas de facturacion recibida
@@ -80,6 +80,8 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::post('respondStatus', 'BillController@respondStatus')->name('Bill.respond');
     Route::get('validaciones', 'BillController@indexValidaciones')->name('Bill.validaciones');
     Route::patch('confirmar-validacion/{id}', 'BillController@confirmarValidacion')->name('Bill.confirmar_validacion');
+    Route::get('autorizaciones', 'BillController@indexAuthorize')->name('Bill.validaciones');
+    Route::patch('confirmar-autorizacion/{id}', 'BillController@authorizeBill')->name('Bill.confirmar_validacion');
 });
 
 // Rutas de Wizard
@@ -107,8 +109,10 @@ Route::prefix('usuario')->group(function() {
 
 // Rutas de API data para ajax
 Route::get('/api/invoices', 'InvoiceController@indexData')->name('Invoice.data');
+Route::get('/api/invoicesAuthorize', 'InvoiceController@indexDataAuthorize')->name('Invoice.data_authorizes');
 Route::get('/api/bills', 'BillController@indexData')->name('Bill.data');
 Route::get('/api/billsAccepts', 'BillController@indexDataAccepts')->name('Bill.data_accepts');
+Route::get('/api/billsAuthorize', 'BillController@indexDataAuthorize')->name('Bill.data_authorizes');
 Route::get('/api/clients', 'ClientController@indexData')->name('Client.data');
 Route::get('/api/providers', 'ProviderController@indexData')->name('Provider.data');
 Route::get('/api/products', 'ProductController@indexData')->name('Product.data');

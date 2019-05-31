@@ -30,7 +30,7 @@ class InvoiceController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth', ['except' => ['receiveEmailInvoices']] );
     }
   
     /**
@@ -52,10 +52,13 @@ class InvoiceController extends Controller
         $current_company = currentCompany();
         
         $query = Invoice::where('invoices.company_id', $current_company)
-                ->where('is_void', false)->where('is_totales', false)->with('client');
+                ->where('is_void', false)
+                ->where('is_authorized', true)
+                ->where('is_code_validated', true)
+                ->where('is_totales', false)
+                ->with('client');
                 
         return datatables()->eloquent( $query )
-            ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($invoice) {
                 $hideEdit = false;
                 if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
@@ -78,65 +81,6 @@ class InvoiceController extends Controller
             })
             ->rawColumns(['actions'])
             ->toJson();
-    }
-    
-    
-    /**
-     * Despliega las facturas que requieren validación de códigos
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function indexValidaciones()
-    {
-        $current_company = currentCompany();
-        $invoices = Invoice::where('company_id', $current_company)
-                    ->where('is_void', false)
-                    ->where('is_totales', false)
-                    ->where('is_code_validated', false)
-                    ->orderBy('generated_date', 'DESC')
-                    ->orderBy('reference_number', 'DESC')->paginate(10);
-        return view('Invoice/index-validaciones', [
-          'invoices' => $invoices
-        ]);
-    }
-    
-    public function confirmarValidacion( Request $request, $id )
-    {
-        $invoice = Invoice::findOrFail($id);
-        $this->authorize('update', $invoice);
-        
-        $tipoIva = $request->tipo_iva;
-        foreach( $invoice->items as $item ) {
-            $item->iva_type = $request->tipo_iva;
-            $item->save();
-        }
-        
-        $invoice->is_code_validated = true;
-        $invoice->save();
-        
-        if( $invoice->year == 2018 ) {
-            clearLastTaxesCache($invoice->company->id, 2018);
-        }
-        clearInvoiceCache($invoice);
-        
-        return redirect('/facturas-emitidas/validaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido validada');
-    }
-    
-    /**
-     * Despliega las facturas que requieren validación de códigos
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function indexValidacionesLinea()
-    {
-        $current_company = currentCompany()->id;
-        $items = InvoiceItem::with('bill')
-                  ->where('company_id', $company)
-                  ->whereNull('iva_type')->paginate(10);
-                  
-        return view('Invoice/index-validaciones-linea', [
-          'invoices' => $invoices
-        ]);
     }
 
     /**
@@ -406,11 +350,17 @@ class InvoiceController extends Controller
                     
                 }
             }catch( \ErrorException $ex ){
-                return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila. '.$i.'. Mensaje:' . $ex->getMessage());
+                return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila: '.$i);
+                Log::error('Error importando Excel' . $ex->getMessage());
             }catch( \InvalidArgumentException $ex ){
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
+                Log::error('Error importando Excel' . $ex->getMessage());
             }catch( \Exception $ex ){
-                return back()->withError( 'Ha ocurrido un error al subir su archivo. Error en la fila. '.$i.'. Mensaje:' . $ex->getMessage());
+                return back()->withError( 'Ha ocurrido un error al subir su archivo. Error en la fila. '.$i);
+                Log::error('Error importando Excel' . $ex->getMessage());
+            }catch( \Throwable $ex ){
+                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i);
+                Log::error('Error importando Excel' . $ex->getMessage());
             }
             
             $company->save();
@@ -443,10 +393,16 @@ class InvoiceController extends Controller
                     $json = json_encode( $xml ); // convert the XML string to JSON
                     $arr = json_decode( $json, TRUE );
                     
+                    $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
+                    $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
                     $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                    
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $arr['Emisor']['Identificacion']['Numero'] ) ) {
-                        $this->saveInvoice( $arr, 'XML' );
+                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
+                        //Registra el XML. Si todo sale bien, lo guarda en S3
+                        if( $this->saveInvoiceXML( $arr, 'XML' ) ) {
+                            $this->storeXMLEmitido( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
+                        }
                     }else{
                         return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
                     }
@@ -467,7 +423,53 @@ class InvoiceController extends Controller
         
     }
     
-    public function saveInvoice( $arr, $metodoGeneracion ) {
+    public function receiveEmailInvoices(Request $request) {
+        $file = $request->file('attachment1');
+        
+        try {  
+            Log::info( "Se recibió una factura de compra por correo electrónico." );
+            $xml = simplexml_load_string( file_get_contents($file) );
+            $json = json_encode( $xml ); // convert the XML string to JSON
+            $arr = json_decode( $json, TRUE );
+            
+            $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
+            $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+            $consecutivoComprobante = $arr['NumeroConsecutivo'];
+            
+            if( $this->saveInvoiceXML( $arr, 'Email' ) ) {
+                $this->storeXMLRecibido( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
+            }
+            
+            return response()->json([
+                'success' => 'Exito'
+            ], 200);
+            
+        }catch( \Exception $ex ){
+            Log::error( "Hubo un error al guardar la factura. Mensaje:" . $ex->getMessage());
+            return 500;
+        }catch( \Throwable $ex ){
+            Log::error( "Hubo un error al guardar la factura. Mensaje:" . $ex->getMessage());
+            return 500;
+        }
+        
+    }
+    
+    public function storeXMLEmitido($file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor) {
+        
+        if ( Storage::exists("empresa-$identificacionEmisor/$identificacionReceptor-$consecutivoComprobante.xml")) {
+            Storage::delete("empresa-$identificacionEmisor/$identificacionReceptor-$consecutivoComprobante.xml");
+        }
+        
+        $path = \Storage::putFileAs(
+            "empresa-$identificacionEmisor", $file, "$identificacionReceptor-$consecutivoComprobante.xml"
+        );
+        
+        return $path;
+        
+    }
+    
+    
+    public function saveInvoiceXML( $arr, $metodoGeneracion ) {
         $inserts = array();
         
         $claveFactura = $arr['Clave'];
@@ -531,5 +533,112 @@ class InvoiceController extends Controller
         
         InvoiceItem::insert($inserts);
     }
+    
+    /**
+     * Despliega las facturas que requieren validación de códigos
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexValidaciones()
+    {
+        $current_company = currentCompany();
+        $invoices = Invoice::where('company_id', $current_company)
+                    ->where('is_void', false)
+                    ->where('is_totales', false)
+                    ->where('is_code_validated', false)
+                    ->where('is_authorized', true)
+                    ->orderBy('generated_date', 'DESC')
+                    ->orderBy('reference_number', 'DESC')->paginate(10);
+        return view('Invoice/index-validaciones', [
+          'invoices' => $invoices
+        ]);
+    }
+    
+    public function confirmarValidacion( Request $request, $id )
+    {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        
+        $tipoIva = $request->tipo_iva;
+        foreach( $invoice->items as $item ) {
+            $item->iva_type = $request->tipo_iva;
+            $item->save();
+        }
+        
+        $invoice->is_code_validated = true;
+        $invoice->save();
+        
+        if( $invoice->year == 2018 ) {
+            clearLastTaxesCache($invoice->company->id, 2018);
+        }
+        clearInvoiceCache($invoice);
+        
+        return redirect('/facturas-emitidas/validaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido validada');
+    }
+    
+    
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexAuthorize()
+    {
+        return view('Invoice/index-autorizaciones');
+    }
+    
+    /**
+     * Returns the required ajax data.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexDataAuthorize() {
+        $current_company = currentCompany();
+
+        $query = Invoice::where('invoices.company_id', $current_company)
+        ->where('is_void', false)
+        ->where('is_authorized', false)
+        ->where('is_totales', false)
+        ->with('client');
+        
+        return datatables()->eloquent( $query )
+            ->orderColumn('reference_number', '-reference_number $1')
+            ->addColumn('actions', function($invoice) {
+                return view('Invoice.ext.auth-actions', [
+                    'id' => $invoice->id
+                ])->render();
+            }) 
+            ->editColumn('client', function(Invoice $invoice) {
+                return $invoice->client->fullname;
+            })
+            ->editColumn('generated_date', function(Invoice $invoice) {
+                return $invoice->generatedDate()->format('d/m/Y');
+            })
+            ->rawColumns(['actions'])
+            ->toJson();
+    }
+    
+    public function authorizeInvoice ( Request $request, $id )
+    {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        
+        if ( $request->autorizar ) {
+            $invoice->is_authorized = true;
+            $invoice->save();
+            return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido autorizada');
+        }else {
+            $invoice->is_authorized = false;
+            $invoice->is_void = true;
+            InvoiceItem::where('invoice_id', $invoice->id)->delete();
+            $invoice->delete();
+            return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido rechazada');
+        }
+        
+        
+    }
+    
+    
+    
     
 }

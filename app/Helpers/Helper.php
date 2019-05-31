@@ -141,29 +141,13 @@ if (!function_exists('userCompanies')) {
 if (!function_exists('currentCompany')) {
 
     function currentCompany() {
-    
-        $current_company = session('current_company');
         
         $user = auth()->user();
         if ( !$user->companies->count() ) {
-            auth()->user()->addCompany();
-        }else {
-            $company_id = auth()->user()->companies->first()->id;
-            session(['current_company' => $company_id]);
-            return $company_id;
+            return auth()->user()->addCompany();
         }
-
-        if ( !$current_company ) {
-            
-            if ($user->companies->first()) {
-                $company_id = auth()->user()->companies->first()->id;
-                session(['current_company' => $company_id]);
-                $current_company = $company_id;
-            }
-            
-        }
-
-        return $current_company;
+        
+        return $user->currentTeam->company->id;
     }
 
 }
@@ -172,16 +156,20 @@ if (!function_exists('currentCompanyModel')) {
 
     function currentCompanyModel() {
 
-        $current_company = currentCompany();
-        $company = App\Company::find($current_company);
+        $user = auth()->user();
+        if ( !$user->companies->count() ) {
+            auth()->user()->addCompany();
+        }
+        
+        $company = $user->currentTeam->company;
         
         if ( !$company ) {
-            $current_company = auth()->user()->companies->first()->id;
-            session( ['current_company' => $current_company] );
-            $company = App\Company::find($current_company);
+            $companyId = auth()->user()->companies->first()->id;
+            session( ['current_company' => $companyId] );
+            $company = App\Company::find($companyId);
         }
 
-        return ( $current_company ) ? $company : false;
+        return $company;
     }
 
 }
@@ -264,26 +252,7 @@ if (!function_exists('getCurrentUserSubscriptions')) {
         $subscriptions = App\Subscription::where('user_id', $user_id)->where('status', '1')->get();
         
         return $subscriptions;
-        /*
-        if ( !empty($plans->toArray()) ) {
-            $data = array();
-            foreach ($suscriptions as $row) {
-
-                $company_registered_on_plan = \App\Company::where(array('user_id' => $user_id, 'plan_no' => $row->unique_no))->count();
-
-                if ($company_registered_on_plan > 0) {
-                    if (($company_registered_on_plan < $row->no_of_companies) || empty($row->no_of_companies)) {//If no. of companies is unlimited
-                        $data[] = $row->unique_no;
-                    }
-                } else {
-                    $data[] = $row->unique_no;
-                }
-            }
-
-            return $data;
-        } else {
-            return false;
-        }*/
+        
     }
 
 }

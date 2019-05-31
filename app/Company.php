@@ -48,6 +48,11 @@ class Company extends Model {
             return false;
         }
     }
+    
+    //Relación con el equipo
+    public function team() {
+        return $this->hasOne(Team::class);
+    }
 
     //Relación con Usuario
     public function owner() {

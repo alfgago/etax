@@ -15,6 +15,7 @@
               <th data-priority="3">Nombre</th>
               <th>Correo</th>
               <th>Fecha</th>
+              <th>Suscripción</th>
               <th>Empresas</th>
             </tr>
           </thead>
@@ -26,6 +27,11 @@
                   <td>{{ $data->first_name }} {{ $data->last_name }} {{ $data->last_name2 }}</td>
                   <td>{{ $data->email }}</td>
                   <td>{{ $data->created_at }}</td>
+                  <td>
+                  	@foreach ( $data->subscriptions as $s )
+                  		{{ $s->plan->plan_type }} {{ $s->plan->plan_tier }}<br>
+                  	@endforeach
+                  </td>
                   <td>
                   	@foreach ( $data->companies as $c )
                   		{{ $c->name }} ( {{ $c->business_name }} )<br>

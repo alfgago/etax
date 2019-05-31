@@ -58,7 +58,7 @@ class CreateBillsTable extends Migration
           
             $table->boolean('is_void')->default(false);
             $table->boolean('is_totales')->default(false);
-            //Cuando se recibe la factura automáticamente por email, entra como no autorizada hasta que el usuario confirme. No debería marcarse como autorizada hasta que el status sea aceptado o parcialmente aceptado.
+            //Cuando se recibe la factura automáticamente por email, entra como no autorizada hasta que el usuario confirme. No es lo mismo que el status de aceptado
             $table->boolean('is_authorized')->default(true); 
             //Cuando se ingresa via XML o Email, tienen que validar que el código eTax esté correcto.
             $table->boolean('is_code_validated')->default(true); 
