@@ -252,7 +252,7 @@ class UserController extends Controller {
         
         $nombre = $sub->plan->getName();
         
-        return redirect('/')->withMessage("Su cuenta ha sido creada con el plan $nombre");
+        return redirect('payment-crear');
     }
     
     

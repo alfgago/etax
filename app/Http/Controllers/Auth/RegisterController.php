@@ -69,7 +69,7 @@ use RegistersUsers;
                     'first_name' => $data['first_name'],
                     'last_name' => $data['last_name'],
                     'last_name2' => $data['last_name2'],
-                    'password' => Hash::make($data['password']),
+                    'password' => Hash::make($data['password'])
         ]);
 
         $user->assignRole(array('Subscriber'));
