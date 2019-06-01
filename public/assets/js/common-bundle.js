@@ -341,6 +341,15 @@ toastr.options = {
     
     if( precio_unitario && cantidad ){
       var subtotal = cantidad * precio_unitario;
+      
+      var discount = parseFloat( $('#discount').val() );
+      var discount_type = $('#discount_type').val();
+      if( discount_type == "01" && discount > 0 ) {
+        subtotal = subtotal - ( subtotal * (discount / 100) );
+      }else {
+        subtotal = subtotal - discount;
+      }
+      
       $('#item_subtotal').val( subtotal );
       if( $('#porc_iva').val().length ){
         monto_iva = subtotal * porc_iva / 100;
@@ -365,6 +374,15 @@ toastr.options = {
     
     if( precio_unitario && cantidad ){
       var subtotal = cantidad * precio_unitario;
+      
+      var discount = parseFloat( $('#discount').val() );
+      var discount_type = $('#discount_type').val();
+      if( discount_type == "01" && discount > 0 ) {
+        subtotal = subtotal - ( subtotal * (discount / 100) );
+      }else {
+        subtotal = subtotal - discount;
+      }
+      
       $('#item_subtotal').val( subtotal );
       if( monto_iva ){
         $('#item_total').val( subtotal + monto_iva );
@@ -435,8 +453,8 @@ toastr.options = {
     var precio_unitario = $('#precio_unitario').val();
     var porc_identificacion_plena = $('#porc_identificacion_plena').val();
     var is_identificacion_especifica = $('#is_identificacion_especifica:checked').length;
-    var descuento = '';
-    var razon_descuento = '';
+    var descuento = $('#discount').val();
+    var tipo_descuento = $('#discount_type').val();
     var tipo_iva = $('#tipo_iva').val();
     var tipo_iva_text = $('#tipo_iva :selected').text();
     var porc_iva = $('#porc_iva').val();
@@ -462,21 +480,41 @@ toastr.options = {
       }
       var row_id  = "item-tabla-"+numero;
       
+      var inputFields = "<div class='hidden'>" +
+                   "<input type='hidden' class='numero' name='items["+index+"][item_number]' value='"+(numero+1)+"'>" + 
+                   "<input class='item_id' type='hidden' name='items["+index+"][id]' value='"+item_id+"'>" +
+                   "<input type='hidden' class='codigo' name='items["+index+"][code]' value='"+codigo+"'>" +
+                   "<input type='hidden' class='nombre' name='items["+index+"][name]' value='"+nombre+"'>" +
+                   "<input type='hidden' class='tipo_producto' name='items["+index+"][product_type]' value='"+tipo_producto+"'>" +
+                   "<input type='hidden' class='cantidad' name='items["+index+"][item_count]' value='"+cantidad+"'>" +
+                   "<input type='hidden' class='unidad_medicion' name='items["+index+"][measure_unit]' value='"+unidad_medicion+"'>" +
+                   "<input type='hidden' class='precio_unitario' name='items["+index+"][unit_price]' value='"+precio_unitario+"'>" +
+                   "<input type='hidden' class='tipo_iva' name='items["+index+"][iva_type]' value='"+tipo_iva+"'>" +
+                   "<input type='hidden' class='porc_identificacion_plena' name='items["+index+"][porc_identificacion_plena]' value='"+porc_identificacion_plena+"'>" + 
+                   "<input type='hidden' class='discount_type' name='items["+index+"][discount_type]' value='"+tipo_descuento+"'>" + 
+                   "<input type='hidden' class='discount' name='items["+index+"][discount]' value='"+descuento+"'>" +
+                   "<input type='hidden' class='subtotal' name='items["+index+"][subtotal]' value='"+subtotal+"'>" +
+                   "<input type='hidden' class='porc_iva' name='items["+index+"][iva_percentage]' value='"+porc_iva+"'>" +
+                   "<input type='hidden' class='monto_iva' name='items["+index+"][iva_amount]' value='"+monto_iva+"'> " +
+                   "<input type='hidden' class='total' name='items["+index+"][total]' value='"+total+"'>" +
+                   "<input type='hidden' class='is_identificacion_especifica' name='items["+index+"][is_identificacion_especifica]' value='"+is_identificacion_especifica+"'>" +
+                   "</div>"
+                   ;
+      
       //Crea la fila en la tabla
-      var htmlCols = "<td><span class='numero-fila'>"+(numero+1)+"</span><input type='hidden' class='numero' name='items["+index+"][item_number]' value='"+(numero+1)+"'> <input class='item_id' type='hidden' name='items["+index+"][id]' value='"+item_id+"'> </td>";
-        htmlCols += "<td>"+codigo+" <input type='hidden' class='codigo' name='items["+index+"][code]' value='"+codigo+"'></td>";
-        htmlCols += "<td>"+nombre+" <input type='hidden' class='nombre' name='items["+index+"][name]' value='"+nombre+"'></td>";
-        htmlCols += "<td>"+tipo_producto+" <input type='hidden' class='tipo_producto' name='items["+index+"][product_type]' value='"+tipo_producto+"'></td>";
-        htmlCols += "<td>"+cantidad+" <input type='hidden' class='cantidad' name='items["+index+"][item_count]' value='"+cantidad+"'></td>";
-        htmlCols += "<td>"+unidad_medicion+" <input type='hidden' class='unidad_medicion' name='items["+index+"][measure_unit]' value='"+unidad_medicion+"'></td>";
-        htmlCols += "<td>"+ fixComas(precio_unitario) +" <input type='hidden' class='precio_unitario' name='items["+index+"][unit_price]' value='"+precio_unitario+"'></td>";
-        htmlCols += "<td>"+tipo_iva_text+" <input type='hidden' class='tipo_iva' name='items["+index+"][iva_type]' value='"+tipo_iva+"'> <input type='hidden' class='porc_identificacion_plena' name='items["+index+"][porc_identificacion_plena]' value='"+porc_identificacion_plena+"'></td>";
-        htmlCols += "<td>"+ fixComas(subtotal) +" <input class='subtotal' type='hidden' name='items["+index+"][subtotal]' value='"+subtotal+"'></td>";
-        htmlCols += "<td>"+ fixComas(monto_iva) +" <input class='porc_iva' type='hidden' name='items["+index+"][iva_percentage]' value='"+porc_iva+"'> <input class='monto_iva' type='hidden' name='items["+index+"][iva_amount]' value='"+monto_iva+"'> </td>";
-        htmlCols += "<td>"+ fixComas(total) +" <input class='total' type='hidden' name='items["+index+"][total]' value='"+total+"'> <input class='is_identificacion_especifica' type='hidden' name='items["+index+"][is_identificacion_especifica]' value='"+is_identificacion_especifica+"'> </td>";
+      var htmlCols = "<td><span class='numero-fila'>"+(numero+1)+"</span> </td>";
+        htmlCols += "<td>"+codigo + inputFields + " </td>";
+        htmlCols += "<td>"+nombre+" </td>";
+        htmlCols += "<td>"+tipo_producto+" </td>";
+        htmlCols += "<td>"+cantidad+" </td>";
+        htmlCols += "<td>"+unidad_medicion+" </td>";
+        htmlCols += "<td>"+ fixComas(precio_unitario) +" </td>";
+        htmlCols += "<td>"+tipo_iva_text+"  </td>";
+        htmlCols += "<td>"+ fixComas(subtotal) +" </td>";
+        htmlCols += "<td>"+ fixComas(monto_iva) +" </td>";
+        htmlCols += "<td>"+ fixComas(total) +"   </td>";
         htmlCols += "<td class='acciones'><span class='btn-editar-item text-success mr-2' title='Editar linea' onclick='abrirPopup(\"linea-popup\");cargarFormItem("+index+");'> <i class='fa fa-pencil' aria-hidden='true'></i> </span> <span title='Eliminar linea' onclick='eliminarItem("+index+");' class='btn-eliminar-item text-danger mr-2'> <i class='fa fa-trash-o' aria-hidden='true'></i> </span> </td>";
 
-      
       if( !itemExistente ) {
         var htmlRow = "<tr class='item-tabla item-index-"+index+"' index='"+index+"' attr-num='"+numero+"' id='"+row_id+"' > " + htmlCols + "</tr>";
         $('#tabla-items-factura tbody').append(htmlRow);
@@ -537,6 +575,8 @@ toastr.options = {
     $('#codigo').val( item.find('.codigo ').val() );
     $('#nombre').val( item.find('.nombre ').val() );
     $('#tipo_producto').val( item.find('.tipo_producto ').val() );
+    $('#discount').val( item.find('.discount ').val() );
+    $('#discount_type').val( item.find('.discount_type ').val() );
     $('#cantidad').val( item.find('.cantidad ').val() );
     $('#unidad_medicion').val( item.find('.unidad_medicion ').val() );
     $('#precio_unitario').val( item.find('.precio_unitario ').val() );
@@ -617,7 +657,7 @@ $( document ).ready(function() {
 
   if( $("#tabla-items-factura").length ) {
   
-    $('#cantidad, #precio_unitario').on('keyup', function(){
+    $('#cantidad, #precio_unitario, #discount, #discount_type').on('keyup', function(){
       calcularSubtotalItem();
     });
   
