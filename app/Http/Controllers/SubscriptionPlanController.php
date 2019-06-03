@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\User;
 use App\SubscriptionPlan;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\UsersExport;
 
 class SubscriptionPlanController extends Controller
 {
@@ -96,6 +98,10 @@ class SubscriptionPlanController extends Controller
         return view('Subscriptions/all', [
           'users' => $users
         ]);
+    }
+    
+    public function exportar() {
+        return Excel::download(new UsersExport(), 'usuarios.xlsx');
     }
     
 }
