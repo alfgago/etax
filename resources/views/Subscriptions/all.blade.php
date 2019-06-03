@@ -4,6 +4,10 @@
   	Todos los usuarios
 @endsection
 
+@section('breadcrumb-buttons')
+    <a href="/private/exportar" class="btn btn-primary">Exportar usuarios</a>
+@endsection 
+
 @section('content') 
 <div class="row">
   <div class="col-md-12">
