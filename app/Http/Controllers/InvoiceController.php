@@ -400,8 +400,8 @@ class InvoiceController extends Controller
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3
-                        if( $this->saveInvoiceXML( $arr, 'XML' ) ) {
-                            $this->storeXMLEmitido( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
+                        if( Invoice::saveInvoiceXML( $arr, 'XML' ) ) {
+                            Invoice::storeXML( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
                         }
                     }else{
                         return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
@@ -415,42 +415,11 @@ class InvoiceController extends Controller
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
         }catch( \Throwable $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido,');
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
         }
         
         return redirect('/facturas-emitidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
-        
-    }
-    
-    public function receiveEmailInvoices(Request $request) {
-        $file = $request->file('attachment1');
-        
-        try {  
-            Log::info( "Se recibió una factura de compra por correo electrónico." );
-            $xml = simplexml_load_string( file_get_contents($file) );
-            $json = json_encode( $xml ); // convert the XML string to JSON
-            $arr = json_decode( $json, TRUE );
-            
-            $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
-            $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-            $consecutivoComprobante = $arr['NumeroConsecutivo'];
-            
-            if( $this->saveInvoiceXML( $arr, 'Email' ) ) {
-                $this->storeXMLRecibido( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
-            }
-            
-            return response()->json([
-                'success' => 'Exito'
-            ], 200);
-            
-        }catch( \Exception $ex ){
-            Log::error( "Hubo un error al guardar la factura. Mensaje:" . $ex->getMessage());
-            return 500;
-        }catch( \Throwable $ex ){
-            Log::error( "Hubo un error al guardar la factura. Mensaje:" . $ex->getMessage());
-            return 500;
-        }
         
     }
     
