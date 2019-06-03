@@ -351,10 +351,10 @@ class BillController extends Controller
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
         }catch( \Exception $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Mensaje:' . $ex->getMessage());
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
             Log::error('Error importando Excel' . $ex->getMessage());
         }catch( \Throwable $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Mensaje:' . $ex->getMessage());
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
             Log::error('Error importando Excel' . $ex->getMessage());
         }
         

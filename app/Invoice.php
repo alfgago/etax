@@ -8,6 +8,7 @@ use App\InvoiceItem;
 use App\Client;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Invoice extends Model
 {
@@ -379,7 +380,7 @@ class Invoice extends Model
     }
     
     
-    public function saveInvoiceXML( $arr, $metodoGeneracion ) {
+    public static function saveInvoiceXML( $arr, $metodoGeneracion ) {
         $inserts = array();
         
         $claveFactura = $arr['Clave'];
@@ -442,10 +443,12 @@ class Invoice extends Model
         }
         
         InvoiceItem::insert($inserts);
+        
+        return true;
     }
     
     
-    public function storeXML($file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor) {
+    public static function storeXML($file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor) {
         
         if ( Storage::exists("empresa-$identificacionEmisor/$identificacionReceptor-$consecutivoComprobante.xml")) {
             Storage::delete("empresa-$identificacionEmisor/$identificacionReceptor-$consecutivoComprobante.xml");
@@ -456,6 +459,8 @@ class Invoice extends Model
         );
         
         return $path;
+        
+        dd($path);
         
     }
     

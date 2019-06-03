@@ -8,6 +8,7 @@ use App\BillItem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Kyslik\ColumnSortable\Sortable;
+use Illuminate\Support\Facades\Storage;
 
 class Bill extends Model
 {
@@ -389,7 +390,7 @@ class Bill extends Model
       
     }
     
-    public function saveBillXML( $arr, $metodoGeneracion ) {
+    public static function saveBillXML( $arr, $metodoGeneracion ) {
         $inserts = array();
         
         $claveFactura = $arr['Clave'];
@@ -457,7 +458,7 @@ class Bill extends Model
     }
     
     
-    public function storeXML($file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor) {
+    public static function storeXML($file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor) {
         
         if ( Storage::exists("empresa-$identificacionReceptor/$identificacionEmisor-$consecutivoComprobante.xml")) {
             Storage::delete("empresa-$identificacionReceptor/$identificacionEmisor-$consecutivoComprobante.xml");
