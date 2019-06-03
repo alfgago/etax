@@ -15,7 +15,8 @@
       	<table id="invoice-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
-              <th data-priority="3">Nombre</th>
+              <th data-priority="">Id</th>
+              <th data-priority="">Nombre</th>
               <th>Correo</th>
               <th>Fecha</th>
               <th>Suscripción</th>
@@ -26,6 +27,7 @@
             @if ( $users->count() )
               @foreach ( $users as $data )
                 <tr>
+                  <td>{{ $data->id }}</td>
                   <td>{{ $data->first_name }} {{ $data->last_name }} {{ $data->last_name2 }}</td>
                   <td>{{ $data->email }}</td>
                   <td>{{ $data->created_at }}</td>

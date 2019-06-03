@@ -172,3 +172,8 @@ Route::post('purchase', 'PlanController@purchase')->name('plans.purchase');
 Route::get('plans/switch-plan/{plan}/{newPlan}', 'PlanController@switchPlan')->name('plans.switch-plan');
 
 Route::get('/private/all', 'SubscriptionPlanController@all')->name('subscriptions.all');
+Route::get('/private/exportar', 'SubscriptionPlanController@exportar')->name('subscriptions.exportar');
+
+
+Route::get('/admin/impersonate/{id}', 'UserController@impersonate');
+Route::get('/admin/leave', 'UserController@leaveImpersonation');
