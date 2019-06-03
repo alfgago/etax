@@ -11,7 +11,6 @@
       	<table id="invoice-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
-              <th data-priority="2">Cedula</th>
               <th data-priority="3">Nombre</th>
               <th>Correo</th>
               <th>Fecha</th>
@@ -23,7 +22,6 @@
             @if ( $users->count() )
               @foreach ( $users as $data )
                 <tr>
-                  <td>{{ $data->id_number }}</td>
                   <td>{{ $data->first_name }} {{ $data->last_name }} {{ $data->last_name2 }}</td>
                   <td>{{ $data->email }}</td>
                   <td>{{ $data->created_at }}</td>
