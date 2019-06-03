@@ -342,5 +342,21 @@ class UserController extends Controller {
         return redirect()->back()->withMessage('La información del usuario $user->email ha sido actualizada');
         
     }
+    
+    public function impersonate( $id ) {
+        
+        $user = User::findOrFail($id);
+        
+        Auth::user()->impersonate($user);
+        return redirect( '/' );
+        
+    }
+    
+    public function leaveImpersonation( ) {
+        
+        Auth::user()->leaveImpersonation();
+        return redirect( '/' );
+        
+    }
 
 }

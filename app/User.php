@@ -7,12 +7,14 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
 use Mpociot\Teamwork\Traits\UserHasTeams;
+use Lab404\Impersonate\Models\Impersonate;
 
 class User extends Authenticatable {
 
     use Notifiable;
     use HasRoles;
     use UserHasTeams;
+    use Impersonate;
 
     /**
      * The attributes that are mass assignable.
@@ -47,6 +49,11 @@ class User extends Authenticatable {
 
     public function subscriptions() {
         return $this->hasMany(Subscription::class);
+    }
+    
+    public function canImpersonate()
+    {
+        return $this->user_name == "alfgago";
     }
 
     public function addCompany() {
