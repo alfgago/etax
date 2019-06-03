@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Utils\BridgeHaciendaApi;
 use \Carbon\Carbon;
 use App\Invoice;
 use App\InvoiceItem;
@@ -174,6 +175,7 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
+        Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
         $request->validate([
             'subtotal' => 'required',
             'items' => 'required',
@@ -210,28 +212,39 @@ class InvoiceController extends Controller
      */
     public function sendHacienda(Request $request)
     {
-        return redirect()->back()->withMessage("Funcionalidad de facturación electrónica habilitada muy pronto.");
-        
+        Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
+        $request->validate([
+            'subtotal' => 'required',
+            'items' => 'required',
+        ]);
+
+        $apiHacienda = new BridgeHaciendaApi();
+        $tokenApi = $apiHacienda->login();
+        dd($tokenApi);
+
         $invoice = new Invoice();
         $company = currentCompanyModel();
         $invoice->company_id = $company->id;
 
         //Datos generales y para Hacienda
         $invoice->document_type = "01";
+        $invoice->hacienda_status = "01";
         $invoice->payment_status = "01";
         $invoice->payment_receipt = "";
-        $invoice->generation_method = "ETAX";
+        $invoice->generation_method = "M";
         $invoice->reference_number = $company->last_invoice_ref_number + 1;
-        
-        $invoice->setInvoiceData($request);
-        
-        
+
+        $invoiceData = $invoice->setInvoiceData($request);
+        if (!empty($invoiceData)) {
+            dd('enviar hacienda');
+        }
+
         $company->last_invoice_ref_number = $invoice->reference_number;
         $company->last_document = $invoice->document_number;
         $company->save();
-        
+
         clearInvoiceCache($invoice);
-      
+
         return redirect('/facturas-emitidas');
     }
 

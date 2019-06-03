@@ -519,3 +519,35 @@ if (!function_exists('get_microtime')) {
         return ((float) $usec + (float)$sec);
     }
 }
+
+/* Get Document Key */
+if (!function_exists('getDocumentKey')) {
+    function getDocumentKey($docType, $ref = null) {
+        $company = currentCompanyModel();
+        $invoice = new \App\Invoice();
+        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).getDocReference($docType).
+            '1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
+        return $key;
+    }
+}
+
+/* Get Document Reference */
+if (!function_exists('getDocReference')) {
+    function getDocReference($docType, $ref = null)
+    {
+        $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;
+        $consecutive = "001" . "00001" . $docType . substr("0000000000" . $lastSale, -10);
+
+        return $consecutive;
+    }
+}
+
+/* Get Invoice Reference */
+if (!function_exists('getInvoiceReference')) {
+    function getInvoiceReference($ref)
+    {
+        $lastSale = substr($ref, -10);
+        $lastSale = (int)$lastSale;
+        return $lastSale;
+    }
+}

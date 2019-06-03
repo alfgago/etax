@@ -74,7 +74,7 @@
     
     <div class="form-group col-md-3">
       <label for="cantidad">Cantidad</label>
-      <input type="number" class="form-control" id="cantidad" value="1"  >
+      <input type="number" class="form-control" id="cantidad" value="1">
     </div>
 
     <div class="form-group col-md-3">
@@ -84,7 +84,7 @@
 
     <div class="form-group col-md-3">
       <label for="item_iva">Monto IVA</label>
-      <input type="number" class="form-control" id="item_iva_amount" placeholder="" >
+      <input type="number" class="form-control" id="item_iva_amount" placeholder="">
     </div>
 
     <div class="form-group col-md-3">
@@ -97,7 +97,7 @@
 
     <div class="form-group col-md-3">
       <label for="discount">Descuento</label>
-      <input type="text" class="form-control" id="discount" value="0" >
+      <input type="number" class="form-control" id="discount" name="discount" value="0">
     </div>
 
     <div class="form-group col-md-3">

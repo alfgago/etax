@@ -19,7 +19,7 @@
 @section('content') 
 <div class="row form-container">
   <div class="col-md-12">
-      <form method="POST" action="/facturas-emitidas">
+      <form method="POST" action="/facturas-emitidas/send">
 
           @csrf
           
@@ -117,12 +117,12 @@
 
                   <div class="form-group col-md-6">
                     <label for="document_number">Número de documento</label>
-                    <input type="text" class="form-control" name="document_number" id="document_number" value="{{$document_number}}" required disabled>
+                    <input type="text" class="form-control" name="document_number" id="document_number" value="{{$document_number}}" required readonly="readonly">
                   </div>
   
                   <div class="form-group col-md-6 not-required">
                     <label for="document_key">Clave de factura</label>
-                    <input type="text" class="form-control" name="document_key" id="document_key" value="{{$document_key}}" disabled>
+                    <input type="text" class="form-control" name="document_key" id="document_key" value="{{$document_key}}" required readonly="readonly">
                   </div>
 
                   <div class="form-group col-md-4 hidden">

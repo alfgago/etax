@@ -117,15 +117,15 @@ class WizardController extends Controller
      */
     public function updateWizard(Request $request)
     {
-        
-        $company = currentCompanyModel();
-        if( $company->id_number != $request->id_number ) {
-            $request->validate([
-                'id_number' => 'required|unique:companies',
-            ]);
-        }
-          
-        try {  
+        try {
+
+            $company = currentCompanyModel();
+            if( $company->id_number != $request->id_number ) {
+                $request->validate([
+                    'id_number' => 'required|unique:companies',
+                ]);
+            }
+
             $invoice = Invoice::firstOrNew(
                 [
                     'company_id' => $company->id,
@@ -163,6 +163,8 @@ class WizardController extends Controller
             $company->default_invoice_notes = $request->default_invoice_notes;
             $company->default_vat_code = $request->default_vat_code;
             $company->last_document = $request->last_document ? $request->last_document : 0;
+            $company->last_invoice_ref_number = $request->last_document ?
+                getInvoiceReference($request->last_document) : 0;
             $company->first_prorrata = $request->first_prorrata;
             $company->first_prorrata_type = $request->first_prorrata_type;
             $company->use_invoicing = $request->use_invoicing;
