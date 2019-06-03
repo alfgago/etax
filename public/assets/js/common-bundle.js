@@ -660,6 +660,10 @@ $( document ).ready(function() {
     $('#cantidad, #precio_unitario, #discount, #discount_type').on('keyup', function(){
       calcularSubtotalItem();
     });
+    
+    $('#cantidad, #precio_unitario, #discount, #discount_type').on('change', function(){
+      calcularSubtotalItem();
+    });
   
     $('#tipo_iva').on('change', function(){
       presetPorcentaje();
