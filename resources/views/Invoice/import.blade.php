@@ -78,7 +78,7 @@
 		    <div class="descripcion">
 		    	Arrastre los archivos XML de Hacienda que haya generado desde sistemas de facturación externos. <br>
 		    	
-		    	* Utilice el formato 4.2 si su factura fue emitida antes del 1 de Julio del 2018.
+		    	* Utilice el formato 4.2 si su factura fue emitida antes del 1 de Julio del 2019.
 		    	</div>
 		  </div>
 		  

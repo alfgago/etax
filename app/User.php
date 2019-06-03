@@ -45,6 +45,10 @@ class User extends Authenticatable {
         return $this->hasMany(Company::class);
     }
 
+    public function subscriptions() {
+        return $this->hasMany(Subscription::class);
+    }
+
     public function addCompany() {
         $company = Company::create([
                     'user_id' => $this->id,
@@ -61,11 +65,8 @@ class User extends Authenticatable {
         );
         $team->company_id = $company->id;
         $team->save();
-
         $this->attachTeam($team);
 
-        session(['current_company' => $company->id]);
-        
         return $company;
     }
 

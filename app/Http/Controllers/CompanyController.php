@@ -385,20 +385,15 @@ class CompanyController extends Controller {
             return redirect()->back()->withError('Ha ocurrido un error, inténtelo de nuevo.');
         }
 
-        $company_id_no = $request->id;
-        $company = Company::where('id_number', trim($company_id_no))->first();
-
-        $url = '/';
-
-        if (!empty($company)) {
-            session(['current_company' => $company->id]);
-
-            $team = Team::where('company_id', $company->id)->first();
-
-            $url = ($request->is_edit == 1) ? '/empresas/' . $company->id . '/edit' : (($request->is_edit == 3) ? '/companies/permissions/' . $team->id : '/empresas/company-profile/' . $company->id);
+        try {
+            $companyId = $request->companyId;
+            $team = Team::where( 'company_id', $companyId )->first();
+	        auth()->user()->switchTeam( $team );
+        } catch( UserNotInTeamException $e )
+        {
+        	
         }
-
-        return $url;
+        
     }
     
     public function setProrrata2018PorFacturas() {

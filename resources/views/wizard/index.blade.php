@@ -95,6 +95,7 @@
     function checkEmptyFields(id) {
         var allow = true;
         $('.'+id+' .checkEmpty').each( function() {
+        	
     		if( $(this).val() && $(this).val() != "" ) {
     		    $(this).removeClass('isEmptyRequired');
     		}
@@ -102,9 +103,20 @@
     		    $(this).addClass('isEmptyRequired');
     		    allow = false;
     		}
+    		
+    		//Revisa que el campo de correo este correcto
+    		var email = $('#email').val();
+    		allow = validateEmail(email);
+				
+    		
     	});
     	return allow;
     }
+    
+    function validateEmail(email) {
+		  var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+		  return re.test(email);
+		}
     
     function toggleTipoProrrata() {
 	  var metodo = $("#first_prorrata_type").val();

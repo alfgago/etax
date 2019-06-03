@@ -61,18 +61,18 @@
       <div class="inline-block text-left">
         
         <div>
-            No tenés cuenta? 
+            ¿No tiene cuenta? 
             @if (Route::has('register'))
                 <a class="btn btn-link" href="{{ route('register') }}">
-                    {{ __('Registrate aquí') }}
+                    Regístrese aquí
                 </a>
             @endif
         </div>
         <div>
-          Se te olvidó la contraseña? 
+          ¿Se le olvidó la contraseña? 
           @if (Route::has('password.request'))
               <a class="btn btn-link" href="{{ route('password.request') }}">
-                  {{ __('Recuperala') }}
+                  Recupérela
               </a>
           @endif
          </div>

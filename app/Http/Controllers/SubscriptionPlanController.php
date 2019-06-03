@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use App\SubscriptionPlan;
 use Illuminate\Http\Request;
 
@@ -82,4 +83,19 @@ class SubscriptionPlanController extends Controller
     {
         //
     }
+    
+    public function all()
+    {
+        if( auth()->user()->email != "alfgago@gmail.com" ) {
+            return redirect(404);
+        }
+        
+        $users = User::paginate(10);
+        
+        
+        return view('Subscriptions/all', [
+          'users' => $users
+        ]);
+    }
+    
 }
