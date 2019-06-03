@@ -82,7 +82,7 @@ class UserController extends Controller {
         
         if( $user->id_number != $request->id_number ) {
             $request->validate([
-                'id_number' => 'required|unique:companies',
+                'id_number' => 'required|unique:users',
             ]);
         }
         
@@ -283,6 +283,64 @@ class UserController extends Controller {
        $jwt = JWT::encode($payload, $key);
        
        return $jwt;
+    }
+    
+    
+    public function adminEdit( $email ) {
+        
+        if( auth()->user()->user_name != "alfgago" ) {
+            return redirect(404);
+        }
+        
+        $user = User::where('user_name', $email)->first();
+        
+        return view('users.edit-admin', compact('user'));
+        
+        
+    }
+
+    public function updateAdmin(Request $request, $id) {
+        //Edita al usuario logueado.
+        if( auth()->user()->user_name != "alfgago" ) {
+            return redirect(404);
+        }
+        
+        $user = User::findOrFail($id);
+        
+        $this->validate($request, [
+            'first_name' => 'required',
+        ]);
+        
+        if( $user->id_number != $request->id_number ) {
+            $request->validate([
+                'id_number' => 'required|unique:users',
+            ]);
+        }
+        
+        if( $user->user_name != $request->user_name ) {
+            $request->validate([
+                'user_name' => 'required|unique:users',
+            ]);
+        }
+        
+        $user->id_number = preg_replace("/[^0-9]+/", "", $request->id_number);
+        $user->user_name = $request->user_name;
+        $user->first_name = $request->first_name;
+        $user->last_name = $request->last_name;
+        $user->last_name2 = $request->last_name2;
+        $user->email = $request->email;
+        $user->country = $request->country;
+        $user->state = ($request->state != '0') ? $request->state : NULL;
+        $user->city = ($request->city != '0') ? $request->city : NULL;
+        $user->district = ($request->district != '0') ? $request->district : NULL;
+        $user->neighborhood = $request->neighborhood;
+        $user->zip = $request->zip;
+        $user->address = $request->address;
+        $user->phone = $request->phone;
+        $user->save();
+        
+        return redirect()->back()->withMessage('La información del usuario $user->email ha sido actualizada');
+        
     }
 
 }
