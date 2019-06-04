@@ -2,17 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use \Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Company;
 use App\Invoice;
-use App\User;
 use App\AtvCertificate;
 use App\Team;
-use App\Subscription;
 use App\CalculatedTax;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Http\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -191,31 +186,38 @@ class WizardController extends Controller
 
             clearLastTaxesCache($company->id, 2018);
 
-            if ($company->use_invoicing) {
-                if( $request->file('cert') ) {
-                    $id_number = $company->id_number;
-                    $id_company = $company->id;
-                    if (Storage::exists("empresa-$id_number/cert.p12")) {
-                        Storage::delete("empresa-$id_number/cert.p12");
-                    }
-    
-                    $path = \Storage::putFileAs(
-                        "empresa-$id_number", $request->file('cert'), "cert.p12"
-                    );
-    
-                    $cert = AtvCertificate::firstOrNew(
-                        [
-                            'company_id' => $id_company,
-                        ]
-                    );
-    
-                    $cert->user = $request->user;
-                    $cert->password = $request->password;
-                    $cert->key_url = $path;
-                    $cert->pin = $request->pin;
-    
-                    $cert->save();
+            if ($company->use_invoicing && $request->file('cert')) {
+
+                $id_number = $company->id_number;
+                $id_company = $company->id;
+                if (Storage::exists("empresa-$id_number/cert.p12")) {
+                    Storage::delete("empresa-$id_number/cert.p12");
                 }
+
+                $pathCert = Storage::putFileAs(
+                    "empresa-$id_number", $request->file('cert'), "cert.p12"
+                );
+
+                $pathLogo = Storage::putFileAs(
+                    "empresa-$id_number", $request->file('input_logo'),
+                    "logo.".$request->file('input_logo')->getClientOriginalExtension()
+                );
+
+
+                $cert = AtvCertificate::firstOrNew(
+                    [
+                        'company_id' => $id_company,
+                    ]
+                );
+
+                $cert->user = $request->user;
+                $cert->password = $request->password;
+                $cert->key_url = $pathCert;
+                $cert->pin = $request->pin;
+                $cert->save();
+
+                $company->logo_url = $pathLogo;
+                $company->save();
             }
 
             if ($company->first_prorrata_type == 1) {

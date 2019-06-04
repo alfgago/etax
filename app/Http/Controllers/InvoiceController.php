@@ -175,7 +175,7 @@ class InvoiceController extends Controller
         $invoice->hacienda_status = "01";
         $invoice->payment_status = "01";
         $invoice->payment_receipt = "";
-        $invoice->generation_method = "M";
+        $invoice->generation_method = "etax";
         $invoice->reference_number = $company->last_invoice_ref_number + 1;
 
         $invoiceData = $invoice->setInvoiceData($request);
