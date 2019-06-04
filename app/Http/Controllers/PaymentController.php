@@ -65,9 +65,9 @@ class PaymentController extends Controller
         $matches = array();
         $pattern = "#^(?:".implode("|", $cards).")$#";
         $result = preg_match($pattern, str_replace(" ", "", $cc), $matches);
-        if($extra_check && $result > 0){
+        /*if($extra_check && $result > 0){
             $result = (validatecard($cc))?1:0;
-        }
+        }*/
         return ($result>0)?$names[sizeof($matches)-2]:false;
     }
 
@@ -89,6 +89,8 @@ class PaymentController extends Controller
             } else {
                 $descuento = 0;
             }
+        }else{
+            $descuento = 0;
         }
         $planSelected = $request->planSelected;
         switch ($planSelected) {
@@ -120,7 +122,7 @@ class PaymentController extends Controller
             $request->number
         );
         foreach($cards as $c){
-            $check = check_cc($c, true);
+            $check = $this->check_cc($c, true);
             if($check!==false){
                 $TypeCard = $check;
             }else{
@@ -129,18 +131,18 @@ class PaymentController extends Controller
         }
         switch ($TypeCard){
             case "Visa":
-                $CardType = 001;
+                $CardType = '001';
                 break;
             case "Mastercard":
-                $CardType = 002;
+                $CardType = '002';
                 break;
             case "American Express":
-                $CardType = 003;
+                $CardType = '003';
                 break;
         }
         /**************************************************************/
         // Before using this example, you can use your own reference code for the transaction.
-        $referenceCode = 'your_merchant_reference_code';
+        $referenceCode = 5;
 
         $client = new CybsSoapClient();
         $requestClient = $client->createRequest($referenceCode);
@@ -150,18 +152,38 @@ class PaymentController extends Controller
         $paySubscriptionCreateService = new stdClass();
         $paySubscriptionCreateService->run = 'true';
         $requestClient->paySubscriptionCreateService = $paySubscriptionCreateService;
+        $requestClient->deviceFingerPrintID = $request->deviceFingerPrintID;
 
         $billTo = new stdClass();
-        $billTo->firstName = $request->first-name;
-        $billTo->lastName = $request->last-name;
+        $billTo->firstName = $request->first_name;
+        $billTo->lastName = $request->last_name;
         $billTo->street1 = $request->street1;
         $billTo->city = $request->city;
         $billTo->state = $request->state;
         $billTo->postalCode = $request->postalCode;
         $billTo->country = $request->country;
         $billTo->email = $request->email;
-        $billTo->ipAddress = $IP;
+        $billTo->ipAddress = $request->IpAddress;
         $requestClient->billTo = $billTo;
+
+        /*visa 4111 1111 1111 1111 12/2022 123cvn 001
+        mastercard 5555 5555 5555 4444 12/2022 123 002
+        autorizaction y capture
+        reply reason code
+        desition manager
+        100 o 481 autorizacion si se hace. Necesario que el set de pruebas llegue completo
+        Reversion y capture
+        Autorizacion flotante cobro automatico
+        100
+        si alguno no esta en 100 no se aprueba*/
+
+        $item = new stdClass();
+        $item->unitPrice = $amount;
+        $item->quantity = 1;
+        $item->productCode = 'PB';
+        $item->productName = 'Plan Etax Profesional Basico';
+        $item->productSKU = 1;
+        $requestClient->item = $item;
 
         $card = new stdClass();
         $card->accountNumber = $request->number;
@@ -184,6 +206,8 @@ class PaymentController extends Controller
         $requestClient->recurringSubscriptionInfo = $recurringSubscriptionInfo;
 
         $reply = $client->runTransaction($requestClient);
+        //echo $reply;
+        dd($reply);
 
         /**************************************************************/
         if($reply->decision == 'ACCEPT'){
@@ -217,14 +241,16 @@ class PaymentController extends Controller
                     'next_payment_date' => $next_payment_date,
                 ]
             );
-            return view('Wizard.index');
+            dd($reply);
+            //return view('Wizard.index');
         }else{
             if($reply->decision == 'ERROR'){
                 $mensaje = 'Hubo un error en la transaccion';
             }else if ($reply->decision == 'REJECT'){
                 $mensaje = 'El pago fue denegado';
             }
-            return view('payment/create')->withMessage($mensaje);
+            dd($reply);
+            //return view('payment/create')->withMessage($mensaje);
         }
     }
 

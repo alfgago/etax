@@ -208,7 +208,7 @@
                 <p>En poco tiempo podrá utilizar la herramienta más fiable para el cálculo de IVA y facturación electrónica.</p>
             </div>
             <div class="form-container">
-                <form method="POST" action="/payment/payment-checkout" class="wizard-form tarjeta" enctype="multipart/form-data">
+                <form method="POST" action="/payment/payment-card" class="wizard-form tarjeta" enctype="multipart/form-data">
                     <div class="form-group col-md-12">
                         <h3 class="mt-0 tituloDePago">
                             Genere su pago
@@ -233,14 +233,14 @@
                             </div>
                             <div class="form-group col-md-2" style="white-space: nowrap;">
                                 <label for="coupon">Tengo un cup&oacute;n:</label>
-                                <input type="text" class="form-control checkEmpty" name="coupon" id="coupon" placeholder="Cup&oacute;n:" required>
+                                <input type="text" class="form-control checkEmpty" name="coupon" id="coupon" placeholder="Cup&oacute;n:" onblur="fusb();">
                             </div>
                             <div class="form-group col-md-12" style="white-space: nowrap;">
                                 Datos del tarjetahabiente
                             </div>
                             <div class="form-group col-md-3" style="white-space: nowrap;">
                                 <label for="first-name">Nombre:</label>
-                                <input type="text" class="form-control checkEmpty" name="first-name" id="first-name" value="" required placeholder="Nombre">
+                                <input type="text" class="form-control checkEmpty" name="first-name" id="first-name" value="" required placeholder="Nombre" >
                             </div>
                             <div class="form-group col-md-3" style="white-space: nowrap;">
                                 <label for="last-name">Apellido:</label>
@@ -274,10 +274,16 @@
                             <div class="form-group"></div>
                             <input type="text" hidden value="{{$subscription->plan->id}}" name="planId">
                             <input type="text" hidden value=" {{$subscription->id}}" name="subscriptionId">
-                            <input type="text" hidden value="" name="">
+                            <input type="text" hidden id="IpAddress" name="IpAddress">
+                            <input type="text" hidden id="deviceFingerprintID" name="deviceFingerprintID">
+                            <input type="text" hidden value="{{$planSelected}}" name="planSelected">
+                            <input type="text" hidden id="first_name" name="first_name">
+                            <input type="text" hidden id="last_name" name="last_name">
+                            <input type="text" hidden id="cardMonth" name="cardMonth">
+                            <input type="text" hidden id="cardYear" name="cardYear">
                             <div class="btn-holder">
                                 <h6>Nota: Los datos sensibles de su tarjeta no se guardar&aacute;n en nuestra base de datos, ser&aacute;n utilizados solamente para procesar su pago</h6>
-                                <button type="submit" id="btn-submit" class="btn btn-primary btn-next">Confirmar pago</button>
+                                <button type="submit" id="btn-submit" class="btn btn-primary btn-next" onclick="CambiarNombre();">Confirmar pago</button>
                             </div>
                         </div>
                     </div>
@@ -293,12 +299,24 @@
         var card = new Card({
             form: 'form.tarjeta',
             container: '.card-wrapper',
-
             formSelectors: {
                 nameInput: 'input[name="first-name"], input[name="last-name"]'
             }
         });
-
+        $.getJSON('https://api.ipify.org?format=json', function(data){
+            $("#IpAddress").val(data.ip);
+        });
+        function fusb() {
+            var exp = $("#expiry").val();
+            console.log(exp);
+        }
+        function CambiarNombre() {
+            $("#first_name").val($('#first-name').val());
+            $("#last_name").val($('#last-name').val());
+            var exp = $("#expiry").val();
+            $('#cardMonth').val(exp.substr(0,2));
+            $('#cardYear').val(exp.substring(exp.length - 2, exp.length));
+        }
         function valid_credit_card(value) {
             // accept only digits, dashes or spaces
             if (/[^0-9-\s]+/.test(value)) return false;
@@ -332,4 +350,10 @@
             $('.wizard-container').prop('class', id+'-selected wizard-container');
         }
     </script>
+    <script src="../assets/js/cybs_devicefingerprint.js"></script>
+    <script>
+        $("#deviceFingerprintID").val(cybs_dfprofiler("tc_cr_011007172","test"));
+        //document.write('Session Id <input type="text" name="deviceFingerprintID" value="' + cybs_dfprofiler("tc_cr_01100XXXX","test") + '">');
+    </script>
+
 @endsection
