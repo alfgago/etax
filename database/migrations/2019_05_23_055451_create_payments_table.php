@@ -17,7 +17,8 @@ class CreatePaymentsTable extends Migration
             $table->bigIncrements('id');
 			$table->unsignedBigInteger('subscription_id');
 			$table->unsignedBigInteger('coupon_id')->nullable();
-            
+            $table->unsignedBigInteger('payment_method_id');
+
             $table->dateTime('payment_date')->nullable();
             $table->integer('payment_status')->default(1); //1: Pendiente, 2: Procesado, 0: Cancelado
             $table->string('next_payment_date')->nullable();

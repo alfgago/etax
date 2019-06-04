@@ -145,15 +145,18 @@
     }
     .labelPaymentCost{
         border-radius: 10px;
-        width: 45% !important;
-        height: 25% !important;
-        background-color:#5c5d60;
+        width: 53% !important;
+        height: 30% !important;
+        background-color: #5c5d60;
         cursor: pointer;
-        margin-left: 2%;
+        margin-left: 29%;
+        margin-top: 18px;
+        font-size: 23px;
     }
     .labelCostPayment{
         color: white !important;
-        font-size: 17px !important;
+        font-size: 20px !important;
+        margin-top: 6px;
     }
     .rowSpecial{
         margin-left: -19px !important;
@@ -193,7 +196,7 @@
     }
 </style>
 @endsection
-@section('content') 
+@section('content')
 <div class="wizard-container">
   	<div class="wizard-popup">  	
 	   	<div class="titulo-bienvenida">
@@ -206,9 +209,8 @@
 				<div class="step-section step1 is-active">
 			      	<div class="form-row">
 				        <div class="form-group col-md-12">
-
                             <h3 class="mt-0 tituloDePago">
-						    	Genere su pago
+						    	Seleccione su plan
 						  	</h3>
 						</div>
                         <div class="cuadro-planes">
@@ -221,7 +223,7 @@
                                                     <div class="row">
                                                         <div class="form-group">
                                                             <div class="line"></div>
-                                                            <input type="radio" value="{{$subscription->plan->monthly_price}}" checked="checked" name="paymentAmount" id="payment1" class="radioPayment">
+                                                            <input type="radio" value="1" checked="checked" name="paymentAmount" id="payment1" class="radioPayment">
                                                             <div class="col-md-12 montly">
                                                                 <label><strong>{{$subscription->plan->monthly_price}} + IVA</strong></label>
                                                             </div>
@@ -238,7 +240,7 @@
                                                     <div class="row">
                                                         <div class="form-group">
                                                             <div class="line"></div>
-                                                            <input type="radio" value="{{$subscription->plan->monthly_price * 6}}" name="paymentAmount" id="payment2" class="radioPayment">
+                                                            <input type="radio" value="2" name="paymentAmount" id="payment2" class="radioPayment">
                                                             <div class="col-md-12 montly">
                                                                 <label ><strong>{{$subscription->plan->monthly_price * 6}} + IVA</strong></label>
                                                             </div>
@@ -255,7 +257,7 @@
                                                     <div class="row">
                                                         <div class="form-group">
                                                             <div class="line"></div>
-                                                            <input type="radio" value="{{$subscription->plan->monthly_price * 12}}" name="paymentAmount" id="payment3" class="radioPayment">
+                                                            <input type="radio" value="3" name="paymentAmount" id="payment3" class="radioPayment">
                                                             <div class="col-md-12 montly">
                                                                 <label><strong>{{$subscription->plan->monthly_price * 12}} + IVA</strong></label>
                                                             </div>
@@ -267,99 +269,15 @@
                                     </div>
                                 </div>
                             </div>
+                            <input type="number" id="costo" value="{{$subscription->plan->monthly_price}}" hidden>
                             <div class="form-group col-md-12 labelPaymentCost">
                                 <label id="labelPayment" class="labelCostPayment">Costo total del pago: $13.55</label>
                             </div>
                         </div>
-                        <div class="form-group col-md-12" style="white-space: nowrap;">
-                            Datos del tarjetahabiente
-                        </div>
-                        <div class="form-group col-md-3" style="white-space: nowrap;">
-                            <label for="firstName">Nombre:</label>
-                            <input type="text" class="form-control checkEmpty" name="firstName" id="firstName" value="" required placeholder="Nombre">
-                        </div>
-                        <div class="form-group col-md-3" style="white-space: nowrap;">
-                            <label for="lastName">Apellido:</label>
-                            <input type="text" class="form-control checkEmpty" name="lastName" id="lastName" value="" required placeholder="Apellido">
-                        </div>
-                        <div class="form-group col-md-3" style="white-space: nowrap;">
-                            <label for="street1">Direcci&#243;n:</label>
-                            <input type="text" class="form-control checkEmpty" name="street1" id="street1" value="" required placeholder="Direcci&#243;n">
-                        </div>
-                        <div class="form-group col-md-3" style="white-space: nowrap;">
-                            <label for="city">Cant&#243;n:</label>
-                            <input type="text" class="form-control checkEmpty" name="city" id="city" value="" required placeholder="Cant&#243;n">
-                        </div>
-                        <div class="form-group col-md-3" style="white-space: nowrap;">
-                            <label for="state">Provincia:</label>
-                            <input type="text" class="form-control checkEmpty" name="state" id="state" value="" required placeholder="Provincia">
-                        </div>
-                        <div class="form-group col-md-3" style="white-space: nowrap;">
-                            <label for="postalCode">C&oacute;digo Postal:</label>
-                            <input type="text" class="form-control checkEmpty" name="postalCode" id="postalCode" value="" required placeholder="C&oacute;digo postal">
-                        </div>
-                        <div class="form-group col-md-3" style="white-space: nowrap;">
-                            <label for="country">Pa&iacute;s:</label>
-                            <input type="text" class="form-control checkEmpty" name="country" id="country" value="" required placeholder="Pa&iacute;s">
-                        </div>
-                        <div class="form-group col-md-3" style="white-space: nowrap;">
-                            <label for="email">Correo electr&oacute;nico:</label>
-                            <input type="email" class="form-control checkEmpty" name="email" id="email" value="" required placeholder="Correo electr&oacute;nico">
-                        </div>
-                        <div class="form-group col-md-12" style="white-space: nowrap;">
-                            Datos de tarjeta
-                        </div>
-                        <div class="form-group col-md-9" style="white-space: nowrap;">
-                            <label for="cardNumber">N&#250;mero de tarjeta</label>
-                            <input type="text" inputmode="numeric" class="form-control checkEmpty" name="cardNumber" id="cardNumber" placeholder="N&#250;mero de tarjeta" required>
-                        </div>
-                        <div class="form-group col-md-3" style="white-space: nowrap;">
-                            <label for="cardCcv">CVV</label>
-                            <input type="text" inputmode="numeric" class="form-control checkEmpty" name="cardCcv" id="cardCcv" placeholder="CVV" required>
-                        </div>
-                        <div class="form-group col-md-3" style="white-space: nowrap;">
-                            <label for="cardMonth">Mes</label>
-                            <select class="form-control" name="cardMonth" id="cardMonth" required>
-                                <option value="0" selected>Seleccione</option>
-                                <option value="1">01</option>
-                                <option value="2">02</option>
-                                <option value="3">03</option>
-                                <option value="4">04</option>
-                                <option value="5">05</option>
-                                <option value="6">06</option>
-                                <option value="7">07</option>
-                                <option value="8">08</option>
-                                <option value="9">09</option>
-                                <option value="10">10</option>
-                                <option value="11">11</option>
-                                <option value="12">12</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-md-3">
-                            <label for="cardYear">A&#241;o</label>
-                            <select class="form-control" name="cardYear" id="cardYear" required>
-                                <option value="0" selected>Seleccione</option>
-                                <option value="2019">2019</option>
-                                <option value="2020">2020</option>
-                                <option value="2021">2021</option>
-                                <option value="2022">2022</option>
-                                <option value="2023">2023</option>
-                                <option value="2024">2024</option>
-                                <option value="2025">2025</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group"></div>
-                        <input type="text" hidden value="{{$subscription->plan->id}}" name="planId">
-                        <input type="text" hidden value=" {{$subscription->id}}" name="subscriptionId">
-                        <input type="text" hidden value="" name="">
                         <div class="btn-holder">
-                            <i class="fa fa-cc-visa" style="color:navy;"></i>
-                            <i class="fa fa-cc-mastercard" style="color:red;"></i>
-                            <i class="fa fa-cc-amex" style="color:blue;"></i>
-  							<button type="submit" id="btn-submit" class="btn btn-primary btn-next">Confirmar pago</button>
-						</div>
-					</div>
+                            <button type="submit" id="btn-submit" class="btn btn-primary btn-next">Confirmar pago</button>
+                        </div>
+                    </div>
 				</div>				
 		    </form>
 		</div>  
@@ -371,7 +289,19 @@
     $(document).ready(function(){
         $("input[type='radio']").change(function(){
             var radioValue = $("input[name='paymentAmount']:checked").val();
-            var newValue = parseFloat(parseFloat(radioValue) + parseFloat(radioValue * 0.13)).toFixed(2);
+            var costo = $('#costo').val();
+            switch (radioValue) {
+                case "1":
+                    var costoPago = parseFloat(costo * 1);
+                break;
+                case "2":
+                    var costoPago = parseFloat(costo * 6);
+                break;
+                case "3":
+                    var costoPago = parseFloat(costo * 12);
+                break;
+            }
+            var newValue = parseFloat(parseFloat(costoPago) + parseFloat(costoPago * 0.13)).toFixed(2);
             if(newValue) {
                 var text = 'Costo total del pago: $' + newValue;
                 $("#labelPayment").empty();

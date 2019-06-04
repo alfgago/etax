@@ -108,6 +108,7 @@ Route::prefix('usuario')->group(function() {
 Route::prefix('payment')->group(function(){
     Route::get('payment-crear', 'PaymentController@paymentCrear')->name('Payment.payment_crear');
     Route::post('payment-checkout', 'PaymentController@paymentCheckout')->name('Payment.payment_checkout');
+    Route::post('payment-card', 'PaymentController@paymentCard')->name('Payment.payment_card');
 });
 
 // Rutas de API data para ajax

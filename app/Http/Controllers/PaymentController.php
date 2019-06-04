@@ -72,10 +72,53 @@ class PaymentController extends Controller
     }
 
     public function paymentCheckout(Request $request){
-        $cards = array(
-            $request->cardNumber
-        );
+        $planSelected = $request->paymentAmount;
+        $subscription = getCurrentSubscription();
+        return view('payment/paymentCard')->with('planSelected', $planSelected)
+                                               ->with('subscription', $subscription);
+    }
 
+    public function paymentCard(Request $request){
+        $user = auth()->user();
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        if (isset($request->coupon)) {
+            $cuponConsultado = Coupon::where('code', $request->coupon)
+                ->where('used', 0);
+            if (isset($cuponConsultado)) {
+                $descuento = ($cuponConsultado->discount_percentage) / 100;
+            } else {
+                $descuento = 0;
+            }
+        }
+        $planSelected = $request->planSelected;
+        switch ($planSelected) {
+            case 1:
+                $costo = 11.99;
+                $next_payment_date = $start_date->addMonths(1);
+                $frequency = 'monthly';
+                $numberOfPayments = 1;
+                break;
+            case 2:
+                $costo = 71.94;
+                $next_payment_date = $start_date->addMonths(6);
+                $frequency = 'biannual';
+                $numberOfPayments = 6;
+                break;
+            case 3:
+                $costo = 143.88;
+                $next_payment_date = $start_date->addMonths(12);
+                $frequency = 'annual';
+                $numberOfPayments = 12;
+                break;
+        }
+        $montoDescontado = $costo * $descuento;
+        $subtotal = ($costo - $montoDescontado);
+        $iv = $subtotal * 0.13;
+        $amount = $subtotal + $iv;
+        $IP = $this->getUserIpAddr();
+        $cards = array(
+            $request->number
+        );
         foreach($cards as $c){
             $check = check_cc($c, true);
             if($check!==false){
@@ -90,35 +133,11 @@ class PaymentController extends Controller
                 break;
             case "Mastercard":
                 $CardType = 002;
-            break;
+                break;
             case "American Express":
                 $CardType = 003;
-            break;
-        }
-        $company = currentCompanyModel();
-        $user = auth()->user();
-        $start_date = Carbon::parse( now('America/Costa_Rica') );
-        $price = $request->paymentAmount;
-        $subscriptionId = $request->subscriptionId;
-        $amount = $price * 0.13;
-        switch ($amount){
-            case 13.55:
-                $next_payment_date = $start_date->addMonths(1);
-                $frequency = 'monthly';
-                $numberOfPayments = 1;
-                break;
-            case 81.29:
-                $next_payment_date = $start_date->addMonths(6);
-                $frequency = 'biannual';
-                $numberOfPayments = 6;
-                break;
-            case 162.58:
-                $next_payment_date = $start_date->addMonths(12);
-                $frequency = 'annual';
-                $numberOfPayments = 12;
                 break;
         }
-        $IP = $this->getUserIpAddr();
         /**************************************************************/
         // Before using this example, you can use your own reference code for the transaction.
         $referenceCode = 'your_merchant_reference_code';
@@ -133,8 +152,8 @@ class PaymentController extends Controller
         $requestClient->paySubscriptionCreateService = $paySubscriptionCreateService;
 
         $billTo = new stdClass();
-        $billTo->firstName = $request->firstName;
-        $billTo->lastName = $request->lastName;
+        $billTo->firstName = $request->first-name;
+        $billTo->lastName = $request->last-name;
         $billTo->street1 = $request->street1;
         $billTo->city = $request->city;
         $billTo->state = $request->state;
@@ -145,7 +164,7 @@ class PaymentController extends Controller
         $requestClient->billTo = $billTo;
 
         $card = new stdClass();
-        $card->accountNumber = $request->cardNumber;
+        $card->accountNumber = $request->number;
         $card->expirationMonth = $request->cardMonth;
         $card->expirationYear = $request->cardYear;
         $card->cardType= $CardType;
@@ -198,9 +217,6 @@ class PaymentController extends Controller
                     'next_payment_date' => $next_payment_date,
                 ]
             );
-            //$company->subscription_id = $sub->id;
-            $company->subscription_id = $subscriptionId;
-            $company->save();
             return view('Wizard.index');
         }else{
             if($reply->decision == 'ERROR'){
