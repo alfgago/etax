@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\UnidadMedicion;
 use App\Utils\BridgeHaciendaApi;
 use \Carbon\Carbon;
 use App\Invoice;
@@ -96,9 +97,10 @@ class InvoiceController extends Controller
      */
     public function emitFactura()
     {
-
+        $units = UnidadMedicion::all()->toArray();
         return view("Invoice/create-factura", ['document_type' => '01', 'rate' => $this->get_rates(),
-            'document_number' => $this->getDocReference('01'), 'document_key' => $this->getDocumentKey('01')]);
+            'document_number' => $this->getDocReference('01'),
+            'document_key' => $this->getDocumentKey('01'), 'units' => $units]);
     }
     
     /**
@@ -156,40 +158,47 @@ class InvoiceController extends Controller
      */
     public function sendHacienda(Request $request)
     {
-        Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
-        $request->validate([
-            'subtotal' => 'required',
-            'items' => 'required',
-        ]);
+        try {
+            Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
+            $request->validate([
+                'subtotal' => 'required',
+                'items' => 'required',
+            ]);
 
-        $apiHacienda = new BridgeHaciendaApi();
-        $tokenApi = $apiHacienda->login();
-        dd($tokenApi);
+            $apiHacienda = new BridgeHaciendaApi();
+            $tokenApi = $apiHacienda->login();
+            if ($tokenApi !== false) {
+                $invoice = new Invoice();
+                $company = currentCompanyModel();
+                $invoice->company_id = $company->id;
 
-        $invoice = new Invoice();
-        $company = currentCompanyModel();
-        $invoice->company_id = $company->id;
+                //Datos generales y para Hacienda
+                $invoice->document_type = "01";
+                $invoice->hacienda_status = "01";
+                $invoice->payment_status = "01";
+                $invoice->payment_receipt = "";
+                $invoice->generation_method = "etax";
+                $invoice->reference_number = $company->last_invoice_ref_number + 1;
 
-        //Datos generales y para Hacienda
-        $invoice->document_type = "01";
-        $invoice->hacienda_status = "01";
-        $invoice->payment_status = "01";
-        $invoice->payment_receipt = "";
-        $invoice->generation_method = "etax";
-        $invoice->reference_number = $company->last_invoice_ref_number + 1;
+                $invoiceData = $invoice->setInvoiceData($request);
+                if (!empty($invoiceData)) {
+                    $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
+                }
 
-        $invoiceData = $invoice->setInvoiceData($request);
-        if (!empty($invoiceData)) {
-            dd('enviar hacienda');
+                $company->last_invoice_ref_number = $invoice->reference_number;
+                $company->last_document = $invoice->document_number;
+                $company->save();
+
+                clearInvoiceCache($invoice);
+
+                return redirect('/facturas-emitidas');
+            } else {
+                return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+            }
+        } catch( \Exception $ex ) {
+            Log::error("ERROR Envio de factura a hacienda -> ".$ex);
+            return back()->withError( 'Ha ocurrido un error al enviar factura.' );
         }
-
-        $company->last_invoice_ref_number = $invoice->reference_number;
-        $company->last_document = $invoice->document_number;
-        $company->save();
-
-        clearInvoiceCache($invoice);
-
-        return redirect('/facturas-emitidas');
     }
 
     /**
