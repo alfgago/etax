@@ -62,6 +62,36 @@ class EmailController extends Controller
             return 500;
         }
         
+        
+        
+        try {  
+            $file = $request->file('attachment2');
+            Log::info( "Se recibió una factura de compra por correo electrónico." );
+            $xml = simplexml_load_string( file_get_contents($file) );
+            $json = json_encode( $xml ); // convert the XML string to JSON
+            $arr = json_decode( $json, TRUE );
+            
+            $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
+            $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+            $consecutivoComprobante = $arr['NumeroConsecutivo'];
+            
+            if( Bill::saveBillXML( $arr, 'Email' ) ) {
+                Bill::storeXML( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
+            }
+            
+            if( Invoice::saveInvoiceXML( $arr, 'Email' ) ) {
+                Invoice::storeXML( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
+            }
+            
+            return response()->json([
+                'success' => 'Exito'
+            ], 200);
+            
+        }catch( \Throwable $ex ){
+            Log::error( "Hubo un error al guardar la factura. Mensaje:" . $ex->getMessage());
+            return 500;
+        }
+        
     }
     
     
