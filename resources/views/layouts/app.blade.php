@@ -88,28 +88,7 @@
     <script src="https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
-    
-        
-    
-    <script type="text/javascript">
-    /*
-      window.zESettings = {
-       webWidget: {
-         authenticate: {
-           chat: {
-             jwtFn: function(callback) { 
-               fetch('/usuario/zendesk-jwt').then(function(res) {
-                  res.text().then(function(jwt) {
-                    console.log(jwt);
-                   callback(jwt);
-                  });
-                });
-              }
-            } 
-          }
-        }
-      };*/
-   </script>
+
     
     @if( session()->has('message') )
         <script>
