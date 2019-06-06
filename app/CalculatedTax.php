@@ -45,7 +45,7 @@ class CalculatedTax extends Model
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
       
-      if ( !Cache::has($cacheKey) ) {
+      //if ( !Cache::has($cacheKey) ) {
           
           //Busca el calculo del mes en Base de Datos.
           $data = CalculatedTax::firstOrNew(
@@ -87,7 +87,7 @@ class CalculatedTax extends Model
             
           Cache::put($cacheKey, $data, now()->addDays(120));
           
-      }
+     // }
       
       $data = Cache::get($cacheKey);
       return $data;
@@ -339,7 +339,7 @@ class CalculatedTax extends Model
                 {
                   $menor = 2;
                   if( $porc_plena != 2 ){
-                    $menor = $porc_plena < 2 ? 2 : $porc_plena;
+                    $menor = $porc_plena > 2 ? 2 : $porc_plena;
                   }
                   $menor_porc = $menor/100;
                   
@@ -350,7 +350,7 @@ class CalculatedTax extends Model
                 {
                   $menor = 13;
                   if( $porc_plena != 13 ){
-                    $menor = $porc_plena < 13 ? 13 : $porc_plena;
+                    $menor = $porc_plena > 13 ? 13 : $porc_plena;
                   }
                   $menor_porc = $menor/100;
                   
@@ -361,7 +361,7 @@ class CalculatedTax extends Model
                 {
                   $menor = 4;
                   if( $porc_plena != 4 ){
-                    $menor = $porc_plena < 4 ? 4 : $porc_plena;
+                    $menor = $porc_plena > 4 ? 4 : $porc_plena;
                   }
                   $menor_porc = $menor/100;
                   

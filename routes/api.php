@@ -18,5 +18,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 
-Route::post('email-compras', 'BillController@receiveEmailBills');
-Route::post('email-ventas', 'InvoiceController@receiveEmailInvoices');
+Route::post('email-facturas', 'EmailController@receiveEmailXML');

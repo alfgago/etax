@@ -400,8 +400,8 @@ class InvoiceController extends Controller
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3
-                        if( $this->saveInvoiceXML( $arr, 'XML' ) ) {
-                            $this->storeXMLEmitido( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
+                        if( Invoice::saveInvoiceXML( $arr, 'XML' ) ) {
+                            Invoice::storeXML( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
                         }
                     }else{
                         return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
@@ -415,123 +415,12 @@ class InvoiceController extends Controller
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
         }catch( \Throwable $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido,');
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
         }
         
         return redirect('/facturas-emitidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
         
-    }
-    
-    public function receiveEmailInvoices(Request $request) {
-        $file = $request->file('attachment1');
-        
-        try {  
-            Log::info( "Se recibió una factura de compra por correo electrónico." );
-            $xml = simplexml_load_string( file_get_contents($file) );
-            $json = json_encode( $xml ); // convert the XML string to JSON
-            $arr = json_decode( $json, TRUE );
-            
-            $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
-            $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-            $consecutivoComprobante = $arr['NumeroConsecutivo'];
-            
-            if( $this->saveInvoiceXML( $arr, 'Email' ) ) {
-                $this->storeXMLRecibido( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
-            }
-            
-            return response()->json([
-                'success' => 'Exito'
-            ], 200);
-            
-        }catch( \Exception $ex ){
-            Log::error( "Hubo un error al guardar la factura. Mensaje:" . $ex->getMessage());
-            return 500;
-        }catch( \Throwable $ex ){
-            Log::error( "Hubo un error al guardar la factura. Mensaje:" . $ex->getMessage());
-            return 500;
-        }
-        
-    }
-    
-    public function storeXMLEmitido($file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor) {
-        
-        if ( Storage::exists("empresa-$identificacionEmisor/$identificacionReceptor-$consecutivoComprobante.xml")) {
-            Storage::delete("empresa-$identificacionEmisor/$identificacionReceptor-$consecutivoComprobante.xml");
-        }
-        
-        $path = \Storage::putFileAs(
-            "empresa-$identificacionEmisor", $file, "$identificacionReceptor-$consecutivoComprobante.xml"
-        );
-        
-        return $path;
-        
-    }
-    
-    
-    public function saveInvoiceXML( $arr, $metodoGeneracion ) {
-        $inserts = array();
-        
-        $claveFactura = $arr['Clave'];
-        $consecutivoComprobante = $arr['NumeroConsecutivo'];
-        $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10))->format('d/m/Y');
-        $fechaVencimiento = $fechaEmision;
-        $nombreProveedor = $arr['Emisor']['Nombre'];
-        $codigoCliente = '';
-        $tipoPersona = $arr['Emisor']['Identificacion']['Tipo'];
-        $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
-        $correoCliente = $arr['Receptor']['CorreoElectronico'];
-        $telefonoCliente = $arr['Receptor']['Telefono']['NumTelefono'];
-        $tipoPersona = $arr['Receptor']['Identificacion']['Tipo'];
-        $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
-        $nombreCliente = $arr['Receptor']['Nombre'];
-        $condicionVenta = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
-        $plazoCredito = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
-        $metodoPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
-        $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
-        $tipoCambio = $arr['ResumenFactura']['TipoCambio'];
-        $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
-        $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
-        $tipoDocumento = '01';
-        $descripcion = $arr['ResumenFactura']['CodigoMoneda'];
-        
-        $authorize = true;
-        if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
-            $authorize = false;
-        }
-        
-        $lineas = $arr['DetalleServicio']['LineaDetalle'];
-        //Revisa si es una sola linea. Si solo es una linea, lo hace un array para poder entrar en el foreach.
-        if( array_key_exists( 'NumeroLinea', $lineas ) ) {
-            $lineas = [$arr['DetalleServicio']['LineaDetalle']];
-        }
-        
-        foreach( $lineas as $linea ) {
-            $numeroLinea = $linea['NumeroLinea'];
-            $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] : '';
-            $detalleProducto = $linea['Detalle'];
-            $unidadMedicion = $linea['UnidadMedida'];
-            $cantidad = $linea['Cantidad'];
-            $precioUnitario = (float)$linea['PrecioUnitario'];
-            $subtotalLinea = (float)$linea['SubTotal'];
-            $totalLinea = (float)$linea['MontoTotalLinea'];
-            $montoDescuento = array_key_exists('MontoDescuento', $linea) ? $linea['MontoDescuento'] : 0;
-            $codigoEtax = '103'; //De momento asume que todo en 4.2 es al 13%.
-            $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
-            
-            $insert = Invoice::importInvoiceRow(
-                $metodoGeneracion, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
-                $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
-                $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
-                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, false
-            );
-            
-            if( $insert ) {
-                array_push( $inserts, $insert );
-            }
-        }
-        
-        InvoiceItem::insert($inserts);
     }
     
     /**

@@ -173,7 +173,7 @@
           <option value="024">4%</option>
           <option value="022">2%</option>
           <option value="021">1%</option>
-          <option value="028">8%</option>
+          <option style="display:none;" value="028">8%</option>
       </select>
     </div>
     
@@ -184,7 +184,7 @@
           <option value="044">4%</option>
           <option value="042">2%</option>
           <option value="041">1%</option>
-          <option value="048">8%</option>
+          <option style="display:none;" value="048">8%</option>
       </select>
     </div>
     
