@@ -23,7 +23,7 @@
     
     <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=2.04">
     
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=2.03"></script>
+    <script src="{{asset('assets/js/common-bundle.js')}}?v=2.1.1"></script>
 
     <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=a366a538-e5db-4a02-8c91-e6d7def5fe29"> </script>
     

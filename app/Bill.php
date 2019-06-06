@@ -8,6 +8,7 @@ use App\BillItem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Kyslik\ColumnSortable\Sortable;
+use Illuminate\Support\Facades\Storage;
 
 class Bill extends Model
 {
@@ -269,7 +270,8 @@ class Bill extends Model
               [
                   'company_id' => $company->id,
                   'provider_id' => $proveedor->id,
-                  'document_number' => $consecutivoComprobante
+                  'document_number' => $consecutivoComprobante,
+                  'document_key' => $claveFactura,
               ]
           );
           
@@ -388,4 +390,87 @@ class Bill extends Model
       return $insert;
       
     }
+    
+    public static function saveBillXML( $arr, $metodoGeneracion ) {
+        $inserts = array();
+        
+        $claveFactura = $arr['Clave'];
+        $consecutivoComprobante = $arr['NumeroConsecutivo'];
+        $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10))->format('d/m/Y');
+        $fechaVencimiento = $fechaEmision;
+        $nombreProveedor = $arr['Emisor']['Nombre'];
+        $codigoProveedor = '';
+        $tipoPersona = $arr['Emisor']['Identificacion']['Tipo'];
+        $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
+        $correoProveedor = $arr['Emisor']['CorreoElectronico'];
+        $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'];
+        $tipoIdReceptor = $arr['Receptor']['Identificacion']['Tipo'];
+        $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
+        $nombreReceptor = $arr['Receptor']['Nombre'];
+        $condicionVenta = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
+        $plazoCredito = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
+        $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
+        $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
+        $tipoCambio = $arr['ResumenFactura']['TipoCambio'];
+        $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
+        $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
+        $tipoDocumento = '01';
+        $descripcion = $arr['ResumenFactura']['CodigoMoneda'];
+        
+        $authorize = true;
+        if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
+            $authorize = false;
+        }
+        
+        $lineas = $arr['DetalleServicio']['LineaDetalle'];
+        //Revisa si es una sola linea. Si solo es una linea, lo hace un array para poder entrar en el foreach.
+        if( array_key_exists( 'NumeroLinea', $lineas ) ) {
+            $lineas = [$arr['DetalleServicio']['LineaDetalle']];
+        }
+        
+        foreach( $lineas as $linea ) {
+            $numeroLinea = $linea['NumeroLinea'];
+            $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] : '';
+            $detalleProducto = $linea['Detalle'];
+            $unidadMedicion = $linea['UnidadMedida'];
+            $cantidad = $linea['Cantidad'];
+            $precioUnitario = (float)$linea['PrecioUnitario'];
+            $subtotalLinea = (float)$linea['SubTotal'];
+            $totalLinea = (float)$linea['MontoTotalLinea'];
+            $montoDescuento = array_key_exists('MontoDescuento', $linea) ? $linea['MontoDescuento'] : 0;
+            $codigoEtax = '003'; //De momento asume que todo en 4.2 es al 13%.
+            $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
+            
+            $insert = Bill::importBillRow(
+                $metodoGeneracion, $identificacionReceptor, $nombreProveedor, $codigoProveedor, $tipoPersona, $identificacionProveedor, $correoProveedor, $telefonoProveedor,
+                $claveFactura, $consecutivoComprobante, $condicionVenta, $medioPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
+                $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
+                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, $authorize, false
+            );
+            
+            if( $insert ) {
+                array_push( $inserts, $insert );
+            }
+        }
+        
+        BillItem::insert($inserts);
+        
+        return true;
+    }
+    
+    
+    public static function storeXML($file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor) {
+        
+        if ( Storage::exists("empresa-$identificacionReceptor/$identificacionEmisor-$consecutivoComprobante.xml")) {
+            Storage::delete("empresa-$identificacionReceptor/$identificacionEmisor-$consecutivoComprobante.xml");
+        }
+        
+        $path = \Storage::putFileAs(
+            "empresa-$identificacionReceptor", $file, "$identificacionEmisor-$consecutivoComprobante.xml"
+        );
+        
+        return $path;
+        
+    }
+    
 }
