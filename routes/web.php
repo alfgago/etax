@@ -96,6 +96,8 @@ Route::get('/elegir-plan', 'WizardController@selectPlan')->name('Wizard.select_p
 Route::prefix('usuario')->group(function() {
     Route::get('perfil', 'UserController@edit')->name('User.edit');
     Route::patch('update-perfil', 'UserController@update')->name('User.update');
+    Route::get('admin-edit/{email}', 'UserController@adminEdit')->name('User.admin_edit');
+    Route::patch('update-admin/{id}', 'UserController@updateAdmin')->name('User.update_admin');
     Route::get('seguridad', 'UserController@editPassword')->name('User.edit_password');
     Route::get('planes', 'UserController@plans')->name('User.plans');
     Route::get('cambiar-plan', 'UserController@changePlan')->name('User.cambiar_plan');
@@ -170,3 +172,8 @@ Route::post('purchase', 'PlanController@purchase')->name('plans.purchase');
 Route::get('plans/switch-plan/{plan}/{newPlan}', 'PlanController@switchPlan')->name('plans.switch-plan');
 
 Route::get('/private/all', 'SubscriptionPlanController@all')->name('subscriptions.all');
+Route::get('/private/exportar', 'SubscriptionPlanController@exportar')->name('subscriptions.exportar');
+
+
+Route::get('/admin/impersonate/{id}', 'UserController@impersonate');
+Route::get('/admin/leave', 'UserController@leaveImpersonation');
