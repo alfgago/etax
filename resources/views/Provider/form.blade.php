@@ -8,12 +8,12 @@
     <div class="form-group col-md-4">
       <label for="tipo_persona">Tipo de persona *</label>
       <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();">
-        <option value="1" {{ @$provider->tipo_persona == 1 ? 'selected' : '' }} >Física</option>
-        <option value="2" {{ @$provider->tipo_persona == 2 ? 'selected' : '' }}>Jurídica</option>
-        <option value="3" {{ @$provider->tipo_persona == 3 ? 'selected' : '' }}>DIMEX</option>
-        <option value="4" {{ @$provider->tipo_persona == 4 ? 'selected' : '' }}>Extranjero</option>
-        <option value="5" {{ @$provider->tipo_persona == 5 ? 'selected' : '' }}>NITE</option>
-        <option value="6" {{ @$provider->tipo_persona == 6 ? 'selected' : '' }}>Otro</option>
+        <option value="F" {{ @$provider->tipo_persona == 1 ? 'selected' : '' }} >Física</option>
+        <option value="J" {{ @$provider->tipo_persona == 2 ? 'selected' : '' }}>Jurídica</option>
+        <option value="D" {{ @$provider->tipo_persona == 3 ? 'selected' : '' }}>DIMEX</option>
+        <option value="E" {{ @$provider->tipo_persona == 4 ? 'selected' : '' }}>Extranjero</option>
+        <option value="N" {{ @$provider->tipo_persona == 5 ? 'selected' : '' }}>NITE</option>
+        <option value="O" {{ @$provider->tipo_persona == 6 ? 'selected' : '' }}>Otro</option>
       </select>
     </div>
     
