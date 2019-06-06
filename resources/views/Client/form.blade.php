@@ -9,12 +9,12 @@
     <div class="form-group col-md-4">
       <label for="tipo_persona">Tipo de persona *</label>
       <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();">
-        <option value="1" {{ @$client->tipo_persona == 1 ? 'selected' : '' }} >Física</option>
-        <option value="2" {{ @$client->tipo_persona == 2 ? 'selected' : '' }}>Jurídica</option>
-        <option value="3" {{ @$client->tipo_persona == 3 ? 'selected' : '' }}>DIMEX</option>
-        <option value="4" {{ @$client->tipo_persona == 5 ? 'selected' : '' }}>NITE</option>
-        <option value="5" {{ @$client->tipo_persona == 4 ? 'selected' : '' }}>Extranjero</option>
-        <option value="6" {{ @$client->tipo_persona == 6 ? 'selected' : '' }}>Otro</option>
+        <option value="F" {{ @$client->tipo_persona == 1 ? 'selected' : '' }} >Física</option>
+        <option value="J" {{ @$client->tipo_persona == 2 ? 'selected' : '' }}>Jurídica</option>
+        <option value="D" {{ @$client->tipo_persona == 3 ? 'selected' : '' }}>DIMEX</option>
+        <option value="N" {{ @$client->tipo_persona == 5 ? 'selected' : '' }}>NITE</option>
+        <option value="E" {{ @$client->tipo_persona == 4 ? 'selected' : '' }}>Extranjero</option>
+        <option value="O" {{ @$client->tipo_persona == 6 ? 'selected' : '' }}>Otro</option>
       </select>
     </div>
     
