@@ -45,6 +45,12 @@ class Invoice extends Model
     {
         return Carbon::parse($this->due_date);
     }
+
+    //Relacion con hacienda
+    public function xmlHacienda()
+    {
+        return $this->belongsTo(XmlHacienda::class);
+    }
     
     
     /**
@@ -121,6 +127,7 @@ class Invoice extends Model
             $this->client_district = $client->district;
             $this->client_zip = $client->zip;
             $this->client_phone = $client->phone;
+            $this->client_id_number = $client->id_number;
             //Fechas
             $fecha = Carbon::createFromFormat('d/m/Y g:i A',
                 $request->generated_date . ' ' . $request->hora);

@@ -195,7 +195,7 @@ class WizardController extends Controller
                 }
 
                 $pathCert = Storage::putFileAs(
-                    "empresa-$id_number", $request->file('cert'), "cert.p12"
+                    "empresa-$id_number", $request->file('cert'), "$id_number.p12"
                 );
 
                 $pathLogo = Storage::putFileAs(

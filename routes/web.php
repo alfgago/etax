@@ -171,3 +171,4 @@ Route::post('purchase', 'PlanController@purchase')->name('plans.purchase');
 Route::get('plans/switch-plan/{plan}/{newPlan}', 'PlanController@switchPlan')->name('plans.switch-plan');
 
 Route::get('/private/all', 'SubscriptionPlanController@all')->name('subscriptions.all');
+Route::get('/customer/print-pdf', 'InvoiceController@pdf');

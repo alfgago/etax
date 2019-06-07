@@ -11,10 +11,12 @@ use App\Exports\InvoiceExport;
 use App\Imports\InvoiceImport;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use GuzzleHttp\Message\ResponseInterface;
+use PDF;
 
 
 class InvoiceController extends Controller
@@ -188,7 +190,9 @@ class InvoiceController extends Controller
                 $company->last_invoice_ref_number = $invoice->reference_number;
                 $company->last_document = $invoice->document_number;
                 $company->save();
-
+                if ($invoice->hacienda_status == 03) {
+                   // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
+                }
                 clearInvoiceCache($invoice);
 
                 return redirect('/facturas-emitidas');
@@ -599,5 +603,10 @@ class InvoiceController extends Controller
         $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
             '1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
         return $key;
+    }
+
+    public function pdf() {
+        $pdf = PDF::loadView('Pdf/invoice-pdf');
+        return $pdf->download('Invoice.pdf');
     }
 }
