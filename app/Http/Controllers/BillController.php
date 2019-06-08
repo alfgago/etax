@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\UnidadMedicion;
 use \Carbon\Carbon;
 use App\Bill;
 use App\BillItem;
@@ -89,7 +90,8 @@ class BillController extends Controller
      */
     public function create()
     {
-        return view("Bill/create");
+        $units = UnidadMedicion::all()->toArray();
+        return view("Bill/create", ['units' => $units]);
     }
 
     /**

@@ -35,8 +35,8 @@ class Invoice extends Mailable
         $message->attachFromStorage($this->content['xml']);
          $message->attachData($this->makePdf(), $this->content['data_invoice']->document_key.'.pdf', [
              'mime' => 'application/pdf',
-         ]);// attach each file
-        return $message; //Send mail
+         ]);
+        return $message;
     }
 
     private function makePdf()
