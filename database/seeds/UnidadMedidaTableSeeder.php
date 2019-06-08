@@ -81,7 +81,7 @@ class UnidadMedidaTableSeeder extends Seeder
             "pulgada" => "ln",
             "radión" => "rad",
             "radión por segundo" => "rad/s",
-            "Se debe indicar la descripcián de la medida a utilizar" => "Otros",
+            "Se debe indicar la descripción de la medida a utilizar" => "Otros",
             "segundo" => "s",
             "Servicios personales" => "Spe",
             "Servicios técnicos" => "St",
@@ -89,9 +89,9 @@ class UnidadMedidaTableSeeder extends Seeder
             "sievert" => "Sv",
             "tesla" => "T",
             "tonelada" => "t",
-            "unidad astronámica" => "ua",
-            "unidad de masa atámica unificada" => "u",
-            "uno (indice de refraccián)" => "1",
+            "unidad astronómica" => "ua",
+            "unidad de masa atómica unificada" => "u",
+            "uno (indice de refracción)" => "1",
             "volt" => "V",
             "volt por metro" => "V/m",
             "Watt" => "W",
@@ -100,5 +100,9 @@ class UnidadMedidaTableSeeder extends Seeder
             "watt por metro kevin" => "W/(mxK)",
             "weber" => "Wb"
         ];
+
+        foreach ($jsonUnidades as $key => $values) {
+            \App\UnidadMedicion::updateOrCreate(['code' => $values], ['name' => strtoupper($key) ]);
+        }
     }
 }

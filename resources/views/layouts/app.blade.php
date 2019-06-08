@@ -26,6 +26,7 @@
     <script src="{{asset('assets/js/common-bundle.js')}}?v=2.1.1"></script>
 
     <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=a366a538-e5db-4a02-8c91-e6d7def5fe29"> </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
     
     <script>
       /*window.zESettings = {

@@ -2,27 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\UnidadMedicion;
+use App\Utils\BridgeHaciendaApi;
 use \Carbon\Carbon;
 use App\Invoice;
 use App\InvoiceItem;
-use App\Company;
-use App\Client;
-use App\CalculatedTax;
-use App\Http\Controllers\CacheController;
 use App\Exports\InvoiceExport;
 use App\Imports\InvoiceImport;
-use Maatwebsite\Excel\Facades\Excel;
-use Yajra\Datatables\Datatables;
-use App\DataTables\InvoicesDataTable;
-use Orchestra\Parser\Xml\Facade as XmlParser;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
+use GuzzleHttp\Message\ResponseInterface;
+use PDF;
 
 
 class InvoiceController extends Controller
 {
-  
+
     /**
      * Create a new controller instance.
      *
@@ -50,7 +49,7 @@ class InvoiceController extends Controller
      */
     public function indexData() {
         $current_company = currentCompany();
-        
+
         $query = Invoice::where('invoices.company_id', $current_company)
                 ->where('is_void', false)
                 ->where('is_authorized', true)
@@ -100,7 +99,10 @@ class InvoiceController extends Controller
      */
     public function emitFactura()
     {
-        return view("Invoice/create-factura", ['document_type' => '01']);
+        $units = UnidadMedicion::all()->toArray();
+        return view("Invoice/create-factura", ['document_type' => '01', 'rate' => $this->get_rates(),
+            'document_number' => $this->getDocReference('01'),
+            'document_key' => $this->getDocumentKey('01'), 'units' => $units]);
     }
     
     /**
@@ -121,7 +123,7 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
-        
+        Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
         $request->validate([
             'subtotal' => 'required',
             'items' => 'required',
@@ -144,8 +146,7 @@ class InvoiceController extends Controller
         $company->last_invoice_ref_number = $invoice->reference_number;
         $company->last_document = $invoice->document_number;
         $company->save();
-        
-        
+
         clearInvoiceCache($invoice);
       
         return redirect('/facturas-emitidas');
@@ -159,29 +160,49 @@ class InvoiceController extends Controller
      */
     public function sendHacienda(Request $request)
     {
-        return redirect()->back()->withMessage("Funcionalidad de facturación electrónica habilitada muy pronto.");
-        
-        $invoice = new Invoice();
-        $company = currentCompanyModel();
-        $invoice->company_id = $company->id;
+        try {
+            Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
+            $request->validate([
+                'subtotal' => 'required',
+                'items' => 'required',
+            ]);
 
-        //Datos generales y para Hacienda
-        $invoice->document_type = "01";
-        $invoice->payment_status = "01";
-        $invoice->payment_receipt = "";
-        $invoice->generation_method = "ETAX";
-        $invoice->reference_number = $company->last_invoice_ref_number + 1;
-        
-        $invoice->setInvoiceData($request);
-        
-        
-        $company->last_invoice_ref_number = $invoice->reference_number;
-        $company->last_document = $invoice->document_number;
-        $company->save();
-        
-        clearInvoiceCache($invoice);
-      
-        return redirect('/facturas-emitidas');
+            $apiHacienda = new BridgeHaciendaApi();
+            $tokenApi = $apiHacienda->login();
+            if ($tokenApi !== false) {
+                $invoice = new Invoice();
+                $company = currentCompanyModel();
+                $invoice->company_id = $company->id;
+
+                //Datos generales y para Hacienda
+                $invoice->document_type = "01";
+                $invoice->hacienda_status = "01";
+                $invoice->payment_status = "01";
+                $invoice->payment_receipt = "";
+                $invoice->generation_method = "etax";
+                $invoice->reference_number = $company->last_invoice_ref_number + 1;
+
+                $invoiceData = $invoice->setInvoiceData($request);
+                if (!empty($invoiceData)) {
+                    $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
+                }
+
+                $company->last_invoice_ref_number = $invoice->reference_number;
+                $company->last_document = $invoice->document_number;
+                $company->save();
+                if ($invoice->hacienda_status == 03) {
+                   // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
+                }
+                clearInvoiceCache($invoice);
+
+                return redirect('/facturas-emitidas');
+            } else {
+                return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+            }
+        } catch( \Exception $ex ) {
+            Log::error("ERROR Envio de factura a hacienda -> ".$ex);
+            return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+        }
     }
 
     /**
@@ -194,8 +215,9 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::findOrFail($id);
         $this->authorize('update', $invoice);
-      
-        return view('Invoice/show', compact('invoice') );
+
+        $units = UnidadMedicion::all()->toArray();
+        return view('Invoice/show', compact('invoice','units') );
     }
 
 
@@ -208,6 +230,7 @@ class InvoiceController extends Controller
     public function edit($id)
     {
         $invoice = Invoice::findOrFail($id);
+        $units = UnidadMedicion::all()->toArray();
         $this->authorize('update', $invoice);
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
@@ -215,7 +238,7 @@ class InvoiceController extends Controller
           return redirect('/facturas-emitidas');
         }  
       
-        return view('Invoice/edit', compact('invoice') );
+        return view('Invoice/edit', compact('invoice', 'units') );
     }
 
     /**
@@ -227,7 +250,6 @@ class InvoiceController extends Controller
      */
     public function update(Request $request, $id)
     {
-        
         $invoice = Invoice::findOrFail($id);
         $this->authorize('update', $invoice);
       
@@ -373,7 +395,50 @@ class InvoiceController extends Controller
             return redirect('/facturas-emitidas')->withError('Usted tiene un límite de 2500 facturas por archivo.');
         }
     }
-    
+
+    private function microtime_float()
+    {
+        list($usec, $sec) = explode(" ", microtime());
+        return ((float) $usec + (float)$sec);
+    }
+
+    private function get_rates()
+    {
+        try {
+            $value = Cache::remember('usd_rate', '60000', function () {
+                $today = new Carbon();
+                $client = new \GuzzleHttp\Client();
+                $response = $client->get(env('EXCHANGE_URL'),
+                    ['query' => [
+                        'Indicador' => '317',
+                        'FechaInicio' => $today::now()->format('d/m/Y'),
+                        'FechaFinal' => $today::now()->format('d/m/Y'),
+                        'Nombre' => env('NAMEBCCR'),
+                        'SubNiveles' => 'N',
+                        'CorreoElectronico' => env('EMAILBCCR'),
+                        'Token' => env('TOKENBCCR')
+                        ]
+                    ]
+                );
+                $body = $response->getBody()->getContents();
+                $xml = new \SimpleXMLElement($body);
+                $xml->registerXPathNamespace('d', 'urn:schemas-microsoft-com:xml-diffgram-v1');
+                $tables = $xml->xpath('//INGC011_CAT_INDICADORECONOMIC[@d:id="INGC011_CAT_INDICADORECONOMIC1"]');
+                return json_decode($tables[0]->NUM_VALOR);
+            });
+
+            return $value;
+
+        } catch( \Exception $e) {
+            Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: ');
+        } catch (RequestException $e) {
+            Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: '.
+                $e->getResponse()->getReasonPhrase());
+            return null;
+        }
+
+    }
+
     public function importXML() {
         request()->validate([
           'xmls' => 'required'
@@ -384,7 +449,7 @@ class InvoiceController extends Controller
             return back()->withError( 'Por favor mantenga el límite de 10 archivos por intento.');
         }
           
-        //try {  
+        try {
             $time_start = getMicrotime();
             $company = currentCompanyModel();
             if( request()->hasfile('xmls') ) {
@@ -411,16 +476,16 @@ class InvoiceController extends Controller
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
-        /*}catch( \Exception $ex ){
+
+        }catch( \Exception $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
         }catch( \Throwable $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
-        }*/
+        }
         
         return redirect('/facturas-emitidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
-        
     }
     
     /**
@@ -527,7 +592,18 @@ class InvoiceController extends Controller
         
     }
     
-    
-    
-    
+    private function getDocReference($docType) {
+        $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;
+        $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
+
+        return $consecutive;
+    }
+
+    private function getDocumentKey($docType) {
+        $company = currentCompanyModel();
+        $invoice = new Invoice();
+        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
+            '1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
+        return $key;
+    }
 }

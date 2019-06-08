@@ -51,6 +51,13 @@
   <input type="text" class="form-control" name="phone" id="phone" value="{{ @$company->phone }}" >
 </div>
 
+<div class="form-group col-md-6">
+  <label for="logo">Logo Empresa *</label>
+  <div class="fallback">
+    <input name="input_logo" id="input_logo" class="form-control " type="file" multiple="false" >
+  </div>
+</div>
+
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step2');">Siguiente paso</button>
 </div>

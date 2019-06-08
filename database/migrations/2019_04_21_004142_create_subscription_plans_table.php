@@ -15,7 +15,6 @@ class CreateSubscriptionPlansTable extends Migration
     {
         Schema::create('subscription_plans', function (Blueprint $table) {
             $table->bigIncrements('id');
-            
             $table->string('plan_type')->nullable();
             $table->string('plan_tier')->nullable();
             $table->integer('num_companies')->default(0);
@@ -37,7 +36,6 @@ class CreateSubscriptionPlansTable extends Migration
             $table->double('monthly_price')->default(0);
             $table->double('six_price')->default(0);
             $table->double('annual_price')->default(0);
-                        
             $table->timestamps();
 			$table->softDeletes();
         });
@@ -277,6 +275,6 @@ class CreateSubscriptionPlansTable extends Migration
      */
     public function down()
     {
-        Schema::dropSoftDeletes('subscription_plans');
+        Schema::dropIfExists('subscription_plans');
     }
 }

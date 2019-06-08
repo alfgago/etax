@@ -403,7 +403,7 @@ class Bill extends Model
         $tipoPersona = $arr['Emisor']['Identificacion']['Tipo'];
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
         $correoProveedor = $arr['Emisor']['CorreoElectronico'];
-        $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'];
+        $telefonoProveedor = isset($arr['Emisor']['Telefono']) ? $arr['Emisor']['Telefono']['NumTelefono'] : '';
         $tipoIdReceptor = $arr['Receptor']['Identificacion']['Tipo'];
         $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
         $nombreReceptor = $arr['Receptor']['Nombre'];

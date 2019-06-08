@@ -72,6 +72,7 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::patch('confirmar-validacion/{id}', 'InvoiceController@confirmarValidacion')->name('Invoice.confirmar_validacion');
     Route::get('autorizaciones', 'InvoiceController@indexAuthorize')->name('Invoice.validaciones');
     Route::patch('confirmar-autorizacion/{id}', 'InvoiceController@authorizeInvoice')->name('Invoice.confirmar_validacion');
+    Route::post('send', 'InvoiceController@sendHacienda')->name('Invoice.sendHacienda');
 });
 
 // Rutas de facturacion recibida
@@ -173,7 +174,6 @@ Route::get('plans/switch-plan/{plan}/{newPlan}', 'PlanController@switchPlan')->n
 
 Route::get('/private/all', 'SubscriptionPlanController@all')->name('subscriptions.all');
 Route::get('/private/exportar', 'SubscriptionPlanController@exportar')->name('subscriptions.exportar');
-
 
 Route::get('/admin/impersonate/{id}', 'UserController@impersonate');
 Route::get('/admin/leave', 'UserController@leaveImpersonation');
