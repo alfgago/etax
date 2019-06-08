@@ -293,17 +293,17 @@ class BillController extends Controller
                     
                 }
             }catch( \ErrorException $ex ){
+                Log::error('Error importando Excel' . $ex->getMessage());
                 return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila. '.$i);
-                Log::error('Error importando Excel' . $ex->getMessage());
             }catch( \InvalidArgumentException $ex ){
+                Log::error('Error importando Excel' . $ex->getMessage());
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
-                Log::error('Error importando Excel' . $ex->getMessage());
             }catch( \Exception $ex ){
-                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i);
                 Log::error('Error importando Excel' . $ex->getMessage());
+                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i);
             }catch( \Throwable $ex ){
-                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i);
                 Log::error('Error importando Excel' . $ex->getMessage());
+                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i);
             }
         
             $company->save();
@@ -351,11 +351,11 @@ class BillController extends Controller
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
         }catch( \Exception $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
             Log::error('Error importando Excel' . $ex->getMessage());
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
         }catch( \Throwable $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
             Log::error('Error importando Excel' . $ex->getMessage());
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
         }
         
         return redirect('/facturas-recibidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
@@ -396,6 +396,11 @@ class BillController extends Controller
         
         $bill->is_code_validated = true;
         $bill->save();
+        
+        if( $bill->year == 2018 ) {
+            clearLastTaxesCache($bill->company->id, 2018);
+        }
+        clearInvoiceCache($bill);
         
         return redirect('/facturas-recibidas/validaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido validada');
     }

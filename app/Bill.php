@@ -410,6 +410,11 @@ class Bill extends Model
         $condicionVenta = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
         $plazoCredito = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
         $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
+        
+        if ( is_array($medioPago) ) {
+          $medioPago = $medioPago[0];
+        }
+        
         $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
         $tipoCambio = $arr['ResumenFactura']['TipoCambio'];
         $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
