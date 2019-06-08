@@ -270,7 +270,8 @@ class Bill extends Model
               [
                   'company_id' => $company->id,
                   'provider_id' => $proveedor->id,
-                  'document_number' => $consecutivoComprobante
+                  'document_number' => $consecutivoComprobante,
+                  'document_key' => $claveFactura,
               ]
           );
           

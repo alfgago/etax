@@ -37,7 +37,7 @@ $(function() {
   $('#products-table').DataTable({
     processing: true,
     serverSide: true,
-    ajax: "{{ route('Product.data') }}",
+    ajax: "/api/products",
     columns: [
       { data: 'code', name: 'code' },
       { data: 'name', name: 'name' },

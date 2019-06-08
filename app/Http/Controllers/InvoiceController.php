@@ -353,10 +353,10 @@ class InvoiceController extends Controller
                             $totalNeto = 0;
                             
                             $insert = Invoice::importInvoiceRow(
-                                $metodoGeneracion, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
+                                $metodoGeneracion, 0, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
                                 $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
                                 $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
-                                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, true
+                                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, true, true
                             );
                             
                             if( $insert ) {
@@ -603,10 +603,5 @@ class InvoiceController extends Controller
         $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
             '1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
         return $key;
-    }
-
-    public function pdf() {
-        $pdf = PDF::loadView('Pdf/invoice');
-        return $pdf->stream();
     }
 }

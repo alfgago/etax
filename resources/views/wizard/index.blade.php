@@ -9,7 +9,17 @@
 @section('header-scripts')
 
 <style>
-
+  .btn-cerrarsesion {
+  	
+  	position: absolute; top: .5rem; right: .5rem; color: #FFF; font-size: 1.2rem; padding: .5rem .25rem; border: 2px solid #fff; font-weight: bold; z-index: 99;
+  	
+  }
+  
+  @media only screen and (max-width: 680px) {
+	  .btn-cerrarsesion {
+	    display: none;
+	  }
+	}
 </style>
 
 @endsection
@@ -70,7 +80,18 @@
 	    </form>
 	  </div>  
 	  
+	  
+	  
   </div>
+
+		<a style=""
+	  class="btn btn-cerrarsesion" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('frm-logout').submit();">
+        Cerrar sesión
+    </a>
+    <form id="frm-logout" action="{{ route('logout') }}" method="POST" style="display: none;">
+        {{ csrf_field() }}
+    </form>
+    
 </div>  
 
 @endsection

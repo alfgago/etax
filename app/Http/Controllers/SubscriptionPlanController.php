@@ -5,9 +5,22 @@ namespace App\Http\Controllers;
 use App\User;
 use App\SubscriptionPlan;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\UsersExport;
 
 class SubscriptionPlanController extends Controller
 {
+    
+     /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }    
+    
     /**
      * Display a listing of the resource.
      *
@@ -86,7 +99,7 @@ class SubscriptionPlanController extends Controller
     
     public function all()
     {
-        if( auth()->user()->email != "alfgago@gmail.com" ) {
+        if( auth()->user()->user_name != "alfgago" ) {
             return redirect(404);
         }
         
@@ -96,6 +109,15 @@ class SubscriptionPlanController extends Controller
         return view('Subscriptions/all', [
           'users' => $users
         ]);
+    }
+    
+    public function exportar() {
+        if( auth()->user()->user_name != "alfgago" ) {
+            return redirect(404);
+        }
+        
+        
+        return Excel::download(new UsersExport(), 'usuarios.xlsx');
     }
     
 }

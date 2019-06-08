@@ -223,13 +223,23 @@ class Invoice extends Model
     }
     
     public static function importInvoiceRow (
-        $metodoGeneracion, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
+        $metodoGeneracion, $idEmisor, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
         $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
         $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
-        $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, $codeValidated
+        $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, $isAuthorized, $codeValidated
     ) {
       
-      $company = currentCompanyModel();
+      //Revisa si el método es por correo electrónico. De ser así, usa busca la compañia por cedula.
+      if( $metodoGeneracion != "Email" ){
+        $company = currentCompanyModel();
+      }else{
+        //Si es email, busca por ID del receptor para encontrar la compañia
+        $company = Company::where('id_number', $idEmisor)->first();
+      }
+      
+      if( ! $company ) {
+        return false;
+      }
       
       $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
       if ( !Cache::has($clientCacheKey) ) {
@@ -258,7 +268,8 @@ class Invoice extends Model
               [
                   'company_id' => $company->id,
                   'client_id' => $cliente->id,
-                  'document_number' => $consecutivoComprobante
+                  'document_number' => $consecutivoComprobante,
+                  'document_key' => $claveFactura,
               ]
           );
           
@@ -286,6 +297,7 @@ class Invoice extends Model
               $invoice->description = $descripcion;
               
               $invoice->generation_method = $metodoGeneracion;
+              $invoice->is_authorized = $isAuthorized;
               $invoice->is_code_validated = $codeValidated;
               
               //Datos de factura
@@ -453,10 +465,10 @@ class Invoice extends Model
             $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
             
             $insert = Invoice::importInvoiceRow(
-                $metodoGeneracion, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
+                $metodoGeneracion, $identificacionProveedor, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
                 $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
                 $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
-                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, false
+                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, $authorize, false
             );
             
             if( $insert ) {
@@ -479,10 +491,6 @@ class Invoice extends Model
         $path = \Storage::putFileAs(
             "empresa-$identificacionEmisor", $file, "$identificacionReceptor-$consecutivoComprobante.xml"
         );
-        
         return $path;
-        
-        dd($path);
-        
     }  
 }
