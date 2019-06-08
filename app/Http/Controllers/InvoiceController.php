@@ -215,8 +215,9 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::findOrFail($id);
         $this->authorize('update', $invoice);
-      
-        return view('Invoice/show', compact('invoice') );
+
+        $units = UnidadMedicion::all()->toArray();
+        return view('Invoice/show', compact('invoice','units') );
     }
 
 
@@ -229,6 +230,7 @@ class InvoiceController extends Controller
     public function edit($id)
     {
         $invoice = Invoice::findOrFail($id);
+        $units = UnidadMedicion::all()->toArray();
         $this->authorize('update', $invoice);
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
@@ -236,7 +238,7 @@ class InvoiceController extends Controller
           return redirect('/facturas-emitidas');
         }  
       
-        return view('Invoice/edit', compact('invoice') );
+        return view('Invoice/edit', compact('invoice', 'units') );
     }
 
     /**
