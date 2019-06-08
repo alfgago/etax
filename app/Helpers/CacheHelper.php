@@ -43,7 +43,7 @@ if (!function_exists('clearCierreCache')) {
 
 if (!function_exists('clearLastTaxesCache')) {  
 	
-    function clearLastTaxesCache($current_company, $anoAnterior){
+    function clearLastTaxesCache($current_company, $anoAnterior) {
       	$cacheKey = "cache-lasttaxes-$current_company-0-$anoAnterior";
       	Cache::forget($cacheKey);
       	

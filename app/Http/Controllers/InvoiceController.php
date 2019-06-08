@@ -372,17 +372,17 @@ class InvoiceController extends Controller
                     
                 }
             }catch( \ErrorException $ex ){
+                Log::error('Error importando Excel' . $ex->getMessage());
                 return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila: '.$i);
-                Log::error('Error importando Excel' . $ex->getMessage());
             }catch( \InvalidArgumentException $ex ){
+                Log::error('Error importando Excel' . $ex->getMessage());
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
-                Log::error('Error importando Excel' . $ex->getMessage());
             }catch( \Exception $ex ){
+                Log::error('Error importando Excel' . $ex->getMessage());
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Error en la fila. '.$i);
-                Log::error('Error importando Excel' . $ex->getMessage());
             }catch( \Throwable $ex ){
-                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i);
                 Log::error('Error importando Excel' . $ex->getMessage());
+                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i);
             }
             
             $company->save();
@@ -449,7 +449,7 @@ class InvoiceController extends Controller
             return back()->withError( 'Por favor mantenga el límite de 10 archivos por intento.');
         }
           
-        try {  
+        //try {  
             $time_start = getMicrotime();
             $company = currentCompanyModel();
             if( request()->hasfile('xmls') ) {
@@ -464,7 +464,7 @@ class InvoiceController extends Controller
                     
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
-                        //Registra el XML. Si todo sale bien, lo guarda en S3
+                        //Registra el XML. Si todo sale bien, lo guarda en S3.
                         if( Invoice::saveInvoiceXML( $arr, 'XML' ) ) {
                             Invoice::storeXML( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
                         }
@@ -476,13 +476,13 @@ class InvoiceController extends Controller
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
-        }catch( \Exception $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
+        /*}catch( \Exception $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
         }catch( \Throwable $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
-        }
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
+        }*/
         
         return redirect('/facturas-emitidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
         

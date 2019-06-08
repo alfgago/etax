@@ -433,17 +433,23 @@ class Invoice extends Model
         $condicionVenta = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
         $plazoCredito = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
         $metodoPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
+        
+        if ( is_array($metodoPago) ) {
+          $metodoPago = $metodoPago[0];
+        }
+        
         $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
         $tipoCambio = $arr['ResumenFactura']['TipoCambio'];
         $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
         $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
-        $tipoDocumento = '01';
         $descripcion = $arr['ResumenFactura']['CodigoMoneda'];
         
         $authorize = true;
         if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
             $authorize = false;
         }
+        
+        $tipoDocumento = '01';
         
         $lineas = $arr['DetalleServicio']['LineaDetalle'];
         //Revisa si es una sola linea. Si solo es una linea, lo hace un array para poder entrar en el foreach.
