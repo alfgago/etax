@@ -5,9 +5,11 @@ namespace App;
 use App\Company;
 use App\CalculatedTax;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Book extends Model
 {
+    use SoftDeletes;
     protected $guarded = [];
     
     //Relacion con la empresa
