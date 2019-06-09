@@ -6,13 +6,14 @@ use \Carbon\Carbon;
 use App\Company;
 use App\BillItem;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Kyslik\ColumnSortable\Sortable;
 use Illuminate\Support\Facades\Storage;
 
 class Bill extends Model
 {
-    use Sortable;
+    use Sortable, SoftDeletes;
     
     protected $guarded = [];
     public $sortable = ['reference_number', 'generated_date'];
