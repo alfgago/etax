@@ -16,7 +16,7 @@ class BillPolicy
      * 
      */
     public function update(User $user, Bill $bill) {
-        $current_company = $current_company = currentCompany();
+        $current_company = currentCompany();
         return $bill->company_id == $current_company;
     }
 }

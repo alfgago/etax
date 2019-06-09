@@ -42,6 +42,7 @@ class ClientController extends Controller
         $current_company = currentCompany();
 
         $query = Client::where('company_id', $current_company);
+        
         return datatables()->eloquent( $query )
             ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($client) {
