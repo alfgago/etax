@@ -8,12 +8,15 @@ use App\BillItem;
 use App\Invoice;
 use App\Bill;
 use App\Company;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
 class CalculatedTax extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'calculated_taxes';
     
     protected $guarded = [];

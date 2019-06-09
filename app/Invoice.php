@@ -6,6 +6,7 @@ use \Carbon\Carbon;
 use App\Company;
 use App\InvoiceItem;
 use App\Client;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
@@ -13,7 +14,8 @@ use Illuminate\Support\Facades\Storage;
 
 class Invoice extends Model
 {
-  
+    use SoftDeletes;
+
     protected $guarded = [];
     
     //Relacion con la empresa
