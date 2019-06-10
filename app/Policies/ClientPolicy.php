@@ -26,7 +26,7 @@ class ClientPolicy
      * 
      */
     public function update(User $user, Client $client) {
-        $current_company = $user->companies->first()->id;
+        $current_company = currentCompany();
         return $client->company_id == $current_company;
     }
     

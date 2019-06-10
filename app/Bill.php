@@ -108,6 +108,19 @@ class Bill extends Model
       $this->currency_rate = floatval( str_replace(",","", $request->currency_rate ));
       $this->total = floatval( str_replace(",","", $request->total ));
       $this->iva_amount = floatval( str_replace(",","", $request->iva_amount ));
+      
+      $this->provider_first_name = $provider->first_name;
+      $this->provider_last_name = $provider->last_name;
+      $this->provider_last_name2 = $provider->last_name2;
+      $this->provider_email = $provider->email;
+      $this->provider_address = $provider->address;
+      $this->provider_country = $provider->country;
+      $this->provider_state = $provider->state;
+      $this->provider_city = $provider->city;
+      $this->provider_district = $provider->district;
+      $this->provider_zip = $provider->zip;
+      $this->provider_phone = $provider->phone;
+      $this->provider_id_number = $provider->id_number;
 
       //Fechas
       $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
@@ -123,29 +136,9 @@ class Bill extends Model
       $lids = array();
       foreach($request->items as $item) {
         $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
-        $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
-        
-        $item_id = $item['id'] ? $item['id'] : 0;
-        $item_number = $item['item_number'];
-        $code = $item['code'];
-        $name = $item['name'];
-        $product_type = $item['product_type'];
-        $measure_unit = $item['measure_unit'];
-        $item_count = $item['item_count'];
-        $unit_price = $item['unit_price'];
-        $subtotal = $item['subtotal'];
-        $total = $item['total'];
-        $discount_percentage = '0';
-        $discount_reason = '';
-        $iva_type = $item['iva_type'];
-        $iva_percentage = $item['iva_percentage'];
-        $iva_amount = $item['iva_amount'];
-        $is_exempt = false;
-        $isIdentificacion = $item['is_identificacion_especifica'];
-        $porc_identificacion_plena = $item['porc_identificacion_plena'];
-        $item_modificado = $this->addEditItem( 
-          $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, 
-          $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $porc_identificacion_plena, $is_exempt );
+        $item['item_id'] = $item['id'] ? $item['id'] : 0;
+        $item_modificado = $this->addEditItem($item);
+                
         array_push( $lids, $item_modificado->id );
       }
       
@@ -159,7 +152,7 @@ class Bill extends Model
       
     }
   
-    public function addItem( 
+    /*public function addItem( 
       $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, 
       $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $porc_identificacion_plena, $is_exempt )
     {
@@ -186,43 +179,40 @@ class Bill extends Model
         'porc_identificacion_plena' => $porc_identificacion_plena
       ]);
       
-    }
-  
-    public function addEditItem( 
-      $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, 
-      $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $porc_identificacion_plena, $is_exempt )
+    }*/
+
+
+    public function addEditItem(array $data)
     {
-      if( $item_id ){
-        $item = BillItem::find($item_id);
-        //Revisa que la linea exista y pertenece a la factura actual. Asegura que si el ID se cambia en frontend, no se actualice.
-        if( $item && $item->bill_id == $this->id ) {
-          $item->company_id = $this->company_id;
-          $item->year = $this->year;
-          $item->month = $this->month;
-          $item->item_number = $item_number;
-          $item->code = $code;
-          $item->name = $name;
-          $item->product_type = $product_type;
-          $item->measure_unit = $measure_unit;
-          $item->item_count = $item_count;
-          $item->unit_price = $unit_price;
-          $item->subtotal = $subtotal;
-          $item->total = $total;
-          $item->discount_type = '01';
-          $item->discount = $discount_percentage;
-          $item->iva_type = $iva_type;
-          $item->iva_percentage = $iva_percentage;
-          $item->iva_amount = $iva_amount;
-          $item->is_exempt = $is_exempt;
-          $item->porc_identificacion_plena = $porc_identificacion_plena;
-          $item->save();
-        }
-      }else {
-        $item = $this->addItem( 
-          $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, 
-          $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $porc_identificacion_plena, $is_exempt );
+      if(isset($data['item_number'])) {
+          $item = BillItem::updateOrCreate([
+              'item_number' => $data['item_number'],
+              'invoice_id' => $this->id,
+              'code'=> $data['code']
+          ], [
+                  'company_id' => $this->company_id,
+                  'year'  => $this->year,
+                  'month' => $this->month,
+                  'name'  => $data['name'] ?? '',
+                  'product_type' => $data['product_type'] ?? '',
+                  'measure_unit' => $data['measure_unit'] ?? '',
+                  'item_count'   => $data['item_count'] ?? '',
+                  'unit_price'   => $data['unit_price'] ?? '',
+                  'subtotal'     => $data['subtotal'] ?? '',
+                  'total' => $data['total'] ?? '',
+                  'discount_type' => $data['discount_type'] ?? null,
+                  'discount' => $data['discount'] ?? 0,
+                  'iva_type' => $data['iva_type'] ?? '',
+                  'iva_percentage' => $data['iva_percentage'] ?? '',
+                  'iva_amount' => $data['iva_amount'] ?? '',
+                  'is_exempt' => $data['is_exempt'] ?? false,
+                  'porc_identificacion_plena' =>  $data['porc_identificacion_plena'] ?? ''
+              ]
+          );
+          return $item;
+      } else {
+          return false;
       }
-      return $item;
     }
     
     public static function importBillRow (

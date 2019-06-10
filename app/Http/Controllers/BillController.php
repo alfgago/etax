@@ -74,7 +74,7 @@ class BillController extends Controller
                 ])->render();
             }) 
             ->editColumn('provider', function(Bill $bill) {
-                return $bill->provider->fullname;
+                return $bill->provider->getFullName();
             })
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');
@@ -442,7 +442,7 @@ class BillController extends Controller
                 ])->render();
             }) 
             ->editColumn('provider', function(Bill $bill) {
-                return $bill->provider->fullname;
+                return $bill->provider->getFullName();
             })
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');
@@ -483,7 +483,7 @@ class BillController extends Controller
                 ])->render();
             }) 
             ->editColumn('provider', function(Bill $bill) {
-                return $bill->provider->fullname;
+                return $bill->provider->getFullName();
             })
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');
