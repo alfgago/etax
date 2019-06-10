@@ -29,6 +29,22 @@ class Invoice extends Model
     {
         return $this->belongsTo(Client::class);
     }
+    
+    public function clientName() {
+      if( isset($this->client_id) ) {
+        return $this->client->getFullName();
+      }else{
+        return 'N/A';
+      }
+    }
+    
+    public function documentTypeName() {
+      $tipo = 'Factura';
+      if( $this->document_type == '04' ) {
+        $tipo = "Tiquete";
+      }
+      return $tipo;
+    }
   
     //Relación con facturas emitidas
     public function items()
@@ -70,13 +86,14 @@ class Invoice extends Model
             $this->buy_order = $request->buy_order;
             $this->other_reference = $request->other_reference;
 
+            $client;
             //Datos de cliente. El cliente nuevo viene con ID = -1
             if( $request->client_id == '-1' ) {
                 $tipo_persona = $request->tipo_persona;
                 $identificacion_cliente = $request->id_number;
                 $codigo_cliente = $request->code;
 
-                $cliente = Client::updateOrCreate(
+                $client = Client::updateOrCreate(
                     [
                         'id_number' => $identificacion_cliente,
                         'company_id' => $this->company_id,
@@ -104,12 +121,12 @@ class Invoice extends Model
                         'billing_emails' => $request->billing_emails ?? $request->email
                     ]
                 );
-                $this->client_id = $cliente->id;
+                $this->client_id = $client->id;
             }else{
                 $this->client_id = $request->client_id;
+                $client = Client::find($this->client_id);
             }
 
-            $client = Client::find($this->client_id);
             $request->currency_rate = $request->currency_rate ? $request->currency_rate : 1;
             //Datos de factura
             $this->description = $request->description;
@@ -243,25 +260,31 @@ class Invoice extends Model
         return false;
       }
       
-      $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
-      if ( !Cache::has($clientCacheKey) ) {
-          $clienteCache =  Client::firstOrCreate(
-              [
-                  'id_number' => $identificacionCliente,
-                  'company_id' => $company->id,
-              ],
-              [
-                  'code' => $codigoCliente ,
-                  'company_id' => $company->id,
-                  'tipo_persona' => str_pad($tipoPersona, 2, '0', STR_PAD_LEFT),
-                  'id_number' => $identificacionCliente,
-                  'first_name' => $nombreCliente,
-                  'fullname' => "$identificacionCliente - $nombreCliente"
-              ]
-          );
-          Cache::put($clientCacheKey, $clienteCache, 30);
+      $idCliente = null;
+      if( $identificacionCliente ) {
+        $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
+        if ( !Cache::has($clientCacheKey) ) {
+            $clienteCache =  Client::firstOrCreate(
+                [
+                    'id_number' => $identificacionCliente,
+                    'company_id' => $company->id,
+                ],
+                [
+                    'code' => $codigoCliente ,
+                    'company_id' => $company->id,
+                    'tipo_persona' => str_pad($tipoPersona, 2, '0', STR_PAD_LEFT),
+                    'id_number' => $identificacionCliente,
+                    'first_name' => $nombreCliente,
+                    'fullname' => "$identificacionCliente - $nombreCliente"
+                ]
+            );
+            Cache::put($clientCacheKey, $clienteCache, 30);
+        }
+        $cliente = Cache::get($clientCacheKey);
+        $idCliente = $cliente->id;
+      } else {
+        $tipoDocumento = '04';
       }
-      $cliente = Cache::get($clientCacheKey);
       
       $invoiceCacheKey = "import-factura-$nombreCliente-" . $company->id . "-" . $consecutivoComprobante;
       if ( !Cache::has($invoiceCacheKey) ) {
@@ -269,7 +292,7 @@ class Invoice extends Model
           $invoice = Invoice::firstOrNew(
               [
                   'company_id' => $company->id,
-                  'client_id' => $cliente->id,
+                  'client_id' => $idCliente,
                   'document_number' => $consecutivoComprobante,
                   'document_key' => $claveFactura,
               ]
@@ -278,10 +301,9 @@ class Invoice extends Model
           if( !$invoice->exists ) {
               
               $invoice->company_id = $company->id;
-              $invoice->client_id = $cliente->id;    
+              $invoice->client_id = $idCliente;    
       
               //Datos generales y para Hacienda
-              $tipoDocumento = $tipoDocumento;
               if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' 
                   || $tipoDocumento == '05' || $tipoDocumento == '06' || $tipoDocumento == '07' || $tipoDocumento == '08' || $tipoDocumento == '99' ) {
                   $invoice->document_type = $tipoDocumento;    
@@ -422,11 +444,21 @@ class Invoice extends Model
         $codigoCliente = '';
         $tipoPersona = $arr['Emisor']['Identificacion']['Tipo'];
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
-        $correoCliente = $arr['Receptor']['CorreoElectronico'];
-        $telefonoCliente = $arr['Receptor']['Telefono']['NumTelefono'];
-        $tipoPersona = $arr['Receptor']['Identificacion']['Tipo'];
-        $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
-        $nombreCliente = $arr['Receptor']['Nombre'];
+        
+        if ( array_key_exists('Receptor', $arr) ){
+          $correoCliente = $arr['Receptor']['CorreoElectronico'];
+          $telefonoCliente = $arr['Receptor']['Telefono']['NumTelefono'];
+          $tipoPersona = $arr['Receptor']['Identificacion']['Tipo'];
+          $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
+          $nombreCliente = $arr['Receptor']['Nombre'];
+        }else{
+          $correoCliente = 'N/A';
+          $telefonoCliente = 'N/A';
+          $tipoPersona = 'N/A';
+          $identificacionCliente = 0;
+          $nombreCliente = 'N/A';
+        }
+        
         $condicionVenta = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
         $plazoCredito = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
         $metodoPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';

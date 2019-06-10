@@ -61,6 +61,7 @@ class Bill extends Model
       $this->buy_order = $request->buy_order;
       $this->other_reference = $request->other_reference;
     
+      $provider;
       //Datos de proveedor
       if( $request->provider_id == '-1' ){
           $tipo_persona = $request->tipo_persona;
@@ -97,6 +98,7 @@ class Bill extends Model
           $this->provider_id = $provider->id;
       }else{
           $this->provider_id = $request->provider_id;
+          $provider = Provider::find($this->provider_id);
       }
       
       $request->currency_rate = $request->currency_rate ? $request->currency_rate : 1;
@@ -187,7 +189,7 @@ class Bill extends Model
       if(isset($data['item_number'])) {
           $item = BillItem::updateOrCreate([
               'item_number' => $data['item_number'],
-              'invoice_id' => $this->id,
+              'bill_id' => $this->id,
               'code'=> $data['code']
           ], [
                   'company_id' => $this->company_id,
