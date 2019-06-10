@@ -73,7 +73,7 @@ class InvoiceController extends Controller
                 ])->render();
             }) 
             ->editColumn('client', function(Invoice $invoice) {
-                return $invoice->client->fullname;
+                return $invoice->client->getFullName();
             })
             ->editColumn('generated_date', function(Invoice $invoice) {
                 return $invoice->generatedDate()->format('d/m/Y');
@@ -563,7 +563,7 @@ class InvoiceController extends Controller
                 ])->render();
             }) 
             ->editColumn('client', function(Invoice $invoice) {
-                return $invoice->client->fullname;
+                return $invoice->client->getFullName();
             })
             ->editColumn('generated_date', function(Invoice $invoice) {
                 return $invoice->generatedDate()->format('d/m/Y');
@@ -604,6 +604,8 @@ class InvoiceController extends Controller
         $invoice = new Invoice();
         $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
             '1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
+            
+            
         return $key;
     }
 }
