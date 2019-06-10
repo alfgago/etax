@@ -121,6 +121,16 @@ Route::get('/api/providers', 'ProviderController@indexData')->name('Provider.dat
 Route::get('/api/products', 'ProductController@indexData')->name('Product.data');
 Route::get('/api/books', 'BookController@indexData')->name('Book.data');
 
+
+//Rutas de recover
+Route::patch('/facturas-recibidas/{id}/restore', 'BillController@restore')->name('Bill.restore');
+Route::patch('/facturas-emitidas/{id}/restore', 'InvoiceController@restore')->name('Invoice.restore');
+Route::patch('/proveedores/{id}/restore', 'ProviderController@restore')->name('Provider.restore');
+Route::patch('/clientes/{id}/restore', 'ClientController@restore')->name('Client.restore');
+Route::patch('/productos/{id}/restore', 'ProductController@restore')->name('Product.restore');
+
+
+
 // Rutas autogeneradas de CRUD
 Route::resource('clientes', 'ClientController');
 Route::resource('proveedores', 'ProviderController');

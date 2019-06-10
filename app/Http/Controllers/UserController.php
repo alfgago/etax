@@ -217,10 +217,19 @@ class UserController extends Controller {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id) {
-        /*User::find($id)->delete();
-        return redirect()->route('users.index')
-                        ->with('success', 'User deleted successfully');*/
+    public function destroy( $string ) {
+        if( 'ELIMINAR' != $string ){
+            return 404;
+        }
+        
+        $user = auth()->user();
+        
+        Company::where('user_id', $user->id)->delete();
+        $user->delete;
+        
+        Auth::logout();
+        
+        return redirect('/')->with('success', 'Su cuenta ha sido eliminada. Tiene 15 días para solicitar una restauración antes de que sus datos sean eliminados permanentemente.');
     }
     
     public function changePlan() {

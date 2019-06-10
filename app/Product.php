@@ -3,6 +3,7 @@
 namespace App;
 
 use \App\Variables;
+use \App\UnidadMedicion;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -25,7 +26,11 @@ class Product extends Model
   }
   
   public function getUnidadMedicionName(){
-    return Variables::getUnidadMedicionName( $this->measure_unit );
+    try{
+      return UnidadMedicion::where('code', $this->measure_unit)->first()->name;
+    }catch( \Throwable $e ){
+      return $this->measure_unit;
+    }
   }
   
   

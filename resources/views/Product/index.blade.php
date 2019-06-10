@@ -9,9 +9,19 @@
         <a class="btn btn-primary" href="/productos/create">Importar productos</a>
 @endsection 
 
-@section('content') 
+@section('content')
+
 <div class="row">
   <div class="col-md-12">
+          <div class="filters mb-4 pb-4">
+              <label>Filtrar productos por</label>
+              <div class="periodo-selects">
+                <select id="filtro-select" name="filtro" onchange="reloadDataTable();">
+                    <option selected value="1">Productos activos</option>
+                    <option value="0">Productos eliminados</option>
+                </select>
+              </div>
+          </div>
         
          <table id="products-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
@@ -26,18 +36,27 @@
           </thead>
           <tbody></tbody>
         </table>
+        
   </div>  
 </div>
+
 @endsection
 
 @section('footer-scripts')
 <script>
   
+var datatable;
 $(function() {
-  $('#products-table').DataTable({
+  
+  datatable = $('#products-table').DataTable({
     processing: true,
     serverSide: true,
-    ajax: "/api/products",
+    ajax: {
+        url: '/api/products',
+        data: function(d){
+            d.filtro = $( '#filtro-select' ).val();
+        }
+    },
     columns: [
       { data: 'code', name: 'code' },
       { data: 'name', name: 'name' },
@@ -50,7 +69,50 @@ $(function() {
       url: "/lang/datatables-es_ES.json",
     },
   });
+  
 });
+
+
+function reloadDataTable() {
+  datatable.ajax.reload();
+}
+
+function confirmDelete( id ) {
+  
+  var formId = "#delete-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea eliminar el producto',
+    text: "El producto será eliminado de su catálogo. Las facturas donde se utilizó el producto no se verán afectadas.",
+    type: 'warning',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero eliminarlo'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
+
+function confirmRecover( id ) {
+  
+  var formId = "#recover-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea restaurar el producto',
+    text: "El producto será agregado nuevamente a su catálogo.",
+    type: 'success',
+    customContainerClass: 'container-success',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero restaurarlo',
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
   
 </script>
 @endsection

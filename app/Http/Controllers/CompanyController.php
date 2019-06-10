@@ -11,6 +11,7 @@ use App\Team;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class CompanyController extends Controller {
     
@@ -84,7 +85,7 @@ class CompanyController extends Controller {
         $company->phone = $request->phone;
         $company->invoice_email = $request->invoice_email;
         $company->email = $request->email;
-        $company->default_currency = !empty($request->default_currency) ? $request->default_currency : 'crc';
+        $company->default_currency = !empty($request->default_currency) ? $request->default_currency : 'CRC';
 
         /* Add company to a plan */
         $company->subscription_id = getCurrentUserSubscriptions()[0]->id;
@@ -366,17 +367,23 @@ class CompanyController extends Controller {
      * @param  \App\Company  $empresa
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id) {
-        return redirect()->route('empresas.index')->with('success', 'Company deleted successfully');
-        
-        $post = Company::where('id', $id)->first();
-
-        if ($post != null) {
-            $post->delete();
-            return redirect()->route('empresas.index')->with('success', 'Company deleted successfully');
+    public function destroy( Request $request ) {
+        if( 'ELIMINAR' != $request->confirmacion ){
+            return 404;
+            return redirect('/')->withError('La compañía no pudo ser eliminada, verifique el texto de confirmación');
         }
-
-        return redirect()->route('empresas.index')->with(['message' => 'Wrong ID!!']);
+        
+        $user = auth()->user();
+        $currentCompany = currentCompanyModel();
+        
+        if( $currentCompany->user_id != $user->id ) {
+            Log::warning( 'El usuario '. $user->id .' intentó eliminar la empresa #' . $currentCompany->id . ' - ' . $currentCompany->id_number );
+            return redirect('/')->withError('Usted no tiene permisos para eliminar la empresa');
+        }
+        
+        Log::warning( 'El usuario '. $user->id .' eliminó la empresa #' . $currentCompany->id . ' - ' . $currentCompany->id_number );
+        $currentCompany->delete();
+        return redirect('/')->withSuccess('La empresa ha sido eliminada satisfactoriamente.');
     }
 
     public function changeCompany(Request $request) {

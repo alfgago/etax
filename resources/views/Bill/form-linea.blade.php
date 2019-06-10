@@ -41,7 +41,7 @@
   
     <div class="form-group col-md-1">
       <label for="nombre_cliente">% IVA</label>
-      <input type="number" min="0" class="form-control" id="porc_iva" placeholder="13" value="13" readonly>
+      <input type="number" min="0" class="form-control pr-0" id="porc_iva" placeholder="13" value="13" readonly>
     </div>
     
     <div class="form-group col-md-12 inline-form inline-checkbox">

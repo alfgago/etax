@@ -73,7 +73,10 @@ class InvoiceController extends Controller
                 ])->render();
             }) 
             ->editColumn('client', function(Invoice $invoice) {
-                return $invoice->client->getFullName();
+                return $invoice->clientName();
+            })
+            ->editColumn('document_type', function(Invoice $invoice) {
+                return $invoice->documentTypeName();
             })
             ->editColumn('generated_date', function(Invoice $invoice) {
                 return $invoice->generatedDate()->format('d/m/Y');
@@ -454,7 +457,7 @@ class InvoiceController extends Controller
                     $json = json_encode( $xml ); // convert the XML string to JSON
                     $arr = json_decode( $json, TRUE );
                     
-                    $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
+                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
                     $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
                     $consecutivoComprobante = $arr['NumeroConsecutivo'];
                     
@@ -559,7 +562,7 @@ class InvoiceController extends Controller
                 ])->render();
             }) 
             ->editColumn('client', function(Invoice $invoice) {
-                return $invoice->client->getFullName();
+                return $invoice->clientName();
             })
             ->editColumn('generated_date', function(Invoice $invoice) {
                 return $invoice->generatedDate()->format('d/m/Y');
