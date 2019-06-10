@@ -288,8 +288,7 @@ class Invoice extends Model
               } else {
                  $invoice->document_type = '01'; 
               }
-              
-              $invoice->reference_number = $company->last_invoice_ref_number + 1;
+
               $invoice->document_number =  $consecutivoComprobante;
               
               //Datos generales
@@ -308,15 +307,11 @@ class Invoice extends Model
               if( $invoice->currency == 2 ) { $invoice->currency = "USD"; }
               
               $invoice->currency_rate = $tipoCambio;
-            
-              $company->last_invoice_ref_number = $invoice->reference_number;
-              
               $invoice->subtotal = 0;
               $invoice->iva_amount = 0;
               $invoice->total = $totalDocumento;
               
               $invoice->save();
-              $company->save();
           }   
           Cache::put($invoiceCacheKey, $invoice, 30);
       }

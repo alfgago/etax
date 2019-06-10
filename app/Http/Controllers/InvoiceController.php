@@ -89,7 +89,8 @@ class InvoiceController extends Controller
      */
     public function create()
     {
-        return view("Invoice/create-factura-manual");
+        $units = UnidadMedicion::all()->toArray();
+        return view("Invoice/create-factura-manual", ['units' => $units]);
     }
 
     /**
@@ -139,12 +140,7 @@ class InvoiceController extends Controller
         $invoice->payment_status = "01";
         $invoice->payment_receipt = "";
         $invoice->generation_method = "M";
-        $invoice->reference_number = $company->last_invoice_ref_number + 1;
-        
         $invoice->setInvoiceData($request);
-        
-        $company->last_invoice_ref_number = $invoice->reference_number;
-        $company->last_document = $invoice->document_number;
         $company->save();
 
         clearInvoiceCache($invoice);
