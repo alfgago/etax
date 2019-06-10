@@ -117,9 +117,9 @@
         toggleTipoProrrata();
         toggleApellidos();
     });
-  
-    
-  
+
+
+
 </script>
 
 @endsection

@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Controllers\PaymentController;
 use App\Subscription;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -87,15 +88,7 @@ class Kernel extends HttpKernel
     ];
     protected function schedule(Schedule $schedule){
         $schedule->call(function () {
-            $today = Carbon::parse( now('America/Costa_Rica') );
-            $payments = Subscription::where('status', 1)
-                                    ->whereDay('next_payment_date', '<=', $today);
-            foreach ( $payments as $payment ){
-                $userPaymentMethod = $payment->paymentMethod;
-                if($payment->nextPaymentDate == $today){
-                    
-                }
-            }
+            $MakePayment = PaymentController::pagarSuscripcion();
         })->dailyAt('07:00');
     }
 

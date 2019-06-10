@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\EtaxProducts;
 use App\Payment;
 use App\Subscription;
+use App\PaymentMethod;
 use Carbon\Carbon;
 use CybsSoapClient;
 use Illuminate\Http\Request;
 use stdClass;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 
 require __DIR__ . '/../../../vendor/autoload.php';
 
@@ -20,15 +24,117 @@ class PaymentController extends Controller
      */
     public function index()
     {
-
+        return view('Payment/index');
+    }
+    public function createView(){
+        return view('payment/CreatePaymentMethod');
+    }
+    public function StatusBnAPI(){
+        $BnEcomAPIStatus = new Client();
+        $APIStatus = $BnEcomAPIStatus->request('POST', "http://www.fttserver.com:4217/api/LogOnApp?applicationName=string&applicationPassword=string", [
+            'headers' => [
+                'Content-Type' => "application/json",
+            ],
+            'json' => ['applicationName' => 'ETAX_TEST',
+                'applicationPassword' => 'ETFTTJUN0619%'
+            ],
+            'verify' => false,
+        ]);
+        $BnStatus = json_decode($APIStatus->getBody()->getContents(), true);
+        return $BnStatus;
     }
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(){
-
+    public function create(Request $request){
+        $user = auth()->user();
+        $BnStatus = $this->StatusBnAPI();
+        if($BnStatus['apiStatus'] == 'Successful'){
+            $cards = array(
+                $request->number
+            );
+            foreach ($cards as $c) {
+                $check = $this->check_cc($c, true);
+                if ($check !== false) {
+                    $TypeCard = $check;
+                } else {
+                    echo "$c - Not a match";
+                }
+            }
+            switch ($TypeCard) {
+                case "Visa":
+                    $CardType = '001';
+                    $NameCard = "Visa";
+                    break;
+                case "Mastercard":
+                    $CardType = '002';
+                    $NameCard = "Mastercard";
+                    break;
+                case "American Express":
+                    $CardType = '003';
+                    $NameCard = "";
+                    break;
+            }
+            $CardBn = new Client();
+            $CardCreationResult = $CardBn->request('POST', "http://www.fttserver.com:4217/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
+                'headers' => [
+                    'Content-Type'  => "application/json",
+                ],
+                'json' => ['applicationName' => 'ETAX_TEST',
+                    'userName' => $user->user_name,
+                    'userPassword' => $user->password,
+                    'cardDescription' => $NameCard,
+                    'primaryAccountNumber' => $request->number,
+                    "expirationMonth" => $request->cardMonth,
+                    "expirationYear" => '20' . $request->cardYear,
+                    "verificationValue" => $request->cvc
+                ],
+                'verify' => false,
+            ]);
+            $Card = json_decode($CardCreationResult->getBody()->getContents(), true);
+            if($Card['apiStatus'] == 'Success') {
+                $last_4digits = substr($request->number, -4);
+                $token_bn = $Card['cardTokenId'];
+                $paymentMethod = PaymentMethod::create([
+                    'user_id' => $user->id,
+                    'name' => $request->first_name,
+                    'last_name' => $request->last_name,
+                    'last_4digits' => $last_4digits,
+                    'nameCard' => $NameCard,
+                    'due_date' => $request->cardMonth . ' ' . $request->cardYear,
+                    'token_cybersource' => '',
+                    'token_bn' => $token_bn
+                ]);
+                return redirect('payments');
+            }else{
+                return redirect()->back()->withErrors('No se aprobó esta tarjeta');
+            }
+        }else{
+            return redirect()->back()->withErrors('Pagos en línea está fuera de servicio en este momento. No se pudo gestionar la transacción');
+        }
+    }
+    /*
+    *
+    *
+    *
+    *
+    */
+    public function indexData(){
+        $user = auth()->user();
+        $query = PaymentMethod::where('user_id', $user->id);
+        return datatables()->eloquent( $query )
+            ->addColumn('actions', function($payment_method) {
+                return view('payment.actions', [
+                    'data' => $payment_method
+                ])->render();
+            })
+            ->editColumn('last_4digits', function(PaymentMethod $payment_method) {
+                return 'termina en ...' . $payment_method->last_4digits;
+            })
+            ->rawColumns(['actions'])
+            ->toJson();
     }
     /**
      * Show the form for creating a new resource.
@@ -38,17 +144,6 @@ class PaymentController extends Controller
     public function paymentCrear(){
         $subscription = getCurrentSubscription();
         return view('payment/create')->with('subscription', $subscription);
-    }
-
-    public function getUserIpAddr(){
-        if(!empty($_SERVER['HTTP_CLIENT_IP'])){
-            $ip = $_SERVER['HTTP_CLIENT_IP'];
-        }elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
-            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        }else{
-            $ip = $_SERVER['REMOTE_ADDR'];
-        }
-        return $ip;
     }
 
     public function check_cc($cc, $extra_check = false){
@@ -81,6 +176,7 @@ class PaymentController extends Controller
     public function paymentCard(Request $request){
         $user = auth()->user();
         $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $date = Carbon::now()->format('Y/m/d');
         if (isset($request->coupon)) {
             $cuponConsultado = Coupon::where('code', $request->coupon)
                 ->where('used', 0);
@@ -89,7 +185,7 @@ class PaymentController extends Controller
             } else {
                 $descuento = 0;
             }
-        }else{
+        } else {
             $descuento = 0;
         }
         $planSelected = $request->planSelected;
@@ -97,19 +193,16 @@ class PaymentController extends Controller
             case 1:
                 $costo = 11.99;
                 $next_payment_date = $start_date->addMonths(1);
-                $frequency = 'monthly';
                 $numberOfPayments = 1;
                 break;
             case 2:
                 $costo = 71.94;
                 $next_payment_date = $start_date->addMonths(6);
-                $frequency = 'biannual';
                 $numberOfPayments = 6;
                 break;
             case 3:
                 $costo = 143.88;
                 $next_payment_date = $start_date->addMonths(12);
-                $frequency = 'annual';
                 $numberOfPayments = 12;
                 break;
         }
@@ -117,7 +210,121 @@ class PaymentController extends Controller
         $subtotal = ($costo - $montoDescontado);
         $iv = $subtotal * 0.13;
         $amount = $subtotal + $iv;
-        $IP = $this->getUserIpAddr();
+        $cards = array(
+            $request->number
+        );
+        foreach ($cards as $c) {
+            $check = $this->check_cc($c, true);
+            if ($check !== false) {
+                $TypeCard = $check;
+            }
+        }
+        switch ($TypeCard) {
+            case "Visa":
+                $CardType = '001';
+                $NameCard = "Visa";
+                break;
+            case "Mastercard":
+                $CardType = '002';
+                $NameCard = "Mastercard";
+                break;
+            case "American Express":
+                $CardType = '003';
+                $NameCard = "";
+                break;
+        }
+        $payment = Payment::create([
+            'subscription_id' => $request->subscriptionId,
+            'payment_date' => $start_date,
+            'payment_status' => 1,
+            'amount' => $amount
+        ]);
+        $BnStatus = $this->StatusBnAPI();
+        if($BnStatus['apiStatus'] == 'Successful'){
+            $CardBn = new Client();
+            $CardCreationResult = $CardBn->request('POST', "http://www.fttserver.com:4217/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
+                'headers' => [
+                    'Content-Type'  => "application/json",
+                ],
+                'json' => ['applicationName' => 'ETAX_TEST',
+                    'userName' => $user->user_name,
+                    'userPassword' => $user->password,
+                    'cardDescription' => $NameCard,
+                    'primaryAccountNumber' => $request->number,
+                    "expirationMonth" => $request->cardMonth,
+                    "expirationYear" => '20' . $request->cardYear,
+                    "verificationValue" => $request->cvc
+                ],
+                'verify' => false,
+            ]);
+            $Card = json_decode($CardCreationResult->getBody()->getContents(), true);
+            if($Card['apiStatus'] == 'Success') {
+                $last_4digits = substr($request->number, -4);
+                $token_bn = $Card['cardTokenId'];
+                $Token = $token_bn;
+                $token_cybersource = '';
+                $paymentMethod = PaymentMethod::create([
+                    'user_id' => $user->id,
+                    'name' => $request->first_name,
+                    'last_name' => $request->last_name,
+                    'last_4digits' => $last_4digits,
+                    'nameCard' => $NameCard,
+                    'due_date' => $request->cardMonth . ' ' . $request->cardYear,
+                    'token_cybersource' => $token_cybersource,
+                    'token_bn' => $token_bn
+                ]);
+                $payment->proof = $Token;
+                $payment->payment_status = 1;
+                $payment->save();
+
+                $BnPayment = new Client();
+                $BnPaymentCard = $BnPayment->request('POST', "http://www.fttserver.com:4217/api/AppIncludeCharge?applicationName=string&applicationPassword=string&chargeDescription=string&userName=string&transactionCurrency=string&transactionAmount=double", [
+                    'headers' => [
+                        'Content-Type' => "application/json",
+                    ],
+                    'json' => ['applicationName' => 'ETAX_TEST',
+                        'applicationPassword' => 'ETFTTJUN0619%',
+                        "chargeDescription" => 'Compra de Plan ' . $planSelected,
+                        "userName" => $user->user_name,
+                        "transactionCurrency" => "USD",
+                        "transactionAmount" => $amount
+                    ],
+                    'verify' => false,
+                ]);
+                $PaymentCard = json_decode($BnPaymentCard->getBody()->getContents(), true);
+                if ($PaymentCard['apiStatus'] == "Successful") {
+                    $subscription = Subscription::find($request->subscriptionId);
+                    $subscription->status = 1;
+                    $subscription->next_payment_date = $next_payment_date;
+                    $subscription->save();
+                    return redirect('wizard');
+                } else {
+                    $mensaje = 'El pago ha sido denegado';
+                    return redirect()->back()->withError($mensaje);
+                }
+            }else{
+                $mensaje = 'No se pudo verificar la informacion de esta tarjeta. Dirijase a Configuraciones->Gestion de Pagos- para agregar una tarjeta';
+                return redirect('wizard')->withError($mensaje);
+            }
+        }else{
+            $mensaje = 'Pagos en Linea esta fuera de servicio. Dirijase a Configuraciones->Gestion de Pagos- para agregar una tarjeta';
+            return redirect('wizard')->withError($mensaje);
+        }
+    }
+
+
+    public function paymentTokenUpdateView($id){
+        $subscription = getCurrentSubscription();
+        $Payment = PaymentMethod::find($id);
+        return view('payment/updatePaymentMethods')->with('payment', $Payment)
+                                                        ->with('Id', $id);
+    }
+    /*
+    *
+    *
+    *
+    */
+    public function paymentTokenUpdate(Request $request){
         $cards = array(
             $request->number
         );
@@ -140,126 +347,184 @@ class PaymentController extends Controller
                 $CardType = '003';
                 break;
         }
-        /**************************************************************/
-        // Before using this example, you can use your own reference code for the transaction.
-        $referenceCode = 5;
-
-        $client = new CybsSoapClient();
-        $requestClient = $client->createRequest($referenceCode);
-
-        // This section contains a sample transaction request for creating a subscription
-
-        $paySubscriptionCreateService = new stdClass();
-        $paySubscriptionCreateService->run = 'true';
-        $requestClient->paySubscriptionCreateService = $paySubscriptionCreateService;
-        $requestClient->deviceFingerPrintID = $request->deviceFingerPrintID;
-
-        $billTo = new stdClass();
-        $billTo->firstName = $request->first_name;
-        $billTo->lastName = $request->last_name;
-        $billTo->street1 = $request->street1;
-        $billTo->city = $request->city;
-        $billTo->state = $request->state;
-        $billTo->postalCode = $request->postalCode;
-        $billTo->country = $request->country;
-        $billTo->email = $request->email;
-        $billTo->ipAddress = $request->IpAddress;
-        $requestClient->billTo = $billTo;
-
-        /*visa 4111 1111 1111 1111 12/2022 123cvn 001
-        mastercard 5555 5555 5555 4444 12/2022 123 002
-        autorizaction y capture
-        reply reason code
-        desition manager
-        100 o 481 autorizacion si se hace. Necesario que el set de pruebas llegue completo
-        Reversion y capture
-        Autorizacion flotante cobro automatico
-        100
-        si alguno no esta en 100 no se aprueba*/
-
-        $item = new stdClass();
-        $item->unitPrice = $amount;
-        $item->quantity = 1;
-        $item->productCode = 'PB';
-        $item->productName = 'Plan Etax Profesional Basico';
-        $item->productSKU = 1;
-        $requestClient->item = $item;
-
-        $card = new stdClass();
-        $card->accountNumber = $request->number;
-        $card->expirationMonth = $request->cardMonth;
-        $card->expirationYear = $request->cardYear;
-        $card->cardType= $CardType;
-        $requestClient->card = $card;
-
-        $purchaseTotals = new stdClass();
-        $purchaseTotals->currency = 'USD';
-        $requestClient->purchaseTotals = $purchaseTotals;
-
-        $recurringSubscriptionInfo = new stdClass();
-        $recurringSubscriptionInfo->frequency = $frequency;
-        $recurringSubscriptionInfo->amount = $amount;
-        $recurringSubscriptionInfo->automaticRenew = 'true';
-        $recurringSubscriptionInfo->numberOfPayments = $numberOfPayments;
-        $recurringSubscriptionInfo->startDate = $start_date;
-
-        $requestClient->recurringSubscriptionInfo = $recurringSubscriptionInfo;
-
-        $reply = $client->runTransaction($requestClient);
-        //echo $reply;
-        dd($reply);
-
-        /**************************************************************/
-        if($reply->decision == 'ACCEPT'){
-            $token_cybersource = $reply->requestToken;
-            $last_4digits = substr($request->cardNumber, -4);
-            $paymentMethod = PaymentMethodController::create([
-                'user_id' => $user->id,
-                'name' => $request->firstName,
-                'last_name' => $request->lastName,
-                'last_4digits' =>  $last_4digits,
-                'due_date' => $request->cardMonth . ' ' . $request->cardYear,
-                'token_cybersource' => $token_cybersource
-            ]);
-            $payment = Payment::create([
-                'subscription_id' => $request->subscriptionId,
-                'payment_date' => $start_date,
-                'payment_status' => 2,
-                'next_payment_date' => $next_payment_date,
-                'amount' => $amount,
-                'proof' => $reply->ccAuthReply_reconciliationID
-
-            ]);
-            $sub = Subscription::updateOrCreate (
-                [
-                    'user_id' => $user->id
+        $user = auth()->user();
+        $PaymentMethod = PaymentMethod::find($request->Id);
+        $BnStatus = $this->StatusBnAPI();
+        if($BnStatus['apiStatus'] == 'Successful'){
+            $CardBn = new Client();
+            $CardCreationResult = $CardBn->request('POST', "http://www.fttserver.com:4217/api/UserUpdateCard?applicationName=string&userName=string&userPassword=string&cardTokenId=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
+                'headers' => [
+                    'Content-Type'  => "application/json",
                 ],
-                [
-                    'status'  => 1,
-                    'trial_end_date' => $start_date,
-                    'start_date' => $start_date,
-                    'next_payment_date' => $next_payment_date,
-                ]
-            );
-            dd($reply);
-            //return view('Wizard.index');
+                'json' => ['applicationName' => 'ETAX_TEST',
+                    'userName' => $user->user_name,
+                    'userPassword' => $user->password,
+                    'cardTokenId' => $PaymentMethod->token_bn,
+                    "cardDescription" => $PaymentMethod->card_name,
+                    "primaryAccountNumber" => $request->number,
+                    "expirationMonth" => $request->cardMonth,
+                    "expirationYear" => '20' . $request->cardYear,
+                    "verificationValue" => "444"
+                ],
+                'verify' => false,
+            ]);
+            $Card = json_decode($CardCreationResult->getBody()->getContents(), true);
+            $last_4digits = substr($request->number, -4);
+            $due_date = $request->cardMonth . ' ' . $request->cardYear;
+            $PaymentMethod->last_4digits = $last_4digits;
+            $PaymentMethod->due_date = $due_date;
+            $PaymentMethod->nameCard = $TypeCard;
+            $PaymentMethod->updated_by = $user->id;
+            $PaymentMethod->save();
+            return redirect('payments');
         }else{
-            if($reply->decision == 'ERROR'){
-                $mensaje = 'Hubo un error en la transaccion';
-            }else if ($reply->decision == 'REJECT'){
-                $mensaje = 'El pago fue denegado';
-            }
-            dd($reply);
-            //return view('payment/create')->withMessage($mensaje);
+            $mensaje = 'Transacción no disponible en este momento';
+            return redirect()->back()->withError($mensaje);
         }
     }
 
+    public function paymentTokenDelete($Id){
+        $user = auth()->user();
+        $PaymentMethod = PaymentMethod::find($Id);
+        $this->authorize('update', $PaymentMethod);
+        $BnStatus = $this->StatusBnAPI();
+        if($BnStatus['apiStatus'] == 'Successful'){
+            $CardBn = new Client();
+            $CardCreationResult = $CardBn->request('POST', "http://www.fttserver.com:4217/api/UserDeleteCard", [
+                'headers' => [
+                    'Content-Type'  => "application/json",
+                ],
+                'json' => ['applicationName' => 'ETAX_TEST',
+                    'userName' => $user->user_name,
+                    'userPassword' => $user->password,
+                    'cardTokenId' => $PaymentMethod->token_bn
+                ],
+                'verify' => false,
+            ]);
+            $Card = json_decode($CardCreationResult->getBody()->getContents(), true);
+            if($Card['apiStatus'] == 'sucess') {
+                $PaymentMethod->updated_by = $user->id;
+                $PaymentMethod->save();
+                $PaymentMethod->delete();
+                return redirect('payments')->withMessage('Método de pago eliminado:');
+            }else{
+                $mensaje = 'No se pudo eliminar el método de pago: ' . $Card['apiStatus'];
+                return redirect()->back()->withError($mensaje);
+            }
+        }else{
+            $mensaje = 'Transacción no disponible en este momento';
+            return redirect()->back()->withError($mensaje);
+        }
+    }
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+    *
+    *
+    *
+    *
+    */
+    public function paymentCharge(Request $request){
+        $user = auth()->user();
+        $BnCharge = new Client();
+        $ChargeBn = $BnCharge->request('POST', "http://www.fttserver.com:4217/api/AppIncludeCharge?applicationName=string&applicationPassword=string&chargeDescription=string&userName=string&transactionCurrency=string&transactionAmount=double", [
+            'headers' => [
+                'Content-Type' => "application/json",
+            ],
+            'json' => ['applicationName' => 'ETAX_TEST',
+                'applicationPassword' => 'ETFTTJUN0619%',
+                'chargeDescription' => $request->description,
+                'userName' => $user->user_name,
+                "transactionCurrency" => "USD",
+                "transactionAmount" => $request->amount
+            ],
+            'verify' => false,
+        ]);
+        $Charge = json_decode($ChargeBn->getBody()->getContents(), true);
+        return $Charge;
+    }
+    /**
+    *
+    *
+    *
+    *
+    */
+    public function comprarProductos(Request $request){
+        $date = Carbon::parse(now('America/Costa_Rica'));
+        $current_company = currentCompany();
+        $BnStatus = $this->StatusBnAPI();
+        if($BnStatus['apiStatus'] == 'Successful'){
+            $sale = Sale::create([
+                "company_id" => $current_company,
+                "etax_product_id" => $request->id,
+                "status" => 3,
+                "recurrency" => 0
+            ]);
+            $payment = Payment::create([
+                'sale_id' => $sale->id,
+                'payment_date' => $date,
+                'payment_status' => 1,
+                'amount' => $request->amount
+            ]);
+            $Payment = $this->paymentCharge($request);
+            if($Payment['apiStatus'] == "Successful"){
+                $payment->payment_status = 2;
+                $sale->status = 1;
+                $payment->save();
+                $sale->save();
+            }else{
+                return redirect()->back()->withError('No se pudo procesar el pago');
+            }
+        }else{
+            return redirect()->back()->withError('Transacción no disponible en este momento');
+        }
+    }
+    /**
+    *
+    *
+    *
+    *
+    */
+    public function pagarSuscripcion(){
+        $date = Carbon::parse(now('America/Costa_Rica'));
+        $user = auth()->user();
+        $BnStatus = $this->StatusBnAPI();
+        if($BnStatus['apiStatus'] == 'Successful') {
+            $subscriptionsUnpaid = EtaxProducts::where('isSubscription', 1);
+            for($i=0;$i<count($subscriptionsUnpaid);$i++){
+                $sale = Sale::updateOrCreate($subscriptionsUnpaid[$i]->id, [
+                    "etax_product_id" => $subscriptionsUnpaid[$i]->id,
+                    "status" => 3
+                ]);
+                $payment = Payment::create([
+                    'sale_id' => $sale->id,
+                    'payment_date' => $date,
+                    'payment_status' => 1,
+                    'amount' => $subscriptionsUnpaid[$i]->price
+                ]);
+                $data = new stdClass();
+                $data->description = '';
+                $data->amount = $subscriptionsUnpaid[$i]->price;
+                $Payment = $this->paymentCharge($data);
+                if ($Payment['apiStatus'] == "Successful") {
+                    $payment->payment_status = 2;
+                    $sale->status = 1;
+                    $payment->save();
+                    $sale->save();
+                    //crear factura electronica
+                } else {
+                    return redirect()->back()->withError('No se pudo procesar el pago');
+                }
+            }
+        }else{
+            $mensaje = 'Transacción no disponible en este momento';
+            return redirect()->back()->withError($mensaje);
+        }
+    }
+    /**
+    * Store a newly created resource in storage.
+    *
+    * @param  \Illuminate\Http\Request  $request
+    * @return \Illuminate\Http\Response
+    */
     public function store(Request $request){
         //
     }

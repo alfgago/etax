@@ -129,13 +129,16 @@ class InvoiceController extends Controller
      */
     public function indexValidacionesLinea()
     {
-        $current_company = currentCompany()->id;
-        $items = InvoiceItem::with('bill')
-                  ->where('company_id', $company)
-                  ->whereNull('iva_type')->paginate(10);
-                  
-        return view('Invoice/index-validaciones-linea', [
-          'invoices' => $invoices
+        $current_company = currentCompany();
+        $invoices = Invoice::where('company_id', $current_company)
+            ->where('is_void', false)
+            ->where('is_totales', false)
+            ->where('is_code_validated', false)
+            ->where('is_authorized', true)
+            ->orderBy('generated_date', 'DESC')
+            ->orderBy('reference_number', 'DESC')->paginate(10);
+        return view('Invoice/index-validaciones', [
+            'invoices' => $invoices
         ]);
     }
 

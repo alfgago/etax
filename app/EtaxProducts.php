@@ -5,9 +5,8 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class PaymentMethod extends Model
+class EtaxProducts extends Model
 {
     use SoftDeletes;
     protected $guarded = [];
-    //
 }

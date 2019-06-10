@@ -275,7 +275,7 @@
                             <input type="text" hidden value="{{$subscription->plan->id}}" name="planId">
                             <input type="text" hidden value=" {{$subscription->id}}" name="subscriptionId">
                             <input type="text" hidden id="IpAddress" name="IpAddress">
-                            <input type="text" hidden id="deviceFingerprintID" name="deviceFingerprintID">
+                            <input type="text" hidden id="deviceFingerPrintID" name="deviceFingerPrintID">
                             <input type="text" hidden value="{{$planSelected}}" name="planSelected">
                             <input type="text" hidden id="first_name" name="first_name">
                             <input type="text" hidden id="last_name" name="last_name">
@@ -295,6 +295,7 @@
 @section('footer-scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.css" />
+    <script src="../assets/js/cybs_devicefingerprint.js"></script>
     <script type="text/javascript">
         var card = new Card({
             form: 'form.tarjeta',
@@ -316,6 +317,8 @@
             var exp = $("#expiry").val();
             $('#cardMonth').val(exp.substr(0,2));
             $('#cardYear').val(exp.substring(exp.length - 2, exp.length));
+            var FingerprintID = cybs_dfprofiler("tc_cr_011007172","test");
+            $("#deviceFingerPrintID").val(FingerprintID);
         }
         function valid_credit_card(value) {
             // accept only digits, dashes or spaces
@@ -349,10 +352,7 @@
             $('.'+id).addClass('is-active');
             $('.wizard-container').prop('class', id+'-selected wizard-container');
         }
-    </script>
-    <script src="../assets/js/cybs_devicefingerprint.js"></script>
-    <script>
-        $("#deviceFingerprintID").val(cybs_dfprofiler("tc_cr_011007172","test"));
+
         //document.write('Session Id <input type="text" name="deviceFingerprintID" value="' + cybs_dfprofiler("tc_cr_01100XXXX","test") + '">');
     </script>
 
