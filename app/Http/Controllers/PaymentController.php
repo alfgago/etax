@@ -24,7 +24,9 @@ class PaymentController extends Controller
      */
     public function index()
     {
-        return view('Payment/index');
+        $user = auth()->user();
+        $cantidad = PaymentMethod::where('user_id', $user->id)->get()->count();
+        return view('Payment/index')->with('cantidad', $cantidad);
     }
     public function createView(){
         return view('payment/CreatePaymentMethod');
