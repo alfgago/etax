@@ -304,7 +304,7 @@ class PaymentController extends Controller
                 }
             }else{
                 $mensaje = 'No se pudo verificar la informacion de esta tarjeta. Dirijase a Configuraciones->Gestion de Pagos- para agregar una tarjeta';
-                return redirect('wizard')->withError($mensaje);
+                return redirect()->back()->withError($mensaje);
             }
         }else{
             $mensaje = 'Pagos en Linea esta fuera de servicio. Dirijase a Configuraciones->Gestion de Pagos- para agregar una tarjeta';
