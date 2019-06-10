@@ -215,7 +215,7 @@ window.fillProvincias = function() {
   if ($('#country').val() == 'CR') {
     var sel = $('#state');
     sel.html("");
-    sel.append("<option val='0' selected>-- Seleccione una provincia --</option>");
+    sel.append("<option value='0' selected>-- Seleccione una provincia --</option>");
     $.each(provincias, function(i, val) {
       sel.append("<option value='" + i + "'>" + provincias[i]["Nombre"] + "</option>");
     });
@@ -226,7 +226,7 @@ window.fillCantones = function() {
   var provincia = $('#state').val();
   var sel = $('#city');
   sel.html("");
-  sel.append("<option val='0' selected>-- Seleccione un cantón --</option>");
+  sel.append("<option value='0' selected>-- Seleccione un cantón --</option>");
   $.each(cantones, function(i, val) {
     if (provincia == cantones[i]["Provincia"]) {
       sel.append("<option value='" + i + "'>" + cantones[i]["Nombre"] + "</option>");
@@ -238,7 +238,7 @@ window.fillDistritos = function() {
   var canton = $('#city').val();
   var sel = $('#district');
   sel.html("");
-  sel.append("<option val='0' selected>-- Seleccione un distrito --</option>");
+  sel.append("<option value='0' selected>-- Seleccione un distrito --</option>");
   $.each(distritos, function(i, val) {
     if (canton == distritos[i]["Canton"]) {
       sel.append("<option value='" + i + "'>" + distritos[i]["Nombre"] + "</option>");

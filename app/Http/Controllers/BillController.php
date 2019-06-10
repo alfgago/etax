@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\UnidadMedicion;
 use \Carbon\Carbon;
 use App\Bill;
 use App\BillItem;
@@ -73,7 +74,7 @@ class BillController extends Controller
                 ])->render();
             }) 
             ->editColumn('provider', function(Bill $bill) {
-                return $bill->provider->fullname;
+                return $bill->provider->getFullName();
             })
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');
@@ -89,7 +90,8 @@ class BillController extends Controller
      */
     public function create()
     {
-        return view("Bill/create");
+        $units = UnidadMedicion::all()->toArray();
+        return view("Bill/create", ['units' => $units]);
     }
 
     /**
@@ -137,9 +139,10 @@ class BillController extends Controller
     public function show($id)
     {
         $bill = Bill::findOrFail($id);
+        $units = UnidadMedicion::all()->toArray();
         $this->authorize('update', $bill);
       
-        return view('Bill/show', compact('bill') );
+        return view('Bill/show', compact('bill', 'units') );
     }
 
     /**
@@ -151,6 +154,7 @@ class BillController extends Controller
     public function edit($id)
     {
         $bill = Bill::findOrFail($id);
+        $units = UnidadMedicion::all()->toArray();
         $this->authorize('update', $bill);
       
         //Valida que la factura recibida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
@@ -158,7 +162,7 @@ class BillController extends Controller
           return redirect('/facturas-recibidas');
         } 
       
-        return view('Bill/edit', compact('bill') );
+        return view('Bill/edit', compact('bill', 'units') );
     }
 
     /**
@@ -438,7 +442,7 @@ class BillController extends Controller
                 ])->render();
             }) 
             ->editColumn('provider', function(Bill $bill) {
-                return $bill->provider->fullname;
+                return $bill->provider->getFullName();
             })
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');
@@ -479,7 +483,7 @@ class BillController extends Controller
                 ])->render();
             }) 
             ->editColumn('provider', function(Bill $bill) {
-                return $bill->provider->fullname;
+                return $bill->provider->getFullName();
             })
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');

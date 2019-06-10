@@ -80,8 +80,6 @@
 	    </form>
 	  </div>  
 	  
-	  
-	  
   </div>
 
 		<a style=""
@@ -150,9 +148,39 @@
         toggleTipoProrrata();
         toggleApellidos();
     });
-  
-    
-  
+
+	$("#input-cert").change(function () {
+		var ext = this.value.match(/\.(.+)$/)[1];
+		switch (ext) {
+			case 'p12':
+				$('#uploadButton').attr('disabled', false);
+				break;
+			default:
+				alert('El archivo no es un certificado.');
+				this.value = '';
+		}
+	});
+
+	$("#input_logo").change(function () {
+		var ext = this.value.match(/\.(.+)$/)[1];
+		switch (ext) {
+			case 'jpg':
+			case 'jpeg':
+			case 'png':
+				$('#uploadButton').attr('disabled', false);
+				break;
+			default:
+				alert('El archivo no es de tipo imagen.');
+				this.value = '';
+		}
+
+		var file_size = $("#input_logo")[0].files[0].size;
+		if(file_size > 2097152) {
+			alert('El el archivo debe tener un maximo de 2MB.');
+			$("#input_logo").value = '';
+		}
+	});
+
 </script>
 
 @endsection

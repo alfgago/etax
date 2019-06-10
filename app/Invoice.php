@@ -6,14 +6,16 @@ use \Carbon\Carbon;
 use App\Company;
 use App\InvoiceItem;
 use App\Client;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class Invoice extends Model
 {
-  
+    use SoftDeletes;
+
     protected $guarded = [];
     
     //Relacion con la empresa
@@ -26,6 +28,22 @@ class Invoice extends Model
     public function client()
     {
         return $this->belongsTo(Client::class);
+    }
+    
+    public function clientName() {
+      if( isset($this->client_id) ) {
+        return $this->client->getFullName();
+      }else{
+        return 'N/A';
+      }
+    }
+    
+    public function documentTypeName() {
+      $tipo = 'Factura';
+      if( $this->document_type == '04' ) {
+        $tipo = "Tiquete";
+      }
+      return $tipo;
     }
   
     //Relación con facturas emitidas
@@ -45,117 +63,121 @@ class Invoice extends Model
     {
         return Carbon::parse($this->due_date);
     }
+
+    //Relacion con hacienda
+    public function xmlHacienda()
+    {
+        return $this->belongsTo(XmlHacienda::class);
+    }
     
     
     /**
     * Asigna los datos de la factura segun el request recibido
     **/
-    public function setInvoiceData($request) {
-      
-      $this->document_key = $request->document_key;
-      $this->document_number = $request->document_number;
-      $this->sale_condition = $request->sale_condition;
-      $this->payment_type = $request->payment_type;
-      $this->retention_percent = $request->retention_percent;
-      $this->credit_time = $request->credit_time;
-      $this->buy_order = $request->buy_order;
-      $this->other_reference = $request->other_reference;
-    
-      //Datos de cliente. El cliente nuevo viene con ID = -1
-      if( $request->client_id == '-1' ){
-          $tipo_persona = $request->tipo_persona;
-          $identificacion_cliente = $request->id_number;
-          $codigo_cliente = $request->code;
-          
-          $cliente = Client::firstOrCreate(
-              [
-                  'id_number' => $identificacion_cliente,
-                  'company_id' => $this->company_id,
-              ],
-              [
-                  'code' => $codigo_cliente ,
-                  'company_id' => $this->company_id,
-                  'tipo_persona' => $tipo_persona,
-                  'id_number' => $identificacion_cliente
-              ]
-          );
-          $cliente->first_name = $request->first_name;
-          $cliente->last_name = $request->last_name;
-          $cliente->last_name2 = $request->last_name2;
-          $cliente->emisor_receptor = 'ambos';
-          $cliente->country = $request->country;
-          $cliente->state = $request->state;
-          $cliente->city = $request->city;
-          $cliente->district = $request->district;
-          $cliente->neighborhood = $request->neighborhood;
-          $cliente->zip = $request->zip;
-          $cliente->address = $request->address;
-          $cliente->phone = $request->phone;
-          $cliente->es_exento = $request->es_exento;
-          $cliente->email = $request->email;
-          $cliente->save();
-              
-          $this->client_id = $cliente->id;
-      }else{
-          $this->client_id = $request->client_id;
-      }
-      
-      $request->currency_rate = $request->currency_rate ? $request->currency_rate : 1;
-      
-      //Datos de factura
-      $this->description = $request->description;
-      $this->subtotal = floatval( str_replace(",","", $request->subtotal ));
-      $this->currency = $request->currency;
-      $this->currency_rate = floatval( str_replace(",","", $request->currency_rate ));
-      $this->total = floatval( str_replace(",","", $request->total ));
-      $this->iva_amount = floatval( str_replace(",","", $request->iva_amount ));
-      
-      
+    public function setInvoiceData($request)
+    {
+        try {
+            $this->document_key = $request->document_key;
+            $this->document_number = $request->document_number;
+            $this->sale_condition = $request->sale_condition;
+            $this->payment_type = $request->payment_type;
+            $this->retention_percent = $request->retention_percent;
+            $this->credit_time = $request->credit_time;
+            $this->buy_order = $request->buy_order;
+            $this->other_reference = $request->other_reference;
 
-      //Fechas
-      $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
-      $this->generated_date = $fecha;
-      $fechaV = Carbon::createFromFormat('d/m/Y', $request->due_date );
-      $this->due_date = $fechaV;
-      
-      $this->year = $fecha->year;
-      $this->month = $fecha->month;
-    
-      $this->save();
-    
-      $lids = array();
-      foreach($request->items as $item) {
-        $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
-        
-        $item_id = $item['id'] ? $item['id'] : 0;
-        $item_number = $item['item_number'];
-        $code = $item['code'];
-        $name = $item['name'];
-        $product_type = $item['product_type'];
-        $measure_unit = $item['measure_unit'];
-        $item_count = $item['item_count'];
-        $unit_price = $item['unit_price'];
-        $subtotal = $item['subtotal'];
-        $total = $item['total'];
-        $discount_percentage = '0';
-        $discount_reason = "";
-        $iva_type = $item['iva_type'];
-        $iva_percentage = $item['iva_percentage'];
-        $iva_amount = $item['iva_amount'];
-        $is_exempt = false;
-        $isIdentificacion = $item['is_identificacion_especifica'];
-        $item_modificado = $this->addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt );
-        array_push( $lids, $item_modificado->id );
-      }
-      
-      foreach ( $this->items as $item ) {
-        if( !in_array( $item->id, $lids ) ) {
-          $item->delete();
+            $client;
+            //Datos de cliente. El cliente nuevo viene con ID = -1
+            if( $request->client_id == '-1' ) {
+                $tipo_persona = $request->tipo_persona;
+                $identificacion_cliente = $request->id_number;
+                $codigo_cliente = $request->code;
+
+                $client = Client::updateOrCreate(
+                    [
+                        'id_number' => $identificacion_cliente,
+                        'company_id' => $this->company_id,
+                    ],
+                    [
+                        'code' => $codigo_cliente ,
+                        'company_id' => $this->company_id,
+                        'tipo_persona' => $tipo_persona,
+                        'id_number' => $identificacion_cliente,
+                        'first_name' => $request->first_name,
+                        'last_name' => $request->last_name,
+                        'last_name2' => $request->last_name2,
+                        'fullname' => $request->first_name.' '.$request->last_name.' '.$request->last_name2,
+                        'emisor_receptor' => 'ambos',
+                        'country' => $request->country,
+                        'state' => $request->state,
+                        'city' => $request->city,
+                        'district' => $request->district,
+                        'neighborhood' => $request->neighborhood,
+                        'zip' => $request->zip,
+                        'address' => $request->address,
+                        'phone' => $request->phone,
+                        'es_exento' => $request->es_exento,
+                        'email' => $request->email,
+                        'billing_emails' => $request->billing_emails ?? $request->email
+                    ]
+                );
+                $this->client_id = $client->id;
+            }else{
+                $this->client_id = $request->client_id;
+                $client = Client::find($this->client_id);
+            }
+
+            $request->currency_rate = $request->currency_rate ? $request->currency_rate : 1;
+            //Datos de factura
+            $this->description = $request->description;
+            $this->subtotal = floatval( str_replace(",","", $request->subtotal ));
+            $this->currency = $request->currency;
+            $this->currency_rate = floatval( str_replace(",","", $request->currency_rate ));
+            $this->total = floatval( str_replace(",","", $request->total ));
+            $this->iva_amount = floatval( str_replace(",","", $request->iva_amount ));
+            $this->client_first_name = $client->first_name;
+            $this->client_last_name = $client->last_name;
+            $this->client_last_name2 = $client->last_name2;
+            $this->client_email = $client->email;
+            $this->client_address = $client->address;
+            $this->client_country = $client->country;
+            $this->client_state = $client->state;
+            $this->client_city = $client->city;
+            $this->client_district = $client->district;
+            $this->client_zip = $client->zip;
+            $this->client_phone = $client->phone;
+            $this->client_id_number = $client->id_number;
+            //Fechas
+            $fecha = Carbon::createFromFormat('d/m/Y g:i A',
+                $request->generated_date . ' ' . $request->hora);
+            $this->generated_date = $fecha;
+            $fechaV = Carbon::createFromFormat('d/m/Y', $request->due_date );
+            $this->due_date = $fechaV;
+            $this->year = $fecha->year;
+            $this->month = $fecha->month;
+
+            $this->save();
+
+            $lids = array();
+            foreach($request->items as $item) {
+                $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
+                $item['item_id'] = $item['id'] ? $item['id'] : 0;
+                $item_modificado = $this->addEditItem($item);
+
+                array_push( $lids, $item_modificado->id );
+            }
+
+            foreach ( $this->items as $item ) {
+                if( !in_array( $item->id, $lids ) ) {
+                    $item->delete();
+                }
+            }
+            return $this;
+
+        } catch (\Exception $e) {
+            Log::error('Error al crear factura: '.$e->getMessage());
+            return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
         }
-      }
-      
-      return $this;
-      
     }
   
     public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, 
@@ -186,39 +208,37 @@ class Invoice extends Model
       
     }
   
-    public function addEditItem( $item_id, $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, 
-                                 $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt )
+    public function addEditItem(array $data)
     {
-      if( $item_id ){
-        
-        $item = InvoiceItem::find($item_id);
-        //Revisa que la linea exista y pertenece a la factura actual. Asegura que si el ID se cambia en frontend, no se actualice.
-        if( $item && $item->invoice_id == $this->id ) {
-          $item->company_id = $this->company_id;
-          $item->year = $this->year;
-          $item->month = $this->month;
-          $item->item_number = $item_number;
-          $item->code = $code;
-          $item->name = $name;
-          $item->product_type = $product_type;
-          $item->measure_unit = $measure_unit;
-          $item->item_count = $item_count;
-          $item->unit_price = $unit_price;
-          $item->subtotal = $subtotal;
-          $item->total = $total;
-          $item->discount_type = '01';
-          $item->discount = $discount_percentage;
-          $item->iva_type = $iva_type;
-          $item->iva_percentage = $iva_percentage;
-          $item->iva_amount = $iva_amount;
-          $item->is_exempt = $is_exempt;
-          $item->is_identificacion_especifica = $isIdentificacion;
-          $item->save();
-        }
-      }else {
-        $item = $this->addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt );
+      if(isset($data['item_number'])) {
+          $item = InvoiceItem::updateOrCreate([
+              'item_number' => $data['item_number'],
+              'invoice_id' => $this->id,
+              'code'=> $data['code']
+          ], [
+                  'company_id' => $this->company_id,
+                  'year'  => $this->year,
+                  'month' => $this->month,
+                  'name'  => $data['name'] ?? '',
+                  'product_type' => $data['product_type'] ?? '',
+                  'measure_unit' => $data['measure_unit'] ?? '',
+                  'item_count'   => $data['item_count'] ?? '',
+                  'unit_price'   => $data['unit_price'] ?? '',
+                  'subtotal'     => $data['subtotal'] ?? '',
+                  'total' => $data['total'] ?? '',
+                  'discount_type' => $data['discount_type'] ?? null,
+                  'discount' => $data['discount'] ?? 0,
+                  'iva_type' => $data['iva_type'] ?? '',
+                  'iva_percentage' => $data['iva_percentage'] ?? '',
+                  'iva_amount' => $data['iva_amount'] ?? '',
+                  'is_exempt' => $data['is_exempt'] ?? false,
+                  'is_identificacion_especifica' =>  $data['is_identificacion_especifica'] ?? ''
+              ]
+          );
+          return $item;
+      } else {
+          return false;
       }
-      return $item;
     }
     
     public static function importInvoiceRow (
@@ -240,25 +260,31 @@ class Invoice extends Model
         return false;
       }
       
-      $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
-      if ( !Cache::has($clientCacheKey) ) {
-          $clienteCache =  Client::firstOrCreate(
-              [
-                  'id_number' => $identificacionCliente,
-                  'company_id' => $company->id,
-              ],
-              [
-                  'code' => $codigoCliente ,
-                  'company_id' => $company->id,
-                  'tipo_persona' => str_pad($tipoPersona, 2, '0', STR_PAD_LEFT),
-                  'id_number' => $identificacionCliente,
-                  'first_name' => $nombreCliente,
-                  'fullname' => "$identificacionCliente - $nombreCliente"
-              ]
-          );
-          Cache::put($clientCacheKey, $clienteCache, 30);
+      $idCliente = null;
+      if( $identificacionCliente ) {
+        $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
+        if ( !Cache::has($clientCacheKey) ) {
+            $clienteCache =  Client::firstOrCreate(
+                [
+                    'id_number' => $identificacionCliente,
+                    'company_id' => $company->id,
+                ],
+                [
+                    'code' => $codigoCliente ,
+                    'company_id' => $company->id,
+                    'tipo_persona' => str_pad($tipoPersona, 2, '0', STR_PAD_LEFT),
+                    'id_number' => $identificacionCliente,
+                    'first_name' => $nombreCliente,
+                    'fullname' => "$identificacionCliente - $nombreCliente"
+                ]
+            );
+            Cache::put($clientCacheKey, $clienteCache, 30);
+        }
+        $cliente = Cache::get($clientCacheKey);
+        $idCliente = $cliente->id;
+      } else {
+        $tipoDocumento = '04';
       }
-      $cliente = Cache::get($clientCacheKey);
       
       $invoiceCacheKey = "import-factura-$nombreCliente-" . $company->id . "-" . $consecutivoComprobante;
       if ( !Cache::has($invoiceCacheKey) ) {
@@ -266,7 +292,7 @@ class Invoice extends Model
           $invoice = Invoice::firstOrNew(
               [
                   'company_id' => $company->id,
-                  'client_id' => $cliente->id,
+                  'client_id' => $idCliente,
                   'document_number' => $consecutivoComprobante,
                   'document_key' => $claveFactura,
               ]
@@ -275,18 +301,16 @@ class Invoice extends Model
           if( !$invoice->exists ) {
               
               $invoice->company_id = $company->id;
-              $invoice->client_id = $cliente->id;    
+              $invoice->client_id = $idCliente;    
       
               //Datos generales y para Hacienda
-              $tipoDocumento = $tipoDocumento;
               if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' 
                   || $tipoDocumento == '05' || $tipoDocumento == '06' || $tipoDocumento == '07' || $tipoDocumento == '08' || $tipoDocumento == '99' ) {
                   $invoice->document_type = $tipoDocumento;    
               } else {
                  $invoice->document_type = '01'; 
               }
-              
-              $invoice->reference_number = $company->last_invoice_ref_number + 1;
+
               $invoice->document_number =  $consecutivoComprobante;
               
               //Datos generales
@@ -305,15 +329,11 @@ class Invoice extends Model
               if( $invoice->currency == 2 ) { $invoice->currency = "USD"; }
               
               $invoice->currency_rate = $tipoCambio;
-            
-              $company->last_invoice_ref_number = $invoice->reference_number;
-              
               $invoice->subtotal = 0;
               $invoice->iva_amount = 0;
               $invoice->total = $totalDocumento;
               
               $invoice->save();
-              $company->save();
           }   
           Cache::put($invoiceCacheKey, $invoice, 30);
       }
@@ -391,6 +411,26 @@ class Invoice extends Model
       return $insert;
       
     }
+
+
+    public function shortDate() {
+        date_default_timezone_set("America/Costa_Rica");
+        $date = date_create();
+        return date_format($date,'dmy');
+    }
+
+    public function getIdFormat($id){
+        $clean="000000".trim(str_replace("-","",$id));
+        return substr($clean, -12);
+    }
+
+    public function getHashFromRef($ref) {
+        $salesId = $ref;
+        if ($salesId === null) {
+            return '';
+        }
+        return substr('0000'.hexdec(substr(sha1($ref.'Factel'.$salesId.'Facthor'), 0, 15)) % 999999999, -8);
+    }
     
     
     public static function saveInvoiceXML( $arr, $metodoGeneracion ) {
@@ -404,25 +444,41 @@ class Invoice extends Model
         $codigoCliente = '';
         $tipoPersona = $arr['Emisor']['Identificacion']['Tipo'];
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
-        $correoCliente = $arr['Receptor']['CorreoElectronico'];
-        $telefonoCliente = $arr['Receptor']['Telefono']['NumTelefono'];
-        $tipoPersona = $arr['Receptor']['Identificacion']['Tipo'];
-        $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
-        $nombreCliente = $arr['Receptor']['Nombre'];
+        
+        if ( array_key_exists('Receptor', $arr) ){
+          $correoCliente = $arr['Receptor']['CorreoElectronico'];
+          $telefonoCliente = $arr['Receptor']['Telefono']['NumTelefono'];
+          $tipoPersona = $arr['Receptor']['Identificacion']['Tipo'];
+          $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
+          $nombreCliente = $arr['Receptor']['Nombre'];
+        }else{
+          $correoCliente = 'N/A';
+          $telefonoCliente = 'N/A';
+          $tipoPersona = 'N/A';
+          $identificacionCliente = 0;
+          $nombreCliente = 'N/A';
+        }
+        
         $condicionVenta = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
         $plazoCredito = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
         $metodoPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
+        
+        if ( is_array($metodoPago) ) {
+          $metodoPago = $metodoPago[0];
+        }
+        
         $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
         $tipoCambio = $arr['ResumenFactura']['TipoCambio'];
         $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
         $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
-        $tipoDocumento = '01';
         $descripcion = $arr['ResumenFactura']['CodigoMoneda'];
         
         $authorize = true;
         if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
             $authorize = false;
         }
+        
+        $tipoDocumento = '01';
         
         $lineas = $arr['DetalleServicio']['LineaDetalle'];
         //Revisa si es una sola linea. Si solo es una linea, lo hace un array para poder entrar en el foreach.
@@ -470,10 +526,6 @@ class Invoice extends Model
         $path = \Storage::putFileAs(
             "empresa-$identificacionEmisor", $file, "$identificacionReceptor-$consecutivoComprobante.xml"
         );
-        
         return $path;
-        
-    }
-    
-    
+    }  
 }

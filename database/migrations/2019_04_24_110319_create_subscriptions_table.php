@@ -39,6 +39,6 @@ class CreateSubscriptionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_subscriptions_history');
+        Schema::dropIfExists('subscriptions');
     }
 }

@@ -278,6 +278,6 @@ class CreateCalculatedTaxesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('calculated_taxes')->default(0);
+        Schema::dropIfExists('calculated_taxes');
     }
 }

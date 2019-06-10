@@ -41,7 +41,7 @@
   
     <div class="form-group col-md-1">
       <label for="nombre_cliente">% IVA</label>
-      <input type="number" min="0" class="form-control" id="porc_iva" placeholder="13" value="13" readonly>
+      <input type="number" min="0" class="form-control pr-0" id="porc_iva" placeholder="13" value="13" readonly>
     </div>
     
     <div class="form-group col-md-12 inline-form inline-checkbox">
@@ -66,8 +66,8 @@
     <div class="form-group col-md-3">
       <label for="unidad_medicion">Unidad de medición</label>
       <select class="form-control" id="unidad_medicion" value="" >
-        @foreach ( \App\Variables::unidadesMedicion() as $unidad )
-          <option value="{{ $unidad['codigo'] }}" >{{ $unidad['nombre'] }}</option>
+        @foreach ($units as $unit )
+          <option value="{{ $unit['code'] }}" >{{ $unit['name'] }}</option>
         @endforeach
       </select>
     </div>

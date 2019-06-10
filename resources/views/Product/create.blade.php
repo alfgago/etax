@@ -34,8 +34,8 @@
           <div class="form-group col-md-6">
             <label for="measure_unit">Unidad de medición</label>
             <select class="form-control" name="measure_unit" id="unidad_medicion" value="" required>
-              @foreach ( \App\Variables::unidadesMedicion() as $unidad )
-                <option value="{{ $unidad['codigo'] }}" >{{ $unidad['nombre'] }}</option>
+              @foreach ($units as $unit )
+                <option value="{{ $unit['code'] }}" >{{ $unit['name'] }}</option>
               @endforeach
             </select>
             

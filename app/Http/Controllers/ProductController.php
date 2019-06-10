@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Company;
 use App\Product;
+use App\UnidadMedicion;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -34,20 +35,21 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexData() {
+    public function indexData( Request $request ) {
         $current_company = currentCompany();
-
+        
         $query = Product::where('company_id', $current_company)->where('is_catalogue', 1);
+        
+        if( $request->get('filtro') == 0 ) {
+            
+            $query = $query->onlyTrashed();
+        }
+        
+        
         return datatables()->eloquent( $query )
-            ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($product) {
-                return view('datatables.actions', [
-                    'routeName' => 'productos',
-                    'deleteTitle' => 'Anular producto',
-                    'editTitle' => 'Editar producto',
-                    'hideDelete' => true,
-                    'deleteIcon' => 'fa fa-ban',
-                    'id' => $product->id
+                return view('Product.actions', [
+                    'data' => $product
                 ])->render();
             }) 
             ->editColumn('unidad_medicion', function(Product $product) {
@@ -68,7 +70,8 @@ class ProductController extends Controller
      */
     public function create()
     {
-        return view("Product/create");
+        $units = UnidadMedicion::all()->toArray();
+        return view("Product/create", ['units' => $units]);
     }
 
     /**
@@ -103,7 +106,7 @@ class ProductController extends Controller
       
         $product->save();
       
-        return redirect('/productos');
+        return redirect('/productos')->withMessage('El producto ha sido agregado satisfactoriamente.');
     }
 
     /**
@@ -128,7 +131,8 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $this->authorize('update', $product);
         
-        return view('Product/edit', compact('product') );
+        $units = UnidadMedicion::all()->toArray();
+        return view('Product/edit', compact('product', 'units') );
     }
 
     /**
@@ -163,7 +167,7 @@ class ProductController extends Controller
       
         $product->save();
       
-        return redirect('/products');
+        return redirect('/products')->withMessage('El producto ha sido editado satisfactoriamente.');
     }
 
     /**
@@ -178,6 +182,24 @@ class ProductController extends Controller
         $this->authorize('update', $product);
         $product->delete();
         
-        return redirect('/productos');
+        return redirect('/productos')->withMessage('El producto ha sido eliminado satisfactoriamente.');
     }
+    
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Product  $product
+     * @return \Illuminate\Http\Response
+     */
+    public function restore($id)
+    {
+        $product = Product::onlyTrashed()->where('id', $id)->first();
+        if( $product->company_id != currentCompany() ){
+            return 404;
+        }
+        $product->restore();
+        
+        return redirect('/productos')->withMessage('El producto ha sido recuperado satisfactoriamente.');
+    }    
+    
 }

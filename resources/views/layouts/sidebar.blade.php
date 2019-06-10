@@ -57,18 +57,18 @@
                 </div>
             </li>
             
-            <li title="A partir del 4 de Junio" class="soon nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
-                <a  title="A partir del 4 de Junio" class="nav-item-hold" href="#">
+            <li title="Facturación deshabilitada durante la prueba gratuita" class="soon nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
+                <a  title="Facturación deshabilitada durante la prueba gratuita" class="nav-item-hold" href="#">
                     <img src="{{asset('assets/images/iconos/facturacion.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Facturación</span>
                 </a>
                 
                 <div class="subitems">
-                    <a title="A partir del 7 de Junio" href="#">Ver documentos emitidos</a>
-                    <a title="A partir del 7 de Junio" href="#">Emitir factura electrónica</a>
-                    <a title="A partir del 7 de Junio" href="#">Emitir tiquete electrónico</a>
-                    <a title="A partir del 7 de Junio" href="#">Emitir nota de débito</a>
-                    <a title="A partir del 7 de Junio" href="#">Aceptación de facturas recibidas</a>
+                    <a title="Facturación deshabilitada durante la prueba gratuita" href="#">Ver documentos emitidos</a>
+                    <a title="Facturación deshabilitada durante la prueba gratuita" href="#">Emitir factura electrónica</a>
+                    <a title="Facturación deshabilitada durante la prueba gratuita" href="#">Emitir tiquete electrónico</a>
+                    <a title="Facturación deshabilitada durante la prueba gratuita" href="#">Emitir nota de débito</a>
+                    <a title="Facturación deshabilitada durante la prueba gratuita#7" href="#">Aceptación de facturas recibidas</a>
                 </div>
             </li>
             

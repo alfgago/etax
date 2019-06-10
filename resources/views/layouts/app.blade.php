@@ -21,11 +21,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css" />
     
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=2.04">
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=2.05">
     
     <script src="{{asset('assets/js/common-bundle.js')}}?v=2.1.1"></script>
 
     <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=a366a538-e5db-4a02-8c91-e6d7def5fe29"> </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
     
     <script>
       /*window.zESettings = {

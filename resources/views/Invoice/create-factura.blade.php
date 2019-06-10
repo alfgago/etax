@@ -19,8 +19,7 @@
 @section('content') 
 <div class="row form-container">
   <div class="col-md-12">
-                          
-        <form method="POST" action="/facturas-emitidas">
+      <form method="POST" action="/facturas-emitidas/send">
 
           @csrf
           
@@ -65,14 +64,14 @@
                     <div class="form-group col-md-4">
                       <label for="currency">Divisa</label>
                       <select class="form-control" name="currency" id="moneda" required>
-                        <option value="CRC" selected>CRC</option>
-                        <option value="USD">USD</option>
+                        <option value="CRC"  data-rate="{{$rate}}" selected>CRC</option>
+                        <option value="USD"  data-rate="{{$rate}}">USD</option>
                       </select>
                     </div>
       
                     <div class="form-group col-md-8">
                       <label for="currency_rate">Tipo de cambio</label>
-                      <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="1.00" required>
+                      <input type="text" class="form-control" data-rates="{{$rate}}" name="currency_rate" id="tipo_cambio" value="1.00"required>
                     </div>
                   </div>
                 </div>
@@ -118,12 +117,12 @@
 
                   <div class="form-group col-md-6">
                     <label for="document_number">Número de documento</label>
-                    <input type="text" class="form-control" name="document_number" id="document_number" value="" required>
+                    <input type="text" class="form-control" name="document_number" id="document_number" value="{{$document_number}}" required readonly="readonly">
                   </div>
   
                   <div class="form-group col-md-6 not-required">
                     <label for="document_key">Clave de factura</label>
-                    <input type="text" class="form-control" name="document_key" id="document_key" value="" >
+                    <input type="text" class="form-control" name="document_key" id="document_key" value="{{$document_key}}" required readonly="readonly">
                   </div>
 
                   <div class="form-group col-md-4 hidden">
@@ -253,23 +252,31 @@
           @include( 'Invoice.form-nuevo-cliente' )
 
           <div class="btn-holder hidden">
-            <button id="btn-submit" type="submit" class="btn btn-primary" disabled>Enviar factura electrónica</button>
+            <button id="btn-submit" type="submit" class="btn btn-primary">Enviar factura electrónica</button>
           </div>
 
-        </form>
+      </form>
   </div>  
 </div>
 @endsection
 
 @section('breadcrumb-buttons')
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary2" disabled>Enviar factura electrónica</button>
-@endsection 
+  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Enviar factura electrónica</button>
+@endsection
 
 @section('footer-scripts')
 
 <script>
 $(document).ready(function(){
   $('#tipo_iva').val('103');
+
+  $('#moneda').change(function() {
+    if ($(this).val() == 'USD') {
+      $('#tipo_cambio').val($('#tipo_cambio').data('rates'))
+    } else {
+      $('#tipo_cambio').val('1.00')
+    }
+  });
 });
 
 function toggleRetencion() {

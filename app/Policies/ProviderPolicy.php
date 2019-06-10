@@ -26,8 +26,10 @@ class ProviderPolicy
      * 
      */
     public function update(User $user, Provider $provider) {
-        $current_company = $user->companies->first()->id;
+        
+        $current_company = currentCompany();
         return $provider->company_id == $current_company;
+        
     }
     
 }

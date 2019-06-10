@@ -15747,9 +15747,6 @@ h6,
 
 .sidebar-left .navigation-left .nav-item .nav-item-hold {
   position: relative;
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  transform: translateY(-50%);
 }
 
 .sidebar-left-secondary {

@@ -333,7 +333,7 @@
 			        </div>
 			        
 			        <div class="bigtext">
-			        	Elija el plan de su conveniencia y empiece a calcular el IVA con eTax. Disfrute de una <span>prueba gratis</span> válida hasta el 7 de Junio.
+			        	Elija el plan de su conveniencia y empiece a calcular el IVA con eTax. Disfrute de una <span>prueba gratis</span> válida hasta el 14 de Junio.
 			        </div>
 			        
 			        <div class="btn-holder">
