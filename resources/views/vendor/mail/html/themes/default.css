@@ -8,7 +8,7 @@ body *:not(html):not(style):not(br):not(tr):not(code) {
 }
 
 body {
-    background-color: #f8fafc;
+    background-color: #ffffff;
     color: #74787e;
     height: 100%;
     hyphens: auto;
@@ -84,7 +84,7 @@ img {
 /* Layout */
 
 .wrapper {
-    background-color: #f8fafc;
+    background-color: #ffffff;
     margin: 0;
     padding: 0;
     width: 100%;
@@ -120,9 +120,8 @@ img {
 /* Body */
 
 .body {
+    border: 0;
     background-color: #ffffff;
-    border-bottom: 1px solid #edeff2;
-    border-top: 1px solid #edeff2;
     margin: 0;
     padding: 0;
     width: 100%;
@@ -132,6 +131,7 @@ img {
 }
 
 .inner-body {
+    border: 0;
     background-color: #ffffff;
     margin: 0 auto;
     padding: 0;
@@ -174,6 +174,7 @@ img {
 /* Tables */
 
 .table table {
+    border: 0;
     margin: 30px auto;
     width: 100%;
     -premailer-cellpadding: 0;
@@ -188,6 +189,7 @@ img {
 }
 
 .table td {
+    border: 0;
     color: #74787e;
     font-size: 15px;
     line-height: 18px;
