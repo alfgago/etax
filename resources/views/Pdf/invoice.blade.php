@@ -166,7 +166,7 @@
         <td colspan="2">
     <tr>
         <td class="title" style="width: 200px; height: 170px">
-            <img src="{{\Illuminate\Support\Facades\Storage::url($company->logo_url)}}" style="width:100%; max-width:150px; max-height: 150px">
+            <img src="{{\Illuminate\Support\Facades\Storage::temporaryUrl($company->logo_url,  now()->addMinutes(1))}}" style="width:100%; max-width:150px; max-height: 150px">
         </td>
 
         <td>
