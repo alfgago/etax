@@ -3,21 +3,17 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Subscription extends Model {
-
-    /*protected $table = 'subscriptions';
-    
+class EtaxProducts extends Model
+{
+    use SoftDeletes;
     protected $guarded = [];
-    
+    //Relación con Usuario
+
     //Relación con el plan
     public function plan() {
         return $this->belongsTo(SubscriptionPlan::class);
     }
-
-    //Relación con Usuario
-    public function owner() {
-        return $this->belongsTo(User::class);
-    }*/
 
 }

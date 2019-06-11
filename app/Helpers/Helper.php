@@ -264,14 +264,14 @@ if (!function_exists('getCurrentSubscription')) {
     function getCurrentSubscription() {
         
         $company = currentCompanyModel();
-        $subscription = $company->subscription;
+        $sale = $company->sale;
         
-        if( ! $subscription ) {
+        if( ! $sale ) {
             $user_id = auth()->user()->id;
-            $subscription = App\Subscription::where('user_id', $user_id)->where('status', '1')->first();
+            $sale = \App\Sales::where('user_id', $user_id)->where('status', '1')->first();
         }
         
-        return $subscription;
+        return $sale;
         
     }
 

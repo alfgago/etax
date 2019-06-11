@@ -247,15 +247,15 @@ class UserController extends Controller {
         $trial_end_date = $start_date->addMonths(1);
         $next_payment_date = $start_date->addMonths(1);
         
-        $sub = Subscription::updateOrCreate (
+        $sub = Sale::updateOrCreate (
             
             [ 
                 'user_id' => $user->id 
             ],
             [ 
-                'plan_id' => $request->plan_id, 
-                'status'  => 1, 
-                'trial_end_date' => $trial_end_date, 
+                'company_id' => $company->id,
+                'status'  => 1,
+                'trial_end_date' => $trial_end_date,
                 'start_date' => $start_date, 
                 'next_payment_date' => $next_payment_date, 
             ]
@@ -267,7 +267,7 @@ class UserController extends Controller {
         
         $nombre = $sub->plan->getName();
         
-        return redirect('/')->withMessage("Su cuenta ha sido creada con el plan $nombre");
+        return redirect('payment-crear');
     }
     
     

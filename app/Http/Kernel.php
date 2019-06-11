@@ -2,7 +2,13 @@
 
 namespace App\Http;
 
+use App\Http\Controllers\PaymentController;
+use App\Subscription;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends HttpKernel
 {
@@ -80,4 +86,19 @@ class Kernel extends HttpKernel
         \Illuminate\Routing\Middleware\SubstituteBindings::class,
         \Illuminate\Auth\Middleware\Authorize::class,
     ];
+    protected function schedule(Schedule $schedule){
+        $schedule->call(function () {
+            $suscriptionsUpdate = PaymentController::updateAllSubscriptions();
+        })->dailyAt('01:00');
+        $schedule->call(function () {
+            $makePayment = PaymentController::dailySubscriptionsPayment();
+            if($makePayment == false){
+
+            }
+        })->dailyAt('07:00');
+        $schedule->call(function () {
+            $makePayment = PaymentController::dailySubscriptionsPayment();
+        })->dailyAt('10:00');
+    }
+
 }

@@ -109,6 +109,19 @@ Route::prefix('usuario')->group(function() {
     Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
 });
 
+//Rutas de Pagos de la aplicacion
+Route::prefix('payment')->group(function(){
+    Route::get('payment-create', 'PaymentController@create')->name('Payment.payment_create');
+    Route::get('payment-create-view', 'PaymentController@createView')->name('Payment.payment_create_view');
+    Route::get('payment-crear', 'PaymentController@paymentCrear')->name('Payment.payment_crear');
+    Route::post('payment-checkout', 'PaymentController@paymentCheckout')->name('Payment.payment_checkout');
+    Route::post('payment-card', 'PaymentController@paymentCard')->name('Payment.payment_card');
+    Route::get('payment-token-update-view/{id}', 'PaymentController@paymentTokenUpdateView')->name('Payment.payment_token_update_view');
+    Route::patch('payment-token-update', 'PaymentController@paymentTokenUpdate')->name('Payment.payment_tokenUpdate');
+    Route::delete('payment-token-delete/{id}', 'PaymentController@paymentTokenDelete')->name('Payment.payment_token_delete');
+    Route::post('payment-token-transaction', 'PaymentController@paymentTokenTransaction')->name('Payment.payment_token_transaction');
+    Route::post('payment-charge', 'PaymentController@paymentCharge')->name('Payment.payment_charge');
+});
 
 // Rutas de API data para ajax
 Route::get('/api/invoices', 'InvoiceController@indexData')->name('Invoice.data');
@@ -120,6 +133,7 @@ Route::get('/api/clients', 'ClientController@indexData')->name('Client.data');
 Route::get('/api/providers', 'ProviderController@indexData')->name('Provider.data');
 Route::get('/api/products', 'ProductController@indexData')->name('Product.data');
 Route::get('/api/books', 'BookController@indexData')->name('Book.data');
+Route::get('/api/payments', 'PaymentController@indexData')->name('Payment.data');
 
 
 //Rutas de recover
@@ -139,6 +153,7 @@ Route::resource('facturas-emitidas', 'InvoiceController');
 Route::resource('facturas-recibidas', 'BillController');
 Route::resource('plans', 'PlanController');
 Route::resource('empresas', 'CompanyController');
+Route::resource('payments', 'PaymentController');
 
 //Middlewares de autenticación
 Route::group(['middleware' => ['auth']], function() {
@@ -181,6 +196,9 @@ Route::get('/plans/confirm-cancel-plan/{token}', 'PlanController@confirmCancelPl
 Route::get('show-plans', 'PlanController@show_plans')->name('plans.show-data');
 Route::post('purchase', 'PlanController@purchase')->name('plans.purchase');
 Route::get('plans/switch-plan/{plan}/{newPlan}', 'PlanController@switchPlan')->name('plans.switch-plan');
+
+
+Route::post('payment-test', 'PaymentController@checkout')->name('payment.test');
 
 Route::get('/private/all', 'SubscriptionPlanController@all')->name('subscriptions.all');
 Route::get('/private/exportar', 'SubscriptionPlanController@exportar')->name('subscriptions.exportar');
