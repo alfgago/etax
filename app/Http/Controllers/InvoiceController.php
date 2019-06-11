@@ -407,15 +407,15 @@ class InvoiceController extends Controller
             $value = Cache::remember('usd_rate', '60000', function () {
                 $today = new Carbon();
                 $client = new \GuzzleHttp\Client();
-                $response = $client->get(env('EXCHANGE_URL'),
+                $response = $client->get(config('etax.exchange_url'),
                     ['query' => [
                         'Indicador' => '317',
                         'FechaInicio' => $today::now()->format('d/m/Y'),
                         'FechaFinal' => $today::now()->format('d/m/Y'),
-                        'Nombre' => env('NAMEBCCR'),
+                        'Nombre' => config('etax.namebccr'),
                         'SubNiveles' => 'N',
-                        'CorreoElectronico' => env('EMAILBCCR'),
-                        'Token' => env('TOKENBCCR')
+                        'CorreoElectronico' => config('etax.emailbccr'),
+                        'Token' => config('etax.tokenbccr')
                         ]
                     ]
                 );
