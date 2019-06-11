@@ -87,7 +87,7 @@ use RegistersUsers;
             'headers' => [
                 'Content-Type'  => "application/json",
             ],
-            'json' => ['applicationName' => 'ETAX_TEST',
+            'json' => ['applicationName' => 'ETAX',
                 'userName' => $data['email'],
                 'userFirstName' => $data['first_name'],
                 'userLastName' => $data['last_name'],

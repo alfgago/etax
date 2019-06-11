@@ -88,8 +88,17 @@ class Kernel extends HttpKernel
     ];
     protected function schedule(Schedule $schedule){
         $schedule->call(function () {
-            $MakePayment = PaymentController::pagarSuscripcion();
+            $suscriptionsUpdate = PaymentController::updateAllSubscriptions();
+        })->dailyAt('01:00');
+        $schedule->call(function () {
+            $makePayment = PaymentController::dailySubscriptionsPayment();
+            if($makePayment == false){
+
+            }
         })->dailyAt('07:00');
+        $schedule->call(function () {
+            $makePayment = PaymentController::dailySubscriptionsPayment();
+        })->dailyAt('10:00');
     }
 
 }

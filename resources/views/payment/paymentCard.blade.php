@@ -272,8 +272,8 @@
                             </div>
 
                             <div class="form-group"></div>
-                            <input type="text" hidden value="{{$subscription->plan->id}}" name="planId">
-                            <input type="text" hidden value=" {{$subscription->id}}" name="subscriptionId">
+                            <input type="text" hidden value="{{$sale->subscription_plan->id}}" name="planId">
+                            <input type="text" hidden value=" {{$sale->id}}" name="saleId">
                             <input type="text" hidden id="IpAddress" name="IpAddress">
                             <input type="text" hidden id="deviceFingerPrintID" name="deviceFingerPrintID">
                             <input type="text" hidden value="{{$planSelected}}" name="planSelected">

@@ -223,9 +223,9 @@
                                                     <div class="row">
                                                         <div class="form-group">
                                                             <div class="line"></div>
-                                                            <input type="radio" value="1" checked="checked" name="paymentAmount" id="payment1" class="radioPayment">
+                                                            <input type="radio" value="1" checked="checked" name="selectedPlan" id="payment1" class="radioPayment">
                                                             <div class="col-md-12 montly">
-                                                                <label><strong>{{$subscription->plan->monthly_price}} + IVA</strong></label>
+                                                                <label><strong>{{$sale->subscription_plan->monthly_price}} + IVA</strong></label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -240,9 +240,9 @@
                                                     <div class="row">
                                                         <div class="form-group">
                                                             <div class="line"></div>
-                                                            <input type="radio" value="2" name="paymentAmount" id="payment2" class="radioPayment">
+                                                            <input type="radio" value="2" name="selectedPlan" id="payment2" class="radioPayment">
                                                             <div class="col-md-12 montly">
-                                                                <label ><strong>{{$subscription->plan->monthly_price * 6}} + IVA</strong></label>
+                                                                <label ><strong>{{$sale->subscription_plan->six_price * 6}} + IVA</strong></label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -257,9 +257,9 @@
                                                     <div class="row">
                                                         <div class="form-group">
                                                             <div class="line"></div>
-                                                            <input type="radio" value="3" name="paymentAmount" id="payment3" class="radioPayment">
+                                                            <input type="radio" value="3" name="selectedPlan" id="payment3" class="radioPayment">
                                                             <div class="col-md-12 montly">
-                                                                <label><strong>{{$subscription->plan->monthly_price * 12}} + IVA</strong></label>
+                                                                <label><strong>{{$sale->subscription_plan->annual_price * 12}} + IVA</strong></label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -269,7 +269,9 @@
                                     </div>
                                 </div>
                             </div>
-                            <input type="number" id="costo" value="{{$subscription->plan->monthly_price}}" hidden>
+                            <input type="number" id="costomensual" value="{{$sale->subscription_plan->monthly_price}}" hidden>
+                            <input type="number" id="costosemestral" value="{{$sale->subscription_plan->six_price * 6}}" hidden>
+                            <input type="number" id="costoanual" value="{{$sale->subscription_plan->annual_price * 12}}" hidden>
                             <div class="form-group col-md-12 labelPaymentCost">
                                 <label id="labelPayment" class="labelCostPayment">Costo total del pago: $13.55</label>
                             </div>
@@ -288,17 +290,19 @@
 <script type="text/javascript">
     $(document).ready(function(){
         $("input[type='radio']").change(function(){
-            var radioValue = $("input[name='paymentAmount']:checked").val();
-            var costo = $('#costo').val();
+            var radioValue = $("input[name='selectedPlan']:checked").val();
+            var costomensual = $('#costomensual').val();
+            var costosemestral = $('#costosemestral').val();
+            var costoanual = $('#costoanual').val();
             switch (radioValue) {
                 case "1":
-                    var costoPago = parseFloat(costo * 1);
+                    var costoPago = costomensual;
                 break;
                 case "2":
-                    var costoPago = parseFloat(costo * 6);
+                    var costoPago = costosemestral;
                 break;
                 case "3":
-                    var costoPago = parseFloat(costo * 12);
+                    var costoPago = costoanual;
                 break;
             }
             var newValue = parseFloat(parseFloat(costoPago) + parseFloat(costoPago * 0.13)).toFixed(2);

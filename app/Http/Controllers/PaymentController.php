@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\EtaxProducts;
 use App\Payment;
+use App\Sales;
 use App\Subscription;
 use App\PaymentMethod;
+use App\SubscriptionPlan;
 use Carbon\Carbon;
 use CybsSoapClient;
 use Illuminate\Http\Request;
@@ -37,8 +39,8 @@ class PaymentController extends Controller
             'headers' => [
                 'Content-Type' => "application/json",
             ],
-            'json' => ['applicationName' => 'ETAX_TEST',
-                'applicationPassword' => 'ETFTTJUN0619%'
+            'json' => ['applicationName' => 'ETAX',
+                'applicationPassword' => 'ETFTTJUN1019%'
             ],
             'verify' => false,
         ]);
@@ -84,7 +86,7 @@ class PaymentController extends Controller
                 'headers' => [
                     'Content-Type'  => "application/json",
                 ],
-                'json' => ['applicationName' => 'ETAX_TEST',
+                'json' => ['applicationName' => 'ETAX',
                     'userName' => $user->user_name,
                     'userPassword' => $user->password,
                     'cardDescription' => $NameCard,
@@ -133,7 +135,12 @@ class PaymentController extends Controller
                 ])->render();
             })
             ->editColumn('last_4digits', function(PaymentMethod $payment_method) {
-                return 'termina en ...' . $payment_method->last_4digits;
+                if($payment_method->default_card == 1){
+                    $text_default = ' Por defecto';
+                }else{
+                    $text_default = '';
+                }
+                return 'Termina en ...' . $payment_method->last_4digits . ' ' . $text_default;
             })
             ->rawColumns(['actions'])
             ->toJson();
@@ -144,8 +151,8 @@ class PaymentController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function paymentCrear(){
-        $subscription = getCurrentSubscription();
-        return view('payment/create')->with('subscription', $subscription);
+        $sale = getCurrentSubscription();
+        return view('payment/create')->with('sale', $sale);
     }
 
     public function check_cc($cc, $extra_check = false){
@@ -169,19 +176,20 @@ class PaymentController extends Controller
     }
 
     public function paymentCheckout(Request $request){
-        $planSelected = $request->paymentAmount;
-        $subscription = getCurrentSubscription();
+        $planSelected = $request->selectedPlan;
+        $sale = getCurrentSubscription();
         return view('payment/paymentCard')->with('planSelected', $planSelected)
-                                               ->with('subscription', $subscription);
+                                               ->with('sale', $sale);
     }
 
     public function paymentCard(Request $request){
         $user = auth()->user();
+        $current_company = currentCompany();
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $date = Carbon::now()->format('Y/m/d');
         if (isset($request->coupon)) {
             $cuponConsultado = Coupon::where('code', $request->coupon)
-                ->where('used', 0);
+                ->where('used', 0)->get();
             if (isset($cuponConsultado)) {
                 $descuento = ($cuponConsultado->discount_percentage) / 100;
             } else {
@@ -191,19 +199,20 @@ class PaymentController extends Controller
             $descuento = 0;
         }
         $planSelected = $request->planSelected;
+        $subscription_plan = SubscriptionPlan::findOrFail($request->planId);
         switch ($planSelected) {
             case 1:
-                $costo = 11.99;
+                $costo = $subscription_plan->monthly_price;
                 $next_payment_date = $start_date->addMonths(1);
                 $numberOfPayments = 1;
                 break;
             case 2:
-                $costo = 71.94;
+                $costo = $subscription_plan->six_price * 6;
                 $next_payment_date = $start_date->addMonths(6);
                 $numberOfPayments = 6;
                 break;
             case 3:
-                $costo = 143.88;
+                $costo = $subscription_plan->annual_price * 12;
                 $next_payment_date = $start_date->addMonths(12);
                 $numberOfPayments = 12;
                 break;
@@ -235,9 +244,10 @@ class PaymentController extends Controller
                 $NameCard = "";
                 break;
         }
+        $sale = Sale::where('user_id', $user->id);
         $payment = Payment::create([
-            'subscription_id' => $request->subscriptionId,
-            'payment_date' => $start_date,
+            'sale_id' => $sale->id,
+            'payment_date' => $date,
             'payment_status' => 1,
             'amount' => $amount
         ]);
@@ -248,7 +258,7 @@ class PaymentController extends Controller
                 'headers' => [
                     'Content-Type'  => "application/json",
                 ],
-                'json' => ['applicationName' => 'ETAX_TEST',
+                'json' => ['applicationName' => 'ETAX',
                     'userName' => $user->user_name,
                     'userPassword' => $user->password,
                     'cardDescription' => $NameCard,
@@ -263,8 +273,6 @@ class PaymentController extends Controller
             if($Card['apiStatus'] == 'Success') {
                 $last_4digits = substr($request->number, -4);
                 $token_bn = $Card['cardTokenId'];
-                $Token = $token_bn;
-                $token_cybersource = '';
                 $paymentMethod = PaymentMethod::create([
                     'user_id' => $user->id,
                     'name' => $request->first_name,
@@ -272,40 +280,40 @@ class PaymentController extends Controller
                     'last_4digits' => $last_4digits,
                     'nameCard' => $NameCard,
                     'due_date' => $request->cardMonth . ' ' . $request->cardYear,
-                    'token_cybersource' => $token_cybersource,
-                    'token_bn' => $token_bn
+                    'token_bn' => $token_bn,
+                    'default' => 1
                 ]);
-                $payment->proof = $Token;
+                $payment->proof = $token_bn;
                 $payment->payment_status = 1;
                 $payment->save();
 
-                $BnPayment = new Client();
-                $BnPaymentCard = $BnPayment->request('POST', "http://www.fttserver.com:4217/api/AppIncludeCharge?applicationName=string&applicationPassword=string&chargeDescription=string&userName=string&transactionCurrency=string&transactionAmount=double", [
-                    'headers' => [
-                        'Content-Type' => "application/json",
-                    ],
-                    'json' => ['applicationName' => 'ETAX_TEST',
-                        'applicationPassword' => 'ETFTTJUN0619%',
-                        "chargeDescription" => 'Compra de Plan ' . $planSelected,
-                        "userName" => $user->user_name,
-                        "transactionCurrency" => "USD",
-                        "transactionAmount" => $amount
-                    ],
-                    'verify' => false,
-                ]);
-                $PaymentCard = json_decode($BnPaymentCard->getBody()->getContents(), true);
+                $data = new stdClass();
+                $data->description = 'Pago Suscripcion Etax';
+                $data->amount = $amount;
+                $data->user_name = $sale->user->username;
+                $data->cardTokenId = $token_bn;
+                $PaymentCard = $this->paymentCharge($data);
                 if ($PaymentCard['apiStatus'] == "Successful") {
-                    $subscription = Subscription::find($request->subscriptionId);
-                    $subscription->status = 1;
-                    $subscription->next_payment_date = $next_payment_date;
-                    $subscription->save();
+                    $sub = Sale::updateOrCreate (
+
+                        [
+                            'user_id' => $user->id
+                        ],
+                        [
+                            'status'  => 1,
+                            'etax_product_id' => '',
+                            'recurrency' => $numberOfPayments
+                        ]
+
+                    );
+                    //enviar factura electronica
                     return redirect('wizard');
                 } else {
                     $mensaje = 'El pago ha sido denegado';
                     return redirect()->back()->withError($mensaje);
                 }
             }else{
-                $mensaje = 'No se pudo verificar la informacion de esta tarjeta. Dirijase a Configuraciones->Gestion de Pagos- para agregar una tarjeta';
+                $mensaje = 'No se pudo verificar la informacion de la tarjeta. ';
                 return redirect()->back()->withError($mensaje);
             }
         }else{
@@ -358,7 +366,7 @@ class PaymentController extends Controller
                 'headers' => [
                     'Content-Type'  => "application/json",
                 ],
-                'json' => ['applicationName' => 'ETAX_TEST',
+                'json' => ['applicationName' => 'ETAX',
                     'userName' => $user->user_name,
                     'userPassword' => $user->password,
                     'cardTokenId' => $PaymentMethod->token_bn,
@@ -366,7 +374,7 @@ class PaymentController extends Controller
                     "primaryAccountNumber" => $request->number,
                     "expirationMonth" => $request->cardMonth,
                     "expirationYear" => '20' . $request->cardYear,
-                    "verificationValue" => "444"
+                    "verificationValue" => $request->cvc
                 ],
                 'verify' => false,
             ]);
@@ -396,7 +404,7 @@ class PaymentController extends Controller
                 'headers' => [
                     'Content-Type'  => "application/json",
                 ],
-                'json' => ['applicationName' => 'ETAX_TEST',
+                'json' => ['applicationName' => 'ETAX',
                     'userName' => $user->user_name,
                     'userPassword' => $user->password,
                     'cardTokenId' => $PaymentMethod->token_bn
@@ -419,24 +427,39 @@ class PaymentController extends Controller
         }
     }
     /**
-    *
+    *Parametros : description, user_name, amount, cardTokenId
     *
     *
     *
     */
     public function paymentCharge(Request $request){
-        $user = auth()->user();
-        $BnCharge = new Client();
-        $ChargeBn = $BnCharge->request('POST', "http://www.fttserver.com:4217/api/AppIncludeCharge?applicationName=string&applicationPassword=string&chargeDescription=string&userName=string&transactionCurrency=string&transactionAmount=double", [
+        $AppCharge = new Client();
+        $AppChargeBn = $AppCharge->request('POST', "http://www.fttserver.com:4217/api/AppIncludeCharge?applicationName=string&applicationPassword=string&chargeDescription=string&userName=string&transactionCurrency=string&transactionAmount=double", [
             'headers' => [
                 'Content-Type' => "application/json",
             ],
-            'json' => ['applicationName' => 'ETAX_TEST',
-                'applicationPassword' => 'ETFTTJUN0619%',
+            'json' => ['applicationName' => 'ETAX',
+                'applicationPassword' => 'ETFTTJUN1019%',
                 'chargeDescription' => $request->description,
-                'userName' => $user->user_name,
+                'userName' => $request->user_name,
                 "transactionCurrency" => "USD",
                 "transactionAmount" => $request->amount
+            ],
+            'verify' => false,
+        ]);
+        $ChargeAplied = json_decode($AppChargeBn->getBody()->getContents(), true);
+        $chargeTokenId = $ChargeAplied['chargeTokenId'];
+        /****************************************************/
+        $BnCharge = new Client();
+        $ChargeBn = $BnCharge->request('POST', "http://www.fttserver.com:4217/api/AppApplyCharge?applicationName=string&applicationPassword=string&userName=string&chargeTokeId=string&cardTokenId=string", [
+            'headers' => [
+                'Content-Type' => "application/json",
+            ],
+            'json' => ['applicationName' => 'ETAX',
+                'applicationPassword' => 'ETFTTJUN1019%',
+                'userName' => $request->user_name,
+                'chargeTokenId' => $chargeTokenId,
+                "cardTokenId" => $request->cardTokenId
             ],
             'verify' => false,
         ]);
@@ -450,14 +473,17 @@ class PaymentController extends Controller
     *
     */
     public function comprarProductos(Request $request){
+        //recibe parametros: etax_product_id, amount, description
         $date = Carbon::parse(now('America/Costa_Rica'));
         $current_company = currentCompany();
+        $user_id = auth()->user()->id;
         $BnStatus = $this->StatusBnAPI();
         if($BnStatus['apiStatus'] == 'Successful'){
             $sale = Sale::create([
+                "user_id" => $user_id,
                 "company_id" => $current_company,
-                "etax_product_id" => $request->id,
-                "status" => 3,
+                "etax_product_id" => $request->etax_product_id,
+                "status" => 1,
                 "recurrency" => 0
             ]);
             $payment = Payment::create([
@@ -466,12 +492,19 @@ class PaymentController extends Controller
                 'payment_status' => 1,
                 'amount' => $request->amount
             ]);
-            $Payment = $this->paymentCharge($request);
-            if($Payment['apiStatus'] == "Successful"){
+            $paymentMethod = PaymentMethod::where('user_id', $sale->user->id)->where('default', true)->first();
+            $data = new stdClass();
+            $data->description = $request->description;
+            $data->amount = $request->amount;
+            $data->user_name = $sale->user->username;
+            $data->cardTokenId = $paymentMethod->token_bn;
+            $paymentTransaction = $this->paymentCharge($data);
+            if($paymentTransaction['apiStatus'] == "Successful"){
                 $payment->payment_status = 2;
-                $sale->status = 1;
                 $payment->save();
+                $sale->status = 1;
                 $sale->save();
+                //$Invoice = InvoiceController::sendHacienda();
             }else{
                 return redirect()->back()->withError('No se pudo procesar el pago');
             }
@@ -485,40 +518,57 @@ class PaymentController extends Controller
     *
     *
     */
-    public function pagarSuscripcion(){
+    public function dailySubscriptionsPayment(){
         $date = Carbon::parse(now('America/Costa_Rica'));
-        $user = auth()->user();
         $BnStatus = $this->StatusBnAPI();
         if($BnStatus['apiStatus'] == 'Successful') {
-            $subscriptionsUnpaid = EtaxProducts::where('isSubscription', 1);
-            for($i=0;$i<count($subscriptionsUnpaid);$i++){
-                $sale = Sale::updateOrCreate($subscriptionsUnpaid[$i]->id, [
-                    "etax_product_id" => $subscriptionsUnpaid[$i]->id,
-                    "status" => 3
-                ]);
-                $payment = Payment::create([
-                    'sale_id' => $sale->id,
-                    'payment_date' => $date,
-                    'payment_status' => 1,
-                    'amount' => $subscriptionsUnpaid[$i]->price
-                ]);
+            $unpaidSubscriptions = Sale::where('status', 2)->where('recurrency', '!=', '0');
+            foreach($unpaidSubscriptions as $sale){
+                $payment = Payment::updateOrCreate(
+                    [
+                        'sale_id' => $sale->id
+                    ],
+                    [
+                        'payment_date' => $date,
+                        'payment_status' => 1,
+                        'amount' => $sale->price
+                    ]
+                );
+                $paymentMethod = PaymentMethod::where('user_id', $sale->user->id)->where('default', true)->first();
                 $data = new stdClass();
                 $data->description = '';
-                $data->amount = $subscriptionsUnpaid[$i]->price;
-                $Payment = $this->paymentCharge($data);
-                if ($Payment['apiStatus'] == "Successful") {
-                    $payment->payment_status = 2;
+                $data->amount = $sale->price;
+                $data->user_name = $sale->user->username;
+                $data->cardTokenId = $paymentMethod->token_bn;
+
+                $payment = $this->paymentCharge($data);
+                if ($payment['apiStatus'] == "Successful") {
+                    $sale->next_payment_date = $date->addMonth($sale->recurrency);
                     $sale->status = 1;
-                    $payment->save();
                     $sale->save();
-                    //crear factura electronica
-                } else {
-                    return redirect()->back()->withError('No se pudo procesar el pago');
+                    $payment->payment_status = 2;
+                    $payment->save();
+                    //$Invoice = InvoiceController::sendHacienda();
                 }
             }
         }else{
-            $mensaje = 'Transacción no disponible en este momento';
-            return redirect()->back()->withError($mensaje);
+            return false;
+        }
+    }
+    /*
+    *
+    *
+    *
+    *
+    */
+    public function updateAllSubscriptions(){
+        $activeSubscriptions = Sale::where('status', 1);
+        $date = Carbon::parse(now('America/Costa_Rica'));
+        foreach($activeSubscriptions as $activeSubscription){
+            if($date >= $activeSubscription->next_payment_date){
+                $activeSubscription->status=2;
+                $activeSubscription->save();
+            }
         }
     }
     /**

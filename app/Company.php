@@ -56,12 +56,12 @@ class Company extends Model {
     
     //Relación con el plan
     public function subscription() {
-        return $this->belongsTo(Subscription::class);
+        return $this->belongsTo(Sale::class);
     }
 
     /* Changes the current selected company to chosen plan. As long as the plan has available company slots. */
     public function setPlan( $subscription_id ) {
-        $plan = Subscription::findOrFail($subscription_id);
+        $plan = Sale::findOrFail($subscription_id);
         if ($plan) {
             
             if( $plan )

@@ -20,7 +20,7 @@
                     <th>Tarjeta</th>
                     <th>Nombre</th>
                     <th>Apellido</th>
-                    <th>fecha de vencimiento</th>
+                    <th>Fecha de vencimiento</th>
                     <th></th>
                 </tr>
                 </thead>
