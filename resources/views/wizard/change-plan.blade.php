@@ -15,6 +15,8 @@
 	}
 	
 	.cuadro-planes .tier {
+			display: -webkit-box;
+			display: -ms-flexbox;
 			display: flex;
 	    font-size: 1rem;
     	width: 100%;
@@ -49,9 +51,17 @@
 	    overflow: hidden;
 	}
 	
+	.cuadro-planes .tier > div.titulo {
+		    max-width: 100px;
+	}
+	
 	.cuadro-planes .opcion span {
 		position: relative;
 		z-index: 1;
+		-webkit-transition: .5s ease all;
+		-o-transition: .5s ease all;
+		transition: .5s ease all;
+    font-size: .9rem;
 	}
 	
 	.cuadro-planes .opcion:before {
@@ -117,7 +127,139 @@
 	.wizard-popup .form-container {
 	    margin-right: auto;
 	}
+	
+	.bigtext {
+	    font-size: 1.5rem;
+	    color: #000;
+	    line-height: 1.1;
+	    margin: 1.5rem 0;
+	}
+	
+	.bigtext span {
+	    font-weight: bold;
+	    color: #2845A4;
+	}
+	
+	.cuadro-planes .opcion span.precio {
+		position: absolute;
+		top: 0;
+		left: 50%;
+		width: 50%;
+		text-align: 
+		-webkit-auto;
+		line-height: 1;
+		top: 50%;
+		-webkit-transform: translateY(-50%);
+		    -ms-transform: translateY(-50%);
+		        transform: translateY(-50%);
+		font-size: .8rem;
+		margin-left: 3px;
+		padding-left: 3px;
+		border-left: 3px solid #000;
+		-webkit-transition: .5s ease all;
+		-o-transition: .5s ease all;
+		transition: .5s ease all;
+		opacity: 0;
+		
+	}
+	
+	.cuadro-planes .opcion span.precio small {
+	    font-weight: 400;
+	    display: block;
+	}
+	
+	.cuadro-planes .opcion.is-active span.precio {
+	    opacity: 1;
+	}
+	
+	.cuadro-planes .opcion.is-active span:not(.precio) {
+	    margin-right: 50%;
+	}
+	
+	@media screen and (max-width: 600px) {
+	
+		.cuadro-planes .tier > div {
+	    	font-size: .8rem;
+		    padding: .75rem .33rem;
+		}
+		
+		.cuadro-planes .opcion {
+		    margin-left: .33rem;
+		}
+		
+		.cuadro-planes .tier > div.titulo {
+		    max-width: 80px;
+		}
+		
+		.cuadro-planes .opcion span.precio {
+		    left: 55%;
+		}
+		
+		.cuadro-planes .tier > div.titulo {
+		    max-width: none;
+		    width: 100%;
+    		font-size: 1.5rem;
+    		margin-bottom: 0;
+    		padding-bottom: 0;
+		}
+		
+		.cuadro-planes .tier {
+		    -ms-flex-wrap: wrap;
+		        flex-wrap: wrap;
+		}
+		
+		.cuadro-planes .tier > div {
+		    max-width: 30%;
+		    width: 30%;
+		    -webkit-box-flex: 1;
+		        -ms-flex: auto;
+		            flex: auto;
+		    margin-right: 1%;
+		}
+		
+		.cuadro-planes .opcion.is-active span:not(.precio) {
+		    margin: 0;
+		}
+		
+		.cuadro-planes .opcion span.precio {
+		    position: relative;
+		    display: block;
+		    left: auto;
+		    top: auto;
+		    text-align: center;
+		    border: 0;
+		    width: 100%;
+		    margin: 0;
+		    padding: 0;
+		    -webkit-transform: none;
+		        -ms-transform: none;
+		            transform: none;
+		}
+		
+		.cuadro-planes .opcion span {
+		    display: block;
+		}
+		
+		.bigtext {
+		    font-size: 1rem;
+		}
+		
+		.wizard-container .btn-holder {
+		    font-size: .8rem;
+		}
 
+	}
+	
+	@media screen and (max-width: 380px) {
+		.wizard-container .btn-holder a{
+		    font-size: .8rem;
+		}
+		
+		.wizard-container .btn-holder .btn {
+		    width: 100%;
+		}
+	}
+	
 </style>
 
 @endsection
@@ -151,90 +293,52 @@
 			            
 			            <div class="tier">
 			            	<div class="titulo"><span>Profesional</span></div>
-			            	<div class="opcion opcion-1 is-active" val="1" onclick="toggleOpcion(1);"><span>Básico</span></div>
-			            	<div class="opcion opcion-2" val="2" onclick="toggleOpcion(2);"><span>Intermedio</span></div>
-			            	<div class="opcion opcion-3" val="3" onclick="toggleOpcion(3);"><span>Pro</span></div>
+			            	<div class="opcion opcion-1 is-active" val="1" onclick="toggleOpcion(1);"><span>Básico</span>
+			            		<span class="precio"><small>Desde</small> $9.99</span>
+			            	</div>
+			            	<div class="opcion opcion-2" val="2" onclick="toggleOpcion(2);"><span>Intermedio</span>
+			            		<span class="precio"><small>Desde</small> $12.99</span>
+			            	</div>
+			            	<div class="opcion opcion-3" val="3" onclick="toggleOpcion(3);"><span>Pro</span>
+			            		<span class="precio"><small>Desde</small> $19.99</span>
+			            	</div>
 			            </div>
 			            
 			            <div class="tier">
 			            	<div class="titulo"><span>Empresarial</span></div>
-			            	<div class="opcion opcion-4" val="4" onclick="toggleOpcion(4);"><span>Básico</span></div>
-			            	<div class="opcion opcion-5" val="5" onclick="toggleOpcion(5);"><span>Intermedio</span></div>
-			            	<div class="opcion opcion-6" val="6" onclick="toggleOpcion(6);"><span>Pro</span></div>
+			            	<div class="opcion opcion-4" val="4" onclick="toggleOpcion(4);"><span>Básico</span>
+			            		<span class="precio"><small>Desde</small> $32.99</span>
+			            	</div>
+			            	<div class="opcion opcion-5" val="5" onclick="toggleOpcion(5);"><span>Intermedio</span>
+			            		<span class="precio"><small>Desde</small> $82.99</span>
+			            	</div>
+			            	<div class="opcion opcion-6" val="6" onclick="toggleOpcion(6);"><span>Pro</span>
+			            		<span class="precio"><small>Desde</small> $124.99</span>
+			            	</div>
 			            </div>
 			            
 			            <div class="tier">
 			            	<div class="titulo"><span>Contador</span></div>
-			            	<div class="opcion opcion-7" val="7" onclick="toggleOpcion(7);"><span>Básico</span></div>
-			            	<div class="opcion opcion-8" val="8" onclick="toggleOpcion(8);"><span>Intermedio</span></div>
-			            	<div class="opcion opcion-9" val="9" onclick="toggleOpcion(9);"><span>Pro</span></div>
+			            	<div class="opcion opcion-7" val="7" onclick="toggleOpcion(7);"><span>Básico</span>
+			            		<span class="precio"><small>Desde</small> $124.99</span>
+			            	</div>
+			            	<div class="opcion opcion-8" val="8" onclick="toggleOpcion(8);"><span>Intermedio</span>
+			            		<span class="precio"><small>Desde</small> $249.99</span>
+			            	</div>
+			            	<div class="opcion opcion-9" val="9" onclick="toggleOpcion(9);"><span>Pro</span>
+			            		<span class="precio"><small>Desde</small> $415.99</span>
+			            	</div>
 			            </div>
 			          
 			        </div>
 			        
-			        <div class="detalle">
-			        	
-				        <div class="detalle-plan dp-1 is-active">
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>5</span> facturas emitidas</div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>40</span> facturas recibidas</div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>1 usuario</div>
-				        </div>
-				        
-				        <div class="detalle-plan dp-2">
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>25</span> facturas emitidas</div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>200</span> facturas recibidas</div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>1 usuario</div>
-				        </div>
-				        
-				        <div class="detalle-plan dp-3">
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>50</span> facturas emitidas</div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>400</span> facturas recibidas</div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta 2 usuario</div>
-				        </div>
-				        
-				        <div class="detalle-plan dp-4">
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>250</span> facturas emitidas</div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Facturas recibidas <span>ilimitadadas</span></div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta 2 usuarios</div>
-				        </div>
-				        
-				        <div class="detalle-plan dp-5">
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>2000</span> facturas emitidas</div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Facturas recibidas <span>ilimitadadas</span></div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta 4 usuarios</div>
-				        </div>
-				        
-				        <div class="detalle-plan dp-6">
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>5000</span> facturas emitidas</div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Facturas recibidas <span>ilimitadadas</span></div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta 10 usuarios</div>
-				        </div>
-				        
-				        <div class="detalle-plan dp-7">
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Facturas emitidas <span>ilimitadadas</span></div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Facturas recibidas <span>ilimitadadas</span></div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta 10 empresas</div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta 2 usuarios por empresa</div>
-				        </div>
-				        
-				        <div class="detalle-plan dp-8">
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Facturas emitidas <span>ilimitadadas</span></div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Facturas recibidas <span>ilimitadadas</span></div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta 25 empresas</div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta 5 usuarios por empresa</div>
-				        </div>
-				        
-				        <div class="detalle-plan dp-9">
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Facturas emitidas <span>ilimitadadas</span></div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Facturas recibidas <span>ilimitadadas</span></div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta 50 empresas</div>
-					        <div class="plan-feature"><i class="fa fa-caret-right" aria-hidden="true"></i>Hasta 10 usuarios por empresa</div>
-				        </div>
-			        
+			        <div class="bigtext">
+			        	Elija el plan de su conveniencia y empiece a calcular el IVA con eTax. Disfrute de una <span>prueba gratis</span> válida hasta el 14 de Junio.
 			        </div>
 			        
 			        <div class="btn-holder">
-  							<button type="submit" id="btn-submit" class="btn btn-primary btn-next" >Confirmar e iniciar periodo de pruebas</button>
+			        	<a class="btn btn-primary btn-prev" target="_blank" href="https://etaxcr.com/planes">Ver detalle de planes</a>
+  							<button type="submit" id="btn-submit" class="btn btn-primary btn-next" >Confirme su plan</button>
 							</div>
 	
 			      </div>

@@ -12,17 +12,18 @@
 
     <div class="header-part-right">
         
-        @if( !empty( userCompanies()->toArray() ) )
-        <div class="companyParent">
-            <label for="country">Empresa actual:</label>
-            <div class="form-group">
-                <select class="form-control" id="company_change" onchange="companyChange(true);">
-                    @foreach(userCompanies() as $row)
-                        <option value="{{$row->id_number}}" {{ $row->company_id == currentCompany() ? 'selected' : ''  }} > {{ $row->name.' '.$row->last_name.' '.$row->last_name2 }} </option>
-                    @endforeach
-                </select>
+        @if( !empty( auth()->user()->teams ) )
+            <div class="companyParent">
+                <label for="country">Empresa actual:</label>
+                <div class="form-group">
+                    <select class="form-control" id="company_change" onchange="companyChange(true);">
+                        @foreach( auth()->user()->teams as $row )
+                            <?php  $c = $row->company;  ?>
+                            <option value="{{ $c->id }}" {{ $c->id == currentCompany() ? 'selected' : ''  }} > {{ $c->name.' '.$c->last_name.' '.$c->last_name2 }} </option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
-        </div>
         @endif
         
         <!-- User avatar dropdown -->
@@ -54,7 +55,6 @@
     function companyChange($redirect = false) {
 
         var sel = $('#company_change').val();
-        var is_edit = $('#is-company-edit').val();
 
         $.ajaxSetup({
             headers: {
@@ -65,7 +65,7 @@
             url: "/change-company",
             method: 'post',
             data: {
-                id: sel, is_edit
+                companyId: sel
             },
             success: function (result) {
                 if ($redirect) {

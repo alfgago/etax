@@ -16,7 +16,7 @@
 
       <div class="form-group col-md-12">
         <div>
-          <input placeholder="{{ __('Correo electrónico') }}" id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ old('email') }}" required> 
+          <input placeholder="{{ __('Correo electrónico') }}" id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ old('email') }}" autofocus required> 
           @if ($errors->has('email'))
           <span class="invalid-feedback" role="alert">
               <strong>{{ $errors->first('email') }}</strong>
@@ -81,10 +81,10 @@
       <div class="form-group col-md-12 button-container text-center">
         <div class="inline-block text-left">
           <div>
-          Ya tenés cuenta? 
+          ¿Ya tiene cuenta? 
           @if (Route::has('login'))
               <a class="btn btn-link" href="{{ route('login') }}">
-                  {{ __('Ingresá aquí') }}
+                  {{ __('Ingrese aquí') }}
               </a>
           @endif
           </div>

@@ -15,7 +15,6 @@
       <table id="invoice-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
-              <th>#</th>
               <th data-priority="2">Comprobante</th>
               <th data-priority="3">Receptor</th>
               <th>Tipo Doc.</th>
@@ -48,8 +47,8 @@ $(function() {
       url: "/api/invoices",
       type: 'GET'
     },
+    order: [[ 7, 'desc' ]],
     columns: [
-      { data: 'reference_number', name: 'reference_number' },
       { data: 'document_number', name: 'document_number' },
       { data: 'client', name: 'client.fullname' },
       { data: 'document_type', name: 'document_type' },

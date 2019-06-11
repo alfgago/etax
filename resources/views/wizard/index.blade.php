@@ -9,7 +9,17 @@
 @section('header-scripts')
 
 <style>
-
+  .btn-cerrarsesion {
+  	
+  	position: absolute; top: .5rem; right: .5rem; color: #FFF; font-size: 1.2rem; padding: .5rem .25rem; border: 2px solid #fff; font-weight: bold; z-index: 99;
+  	
+  }
+  
+  @media only screen and (max-width: 680px) {
+	  .btn-cerrarsesion {
+	    display: none;
+	  }
+	}
 </style>
 
 @endsection
@@ -71,6 +81,15 @@
 	  </div>  
 	  
   </div>
+
+		<a style=""
+	  class="btn btn-cerrarsesion" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('frm-logout').submit();">
+        Cerrar sesión
+    </a>
+    <form id="frm-logout" action="{{ route('logout') }}" method="POST" style="display: none;">
+        {{ csrf_field() }}
+    </form>
+    
 </div>  
 
 @endsection
@@ -95,6 +114,7 @@
     function checkEmptyFields(id) {
         var allow = true;
         $('.'+id+' .checkEmpty').each( function() {
+        	
     		if( $(this).val() && $(this).val() != "" ) {
     		    $(this).removeClass('isEmptyRequired');
     		}
@@ -102,9 +122,20 @@
     		    $(this).addClass('isEmptyRequired');
     		    allow = false;
     		}
+    		
+    		//Revisa que el campo de correo este correcto
+    		var email = $('#email').val();
+    		allow = validateEmail(email);
+				
+    		
     	});
     	return allow;
     }
+    
+    function validateEmail(email) {
+		  var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+		  return re.test(email);
+		}
     
     function toggleTipoProrrata() {
 	  var metodo = $("#first_prorrata_type").val();
@@ -118,7 +149,37 @@
         toggleApellidos();
     });
 
+	$("#input-cert").change(function () {
+		var ext = this.value.match(/\.(.+)$/)[1];
+		switch (ext) {
+			case 'p12':
+				$('#uploadButton').attr('disabled', false);
+				break;
+			default:
+				alert('El archivo no es un certificado.');
+				this.value = '';
+		}
+	});
 
+	$("#input_logo").change(function () {
+		var ext = this.value.match(/\.(.+)$/)[1];
+		switch (ext) {
+			case 'jpg':
+			case 'jpeg':
+			case 'png':
+				$('#uploadButton').attr('disabled', false);
+				break;
+			default:
+				alert('El archivo no es de tipo imagen.');
+				this.value = '';
+		}
+
+		var file_size = $("#input_logo")[0].files[0].size;
+		if(file_size > 2097152) {
+			alert('El el archivo debe tener un maximo de 2MB.');
+			$("#input_logo").value = '';
+		}
+	});
 
 </script>
 

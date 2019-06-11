@@ -18,7 +18,7 @@
 
 <div class="form-group col-md-4" style="white-space: nowrap;">
   <label for="id_number">Número de identificación *</label>
-  <input type="text" class="form-control checkEmpty" name="id_number" id="id_number" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);">
+  <input type="number" class="form-control checkEmpty" name="id_number" id="id_number" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);">
 </div>
 
 <div class="form-group col-md-4">
@@ -43,12 +43,19 @@
 
 <div class="form-group col-md-4">
   <label for="email">Correo electrónico *</label>
-  <input type="text" class="form-control checkEmpty" name="email" id="email" value="{{ @$company->email }}" required>
+  <input type="email" class="form-control checkEmpty" name="email" id="email" value="{{ @$company->email }}" required>
 </div>
 
 <div class="form-group col-md-4">
   <label for="phone">Teléfono</label>
   <input type="text" class="form-control" name="phone" id="phone" value="{{ @$company->phone }}" >
+</div>
+
+<div class="form-group col-md-6">
+  <label for="logo">Logo Empresa *</label>
+  <div class="fallback">
+    <input name="input_logo" id="input_logo" class="form-control " type="file" multiple="false" >
+  </div>
 </div>
 
 <div class="btn-holder">

@@ -141,18 +141,13 @@ if (!function_exists('userCompanies')) {
 if (!function_exists('currentCompany')) {
 
     function currentCompany() {
-    
-        $current_company = session('current_company');
-
-        if ( !$current_company ) {
-            if (auth()->user()->companies->first()) {
-                $company_id = auth()->user()->companies->first()->id;
-                session(['current_company' => $company_id]);
-                $current_company = $company_id;
-            }
+        
+        $user = auth()->user();
+        if ( !$user->companies->count() ) {
+            return auth()->user()->addCompany();
         }
-
-        return $current_company;
+        
+        return $user->currentTeam->company->id;
     }
 
 }
@@ -161,16 +156,20 @@ if (!function_exists('currentCompanyModel')) {
 
     function currentCompanyModel() {
 
-        $current_company = currentCompany();
-        $company = App\Company::find($current_company);
+        $user = auth()->user();
+        if ( !$user->companies->count() ) {
+            auth()->user()->addCompany();
+        }
+        
+        $company = $user->currentTeam->company;
         
         if ( !$company ) {
-            $current_company = auth()->user()->companies->first()->id;
-            session( ['current_company' => $current_company] );
-            $company = App\Company::find($current_company);
+            $companyId = auth()->user()->companies->first()->id;
+            session( ['current_company' => $companyId] );
+            $company = App\Company::find($companyId);
         }
 
-        return ( $current_company ) ? $company : false;
+        return $company;
     }
 
 }
@@ -253,26 +252,7 @@ if (!function_exists('getCurrentUserSubscriptions')) {
         $subscriptions = App\Subscription::where('user_id', $user_id)->where('status', '1')->get();
         
         return $subscriptions;
-        /*
-        if ( !empty($plans->toArray()) ) {
-            $data = array();
-            foreach ($suscriptions as $row) {
-
-                $company_registered_on_plan = \App\Company::where(array('user_id' => $user_id, 'plan_no' => $row->unique_no))->count();
-
-                if ($company_registered_on_plan > 0) {
-                    if (($company_registered_on_plan < $row->no_of_companies) || empty($row->no_of_companies)) {//If no. of companies is unlimited
-                        $data[] = $row->unique_no;
-                    }
-                } else {
-                    $data[] = $row->unique_no;
-                }
-            }
-
-            return $data;
-        } else {
-            return false;
-        }*/
+        
     }
 
 }
@@ -517,5 +497,37 @@ if (!function_exists('get_microtime')) {
     function getMicrotime(){
         list($usec, $sec) = explode(" ", microtime());
         return ((float) $usec + (float)$sec);
+    }
+}
+
+/* Get Document Key */
+if (!function_exists('getDocumentKey')) {
+    function getDocumentKey($docType, $ref = null) {
+        $company = currentCompanyModel();
+        $invoice = new \App\Invoice();
+        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).getDocReference($docType).
+            '1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
+        return $key;
+    }
+}
+
+/* Get Document Reference */
+if (!function_exists('getDocReference')) {
+    function getDocReference($docType, $ref = null)
+    {
+        $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;
+        $consecutive = "001" . "00001" . $docType . substr("0000000000" . $lastSale, -10);
+
+        return $consecutive;
+    }
+}
+
+/* Get Invoice Reference */
+if (!function_exists('getInvoiceReference')) {
+    function getInvoiceReference($ref)
+    {
+        $lastSale = substr($ref, -10);
+        $lastSale = (int)$lastSale;
+        return $lastSale;
     }
 }

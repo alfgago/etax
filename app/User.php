@@ -2,17 +2,17 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
 use Mpociot\Teamwork\Traits\UserHasTeams;
+use Lab404\Impersonate\Models\Impersonate;
 
 class User extends Authenticatable {
 
-    use Notifiable;
-    use HasRoles;
-    use UserHasTeams;
+    use Notifiable, HasRoles, UserHasTeams, Impersonate, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -45,6 +45,15 @@ class User extends Authenticatable {
         return $this->hasMany(Company::class);
     }
 
+    public function subscriptions() {
+        return $this->hasMany(Subscription::class);
+    }
+    
+    public function canImpersonate()
+    {
+        return $this->user_name == "alfgago";
+    }
+
     public function addCompany() {
         $company = Company::create([
                     'user_id' => $this->id,
@@ -61,11 +70,8 @@ class User extends Authenticatable {
         );
         $team->company_id = $company->id;
         $team->save();
-
         $this->attachTeam($team);
 
-        session(['current_company' => $company->id]);
-        
         return $company;
     }
 

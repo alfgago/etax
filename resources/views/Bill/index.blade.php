@@ -16,7 +16,6 @@
         <table id="bill-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
-              <th>#</th>
               <th data-priority="2">Comprobante</th>
               <th data-priority="3">Emisor</th>
               <th>Tipo Doc.</th>
@@ -44,9 +43,12 @@ $(function() {
   $('#bill-table').DataTable({
     processing: true,
     serverSide: true,
-    ajax: "/api/bills",
+    ajax: {
+      url: "/api/bills",
+      type: 'GET'
+    },
+    order: [[ 7, 'desc' ]],
     columns: [
-      { data: 'reference_number', name: 'reference_number' },
       { data: 'document_number', name: 'document_number' },
       { data: 'provider', name: 'provider.fullname' },
       { data: 'document_type', name: 'document_type' },
@@ -67,7 +69,7 @@ function confirmDelete( id ) {
   var formId = "#delete-form-"+id;
   Swal.fire({
     title: '¿Está seguro que desea eliminar la factura',
-    text: "Este proceso la eliminará a nivel de cálculo en eTax, sin embargo no hace anulaciones ni revierte aceptaciones ante Hacienda.",
+    text: "Este proceso la eliminará a nivel de cálculo en eTax, sin embargo no hace anulaciones ni revierte aceptaciones ante Hacienda. Usted podrá volver a importar la factura via XML o ingreso manual.",
     type: 'warning',
     showCloseButton: true,
     showCancelButton: true,

@@ -41,7 +41,7 @@
   
     <div class="form-group col-md-1">
       <label for="nombre_cliente">% IVA</label>
-      <input type="text" class="form-control" id="porc_iva" placeholder="13" value="13" readonly>
+      <input type="number" min="0" class="form-control pr-0" id="porc_iva" placeholder="13" value="13" readonly>
     </div>
     
     <div class="form-group col-md-12 inline-form inline-checkbox">
@@ -66,25 +66,25 @@
     <div class="form-group col-md-3">
       <label for="unidad_medicion">Unidad de medición</label>
       <select class="form-control" id="unidad_medicion" value="" >
-        @foreach ( \App\Variables::unidadesMedicion() as $unidad )
-          <option value="{{ $unidad['codigo'] }}" >{{ $unidad['nombre'] }}</option>
+        @foreach ($units as $unit )
+          <option value="{{ $unit['code'] }}" >{{ $unit['name'] }}</option>
         @endforeach
       </select>
     </div>
     
     <div class="form-group col-md-3">
-      <label for="precio_unitario">Cantidad</label>
-      <input type="text" class="form-control" id="cantidad" value="1" >
+      <label for="cantidad">Cantidad</label>
+      <input type="number" min="1" class="form-control" id="cantidad" value="1"  >
     </div>
 
     <div class="form-group col-md-3">
       <label for="precio_unitario">Precio unitario</label>
-      <input type="text" class="form-control" id="precio_unitario" value="" >
+      <input type="number" min="0" class="form-control" id="precio_unitario" value="" number >
     </div>
 
     <div class="form-group col-md-3">
       <label for="item_iva">Monto IVA</label>
-      <input type="text" class="form-control" id="item_iva_amount" placeholder="" >
+      <input type="number" min="0" class="form-control" id="item_iva_amount" placeholder="" >
     </div>
 
     <div class="form-group col-md-3">
@@ -97,7 +97,7 @@
 
     <div class="form-group col-md-3">
       <label for="discount">Descuento</label>
-      <input type="text" class="form-control" id="discount" value="0" >
+      <input type="number" min="0" max="100" class="form-control" id="discount" value="0" >
     </div>
 
     <div class="form-group col-md-3">

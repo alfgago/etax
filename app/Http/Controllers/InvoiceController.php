@@ -2,27 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\UnidadMedicion;
+use App\Utils\BridgeHaciendaApi;
 use \Carbon\Carbon;
 use App\Invoice;
 use App\InvoiceItem;
-use App\Company;
-use App\Client;
-use App\CalculatedTax;
-use App\Http\Controllers\CacheController;
 use App\Exports\InvoiceExport;
 use App\Imports\InvoiceImport;
-use Maatwebsite\Excel\Facades\Excel;
-use Yajra\Datatables\Datatables;
-use App\DataTables\InvoicesDataTable;
-use Orchestra\Parser\Xml\Facade as XmlParser;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
+use GuzzleHttp\Message\ResponseInterface;
+use PDF;
 
 
 class InvoiceController extends Controller
 {
-  
+
     /**
      * Create a new controller instance.
      *
@@ -30,7 +29,7 @@ class InvoiceController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth', ['except' => ['receiveEmailInvoices']] );
     }
   
     /**
@@ -50,12 +49,15 @@ class InvoiceController extends Controller
      */
     public function indexData() {
         $current_company = currentCompany();
-        
+
         $query = Invoice::where('invoices.company_id', $current_company)
-                ->where('is_void', false)->where('is_totales', false)->with('client');
+                ->where('is_void', false)
+                ->where('is_authorized', true)
+                ->where('is_code_validated', true)
+                ->where('is_totales', false)
+                ->with('client');
                 
         return datatables()->eloquent( $query )
-            ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($invoice) {
                 $hideEdit = false;
                 if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
@@ -71,75 +73,16 @@ class InvoiceController extends Controller
                 ])->render();
             }) 
             ->editColumn('client', function(Invoice $invoice) {
-                return $invoice->client->fullname;
+                return $invoice->clientName();
+            })
+            ->editColumn('document_type', function(Invoice $invoice) {
+                return $invoice->documentTypeName();
             })
             ->editColumn('generated_date', function(Invoice $invoice) {
                 return $invoice->generatedDate()->format('d/m/Y');
             })
             ->rawColumns(['actions'])
             ->toJson();
-    }
-    
-    
-    /**
-     * Despliega las facturas que requieren validación de códigos
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function indexValidaciones()
-    {
-        $current_company = currentCompany();
-        $invoices = Invoice::where('company_id', $current_company)
-                    ->where('is_void', false)
-                    ->where('is_totales', false)
-                    ->where('is_code_validated', false)
-                    ->orderBy('generated_date', 'DESC')
-                    ->orderBy('reference_number', 'DESC')->paginate(10);
-        return view('Invoice/index-validaciones', [
-          'invoices' => $invoices
-        ]);
-    }
-    
-    public function confirmarValidacion( Request $request, $id )
-    {
-        $invoice = Invoice::findOrFail($id);
-        $this->authorize('update', $invoice);
-        
-        $tipoIva = $request->tipo_iva;
-        foreach( $invoice->items as $item ) {
-            $item->iva_type = $request->tipo_iva;
-            $item->save();
-        }
-        
-        $invoice->is_code_validated = true;
-        $invoice->save();
-        
-        if( $invoice->year == 2018 ) {
-            clearLastTaxesCache($invoice->company->id, 2018);
-        }
-        clearInvoiceCache($invoice);
-        
-        return redirect('/facturas-emitidas/validaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido validada');
-    }
-    
-    /**
-     * Despliega las facturas que requieren validación de códigos
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function indexValidacionesLinea()
-    {
-        $current_company = currentCompany();
-        $invoices = Invoice::where('company_id', $current_company)
-            ->where('is_void', false)
-            ->where('is_totales', false)
-            ->where('is_code_validated', false)
-            ->where('is_authorized', true)
-            ->orderBy('generated_date', 'DESC')
-            ->orderBy('reference_number', 'DESC')->paginate(10);
-        return view('Invoice/index-validaciones', [
-            'invoices' => $invoices
-        ]);
     }
 
     /**
@@ -149,7 +92,8 @@ class InvoiceController extends Controller
      */
     public function create()
     {
-        return view("Invoice/create-factura-manual");
+        $units = UnidadMedicion::all()->toArray();
+        return view("Invoice/create-factura-manual", ['units' => $units]);
     }
 
     /**
@@ -159,7 +103,10 @@ class InvoiceController extends Controller
      */
     public function emitFactura()
     {
-        return view("Invoice/create-factura", ['document_type' => '01']);
+        $units = UnidadMedicion::all()->toArray();
+        return view("Invoice/create-factura", ['document_type' => '01', 'rate' => $this->get_rates(),
+            'document_number' => $this->getDocReference('01'),
+            'document_key' => $this->getDocumentKey('01'), 'units' => $units]);
     }
     
     /**
@@ -180,7 +127,7 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
-        
+        Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
         $request->validate([
             'subtotal' => 'required',
             'items' => 'required',
@@ -196,15 +143,9 @@ class InvoiceController extends Controller
         $invoice->payment_status = "01";
         $invoice->payment_receipt = "";
         $invoice->generation_method = "M";
-        $invoice->reference_number = $company->last_invoice_ref_number + 1;
-        
         $invoice->setInvoiceData($request);
-        
-        $company->last_invoice_ref_number = $invoice->reference_number;
-        $company->last_document = $invoice->document_number;
         $company->save();
-        
-        
+
         clearInvoiceCache($invoice);
       
         return redirect('/facturas-emitidas');
@@ -218,29 +159,49 @@ class InvoiceController extends Controller
      */
     public function sendHacienda(Request $request)
     {
-        return redirect()->back()->withMessage("Funcionalidad de facturación electrónica habilitada muy pronto.");
-        
-        $invoice = new Invoice();
-        $company = currentCompanyModel();
-        $invoice->company_id = $company->id;
+        try {
+            Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
+            $request->validate([
+                'subtotal' => 'required',
+                'items' => 'required',
+            ]);
 
-        //Datos generales y para Hacienda
-        $invoice->document_type = "01";
-        $invoice->payment_status = "01";
-        $invoice->payment_receipt = "";
-        $invoice->generation_method = "ETAX";
-        $invoice->reference_number = $company->last_invoice_ref_number + 1;
-        
-        $invoice->setInvoiceData($request);
-        
-        
-        $company->last_invoice_ref_number = $invoice->reference_number;
-        $company->last_document = $invoice->document_number;
-        $company->save();
-        
-        clearInvoiceCache($invoice);
-      
-        return redirect('/facturas-emitidas');
+            $apiHacienda = new BridgeHaciendaApi();
+            $tokenApi = $apiHacienda->login();
+            if ($tokenApi !== false) {
+                $invoice = new Invoice();
+                $company = currentCompanyModel();
+                $invoice->company_id = $company->id;
+
+                //Datos generales y para Hacienda
+                $invoice->document_type = "01";
+                $invoice->hacienda_status = "01";
+                $invoice->payment_status = "01";
+                $invoice->payment_receipt = "";
+                $invoice->generation_method = "etax";
+                $invoice->reference_number = $company->last_invoice_ref_number + 1;
+
+                $invoiceData = $invoice->setInvoiceData($request);
+                if (!empty($invoiceData)) {
+                    $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
+                }
+
+                $company->last_invoice_ref_number = $invoice->reference_number;
+                $company->last_document = $invoice->document_number;
+                $company->save();
+                if ($invoice->hacienda_status == 03) {
+                   // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
+                }
+                clearInvoiceCache($invoice);
+
+                return redirect('/facturas-emitidas');
+            } else {
+                return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+            }
+        } catch( \Exception $ex ) {
+            Log::error("ERROR Envio de factura a hacienda -> ".$ex);
+            return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+        }
     }
 
     /**
@@ -253,8 +214,9 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::findOrFail($id);
         $this->authorize('update', $invoice);
-      
-        return view('Invoice/show', compact('invoice') );
+
+        $units = UnidadMedicion::all()->toArray();
+        return view('Invoice/show', compact('invoice','units') );
     }
 
 
@@ -267,6 +229,7 @@ class InvoiceController extends Controller
     public function edit($id)
     {
         $invoice = Invoice::findOrFail($id);
+        $units = UnidadMedicion::all()->toArray();
         $this->authorize('update', $invoice);
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
@@ -274,7 +237,7 @@ class InvoiceController extends Controller
           return redirect('/facturas-emitidas');
         }  
       
-        return view('Invoice/edit', compact('invoice') );
+        return view('Invoice/edit', compact('invoice', 'units') );
     }
 
     /**
@@ -286,7 +249,6 @@ class InvoiceController extends Controller
      */
     public function update(Request $request, $id)
     {
-        
         $invoice = Invoice::findOrFail($id);
         $this->authorize('update', $invoice);
       
@@ -370,6 +332,7 @@ class InvoiceController extends Controller
                             $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
                             $numeroLinea = array_key_exists('numerolinea', $row) ? $row['numerolinea'] : 1;
                             $fechaEmision = $row['fechaemision'];
+                            
                             $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
                             $idMoneda = $row['idmoneda'];
                             $tipoCambio = $row['tipocambio'];
@@ -388,12 +351,13 @@ class InvoiceController extends Controller
                             $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
                             $codigoEtax = $row['codigoetax'];
                             $montoIva = (float)$row['montoiva'];
+                            $totalNeto = 0;
                             
                             $insert = Invoice::importInvoiceRow(
-                                $metodoGeneracion, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
+                                $metodoGeneracion, 0, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
                                 $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
-                                $idMoneda, $tipoCambio, $totalDocumento, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
-                                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, true
+                                $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
+                                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, true, true
                             );
                             
                             if( $insert ) {
@@ -407,11 +371,17 @@ class InvoiceController extends Controller
                     
                 }
             }catch( \ErrorException $ex ){
-                return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila. '.$i.'. Mensaje:' . $ex->getMessage());
+                Log::error('Error importando Excel' . $ex->getMessage());
+                return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila: '.$i);
             }catch( \InvalidArgumentException $ex ){
+                Log::error('Error importando Excel' . $ex->getMessage());
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
             }catch( \Exception $ex ){
-                return back()->withError( 'Ha ocurrido un error al subir su archivo. Error en la fila. '.$i.'. Mensaje:' . $ex->getMessage());
+                Log::error('Error importando Excel' . $ex->getMessage());
+                return back()->withError( 'Ha ocurrido un error al subir su archivo. Error en la fila. '.$i);
+            }catch( \Throwable $ex ){
+                Log::error('Error importando Excel' . $ex->getMessage());
+                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i);
             }
             
             $company->save();
@@ -424,7 +394,51 @@ class InvoiceController extends Controller
             return redirect('/facturas-emitidas')->withError('Usted tiene un límite de 2500 facturas por archivo.');
         }
     }
-    
+
+    private function microtime_float()
+    {
+        list($usec, $sec) = explode(" ", microtime());
+        return ((float) $usec + (float)$sec);
+    }
+
+    private function get_rates()
+    {
+        
+        try {
+            $value = Cache::remember('usd_rate', '60000', function () {
+                $today = new Carbon();
+                $client = new \GuzzleHttp\Client();
+                $response = $client->get(config('etax.exchange_url'),
+                    ['query' => [
+                        'Indicador' => '317',
+                        'FechaInicio' => $today::now()->format('d/m/Y'),
+                        'FechaFinal' => $today::now()->format('d/m/Y'),
+                        'Nombre' => config('etax.namebccr'),
+                        'SubNiveles' => 'N',
+                        'CorreoElectronico' => config('etax.emailbccr'),
+                        'Token' => config('etax.tokenbccr')
+                        ]
+                    ]
+                );
+                $body = $response->getBody()->getContents();
+                $xml = new \SimpleXMLElement($body);
+                $xml->registerXPathNamespace('d', 'urn:schemas-microsoft-com:xml-diffgram-v1');
+                $tables = $xml->xpath('//INGC011_CAT_INDICADORECONOMIC[@d:id="INGC011_CAT_INDICADORECONOMIC1"]');
+                return json_decode($tables[0]->NUM_VALOR);
+            });
+
+            return $value;
+
+        } catch( \Exception $e) {
+            Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: ');
+        } catch (RequestException $e) {
+            Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: '.
+                $e->getResponse()->getReasonPhrase());
+            return null;
+        }
+
+    }
+
     public function importXML() {
         request()->validate([
           'xmls' => 'required'
@@ -435,7 +449,7 @@ class InvoiceController extends Controller
             return back()->withError( 'Por favor mantenga el límite de 10 archivos por intento.');
         }
           
-        try {  
+        try {
             $time_start = getMicrotime();
             $company = currentCompanyModel();
             if( request()->hasfile('xmls') ) {
@@ -444,10 +458,16 @@ class InvoiceController extends Controller
                     $json = json_encode( $xml ); // convert the XML string to JSON
                     $arr = json_decode( $json, TRUE );
                     
+                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
+                    $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
                     $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                    
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $arr['Emisor']['Identificacion']['Numero'] ) ) {
-                        $this->saveInvoice( $arr, 'XML' );
+                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
+                        //Registra el XML. Si todo sale bien, lo guarda en S3.
+                        if( Invoice::saveInvoiceXML( $arr, 'XML' ) ) {
+                            Invoice::storeXML( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
+                        }
                     }else{
                         return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
                     }
@@ -456,80 +476,136 @@ class InvoiceController extends Controller
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
+
         }catch( \Exception $ex ){
+            Log::error('Error importando con archivo inválido' . $ex->getMessage());
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
-            Log::error('Error importando con archivo inválido' . $ex->getMessage());
         }catch( \Throwable $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido,');
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
         }
         
         return redirect('/facturas-emitidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
+    }
+    
+    /**
+     * Despliega las facturas que requieren validación de códigos
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexValidaciones()
+    {
+        $current_company = currentCompany();
+        $invoices = Invoice::where('company_id', $current_company)
+                    ->where('is_void', false)
+                    ->where('is_totales', false)
+                    ->where('is_code_validated', false)
+                    ->where('is_authorized', true)
+                    ->orderBy('generated_date', 'DESC')
+                    ->orderBy('reference_number', 'DESC')->paginate(10);
+        return view('Invoice/index-validaciones', [
+          'invoices' => $invoices
+        ]);
+    }
+    
+    public function confirmarValidacion( Request $request, $id )
+    {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        
+        $tipoIva = $request->tipo_iva;
+        foreach( $invoice->items as $item ) {
+            $item->iva_type = $request->tipo_iva;
+            $item->save();
+        }
+        
+        $invoice->is_code_validated = true;
+        $invoice->save();
+        
+        if( $invoice->year == 2018 ) {
+            clearLastTaxesCache($invoice->company->id, 2018);
+        }
+        clearInvoiceCache($invoice);
+        
+        return redirect('/facturas-emitidas/validaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido validada');
+    }
+    
+    
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexAuthorize()
+    {
+        return view('Invoice/index-autorizaciones');
+    }
+    
+    /**
+     * Returns the required ajax data.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexDataAuthorize() {
+        $current_company = currentCompany();
+
+        $query = Invoice::where('invoices.company_id', $current_company)
+        ->where('is_void', false)
+        ->where('is_authorized', false)
+        ->where('is_totales', false)
+        ->with('client');
+        
+        return datatables()->eloquent( $query )
+            ->orderColumn('reference_number', '-reference_number $1')
+            ->addColumn('actions', function($invoice) {
+                return view('Invoice.ext.auth-actions', [
+                    'id' => $invoice->id
+                ])->render();
+            }) 
+            ->editColumn('client', function(Invoice $invoice) {
+                return $invoice->clientName();
+            })
+            ->editColumn('generated_date', function(Invoice $invoice) {
+                return $invoice->generatedDate()->format('d/m/Y');
+            })
+            ->rawColumns(['actions'])
+            ->toJson();
+    }
+    
+    public function authorizeInvoice ( Request $request, $id )
+    {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        
+        if ( $request->autorizar ) {
+            $invoice->is_authorized = true;
+            $invoice->save();
+            return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido autorizada');
+        }else {
+            $invoice->is_authorized = false;
+            $invoice->is_void = true;
+            InvoiceItem::where('invoice_id', $invoice->id)->delete();
+            $invoice->delete();
+            return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido rechazada');
+        }
+        
         
     }
     
-    public function saveInvoice( $arr, $metodoGeneracion ) {
-        $inserts = array();
-        
-        $claveFactura = $arr['Clave'];
-        $consecutivoComprobante = $arr['NumeroConsecutivo'];
-        $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10))->format('d/m/Y');
-        $fechaVencimiento = $fechaEmision;
-        $nombreProveedor = $arr['Emisor']['Nombre'];
-        $codigoCliente = '';
-        $tipoPersona = $arr['Emisor']['Identificacion']['Tipo'];
-        $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
-        $correoCliente = $arr['Receptor']['CorreoElectronico'];
-        $telefonoCliente = $arr['Receptor']['Telefono']['NumTelefono'];
-        $tipoPersona = $arr['Receptor']['Identificacion']['Tipo'];
-        $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
-        $nombreCliente = $arr['Receptor']['Nombre'];
-        $condicionVenta = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
-        $plazoCredito = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
-        $metodoPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
-        $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
-        $tipoCambio = $arr['ResumenFactura']['TipoCambio'];
-        $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
-        $tipoDocumento = '01';
-        $descripcion = $arr['ResumenFactura']['CodigoMoneda'];
-        
-        $authorize = true;
-        if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
-            $authorize = false;
-        }
-        
-        $lineas = $arr['DetalleServicio']['LineaDetalle'];
-        //Revisa si es una sola linea. Si solo es una linea, lo hace un array para poder entrar en el foreach.
-        if( array_key_exists( 'NumeroLinea', $lineas ) ) {
-            $lineas = [$arr['DetalleServicio']['LineaDetalle']];
-        }
-        
-        foreach( $lineas as $linea ) {
-            $numeroLinea = $linea['NumeroLinea'];
-            $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] : '';
-            $detalleProducto = $linea['Detalle'];
-            $unidadMedicion = $linea['UnidadMedida'];
-            $cantidad = $linea['Cantidad'];
-            $precioUnitario = (float)$linea['PrecioUnitario'];
-            $subtotalLinea = (float)$linea['SubTotal'];
-            $totalLinea = (float)$linea['MontoTotalLinea'];
-            $montoDescuento = array_key_exists('MontoDescuento', $linea) ? $linea['MontoDescuento'] : 0;
-            $codigoEtax = '103'; //De momento asume que todo en 4.2 es al 13%.
-            $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
-            
-            $insert = Invoice::importInvoiceRow(
-                $metodoGeneracion, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
-                $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
-                $idMoneda, $tipoCambio, $totalDocumento, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
-                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, false
-            );
-            
-            if( $insert ) {
-                array_push( $inserts, $insert );
-            }
-        }
-        
-        InvoiceItem::insert($inserts);
+    private function getDocReference($docType) {
+        $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;
+        $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
+
+        return $consecutive;
     }
-    
+
+    private function getDocumentKey($docType) {
+        $company = currentCompanyModel();
+        $invoice = new Invoice();
+        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
+            '1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
+            
+            
+        return $key;
+    }
 }

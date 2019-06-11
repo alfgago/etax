@@ -20,7 +20,4 @@ class Payment extends Model
     public function nextPaymentDate(){
         return $this->belongsTo(PaymentMethod::class);
     }
-
-
-
 }

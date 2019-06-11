@@ -1,18 +1,19 @@
 @extends('layouts/app')
 
 @section('title') 
-  Aceptación de facturas
+  Autorización de facturas de compra recibidas por correo electrónico
 @endsection
 
 @section('breadcrumb-buttons')
-    <div onclick="abrirPopup('importar-aceptacion-popup');" class="btn btn-primary">Importar XML para aceptación</div>
+    
 @endsection 
 
 @section('content') 
 <div class="row">
   <div class="col-md-12">
         <div class="descripcion mb-4">
-          Las facturas enviadas a facturas@etaxcr.com, se verán reflejadas en esta pantalla automáticamente.
+          Las facturas enviadas a <b>facturas@etaxcr.com</b> se verán reflejadas en esta pantalla automáticamente. <br><br>
+          Este proceso NO crea la aceptación o rechazo ante Hacienda, la funcionalidad de aceptaciones ante Hacienda estará habilitada a partir del 7 de Junio.
         </div>
           
         <table id="bill-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
@@ -34,8 +35,6 @@
   </div>  
 </div>
 
-@include('Bill.import-accepts')
-
 @endsection
 
 @section('footer-scripts')
@@ -46,7 +45,8 @@ $(function() {
   $('#bill-table').DataTable({
     processing: true,
     serverSide: true,
-    ajax: "/api/billsAccepts",
+    ajax: "/api/billsAuthorize",
+    order: [[ 6, 'desc' ]],
     columns: [
       { data: 'document_number', name: 'document_number' },
       { data: 'provider', name: 'provider.fullname' },
@@ -62,6 +62,42 @@ $(function() {
     },
   });
 });
+  
+  
+function confirmAuthorize( id ) {
+  var formId = "#accept-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea autorizar la factura?',
+    text: "Al autorizarla, está aceptando que se incluya entre sus facturas utilizadas para el cálculo de impuestos.",
+    type: 'success',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero autorizarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
+  
+function confirmDelete( id ) {
+  var formId = "#delete-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea eliminar la factura?',
+    text: "Al rechazarla, la factura se eliminará de esta lista. Este proceso no es reversible",
+    type: 'warning',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero eliminarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
+    
   
 </script>
 

@@ -235,7 +235,7 @@
                       <td>{{ $item->item_count }}
                         <input type="hidden" class='cantidad' name="items[{{ $loop->index }}][item_count]" value="{{ $item->item_count }}">
                       </td>
-                      <td>{{ \App\Variables::getUnidadMedicionName($item->measure_unit) }}
+                      <td>{{ \App\UnidadMedicion::getUnidadMedicionName($item->measure_unit) }}
                         <input type="hidden" class='unidad_medicion' name="items[{{ $loop->index }}][measure_unit]" value="{{ $item->measure_unit }}">
                       </td>
                       <td>{{ $item->unit_price }}

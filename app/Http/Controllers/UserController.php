@@ -17,7 +17,7 @@ use Carbon\Carbon;
 class UserController extends Controller {
 
     function __construct() {
-        
+        $this->middleware('auth');
     }
 
     /**
@@ -82,7 +82,7 @@ class UserController extends Controller {
         
         if( $user->id_number != $request->id_number ) {
             $request->validate([
-                'id_number' => 'required|unique:companies',
+                'id_number' => 'required|unique:users',
             ]);
         }
         
@@ -148,24 +148,30 @@ class UserController extends Controller {
     }
 
     public function companies() {
-
-        $teams = auth()->user()->teams;
-
-        /* Show registered companies list on specific plan */
-        if ( isset($_GET['plan']) ) {
-            $company_ids = \App\Company::where('subscription_id', decrypt($_GET['plan']))->get(['id'])->toArray();
-            $teams = \Mpociot\Teamwork\TeamworkTeam::whereIn('company_id', $company_ids)->get();
-        } else {
-            //$teams = \Mpociot\Teamwork\TeamworkTeam::get();
-        }
-
+        
         $data['class'] = '';
         $data['url'] = '/empresas/create';
-
-        $available_companies_count = User::checkCountAvailableCompanies();
         
-
-        return view('users.companies', compact('data'))->with('teams', $teams);
+        try {
+        
+            $teams = auth()->user()->teams;
+    
+            /* Show registered companies list on specific plan */
+            if ( isset($_GET['plan']) ) {
+                $company_ids = \App\Company::where('subscription_id', decrypt($_GET['plan']))->get(['id'])->toArray();
+                $teams = \Mpociot\Teamwork\TeamworkTeam::whereIn('company_id', $company_ids)->get();
+            } else {
+                //$teams = \Mpociot\Teamwork\TeamworkTeam::get();
+            }
+    
+            $available_companies_count = User::checkCountAvailableCompanies();
+            
+            return view('users.companies', compact('data'))->with('teams', $teams);
+        
+        }catch( \Throwable $ex ){
+            return view('users.companies');
+        }
+        
     }
 
     public function plans() {
@@ -211,10 +217,19 @@ class UserController extends Controller {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id) {
-        /*User::find($id)->delete();
-        return redirect()->route('users.index')
-                        ->with('success', 'User deleted successfully');*/
+    public function destroy( $string ) {
+        if( 'ELIMINAR' != $string ){
+            return 404;
+        }
+        
+        $user = auth()->user();
+        
+        Company::where('user_id', $user->id)->delete();
+        $user->delete;
+        
+        Auth::logout();
+        
+        return redirect('/')->with('success', 'Su cuenta ha sido eliminada. Tiene 15 días para solicitar una restauración antes de que sus datos sean eliminados permanentemente.');
     }
     
     public function changePlan() {
@@ -277,6 +292,80 @@ class UserController extends Controller {
        $jwt = JWT::encode($payload, $key);
        
        return $jwt;
+    }
+    
+    
+    public function adminEdit( $email ) {
+        
+        if( auth()->user()->user_name != "alfgago" ) {
+            return redirect(404);
+        }
+        
+        $user = User::where('user_name', $email)->first();
+        
+        return view('users.edit-admin', compact('user'));
+        
+        
+    }
+
+    public function updateAdmin(Request $request, $id) {
+        //Edita al usuario logueado.
+        if( auth()->user()->user_name != "alfgago" ) {
+            return redirect(404);
+        }
+        
+        $user = User::findOrFail($id);
+        
+        $this->validate($request, [
+            'first_name' => 'required',
+        ]);
+        
+        if( $user->id_number != $request->id_number ) {
+            $request->validate([
+                'id_number' => 'required|unique:users',
+            ]);
+        }
+        
+        if( $user->user_name != $request->user_name ) {
+            $request->validate([
+                'user_name' => 'required|unique:users',
+            ]);
+        }
+        
+        $user->id_number = preg_replace("/[^0-9]+/", "", $request->id_number);
+        $user->user_name = $request->user_name;
+        $user->first_name = $request->first_name;
+        $user->last_name = $request->last_name;
+        $user->last_name2 = $request->last_name2;
+        $user->email = $request->email;
+        $user->country = $request->country;
+        $user->state = ($request->state != '0') ? $request->state : NULL;
+        $user->city = ($request->city != '0') ? $request->city : NULL;
+        $user->district = ($request->district != '0') ? $request->district : NULL;
+        $user->neighborhood = $request->neighborhood;
+        $user->zip = $request->zip;
+        $user->address = $request->address;
+        $user->phone = $request->phone;
+        $user->save();
+        
+        return redirect()->back()->withMessage('La información del usuario $user->email ha sido actualizada');
+        
+    }
+    
+    public function impersonate( $id ) {
+        
+        $user = User::findOrFail($id);
+        
+        Auth::user()->impersonate($user);
+        return redirect( '/' );
+        
+    }
+    
+    public function leaveImpersonation( ) {
+        
+        Auth::user()->leaveImpersonation();
+        return redirect( '/' );
+        
     }
 
 }

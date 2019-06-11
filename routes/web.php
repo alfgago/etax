@@ -70,8 +70,9 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::post('enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
     Route::get('validaciones', 'InvoiceController@indexValidaciones')->name('Invoice.validaciones');
     Route::patch('confirmar-validacion/{id}', 'InvoiceController@confirmarValidacion')->name('Invoice.confirmar_validacion');
-    Route::get('validaciones-linea', 'InvoiceController@indexValidacionesLinea')->name('Invoice.validaciones');
-    Route::patch('confirmar-validacion-linea/{id}', 'InvoiceController@confirmarValidacion')->name('Invoice.confirmar_validacion');
+    Route::get('autorizaciones', 'InvoiceController@indexAuthorize')->name('Invoice.validaciones');
+    Route::patch('confirmar-autorizacion/{id}', 'InvoiceController@authorizeInvoice')->name('Invoice.confirmar_validacion');
+    Route::post('send', 'InvoiceController@sendHacienda')->name('Invoice.sendHacienda');
 });
 
 // Rutas de facturacion recibida
@@ -80,6 +81,8 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::post('respondStatus', 'BillController@respondStatus')->name('Bill.respond');
     Route::get('validaciones', 'BillController@indexValidaciones')->name('Bill.validaciones');
     Route::patch('confirmar-validacion/{id}', 'BillController@confirmarValidacion')->name('Bill.confirmar_validacion');
+    Route::get('autorizaciones', 'BillController@indexAuthorize')->name('Bill.validaciones');
+    Route::patch('confirmar-autorizacion/{id}', 'BillController@authorizeBill')->name('Bill.confirmar_validacion');
 });
 
 // Rutas de Wizard
@@ -94,6 +97,8 @@ Route::get('/elegir-plan', 'WizardController@selectPlan')->name('Wizard.select_p
 Route::prefix('usuario')->group(function() {
     Route::get('perfil', 'UserController@edit')->name('User.edit');
     Route::patch('update-perfil', 'UserController@update')->name('User.update');
+    Route::get('admin-edit/{email}', 'UserController@adminEdit')->name('User.admin_edit');
+    Route::patch('update-admin/{id}', 'UserController@updateAdmin')->name('User.update_admin');
     Route::get('seguridad', 'UserController@editPassword')->name('User.edit_password');
     Route::get('planes', 'UserController@plans')->name('User.plans');
     Route::get('cambiar-plan', 'UserController@changePlan')->name('User.cambiar_plan');
@@ -120,13 +125,25 @@ Route::prefix('payment')->group(function(){
 
 // Rutas de API data para ajax
 Route::get('/api/invoices', 'InvoiceController@indexData')->name('Invoice.data');
+Route::get('/api/invoicesAuthorize', 'InvoiceController@indexDataAuthorize')->name('Invoice.data_authorizes');
 Route::get('/api/bills', 'BillController@indexData')->name('Bill.data');
 Route::get('/api/billsAccepts', 'BillController@indexDataAccepts')->name('Bill.data_accepts');
+Route::get('/api/billsAuthorize', 'BillController@indexDataAuthorize')->name('Bill.data_authorizes');
 Route::get('/api/clients', 'ClientController@indexData')->name('Client.data');
 Route::get('/api/providers', 'ProviderController@indexData')->name('Provider.data');
 Route::get('/api/products', 'ProductController@indexData')->name('Product.data');
 Route::get('/api/books', 'BookController@indexData')->name('Book.data');
 Route::get('/api/payments', 'PaymentController@indexData')->name('Payment.data');
+
+
+//Rutas de recover
+Route::patch('/facturas-recibidas/{id}/restore', 'BillController@restore')->name('Bill.restore');
+Route::patch('/facturas-emitidas/{id}/restore', 'InvoiceController@restore')->name('Invoice.restore');
+Route::patch('/proveedores/{id}/restore', 'ProviderController@restore')->name('Provider.restore');
+Route::patch('/clientes/{id}/restore', 'ClientController@restore')->name('Client.restore');
+Route::patch('/productos/{id}/restore', 'ProductController@restore')->name('Product.restore');
+
+
 
 // Rutas autogeneradas de CRUD
 Route::resource('clientes', 'ClientController');
@@ -180,4 +197,11 @@ Route::get('show-plans', 'PlanController@show_plans')->name('plans.show-data');
 Route::post('purchase', 'PlanController@purchase')->name('plans.purchase');
 Route::get('plans/switch-plan/{plan}/{newPlan}', 'PlanController@switchPlan')->name('plans.switch-plan');
 
+
 Route::post('payment-test', 'PaymentController@checkout')->name('payment.test');
+
+Route::get('/private/all', 'SubscriptionPlanController@all')->name('subscriptions.all');
+Route::get('/private/exportar', 'SubscriptionPlanController@exportar')->name('subscriptions.exportar');
+
+Route::get('/admin/impersonate/{id}', 'UserController@impersonate');
+Route::get('/admin/leave', 'UserController@leaveImpersonation');
