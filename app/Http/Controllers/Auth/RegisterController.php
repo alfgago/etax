@@ -83,7 +83,7 @@ use RegistersUsers;
             $phone = '22802130';
         }
         $client = new Client();
-        $result = $client->request('POST', "http://www.fttserver.com:4217/api/createUser", [
+        $result = $client->request('POST', "https://emcom.oneklap.com:2263/api/createUser", [
             'headers' => [
                 'Content-Type'  => "application/json",
             ],

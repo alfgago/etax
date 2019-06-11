@@ -35,7 +35,7 @@ class PaymentController extends Controller
     }
     public function StatusBnAPI(){
         $BnEcomAPIStatus = new Client();
-        $APIStatus = $BnEcomAPIStatus->request('POST', "http://www.fttserver.com:4217/api/LogOnApp?applicationName=string&applicationPassword=string", [
+        $APIStatus = $BnEcomAPIStatus->request('POST', "https://emcom.oneklap.com:2263/api/LogOnApp?applicationName=string&applicationPassword=string", [
             'headers' => [
                 'Content-Type' => "application/json",
             ],
@@ -82,7 +82,7 @@ class PaymentController extends Controller
                     break;
             }
             $CardBn = new Client();
-            $CardCreationResult = $CardBn->request('POST', "http://www.fttserver.com:4217/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
+            $CardCreationResult = $CardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
                 'headers' => [
                     'Content-Type'  => "application/json",
                 ],
@@ -254,7 +254,7 @@ class PaymentController extends Controller
         $BnStatus = $this->StatusBnAPI();
         if($BnStatus['apiStatus'] == 'Successful'){
             $CardBn = new Client();
-            $CardCreationResult = $CardBn->request('POST', "http://www.fttserver.com:4217/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
+            $CardCreationResult = $CardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
                 'headers' => [
                     'Content-Type'  => "application/json",
                 ],
@@ -362,7 +362,7 @@ class PaymentController extends Controller
         $BnStatus = $this->StatusBnAPI();
         if($BnStatus['apiStatus'] == 'Successful'){
             $CardBn = new Client();
-            $CardCreationResult = $CardBn->request('POST', "http://www.fttserver.com:4217/api/UserUpdateCard?applicationName=string&userName=string&userPassword=string&cardTokenId=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
+            $CardCreationResult = $CardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserUpdateCard?applicationName=string&userName=string&userPassword=string&cardTokenId=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
                 'headers' => [
                     'Content-Type'  => "application/json",
                 ],
@@ -400,7 +400,7 @@ class PaymentController extends Controller
         $BnStatus = $this->StatusBnAPI();
         if($BnStatus['apiStatus'] == 'Successful'){
             $CardBn = new Client();
-            $CardCreationResult = $CardBn->request('POST', "http://www.fttserver.com:4217/api/UserDeleteCard", [
+            $CardCreationResult = $CardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserDeleteCard", [
                 'headers' => [
                     'Content-Type'  => "application/json",
                 ],
@@ -434,7 +434,7 @@ class PaymentController extends Controller
     */
     public function paymentCharge(Request $request){
         $AppCharge = new Client();
-        $AppChargeBn = $AppCharge->request('POST', "http://www.fttserver.com:4217/api/AppIncludeCharge?applicationName=string&applicationPassword=string&chargeDescription=string&userName=string&transactionCurrency=string&transactionAmount=double", [
+        $AppChargeBn = $AppCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppIncludeCharge?applicationName=string&applicationPassword=string&chargeDescription=string&userName=string&transactionCurrency=string&transactionAmount=double", [
             'headers' => [
                 'Content-Type' => "application/json",
             ],
@@ -451,7 +451,7 @@ class PaymentController extends Controller
         $chargeTokenId = $ChargeAplied['chargeTokenId'];
         /****************************************************/
         $BnCharge = new Client();
-        $ChargeBn = $BnCharge->request('POST', "http://www.fttserver.com:4217/api/AppApplyCharge?applicationName=string&applicationPassword=string&userName=string&chargeTokeId=string&cardTokenId=string", [
+        $ChargeBn = $BnCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppApplyCharge?applicationName=string&applicationPassword=string&userName=string&chargeTokeId=string&cardTokenId=string", [
             'headers' => [
                 'Content-Type' => "application/json",
             ],
