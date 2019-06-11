@@ -403,6 +403,7 @@ class InvoiceController extends Controller
 
     private function get_rates()
     {
+        
         try {
             $value = Cache::remember('usd_rate', '60000', function () {
                 $today = new Carbon();
