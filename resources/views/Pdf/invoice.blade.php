@@ -114,6 +114,7 @@
             background: black;
             color: black;
             height: 25px;
+            margin-bottom: 15px;
         }
 
         .total {
@@ -147,6 +148,7 @@
             color: white;
             text-align: center;
             vertical-align: middle;
+            padding: 8px;
         }
 
         .footer {
@@ -209,7 +211,7 @@
         </td>
     </tr>
 </table>
-    <table width="100%">
+    <table width="100%" style="margin-top: 10px">
     <tr class="heading">
         <td class="tb-header">
             Código
@@ -282,7 +284,7 @@
             </td>
 
             <td class="box-total">
-                <b>Total:</b> {{round($data_invoice->total, 2)}}
+                <b>Total ¢:</b> {{round($data_invoice->total, 2)}}
             </td>
         </tr>
     </table>
