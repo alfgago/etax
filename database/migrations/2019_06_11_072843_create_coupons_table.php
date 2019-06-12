@@ -14,9 +14,9 @@ class CreateCouponsTable extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('coupons');
         Schema::create('coupons', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('subscription_id')->nullable();
             
             $table->string('code')->nullable();
             $table->string('promotion_name')->nullable();
@@ -27,10 +27,11 @@ class CreateCouponsTable extends Migration
             $table->boolean('use_once')->default(false);
             $table->boolean('used')->default(false);
             
+            $table->softDeletes();
             $table->timestamps();
         });
         
-        $faker = Faker\Factory::create();
+        /*$faker = Faker\Factory::create();
         for($i = 0; $i < 500; $i++) {
             
             App\Coupon::create([
@@ -42,7 +43,7 @@ class CreateCouponsTable extends Migration
                 'valid_until' =>  Carbon::now()->addMonths(2)
             ]);
             
-        }
+        }*/
     }
 
     /**

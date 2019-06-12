@@ -15,7 +15,7 @@ use stdClass;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 
-require __DIR__ . '/../../../vendor/autoload.php';
+//require __DIR__ . '/../../../vendor/autoload.php';
 
 class PaymentController extends Controller
 {

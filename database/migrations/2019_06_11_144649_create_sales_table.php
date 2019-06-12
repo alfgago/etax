@@ -13,6 +13,7 @@ class CreateSalesTable extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('sales');
         Schema::create('sales', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id')->default(0);
@@ -31,6 +32,7 @@ class CreateSalesTable extends Migration
             $table->dateTime('cancel_date')->nullable();
             $table->string('cancellation_token')->nullable();
 
+            $table->softDeletes();
             $table->timestamps();
         });
     }

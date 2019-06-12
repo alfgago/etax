@@ -248,7 +248,6 @@ class UserController extends Controller {
         $next_payment_date = $start_date->addMonths(1);
         
         $sub = Sale::updateOrCreate (
-            
             [ 
                 'user_id' => $user->id 
             ],
@@ -258,12 +257,9 @@ class UserController extends Controller {
                 'trial_end_date' => $trial_end_date,
                 'start_date' => $start_date, 
                 'next_payment_date' => $next_payment_date, 
+                'etax_product_id' => $request->product_id
             ]
-                
         );
-        
-        $company->subscription_id = $sub->id;
-        $company->save();
         
         $nombre = $sub->plan->getName();
         

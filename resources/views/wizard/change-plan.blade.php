@@ -176,6 +176,29 @@
 	    margin-right: 50%;
 	}
 	
+	.wizard-container .precio-text {
+	    background: #d6d4cc;
+	    padding: .5rem;
+	    font-size: 1.5rem;
+	    line-height: 1;
+	    border-radius: 5px;
+	}
+		
+	.wizard-container .form-group label {
+	    font-size: 1.2rem;
+	}
+		
+	.wizard-container .form-group select {
+	    font-size: 1.5rem;
+	    line-height: 1.1;
+	    height: auto;
+	}
+	
+	.wizard-container .precio-text span {
+	    font-size: 2rem;
+	    font-weight: bold;
+	}
+	
 	@media screen and (max-width: 600px) {
 	
 		.cuadro-planes .tier > div {
@@ -241,7 +264,10 @@
 		}
 		
 		.bigtext {
-		    font-size: 1rem;
+		    font-size: 1.3rem;
+		    color: #000;
+		    line-height: 1.1;
+		    margin: 1.5rem 0;
 		}
 		
 		.wizard-container .btn-holder {
@@ -287,53 +313,38 @@
 							  </h3>
 							</div>
 							
-							<input id="plan_id" name="plan_id" type="hidden" value="1">
+							<div class="form-group col-md-6">
+							  <label for="plan-sel">Plan </label>
+							  <select class="form-control " name="plan-sel" id="plan-sel" onchange="togglePlan();">
+							  	<option value="p" selected>Profesional</option>
+							  	<option value="e">Empresarial</option>
+							  	<option value="c">Contador</option>
+							  </select>
+							</div>
 							
-							<div class="cuadro-planes">
-			            
-			            <div class="tier">
-			            	<div class="titulo"><span>Profesional</span></div>
-			            	<div class="opcion opcion-1 is-active" val="1" onclick="toggleOpcion(1);"><span>Básico</span>
-			            		<span class="precio"><small>Desde</small> $9.99</span>
-			            	</div>
-			            	<div class="opcion opcion-2" val="2" onclick="toggleOpcion(2);"><span>Intermedio</span>
-			            		<span class="precio"><small>Desde</small> $12.99</span>
-			            	</div>
-			            	<div class="opcion opcion-3" val="3" onclick="toggleOpcion(3);"><span>Pro</span>
-			            		<span class="precio"><small>Desde</small> $19.99</span>
-			            	</div>
-			            </div>
-			            
-			            <div class="tier">
-			            	<div class="titulo"><span>Empresarial</span></div>
-			            	<div class="opcion opcion-4" val="4" onclick="toggleOpcion(4);"><span>Básico</span>
-			            		<span class="precio"><small>Desde</small> $32.99</span>
-			            	</div>
-			            	<div class="opcion opcion-5" val="5" onclick="toggleOpcion(5);"><span>Intermedio</span>
-			            		<span class="precio"><small>Desde</small> $82.99</span>
-			            	</div>
-			            	<div class="opcion opcion-6" val="6" onclick="toggleOpcion(6);"><span>Pro</span>
-			            		<span class="precio"><small>Desde</small> $124.99</span>
-			            	</div>
-			            </div>
-			            
-			            <div class="tier">
-			            	<div class="titulo"><span>Contador</span></div>
-			            	<div class="opcion opcion-7" val="7" onclick="toggleOpcion(7);"><span>Básico</span>
-			            		<span class="precio"><small>Desde</small> $124.99</span>
-			            	</div>
-			            	<div class="opcion opcion-8" val="8" onclick="toggleOpcion(8);"><span>Intermedio</span>
-			            		<span class="precio"><small>Desde</small> $249.99</span>
-			            	</div>
-			            	<div class="opcion opcion-9" val="9" onclick="toggleOpcion(9);"><span>Pro</span>
-			            		<span class="precio"><small>Desde</small> $415.99</span>
-			            	</div>
-			            </div>
-			          
+							<div class="form-group col-md-6 hide-contador">
+							  <label for="product_id">Plan </label>
+							  <select class="form-control " name="product_id" id="product_id" onchange="toggleProducto();">
+							  	<option class="p" value="1" precio="9.99">Básico</option>
+							  	<option class="p" value="2" precio="12.99">Intermedio</option>
+							  	<option class="p" value="3" precio="19.99">Pro</option>
+							  	<option class="e" value="4" precio="32.99">Básico</option>
+							  	<option class="e" value="5" precio="82.99">Intermedio</option>
+							  	<option class="e" value="6" precio="124.99">Pro</option>
+							  	<option class="c" value="7" precio="124.99">Contador</option>
+							  </select>
+							</div>
+							
+							<div class="form-group col-md-12 mt-4">
+								<span class="precio-text">
+									Desde <span id="precio-plan">9.99</span>
+								</span>
 			        </div>
 			        
-			        <div class="bigtext">
-			        	Elija el plan de su conveniencia y empiece a calcular el IVA con eTax. Disfrute de una <span>prueba gratis</span> válida hasta el 14 de Junio.
+			        <div class="form-group col-md-12">
+				        <div class="bigtext">
+				        	Elija el plan de su conveniencia y empiece a calcular el IVA con eTax. Disfrute de una <span>prueba gratis</span> válida hasta el 14 de Junio.
+				        </div>
 			        </div>
 			        
 			        <div class="btn-holder">
@@ -358,11 +369,20 @@
 
 <script>
 	
-	function toggleOpcion(plan) {
-    $(".detalle-plan, .opcion").removeClass("is-active");
-    $(".dp-"+plan+", .opcion-"+plan).addClass("is-active");
-    $("#plan_id").val(plan);
+	function togglePlan() {
+		var planId = $("#plan-sel").val();
+    $("#product_id option").hide();
+    $("#product_id ."+planId).show();
+    $("#product_id").val( $("#product_id ."+planId).first().val() );
+    toggleProducto();
   }
+  
+  function toggleProducto() {
+  	var precio = $('#product_id :selected').attr('precio');
+    $("#precio-plan").text(precio);
+  }
+  
+  togglePlan();01
   
 </script>
 

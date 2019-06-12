@@ -13,6 +13,7 @@ class CreatePaymentsTable extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('payments');
         Schema::create('payments', function (Blueprint $table) {
             $table->bigIncrements('id');
 			$table->unsignedBigInteger('sale_id');
@@ -24,6 +25,7 @@ class CreatePaymentsTable extends Migration
             $table->string('nameCard')->nullable();
             $table->double('amount')->default(0);
             $table->string('proof')->nullable();
+            
             $table->softDeletes();
             $table->timestamps();
         });
