@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
-use App\Subscription;
+use App\Sales;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use DB;
@@ -177,7 +177,7 @@ class UserController extends Controller {
     public function plans() {
 
         $user_id = auth()->user()->id;
-        $plans = Subscription::where('user_id', $user_id)->get()->with('plan');
+        $plans = Sales::where('user_id', $user_id)->get()->with('plan');
 
         return view('users.subscribed-plans', compact('plans'));
     }
@@ -247,7 +247,7 @@ class UserController extends Controller {
         $trial_end_date = $start_date->addMonths(1);
         $next_payment_date = $start_date->addMonths(1);
         
-        $sub = Sale::updateOrCreate (
+        $sub = Sales::updateOrCreate (
             [ 
                 'user_id' => $user->id 
             ],
@@ -261,9 +261,9 @@ class UserController extends Controller {
             ]
         );
         
-        $nombre = $sub->plan->getName();
+        $nombre = $sub->subscription_plan->getName();
         
-        return redirect('payment-crear');
+        return redirect('payment/payment-crear');
     }
     
     

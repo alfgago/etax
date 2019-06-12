@@ -91,14 +91,13 @@ use RegistersUsers;
                 'userName' => $data['email'],
                 'userFirstName' => $data['first_name'],
                 'userLastName' => $data['last_name'],
-                'userPassword' => Hash::make($data['password']),
+                'userPassword' => 'Etax-' . $user->id . 'Klap',
                 'userEmail' => $data['email'],
                 'userCallerId' => $phone
             ],
             'verify' => false,
         ]);
         $output = json_decode($result->getBody()->getContents(), true);
-
         /* Old Code
          * If user is registering from invitation,it is added as normal user else as admin user
           if (!empty(session('invite_token'))) {

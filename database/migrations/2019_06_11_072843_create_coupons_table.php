@@ -26,8 +26,7 @@ class CreateCouponsTable extends Migration
             $table->timestamp('start_date')->nullable();
             $table->boolean('use_once')->default(false);
             $table->boolean('used')->default(false);
-            
-            $table->softDeletes();
+
             $table->timestamps();
         });
         

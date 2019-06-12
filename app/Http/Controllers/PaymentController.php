@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Company;
 use App\EtaxProducts;
+use App\Invoice;
 use App\Payment;
 use App\Sales;
 use App\Subscription;
@@ -11,9 +13,12 @@ use App\SubscriptionPlan;
 use Carbon\Carbon;
 use CybsSoapClient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use stdClass;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use App\Utils\BridgeHaciendaApi;
+
 
 //require __DIR__ . '/../../../vendor/autoload.php';
 
@@ -88,7 +93,7 @@ class PaymentController extends Controller
                 ],
                 'json' => ['applicationName' => 'ETAX',
                     'userName' => $user->user_name,
-                    'userPassword' => $user->password,
+                    'userPassword' => 'Etax-' . $user->id . 'Klap',
                     'cardDescription' => $NameCard,
                     'primaryAccountNumber' => $request->number,
                     "expirationMonth" => $request->cardMonth,
@@ -108,7 +113,6 @@ class PaymentController extends Controller
                     'last_4digits' => $last_4digits,
                     'nameCard' => $NameCard,
                     'due_date' => $request->cardMonth . ' ' . $request->cardYear,
-                    'token_cybersource' => '',
                     'token_bn' => $token_bn
                 ]);
                 return redirect('payments');
@@ -155,6 +159,23 @@ class PaymentController extends Controller
         return view('payment/create')->with('sale', $sale);
     }
 
+    private function getDocReference($docType) {
+        $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;
+        $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
+
+        return $consecutive;
+    }
+
+    private function getDocumentKey($docType) {
+        $company = currentCompanyModel();
+        $invoice = new Invoice();
+        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
+            '1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
+
+
+        return $key;
+    }
+
     public function check_cc($cc, $extra_check = false){
         $cards = array(
             "visa" => "(4\d{12}(?:\d{3})?)",
@@ -182,9 +203,60 @@ class PaymentController extends Controller
                                                ->with('sale', $sale);
     }
 
-    public function paymentCard(Request $request){
+    public function userCardInclusion($number, $nameCard, $cardMonth, $cardYear, $cvc){
         $user = auth()->user();
-        $current_company = currentCompany();
+        $CardBn = new Client();
+        $CardCreationResult = $CardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
+            'headers' => [
+                'Content-Type'  => "application/json",
+            ],
+            'json' => ['applicationName' => 'ETAX',
+                'userName' => $user->user_name,
+                'userPassword' => 'Etax-' . $user->id . 'Klap',
+                'cardDescription' => $nameCard,
+                'primaryAccountNumber' => $number,
+                "expirationMonth" => $cardMonth,
+                "expirationYear" => '20' . $cardYear,
+                "verificationValue" => $cvc
+            ],
+            'verify' => false,
+        ]);
+        $Card = json_decode($CardCreationResult->getBody()->getContents(), true);
+        return $Card;
+    }
+
+    public function storeClient(Request $request){
+        $cliente = new \App\Client();
+        $cliente->company_id = 1;
+        $cliente->tipo_persona = $request->tipo_persona;
+        $cliente->id_number = $request->id_number;
+        $cliente->code = $request->code;
+        $cliente->first_name = $request->first_name;
+        $cliente->last_name = $request->last_name;
+        $cliente->last_name2 = $request->last_name2;
+        $cliente->emisor_receptor = $request->emisor_receptor;
+        $cliente->country = $request->country;
+        $cliente->state = $request->state;
+        $cliente->city = $request->city;
+        $cliente->district = $request->district;
+        $cliente->neighborhood = $request->neighborhood;
+        $cliente->zip = $request->zip;
+        $cliente->address = $request->address;
+        $cliente->phone = $request->phone;
+        $cliente->es_exento = $request->es_exento;
+        $cliente->email = $request->email;
+        $cliente->fullname = $cliente->toString();
+        $cliente->billing_emails = $request->email;
+
+        $cliente->save();
+
+        return $cliente;
+    }
+
+    public function paymentCard(Request $request){
+        /*$T = $this->Cards();
+        dd($T);*/
+        $user = auth()->user();
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $date = Carbon::now()->format('Y/m/d');
         if (isset($request->coupon)) {
@@ -205,21 +277,24 @@ class PaymentController extends Controller
                 $costo = $subscription_plan->monthly_price;
                 $next_payment_date = $start_date->addMonths(1);
                 $numberOfPayments = 1;
+                $descriptionMessage = 'mensual';
                 break;
             case 2:
                 $costo = $subscription_plan->six_price * 6;
                 $next_payment_date = $start_date->addMonths(6);
                 $numberOfPayments = 6;
+                $descriptionMessage = 'semestral';
                 break;
             case 3:
                 $costo = $subscription_plan->annual_price * 12;
                 $next_payment_date = $start_date->addMonths(12);
                 $numberOfPayments = 12;
+                $descriptionMessage = 'anual';
                 break;
         }
         $montoDescontado = $costo * $descuento;
         $subtotal = ($costo - $montoDescontado);
-        $iv = $subtotal * 0.13;
+        $iv = $subtotal * 0;
         $amount = $subtotal + $iv;
         $cards = array(
             $request->number
@@ -232,19 +307,17 @@ class PaymentController extends Controller
         }
         switch ($TypeCard) {
             case "Visa":
-                $CardType = '001';
                 $NameCard = "Visa";
                 break;
             case "Mastercard":
-                $CardType = '002';
                 $NameCard = "Mastercard";
                 break;
             case "American Express":
-                $CardType = '003';
                 $NameCard = "";
                 break;
         }
-        $sale = Sale::where('user_id', $user->id);
+        $sale = Sales::where('user_id', $user->id)->first();
+        dd($sale->id);
         $payment = Payment::create([
             'sale_id' => $sale->id,
             'payment_date' => $date,
@@ -253,23 +326,7 @@ class PaymentController extends Controller
         ]);
         $BnStatus = $this->StatusBnAPI();
         if($BnStatus['apiStatus'] == 'Successful'){
-            $CardBn = new Client();
-            $CardCreationResult = $CardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
-                'headers' => [
-                    'Content-Type'  => "application/json",
-                ],
-                'json' => ['applicationName' => 'ETAX',
-                    'userName' => $user->user_name,
-                    'userPassword' => $user->password,
-                    'cardDescription' => $NameCard,
-                    'primaryAccountNumber' => $request->number,
-                    "expirationMonth" => $request->cardMonth,
-                    "expirationYear" => '20' . $request->cardYear,
-                    "verificationValue" => $request->cvc
-                ],
-                'verify' => false,
-            ]);
-            $Card = json_decode($CardCreationResult->getBody()->getContents(), true);
+            $Card = $this->userCardInclusion($request->number, $NameCard, $request->cardMonth, $request->cardYear, $request->cvc);
             if($Card['apiStatus'] == 'Success') {
                 $last_4digits = substr($request->number, -4);
                 $token_bn = $Card['cardTokenId'];
@@ -288,8 +345,9 @@ class PaymentController extends Controller
                 $payment->save();
 
                 $data = new stdClass();
-                $data->description = 'Pago Suscripcion Etax';
-                $data->amount = $amount;
+                $data->description = 'Suscripcion ' . $descriptionMessage . ' Etax';
+                //$data->amount = $amount;
+                $data->amount = 0.01;
                 $data->user_name = $sale->user->username;
                 $data->cardTokenId = $token_bn;
                 $PaymentCard = $this->paymentCharge($data);
@@ -301,13 +359,32 @@ class PaymentController extends Controller
                         ],
                         [
                             'status'  => 1,
-                            'etax_product_id' => '',
-                            'recurrency' => $numberOfPayments
+                            'recurrency' => $numberOfPayments,
+                            'next_payment_date' => $next_payment_date
                         ]
 
                     );
-                    //enviar factura electronica
-                    return redirect('wizard');
+                    $client = $this->storeClient($request);
+                    $invoiceData = new stdClass();
+                    $invoiceData->client_code = $client->code;
+                    $invoiceData->client_id_number = $client->id_number;
+                    $invoiceData->amount = $amount;
+
+                    $item = new stdClass();
+                    $item->total = $amount;
+                    $item->id = $sub->id;
+                    $item->descuento = $descuento;
+                    dd($client);
+                    $invoiceData->items = [$item];
+                    try {
+                        $factura = $this->CrearFacturaClienteEtax($invoiceData);
+                        if($factura){
+                            return redirect('wizard');
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Error al crear factura: '.$e->getMessage());
+                        return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
+                    }
                 } else {
                     $mensaje = 'El pago ha sido denegado';
                     return redirect()->back()->withError($mensaje);
@@ -321,7 +398,94 @@ class PaymentController extends Controller
             return redirect('wizard')->withError($mensaje);
         }
     }
+    /*
+    *
+    *
+    *
+    *
+    */
+    public function CrearFacturaClienteEtax($invoiceData){
+        $product = EtaxProducts::where('id', $invoiceData->item->id);
+        $apiHacienda = new BridgeHaciendaApi();
+        $tokenApi = $apiHacienda->login();
+        if ($tokenApi !== false) {
+            $invoice = new Invoice();
+            $company = Company::find(1);
+            $invoice->company_id = 1;
+            $document_key = $this->getDocumentKey('01');
+            $document_number = $this->getDocReference('01');
 
+            //Datos generales y para Hacienda
+            $invoice->document_type = "01";
+            $invoice->hacienda_status = "01";
+            $invoice->payment_status = "01";
+            $invoice->payment_receipt = "";
+            $invoice->generation_method = "etax";
+            $invoice->reference_number = $company->last_invoice_ref_number + 1;
+
+            $data = new stdClass();
+            $data->document_key = $document_key;
+            $data->document_number = $document_number;
+            $data->sale_condition = '01';
+            $data->payment_type = "02";
+            $data->retention_percent = "6";
+            $data->credit_time = "0";
+
+            if($invoiceData->item->descuento > 0){
+                $discount_reason = 'Cupon con descuento de ' . $invoiceData->item->descuento;
+            }else{
+                $discount_reason = '';
+            }
+
+            $data->tipo_persona = "02";
+            $data->identificacion_cliente = $invoiceData->client_id_number;
+            $data->codigo_cliente = $invoiceData->client_code;
+
+            $item = new stdClass();
+
+            $item->item_number = 1;
+            $item->code = $invoiceData->item->id;
+            $item->name = $product->name;
+            $item->product_type = 'Plan';
+            $item->measure_unit = 'Sp';
+            $item->item_count = 1;
+            $item->unit_price = $invoiceData->amount;
+            $item->subtotal = $data->items->item_count * $invoiceData->unit_price;
+
+            $item->discount_percentage = $invoiceData->item->descuento;
+            $item->discount_reason = $discount_reason;
+            $item->discount = $discount_reason;
+
+            $item->iva_type = '103';
+            $item->iva_percentage = 0;
+            $item->iva_amount = 0;
+
+            $item->total = $invoiceData->subtotal + $data->items->iva_amount ;
+            $item->isIdentificacion = false;
+            $item->is_exempt = false;
+
+            $data->items = [$item];
+
+            $invoiceDataSent = $invoice->setInvoiceData($data);
+            dd($invoiceDataSent);
+
+            if (!empty($invoiceDataSent)) {
+                $invoice = $apiHacienda->createInvoice($invoiceDataSent, $tokenApi);
+            }
+
+            $company->last_invoice_ref_number = $invoice->reference_number;
+            $company->last_document = $invoice->document_number;
+            $company->save();
+            if ($invoice->hacienda_status == 03) {
+                // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
+            }
+            clearInvoiceCache($invoice);
+
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     public function paymentTokenUpdateView($id){
         $subscription = getCurrentSubscription();
@@ -329,11 +493,6 @@ class PaymentController extends Controller
         return view('payment/updatePaymentMethods')->with('payment', $Payment)
                                                         ->with('Id', $id);
     }
-    /*
-    *
-    *
-    *
-    */
     public function paymentTokenUpdate(Request $request){
         $cards = array(
             $request->number
@@ -368,7 +527,7 @@ class PaymentController extends Controller
                 ],
                 'json' => ['applicationName' => 'ETAX',
                     'userName' => $user->user_name,
-                    'userPassword' => $user->password,
+                    'userPassword' => 'Etax-' . $user->id . 'Klap',
                     'cardTokenId' => $PaymentMethod->token_bn,
                     "cardDescription" => $PaymentMethod->card_name,
                     "primaryAccountNumber" => $request->number,
@@ -406,7 +565,7 @@ class PaymentController extends Controller
                 ],
                 'json' => ['applicationName' => 'ETAX',
                     'userName' => $user->user_name,
-                    'userPassword' => $user->password,
+                    'userPassword' => 'Etax-' . $user->id . 'Klap',
                     'cardTokenId' => $PaymentMethod->token_bn
                 ],
                 'verify' => false,

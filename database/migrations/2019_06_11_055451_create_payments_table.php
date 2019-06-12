@@ -25,8 +25,7 @@ class CreatePaymentsTable extends Migration
             $table->string('nameCard')->nullable();
             $table->double('amount')->default(0);
             $table->string('proof')->nullable();
-            
-            $table->softDeletes();
+
             $table->timestamps();
         });
     }

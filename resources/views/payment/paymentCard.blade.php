@@ -236,39 +236,102 @@
                                 <input type="text" class="form-control checkEmpty" name="coupon" id="coupon" placeholder="Cup&oacute;n:" onblur="fusb();">
                             </div>
                             <div class="form-group col-md-12" style="white-space: nowrap;">
-                                Datos del tarjetahabiente
+                                Datos del receptor de la factura de Etax
                             </div>
-                            <div class="form-group col-md-3" style="white-space: nowrap;">
-                                <label for="first-name">Nombre:</label>
-                                <input type="text" class="form-control checkEmpty" name="first-name" id="first-name" value="" required placeholder="Nombre" >
+                            <div class="form-group col-md-4">
+                                <label for="tipo_persona">Tipo de persona *</label>
+                                <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();">
+                                    <option value="F" >Física</option>
+                                    <option value="J" >Jurídica</option>
+                                    <option value="D" >DIMEX</option>
+                                    <option value="N" >NITE</option>
+                                    <option value="E" >Extranjero</option>
+                                    <option value="O" >Otro</option>
+                                </select>
                             </div>
-                            <div class="form-group col-md-3" style="white-space: nowrap;">
-                                <label for="last-name">Apellido:</label>
-                                <input type="text" class="form-control checkEmpty" name="last-name" id="last-name" value="" required placeholder="Apellido">
+
+                            <div class="form-group col-md-4">
+                                <label for="id_number">Número de identificación *</label>
+                                <input type="text" class="form-control checkEmpty" name="id_number" id="id_number" onchange="getJSONCedula(this.value);">
                             </div>
-                            <div class="form-group col-md-3" style="white-space: nowrap;">
-                                <label for="street1">Direcci&#243;n:</label>
-                                <input type="text" class="form-control checkEmpty" name="street1" id="street1" value="" required placeholder="Direcci&#243;n">
+
+                            <div class="form-group col-md-4">
+                                <label for="first_name">Nombre *</label>
+                                <input type="text" class="form-control checkEmpty" name="first_name" id="first_name" >
                             </div>
-                            <div class="form-group col-md-3" style="white-space: nowrap;">
-                                <label for="city">Cant&#243;n:</label>
-                                <input type="text" class="form-control checkEmpty" name="city" id="city" value="" required placeholder="Cant&#243;n">
+
+                            <div class="form-group col-md-4">
+                                <label for="last_name">Apellido</label>
+                                <input type="text" class="form-control" name="last_name" id="last_name" >
                             </div>
-                            <div class="form-group col-md-3" style="white-space: nowrap;">
-                                <label for="state">Provincia:</label>
-                                <input type="text" class="form-control checkEmpty" name="state" id="state" value="" required placeholder="Provincia">
+
+                            <div class="form-group col-md-4">
+                                <label for="last_name2">Segundo apellido</label>
+                                <input type="text" class="form-control" name="last_name2" id="last_name2" >
                             </div>
-                            <div class="form-group col-md-3" style="white-space: nowrap;">
-                                <label for="postalCode">C&oacute;digo Postal:</label>
-                                <input type="text" class="form-control checkEmpty" name="postalCode" id="postalCode" value="" required placeholder="C&oacute;digo postal">
+
+                            <div class="form-group col-md-4">
+                                <label for="email">Correo electrónico *</label>
+                                <input type="text" class="form-control checkEmpty" name="email" id="email" >
                             </div>
-                            <div class="form-group col-md-3" style="white-space: nowrap;">
-                                <label for="country">Pa&iacute;s:</label>
-                                <input type="text" class="form-control checkEmpty" name="country" id="country" value="" required placeholder="Pa&iacute;s">
+
+                            <div class="form-group col-md-4">
+                                <label for="phone">Teléfono</label>
+                                <input type="text" class="form-control" name="phone" id="phone" >
                             </div>
-                            <div class="form-group col-md-3" style="white-space: nowrap;">
-                                <label for="email">Correo electr&oacute;nico:</label>
-                                <input type="email" class="form-control checkEmpty" name="email" id="email" value="" required placeholder="Correo electr&oacute;nico">
+
+                            <div></div>
+
+                            <div class="form-group col-md-4">
+                                <label for="country">País *</label>
+                                <select class="form-control checkEmpty" name="country" id="country" >
+                                    <option value="CR" selected>Costa Rica</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label for="state">Provincia</label>
+                                <select class="form-control" name="state" id="state" onchange="fillCantones();">
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label for="city">Canton</label>
+                                <select class="form-control" name="city" id="city" onchange="fillDistritos();">
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label for="district">Distrito</label>
+                                <select class="form-control" name="district" id="district" onchange="fillZip();" >
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label for="neighborhood">Barrio</label>
+                                <input class="form-control" name="neighborhood" id="neighborhood" >
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label for="zip">Zip</label>
+                                <input type="text" class="form-control" name="zip" id="zip" readonly >
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="code">Código *</label>
+                                <input type="text" class="form-control" name="code" id="code" required>
+                            </div>
+                            <div class="form-group col-md-12">
+                                <label for="address">Dirección</label>
+                                <textarea class="form-control" name="address" id="address" ></textarea>
+                            </div>
+
+                            <div class="form-group col-md-4 hidden">
+                                <label for="es_exento">Exento de IVA</label>
+                                <select class="form-control" name="es_exento" id="es_exento" >
+                                    <option value="0" >No</option>
+                                    <option value="1" >Sí</option>
+                                </select>
                             </div>
 
                             <div class="form-group"></div>
@@ -277,12 +340,12 @@
                             <input type="text" hidden id="IpAddress" name="IpAddress">
                             <input type="text" hidden id="deviceFingerPrintID" name="deviceFingerPrintID">
                             <input type="text" hidden value="{{$planSelected}}" name="planSelected">
-                            <input type="text" hidden id="first_name" name="first_name">
-                            <input type="text" hidden id="last_name" name="last_name">
                             <input type="text" hidden id="cardMonth" name="cardMonth">
                             <input type="text" hidden id="cardYear" name="cardYear">
+                            <input type="text" hidden id="cardYear" name="emisor_receptor" value="receptor">
                             <div class="btn-holder">
                                 <h6>Nota: Los datos sensibles de su tarjeta no se guardar&aacute;n en nuestra base de datos, ser&aacute;n utilizados solamente para procesar su pago</h6>
+                                <h6>* Ingrese un c&oacute;digo de 6 d&iacute;gitos para confirmar las facturas que emita</h6>
                                 <button type="submit" id="btn-submit" class="btn btn-primary btn-next" onclick="CambiarNombre();">Confirmar pago</button>
                             </div>
                         </div>
@@ -312,8 +375,6 @@
             console.log(exp);
         }
         function CambiarNombre() {
-            $("#first_name").val($('#first-name').val());
-            $("#last_name").val($('#last-name').val());
             var exp = $("#expiry").val();
             $('#cardMonth').val(exp.substr(0,2));
             $('#cardYear').val(exp.substring(exp.length - 2, exp.length));
@@ -354,6 +415,15 @@
         }
 
         //document.write('Session Id <input type="text" name="deviceFingerprintID" value="' + cybs_dfprofiler("tc_cr_01100XXXX","test") + '">');
+    </script>
+    <script>
+
+        $(document).ready(function(){
+
+            fillProvincias();
+
+        });
+
     </script>
 
 @endsection
