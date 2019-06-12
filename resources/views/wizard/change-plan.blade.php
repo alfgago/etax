@@ -325,13 +325,13 @@
 							<div class="form-group col-md-6 hide-contador">
 							  <label for="product_id">Plan </label>
 							  <select class="form-control " name="product_id" id="product_id" onchange="toggleProducto();">
-							  	<option class="p" value="1" precio="9.99">Básico</option>
-							  	<option class="p" value="2" precio="12.99">Intermedio</option>
-							  	<option class="p" value="3" precio="19.99">Pro</option>
-							  	<option class="e" value="4" precio="32.99">Básico</option>
-							  	<option class="e" value="5" precio="82.99">Intermedio</option>
-							  	<option class="e" value="6" precio="124.99">Pro</option>
-							  	<option class="c" value="7" precio="124.99">Contador</option>
+							  	<option class="p" value="1" precio="$9.99">Básico</option>
+							  	<option class="p" value="2" precio="$12.99">Intermedio</option>
+							  	<option class="p" value="3" precio="$19.99">Pro</option>
+							  	<option class="e" value="4" precio="$32.99">Básico</option>
+							  	<option class="e" value="5" precio="$82.99">Intermedio</option>
+							  	<option class="e" value="6" precio="$124.99">Pro</option>
+							  	<option class="c" value="7" precio="$124.99">Pro</option>
 							  </select>
 							</div>
 							
