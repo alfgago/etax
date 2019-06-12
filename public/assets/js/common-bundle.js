@@ -313,6 +313,12 @@ $(document).ready(function() {
 	toggleTiposImportacion();
 	initHelpers();
 
+    $('#input_logo').on('change', function() {
+        filename = this.files[0].name;
+        $('#logo-name').text(filename)
+        console.log(filename);
+    });
+
 });
 
 toastr.options = {

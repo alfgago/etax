@@ -86,7 +86,6 @@ class Invoice extends Model
             $this->buy_order = $request->buy_order;
             $this->other_reference = $request->other_reference;
 
-            $client;
             //Datos de cliente. El cliente nuevo viene con ID = -1
             if( $request->client_id == '-1' ) {
                 $tipo_persona = $request->tipo_persona;

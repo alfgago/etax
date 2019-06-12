@@ -122,15 +122,6 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function edit() {
-
-        /*if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-            $company = Company::find($_GET['id']);
-
-            if ($company) {
-                session(['current_company' => $company->id]);
-            }
-        }*/
-        
         $company = currentCompanyModel();
         
         if (!$company) {
@@ -218,7 +209,6 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id) {
-        
         $company = Company::find($id);
         $this->authorize('update', $company);
 
@@ -247,6 +237,14 @@ class CompanyController extends Controller {
             return redirect()->back()->withError('Usted no está autorizado para actualizar esta información');
         }
 
+        if ($request->file('input_logo')) {
+            $pathLogo = Storage::putFileAs(
+                "empresa-$request->id_number", $request->file('input_logo'),
+                "logo.".$request->file('input_logo')->getClientOriginalExtension()
+            );
+            $company->logo_url = $pathLogo;
+        }
+
         $company->type = $request->tipo_persona;
         $company->id_number = preg_replace("/[^0-9]+/", "", $request->id_number);
         $company->business_name = $request->business_name;
@@ -269,8 +267,6 @@ class CompanyController extends Controller {
         //Update Team name based on company
         /*$team->name = "(".$company->id.") " . $company->id_number;
         $team->save();*/
-        
-
 
         return redirect()->route('Company.edit')->withMessage('La información de la empresa ha sido actualizada.');
     }
