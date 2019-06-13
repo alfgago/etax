@@ -47,7 +47,7 @@ class ReportsController extends Controller
       
       $subscription = getCurrentSubscription();
       if( !$subscription ) {
-          return redirect('/usuario/cambiar-plan');
+          return redirect('/cambiar-plan');
       }
       
       if( ! currentCompanyModel()->wizard_finished ) {

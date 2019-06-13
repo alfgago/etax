@@ -25,7 +25,7 @@ class Sales extends Model
     //Relacion con la empresa
     public function product()
     {
-        return $this->belongsTo(EtaxProduct::class, 'etax_product_id');
+        return $this->belongsTo(EtaxProducts::class, 'etax_product_id');
     }
 
     public function subscription_plan()

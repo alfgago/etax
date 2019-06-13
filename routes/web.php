@@ -91,7 +91,11 @@ Route::get('/editar-totales-2018', 'WizardController@setTotales2018')->name('Wiz
 Route::post('/update-totales-2018', 'WizardController@storeTotales2018')->name('Wizard.update_2018');
 Route::post('/update-wizard', 'WizardController@updateWizard')->name('Wizard.update_wizard');
 Route::post('/store-wizard', 'WizardController@createWizard')->name('Wizard.store_wizard');
-Route::get('/elegir-plan', 'WizardController@selectPlan')->name('Wizard.select_plan');
+
+//Rutas para suscripciones
+Route::get('/cambiar-plan', 'SubscriptionPlanController@changePlan')->name('Subscription.cambiar_plan');
+Route::get('/elegir-plan', 'SubscriptionPlanController@changePlan')->name('Subscription.select_plan');
+Route::post('/confirmar-plan', 'SubscriptionPlanController@confirmPlanChange')->name('Subscription.confirmar_plan');
 
 // Rutas de usuario
 Route::prefix('usuario')->group(function() {
@@ -101,8 +105,6 @@ Route::prefix('usuario')->group(function() {
     Route::patch('update-admin/{id}', 'UserController@updateAdmin')->name('User.update_admin');
     Route::get('seguridad', 'UserController@editPassword')->name('User.edit_password');
     Route::get('planes', 'UserController@plans')->name('User.plans');
-    Route::get('cambiar-plan', 'UserController@changePlan')->name('User.cambiar_plan');
-    Route::post('confirmar-plan', 'UserController@confirmPlanChange')->name('User.confirmar_plan');
     Route::get('empresas', 'UserController@companies')->name('User.companies');
     Route::get('usuarios-invitados', 'UserController@invitedUsersList')->name('User.invited-users-list');
     Route::get('zendesk-jwt', 'UserController@zendeskJwt')->name('User.zendesk_jwt');
@@ -114,7 +116,7 @@ Route::prefix('payment')->group(function(){
     Route::get('payment-create', 'PaymentController@create')->name('Payment.payment_create');
     Route::get('payment-create-view', 'PaymentController@createView')->name('Payment.payment_create_view');
     Route::get('payment-crear', 'PaymentController@paymentCrear')->name('Payment.payment_crear');
-    Route::post('payment-checkout', 'PaymentController@paymentCheckout')->name('Payment.payment_checkout');
+    Route::get('payment-checkout', 'PaymentController@paymentCheckout')->name('Payment.payment_checkout');
     Route::post('payment-card', 'PaymentController@paymentCard')->name('Payment.payment_card');
     Route::get('payment-token-update-view/{id}', 'PaymentController@paymentTokenUpdateView')->name('Payment.payment_token_update_view');
     Route::patch('payment-token-update', 'PaymentController@paymentTokenUpdate')->name('Payment.payment_tokenUpdate');
@@ -142,8 +144,6 @@ Route::patch('/facturas-emitidas/{id}/restore', 'InvoiceController@restore')->na
 Route::patch('/proveedores/{id}/restore', 'ProviderController@restore')->name('Provider.restore');
 Route::patch('/clientes/{id}/restore', 'ClientController@restore')->name('Client.restore');
 Route::patch('/productos/{id}/restore', 'ProductController@restore')->name('Product.restore');
-
-
 
 // Rutas autogeneradas de CRUD
 Route::resource('clientes', 'ClientController');
@@ -196,7 +196,6 @@ Route::get('/plans/confirm-cancel-plan/{token}', 'PlanController@confirmCancelPl
 Route::get('show-plans', 'PlanController@show_plans')->name('plans.show-data');
 Route::post('purchase', 'PlanController@purchase')->name('plans.purchase');
 Route::get('plans/switch-plan/{plan}/{newPlan}', 'PlanController@switchPlan')->name('plans.switch-plan');
-
 
 Route::post('payment-test', 'PaymentController@checkout')->name('payment.test');
 

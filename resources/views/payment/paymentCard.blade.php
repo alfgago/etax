@@ -209,32 +209,41 @@
             </div>
             <div class="form-container">
                 <form method="POST" action="/payment/payment-card" class="wizard-form tarjeta" enctype="multipart/form-data">
+                    @csrf
                     <div class="form-group col-md-12">
-                        <h3 class="mt-0 tituloDePago">
+                        <h3 class="mt-0">
                             Genere su pago
                         </h3>
                     </div>
-                    <div class='card-wrapper'></div>
-                    @csrf
                     <div class="step-section step1 is-active">
                         <div class="form-row">
-                            <div class="form-group col-md-5" style="white-space: nowrap;">
-                                <label for="number">N&#250;mero de tarjeta</label>
-                                <input type="text" inputmode="numeric" class="form-control checkEmpty" name="number" id="number" placeholder="N&#250;mero de tarjeta:" required onblur="valid_credit_card(this.value);">
-                                <label id="alertCardValid" class="alertCardValid"></label>
+                            <div class="col-md-4">
+                                <div class="row">
+                                    <div class="form-group col-md-12" style="white-space: nowrap;">
+                                        <label for="number">N&#250;mero de tarjeta</label>
+                                        <input type="text" inputmode="numeric" class="form-control checkEmpty" name="number" id="number" placeholder="N&#250;mero de tarjeta" required onblur="valid_credit_card(this.value);">
+                                    </div>
+                                    <div class="form-group col-md-12" style="white-space: nowrap;">
+                                        <label for="expiry">Expira</label>
+                                        <input type="text" inputmode="numeric" class="form-control checkEmpty" name="expiry" id="expiry" placeholder="Mes / A&#241;o" required>
+                                    </div>
+                                    <div class="form-group col-md-12" style="white-space: nowrap;">
+                                        <label for="cardCcv">CVV</label>
+                                        <input type="text" inputmode="numeric" class="form-control checkEmpty" name="cvc" id="cvc" placeholder="CVV" required>
+                                    </div>
+                                    <div class="form-group col-md-12" style="white-space: nowrap;">
+                                        <label for="coupon">Tengo un cup&oacute;n:</label>
+                                        <input type="text" class="form-control checkEmpty" name="coupon" id="coupon" placeholder="Cup&oacute;n" onblur="fusb();">
+                                        
+                                        <label id="alertCardValid" class="alertCardValid"></label>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-group col-md-3" style="white-space: nowrap;">
-                                <label for="expiry">Expira</label>
-                                <input type="text" inputmode="numeric" class="form-control checkEmpty" name="expiry" id="expiry" placeholder="Mes / A&#241;o:" required>
+                            
+                            <div class="col-md-8">
+                                <div class='card-wrapper'></div>
                             </div>
-                            <div class="form-group col-md-2" style="white-space: nowrap;">
-                                <label for="cardCcv">CVV</label>
-                                <input type="text" inputmode="numeric" class="form-control checkEmpty" name="cvc" id="cvc" placeholder="CVV:" required>
-                            </div>
-                            <div class="form-group col-md-2" style="white-space: nowrap;">
-                                <label for="coupon">Tengo un cup&oacute;n:</label>
-                                <input type="text" class="form-control checkEmpty" name="coupon" id="coupon" placeholder="Cup&oacute;n:" onblur="fusb();">
-                            </div>
+                            
                             <div class="form-group col-md-12" style="white-space: nowrap;">
                                 Datos del receptor de la factura de Etax
                             </div>
@@ -335,11 +344,11 @@
                             </div>
 
                             <div class="form-group"></div>
-                            <input type="text" hidden value="{{$sale->subscription_plan->id}}" name="planId">
+                            <input type="text" hidden value="{{ $sale->product->plan->id }}" name="planId">
                             <input type="text" hidden value=" {{$sale->id}}" name="saleId">
                             <input type="text" hidden id="IpAddress" name="IpAddress">
                             <input type="text" hidden id="deviceFingerPrintID" name="deviceFingerPrintID">
-                            <input type="text" hidden value="{{$planSelected}}" name="planSelected">
+                            <input type="text" hidden value="{{ $sale->recurrency }}" name="planSelected">
                             <input type="text" hidden id="cardMonth" name="cardMonth">
                             <input type="text" hidden id="cardYear" name="cardYear">
                             <input type="text" hidden id="cardYear" name="emisor_receptor" value="receptor">
