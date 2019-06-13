@@ -77,6 +77,7 @@ class Invoice extends Model
     public function setInvoiceData($request)
     {
         try {
+
             $this->document_key = $request->document_key;
             $this->document_number = $request->document_number;
             $this->sale_condition = $request->sale_condition;
@@ -88,6 +89,7 @@ class Invoice extends Model
 
             //Datos de cliente. El cliente nuevo viene con ID = -1
             if( $request->client_id == '-1' ) {
+
                 $tipo_persona = $request->tipo_persona;
                 $identificacion_cliente = $request->id_number;
                 $codigo_cliente = $request->code;
@@ -120,6 +122,7 @@ class Invoice extends Model
                         'billing_emails' => $request->billing_emails ?? $request->email
                     ]
                 );
+
                 $this->client_id = $client->id;
             }else{
                 $this->client_id = $request->client_id;
@@ -174,6 +177,7 @@ class Invoice extends Model
             return $this;
 
         } catch (\Exception $e) {
+            dd('error', $e);
             Log::error('Error al crear factura: '.$e->getMessage());
             return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
         }
