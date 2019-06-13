@@ -225,6 +225,23 @@ class PaymentController extends Controller
         return $Card;
     }
 
+    public function userCardsInfo(){
+        $user = auth()->user();
+        $CardBn = new Client();
+        $CardCreationResult = $CardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserRequestCards?applicationName=string&userName=string&userPassword=string", [
+            'headers' => [
+                'Content-Type'  => "application/json",
+            ],
+            'json' => ['applicationName' => 'ETAX',
+                'userName' => $user->user_name,
+                'userPassword' => 'Etax-' . $user->id . 'Klap'
+            ],
+            'verify' => false,
+        ]);
+        $Cards = json_decode($CardCreationResult->getBody()->getContents(), true);
+        return $Cards;
+    }
+
     public function storeClient(Request $request){
         $cliente = new \App\Client();
         $cliente->company_id = 1;
@@ -254,7 +271,7 @@ class PaymentController extends Controller
     }
 
     public function paymentCard(Request $request){
-        /*$T = $this->Cards();
+        /*$T = $this->userCardsInfo();
         dd($T);*/
         $user = auth()->user();
         $start_date = Carbon::parse(now('America/Costa_Rica'));
@@ -276,19 +293,19 @@ class PaymentController extends Controller
             case 1:
                 $costo = $subscription_plan->monthly_price;
                 $next_payment_date = $start_date->addMonths(1);
-                $numberOfPayments = 1;
+                $numberOfPayments = '1';
                 $descriptionMessage = 'mensual';
                 break;
             case 2:
                 $costo = $subscription_plan->six_price * 6;
                 $next_payment_date = $start_date->addMonths(6);
-                $numberOfPayments = 6;
+                $numberOfPayments = '6';
                 $descriptionMessage = 'semestral';
                 break;
             case 3:
                 $costo = $subscription_plan->annual_price * 12;
                 $next_payment_date = $start_date->addMonths(12);
-                $numberOfPayments = 12;
+                $numberOfPayments = '12';
                 $descriptionMessage = 'anual';
                 break;
         }
@@ -316,43 +333,40 @@ class PaymentController extends Controller
                 $NameCard = "";
                 break;
         }
-        $sale = Sales::where('user_id', $user->id)->first();
-        dd($sale->id);
+        /*$sale = Sales::where('user_id', $user->id)->first();
         $payment = Payment::create([
             'sale_id' => $sale->id,
             'payment_date' => $date,
             'payment_status' => 1,
             'amount' => $amount
-        ]);
+        ]);*/
         $BnStatus = $this->StatusBnAPI();
         if($BnStatus['apiStatus'] == 'Successful'){
-            $Card = $this->userCardInclusion($request->number, $NameCard, $request->cardMonth, $request->cardYear, $request->cvc);
-            if($Card['apiStatus'] == 'Success') {
+           /* $Card = $this->userCardInclusion($request->number, $NameCard, $request->cardMonth, $request->cardYear, $request->cvc);
+            if($Card['apiStatus'] == 'Success'){
                 $last_4digits = substr($request->number, -4);
-                $token_bn = $Card['cardTokenId'];
                 $paymentMethod = PaymentMethod::create([
                     'user_id' => $user->id,
                     'name' => $request->first_name,
                     'last_name' => $request->last_name,
                     'last_4digits' => $last_4digits,
-                    'nameCard' => $NameCard,
                     'due_date' => $request->cardMonth . ' ' . $request->cardYear,
-                    'token_bn' => $token_bn,
-                    'default' => 1
+                    'token_bn' => $Card['cardTokenId'],
+                    'default_card' => 1
                 ]);
-                $payment->proof = $token_bn;
+                $payment->proof = $Card['cardTokenId'];
                 $payment->payment_status = 1;
                 $payment->save();
 
                 $data = new stdClass();
                 $data->description = 'Suscripcion ' . $descriptionMessage . ' Etax';
-                //$data->amount = $amount;
-                $data->amount = 0.01;
+                $data->amount = $amount;
                 $data->user_name = $sale->user->username;
-                $data->cardTokenId = $token_bn;
+                $data->cardTokenId = 'e36090c9-22fc-4407-9d14-f8fab5a35636';//$token_bn;
                 $PaymentCard = $this->paymentCharge($data);
-                if ($PaymentCard['apiStatus'] == "Successful") {
-                    $sub = Sale::updateOrCreate (
+                if ($PaymentCard['apiStatus'] == "Successful") {*/
+                if (1 == 1) {
+                    $sub = Sales::updateOrCreate (
 
                         [
                             'user_id' => $user->id
@@ -364,50 +378,61 @@ class PaymentController extends Controller
                         ]
 
                     );
-                    $client = $this->storeClient($request);
+                    //$client = $this->storeClient($request);
                     $invoiceData = new stdClass();
-                    $invoiceData->client_code = $client->code;
-                    $invoiceData->client_id_number = $client->id_number;
+                    $invoiceData->client_code = $request->id_number;
+                    $invoiceData->client_id_number = $request->id_number;
+                    $invoiceData->client_id = '-1';
+                    $invoiceData->tipo_persona = $request->tipo_persona;
+                    $invoiceData->first_name = $request->first_name;
+                    $invoiceData->last_name = $request->last_name;
+                    $invoiceData->last_name2 = $request->last_name2;
+                    $invoiceData->country = $request->country;
+                    $invoiceData->state = $request->state;
+                    $invoiceData->city = $request->city;
+                    $invoiceData->district = $request->district;
+                    $invoiceData->neighborhood = $request->neighborhood;
+                    $invoiceData->zip = $request->zip;
+                    $invoiceData->address = $request->address;
+                    $invoiceData->phone = $request->phone;
+                    $invoiceData->es_exento = $request->es_exento;
+                    $invoiceData->email = $request->email;
+                    $invoiceData->expiry = $request->expiry;
                     $invoiceData->amount = $amount;
+                    $invoiceData->subtotal = $amount;
 
                     $item = new stdClass();
                     $item->total = $amount;
-                    $item->id = $sub->id;
+                    $item->id = $sub->etax_product_id;
                     $item->descuento = $descuento;
-                    dd($client);
+                    $item->cantidad = 1;
                     $invoiceData->items = [$item];
-                    try {
-                        $factura = $this->CrearFacturaClienteEtax($invoiceData);
-                        if($factura){
-                            return redirect('wizard');
-                        }
-                    } catch (\Exception $e) {
-                        Log::error('Error al crear factura: '.$e->getMessage());
-                        return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
+                    $factura = $this->CrearFacturaClienteEtax($invoiceData);
+                    if($factura){
+                        return redirect('wizard');
                     }
                 } else {
                     $mensaje = 'El pago ha sido denegado';
                     return redirect()->back()->withError($mensaje);
                 }
-            }else{
+            /*}else{
                 $mensaje = 'No se pudo verificar la informacion de la tarjeta. ';
                 return redirect()->back()->withError($mensaje);
-            }
+            }*/
         }else{
             $mensaje = 'Pagos en Linea esta fuera de servicio. Dirijase a Configuraciones->Gestion de Pagos- para agregar una tarjeta';
             return redirect('wizard')->withError($mensaje);
         }
     }
-    /*
-    *
-    *
-    *
-    *
-    */
+
     public function CrearFacturaClienteEtax($invoiceData){
-        $product = EtaxProducts::where('id', $invoiceData->item->id);
+        /*$product = EtaxProducts::find($invoiceData->items[0]->id);
+        dd($product);
+        */
+        //dd($invoiceData);
         $apiHacienda = new BridgeHaciendaApi();
         $tokenApi = $apiHacienda->login();
+        //dd($tokenApi);
         if ($tokenApi !== false) {
             $invoice = new Invoice();
             $company = Company::find(1);
@@ -431,7 +456,7 @@ class PaymentController extends Controller
             $data->retention_percent = "6";
             $data->credit_time = "0";
 
-            if($invoiceData->item->descuento > 0){
+            if($invoiceData->items[0]->descuento > 0){
                 $discount_reason = 'Cupon con descuento de ' . $invoiceData->item->descuento;
             }else{
                 $discount_reason = '';
@@ -440,19 +465,52 @@ class PaymentController extends Controller
             $data->tipo_persona = "02";
             $data->identificacion_cliente = $invoiceData->client_id_number;
             $data->codigo_cliente = $invoiceData->client_code;
+            $data->code = $invoiceData->client_code;
+            $data->id_number = $invoiceData->client_id_number;
+
+            $data->client_code = $invoiceData->client_id_number;
+            $data->client_id_number = $invoiceData->client_id_number;
+            $data->client_id = '-1';
+            $data->tipo_persona = $invoiceData->tipo_persona;
+            $data->first_name = $invoiceData->first_name;
+            $data->last_name = $invoiceData->last_name;
+            $data->last_name2 = $invoiceData->last_name2;
+            $data->country = $invoiceData->country;
+            $data->state = $invoiceData->state;
+            $data->city = $invoiceData->city;
+            $data->district = $invoiceData->district;
+            $data->neighborhood = $invoiceData->neighborhood;
+            $data->zip = $invoiceData->zip;
+            $data->address = $invoiceData->address;
+            $data->phone = $invoiceData->phone;
+            $data->es_exento = $invoiceData->es_exento;
+            $data->email = $invoiceData->email;
+            $data->buy_order = '';
+            $data->due_date =
+            $data->other_reference = '';
+            $data->currency_rate = get_rates();
+            $data->description = 'Factura de Etax';
+            $data->subtotal = $invoiceData->items[0]->cantidad * $invoiceData->amount;
+            $data->currency = 'USD';
+            $data->total = $invoiceData->items[0]->cantidad * $invoiceData->amount;
+            $data->iva_amount = 0;
+            $data->generated_date = Carbon::now()->format('d/m/Y');
+            $data->hora = Carbon::now()->format('H:i:s');
+            $data->due_date = $invoiceData->expiry;
+            //dd($data->hora);
 
             $item = new stdClass();
 
             $item->item_number = 1;
-            $item->code = $invoiceData->item->id;
-            $item->name = $product->name;
+            $item->code = $invoiceData->items[0]->id;//$invoiceData->item->id;
+            $item->name = 'Prueba';//$product->name;
             $item->product_type = 'Plan';
             $item->measure_unit = 'Sp';
-            $item->item_count = 1;
+            $item->item_count = $invoiceData->items[0]->cantidad;
             $item->unit_price = $invoiceData->amount;
-            $item->subtotal = $data->items->item_count * $invoiceData->unit_price;
+            $item->subtotal = $invoiceData->items[0]->cantidad * $invoiceData->amount;
 
-            $item->discount_percentage = $invoiceData->item->descuento;
+            $item->discount_percentage = $invoiceData->items[0]->descuento;
             $item->discount_reason = $discount_reason;
             $item->discount = $discount_reason;
 
@@ -460,7 +518,7 @@ class PaymentController extends Controller
             $item->iva_percentage = 0;
             $item->iva_amount = 0;
 
-            $item->total = $invoiceData->subtotal + $data->items->iva_amount ;
+            $item->total = $invoiceData->subtotal + 0;//$data->items->iva_amount;
             $item->isIdentificacion = false;
             $item->is_exempt = false;
 
@@ -585,13 +643,8 @@ class PaymentController extends Controller
             return redirect()->back()->withError($mensaje);
         }
     }
-    /**
-    *Parametros : description, user_name, amount, cardTokenId
-    *
-    *
-    *
-    */
-    public function paymentCharge(Request $request){
+
+    public function paymentCharge($request){
         $AppCharge = new Client();
         $AppChargeBn = $AppCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppIncludeCharge?applicationName=string&applicationPassword=string&chargeDescription=string&userName=string&transactionCurrency=string&transactionAmount=double", [
             'headers' => [
@@ -607,6 +660,7 @@ class PaymentController extends Controller
             'verify' => false,
         ]);
         $ChargeAplied = json_decode($AppChargeBn->getBody()->getContents(), true);
+        //dd($ChargeAplied);
         $chargeTokenId = $ChargeAplied['chargeTokenId'];
         /****************************************************/
         $BnCharge = new Client();
@@ -671,12 +725,7 @@ class PaymentController extends Controller
             return redirect()->back()->withError('Transacción no disponible en este momento');
         }
     }
-    /**
-    *
-    *
-    *
-    *
-    */
+
     public function dailySubscriptionsPayment(){
         $date = Carbon::parse(now('America/Costa_Rica'));
         $BnStatus = $this->StatusBnAPI();
@@ -714,12 +763,7 @@ class PaymentController extends Controller
             return false;
         }
     }
-    /*
-    *
-    *
-    *
-    *
-    */
+
     public function updateAllSubscriptions(){
         $activeSubscriptions = Sale::where('status', 1);
         $date = Carbon::parse(now('America/Costa_Rica'));
