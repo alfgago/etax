@@ -129,7 +129,7 @@
 	}
 	
 	.bigtext {
-	    font-size: 1.5rem;
+	    font-size: 1.3rem;
 	    color: #000;
 	    line-height: 1.1;
 	    margin: 1.5rem 0;
@@ -178,10 +178,11 @@
 	
 	.wizard-container .precio-text {
 	    background: #d6d4cc;
-	    padding: .5rem;
-	    font-size: 1.5rem;
+    	padding: .75rem 1.5rem;
+	    font-size: 1.3rem;
 	    line-height: 1;
 	    border-radius: 5px;
+	    display: block;
 	}
 		
 	.wizard-container .form-group label {
@@ -195,7 +196,7 @@
 	}
 	
 	.wizard-container .precio-text span {
-	    font-size: 2rem;
+	    font-size: 1.75rem;
 	    font-weight: bold;
 	}
 	
@@ -301,7 +302,7 @@
     
     <div class="form-container">
     
-	    <form method="POST" action="/usuario/confirmar-plan" class="wizard-form" enctype="multipart/form-data">
+	    <form method="POST" action="/confirmar-plan" class="wizard-form" enctype="multipart/form-data">
 
 	       @csrf
 				
@@ -323,21 +324,30 @@
 							</div>
 							
 							<div class="form-group col-md-6 hide-contador">
-							  <label for="product_id">Plan </label>
-							  <select class="form-control " name="product_id" id="product_id" onchange="toggleProducto();">
-							  	<option class="p" value="1" precio="$9.99">Básico</option>
-							  	<option class="p" value="2" precio="$12.99">Intermedio</option>
-							  	<option class="p" value="3" precio="$19.99">Pro</option>
-							  	<option class="e" value="4" precio="$32.99">Básico</option>
-							  	<option class="e" value="5" precio="$82.99">Intermedio</option>
-							  	<option class="e" value="6" precio="$124.99">Pro</option>
-							  	<option class="c" value="7" precio="$124.99">Pro</option>
+							  <label for="product_id">Tipo </label>
+							  <select class="form-control " name="product_id" id="product_id" onchange="togglePrice();">
+							  	<option class="p" value="1" monthly="{{ $plans[0]->plan->monthly_price }}" six="{{ $plans[0]->plan->six_price * 6 }}" annual="{{ $plans[0]->plan->annual_price * 12 }}">Básico</option>
+							  	<option class="p" value="2" monthly="{{ $plans[1]->plan->monthly_price }}" six="{{ $plans[1]->plan->six_price * 6 }}" annual="{{ $plans[1]->plan->annual_price * 12 }}" >Intermedio</option>
+							  	<option class="p" value="3" monthly="{{ $plans[2]->plan->monthly_price }}" six="{{ $plans[2]->plan->six_price * 6 }}" annual="{{ $plans[2]->plan->annual_price * 12 }}" >Pro</option>
+							  	<option class="e" value="4" monthly="{{ $plans[3]->plan->monthly_price }}" six="{{ $plans[3]->plan->six_price * 6 }}" annual="{{ $plans[3]->plan->annual_price * 12 }}" >Básico</option>
+							  	<option class="e" value="5" monthly="{{ $plans[4]->plan->monthly_price }}" six="{{ $plans[4]->plan->six_price * 6 }}" annual="{{ $plans[4]->plan->annual_price * 12 }}" >Intermedio</option>
+							  	<option class="e" value="6" monthly="{{ $plans[5]->plan->monthly_price }}" six="{{ $plans[5]->plan->six_price * 6 }}" annual="{{ $plans[5]->plan->annual_price * 12 }}" >Pro</option>
+							  	<option class="c" value="7" monthly="{{ $plans[6]->plan->monthly_price }}" six="{{ $plans[6]->plan->six_price * 6 }}" annual="{{ $plans[6]->plan->annual_price * 12 }}" >Pro</option>
+							  </select>
+							</div>
+							
+							<div class="form-group col-md-6">
+							  <label for="recurrency">Recurrencia de pagos </label>
+							  <select class="form-control " name="recurrency" id="recurrency" onchange="togglePrice();">
+							  	<option value="1" selected>Mensual</option>
+							  	<option value="6">Semestral</option>
+							  	<option value="12">Anual</option>
 							  </select>
 							</div>
 							
 							<div class="form-group col-md-12 mt-4">
 								<span class="precio-text">
-									Desde <span id="precio-plan">9.99</span>
+									Precio de $<span id="precio-plan">9.99</span> <span id="recurrencia-text">/ mes</span>
 								</span>
 			        </div>
 			        
@@ -374,15 +384,26 @@
     $("#product_id option").hide();
     $("#product_id ."+planId).show();
     $("#product_id").val( $("#product_id ."+planId).first().val() );
-    toggleProducto();
+    togglePrice();
   }
   
-  function toggleProducto() {
-  	var precio = $('#product_id :selected').attr('precio');
-    $("#precio-plan").text(precio);
+  function togglePrice() {
+  	var recurrency = $('#recurrency :selected').val();
+  	if( recurrency == 1 ) {
+	  	var precio = $('#product_id :selected').attr('monthly');
+	  	var rtext = '/ mes';
+  	}else if( recurrency == 6 ) {
+	  	var precio = $('#product_id :selected').attr('six');
+	  	var rtext = '/ semestre';
+  	}else if( recurrency == 12 ) {
+	  	var precio = $('#product_id :selected').attr('annual');
+	  	var rtext = '/ año';
+  	}
+  	$("#precio-plan").text(precio);
+  	$("#recurrencia-text").text(rtext);
   }
   
-  togglePlan();01
+  togglePlan();
   
 </script>
 

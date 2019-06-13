@@ -209,7 +209,7 @@
 				<div class="step-section step1 is-active">
 			      	<div class="form-row">
 				        <div class="form-group col-md-12">
-                            <h3 class="mt-0 tituloDePago">
+                            <h3 class="mt-0">
 						    	Seleccione su plan
 						  	</h3>
 						</div>

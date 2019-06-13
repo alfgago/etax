@@ -13,7 +13,7 @@ class EtaxProducts extends Model
 
     //Relación con el plan
     public function plan() {
-        return $this->belongsTo(SubscriptionPlan::class);
+        return $this->belongsTo(SubscriptionPlan::class, 'subscription_plan_id');
     }
 
 }

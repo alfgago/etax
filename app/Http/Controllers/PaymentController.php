@@ -196,11 +196,9 @@ class PaymentController extends Controller
         return ($result>0)?$names[sizeof($matches)-2]:false;
     }
 
-    public function paymentCheckout(Request $request){
-        $planSelected = $request->selectedPlan;
+    public function paymentCheckout(){
         $sale = getCurrentSubscription();
-        return view('payment/paymentCard')->with('planSelected', $planSelected)
-                                               ->with('sale', $sale);
+        return view('payment/paymentCard')->with('sale', $sale);
     }
 
     public function userCardInclusion($number, $nameCard, $cardMonth, $cardYear, $cvc){
@@ -398,11 +396,8 @@ class PaymentController extends Controller
             return redirect('wizard')->withError($mensaje);
         }
     }
+    
     /*
-    *
-    *
-    *
-    *
     */
     public function CrearFacturaClienteEtax($invoiceData){
         $product = EtaxProducts::where('id', $invoiceData->item->id);
@@ -730,26 +725,7 @@ class PaymentController extends Controller
             }
         }
     }
-    /**
-    * Store a newly created resource in storage.
-    *
-    * @param  \Illuminate\Http\Request  $request
-    * @return \Illuminate\Http\Response
-    */
-    public function store(Request $request){
-        //
-    }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Payment  $payment
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Payment $payment)
-    {
-        //
-    }
 
     /**
      * Show the form for editing the specified resource.

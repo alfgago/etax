@@ -232,41 +232,6 @@ class UserController extends Controller {
         return redirect('/')->with('success', 'Su cuenta ha sido eliminada. Tiene 15 días para solicitar una restauración antes de que sus datos sean eliminados permanentemente.');
     }
     
-    public function changePlan() {
-        
-        return view('wizard.change-plan');
-        
-    }
-    
-    public function confirmPlanChange(Request $request) {
-        
-        $company = currentCompanyModel();
-        $user = auth()->user();
-        
-        $start_date = Carbon::parse( now('America/Costa_Rica') );
-        $trial_end_date = $start_date->addMonths(1);
-        $next_payment_date = $start_date->addMonths(1);
-        
-        $sub = Sales::updateOrCreate (
-            [ 
-                'user_id' => $user->id 
-            ],
-            [ 
-                'company_id' => $company->id,
-                'status'  => 1,
-                'trial_end_date' => $trial_end_date,
-                'start_date' => $start_date, 
-                'next_payment_date' => $next_payment_date, 
-                'etax_product_id' => $request->product_id
-            ]
-        );
-        
-        $nombre = $sub->subscription_plan->getName();
-        
-        return redirect('payment/payment-crear');
-    }
-    
-    
     /**
      * Devuelve una llave JWT para ser usada por Zendesk y así validar al usuario. 
      **/

@@ -1,6 +1,6 @@
-<div class='card-wrapper' style="margin-left:40% !important;margin-bottom: 5% !important;"></div>
+<div class='card-wrapper'></div>
 <div class="col-md-12">
-    <div class="form-row" style="margin-left: 25%;">
+    <div class="form-row">
         <div class="form-group col-md-5" style="white-space: nowrap;">
             <label for="number">N&#250;mero de tarjeta</label>
             <input type="text" inputmode="numeric" class="form-control checkEmpty" name="number" id="number" placeholder="N&#250;mero de tarjeta:" required onblur="valid_credit_card(this.value);">

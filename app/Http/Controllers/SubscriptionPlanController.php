@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\User;
 use App\SubscriptionPlan;
+use App\EtaxProducts;
+use App\Sales;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\UsersExport;
+use Carbon\Carbon;
 
 class SubscriptionPlanController extends Controller
 {
@@ -19,71 +22,40 @@ class SubscriptionPlanController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-    }    
+    } 
+        
+    public function changePlan() {
+        
+        $plans = EtaxProducts::where('isSubscription', true)->with('plan')->get();
+        return view( 'Subscriptions/change-plan', compact('plans') );
+        
+    }
     
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\SubscriptionPlan  $subscriptionPlan
-     * @return \Illuminate\Http\Response
-     */
-    public function show(SubscriptionPlan $subscriptionPlan)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\SubscriptionPlan  $subscriptionPlan
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(SubscriptionPlan $subscriptionPlan)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\SubscriptionPlan  $subscriptionPlan
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, SubscriptionPlan $subscriptionPlan)
-    {
-        //
+    public function confirmPlanChange(Request $request) {
+        
+        $company = currentCompanyModel();
+        $user = auth()->user();
+        
+        $start_date = Carbon::parse( now('America/Costa_Rica') );
+        $trial_end_date = $start_date->addDays(1);
+        $next_payment_date = $start_date->addMonths(1);
+        
+        $sale = Sales::updateOrCreate (
+            [ 
+                'user_id' => $user->id 
+            ],
+            [ 
+                'company_id' => $company->id,
+                'status'  => 1,
+                'recurrency' => $request->recurrency,
+                'trial_end_date' => $trial_end_date,
+                'start_date' => $start_date, 
+                'next_payment_date' => $next_payment_date, 
+                'etax_product_id' => $request->product_id
+            ]
+        );
+        
+        return redirect('payment/payment-checkout');
     }
 
     /**

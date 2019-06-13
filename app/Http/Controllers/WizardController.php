@@ -26,22 +26,21 @@ class WizardController extends Controller
     
     public function index() {
       
-      $subscriptions = getCurrentUserSubscriptions();
+      /*$subscriptions = getCurrentUserSubscriptions();
       
       if( $subscriptions->isEmpty() ) {
           return redirect('/elegir-plan');
       }
       
-      $subscription = $subscriptions[0];
+      $subscription = $subscriptions[0];*/
+      
+      $subscription = getCurrentSubscription();
+      if( !$subscription ) {
+          return redirect('/elegir-plan');
+      }
       
       return view('/wizard/index', compact( 'subscription' ) );
 
-    }
-    
-    public function selectPlan() {
-        
-        return view('wizard.change-plan');
-        
     }
     
      /**
