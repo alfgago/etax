@@ -1,7 +1,7 @@
 @extends('layouts/app')
 
 @section('title')
-    Editar metodo de Pago {{}}
+    Editar metodo de Pago
 @endsection
 
 @section('content')
