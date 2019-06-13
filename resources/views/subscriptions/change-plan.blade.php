@@ -10,120 +10,6 @@
 
 <style>
 	
-	.cuadro-planes {
-	    width: 100%;
-	}
-	
-	.cuadro-planes .tier {
-			display: -webkit-box;
-			display: -ms-flexbox;
-			display: flex;
-	    font-size: 1rem;
-    	width: 100%;
-	}
-	
-	.cuadro-planes .tier > div {
-			-webkit-box-flex: 1;
-	    -ms-flex: 1;
-	    flex: 1;
-	    font-weight: 600;
-	    padding: .9rem;
-    	margin-bottom: .75rem;
-		
-	}
-	
-	.cuadro-planes .opcion {
-	    position: relative;
-	    color: #fff;
-	    background: rgb(120,128,142);
-	    background: -webkit-gradient(linear, left top, right top, from(rgba(120,128,142,1)), to(rgba(91,98,111,1)));
-	    background: -webkit-linear-gradient(left, rgba(120,128,142,1) 0%, rgba(91,98,111,1) 100%);
-	    background: -o-linear-gradient(left, rgba(120,128,142,1) 0%, rgba(91,98,111,1) 100%);
-	    background: linear-gradient(90deg, rgba(120,128,142,1) 0%, rgba(91,98,111,1) 100%);
-	    text-align: center;
-	    border-radius: 15px;
-	    margin-left: .75rem;
-    	margin-bottom: .75rem;
-	    -webkit-transition: .5s ease all;
-	    -o-transition: .5s ease all;
-	    transition: .5s ease all;
-	    cursor: pointer;
-	    overflow: hidden;
-	}
-	
-	.cuadro-planes .tier > div.titulo {
-		    max-width: 100px;
-	}
-	
-	.cuadro-planes .opcion span {
-		position: relative;
-		z-index: 1;
-		-webkit-transition: .5s ease all;
-		-o-transition: .5s ease all;
-		transition: .5s ease all;
-    font-size: .9rem;
-	}
-	
-	.cuadro-planes .opcion:before {
-	    position: absolute;
-	    width: 100%;
-	    height: 100%;
-	    left: 0;
-	    top: 0;
-	    background: #F1CB61;
-	    content: '';
-	    opacity: 0;
-	    -webkit-transition: .5s ease all;
-	    -o-transition: .5s ease all;
-	    transition: .5s ease all;
-	}
-	
-	.cuadro-planes .opcion.is-active:before {
-	    opacity: 1;
-	}
-		
-	.cuadro-planes .opcion.is-active {
-	    color: #333;
-	}
-	
-	.detalle {
-	    background: #e5e5e5;
-	    padding: 1rem;
-	    border-radius: 15px;
-	    margin: auto;
-	    width: 100%;
-	    text-align: center;
-	}
-	
-	.detalle-plan {
-	    display: none;
-	    margin: auto;
-	    text-align: left;
-	}
-		
-	.detalle-plan.is-active {
-		display: inline-block;
-	}
-	
-	.plan-feature {
-	    font-size: .9rem;
-	    margin-bottom: .5rem;
-	}
-	
-	.plan-feature i {
-	    padding-right: .5rem;
-	    color: #999;
-	    text-align: center;
-	    width: 25px;
-	}
-	
-	.plan-feature span {
-	    font-size: 1rem;
-	    font-weight: 400;
-	    padding: 0 .2rem;
-	    color: #2845A4;
-	}
-	
 	.wizard-popup .form-container {
 	    margin-right: auto;
 	}
@@ -138,42 +24,6 @@
 	.bigtext span {
 	    font-weight: bold;
 	    color: #2845A4;
-	}
-	
-	.cuadro-planes .opcion span.precio {
-		position: absolute;
-		top: 0;
-		left: 50%;
-		width: 50%;
-		text-align: 
-		-webkit-auto;
-		line-height: 1;
-		top: 50%;
-		-webkit-transform: translateY(-50%);
-		    -ms-transform: translateY(-50%);
-		        transform: translateY(-50%);
-		font-size: .8rem;
-		margin-left: 3px;
-		padding-left: 3px;
-		border-left: 3px solid #000;
-		-webkit-transition: .5s ease all;
-		-o-transition: .5s ease all;
-		transition: .5s ease all;
-		opacity: 0;
-		
-	}
-	
-	.cuadro-planes .opcion span.precio small {
-	    font-weight: 400;
-	    display: block;
-	}
-	
-	.cuadro-planes .opcion.is-active span.precio {
-	    opacity: 1;
-	}
-	
-	.cuadro-planes .opcion.is-active span:not(.precio) {
-	    margin-right: 50%;
 	}
 	
 	.wizard-container .precio-text {
@@ -201,68 +51,6 @@
 	}
 	
 	@media screen and (max-width: 600px) {
-	
-		.cuadro-planes .tier > div {
-	    	font-size: .8rem;
-		    padding: .75rem .33rem;
-		}
-		
-		.cuadro-planes .opcion {
-		    margin-left: .33rem;
-		}
-		
-		.cuadro-planes .tier > div.titulo {
-		    max-width: 80px;
-		}
-		
-		.cuadro-planes .opcion span.precio {
-		    left: 55%;
-		}
-		
-		.cuadro-planes .tier > div.titulo {
-		    max-width: none;
-		    width: 100%;
-    		font-size: 1.5rem;
-    		margin-bottom: 0;
-    		padding-bottom: 0;
-		}
-		
-		.cuadro-planes .tier {
-		    -ms-flex-wrap: wrap;
-		        flex-wrap: wrap;
-		}
-		
-		.cuadro-planes .tier > div {
-		    max-width: 30%;
-		    width: 30%;
-		    -webkit-box-flex: 1;
-		        -ms-flex: auto;
-		            flex: auto;
-		    margin-right: 1%;
-		}
-		
-		.cuadro-planes .opcion.is-active span:not(.precio) {
-		    margin: 0;
-		}
-		
-		.cuadro-planes .opcion span.precio {
-		    position: relative;
-		    display: block;
-		    left: auto;
-		    top: auto;
-		    text-align: center;
-		    border: 0;
-		    width: 100%;
-		    margin: 0;
-		    padding: 0;
-		    -webkit-transform: none;
-		        -ms-transform: none;
-		            transform: none;
-		}
-		
-		.cuadro-planes .opcion span {
-		    display: block;
-		}
 		
 		.bigtext {
 		    font-size: 1.3rem;
@@ -271,7 +59,7 @@
 		    margin: 1.5rem 0;
 		}
 		
-		.wizard-container .btn-holder {
+		.wizard-container .btn-holder a{
 		    font-size: .8rem;
 		}
 

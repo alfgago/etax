@@ -27,35 +27,15 @@ class SubscriptionPlanController extends Controller
     public function changePlan() {
         
         $plans = EtaxProducts::where('isSubscription', true)->with('plan')->get();
-        return view( 'Subscriptions/change-plan', compact('plans') );
+        return view( 'subscriptions/subscription-wizard', compact('plans') );
         
     }
     
     public function confirmPlanChange(Request $request) {
-        
-        $company = currentCompanyModel();
-        $user = auth()->user();
-        
-        $start_date = Carbon::parse( now('America/Costa_Rica') );
-        $trial_end_date = $start_date->addDays(1);
-        $next_payment_date = $start_date->addMonths(1);
-        
-        $sale = Sales::updateOrCreate (
-            [ 
-                'user_id' => $user->id 
-            ],
-            [ 
-                'company_id' => $company->id,
-                'status'  => 1,
-                'recurrency' => $request->recurrency,
-                'trial_end_date' => $trial_end_date,
-                'start_date' => $start_date, 
-                'next_payment_date' => $next_payment_date, 
-                'etax_product_id' => $request->product_id
-            ]
-        );
-        
+    
+        $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
         return redirect('payment/payment-checkout');
+        
     }
 
     /**
@@ -90,6 +70,23 @@ class SubscriptionPlanController extends Controller
         
         
         return Excel::download(new UsersExport(), 'usuarios.xlsx');
+    }
+    
+    private function getDocReference($docType) {
+        $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;
+        $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
+
+        return $consecutive;
+    }
+
+    private function getDocumentKey($docType) {
+        $company = currentCompanyModel();
+        $invoice = new Invoice();
+        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
+            '1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
+
+
+        return $key;
     }
     
 }

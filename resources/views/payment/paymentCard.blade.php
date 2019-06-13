@@ -1,8 +1,11 @@
 @extends('layouts/app')
+
 @section('title')
     Configuración inicial
 @endsection
+
 @section('slug', 'wizard')
+
 @section('header-scripts')
     <style>
         .cuadro-planes {
@@ -232,10 +235,9 @@
                                         <input type="text" inputmode="numeric" class="form-control checkEmpty" name="cvc" id="cvc" placeholder="CVV" required>
                                     </div>
                                     <div class="form-group col-md-12" style="white-space: nowrap;">
+                                        <label id="alertCardValid" class="alertCardValid"></label>
                                         <label for="coupon">Tengo un cup&oacute;n:</label>
                                         <input type="text" class="form-control checkEmpty" name="coupon" id="coupon" placeholder="Cup&oacute;n" onblur="fusb();">
-                                        
-                                        <label id="alertCardValid" class="alertCardValid"></label>
                                     </div>
                                 </div>
                             </div>
@@ -245,7 +247,7 @@
                             </div>
                             
                             <div class="form-group col-md-12" style="white-space: nowrap;">
-                                Datos del receptor de la factura de Etax
+                                Datos del receptor de la factura de eTax
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="tipo_persona">Tipo de persona *</label>

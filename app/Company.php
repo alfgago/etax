@@ -61,7 +61,7 @@ class Company extends Model {
     
     //Relación con el plan
     public function subscription() {
-        return $this->hasOne(Sale::class);
+        return $this->hasOne(Sales::class);
     }
 
     /* Changes the current selected company to chosen plan. As long as the plan has available company slots. */

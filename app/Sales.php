@@ -32,4 +32,31 @@ class Sales extends Model
     {
         return $this->belongsTo(SubscriptionPlan::class, 'id');
     }
+    
+    public static function createUpdateSubscriptionSale ( $procuctId, $recurrency ) {
+        $company = currentCompanyModel();
+        $user = auth()->user();
+        
+        $start_date = Carbon::parse( now('America/Costa_Rica') );
+        $trial_end_date = $start_date->addDays(1);
+        $next_payment_date = $start_date->addMonths(1);
+        
+        $sale = Sales::updateOrCreate (
+            [ 
+                'user_id' => $user->id 
+            ],
+            [ 
+                'company_id' => $company->id,
+                'status'  => 1,
+                'recurrency' => $recurrency,
+                'trial_end_date' => $trial_end_date,
+                'start_date' => $start_date, 
+                'next_payment_date' => $next_payment_date, 
+                'etax_product_id' => $procuctId
+            ]
+        );
+        
+        return $sale;
+    }
+    
 }

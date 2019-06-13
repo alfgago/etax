@@ -116,8 +116,8 @@ Route::prefix('payment')->group(function(){
     Route::get('payment-create', 'PaymentController@create')->name('Payment.payment_create');
     Route::get('payment-create-view', 'PaymentController@createView')->name('Payment.payment_create_view');
     Route::get('payment-crear', 'PaymentController@paymentCrear')->name('Payment.payment_crear');
-    Route::get('payment-checkout', 'PaymentController@paymentCheckout')->name('Payment.payment_checkout');
-    Route::post('payment-card', 'PaymentController@paymentCard')->name('Payment.payment_card');
+    //Route::get('payment-checkout', 'PaymentController@paymentCheckout')->name('Payment.payment_checkout');
+    Route::post('confirm-payment', 'PaymentController@confirmPayment')->name('Payment.payment_card');
     Route::get('payment-token-update-view/{id}', 'PaymentController@paymentTokenUpdateView')->name('Payment.payment_token_update_view');
     Route::patch('payment-token-update', 'PaymentController@paymentTokenUpdate')->name('Payment.payment_tokenUpdate');
     Route::delete('payment-token-delete/{id}', 'PaymentController@paymentTokenDelete')->name('Payment.payment_token_delete');
