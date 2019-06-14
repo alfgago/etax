@@ -125,6 +125,20 @@ Route::prefix('payment')->group(function(){
     Route::post('payment-charge', 'PaymentController@paymentCharge')->name('Payment.payment_charge');
 });
 
+Route::prefix('sale')->group(function(){
+    Route::get('sales-new-view','SalesController@salesNewView')->name('sales_new_view');
+    Route::get('sales-new','sales@salesNew')->name('sales_new');
+    /*
+
+    Route::get('','sales@')->name('');
+    Route::get('','sales@')->name('');
+    Route::get('','sales@')->name('');
+    Route::get('','sales@')->name('');
+    Route::get('','sales@')->name('');
+    Route::get('','sales@')->name('');
+    Route::get('','sales@')->name('');
+    */
+});
 // Rutas de API data para ajax
 Route::get('/api/invoices', 'InvoiceController@indexData')->name('Invoice.data');
 Route::get('/api/invoicesAuthorize', 'InvoiceController@indexDataAuthorize')->name('Invoice.data_authorizes');
@@ -136,6 +150,7 @@ Route::get('/api/providers', 'ProviderController@indexData')->name('Provider.dat
 Route::get('/api/products', 'ProductController@indexData')->name('Product.data');
 Route::get('/api/books', 'BookController@indexData')->name('Book.data');
 Route::get('/api/payments', 'PaymentController@indexData')->name('Payment.data');
+Route::get('/api/sales', 'SalesController@indexData')->name('Sale.data');
 
 
 //Rutas de recover
@@ -154,6 +169,7 @@ Route::resource('facturas-recibidas', 'BillController');
 Route::resource('plans', 'PlanController');
 Route::resource('empresas', 'CompanyController');
 Route::resource('payments', 'PaymentController');
+Route::resource('sales', 'SalesController');
 
 //Middlewares de autenticación
 Route::group(['middleware' => ['auth']], function() {

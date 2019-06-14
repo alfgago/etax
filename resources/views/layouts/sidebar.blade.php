@@ -38,6 +38,7 @@
                     <a href="#" onclick="abrirPopup('importar-recibidas-popup');">Importar facturas</a>
                     <a href="/facturas-recibidas/validaciones">Validar facturas</a>
                     <a href="/facturas-recibidas/autorizaciones">Autorizar facturas por email</a>
+                    <a href="/sales">Comprar productos eTax</a>
                 </div>
             </li>
             
