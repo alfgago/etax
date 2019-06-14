@@ -291,7 +291,8 @@ class CompanyController extends Controller {
         $team = Team::where('company_id', $company->id)->first();
 
         /* Only owner of company or user invited as admin for that company can edit company details */
-        if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) && get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
+        if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) &&
+                get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
             return redirect()->back()->withError('Usted no está autorizado para actualizar esta información');
         }
 
@@ -299,6 +300,8 @@ class CompanyController extends Controller {
         $company->default_invoice_notes = $request->default_invoice_notes;
         $company->default_vat_code = $request->default_vat_code;
         $company->last_document = $request->last_document;
+        $company->last_invoice_ref_number = $request->last_document ?
+            getInvoiceReference($request->last_document) : 0;
         $company->first_prorrata = $request->first_prorrata;
         $company->first_prorrata_type = $request->first_prorrata_type;
         $company->use_invoicing = $request->use_invoicing;
@@ -448,5 +451,4 @@ class CompanyController extends Controller {
             return redirect()->route('User.companies')->withErrors(['error' => 'Invalid Link or Company already deactivated.']);
         }
     }
-
 }
