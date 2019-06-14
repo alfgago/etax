@@ -34,7 +34,7 @@ class PaymentController extends Controller
     {
         $user = auth()->user();
         $cantidad = PaymentMethod::where('user_id', $user->id)->get()->count();
-        return view('Payment/index')->with('cantidad', $cantidad);
+        return view('payment/index')->with('cantidad', $cantidad);
     }
     public function createView(){
         return view('payment/CreatePaymentMethod');
