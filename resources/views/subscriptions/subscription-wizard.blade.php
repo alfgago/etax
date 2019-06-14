@@ -127,6 +127,7 @@
     </div>
     
     <div class="form-container">
+
       <form method="POST" action="/confirmar-plan" class="wizard-form" enctype="multipart/form-data">
         @csrf
         <div class="step-section biginputs step1 is-active">
@@ -267,7 +268,7 @@
 		      form: 'form.tarjeta',
 		      container: '.card-wrapper',
 		      formSelectors: {
-		          nameInput: 'input[name="first-name"], input[name="last-name"]'
+		          nameInput: 'input[name="first_name_card"], input[name="last_name_card"]'
 		      }
 		  });
   	}

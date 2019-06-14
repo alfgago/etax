@@ -1,24 +1,51 @@
-<div class='card-wrapper'></div>
-<div class="col-md-12">
-    <div class="form-row">
-        <div class="form-group col-md-5" style="white-space: nowrap;">
-            <label for="number">N&#250;mero de tarjeta</label>
-            <input type="text" inputmode="numeric" class="form-control checkEmpty" name="number" id="number" placeholder="N&#250;mero de tarjeta:" required onblur="valid_credit_card(this.value);">
-            <label id="alertCardValid" class="alertCardValid"></label>
-        </div>
-        <div class="form-group col-md-3" style="white-space: nowrap;">
-            <label for="expiry">Expira</label>
-            <input type="text" inputmode="numeric" class="form-control checkEmpty" name="expiry" id="expiry" placeholder="Mes / A&#241;o:" required onblur="CambiarNombre();">
-        </div>
-        <div class="form-group col-md-2" style="white-space: nowrap;">
-            <label for="cardCcv">CVV</label>
-            <input type="text" inputmode="numeric" class="form-control checkEmpty" name="cvc" id="cvc" placeholder="CVV:" required>
-        </div>
+<style>
+    .vl {
+        margin-left: 5%;
+        border-left: 2px solid black;
+        height: 400px;
+        margin-right: 1%;
+    }
+    .newCard{
+        margin-left: 2%;
+        margin-top: 15%;
+    }
+</style>
+<div class="col-md-12 offset-1">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-row">
+                <div class="form-group col-md-12" style="white-space: nowrap;">
+                    <label for="number">N&#250;mero de tarjeta</label>
+                    <input type="text" inputmode="numeric" class="form-control checkEmpty" name="number" id="number" placeholder="N&#250;mero de tarjeta:" required onblur="valid_credit_card(this.value);">
+                    <label id="alertCardValid" class="alertCardValid"></label>
+                </div>
+                <div class="form-group col-md-6" style="white-space: nowrap;">
+                    <label for="expiry">Expira</label>
+                    <input type="text" inputmode="numeric" class="form-control checkEmpty" name="expiry" id="expiry" placeholder="Mes / A&#241;o:" required onblur="CambiarNombre();">
+                </div>
+                <div class="form-group col-md-6" style="white-space: nowrap;">
+                    <label for="cardCcv">CVV</label>
+                    <input type="text" inputmode="numeric" class="form-control checkEmpty" name="cvc" id="cvc" placeholder="CVV:" required>
+                </div>
+                <div class="form-group col-md-12" style="white-space: nowrap;">
+                    <label for="first_name">Nombre:</label>
+                    <input type="text" inputmode="text" class="form-control checkEmpty" name="first_name" id="first_name" placeholder="Nombre tarjeta-habiente:" required>
+                </div>
+                <div class="form-group col-md-12" style="white-space: nowrap;">
+                    <label for="last_name">Apellido:</label>
+                    <input type="text" inputmode="text" class="form-control checkEmpty" name="last_name" id="last_name" placeholder="Apellido tarjeta-habiente:" required>
+                </div>
 
-        <input type="text" hidden id="cardMonth" name="cardMonth">
-        <input type="text" hidden id="cardYear" name="cardYear">
-        <div class="btn-holder">
-            <h6>Nota: Los datos sensibles de su tarjeta no se guardar&aacute;n en nuestra base de datos, ser&aacute;n utilizados solamente <br> para procesar sus pagos</h6>
+                <input type="text" hidden id="cardMonth" name="cardMonth">
+                <input type="text" hidden id="cardYear" name="cardYear">
+                <div class="btn-holder">
+                    <h6>Nota: Los datos sensibles de su tarjeta no se guardar&aacute;n en nuestra base de datos, ser&aacute;n utilizados solamente <br> para procesar sus pagos</h6>
+                </div>
+            </div>
+        </div>
+        <div class="vl"></div>
+        <div class="col-md-5">
+            <div class='card-wrapper newCard'></div>
         </div>
     </div>
 </div>
@@ -29,7 +56,7 @@
         form: 'form.tarjeta',
         container: '.card-wrapper',
         formSelectors: {
-            nameInput: 'input[name="first-name"], input[name="last-name"]'
+            nameInput: 'input[name="first_name"], input[name="last_name"]'
         }
     });
     function CambiarNombre() {
