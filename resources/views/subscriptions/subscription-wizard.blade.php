@@ -129,6 +129,7 @@
     <div class="form-container">
 
       <form method="POST" action="/confirmar-plan" class="wizard-form" enctype="multipart/form-data">
+
         @csrf
         <div class="step-section biginputs step1 is-active">
           <div class="form-row">
