@@ -1,7 +1,7 @@
 @extends('layouts/app')
 
 @section('title') 
-	Configuración de plan inicial41
+	Configuración de plan inicial
 @endsection
 
 @section('slug', 'wizard')
