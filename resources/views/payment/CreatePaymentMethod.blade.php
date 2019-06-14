@@ -18,7 +18,7 @@
                         <h3>
                             Informaci&oacute;n de la tarjeta:</h3>
                     </div>
-                    @include( 'Payment.formCreate' )
+                    @include( 'payment.formCreate' )
 
                 </div>
 
