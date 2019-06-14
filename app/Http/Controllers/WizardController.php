@@ -106,14 +106,20 @@ class WizardController extends Controller
         $invoice->save();
         
         $company->first_prorrata_type = 2;
-        $company->save();
         
         clearLastTaxesCache($company->id, 2018);
         clearLastTaxesCache($company->id, 2019);
         
-        $prorrata = CalculatedTax::getProrrataPeriodoAnterior(2018)->prorrata;
+        $calc = CalculatedTax::getProrrataPeriodoAnterior(2018);
+        
+        $company->operative_prorrata = $calc->prorrata;
+        $company->operative_ratio1 = $calc->ratio1*100;
+        $company->operative_ratio2 = $calc->ratio2*100;
+        $company->operative_ratio3 = $calc->ratio3*100;
+        $company->operative_ratio4 = $calc->ratio4*100;
+        $company->save();
       
-        return redirect('/empresas/configuracion')->withMessage( 'Su prorrata operativa 2018 es de: '. number_format( $prorrata*100, 2) . '%' );
+        return redirect('/empresas/configuracion')->withMessage( 'Su prorrata operativa 2018 es de: '. number_format( $calc->prorrata*100, 2) . '%' );
     }
     
     
@@ -219,12 +225,12 @@ class WizardController extends Controller
                 $company->save();
             }
 
-            if ($company->first_prorrata_type == 1) {
-                return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
-            }
-
             if ($company->first_prorrata_type == 2) {
                 return redirect('/editar-totales-2018')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
+            }
+
+            if ($company->first_prorrata_type == 3) {
+                return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
             }
 
             return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento.');

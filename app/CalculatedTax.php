@@ -48,7 +48,7 @@ class CalculatedTax extends Model
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
       
-      if ( !Cache::has($cacheKey) ) {
+      //if ( !Cache::has($cacheKey) ) {
           
           //Busca el calculo del mes en Base de Datos.
           $data = CalculatedTax::firstOrNew(
@@ -90,7 +90,7 @@ class CalculatedTax extends Model
             
           Cache::put($cacheKey, $data, now()->addDays(120));
           
-     }
+     //}
       
       $data = Cache::get($cacheKey);
       return $data;
@@ -420,6 +420,8 @@ class CalculatedTax extends Model
     
     public function setCalculosIVA( $prorrataOperativa, $lastBalance ) {
       
+      $company = currentCompanyModel();
+      
       //Determina numerador y denominador de la prorrata.
       $numeradorProrrata = $this->invoices_subtotal - $this->sum_repercutido_exento_sin_credito;
       $denumeradorProrrata = $this->invoices_subtotal;
@@ -453,16 +455,47 @@ class CalculatedTax extends Model
         $ratio3 = $this->sum_repercutido3 / $numeradorProrrata;
         $ratio4 = $this->sum_repercutido4 / $numeradorProrrata;
         
+      
+        //Define los ratios por tipo para guardar
+        $fakeRatio1 = $this->sum_repercutido1 / $this->invoices_subtotal;
+        $fakeRatio2 = $this->sum_repercutido2 / $this->invoices_subtotal;
+        $fakeRatio3 = ($this->sum_repercutido3-$this->sum_repercutido_exento_con_credito) / $this->invoices_subtotal;
+        $fakeRatio4 = $this->sum_repercutido4 / $this->invoices_subtotal;
+        $fakeRatioExentoSinCredito = $this->sum_repercutido_exento_sin_credito / $this->invoices_subtotal;
+        $fakeRatioExentoConCredito = $this->sum_repercutido_exento_con_credito / $this->invoices_subtotal;
+        
+        
         //Calcula prorrata
         $prorrata = $numeradorProrrata / $denumeradorProrrata;
+      } else {
+        $prorrata = 1;
+        $ratio1 = 0;
+        $ratio2 = 0;
+        $ratio3 = 0;
+        $ratio4 = 0;
+      
+        //Define los ratios por tipo para guardar
+        $fakeRatio1 = 0;
+        $fakeRatio2 = 0;
+        $fakeRatio3 = 0;
+        $fakeRatio4 = 0;
+        $fakeRatioExentoSinCredito = 0;
+        $fakeRatioExentoConCredito = 0;
         
+      }
+      
         //Calcula el total deducible y no deducible en base a los ratios y los montos de facturas recibidas.
         $subtotalParaCFDP = $this->bills_subtotal - $this->bases_identificacion_plena - $this->bases_no_deducibles;
         
-        $cfdp1 = $this->bills_subtotal1*$ratio1*0.01 + $this->bills_subtotal1*$ratio2*0.01 + $this->bills_subtotal1*$ratio3*0.01 + $this->bills_subtotal1*$ratio4*0.01 ; 
-        $cfdp2 = $this->bills_subtotal2*$ratio1*0.01 + $this->bills_subtotal2*$ratio2*0.02 + $this->bills_subtotal2*$ratio3*0.02 + $this->bills_subtotal2*$ratio4*0.02 ; 
-        $cfdp3 = $this->bills_subtotal3*$ratio1*0.01 + $this->bills_subtotal3*$ratio2*0.02 + $this->bills_subtotal3*$ratio3*0.13 + $this->bills_subtotal3*$ratio4*0.04 ; 
-        $cfdp4 = $this->bills_subtotal4*$ratio1*0.01 + $this->bills_subtotal4*$ratio2*0.02 + $this->bills_subtotal4*$ratio3*0.04 + $this->bills_subtotal4*$ratio4*0.04 ; 
+        $ratio1_operativo = $company->operative_ratio1 / 100;
+        $ratio2_operativo = $company->operative_ratio2 / 100;
+        $ratio3_operativo = $company->operative_ratio3 / 100;
+        $ratio4_operativo = $company->operative_ratio4 / 100;
+        
+        $cfdp1 = $this->bills_subtotal1*$ratio1_operativo*0.01 + $this->bills_subtotal1*$ratio2_operativo*0.02 + $this->bills_subtotal1*$ratio3_operativo*0.13 + $this->bills_subtotal1*$ratio4_operativo*0.04 ; 
+        $cfdp2 = $this->bills_subtotal2*$ratio1_operativo*0.02 + $this->bills_subtotal2*$ratio2_operativo*0.02 + $this->bills_subtotal2*$ratio3_operativo*0.02 + $this->bills_subtotal2*$ratio4_operativo*0.02 ; 
+        $cfdp3 = $this->bills_subtotal3*$ratio1_operativo*0.13 + $this->bills_subtotal3*$ratio2_operativo*0.02 + $this->bills_subtotal3*$ratio3_operativo*0.13 + $this->bills_subtotal3*$ratio4_operativo*0.04 ; 
+        $cfdp4 = $this->bills_subtotal4*$ratio1_operativo*0.04 + $this->bills_subtotal4*$ratio2_operativo*0.02 + $this->bills_subtotal4*$ratio3_operativo*0.04 + $this->bills_subtotal4*$ratio4_operativo*0.04 ; 
         
         $cfdp = $cfdp1 + $cfdp2 + $cfdp3 + $cfdp4;
       
@@ -475,19 +508,11 @@ class CalculatedTax extends Model
         $balanceOperativo = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleOperativo;
         $ivaNoDeducible = $this->total_bill_iva - $ivaDeducibleOperativo;
         
-      
-        //Define los ratios por tipo para guardar
-        $fakeRatio1 = $this->sum_repercutido1 / $this->invoices_subtotal;
-        $fakeRatio2 = $this->sum_repercutido2 / $this->invoices_subtotal;
-        $fakeRatio3 = ($this->sum_repercutido3-$this->sum_repercutido_exento_con_credito) / $this->invoices_subtotal;
-        $fakeRatio4 = $this->sum_repercutido4 / $this->invoices_subtotal;
-        $fakeRatioExentoSinCredito = $this->sum_repercutido_exento_sin_credito / $this->invoices_subtotal;
-        $fakeRatioExentoConCredito = $this->sum_repercutido_exento_con_credito / $this->invoices_subtotal;
         
         $saldoFavor = $balanceOperativo - $this->iva_retenido;
         $saldoFavor = $saldoFavor < 0 ? abs( $saldoFavor ) : 0;
         
-      }else {  //Entra aqui en el caso de que el numerador da 0.
+      /*}else {  //Entra aqui en el caso de que el numerador da 0.
         $prorrata = 1;
         $cfdp = $this->total_bill_iva; 
         //Calcula el balance estimado.
@@ -507,7 +532,7 @@ class CalculatedTax extends Model
         $fakeRatioExentoConCredito = $this->sum_repercutido_exento_sin_credito ? 1 : 0; 
         $saldoFavor = $balanceOperativo - $this->iva_retenido;
         $saldoFavor = $saldoFavor < 0 ? abs( $saldoFavor ) : 0;
-      }
+      }*/
       
       $this->numerador_prorrata = $numeradorProrrata;
       $this->denumerador_prorrata = $denumeradorProrrata;
@@ -572,7 +597,7 @@ class CalculatedTax extends Model
                 $data->book = $book;
               }
               
-            }
+          }
             
         }else {
           if( !$data->is_closed ) {

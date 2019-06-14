@@ -18,6 +18,7 @@ use stdClass;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use App\Utils\BridgeHaciendaApi;
+use App\Utils\PaymentUtils;
 
 
 //require __DIR__ . '/../../../vendor/autoload.php';
@@ -38,20 +39,7 @@ class PaymentController extends Controller
     public function createView(){
         return view('payment/CreatePaymentMethod');
     }
-    public function StatusBnAPI(){
-        $BnEcomAPIStatus = new Client();
-        $APIStatus = $BnEcomAPIStatus->request('POST', "https://emcom.oneklap.com:2263/api/LogOnApp?applicationName=string&applicationPassword=string", [
-            'headers' => [
-                'Content-Type' => "application/json",
-            ],
-            'json' => ['applicationName' => 'ETAX',
-                'applicationPassword' => 'ETFTTJUN1019%'
-            ],
-            'verify' => false,
-        ]);
-        $BnStatus = json_decode($APIStatus->getBody()->getContents(), true);
-        return $BnStatus;
-    }
+
     /**
      * Display a listing of the resource.
      *
@@ -59,42 +47,44 @@ class PaymentController extends Controller
      */
     public function create(Request $request){
         $user = auth()->user();
-        $BnStatus = $this->StatusBnAPI();
-        if($BnStatus['apiStatus'] == 'Successful'){
+        
+        $paymentUtils = new PaymentUtils();
+        $bnStatus = $paymentUtils->statusBNAPI();
+        if($bnStatus['apiStatus'] == 'Successful'){
             $cards = array(
                 $request->number
             );
             foreach ($cards as $c) {
                 $check = $this->check_cc($c, true);
                 if ($check !== false) {
-                    $TypeCard = $check;
+                    $typeCard = $check;
                 } else {
                     echo "$c - Not a match";
                 }
             }
-            switch ($TypeCard) {
+            switch ($typeCard) {
                 case "Visa":
-                    $CardType = '001';
-                    $NameCard = "Visa";
+                    $cardType = '001';
+                    $nameCard = "Visa";
                     break;
                 case "Mastercard":
-                    $CardType = '002';
-                    $NameCard = "Mastercard";
+                    $cardType = '002';
+                    $nameCard = "Mastercard";
                     break;
                 case "American Express":
-                    $CardType = '003';
-                    $NameCard = "";
+                    $cardType = '003';
+                    $nameCard = "";
                     break;
             }
-            $CardBn = new Client();
-            $CardCreationResult = $CardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
+            $cardBn = new Client();
+            $cardCreationResult = $cardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
                 'headers' => [
                     'Content-Type'  => "application/json",
                 ],
                 'json' => ['applicationName' => 'ETAX',
                     'userName' => $user->user_name,
                     'userPassword' => 'Etax-' . $user->id . 'Klap',
-                    'cardDescription' => $NameCard,
+                    'cardDescription' => $nameCard,
                     'primaryAccountNumber' => $request->number,
                     "expirationMonth" => $request->cardMonth,
                     "expirationYear" => '20' . $request->cardYear,
@@ -102,16 +92,17 @@ class PaymentController extends Controller
                 ],
                 'verify' => false,
             ]);
-            $Card = json_decode($CardCreationResult->getBody()->getContents(), true);
-            if($Card['apiStatus'] == 'Success') {
+            
+            $card = json_decode($cardCreationResult->getBody()->getContents(), true);
+            if($card['apiStatus'] == 'Success') {
                 $last_4digits = substr($request->number, -4);
-                $token_bn = $Card['cardTokenId'];
+                $token_bn = $card['cardTokenId'];
                 $paymentMethod = PaymentMethod::create([
                     'user_id' => $user->id,
                     'name' => $request->first_name,
                     'last_name' => $request->last_name,
                     'last_4digits' => $last_4digits,
-                    'nameCard' => $NameCard,
+                    'nameCard' => $nameCard,
                     'due_date' => $request->cardMonth . ' ' . $request->cardYear,
                     'token_bn' => $token_bn
                 ]);
@@ -123,32 +114,30 @@ class PaymentController extends Controller
             return redirect()->back()->withErrors('Pagos en línea está fuera de servicio en este momento. No se pudo gestionar la transacción');
         }
     }
+    
     /*
-    *
-    *
-    *
-    *
     */
     public function indexData(){
         $user = auth()->user();
         $query = PaymentMethod::where('user_id', $user->id);
         return datatables()->eloquent( $query )
-            ->addColumn('actions', function($payment_method) {
+            ->addColumn('actions', function($paymentMethod) {
                 return view('payment.actions', [
-                    'data' => $payment_method
+                    'data' => $paymentMethod
                 ])->render();
             })
-            ->editColumn('last_4digits', function(PaymentMethod $payment_method) {
-                if($payment_method->default_card == 1){
-                    $text_default = ' Por defecto';
+            ->editColumn('last_4digits', function(PaymentMethod $paymentMethod) {
+                if($paymentMethod->default_card == 1){
+                    $defaultText = ' Por defecto';
                 }else{
-                    $text_default = '';
+                    $defaultText = '';
                 }
-                return 'Termina en ...' . $payment_method->last_4digits . ' ' . $text_default;
+                return 'Termina en ...' . $paymentMethod->last_4digits . ' ' . $defaultText;
             })
             ->rawColumns(['actions'])
             ->toJson();
     }
+    
     /**
      * Show the form for creating a new resource.
      *
@@ -176,68 +165,9 @@ class PaymentController extends Controller
         return $key;
     }
 
-    public function check_cc($cc, $extra_check = false){
-        $cards = array(
-            "visa" => "(4\d{12}(?:\d{3})?)",
-            "amex" => "(3[47]\d{13})",
-            "jcb" => "(35[2-8][89]\d\d\d{10})",
-            "maestro" => "((?:5020|5038|6304|6579|6761)\d{12}(?:\d\d)?)",
-            "solo" => "((?:6334|6767)\d{12}(?:\d\d)?\d?)",
-            "mastercard" => "(5[1-5]\d{14})",
-            "switch" => "(?:(?:(?:4903|4905|4911|4936|6333|6759)\d{12})|(?:(?:564182|633110)\d{10})(\d\d)?\d?)",
-        );
-        $names = array("Visa", "American Express", "JCB", "Maestro", "Solo", "Mastercard", "Switch");
-        $matches = array();
-        $pattern = "#^(?:".implode("|", $cards).")$#";
-        $result = preg_match($pattern, str_replace(" ", "", $cc), $matches);
-        /*if($extra_check && $result > 0){
-            $result = (validatecard($cc))?1:0;
-        }*/
-        return ($result>0)?$names[sizeof($matches)-2]:false;
-    }
-
     public function paymentCheckout(){
         $sale = getCurrentSubscription();
         return view('payment/paymentCard')->with('sale', $sale);
-    }
-
-    public function userCardInclusion($number, $nameCard, $cardMonth, $cardYear, $cvc){
-        $user = auth()->user();
-        $CardBn = new Client();
-        $CardCreationResult = $CardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
-            'headers' => [
-                'Content-Type'  => "application/json",
-            ],
-            'json' => ['applicationName' => 'ETAX',
-                'userName' => $user->user_name,
-                'userPassword' => 'Etax-' . $user->id . 'Klap',
-                'cardDescription' => $nameCard,
-                'primaryAccountNumber' => $number,
-                "expirationMonth" => $cardMonth,
-                "expirationYear" => '20' . $cardYear,
-                "verificationValue" => $cvc
-            ],
-            'verify' => false,
-        ]);
-        $Card = json_decode($CardCreationResult->getBody()->getContents(), true);
-        return $Card;
-    }
-
-    public function userCardsInfo(){
-        $user = auth()->user();
-        $CardBn = new Client();
-        $CardCreationResult = $CardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserRequestCards?applicationName=string&userName=string&userPassword=string", [
-            'headers' => [
-                'Content-Type'  => "application/json",
-            ],
-            'json' => ['applicationName' => 'ETAX',
-                'userName' => $user->user_name,
-                'userPassword' => 'Etax-' . $user->id . 'Klap'
-            ],
-            'verify' => false,
-        ]);
-        $Cards = json_decode($CardCreationResult->getBody()->getContents(), true);
-        return $Cards;
     }
 
     public function storeClient(Request $request){
@@ -268,10 +198,15 @@ class PaymentController extends Controller
         return $cliente;
     }
 
-    public function paymentCard(Request $request){
-        /*$T = $this->userCardsInfo();
+    public function confirmPayment(Request $request){
+        $paymentUtils = new PaymentUtils();
+        /*$T = $paymentUtils->userCardsInfo();
         dd($T);*/
         $user = auth()->user();
+        
+        //Crea el sale de suscripción
+        $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
+        
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $date = Carbon::now()->format('Y/m/d');
         if (isset($request->coupon)) {
@@ -285,24 +220,25 @@ class PaymentController extends Controller
         } else {
             $descuento = 0;
         }
-        $planSelected = $request->planSelected;
-        $subscription_plan = SubscriptionPlan::findOrFail($request->planId);
-        switch ($planSelected) {
+        
+        $recurrency = $request->recurrency;
+        $subscriptionPlan= $sale->product->plan;
+        switch ($recurrency) {
             case 1:
-                $costo = $subscription_plan->monthly_price;
-                $next_payment_date = $start_date->addMonths(1);
+                $costo = $subscriptionPlan->monthly_price;
+                $nextPaymentDate = $start_date->addMonths(1);
                 $numberOfPayments = '1';
                 $descriptionMessage = 'mensual';
                 break;
             case 2:
-                $costo = $subscription_plan->six_price * 6;
-                $next_payment_date = $start_date->addMonths(6);
+                $costo = $subscriptionPlan->six_price * 6;
+                $nextPaymentDate = $start_date->addMonths(6);
                 $numberOfPayments = '6';
                 $descriptionMessage = 'semestral';
                 break;
             case 3:
-                $costo = $subscription_plan->annual_price * 12;
-                $next_payment_date = $start_date->addMonths(12);
+                $costo = $subscriptionPlan->annual_price * 12;
+                $nextPaymentDate = $start_date->addMonths(12);
                 $numberOfPayments = '12';
                 $descriptionMessage = 'anual';
                 break;
@@ -315,33 +251,33 @@ class PaymentController extends Controller
             $request->number
         );
         foreach ($cards as $c) {
-            $check = $this->check_cc($c, true);
+            $check = $paymentUtils->check_cc($c, true);
             if ($check !== false) {
-                $TypeCard = $check;
+                $typeCard = $check;
             }
         }
-        switch ($TypeCard) {
+        switch ($typeCard) {
             case "Visa":
-                $NameCard = "Visa";
+                $nameCard = "Visa";
                 break;
             case "Mastercard":
-                $NameCard = "Mastercard";
+                $nameCard = "Mastercard";
                 break;
             case "American Express":
-                $NameCard = "";
+                $nameCard = "";
                 break;
         }
-        /*$sale = Sales::where('user_id', $user->id)->first();
+        /*
         $payment = Payment::create([
             'sale_id' => $sale->id,
             'payment_date' => $date,
             'payment_status' => 1,
             'amount' => $amount
         ]);*/
-        $BnStatus = $this->StatusBnAPI();
-        if($BnStatus['apiStatus'] == 'Successful'){
-           /* $Card = $this->userCardInclusion($request->number, $NameCard, $request->cardMonth, $request->cardYear, $request->cvc);
-            if($Card['apiStatus'] == 'Success'){
+        $bnStatus = $paymentUtils->statusBNAPI();
+        if($bnStatus['apiStatus'] == 'Successful'){
+           /* $card = $paymentUtils->userCardInclusion($request->number, $nameCard, $request->cardMonth, $request->cardYear, $request->cvc);
+            if($card['apiStatus'] == 'Success'){
                 $last_4digits = substr($request->number, -4);
                 $paymentMethod = PaymentMethod::create([
                     'user_id' => $user->id,
@@ -349,10 +285,10 @@ class PaymentController extends Controller
                     'last_name' => $request->last_name,
                     'last_4digits' => $last_4digits,
                     'due_date' => $request->cardMonth . ' ' . $request->cardYear,
-                    'token_bn' => $Card['cardTokenId'],
+                    'token_bn' => $card['cardTokenId'],
                     'default_card' => 1
                 ]);
-                $payment->proof = $Card['cardTokenId'];
+                $payment->proof = $card['cardTokenId'];
                 $payment->payment_status = 1;
                 $payment->save();
 
@@ -372,7 +308,7 @@ class PaymentController extends Controller
                         [
                             'status'  => 1,
                             'recurrency' => $numberOfPayments,
-                            'next_payment_date' => $next_payment_date
+                            'next_payment_date' => $nextPaymentDate
                         ]
 
                     );
@@ -405,7 +341,7 @@ class PaymentController extends Controller
                     $item->descuento = $descuento;
                     $item->cantidad = 1;
                     $invoiceData->items = [$item];
-                    $factura = $this->CrearFacturaClienteEtax($invoiceData);
+                    $factura = $this->crearFacturaClienteEtax($invoiceData);
                     if($factura){
                         return redirect('wizard');
                     }
@@ -424,7 +360,7 @@ class PaymentController extends Controller
     }
 
   
-    public function CrearFacturaClienteEtax($invoiceData){
+    public function crearFacturaClienteEtax($invoiceData){
         /*$product = EtaxProducts::find($invoiceData->items[0]->id);
         dd($product);
         */
@@ -551,42 +487,43 @@ class PaymentController extends Controller
                                                         ->with('Id', $id);
     }
     public function paymentTokenUpdate(Request $request){
+        $paymentUtils = new PaymentUtils();
         $cards = array(
             $request->number
         );
         foreach($cards as $c){
             $check = $this->check_cc($c, true);
             if($check!==false){
-                $TypeCard = $check;
+                $typeCard = $check;
             }else{
                 echo "$c - Not a match";
             }
         }
-        switch ($TypeCard){
+        switch ($typeCard){
             case "Visa":
-                $CardType = '001';
+                $cardType = '001';
                 break;
             case "Mastercard":
-                $CardType = '002';
+                $cardType = '002';
                 break;
             case "American Express":
-                $CardType = '003';
+                $cardType = '003';
                 break;
         }
         $user = auth()->user();
-        $PaymentMethod = PaymentMethod::find($request->Id);
-        $BnStatus = $this->StatusBnAPI();
-        if($BnStatus['apiStatus'] == 'Successful'){
-            $CardBn = new Client();
-            $CardCreationResult = $CardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserUpdateCard?applicationName=string&userName=string&userPassword=string&cardTokenId=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
+        $paymentMethod = PaymentMethod::find($request->Id);
+        $bnStatus = $paymentUtils->statusBNAPI();
+        if($bnStatus['apiStatus'] == 'Successful'){
+            $cardBn = new Client();
+            $cardCreationResult = $cardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserUpdateCard?applicationName=string&userName=string&userPassword=string&cardTokenId=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
                 'headers' => [
                     'Content-Type'  => "application/json",
                 ],
                 'json' => ['applicationName' => 'ETAX',
                     'userName' => $user->user_name,
                     'userPassword' => 'Etax-' . $user->id . 'Klap',
-                    'cardTokenId' => $PaymentMethod->token_bn,
-                    "cardDescription" => $PaymentMethod->card_name,
+                    'cardTokenId' => $paymentMethod->token_bn,
+                    "cardDescription" => $paymentMethod->card_name,
                     "primaryAccountNumber" => $request->number,
                     "expirationMonth" => $request->cardMonth,
                     "expirationYear" => '20' . $request->cardYear,
@@ -594,14 +531,14 @@ class PaymentController extends Controller
                 ],
                 'verify' => false,
             ]);
-            $Card = json_decode($CardCreationResult->getBody()->getContents(), true);
+            $card = json_decode($cardCreationResult->getBody()->getContents(), true);
             $last_4digits = substr($request->number, -4);
             $due_date = $request->cardMonth . ' ' . $request->cardYear;
-            $PaymentMethod->last_4digits = $last_4digits;
-            $PaymentMethod->due_date = $due_date;
-            $PaymentMethod->nameCard = $TypeCard;
-            $PaymentMethod->updated_by = $user->id;
-            $PaymentMethod->save();
+            $paymentMethod->last_4digits = $last_4digits;
+            $paymentMethod->due_date = $due_date;
+            $paymentMethod->nameCard = $typeCard;
+            $paymentMethod->updated_by = $user->id;
+            $paymentMethod->save();
             return redirect('payments');
         }else{
             $mensaje = 'Transacción no disponible en este momento';
@@ -610,31 +547,32 @@ class PaymentController extends Controller
     }
 
     public function paymentTokenDelete($Id){
+        $paymentUtils = new PaymentUtils();
         $user = auth()->user();
-        $PaymentMethod = PaymentMethod::find($Id);
-        $this->authorize('update', $PaymentMethod);
-        $BnStatus = $this->StatusBnAPI();
-        if($BnStatus['apiStatus'] == 'Successful'){
-            $CardBn = new Client();
-            $CardCreationResult = $CardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserDeleteCard", [
+        $paymentMethod = PaymentMethod::find($Id);
+        $this->authorize('update', $paymentMethod);
+        $bnStatus = $paymentUtils->statusBNAPI();
+        if($bnStatus['apiStatus'] == 'Successful'){
+            $cardBn = new Client();
+            $cardCreationResult = $cardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserDeleteCard", [
                 'headers' => [
                     'Content-Type'  => "application/json",
                 ],
                 'json' => ['applicationName' => 'ETAX',
                     'userName' => $user->user_name,
                     'userPassword' => 'Etax-' . $user->id . 'Klap',
-                    'cardTokenId' => $PaymentMethod->token_bn
+                    'cardTokenId' => $paymentMethod->token_bn
                 ],
                 'verify' => false,
             ]);
-            $Card = json_decode($CardCreationResult->getBody()->getContents(), true);
-            if($Card['apiStatus'] == 'sucess') {
-                $PaymentMethod->updated_by = $user->id;
-                $PaymentMethod->save();
-                $PaymentMethod->delete();
+            $card = json_decode($cardCreationResult->getBody()->getContents(), true);
+            if($card['apiStatus'] == 'sucess') {
+                $paymentMethod->updated_by = $user->id;
+                $paymentMethod->save();
+                $paymentMethod->delete();
                 return redirect('payments')->withMessage('Método de pago eliminado:');
             }else{
-                $mensaje = 'No se pudo eliminar el método de pago: ' . $Card['apiStatus'];
+                $mensaje = 'No se pudo eliminar el método de pago: ' . $card['apiStatus'];
                 return redirect()->back()->withError($mensaje);
             }
         }else{
@@ -644,8 +582,8 @@ class PaymentController extends Controller
     }
 
     public function paymentCharge($request){
-        $AppCharge = new Client();
-        $AppChargeBn = $AppCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppIncludeCharge?applicationName=string&applicationPassword=string&chargeDescription=string&userName=string&transactionCurrency=string&transactionAmount=double", [
+        $appCharge = new Client();
+        $appChargeBn = $appCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppIncludeCharge?applicationName=string&applicationPassword=string&chargeDescription=string&userName=string&transactionCurrency=string&transactionAmount=double", [
             'headers' => [
                 'Content-Type' => "application/json",
             ],
@@ -658,12 +596,12 @@ class PaymentController extends Controller
             ],
             'verify' => false,
         ]);
-        $ChargeAplied = json_decode($AppChargeBn->getBody()->getContents(), true);
-        //dd($ChargeAplied);
-        $chargeTokenId = $ChargeAplied['chargeTokenId'];
+        $chargeAplied = json_decode($appChargeBn->getBody()->getContents(), true);
+        //dd($chargeAplied);
+        $chargeTokenId = $chargeAplied['chargeTokenId'];
         /****************************************************/
         $BnCharge = new Client();
-        $ChargeBn = $BnCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppApplyCharge?applicationName=string&applicationPassword=string&userName=string&chargeTokeId=string&cardTokenId=string", [
+        $chargeBn = $BnCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppApplyCharge?applicationName=string&applicationPassword=string&userName=string&chargeTokeId=string&cardTokenId=string", [
             'headers' => [
                 'Content-Type' => "application/json",
             ],
@@ -675,8 +613,8 @@ class PaymentController extends Controller
             ],
             'verify' => false,
         ]);
-        $Charge = json_decode($ChargeBn->getBody()->getContents(), true);
-        return $Charge;
+        $charge = json_decode($chargeBn->getBody()->getContents(), true);
+        return $charge;
     }
     /**
     *
@@ -685,12 +623,13 @@ class PaymentController extends Controller
     *
     */
     public function comprarProductos(Request $request){
+        $paymentUtils = new PaymentUtils();
         //recibe parametros: etax_product_id, amount, description
         $date = Carbon::parse(now('America/Costa_Rica'));
         $current_company = currentCompany();
         $user_id = auth()->user()->id;
-        $BnStatus = $this->StatusBnAPI();
-        if($BnStatus['apiStatus'] == 'Successful'){
+        $bnStatus = $paymentUtils->statusBNAPI();
+        if($bnStatus['apiStatus'] == 'Successful'){
             $sale = Sale::create([
                 "user_id" => $user_id,
                 "company_id" => $current_company,
@@ -726,9 +665,10 @@ class PaymentController extends Controller
     }
 
     public function dailySubscriptionsPayment(){
+        $paymentUtils = new PaymentUtils();
         $date = Carbon::parse(now('America/Costa_Rica'));
-        $BnStatus = $this->StatusBnAPI();
-        if($BnStatus['apiStatus'] == 'Successful') {
+        $bnStatus = $paymentUtils->statusBNAPI();
+        if($bnStatus['apiStatus'] == 'Successful') {
             $unpaidSubscriptions = Sale::where('status', 2)->where('recurrency', '!=', '0');
             foreach($unpaidSubscriptions as $sale){
                 $payment = Payment::updateOrCreate(

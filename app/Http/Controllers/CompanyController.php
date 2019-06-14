@@ -302,12 +302,20 @@ class CompanyController extends Controller {
         $company->first_prorrata = $request->first_prorrata;
         $company->first_prorrata_type = $request->first_prorrata_type;
         $company->use_invoicing = $request->use_invoicing;
+        
+        if( $company->first_prorrata_type == 1 ) {
+            $company->operative_prorrata = $request->first_prorrata;
+            $company->operative_ratio1 = $request->operative_ratio1;
+            $company->operative_ratio2 = $request->operative_ratio2;
+            $company->operative_ratio3 = $request->operative_ratio3;
+            $company->operative_ratio4 = $request->operative_ratio4;
+        }
 
         $company->save();
         
         clearLastTaxesCache( $company->id, 2018);
 
-        return redirect()->route('Company.edit_config')->with('success', 'La configuración de la empresa ha sido actualizada.');
+        return redirect()->route('Company.edit_config')->withMessage('La configuración de la empresa ha sido actualizada.');
     }
 
     /**

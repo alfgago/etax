@@ -85,7 +85,7 @@ class ReportsController extends Controller
         $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, $prorrataOperativa );
         
         $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
-        
+
         $nombreMes = Variables::getMonthName($mes);
         $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
       }catch( \Exception $ex ){
@@ -207,7 +207,7 @@ class ReportsController extends Controller
       
       if($anoAnterior == 2018) {
         if( $company->first_prorrata_type == 1 ){
-          $prorrataOperativa = $company->first_prorrata ? currentCompanyModel()->first_prorrata / 100 : 1;
+          $prorrataOperativa = $company->first_prorrata ? $company->first_prorrata / 100 : 1;
         }else {
           $anterior = CalculatedTax::getProrrataPeriodoAnterior( $anoAnterior );
           $prorrataOperativa = $anterior->prorrata;

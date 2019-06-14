@@ -51,7 +51,7 @@
             {{ $empresa->id_number }} {{ $empresa->business_name ? " - ".$empresa->business_name : ''}}
           </div>
           <div class="dato-empresa">
-            <b>Plan actual:</b> {{ getCurrentSubscription()->plan->getName() }}
+            <b>Plan actual:</b> {{ getCurrentSubscription()->product->plan->getName() }}
           </div>
           <div class="dato-empresa">
             <b>Facturación electrónica:</b> Habilitada
