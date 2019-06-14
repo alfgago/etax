@@ -74,7 +74,7 @@ class PaymentUtils
                 'cardDescription' => $nameCard,
                 'primaryAccountNumber' => $number,
                 "expirationMonth" => $cardMonth,
-                "expirationYear" => '20' . $cardYear,
+                "expirationYear" => '20'.$cardYear,
                 "verificationValue" => $cvc
             ],
             'verify' => false,

@@ -113,7 +113,7 @@ Route::prefix('usuario')->group(function() {
 
 //Rutas de Pagos de la aplicacion
 Route::prefix('payment')->group(function(){
-    Route::get('payment-create', 'PaymentController@create')->name('Payment.payment_create');
+    Route::post('payment-create', 'PaymentController@create')->name('Payment.payment_create');
     Route::get('payment-create-view', 'PaymentController@createView')->name('Payment.payment_create_view');
     Route::get('payment-crear', 'PaymentController@paymentCrear')->name('Payment.payment_crear');
     //Route::get('payment-checkout', 'PaymentController@paymentCheckout')->name('Payment.payment_checkout');

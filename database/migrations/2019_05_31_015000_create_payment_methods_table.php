@@ -21,7 +21,7 @@ class CreatePaymentMethodsTable extends Migration
             $table->string('last_4digits')->nullable();
             $table->string('due_date')->nullable();
             $table->string('token_bn')->nullable();
-            $table->int('default_card')->nullable();
+            $table->boolean('default_card')->default(false);
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->softDeletes();
             $table->timestamps();

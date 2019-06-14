@@ -11,7 +11,7 @@
             <form method="POST" action="/payment/payment-create" class="tarjeta">
 
                 @csrf
-                @method('patch')
+                @method('post')
 
                 <div class="form-row">
                     <div class="form-group col-md-12">
