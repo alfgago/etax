@@ -22,8 +22,8 @@
          <div class="form-group col-md-12" style="white-space: nowrap;">
             <input type="text" inputmode="text" class="form-control checkEmpty" name="last_name_card" id="last_name" placeholder="Apellido" required onblur="valid_credit_card(this.value);">
         </div>
-        <div class="form-group col-md-12" style="white-space: nowrap;">
-            <label id="alertCardValid" class="alertCardValid"></label>
+        <div class="form-group col-md-12">
+            <label id="alertCardValid" class="alertCardValid"  style="color: red;"></label>
         </div>
     </div>
 </div>
@@ -50,6 +50,6 @@
 
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-prev" onclick="toggleStep('step1');">Paso anterior</button>
-  <button type="submit" id="btn-submit" class="btn btn-primary btn-next" >Confirmar</button>
+  <button type="submit" id="btn-submit" class="btn btn-primary btn-next" >Confirmar <span style="font-size:10px;">(No tiene que ser datos reales en staging)</span></button>
 </div>
 
