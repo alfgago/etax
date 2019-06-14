@@ -1,7 +1,7 @@
 @extends('layouts/app')
 
 @section('title') 
-	Configuración de plan inicial41
+	Configuración de plan inicial
 @endsection
 
 @section('slug', 'wizard')
@@ -127,7 +127,8 @@
     </div>
     
     <div class="form-container">
-      <form method="POST" action="/payment/confirm-payment" class="wizard-form tarjeta" enctype="multipart/form-data">
+
+      <form method="POST" action="/confirmar-plan" class="wizard-form" enctype="multipart/form-data">
         @csrf
         <div class="step-section biginputs step1 is-active">
           <div class="form-row">

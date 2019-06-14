@@ -127,7 +127,6 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
-        Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
         $request->validate([
             'subtotal' => 'required',
             'items' => 'required',

@@ -34,7 +34,7 @@ class SubscriptionPlanController extends Controller
     public function confirmPlanChange(Request $request) {
     
         $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
-        return redirect('payment/payment-checkout');
+        return redirect('/');
         
     }
 

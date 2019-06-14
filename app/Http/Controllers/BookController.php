@@ -34,8 +34,10 @@ class BookController extends Controller
         $books = CalculatedTax::where([ 
             ['company_id', $current_company],
             ['month', '!=', 0],
-            ['month', '!=', -1]
-        ])->orderBy('year', 'DESC')->orderBy('month', 'DESC')->orderBy('created_at', 'DESC')->get();
+            ['month', '!=', -1],
+            ['year', '!=', 2018]
+        ])
+        ->orderBy('year', 'DESC')->orderBy('month', 'DESC')->orderBy('created_at', 'DESC')->get();
         
         foreach ( $books as $book ) {
             if( ! $book->is_closed ) {
