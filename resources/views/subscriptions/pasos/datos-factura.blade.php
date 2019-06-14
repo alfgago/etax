@@ -84,9 +84,9 @@
     <label for="zip">Zip</label>
     <input type="text" class="form-control" name="zip" id="zip" readonly >
 </div>
-<div class="form-group col-md-12">
+<div class="form-group col-md-8">
     <label for="address">Dirección</label>
-    <textarea class="form-control checkEmpty" name="address" id="address" ></textarea>
+    <input class="form-control checkEmpty" name="address" id="address">
 </div>
 
 <div class="form-group col-md-4 hidden">

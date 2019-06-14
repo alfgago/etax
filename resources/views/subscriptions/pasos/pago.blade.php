@@ -5,23 +5,26 @@
   <p class="description">Los datos confidenciales de su tarjeta de crédito nunca serán guardados por eTax. Estos permanecerán seguros en la pasarela de pagos autorizada por el Banco Nacional.</p>
 </div>
 
-<div class="col-md-4">1
+<div class="col-md-4">
     <div class="row">
-        <div class="form-group col-md-12" style="white-space: nowrap;">
-            <label for="number">N&#250;mero de tarjeta</label>
+        <div class="form-group col-md-12" style="white-space: nowrap;margin-top:2px;">
             <input type="text" inputmode="numeric" class="form-control checkEmpty" name="number" id="number" placeholder="N&#250;mero de tarjeta" required onblur="valid_credit_card(this.value);">
         </div>
-        <div class="form-group col-md-12" style="white-space: nowrap;">
-            <label for="expiry">Expira</label>
+        <div class="form-group col-md-6" style="white-space: nowrap;">
             <input type="text" inputmode="numeric" class="form-control checkEmpty" name="expiry" id="expiry" placeholder="Mes / A&#241;o" required>
         </div>
-        <div class="form-group col-md-12" style="white-space: nowrap;">
-            <label for="cardCcv">CVV</label>
+        <div class="form-group col-md-6" style="white-space: nowrap;">
             <input type="text" inputmode="numeric" class="form-control checkEmpty" name="cvc" id="cvc" placeholder="CVV" required>
         </div>
         <div class="form-group col-md-12" style="white-space: nowrap;">
-				    <label id="alertCardValid" class="alertCardValid"></label>
-				</div>
+            <input type="text" inputmode="text" class="form-control checkEmpty" name="first_name_card" id="first_name" placeholder="Nombre" required onblur="valid_credit_card(this.value);">
+        </div>
+         <div class="form-group col-md-12" style="white-space: nowrap;">
+            <input type="text" inputmode="text" class="form-control checkEmpty" name="last_name_card" id="last_name" placeholder="Apellido" required onblur="valid_credit_card(this.value);">
+        </div>
+        <div class="form-group col-md-12" style="white-space: nowrap;">
+            <label id="alertCardValid" class="alertCardValid"></label>
+        </div>
     </div>
 </div>
 
@@ -35,6 +38,7 @@
 </div>
 
 <div class="biginputs form-group col-md-4" style="white-space: nowrap;">
+    <label for="coupon">&nbsp;</label>
     <input type="button" class="btn btn-dark form-button" value="Aplicar">
 </div>
 
