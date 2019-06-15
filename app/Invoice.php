@@ -137,7 +137,7 @@ class Invoice extends Model
             $this->currency_rate = floatval( str_replace(",","", $request->currency_rate ));
             $this->total = floatval( str_replace(",","", $request->total ));
             $this->iva_amount = floatval( str_replace(",","", $request->iva_amount ));
-            /*$this->client_first_name = $client->first_name;
+            $this->client_first_name = $client->first_name;
             $this->client_last_name = $client->last_name;
             $this->client_last_name2 = $client->last_name2;
             $this->client_email = $client->email;
@@ -148,7 +148,7 @@ class Invoice extends Model
             $this->client_district = $client->district;
             $this->client_zip = $client->zip;
             $this->client_phone = $client->phone;
-            $this->client_id_number = $client->id_number;*/
+            $this->client_id_number = $client->id_number;
             //Fechas
             $fecha = Carbon::createFromFormat('d/m/Y g:i A',
                 $request->generated_date . ' ' . $request->hora);
@@ -177,7 +177,6 @@ class Invoice extends Model
             return $this;
 
         } catch (\Exception $e) {
-            dd('error', $e);
             Log::error('Error al crear factura: '.$e->getMessage());
             return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
         }

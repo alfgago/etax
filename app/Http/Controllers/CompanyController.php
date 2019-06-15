@@ -344,14 +344,15 @@ class CompanyController extends Controller {
             return redirect()->back()->withError('Usted no está autorizado para actualizar esta información');
         }
 
-        if (Storage::exists("empresa-$id/cert.p12")) {
-            Storage::delete("empresa-$id/cert.p12");
+        $id_number = $company->id_number;
+        if (Storage::exists("empresa-$id/$id_number.p12")) {
+            Storage::delete("empresa-$id/$id_number.p12");
         }
-        
-        $path = \Storage::putFileAs(
-            "empresa-$id", $request->file('cert'), "cert.p12"
+
+        $pathCert = Storage::putFileAs(
+            "empresa-$id_number", $request->file('cert'), "$id_number.p12"
         );
-        
+
         $cert = AtvCertificate::firstOrNew(
             [
                 'company_id' => $id,
@@ -360,7 +361,7 @@ class CompanyController extends Controller {
 
         $cert->user = $request->user;
         $cert->password = $request->password;
-        $cert->key_url = $path;
+        $cert->key_url = $pathCert;
         $cert->pin = $request->pin;
         
         $cert->save();
