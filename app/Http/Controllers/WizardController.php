@@ -195,8 +195,8 @@ class WizardController extends Controller
 
                 $id_number = $company->id_number;
                 $id_company = $company->id;
-                if (Storage::exists("empresa-$id_number/cert.p12")) {
-                    Storage::delete("empresa-$id_number/cert.p12");
+                if (Storage::exists("empresa-$id_number/$id_number.p12")) {
+                    Storage::delete("empresa-$id_number/$id_number.p12");
                 }
 
                 $pathCert = Storage::putFileAs(

@@ -160,7 +160,7 @@ class BridgeHaciendaApi
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
                 'atvcertPin' => $company->atv->pin ?? '',
                 'atvcertFile' => Storage::get($company->atv->key_url),
-                'detalle' => '{"1": {"cantidad":"1","unidadMedida":"Servicios","detalle":"Honorarios por hora de programacion","precioUnitario":"1130","montoTotal":"1130","subtotal":"1130","montoTotalLinea":"1130", "descuento":0,"impuesto":0}}'
+                'detalle' => $details
             );
             foreach ($invoiceData as $key => $values) {
                 if ($key == 'atvcertFile') {
