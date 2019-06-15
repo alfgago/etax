@@ -26,16 +26,13 @@ class WizardController extends Controller
     
     public function index() {
       
-      /*$subscriptions = getCurrentUserSubscriptions();
-      
-      if( $subscriptions->isEmpty() ) {
-          return redirect('/elegir-plan');
+      $user = auth()->user();
+      if( !$user->has_klap_user ) {
+          $user->createKlapUser();
       }
       
-      $subscription = $subscriptions[0];*/
-      
       $subscription = getCurrentSubscription();
-      if( !$subscription ) {
+      if( ! isset( $subscription ) ) {
           return redirect('/elegir-plan');
       }
       

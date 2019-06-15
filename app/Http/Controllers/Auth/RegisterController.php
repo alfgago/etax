@@ -71,33 +71,14 @@ use RegistersUsers;
                     'first_name' => $data['first_name'],
                     'last_name' => $data['last_name'],
                     'last_name2' => $data['last_name2'],
+                    'phone' => $data['phone'],
                     'password' => Hash::make($data['password'])
         ]);
 
         $user->assignRole(array('Subscriber'));
-        
         $user->addCompany();
-
-        $phone =$user->phone;
-        if(!isset($phone)){
-            $phone = '22802130';
-        }
-        $client = new Client();
-        $result = $client->request('POST', "https://emcom.oneklap.com:2263/api/createUser", [
-            'headers' => [
-                'Content-Type'  => "application/json",
-            ],
-            'json' => ['applicationName' => 'ETAX',
-                'userName' => $data['email'],
-                'userFirstName' => $data['first_name'],
-                'userLastName' => $data['last_name'],
-                'userPassword' => 'Etax-' . $user->id . 'Klap',
-                'userEmail' => $data['email'],
-                'userCallerId' => $phone
-            ],
-            'verify' => false,
-        ]);
-        $output = json_decode($result->getBody()->getContents(), true);
+        $user->createKlapUser();
+        
         /* Old Code
          * If user is registering from invitation,it is added as normal user else as admin user
           if (!empty(session('invite_token'))) {

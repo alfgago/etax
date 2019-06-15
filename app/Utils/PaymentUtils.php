@@ -32,8 +32,8 @@ class PaymentUtils
               'Content-Type' => "application/json",
           ],
           'json' => [
-              'applicationName' => 'ETAX',
-              'applicationPassword' => 'ETFTTJUN1019%'
+              'applicationName' => config('etax.klap_app_name'),
+              'applicationPassword' => config('etax.klap_app_password')
           ],
           'verify' => false,
       ]);
@@ -62,7 +62,7 @@ class PaymentUtils
         return ($result>0) ? $names[ sizeof($matches)-2 ] : false;
     }
     
-    public function userCardInclusion($number, $nameCard, $cardMonth, $cardYear, $cvc){
+    public function userCardInclusion($number, $cardDescripcion, $cardMonth, $cardYear, $cvc){
         $user = auth()->user();
         $cardBn = new Client();
         $cardCreationResult = $cardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
@@ -70,19 +70,19 @@ class PaymentUtils
                 'Content-Type'  => "application/json",
             ],
             'json' => [
-                'applicationName' => 'ETAX',
+                'applicationName' => config('etax.klap_app_name'),
                 'userName' => $user->user_name,
                 'userPassword' => 'Etax-' . $user->id . 'Klap',
-                'cardDescription' => $nameCard,
+                'cardDescription' => $cardDescripcion,
                 'primaryAccountNumber' => $number,
-                "expirationMonth" => $cardMonth,
-                "expirationYear" => '20'.$cardYear,
-                "verificationValue" => $cvc
+                "expirationMonth" => (int)$cardMonth,
+                "expirationYear" => (int)'20'.$cardYear,
+                "verificationValue" => (int)$cvc
             ],
             'verify' => false,
         ]);
         $card = json_decode($cardCreationResult->getBody()->getContents(), true);
-        Log::info("UserIncludeCard". implode(", ",$cardCreationResult->getBody()->getContents()) );
+        Log::info("UserIncludeCard: ". $cardCreationResult->getBody()->getContents() );
         return $card;
     }
 
@@ -101,6 +101,49 @@ class PaymentUtils
         ]);
         $cards = json_decode($cardCreationResult->getBody()->getContents(), true);
         return $cards;
+    }
+    
+    
+    public function paymentIncludeCharge($request){
+        $appCharge = new Client();
+        $appChargeBn = $appCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppIncludeCharge?applicationName=string&applicationPassword=string&chargeDescription=string&userName=string&transactionCurrency=string&transactionAmount=double", [
+            'headers' => [
+                'Content-Type' => "application/json",
+            ],
+            'json' => [
+                'applicationName' => config('etax.klap_app_name'),
+                'applicationPassword' => config('etax.klap_app_password'),
+                'chargeDescription' => $request->description,
+                'userName' => $request->user_name,
+                "transactionCurrency" => "USD",
+                "transactionAmount" => $request->amount
+            ],
+            'verify' => false,
+        ]);
+        $chargeIncluded = json_decode($appChargeBn->getBody()->getContents(), true);
+        Log::info("AppIncludeCharge: ".  $appChargeBn->getBody()->getContents() );
+        return $chargeIncluded;
+    }
+    
+    
+    public function paymentApplyCharge($request){
+        $bnCharge = new Client();
+        $chargeBn = $bnCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppApplyCharge?applicationName=string&applicationPassword=string&userName=string&chargeTokeId=string&cardTokenId=string", [
+            'headers' => [
+                'Content-Type' => "application/json",
+            ],
+            'json' => [
+                'applicationName' => config('etax.klap_app_name'),
+                'applicationPassword' => config('etax.klap_app_password'),
+                'userName' => $request->user_name,
+                'chargeTokenId' => $request->chargeTokenId,
+                "cardTokenId" => $request->cardTokenId
+            ],
+            'verify' => false,
+        ]);
+        $charge = json_decode($chargeBn->getBody()->getContents(), true);
+        Log::info("AppApplyCharge: ". $chargeBn->getBody()->getContents() );
+        return $charge;
     }
     
 	

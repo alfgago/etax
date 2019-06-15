@@ -271,9 +271,12 @@ if (!function_exists('getCurrentSubscription')) {
         $company = currentCompanyModel();
         $sale = $company->sale;
         
-        if( ! $sale ) {
+        if( ! isset($sale) ) {
             $user_id = auth()->user()->id;
-            $sale = \App\Sales::where('user_id', $user_id)->where('status', '1')->first();
+            $sale = \App\Sales::where('user_id', $user_id)
+                ->where('recurrency', '>', 0)
+                ->where('status', '1')
+                ->first();
         }
         
         return $sale;
