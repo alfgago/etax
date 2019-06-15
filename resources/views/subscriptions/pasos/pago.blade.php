@@ -34,7 +34,7 @@
 
 <div class="biginputs form-group col-md-8" style="white-space: nowrap;">
     <label for="coupon">Tengo un cup&oacute;n:</label>
-    <input type="text" class="form-control checkEmpty" name="coupon" id="coupon" placeholder="Cup&oacute;n" onblur="fusb();">
+    <input type="text" class="form-control" name="coupon" id="coupon" placeholder="Cup&oacute;n" onblur="fusb();">
 </div>
 
 <div class="biginputs form-group col-md-4" style="white-space: nowrap;">
@@ -49,7 +49,7 @@
 </div>
 
 <div class="btn-holder">
-  <button type="button" class="btn btn-primary btn-prev" onclick="toggleStep('step1');">Paso anterior</button>
+  <button type="button" class="btn btn-primary btn-prev" onclick="toggleStep('step2');">Paso anterior</button>
   <button type="submit" id="btn-submit" class="btn btn-primary btn-next" >Confirmar <span style="font-size:10px;">(No tiene que ser datos reales en staging)</span></button>
 </div>
 

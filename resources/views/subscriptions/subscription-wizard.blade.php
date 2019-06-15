@@ -127,7 +127,7 @@
     </div>
     
     <div class="form-container">
-      <form method="POST" action="/confirmar-plan" class="wizard-form tarjeta" enctype="multipart/form-data">
+      <form method="POST" action="/payment/confirm-payment" class="wizard-form tarjeta" enctype="multipart/form-data">
         @csrf
         <div class="step-section biginputs step1 is-active">
           <div class="form-row">
@@ -183,7 +183,10 @@
       }
       //Revisa que el campo de correo este correcto
       var email = $('#email').val();
-      allow = validateEmail(email);
+      allowEmails = validateEmail(email);
+      if( !allowEmails ) {
+        allow = false;
+      }
     }
                                           );
     return allow;

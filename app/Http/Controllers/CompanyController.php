@@ -181,6 +181,7 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function editTeam() {
+ $company = currentCompanyModel();
 
         $company = currentCompanyModel();
 
@@ -345,8 +346,8 @@ class CompanyController extends Controller {
         }
 
         $id_number = $company->id_number;
-        if (Storage::exists("empresa-$id/$id_number.p12")) {
-            Storage::delete("empresa-$id/$id_number.p12");
+        if (Storage::exists("empresa-$id_number/$id_number.p12")) {
+            Storage::delete("empresa-$id_number/$id_number.p12");
         }
 
         $pathCert = Storage::putFileAs(

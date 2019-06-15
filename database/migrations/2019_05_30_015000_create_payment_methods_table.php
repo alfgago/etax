@@ -14,6 +14,7 @@ class CreatePaymentMethodsTable extends Migration
     public function up()
     {
         Schema::create('payment_methods', function (Blueprint $table) {
+            Schema::dropIfExists('payment_methods');
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id')->default(0);
             $table->string('name')->nullable();
