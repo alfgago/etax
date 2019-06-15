@@ -142,6 +142,7 @@ class BridgeHaciendaApi
                 'receptor_cedula_numero' => $data['client_id_number'] ?? '',
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',
+                'tipocambio' => $data['currency_rate'] ?? '',
                 'tipo_documento' => $data['document_type'] ?? '',
                 'sucursal_nro' => '001',
                 'terminal_nro' => '00001',
