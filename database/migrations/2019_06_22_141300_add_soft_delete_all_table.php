@@ -7,7 +7,7 @@ use Illuminate\Database\Migrations\Migration;
 class AddSoftDeleteAllTable extends Migration
 {
     protected $tables = ['atv_certificates', 'bills', 'bill_items', 'books', 'calculated_taxes', 'clients',
-        'codigo_iva_repercutidos', 'codigo_iva_soportados', 'coupons', 'invoices', 'invoice_items', 'payments',
+        'codigo_iva_repercutidos', 'codigo_iva_soportados', 'coupons', 'invoices', 'invoice_items',
         'plans_invitations', 'products', 'product_categories', 'providers', 'users', 'xml_haciendas'];
 
     /**

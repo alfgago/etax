@@ -19,4 +19,7 @@ return [
     'api_hacienda_username' => env('API_HACIENDA_USERNAME', 'admin'),
     'api_hacienda_password' => env('API_HACIENDA_PASSWORD', 'Cc1ksNQyl<KOrT'),
     'hacienda_ambiente' => env('HACIENDA_AMBIENTE', '01'),
+    //Ambiente Pagos en línea
+    'klap_app_name' => env('KLAP_APP_NAME', 'ETAX TEST'),
+    'klap_app_password' => env('KLAP_APP_PASSWORD', 'ETFTTJUN0619%'),
 ];

@@ -22,10 +22,10 @@ class CreatePaymentsTable extends Migration
 
             $table->dateTime('payment_date')->nullable();
             $table->integer('payment_status')->default(1); //1: Pendiente, 2: Procesado, 0: Cancelado
-            $table->string('nameCard')->nullable();
             $table->double('amount')->default(0);
+            $table->string('charge_token')->nullable();
             $table->string('proof')->nullable();
-
+            $table->softDeletes();
             $table->timestamps();
         });
     }

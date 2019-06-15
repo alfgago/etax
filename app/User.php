@@ -9,6 +9,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
 use Mpociot\Teamwork\Traits\UserHasTeams;
 use Lab404\Impersonate\Models\Impersonate;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 
 class User extends Authenticatable {
 
@@ -106,5 +108,35 @@ class User extends Authenticatable {
         
         
     }
+    
+    public function createKlapUser() {
+        $phone = $this->phone;
+        if(!isset($phone)){
+            $phone = '22802130';
+        }
+        $client = new Client();
+        $result = $client->request('POST', "https://emcom.oneklap.com:2263/api/createUser", [
+            'headers' => [
+                'Content-Type'  => "application/json",
+            ],
+            'json' => ['applicationName' => 'ETAX',
+                'userName' => $this->email,
+                'userFirstName' => $this->first_name,
+                'userLastName' => $this->last_name,
+                'userPassword' => 'Etax-' . $this->id . 'Klap',
+                'userEmail' => $this->email,
+                'userCallerId' => $phone
+            ],
+            'verify' => false,
+        ]);
+        $output = json_decode($result->getBody()->getContents(), true);
+        
+        $this->has_klap_user = true;
+        $this->save();
+        
+        return $output;
+    }
+    
+    
 
 }

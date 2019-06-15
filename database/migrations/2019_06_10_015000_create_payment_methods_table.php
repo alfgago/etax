@@ -13,8 +13,8 @@ class CreatePaymentMethodsTable extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('payment_methods');
         Schema::create('payment_methods', function (Blueprint $table) {
-            Schema::dropIfExists('payment_methods');
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id')->default(0);
             $table->string('name')->nullable();
@@ -22,6 +22,7 @@ class CreatePaymentMethodsTable extends Migration
             $table->string('last_4digits')->nullable();
             $table->string('due_date')->nullable();
             $table->string('token_bn')->nullable();
+            $table->string('masked_card')->nullable();
             $table->boolean('default_card')->default(false);
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->softDeletes();

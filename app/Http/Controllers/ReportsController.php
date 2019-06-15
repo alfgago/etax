@@ -45,9 +45,14 @@ class ReportsController extends Controller
           }
       }
       
+      $user = auth()->user();
+      if( !$user->has_klap_user ) {
+          $user->createKlapUser();
+      }
+      
       $subscription = getCurrentSubscription();
-      if( !$subscription ) {
-          return redirect('/cambiar-plan');
+      if( ! isset( $subscription ) ) {
+          return redirect('/elegir-plan');
       }
       
       if( ! currentCompanyModel()->wizard_finished ) {
