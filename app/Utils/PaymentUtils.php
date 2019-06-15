@@ -31,7 +31,8 @@ class PaymentUtils
           'headers' => [
               'Content-Type' => "application/json",
           ],
-          'json' => ['applicationName' => 'ETAX',
+          'json' => [
+              'applicationName' => 'ETAX',
               'applicationPassword' => 'ETFTTJUN1019%'
           ],
           'verify' => false,
@@ -80,8 +81,9 @@ class PaymentUtils
             ],
             'verify' => false,
         ]);
-        $Card = json_decode($cardCreationResult->getBody()->getContents(), true);
-        return $Card;
+        $card = json_decode($cardCreationResult->getBody()->getContents(), true);
+        Log::info("UserIncludeCard". implode(", ",$cardCreationResult->getBody()->getContents()) );
+        return $card;
     }
 
     public function userCardsInfo(){

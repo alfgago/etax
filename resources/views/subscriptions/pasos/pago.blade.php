@@ -17,10 +17,10 @@
             <input type="text" inputmode="numeric" class="form-control checkEmpty" name="cvc" id="cvc" placeholder="CVV" required>
         </div>
         <div class="form-group col-md-12" style="white-space: nowrap;">
-            <input type="text" inputmode="text" class="form-control checkEmpty" name="first_name_card" id="first_name" placeholder="Nombre" required onblur="valid_credit_card(this.value);">
+            <input type="text" inputmode="text" class="form-control checkEmpty" name="first_name_card" id="first_name" placeholder="Nombre" required >
         </div>
          <div class="form-group col-md-12" style="white-space: nowrap;">
-            <input type="text" inputmode="text" class="form-control checkEmpty" name="last_name_card" id="last_name" placeholder="Apellido" required onblur="valid_credit_card(this.value);">
+            <input type="text" inputmode="text" class="form-control checkEmpty" name="last_name_card" id="last_name" placeholder="Apellidos" required >
         </div>
         <div class="form-group col-md-12">
             <label id="alertCardValid" class="alertCardValid"  style="color: red;"></label>

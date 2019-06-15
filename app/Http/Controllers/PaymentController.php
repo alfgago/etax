@@ -271,15 +271,16 @@ class PaymentController extends Controller
         $bnStatus = $paymentUtils->statusBNAPI();
         if($bnStatus['apiStatus'] == 'Successful'){
             //Agrega la tarjeta al API del BN.
-            //$card = $paymentUtils->userCardInclusion($request->number, $nameCard, $cardMonth, $cardYear, $request->cvc);
-            if(true){
+            $card = $paymentUtils->userCardInclusion($request->number, $nameCard, $cardMonth, $cardYear, $request->cvc);
+            if($card['apiStatus'] == 'Successful'){
                 $last_4digits = substr($request->number, -4);
                 $paymentMethod = PaymentMethod::updateOrCreate([
                     'user_id' => $user->id,
                     'name' => $request->first_name_card,
                     'last_name' => $request->last_name_card,
                     'last_4digits' => $last_4digits,
-                    'due_date' => $request->cardMonth . ' ' . $request->cardYear,
+                    'due_date' => $cardMonth . '/' .$cardYear,
+                    'token_bn' => $card['cardTokenId'],
                     'default_card' => 1
                 ]);
                 
@@ -290,21 +291,19 @@ class PaymentController extends Controller
                         'payment_date' => $date,
                         'payment_status' => 1,
                         'amount' => $amount
-                    ]/*,
+                    ],
                     [
                         'proof' => $card['cardTokenId']
-                    ]*/
+                    ]
                 );
 
                 $data = new stdClass();
                 $data->description = 'Pago Suscripción Etax';
                 $data->amount = $amount;
                 $data->user_name = $user->user_name;
-                //$data->cardTokenId = $card['cardTokenId'];
-               // $paymentCard = $this->paymentCharge($data);
-                
-                //if ($paymentCard['apiStatus'] == "Successful") {
-                if(true) {
+                $data->cardTokenId = $card['cardTokenId'];
+                $paymentCard = $this->paymentCharge($data);
+                if ($paymentCard['apiStatus'] == "Successful") {
                     $sale->status = 1;
                     $sale->next_payment_date = $nextPaymentDate;
                     $sale->save();
@@ -577,7 +576,8 @@ class PaymentController extends Controller
             'headers' => [
                 'Content-Type' => "application/json",
             ],
-            'json' => ['applicationName' => 'ETAX',
+            'json' => [
+                'applicationName' => 'ETAX',
                 'applicationPassword' => 'ETFTTJUN1019%',
                 'chargeDescription' => $request->description,
                 'userName' => $request->user_name,
@@ -587,14 +587,16 @@ class PaymentController extends Controller
             'verify' => false,
         ]);
         $chargeAplied = json_decode($appChargeBn->getBody()->getContents(), true);
+        Log::info("AppIncludeCharge".  implode(", ",$appChargeBn->getBody()->getContents()) );
         $chargeTokenId = $chargeAplied['chargeTokenId'];
         /****************************************************/
-        $BnCharge = new Client();
-        $chargeBn = $BnCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppApplyCharge?applicationName=string&applicationPassword=string&userName=string&chargeTokeId=string&cardTokenId=string", [
+        $bnCharge = new Client();
+        $chargeBn = $bnCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppApplyCharge?applicationName=string&applicationPassword=string&userName=string&chargeTokeId=string&cardTokenId=string", [
             'headers' => [
                 'Content-Type' => "application/json",
             ],
-            'json' => ['applicationName' => 'ETAX',
+            'json' => [
+                'applicationName' => 'ETAX',
                 'applicationPassword' => 'ETFTTJUN1019%',
                 'userName' => $request->user_name,
                 'chargeTokenId' => $chargeTokenId,
@@ -603,6 +605,7 @@ class PaymentController extends Controller
             'verify' => false,
         ]);
         $charge = json_decode($chargeBn->getBody()->getContents(), true);
+        Log::info("AppApplyCharge". implode(", ",$chargeBn->getBody()->getContents()) );
         return $charge;
     }
     /**
