@@ -93,7 +93,6 @@ class BridgeHaciendaApi
                 return false;
             }
         } catch (ClientException $error) {
-            dd('error', $error);
             Log:info('Error al crear factura en API HACIENDA -->>'. $error);
             return false;
         }
