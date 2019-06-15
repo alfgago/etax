@@ -177,8 +177,7 @@ class WizardController extends Controller
             $company->default_invoice_notes = $request->default_invoice_notes;
             $company->default_vat_code = $request->default_vat_code;
             $company->last_document = $request->last_document ? $request->last_document : 0;
-            $company->last_invoice_ref_number = $request->last_document ?
-                getInvoiceReference($request->last_document) : 0;
+            $company->last_invoice_ref_number = $request->last_document ? getInvoiceReference($request->last_document) : 0;
             $company->first_prorrata = $request->first_prorrata;
             $company->first_prorrata_type = $request->first_prorrata_type;
             $company->use_invoicing = $request->use_invoicing;
@@ -186,7 +185,7 @@ class WizardController extends Controller
             $company->save();
 
             //Update Team name based on company
-            $team->name = $request->id_number . " - " . $request->name;
+            $team->name = $company->id . ": " . $request->id_number . " - " . $request->name;
             $team->save();
 
             clearLastTaxesCache($company->id, 2018);
@@ -255,9 +254,7 @@ class WizardController extends Controller
         
           
         try {  
-            
             $user = auth()->user();
-            
             $company = new Company();
             
             $company->subscription_id = getCurrentSubscription()->id;
@@ -298,7 +295,7 @@ class WizardController extends Controller
             );
 
             $team = new Team();
-    		$team->name = $request->id_number . " - " . $request->name;
+    		$team->name = $company->id . ": " . $request->id_number . " - " . $request->name;
     		$team->owner_id = $user->id;;
     		$team->company_id = $company->id;;
             $team->save();
@@ -333,12 +330,12 @@ class WizardController extends Controller
                 }
             }
 
-            if ($company->first_prorrata_type == 1) {
-                return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
-            }
-
             if ($company->first_prorrata_type == 2) {
                 return redirect('/editar-totales-2018')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
+            }
+
+            if ($company->first_prorrata_type == 3) {
+                return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
             }
 
             return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento.');

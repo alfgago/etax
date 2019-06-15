@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\User;
 use App\AtvCertificate;
 use App\Team;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
@@ -300,8 +301,7 @@ class CompanyController extends Controller {
         $company->default_invoice_notes = $request->default_invoice_notes;
         $company->default_vat_code = $request->default_vat_code;
         $company->last_document = $request->last_document;
-        $company->last_invoice_ref_number = $request->last_document ?
-            getInvoiceReference($request->last_document) : 0;
+        $company->last_invoice_ref_number = $request->last_document ? getInvoiceReference($request->last_document) : 0;
         $company->first_prorrata = $request->first_prorrata;
         $company->first_prorrata_type = $request->first_prorrata_type;
         $company->use_invoicing = $request->use_invoicing;
