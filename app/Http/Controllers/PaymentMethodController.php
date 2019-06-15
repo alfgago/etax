@@ -17,6 +17,26 @@ class PaymentMethodController extends Controller
         //
     }
 
+    public function indexData(){
+        $user = auth()->user();
+        $query = PaymentMethod::where('user_id', $user->id);
+        return datatables()->eloquent( $query )
+            ->addColumn('actions', function($paymentMethod) {
+                return view('payment.actions', [
+                    'data' => $paymentMethod
+                ])->render();
+            })
+            ->editColumn('last_4digits', function(PaymentMethod $paymentMethod) {
+                if($paymentMethod->default_card == 1){
+                    $defaultText = ' Por defecto';
+                }else{
+                    $defaultText = '';
+                }
+                return 'Termina en ...' . $paymentMethod->last_4digits . ' ' . $defaultText;
+            })
+            ->rawColumns(['actions'])
+            ->toJson();
+    }
     /**
      * Show the form for creating a new resource.
      *

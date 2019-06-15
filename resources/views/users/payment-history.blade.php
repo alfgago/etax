@@ -1,15 +1,3 @@
-@extends('layouts/app')
-
-@section('title')
-    M&eacute;todos de pago
-@endsection
-
-@section('breadcrumb-buttons')
-    @if($cantidad < 3)
-        <a type="submit" class="btn btn-primary" href="/payment/payment-create-view">Ingresar nuevo..</a>
-    @endif
-@endsection
-
 @section('content')
     <div class="row">
         <div class="col-md-12">
@@ -17,9 +5,11 @@
             <table id="payments-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
                 <thead>
                 <tr>
-                    <th>Tarjeta</th>
-                    <th>Nombre</th>
-                    <th>Fecha de vencimiento</th>
+                    <th>Id</th>
+                    <th>Producto</th>
+                    <th>Status de pago</th>
+                    <th>Monto</th>
+                    <th>Creado</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -37,10 +27,11 @@
                 serverSide: true,
                 ajax: "{{ route('Payment.data') }}",
                 columns: [
-                    { data: 'payment_status', name: 'payment_status' },
-                    { data: 'payment_date', name: 'payment_date' },
-                    { data: 'amount', name: 'amount' },
-                    { data: 'sale', name: 'sale_id' }
+                    { data: 'last_4digits', name: 'last_4digits' },
+                    { data: 'name', name: 'name' },
+                    { data: 'last_name', name: 'last_name' },
+                    { data: 'due_date', name: 'due_date'},
+                    { data: 'actions', name: 'actions', orderable: false, searchable: false }
                 ],
                 language: {
                     url: "/lang/datatables-es_ES.json",
@@ -66,4 +57,3 @@
 
         }
     </script>
-@endsection

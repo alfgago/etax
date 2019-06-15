@@ -12,6 +12,10 @@ class Payment extends Model
     protected $guarded = [];
 
     //Relacion con el metodo de pago
+    public function sale(){
+        return $this->belongsTo(Sales::class);
+    }
+
     public function paymentMethod()
     {
         return $this->belongsTo(PaymentMethod::class);

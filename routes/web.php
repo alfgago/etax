@@ -136,6 +136,7 @@ Route::get('/api/providers', 'ProviderController@indexData')->name('Provider.dat
 Route::get('/api/products', 'ProductController@indexData')->name('Product.data');
 Route::get('/api/books', 'BookController@indexData')->name('Book.data');
 Route::get('/api/payments', 'PaymentController@indexData')->name('Payment.data');
+Route::get('/api/paymentsMethods', 'PaymentMethodController@indexData')->name('PaymentMethod.data');
 
 
 //Rutas de recover
@@ -154,6 +155,7 @@ Route::resource('facturas-recibidas', 'BillController');
 Route::resource('plans', 'PlanController');
 Route::resource('empresas', 'CompanyController');
 Route::resource('payments', 'PaymentController');
+Route::resource('payments-methods', 'PaymentMethodController');
 
 //Middlewares de autenticación
 Route::group(['middleware' => ['auth']], function() {

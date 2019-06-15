@@ -29,6 +29,9 @@
                         <li>
                             <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
                         </li>
+                        <li>
+                            <a class="nav-link" aria-selected="false" href="/usuario/empresas">Histórico de pagos</a>
+                        </li>
                     </ul>
                 </div>
                 <div class="col-9">
