@@ -16,7 +16,7 @@ class UsersExport implements WithHeadings, WithMapping, FromQuery
     public function query()
     {
         
-        $data = User::query()->with(['subscriptions', 'companies']);
+        $data = User::query()->with(['sales', 'companies']);
         
         return $data;
     }

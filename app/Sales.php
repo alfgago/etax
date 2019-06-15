@@ -48,7 +48,7 @@ class Sales extends Model
             ],
             [ 
                 'company_id' => $company->id,
-                'status'  => 1,
+                'status'  => 2,
                 'recurrency' => $recurrency,
                 'trial_end_date' => $trial_end_date,
                 'start_date' => $start_date, 

@@ -29,12 +29,12 @@
 
 <div class="form-group col-md-4">
     <label for="last_name">Apellido</label>
-    <input type="text" class="form-control checkEmpty" name="last_name" id="last_name" >
+    <input type="text" class="form-control " name="last_name" id="last_name" >
 </div>
 
 <div class="form-group col-md-4">
     <label for="last_name2">Segundo apellido</label>
-    <input type="text" class="form-control checkEmpty" name="last_name2" id="last_name2" >
+    <input type="text" class="form-control " name="last_name2" id="last_name2" >
 </div>
 
 <div class="form-group col-md-4">

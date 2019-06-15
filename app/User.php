@@ -49,6 +49,10 @@ class User extends Authenticatable {
         return $this->hasMany(Subscription::class);
     }
     
+    public function sales() {
+        return $this->hasMany(Subscription::class);
+    }    
+    
     public function canImpersonate()
     {
         return $this->user_name == "alfgago";

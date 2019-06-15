@@ -4,7 +4,7 @@
       <span class="helper helper-proporcion" def="helper-proporcion">  <i class="fa fa-question-circle" aria-hidden="true"></i> </span> 
     </div>
     @if( $data->count_invoices  )
-      <div id="echartPie" style="height: 12.5rem; max-width: 25rem;"></div>
+      <div id="echartPie" style="height: 15rem; max-width: 25rem;"></div>
     @else
       <div class="descripcion">La empresa aún no registra ventas durante el año. Empiece ingresando sus facturas de venta o emitiéndolas por medio de eTax</div>
     @endif

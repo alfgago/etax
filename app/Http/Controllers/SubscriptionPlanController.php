@@ -58,7 +58,7 @@ class SubscriptionPlanController extends Controller
         $users = User::paginate(10);
         
         
-        return view('Subscriptions/all', [
+        return view('subscriptions/all', [
           'users' => $users
         ]);
     }

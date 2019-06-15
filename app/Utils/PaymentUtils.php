@@ -36,12 +36,12 @@ class PaymentUtils
           ],
           'verify' => false,
       ]);
-      $BnStatus = json_decode($APIStatus->getBody()->getContents(), true);
-      return $BnStatus;
+      $bnStatus = json_decode($APIStatus->getBody()->getContents(), true);
+      return $bnStatus;
   	}
     
     
-    public function check_cc($cc, $extra_check = false){
+    public function checkCC($cc, $extra_check = false){
         $cards = array(
             "visa" => "(4\d{12}(?:\d{3})?)",
             "amex" => "(3[47]\d{13})",
@@ -58,17 +58,18 @@ class PaymentUtils
         /*if($extra_check && $result > 0){
             $result = (validatecard($cc))?1:0;
         }*/
-        return ($result>0)?$names[sizeof($matches)-2]:false;
+        return ($result>0) ? $names[ sizeof($matches)-2 ] : false;
     }
     
     public function userCardInclusion($number, $nameCard, $cardMonth, $cardYear, $cvc){
         $user = auth()->user();
-        $CardBn = new Client();
-        $CardCreationResult = $CardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
+        $cardBn = new Client();
+        $cardCreationResult = $cardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
             'headers' => [
                 'Content-Type'  => "application/json",
             ],
-            'json' => ['applicationName' => 'ETAX',
+            'json' => [
+                'applicationName' => 'ETAX',
                 'userName' => $user->user_name,
                 'userPassword' => 'Etax-' . $user->id . 'Klap',
                 'cardDescription' => $nameCard,
@@ -79,14 +80,14 @@ class PaymentUtils
             ],
             'verify' => false,
         ]);
-        $Card = json_decode($CardCreationResult->getBody()->getContents(), true);
+        $Card = json_decode($cardCreationResult->getBody()->getContents(), true);
         return $Card;
     }
 
     public function userCardsInfo(){
         $user = auth()->user();
-        $CardBn = new Client();
-        $CardCreationResult = $CardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserRequestCards?applicationName=string&userName=string&userPassword=string", [
+        $cardBn = new Client();
+        $cardCreationResult = $cardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserRequestCards?applicationName=string&userName=string&userPassword=string", [
             'headers' => [
                 'Content-Type'  => "application/json",
             ],
@@ -96,8 +97,8 @@ class PaymentUtils
             ],
             'verify' => false,
         ]);
-        $Cards = json_decode($CardCreationResult->getBody()->getContents(), true);
-        return $Cards;
+        $cards = json_decode($cardCreationResult->getBody()->getContents(), true);
+        return $cards;
     }
     
 	
