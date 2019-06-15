@@ -53,7 +53,7 @@ class BridgeHaciendaApi
     public function createInvoice(Invoice $invoice, $token) {
         try {
             $requestDetails = $this->setDetails($invoice->items);
-            $company = $invoice->company();
+            $company = $invoice->company;
             $requestData = $this->setInvoiceData($invoice, $requestDetails);
             if ($requestData !== false) {
                 $client = new Client();
@@ -123,7 +123,7 @@ class BridgeHaciendaApi
 
     private function setInvoiceData(Invoice $data, $details) {
         try {
-            $company = $data->company();
+            $company = $data->company;
             $ref = getInvoiceReference($company->last_invoice_ref_number) + 1;
             $data->reference_number = $ref;
             $data->save();
