@@ -216,16 +216,22 @@ class PaymentController extends Controller
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         //$date = Carbon::now()->format('Y/m/d');
         
-        if (isset($request->coupon)) {
+        //El descuento por defecto es cero.
+        $descuento = 0;
+        //Aplica descuento del Banco Nacional
+        if( $request->bncupon ) {
+            $descuento = 0.1;
+        }
+        
+        //Si tiene un cupon adicional, este aplica sobre el de la tarjeta del BN.
+        if ( isset($request->coupon) ) {
             $cuponConsultado = Coupon::where('code', $request->coupon)
-                ->where('used', 0)->get();
-            if (isset($cuponConsultado)) {
+                                    ->where('used', 0)->first();
+            if ( isset($cuponConsultado) ) {
                 $descuento = ($cuponConsultado->discount_percentage) / 100;
             } else {
                 $descuento = 0;
             }
-        } else {
-            $descuento = 0;
         }
         
         //Revisa recurrencia para definir el costo.
@@ -270,7 +276,6 @@ class PaymentController extends Controller
         $nameCard = $typeCard ? $typeCard : 'Visa';
         $cardDescripcion = "Tarjeta $last_4digits de usuario: " . auth()->user()->user_name;
         
-        $amount = 1;
         //Revisa si el API del BN esta arriba.
         $bnStatus = $paymentUtils->statusBNAPI();
         if($bnStatus['apiStatus'] == 'Successful'){
@@ -409,14 +414,6 @@ class PaymentController extends Controller
             $data->retention_percent = "6";
             $data->credit_time = "0";
 
-            if($invoiceData->items[0]->descuento > 0){
-                $discount_reason = 'Cupon con descuento de ' . $invoiceData->item->descuento;
-                $discount = $invoiceData->items[0]->descuento;
-            }else{
-                $discount_reason = '';
-                $discount = 0;
-            }
-
             $data->tipo_persona = "02";
             $data->identificacion_cliente = $invoiceData->client_id_number;
             $data->codigo_cliente = $invoiceData->client_code;
@@ -465,6 +462,13 @@ class PaymentController extends Controller
             $item['unit_price'] = $invoiceData->amount;
             $item['subtotal'] = $invoiceData->items[0]->cantidad * $invoiceData->amount;
 
+            if($invoiceData->items[0]->descuento > 0){
+                $discount_reason = 'Cupón de descuento';
+                $discount = $invoiceData->items[0]->descuento;
+            }else{
+                $discount_reason = null;
+                $discount = 0;
+            }
             $item['discount_percentage'] = $invoiceData->items[0]->descuento;
             $item['discount_reason'] = $discount_reason;
             $item['discount'] = $discount;
