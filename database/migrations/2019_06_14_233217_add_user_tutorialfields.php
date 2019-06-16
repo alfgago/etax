@@ -13,10 +13,10 @@ class AddUserTutorialFields extends Migration
      */
     public function up()
     {
-        Schema::table('users', function($table) {
+        /*Schema::table('users', function($table) {
             $table->dropColumn('hide_tutorial');
             $table->dropColumn('is_guest');
-        });
+        });*/
         
         Schema::table('users', function (Blueprint $table) {
             $table->boolean('hide_tutorial')->default(false);

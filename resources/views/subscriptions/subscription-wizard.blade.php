@@ -45,6 +45,10 @@
     font-size: 1.75rem;
     font-weight: bold;
   }
+    .wizard-container .precio-container span.etiqueta-descuento {
+        font-size: 0.8rem;
+        font-weight: normal;
+    }
   @media screen and (max-width: 600px) {
     .bigtext {
       font-size: 1.3rem;
@@ -64,7 +68,7 @@
       width: 100%;
     }
   }
-  
+
   .btn-cerrarsesion {
     position: absolute;
     top: .5rem;
@@ -222,6 +226,37 @@
   $.getJSON('https://api.ipify.org?format=json', function(data){
       $("#IpAddress").val(data.ip);
   });
+  function cambiarPrecio() {
+      var precio = $(".precio-inicial").text().replace('$', "");
+      var numero = parseFloat(precio);
+
+      var binsBn = ['541254', '493824', '450777', '451418', '410865', '419556', '512905', '518668',
+          '518439', '450776', '404144', '552882', '524471', '456949', '514006', '480853', '529164', '542178',
+          '527552', '529060', '520026', '510980', '477280', '548711', '493823', '525843', '281010', '517784',
+          '410864', '483126', '456337', '502107', '411061', '483189', '523587', '523592', '483190', '456338',
+          '464137', '552450', '528080', '478019', '402520', '502108', '101001', '404980', '461131', '483103',
+          '489353', '515575', '516681', '517588', '517871', '518214', '518541', '519995', '519996', '523671',
+          '524308', '531643', '542133', '551898', '557683', '559727'];
+      var tarjeta = $('#number').val();
+      var tarjeta1 = tarjeta.replace(/ /g, "");
+      var binEnviado = tarjeta1.substr(0, 6);
+      var binDescuento = binsBn.indexOf(binEnviado);
+
+      var precioFinal = numero;
+      var etiqueta = '';
+      if(binDescuento != -1){
+          var descuento = parseFloat(numero * 0.1);
+          var precioDescuento = parseFloat(numero - descuento).toFixed(2);
+          precioFinal = precioDescuento;
+          etiqueta = '(descuento del Banco Nacional)';
+      }
+
+      $(".precio-final").text('$' + precioFinal);
+      $(".etiqueta-descuento").text(etiqueta);
+
+      $('#bncupon').val(1);
+
+  }
   function fusb() {
       var exp = $("#expiry").val();
       console.log(exp);
@@ -258,14 +293,15 @@
       }else{
           document.getElementById('number').classList.remove('alertCard');
           $("#alertCardValid").empty();
+          cambiarPrecio();
       }
   }
-  
-  
+
+
   $( document ).ready(function() {
 	    fillProvincias();
 	    togglePlan();
-  
+
 		  var card = new Card({
 		      form: 'form.tarjeta',
 		      container: '.card-wrapper',

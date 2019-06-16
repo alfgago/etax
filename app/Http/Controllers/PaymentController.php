@@ -205,6 +205,7 @@ class PaymentController extends Controller
     }
 
     public function confirmPayment(Request $request){
+        dd($request);
         $user = auth()->user();
         $paymentUtils = new PaymentUtils();
         
