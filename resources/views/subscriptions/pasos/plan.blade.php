@@ -37,7 +37,7 @@
 
 <div class="form-group col-md-12 mt-4">
 	<span class="precio-container">
-		Precio de <span class="precio-text">9.99</span> <span class="recurrencia-text">/ mes</span>
+		Precio de <span class="precio-text precio-inicial">9.99</span> <span class="recurrencia-text">/ mes</span>
 	</span>
 </div>
 

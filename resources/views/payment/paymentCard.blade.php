@@ -349,10 +349,10 @@
                             <input type="text" hidden value="{{ $sale->product->plan->id }}" name="planId">
                             <input type="text" hidden value=" {{$sale->id}}" name="saleId">
                             <input type="text" hidden id="IpAddress" name="IpAddress">
-                            <input type="text" hidden id="deviceFingerPrintID" name="deviceFingerPrintID">
                             <input type="text" hidden value="{{ $sale->recurrency }}" name="planSelected">
                             <input type="text" hidden id="cardMonth" name="cardMonth">
                             <input type="text" hidden id="cardYear" name="cardYear">
+                            <input type="text" hidden id="bncupon" name="bncupon" value="0">
                             <input type="text" hidden id="cardYear" name="emisor_receptor" value="receptor">
                             <div class="btn-holder">
                                 <h6>Nota: Los datos sensibles de su tarjeta no se guardar&aacute;n en nuestra base de datos, ser&aacute;n utilizados solamente para procesar su pago</h6>
@@ -370,7 +370,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.css" />
     <script src="../assets/js/cybs_devicefingerprint.js"></script>
-    <script type="text/javascript">
+    <script>
+        <script type="text/javascript">
         var card = new Card({
             form: 'form.tarjeta',
             container: '.card-wrapper',
@@ -386,10 +387,16 @@
             console.log(exp);
         }
         function CambiarNombre() {
+            
+            if(BinDescuento != -1){
+                alert(BinDescuento );
+                $('#bncupon').val(1);
+            }else{
+                alert('No encontrado');
+            }
             var exp = $("#expiry").val();
             $('#cardMonth').val(exp.substr(0,2));
             $('#cardYear').val(exp.substring(exp.length - 2, exp.length));
-            var FingerprintID = cybs_dfprofiler("tc_cr_011007172","test");
             $("#deviceFingerPrintID").val(FingerprintID);
         }
         function valid_credit_card(value) {
@@ -427,7 +434,6 @@
 
         //document.write('Session Id <input type="text" name="deviceFingerprintID" value="' + cybs_dfprofiler("tc_cr_01100XXXX","test") + '">');
     </script>
-    <script>
 
         $(document).ready(function(){
 

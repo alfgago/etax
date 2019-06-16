@@ -44,10 +44,10 @@
 
 <div class="form-group col-md-12 mt-4">
 	<span class="precio-container">
-		Precio total: <span class="precio-text">9.99</span> <span class="recurrencia-text">/ mes</span>
+		Precio total: <span class="precio-text precio-final">9.99</span> <span class="recurrencia-text">/ mes</span> <span class="etiqueta-descuento"></span>
 	</span>
 </div>
-
+<input type="text" hidden id="bncupon" name="bncupon" value="0">
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-prev" onclick="toggleStep('step2');">Paso anterior</button>
   <button type="submit" id="btn-submit" class="btn btn-primary btn-next" >Confirmar <span style="font-size:10px;">(No tiene que ser datos reales en staging)</span></button>
