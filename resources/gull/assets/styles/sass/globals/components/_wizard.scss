@@ -18,6 +18,14 @@
     position: relative;
 }
 
+
+.wizard-popup {
+    max-width: 56rem;
+    height: auto;
+    margin: 4rem auto auto;
+    position: relative;
+}
+
 .wizard-container:before {
     content: '';
     position: absolute;
@@ -26,7 +34,7 @@
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, #2852A6 0%, #392993 100%);
-    opacity: 0.9;
+    opacity: 1;
 }
 
 .wizard-container .btn-holder {
@@ -192,9 +200,55 @@
     font-size: 0.9rem;
     height: calc(1.9695rem + 0.133rem);
 }
-    
-    
-    
+
+.bigtext {
+    font-size: 1.3rem;
+    color: #000;
+    line-height: 1.1;
+    margin: 1.5rem 0;
+}
+
+.bigtext span {
+    font-weight: bold;
+    color: #2845A4;
+}
+
+.wizard-container .precio-container {
+    background: #d6d4cc;
+    padding: .75rem 1.5rem;
+    font-size: 1.3rem;
+    line-height: 1;
+    border-radius: 5px;
+    display: block;
+}
+.biginputs .form-group label {
+    font-size: 1.2rem;
+}
+.biginputs .form-group select {
+    font-size: 1.5rem;
+    line-height: 1.1;
+    height: auto;
+}
+.wizard-container .precio-container span {
+    font-size: 1.75rem;
+    font-weight: bold;
+}
+.wizard-container .precio-container span.etiqueta-descuento {
+  font-size: 0.8rem;
+  font-weight: normal;
+}
+
+.btn-cerrarsesion {
+    position: absolute;
+    top: .5rem;
+    right: .5rem;
+    color: #fff !important;
+    font-size: 1.2rem;
+    padding: .5rem .25rem;
+    border: 2px solid #fff;
+    font-weight: bold;
+    z-index: 99;
+}
     
 @media (max-width: 580px) {    
     .wizard-popup {
@@ -224,5 +278,26 @@
     .wizard-container:before {
         position: fixed;
         opacity: 1;
+    }
+    .btn-cerrarsesion {
+	    display: none;
+	}
+	.bigtext {
+      font-size: 1.3rem;
+      color: #000;
+      line-height: 1.1;
+      margin: 1.5rem 0;
+    }
+    .wizard-container .btn-holder a{
+      font-size: .8rem;
+    }
+}
+
+@media screen and (max-width: 380px) {
+    .wizard-container .btn-holder a{
+      font-size: .8rem;
+    }
+    .wizard-container .btn-holder .btn {
+      width: 100%;
     }
 }

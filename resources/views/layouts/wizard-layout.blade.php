@@ -33,25 +33,14 @@
 <body>
     <div class="app-admin-wrap page-@yield('slug', 'default')">
 
-      @include('layouts.header-menu')
-
-       @include('layouts.sidebar')
 
         <!-- ============ Body content start ============= -->
-        <div class="main-content-wrap sidenav-open d-flex flex-column">
-
-          <div class="breadcrumb">
-              <h1>@yield('title')</h1>
-              <div class="breadcrumb-buttons">
-                @yield('breadcrumb-buttons')
-              </div>
-          </div>
-          
-          <div class="separator-breadcrumb border-top"></div>
+        <div class="main-content-wrap wizard-layout-content">
           
           @yield('content')
 
-           @include('layouts.footer')
+          @include('layouts.footer')
+          
         </div>
         <!-- ============ Body content End ============= -->
     </div>
@@ -110,7 +99,7 @@
 
         gtag('config', 'UA-134999499-1');
       </script>
- 
+    
     <button type="button" class="callnow" onclick="popupReproductor();">Ayuda</button>
     <?php
       $user = auth()->user();

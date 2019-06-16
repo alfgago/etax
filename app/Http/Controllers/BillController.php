@@ -508,8 +508,23 @@ class BillController extends Controller
             $bill->delete();
             return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido rechazada');
         }
-        
-        
     }
+    
+    /**
+     * Restore the specific item
+     *
+     * @param  \App\Product  $product
+     * @return \Illuminate\Http\Response
+     */
+    public function restore($id)
+    {
+        $rest = Bill::onlyTrashed()->where('id', $id)->first();
+        if( $rest->company_id != currentCompany() ){
+            return 404;
+        }
+        $rest->restore();
+        
+        return redirect('/facturas-recibidas')->withMessage('La factura ha sido restaurado satisfactoriamente.');
+    }  
     
 }

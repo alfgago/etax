@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Company;
 use App\EtaxProducts;
+use App\Coupon;
 use App\Invoice;
 use App\Payment;
 use App\Sales;
@@ -205,17 +206,11 @@ class PaymentController extends Controller
     }
 
     public function confirmPayment(Request $request){
-        dd($request);
         $user = auth()->user();
         $paymentUtils = new PaymentUtils();
         
         $request->number = preg_replace('/\s+/', '',  $request->number);
-
-        //Crea el sale de suscripción
-        $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
-        
         $start_date = Carbon::parse(now('America/Costa_Rica'));
-        //$date = Carbon::now()->format('Y/m/d');
         
         //El descuento por defecto es cero.
         $descuento = 0;
@@ -226,15 +221,21 @@ class PaymentController extends Controller
         
         //Si tiene un cupon adicional, este aplica sobre el de la tarjeta del BN.
         if ( isset($request->coupon) ) {
-            $cuponConsultado = Coupon::where('code', $request->coupon)
-                                    ->where('used', 0)->first();
+            $cuponConsultado = Coupon::where('code', $request->coupon)->first();
             if ( isset($cuponConsultado) ) {
+                if( $cuponConsultado->code == '$$$ETAX100DESCUENTO!' || $cuponConsultado->code == '$$$ETAXTRANSFERENCIA!' ){
+                    return $this->skipPaymentCoupon( $request, $cuponConsultado );
+                }
+                    
                 $descuento = ($cuponConsultado->discount_percentage) / 100;
             } else {
                 $descuento = 0;
             }
         }
         
+        //Crea el sale de suscripción
+        $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
+
         //Revisa recurrencia para definir el costo.
         $recurrency = $request->recurrency;
         $subscriptionPlan = $sale->product->plan;
@@ -498,6 +499,50 @@ class PaymentController extends Controller
         } else {
             return false;
         }
+    }
+    
+    public function skipPaymentCoupon( $request, $coupon ) {
+        $user = auth()->user();
+        $nextPaymentDate = Carbon::parse(now('America/Costa_Rica'))->addYears(1);
+        $proof = "Pago por transferencia";
+        if( $coupon->code == '$$$ETAX100DESCUENTO!' ){
+            $nextPaymentDate = Carbon::parse(now('America/Costa_Rica'))->addYears(10);
+            $proof = "Equipo de eTax";
+        }
+        
+        $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
+        $sale->status = 1;
+        $sale->next_payment_date = $nextPaymentDate;
+        $sale->save();
+        
+        $paymentMethod = PaymentMethod::updateOrCreate([
+            'user_id' => $user->id,
+            'name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'last_4digits' => 'N/A',
+            'masked_card' => 'N/A',
+            'due_date' => 'N/A',
+            'token_bn' => 'N/A',
+            'default_card' => 0
+        ]);
+      
+        $payment = Payment::updateOrCreate(
+            [
+                'sale_id' => $sale->id,
+            ],
+            [
+                'payment_method_id' => $paymentMethod->id,
+                'coupon_id' => $coupon->id,
+                'payment_date' => Carbon::parse(now('America/Costa_Rica')),
+                'payment_status' => 2,
+                'amount' => 0,
+                'charge_token' => 'N/A',
+                'proof' => $proof
+            ]
+        );
+        
+        return redirect('/wizard')->withMessage('Se aplicó el cupón exitosamente');
+           
     }
 
     public function paymentTokenUpdateView($id){

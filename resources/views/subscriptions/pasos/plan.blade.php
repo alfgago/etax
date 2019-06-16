@@ -41,13 +41,6 @@
 	</span>
 </div>
 
-<div class="form-group col-md-12">
-  <div class="bigtext">
-  	Elija el plan de su conveniencia y empiece a calcular el IVA con eTax. Disfrute de una <span>prueba gratis</span> válida hasta el 14 de Junio.
-  </div>
-</div>
-
-
 <div class="btn-holder">
   <a class="btn btn-primary btn-prev" target="_blank" href="https://etaxcr.com/planes">Ver detalle de planes</a>
   <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step2');">Siguiente paso</button>

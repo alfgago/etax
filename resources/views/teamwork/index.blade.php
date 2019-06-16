@@ -17,12 +17,12 @@ Companies
         <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>ID-Number</th>
+                    <th>Nombre</th>
+                    <th>Identifiación</th>
                     <th>Email</th>
-                    <th>Address</th>
-                    <th>Contact No.</th>
-                    <th>Status</th>
+                    <th>Dirección</th>
+                    <th>Contacto.</th>
+                    <th>Estado</th>
                     <th></th>
                 </tr>
             </thead>

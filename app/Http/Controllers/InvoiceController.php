@@ -587,9 +587,24 @@ class InvoiceController extends Controller
             $invoice->delete();
             return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido rechazada');
         }
-        
-        
     }
+    
+     /**
+     * Restore the specific item
+     *
+     * @param  \App\Product  $product
+     * @return \Illuminate\Http\Response
+     */
+    public function restore($id)
+    {
+        $rest = Invoice::onlyTrashed()->where('id', $id)->first();
+        if( $rest->company_id != currentCompany() ){
+            return 404;
+        }
+        $rest->restore();
+        
+        return redirect('/facturas-emitidas')->withMessage('La factura ha sido restaurado satisfactoriamente.');
+    }  
     
     private function getDocReference($docType) {
         $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;

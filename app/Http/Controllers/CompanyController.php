@@ -42,11 +42,15 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function create() {
-
+        
+        if( ! auth()->user()->isContador() ) {
+            return redirect('/')->withMessage('Su cuenta actual no permite más empresas.');
+        }
+        
         $available_companies_count = User::checkCountAvailableCompanies();
-
+        
         if ($available_companies_count == 0) {
-            return redirect()->route('User.companies')->withError('Su plan actual no permite más empresas.');
+            return redirect()->route('User.companies')->withError('Su cuenta actual no permite más empresas.');
         }
         
         return view('Company.create');
