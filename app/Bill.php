@@ -485,12 +485,12 @@ class Bill extends Model
     
     public static function storeXML($file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor) {
         
-        if ( Storage::exists("empresa-$identificacionReceptor/$identificacionEmisor-$consecutivoComprobante.xml")) {
-            Storage::delete("empresa-$identificacionReceptor/$identificacionEmisor-$consecutivoComprobante.xml");
+        if ( Storage::exists("empresa-$identificacionReceptor/facturas_compras/$identificacionEmisor-$consecutivoComprobante.xml")) {
+            Storage::delete("empresa-$identificacionReceptor/facturas_compras/$identificacionEmisor-$consecutivoComprobante.xml");
         }
         
         $path = \Storage::putFileAs(
-            "empresa-$identificacionReceptor", $file, "$identificacionEmisor-$consecutivoComprobante.xml"
+            "empresa-$identificacionReceptor/facturas_compras", $file, "$identificacionEmisor-$consecutivoComprobante.xml"
         );
         
         return $path;

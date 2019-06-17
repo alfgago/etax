@@ -537,12 +537,12 @@ class Invoice extends Model
     
     public static function storeXML($file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor) {
         
-        if ( Storage::exists("empresa-$identificacionEmisor/$identificacionReceptor-$consecutivoComprobante.xml")) {
-            Storage::delete("empresa-$identificacionEmisor/$identificacionReceptor-$consecutivoComprobante.xml");
+        if ( Storage::exists("empresa-$identificacionEmisor/facturas_ventas/$identificacionReceptor-$consecutivoComprobante.xml")) {
+            Storage::delete("empresa-$identificacionEmisor/facturas_ventas/$identificacionReceptor-$consecutivoComprobante.xml");
         }
         
         $path = \Storage::putFileAs(
-            "empresa-$identificacionEmisor", $file, "$identificacionReceptor-$consecutivoComprobante.xml"
+            "empresa-$identificacionEmisor/facturas_ventas", $file, "$identificacionReceptor-$consecutivoComprobante.xml"
         );
         return $path;
     }  
