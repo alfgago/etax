@@ -340,6 +340,7 @@ class Invoice extends Model
               $invoice->generation_method = $metodoGeneracion;
               $invoice->is_authorized = $isAuthorized;
               $invoice->is_code_validated = $codeValidated;
+              $invoice->hacienda_status = "03";
               
               //Datos de factura
               $invoice->currency = $idMoneda;

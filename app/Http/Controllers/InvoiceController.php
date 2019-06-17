@@ -152,7 +152,7 @@ class InvoiceController extends Controller
 
         //Datos generales y para Hacienda
         $invoice->document_type = "01";
-        $invoice->hacienda_status = "01";
+        $invoice->hacienda_status = "03";
         $invoice->payment_status = "01";
         $invoice->payment_receipt = "";
         $invoice->generation_method = "M";
