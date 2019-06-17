@@ -376,7 +376,7 @@ class PaymentController extends Controller
                 $invoiceData->items = [$item];
                 $factura = $this->crearFacturaClienteEtax($invoiceData);
                 if($factura){
-                    return redirect('/wizard')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito.');
+                    return redirect('/wizard')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
                 }
             } else {
                 $mensaje = 'El pago ha sido denegado';
@@ -484,11 +484,14 @@ class PaymentController extends Controller
             $item['is_exempt'] = 0;
 
             $data->items = [ $item ];
-
-            $invoiceDataSent = $invoice->setInvoiceData($data);
-            if ( !empty($invoiceDataSent) ) {
-                $invoice = $apiHacienda->createInvoice($invoiceDataSent, $tokenApi);
-            }
+            
+            try{
+                $invoiceDataSent = $invoice->setInvoiceData($data);
+                Log::info('Suscriptor: '. $data->client_id_number . ", Nombre: " . $data->first_name . " " . $data->last_name . " " . $data->last_name2 . ", Plan:" . $invoiceData->items[0]->name );
+                if ( !empty($invoiceDataSent) ) {
+                    //$invoice = $apiHacienda->createInvoice($invoiceDataSent, $tokenApi);
+                }
+            }catch(\Throwable $e){}
 
             $company->last_invoice_ref_number = $invoice->reference_number;
             $company->last_document = $invoice->document_number;

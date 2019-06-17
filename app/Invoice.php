@@ -84,7 +84,7 @@ class Invoice extends Model
     **/
     public function setInvoiceData($request)
     {
-        //try {
+        try {
 
             $this->document_key = $request->document_key;
             $this->document_number = $request->document_number;
@@ -190,10 +190,10 @@ class Invoice extends Model
             }
             return $this;
 
-        /*} catch (\Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error al crear factura: '.$e->getMessage());
             return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
-        }*/
+        }
     }
   
     public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, 
