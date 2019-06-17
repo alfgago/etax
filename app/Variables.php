@@ -245,6 +245,10 @@ class Variables
     $value = $value != '1' ? $value : 'Unid';
     $value = $value != '2' ? $value : 'Sp';
     
+    if($value == 'Otros'){
+      return $value;
+    }
+    
     $unid = UnidadMedicion::where('code', $value)->first();
     
     if( isset($unid) ){

@@ -207,9 +207,20 @@ blockquote {
     cursor: pointer;
     margin: 1rem 0 0.266rem;
     display: inline-block;
-    padding: 12px;
+    padding: .5rem 1rem;
     position: relative;
     font-size: 0.9rem;
+}
+
+label#logo-name {
+    display: block;
+    color: green;
+}
+
+.logo-container {
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 
 .callnow {
@@ -234,6 +245,45 @@ blockquote {
 .callnow span {
   display: block;
 }
+
+.manuales-etax ul {
+    padding: 0;
+    list-style: none;
+}
+
+.manuales-etax ul li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: .5rem;
+}
+
+.manuales-etax ul li:after {
+    position: absolute;
+    content: '';
+    top: 5px;
+    left: 0;
+    width: 12px;
+    height: 12px;
+    background: #EAA73C;
+    -webkit-box-shadow: 1.5px 1.5px #D2E2FB;
+    box-shadow: 1.5px 1.5px #D2E2FB;
+    border-radius: 50%;
+}
+
+.manuales-etax ul a {
+    outline: none;
+    font-size: 0.9rem;
+    color: #000;
+    text-decoration: underline !important;
+}
+
+body:after {
+    position: relative;
+    content: '';
+    clear: both;
+    display: block;
+}
+
 @media only screen and (max-width: 600px) {
   .callnow {
       font-size: 12px;
@@ -257,7 +307,7 @@ blockquote {
 
 ::-webkit-scrollbar-thumb
 {
-	background-color: #111 !important;
+	background-color: #284170 !important;
 	border-radius: 15px;
 	box-shadow: 3px 0 15px rgba(0,0,0,.3);
 }

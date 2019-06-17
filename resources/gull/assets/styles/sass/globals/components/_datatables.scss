@@ -107,3 +107,21 @@ small {
 td a {
     cursor: pointer;
 }
+
+.table .thead-dark tr,
+table.table-bordered.dataTable thead tr {
+    background: -webkit-linear-gradient(left,#274eab,#2f006d);
+    background: -webkit-linear-gradient(left,#555,#222) !important;
+}
+
+.table .thead-dark th,
+table.table-bordered.dataTable thead tr th {
+    color: #fff;
+    background: none;
+    border-color: transparent;
+    font-weight: bold;
+}
+
+table.table-bordered.dataTable tr {
+    transition: .25s ease all;
+}

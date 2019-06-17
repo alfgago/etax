@@ -459,10 +459,11 @@ class Invoice extends Model
         $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10))->format('d/m/Y');
         $fechaVencimiento = $fechaEmision;
         $nombreProveedor = $arr['Emisor']['Nombre'];
-        $codigoCliente = '';
         $tipoPersona = $arr['Emisor']['Identificacion']['Tipo'];
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
+        $codigoCliente = $identificacionProveedor;
         
+        $tipoDocumento = '01';
         if ( array_key_exists('Receptor', $arr) ){
           $correoCliente = $arr['Receptor']['CorreoElectronico'];
           $telefonoCliente = $arr['Receptor']['Telefono']['NumTelefono'];
@@ -475,6 +476,7 @@ class Invoice extends Model
           $tipoPersona = 'N/A';
           $identificacionCliente = 0;
           $nombreCliente = 'N/A';
+          $tipoDocumento = '04';
         }
         
         $condicionVenta = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
@@ -486,7 +488,7 @@ class Invoice extends Model
         }
         
         $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
-        $tipoCambio = $arr['ResumenFactura']['TipoCambio'];
+        $tipoCambio = array_key_exists('TipoCambio', $arr['ResumenFactura']) ? $arr['ResumenFactura']['TipoCambio'] : '1';
         $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
         $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
         $descripcion = $arr['ResumenFactura']['CodigoMoneda'];
@@ -495,8 +497,6 @@ class Invoice extends Model
         if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
             $authorize = false;
         }
-        
-        $tipoDocumento = '01';
         
         $lineas = $arr['DetalleServicio']['LineaDetalle'];
         //Revisa si es una sola linea. Si solo es una linea, lo hace un array para poder entrar en el foreach.
