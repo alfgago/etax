@@ -337,7 +337,7 @@ class PaymentController extends Controller
             $appliedCharge = $paymentUtils->paymentApplyCharge($data);
             if ($appliedCharge['apiStatus'] == "Successful") {
                 $payment->proof = $appliedCharge['retrievalRefNo'];
-                $payment->status = 2;
+                $payment->payment_status = 2;
                 $payment->save();
                 
                 $sale->status = 1;
