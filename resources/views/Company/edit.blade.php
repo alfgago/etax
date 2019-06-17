@@ -54,7 +54,7 @@
 								  
 								  <div class="logo-container">
 								  @if($company->logo_url)
-								  	<img src="{{ \Illuminate\Support\Facades\Storage::temporaryUrl($company->logo_url, now()->addMinutes(1)) }}" style="width:100%; max-width:150px; max-height: 150px">
+								  	<img src="{{ \Illuminate\Support\Facades\Storage::temporaryUrl($company->logo_url, now()->addMinutes(1)) }}" style="max-height: 75px">
 								  @endif
 								  </div>
 							  </div>
