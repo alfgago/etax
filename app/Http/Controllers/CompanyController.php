@@ -8,7 +8,10 @@ use App\Http\Controllers\Controller;
 use App\User;
 use App\AtvCertificate;
 use App\Team;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NewUser;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -41,11 +44,15 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function create() {
-
+        
+        if( ! auth()->user()->isContador() ) {
+            return redirect('/')->withMessage('Su cuenta actual no permite más empresas.');
+        }
+        
         $available_companies_count = User::checkCountAvailableCompanies();
-
+        
         if ($available_companies_count == 0) {
-            return redirect()->route('User.companies')->withError('Su plan actual no permite más empresas.');
+            return redirect()->route('User.companies')->withError('Su cuenta actual no permite más empresas.');
         }
         
         return view('Company.create');
@@ -122,15 +129,6 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function edit() {
-
-        /*if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-            $company = Company::find($_GET['id']);
-
-            if ($company) {
-                session(['current_company' => $company->id]);
-            }
-        }*/
-        
         $company = currentCompanyModel();
         
         if (!$company) {
@@ -189,6 +187,7 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function editTeam() {
+ $company = currentCompanyModel();
 
         $company = currentCompanyModel();
 
@@ -218,7 +217,6 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id) {
-        
         $company = Company::find($id);
         $this->authorize('update', $company);
 
@@ -247,6 +245,23 @@ class CompanyController extends Controller {
             return redirect()->back()->withError('Usted no está autorizado para actualizar esta información');
         }
 
+
+        
+        if ($request->file('input_logo')) {
+            
+            if ( isset( $company->logo_url ) ){
+                if (Storage::exists( $company->logo_url )) {
+                    Storage::delete( $company->logo_url );
+                }
+            }
+            
+            $pathLogo = Storage::putFileAs(
+                "empresa-$request->id_number", $request->file('input_logo'),
+                "logo.".$request->file('input_logo')->getClientOriginalExtension()
+            );
+            $company->logo_url = $pathLogo;
+        }
+
         $company->type = $request->tipo_persona;
         $company->id_number = preg_replace("/[^0-9]+/", "", $request->id_number);
         $company->business_name = $request->business_name;
@@ -269,8 +284,6 @@ class CompanyController extends Controller {
         //Update Team name based on company
         /*$team->name = "(".$company->id.") " . $company->id_number;
         $team->save();*/
-        
-
 
         return redirect()->route('Company.edit')->withMessage('La información de la empresa ha sido actualizada.');
     }
@@ -295,7 +308,8 @@ class CompanyController extends Controller {
         $team = Team::where('company_id', $company->id)->first();
 
         /* Only owner of company or user invited as admin for that company can edit company details */
-        if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) && get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
+        if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) &&
+                get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
             return redirect()->back()->withError('Usted no está autorizado para actualizar esta información');
         }
 
@@ -303,15 +317,24 @@ class CompanyController extends Controller {
         $company->default_invoice_notes = $request->default_invoice_notes;
         $company->default_vat_code = $request->default_vat_code;
         $company->last_document = $request->last_document;
+        $company->last_invoice_ref_number = $request->last_document ? getInvoiceReference($request->last_document) : 0;
         $company->first_prorrata = $request->first_prorrata;
         $company->first_prorrata_type = $request->first_prorrata_type;
         $company->use_invoicing = $request->use_invoicing;
+        
+        if( $company->first_prorrata_type == 1 ) {
+            $company->operative_prorrata = $request->first_prorrata;
+            $company->operative_ratio1 = $request->operative_ratio1;
+            $company->operative_ratio2 = $request->operative_ratio2;
+            $company->operative_ratio3 = $request->operative_ratio3;
+            $company->operative_ratio4 = $request->operative_ratio4;
+        }
 
         $company->save();
         
         clearLastTaxesCache( $company->id, 2018);
 
-        return redirect()->route('Company.edit_config')->with('success', 'La configuración de la empresa ha sido actualizada.');
+        return redirect()->route('Company.edit_config')->withMessage('La configuración de la empresa ha sido actualizada.');
     }
 
     /**
@@ -337,14 +360,15 @@ class CompanyController extends Controller {
             return redirect()->back()->withError('Usted no está autorizado para actualizar esta información');
         }
 
-        if (Storage::exists("empresa-$id/cert.p12")) {
-            Storage::delete("empresa-$id/cert.p12");
+        $id_number = $company->id_number;
+        if (Storage::exists("empresa-$id_number/$id_number.p12")) {
+            Storage::delete("empresa-$id_number/$id_number.p12");
         }
-        
-        $path = \Storage::putFileAs(
-            "empresa-$id", $request->file('cert'), "cert.p12"
+
+        $pathCert = Storage::putFileAs(
+            "empresa-$id_number", $request->file('cert'), "$id_number.p12"
         );
-        
+
         $cert = AtvCertificate::firstOrNew(
             [
                 'company_id' => $id,
@@ -353,7 +377,7 @@ class CompanyController extends Controller {
 
         $cert->user = $request->user;
         $cert->password = $request->password;
-        $cert->key_url = $path;
+        $cert->key_url = $pathCert;
         $cert->pin = $request->pin;
         
         $cert->save();
@@ -444,5 +468,4 @@ class CompanyController extends Controller {
             return redirect()->route('User.companies')->withErrors(['error' => 'Invalid Link or Company already deactivated.']);
         }
     }
-
 }

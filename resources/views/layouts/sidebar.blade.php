@@ -41,7 +41,7 @@
                 </div>
             </li>
             
-            <li class="hidden nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
+            <li class=" nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
                 <a class="nav-item-hold" href="/facturas-recibidas">
                     <img src="{{asset('assets/images/iconos/facturacion.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Facturación</span>
@@ -57,7 +57,7 @@
                 </div>
             </li>
             
-            <li title="Facturación deshabilitada durante la prueba gratuita" class="soon nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
+            <li title="Facturación deshabilitada durante la prueba gratuita" class="hidden soon nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
                 <a  title="Facturación deshabilitada durante la prueba gratuita" class="nav-item-hold" href="#">
                     <img src="{{asset('assets/images/iconos/facturacion.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Facturación</span>

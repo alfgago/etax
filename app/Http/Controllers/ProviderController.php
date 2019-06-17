@@ -252,4 +252,21 @@ class ProviderController extends Controller
         return redirect('/proveedores')->withMessage('Proveedores importados exitosamente en '.$time.'s');
     }
     
+    /**
+     * Restore the specific item
+     *
+     * @param  \App\Product  $product
+     * @return \Illuminate\Http\Response
+     */
+    public function restore($id)
+    {
+        $rest = Provider::onlyTrashed()->where('id', $id)->first();
+        if( $rest->company_id != currentCompany() ){
+            return 404;
+        }
+        $rest->restore();
+        
+        return redirect('/proveedores')->withMessage('El proveedor ha sido restaurado satisfactoriamente.');
+    }    
+    
 }

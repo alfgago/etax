@@ -263,3 +263,18 @@
     margin-top: .5rem;
     border-bottom: 0.133rem solid #ddd;
 }
+
+@media only screen and (max-width: 800px) {
+    .sidebar-dashboard .dato-iva .dato {
+        position: absolute;
+        top: 0;
+        right: .25rem;
+        background: #fff;
+        border: 1.2px solid #ddd;
+        color: #000;
+    }
+    
+    .sidebar-dashboard .dato-iva {
+        margin-bottom: .5rem;
+    }
+}

@@ -22,3 +22,4 @@ docker exec php php artisan config:clear
 docker exec php php artisan route:clear
 docker exec php php artisan view:clear
 docker exec php php artisan migrate
+docker exec php php artisan db:seed

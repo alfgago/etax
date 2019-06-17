@@ -27,6 +27,11 @@ class ReportsController extends Controller
   
     public function dashboard() {
       
+      $user = auth()->user();
+      if( !$user->has_klap_user ) {
+          $user->createKlapUser();
+      }
+      
       /* Logic for New User Invite */
       $token = session('invite_token');
       if ($token) {
@@ -41,13 +46,13 @@ class ReportsController extends Controller
               $is_readonly = ($invite->role == 'readonly') ? '1' : '0';
               PlansInvitation::create(['subscription_id' => $company->subscription_id, 'company_id' => $company->id, 'user_id' => auth()->user()->id]);
 
-              return redirect()->route('User.companies')->with('success', 'La invitación ha sido enviada.');
+              return redirect()->route('User.companies')->withMessage('La invitación ha sido aceptada.');
           }
       }
       
       $subscription = getCurrentSubscription();
-      if( !$subscription ) {
-          return redirect('/usuario/cambiar-plan');
+      if( ! isset( $subscription ) ) {
+          return redirect('/elegir-plan');
       }
       
       if( ! currentCompanyModel()->wizard_finished ) {
@@ -85,7 +90,7 @@ class ReportsController extends Controller
         $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, $prorrataOperativa );
         
         $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
-        
+
         $nombreMes = Variables::getMonthName($mes);
         $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
       }catch( \Exception $ex ){
@@ -207,7 +212,7 @@ class ReportsController extends Controller
       
       if($anoAnterior == 2018) {
         if( $company->first_prorrata_type == 1 ){
-          $prorrataOperativa = $company->first_prorrata ? currentCompanyModel()->first_prorrata / 100 : 1;
+          $prorrataOperativa = $company->first_prorrata ? $company->first_prorrata / 100 : 1;
         }else {
           $anterior = CalculatedTax::getProrrataPeriodoAnterior( $anoAnterior );
           $prorrataOperativa = $anterior->prorrata;
@@ -216,7 +221,7 @@ class ReportsController extends Controller
         $anterior = CalculatedTax::getProrrataPeriodoAnterior( $anoAnterior );
         $prorrataOperativa = $anterior->prorrata;
       }
-      
+
       return $prorrataOperativa;
     }
   

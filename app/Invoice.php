@@ -39,10 +39,18 @@ class Invoice extends Model
     }
     
     public function documentTypeName() {
-      $tipo = 'Factura';
-      if( $this->document_type == '04' ) {
+      $tipo = 'Factura electrónica';
+      if( $this->document_type == '03' ) {
+        $tipo = "Nota de crédito";
+      }else if( $this->document_type == '04' ) {
         $tipo = "Tiquete";
+      }else if( $this->document_type == '02' ) {
+        $tipo = "Nota de débito";
+      }else if( $this->document_type == '1' ) {
+         $this->document_type = '01';
+         $this->save();
       }
+      
       return $tipo;
     }
   
@@ -76,7 +84,8 @@ class Invoice extends Model
     **/
     public function setInvoiceData($request)
     {
-        try {
+        //try {
+
             $this->document_key = $request->document_key;
             $this->document_number = $request->document_number;
             $this->sale_condition = $request->sale_condition;
@@ -86,9 +95,9 @@ class Invoice extends Model
             $this->buy_order = $request->buy_order;
             $this->other_reference = $request->other_reference;
 
-            $client;
             //Datos de cliente. El cliente nuevo viene con ID = -1
             if( $request->client_id == '-1' ) {
+
                 $tipo_persona = $request->tipo_persona;
                 $identificacion_cliente = $request->id_number;
                 $codigo_cliente = $request->code;
@@ -121,6 +130,7 @@ class Invoice extends Model
                         'billing_emails' => $request->billing_emails ?? $request->email
                     ]
                 );
+
                 $this->client_id = $client->id;
             }else{
                 $this->client_id = $request->client_id;
@@ -135,18 +145,24 @@ class Invoice extends Model
             $this->currency_rate = floatval( str_replace(",","", $request->currency_rate ));
             $this->total = floatval( str_replace(",","", $request->total ));
             $this->iva_amount = floatval( str_replace(",","", $request->iva_amount ));
-            $this->client_first_name = $client->first_name;
-            $this->client_last_name = $client->last_name;
-            $this->client_last_name2 = $client->last_name2;
-            $this->client_email = $client->email;
-            $this->client_address = $client->address;
-            $this->client_country = $client->country;
-            $this->client_state = $client->state;
-            $this->client_city = $client->city;
-            $this->client_district = $client->district;
-            $this->client_zip = $client->zip;
-            $this->client_phone = $client->phone;
-            $this->client_id_number = $client->id_number;
+
+            if( isset( $client ) ) {
+              $this->client_first_name = $client->first_name;
+              $this->client_last_name = $client->last_name;
+              $this->client_last_name2 = $client->last_name2;
+              $this->client_email = $client->email;
+              $this->client_address = $client->address;
+              $this->client_country = $client->country;
+              $this->client_state = $client->state;
+              $this->client_city = $client->city;
+              $this->client_district = $client->district;
+              $this->client_zip = $client->zip;
+              $this->client_phone = $client->phone;
+              $this->client_id_number = $client->id_number;
+            }else{
+              $this->client_first_name = 'N/A';
+            }
+            
             //Fechas
             $fecha = Carbon::createFromFormat('d/m/Y g:i A',
                 $request->generated_date . ' ' . $request->hora);
@@ -174,10 +190,10 @@ class Invoice extends Model
             }
             return $this;
 
-        } catch (\Exception $e) {
+        /*} catch (\Exception $e) {
             Log::error('Error al crear factura: '.$e->getMessage());
             return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
-        }
+        }*/
     }
   
     public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, 
@@ -275,6 +291,8 @@ class Invoice extends Model
                     'tipo_persona' => str_pad($tipoPersona, 2, '0', STR_PAD_LEFT),
                     'id_number' => $identificacionCliente,
                     'first_name' => $nombreCliente,
+                    'email' => $correoCliente,
+                    'phone' => $telefonoCliente,
                     'fullname' => "$identificacionCliente - $nombreCliente"
                 ]
             );
@@ -441,10 +459,11 @@ class Invoice extends Model
         $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10))->format('d/m/Y');
         $fechaVencimiento = $fechaEmision;
         $nombreProveedor = $arr['Emisor']['Nombre'];
-        $codigoCliente = '';
         $tipoPersona = $arr['Emisor']['Identificacion']['Tipo'];
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
+        $codigoCliente = $identificacionProveedor;
         
+        $tipoDocumento = '01';
         if ( array_key_exists('Receptor', $arr) ){
           $correoCliente = $arr['Receptor']['CorreoElectronico'];
           $telefonoCliente = $arr['Receptor']['Telefono']['NumTelefono'];
@@ -457,6 +476,7 @@ class Invoice extends Model
           $tipoPersona = 'N/A';
           $identificacionCliente = 0;
           $nombreCliente = 'N/A';
+          $tipoDocumento = '04';
         }
         
         $condicionVenta = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
@@ -468,7 +488,7 @@ class Invoice extends Model
         }
         
         $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
-        $tipoCambio = $arr['ResumenFactura']['TipoCambio'];
+        $tipoCambio = array_key_exists('TipoCambio', $arr['ResumenFactura']) ? $arr['ResumenFactura']['TipoCambio'] : '1';
         $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
         $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
         $descripcion = $arr['ResumenFactura']['CodigoMoneda'];
@@ -477,8 +497,6 @@ class Invoice extends Model
         if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
             $authorize = false;
         }
-        
-        $tipoDocumento = '01';
         
         $lineas = $arr['DetalleServicio']['LineaDetalle'];
         //Revisa si es una sola linea. Si solo es una linea, lo hace un array para poder entrar en el foreach.
@@ -519,12 +537,12 @@ class Invoice extends Model
     
     public static function storeXML($file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor) {
         
-        if ( Storage::exists("empresa-$identificacionEmisor/$identificacionReceptor-$consecutivoComprobante.xml")) {
-            Storage::delete("empresa-$identificacionEmisor/$identificacionReceptor-$consecutivoComprobante.xml");
+        if ( Storage::exists("empresa-$identificacionEmisor/facturas_ventas/$identificacionReceptor-$consecutivoComprobante.xml")) {
+            Storage::delete("empresa-$identificacionEmisor/facturas_ventas/$identificacionReceptor-$consecutivoComprobante.xml");
         }
         
         $path = \Storage::putFileAs(
-            "empresa-$identificacionEmisor", $file, "$identificacionReceptor-$consecutivoComprobante.xml"
+            "empresa-$identificacionEmisor/facturas_ventas", $file, "$identificacionReceptor-$consecutivoComprobante.xml"
         );
         return $path;
     }  

@@ -1,5 +1,10 @@
 <?php
 
+use Carbon\Carbon;
+use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+
 if (!function_exists('prd')) {
 
     function prd($arr = 'No Data') {
@@ -264,14 +269,17 @@ if (!function_exists('getCurrentSubscription')) {
     function getCurrentSubscription() {
         
         $company = currentCompanyModel();
-        $subscription = $company->subscription;
+        $sale = $company->sale;
         
-        if( ! $subscription ) {
+        if( ! isset($sale) ) {
             $user_id = auth()->user()->id;
-            $subscription = App\Subscription::where('user_id', $user_id)->where('status', '1')->first();
+            $sale = \App\Sales::where('user_id', $user_id)
+                ->where('recurrency', '>', 0)
+                ->where('status', '1')
+                ->first();
         }
         
-        return $subscription;
+        return $sale;
         
     }
 
@@ -529,5 +537,44 @@ if (!function_exists('getInvoiceReference')) {
         $lastSale = substr($ref, -10);
         $lastSale = (int)$lastSale;
         return $lastSale;
+    }
+}
+
+/* Get get_rates */
+if (!function_exists('get_rates')) {
+    function get_rates(){
+        try {
+            $value = Cache::remember('usd_rate', '60000', function () {
+                $today = new Carbon();
+                $client = new \GuzzleHttp\Client();
+                $response = $client->get(config('etax.exchange_url'),
+                    ['query' => [
+                        'Indicador' => '317',
+                        'FechaInicio' => $today::now()->format('d/m/Y'),
+                        'FechaFinal' => $today::now()->format('d/m/Y'),
+                        'Nombre' => config('etax.namebccr'),
+                        'SubNiveles' => 'N',
+                        'CorreoElectronico' => config('etax.emailbccr'),
+                        'Token' => config('etax.tokenbccr')
+                    ]
+                    ]
+                );
+                $body = $response->getBody()->getContents();
+                $xml = new \SimpleXMLElement($body);
+                $xml->registerXPathNamespace('d', 'urn:schemas-microsoft-com:xml-diffgram-v1');
+                $tables = $xml->xpath('//INGC011_CAT_INDICADORECONOMIC[@d:id="INGC011_CAT_INDICADORECONOMIC1"]');
+                return json_decode($tables[0]->NUM_VALOR);
+            });
+
+            return $value;
+
+        } catch( \Exception $e) {
+            Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: ');
+        } catch (RequestException $e) {
+            Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: '.
+                $e->getResponse()->getReasonPhrase());
+            return null;
+        }
+
     }
 }

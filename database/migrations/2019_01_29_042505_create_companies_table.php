@@ -48,8 +48,8 @@ class CreateCompaniesTable extends Migration
             $table->integer('last_invoice_ref_number')->default(0);
             $table->integer('last_bill_ref_number')->default(0);
             $table->double('first_prorrata')->default(100);
-            $table->integer('prorrata_type')->default(1); // 1 = Ingresar facturas, 2 = Ingresar totales, 3 = Manual 
-            $table->integer('first_prorrata_type')->default(1); // 1 = Ingresar facturas, 2 = Ingresar totales, 3 = Manual 
+            $table->integer('prorrata_type')->default(1); // 1 = Manual, 2 = Ingresar totales, 3 = Ingresar facturas 
+            $table->integer('first_prorrata_type')->default(1); //1 = Manual, 2 = Ingresar totales, 3 = Ingresar facturas 
             $table->boolean('use_invoicing')->default(true);
 			$table->string('deactivation_token')->nullable();
 			

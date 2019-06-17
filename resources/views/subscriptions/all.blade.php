@@ -32,8 +32,8 @@
                   <td>{{ $data->email }}</td>
                   <td>{{ $data->created_at }}</td>
                   <td>
-                  	@foreach ( $data->subscriptions as $s )
-                  		{{ $s->plan->plan_type }} {{ $s->plan->plan_tier }}<br>
+                  	@foreach ( $data->sales as $s )
+                  		{{ @$s->product->plan->plan_type }} {{ @$s->product->plan->plan_tier }}<br>
                   	@endforeach
                   </td>
                   <td>

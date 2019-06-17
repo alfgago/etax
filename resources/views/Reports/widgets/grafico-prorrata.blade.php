@@ -1,3 +1,33 @@
+<style>
+  
+.ope th {
+    min-width: 100px;
+}
+
+.ope tr {
+    border-bottom: 1px solid #ccc;
+}
+
+.ope tr:last-of-type {
+    border: 0;
+}
+
+.ope table {
+    margin: auto;
+}
+  
+</style>
+
+<?php
+
+  $signo = ( $acumulado->prorrata - $acumulado->prorrata_operativa ) < 0 ? ' - ' : ' + ';
+  $texto = ( $acumulado->prorrata - $acumulado->prorrata_operativa ) < 0 ? 'por pagar' : 'por cobrar';
+  
+  $numerador = abs($acumulado->balance_operativo - $acumulado->balance_estimado) ;
+  $denumerador = abs($acumulado->balance_operativo);
+  $porcentaje = abs($numerador) / abs($denumerador);
+  
+?>
 
 <div class="widget text-center ">
     <div class="card-title"> {{ $titulo }} </div>
@@ -6,39 +36,56 @@
       <div class="col-lg-12 dif">
         <div>
           <label>
-            Liquidación de IVA <br> estimada a fin de año:
+            Liquidación de IVA estimada <br> {{$texto}} a fin de año:
             <span class="helper helper-resumen-mensual" def="helper-resumen-mensual">  <i class="fa fa-question-circle" aria-hidden="true"></i> </span> 
           </label> 
-            
-          <span>₡{{ number_format( abs($acumulado->balance_operativo - $acumulado->balance_estimado), 0) }}</span>
+          <span>₡{{ number_format( abs($acumulado->balance_operativo - $acumulado->balance_estimado), 0 ) }}</span>
         </div>
       </div>
       <div class="col-lg-12 ope">
-        <div>
-          <label>
-            Prorrata operativa:
-            <span class="helper helper-resumen-mensual" def="helper-resumen-mensual">  <i class="fa fa-question-circle" aria-hidden="true"></i> </span> 
-          </label> <span>{{ number_format( $acumulado->prorrata_operativa*100, 2) }}%</span>
-        </div>
-      </div>
-      <div class="col-lg-12 est">
-        <div>
-          <label>
-            Prorrata estimada:
-            <span class="helper helper-resumen-mensual" def="helper-resumen-mensual">  <i class="fa fa-question-circle" aria-hidden="true"></i> </span> 
-          </label> 
-          <span>{{ number_format( $acumulado->prorrata*100, 2) }}%</span>
-        </div>
+        <table>
+          
+          <tr>
+            <td></td>
+            <th>Operativos</th>
+            <th>Real estimado</th>
+          </tr>
+          
+          <tr>
+            <th>Prorrata</td>
+            <td> <span>{{ number_format( $acumulado->company->operative_prorrata, 2) }}%</span> </td>
+            <td> {{ number_format( $acumulado->prorrata*100, 2) }}% </td>
+          </tr>
+          
+          <tr>
+            <th>Ventas 1%</td>
+            <td> <span>{{ number_format( $acumulado->company->operative_ratio1, 2) }}%</span> </td>
+            <td> {{ number_format( $acumulado->ratio1*100, 2) }}% </td>
+          </tr>
+          
+          <tr>
+            <th>Ventas 2%</td>
+            <td> <span>{{ number_format( $acumulado->company->operative_ratio2, 2) }}%</span> </td>
+            <td> {{ number_format( $acumulado->ratio2*100, 2) }}% </td>
+          </tr>
+          
+          <tr>
+            <th>Ventas 13%</td>
+            <td> <span>{{ number_format( $acumulado->company->operative_ratio3, 2) }}%</span> </td>
+            <td> {{ number_format( $acumulado->ratio3*100, 2) }}% </td>
+          </tr>
+          
+          <tr>
+            <th>Ventas 4%</td>
+            <td> <span>{{ number_format( $acumulado->company->operative_ratio4, 2) }}%</span> </td>
+            <td> {{ number_format( $acumulado->ratio4*100, 2) }}% </td>
+          </tr>
+          
+        </table>
       </div>
     </div>
     
 </div>
-
-<?php
-
-  $signo = ( $acumulado->prorrata - $acumulado->last_prorrata ) < 0 ? ' - ' : ' + ';
-
-?>
 
 <script>
 
@@ -48,12 +95,12 @@
       var echartElemGauge = document.getElementById('echartGauge');
       if (echartElemGauge) {
         
-        var diff = {{ abs ($acumulado->prorrata_operativa - $acumulado->prorrata )*100 }};
+        var diff = {{ $porcentaje*100 }};
         var rango = 40;
         if( diff > 40 ){
           rango = 100;
         }
-        var res = {{ $acumulado->prorrata*100 - $acumulado->prorrata_operativa*100 }};
+        var res = {{ $porcentaje*100 }};
         var ratio = 50 / rango;
         var res = ( parseFloat(res) * ratio ) + 50;
         
@@ -107,7 +154,7 @@
                 width: 100,
                 height: 40,
                 offsetCenter: [0, 30],
-                formatter:'{{ number_format( abs ($acumulado->prorrata_operativa - $acumulado->prorrata )*100 , 2 ) }}%',
+                formatter:'{{ number_format( $porcentaje*100, 2 ) }}%',
                 textStyle: {  
                     color: '#000',
                     fontSize : 18,

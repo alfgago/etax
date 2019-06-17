@@ -8,6 +8,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NewUser;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 
 class RegisterController extends Controller {
     /*
@@ -69,22 +73,20 @@ use RegistersUsers;
                     'first_name' => $data['first_name'],
                     'last_name' => $data['last_name'],
                     'last_name2' => $data['last_name2'],
-                    'password' => Hash::make($data['password']),
+                    'phone' => $data['phone'],
+                    'password' => Hash::make($data['password'])
         ]);
 
         $user->assignRole(array('Subscriber'));
-        
         $user->addCompany();
-
-        /* Old Code
-         * If user is registering from invitation,it is added as normal user else as admin user
-          if (!empty(session('invite_token'))) {
-          $user->assignRole(array('Normal User'));
-          } else {
-          //$user->addCompany();
-          $user->assignRole(array('Admin'));
-          }
-         */
+        $user->createKlapUser();
+        
+        Mail::to($user->email)->send(new NewUser(
+            [ 
+                'name' => $user->first_name . " " . $user->last_name . " " . $user->last_name2 
+            ]
+        ));
+        
         return $user;
     }
 

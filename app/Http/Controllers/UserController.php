@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
-use App\Subscription;
+use App\Sales;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use DB;
@@ -153,8 +153,12 @@ class UserController extends Controller {
         $data['url'] = '/empresas/create';
         
         try {
+            $user = auth()->user();
+            if( ! $user->isContador() ) {
+                return redirect('/');
+            }
         
-            $teams = auth()->user()->teams;
+            $teams = $user->teams;
     
             /* Show registered companies list on specific plan */
             if ( isset($_GET['plan']) ) {
@@ -177,7 +181,7 @@ class UserController extends Controller {
     public function plans() {
 
         $user_id = auth()->user()->id;
-        $plans = Subscription::where('user_id', $user_id)->get()->with('plan');
+        $plans = Sales::where('user_id', $user_id)->get()->with('plan');
 
         return view('users.subscribed-plans', compact('plans'));
     }
@@ -231,45 +235,6 @@ class UserController extends Controller {
         
         return redirect('/')->with('success', 'Su cuenta ha sido eliminada. Tiene 15 días para solicitar una restauración antes de que sus datos sean eliminados permanentemente.');
     }
-    
-    public function changePlan() {
-        
-        return view('wizard.change-plan');
-        
-    }
-    
-    public function confirmPlanChange(Request $request) {
-        
-        $company = currentCompanyModel();
-        $user = auth()->user();
-        
-        $start_date = Carbon::parse( now('America/Costa_Rica') );
-        $trial_end_date = $start_date->addMonths(1);
-        $next_payment_date = $start_date->addMonths(1);
-        
-        $sub = Subscription::updateOrCreate (
-            
-            [ 
-                'user_id' => $user->id 
-            ],
-            [ 
-                'plan_id' => $request->plan_id, 
-                'status'  => 1, 
-                'trial_end_date' => $trial_end_date, 
-                'start_date' => $start_date, 
-                'next_payment_date' => $next_payment_date, 
-            ]
-                
-        );
-        
-        $company->subscription_id = $sub->id;
-        $company->save();
-        
-        $nombre = $sub->plan->getName();
-        
-        return redirect('/')->withMessage("Su cuenta ha sido creada con el plan $nombre");
-    }
-    
     
     /**
      * Devuelve una llave JWT para ser usada por Zendesk y así validar al usuario. 

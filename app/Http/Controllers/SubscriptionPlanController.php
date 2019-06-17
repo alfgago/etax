@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\User;
 use App\SubscriptionPlan;
+use App\EtaxProducts;
+use App\Sales;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\UsersExport;
+use Carbon\Carbon;
 
 class SubscriptionPlanController extends Controller
 {
@@ -19,71 +22,20 @@ class SubscriptionPlanController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-    }    
+    } 
+        
+    public function changePlan() {
+        
+        $plans = EtaxProducts::where('isSubscription', true)->with('plan')->get();
+        return view( 'subscriptions/subscription-wizard', compact('plans') );
+        
+    }
     
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\SubscriptionPlan  $subscriptionPlan
-     * @return \Illuminate\Http\Response
-     */
-    public function show(SubscriptionPlan $subscriptionPlan)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\SubscriptionPlan  $subscriptionPlan
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(SubscriptionPlan $subscriptionPlan)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\SubscriptionPlan  $subscriptionPlan
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, SubscriptionPlan $subscriptionPlan)
-    {
-        //
+    public function confirmPlanChange(Request $request) {
+    
+        $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
+        return redirect('/');
+        
     }
 
     /**
@@ -106,7 +58,7 @@ class SubscriptionPlanController extends Controller
         $users = User::paginate(10);
         
         
-        return view('Subscriptions/all', [
+        return view('subscriptions/all', [
           'users' => $users
         ]);
     }
@@ -118,6 +70,23 @@ class SubscriptionPlanController extends Controller
         
         
         return Excel::download(new UsersExport(), 'usuarios.xlsx');
+    }
+    
+    private function getDocReference($docType) {
+        $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;
+        $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
+
+        return $consecutive;
+    }
+
+    private function getDocumentKey($docType) {
+        $company = currentCompanyModel();
+        $invoice = new Invoice();
+        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
+            '1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
+
+
+        return $key;
     }
     
 }

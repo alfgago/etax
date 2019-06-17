@@ -14,9 +14,29 @@
   </select>
 </div>
 
-<div class="form-group col-md-6 hidden toggle-types type-1" style="padding-top: 1em;">
+<div class="form-group col-md-6 hidden toggle-types type-1" >
   <label for="first_prorrata">Digite su prorrata inicial</label>
   <input type="number" class="form-control" name="first_prorrata" id="first_prorrata" step="0.01" min="1" max="100" value="{{ @$company->first_prorrata ? $company->first_prorrata : 100 }}">
+</div>
+
+<div class="form-group col-md-6 hidden toggle-types type-1">
+  <label for="operative_ratio1">Digite su proporción de ventas al 1%</label>
+  <input type="number" class="form-control" name="operative_ratio1" id="operative_ratio1" step="0.01" min="0" max="100" value="{{ @$company->operative_ratio1 ? $company->operative_ratio1 : 0 }}">
+</div>
+
+<div class="form-group col-md-6 hidden toggle-types type-1">
+  <label for="operative_ratio2">Digite su proporción de ventas al 2%</label>
+  <input type="number" class="form-control" name="operative_ratio2" id="operative_ratio2" step="0.01" min="0" max="100" value="{{ @$company->operative_ratio2 ? $company->operative_ratio2 : 0 }}">
+</div>
+
+<div class="form-group col-md-6 hidden toggle-types type-1">
+  <label for="operative_ratio3">Digite su proporción de ventas al 13%</label>
+  <input type="number" class="form-control" name="operative_ratio3" id="operative_ratio3" step="0.01" min="0" max="100" value="{{ @$company->operative_ratio3 ? $company->operative_ratio3 : 0 }}">
+</div>
+
+<div class="form-group col-md-6 hidden toggle-types type-1">
+  <label for="operative_ratio4">Digite su proporción de ventas al 4%</label>
+  <input type="number" class="form-control" name="operative_ratio4" id="operative_ratio4" step="0.01" min="0" max="100" value="{{ @$company->operative_ratio4 ? $company->operative_ratio4 : 0 }}">
 </div>
 
 <div class="form-group col-md-6">

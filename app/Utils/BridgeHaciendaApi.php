@@ -26,14 +26,14 @@ class BridgeHaciendaApi
         try {
             $value = Cache::remember('token-api-'.currentCompany(), '60000', function () {
                 $client = new Client();
-                $result = $client->request('POST', env('API_HACIENDA_URL') . '/index.php/auth/login', [
+                $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/auth/login', [
                     'headers' => [
-                        'Auth-Key'  => env('API_HACIENDA_KEY'),
-                        'Client-Service' => env('API_HACIENDA_CLIENT'),
+                        'Auth-Key'  => config('etax.api_hacienda_key'),
+                        'Client-Service' => config('etax.api_hacienda_client'),
                         'Connection' => 'Close'
                     ],
-                    'json' => ["username" => env('API_HACIENDA_USERNAME'),
-                        "password" => env('API_HACIENDA_PASSWORD')
+                    'json' => ["username" => config('etax.api_hacienda_username'),
+                        "password" => config('etax.api_hacienda_password')
                     ],
                     'verify' => false,
                 ]);
@@ -53,17 +53,17 @@ class BridgeHaciendaApi
     public function createInvoice(Invoice $invoice, $token) {
         try {
             $requestDetails = $this->setDetails($invoice->items);
-            $company = currentCompanyModel();
+            $company = $invoice->company;
             $requestData = $this->setInvoiceData($invoice, $requestDetails);
             if ($requestData !== false) {
                 $client = new Client();
                 Log::info('Enviando parametros  API HACIENDA -->>');
-                $result = $client->request('POST', env('API_HACIENDA_URL') . '/index.php/invoice/create', [
+                $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice/create', [
                     'headers' => [
-                        'Auth-Key'  => env('API_HACIENDA_KEY'),
-                        'Client-Service' => env('API_HACIENDA_CLIENT'),
+                        'Auth-Key'  => config('etax.api_hacienda_key'),
+                        'Client-Service' => config('etax.api_hacienda_client'),
                         'Authorization' => $token,
-                        'User-ID' => env('API_HACIENDA_USER_ID'),
+                        'User-ID' => config('etax.api_hacienda_user_id'),
                         'Connection' => 'Close'
                     ],
                     'multipart' => $requestData,
@@ -123,7 +123,7 @@ class BridgeHaciendaApi
 
     private function setInvoiceData(Invoice $data, $details) {
         try {
-            $company = currentCompanyModel();
+            $company = $data->company;
             $ref = getInvoiceReference($company->last_invoice_ref_number) + 1;
             $data->reference_number = $ref;
             $data->save();
@@ -142,6 +142,7 @@ class BridgeHaciendaApi
                 'receptor_cedula_numero' => $data['client_id_number'] ?? '',
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',
+                'tipocambio' => $data['currency_rate'] ?? '',
                 'tipo_documento' => $data['document_type'] ?? '',
                 'sucursal_nro' => '001',
                 'terminal_nro' => '00001',
@@ -157,10 +158,10 @@ class BridgeHaciendaApi
                 'emisor_cedula' => $company->id_number ?? '',
                 'usuarioAtv' => $company->atv->user ?? '',
                 'passwordAtv' => $company->atv->password ?? '',
-                'tipoAmbiente' => env('HACIENDA_AMBIENTE') ?? 01,
+                'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
                 'atvcertPin' => $company->atv->pin ?? '',
-                'atvcertFile' => file_get_contents(Storage::url($company->atv->key_url)),
-                'detalle' => '{"1": {"cantidad":"1","unidadMedida":"Servicios","detalle":"Honorarios por hora de programacion","precioUnitario":"1130","montoTotal":"1130","subtotal":"1130","montoTotalLinea":"1130", "descuento":0,"impuesto":0}}'
+                'atvcertFile' => Storage::get($company->atv->key_url),
+                'detalle' => $details
             );
             foreach ($invoiceData as $key => $values) {
                 if ($key == 'atvcertFile') {

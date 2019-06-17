@@ -30,15 +30,15 @@ class Provider extends Model
     $tipoStr = 'Física';
     if( $this->tipo_persona == 1 ) {
       $tipoStr = 'Física';
-    }else if( $this->tipo_persona == 2 ) {
+    }else if( $this->tipo_persona == 2 || $this->tipo_persona == 'J' ) {
       $tipoStr = 'Jurídica';
-    }else if( $this->tipo_persona == 3 ) {
+    }else if( $this->tipo_persona == 3 || $this->tipo_persona == 'D' ) {
       $tipoStr = 'DIMEX';
-    }else if( $this->tipo_persona == 4 ) {
+    }else if( $this->tipo_persona == 4 || $this->tipo_persona == 'E' ) {
       $tipoStr = 'Extranjero';
-    }else if( $this->tipo_persona == 5 ) {
+    }else if( $this->tipo_persona == 5 || $this->tipo_persona == 'N' ) {
       $tipoStr = 'NITE';
-    }else if( $this->tipo_persona == 6 ) {
+    }else if( $this->tipo_persona == 6 || $this->tipo_persona == 'O') {
       $tipoStr = 'Otro';
     }
     return $tipoStr;

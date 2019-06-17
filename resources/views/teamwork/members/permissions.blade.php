@@ -25,9 +25,27 @@ Editar permisos de equipo "{{$team->name}}"
             <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
                 <thead>                
                     <tr>
-                        <th colspan="2">Invited Users</th>                             
+                        <th>Nombre</th>       
+                        <th>Correo</th>                             
                         @foreach($permissions as $permission)
-                        <th>{{$permission->permission}}</th>                    
+                            <?php 
+                                if($permission->permission == 'admin') {
+                                    $trans = 'Admin';
+                                }else if($permission->permission == 'invoicing') {
+                                    $trans = 'Ventas';
+                                }else if($permission->permission == 'billing') {
+                                    $trans = 'Compras';
+                                }else if($permission->permission == 'validation') {
+                                    $trans = 'Validaciones';
+                                }else if($permission->permission == 'books') {
+                                    $trans = 'Cierres';
+                                }else if($permission->permission == 'reports') {
+                                    $trans = 'Reportes';
+                                }else if($permission->permission == 'catalogue') {
+                                    $trans = 'Catálogos';
+                                }
+                            ?>
+                            <th> {{ $trans }} </th>                    
                         @endforeach                               
                     </tr>
                 </thead>

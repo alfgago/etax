@@ -21,12 +21,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css" />
     
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=2.05">
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=5.3">
     
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=2.1.1"></script>
-
+    <script src="{{asset('assets/js/common-bundle.js')}}?v=5.02"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
-    
   
     @yield('header-scripts')
     
@@ -112,49 +110,16 @@
 
         gtag('config', 'UA-134999499-1');
       </script>
-      
-      
-    <style>
-      .callnow {
-          position: fixed;
-          bottom: 1rem;
-          right: 1rem;
-          display: block;
-          padding: .5rem 2rem;
-          background: #fff;
-          color: #fff;
-          font-weight: bold;
-          font-size: 18px;
-          border-radius: 25px;
-          box-shadow: 0 0 15px rgba(0,0,0,0.5);
-          background: -webkit-linear-gradient(left, #274eab 0%,#2f006d 100%);
-          z-index: 999999999;
-          text-decoration: none !important;
-          border: 0;
-          cursor: pointer;0
-      }
-  
-      .callnow span {
-          display: block;
-      }
-      @media only screen and (max-width: 600px) {
-          .callnow {
-              font-size: 12px;
-              bottom: 10px;
-              right: 10px;
-          }
-      }
-    </style>  
+
     <button type="button" class="callnow" onclick="popupReproductor();">Ayuda</button>
     <?php
       $user = auth()->user();
     ?>
     <script type="text/javascript">
-    function popupReproductor(){
-      window.open('https://www.callmyway.com/Welcome/SupportChatInfo/171479/?chat_type_id=5&contact_name={{ $user->first_name . " " . $user->last_name }}&contact_email={{ $user->email }}&contact_phone={{ $user->phone ? $user->phone : '' }}&contact_request=Chat de ayuda iniciado..&autoSubmit=1', 'Soporte eTax', 'height=350,width=350,resizable=0,marginwidth=0,marginheight=0,frameborder=0');
-    };
+      function popupReproductor(){
+        window.open('https://www.callmyway.com/Welcome/SupportChatInfo/171479/?chat_type_id=5&contact_name={{ $user->first_name . " " . $user->last_name }}&contact_email={{ $user->email }}&contact_phone={{ $user->phone ? $user->phone : '' }}&contact_request=Chat de ayuda iniciado..&autoSubmit=1', 'Soporte eTax', 'height=350,width=350,resizable=0,marginwidth=0,marginheight=0,frameborder=0');
+      };
     </script>
-    
     
 </body>
 

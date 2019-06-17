@@ -1,0 +1,44 @@
+[2019-05-30 14:53:21] [CyberSource\Authentication\Core\MerchantConfiguration] [INFO] authenticationType =>HTTP_SIGNATURE
+[DEBUG] HTTP Request body  ~BEGIN~
+{"clientReferenceInformation":{"code":"test_payment"},"processingInformation":{"capture":false,"commerceIndicator":"internet"},"paymentInformation":{"card":{"number":"4111111111111111","expirationMonth":"12","expirationYear":"2031","securityCode":"123"}},"orderInformation":{"amountDetails":{"totalAmount":"102.21","currency":"USD"},"billTo":{"firstName":"John","lastName":"Doe","company":"ABC Company","address1":"1 Market St","locality":"san francisco","administrativeArea":"CA","postalCode":"94105","country":"US","email":"test@cybs.com","phoneNumber":"4158880000"}}}
+~END~
+*   Trying 66.185.182.49...
+* TCP_NODELAY set
+* Connected to apitest.cybersource.com (66.185.182.49) port 443 (#0)
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+*   CAfile: C:\laragon\www\etax\vendor\cybersource\rest-client-php\lib\ssl/cacert.pem
+  CApath: none
+* SSL connection using TLSv1.2 / AES256-GCM-SHA384
+* ALPN, server did not agree to a protocol
+* Server certificate:
+*  subject: C=US; ST=California; L=Foster City; jurisdictionC=US; jurisdictionST=Delaware; O=Cybersource Corporation; businessCategory=Private Organization; serialNumber=2838921; CN=apitest.cybersource.com
+*  start date: Jan 18 20:14:02 2019 GMT
+*  expire date: Feb 15 20:44:00 2021 GMT
+*  subjectAltName: host "apitest.cybersource.com" matched cert's "apitest.cybersource.com"
+*  issuer: C=US; O=Entrust, Inc.; OU=See www.entrust.net/legal-terms; OU=(c) 2014 Entrust, Inc. - for authorized use only; CN=Entrust Certification Authority - L1M
+*  SSL certificate verify ok.
+> POST /pts/v2/payments/ HTTP/1.1
+Host:apitest.cybersource.com
+User-Agent: Swagger-Codegen/1.0.0/php
+Accept: application/hal+json;charset=utf-8
+Content-Type: application/json
+v-c-merchant-id:testrest
+Signature:keyid="08c94330-f618-42a3-b09d-e1e43be5efda", algorithm="HmacSHA256", headers="host date (request-target) digest v-c-merchant-id", signature="UFw3LYFq/rXR4HVUbZ9Ntwu9z76qOoGGTNfUe3W3Lgc="
+Date:Thu, 30 May 2019 14:53:21 GMT
+Digest: SHA-256=ZWDaEIffx5NdoURBYQzdrEM9OQ/YAf83MxgOXLY4P9I=
+Content-Length: 570
+
+* upload completely sent off: 570 out of 570 bytes
+< HTTP/1.1 201 Created
+< Content-Type: application/hal+json
+< Content-Length: 797
+< X-Cnection: close
+< x-response-time: 243ms
+< Strict-Transport-Security: max-age=31536000
+< v-c-correlation-id: 9be33061-f94d-474c-8c45-affc045c3fff
+< 
+* Connection #0 to host apitest.cybersource.com left intact
+[DEBUG] HTTP Response body ~BEGIN~
+{"clientReferenceInformation":{"code":"test_payment"},"id":"5592280015536077904004","orderInformation":{"amountDetails":{"authorizedAmount":"102.21","currency":"USD"}},"processorInformation":{"approvalCode":"888888","responseCode":"100","avs":{"code":"X","codeRaw":"I1"}},"reconciliationId":"73377108TVZIXFE1","status":"AUTHORIZED","submitTimeUtc":"2019-05-30T14:53:21Z","_links":{"self":{"href":"/pts/v2/payments/5592280015536077904004","method":"GET"},"authReversal":{"href":"/pts/v2/payments/5592280015536077904004/reversals","method":"POST"},"capture":{"href":"/pts/v2/payments/5592280015536077904004/captures","method":"POST"},"refund":{"href":"/pts/v2/payments/5592280015536077904004/refunds","method":"POST"},"void":{"href":"/pts/v2/payments/5592280015536077904004/voids","method":"POST"}}}
+~END~

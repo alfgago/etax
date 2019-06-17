@@ -211,7 +211,6 @@
                     <th>#</th>
                     <th>Código</th>
                     <th>Nombre</th>
-                    <th>Tipo producto</th>
                     <th>Cant.</th>
                     <th>Unidad</th>
                     <th>Precio unitario</th>

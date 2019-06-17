@@ -19,8 +19,7 @@
   <div class="wizard-popup">
   	
    	<div class="titulo-bienvenida">
-    	<h2>Registro de empresa ¡Gracias por confiar en eTax!</h2>
-    	<p>En poco tiempo podrá utilizar la herramienta más fiable para el cálculo de IVA y facturación electrónica. Para iniciar, complete sus datos a continuación.</p>
+    	<h2>Registro de nueva empresa ¡Gracias por confiar en eTax!</h2>
     </div>
     	
 	<div class="wizard-steps">

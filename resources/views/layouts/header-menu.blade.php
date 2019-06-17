@@ -36,8 +36,8 @@
                         <i class="i-Lock-User mr-1"></i> {{Auth::user()->first_name.' '.Auth::user()->last_name.' '.Auth::user()->last_name2}}
                     </div>
                     <a class="dropdown-item" href="/usuario/perfil">Perfil</a>                     
-                    <a class="dropdown-item" href="/empresas/editar">Configuración de empresa</a>           
-                    <a class="dropdown-item" href="/usuario/cambiar-plan">Cambiar plan</a>
+                    <a class="dropdown-item" href="/empresas/editar">Configuración de empresa</a>   
+                    <a class="dropdown-item" href="/payments">Gesti&oacute;n de pagos</a>
                     <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('frm-logout').submit();">
                         Cerrar sesión
                     </a>
