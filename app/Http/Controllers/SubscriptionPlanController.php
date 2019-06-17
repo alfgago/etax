@@ -67,8 +67,6 @@ class SubscriptionPlanController extends Controller
         if( auth()->user()->user_name != "alfgago" ) {
             return redirect(404);
         }
-        
-        
         return Excel::download(new UsersExport(), 'usuarios.xlsx');
     }
     

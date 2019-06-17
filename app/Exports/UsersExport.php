@@ -24,8 +24,14 @@ class UsersExport implements WithHeadings, WithMapping, FromQuery
     public function map($map): array
     {
         $plans = [];
-        foreach ( $map->subscriptions as $s ) {
-      		$plans[] = $s->plan->plan_type . " " . $s->plan->plan_tier;
+        foreach ( $map->sales as $s ) {
+      		$plans[] = $s->product->name;
+        }
+        
+        if( empty($map->sales) ){
+            foreach ( $map->subscriptions as $s ) {
+          		$plans[] = $s->plan->plan_type . " " . $s->plan->plan_tier;
+            }
         }
       	
       	$comps = [];
