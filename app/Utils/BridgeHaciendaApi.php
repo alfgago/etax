@@ -69,28 +69,29 @@ class BridgeHaciendaApi
                     'multipart' => $requestData,
                     'verify' => false,
                 ]);
-                $result = $result->wait();
-                $response = json_decode($result->getBody()->getContents(), true);
-                if (isset($response['status']) && $response['status'] == 200) {
-                    $date = Carbon::now();
-                    $invoice->hacienda_status = 03;
-                    $invoice->save();
-                    $path = 'empresa-'.$company->id_number.
-                        "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
-                    $save = Storage::put(
-                        $path,
-                        ltrim($response['data']['xmlFirmado'], '\n'));
-                    if ($save) {
-                        $xml = new XmlHacienda();
-                        $xml->invoice_id = $invoice->id;
-                        $xml->bill_id = 0;
-                        $xml->xml = $path;
-                        $xml->save();
-                        Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['xml' => $path,
-                            'data_invoice' => $invoice, 'data_company' =>$company]));
-                        return $invoice;
+                $result->then(function ($response, $invoice, $company) {
+                    $response = json_decode($response->getBody()->getContents(), true);
+                    if (isset($response['status']) && $response['status'] == 200) {
+                        $date = Carbon::now();
+                        $invoice->hacienda_status = 03;
+                        $invoice->save();
+                        $path = 'empresa-'.$company->id_number.
+                            "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
+                        $save = Storage::put(
+                            $path,
+                            ltrim($response['data']['xmlFirmado'], '\n'));
+                        if ($save) {
+                            $xml = new XmlHacienda();
+                            $xml->invoice_id = $invoice->id;
+                            $xml->bill_id = 0;
+                            $xml->xml = $path;
+                            $xml->save();
+                            Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['xml' => $path,
+                                'data_invoice' => $invoice, 'data_company' =>$company]));
+                            return $invoice;
+                        }
                     }
-                }
+                });
                 return $invoice;
             }
         } catch (ClientException $error) {
