@@ -58,7 +58,7 @@ class BridgeHaciendaApi
             if ($requestData !== false) {
                 $client = new Client();
                 Log::info('Enviando parametros  API HACIENDA -->>');
-                $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice/create', [
+                $result = $client->requestAsync('POST', config('etax.api_hacienda_url') . '/index.php/invoice/create', [
                     'headers' => [
                         'Auth-Key'  => config('etax.api_hacienda_key'),
                         'Client-Service' => config('etax.api_hacienda_client'),
@@ -69,6 +69,7 @@ class BridgeHaciendaApi
                     'multipart' => $requestData,
                     'verify' => false,
                 ]);
+                $result = $result->wait();
                 $response = json_decode($result->getBody()->getContents(), true);
                 if (isset($response['status']) && $response['status'] == 200) {
                     $date = Carbon::now();
@@ -90,11 +91,11 @@ class BridgeHaciendaApi
                         return $invoice;
                     }
                 }
-                return false;
+                return $invoice;
             }
         } catch (ClientException $error) {
             Log:info('Error al crear factura en API HACIENDA -->>'. $error);
-            return false;
+            return $invoice;
         }
     }
 

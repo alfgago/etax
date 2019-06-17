@@ -188,17 +188,15 @@ class InvoiceController extends Controller
 
                 //Datos generales y para Hacienda
                 $invoice->document_type = "01";
-                $invoice->hacienda_status = "01";
+                $invoice->hacienda_status = 01;
                 $invoice->payment_status = "01";
                 $invoice->payment_receipt = "";
                 $invoice->generation_method = "etax";
                 $invoice->reference_number = $company->last_invoice_ref_number + 1;
-
                 $invoiceData = $invoice->setInvoiceData($request);
                 if (!empty($invoiceData)) {
                     $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
                 }
-
                 $company->last_invoice_ref_number = $invoice->reference_number;
                 $company->last_document = $invoice->document_number;
                 $company->save();
