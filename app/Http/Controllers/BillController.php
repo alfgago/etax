@@ -125,7 +125,8 @@ class BillController extends Controller
 
         //Datos generales y para Hacienda
         $bill->document_type = "01";
-        $bill->hacienda_status = "01";
+        $bill->hacienda_status = "02";
+        $bill->status = "02";
         $bill->payment_status = "01";
         $bill->payment_receipt = "";
         $bill->generation_method = "M";
