@@ -12,6 +12,19 @@
 @section('content') 
 <div class="row">
   <div class="col-md-12">
+      <div class="filters mb-4 pb-4">
+          <label>Filtrar documentos</label>
+          <div class="periodo-selects">
+            <select id="filtro-select" name="filtro" onchange="reloadDataTable();">
+                <option value="99" selected>Todos los documentos</option>
+                <option value="1">Facturas electrónicas</option>
+                <option value="4">Tiquete electrónico</option>
+                <option value="3">Notas de crédito</option>
+                <option value="0">Documentos eliminados</option>
+            </select>
+          </div>
+      </div>
+        
       <table id="invoice-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
@@ -39,12 +52,16 @@
 
 <script>
   
+var datatable;
 $(function() {
-  $('#invoice-table').DataTable({
+  datatable = $('#invoice-table').DataTable({
     processing: true,
     serverSide: true,
     ajax: {
       url: "/api/invoices",
+      data: function(d){
+          d.filtro = $( '#filtro-select' ).val();
+      },
       type: 'GET'
     },
     order: [[ 7, 'desc' ]],
@@ -65,12 +82,33 @@ $(function() {
   });
 });
 
+function reloadDataTable() {
+  datatable.ajax.reload();
+}
 
 function confirmDelete( id ) {
   var formId = "#delete-form-"+id;
   Swal.fire({
+    title: '¿Está seguro que desea eliminar la factura',
+    text: "Este proceso la eliminará a nivel de cálculo en eTax, sin embargo no hace anulaciones ni revierte aceptaciones ante Hacienda. Usted podrá volver a importar la factura via XML o ingreso manual.",
+    type: 'warning',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero eliminarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
+
+
+function confirmAnular( id ) {
+  var formId = "#anular-form-"+id;
+  Swal.fire({
     title: '¿Está seguro que desea anular la factura',
-    text: "Este proceso generará una nota de crédito y no podrá ser revertido.",
+    text: "Este proceso anulará la factura ante Hacienda y enviará una nueva nota de crédito al cliente.",
     type: 'warning',
     showCloseButton: true,
     showCancelButton: true,
@@ -83,6 +121,25 @@ function confirmDelete( id ) {
   
 }
 
+function confirmRecover( id ) {
+  
+  var formId = "#recover-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea restaurar la factura?',
+    text: "La factura será tomada en cuenta para sus cálculos de IVA nuevamente.",
+    type: 'success',
+    customContainerClass: 'container-success',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero restaurarla',
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
+  
 </script>
 
 @endsection

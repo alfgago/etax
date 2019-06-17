@@ -72,7 +72,6 @@ $(function() {
   
 });
 
-
 function reloadDataTable() {
   datatable.ajax.reload();
 }

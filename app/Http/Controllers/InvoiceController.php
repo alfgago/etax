@@ -47,7 +47,7 @@ class InvoiceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexData() {
+    public function indexData( Request $request ) {
         $current_company = currentCompany();
 
         $query = Invoice::where('invoices.company_id', $current_company)
@@ -57,19 +57,28 @@ class InvoiceController extends Controller
                 ->where('is_totales', false)
                 ->with('client');
                 
+        $filtro = $request->get('filtro');
+        if( $filtro == 0 ) {
+            $query = $query->onlyTrashed();
+        }else if( $filtro == 1 ) {
+            $query = $query->where('document_type', '01');
+        }else if( $filtro == 2 ) {
+            $query = $query->where('document_type', '02');
+        }else if( $filtro == 3 ) {
+            $query = $query->where('document_type', '03');
+        }else if( $filtro == 4 ) {
+            $query = $query->where('document_type', '04');
+        }             
+                
         return datatables()->eloquent( $query )
             ->addColumn('actions', function($invoice) {
-                $hideEdit = false;
+                $oficialHacienda = false;
                 if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
-                    $hideEdit =  true;
+                    $oficialHacienda =  true;
                 }
-                return view('datatables.actions', [
-                    'routeName' => 'facturas-emitidas',
-                    'deleteTitle' => 'Anular factura',
-                    'editTitle' => 'Editar factura',
-                    'deleteIcon' => 'fa fa-ban',
-                    'hideEdit' => $hideEdit,
-                    'id' => $invoice->id
+                return view('Invoice.ext.actions', [
+                    'oficialHacienda' => $oficialHacienda,
+                    'data' => $invoice
                 ])->render();
             }) 
             ->editColumn('client', function(Invoice $invoice) {
@@ -262,25 +271,6 @@ class InvoiceController extends Controller
           
         return redirect('/facturas-emitidas');
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Invoice  $invoice
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        $invoice = Invoice::find($id);
-        $this->authorize('update', $invoice);
-
-        clearInvoiceCache($invoice);
-        
-        $invoice->is_void = true;
-        $invoice->save();
-        
-        return redirect('/facturas-emitidas');
-    }
     
     public function export() {
         return Excel::download(new InvoiceExport(), 'documentos-emitidos.xlsx');
@@ -321,8 +311,8 @@ class InvoiceController extends Controller
                             $codigoCliente = array_key_exists('codigocliente', $row) ? $row['codigocliente'] : '';
                             $tipoPersona = $row['tipoidentificacion'];
                             $identificacionCliente = $row['identificacionreceptor'];
-                            $correoCliente = '';
-                            $telefonoCliente = '';
+                            $correoCliente = $row['correoreceptor'];
+                            $telefonoCliente = null;
                                         
                             //Datos de factura
                             $consecutivoComprobante = $row['consecutivocomprobante'];
@@ -333,7 +323,7 @@ class InvoiceController extends Controller
                             $fechaEmision = $row['fechaemision'];
                             
                             $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
-                            $idMoneda = $row['idmoneda'];
+                            $idMoneda = $row['moneda'];
                             $tipoCambio = $row['tipocambio'];
                             $totalDocumento = $row['totaldocumento'];
                             $tipoDocumento = $row['tipodocumento'];
@@ -348,7 +338,7 @@ class InvoiceController extends Controller
                             $subtotalLinea = (float)$row['subtotallinea'];
                             $totalLinea = $row['totallinea'];
                             $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
-                            $codigoEtax = $row['codigoetax'];
+                            $codigoEtax = $row['codigoivaetax'];
                             $montoIva = (float)$row['montoiva'];
                             $totalNeto = 0;
                             
@@ -590,20 +580,39 @@ class InvoiceController extends Controller
     }
     
      /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Invoice  $invoice
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        InvoiceItem::where('invoice_id', $invoice->id)->delete();
+        $invoice->delete();
+        clearInvoiceCache($invoice);
+        
+        return redirect('/facturas-emitidas')->withMessage('La factura ha sido eliminada satisfactoriamente.');
+    } 
+    
+    /**
      * Restore the specific item
      *
-     * @param  \App\Product  $product
+     * @param  \App\Invoice  $invoice
      * @return \Illuminate\Http\Response
      */
     public function restore($id)
     {
-        $rest = Invoice::onlyTrashed()->where('id', $id)->first();
-        if( $rest->company_id != currentCompany() ){
+        $invoice = Invoice::onlyTrashed()->where('id', $id)->first();
+        if( $invoice->company_id != currentCompany() ){
             return 404;
         }
-        $rest->restore();
+        $invoice->restore();
+        InvoiceItem::onlyTrashed()->where('invoice_id', $invoice->id)->restore();
+        clearInvoiceCache($invoice);
         
-        return redirect('/facturas-emitidas')->withMessage('La factura ha sido restaurado satisfactoriamente.');
+        return redirect('/facturas-emitidas')->withMessage('La factura ha sido restaurada satisfactoriamente.');
     }  
     
     private function getDocReference($docType) {

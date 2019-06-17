@@ -39,10 +39,18 @@ class Invoice extends Model
     }
     
     public function documentTypeName() {
-      $tipo = 'Factura';
-      if( $this->document_type == '04' ) {
+      $tipo = 'Factura electrónica';
+      if( $this->document_type == '03' ) {
+        $tipo = "Nota de crédito";
+      }else if( $this->document_type == '04' ) {
         $tipo = "Tiquete";
+      }else if( $this->document_type == '02' ) {
+        $tipo = "Nota de débito";
+      }else if( $this->document_type == '1' ) {
+         $this->document_type = '01';
+         $this->save();
       }
+      
       return $tipo;
     }
   
@@ -283,6 +291,8 @@ class Invoice extends Model
                     'tipo_persona' => str_pad($tipoPersona, 2, '0', STR_PAD_LEFT),
                     'id_number' => $identificacionCliente,
                     'first_name' => $nombreCliente,
+                    'email' => $correoCliente,
+                    'phone' => $telefonoCliente,
                     'fullname' => "$identificacionCliente - $nombreCliente"
                 ]
             );
