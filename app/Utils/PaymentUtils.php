@@ -82,7 +82,6 @@ class PaymentUtils
             'verify' => false,
         ]);
         $card = json_decode($cardCreationResult->getBody()->getContents(), true);
-        Log::info("UserIncludeCard: ". $cardCreationResult->getBody()->getContents() );
         return $card;
     }
 
@@ -121,7 +120,6 @@ class PaymentUtils
             'verify' => false,
         ]);
         $chargeIncluded = json_decode($appChargeBn->getBody()->getContents(), true);
-        Log::info("AppIncludeCharge: ".  $appChargeBn->getBody()->getContents() );
         return $chargeIncluded;
     }
     
@@ -142,7 +140,6 @@ class PaymentUtils
             'verify' => false,
         ]);
         $charge = json_decode($chargeBn->getBody()->getContents(), true);
-        Log::info("AppApplyCharge: ". $chargeBn->getBody()->getContents() );
         return $charge;
     }
     
