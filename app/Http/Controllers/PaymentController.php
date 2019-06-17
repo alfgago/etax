@@ -319,7 +319,7 @@ class PaymentController extends Controller
             );
             
             $data = new stdClass();
-            $data->description = 'Pago Suscripción Etax';
+            $data->description = 'Pago suscripción etax';
             $data->amount = $amount;
             $data->user_name = $user->user_name;
             
