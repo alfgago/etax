@@ -8,7 +8,6 @@
         "php": "^7.1.3",
         "barryvdh/laravel-dompdf": "^0.8.4",
         "curl/json": "dev-master",
-        "cybersource/sdk-php": "*",
         "fideloper/proxy": "^4.0",
         "firebase/php-jwt": "^5.0",
         "fzaninotto/faker": "^1.8",

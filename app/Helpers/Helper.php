@@ -262,14 +262,13 @@ if (!function_exists('getCurrentUserSubscriptions')) {
 
 }
 
-
 /* Get current user active subscriptions */
 if (!function_exists('getCurrentSubscription')) {
 
     function getCurrentSubscription() {
         
         $company = currentCompanyModel();
-        $sale = $company->sale;
+        $sale = $company->subscription;
         
         if( ! isset($sale) ) {
             $user_id = auth()->user()->id;
