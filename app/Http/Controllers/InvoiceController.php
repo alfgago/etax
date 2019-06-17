@@ -112,6 +112,11 @@ class InvoiceController extends Controller
      */
     public function emitFactura()
     {
+        $company = currentCompanyModel();
+        if( ! isset($compamy->logo_url) ){
+            return redirect('/empresas/editar')->withError('Para poder emitir facturas, debe subir un logo y certificado ATV');
+        }
+        
         $units = UnidadMedicion::all()->toArray();
         return view("Invoice/create-factura", ['document_type' => '01', 'rate' => $this->get_rates(),
             'document_number' => $this->getDocReference('01'),

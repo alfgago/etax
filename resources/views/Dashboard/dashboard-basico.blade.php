@@ -38,6 +38,48 @@
 <div class=" col-md-4 mb-4">
   <div class="row">
     
+    
+    <div class="col-lg-12 mb-4 manuales-etax">
+      <div class="sidebar-dashboard">
+        <div class="card-title">Manuales eTax</div>
+        <ul>
+    			<li>	
+    			  <a download href="/assets/files/guias/Manual-ConfiguracionEmpresa.pdf">Descargar manual de configuración de empresa</a>
+    			</li>
+    			<li>	
+    				<a download href="/assets/files/guias/Manual-IntroducirVentas.pdf">Descargar manual de introducción de ventas</a>
+    			</li>
+    			<li>	
+    				<a download href="/assets/files/guias/Manual-GenerarFactura.pdf">Descargar manual de facturación electrónica</a>
+    			</li>
+    			<li>	
+    				<a download href="/assets/files/guias/Manual-IntroducirCompras.pdf">Descargar manual de introducción de compras</a>
+    			</li>
+    			<li>	
+    				<a download href="/assets/files/guias/Manual-Escritorio.pdf">Descargar manual de escritorio</a>
+    			</li>
+    			<li>	
+    				<a download href="/assets/files/guias/Manual-CodigosVentasEtax.pdf">Descargar manual de códigos eTax de ventas.</a>
+    			</li>
+    			<li>	
+    				<a download href="/assets/files/guias/Manual-CodigosComprasEtax.pdf">Descargar manual de códigos eTax de compras.</a>
+    			</li>
+    		</ul>
+        
+      </div>
+    </div>
+    
+    <div class="col-lg-12 mb-4">
+      <div class="sidebar-dashboard">
+        <div class="card-title">Notificaciones</div>
+    
+        <div class="notificaciones-container">
+          <div class="notificacion"><span class="fecha">17/06/2019</span> Facturación habilitada en eTax.</div>
+        </div>
+        
+      </div>
+    </div>
+    
     <div class="col-lg-12 mb-4">
       <div class="sidebar-dashboard">
         <div class="card-title">Empresa</div>
@@ -59,18 +101,6 @@
           <div class="dato-empresa mt-3">  
             <a class="btn btn-secondary btn-sm" href="/empresas/configuracion">Configurar datos</a>
           </div>
-        </div>
-        
-      </div>
-    </div>
-    
-    <div class="col-lg-12 mb-4">
-      <div class="sidebar-dashboard">
-        <div class="card-title">Notificaciones</div>
-    
-        <div class="notificaciones-container">
-          <div class="notificacion "><span class="fecha"></span> Usted no tiene notificaciones en este momento.</div>
-          <div class="notificacion hidden"><span class="fecha">21/01/2019</span> 1500 facturas de compra importadas.</div>
         </div>
         
       </div>

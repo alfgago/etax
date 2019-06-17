@@ -418,9 +418,9 @@ class Bill extends Model
         $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10))->format('d/m/Y');
         $fechaVencimiento = $fechaEmision;
         $nombreProveedor = $arr['Emisor']['Nombre'];
-        $codigoProveedor = '';
         $tipoPersona = $arr['Emisor']['Identificacion']['Tipo'];
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
+        $codigoProveedor = $identificacionProveedor;
         $correoProveedor = $arr['Emisor']['CorreoElectronico'];
         $telefonoProveedor = isset($arr['Emisor']['Telefono']) ? $arr['Emisor']['Telefono']['NumTelefono'] : '';
         $tipoIdReceptor = $arr['Receptor']['Identificacion']['Tipo'];
@@ -435,7 +435,7 @@ class Bill extends Model
         }
         
         $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
-        $tipoCambio = $arr['ResumenFactura']['TipoCambio'];
+        $tipoCambio = array_key_exists('TipoCambio', $arr['ResumenFactura']) ? $arr['ResumenFactura']['TipoCambio'] : '1';
         $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
         $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
         $tipoDocumento = '01';

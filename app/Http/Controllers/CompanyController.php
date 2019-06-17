@@ -10,6 +10,8 @@ use App\AtvCertificate;
 use App\Team;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NewUser;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -243,7 +245,16 @@ class CompanyController extends Controller {
             return redirect()->back()->withError('Usted no está autorizado para actualizar esta información');
         }
 
+
+        
         if ($request->file('input_logo')) {
+            
+            if ( isset( $company->logo_url ) ){
+                if (Storage::exists( $company->logo_url )) {
+                    Storage::delete( $company->logo_url );
+                }
+            }
+            
             $pathLogo = Storage::putFileAs(
                 "empresa-$request->id_number", $request->file('input_logo'),
                 "logo.".$request->file('input_logo')->getClientOriginalExtension()
