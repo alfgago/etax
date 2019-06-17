@@ -1,13 +1,15 @@
 @extends('layouts/app')
 
 @section('title')
-Empresas
+    Empresas
 @endsection
 
 @section('breadcrumb-buttons')
-    @can('admin')
-        <a type="submit" class="btn btn-primary {{$data['class']}}" href="{{$data['url']}}">Registrar otra compañía</a>
-    @endcan
+    @if( auth()->user()->isContador() )
+        @can('admin')
+            <a type="submit" class="btn btn-primary {{$data['class']}}" href="{{$data['url']}}">Registrar otra empresa</a>
+        @endcan
+    @endif
 @endsection
 
 @section('content')
@@ -26,7 +28,7 @@ Empresas
                             <a class="nav-link" aria-selected="false" href="/usuario/seguridad">Seguridad</a>
                         </li>
                         <li>
-                            <a class="nav-link" aria-selected="false" href="/usuario/cambiar-plan">Cambiar plan</a>
+                            <a class="nav-link" aria-selected="false" href="/elegir-plan">Cambiar plan</a>
                         </li>
                         <li class="active">
                             <a class="nav-link active" aria-selected="true" href="/usuario/empresas">Empresas</a>
@@ -38,7 +40,7 @@ Empresas
 
                         <div class="tab-pane fade show active" role="tabpanel">
 
-                            <h3 class="card-title">Empresas</h3>
+                            <h3 class="card-title">Contabilidades</h3>
 
                             <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
                                 <thead>

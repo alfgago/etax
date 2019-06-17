@@ -13,7 +13,7 @@ class BillImport implements WithHeadingRow, WithBatchInserts, WithChunkReading, 
     
     public function headingRow(): int 
     {
-        return 1;
+        return 3;
     }
     
     public function batchSize(): int
@@ -24,7 +24,7 @@ class BillImport implements WithHeadingRow, WithBatchInserts, WithChunkReading, 
     public function chunkSize(): int
     {
         return 1000;
-    }  
+    }
     
 }
 

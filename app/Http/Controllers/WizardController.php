@@ -36,7 +36,9 @@ class WizardController extends Controller
           return redirect('/elegir-plan');
       }
       
-      return view('/wizard/index', compact( 'subscription' ) );
+      $company = currentCompanyModel();
+      
+      return view('/wizard/index', compact( 'subscription', 'company' ) );
 
     }
     
@@ -109,11 +111,11 @@ class WizardController extends Controller
         
         $calc = CalculatedTax::getProrrataPeriodoAnterior(2018);
         
-        $company->operative_prorrata = $calc->prorrata;
-        $company->operative_ratio1 = $calc->ratio1*100;
-        $company->operative_ratio2 = $calc->ratio2*100;
-        $company->operative_ratio3 = $calc->ratio3*100;
-        $company->operative_ratio4 = $calc->ratio4*100;
+        $company->operative_prorrata = $calc->prorrata*100;
+        $company->operative_ratio1 = number_format( $calc->ratio1*100, 2);
+        $company->operative_ratio2 = number_format( $calc->ratio2*100, 2);
+        $company->operative_ratio3 = number_format( $calc->ratio3*100, 2);
+        $company->operative_ratio4 = number_format( $calc->ratio4*100, 2);
         $company->save();
       
         return redirect('/empresas/configuracion')->withMessage( 'Su prorrata operativa 2018 es de: '. number_format( $calc->prorrata*100, 2) . '%' );
@@ -178,6 +180,27 @@ class WizardController extends Controller
             $company->first_prorrata = $request->first_prorrata;
             $company->first_prorrata_type = $request->first_prorrata_type;
             $company->use_invoicing = $request->use_invoicing;
+            
+            if( $company->first_prorrata_type == 1 ) {
+                $company->operative_prorrata = $request->first_prorrata;
+                $company->operative_ratio1 = $request->operative_ratio1;
+                $company->operative_ratio2 = $request->operative_ratio2;
+                $company->operative_ratio3 = $request->operative_ratio3;
+                $company->operative_ratio4 = $request->operative_ratio4;
+            }
+            
+            $id_number = $company->id_number;
+            $id_company = $company->id;
+            if ( $request->file('input_logo') ) {
+
+                $pathLogo = Storage::putFileAs(
+                    "empresa-$id_number", $request->file('input_logo'),
+                    "logo.".$request->file('input_logo')->getClientOriginalExtension()
+                );
+                $company->logo_url = $pathLogo;
+                
+            }
+                
             $company->wizard_finished = true;
             $company->save();
 
@@ -186,11 +209,8 @@ class WizardController extends Controller
             $team->save();
 
             clearLastTaxesCache($company->id, 2018);
-
+            
             if ($company->use_invoicing && $request->file('cert')) {
-
-                $id_number = $company->id_number;
-                $id_company = $company->id;
                 if (Storage::exists("empresa-$id_number/$id_number.p12")) {
                     Storage::delete("empresa-$id_number/$id_number.p12");
                 }
@@ -198,12 +218,6 @@ class WizardController extends Controller
                 $pathCert = Storage::putFileAs(
                     "empresa-$id_number", $request->file('cert'), "$id_number.p12"
                 );
-
-                $pathLogo = Storage::putFileAs(
-                    "empresa-$id_number", $request->file('input_logo'),
-                    "logo.".$request->file('input_logo')->getClientOriginalExtension()
-                );
-
 
                 $cert = AtvCertificate::firstOrNew(
                     [
@@ -216,9 +230,6 @@ class WizardController extends Controller
                 $cert->key_url = $pathCert;
                 $cert->pin = $request->pin;
                 $cert->save();
-
-                $company->logo_url = $pathLogo;
-                $company->save();
             }
 
             if ($company->first_prorrata_type == 2) {

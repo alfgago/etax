@@ -1,4 +1,4 @@
-@extends('layouts/app')
+@extends('layouts/wizard-layout')
 
 @section('title') 
   Configuración inicial
@@ -8,20 +8,6 @@
 
 @section('header-scripts')
 
-<style>
-  .btn-cerrarsesion {
-  	
-  	position: absolute; top: .5rem; right: .5rem; color: #FFF; font-size: 1.2rem; padding: .5rem .25rem; border: 2px solid #fff; font-weight: bold; z-index: 99;
-  	
-  }
-  
-  @media only screen and (max-width: 680px) {
-	  .btn-cerrarsesion {
-	    display: none;
-	  }
-	}
-</style>
-
 @endsection
 
 @section('content') 
@@ -29,8 +15,8 @@
   <div class="wizard-popup">
   	
    	<div class="titulo-bienvenida">
-    	<h2>¡Bienvenido a eTax!</h2>
-    	<p>En poco tiempo podrá utilizar la herramienta más fiable para el cálculo de IVA y facturación electrónica. Para iniciar, complete sus datos a continuación.</p>
+    	<h2>Configuración inicial</h2>
+    	<p>Para iniciar con eTax, complete sus datos a continuación.</p>
     </div>
     	
 	<div class="wizard-steps">

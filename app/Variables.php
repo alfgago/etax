@@ -1,5 +1,7 @@
 <?php
 
+use App\UnidadMedicion;
+
 namespace App;
 
 class Variables
@@ -232,12 +234,21 @@ class Variables
   }
   
   public static function getUnidadMedicionName($value){
-    $lista = Variables::unidadesMedicion();
+    /*$lista = Variables::unidadesMedicion();
     
     foreach ($lista as $tipo) {
       if( $value == $tipo['codigo'] ){
         return $tipo['nombre'];
       }
+    }*/
+    
+    $value = $value != '1' ? $value : 'Unid';
+    $value = $value != '2' ? $value : 'Sp';
+    
+    $unid = UnidadMedicion::where('code', $value)->first();
+    
+    if( isset($unid) ){
+      return $unid['name'];
     }
     
     return "Otros";

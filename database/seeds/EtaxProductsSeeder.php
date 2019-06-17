@@ -111,5 +111,6 @@ class EtaxProductsSeeder extends Seeder
             'name' => 'Prorrata 2018',
             'price' => 99.99,
         ]);   
+        
     }
 }

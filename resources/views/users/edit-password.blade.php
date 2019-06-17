@@ -24,11 +24,13 @@ Change Password
                             <a class="nav-link active" aria-selected="true" href="/usuario/seguridad">Seguridad</a>
                         </li>
                         <li>
-                            <a class="nav-link" aria-selected="false" href="/usuario/cambiar-plan">Cambiar plan</a>
+                            <a class="nav-link" aria-selected="false" href="/elegir-plan">Cambiar plan</a>
                         </li>
+                        @if( auth()->user()->isContador() )
                         <li>
                             <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
                         </li>
+                        @endif
                     </ul>
                 </div>
                 <div class="col-9">

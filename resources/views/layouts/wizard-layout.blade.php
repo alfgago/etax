@@ -21,9 +21,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css" />
     
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=5.02">
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=2.08">
     
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=5.02"></script>
+    <script src="{{asset('assets/js/common-bundle.js')}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
   
     @yield('header-scripts')
@@ -33,25 +33,14 @@
 <body>
     <div class="app-admin-wrap page-@yield('slug', 'default')">
 
-      @include('layouts.header-menu')
-
-       @include('layouts.sidebar')
 
         <!-- ============ Body content start ============= -->
-        <div class="main-content-wrap sidenav-open d-flex flex-column">
-
-          <div class="breadcrumb">
-              <h1>@yield('title')</h1>
-              <div class="breadcrumb-buttons">
-                @yield('breadcrumb-buttons')
-              </div>
-          </div>
-          
-          <div class="separator-breadcrumb border-top"></div>
+        <div class="main-content-wrap wizard-layout-content">
           
           @yield('content')
 
-           @include('layouts.footer')
+          @include('layouts.footer')
+          
         </div>
         <!-- ============ Body content End ============= -->
     </div>
@@ -110,7 +99,7 @@
 
         gtag('config', 'UA-134999499-1');
       </script>
- 
+    
     <button type="button" class="callnow" onclick="popupReproductor();">Ayuda</button>
     <?php
       $user = auth()->user();
