@@ -321,6 +321,7 @@ class Bill extends Model
               $bill->is_authorized = $isAuthorized;
               $bill->is_code_validated = $codeValidated;
               $bill->is_void = false;
+              $bill->hacienda_status = "03";
               
               //Datos de factura
               $bill->currency = $idMoneda;
