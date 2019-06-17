@@ -226,7 +226,6 @@ class PaymentController extends Controller
                 if( $cuponConsultado->code == '$$$ETAX100DESCUENTO!' || $cuponConsultado->code == '$$$ETAXTRANSFERENCIA!' ){
                     return $this->skipPaymentCoupon( $request, $cuponConsultado );
                 }
-                    
                 $descuento = ($cuponConsultado->discount_percentage) / 100;
             } else {
                 $descuento = 0;
@@ -267,6 +266,11 @@ class PaymentController extends Controller
         );
         $cardYear = substr($request->expiry, -2);
         $cardMonth = substr($request->expiry, 0 , 2);
+        
+        //Cupon para pruebas, hace pagos por $1.
+        if( $request->coupon == "!!CUPON1!!" ) {
+            $amount = 1;
+        }
         
         foreach ($cards as $c) {
             $check = $paymentUtils->checkCC($c, true);
@@ -309,11 +313,11 @@ class PaymentController extends Controller
             $payment = Payment::updateOrCreate(
                 [
                     'sale_id' => $sale->id,
+                    'payment_status' => 1,
                 ],
                 [
                     'payment_method_id' => $paymentMethod->id,
                     'payment_date' => $start_date,
-                    'payment_status' => 1,
                     'amount' => $amount
                 ]
             );
@@ -489,7 +493,7 @@ class PaymentController extends Controller
                 $invoiceDataSent = $invoice->setInvoiceData($data);
                 Log::info('Suscriptor: '. $data->client_id_number . ", Nombre: " . $data->first_name . " " . $data->last_name . " " . $data->last_name2 . ", Plan:" . $invoiceData->items[0]->name );
                 if ( !empty($invoiceDataSent) ) {
-                    //$invoice = $apiHacienda->createInvoice($invoiceDataSent, $tokenApi);
+                    $invoice = $apiHacienda->createInvoice($invoiceDataSent, $tokenApi);
                 }
             }catch(\Throwable $e){}
 
