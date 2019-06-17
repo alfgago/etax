@@ -45,13 +45,19 @@
 						        Editar perfil de empresa
 						      </h3>
 						    </div>
-						  <div class="form-group col-md-7">
-							  <div class="">
-								  <label for="input_logo" class="logo-input">Logo empresa</label>
-								  <label id="logo-name"></label>
-								  <input name="input_logo" id="input_logo" style="visibility:hidden;" type="file" multiple="false">
+							  <div class="form-group col-md-7">
+								  <div class="">
+									  <label for="input_logo" class="logo-input">Logo empresa</label>
+									  <label id="logo-name"></label>
+									  <input name="input_logo" id="input_logo" style="visibility:hidden;" type="file" multiple="false">
+								  </div>
+								  
+								  <div class="logo-container">
+								  @if($company->logo_url)
+								  	<img src="{{ \Illuminate\Support\Facades\Storage::temporaryUrl($company->logo_url, now()->addMinutes(1)) }}" style="max-height: 75px">
+								  @endif
+								  </div>
 							  </div>
-						  </div>
 						    
 						    <div class="form-group col-md-4">
 						      <label for="tipo_persona">Tipo de persona *</label>

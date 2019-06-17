@@ -272,5 +272,22 @@ class ClientController extends Controller
         return redirect('/clientes')->withMessage('Clientes importados exitosamente en '.$time.'s');
     }
     
+    /**
+     * Restore the specific item
+     *
+     * @param  \App\Product  $product
+     * @return \Illuminate\Http\Response
+     */
+    public function restore($id)
+    {
+        $rest = Client::onlyTrashed()->where('id', $id)->first();
+        if( $rest->company_id != currentCompany() ){
+            return 404;
+        }
+        $rest->restore();
+        
+        return redirect('/clientes')->withMessage('El cliente ha sido restaurado satisfactoriamente.');
+    }   
+    
     
 }

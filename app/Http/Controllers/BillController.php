@@ -47,7 +47,7 @@ class BillController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexData() {
+    public function indexData( Request $request ) {
         $current_company = currentCompany();
 
         $query = Bill::where('bills.company_id', $current_company)
@@ -56,25 +56,36 @@ class BillController extends Controller
                 ->where('is_code_validated', true)
                 ->where('is_totales', false)
                 ->with('provider');
+        
+        $filtro = $request->get('filtro');
+        if( $filtro == 0 ) {
+            $query = $query->onlyTrashed();
+        }else if( $filtro == 1 ) {
+            $query = $query->where('document_type', '01');
+        }else if( $filtro == 2 ) {
+            $query = $query->where('document_type', '02');
+        }else if( $filtro == 3 ) {
+            $query = $query->where('document_type', '03');
+        }else if( $filtro == 4 ) {
+            $query = $query->where('document_type', '04');
+        }             
+                
         return datatables()->eloquent( $query )
-            ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($bill) {
-                $hideEdit = false;
+                $oficialHacienda = false;
                 if( $bill->generation_method != 'M' && $bill->generation_method != 'XLSX' ){
-                    $hideEdit =  true;
+                    $oficialHacienda =  true;
                 }
-                return view('datatables.actions', [
-                    'routeName' => 'facturas-recibidas',
-                    'showTitle' => 'Ver factura',
-                    'deleteTitle' => 'Anular factura',
-                    'editTitle' => 'Editar factura',
-                    'deleteIcon' => 'fa fa-ban',
-                    'hideEdit' => $hideEdit,
-                    'id' => $bill->id
+                return view('Bill.ext.actions', [
+                    'oficialHacienda' => $oficialHacienda,
+                    'data' => $bill
                 ])->render();
             }) 
             ->editColumn('provider', function(Bill $bill) {
-                return $bill->provider->getFullName();
+                return $bill->providerName();
+            })
+            ->editColumn('document_type', function(Bill $bill) {
+                return $bill->documentTypeName();
             })
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');
@@ -114,7 +125,8 @@ class BillController extends Controller
 
         //Datos generales y para Hacienda
         $bill->document_type = "01";
-        $bill->hacienda_status = "01";
+        $bill->hacienda_status = "03";
+        $bill->status = "02";
         $bill->payment_status = "01";
         $bill->payment_receipt = "";
         $bill->generation_method = "M";
@@ -196,16 +208,8 @@ class BillController extends Controller
      * @param  \App\Bill  $bill
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function anular($id)
     {
-        $bill = Bill::find($id);
-        $this->authorize('update', $bill);
-        
-        clearBillCache($bill);
-        
-        $bill->is_void = true;
-        $bill->save();
-        
         return redirect('/facturas-recibidas');
     }
     
@@ -248,8 +252,8 @@ class BillController extends Controller
                             $codigoProveedor = $row['codigoproveedor'] ? $row['codigoproveedor'] : '';
                             $tipoPersona = $row['tipoidentificacion'];
                             $identificacionProveedor = $row['identificacionproveedor'];
-                            $correoProveedor = '';
-                            $telefonoProveedor = '';
+                            $correoProveedor = $row['correoproveedor'];
+                            $telefonoProveedor = null;
                                         
                             //Datos de factura
                             $consecutivoComprobante = $row['consecutivocomprobante'];
@@ -259,7 +263,7 @@ class BillController extends Controller
                             $numeroLinea = array_key_exists('numerolinea', $row) ? $row['numerolinea'] : 1;
                             $fechaEmision = $row['fechaemision'];
                             $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
-                            $idMoneda = $row['idmoneda'];
+                            $idMoneda = $row['moneda'];
                             $tipoCambio = $row['tipocambio'];
                             $totalDocumento = $row['totaldocumento'];
                             $tipoDocumento = $row['tipodocumento'];
@@ -274,7 +278,7 @@ class BillController extends Controller
                             $subtotalLinea = (float)$row['subtotallinea'];
                             $totalLinea = $row['totallinea'];
                             $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
-                            $codigoEtax = $row['codigoetax'];
+                            $codigoEtax = $row['codigoivaetax'];
                             $montoIva = (float)$row['montoiva'];
                             $totalNeto = 0;
                             
@@ -508,8 +512,42 @@ class BillController extends Controller
             $bill->delete();
             return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido rechazada');
         }
-        
-        
     }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Bill  $bill
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+        BillItem::where('bill_id', $bill->id)->delete();
+        $bill->delete();
+        clearBillCache($bill);
+        
+        return redirect('/facturas-recibidas')->withMessage('La factura ha sido eliminada satisfactoriamente.');
+    } 
+    
+    /**
+     * Restore the specific item
+     *
+     * @param  \App\Bill  $bill
+     * @return \Illuminate\Http\Response
+     */
+    public function restore($id)
+    {
+        $bill = Bill::onlyTrashed()->where('id', $id)->first();
+        if( $bill->company_id != currentCompany() ){
+            return 404;
+        }
+        $bill->restore();
+        BillItem::onlyTrashed()->where('bill_id', $bill->id)->restore();
+        clearBillCache($bill);
+        
+        return redirect('/facturas-recibidas')->withMessage('La factura ha sido restaurada satisfactoriamente.');
+    }  
     
 }

@@ -21,30 +21,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css" />
     
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=2.05">
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=5.3">
     
-    <script src="{{asset('assets/js/common-bundle.js')}}"></script>
-
-    <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=a366a538-e5db-4a02-8c91-e6d7def5fe29"> </script>
+    <script src="{{asset('assets/js/common-bundle.js')}}?v=5.02"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
-    
-    <script>
-      /*window.zESettings = {
-       webWidget: {
-         authenticate: {
-           chat: {
-             jwtFn: function(callback) { 
-               fetch('/usuario/zendesk-jwt').then(function(res) {
-                  res.text().then(function(jwt) {
-                   callback(jwt);
-                  });
-                });
-              }
-            } 
-          }
-        }
-      };*/
-    </script>
   
     @yield('header-scripts')
     
@@ -130,6 +110,16 @@
 
         gtag('config', 'UA-134999499-1');
       </script>
+
+    <button type="button" class="callnow" onclick="popupReproductor();">Ayuda</button>
+    <?php
+      $user = auth()->user();
+    ?>
+    <script type="text/javascript">
+      function popupReproductor(){
+        window.open('https://www.callmyway.com/Welcome/SupportChatInfo/171479/?chat_type_id=5&contact_name={{ $user->first_name . " " . $user->last_name }}&contact_email={{ $user->email }}&contact_phone={{ $user->phone ? $user->phone : '' }}&contact_request=Chat de ayuda iniciado..&autoSubmit=1', 'Soporte eTax', 'height=350,width=350,resizable=0,marginwidth=0,marginheight=0,frameborder=0');
+      };
+    </script>
     
 </body>
 

@@ -102,6 +102,14 @@ class Book extends Model
     }
     
     public function setCuentaContableAjustes( $calculos ){
+      $company = currentCompanyModel();
+      
+      $prorrataOperativa = $company->operative_prorrata / 100;
+      $ratio1_operativo = $company->operative_ratio1 / 100;
+      $ratio2_operativo = $company->operative_ratio2 / 100;
+      $ratio3_operativo = $company->operative_ratio3 / 100;
+      $ratio4_operativo = $company->operative_ratio4 / 100;
+      
       //Haber 3
         $this->cc_ppp_1 = $calculos->i011 + $calculos->i031 + $calculos->i051 + $calculos->i071;
         $this->cc_ppp_2 = $calculos->i012 + $calculos->i032 + $calculos->i052 + $calculos->i072;
@@ -140,15 +148,15 @@ class Book extends Model
         $this->cc_aj_bs_3 = $calculos->i003 + $calculos->i023 ;
         $this->cc_aj_bs_4 = $calculos->i004 + $calculos->i024 ;
         
-        $acreditable_bs1  = ( ($bases_bs1 * $calculos->ratio1 * 0.01) + ($bases_bs1 * $calculos->ratio2 * 0.01) + ($bases_bs1 * $calculos->ratio3 * 0.01) + ($bases_bs1 * $calculos->ratio4 * 0.01) ) * $calculos->prorrata_operativa;
-        $acreditable_bs2  = ( ($bases_bs2 * $calculos->ratio1 * 0.01) + ($bases_bs2 * $calculos->ratio2 * 0.02) + ($bases_bs2 * $calculos->ratio3 * 0.02) + ($bases_bs2 * $calculos->ratio4 * 0.02) ) * $calculos->prorrata_operativa;
-        $acreditable_bs3  = ( ($bases_bs3 * $calculos->ratio1 * 0.01) + ($bases_bs3 * $calculos->ratio2 * 0.02) + ($bases_bs3 * $calculos->ratio3 * 0.13) + ($bases_bs3 * $calculos->ratio4 * 0.04) ) * $calculos->prorrata_operativa;
-        $acreditable_bs4  = ( ($bases_bs4 * $calculos->ratio1 * 0.01) + ($bases_bs4 * $calculos->ratio2 * 0.02) + ($bases_bs4 * $calculos->ratio3 * 0.04) + ($bases_bs4 * $calculos->ratio4 * 0.04) ) * $calculos->prorrata_operativa;
-        
-        $acreditable_ppp1 = ( ($bases_ppp1 * $calculos->ratio1 * 0.01) + ($bases_ppp1 * $calculos->ratio2 * 0.01) + ($bases_ppp1 * $calculos->ratio3 * 0.01) + ($bases_ppp1 * $calculos->ratio4 * 0.01) ) * $calculos->prorrata_operativa;
-        $acreditable_ppp2 = ( ($bases_ppp2 * $calculos->ratio1 * 0.01) + ($bases_ppp2 * $calculos->ratio2 * 0.02) + ($bases_ppp2 * $calculos->ratio3 * 0.02) + ($bases_ppp2 * $calculos->ratio4 * 0.02) ) * $calculos->prorrata_operativa;
-        $acreditable_ppp3 = ( ($bases_ppp3 * $calculos->ratio1 * 0.01) + ($bases_ppp3 * $calculos->ratio2 * 0.02) + ($bases_ppp3 * $calculos->ratio3 * 0.13) + ($bases_ppp3 * $calculos->ratio4 * 0.04) ) * $calculos->prorrata_operativa;
-        $acreditable_ppp4 = ( ($bases_ppp4 * $calculos->ratio1 * 0.01) + ($bases_ppp4 * $calculos->ratio2 * 0.02) + ($bases_ppp4 * $calculos->ratio3 * 0.04) + ($bases_ppp4 * $calculos->ratio4 * 0.04) ) * $calculos->prorrata_operativa;
+        $acreditable_bs1  = ( ($bases_bs1 * $ratio1_operativo * 0.01) + ($bases_bs1 * $ratio2_operativo * 0.02) + ($bases_bs1 * $ratio3_operativo * 0.13) + ($bases_bs1 * $ratio4_operativo * 0.04) ) * $prorrataOperativa;
+        $acreditable_bs2  = ( ($bases_bs2 * $ratio1_operativo * 0.02) + ($bases_bs2 * $ratio2_operativo * 0.02) + ($bases_bs2 * $ratio3_operativo * 0.02) + ($bases_bs2 * $ratio4_operativo * 0.02) ) * $prorrataOperativa;
+        $acreditable_bs3  = ( ($bases_bs3 * $ratio1_operativo * 0.13) + ($bases_bs3 * $ratio2_operativo * 0.02) + ($bases_bs3 * $ratio3_operativo * 0.13) + ($bases_bs3 * $ratio4_operativo * 0.04) ) * $prorrataOperativa;
+        $acreditable_bs4  = ( ($bases_bs4 * $ratio1_operativo * 0.04) + ($bases_bs4 * $ratio2_operativo * 0.02) + ($bases_bs4 * $ratio3_operativo * 0.04) + ($bases_bs4 * $ratio4_operativo * 0.04) ) * $prorrataOperativa;
+
+        $acreditable_ppp1 = ( ($bases_ppp1 * $ratio1_operativo * 0.01) + ($bases_ppp1 * $ratio2_operativo * 0.02) + ($bases_ppp1 * $ratio3_operativo * 0.13) + ($bases_ppp1 * $ratio4_operativo * 0.04) ) * $prorrataOperativa;
+        $acreditable_ppp2 = ( ($bases_ppp2 * $ratio1_operativo * 0.02) + ($bases_ppp2 * $ratio2_operativo * 0.02) + ($bases_ppp2 * $ratio3_operativo * 0.02) + ($bases_ppp2 * $ratio4_operativo * 0.02) ) * $prorrataOperativa;
+        $acreditable_ppp3 = ( ($bases_ppp3 * $ratio1_operativo * 0.13) + ($bases_ppp3 * $ratio2_operativo * 0.02) + ($bases_ppp3 * $ratio3_operativo * 0.13) + ($bases_ppp3 * $ratio4_operativo * 0.04) ) * $prorrataOperativa;
+        $acreditable_ppp4 = ( ($bases_ppp4 * $ratio1_operativo * 0.04) + ($bases_ppp4 * $ratio2_operativo * 0.02) + ($bases_ppp4 * $ratio3_operativo * 0.04) + ($bases_ppp4 * $ratio4_operativo * 0.04) ) * $prorrataOperativa;
 
         $acreditable_ppp = $acreditable_ppp1 + $acreditable_ppp2 + $acreditable_ppp3 + $acreditable_ppp4;
         $acreditable_bs = $acreditable_bs1 + $acreditable_bs2 + $acreditable_bs3 + $acreditable_bs4;

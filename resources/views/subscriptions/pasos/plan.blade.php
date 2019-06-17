@@ -37,16 +37,9 @@
 
 <div class="form-group col-md-12 mt-4">
 	<span class="precio-container">
-		Precio de <span class="precio-text">9.99</span> <span class="recurrencia-text">/ mes</span>
+		Precio de <span class="precio-text precio-inicial">9.99</span> <span class="recurrencia-text">/ mes</span>
 	</span>
 </div>
-
-<div class="form-group col-md-12">
-  <div class="bigtext">
-  	Elija el plan de su conveniencia y empiece a calcular el IVA con eTax. Disfrute de una <span>prueba gratis</span> válida hasta el 14 de Junio.
-  </div>
-</div>
-
 
 <div class="btn-holder">
   <a class="btn btn-primary btn-prev" target="_blank" href="https://etaxcr.com/planes">Ver detalle de planes</a>

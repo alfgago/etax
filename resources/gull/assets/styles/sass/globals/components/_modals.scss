@@ -117,3 +117,7 @@
 .swal2-container .swal2-styled:not(.swal2-cancel) {
     background: #d22346 !important
 }
+
+.swal2-container.container-success .swal2-styled:not(.swal2-cancel) {
+    background: #158e5d!important;
+}

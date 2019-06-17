@@ -153,8 +153,12 @@ class UserController extends Controller {
         $data['url'] = '/empresas/create';
         
         try {
+            $user = auth()->user();
+            if( ! $user->isContador() ) {
+                return redirect('/');
+            }
         
-            $teams = auth()->user()->teams;
+            $teams = $user->teams;
     
             /* Show registered companies list on specific plan */
             if ( isset($_GET['plan']) ) {

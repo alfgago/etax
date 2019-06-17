@@ -28,13 +28,14 @@
 			  	<ul class="cols-excel">
 			  		<li>TipoDocumento</li>
 			  		<li>ConsecutivoComprobante</li>
-			  		<li>IdMoneda</li>
+			  		<li>Moneda</li>
 			  		<li>TipoCambio</li>
 			  		<li>FechaEmision</li>
 			  		<li>CodigoCliente</li>
 			  		<li>NombreCliente</li>
 			  		<li>TipoIdentificacion</li>
 			  		<li>IdentificacionReceptor</li>
+			  		<li>CorreoReceptor</li>
 			  		<li>CondicionVenta</li>
 			  		<li>MetodoPago</li>
 			  		<li>NumeroLinea</li>
@@ -48,7 +49,7 @@
 			  		<li>MontoIVA</li>
 			  		<li>TotalLinea</li>
 			  		<li>TotalDocumento</li>
-			  		<li>CodigoEtax</li>
+			  		<li>CodigoIVAEtax</li>
 			  	</ul>
 			  	* El orden puede variar, mantener nombres de columnas. Debe utilizar una fila por cada linea de factura.
 			  	* Máximo de 2500 lineas por archivo.

@@ -7,8 +7,8 @@ use Illuminate\Database\Migrations\Migration;
 class AddSoftDeleteAllTable extends Migration
 {
     protected $tables = ['atv_certificates', 'bills', 'bill_items', 'books', 'calculated_taxes', 'clients',
-        'codigo_iva_repercutidos', 'codigo_iva_soportados', 'coupons', 'invoices', 'invoice_items', 'payments',
-        'permissions', 'plans_invitations', 'products', 'product_categories', 'providers', 'users', 'xml_haciendas'];
+        'codigo_iva_repercutidos', 'codigo_iva_soportados', 'coupons', 'invoices', 'invoice_items',
+        'plans_invitations', 'products', 'product_categories', 'providers', 'users', 'xml_haciendas'];
 
     /**
      * Run the migrations.
@@ -18,9 +18,11 @@ class AddSoftDeleteAllTable extends Migration
     public function up()
     {
        foreach ($this->tables as $table) {
-           Schema::table($table, function (Blueprint $tab) {
-               $tab->softDeletes();
-           });
+            if ( !Schema::hasColumn($table, 'deleted_at') ) {
+               Schema::table($table, function (Blueprint $tab) {
+                   $tab->softDeletes();
+               });
+            }
        }
     }
 

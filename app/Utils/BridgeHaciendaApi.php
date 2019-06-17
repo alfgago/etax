@@ -53,12 +53,12 @@ class BridgeHaciendaApi
     public function createInvoice(Invoice $invoice, $token) {
         try {
             $requestDetails = $this->setDetails($invoice->items);
-            $company = currentCompanyModel();
+            $company = $invoice->company;
             $requestData = $this->setInvoiceData($invoice, $requestDetails);
             if ($requestData !== false) {
                 $client = new Client();
                 Log::info('Enviando parametros  API HACIENDA -->>');
-                $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice/create', [
+                $result = $client->requestAsync('POST', config('etax.api_hacienda_url') . '/index.php/invoice/create', [
                     'headers' => [
                         'Auth-Key'  => config('etax.api_hacienda_key'),
                         'Client-Service' => config('etax.api_hacienda_client'),
@@ -69,6 +69,7 @@ class BridgeHaciendaApi
                     'multipart' => $requestData,
                     'verify' => false,
                 ]);
+                $result = $result->wait();
                 $response = json_decode($result->getBody()->getContents(), true);
                 if (isset($response['status']) && $response['status'] == 200) {
                     $date = Carbon::now();
@@ -90,11 +91,11 @@ class BridgeHaciendaApi
                         return $invoice;
                     }
                 }
-                return false;
+                return $invoice;
             }
         } catch (ClientException $error) {
             Log:info('Error al crear factura en API HACIENDA -->>'. $error);
-            return false;
+            return $invoice;
         }
     }
 
@@ -123,7 +124,7 @@ class BridgeHaciendaApi
 
     private function setInvoiceData(Invoice $data, $details) {
         try {
-            $company = currentCompanyModel();
+            $company = $data->company;
             $ref = getInvoiceReference($company->last_invoice_ref_number) + 1;
             $data->reference_number = $ref;
             $data->save();
@@ -142,6 +143,7 @@ class BridgeHaciendaApi
                 'receptor_cedula_numero' => $data['client_id_number'] ?? '',
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',
+                'tipocambio' => $data['currency_rate'] ?? '',
                 'tipo_documento' => $data['document_type'] ?? '',
                 'sucursal_nro' => '001',
                 'terminal_nro' => '00001',
@@ -160,7 +162,7 @@ class BridgeHaciendaApi
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
                 'atvcertPin' => $company->atv->pin ?? '',
                 'atvcertFile' => Storage::get($company->atv->key_url),
-                'detalle' => '{"1": {"cantidad":"1","unidadMedida":"Servicios","detalle":"Honorarios por hora de programacion","precioUnitario":"1130","montoTotal":"1130","subtotal":"1130","montoTotalLinea":"1130", "descuento":0,"impuesto":0}}'
+                'detalle' => $details
             );
             foreach ($invoiceData as $key => $values) {
                 if ($key == 'atvcertFile') {

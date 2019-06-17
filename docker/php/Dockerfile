@@ -15,6 +15,7 @@ RUN apt-get update && \
 RUN docker-php-ext-install bcmath
 
 RUN docker-php-ext-install zip
+RUN docker-php-ext-install pcntl
 
 RUN docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr; 
 RUN docker-php-ext-install gd

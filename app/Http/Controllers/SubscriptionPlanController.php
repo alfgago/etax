@@ -58,7 +58,7 @@ class SubscriptionPlanController extends Controller
         $users = User::paginate(10);
         
         
-        return view('Subscriptions/all', [
+        return view('subscriptions/all', [
           'users' => $users
         ]);
     }
@@ -67,8 +67,6 @@ class SubscriptionPlanController extends Controller
         if( auth()->user()->user_name != "alfgago" ) {
             return redirect(404);
         }
-        
-        
         return Excel::download(new UsersExport(), 'usuarios.xlsx');
     }
     

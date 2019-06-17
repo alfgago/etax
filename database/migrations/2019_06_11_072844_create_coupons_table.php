@@ -29,20 +29,6 @@ class CreateCouponsTable extends Migration
 
             $table->timestamps();
         });
-        
-        /*$faker = Faker\Factory::create();
-        for($i = 0; $i < 500; $i++) {
-            
-            App\Coupon::create([
-                'code' => $faker->lexify('??????'),
-                'promotion_name' => 'Evento de lanzamiento',
-                'discount_percentage' => '100',
-                'months_duration' => '1',
-                'use_once' => true,
-                'valid_until' =>  Carbon::now()->addMonths(2)
-            ]);
-            
-        }*/
     }
 
     /**

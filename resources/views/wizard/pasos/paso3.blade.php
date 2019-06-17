@@ -13,7 +13,7 @@
 </div>
 
 <div class="form-group col-md-6">
-  <label for="last_document" style="padding-top:1.4em;">Último documento emitido</label>
+  <label for="last_document" >Último documento emitido</label>
   <input type="text" class="form-control" name="last_document" id="last_document" value="{{ @$company->last_document }}" >
   <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
 </div>

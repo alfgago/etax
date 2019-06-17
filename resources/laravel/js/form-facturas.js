@@ -9,6 +9,9 @@
       var subtotal = cantidad * precio_unitario;
       
       var discount = parseFloat( $('#discount').val() );
+      if( !discount ) {
+        $('#discount').val(0);
+      }
       var discount_type = $('#discount_type').val();
       if( discount_type == "01" && discount > 0 ) {
         subtotal = subtotal - ( subtotal * (discount / 100) );
@@ -171,7 +174,6 @@
       var htmlCols = "<td><span class='numero-fila'>"+(numero+1)+"</span> </td>";
         htmlCols += "<td>"+codigo + inputFields + " </td>";
         htmlCols += "<td>"+nombre+" </td>";
-        htmlCols += "<td>"+tipo_producto+" </td>";
         htmlCols += "<td>"+cantidad+" </td>";
         htmlCols += "<td>"+unidad_medicion+" </td>";
         htmlCols += "<td>"+ fixComas(precio_unitario) +" </td>";
@@ -223,7 +225,7 @@
       $('.item-factura-form input[type=checkbox]').prop('checked', false);
       
       $('#tipo_producto').val(1).change();
-      $('#unidad_medicion').val(1);
+      $('#unidad_medicion').val('Unid');
       $('#cantidad').val(1);
       $('#porc_identificacion_plena').val(1);
       $('#discount_type').val('01');

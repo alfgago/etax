@@ -47,7 +47,7 @@ class InvoiceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexData() {
+    public function indexData( Request $request ) {
         $current_company = currentCompany();
 
         $query = Invoice::where('invoices.company_id', $current_company)
@@ -57,19 +57,28 @@ class InvoiceController extends Controller
                 ->where('is_totales', false)
                 ->with('client');
                 
+        $filtro = $request->get('filtro');
+        if( $filtro == 0 ) {
+            $query = $query->onlyTrashed();
+        }else if( $filtro == 1 ) {
+            $query = $query->where('document_type', '01');
+        }else if( $filtro == 2 ) {
+            $query = $query->where('document_type', '02');
+        }else if( $filtro == 3 ) {
+            $query = $query->where('document_type', '03');
+        }else if( $filtro == 4 ) {
+            $query = $query->where('document_type', '04');
+        }             
+                
         return datatables()->eloquent( $query )
             ->addColumn('actions', function($invoice) {
-                $hideEdit = false;
+                $oficialHacienda = false;
                 if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
-                    $hideEdit =  true;
+                    $oficialHacienda =  true;
                 }
-                return view('datatables.actions', [
-                    'routeName' => 'facturas-emitidas',
-                    'deleteTitle' => 'Anular factura',
-                    'editTitle' => 'Editar factura',
-                    'deleteIcon' => 'fa fa-ban',
-                    'hideEdit' => $hideEdit,
-                    'id' => $invoice->id
+                return view('Invoice.ext.actions', [
+                    'oficialHacienda' => $oficialHacienda,
+                    'data' => $invoice
                 ])->render();
             }) 
             ->editColumn('client', function(Invoice $invoice) {
@@ -103,6 +112,11 @@ class InvoiceController extends Controller
      */
     public function emitFactura()
     {
+        $company = currentCompanyModel();
+        if( ! isset($company->logo_url) ){
+            return redirect('/empresas/editar')->withError('Para poder emitir facturas, debe subir un logo y certificado ATV');
+        }
+        
         $units = UnidadMedicion::all()->toArray();
         return view("Invoice/create-factura", ['document_type' => '01', 'rate' => $this->get_rates(),
             'document_number' => $this->getDocReference('01'),
@@ -138,7 +152,7 @@ class InvoiceController extends Controller
 
         //Datos generales y para Hacienda
         $invoice->document_type = "01";
-        $invoice->hacienda_status = "01";
+        $invoice->hacienda_status = "03";
         $invoice->payment_status = "01";
         $invoice->payment_receipt = "";
         $invoice->generation_method = "M";
@@ -174,17 +188,15 @@ class InvoiceController extends Controller
 
                 //Datos generales y para Hacienda
                 $invoice->document_type = "01";
-                $invoice->hacienda_status = "01";
+                $invoice->hacienda_status = 01;
                 $invoice->payment_status = "01";
                 $invoice->payment_receipt = "";
                 $invoice->generation_method = "etax";
                 $invoice->reference_number = $company->last_invoice_ref_number + 1;
-
                 $invoiceData = $invoice->setInvoiceData($request);
                 if (!empty($invoiceData)) {
                     $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
                 }
-
                 $company->last_invoice_ref_number = $invoice->reference_number;
                 $company->last_document = $invoice->document_number;
                 $company->save();
@@ -262,25 +274,6 @@ class InvoiceController extends Controller
           
         return redirect('/facturas-emitidas');
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Invoice  $invoice
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        $invoice = Invoice::find($id);
-        $this->authorize('update', $invoice);
-
-        clearInvoiceCache($invoice);
-        
-        $invoice->is_void = true;
-        $invoice->save();
-        
-        return redirect('/facturas-emitidas');
-    }
     
     public function export() {
         return Excel::download(new InvoiceExport(), 'documentos-emitidos.xlsx');
@@ -321,8 +314,8 @@ class InvoiceController extends Controller
                             $codigoCliente = array_key_exists('codigocliente', $row) ? $row['codigocliente'] : '';
                             $tipoPersona = $row['tipoidentificacion'];
                             $identificacionCliente = $row['identificacionreceptor'];
-                            $correoCliente = '';
-                            $telefonoCliente = '';
+                            $correoCliente = $row['correoreceptor'];
+                            $telefonoCliente = null;
                                         
                             //Datos de factura
                             $consecutivoComprobante = $row['consecutivocomprobante'];
@@ -333,7 +326,7 @@ class InvoiceController extends Controller
                             $fechaEmision = $row['fechaemision'];
                             
                             $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
-                            $idMoneda = $row['idmoneda'];
+                            $idMoneda = $row['moneda'];
                             $tipoCambio = $row['tipocambio'];
                             $totalDocumento = $row['totaldocumento'];
                             $tipoDocumento = $row['tipodocumento'];
@@ -348,7 +341,7 @@ class InvoiceController extends Controller
                             $subtotalLinea = (float)$row['subtotallinea'];
                             $totalLinea = $row['totallinea'];
                             $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
-                            $codigoEtax = $row['codigoetax'];
+                            $codigoEtax = $row['codigoivaetax'];
                             $montoIva = (float)$row['montoiva'];
                             $totalNeto = 0;
                             
@@ -587,9 +580,43 @@ class InvoiceController extends Controller
             $invoice->delete();
             return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido rechazada');
         }
-        
-        
     }
+    
+     /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Invoice  $invoice
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        InvoiceItem::where('invoice_id', $invoice->id)->delete();
+        $invoice->delete();
+        clearInvoiceCache($invoice);
+        
+        return redirect('/facturas-emitidas')->withMessage('La factura ha sido eliminada satisfactoriamente.');
+    } 
+    
+    /**
+     * Restore the specific item
+     *
+     * @param  \App\Invoice  $invoice
+     * @return \Illuminate\Http\Response
+     */
+    public function restore($id)
+    {
+        $invoice = Invoice::onlyTrashed()->where('id', $id)->first();
+        if( $invoice->company_id != currentCompany() ){
+            return 404;
+        }
+        $invoice->restore();
+        InvoiceItem::onlyTrashed()->where('invoice_id', $invoice->id)->restore();
+        clearInvoiceCache($invoice);
+        
+        return redirect('/facturas-emitidas')->withMessage('La factura ha sido restaurada satisfactoriamente.');
+    }  
     
     private function getDocReference($docType) {
         $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;

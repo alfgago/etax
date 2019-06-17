@@ -196,7 +196,6 @@
                     <th>#</th>
                     <th>Código</th>
                     <th>Nombre</th>
-                    <th>Tipo producto</th>
                     <th>Cant.</th>
                     <th>Unidad</th>
                     <th>Precio unitario</th>
@@ -218,8 +217,6 @@
                       </td>
                       <td>{{ $item->name }}
                         <input type="hidden" class='nombre' name="items[{{ $loop->index }}][name]" value="{{ $item->name }}">
-                      </td>
-                      <td>{{ $item->product_type }}
                         <input type="hidden" class='tipo_producto' name="items[{{ $loop->index }}][product_type]" value="{{ $item->product_type }}">
                       </td>
                       <td>{{ $item->item_count }}

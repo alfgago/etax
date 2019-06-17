@@ -200,6 +200,7 @@
     .main-header {
         height: $topbar-height-mobile;
         padding: 0 .5rem;
+        max-width: 100vw;
         .search-bar {
             display: none;
         }
@@ -241,9 +242,12 @@
     
     .breadcrumb-buttons {
         margin-left: 0;
-        display: flex;
         font-size: 0.8rem;
         margin-top: 1rem;
+    }
+    
+    .mobile-flex {
+        display: flex !important;
     }
 
     .sidebar-dashboard .dato-iva label {

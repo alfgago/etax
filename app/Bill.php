@@ -29,6 +29,30 @@ class Bill extends Model
     {
         return $this->belongsTo(Provider::class);
     }
+    
+    public function providerName() {
+      if( isset($this->provider_id) ) {
+        return $this->provider->getFullName();
+      }else{
+        return 'N/A';
+      }
+    }
+    
+    public function documentTypeName() {
+      $tipo = 'Factura electrónica';
+      if( $this->document_type == '03' ) {
+        $tipo = "Nota de crédito";
+      }else if( $this->document_type == '04' ) {
+        $tipo = "Tiquete";
+      }else if( $this->document_type == '02' ) {
+        $tipo = "Nota de débito";
+      }else if( $this->document_type == '1' ) {
+         $this->document_type = '01';
+         $this->save();
+      }
+      
+      return $tipo;
+    }
   
     //Relación con facturas recibidas
     public function items()
@@ -249,6 +273,8 @@ class Bill extends Model
                   'tipo_persona' => str_pad($tipoPersona, 2, '0', STR_PAD_LEFT),
                   'id_number' => $identificacionProveedor,
                   'first_name' => $nombreProveedor,
+                  'email' => $correoProveedor,
+                  'phone' => $telefonoProveedor,
                   'fullname' => "$identificacionProveedor - $nombreProveedor"
               ]
           );
@@ -295,6 +321,7 @@ class Bill extends Model
               $bill->is_authorized = $isAuthorized;
               $bill->is_code_validated = $codeValidated;
               $bill->is_void = false;
+              $bill->hacienda_status = "03";
               
               //Datos de factura
               $bill->currency = $idMoneda;
@@ -392,9 +419,9 @@ class Bill extends Model
         $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10))->format('d/m/Y');
         $fechaVencimiento = $fechaEmision;
         $nombreProveedor = $arr['Emisor']['Nombre'];
-        $codigoProveedor = '';
         $tipoPersona = $arr['Emisor']['Identificacion']['Tipo'];
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
+        $codigoProveedor = $identificacionProveedor;
         $correoProveedor = $arr['Emisor']['CorreoElectronico'];
         $telefonoProveedor = isset($arr['Emisor']['Telefono']) ? $arr['Emisor']['Telefono']['NumTelefono'] : '';
         $tipoIdReceptor = $arr['Receptor']['Identificacion']['Tipo'];
@@ -409,7 +436,7 @@ class Bill extends Model
         }
         
         $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
-        $tipoCambio = $arr['ResumenFactura']['TipoCambio'];
+        $tipoCambio = array_key_exists('TipoCambio', $arr['ResumenFactura']) ? $arr['ResumenFactura']['TipoCambio'] : '1';
         $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
         $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
         $tipoDocumento = '01';
@@ -459,12 +486,12 @@ class Bill extends Model
     
     public static function storeXML($file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor) {
         
-        if ( Storage::exists("empresa-$identificacionReceptor/$identificacionEmisor-$consecutivoComprobante.xml")) {
-            Storage::delete("empresa-$identificacionReceptor/$identificacionEmisor-$consecutivoComprobante.xml");
+        if ( Storage::exists("empresa-$identificacionReceptor/facturas_compras/$identificacionEmisor-$consecutivoComprobante.xml")) {
+            Storage::delete("empresa-$identificacionReceptor/facturas_compras/$identificacionEmisor-$consecutivoComprobante.xml");
         }
         
         $path = \Storage::putFileAs(
-            "empresa-$identificacionReceptor", $file, "$identificacionEmisor-$consecutivoComprobante.xml"
+            "empresa-$identificacionReceptor/facturas_compras", $file, "$identificacionEmisor-$consecutivoComprobante.xml"
         );
         
         return $path;

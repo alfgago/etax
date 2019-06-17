@@ -41,34 +41,18 @@
                 </div>
             </li>
             
-            <li class="hidden nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
+            <li class="nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
                 <a class="nav-item-hold" href="/facturas-recibidas">
                     <img src="{{asset('assets/images/iconos/facturacion.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Facturación</span>
                 </a>
                 
-                
                 <div class="subitems">
                     <a href="/facturas-emitidas">Ver documentos emitidos</a>
                     <a href="/facturas-emitidas/emitir-factura">Emitir factura electrónica</a>
-                    <a href="/facturas-emitidas/emitir-tiquete">Emitir tiquete electrónico</a>
+                    <a href="/facturas-emitidas/emitir-factura">Emitir tiquete electrónico</a>
                     <a href="/facturas-emitidas/emitir-factura">Emitir nota de débito</a>
                     <a href="/facturas-recibidas/aceptaciones">Aceptación de facturas recibidas</a>
-                </div>
-            </li>
-            
-            <li title="Facturación deshabilitada durante la prueba gratuita" class="soon nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
-                <a  title="Facturación deshabilitada durante la prueba gratuita" class="nav-item-hold" href="#">
-                    <img src="{{asset('assets/images/iconos/facturacion.png')}}" class="sidemenu-icon">
-                    <span class="nav-text">Facturación</span>
-                </a>
-                
-                <div class="subitems">
-                    <a title="Facturación deshabilitada durante la prueba gratuita" href="#">Ver documentos emitidos</a>
-                    <a title="Facturación deshabilitada durante la prueba gratuita" href="#">Emitir factura electrónica</a>
-                    <a title="Facturación deshabilitada durante la prueba gratuita" href="#">Emitir tiquete electrónico</a>
-                    <a title="Facturación deshabilitada durante la prueba gratuita" href="#">Emitir nota de débito</a>
-                    <a title="Facturación deshabilitada durante la prueba gratuita#7" href="#">Aceptación de facturas recibidas</a>
                 </div>
             </li>
             

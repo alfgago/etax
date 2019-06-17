@@ -1,109 +1,10 @@
-@extends('layouts/app')
+@extends('layouts/wizard-layout')
 
 @section('title') 
 	Configuración de plan inicial
 @endsection
 
 @section('slug', 'wizard')
-
-@section('header-scripts')
-
-<style>
-	.wizard-popup {
-	    max-width: 56rem;
-	    height: auto;
-	    margin: 4rem auto auto;
-	    position: relative;
-	}
-  .bigtext {
-    font-size: 1.3rem;
-    color: #000;
-    line-height: 1.1;
-    margin: 1.5rem 0;
-  }
-  .bigtext span {
-    font-weight: bold;
-    color: #2845A4;
-  }
-  .wizard-container .precio-container {
-    background: #d6d4cc;
-    padding: .75rem 1.5rem;
-    font-size: 1.3rem;
-    line-height: 1;
-    border-radius: 5px;
-    display: block;
-  }
-  .biginputs .form-group label {
-    font-size: 1.2rem;
-  }
-  .biginputs .form-group select {
-    font-size: 1.5rem;
-    line-height: 1.1;
-    height: auto;
-  }
-  .wizard-container .precio-container span {
-    font-size: 1.75rem;
-    font-weight: bold;
-  }
-  @media screen and (max-width: 600px) {
-    .bigtext {
-      font-size: 1.3rem;
-      color: #000;
-      line-height: 1.1;
-      margin: 1.5rem 0;
-    }
-    .wizard-container .btn-holder a{
-      font-size: .8rem;
-    }
-  }
-  @media screen and (max-width: 380px) {
-    .wizard-container .btn-holder a{
-      font-size: .8rem;
-    }
-    .wizard-container .btn-holder .btn {
-      width: 100%;
-    }
-  }
-  
-  .btn-cerrarsesion {
-    position: absolute;
-    top: .5rem;
-    right: .5rem;
-    color: #fff !important;
-    font-size: 1.2rem;
-    padding: .5rem .25rem;
-    border: 2px solid #fff;
-    font-weight: bold;
-    z-index: 99;
-  }
-  @media only screen and (max-width: 680px) {
-    .btn-cerrarsesion {
-      display: none;
-    }
-  }
-  
-  ::-webkit-scrollbar-track
-	{
-		background-color: #e5e5e5 !important;
-		box-shadow: inset 0px 0px 5px rgba(0,0,0,0.2);
-	}
-	
-	::-webkit-scrollbar
-	{
-		width: 10px !important;
-		background-color: #e5e5e5 !important;
-		box-shadow: inset 0px 0px 5px rgba(0,0,0,0.2);
-	}
-	
-	::-webkit-scrollbar-thumb
-	{
-		background-color: #111 !important;
-		border-radius: 15px;
-		box-shadow: 3px 0 15px rgba(0,0,0,.3);
-	}
-  
-</style>
-@endsection
 
 @section('content') 
 <div class="wizard-container">
@@ -127,9 +28,7 @@
     </div>
     
     <div class="form-container">
-
-      <form method="POST" action="/confirmar-plan" class="wizard-form" enctype="multipart/form-data">
-
+      <form method="POST" action="/payment/confirm-payment" class="wizard-form tarjeta" enctype="multipart/form-data">
         @csrf
         <div class="step-section biginputs step1 is-active">
           <div class="form-row">
@@ -185,7 +84,10 @@
       }
       //Revisa que el campo de correo este correcto
       var email = $('#email').val();
-      allow = validateEmail(email);
+      allowEmails = validateEmail(email);
+      if( !allowEmails ) {
+        allow = false;
+      }
     }
                                           );
     return allow;
@@ -221,6 +123,37 @@
   $.getJSON('https://api.ipify.org?format=json', function(data){
       $("#IpAddress").val(data.ip);
   });
+  function cambiarPrecio() {
+      var precio = $(".precio-inicial").text().replace('$', "");
+      var numero = parseFloat(precio);
+
+      var binsBn = ['541254', '493824', '450777', '451418', '410865', '419556', '512905', '518668',
+          '518439', '450776', '404144', '552882', '524471', '456949', '514006', '480853', '529164', '542178',
+          '527552', '529060', '520026', '510980', '477280', '548711', '493823', '525843', '281010', '517784',
+          '410864', '483126', '456337', '502107', '411061', '483189', '523587', '523592', '483190', '456338',
+          '464137', '552450', '528080', '478019', '402520', '502108', '101001', '404980', '461131', '483103',
+          '489353', '515575', '516681', '517588', '517871', '518214', '518541', '519995', '519996', '523671',
+          '524308', '531643', '542133', '551898', '557683', '559727'];
+      var tarjeta = $('#number').val();
+      var tarjeta1 = tarjeta.replace(/ /g, "");
+      var binEnviado = tarjeta1.substr(0, 6);
+      var binDescuento = binsBn.indexOf(binEnviado);
+
+      var precioFinal = numero;
+      var etiqueta = '';
+      if(binDescuento != -1){
+          var descuento = parseFloat(numero * 0.1);
+          var precioDescuento = parseFloat(numero - descuento).toFixed(2);
+          precioFinal = precioDescuento;
+          etiqueta = '(descuento del Banco Nacional)';
+      }
+
+      $(".precio-final").text('$' + precioFinal);
+      $(".etiqueta-descuento").text(etiqueta);
+
+      $('#bncupon').val(1);
+
+  }
   function fusb() {
       var exp = $("#expiry").val();
       console.log(exp);
@@ -257,14 +190,15 @@
       }else{
           document.getElementById('number').classList.remove('alertCard');
           $("#alertCardValid").empty();
+          cambiarPrecio();
       }
   }
-  
-  
+
+
   $( document ).ready(function() {
 	    fillProvincias();
 	    togglePlan();
-  
+
 		  var card = new Card({
 		      form: 'form.tarjeta',
 		      container: '.card-wrapper',

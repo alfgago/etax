@@ -192,22 +192,22 @@
     <table width="100%">
     <tr class="details">
         <td style="width: 42%">
-            <b>Receptor:</b> {{$data_invoice->client_first_name.' '.$data_invoice->client_last_name}} <br>
-            <b>Cedula:</b> {{$data_invoice->client_id_number}}<br>
-            <b>Tel:</b> {{$data_invoice->client_phone}}<br>
-            <b>Fax:</b> <br>
-            <b>Correo:</b> {{$data_invoice->client_email}}<br>
-            <b>Codigo Interno:</b> {{$data_invoice->id}}<br>
-            <b>Direccion:</b> {{$data_invoice->client_address}}<br>
+            <b>Receptor: </b> {{$data_invoice->client_first_name.' '.$data_invoice->client_last_name}} <br>
+            <b>Cedula: </b> {{$data_invoice->client_id_number}}<br>
+            <b>Tel: </b> {{$data_invoice->client_phone}}<br>
+            <b>Fax: </b> <br>
+            <b>Correo: </b> {{$data_invoice->client_email}}<br>
+            <b>Codigo Interno :</b> {{$data_invoice->id}}<br>
+            <b>Direccion: </b> {{$data_invoice->client_address}}<br>
         </td>
 
         <td>
-            <b>Factura Electrónica N°:</b>{{$data_invoice->document_number}} <br>
+            <b>Factura Electrónica N°: </b>{{$data_invoice->document_number}} <br>
             <b>Clave Numérica: </b> {{$data_invoice->document_key}}<br>
             <br><br>
-            <b>Fecha de Emisión:</b> {{$data_invoice->generated_date}}<br>
-            <b>Condición Venta:</b> Contado<br>
-            <b>Medio de Pago:</b> Efectivo<br>
+            <b>Fecha de Emisión: </b> {{$data_invoice->generated_date}}<br>
+            <b>Condición Venta: </b> Contado<br>
+            <b>Medio de Pago: </b> Efectivo<br>
         </td>
     </tr>
 </table>
@@ -284,7 +284,7 @@
             </td>
 
             <td class="box-total">
-                <b>Total ¢:</b> {{round($data_invoice->total, 2)}}
+                <b>Total {{ $data_invoice->currency }}: </b> {{round($data_invoice->total, 2)}}
             </td>
         </tr>
     </table>

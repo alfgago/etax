@@ -27,6 +27,11 @@ class ReportsController extends Controller
   
     public function dashboard() {
       
+      $user = auth()->user();
+      if( !$user->has_klap_user ) {
+          $user->createKlapUser();
+      }
+      
       /* Logic for New User Invite */
       $token = session('invite_token');
       if ($token) {
@@ -41,13 +46,13 @@ class ReportsController extends Controller
               $is_readonly = ($invite->role == 'readonly') ? '1' : '0';
               PlansInvitation::create(['subscription_id' => $company->subscription_id, 'company_id' => $company->id, 'user_id' => auth()->user()->id]);
 
-              return redirect()->route('User.companies')->with('success', 'La invitación ha sido enviada.');
+              return redirect()->route('User.companies')->withMessage('La invitación ha sido aceptada.');
           }
       }
       
       $subscription = getCurrentSubscription();
-      if( !$subscription ) {
-          return redirect('/cambiar-plan');
+      if( ! isset( $subscription ) ) {
+          return redirect('/elegir-plan');
       }
       
       if( ! currentCompanyModel()->wizard_finished ) {
@@ -216,7 +221,7 @@ class ReportsController extends Controller
         $anterior = CalculatedTax::getProrrataPeriodoAnterior( $anoAnterior );
         $prorrataOperativa = $anterior->prorrata;
       }
-      
+
       return $prorrataOperativa;
     }
   

@@ -12,6 +12,7 @@
 @endsection
 
 @section('breadcrumb-buttons')
+<div class="mobile-flex">
   <div class="periodo-actual filters">
     <form class="periodo-form">
       <?php 
@@ -49,6 +50,7 @@
       </select>
     </div>
   </div>
+</div>
 @endsection 
 
 @section('content')

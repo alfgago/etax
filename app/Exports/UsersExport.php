@@ -16,7 +16,7 @@ class UsersExport implements WithHeadings, WithMapping, FromQuery
     public function query()
     {
         
-        $data = User::query()->with(['subscriptions', 'companies']);
+        $data = User::query()->with(['sales', 'companies']);
         
         return $data;
     }
@@ -24,8 +24,14 @@ class UsersExport implements WithHeadings, WithMapping, FromQuery
     public function map($map): array
     {
         $plans = [];
-        foreach ( $map->subscriptions as $s ) {
-      		$plans[] = $s->plan->plan_type . " " . $s->plan->plan_tier;
+        foreach ( $map->sales as $s ) {
+      		$plans[] = $s->product->name;
+        }
+        
+        if( empty($map->sales) ){
+            foreach ( $map->subscriptions as $s ) {
+          		$plans[] = $s->plan->plan_type . " " . $s->plan->plan_tier;
+            }
         }
       	
       	$comps = [];
