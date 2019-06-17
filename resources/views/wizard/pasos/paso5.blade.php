@@ -8,9 +8,9 @@
 <div class="form-group col-md-6">
   <label for="first_prorrata_type">Método de cálculo de prorrata operativa inicial</label>
   <select class="form-control" name="first_prorrata_type" id="first_prorrata_type" onchange="toggleTipoProrrata();" required>
-    <option value="1" {{ @$company->first_prorrata_type == 1 ? 'selected' : '' }}>Registro manual</option>
-    <option value="2" {{ @$company->first_prorrata_type == 2 ? 'selected' : '' }}>Ingreso de totales por código</option>
-    <option value="3" {{ @$company->first_prorrata_type == 3 ? 'selected' : '' }}>Ingreso de facturas del 2018</option>
+    <option value="1" selected>Registro manual</option>
+    <option value="2" >Ingreso de totales por código</option>
+    <option value="3" >Ingreso de facturas del 2018</option>
   </select>
 </div>
 
