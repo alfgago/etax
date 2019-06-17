@@ -113,7 +113,7 @@ class InvoiceController extends Controller
     public function emitFactura()
     {
         $company = currentCompanyModel();
-        if( ! isset($compamy->logo_url) ){
+        if( ! isset($company->logo_url) ){
             return redirect('/empresas/editar')->withError('Para poder emitir facturas, debe subir un logo y certificado ATV');
         }
         
