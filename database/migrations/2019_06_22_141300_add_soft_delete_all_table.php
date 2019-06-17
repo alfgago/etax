@@ -18,9 +18,11 @@ class AddSoftDeleteAllTable extends Migration
     public function up()
     {
        foreach ($this->tables as $table) {
-           Schema::table($table, function (Blueprint $tab) {
-               $tab->softDeletes();
-           });
+            if ( !Schema::hasColumn($table, 'deleted_at') ) {
+               Schema::table($table, function (Blueprint $tab) {
+                   $tab->softDeletes();
+               });
+            }
        }
     }
 
