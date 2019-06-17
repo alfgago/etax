@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Subscription extends Model {
 
-    /*protected $table = 'subscriptions';
+    protected $table = 'subscriptions';
     
     protected $guarded = [];
     
@@ -18,6 +18,6 @@ class Subscription extends Model {
     //Relación con Usuario
     public function owner() {
         return $this->belongsTo(User::class);
-    }*/
+    }
 
 }

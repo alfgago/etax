@@ -52,7 +52,7 @@ class User extends Authenticatable {
     }
     
     public function sales() {
-        return $this->hasMany(Subscription::class);
+        return $this->hasMany(Sales::class);
     }    
     
     public function canImpersonate()

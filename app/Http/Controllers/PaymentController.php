@@ -267,6 +267,11 @@ class PaymentController extends Controller
         $cardYear = substr($request->expiry, -2);
         $cardMonth = substr($request->expiry, 0 , 2);
         
+        //Cupon para pruebas, hace pagos por $1.
+        if( $request->coupon == "!!CUPON1!!" ) {
+            $amount = 1;
+        }
+        
         foreach ($cards as $c) {
             $check = $paymentUtils->checkCC($c, true);
             //if ($check !== false) {
@@ -488,7 +493,7 @@ class PaymentController extends Controller
                 $invoiceDataSent = $invoice->setInvoiceData($data);
                 Log::info('Suscriptor: '. $data->client_id_number . ", Nombre: " . $data->first_name . " " . $data->last_name . " " . $data->last_name2 . ", Plan:" . $invoiceData->items[0]->name );
                 if ( !empty($invoiceDataSent) ) {
-                    //$invoice = $apiHacienda->createInvoice($invoiceDataSent, $tokenApi);
+                    $invoice = $apiHacienda->createInvoice($invoiceDataSent, $tokenApi);
                 }
             }catch(\Throwable $e){}
 
