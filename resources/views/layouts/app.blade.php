@@ -110,7 +110,7 @@
 
         gtag('config', 'UA-134999499-1');
       </script>
- 
+
     <button type="button" class="callnow" onclick="popupReproductor();">Ayuda</button>
     <?php
       $user = auth()->user();
@@ -119,7 +119,7 @@
       function popupReproductor(){
         window.open('https://www.callmyway.com/Welcome/SupportChatInfo/171479/?chat_type_id=5&contact_name={{ $user->first_name . " " . $user->last_name }}&contact_email={{ $user->email }}&contact_phone={{ $user->phone ? $user->phone : '' }}&contact_request=Chat de ayuda iniciado..&autoSubmit=1', 'Soporte eTax', 'height=350,width=350,resizable=0,marginwidth=0,marginheight=0,frameborder=0');
       };
-    </script>  
+    </script>
     
 </body>
 
