@@ -226,7 +226,6 @@ class PaymentController extends Controller
                 if( $cuponConsultado->code == '$$$ETAX100DESCUENTO!' || $cuponConsultado->code == '$$$ETAXTRANSFERENCIA!' ){
                     return $this->skipPaymentCoupon( $request, $cuponConsultado );
                 }
-                    
                 $descuento = ($cuponConsultado->discount_percentage) / 100;
             } else {
                 $descuento = 0;
@@ -309,11 +308,11 @@ class PaymentController extends Controller
             $payment = Payment::updateOrCreate(
                 [
                     'sale_id' => $sale->id,
+                    'payment_status' => 1,
                 ],
                 [
                     'payment_method_id' => $paymentMethod->id,
                     'payment_date' => $start_date,
-                    'payment_status' => 1,
                     'amount' => $amount
                 ]
             );
