@@ -89,7 +89,7 @@ class Bill extends Model
       //Datos de proveedor
       if( $request->provider_id == '-1' ){
           $tipo_persona = $request->tipo_persona;
-          $identificacion_provider = $request->id_number;
+          $identificacion_provider = preg_replace("/[^0-9]/", "", $request->id_number );
           $codigo_provider = $request->code;
           
           $provider = Provider::firstOrCreate(
@@ -260,6 +260,7 @@ class Bill extends Model
         return false;
       }
       
+      $identificacionProveedor = preg_replace("/[^0-9]/", "", $identificacionProveedor );
       $providerCacheKey = "import-proveedors-$identificacionProveedor-".$company->id;
       if ( !Cache::has($providerCacheKey) ) {
           $proveedorCache =  Provider::firstOrCreate(
