@@ -90,7 +90,7 @@ class BridgeHaciendaApi
                             'data_invoice' => $invoice, 'data_company' =>$company]));
                         //Send to queue invoice
                         ProcessInvoice::dispatch($invoice->id, $company->id, $token)
-                            ->onConnection('database')->onQueue('invoices');
+                            ->onConnection('redis')->onQueue('invoices');
                         return $invoice;
                     }
                 }
