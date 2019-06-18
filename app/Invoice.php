@@ -99,7 +99,7 @@ class Invoice extends Model
             if( $request->client_id == '-1' ) {
 
                 $tipo_persona = $request->tipo_persona;
-                $identificacion_cliente = $request->id_number;
+                $identificacion_cliente = preg_replace("/[^0-9]/", "", $request->id_number );
                 $codigo_cliente = $request->code;
 
                 $client = Client::updateOrCreate(
@@ -304,6 +304,7 @@ class Invoice extends Model
         $tipoDocumento = '04';
       }
       
+      $idCliente = preg_replace("/[^0-9]/", "", $idCliente );
       $invoiceCacheKey = "import-factura-$nombreCliente-" . $company->id . "-" . $consecutivoComprobante;
       if ( !Cache::has($invoiceCacheKey) ) {
       
