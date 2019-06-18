@@ -101,7 +101,8 @@ class ClientController extends Controller
         $cliente->company_id = $company->id;
       
         $cliente->tipo_persona = $request->tipo_persona;
-        $cliente->id_number = $request->id_number;
+        $cliente->id_number = preg_replace("/[^0-9]/", "", $request->id_number );
+        
         $cliente->code = $request->code;
         $cliente->first_name = $request->first_name;
         $cliente->last_name = $request->last_name;
@@ -120,10 +121,9 @@ class ClientController extends Controller
         if (is_array ($cliente->billing_emails)) {
             $cliente->billing_emails = implode(", ",$cliente->billing_emails);
         }
+        
         $cliente->email = $request->email;
         $cliente->fullname = $cliente->toString();
-        
-       
       
         $cliente->save();
       
@@ -179,7 +179,7 @@ class ClientController extends Controller
         $this->authorize('update', $cliente);
       
         $cliente->tipo_persona = $request->tipo_persona;
-        $cliente->id_number = $request->id_number;
+        $cliente->id_number = preg_replace("/[^0-9]/", "", $request->id_number );
         $cliente->code = $request->code;
         $cliente->first_name = $request->first_name;
         $cliente->last_name = $request->last_name;
