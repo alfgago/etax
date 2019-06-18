@@ -86,11 +86,16 @@ class BridgeHaciendaApi
                         $xml->bill_id = 0;
                         $xml->xml = $path;
                         $xml->save();
-                        Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['xml' => $path,
-                            'data_invoice' => $invoice, 'data_company' =>$company]));
+                        if (!empty($invoice->send_emails)) {
+                            Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new \App\Mail\Invoice(['xml' => $path,
+                                'data_invoice' => $invoice, 'data_company' =>$company]));
+                        } else {
+                            Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['xml' => $path,
+                                'data_invoice' => $invoice, 'data_company' =>$company]));
+                        }
                         //Send to queue invoice
                         ProcessInvoice::dispatch($invoice->id, $company->id, $token)
-                            ->onConnection('redis')->onQueue('invoices');
+                            ->onConnection('database')->onQueue('invoices');
                         return $invoice;
                     }
                 }
