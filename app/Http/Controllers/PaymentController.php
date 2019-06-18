@@ -313,9 +313,9 @@ class PaymentController extends Controller
             $payment = Payment::updateOrCreate(
                 [
                     'sale_id' => $sale->id,
-                    'payment_status' => 1,
                 ],
                 [
+                    'payment_status' => 1,
                     'payment_method_id' => $paymentMethod->id,
                     'payment_date' => $start_date,
                     'amount' => $amount

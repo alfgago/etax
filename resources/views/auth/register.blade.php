@@ -27,7 +27,7 @@
 
       <div class="form-group col-md-12">
         <div>
-          <input placeholder="{{ __('Teléfono') }}" id="phone" type="text" class="form-control{{ $errors->has('phone') ? ' is-invalid' : '' }}" name="phone" value="{{ old('phone') }}" required autofocus> @if ($errors->has('phone'))
+          <input placeholder="{{ __('Teléfono') }}" id="phone" type="number" class="form-control{{ $errors->has('phone') ? ' is-invalid' : '' }}" name="phone" value="{{ old('phone') }}" required autofocus> @if ($errors->has('phone'))
           <span class="invalid-feedback" role="alert">
                 <strong>{{ $errors->first('phone') }}</strong>
             </span> @endif
