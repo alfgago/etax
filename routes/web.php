@@ -61,6 +61,8 @@ Route::prefix('empresas')->group(function() {
     Route::patch('update-certificado/{id}', 'CompanyController@updateCertificado')->name('Company.update_cert');
     Route::get('company-profile/{id}', 'CompanyController@company_profile')->name('Company.company_profile');
     Route::get('set-prorrata-2018-facturas', 'CompanyController@setProrrata2018PorFacturas')->name('Company.set_prorrata_2018_facturas');
+    Route::get('comprar-facturas-vista', 'CompanyController@comprarFacturasVista')->name('Company.comprar_facturas_vista');
+    Route::patch('comprar-facturas', 'CompanyController@comprarFacturas')->name('Company.comprar_facturas');
 });
 
 // Rutas de facturación
@@ -109,6 +111,7 @@ Route::prefix('usuario')->group(function() {
     Route::get('usuarios-invitados', 'UserController@invitedUsersList')->name('User.invited-users-list');
     Route::get('zendesk-jwt', 'UserController@zendeskJwt')->name('User.zendesk_jwt');
     Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
+    Route::get('payments', 'UserController@payments')->name('User.payments');
 });
 
 //Rutas de Pagos de la aplicacion

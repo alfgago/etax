@@ -1,54 +1,103 @@
+@extends('layouts/app')
+
+@section('title')
+    Pagos
+@endsection
+
 @section('content')
+
     <div class="row">
         <div class="col-md-12">
 
-            <table id="payments-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
-                <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Producto</th>
-                    <th>Status de pago</th>
-                    <th>Monto</th>
-                    <th>Creado</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+            <div class="tabbable verticalForm">
+                <div class="row">
+                    <div class="col-3">
+                        <ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                            <li>
+                                <a class="nav-link" aria-selected="false" href="/usuario/perfil">Editar información personal</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" aria-selected="false" href="/usuario/seguridad">Seguridad</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" aria-selected="false" href="/elegir-plan">Cambiar plan</a>
+                            </li>
+                            @if( !auth()->user()->is_guest )
+                                <li>
+                                    <a class="nav-link" aria-selected="false" href="/usuario/payments">Historial de pagos</a>
+                                </li>
+                            @endif
+                            @if( auth()->user()->isContador() )
+                                <li>
+                                    <a class="nav-link active" aria-selected="true" href="/usuario/empresas">Empresas</a>
+                                </li>
+                            @endif
+                        </ul>
+                    </div>
+                    <div class="col-9">
+                        <div class="tab-content p-0">
+
+                            <div class="tab-pane fade show active" role="tabpanel">
+
+                                <h3 class="card-title">Historial de Pagos</h3>
+
+                                <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                                    <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Fecha</th>
+                                        <th>Monto</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    @if ( $payments->count() )
+                                        @foreach($payments as $payment)
+                                            @if($payment)
+                                                <tr>
+                                                    <td>{{$payment->payment_date}}</td>
+                                                    <td>{{$payment->amount}}</td>
+                                                    <td>{{$payment->payment_status}}</td>
+                                                    {{--<td>
+                                                        @if( auth()->user()->isOwnerOfTeam($team) )
+                                                            <form id="delete-form-{{ $company_detail->id }}" class="inline-form" method="POST" action="/empresas/{{ $company_detail->id }}" >
+                                                                @csrf
+                                                                @method('delete')
+                                                                <a type="button" class="text-danger mr-2" title="Eliminar empresa" style="display: inline-block; background: none; border: 0;" onclick="confirmDelete({{ $company_detail->id }});">
+                                                                    <i class="fa fa-ban" aria-hidden="true"></i>
+                                                                </a>
+                                                            </form>
+                                                        @endif
+                                                    </td>--}}
+                                                </tr>
+                                            @endif
+                                        @endforeach
+                                    @endif
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
 @endsection
 
 @section('footer-scripts')
-    <script>
-        $(function() {
-            $('#payments-table').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: "{{ route('Payment.data') }}",
-                columns: [
-                    { data: 'last_4digits', name: 'last_4digits' },
-                    { data: 'name', name: 'name' },
-                    { data: 'last_name', name: 'last_name' },
-                    { data: 'due_date', name: 'due_date'},
-                    { data: 'actions', name: 'actions', orderable: false, searchable: false }
-                ],
-                language: {
-                    url: "/lang/datatables-es_ES.json",
-                },
-            });
-        });
 
+    <script>
 
         function confirmDelete( id ) {
             var formId = "#delete-form-"+id;
             Swal.fire({
-                title: '¿Está seguro que desea eliminar el metodo de pago',
-                text: "",
+                title: '¿Está seguro que desea desactivar la empresa?',
+                text: "Los datos de la empresa serán guardados durante 12 meses. Si desea recuperarlos o transferirlos a otra cuentas, contacte a soporte.",
                 type: 'warning',
                 showCloseButton: true,
                 showCancelButton: true,
-                confirmButtonText: 'Sí, quiero eliminarlo'
+                confirmButtonText: 'Sí, quiero desactivarla'
             }).then((result) => {
                 if (result.value) {
                     $(formId).submit();
@@ -56,4 +105,8 @@
             })
 
         }
+
     </script>
+
+
+@endsection

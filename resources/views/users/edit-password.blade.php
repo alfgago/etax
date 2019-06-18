@@ -26,10 +26,15 @@ Change Password
                         <li>
                             <a class="nav-link" aria-selected="false" href="/elegir-plan">Cambiar plan</a>
                         </li>
+                        @if( !auth()->user()->is_guest )
+                            <li>
+                                <a class="nav-link" aria-selected="false" href="/usuario/payments">Historial de pagos</a>
+                            </li>
+                        @endif
                         @if( auth()->user()->isContador() )
-                        <li>
-                            <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
-                        </li>
+                            <li>
+                                <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
+                            </li>
                         @endif
                     </ul>
                 </div>

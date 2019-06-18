@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Payment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
@@ -258,7 +259,11 @@ class UserController extends Controller {
        
        return $jwt;
     }
-    
+
+    public function payments(){
+        $payments = auth()->user()->payments;
+        return view('users.payment-history', compact('data'))->with('payments', $payments);
+    }
     
     public function adminEdit( $email ) {
         

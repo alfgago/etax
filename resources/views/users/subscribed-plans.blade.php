@@ -25,9 +25,16 @@ Mis Planes Suscritos
                         <li class="active">
                             <a class="nav-link" aria-selected="false" href="/usuario/cambiar-plan">Cambiar plan</a>
                         </li>
-                        <li>
-                            <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
-                        </li>
+                        @if( !auth()->user()->is_guest )
+                            <li>
+                                <a class="nav-link" aria-selected="false" href="/usuario/payments">Historial de pagos</a>
+                            </li>
+                        @endif
+                        @if( auth()->user()->isContador() )
+                            <li>
+                                <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
+                            </li>
+                        @endif
                     </ul>
                 </div>
                 <div class="col-9">

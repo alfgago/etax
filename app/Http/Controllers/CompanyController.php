@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\EtaxProducts;
+use App\PaymentMethod;
+use App\Sales;
+use App\SubscriptionPlan;
+use App\Utils\PaymentUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
@@ -437,6 +442,36 @@ class CompanyController extends Controller {
         $company->save();
 
         return redirect('/facturas-emitidas')->with('success', 'Empiece calculando su prorrata 2018 ingresando todas sus facturas de dicho periodo.');
+    }
+
+    public function comprarFacturasVista(){
+        $company = currentCompany();
+        $sale = Sales::where('company_id', $company)->first();
+        $producto = EtaxProducts::where('id', $sale->etax_product_id)->first();
+        $facturasPlan = SubscriptionPlan::where('id', $producto->subscription_plan_id)->first();
+        $availableInvoices = $facturasPlan->num_invoices - get_company_details($company)->use_invoicing;
+        $productosEtax = EtaxProducts::where('isSubscription', 0)->where('id', '!=', 15)->get();
+        $paymentmethods = PaymentMethod::where('user_id', auth()->user()->id);
+        return view('/Company/comprarFacturasView')->with('productosEtax', $productosEtax)
+                                                        ->with('availableInvoices', $availableInvoices)
+                                                        ->with('facturasPlan', $facturasPlan->num_invoices)
+                                                        ->with('paymentmethods', $paymentmethods);
+    }
+
+    public function comprarFacturas(Request $request){
+        dd($request);
+        $paymentUtils = new PaymentUtils();
+        $bnStatus = $paymentUtils->statusBNAPI();
+        if($bnStatus['apiStatus'] == 'Successful'){
+            if(isset($request->payment_method)){
+                $chargeCreated = $paymentUtils->paymentIncludeCharge();
+                return redirect()->back()->withMessage('Compra realizada');
+            }else{
+                return redirect()->back()->withErrors('Debe incluir un método de pago');
+            }
+        }else{
+            return redirect()->back()->withErrors('Pagos en línea no esta disponible en este momento');
+        }
     }
 
     public function confirmCompanyDeactivation($token) {

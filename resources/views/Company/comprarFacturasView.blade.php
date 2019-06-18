@@ -33,7 +33,7 @@
                         <div class="tab-content">
                             <form method="POST" action="/empresas/comprar-facturas" enctype="multipart/form-data">
                                 @csrf
-                                @method('post')
+                                @method('patch')
                                 <div class="form-row">
                                     <div class="form-group col-md-7">
                                         <h3>
@@ -42,7 +42,7 @@
                                     </div>
                                     <div class="form-group col-md-5 dato-facturas" style="margin-top: 3%;">
                                         <div class="barra-limites emitidas" >
-                                            <div class="fill-bar" data-total="{{ $availableInvoices }}" data-fill="{{ number_format( $company->use_invoicing ) }}"></div>
+                                            <div class="fill-bar" data-total="{{ $availableInvoices }}" data-fill="{{ number_format( $facturasPlan ) }}"></div>
                                             <div class="barra-text">{{ number_format( $availableInvoices ) }} de {{ $availableInvoices }}</div>
                                         </div>
                                     </div>
@@ -56,7 +56,7 @@
                                     <?php $checked = ($cnt == 1) ? 'checked="checked"' : ''; ?>
                                         <div class="form-group col-md-12">
                                             <label for="id_number">
-                                                <input type="radio" name="product_id" id="product_id" value="{{$producto->id}}" <?php echo $checked ?> onchange="getRadioValue(this.value);"> {{ $producto->name }}
+                                                <input type="radio" name="product" id="product" value="{{$producto}}" <?php echo $checked ?> onchange="getRadioValue(this.value);"> {{ $producto->name }} -- Precio del paquete ${{$producto->price}}
                                             </label>
                                         </div>
                                         <?php
@@ -75,7 +75,6 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <input type="text" name="radioValue" id="radioValue" hidden>
                                     <button id="btn-submit" type="submit" class="hidden btn btn-primary">Comprar</button>
                                 </div>
                             </form>
@@ -87,9 +86,5 @@
     </div>
 @endsection
 @section('footer-scripts')
-    <script>
-        function getRadioValue(e) {
-            $('#radioValue').val(e);
-        };
-    </script>
+
 @endsection
