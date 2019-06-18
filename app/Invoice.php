@@ -304,6 +304,7 @@ class Invoice extends Model
         $tipoDocumento = '04';
       }
       
+      $idCliente = preg_replace("/[^0-9]/", "", $idCliente );
       $invoiceCacheKey = "import-factura-$nombreCliente-" . $company->id . "-" . $consecutivoComprobante;
       if ( !Cache::has($invoiceCacheKey) ) {
       
