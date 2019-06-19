@@ -4,30 +4,33 @@
     
     <div class="col-lg-12">
       
-      <div class="card-title">Enlaces rápidos</div>
+      <div class="card-title" id="header">Enlaces rápidos</div>
       <div class="quicklinks">
         <a class="btn btn-primary" href="/facturas-emitidas/emitir-factura">Emitir facturas</a>
         <a class="btn btn-primary" href="#" onclick="abrirPopup('importar-emitidas-popup');">Importar facturas de venta</a>
         <a class="btn btn-primary" href="#" onclick="abrirPopup('importar-recibidas-popup');">Importar facturas de compra</a>
         <a class="btn btn-primary" href="/cierres">Cierres de mes</a>
         <a class="btn btn-primary" href="/reportes">Generar presentación de IVA</a>
+          <div id="content">
+              <p></p>
+          </div>
       </div>
       
     </div>
     
-    <div class="col-lg-6 mb-4">
+    <div class="col-lg-6 mb-4" id="reporteMes">
       @include('Reports.widgets.resumen-basico', ['titulo' => "Resumen de $nombreMes $ano", 'data' => $dataMes])
     </div>
     
-    <div class="col-lg-6 mb-4">
+    <div class="col-lg-6 mb-4" id="facturas">
       @include('Reports.widgets.resumen-facturacion', ['titulo' => "Facturación $nombreMes $ano", 'data' => $dataMes])
     </div>
     
-    <div class="col-lg-6 mb-4">
+    <div class="col-lg-6 mb-4" id="proporcion">
       @include('Reports.widgets.proporcion-porcentajes', ['titulo' => "Proporción anual de ventas por tipo de IVA", 'data' => $acumulado])
     </div>
     
-    <div class="col-lg-6 mb-4">
+    <div class="col-lg-6 mb-4" id="prorrata">
       @include('Reports.widgets.grafico-prorrata-basico', ['titulo' => 'Prorrata operativa vs estimada', 'data' => $acumulado])
     </div>
 
@@ -41,7 +44,7 @@
     
     <div class="col-lg-12 mb-4 manuales-etax">
       <div class="sidebar-dashboard">
-        <div class="card-title">Manuales eTax</div>
+        <div class="card-title" id="manuales">Manuales eTax</div>
         <ul>
     			<li>	
     			  <a download href="/assets/files/guias/Manual-ConfiguracionEmpresa.pdf">Descargar manual de configuración de empresa</a>
@@ -82,7 +85,7 @@
     
     <div class="col-lg-12 mb-4">
       <div class="sidebar-dashboard">
-        <div class="card-title">Empresa</div>
+        <div class="card-title" id="empresa">Empresa</div>
     
         <div class="info-empresa">
           <?php $empresa = currentCompanyModel(); ?>
@@ -109,3 +112,57 @@
   </div> 
  
 </div>
+<script>
+var tour = {
+    id: "tour",
+        i18n: {
+            nextBtn: "Next",
+            prevBtn: "Previous"
+        },
+        steps: [
+            {
+                title: "Enlaces Rápidos",
+                content: "Estos le llevarán a las tareas más comunes",
+                target: document.querySelector("#header"),
+                placement: "right"
+            },
+            {
+                title: "PDF",
+                content: "Aprenda paso a paso con nuestras guías",
+                target: document.querySelector("#manuales"),
+                placement: "left"
+            },
+            {
+                title: "Reportes por mes",
+                content: "Tenga siempre a mano la informacion detallada y concisa de sus operaciones mensuales",
+                target: document.querySelector("#reporteMes"),
+                placement: "top"
+            },
+            {
+                title: "Facturacion",
+                content: "Controle sus facturas emitidas y recibidas",
+                target: document.querySelector("#facturas"),
+                placement: "left"
+            },
+            {
+                title: "Proporcion",
+                content: "Analice de forma visual cual es su estado",
+                target: document.querySelector("#proporcion"),
+                placement: "top"
+            },
+            {
+                title: "Prorrata",
+                content: "El detalle de su prorrata a simple vista",
+                target: document.querySelector("#prorrata"),
+                placement: "left"
+            },
+            {
+                title: "Empresa",
+                content: "Configure sus datos",
+                target: document.querySelector("#empresa"),
+                placement: "left"
+            }
+        ]
+    }
+    hopscotch.startTour(tour);
+</script>
