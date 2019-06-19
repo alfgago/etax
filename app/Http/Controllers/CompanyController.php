@@ -187,7 +187,7 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function editTeam() {
- $company = currentCompanyModel();
+        $company = currentCompanyModel();
 
         $company = currentCompanyModel();
 

@@ -169,7 +169,11 @@ $(document).ready(function() {
     $('#input_logo').on('change', function() {
         filename = this.files[0].name;
         $('#logo-name').text(filename)
-        console.log(filename);
+    });
+
+    $('form').submit(function() {
+        $('#btn-submit-fe').attr('disabled', true);
+        $('#btn-submit-tc').attr('disabled', true);
     });
 
 });
