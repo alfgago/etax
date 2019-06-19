@@ -86,8 +86,13 @@ class BridgeHaciendaApi
                         $xml->bill_id = 0;
                         $xml->xml = $path;
                         $xml->save();
-                        Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['xml' => $path,
-                            'data_invoice' => $invoice, 'data_company' =>$company]));
+                        if (!empty($invoice->send_emails)) {
+                            Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new \App\Mail\Invoice(['xml' => $path,
+                                'data_invoice' => $invoice, 'data_company' =>$company]));
+                        } else {
+                            Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['xml' => $path,
+                                'data_invoice' => $invoice, 'data_company' =>$company]));
+                        }
                         //Send to queue invoice
                         ProcessInvoice::dispatch($invoice->id, $company->id, $token)
                             ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
@@ -143,7 +148,7 @@ class BridgeHaciendaApi
                 'receptor_ubicacion_distrito' => substr($receptorPostalCode,3),
                 'receptor_ubicacion_otras_senas' => $data['client_address'] ?? '',
                 'receptor_email' => $data['client_email'] ?? '',
-                'receptor_cedula_numero' => $data['client_id_number'] ?? '',
+                'receptor_cedula_numero' => $data['client_id_number'] ? preg_replace("/[^0-9]/", "", $data['client_id_number']) : '',
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',
                 'tipocambio' => $data['currency_rate'] ?? '',
@@ -159,7 +164,7 @@ class BridgeHaciendaApi
                 'emisor_country' => $company->country ?? '',
                 'emisor_address' => $company->address ?? '',
                 'emisor_phone' => $company->phone ?? '',
-                'emisor_cedula' => $company->id_number ?? '',
+                'emisor_cedula' => $company->id_number ? preg_replace("/[^0-9]/", "", $company->id_number) : '',
                 'usuarioAtv' => $company->atv->user ?? '',
                 'passwordAtv' => $company->atv->password ?? '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,

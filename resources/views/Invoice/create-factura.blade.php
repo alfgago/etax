@@ -50,6 +50,10 @@
                         @endforeach
                       </select>
                     </div>
+                    <div class="form-group col-md-12">
+                      <label for="send_email">Enviar copia a:</label>
+                      <input type="email" class="form-control" name="send_email" id="send_email" value="">
+                    </div>
                   </div>
                 </div>
                 
@@ -260,7 +264,7 @@
 @endsection
 
 @section('breadcrumb-buttons')
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Enviar factura electrónica</button>
+  <button id='btn-submit-fe' onclick="$('#btn-submit').click();" class="btn btn-primary">Enviar factura electrónica</button>
 @endsection
 
 @section('footer-scripts')

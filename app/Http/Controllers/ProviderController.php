@@ -99,7 +99,7 @@ class ProviderController extends Controller
         $provider->company_id = $company->id;
       
         $provider->tipo_persona = $request->tipo_persona;
-        $provider->id_number = $request->id_number;
+        $provider->id_number = preg_replace("/[^0-9]/", "", $request->id_number );
         $provider->code = $request->code;
         $provider->first_name = $request->first_name;
         $provider->last_name = $request->last_name;
@@ -166,7 +166,7 @@ class ProviderController extends Controller
         $this->authorize('update', $provider);
       
         $provider->tipo_persona = $request->tipo_persona;
-        $provider->id_number = $request->id_number;
+        $provider->id_number = preg_replace("/[^0-9]/", "", $request->id_number );
         $provider->code = $request->code;
         $provider->first_name = $request->first_name;
         $provider->last_name = $request->last_name;
