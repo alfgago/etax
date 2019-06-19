@@ -31,7 +31,7 @@
                     </div>
                     <div class="col-sm-9">
                         <div class="tab-content">
-                            <form method="POST" action="/empresas/comprar-facturas" enctype="multipart/form-data">
+                            <form method="POST" action="/empresas/seleccionar-cliente" enctype="multipart/form-data">
                                 @csrf
                                 @method('patch')
                                 <div class="form-row">

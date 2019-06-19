@@ -6,25 +6,50 @@
 
 @section('breadcrumb-buttons')
     @if($cantidad < 3)
-        <a type="submit" class="btn btn-primary" href="/payment/payment-create-view">Ingresar nuevo..</a>
+        <a type="submit" class="btn btn-primary" href="/payment-methods/payment-method-create-view">Ingresar nuevo..</a>
     @endif
 @endsection
 
 @section('content')
     <div class="row">
         <div class="col-md-12">
-
-            <table id="payments-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
-                <thead>
-                <tr>
-                    <th>Tarjeta</th>
-                    <th>Nombre</th>
-                    <th>Fecha de vencimiento</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+            <div class="tabbable verticalForm">
+                <div class="row">
+                    <div class="col-3">
+                        <ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                            @if( !auth()->user()->is_guest )
+                                <li>
+                                    <a class="nav-link active" aria-selected="true" href="/payments-methods">M&eacute;todos de pagos</a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" aria-selected="false" href="/payments">Historial de pagos</a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" aria-selected="false" href="/payment/pending-charges">Cargos Pendientes</a>
+                                </li>
+                            @endif
+                        </ul>
+                    </div>
+                    <div class="col-9">
+                        <div class="tab-content p-0">
+                            <div class="tab-pane fade show active" role="tabpanel">
+                                <h3 class="card-title">Metodos de Pagos</h3>
+                                <table id="paymentMethod-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                                    <thead>
+                                    <tr>
+                                        <th>Tarjeta</th>
+                                        <th>Nombre</th>
+                                        <th>Vencimiento</th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
@@ -32,15 +57,15 @@
 @section('footer-scripts')
     <script>
         $(function() {
-            $('#payments-table').DataTable({
+            $('#paymentMethod-table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('Payment.data') }}",
+                ajax: "{{ route('PaymentMethod.data') }}",
                 columns: [
-                    { data: 'payment_status', name: 'payment_status' },
-                    { data: 'payment_date', name: 'payment_date' },
-                    { data: 'amount', name: 'amount' },
-                    { data: 'sale', name: 'sale_id' }
+                    { data: 'masked_card', name: 'masked_card' },
+                    { data: 'name', name: 'name' },
+                    { data: 'due_date', name: 'due_date' },
+                    { data: 'actions', name: 'actions', orderable: false, searchable: false },
                 ],
                 language: {
                     url: "/lang/datatables-es_ES.json",
@@ -67,3 +92,4 @@
         }
     </script>
 @endsection
+

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Company;
 use App\EtaxProducts;
+use App\Payment;
 use App\PaymentMethod;
 use App\Sales;
 use App\SubscriptionPlan;
@@ -20,6 +21,7 @@ use App\Mail\NewUser;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use stdClass;
 
 class CompanyController extends Controller {
     
@@ -458,19 +460,70 @@ class CompanyController extends Controller {
                                                         ->with('paymentmethods', $paymentmethods);
     }
 
+    public function seleccionarCliente(Request $request){
+        $request->product = json_decode($request->product);
+        $request->payment_method = json_decode($request->payment_method);
+        $product = $request->product;
+        //dd($product);
+        $payment = $request->payment;
+        $user = auth()->user();
+        //if(isset($payment)){
+            return view('payment/clientDataSelect')->with('product', $product)
+                ->with('user', $user)
+                ->with('payment', $payment);
+        /*}else{
+            return redirect()->back()->withErrors('Debe seleccionar un metodo de pago');
+        }*/
+    }
+
     public function comprarFacturas(Request $request){
-        dd($request);
+        $product_id = $request->product_id;
+        $product_name = $request->product_name;
+        $product_price = $request->product_price;
+        $payment_id = $request->payment_id;
+
         $paymentUtils = new PaymentUtils();
-        $bnStatus = $paymentUtils->statusBNAPI();
-        if($bnStatus['apiStatus'] == 'Successful'){
-            if(isset($request->payment_method)){
-                $chargeCreated = $paymentUtils->paymentIncludeCharge();
-                return redirect()->back()->withMessage('Compra realizada');
+        if(isset($payment_id)){
+            $pagoProducto = $paymentUtils->comprarProductos($request);
+            if($pagoProducto){
+                $user = auth()->user();
+                $invoiceData = new stdClass();
+                $invoiceData->client_code = $request->id_number;
+                $invoiceData->client_id_number = $request->id_number;
+                $invoiceData->client_id = $request->user_id;
+                $invoiceData->tipo_persona = $request->tipo_persona;
+                $invoiceData->first_name = $request->first_name;
+                $invoiceData->last_name = $request->last_name;
+                $invoiceData->last_name2 = $request->last_name2;
+                $invoiceData->country = $request->country;
+                $invoiceData->state = $request->state;
+                $invoiceData->city = $request->city;
+                $invoiceData->district = $request->district;
+                $invoiceData->neighborhood = $request->neighborhood;
+                $invoiceData->zip = $request->zip;
+                $invoiceData->address = $request->address;
+                $invoiceData->phone = $request->phone;
+                $invoiceData->es_exento = $request->es_exento;
+                $invoiceData->email = $request->email;
+                $invoiceData->expiry = $request->expiry;
+                $invoiceData->amount = $product_price;
+                $invoiceData->subtotal = $product_price;
+
+                $item = new stdClass();
+                $item->total = $product_price;
+                $item->code = $product_id;
+                $item->name = $product_name;
+                $item->descuento = 0;
+                $item->cantidad = 1;
+
+                $invoiceData->items = [$item];
+                $procesoFactura = $paymentUtils->facturarProductosEtax($invoiceData);
+                return redirect()->back()->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
             }else{
-                return redirect()->back()->withErrors('Debe incluir un método de pago');
+                return redirect()->back()->withErrors('No pudo procesarse el pago');
             }
         }else{
-            return redirect()->back()->withErrors('Pagos en línea no esta disponible en este momento');
+            return redirect()->back()->withErrors('Debe incluir un método de pago');
         }
     }
 

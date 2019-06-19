@@ -27,11 +27,6 @@ Información general del perfil
                         <li>
                             <a class="nav-link" aria-selected="false" href="/usuario/planes">Mis Planes Suscritos</a>
                         </li>
-                        @if( !auth()->user()->is_guest )
-                            <li>
-                                <a class="nav-link" aria-selected="false" href="/usuario/payments">Historial de pagos</a>
-                            </li>
-                        @endif
                         @if( auth()->user()->isContador() )
                             <li>
                                 <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
