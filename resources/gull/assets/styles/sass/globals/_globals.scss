@@ -106,6 +106,12 @@ blockquote {
     font-size: .8rem;
 }
 
+.input-info {
+    font-size: 0.8rem;
+    color: #050505;
+    margin-bottom: 0.266rem;
+}
+
 @for $i from 1 through 5 {
     .line-height-#{$i} {
         line-height: #{$i};
