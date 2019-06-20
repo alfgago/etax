@@ -116,7 +116,7 @@
         date_default_timezone_set('America/Costa_Rica');
         $user = auth()->user();
         $hoy = getdate();
-        if($hoy['hours'] < 22 && $hoy['hours'] > 7){ ?>
+        if($hoy['hours'] < 21 && $hoy['hours'] > 7){ ?>
             <button type="button" class="callnow" onclick="popupReproductor();">Ayuda</button>
     <?php }else{ ?>
             <button type="button" class="callnow" onclick="mailSoporte();">Correo</button>
