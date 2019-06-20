@@ -86,7 +86,7 @@ class BridgeHaciendaApi
                         $xml->bill_id = 0;
                         $xml->xml = $path;
                         $xml->save();
-                        if (!empty($invoice->send_emails)) {
+                        if ( !empty($invoice->send_emails) ) {
                             Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new \App\Mail\Invoice(['xml' => $path,
                                 'data_invoice' => $invoice, 'data_company' =>$company]));
                         } else {

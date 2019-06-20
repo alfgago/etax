@@ -90,7 +90,7 @@ class Book extends Model
                                  $this->cc_ventas_1_iva + $this->cc_ventas_2_iva + $this->cc_ventas_13_iva + $this->cc_ventas_4_iva + 
                                  $this->cc_ventas_exp + $this->cc_ventas_estado + $this->cc_ventas_sin_derecho;
       
-    //Debe 2
+      //Debe 2
       $this->cc_clientes_credito = $calculos->total_clientes_credito;
       $this->cc_clientes_contado = $calculos->total_clientes_contado;  
       $this->cc_clientes_credito_exp = $calculos->total_clientes_credito_exp;

@@ -138,10 +138,12 @@ class User extends Authenticatable {
     }
     
     public function isContador() {
-        $productId = getCurrentSubscription()->etax_product_id;
-        if( $productId == 7 ) {
-            return true;
-        }
+        try{
+            $productId = getCurrentSubscription()->etax_product_id;
+            if( $productId == 7 ) {
+                return true;
+            }
+        }catch( \Throwable $e) { return false; }
         
         return false;
     }

@@ -45,3 +45,22 @@
   <a class="btn btn-primary btn-prev" target="_blank" href="https://etaxcr.com/planes">Ver detalle de planes</a>
   <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step2');">Siguiente paso</button>
 </div>
+
+ @if( !empty( auth()->user()->teams ) )
+    @if( sizeof(auth()->user()->teams) > 1 )
+      <div class="companyParent suscripciones">
+          <label for="">Saltar suscripción y entrar como:</label>
+          <div class="form-group">
+              <select class="form-control" id="company_change" onchange="companyChange(false);">
+                  @foreach( auth()->user()->teams as $row )
+                      <?php  
+                          $c = $row->company;  
+                          $name = $c->name ? $c->name.' '.$c->last_name.' '.$c->last_name2 : '-- Nueva Empresa --';  
+                      ?>
+                      <option value="{{ $c->id }}" {{ $c->id == currentCompany() ? 'selected' : ''  }} > {{ $name }} </option>
+                  @endforeach
+              </select>
+          </div>
+      </div>
+    @endif
+@endif

@@ -150,6 +150,53 @@ window.initHelpers = function (){
   	});
 }
 
+window.checkProporciones100 = function (){
+  	var r1 = parseFloat($('#operative_ratio1').val());
+  	var r2 = parseFloat($('#operative_ratio2').val());
+  	var r3 = parseFloat($('#operative_ratio3').val());
+  	var r4 = parseFloat($('#operative_ratio4').val());
+  	var sum = r1+r2+r3+r4;
+  
+  	if( !(sum > 99.75 && sum < 100.05) ) {
+  	  $('.proporciones input').css('border-color', 'red');
+      $('#validate-ratios-text').show();
+    }else {
+      $('.proporciones input').css('border-color', '#999');
+      $('#validate-ratios-text').hide();
+    }
+}
+
+
+window.companyChange = function($redirect = false) {
+    var sel = $('#company_change').val();
+
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    jQuery.ajax({
+        url: "/change-company",
+        method: 'post',
+        data: {
+            companyId: sel
+        },
+        success: function (result) {
+            if ($redirect) {
+
+                if (typeof is_edit === 'undefined') {
+                    window.location.href = window.location.href;
+                } else {
+                    window.location.href = result;
+                }
+            }else{
+              window.location.href = "/";
+            }
+
+        }});
+
+}
+
 $(document).ready(function() {
 
   $('.select-search').select2({
@@ -174,6 +221,10 @@ $(document).ready(function() {
     $('form').submit(function() {
         $('#btn-submit-fe').attr('disabled', true);
         $('#btn-submit-tc').attr('disabled', true);
+    });
+    
+    $('.proporciones').on('change', function() {
+        checkProporciones100();
     });
 
 });

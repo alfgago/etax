@@ -152,6 +152,13 @@
     border-color: red;
 }
 
+.btn-primary.disabled, .btn-primary:disabled {
+    background: #ccc;
+    border-color: #aaa;
+    color: #666;
+    cursor: progress;
+}
+
 @each $name, $value in $theme-colors {
     .checkbox-#{$name} {
         input {
