@@ -1,4 +1,4 @@
-<div class="col-md-8">
+<div class="col-md-8" id="vistagerencial">
     
   <div class="row">
     

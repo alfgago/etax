@@ -1,7 +1,7 @@
 @extends('layouts/app') 
 
 @section('title') 
-  Escritorio 
+    Escritorio <div id="escritorio"></div>
 @endsection 
 
 @section('header-scripts')
@@ -42,7 +42,7 @@
   </div>
   
   <div class="toggle-vista filters">
-    <label>Vista de dashboard</label>
+    <label id="vistabasica">Vista de dashboard</label>
     <div class="">
       <select id="input-vista" name="input-vista" onchange="loadReportes();">
         <option value="basica" selected> Vista básica</option>

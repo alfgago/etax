@@ -121,18 +121,31 @@ var tour = {
         },
         steps: [
             {
+                title: "Escritorio",
+                content: "El escritorio en versión básica le permite revisar en minutos la información más relevante para su negocio. Su escritorio se alimentará conforme incluya información de ventas y compras. Para conocer más sobre cada uno de los elementos, posicione el cursor sobre los signos de pregunta.",
+                target: document.querySelector("#escritorio"),
+                placement: "right"
+            },{
+                title: "Vista básica",
+                content: "Además del escritorio en vista simple, cuenta con una opción de vista avanzada, selecciónela en el accionable para acceder a ella",
+                target: document.querySelector("#vistabasica"),
+                placement: "left"
+            },{
+                title: "Vista Gerencial",
+                content: "El escritorio avanzado incluye información de interés como el gráfico de resumen del IVA. Un gráfico con la evolución mensual del impuesto para su negocio. ",
+                target: document.querySelector("#vistagerencial"),
+                placement: "right"
+            },{
                 title: "Enlaces Rápidos",
                 content: "Estos le llevarán a las tareas más comunes",
                 target: document.querySelector("#header"),
                 placement: "right"
-            },
-            {
+            },{
                 title: "PDF",
                 content: "Aprenda paso a paso con nuestras guías",
                 target: document.querySelector("#manuales"),
                 placement: "left"
-            },
-            {
+            },{
                 title: "Reportes por mes",
                 content: "Tenga siempre a mano la informacion detallada y concisa de sus operaciones mensuales",
                 target: document.querySelector("#reporteMes"),
