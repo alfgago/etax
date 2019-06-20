@@ -129,6 +129,12 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function edit() {
+        
+        $subscription = getCurrentSubscription();
+        if( ! isset( $subscription ) ) {
+          return redirect('/elegir-plan');
+        }
+        
         $company = currentCompanyModel();
         
         if (!$company) {
@@ -151,7 +157,7 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function editConfiguracion() {
-
+        
         $company = currentCompanyModel();
 
         if (!$company) {
@@ -187,8 +193,6 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function editTeam() {
-        $company = currentCompanyModel();
-
         $company = currentCompanyModel();
 
         if (!$company) {
@@ -239,13 +243,6 @@ class CompanyController extends Controller {
         }
 
         $team = Team::where('company_id', $company->id)->first();
-
-        /* Only owner of company or user invited as admin for that company can edit company details */
-        if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) && get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
-            return redirect()->back()->withError('Usted no está autorizado para actualizar esta información');
-        }
-
-
         
         if ($request->file('input_logo')) {
             
@@ -307,12 +304,6 @@ class CompanyController extends Controller {
 
         $team = Team::where('company_id', $company->id)->first();
 
-        /* Only owner of company or user invited as admin for that company can edit company details */
-        if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) &&
-                get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
-            return redirect()->back()->withError('Usted no está autorizado para actualizar esta información');
-        }
-
         $company->default_currency = $request->default_currency;
         $company->default_invoice_notes = $request->default_invoice_notes;
         $company->default_vat_code = $request->default_vat_code;
@@ -354,11 +345,6 @@ class CompanyController extends Controller {
         }
 
         $team = Team::where('company_id', $company->id)->first();
-
-        /* Only owner of company or user invited as admin for that company can edit company details */
-        if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) && get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
-            return redirect()->back()->withError('Usted no está autorizado para actualizar esta información');
-        }
 
         $id_number = $company->id_number;
         if (Storage::exists("empresa-$id_number/$id_number.p12")) {

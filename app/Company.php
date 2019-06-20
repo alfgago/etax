@@ -56,7 +56,7 @@ class Company extends Model {
 
     //Relación con Usuario
     public function owner() {
-        return $this->belongsTo('App\User');
+        return $this->belongsTo( User::class );
     }
     
     //Relación con el plan
