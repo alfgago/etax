@@ -3,8 +3,8 @@
   <div class="row">
     
     <div class="col-lg-12">
-      
-      <div class="card-title" id="header">Enlaces rápidos</div>
+        <div id=""></div>
+      <div class="card-title" id="escritorio">Enlaces rápidos</div>
       <div class="quicklinks">
         <a class="btn btn-primary" href="/facturas-emitidas/emitir-factura">Emitir facturas</a>
         <a class="btn btn-primary" href="#" onclick="abrirPopup('importar-emitidas-popup');">Importar facturas de venta</a>
@@ -67,6 +67,9 @@
     			<li>	
     				<a download href="/assets/files/guias/Manual-CodigosComprasEtax.pdf">Descargar manual de códigos eTax de compras.</a>
     			</li>
+                <li onclick="actualizarTutorial();">
+                    <a style="cursor: pointer">Tutorial r&aacute;pido</a>
+                </li>
     		</ul>
         
       </div>
@@ -88,7 +91,7 @@
         <div class="card-title" id="empresa">Empresa</div>
     
         <div class="info-empresa">
-          <?php $empresa = currentCompanyModel(); ?>
+          <?php $empresa = currentCompanyModel(); $hide_tutorial = $user = auth()->user()->hide_tutorial;?>
           <div class="dato-empresa">
             {{ $empresa->name.' '.$empresa->last_name.' '.$empresa->last_name2 }}
           </div>
@@ -110,72 +113,148 @@
     </div>
   
   </div> 
- 
+ <input type="text" hidden value="{{$hide_tutorial}}" id="hide_tutorial">
 </div>
 <script>
-var tour = {
-    id: "tour",
-        i18n: {
-            nextBtn: "Next",
-            prevBtn: "Previous"
-        },
-        steps: [
-            {
-                title: "Escritorio",
-                content: "El escritorio en versión básica le permite revisar en minutos la información más relevante para su negocio. Su escritorio se alimentará conforme incluya información de ventas y compras. Para conocer más sobre cada uno de los elementos, posicione el cursor sobre los signos de pregunta.",
-                target: document.querySelector("#escritorio"),
-                placement: "right"
-            },{
-                title: "Vista básica",
-                content: "Además del escritorio en vista simple, cuenta con una opción de vista avanzada, selecciónela en el accionable para acceder a ella",
-                target: document.querySelector("#vistabasica"),
-                placement: "left"
-            },{
-                title: "Vista Gerencial",
-                content: "El escritorio avanzado incluye información de interés como el gráfico de resumen del IVA. Un gráfico con la evolución mensual del impuesto para su negocio. ",
-                target: document.querySelector("#vistagerencial"),
-                placement: "right"
-            },{
-                title: "Enlaces Rápidos",
-                content: "Estos le llevarán a las tareas más comunes",
-                target: document.querySelector("#header"),
-                placement: "right"
-            },{
-                title: "PDF",
-                content: "Aprenda paso a paso con nuestras guías",
-                target: document.querySelector("#manuales"),
-                placement: "left"
-            },{
-                title: "Reportes por mes",
-                content: "Tenga siempre a mano la informacion detallada y concisa de sus operaciones mensuales",
-                target: document.querySelector("#reporteMes"),
-                placement: "top"
+    function tutorialBurbujas(){
+        var tour = {
+            id: "tour",
+            i18n: {
+                nextBtn: "Siguiente",
+                prevBtn: "Anterior",
+                doneBtn: "Finalizar",
             },
-            {
-                title: "Facturacion",
-                content: "Controle sus facturas emitidas y recibidas",
-                target: document.querySelector("#facturas"),
-                placement: "left"
-            },
-            {
-                title: "Proporcion",
-                content: "Analice de forma visual cual es su estado",
-                target: document.querySelector("#proporcion"),
-                placement: "top"
-            },
-            {
-                title: "Prorrata",
-                content: "El detalle de su prorrata a simple vista",
-                target: document.querySelector("#prorrata"),
-                placement: "left"
-            },
-            {
-                title: "Empresa",
-                content: "Configure sus datos",
-                target: document.querySelector("#empresa"),
-                placement: "left"
+            steps: [
+                {
+                    title: "Vista básica",
+                    content: "El escritorio en versión básica le permite revisar en minutos la información más relevante para su negocio. Su escritorio se alimentará conforme incluya información de ventas y compras. Para conocer más sobre cada uno de los elementos, posicione el cursor sobre los signos de pregunta.",
+                    target: document.querySelector("#escritorio"),
+                    placement: "right",
+                    delay:500
+                },{
+                    title: "Menú de Ventas",
+                    content: "eTax funciona con base en la información de compras y ventas de su negocio. Para ingresar la información usted puede: \n" +
+                        "\tRegistrar una factura manual \n" +
+                        "\tImportar a través de un excel \n" +
+                        "Importar a través de un XML\n" +
+                        "\n" +
+                        "Posiciónese sobre el botón de ventas para ver las opciones. \n" +
+                        "\n" +
+                        "También puede reenviar sus XML’s al correo facturas@etaxcr.com y autorizarlas desde el sistema.",
+                    target: document.querySelector("#ventas"),
+                    placement: "right",
+                    showPrevButton:true
+                },{
+                    title: "Menú de Compras",
+                    content: "Lo mismo sucede en el caso de las compras. Puede registrar facturas, importar (en XML o excel) o re-enviar a través de facturas@etaxcr.com y autorizarlas aquí.",
+                    target: document.querySelector("#compras"),
+                    placement: "right",
+                    showPrevButton:true
+                },{
+                    title: "Facturación",
+                    content: "Si usted utiliza eTax para facturar, en Facturación encuentra la posibilidad de realizar los diferentes tipos de documentos y de aceptar las facturas recibidas ante el Ministerio de Hacienda.",
+                    target: document.querySelector("#facturacion"),
+                    placement: "right",
+                    showPrevButton:true
+                },{
+                    title: "Cierres de Mes",
+                    content: "Previo a descargar su declaración de IVA mensual, usted tendrá que realizar el cierre de mes. ",
+                    target: document.querySelector("#cierresmes"),
+                    placement: "right",
+                    showPrevButton:true
+                },{
+                    title: "Reportes",
+                    content: " Ingrese a Reportes para conocer múltiple información sobre su negocio y el IVA. Cada uno de ellos incluye una explicación sobre su contenido.",
+                    target: document.querySelector("#reportes"),
+                    placement: "right",
+                    showPrevButton:true
+                },{
+                    title: "Clientes",
+                    content: "Usted puede incluir la información de sus clientes. Así los tendrá disponibles al momento de realizar una venta.",
+                    target: document.querySelector("#clientes"),
+                    placement: "right",
+                    showPrevButton:true
+                },{
+                    title: "Proveedores",
+                    content: "Usted puede incluir la información de sus proveedores. Así los tendrá disponibles al momento de registrar una compra.",
+                    target: document.querySelector("#proveedores"),
+                    placement: "right",
+                    showPrevButton:true
+                },{
+                    title: "Productos",
+                    content: "Usted puede incluir la información de sus productos. Así los tendrá disponibles al momento de realizar una venta.",
+                    target: document.querySelector("#productos"),
+                    placement: "right",
+                    showPrevButton:true,
+                },{
+                    title: "Vista Básica",
+                    content: "Además del escritorio en vista simple, tambien cuenta con una opción de vista avanzada. Pulse 'Siguiente' para ver la Vista Gerencial y completar el tutorial",
+                    target: document.querySelector("#vistabasica"),
+                    placement: "left",
+                    showPrevButton:true
+                }
+            ],
+            multipage:true,
+            onEnd: function (){
+                var vista = "gerencial";
+                var mes = $("#input-mes").val();
+                var ano = $("#input-ano").val();
+
+                jQuery.ajax({
+                    url: "/reportes/reporte-dashboard",
+                    type: 'post',
+                    cache: false,
+                    data : {
+                        mes : mes,
+                        ano : ano,
+                        vista : vista,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success : function( response ) {
+                        $('#reporte-container').html(response);
+                        initHelpers();
+                        $("#input-vista").val("gerencial");
+                    },
+                    async: true
+                });
+                jQuery.ajax({
+                    url: "/usuario/update-user-tutorial",
+                    type: 'post',
+                    cache: false,
+                    data : {
+                        tutorialInicial : 0,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success : function( response ) {
+                        console.log(response);
+                    },
+                    async: true
+                });
             }
-        ]
+        }
+        hopscotch.startTour(tour);
     }
-    hopscotch.startTour(tour);
+    function actualizarTutorial() {
+        console.log('here');
+        jQuery.ajax({
+            url: "/usuario/update-user-tutorial",
+            type: 'post',
+            cache: false,
+            data : {
+                tutorialInicial : 2,
+                _token: '{{ csrf_token() }}'
+            },
+            success : function( response ) {
+                console.log(response);
+                tutorialBurbujas();
+            },
+            async: true
+        });
+    }
+    $( document ).ready(function(){
+        var tutorialInicial = '{{$hide_tutorial}}';
+        if(tutorialInicial == 0){
+            tutorialBurbujas();
+        }
+    });
 </script>

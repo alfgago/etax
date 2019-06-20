@@ -1,7 +1,7 @@
 @extends('layouts/app') 
 
 @section('title') 
-    Escritorio <div id="escritorio"></div>
+    Escritorio
 @endsection 
 
 @section('header-scripts')
@@ -45,7 +45,7 @@
     <label id="vistabasica">Vista de dashboard</label>
     <div class="">
       <select id="input-vista" name="input-vista" onchange="loadReportes();">
-        <option value="basica" selected> Vista básica</option>
+        <option value="basica" selected > Vista básica</option>
         <option value="gerencial"> Vista avanzada</option>
       </select>
     </div>
@@ -91,7 +91,9 @@
   $( document ).ready(function() {  
     loadReportes();
   });
-  
+
+
+
 </script>
 
 
