@@ -250,6 +250,27 @@
     z-index: 99;
 }
     
+.companyParent.suscripciones select {
+    font-size: 1rem;
+}
+
+.companyParent.suscripciones {
+    margin: 3rem 0 0 auto;
+    width: auto;
+    color: #999;
+    font-size: .9rem;
+    padding: .25rem;
+    line-height: 25px;
+}
+
+.companyParent.suscripciones label {
+    margin: 0;
+}
+
+.companyParent.suscripciones .form-group {
+    margin: 0;
+}    
+    
 @media (max-width: 580px) {    
     .wizard-popup {
         position: relative;
