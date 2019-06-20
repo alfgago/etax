@@ -45,7 +45,9 @@ class ReportsController extends Controller
               $is_admin = ($invite->role == 'admin') ? '1' : '0';
               $is_readonly = ($invite->role == 'readonly') ? '1' : '0';
               PlansInvitation::create(['subscription_id' => $company->subscription_id, 'company_id' => $company->id, 'user_id' => auth()->user()->id]);
-
+              
+              auth()->user()->switchTeam( $team );
+              
               return redirect()->route('User.companies')->withMessage('La invitación ha sido aceptada.');
           }
       }
@@ -115,11 +117,21 @@ class ReportsController extends Controller
       
       $prorrataOperativa = $this->getProrrataOperativa($ano);
       
+      $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
+      $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
+      $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0, $prorrataOperativa );
+      $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0, $prorrataOperativa );
+      $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0, $prorrataOperativa );
+      $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0, $prorrataOperativa );
+      $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0, $prorrataOperativa );
+      $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0, $prorrataOperativa );
+      $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0, $prorrataOperativa );
+      $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0, $prorrataOperativa );
+      $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0, $prorrataOperativa );
+      $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, $prorrataOperativa );
+      
       $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
       $nombreMes = Variables::getMonthName($mes);
-      
-      $time_end = $this->microtime_float();
-      $time = $time_end - $time_start;
       
       return view('/Reports/reporte-cuentas', compact('data', 'ano', 'nombreMes') );
 

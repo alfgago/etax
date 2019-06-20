@@ -61,10 +61,3 @@
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step2');">Siguiente paso</button>
 </div>
-
-
-<script>
-
-
-  
-</script>

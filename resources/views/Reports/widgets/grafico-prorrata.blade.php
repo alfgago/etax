@@ -25,7 +25,7 @@
   
   $numerador = abs($acumulado->balance_operativo - $acumulado->balance_estimado) ;
   $denumerador = abs($acumulado->balance_operativo);
-  
+  $porcentaje = 0;
   if( abs($denumerador) ) {
     $porcentaje = abs($numerador) / abs($denumerador);
   }
