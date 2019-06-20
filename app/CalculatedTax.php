@@ -226,8 +226,14 @@ class CalculatedTax extends Model
                   $sumRepercutido4 += $subtotal;
                 }
                 //sum los del exentos. Estos se sumn como si fueran 13 para efectos del cálculo.
-                if( $ivaType == '150' || $ivaType == '160' || $ivaType == '199' ){
+                if( $ivaType == '150' || $ivaType == '160' ||  $ivaType == '170' ||$ivaType == '199' ){
                   $sumRepercutido3 += $subtotal;
+                  $sumRepercutidoExentoConCredito += $subtotal;
+                }
+                
+                //Suma la transitoria de canasta básica
+                if( $ivaType == '165' ){
+                  $sumRepercutido1 += $subtotal;
                   $sumRepercutidoExentoConCredito += $subtotal;
                 }
            
@@ -836,6 +842,12 @@ class CalculatedTax extends Model
           $this->b160 += $calculosAnteriores[$i]->b160;
           $this->i160 += $calculosAnteriores[$i]->i160;
           
+          $this->b165 += $calculosAnteriores[$i]->b165;
+          $this->i165 += $calculosAnteriores[$i]->i165;
+          
+          $this->b170 += $calculosAnteriores[$i]->b170;
+          $this->i170 += $calculosAnteriores[$i]->i170;
+          
           $this->b200 += $calculosAnteriores[$i]->b200;
           $this->i200 += $calculosAnteriores[$i]->i200;
           
@@ -1025,6 +1037,12 @@ class CalculatedTax extends Model
             
             $this->b160 = 0;
             $this->i160 = 0;
+            
+            $this->b165 = 0;
+            $this->i165 = 0;
+            
+            $this->b170 = 0;
+            $this->i170 = 0;
             
             $this->b200 = 0;
             $this->i200 = 0;

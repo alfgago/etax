@@ -26,12 +26,14 @@ class Variables
       ['nombre'=>'140 - Inversion del sujeto pasivo', 'codigo'=>'140', 'porcentaje'=>'13', 'hideMasiva'=>true],
       ['nombre'=>'150 - Ventas por exportación con derecho a crédito', 'codigo'=>'150', 'porcentaje'=>'0'],
       ['nombre'=>'160 - Ventas al Estado e Instituciones con derecho a crédito', 'codigo'=>'160', 'porcentaje'=>'0'],
+      ['nombre'=>'165 - Ventas de canasta básica con tarifa transitoria de 0% con acreditación plena', 'codigo'=>'165', 'porcentaje'=>'0'],
+      ['nombre'=>'170 - Ventas a no sujetos y exentos con derecho a crédito', 'codigo'=>'170', 'porcentaje'=>'0'],
       ['nombre'=>'200 - Ventas sin derecho a crédito por exenciones objetivas', 'codigo'=>'200', 'porcentaje'=>'0'],
       ['nombre'=>'201 - Ventas sin derecho a crédito por exenciones objetivas con límite no sobrepasado', 'codigo'=>'201', 'porcentaje'=>'0'],
       ['nombre'=>'240 - Autoconsumo sin derecho a crédito', 'codigo'=>'240', 'porcentaje'=>'0', 'hideMasiva'=>true],
       ['nombre'=>'245 - Ventas locales con tarifa transitoria del 0% sin derecho a crédito', 'codigo'=>'245', 'porcentaje'=>'0'], //*vigente del 1-07-2019 al 30-06-2020
-      ['nombre'=>'250 - Ventas a sujetos exentos', 'codigo'=>'250', 'porcentaje'=>'0'],
-      ['nombre'=>'260 - Ventas a no sujetos', 'codigo'=>'260', 'porcentaje'=>'0'],
+      ['nombre'=>'250 - Ventas a sujetos exentos sin derecho a crédito', 'codigo'=>'250', 'porcentaje'=>'0', 'hide'=>true, 'hideMasiva'=>true],
+      ['nombre'=>'260 - Ventas a no sujetos (sin derecho a crédito)', 'codigo'=>'260', 'porcentaje'=>'0'],
     ];
 
     return $lista;
@@ -43,7 +45,7 @@ class Variables
       ['nombre'=>'Exportaciones/Importaciones', 'codigo_iva'=>'150'],
       ['nombre'=>'Servicios profesionales', 'codigo_iva'=>'103'],
       ['nombre'=>'Autoconsumo de servicios', 'codigo_iva'=>'123'],
-      ['nombre'=>'Canasta básica', 'codigo_iva'=>'101'],
+      ['nombre'=>'Canasta básica', 'codigo_iva'=>'165'],
       ['nombre'=>'Medicamentos', 'codigo_iva'=>'102'],
       ['nombre'=>'Turismo', 'codigo_iva'=>'200'],
       ['nombre'=>'Libros', 'codigo_iva'=>'200'],
