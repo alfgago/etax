@@ -68,12 +68,12 @@ class BridgeHaciendaApi
                         'Connection' => 'Close'
                     ],
                     'multipart' => $requestData,
-                    'verify' => false,
+                    'verify' => false
                 ]);
                 $response = json_decode($result->getBody()->getContents(), true);
                 if (isset($response['status']) && $response['status'] == 200) {
                     $date = Carbon::now();
-                    $invoice->hacienda_status = 03;
+                    $invoice->hacienda_status = 1;
                     $invoice->save();
                     $path = 'empresa-'.$company->id_number.
                         "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";

@@ -27,7 +27,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')
         //          ->hourly();
         //Invoice Queue
-        $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=2 --queue=invoices')
+        $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=1 --queue=invoices')
             ->timezone(config('app.timezone'))->everyThirtyMinutes();
         //Emails Queue Restart
         $schedule->command('queue:restart')
