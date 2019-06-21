@@ -109,6 +109,7 @@ Route::prefix('usuario')->group(function() {
     Route::get('usuarios-invitados', 'UserController@invitedUsersList')->name('User.invited-users-list');
     Route::get('zendesk-jwt', 'UserController@zendeskJwt')->name('User.zendesk_jwt');
     Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
+    Route::post('update-user-tutorial', 'UserController@updateUserTutorial')->name('User.update_user_tutorial');
 });
 
 //Rutas de Pagos de la aplicacion

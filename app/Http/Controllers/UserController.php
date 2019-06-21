@@ -333,4 +333,19 @@ class UserController extends Controller {
         
     }
 
+    public function updateUserTutorial(Request $request){
+        if(request()->ajax()){
+            $user = auth()->user();
+            if($request->tutorialInicial==0){
+                $user->hide_tutorial = 1;
+                $user->save();
+            }else if($request->tutorialInicial==1){
+                $user->hide_tutorial = 2;
+                $user->save();
+            }else if($request->tutorialInicial==2){
+                $user->hide_tutorial = 0;
+                $user->save();
+            }
+        }
+    }
 }

@@ -9,9 +9,11 @@
      <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title') | eTax</title>
-  
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/3.4.1/tippy.css" />
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/select2.min.css')}}">
+    <link rel="stylesheet" href="{{asset('css/hopscotch.css')}}">
+    <link rel="stylesheet" href="{{asset('css/hopscotch.min.css')}}">
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/sweetalert2.min.css')}}">
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/toastr.min.css')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
@@ -68,8 +70,13 @@
     <script src="https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="/assets/js/hopscotch.js"></script>
+    <script src="/assets/js/hopscotch.min.js"></script>
+    <script src="/assets/js/hopscotch.script.js"></script>
+    <script src="/assets/js/hopscotch_amd.js"></script>
+    <script src="/assets/js/hopscotch_amd.min.js"></script>
 
-    
+
     @if( session()->has('message') )
         <script>
           toastr.success( "{{ session()->get('message') }}" );
