@@ -22,4 +22,5 @@ return [
     //Ambiente Pagos en línea
     'klap_app_name' => env('KLAP_APP_NAME', 'ETAX TEST'),
     'klap_app_password' => env('KLAP_APP_PASSWORD', 'ETFTTJUN0619%'),
+    'queue_connections' => env('QUEUE_CONNECTION', 'redis')
 ];

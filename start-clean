@@ -23,4 +23,4 @@ docker exec php php artisan route:clear
 docker exec php php artisan view:clear
 docker exec php php artisan migrate:fresh
 docker exec php php artisan key:generate
-
+docker exec php php artisan db:seed

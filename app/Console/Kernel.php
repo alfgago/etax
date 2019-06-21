@@ -26,6 +26,12 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
+        //Invoice Queue
+        $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=1 --queue=invoices')
+            ->timezone(config('app.timezone'))->everyThirtyMinutes();
+        //Emails Queue Restart
+        $schedule->command('queue:restart')
+            ->timezone(config('app.timezone'))->daily();
         $schedule->command('telescope:prune')->daily();
     }
 
@@ -37,7 +43,6 @@ class Kernel extends ConsoleKernel
     protected function commands()
     {
         $this->load(__DIR__.'/Commands');
-
         require base_path('routes/console.php');
     }
 }

@@ -64,13 +64,14 @@ class ProcessInvoice implements ShouldQueue
                     ],
                     'multipart' => $requestData,
                     'verify' => false,
+                    'connect_timeout' => 18
                 ]);
 
                 $response = json_decode($result->getBody()->getContents(), true);
                 if (isset($response['status']) && $response['status'] == 200) {
                     Log::info('API HACIENDA 200 -->>'.$result->getBody()->getContents());
                     $date = Carbon::now();
-                    $invoice->hacienda_status = 03;
+                    $invoice->hacienda_status = 3;
                     $invoice->save();
                     $path = 'empresa-'.$company->id_number.
                         "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
@@ -83,8 +84,9 @@ class ProcessInvoice implements ShouldQueue
                         $xml->bill_id = 0;
                         $xml->xml = $path;
                         $xml->save();
-                        Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['xml' => $path,
-                            'data_invoice' => $invoice, 'data_company' =>$company]));
+                        Mail::to($invoice->client_email)->send(new \App\Mail\InvoiceNotification(['xml' => $path,
+                            'data_invoice' => $invoice, 'data_company' => $company,
+                            'xml' => ltrim($response['data']['response'], '\n')]));
                     }
                 }
             }
@@ -96,7 +98,7 @@ class ProcessInvoice implements ShouldQueue
     private function setInvoiceData(Invoice $data, $details) {
         try {
             $company = $data->company;
-            $ref = getInvoiceReference($company->last_invoice_ref_number) + 1;
+            $ref = getInvoiceReference($company->last_invoice_ref_number);
             $data->reference_number = $ref;
             $data->save();
             $receptorPostalCode = $data['client_zip'];

@@ -630,8 +630,7 @@ class InvoiceController extends Controller
         $invoice = new Invoice();
         $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
             '1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
-            
-            
+
         return $key;
     }
 }
