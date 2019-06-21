@@ -7,7 +7,7 @@ namespace App;
 class Variables
 {
   
-    public static function tiposIVARepercutidos() {
+  public static function tiposIVARepercutidos() {
     $lista = [
       ['nombre'=>'101 - Ventas locales de bienes y servicios con derecho a crédito al 1%', 'codigo'=>'101', 'porcentaje'=>'1'],
       ['nombre'=>'102 - Ventas locales de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'102', 'porcentaje'=>'2'],
@@ -15,7 +15,7 @@ class Variables
       ['nombre'=>'104 - Ventas locales de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'104', 'porcentaje'=>'4'],
       
       ['nombre'=>'114 - Ventas locales con tarifa transitoria del 4% con derecho a crédito  *vigente del 1-07-2020 al 30-06-2021', 'codigo'=>'114', 'porcentaje'=>'4', 'hide'=>true, 'hideMasiva'=>true],
-      ['nombre'=>'118 - Ventas locales con tarifa transitoria del 8% con derecho a crédito  *vigente del 1-07-2021 al 30-06-2021', 'codigo'=>'118', 'porcentaje'=>'8', 'hide'=>true, 'hideMasiva'=>true],
+      ['nombre'=>'118 - Ventas locales con tarifa transitoria del 8% con derecho a crédito  *vigente del 1-07-2021 al 30-06-2022', 'codigo'=>'118', 'porcentaje'=>'8', 'hide'=>true, 'hideMasiva'=>true],
       
       ['nombre'=>'121 - Autoconsumo de bienes y servicios con derecho a crédito al 1%', 'codigo'=>'121', 'porcentaje'=>'1', 'hideMasiva'=>true],
       ['nombre'=>'122 - Autoconsumo de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'122', 'porcentaje'=>'2', 'hideMasiva'=>true],
@@ -25,6 +25,7 @@ class Variables
       ['nombre'=>'130 - Ventas de bienes y servicios con límites sobrepasados al 13% con derecho a crédito', 'codigo'=>'130', 'porcentaje'=>'13', 'hideMasiva'=>true],
       ['nombre'=>'140 - Inversion del sujeto pasivo', 'codigo'=>'140', 'porcentaje'=>'13', 'hideMasiva'=>true],
       ['nombre'=>'150 - Ventas por exportación con derecho a crédito', 'codigo'=>'150', 'porcentaje'=>'0'],
+      ['nombre'=>'155 - Ventas con derecho a crédito por ventas con IVA recaudado desde aduanas.', 'codigo'=>'155', 'porcentaje'=>'0'],
       ['nombre'=>'160 - Ventas al Estado e Instituciones con derecho a crédito', 'codigo'=>'160', 'porcentaje'=>'0'],
       ['nombre'=>'165 - Ventas de canasta básica con tarifa transitoria de 0% con acreditación plena', 'codigo'=>'165', 'porcentaje'=>'0'],
       ['nombre'=>'170 - Ventas a no sujetos y exentos con derecho a crédito', 'codigo'=>'170', 'porcentaje'=>'0'],
@@ -32,8 +33,8 @@ class Variables
       ['nombre'=>'201 - Ventas sin derecho a crédito por exenciones objetivas con límite no sobrepasado', 'codigo'=>'201', 'porcentaje'=>'0'],
       ['nombre'=>'240 - Autoconsumo sin derecho a crédito', 'codigo'=>'240', 'porcentaje'=>'0', 'hideMasiva'=>true],
       ['nombre'=>'245 - Ventas locales con tarifa transitoria del 0% sin derecho a crédito', 'codigo'=>'245', 'porcentaje'=>'0'], //*vigente del 1-07-2019 al 30-06-2020
-      ['nombre'=>'250 - Ventas a sujetos exentos sin derecho a crédito', 'codigo'=>'250', 'porcentaje'=>'0', 'hide'=>true, 'hideMasiva'=>true],
-      ['nombre'=>'260 - Ventas a no sujetos (sin derecho a crédito)', 'codigo'=>'260', 'porcentaje'=>'0'],
+      ['nombre'=>'250 - Ventas con IVA incluido en el precio', 'codigo'=>'250', 'porcentaje'=>'0', 'hide'=>true, 'hideMasiva'=>true],
+      ['nombre'=>'260 - Ventas a no sujetos (sin derecho a crédito)', 'codigo'=>'260', 'porcentaje'=>'0', 'hide'=>true, 'hideMasiva'=>true],
     ];
 
     return $lista;
@@ -73,6 +74,8 @@ class Variables
       ['nombre'=>'012 - Compras locales de propiedad planta y equipo con IVA al 2% sin identificación específica', 'codigo'=>'012', 'porcentaje'=>'2'],
       ['nombre'=>'013 - Compras locales de propiedad planta y equipo con IVA al 13% sin identificación específica', 'codigo'=>'013', 'porcentaje'=>'13'],
       ['nombre'=>'014 - Compras locales de propiedad planta y equipo con IVA al 4% sin identificación específica', 'codigo'=>'014', 'porcentaje'=>'4'],
+      ['nombre'=>'015 - Compras locales de propiedad planta y equipo con IVA al 1% sin identificación específica. Con costo superior a 15 salarios base', 'codigo'=>'015', 'porcentaje'=>'1'],
+      ['nombre'=>'016 - Compras locales de propiedad planta y equipo con IVA al 13% sin identificación específica. Con costo superior a 15 salarios base', 'codigo'=>'016', 'porcentaje'=>'13'],
       
       ['nombre'=>'021 - Importaciones de bienes y servicios con IVA al 1% sin identificación específica', 'codigo'=>'021', 'porcentaje'=>'1'],
       ['nombre'=>'022 - Importaciones de bienes y servicios con IVA al 2% sin identificación específica', 'codigo'=>'022', 'porcentaje'=>'2'],
@@ -83,6 +86,8 @@ class Variables
       ['nombre'=>'032 - Importaciones de propiedad planta y equipo con IVA al 2% sin identificación específica', 'codigo'=>'032', 'porcentaje'=>'2'],
       ['nombre'=>'033 - Importaciones de propiedad planta y equipo con IVA al 13% sin identificación específica', 'codigo'=>'033', 'porcentaje'=>'13'],
       ['nombre'=>'034 - Importaciones de propiedad planta y equipo con IVA al 4% sin identificación específica', 'codigo'=>'034', 'porcentaje'=>'4'],
+      ['nombre'=>'035 - Importaciones de propiedad planta y equipo con IVA al 1% sin identificación específica Con costo superior a 15 salarios base', 'codigo'=>'035', 'porcentaje'=>'1'],
+      ['nombre'=>'036 - Importaciones de propiedad planta y equipo con IVA al 13% sin identificación específica Con costo superior a 15 salarios base', 'codigo'=>'036', 'porcentaje'=>'13'],
       
       //Con identificación específica
       ['nombre'=>'040 - Importaciones de bienes y servicios exentos', 'codigo'=>'040', 'porcentaje'=>'0'],
