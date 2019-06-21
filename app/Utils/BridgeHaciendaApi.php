@@ -10,6 +10,7 @@ namespace App\Utils;
 
 use App\Invoice;
 use App\InvoiceItem;
+use App\Jobs\ProcessInvoice;
 use App\XmlHacienda;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -22,26 +23,13 @@ use Log;
 
 class BridgeHaciendaApi
 {
-    public function login() {
+    public function login($cache = true) {
         try {
+            if ($cache === false) {
+                return $this->requestLogin();
+            }
             $value = Cache::remember('token-api-'.currentCompany(), '60000', function () {
-                $client = new Client();
-                $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/auth/login', [
-                    'headers' => [
-                        'Auth-Key'  => config('etax.api_hacienda_key'),
-                        'Client-Service' => config('etax.api_hacienda_client'),
-                        'Connection' => 'Close'
-                    ],
-                    'json' => ["username" => config('etax.api_hacienda_username'),
-                        "password" => config('etax.api_hacienda_password')
-                    ],
-                    'verify' => false,
-                ]);
-                $tokenApi = json_decode($result->getBody()->getContents(), true);
-                if (isset($tokenApi['status']) && $tokenApi['status'] == 200) {
-                    return $tokenApi['data']['token'];
-                }
-                return false;
+                return $this->requestLogin();
             });
             return $value;
         } catch (ClientException $error) {
@@ -58,7 +46,7 @@ class BridgeHaciendaApi
             if ($requestData !== false) {
                 $client = new Client();
                 Log::info('Enviando parametros  API HACIENDA -->>');
-                $result = $client->requestAsync('POST', config('etax.api_hacienda_url') . '/index.php/invoice/create', [
+                $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice/signxml', [
                     'headers' => [
                         'Auth-Key'  => config('etax.api_hacienda_key'),
                         'Client-Service' => config('etax.api_hacienda_client'),
@@ -67,13 +55,12 @@ class BridgeHaciendaApi
                         'Connection' => 'Close'
                     ],
                     'multipart' => $requestData,
-                    'verify' => false,
+                    'verify' => false
                 ]);
-                $result = $result->wait();
                 $response = json_decode($result->getBody()->getContents(), true);
                 if (isset($response['status']) && $response['status'] == 200) {
                     $date = Carbon::now();
-                    $invoice->hacienda_status = 03;
+                    $invoice->hacienda_status = 1;
                     $invoice->save();
                     $path = 'empresa-'.$company->id_number.
                         "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
@@ -86,8 +73,16 @@ class BridgeHaciendaApi
                         $xml->bill_id = 0;
                         $xml->xml = $path;
                         $xml->save();
-                        Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['xml' => $path,
-                            'data_invoice' => $invoice, 'data_company' =>$company]));
+                        if ( !empty($invoice->send_emails) ) {
+                            Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new \App\Mail\Invoice(['xml' => $path,
+                                'data_invoice' => $invoice, 'data_company' =>$company]));
+                        } else {
+                            Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['xml' => $path,
+                                'data_invoice' => $invoice, 'data_company' =>$company]));
+                        }
+                        //Send to queue invoice
+                        ProcessInvoice::dispatch($invoice->id, $company->id, $token)
+                            ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
                         return $invoice;
                     }
                 }
@@ -140,7 +135,7 @@ class BridgeHaciendaApi
                 'receptor_ubicacion_distrito' => substr($receptorPostalCode,3),
                 'receptor_ubicacion_otras_senas' => $data['client_address'] ?? '',
                 'receptor_email' => $data['client_email'] ?? '',
-                'receptor_cedula_numero' => $data['client_id_number'] ?? '',
+                'receptor_cedula_numero' => $data['client_id_number'] ? preg_replace("/[^0-9]/", "", $data['client_id_number']) : '',
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',
                 'tipocambio' => $data['currency_rate'] ?? '',
@@ -156,7 +151,7 @@ class BridgeHaciendaApi
                 'emisor_country' => $company->country ?? '',
                 'emisor_address' => $company->address ?? '',
                 'emisor_phone' => $company->phone ?? '',
-                'emisor_cedula' => $company->id_number ?? '',
+                'emisor_cedula' => $company->id_number ? preg_replace("/[^0-9]/", "", $company->id_number) : '',
                 'usuarioAtv' => $company->atv->user ?? '',
                 'passwordAtv' => $company->atv->password ?? '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
@@ -183,6 +178,26 @@ class BridgeHaciendaApi
             Log:info('Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         }
+    }
+
+    private function requestLogin() {
+        $client = new Client();
+        $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/auth/login', [
+            'headers' => [
+                'Auth-Key'  => config('etax.api_hacienda_key'),
+                'Client-Service' => config('etax.api_hacienda_client'),
+                'Connection' => 'Close'
+            ],
+            'json' => ["username" => config('etax.api_hacienda_username'),
+                "password" => config('etax.api_hacienda_password')
+            ],
+            'verify' => false,
+        ]);
+        $tokenApi = json_decode($result->getBody()->getContents(), true);
+        if (isset($tokenApi['status']) && $tokenApi['status'] == 200) {
+            return $tokenApi['data']['token'];
+        }
+        return false;
     }
 
 }

@@ -89,6 +89,21 @@
                 <td>  ₡{{ number_format( $data->book->cc_ventas_estado, 0 ) }} </td>
               </tr>
               <tr>
+                <th>Ventas exentas de IVA</td>
+                <td>-</td>
+                <td>  ₡{{ number_format( $data->book->cc_ventas_exentas, 0 ) }} </td>
+              </tr>
+              <tr>
+                <th>Ventas de canasta básica con derecho a crédito</td>
+                <td>-</td>
+                <td>  ₡{{ number_format( $data->book->cc_ventas_canasta, 0 ) }} </td>
+              </tr>
+              <tr>
+                <th>Ventas con IVA pagado en aduanas</td>
+                <td>-</td>
+                <td>  ₡{{ number_format( $data->book->cc_ventas_aduana, 0 ) }} </td>
+              </tr>
+              <tr>
                 <th>Ventas sin derecho a crédito</td>
                 <td>-</td>
                 <td>  ₡{{ number_format( $data->book->cc_ventas_sin_derecho, 0 ) }} </td>

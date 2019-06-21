@@ -76,7 +76,7 @@
 						    
 						    <div class="form-group col-md-4">
 						      <label for="id_number">Número de identificación *</label>
-						      <input type="text" class="form-control" name="id_number" id="id_number" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);">
+						      <input type="number" class="form-control" name="id_number" id="id_number" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);">
 						    </div>
 						    
 						    <div class="form-group col-md-4">

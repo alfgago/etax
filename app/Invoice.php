@@ -85,7 +85,6 @@ class Invoice extends Model
     public function setInvoiceData($request)
     {
         try {
-
             $this->document_key = $request->document_key;
             $this->document_number = $request->document_number;
             $this->sale_condition = $request->sale_condition;
@@ -94,12 +93,13 @@ class Invoice extends Model
             $this->credit_time = $request->credit_time;
             $this->buy_order = $request->buy_order;
             $this->other_reference = $request->other_reference;
+            $this->send_emails = $request->send_email ?? null;
 
             //Datos de cliente. El cliente nuevo viene con ID = -1
             if( $request->client_id == '-1' ) {
 
                 $tipo_persona = $request->tipo_persona;
-                $identificacion_cliente = $request->id_number;
+                $identificacion_cliente = preg_replace("/[^0-9]/", "", $request->id_number );
                 $codigo_cliente = $request->code;
 
                 $client = Client::updateOrCreate(
@@ -304,6 +304,7 @@ class Invoice extends Model
         $tipoDocumento = '04';
       }
       
+      $idCliente = preg_replace("/[^0-9]/", "", $idCliente );
       $invoiceCacheKey = "import-factura-$nombreCliente-" . $company->id . "-" . $consecutivoComprobante;
       if ( !Cache::has($invoiceCacheKey) ) {
       

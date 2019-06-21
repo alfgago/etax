@@ -524,9 +524,9 @@ class BillController extends Controller
     {
         $bill = Bill::findOrFail($id);
         $this->authorize('update', $bill);
+        clearBillCache($bill);
         BillItem::where('bill_id', $bill->id)->delete();
         $bill->delete();
-        clearBillCache($bill);
         
         return redirect('/facturas-recibidas')->withMessage('La factura ha sido eliminada satisfactoriamente.');
     } 

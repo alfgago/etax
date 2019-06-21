@@ -8,6 +8,7 @@
 
 @section('content') 
 <div class="wizard-container">
+  
   <div class="wizard-popup">
     <div class="titulo-bienvenida">
       <h2>¡Bienvenido a eTax!
@@ -16,13 +17,13 @@
       </p>
     </div>
     <div class="wizard-steps">
-      <div id="step1" class="step-btn step1 is-active" onclick="toggleStep(id);">
+      <div id="step1" class="step-btn step1 is-active">
         <span>Confirme su plan</span>
       </div>
-      <div id="step2" class="step-btn step2" onclick="toggleStep(id);">
+      <div id="step2" class="step-btn step2">
         <span>Datos de facturación</span>
       </div>
-      <div id="step3" class="step-btn step3" onclick="toggleStep(id);">
+      <div id="step3" class="step-btn step3">
         <span>Método de pago</span>
       </div>
     </div>

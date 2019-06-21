@@ -10,7 +10,7 @@
                 
             </li>
             
-            <li class="nav-item {{ request()->is('facturas-emitidas/*') || request()->is('facturas-emitidas') ? 'active' : '' }}" >
+            <li class="nav-item {{ request()->is('facturas-emitidas/*') || request()->is('facturas-emitidas') ? 'active' : '' }}" id="ventas">
                 <a class="nav-item-hold" href="/facturas-emitidas">
                     <img src="{{asset('assets/images/iconos/ventas.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Ventas</span>
@@ -26,7 +26,7 @@
                 
             </li>
             
-            <li class="nav-item {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
+            <li class="nav-item {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" id="compras">
                 <a class="nav-item-hold" href="/facturas-recibidas">
                     <img src="{{asset('assets/images/iconos/compras.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Compras</span>
@@ -41,7 +41,7 @@
                 </div>
             </li>
             
-            <li class="nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" >
+            <li class="nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" id="facturacion">
                 <a class="nav-item-hold" href="/facturas-recibidas">
                     <img src="{{asset('assets/images/iconos/facturacion.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Facturación</span>
@@ -75,7 +75,7 @@
                 }
             </style>
             
-            <li class="nav-item small-nav {{ request()->is('reportes/*') || request()->is('reportes') ? 'active' : '' }}" >
+            <li class="nav-item small-nav {{ request()->is('reportes/*') || request()->is('reportes') ? 'active' : '' }}" id="cierresmes">
                 <a class="nav-item-hold" href="/cierres">
                     <img src="{{asset('assets/images/iconos/report.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Cierres de mes</span>
@@ -83,7 +83,7 @@
                 
             </li>
             
-            <li class="nav-item small-nav {{ request()->is('reportes/*') || request()->is('reportes') ? 'active' : '' }}" >
+            <li class="nav-item small-nav {{ request()->is('reportes/*') || request()->is('reportes') ? 'active' : '' }}" id="reportes">
                 <a class="nav-item-hold" href="/reportes">
                     <img src="{{asset('assets/images/iconos/report.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Reportes</span>
@@ -91,7 +91,7 @@
                 
             </li>
             
-            <li class="nav-item small-nav {{ request()->is('clientes/*') || request()->is('clientes') ? 'active' : '' }}" >
+            <li class="nav-item small-nav {{ request()->is('clientes/*') || request()->is('clientes') ? 'active' : '' }}" id="clientes">
                 <a class="nav-item-hold" href="/clientes">
                     <img src="{{asset('assets/images/iconos/cliente.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Clientes</span>
@@ -104,7 +104,7 @@
                     <a href="#" onclick="abrirPopup('importar-clientes-popup');">Importar clientes</a>
                 </div>
             </li>
-            <li class="nav-item small-nav {{ request()->is('proveedores/*') || request()->is('proveedores') ? 'active' : '' }}" >
+            <li class="nav-item small-nav {{ request()->is('proveedores/*') || request()->is('proveedores') ? 'active' : '' }}" id="proveedores">
                 <a class="nav-item-hold" href="/proveedores">
                     <img src="{{asset('assets/images/iconos/prove.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Proveedores</span>
@@ -117,7 +117,7 @@
                     <a href="#" onclick="abrirPopup('importar-proveedores-popup');">Importar proveedores</a>
                 </div>
             </li>
-            <li class="nav-item small-nav {{ request()->is('productos/*') || request()->is('productos') ? 'active' : '' }}" >
+            <li class="nav-item small-nav {{ request()->is('productos/*') || request()->is('productos') ? 'active' : '' }}" id="productos">
                 <a class="nav-item-hold" href="/productos">
                     <img src="{{asset('assets/images/iconos/produ.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Productos</span>
