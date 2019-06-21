@@ -48,7 +48,7 @@ class CalculatedTax extends Model
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
       
-      if ( !Cache::has($cacheKey) ) {
+     // if ( !Cache::has($cacheKey) ) {
           
           //Busca el calculo del mes en Base de Datos.
           $data = CalculatedTax::firstOrNew(
@@ -90,7 +90,7 @@ class CalculatedTax extends Model
             
           Cache::put($cacheKey, $data, now()->addDays(120));
           
-     }
+     //}
       
       $data = Cache::get($cacheKey);
       return $data;
@@ -170,78 +170,91 @@ class CalculatedTax extends Model
               $invoiceIva = $invoiceItems[$i]->iva_amount * $invoiceItems[$i]->invoice->currency_rate;
               $currentTotal = $subtotal + $invoiceIva;
               
+              //Redondea todo a 2 decimales
+              $subtotal = round($subtotal, 2);
+              $invoiceIva = round($invoiceIva, 2);
+              $currentTotal = round($currentTotal, 2);
+              
               $ivaType = $ivaType ? $ivaType : '103';
               
-                $invoicesTotal += $currentTotal; //Agrega a sumatoria de totales
-                $invoicesSubtotal += $subtotal;  //Agrega a sumatoria de subtotales
-                $totalInvoiceIva += $invoiceIva; //Agrega a sumatoria de ivas
-                
-                $tipoPago = $invoiceItems[$i]->invoice->payment_type;
-                $retenidoLinea = 0;
-                
-                $porcRetencion = $invoiceItems[$i]->invoice->retention_percent;
-                if( $tipoPago == '02' ) {
-                  $retenidoLinea = $currentTotal * ($porcRetencion / 100);
-                  $ivaRetenido += $retenidoLinea;
+              if( $ivaType == '200' || $ivaType == '201' || $ivaType == '240' || $ivaType == '250' || $ivaType == '260' || $ivaType == '245' ){
+                $subtotal = $subtotal + $invoiceIva;
+                $invoiceIva = 0;
+                $sumRepercutidoExentoSinCredito += $subtotal;
+              }else if( $invoiceItems[$i]->is_identificacion_especifica ) {
+                $basesVentasConIdentificacion += $subtotal;
+              }
+              
+              //sum los del 1%
+              if( $ivaType == '101' || $ivaType == '121' || $ivaType == '141' ){
+                $sumRepercutido1 += $subtotal;
+              }
+              
+              //sum los del 2%
+              if( $ivaType == '102' || $ivaType == '122' || $ivaType == '142' ){
+                $sumRepercutido2 += $subtotal;
+              }
+              
+              //sum los del 13%
+              if( $ivaType == '103' || $ivaType == '123' || $ivaType == '143' || $ivaType == '130' || $ivaType == '140' ){
+                $sumRepercutido3 += $subtotal;
+              }
+              
+              //sum los del 4%
+              if( $ivaType == '104' || $ivaType == '124' || $ivaType == '144' || $ivaType == '114' ){
+                $sumRepercutido4 += $subtotal;
+              }
+              //sum los del exentos. Estos se suman como si fueran 13 para efectos del cálculo.
+              if( $ivaType == '150' || $ivaType == '160' ||  $ivaType == '170' || $ivaType == '199' || $ivaType == '155' ){
+                $subtotal = $subtotal + $invoiceIva;
+                $invoiceIva = 0;
+                $sumRepercutido3 += $subtotal;
+                $sumRepercutidoExentoConCredito += $subtotal;
+              }
+              
+              //Suma la transitoria de canasta básica
+              if( $ivaType == '165' ){
+                $subtotal = $subtotal + $invoiceIva;
+                $invoiceIva = 0;
+                $sumRepercutido1 += $subtotal;
+                $sumRepercutidoExentoConCredito += $subtotal;
+              }
+              
+              //Ingresa retenciones al calculo
+              $tipoPago = $invoiceItems[$i]->invoice->payment_type;
+              $retenidoLinea = 0;
+              $porcRetencion = $invoiceItems[$i]->invoice->retention_percent;
+              if( $tipoPago == '02' ) {
+                $retenidoLinea = $currentTotal * ($porcRetencion / 100);
+                $ivaRetenido += $retenidoLinea;
+              }
+              
+              //Ingresa retenciones al calculo
+              $tipo_venta = $invoiceItems[$i]->invoice->sale_condition;
+              if( $ivaType == '150' ){
+                if( $tipo_venta == '01' ) {
+                  $totalClientesContadoExp += $currentTotal-$retenidoLinea;
+                }else {
+                  $totalClientesCreditoExp += $currentTotal-$retenidoLinea;
                 }
-                
-                $tipo_venta = $invoiceItems[$i]->invoice->sale_condition;
-                if( $ivaType == '150' ){
-                  if( $tipo_venta == '01' ) {
-                    $totalClientesContadoExp += $currentTotal-$retenidoLinea;
-                  }else {
-                    $totalClientesCreditoExp += $currentTotal-$retenidoLinea;
-                  }
-                }else{
-                  if( $tipo_venta == '01' ) {
-                    $totalClientesContadoLocal += $currentTotal-$retenidoLinea;
-                  }else {
-                    $totalClientesCreditoLocal += $currentTotal-$retenidoLinea;
-                  }
+              }else{
+                if( $tipo_venta == '01' ) {
+                  $totalClientesContadoLocal += $currentTotal-$retenidoLinea;
+                }else {
+                  $totalClientesCreditoLocal += $currentTotal-$retenidoLinea;
                 }
-                
-                //sum a las variable según el tipo de IVA que tenga.
-                $bVar = "b".$ivaType;
-                $iVar = "i".$ivaType;
-                $this->$bVar += $subtotal;
-                $this->$iVar += $invoiceIva;
-                
-                //sum los del 1%
-                if( $ivaType == '101' || $ivaType == '121' || $ivaType == '141' ){
-                  $sumRepercutido1 += $subtotal;
-                }
-                
-                //sum los del 2%
-                if( $ivaType == '102' || $ivaType == '122' || $ivaType == '142' ){
-                  $sumRepercutido2 += $subtotal;
-                }
-                
-                //sum los del 13%
-                if( $ivaType == '103' || $ivaType == '123' || $ivaType == '143' || $ivaType == '130' || $ivaType == '140' ){
-                  $sumRepercutido3 += $subtotal;
-                }
-                
-                //sum los del 4%
-                if( $ivaType == '104' || $ivaType == '124' || $ivaType == '144' || $ivaType == '114' ){
-                  $sumRepercutido4 += $subtotal;
-                }
-                //sum los del exentos. Estos se sumn como si fueran 13 para efectos del cálculo.
-                if( $ivaType == '150' || $ivaType == '160' ||  $ivaType == '170' ||$ivaType == '199' ){
-                  $sumRepercutido3 += $subtotal;
-                  $sumRepercutidoExentoConCredito += $subtotal;
-                }
-                
-                //Suma la transitoria de canasta básica
-                if( $ivaType == '165' ){
-                  $sumRepercutido1 += $subtotal;
-                  $sumRepercutidoExentoConCredito += $subtotal;
-                }
-           
-                if( $ivaType == '200' || $ivaType == '201' || $ivaType == '240' || $ivaType == '250' || $ivaType == '260' || $ivaType == '245' ){
-                  $sumRepercutidoExentoSinCredito += $subtotal;
-                }else if( $invoiceItems[$i]->is_identificacion_especifica ) {
-                  $basesVentasConIdentificacion += $subtotal;
-                }
+              }
+              
+              $invoicesTotal += $currentTotal; //Agrega a sumatoria de totales
+              $invoicesSubtotal += $subtotal;  //Agrega a sumatoria de subtotales
+              $totalInvoiceIva += $invoiceIva; //Agrega a sumatoria de ivas
+              
+              //sum a las variable según el tipo de IVA que tenga.
+              $bVar = "b".$ivaType;
+              $iVar = "i".$ivaType;
+              $this->$bVar += $subtotal;
+              $this->$iVar += $invoiceIva;
+              
                 
             }
             
@@ -294,7 +307,7 @@ class CalculatedTax extends Model
                   ->where('company_id', $company)
                   ->where('year', $year)
                   ->where('month', $month)
-                  ->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$calc,
+                  ->chunk( 2500,  function($billItems) use ($year, $month, &$company,
        &$billsTotal, &$billsSubtotal, &$totalBillIva, &$basesIdentificacionPlena, &$basesNoDeducibles, &$ivaAcreditableIdentificacionPlena, 
        &$ivaNoAcreditableIdentificacionPlena, &$totalProveedoresContado, &$totalProveedoresCredito
       ) {
@@ -310,6 +323,11 @@ class CalculatedTax extends Model
               $ivaType = $billItems[$i]->iva_type;
               $billIva = $billItems[$i]->iva_amount * $billItems[$i]->bill->currency_rate;
               $currentTotal = $subtotal + $billIva;
+              
+              //Redondea todo a 2 decimales
+              $subtotal = round($subtotal, 2);
+              $billIva = round($billIva, 2);
+              $currentTotal = round($currentTotal, 2);
               
               $ivaType = $ivaType ? $ivaType : '003';
               $ivaType = str_pad($ivaType, 3, '0', STR_PAD_LEFT);
@@ -330,6 +348,7 @@ class CalculatedTax extends Model
               if( $ivaType == '080' || $ivaType == '090' || $ivaType == '097' || $ivaType == '098' || $ivaType == '099' )
               {
                 $basesNoDeducibles += $subtotal;
+                $ivaNoAcreditableIdentificacionPlena += $billIva;
               }
               
               if( $ivaType == '040' || $ivaType == '050' || $ivaType == '060' || $ivaType == '070' )
@@ -415,9 +434,9 @@ class CalculatedTax extends Model
       $this->total_proveedores_credito = $totalProveedoresCredito;
       
       //Separa los subtotales sin identificacion por tarifa.
-      $this->bills_subtotal1 = $this->b001 + $this->b011 + $this->b021 + $this->b031;
+      $this->bills_subtotal1 = $this->b001 + $this->b011 + $this->b021 + $this->b031 + $this->b015 + $this->b035;
       $this->bills_subtotal2 = $this->b002 + $this->b012 + $this->b022 + $this->b032;
-      $this->bills_subtotal3 = $this->b003 + $this->b013 + $this->b023 + $this->b033;
+      $this->bills_subtotal3 = $this->b003 + $this->b013 + $this->b023 + $this->b033 + $this->b016 + $this->b036;
       $this->bills_subtotal4 = $this->b004 + $this->b014 + $this->b024 + $this->b034;
       
       return $this;
@@ -460,7 +479,12 @@ class CalculatedTax extends Model
         $ratio3 = $this->sum_repercutido3 / $numeradorProrrata;
         $ratio4 = $this->sum_repercutido4 / $numeradorProrrata;
         
-      
+        //Redondea todo a 2 decimales
+        $ratio1 = round($ratio1, 4);
+        $ratio2 = round($ratio2, 4);
+        $ratio3 = round($ratio3, 4);
+        $ratio4 = round($ratio4, 4);
+        
         //Define los ratios por tipo para guardar
         $fakeRatio1 = $this->sum_repercutido1 / $this->invoices_subtotal;
         $fakeRatio2 = $this->sum_repercutido2 / $this->invoices_subtotal;
@@ -488,59 +512,44 @@ class CalculatedTax extends Model
         
       }
       
-        //Calcula el total deducible y no deducible en base a los ratios y los montos de facturas recibidas.
-        $subtotalParaCFDP = $this->bills_subtotal - $this->bases_identificacion_plena - $this->bases_no_deducibles;
-        
-        
-        $cfdpEstimado1 = $this->bills_subtotal1*$ratio1*0.01 + $this->bills_subtotal1*$ratio2*0.02 + $this->bills_subtotal1*$ratio3*0.13 + $this->bills_subtotal1*$ratio4*0.04 ; 
-        $cfdpEstimado2= $this->bills_subtotal2*$ratio1*0.02 + $this->bills_subtotal2*$ratio2*0.02 + $this->bills_subtotal2*$ratio3*0.02 + $this->bills_subtotal2*$ratio4*0.02 ; 
-        $cfdpEstimado3 = $this->bills_subtotal3*$ratio1*0.13 + $this->bills_subtotal3*$ratio2*0.02 + $this->bills_subtotal3*$ratio3*0.13 + $this->bills_subtotal3*$ratio4*0.04 ; 
-        $cfdpEstimado4 = $this->bills_subtotal4*$ratio1*0.04 + $this->bills_subtotal4*$ratio2*0.02 + $this->bills_subtotal4*$ratio3*0.04 + $this->bills_subtotal4*$ratio4*0.04 ; 
-        $cfdpEstimado  = $cfdpEstimado1 + $cfdpEstimado2 + $cfdpEstimado3 + $cfdpEstimado4;
-        //Calcula el balance estimado.
-        $ivaDeducibleEstimado = ($cfdpEstimado * $prorrata) + $this->iva_acreditable_identificacion_plena;
-        $balanceEstimado = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleEstimado;
-
-
-        $ratio1_operativo = $company->operative_ratio1 / 100;
-        $ratio2_operativo = $company->operative_ratio2 / 100;
-        $ratio3_operativo = $company->operative_ratio3 / 100;
-        $ratio4_operativo = $company->operative_ratio4 / 100;
-        $cfdp1 = $this->bills_subtotal1*$ratio1_operativo*0.01 + $this->bills_subtotal1*$ratio2_operativo*0.02 + $this->bills_subtotal1*$ratio3_operativo*0.13 + $this->bills_subtotal1*$ratio4_operativo*0.04 ; 
-        $cfdp2 = $this->bills_subtotal2*$ratio1_operativo*0.02 + $this->bills_subtotal2*$ratio2_operativo*0.02 + $this->bills_subtotal2*$ratio3_operativo*0.02 + $this->bills_subtotal2*$ratio4_operativo*0.02 ; 
-        $cfdp3 = $this->bills_subtotal3*$ratio1_operativo*0.13 + $this->bills_subtotal3*$ratio2_operativo*0.02 + $this->bills_subtotal3*$ratio3_operativo*0.13 + $this->bills_subtotal3*$ratio4_operativo*0.04 ; 
-        $cfdp4 = $this->bills_subtotal4*$ratio1_operativo*0.04 + $this->bills_subtotal4*$ratio2_operativo*0.02 + $this->bills_subtotal4*$ratio3_operativo*0.04 + $this->bills_subtotal4*$ratio4_operativo*0.04 ; 
-        $cfdp = $cfdp1 + $cfdp2 + $cfdp3 + $cfdp4;
-        //Calcula el balance operativo.
-        $ivaDeducibleOperativo = ($cfdp * $prorrataOperativa) + $this->iva_acreditable_identificacion_plena;
-        $balanceOperativo = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleOperativo;
-        $ivaNoDeducible = $this->total_bill_iva - $ivaDeducibleOperativo;
-   
-        $saldoFavor = $balanceOperativo - $this->iva_retenido;
-        $saldoFavor = $saldoFavor < 0 ? abs( $saldoFavor ) : 0;
-        
-      /*}else {  //Entra aqui en el caso de que el numerador da 0.
-        $prorrata = 1;
-        $cfdp = $this->total_bill_iva; 
-        //Calcula el balance estimado.
-        $ivaDeducibleEstimado = ($cfdp * $prorrata) + $this->iva_acreditable_identificacion_plena;
-        $balanceEstimado = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleEstimado;
-        //Calcula el balance operativo.
-        $ivaDeducibleOperativo = ($cfdp * $prorrataOperativa) + $this->iva_acreditable_identificacion_plena;
-        $balanceOperativo = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleOperativo;
-        $ivaNoDeducible = $this->total_bill_iva - $ivaDeducibleOperativo;
-        //Define los ratios por tipo para guardar
-        $fakeRatio1 = 0;
-        $fakeRatio2 = 0;
-        $fakeRatio3 = 0;
-        $fakeRatio4 = 0;
-        $fakeRatioExentoSinCredito = 0;
-        //Si el repercutido exento existe, es porque es el único tipo de venta y por eso entró en este if.
-        $fakeRatioExentoConCredito = $this->sum_repercutido_exento_sin_credito ? 1 : 0; 
-        $saldoFavor = $balanceOperativo - $this->iva_retenido;
-        $saldoFavor = $saldoFavor < 0 ? abs( $saldoFavor ) : 0;
-      }*/
+      //Calcula el total deducible y no deducible en base a los ratios y los montos de facturas recibidas.
+      $subtotalParaCFDP = $this->bills_subtotal - $this->bases_identificacion_plena - $this->bases_no_deducibles;
       
+      $cfdpEstimado1 = $this->bills_subtotal1*$ratio1*0.01 + $this->bills_subtotal1*$ratio2*0.02 + $this->bills_subtotal1*$ratio3*0.13 + $this->bills_subtotal1*$ratio4*0.04 ; 
+      $cfdpEstimado2= $this->bills_subtotal2*$ratio1*0.02 + $this->bills_subtotal2*$ratio2*0.02 + $this->bills_subtotal2*$ratio3*0.02 + $this->bills_subtotal2*$ratio4*0.02 ; 
+      $cfdpEstimado3 = $this->bills_subtotal3*$ratio1*0.13 + $this->bills_subtotal3*$ratio2*0.02 + $this->bills_subtotal3*$ratio3*0.13 + $this->bills_subtotal3*$ratio4*0.04 ; 
+      $cfdpEstimado4 = $this->bills_subtotal4*$ratio1*0.04 + $this->bills_subtotal4*$ratio2*0.02 + $this->bills_subtotal4*$ratio3*0.04 + $this->bills_subtotal4*$ratio4*0.04 ; 
+      $cfdpEstimado  = $cfdpEstimado1 + $cfdpEstimado2 + $cfdpEstimado3 + $cfdpEstimado4;
+      //Calcula el balance estimado.
+      $ivaDeducibleEstimado = ($cfdpEstimado * $prorrata) + $this->iva_acreditable_identificacion_plena;
+      $balanceEstimado = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleEstimado;
+
+      $ratio1_operativo = $company->operative_ratio1 / 100;
+      $ratio2_operativo = $company->operative_ratio2 / 100;
+      $ratio3_operativo = $company->operative_ratio3 / 100;
+      $ratio4_operativo = $company->operative_ratio4 / 100;
+      
+      //Redondea ratios a 4 decimales (Al multiplicar por 100, queda en 2)
+      $ratio1_operativo = round($ratio1_operativo, 4);
+      $ratio2_operativo = round($ratio2_operativo, 4);
+      $ratio3_operativo = round($ratio3_operativo, 4);
+      $ratio4_operativo = round($ratio4_operativo, 4);
+      
+      $cfdp1 = $this->bills_subtotal1*$ratio1_operativo*0.01 + $this->bills_subtotal1*$ratio2_operativo*0.02 + $this->bills_subtotal1*$ratio3_operativo*0.13 + $this->bills_subtotal1*$ratio4_operativo*0.04 ; 
+      $cfdp2 = $this->bills_subtotal2*$ratio1_operativo*0.02 + $this->bills_subtotal2*$ratio2_operativo*0.02 + $this->bills_subtotal2*$ratio3_operativo*0.02 + $this->bills_subtotal2*$ratio4_operativo*0.02 ; 
+      $cfdp3 = $this->bills_subtotal3*$ratio1_operativo*0.13 + $this->bills_subtotal3*$ratio2_operativo*0.02 + $this->bills_subtotal3*$ratio3_operativo*0.13 + $this->bills_subtotal3*$ratio4_operativo*0.04 ; 
+      $cfdp4 = $this->bills_subtotal4*$ratio1_operativo*0.04 + $this->bills_subtotal4*$ratio2_operativo*0.02 + $this->bills_subtotal4*$ratio3_operativo*0.04 + $this->bills_subtotal4*$ratio4_operativo*0.04 ; 
+      $cfdp = $cfdp1 + $cfdp2 + $cfdp3 + $cfdp4;
+      $cfdp = round($cfdp, 2); 
+      
+      //Calcula el balance operativo.
+      $ivaDeducibleOperativo = ($cfdp * $prorrataOperativa) + $this->iva_acreditable_identificacion_plena;
+      $balanceOperativo = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleOperativo;
+      $ivaNoDeducible = $this->total_bill_iva - $ivaDeducibleOperativo;
+ 
+      $saldoFavor = $balanceOperativo - $this->iva_retenido;
+      $saldoFavor = $saldoFavor < 0 ? abs( $saldoFavor ) : 0;
+
       $this->numerador_prorrata = $numeradorProrrata;
       $this->denumerador_prorrata = $denumeradorProrrata;
       $this->prorrata = $prorrata;
@@ -748,6 +757,16 @@ class CalculatedTax extends Model
           $this->i033 += $calculosAnteriores[$i]->i033;
           $this->b034 += $calculosAnteriores[$i]->b034;
           $this->i034 += $calculosAnteriores[$i]->i034;
+
+          $this->b015 += $calculosAnteriores[$i]->b015;
+          $this->i015 += $calculosAnteriores[$i]->i015;
+          $this->b016 += $calculosAnteriores[$i]->b016;
+          $this->i016 += $calculosAnteriores[$i]->i016;
+          
+          $this->b035 += $calculosAnteriores[$i]->b035;
+          $this->i035 += $calculosAnteriores[$i]->i035;
+          $this->b036 += $calculosAnteriores[$i]->b036;
+          $this->i036 += $calculosAnteriores[$i]->i036;
           
           $this->b040 += $calculosAnteriores[$i]->b040;
           $this->i040 += $calculosAnteriores[$i]->i040;
@@ -838,6 +857,9 @@ class CalculatedTax extends Model
           
           $this->b150 += $calculosAnteriores[$i]->b150;
           $this->i150 += $calculosAnteriores[$i]->i150;
+          
+          $this->b155 += $calculosAnteriores[$i]->b155;
+          $this->i155 += $calculosAnteriores[$i]->i155;
           
           $this->b160 += $calculosAnteriores[$i]->b160;
           $this->i160 += $calculosAnteriores[$i]->i160;
@@ -944,6 +966,16 @@ class CalculatedTax extends Model
             $this->b034 = 0;
             $this->i034 = 0;
             
+            $this->b015 = 0;
+            $this->i015 = 0;
+            $this->b016 = 0;
+            $this->i016 = 0;
+            
+            $this->b035 = 0;
+            $this->i035 = 0;
+            $this->b036 = 0;
+            $this->i036 = 0;
+            
             $this->b040 = 0;
             $this->i040 = 0;
             $this->b041 = 0;
@@ -1034,6 +1066,9 @@ class CalculatedTax extends Model
             
             $this->b150 = 0;
             $this->i150 = 0;
+            
+            $this->b155 = 0;
+            $this->i155 = 0;
             
             $this->b160 = 0;
             $this->i160 = 0;
