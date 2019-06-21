@@ -516,13 +516,17 @@ class CalculatedTax extends Model
       $subtotalParaCFDP = $this->bills_subtotal - $this->bases_identificacion_plena - $this->bases_no_deducibles;
       
       $cfdpEstimado1 = $this->bills_subtotal1*$ratio1*0.01 + $this->bills_subtotal1*$ratio2*0.02 + $this->bills_subtotal1*$ratio3*0.13 + $this->bills_subtotal1*$ratio4*0.04 ; 
-      $cfdpEstimado2= $this->bills_subtotal2*$ratio1*0.02 + $this->bills_subtotal2*$ratio2*0.02 + $this->bills_subtotal2*$ratio3*0.02 + $this->bills_subtotal2*$ratio4*0.02 ; 
-      $cfdpEstimado3 = $this->bills_subtotal3*$ratio1*0.13 + $this->bills_subtotal3*$ratio2*0.02 + $this->bills_subtotal3*$ratio3*0.13 + $this->bills_subtotal3*$ratio4*0.04 ; 
-      $cfdpEstimado4 = $this->bills_subtotal4*$ratio1*0.04 + $this->bills_subtotal4*$ratio2*0.02 + $this->bills_subtotal4*$ratio3*0.04 + $this->bills_subtotal4*$ratio4*0.04 ; 
+      $cfdpEstimado2 = $this->bills_subtotal2*$ratio1*0.01 + $this->bills_subtotal2*$ratio2*0.02 + $this->bills_subtotal2*$ratio3*0.02 + $this->bills_subtotal2*$ratio4*0.02 ; 
+      $cfdpEstimado3 = $this->bills_subtotal3*$ratio1*0.01 + $this->bills_subtotal3*$ratio2*0.02 + $this->bills_subtotal3*$ratio3*0.13 + $this->bills_subtotal3*$ratio4*0.04 ; 
+      $cfdpEstimado4 = $this->bills_subtotal4*$ratio1*0.01 + $this->bills_subtotal4*$ratio2*0.02 + $this->bills_subtotal4*$ratio3*0.04 + $this->bills_subtotal4*$ratio4*0.04 ; 
       $cfdpEstimado  = $cfdpEstimado1 + $cfdpEstimado2 + $cfdpEstimado3 + $cfdpEstimado4;
       //Calcula el balance estimado.
       $ivaDeducibleEstimado = ($cfdpEstimado * $prorrata) + $this->iva_acreditable_identificacion_plena;
       $balanceEstimado = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleEstimado;
+      
+      if( $this->month == 6) {
+        //3dd( $this );
+      }
 
       $ratio1_operativo = $company->operative_ratio1 / 100;
       $ratio2_operativo = $company->operative_ratio2 / 100;

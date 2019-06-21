@@ -97,6 +97,41 @@
       </script>
     @endif
   
+    @yield('header-scripts')
+    
+    <style>
+      
+      div.hopscotch-bubble {
+    box-shadow: 0 0 15px rgba(68, 21, 142,0.5);
+    border: 2px solid  rgb(68, 21, 142);
+}
+
+.hopscotch-bubble-arrow-container.hopscotch-arrow.right {}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.right .hopscotch-bubble-arrow-border {
+    border-left: 17px solid rgb(68, 21, 142);
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.right {
+    right: -35px;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.right .hopscotch-bubble-arrow {
+    left: -3px;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.left {
+    left: -18px;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-arrow-border {
+    border-right: 17px solid rgb(68, 21, 142);
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-arrow {
+    left: 3px;
+}
+    </style>
 
     @yield('footer-scripts')
     
