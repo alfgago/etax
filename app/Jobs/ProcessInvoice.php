@@ -89,6 +89,7 @@ class ProcessInvoice implements ShouldQueue
                             'xml' => ltrim($response['data']['response'], '\n')]));
                     }
                 }
+                Log::error('ERROR Enviando parametros  API HACIENDA Invoice: '.$this->invoiceId.'-->>'.$result->getBody()->getContents());
             }
         } catch (\Exception $e) {
             Log::error('ERROR Enviando parametros  API HACIENDA Invoice: '.$this->invoiceId.'-->>'.$e);
