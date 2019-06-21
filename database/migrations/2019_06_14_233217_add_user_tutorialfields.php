@@ -19,7 +19,7 @@ class AddUserTutorialFields extends Migration
         });*/
         
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('hide_tutorial')->default(false);
+            $table->integer('hide_tutorial')->default(false);
             $table->boolean('is_guest')->default(false);
             $table->boolean('has_klap_user')->default(false);
         });

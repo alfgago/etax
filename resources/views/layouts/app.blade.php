@@ -9,9 +9,11 @@
      <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title') | eTax</title>
-  
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/3.4.1/tippy.css" />
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/select2.min.css')}}">
+    <link rel="stylesheet" href="{{asset('css/hopscotch.css')}}">
+    <link rel="stylesheet" href="{{asset('css/hopscotch.min.css')}}">
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/sweetalert2.min.css')}}">
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/toastr.min.css')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
@@ -68,8 +70,13 @@
     <script src="https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="/assets/js/hopscotch.js"></script>
+    <script src="/assets/js/hopscotch.min.js"></script>
+    <script src="/assets/js/hopscotch.script.js"></script>
+    <script src="/assets/js/hopscotch_amd.js"></script>
+    <script src="/assets/js/hopscotch_amd.min.js"></script>
 
-    
+
     @if( session()->has('message') )
         <script>
           toastr.success( "{{ session()->get('message') }}" );
@@ -90,6 +97,41 @@
       </script>
     @endif
   
+    @yield('header-scripts')
+    
+    <style>
+      
+      div.hopscotch-bubble {
+    box-shadow: 0 0 15px rgba(68, 21, 142,0.5);
+    border: 2px solid  rgb(68, 21, 142);
+}
+
+.hopscotch-bubble-arrow-container.hopscotch-arrow.right {}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.right .hopscotch-bubble-arrow-border {
+    border-left: 17px solid rgb(68, 21, 142);
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.right {
+    right: -35px;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.right .hopscotch-bubble-arrow {
+    left: -3px;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.left {
+    left: -18px;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-arrow-border {
+    border-right: 17px solid rgb(68, 21, 142);
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-arrow {
+    left: 3px;
+}
+    </style>
 
     @yield('footer-scripts')
     
@@ -110,14 +152,25 @@
         gtag('config', 'UA-134999499-1');
       </script>
 
-    <button type="button" class="callnow" onclick="popupReproductor();">Ayuda</button>
+
     <?php
-      $user = auth()->user();
-    ?>
+        date_default_timezone_set('America/Costa_Rica');
+        $user = auth()->user();
+        $hoy = getdate();
+        if($hoy['hours'] < 21 && $hoy['hours'] > 7){ ?>
+            <button type="button" class="callnow" onclick="popupReproductor();">Ayuda</button>
+    <?php }else{ ?>
+            <button type="button" class="callnow" onclick="mailSoporte();">Correo</button>
+    <?php } ?>
+
     <script type="text/javascript">
-      function popupReproductor(){
-        window.open('https://www.callmyway.com/Welcome/SupportChatInfo/171479/?chat_type_id=5&contact_name={{ $user->first_name . " " . $user->last_name }}&contact_email={{ $user->email }}&contact_phone={{ $user->phone ? $user->phone : '' }}&contact_request=Chat de ayuda iniciado..&autoSubmit=1', 'Soporte eTax', 'height=350,width=350,resizable=0,marginwidth=0,marginheight=0,frameborder=0');
-      };
+        function popupReproductor(){
+            window.open('https://www.callmyway.com/Welcome/SupportChatInfo/171479/?chat_type_id=5&contact_name={{ $user->first_name . " " . $user->last_name }}&contact_email={{ $user->email }}&contact_phone={{ $user->phone ? $user->phone : '' }}&contact_request=Chat de ayuda iniciado..&autoSubmit=1', 'Soporte eTax', 'height=350,width=350,resizable=0,marginwidth=0,marginheight=0,frameborder=0');
+        };
+
+        function mailSoporte() {
+            location.href = "mailto:soporte@etaxcr.com?subject=Solicitud de Soporte&body=Agradezco la ayuda con el siguiente requerimiento:";
+        }
     </script>
     
 </body>
