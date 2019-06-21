@@ -142,6 +142,58 @@ class PaymentUtils
         $charge = json_decode($chargeBn->getBody()->getContents(), true);
         return $charge;
     }
-    
-	
+
+    public function deleteKlapCharge($request){
+        $bnCharge = new Client();
+        $chargeBn = $bnCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppDeleteCharge?applicationName=string&applicationPassword=string&userName=string&chargeTokenId=string", [
+            'headers' => [
+                'Content-Type' => "application/json",
+            ],
+            'json' => [
+                'applicationName' => config('etax.klap_app_name'),
+                'applicationPassword' => config('etax.klap_app_password'),
+                'userName' => $request->user_name,
+                'chargeTokenId' => $request->chargeTokenId,
+            ],
+            'verify' => false,
+        ]);
+        $chargeDeleted = json_decode($chargeBn->getBody()->getContents(), true);
+        return $chargeDeleted;
+    }
+
+    public function deleteKlapUserCard($request){
+        $bnCharge = new Client();
+        $chargeBn = $bnCharge->request('POST', "https://emcom.oneklap.com:2263/api/UserDeleteCard", [
+            'headers' => [
+                'Content-Type' => "application/json",
+            ],
+            'json' => [
+                'applicationName' => config('etax.klap_app_name'),
+                'userName' => $request->user_name,
+                'userPassword' => $request->userPassword,
+                'cardTokenId' => $request->userEmail,
+            ],
+            'verify' => false,
+        ]);
+        $cardDeleted = json_decode($chargeBn->getBody()->getContents(), true);
+        return $cardDeleted;
+    }
+
+    public function deleteKlapUser($request){
+        $bnCharge = new Client();
+        $chargeBn = $bnCharge->request('POST', "https://emcom.oneklap.com:2263/api/UserDeleteProfile", [
+            'headers' => [
+                'Content-Type' => "application/json",
+            ],
+            'json' => [
+                'applicationName' => config('etax.klap_app_name'),
+                'userName' => $request->user_name,
+                'userPassword' => $request->userPassword,
+                'userEmail' => $request->userEmail,
+            ],
+            'verify' => false,
+        ]);
+        $userDeleted = json_decode($chargeBn->getBody()->getContents(), true);
+        return $userDeleted;
+    }
 }
