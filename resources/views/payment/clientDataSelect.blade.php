@@ -116,7 +116,7 @@
                             <input type="text" hidden value=" {{$product->id}}" name="product_id">
                             <input type="text" hidden value=" {{$product->name}}" name="product_name">
                             <input type="text" hidden value=" {{$product->price}}" name="product_price">
-                            <!--input type="text" hidden value=" {{--$payment->id--}}" name="payment_id"-->
+                            <input type="text" hidden value=" {{$payment_method}}" name="payment_method">
                             <div class="btn-holder">
                                 <button type="submit" id="btn-submit" class="btn btn-primary btn-next" onclick="CambiarNombre();">Continuar</button>
                             </div>

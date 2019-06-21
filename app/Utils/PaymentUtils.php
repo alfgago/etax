@@ -108,19 +108,19 @@ class PaymentUtils
             $date = Carbon::parse(now('America/Costa_Rica'));
             $user = auth()->user();
             $data = new stdClass();
-            $data->description = 'Compra de ' . $request->product->name . ' eTax';
+            $data->description = 'Compra de ' . $request->product_name . ' eTax';
             $data->user_name = $user->user_name;
-            $data->amount = $request->product->price;
+            $data->amount = $request->product_price;
 
             $chargeCreated = $this->paymentIncludeCharge($data);
             if($chargeCreated['apiStatus'] == "Successful"){
-                $paymentMethod = PaymentMethod::where('id', $request->payment_id)->first();
+                $paymentMethod = PaymentMethod::where('id', $request->payment_method)->first();
                 $current_company = currentCompany();
                 $date = Carbon::parse(now('America/Costa_Rica'));
                 $sale = Sale::create([
                     "user_id" => $user->user_id,
                     "company_id" => $current_company,
-                    "etax_product_id" => $request->product->id,
+                    "etax_product_id" => $request->product_id,
                     "status" => 1,
                     "recurrency" => 0
                 ]);
@@ -128,7 +128,7 @@ class PaymentUtils
                     'sale_id' => $sale->id,
                     'payment_date' => $date,
                     'payment_status' => 1,
-                    'amount' => $request->product->price
+                    'amount' => $request->product_price
                 ]);
 
                 $chargeTokenId = $chargeCreated['chargeTokenId'];
@@ -143,6 +143,7 @@ class PaymentUtils
                     $payment->save();
                     $sale->status = 1;
                     $sale->save();
+
                     return true;
                 }else{
                     return false;

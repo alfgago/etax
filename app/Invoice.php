@@ -427,6 +427,9 @@ class Invoice extends Model
       }
       
       $invoice->save();
+        $available_invoices = AvailableInvoices::where('company_id', $company->id)->first();
+        $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
+        $available_invoices->save();
       
       return $insert;
       

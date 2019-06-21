@@ -157,6 +157,7 @@ class InvoiceController extends Controller
         $invoice->payment_receipt = "";
         $invoice->generation_method = "M";
         $invoice->setInvoiceData($request);
+        $company->current_month_sent = $company->current_month_sent + 1;
         $company->save();
 
         clearInvoiceCache($invoice);
@@ -306,7 +307,7 @@ class InvoiceController extends Controller
                         $inserts = array();
                         foreach ($facturas as $row){
                             $i++;
-                            
+                            $company->current_month_sent = $company->current_month_sent + 1;
                             $metodoGeneracion = "XLSX";
                             
                             //Datos de proveedor

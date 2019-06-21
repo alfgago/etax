@@ -25,7 +25,7 @@
                                 <a class="nav-link" aria-selected="false" href="/empresas/equipo">Equipo de trabajo</a>
                             </li>
                             <li>
-                                <a class="nav-link active" aria-selected="true" href="/empresas/comprar-facturas-view">Comprar facturas</a>
+                                <a class="nav-link active" aria-selected="true" href="/empresas/comprar-facturas-vista">Comprar facturas</a>
                             </li>
                         </ul>
                     </div>
@@ -42,8 +42,9 @@
                                     </div>
                                     <div class="form-group col-md-5 dato-facturas" style="margin-top: 3%;">
                                         <div class="barra-limites emitidas" >
-                                            <div class="fill-bar" data-total="{{ $availableInvoices }}" data-fill="{{ number_format( $facturasPlan ) }}"></div>
-                                            <div class="barra-text">{{ number_format( $availableInvoices ) }} de {{ $availableInvoices }}</div>
+                                            <?php   ?>
+                                            <div class="fill-bar" data-total="{{ $availableInvoices }}" data-fill="{{ number_format( $invoices ) }}"></div>
+                                            <div class="barra-text">{{ number_format( $invoices ) }} de {{ $availableInvoices->monthly_quota }}</div>
                                         </div>
                                     </div>
                                     <p>Seleccione el paquete de facturas que requiere</p>
@@ -71,7 +72,7 @@
                                         <select class="form-control select-search" name="payment_method" id="payment_method" >
                                             <option value='' selected>-- Seleccione un m&eacute;todo de pago --</option>
                                             @foreach ( $paymentmethods as $paymentmethod )
-                                                <option value="{{ $paymentmethod->name }}" >{{ $paymentmethod->last_name }} - {{ $paymentmethod->masked_card }} ></option>
+                                                <option value="{{ $paymentmethod->id }}" >{{ $paymentmethod->name }} {{ $paymentmethod->last_name }} - {{ $paymentmethod->masked_card }}</option>
                                             @endforeach
                                         </select>
                                     </div>

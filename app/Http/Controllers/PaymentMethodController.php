@@ -110,7 +110,7 @@ class PaymentMethodController extends Controller
                         'name' => $request->first_name,
                         'last_name' => $request->last_name,
                         'last_4digits' => $last_4digits,
-                        'masked_card' => $card['masked_card'],
+                        'masked_card' => $card['maskedCard'],
                         'due_date' => $request->cardMonth . ' ' . $request->cardYear,
                         'token_bn' => $card['cardTokenId']
                     ]);
