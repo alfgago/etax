@@ -23,26 +23,13 @@ use Log;
 
 class BridgeHaciendaApi
 {
-    public function login() {
+    public function login($cache = true) {
         try {
+            if ($cache === false) {
+                return $this->requestLogin();
+            }
             $value = Cache::remember('token-api-'.currentCompany(), '60000', function () {
-                $client = new Client();
-                $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/auth/login', [
-                    'headers' => [
-                        'Auth-Key'  => config('etax.api_hacienda_key'),
-                        'Client-Service' => config('etax.api_hacienda_client'),
-                        'Connection' => 'Close'
-                    ],
-                    'json' => ["username" => config('etax.api_hacienda_username'),
-                        "password" => config('etax.api_hacienda_password')
-                    ],
-                    'verify' => false,
-                ]);
-                $tokenApi = json_decode($result->getBody()->getContents(), true);
-                if (isset($tokenApi['status']) && $tokenApi['status'] == 200) {
-                    return $tokenApi['data']['token'];
-                }
-                return false;
+                return $this->requestLogin();
             });
             return $value;
         } catch (ClientException $error) {
@@ -191,6 +178,26 @@ class BridgeHaciendaApi
             Log:info('Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         }
+    }
+
+    private function requestLogin() {
+        $client = new Client();
+        $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/auth/login', [
+            'headers' => [
+                'Auth-Key'  => config('etax.api_hacienda_key'),
+                'Client-Service' => config('etax.api_hacienda_client'),
+                'Connection' => 'Close'
+            ],
+            'json' => ["username" => config('etax.api_hacienda_username'),
+                "password" => config('etax.api_hacienda_password')
+            ],
+            'verify' => false,
+        ]);
+        $tokenApi = json_decode($result->getBody()->getContents(), true);
+        if (isset($tokenApi['status']) && $tokenApi['status'] == 200) {
+            return $tokenApi['data']['token'];
+        }
+        return false;
     }
 
 }
