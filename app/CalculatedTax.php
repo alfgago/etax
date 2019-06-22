@@ -361,6 +361,7 @@ class CalculatedTax extends Model
               
               if( $ivaType == '041' || $ivaType == '051' || $ivaType == '061' || $ivaType == '071' )
               {
+                $basesIdentificacionPlena += $subtotal;
                 $ivaAcreditableIdentificacionPlena += $billIva;
               }
               if( $ivaType == '042' || $ivaType == '052' || $ivaType == '062' || $ivaType == '072' )
