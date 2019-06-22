@@ -517,11 +517,10 @@ if (!function_exists('get_microtime')) {
 
 /* Get Document Key */
 if (!function_exists('getDocumentKey')) {
-    function getDocumentKey($docType, $ref = null) {
-        $company = currentCompanyModel();
+    function getDocumentKey($docType, $ref = null, $company = '') {
         $invoice = new \App\Invoice();
-        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).getDocReference($docType).
-            '1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
+        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company).getDocReference($docType, $ref).
+            '1'.$invoice->getHashFromRef($ref);
         return $key;
     }
 }
@@ -530,7 +529,7 @@ if (!function_exists('getDocumentKey')) {
 if (!function_exists('getDocReference')) {
     function getDocReference($docType, $ref = null)
     {
-        $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;
+        $lastSale = $ref;
         $consecutive = "001" . "00001" . $docType . substr("0000000000" . $lastSale, -10);
 
         return $consecutive;

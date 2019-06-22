@@ -89,7 +89,7 @@ class BridgeHaciendaApi
                 return $invoice;
             }
         } catch (ClientException $error) {
-            Log:info('Error al crear factura en API HACIENDA -->>'. $error);
+            Log::info('Error al crear factura en API HACIENDA -->>'. $error);
             return $invoice;
         }
     }
@@ -107,12 +107,12 @@ class BridgeHaciendaApi
                     'montoTotal' => $value['item_count'] * $value['unit_price'] ?? '',
                     'montoTotalLinea' => $value['subtotal'] + $value['iva_amount'] ?? '',
                     'descuento' => $value['discount'] ?? '',
-                    'impuesto' => $value['iva_amount'] ?? ''
+                    'impuesto' => 0 // @todo 4.3
                 );
             }
             return json_encode($details, true);
         } catch (ClientException $error) {
-            Log:info('Error al iniciar session en API HACIENDA -->>'. $error);
+            Log::info('Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         }
     }
@@ -175,7 +175,7 @@ class BridgeHaciendaApi
             }
             return $request;
         } catch (ClientException $error) {
-            Log:info('Error al iniciar session en API HACIENDA -->>'. $error);
+            Log::info('Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         }
     }
