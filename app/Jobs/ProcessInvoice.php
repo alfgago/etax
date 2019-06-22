@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Company;
 use App\Invoice;
+use App\Utils\BridgeHaciendaApi;
 use App\XmlHacienda;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -52,19 +53,21 @@ class ProcessInvoice implements ShouldQueue
             $company = Company::find($this->companyId);
             $requestDetails = $this->setDetails($invoice->items);
             $requestData = $this->setInvoiceData($invoice, $requestDetails);
+            $apiHacienda = new BridgeHaciendaApi();
+            $tokenApi = $apiHacienda->login(false);
             if ($requestData !== false) {
                 Log::info('Enviando Request  API HACIENDA -->>'.$this->invoiceId);
                 $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice/create', [
                     'headers' => [
                         'Auth-Key'  => config('etax.api_hacienda_key'),
                         'Client-Service' => config('etax.api_hacienda_client'),
-                        'Authorization' => $this->token,
+                        'Authorization' => $tokenApi,
                         'User-ID' => config('etax.api_hacienda_user_id'),
                         'Connection' => 'Close'
                     ],
                     'multipart' => $requestData,
                     'verify' => false,
-                    'connect_timeout' => 18
+                    'connect_timeout' => 20
                 ]);
 
                 $response = json_decode($result->getBody()->getContents(), true);
