@@ -51,7 +51,7 @@ class ProcessInvoice implements ShouldQueue
             $client = new Client();
             $invoice = Invoice::find($this->invoiceId);
             $company = Company::find($this->companyId);
-            if ($invoice->hacienda_status !== 3) {
+            if ($invoice->hacienda_status == '01') {
                 $requestDetails = $this->setDetails($invoice->items);
                 $requestData = $this->setInvoiceData($invoice, $requestDetails);
                 $apiHacienda = new BridgeHaciendaApi();
