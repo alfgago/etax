@@ -6,6 +6,7 @@ use \Carbon\Carbon;
 use App\Company;
 use App\InvoiceItem;
 use App\Client;
+use App\XmlHacienda;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
@@ -276,7 +277,8 @@ class Invoice extends Model
         return false;
       }
       
-      $idCliente = null;
+      $idCliente = 0;
+      $identificacionCliente = preg_replace("/[^0-9]/", "", $identificacionCliente );
       if( $identificacionCliente ) {
         $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
         if ( !Cache::has($clientCacheKey) ) {
@@ -296,6 +298,7 @@ class Invoice extends Model
                     'fullname' => "$identificacionCliente - $nombreCliente"
                 ]
             );
+            $clienteCache->save();
             Cache::put($clientCacheKey, $clienteCache, 30);
         }
         $cliente = Cache::get($clientCacheKey);
@@ -531,21 +534,38 @@ class Invoice extends Model
             }
         }
         
-        InvoiceItem::insert($inserts);
+        $items = InvoiceItem::insert($inserts);
         
-        return true;
+        return $items;
     }
     
     
-    public static function storeXML($file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor) {
+    public static function storeXML($invoice, $file) {
+        $cedulaEmpresa = $invoice->company->id_number;
+        $cedulaCliente = $invoice->client->id_number;
+        $consecutivoComprobante = $invoice->document_number;
         
-        if ( Storage::exists("empresa-$identificacionEmisor/facturas_ventas/$identificacionReceptor-$consecutivoComprobante.xml")) {
-            Storage::delete("empresa-$identificacionEmisor/facturas_ventas/$identificacionReceptor-$consecutivoComprobante.xml");
+        if ( Storage::exists("empresa-$cedulaEmpresa/facturas_ventas/$cedulaCliente-$consecutivoComprobante.xml")) {
+            Storage::delete("empresa-$cedulaEmpresa/facturas_ventas/$cedulaCliente-$consecutivoComprobante.xml");
         }
         
         $path = \Storage::putFileAs(
-            "empresa-$identificacionEmisor/facturas_ventas", $file, "$identificacionReceptor-$consecutivoComprobante.xml"
+            "empresa-$cedulaEmpresa/facturas_ventas", $file, "$cedulaCliente-$consecutivoComprobante.xml"
         );
+        
+        try{
+          $xmlHacienda = new XmlHacienda();
+          $xmlHacienda->xml = $path;
+          $xmlHacienda->bill_id = 0;
+          $xmlHacienda->invoice_id = $invoice->id;
+          $xmlHacienda->save();
+          Log::info( 'XMLHacienda guardado : ' . $invoice->id );
+        }catch( \Throwable $e ){
+          Log::error( 'Error al registrar en tabla XMLHacienda: ' . $e->getMessage() );
+        }
+        
         return $path;
-    }  
+        
+    }
+
 }

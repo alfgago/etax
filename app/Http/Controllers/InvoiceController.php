@@ -458,7 +458,8 @@ class InvoiceController extends Controller
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3.
                         if( Invoice::saveInvoiceXML( $arr, 'XML' ) ) {
-                            Invoice::storeXML( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
+                            $invoice = Invoice::where('company_id', $company->id)->where('document_number', $consecutivoComprobante)->first();
+                            Invoice::storeXML( $invoice, $file );
                         }
                     }else{
                         return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );

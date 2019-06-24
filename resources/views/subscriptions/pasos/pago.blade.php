@@ -46,10 +46,31 @@
 	<span class="precio-container">
 		Precio total: <span class="precio-text precio-final">9.99</span> <span class="recurrencia-text">/ mes</span> <span class="etiqueta-descuento"></span>
 	</span>
+	<p class="description">* No se aceptan tarjetas American Express</p>
 </div>
 <input type="text" hidden id="bncupon" name="bncupon" value="0">
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-prev" onclick="toggleStep('step2');">Paso anterior</button>
-  <button type="submit" id="btn-submit-tc" class="btn btn-primary btn-next has-spinner" >Confirmar</button>
+  <button onclick="trackClickEvent( 'ConfirmarPago' );" type="submit" id="btn-submit-tc" class="btn btn-primary btn-next has-spinner" >Confirmar</button>
 </div>
 
+<div class="verificado-logos">
+    <img src="/assets/images/visa.png">
+    <img src="/assets/images/mastercard.png">
+    <img src="/assets/images/logo-banco-nacional.png">
+</div>
+
+
+<style>
+.verificado-logos {
+    margin-top: 1.5rem;
+    text-align: right;
+    width: 100%;
+}
+
+.verificado-logos img {
+    display: inline-block;
+    max-width: 75px;
+    margin: 0 1rem;
+}
+</style>

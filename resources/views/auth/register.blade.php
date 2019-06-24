@@ -84,13 +84,13 @@
       </div>
       
       <div class="form-group col-md-12 text-center">
-          <button type="submit" class="btn btn-primary">{{ __('Confirmar cuenta') }} </button>
+          <button type="submit" class="btn btn-primary" onclick="trackClickEvent( 'Lead' );">{{ __('Confirmar cuenta') }} </button>
       </div>
       
       <div class="form-group col-md-12 button-container text-center">
-        <div class="inline-block text-left">
-          <div>
-          ¿Ya tiene cuenta? 
+        <div class="inline-block text-center">
+          <div class="login-secondary-btn-cont">
+          <span class="loginbtn-label">¿Ya tiene cuenta? </span>
           @if (Route::has('login'))
               <a class="btn btn-link" href="{{ route('login') }}">
                   {{ __('Ingrese aquí') }}

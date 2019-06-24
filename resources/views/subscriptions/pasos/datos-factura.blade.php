@@ -99,5 +99,5 @@
 
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-prev" onclick="toggleStep('step1');">Paso anterior</button>
-  <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step3');">Siguiente paso</button>
+  <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step3');"  onclick="trackClickEvent( 'PagosPaso3' );">Siguiente paso</button>
 </div>

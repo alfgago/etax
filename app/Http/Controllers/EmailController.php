@@ -65,21 +65,21 @@ class EmailController extends Controller
         $consecutivoComprobante = $arr['NumeroConsecutivo'];
         
         try {  
-        
-            if( Bill::saveBillXML( $arr, 'Email' ) ) {
-                Bill::storeXML( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
+            if( Bill::saveBillXML( $arr, 'XML' ) ) {
+                $company = Company::where('id_number', $identificacionReceptor)->first();
+                $bill = Bill::where('company_id', $company->id)->where('document_number', $consecutivoComprobante)->first();
+                Bill::storeXML( $bill, $file );
             }
-        
         }catch( \Throwable $ex ){
             Log::warning( "No se pudo guardar la factura de compra via Email. Mensaje:" . $ex->getMessage());
         }
        
         try {  
-           
-            if( Invoice::saveInvoiceXML( $arr, 'Email' ) ) {
-                Invoice::storeXML( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
+            if( Invoice::saveInvoiceXML( $arr, 'XML' ) ) {
+                $company = Company::where('id_number', $identificacionEmisor)->first();
+                $invoice = Invoice::where('company_id', $company->id)->where('document_number', $consecutivoComprobante)->first();
+                Invoice::storeXML( $invoice, $file );
             }
-            
         }catch( \Throwable $ex ){
             Log::warning( "No se pudo guardar la factura de venta via Email. Mensaje:" . $ex->getMessage());
         }

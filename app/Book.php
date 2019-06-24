@@ -184,11 +184,11 @@ class Book extends Model
         $acreditable_ppp3 = ( ($bases_ppp3 * $ratio1_operativo * 0.13) + ($bases_ppp3 * $ratio2_operativo * 0.02) + ($bases_ppp3 * $ratio3_operativo * 0.13) + ($bases_ppp3 * $ratio4_operativo * 0.04) ) * $prorrataOperativa;
         $acreditable_ppp4 = ( ($bases_ppp4 * $ratio1_operativo * 0.04) + ($bases_ppp4 * $ratio2_operativo * 0.02) + ($bases_ppp4 * $ratio3_operativo * 0.04) + ($bases_ppp4 * $ratio4_operativo * 0.04) ) * $prorrataOperativa;
 
-        $acreditable_ppp = $acreditable_ppp1 + $acreditable_ppp2 + $acreditable_ppp3 + $acreditable_ppp4;
-        $acreditable_bs = $acreditable_bs1 + $acreditable_bs2 + $acreditable_bs3 + $acreditable_bs4;
+        $acreditable_ppp = 0 + $acreditable_ppp2 + $acreditable_ppp3 + $acreditable_ppp4;
+        $acreditable_bs = 0 + $acreditable_bs2 + $acreditable_bs3 + $acreditable_bs4;
         
-        $this->cc_ajuste_ppp =  - $acreditable_ppp + $this->cc_aj_ppp_1 + $this->cc_aj_ppp_2 + + $this->cc_aj_ppp_3 + + $this->cc_aj_ppp_4; 
-        $this->cc_ajuste_bs =  - $acreditable_bs + $this->cc_aj_bs_1 + $this->cc_aj_bs_2 + $this->cc_aj_bs_3 + $this->cc_aj_bs_4;
+        $this->cc_ajuste_ppp =  - $acreditable_ppp + 0 + $this->cc_aj_ppp_2 + + $this->cc_aj_ppp_3 + + $this->cc_aj_ppp_4; 
+        $this->cc_ajuste_bs =  - $acreditable_bs + 0 + $this->cc_aj_bs_2 + $this->cc_aj_bs_3 + $this->cc_aj_bs_4;
         
         $this->cc_gasto_no_acreditable = $calculos->iva_no_acreditable_identificacion_plena;
         
@@ -202,6 +202,10 @@ class Book extends Model
                              + $this->cc_bs_1 + $this->cc_bs_2 + $this->cc_bs_3 + $this->cc_bs_4;
             $this->cc_sum1 = $this->cc_iva_emitido_1 + $this->cc_iva_emitido_2 + $this->cc_iva_emitido_3 + 
             $this->cc_iva_emitido_4 + $this->cc_ajuste_ppp + $this->cc_ajuste_bs + abs($this->cc_por_pagar) + $this->cc_gasto_no_acreditable;
+        }
+        
+        if($calculos->month == 6) {
+          //dd($this);
         }
     }
     

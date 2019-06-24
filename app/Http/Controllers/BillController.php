@@ -348,7 +348,8 @@ class BillController extends Controller
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3
                         if( Bill::saveBillXML( $arr, 'XML' ) ) {
-                            Bill::storeXML( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
+                            $bill = Bill::where('company_id', $company->id)->where('document_number', $consecutivoComprobante)->first();
+                            Bill::storeXML( $bill, $file );
                         }
                     }else{
                         return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
