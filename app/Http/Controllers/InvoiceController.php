@@ -188,7 +188,7 @@ class InvoiceController extends Controller
 
                 //Datos generales y para Hacienda
                 $invoice->document_type = "01";
-                $invoice->hacienda_status = 01;
+                $invoice->hacienda_status = '01';
                 $invoice->payment_status = "01";
                 $invoice->payment_receipt = "";
                 $invoice->generation_method = "etax";
@@ -200,7 +200,7 @@ class InvoiceController extends Controller
                 $company->last_invoice_ref_number = $invoice->reference_number;
                 $company->last_document = $invoice->document_number;
                 $company->save();
-                if ($invoice->hacienda_status == 03) {
+                if ($invoice->hacienda_status == '03') {
                    // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
                 }
                 clearInvoiceCache($invoice);
@@ -458,7 +458,8 @@ class InvoiceController extends Controller
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3.
                         if( Invoice::saveInvoiceXML( $arr, 'XML' ) ) {
-                            Invoice::storeXML( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
+                            $invoice = Invoice::where('company_id', $company->id)->where('document_number', $consecutivoComprobante)->first();
+                            Invoice::storeXML( $invoice, $file );
                         }
                     }else{
                         return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );

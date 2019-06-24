@@ -53,25 +53,25 @@
     </div>
 
     <div class="form-group col-md-12 text-center">
-      <button type="submit" class="btn btn-primary">{{ __('Iniciar sesión') }}</button>
+      <button type="submit" class="btn btn-primary" onclick="trackClickEvent( 'IniciarSesion' );">{{ __('Iniciar sesión') }}</button>
     </div>
 
     <div class="form-group col-md-12 button-container text-center">
 
-      <div class="inline-block text-left">
+      <div class="inline-block text-center">
         
-        <div>
-            ¿No tiene cuenta? 
+        <div class="login-secondary-btn-cont">
+            <span class="loginbtn-label">¿No tiene cuenta?</span>
             @if (Route::has('register'))
-                <a class="btn btn-link" href="{{ route('register') }}">
+                <a class="btn btn-link" onclick="trackClickEvent( 'EnlaceRegister' );" href="{{ route('register') }}">
                     Regístrese aquí
                 </a>
             @endif
         </div>
-        <div>
-          ¿Se le olvidó la contraseña? 
+        <div class="login-secondary-btn-cont">
+          <span class="loginbtn-label">¿Se le olvidó la contraseña? </span>
           @if (Route::has('password.request'))
-              <a class="btn btn-link" href="{{ route('password.request') }}">
+              <a class="btn btn-link" onclick="trackClickEvent( 'EnlacePassword' );" href="{{ route('password.request') }}">
                   Recupérela
               </a>
           @endif

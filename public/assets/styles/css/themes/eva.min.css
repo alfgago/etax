@@ -19352,6 +19352,50 @@ ngb-tabset.p-0 .tab-content {
   }
 }
 
+div.hopscotch-bubble .hopscotch-bubble-close {
+  line-height: 1;
+  width: auto;
+  -webkit-appearance: button;
+  text-indent: unset;
+  color: transparent;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-close:after {
+  content: 'Cerrar';
+  color: #000;
+  cursor: pointer;
+}
+
+div.hopscotch-bubble {
+  -webkit-box-shadow: 0 0 15px rgba(68, 21, 142, 0.5);
+          box-shadow: 0 0 15px rgba(68, 21, 142, 0.5);
+  border: 2px solid #44158e;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.right .hopscotch-bubble-arrow-border {
+  border-left: 17px solid #44158e;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.right {
+  right: -35px;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.right .hopscotch-bubble-arrow {
+  left: -3px;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.left {
+  left: -18px;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-arrow-border {
+  border-right: 17px solid #44158e;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-arrow {
+  left: 3px;
+}
+
 .main-header {
   position: fixed;
   width: 100%;

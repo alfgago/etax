@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use \Carbon\Carbon;
 use App\Company;
+use App\BillItem;
+use App\InvoiceItem;
 use App\User;
 use App\CalculatedTax;
 use App\Variables;
@@ -67,6 +69,46 @@ class ReportsController extends Controller
     public function reports() {
       
       return view('/Reports/index');
+
+    }
+    
+    public function reporteLibroVentas( Request $request ) {
+      $ano = $request->ano ? $request->ano : 2019;
+      $mes = $request->mes ? $request->mes : 1;
+      
+      $companyID = currentCompany();
+      
+      $data = InvoiceItem::where('month', $mes)
+                      ->where('year', $ano)
+                      ->where('company_id', $companyID)
+                      ->with('invoice', 'invoice.client')
+                        ->orderBy('created_at', 'ASC')
+                        ->orderBy('item_number', 'ASC')
+                        ->get();
+      
+      $nombreMes = Variables::getMonthName($mes);
+      
+      return view('/Reports/reporte-libro-ventas', compact('data', 'ano', 'nombreMes') );
+
+    }
+    
+    public function reporteLibroCompras( Request $request ) {
+      $ano = $request->ano ? $request->ano : 2019;
+      $mes = $request->mes ? $request->mes : 1;
+      
+      $companyID = currentCompany();
+      
+      $data = BillItem::where('month', $mes)
+                      ->where('year', $ano)
+                      ->where('company_id', $companyID)
+                      ->with('bill', 'bill.provider')
+                        ->orderBy('created_at', 'ASC')
+                        ->orderBy('item_number', 'ASC')
+                        ->get();
+      
+      $nombreMes = Variables::getMonthName($mes);
+      
+      return view('/Reports/reporte-libro-compras', compact('data', 'ano', 'nombreMes') );
 
     }
     
