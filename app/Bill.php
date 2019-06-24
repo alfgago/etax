@@ -5,10 +5,13 @@ namespace App;
 use \Carbon\Carbon;
 use App\Company;
 use App\BillItem;
+use App\Provider;
+use App\XmlHacienda;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Kyslik\ColumnSortable\Sortable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class Bill extends Model
@@ -280,6 +283,7 @@ class Bill extends Model
               ]
           );
           Cache::put($providerCacheKey, $proveedorCache, 30);
+          $proveedorCache->save();
       }
       $proveedor = Cache::get($providerCacheKey);
       
@@ -479,21 +483,36 @@ class Bill extends Model
             }
         }
         
-        BillItem::insert($inserts);
+        $items = BillItem::insert($inserts);
         
-        return true;
+        return $items;
     }
     
     
-    public static function storeXML($file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor) {
+    public static function storeXML($bill, $file) {
         
-        if ( Storage::exists("empresa-$identificacionReceptor/facturas_compras/$identificacionEmisor-$consecutivoComprobante.xml")) {
-            Storage::delete("empresa-$identificacionReceptor/facturas_compras/$identificacionEmisor-$consecutivoComprobante.xml");
+        $cedulaEmpresa = $bill->company->id_number;
+        $cedulaProveedor = $bill->provider->id_number;
+        $consecutivoComprobante = $bill->document_number;
+        
+        if ( Storage::exists("empresa-$cedulaEmpresa/facturas_compras/$cedulaProveedor-$consecutivoComprobante.xml")) {
+            Storage::delete("empresa-$cedulaEmpresa/facturas_compras/$cedulaProveedor-$consecutivoComprobante.xml");
         }
         
         $path = \Storage::putFileAs(
-            "empresa-$identificacionReceptor/facturas_compras", $file, "$identificacionEmisor-$consecutivoComprobante.xml"
+            "empresa-$cedulaEmpresa/facturas_compras", $file, "$cedulaProveedor-$consecutivoComprobante.xml"
         );
+        
+        try{
+          $xmlHacienda = new XmlHacienda();
+          $xmlHacienda->xml = $path;
+          $xmlHacienda->bill_id = $bill->id;
+          $xmlHacienda->invoice_id = 0;
+          $xmlHacienda->save();
+          Log::info( 'XMLHacienda guardado: ' . $bill->id );
+        }catch( \Throwable $e ){
+          Log::error( 'Error al registrar en tabla XMLHacienda: ' . $e->getMessage() );
+        }
         
         return $path;
         

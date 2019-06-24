@@ -48,7 +48,7 @@ class CalculatedTax extends Model
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
       
-     // if ( !Cache::has($cacheKey) ) {
+      if ( !Cache::has($cacheKey) ) {
           
           //Busca el calculo del mes en Base de Datos.
           $data = CalculatedTax::firstOrNew(
@@ -90,7 +90,7 @@ class CalculatedTax extends Model
             
           Cache::put($cacheKey, $data, now()->addDays(120));
           
-     //}
+     }
       
       $data = Cache::get($cacheKey);
       return $data;
@@ -361,6 +361,7 @@ class CalculatedTax extends Model
               
               if( $ivaType == '041' || $ivaType == '051' || $ivaType == '061' || $ivaType == '071' )
               {
+                //Cuando es al 1%, se puede agreditar el 100%
                 $basesIdentificacionPlena += $subtotal;
                 $ivaAcreditableIdentificacionPlena += $billIva;
               }
@@ -440,6 +441,11 @@ class CalculatedTax extends Model
       $this->bills_subtotal3 = $this->b003 + $this->b013 + $this->b023 + $this->b033 + $this->b016 + $this->b036;
       $this->bills_subtotal4 = $this->b004 + $this->b014 + $this->b024 + $this->b034;
       
+      //Canasta cuenta como acreditaccion plena. 
+      $acredPorCanasta = $this->i001 + $this->i011 + $this->i021 + $this->i031 + $this->i015 + $this->i035;
+      $this->iva_acreditable_identificacion_plena = $ivaAcreditableIdentificacionPlena + $acredPorCanasta;
+      $this->bills_subtotal1 = 0; //Lo deja en 0 de una vez. Todas deberian contar como base no acreditable.
+      
       return $this;
     }
     
@@ -516,11 +522,14 @@ class CalculatedTax extends Model
       //Calcula el total deducible y no deducible en base a los ratios y los montos de facturas recibidas.
       $subtotalParaCFDP = $this->bills_subtotal - $this->bases_identificacion_plena - $this->bases_no_deducibles;
       
+      
+      //Usa los subtotales de cada tarifa para hacer el calculo. Los subtotales no incluyen nada 100% acreditable.
       $cfdpEstimado1 = $this->bills_subtotal1*$ratio1*0.01 + $this->bills_subtotal1*$ratio2*0.02 + $this->bills_subtotal1*$ratio3*0.13 + $this->bills_subtotal1*$ratio4*0.04 ; 
       $cfdpEstimado2 = $this->bills_subtotal2*$ratio1*0.01 + $this->bills_subtotal2*$ratio2*0.02 + $this->bills_subtotal2*$ratio3*0.02 + $this->bills_subtotal2*$ratio4*0.02 ; 
       $cfdpEstimado3 = $this->bills_subtotal3*$ratio1*0.01 + $this->bills_subtotal3*$ratio2*0.02 + $this->bills_subtotal3*$ratio3*0.13 + $this->bills_subtotal3*$ratio4*0.04 ; 
       $cfdpEstimado4 = $this->bills_subtotal4*$ratio1*0.01 + $this->bills_subtotal4*$ratio2*0.02 + $this->bills_subtotal4*$ratio3*0.04 + $this->bills_subtotal4*$ratio4*0.04 ; 
       $cfdpEstimado  = $cfdpEstimado1 + $cfdpEstimado2 + $cfdpEstimado3 + $cfdpEstimado4;
+      
       //Calcula el balance estimado.
       $ivaDeducibleEstimado = ($cfdpEstimado * $prorrata) + $this->iva_acreditable_identificacion_plena;
       $balanceEstimado = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleEstimado;

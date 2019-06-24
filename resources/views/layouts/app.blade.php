@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css" />
     
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=5.5">
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=5.6">
     <script src="{{asset('assets/js/common-bundle.js')}}?v=5.5"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
   
@@ -98,40 +98,6 @@
     @endif
   
     @yield('header-scripts')
-    
-    <style>
-      
-      div.hopscotch-bubble {
-    box-shadow: 0 0 15px rgba(68, 21, 142,0.5);
-    border: 2px solid  rgb(68, 21, 142);
-}
-
-.hopscotch-bubble-arrow-container.hopscotch-arrow.right {}
-
-div.hopscotch-bubble .hopscotch-bubble-arrow-container.right .hopscotch-bubble-arrow-border {
-    border-left: 17px solid rgb(68, 21, 142);
-}
-
-div.hopscotch-bubble .hopscotch-bubble-arrow-container.right {
-    right: -35px;
-}
-
-div.hopscotch-bubble .hopscotch-bubble-arrow-container.right .hopscotch-bubble-arrow {
-    left: -3px;
-}
-
-div.hopscotch-bubble .hopscotch-bubble-arrow-container.left {
-    left: -18px;
-}
-
-div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-arrow-border {
-    border-right: 17px solid rgb(68, 21, 142);
-}
-
-div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-arrow {
-    left: 3px;
-}
-    </style>
 
     @yield('footer-scripts')
     
@@ -151,6 +117,26 @@ div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-ar
 
         gtag('config', 'UA-134999499-1');
       </script>
+      
+      <!-- Facebook Pixel Code -->
+      <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window,document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');;
+       fbq('init', '2079941852310831'); 
+      fbq('track', 'PageView');
+      </script>
+      <noscript>
+       <img height="1" width="1" 
+      src="https://www.facebook.com/tr?id=2079941852310831&ev=PageView
+      &noscript=1"/>
+      </noscript>
+      <!-- End Facebook Pixel Code -->
 
 
     <?php
