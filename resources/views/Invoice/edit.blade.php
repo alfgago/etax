@@ -305,9 +305,9 @@ $(document).ready(function(){
     total += t;	
   });
 
-  $('#subtotal').val(subtotal);
-  $('#monto_iva').val(monto_iva);
-  $('#total').val(total);
+  $('#subtotal').val( fixComas(subtotal) );
+  $('#monto_iva').val( fixComas(monto_iva) );
+  $('#total').val( fixComas(total) );
   
   toggleRetencion();
 });
