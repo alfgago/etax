@@ -188,7 +188,7 @@ class InvoiceController extends Controller
 
                 //Datos generales y para Hacienda
                 $invoice->document_type = "01";
-                $invoice->hacienda_status = 01;
+                $invoice->hacienda_status = '01';
                 $invoice->payment_status = "01";
                 $invoice->payment_receipt = "";
                 $invoice->generation_method = "etax";
@@ -200,7 +200,7 @@ class InvoiceController extends Controller
                 $company->last_invoice_ref_number = $invoice->reference_number;
                 $company->last_document = $invoice->document_number;
                 $company->save();
-                if ($invoice->hacienda_status == 03) {
+                if ($invoice->hacienda_status == '03') {
                    // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
                 }
                 clearInvoiceCache($invoice);

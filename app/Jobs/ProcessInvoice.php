@@ -76,7 +76,7 @@ class ProcessInvoice implements ShouldQueue
                     if (isset($response['status']) && $response['status'] == 200) {
                         Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
                         $date = Carbon::now();
-                        $invoice->hacienda_status = 3;
+                        $invoice->hacienda_status = '03';
                         $invoice->save();
                         $path = 'empresa-' . $company->id_number .
                             "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
@@ -131,7 +131,7 @@ class ProcessInvoice implements ShouldQueue
                             if (isset($response['status']) && $response['status'] == 200) {
                                 Log::info('API HACIENDA 200 :'. $invoice->document_number);
                                 $date = Carbon::now();
-                                $invoice->hacienda_status = 3;
+                                $invoice->hacienda_status = '03';
                                 $invoice->save();
                                 $path = 'empresa-' . $company->id_number .
                                     "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
