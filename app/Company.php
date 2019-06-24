@@ -147,11 +147,12 @@ class Company extends Model {
     /* Returns count of total available invoices. Current plan invoices + bought add-on invoices */
 
     public function checkCountAvailableInvoices() {
-        
+        $company_id = currentCompany();
         try{
-            
-            $count = $this->subscription->plan->num_invoices;
-            
+            $available_invoices = AvailableInvoices::where('company_id', $company_id)->first();
+            $monthly_quota = $available_invoices->monthly_quota;
+            $sent = $available_invoices->current_month_sent;
+            $count = $monthly_quota - $sent;
             if( !$count ) {
                 return -1;
             }
@@ -183,6 +184,16 @@ class Company extends Model {
         }catch( \Exception $ex ){
             return 5000;
         }
+    }
+
+    public function checkPurchasedInvoices(){
+        $company_id = currentCompany();
+        $companyDetails = get_company_details($company_id);
+        $purchased_invoices = $companyDetails->additional_invoices;
+        if( !$purchased_invoices ) {
+            return -1;
+        }
+        return $purchased_invoices;
     }
 
     /* Email to deactivate the current company so user can add another one on same plan without deleting the data. */
