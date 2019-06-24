@@ -289,7 +289,7 @@ $(document).ready(function(){
     monto_iva += m;	
     total += t;	
   });
-
+  
   $('#subtotal').val( fixComas(subtotal) );
   $('#monto_iva').val( fixComas(monto_iva) );
   $('#total').val( fixComas(total) );

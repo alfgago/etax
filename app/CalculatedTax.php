@@ -48,7 +48,7 @@ class CalculatedTax extends Model
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
       
-      if ( !Cache::has($cacheKey) ) {
+      //if ( !Cache::has($cacheKey) ) {
           
           //Busca el calculo del mes en Base de Datos.
           $data = CalculatedTax::firstOrNew(
@@ -90,7 +90,7 @@ class CalculatedTax extends Model
             
           Cache::put($cacheKey, $data, now()->addDays(120));
           
-     }
+     //}
       
       $data = Cache::get($cacheKey);
       return $data;
@@ -533,10 +533,6 @@ class CalculatedTax extends Model
       //Calcula el balance estimado.
       $ivaDeducibleEstimado = ($cfdpEstimado * $prorrata) + $this->iva_acreditable_identificacion_plena;
       $balanceEstimado = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleEstimado;
-      
-      if( $this->month == 6) {
-        //3dd( $this );
-      }
 
       $ratio1_operativo = $company->operative_ratio1 / 100;
       $ratio2_operativo = $company->operative_ratio2 / 100;
@@ -560,6 +556,10 @@ class CalculatedTax extends Model
       $ivaDeducibleOperativo = ($cfdp * $prorrataOperativa) + $this->iva_acreditable_identificacion_plena;
       $balanceOperativo = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleOperativo;
       $ivaNoDeducible = $this->total_bill_iva - $ivaDeducibleOperativo;
+      
+      if( $this->month == 1) {
+        //dd( "1: $cfdp1 - 2: $cfdp2 - 3: $cfdp3 - 4: $cfdp4 - PLENA: $this->iva_acreditable_identificacion_plena" );
+      }
  
       $saldoFavor = $balanceOperativo - $this->iva_retenido;
       $saldoFavor = $saldoFavor < 0 ? abs( $saldoFavor ) : 0;
