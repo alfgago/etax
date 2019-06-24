@@ -20,9 +20,12 @@
                     </li>
                     <li>
                         <a class="nav-link " aria-selected="false" href="/empresas/certificado">Certificado digital</a>
-                    </li class="active">
+                    </li">
                     <li>
                         <a class="nav-link active" aria-selected="true" href="/empresas/equipo">Equipo de trabajo</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" aria-selected="false" href="/empresas/equipo">Facturaci&oacute;n</a>
                     </li>
                 </ul>
             </div>

@@ -30,6 +30,9 @@
                 <li>
                     <a class="nav-link" aria-selected="false" href="/empresas/equipo">Equipo de trabajo</a>
                 </li>
+                <li>
+                    <a class="nav-link" aria-selected="false" href="/empresas/equipo">Facturaci&oacute;n</a>
+                </li>
             </ul>
         </div>
         <div class="col-sm-9">
@@ -101,52 +104,8 @@
 						      <input type="number" class="form-control" name="saldo_favor_2018" id="saldo_favor_2018" step="0.01" value="{{ @$company->saldo_favor_2018 ? $company->saldo_favor_2018 : 0 }}">
 						    </div>
 						    
-						    <div class="form-group col-md-12">
-						      <h3>
-						        Facturación
-						      </h3>
-						    </div>
-						    
-						    <div class="form-group col-md-6">
-						      <label for="use_invoicing">¿Desea emitir facturas electrónicas con eTax?</label>
-						      <select class="form-control" name="use_invoicing" id="use_invoicing" required>
-						        <option value="1" {{ @$company->use_invoicing ? 'selected' : '' }}>Sí</option>
-						        <option value="0" {{ !(@$company->use_invoicing) ? 'selected' : '' }}>No</option>
-						      </select>
-						    </div>
-						    
-						    <div class="form-group col-md-6">
-						      <label for="last_document">Último documento emitido</label>
-						      <input type="text" class="form-control" name="last_document" id="last_document" value="{{ @$company->last_document }}" required>
-						      <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
-						    </div>
-						    
-						    <div class="form-group col-md-12">
-						      <label for="default_vat_code">Tipo de IVA por defecto</label>
-						      <select class="form-control" id="default_vat_code" name="default_vat_code" >
-						        @foreach ( \App\Variables::tiposIVARepercutidos() as $tipo )
-						          <option value="{{ $tipo['codigo'] }}" porcentaje="{{ $tipo['porcentaje'] }}" {{ @$company->default_vat_code == $tipo['codigo']  ? 'selected' : '' }}>{{ $tipo['nombre'] }}</option>
-						        @endforeach
-						      </select>
-						    </div>
-						    
-						    <div class="form-group col-md-6">
-						      <label for="default_currency">Tipo de moneda por defecto</label>
-						      <select class="form-control" name="default_currency" id="default_currency" required>
-                    <option value="crc" {{ @$company->default_currency == 'crc' ? 'selected' : '' }}>CRC</option>
-                    <option value="usd" {{ @$company->default_currency == 'usd' ? 'selected' : '' }}>USD</option>
-                  </select>
-						    </div>
-						    
-						     <div class="form-group col-md-12">
-						      <label for="default_invoice_notes">Notas por defecto</label>
-						      <textarea class="form-control" name="default_invoice_notes" id="default_invoice_notes" >{{ @$company->default_invoice_notes }}</textarea>
-						    </div>
-						    
-						    <button id="btn-submit" type="submit" class="hidden btn btn-primary">Guardar información</button>          
-						    
-						  </div>
-						  
+
+                          </div>
 						</form>
 
           </div>
