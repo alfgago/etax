@@ -704,7 +704,7 @@ toastr.options = {
   
   window.fixComas = function( numero ) {
     numero = parseFloat(numero);
-    return numero.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2});
+    return numero.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2});
   }
   
   window.toggleRetencion = function() {
