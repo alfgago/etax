@@ -55,7 +55,8 @@ class BridgeHaciendaApi
                         'Connection' => 'Close'
                     ],
                     'multipart' => $requestData,
-                    'verify' => false
+                    'verify' => false,
+                    'http_errors' => false
                 ]);
                 Log::info('Factura firmada -->>' . $invoice->id);
                 $response = json_decode($result->getBody()->getContents(), true);
@@ -204,4 +205,59 @@ class BridgeHaciendaApi
         return false;
     }
 
+    public function validateAtv($token, $company) {
+        try {
+            $client = new Client();
+            Log::info('Validate User ATV  API HACIENDA -->>' . $company->id);
+            $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice/validateatv', [
+                'headers' => [
+                    'Auth-Key'  => config('etax.api_hacienda_key'),
+                    'Client-Service' => config('etax.api_hacienda_client'),
+                    'Authorization' => $token,
+                    'User-ID' => config('etax.api_hacienda_user_id'),
+                    'Connection' => 'Close'
+                ],
+                'multipart' => $this->setHaciendaInfo($company),
+                'verify' => false,
+                'http_errors' => false
+            ]);
+            Log::info('Validate User Atv Response -->>' . $company->id);
+            $response = json_decode($result->getBody()->getContents(), true);
+            return $response;
+        } catch (\Exception $e) {
+            Log::info('Validate User Atv Response -->>' . $company->id);
+        }
+    }
+
+    private function setHaciendaInfo($company) {
+        try {
+            $companyData = null;
+            $request = null;
+            $companyData = array(
+                'usuarioAtv' => $company->atv->user ?? '',
+                'passwordAtv' => $company->atv->password ?? '',
+                'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
+                'atvcertPin' => $company->atv->pin ?? '',
+                'atvcertFile' => Storage::get($company->atv->key_url),
+            );
+            foreach ($companyData as $key => $values) {
+                if ($key == 'atvcertFile') {
+                    $request[]=array(
+                        'name' => $key,
+                        'contents' => $values,
+                        'filename' => $company->id_number.'.p12'
+                    );
+                } else {
+                    $request[]=array(
+                        'name' => $key,
+                        'contents' => $values
+                    );
+                }
+            }
+            return $request;
+        } catch (ClientException $error) {
+            Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
+            return false;
+        }
+    }
 }
