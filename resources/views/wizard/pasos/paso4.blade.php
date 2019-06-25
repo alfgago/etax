@@ -3,7 +3,7 @@
   Certificado digital
   </h3>
   <p class="description">
-    <b style="font-size: 1rem; display: block; color: red;">Si usted <u>no</u> va a facturar con eTax, puede ignorar este paso.
+    <b style="font-size: 1rem; display: block; color: red;">Si usted <u>no</u> va a facturar con eTax, puede ignorar este paso.</b>
   </p>
   
 </div>
