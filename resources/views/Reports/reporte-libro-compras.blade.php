@@ -29,10 +29,10 @@
 	                <td>{{ $item->item_number }}</td>
 	                <td>{{ $item->name }}</td>
 	                <td>{{ $item->bill->currency }}</td>
-	                <td>{{ $item->subtotal }}</td>
+	                <td>{{ number_format( $item->subtotal, 0) }}</td>
 	                <td>{{ $item->iva_percentage }}%</td>
-	                <td>{{ $item->iva_amount }}</td>
-	                <td>{{ $item->total }}</td>
+	                <td>{{ number_format( $item->iva_amount, 0) }}</td>
+	                <td>{{ number_format( $item->total, 0) }}</td>
 	              </tr>
 	              @endforeach
 	            </tbody>

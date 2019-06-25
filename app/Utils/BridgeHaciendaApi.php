@@ -33,7 +33,7 @@ class BridgeHaciendaApi
             });
             return $value;
         } catch (ClientException $error) {
-            Log::info('Error al iniciar session en API HACIENDA -->>'. $error);
+            Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
             return false;
         }
     }
@@ -45,7 +45,7 @@ class BridgeHaciendaApi
             $requestData = $this->setInvoiceData($invoice, $requestDetails);
             if ($requestData !== false) {
                 $client = new Client();
-                Log::info('Enviando parametros  API HACIENDA -->>');
+                Log::info('Enviando parametros  API HACIENDA -->>' . $invoice->id);
                 $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice/signxml', [
                     'headers' => [
                         'Auth-Key'  => config('etax.api_hacienda_key'),
@@ -57,6 +57,7 @@ class BridgeHaciendaApi
                     'multipart' => $requestData,
                     'verify' => false
                 ]);
+                Log::info('Factura firmada -->>' . $invoice->id);
                 $response = json_decode($result->getBody()->getContents(), true);
                 if (isset($response['status']) && $response['status'] == 200) {
                     $date = Carbon::now();
@@ -67,12 +68,15 @@ class BridgeHaciendaApi
                     $save = Storage::put(
                         $path,
                         ltrim($response['data']['xmlFirmado'], '\n'));
+                    
                     if ($save) {
                         $xml = new XmlHacienda();
                         $xml->invoice_id = $invoice->id;
                         $xml->bill_id = 0;
                         $xml->xml = $path;
                         $xml->save();
+                        Log::info('XML Guardado -->>' . 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml");
+                        
                         if ( !empty($invoice->send_emails) ) {
                             Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new \App\Mail\Invoice(['xml' => $path,
                                 'data_invoice' => $invoice, 'data_company' =>$company]));
@@ -89,7 +93,7 @@ class BridgeHaciendaApi
                 return $invoice;
             }
         } catch (ClientException $error) {
-            Log::info('Error al crear factura en API HACIENDA -->>'. $error);
+            Log::error('Error al crear factura en API HACIENDA -->>'. $error->getMessage() );
             return $invoice;
         }
     }
@@ -112,7 +116,7 @@ class BridgeHaciendaApi
             }
             return json_encode($details, true);
         } catch (ClientException $error) {
-            Log::info('Error al iniciar session en API HACIENDA -->>'. $error);
+            Log::error('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
             return false;
         }
     }
@@ -175,7 +179,7 @@ class BridgeHaciendaApi
             }
             return $request;
         } catch (ClientException $error) {
-            Log::info('Error al iniciar session en API HACIENDA -->>'. $error);
+            Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
             return false;
         }
     }
