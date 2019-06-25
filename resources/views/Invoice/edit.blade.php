@@ -191,7 +191,7 @@
 
                   <div class="form-group col-md-12">
                     <label for="description">Notas</label>
-                    <input type="text" class="form-control" name="description" id="notas" placeholder="" value="{{ $invoice->description }}">
+                    <input type="text" class="form-control" name="description" id="notas"  maxlength="200" placeholder="" value="{{ $invoice->description }}">
                   </div>
 
               </div>

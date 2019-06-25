@@ -90,7 +90,7 @@ class CalculatedTax extends Model
             
           Cache::put($cacheKey, $data, now()->addDays(120));
           
-     }
+      }
       
       $data = Cache::get($cacheKey);
       return $data;
@@ -557,9 +557,9 @@ class CalculatedTax extends Model
       $balanceOperativo = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleOperativo;
       $ivaNoDeducible = $this->total_bill_iva - $ivaDeducibleOperativo;
       
-      if( $this->month == 1) {
-        //dd( "1: $cfdp1 - 2: $cfdp2 - 3: $cfdp3 - 4: $cfdp4 - PLENA: $this->iva_acreditable_identificacion_plena" );
-      }
+      /*if( $this->month == 6) {
+        dd( "1: $cfdp1 - 2: $cfdp2 - 3: $cfdp3 - 4: $cfdp4 - PLENA: $this->iva_acreditable_identificacion_plena" );
+      }*/
  
       $saldoFavor = $balanceOperativo - $this->iva_retenido;
       $saldoFavor = $saldoFavor < 0 ? abs( $saldoFavor ) : 0;
