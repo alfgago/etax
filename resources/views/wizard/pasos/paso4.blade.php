@@ -3,8 +3,7 @@
   Certificado digital
   </h3>
   <p class="description">
-    <b style="font-size: 1rem; display: block; color: red;">La funcionalidad de facturación electrónica está deshabilitada durante el periodo de pruebas.</b>
-    No podrá enviar facturas por medio de eTax hasta haber registrado su certificado de ATV. Si usted <u>no</u> va a facturar con eTax, puede ignorar este paso.
+    <b style="font-size: 1rem; display: block; color: red;">Si usted <u>no</u> va a facturar con eTax, puede ignorar este paso.
   </p>
   
 </div>
