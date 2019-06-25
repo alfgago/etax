@@ -21,10 +21,10 @@ class CreateSucursalsTable extends Migration
             $table->string('city')->nullable(); //Canton
             $table->string('district')->nullable(); //Distrito
             $table->string('neighborhood')->nullable(); //Barrio
-            $table->string('zip')->nullable();
             $table->string('address')->nullable();
             $table->string('phone')->nullable();
             $table->string('description')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

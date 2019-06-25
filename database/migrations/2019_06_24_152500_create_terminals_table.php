@@ -16,12 +16,14 @@ class CreateTerminalsTable extends Migration
         Schema::create('terminals', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('sucursal_id')->default(0);
+            $table->string('internal_description')->nullable();
             $table->string('description')->nullable();
             $table->string('last_document')->default('1000000000000000001');
             $table->integer('last_invoice_ref_number')->default(0);
             $table->integer('last_bill_ref_number')->default(0);
             //0 = Disponible, 1 = En uso
             $table->integer('status')->default(0);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

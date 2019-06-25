@@ -61,6 +61,12 @@ Route::prefix('empresas')->group(function() {
     Route::patch('update-certificado/{id}', 'CompanyController@updateCertificado')->name('Company.update_cert');
     Route::get('company-profile/{id}', 'CompanyController@company_profile')->name('Company.company_profile');
     Route::get('set-prorrata-2018-facturas', 'CompanyController@setProrrata2018PorFacturas')->name('Company.set_prorrata_2018_facturas');
+    Route::get('facturacion', 'CompanyController@facturacion')->name('Company.facturacion');
+    Route::patch('sucursal/{id}', 'CompanyController@getTerminals')->name('Company.sucursal');
+    Route::patch('add-terminal-view/{sucursal_id}', 'CompanyController@addTerminalsView')->name('Company.add_terminal_view');
+    Route::patch('add-terminal', 'CompanyController@addTerminals')->name('Company.add_terminal');
+    Route::get('edit-terminal-view/{id}', 'CompanyController@editTerminalView')->name('Company.edit_terminal_view');
+    Route::patch('edit-terminal', 'CompanyController@editTerminal')->name('Company.edit_terminal');
 });
 
 // Rutas de facturación

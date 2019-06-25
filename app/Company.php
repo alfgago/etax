@@ -54,6 +54,10 @@ class Company extends Model {
         return $this->hasOne(Team::class);
     }
 
+    public function sucursales() {
+        return $this->hasOne(Sucursal::class);
+    }
+
     //Relación con Usuario
     public function owner() {
         return $this->belongsTo( User::class );

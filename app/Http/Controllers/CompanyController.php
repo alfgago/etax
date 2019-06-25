@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\Sucursal;
+use App\Terminal;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
@@ -284,6 +286,68 @@ class CompanyController extends Controller {
 
         return redirect()->route('Company.edit')->withMessage('La información de la empresa ha sido actualizada.');
     }
+
+    public function facturacion(){
+        $company = currentCompanyModel();
+        $sucursales = Sucursal::where('company_id', $company->id)->get();
+
+        if (!$company) {
+            return redirect('/');
+        }
+
+        return view('Company.invoicing')->with('company', $company)
+                                                ->with('sucursales', $sucursales);
+    }
+
+    public function getTerminals($id){
+        $company = currentCompanyModel();
+        $sucursal = Sucursal::where('id', $id)->first();
+        $terminales = Terminal::where('sucursal_id', $id)->get();
+        return view('Company.sucursalDetails')->with('terminales', $terminales)
+                                                   ->with('company_name', $company->business_name)
+                                                   ->with('sucursal', $sucursal);
+    }
+
+    public function addTerminalsView($id){
+        $sucursal = Sucursal::where('id', $id)->first();
+        $nombreSucursal = $sucursal->description;
+        $terminales = Terminal::where('sucursal_id', $id)->get();
+        $totalTerminales = $terminales->count();
+        return view('Company.add-terminal')->with('id', $id)
+                                                ->with('nombreSucursal', $nombreSucursal)
+                                                ->with('totalTerminales', $totalTerminales);
+    }
+
+    public function addTerminals(Request $request){
+        $newTerminal = Terminal::create([
+            "sucursal_id" => $request->sucursal_id,
+            "internal_description" => 'Terminal ' . $request->newTerminalCounter,
+            "description" => $request->description
+        ]);
+        $company = currentCompanyModel();
+        $sucursales = Sucursal::where('company_id', $company->id)->get();
+
+        return view('Company.invoicing')->with('company', $company)
+                                             ->with('sucursales', $sucursales);
+    }
+
+    public function editTerminalView($id){
+        $terminal = Terminal::where('id', $id)->first();
+        return view('Company.edit-terminal')->with('terminal', $terminal);
+    }
+
+    public function editTerminal(Request $request){
+        $terminal = Terminal::updateOrCreate(
+            [
+                'id' => $request->terminal_id
+            ],
+            [
+                'description' => $request->description
+            ]
+        );
+        return redirect('/empresas/facturacion')->withMessage('El registro se actualizo correctamente');
+    }
+
 
     /**
      * Update the specified resource in storage.

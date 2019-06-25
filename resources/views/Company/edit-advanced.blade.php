@@ -31,7 +31,7 @@
                     <a class="nav-link" aria-selected="false" href="/empresas/equipo">Equipo de trabajo</a>
                 </li>
                 <li>
-                    <a class="nav-link" aria-selected="false" href="/empresas/equipo">Facturaci&oacute;n</a>
+                    <a class="nav-link" aria-selected="false" href="/empresas/facturacion">Facturaci&oacute;n</a>
                 </li>
             </ul>
         </div>

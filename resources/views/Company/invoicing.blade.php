@@ -5,7 +5,8 @@
 @endsection
 @section('breadcrumb-buttons')
 
-    <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar configuración avanzada</button>
+    <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar</button>
+
 
 @endsection
 @section('content')
@@ -19,7 +20,7 @@
                                 <a class="nav-link" aria-selected="false" href="/empresas/editar">Editar perfil de empresa</a>
                             </li>
                             <li class="active">
-                                <a class="nav-link active" aria-selected="false" href="/empresas/configuracion">Configuración avanzada</a>
+                                <a class="nav-link" aria-selected="false" href="/empresas/configuracion">Configuración avanzada</a>
                             </li>
                             <li>
                                 <a class="nav-link" aria-selected="false" href="/empresas/certificado">Certificado digital</a>
@@ -28,7 +29,7 @@
                                 <a class="nav-link" aria-selected="false" href="/empresas/equipo">Equipo de trabajo</a>
                             </li>
                             <li>
-                                <a class="nav-link" aria-selected="true" href="/empresas/equipo">Facturaci&oacute;n</a>
+                                <a class="nav-link active" aria-selected="true" href="/empresas/facturacion">Facturaci&oacute;n</a>
                             </li>
                         </ul>
                     </div>
@@ -80,81 +81,32 @@
                         </div>
                         <div class="tab-content">
                             <h3 class="card-title">Sucursales</h3>
-                            @if(auth()->user()->isOwnerOfTeam($team))
-                                <a class="btn btn-sm btn-primary pull-right m-0" href="{{route('teams.members.assign_permissions', $team)}}">Agregar Sucursal..</a>
-                            @endif
                             <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
                                 <thead>
                                 <tr>
-                                    <th>Nombre</th>
-                                    <th>Correo</th>
-                                    <th>Acción</th>
+                                    <th>Descripci&oacute;n</th>
+                                    <th>Cant&oacute;n</th>
+                                    <th>Distrito</th>
+                                    <th>Direcci&oacute;n</th>
+                                    <th>Acciones</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                @if ( $team->users->count() )
-                                    @foreach($team->users AS $user)
-                                        <tr>
-                                            <td>{{$user->first_name.' '.$user->last_name.' '.$user->last_name2}}</td>
-                                            <td>{{$user->email}}</td>
+                                @if ( $sucursales->count() )
+                                    @foreach($sucursales AS $sucursal)
+                                        <tr id="sucursal" onclick="verInfo({{$sucursal->id}});">
+                                            <td>{{$sucursal->description}}</td>
+                                            <td>{{$sucursal->district}}</td>
+                                            <td>{{$sucursal->neighborhood}}</td>
+                                            <td>{{$sucursal->address}}</td>
                                             <td>
-                                                @if( auth()->user()->isOwnerOfTeam($team) )
-                                                    @if(auth()->user()->getKey() !== $user->getKey())
-                                                        <form style="display: inline-block;" action="{{route('teams.members.destroy', [$team, $user])}}" method="post">
-                                                            @csrf
-                                                            @method('delete')
-
-                                                            <button type="submit" class="text-danger mr-2" title="Quitar de equipo" style="display: inline-block; background: none; border: 0;">
-                                                                <i class="fa fa-ban" aria-hidden="true"></i>
-                                                            </button>
-                                                        </form>
-
-                                                    @else
-                                                        Admin
-                                                    @endif
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                @endif
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="tab-content">
-                            <h3 class="card-title">Terminales</h3>
-                            @if(auth()->user()->isOwnerOfTeam($team))
-                                <a class="btn btn-sm btn-primary pull-right m-0" href="{{route('teams.members.assign_permissions', $team)}}">Agregar Terminal..</a>
-                            @endif
-                            <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
-                                <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Correo</th>
-                                    <th>Acción</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                @if ( $team->users->count() )
-                                    @foreach($team->users AS $user)
-                                        <tr>
-                                            <td>{{$user->first_name.' '.$user->last_name.' '.$user->last_name2}}</td>
-                                            <td>{{$user->email}}</td>
-                                            <td>
-                                                @if( auth()->user()->isOwnerOfTeam($team) )
-                                                    @if(auth()->user()->getKey() !== $user->getKey())
-                                                        <form style="display: inline-block;" action="{{route('teams.members.destroy', [$team, $user])}}" method="post">
-                                                            @csrf
-                                                            @method('delete')
-
-                                                            <button type="submit" class="text-danger mr-2" title="Quitar de equipo" style="display: inline-block; background: none; border: 0;">
-                                                                <i class="fa fa-ban" aria-hidden="true"></i>
-                                                            </button>
-                                                        </form>
-
-                                                    @else
-                                                        Admin
-                                                    @endif
-                                                @endif
+                                                <form style="display: inline-block;" action="{{route('Company.sucursal', ['id' => $sucursal->id])}}" method="post">
+                                                    @csrf
+                                                    @method('patch')
+                                                    <button type="submit" class="text-info mr-2" title="Ver Detalles" style="display: inline-block; background: none; border: 0;cursor:pointer;">
+                                                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -169,16 +121,6 @@
     </div>
 @endsection
 @section('footer-scripts')
-    <script>
-        function toggleTipoProrrata() {
-            var metodo = $("#first_prorrata_type").val();
-            $( ".toggle-types" ).hide();
-            $( ".type-"+metodo ).show();
-        }
-        $(document).ready(function(){
-            toggleTipoProrrata();
-        });
-    </script>
     <style>
         .form-button {
             display: block;
@@ -188,4 +130,5 @@
             height: calc(1.9695rem + 2px);
         }
     </style>
+
 @endsection
