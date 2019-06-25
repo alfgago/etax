@@ -37,7 +37,7 @@
 
 <div class="form-group col-md-12">
   <label for="default_invoice_notes">Notas por defecto</label>
-  <textarea class="form-control" name="default_invoice_notes" id="default_invoice_notes" >{{ @$company->default_invoice_notes }}</textarea>
+  <textarea class="form-control" name="default_invoice_notes" id="default_invoice_notes" maxlength="190" >{{ @$company->default_invoice_notes }}</textarea>
 </div>
 
 <div class="btn-holder">

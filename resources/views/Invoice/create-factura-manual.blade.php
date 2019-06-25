@@ -9,6 +9,8 @@
   <div class="col-md-12">
                           
         <form method="POST" action="/facturas-emitidas">
+          <div class="mb-3 text-danger">Este formulario es únicamente para el registro de facturas existentes. No hace emisión ante hacienda, 
+          para emitir ante Hacienda debe hacerlo desde la opción de "Facturación" en el menú lateral, o bien ingresar en <a href="/facturas-emitidas/emitir-factura">este enlace</a> </div>
 
           @csrf
           
@@ -192,7 +194,7 @@
 
                   <div class="form-group col-md-12">
                     <label for="description">Notas</label>
-                    <textarea class="form-control" name="description" id="notas" placeholder=""></textarea>
+                    <textarea class="form-control" name="description"  maxlength="200" id="notas" placeholder=""></textarea>
                   </div>
 
               </div>
