@@ -71,6 +71,7 @@ class EmailController extends Controller
                 $company = Company::where('id_number', $identificacionReceptor)->first();
                 $bill = Bill::where('company_id', $company->id)->where('document_number', $consecutivoComprobante)->first();
                 Bill::storeXML( $bill, $file );
+                Log::info( "Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor");
             }
         }catch( \Throwable $ex ){
             Log::warning( "No se pudo guardar la factura de compra via Email. Mensaje:" . $ex->getMessage());
@@ -81,6 +82,7 @@ class EmailController extends Controller
                 $company = Company::where('id_number', $identificacionEmisor)->first();
                 $invoice = Invoice::where('company_id', $company->id)->where('document_number', $consecutivoComprobante)->first();
                 Invoice::storeXML( $invoice, $file );
+                Log::info( "Se registró la factura de venta $consecutivoComprobante para la empresa $identificacionEmisor");
             }
         }catch( \Throwable $ex ){
             Log::warning( "No se pudo guardar la factura de venta via Email. Mensaje:" . $ex->getMessage());
