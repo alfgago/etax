@@ -22,12 +22,14 @@ Mis Planes Suscritos
                         <li>
                             <a class="nav-link" aria-selected="false" href="/usuario/seguridad">Seguridad</a>
                         </li>
-                        <li class="active">
-                            <a class="nav-link" aria-selected="false" href="/usuario/cambiar-plan">Cambiar plan</a>
-                        </li>
                         <li>
-                            <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
+                            <a class="nav-link" aria-selected="false" href="/elegir-plan">Cambiar plan</a>
                         </li>
+                        @if( auth()->user()->isContador() )
+                            <li>
+                                <a class="nav-link active" aria-selected="true" href="/usuario/empresas">Empresas</a>
+                            </li>
+                        @endif
                     </ul>
                 </div>
                 <div class="col-9">

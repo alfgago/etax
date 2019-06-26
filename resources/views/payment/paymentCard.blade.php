@@ -434,6 +434,7 @@
 
         //document.write('Session Id <input type="text" name="deviceFingerprintID" value="' + cybs_dfprofiler("tc_cr_01100XXXX","test") + '">');
     </script>
+    <script>
 
         $(document).ready(function(){
 

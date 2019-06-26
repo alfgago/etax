@@ -109,10 +109,11 @@
     		    allow = false;
     		}
     		
-    		//Revisa que el campo de correo este correcto
-    		var email = $('#email').val();
-    		allow = validateEmail(email);
-				
+    		if(allow) {
+	    		//Revisa que el campo de correo este correcto
+	    		var email = $('#email').val();
+	    		allow = validateEmail(email);
+    		}
     		
     	});
     	return allow;

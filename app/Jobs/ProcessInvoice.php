@@ -93,6 +93,7 @@ class ProcessInvoice implements ShouldQueue
                                 'data_invoice' => $invoice, 'data_company' => $company,
                                 'xml' => ltrim($response['data']['response'], '\n')]));
                         }
+                        Log::info('Factura enviada y XML guardado.');
                     } else if (isset($response['status']) && $response['status'] == 400 &&
                         strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
                         Log::info('Consecutive repeated -->' . $invoice->document_number);
@@ -152,7 +153,7 @@ class ProcessInvoice implements ShouldQueue
                             }
                         }
                     }
-                    Log::error('ERROR Enviando parametros  API HACIENDA Invoice: ' . $this->invoiceId . '-->>' . $result->getBody()->getContents());
+                    Log::info('Proceso de facturación finalizado con éxito.');
                 }
             }
         } catch ( \Exception $e) {

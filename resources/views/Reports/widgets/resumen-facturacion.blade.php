@@ -3,15 +3,16 @@
     <div class="row">
       <?php 
         $company = currentCompanyModel();
-        $availableBills = $company->checkCountAvailableBills();
-        $availableInvoices = $company->checkCountAvailableInvoices();
+        $countAvailableBills    = $company->getCountAvailableBills();
+        $countPurchasedInvoices = $company->getCountPurchasedInvoices();
+        $availableInvoices      = $company->getAvailableInvoices( $data->year, $data->month );
       ?>
       <div class="col-md-12 dato-facturas">
-          <label><span>Facturas de venta</span></label>
-          @if( $availableInvoices != -1 )
+          <label><span>Facturas de venta procesadas</span></label>
+          @if( $availableInvoices )
             <div class="barra-limites emitidas" >
               <div class="fill-bar" data-total="{{ $availableInvoices }}" data-fill="{{ number_format( $data->count_invoices ) }}"></div>
-              <div class="barra-text">{{ number_format( $data->count_invoices ) }} de {{ $availableInvoices }}</div>
+              <div class="barra-text">{{ number_format( $availableInvoices->current_month_sent ) }} de {{ $availableInvoices->monthly_quota  }}</div>
             </div>
           @else
             <div class="barra-limites emitidas" >
@@ -19,14 +20,15 @@
               <div class="barra-text">{{ number_format( $data->count_invoices ) }} de &infin;</div>
             </div>
           @endif
+
       </div>
       
       <div class="col-md-12 dato-facturas mt-2">
-          <label><span>Facturas de compra</span></label>
-          @if( $availableBills != -1 )
+          <label><span>Facturas de compra procesadas</span></label>
+          @if( $countAvailableBills != -1 )
             <div class="barra-limites recibidas">
-              <div class="fill-bar" data-total="{{ $availableBills }}" data-fill="{{ number_format( $data->count_bills ) }}"></div>
-              <div class="barra-text">{{ number_format( $data->count_bills ) }} de {{ $availableBills }}</div>
+              <div class="fill-bar" data-total="{{ $countAvailableBills }}" data-fill="{{ number_format( $data->count_bills ) }}"></div>
+              <div class="barra-text">{{ number_format( $data->count_bills ) }} de {{ $countAvailableBills }}</div>
             </div>
           @else
             <div class="barra-limites recibidas">
@@ -35,7 +37,12 @@
             </div>
           @endif
       </div>
-      
+      <div class="col-md-12 dato-facturas mt-2">
+          @if( $countPurchasedInvoices > 0 )
+            <label><span>Facturas prepago disponibles</span></label>
+            <div> {{ $countPurchasedInvoices }} </div>
+          @endif
+      </div>
       <div class="col-md-12 dato-facturas hidden">
         <a class="btn btn-secondary btn-sm" href="#">Comprar facturas</a>
       </div>

@@ -34,7 +34,7 @@ class Variables
       ['nombre'=>'240 - Autoconsumo sin derecho a crédito', 'codigo'=>'240', 'porcentaje'=>'0', 'hideMasiva'=>true],
       ['nombre'=>'245 - Ventas locales con tarifa transitoria del 0% sin derecho a crédito', 'codigo'=>'245', 'porcentaje'=>'0'], //*vigente del 1-07-2019 al 30-06-2020
       ['nombre'=>'250 - Ventas con IVA incluido en el precio', 'codigo'=>'250', 'porcentaje'=>'0', 'hide'=>true, 'hideMasiva'=>true],
-      ['nombre'=>'260 - Ventas a no sujetos (sin derecho a crédito)', 'codigo'=>'260', 'porcentaje'=>'0', 'hide'=>true, 'hideMasiva'=>true],
+      ['nombre'=>'260 - Ventas sin derecho a crédito por ventas al Estado', 'codigo'=>'260', 'porcentaje'=>'0'],
     ];
 
     return $lista;

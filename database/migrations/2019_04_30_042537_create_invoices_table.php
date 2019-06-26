@@ -34,7 +34,7 @@ class CreateInvoicesTable extends Migration
             $table->double('subtotal')->default(0);
             $table->double('iva_amount')->default(0);
             $table->double('total')->default(0);
-            $table->string('currency')->default('01');
+            $table->string('currency')->default('CRC');
             $table->double('currency_rate')->default(1);
 
             //Condiciones de la venta: 01 Contado, 02 Crédito, 03 Consignación, 04 Apartado, 05 Arrendamiento con opción de compra, 06 Arrendamiento en función financiera, 99 Otros

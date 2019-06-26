@@ -28,6 +28,9 @@
                 <li>
                     <a class="nav-link" aria-selected="false" href="/empresas/equipo">Equipo de trabajo</a>
                 </li>
+                <li>
+                    <a class="nav-link" aria-selected="false" href="/empresas/comprar-facturas-vista">Comprar facturas</a>
+                </li>
             </ul>
         </div>
         <div class="col-sm-9">
@@ -36,10 +39,14 @@
 			<form method="POST" action="{{ route('Company.update_cert', ['id' => $company->id]) }}" enctype="multipart/form-data">
 			    
 			 @if( @$certificate->key_url )
-    		 <div class="alert alert-success"> 
-		         Usted ya subió su certificado ATV. Cualquier edición en esta pantalla requerirá que lo suba nuevamente.
+    		 <div class="alert alert-danger"> 
+		         Usted ya subió su llave criptográfica. Cualquier edición en esta pantalla requerirá que lo suba nuevamente.
     		 </div>
 			 @endif
+			 
+			 <div class="alert alert-info"> 
+		         ¿No sabe cómo conseguir esta información? Contáctenos via chat, teléfono, o descarge el <a style="text-decoration:underline;" href="https://app.etaxcr.com/assets/files/guias/Manual-ConfiguracionEmpresa.pdf">Manual de configuración de empresa.</a>
+    		 </div>
 			 
 			  @csrf
 			  @method('patch') 
@@ -54,7 +61,10 @@
 						    
                 <div class="form-group col-md-6">
                     <label for="user">Usuario ATV</label>
-                    <input type="text" class="form-control" name="user" id="user" value="{{ @$certificate->user }}" required>
+                    <input type="email" class="form-control" name="user" id="user" value="{{ @$certificate->user }}" required>
+                    <div class="description">
+                        El formato de este campo debe verse similar a este: cpj-x-xxx-xxxxxx@prod.comprobanteselectronicos.go.cr
+                    </div>
                 </div>
                 <div class="form-group col-md-6">
                     <label for="password">Contraseña ATV</label>
@@ -66,6 +76,11 @@
                     <div class="fallback">
     				    <input name="cert" type="file" multiple="false">
     				</div>
+    				@if( @$certificate->key_url )
+            		 <div class="description text-danger"> 
+        		         Usted ya subió su llave criptográfica de  ATV. Volver a guardar este formulario, requerirá que suba el archivo nuevamente.
+            		 </div>
+        			 @endif
                 </div>
                 
                 <div class="form-group col-md-6">

@@ -50,6 +50,18 @@ class User extends Authenticatable {
     public function subscriptions() {
         return $this->hasMany(Subscription::class);
     }
+
+    public function payments()
+    {
+        return $this->hasManyThrough(
+            'App\Payment',
+            'App\Sales',
+            'user_id',
+            'sale_id',
+            'id',
+            'id'
+        );
+    }
     
     public function sales() {
         return $this->hasMany(Sales::class);

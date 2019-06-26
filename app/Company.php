@@ -106,11 +106,11 @@ class Company extends Model {
     }
 
     /* Returns count of total available bills Current plan bills + bought add-on bills */
-    public function checkCountAvailableBills() {
+    public function getCountAvailableBills() {
 
         try{
             
-            $count =  $this->subscription->plan->num_bills;
+            $count =  getCurrentSubscription()->product->plan->num_bills;
             
             if( !$count ) {
                 return -1;
@@ -118,71 +118,111 @@ class Company extends Model {
             
             return $count;
             
-            /*$query = Company::query();
-    
-            $query->leftJoin('user_subscriptions_history', 'user_subscriptions_history.unique_no', '=', 'companies.plan_no');
-            $query->leftJoin('subscription_plans', 'subscription_plans.id', '=', 'user_subscriptions_history.plan_id');
-            $query->where('companies.id', $this->id);
-    
-            $plan_details = $query->select('subscription_plans.no_of_bills')->first();
-    
-            $bill_count = \App\Bill::where(array('company_id' => $this->id, 'month' => date('m'), 'year' => date('Y')))->count();
-    
-            if ($plan_details) {
-    
-                if ( is_null($plan_details->no_of_bills) || $plan_details->no_of_bill == -1 ) { //If bills are unlimited
-                    return 5000;
-                } else {
-                    $available_bills = $plan_details->no_of_bills - $bill_count;
-                    return ($available_bills > 0) ? $available_bills : 0;
-                }
-            } else {
-                return 0;
-            }*/
         }catch( \Exception $ex ){
             return 5000;
         }
     }
 
     /* Returns count of total available invoices. Current plan invoices + bought add-on invoices */
+    public function getAvailableInvoices( $year, $month ) {
 
-    public function checkCountAvailableInvoices() {
-        
         try{
-            
-            $count = $this->subscription->plan->num_invoices;
-            
-            if( !$count ) {
-                return -1;
+            if( $month && $year ) {
+                $today = Carbon::parse(now('America/Costa_Rica'));
+                $month = $today->month;
+                $year = $today->year;
             }
             
-            return $count;
+            $available_invoices = AvailableInvoices::where('company_id', $this->id)
+                                ->where('month', $month)
+                                ->where('year', $year)
+                                ->first();
+                                
+            // Si no encontró nada, tiene que crearla.
+            if( ! $available_invoices ) {
+                $subscriptionPlan = getCurrentSubscription()->product->plan;
+
+                $available_invoices = AvailableInvoices::create(
+                    [
+                        'company_id' => $this->id,
+                        'monthly_quota' => $subscriptionPlan->num_invoices,
+                        'month' => $month,
+                        'year' => $year,
+                        'current_month_sent' => 0
+                    ]
+                );
+            }
             
-            /*$query = Company::query();
-    
-            $query->leftJoin('user_subscriptions_history', 'user_subscriptions_history.unique_no', '=', 'companies.plan_no');
-            $query->leftJoin('subscription_plans', 'subscription_plans.id', '=', 'user_subscriptions_history.plan_id');
-            $query->where('companies.id', $this->id);
-    
-            $plan_details = $query->select('subscription_plans.no_of_invoices')->first();
-    
-            $invoice_count = \App\Invoice::where(array('company_id' => $this->id, 'month' => date('m'), 'year' => date('Y')))->count();
-    
-            if ($plan_details) {
-    
-                if (is_null($plan_details->no_of_invoices)) {//If invoices are unlimited
-                    return 5000;
-                } else {
-                    $available_invoices = $plan_details->no_of_invoices - $invoice_count;
-                    return ($available_invoices > 0) ? $available_invoices : 0;
-                }
-            } else {
-                return 0;
-            }*/
+            return $available_invoices;
         
         }catch( \Exception $ex ){
-            return 5000;
+            Log::error('Error en getAvailableInvoices: ' . $ex->getMessage() );
+            return null;
         }
+    }
+    
+    public function addSentInvoice( $year, $month ){
+        try{
+        if( $month && $year ) {
+            $today = Carbon::parse(now('America/Costa_Rica'));
+            $month = $today->month;
+            $year = $today->year;
+        }
+        
+        $available_invoices = AvailableInvoices::where('company_id', $this->id)
+                            ->where('month', $month)
+                            ->where('year', $year)
+                            ->first();
+        
+        $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
+        $available_invoices->save();
+        return $available_invoices;
+        }catch( \Throwable $ex ){
+             Log::error('Error en addSentInvoice: ' . $ex->getMessage() );
+        }
+    }
+    
+    public function setFirstAvailableInvoices( $year, $month, $count ) {
+
+        try{
+            $available_invoices = AvailableInvoices::where('company_id', $this->id)
+                                ->where('month', $month)
+                                ->where('year', $year)
+                                ->first();
+                                
+            // Si no encontró nada, tiene que crearla.
+            if( ! $available_invoices ) {
+                $subscriptionPlan = getCurrentSubscription()->product->plan;
+                $available_invoices = AvailableInvoices::create(
+                    [
+                        'company_id' => $this->id,
+                        'monthly_quota' => $subscriptionPlan->num_invoices,
+                        'month' => $month,
+                        'year' => $year,
+                        'current_month_sent' => $count
+                    ]
+                );
+                return true;
+            }
+            
+            return false;
+        
+        }catch( \Exception $ex ){
+            Log::error('Error en setAvailableInvoices: ' . $ex->getMessage() );
+            return false;
+        }
+    }
+
+    //Deprecado. Ya no se debería estar usando.
+    public function getCountPurchasedInvoices(){
+        $company = currentCompanyModel();
+        $purchased_invoices = $company->additional_invoices;
+        
+        if( !$purchased_invoices ) {
+            return -1;
+        }
+        
+        return $purchased_invoices;
     }
 
     /* Email to deactivate the current company so user can add another one on same plan without deleting the data. */

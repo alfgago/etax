@@ -293,6 +293,15 @@ class WizardController extends Controller
             $company->first_prorrata = $request->first_prorrata;
             $company->first_prorrata_type = $request->first_prorrata_type;
             $company->use_invoicing = $request->use_invoicing;
+            
+            if( $company->first_prorrata_type == 1 ) {
+                $company->operative_prorrata = $request->first_prorrata;
+                $company->operative_ratio1 = $request->operative_ratio1;
+                $company->operative_ratio2 = $request->operative_ratio2;
+                $company->operative_ratio3 = $request->operative_ratio3;
+                $company->operative_ratio4 = $request->operative_ratio4;
+            }
+            
             $company->wizard_finished = true;
             $company->save();
             
@@ -305,7 +314,7 @@ class WizardController extends Controller
             );
 
             $team = new Team();
-    		$team->name = $company->id . ": " . $request->id_number . " - " . $request->name;
+    		$team->name = "(".$company->id.") " . $company->id_number;
     		$team->owner_id = $user->id;;
     		$team->company_id = $company->id;;
             $team->save();
@@ -313,31 +322,26 @@ class WizardController extends Controller
 
             clearLastTaxesCache($company->id, 2018);
 
-            if ($company->use_invoicing) {
-                if( $request->file('cert') ) {
-                    $id_number = $company->id_number;
-                    $id_company = $company->id;
-                    if (Storage::exists("empresa-$id_number/cert.p12")) {
-                        Storage::delete("empresa-$id_number/cert.p12");
-                    }
-    
-                    $path = \Storage::putFileAs(
-                        "empresa-$id_number", $request->file('cert'), "cert.p12"
-                    );
-    
-                    $cert = AtvCertificate::firstOrNew(
-                        [
-                            'company_id' => $id_company,
-                        ]
-                    );
-    
-                    $cert->user = $request->user;
-                    $cert->password = $request->password;
-                    $cert->key_url = $path;
-                    $cert->pin = $request->pin;
-    
-                    $cert->save();
+            if ($company->use_invoicing && $request->file('cert')) {
+                if (Storage::exists("empresa-$id_number/$id_number.p12")) {
+                    Storage::delete("empresa-$id_number/$id_number.p12");
                 }
+
+                $pathCert = Storage::putFileAs(
+                    "empresa-$id_number", $request->file('cert'), "$id_number.p12"
+                );
+
+                $cert = AtvCertificate::firstOrNew(
+                    [
+                        'company_id' => $id_company,
+                    ]
+                );
+
+                $cert->user = $request->user;
+                $cert->password = $request->password;
+                $cert->key_url = $pathCert;
+                $cert->pin = $request->pin;
+                $cert->save();
             }
 
             if ($company->first_prorrata_type == 2) {

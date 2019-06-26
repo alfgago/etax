@@ -15,21 +15,20 @@ Información general del perfil
             <div class="row">
                 <div class="col-sm-3">
                     <ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                        <li class="active">
-                            <a class="nav-link active" aria-selected="true" href="/usuario/overview">Visión general</a>
-                        </li>
                         <li>
-                            <a class="nav-link" aria-selected="false" href="/usuario/general">Editar información personal</a>
+                            <a class="nav-link" aria-selected="false" href="/usuario/perfil">Editar información personal</a>
                         </li>
                         <li>
                             <a class="nav-link" aria-selected="false" href="/usuario/seguridad">Seguridad</a>
                         </li>
                         <li>
-                            <a class="nav-link" aria-selected="false" href="/usuario/planes">Mis Planes Suscritos</a>
+                            <a class="nav-link" aria-selected="false" href="/elegir-plan">Cambiar plan</a>
                         </li>
-                        <li>
-                            <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
-                        </li>
+                        @if( auth()->user()->isContador() )
+                            <li>
+                                <a class="nav-link active" aria-selected="true" href="/usuario/empresas">Empresas</a>
+                            </li>
+                        @endif
                     </ul>
                 </div>
                 <div class="col-sm-9">

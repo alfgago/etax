@@ -30,9 +30,11 @@
                         <li>
                             <a class="nav-link" aria-selected="false" href="/elegir-plan">Cambiar plan</a>
                         </li>
-                        <li class="active">
-                            <a class="nav-link active" aria-selected="true" href="/usuario/empresas">Empresas</a>
-                        </li>
+                        @if( auth()->user()->isContador() )
+                            <li>
+                                <a class="nav-link active" aria-selected="true" href="/usuario/empresas">Empresas</a>
+                            </li>
+                        @endif
                     </ul>
                 </div>
                 <div class="col-9">

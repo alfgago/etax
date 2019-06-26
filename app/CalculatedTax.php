@@ -164,6 +164,10 @@ class CalculatedTax extends Model
           
             if( !$invoiceItems[$i]->invoice->is_void && $invoiceItems[$i]->invoice->is_authorized && $invoiceItems[$i]->invoice->is_code_validated ) {
             
+              if( $invoiceItems[$i]->invoice->currency == 'CRC' ) {
+                $invoiceItems[$i]->invoice->currency_rate = 1;
+              }
+            
               $subtotal = $invoiceItems[$i]->subtotal * $invoiceItems[$i]->invoice->currency_rate;
               //$currentTotal = $invoiceItems[$i]->total * $invoiceItems[$i]->invoice->currency_rate;
               $ivaType = $invoiceItems[$i]->iva_type;
@@ -319,6 +323,10 @@ class CalculatedTax extends Model
           
             if( !$billItems[$i]->bill->is_void && $billItems[$i]->bill->is_authorized && $billItems[$i]->bill->is_code_validated ) {
             
+              if( $billItems[$i]->invoice->currency == 'CRC' ) {
+                $billItems[$i]->invoice->currency_rate = 1;
+              }
+            
               $subtotal = $billItems[$i]->subtotal * $billItems[$i]->bill->currency_rate;
               $ivaType = $billItems[$i]->iva_type;
               $billIva = $billItems[$i]->iva_amount * $billItems[$i]->bill->currency_rate;
@@ -358,6 +366,10 @@ class CalculatedTax extends Model
               
               /***SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
               $porc_plena = $billItems[$i]->porc_identificacion_plena ? $billItems[$i]->porc_identificacion_plena : 0;
+              
+              if ( $porc_plena == 1 || $porc_plena == 5 ) {
+                $porc_plena = 13;
+              } 
               
               if( $ivaType == '041' || $ivaType == '051' || $ivaType == '061' || $ivaType == '071' )
               {

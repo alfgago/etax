@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateEtaxProductsTable extends Migration
+class CreateAvailableInvoicesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,13 @@ class CreateEtaxProductsTable extends Migration
      */
     public function up()
     {
-        Schema::create('etax_products', function (Blueprint $table) {
+        Schema::create('available_invoices', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('subscription_plan_id')->nullable();
-            $table->boolean('is_subscription')->default(false);
-            $table->string('name')->nullable();
-            $table->double('price')->default(0);
-
+            $table->unsignedBigInteger('company_id')->default(0);
+            $table->integer('monthly_quota')->default(0);
+            $table->integer('month')->nullable();
+            $table->integer('year')->nullable();
+            $table->integer('current_month_sent')->default(0);
             $table->softDeletes();
             $table->timestamps();
         });
@@ -32,6 +32,6 @@ class CreateEtaxProductsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('etax_products');
+        Schema::dropIfExists('available_invoices');
     }
 }
