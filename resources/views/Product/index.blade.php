@@ -6,7 +6,7 @@
 
 @section('breadcrumb-buttons')
         <a type="submit" class="btn btn-primary" href="/productos/create">Ingresar producto nuevo</a>
-        <a class="btn btn-primary" href="/productos/create">Importar productos</a>
+        <a onclick="abrirPopup('importar-productos-popup');" class="btn btn-primary">Importar productos</a>
 @endsection 
 
 @section('content')

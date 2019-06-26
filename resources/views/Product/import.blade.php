@@ -24,7 +24,7 @@
                         <li>UnidadMedida</li>
                         <li>Precio</li>
                         <li>Descripcion</li>
-                        <li>TipoIva</li>
+                        <li>CodigoEtax</li>
                     </ul>
                     * El orden puede variar, mantener nombres de columnas. Debe utilizar una fila por cada producto.
                     <br>
