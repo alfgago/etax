@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\Imports\ProductImport;
 use App\Product;
 use App\UnidadMedicion;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
@@ -109,6 +111,40 @@ class ProductController extends Controller
         return redirect('/productos')->withMessage('El producto ha sido agregado satisfactoriamente.');
     }
 
+    public function import() {
+
+        request()->validate([
+            'archivo' => 'required',
+            'tipo_archivo' => 'required',
+        ]);
+        $productos = Excel::toCollection( new ProductImport(), request()->file('archivo') );
+        $company_id = currentCompany();
+        foreach ($productos[0] as $row){
+            Product::updateOrCreate(
+                [
+                    'code' => $row['codigo'] ? $row['codigo'] : '',
+                    'company_id' => $company_id,
+                ],
+
+                [
+                    'name' => $row['Nombre'],
+                    'measure_unit' => $row['UnidadMedida'],
+                    'unit_price' => $row['Precio'],
+                    'description' => $row['Descripcion'],
+                    'is_catalogue' => $row['Catalogo'],
+                    'default_iva_type' => $row['TipoIva']
+                ]
+            );
+
+        }
+        $time_start = getMicrotime();
+
+
+        $time_end = getMicrotime();
+        $time = $time_end - $time_start;
+
+        return redirect('/productos')->withMessage('Productos importados exitosamente en '.$time.'s');
+    }
     /**
      * Display the specified resource.
      *

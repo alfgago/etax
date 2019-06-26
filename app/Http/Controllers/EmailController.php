@@ -45,7 +45,9 @@ class EmailController extends Controller
         try {
             $file2 = $request->file('attachment2');
             EmailController::processAttachment( $file2 );
-        }catch( \Throwable $ex ){}
+        }catch( \Throwable $ex ){
+            Log::warning( "Hubo un error durante el proceso de guardar la factura2 via Email. Mensaje:" . $ex->getMessage());
+        }
         
         return response()->json([
             'success' => 'Exito'
@@ -65,20 +67,22 @@ class EmailController extends Controller
         $consecutivoComprobante = $arr['NumeroConsecutivo'];
         
         try {  
-            if( Bill::saveBillXML( $arr, 'XML' ) ) {
+            if( Bill::saveBillXML( $arr, 'Email' ) ) {
                 $company = Company::where('id_number', $identificacionReceptor)->first();
                 $bill = Bill::where('company_id', $company->id)->where('document_number', $consecutivoComprobante)->first();
                 Bill::storeXML( $bill, $file );
+                Log::info( "Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor");
             }
         }catch( \Throwable $ex ){
             Log::warning( "No se pudo guardar la factura de compra via Email. Mensaje:" . $ex->getMessage());
         }
        
         try {  
-            if( Invoice::saveInvoiceXML( $arr, 'XML' ) ) {
+            if( Invoice::saveInvoiceXML( $arr, 'Email' ) ) {
                 $company = Company::where('id_number', $identificacionEmisor)->first();
                 $invoice = Invoice::where('company_id', $company->id)->where('document_number', $consecutivoComprobante)->first();
                 Invoice::storeXML( $invoice, $file );
+                Log::info( "Se registró la factura de venta $consecutivoComprobante para la empresa $identificacionEmisor");
             }
         }catch( \Throwable $ex ){
             Log::warning( "No se pudo guardar la factura de venta via Email. Mensaje:" . $ex->getMessage());
