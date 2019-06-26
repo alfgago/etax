@@ -34,12 +34,12 @@
 
 <div class="biginputs form-group col-md-8" style="white-space: nowrap;">
     <label for="coupon">Tengo un cup&oacute;n:</label>
-    <input type="text" class="form-control" name="coupon" id="coupon" placeholder="Cup&oacute;n" onblur="fusb();">
+    <input type="text" class="form-control" name="coupon" id="coupon" placeholder="Cup&oacute;n" >
 </div>
 
 <div class="biginputs form-group col-md-4" style="white-space: nowrap;">
     <label for="coupon">&nbsp;</label>
-    <input type="button" class="btn btn-dark form-button" value="Aplicar">
+    <input type="button" class="btn btn-dark form-button" value="Aplicar" onclick="checkCupon();">
 </div>
 
 <div class="form-group col-md-12 mt-4">
@@ -74,3 +74,12 @@
     margin: 0 1rem;
 }
 </style>
+
+<script>
+    function checkCupon() {
+        if( $('#coupon').val() == '!!S0C10S3T4X!!' ){
+            $('.precio-final').text( '$' + (parseFloat( $('.precio-inicial').text().slice(1) ) * 0.5) );
+            $('.etiqueta-descuento').text('( Socios eTax 50% )');
+        }
+    }
+</script>
