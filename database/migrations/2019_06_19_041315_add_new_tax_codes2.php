@@ -11,7 +11,7 @@ class AddNewTaxCodes2 extends Migration
      */
     public function up()
     {
-        
+        /*
         Schema::table('calculated_taxes', function (Blueprint $table) {
             $table->double('b015')->default(0);
             $table->double('i015')->default(0);
@@ -24,7 +24,7 @@ class AddNewTaxCodes2 extends Migration
             
             $table->double('b155')->default(0);
             $table->double('i155')->default(0);
-        });
+        });*/
     }
 
     /**

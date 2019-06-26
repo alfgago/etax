@@ -164,6 +164,10 @@ class CalculatedTax extends Model
           
             if( !$invoiceItems[$i]->invoice->is_void && $invoiceItems[$i]->invoice->is_authorized && $invoiceItems[$i]->invoice->is_code_validated ) {
             
+              if( $invoiceItems[$i]->invoice->currency == 'CRC' ) {
+                $invoiceItems[$i]->invoice->currency_rate = 1;
+              }
+            
               $subtotal = $invoiceItems[$i]->subtotal * $invoiceItems[$i]->invoice->currency_rate;
               //$currentTotal = $invoiceItems[$i]->total * $invoiceItems[$i]->invoice->currency_rate;
               $ivaType = $invoiceItems[$i]->iva_type;
@@ -318,6 +322,10 @@ class CalculatedTax extends Model
           try {
           
             if( !$billItems[$i]->bill->is_void && $billItems[$i]->bill->is_authorized && $billItems[$i]->bill->is_code_validated ) {
+            
+              if( $billItems[$i]->invoice->currency == 'CRC' ) {
+                $billItems[$i]->invoice->currency_rate = 1;
+              }
             
               $subtotal = $billItems[$i]->subtotal * $billItems[$i]->bill->currency_rate;
               $ivaType = $billItems[$i]->iva_type;
