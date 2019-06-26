@@ -46,5 +46,5 @@
 
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-prev" onclick="toggleStep('step4');">Paso anterior</button>
-  <button type="submit" id="btn-submit" class="btn btn-primary btn-next" >Terminar configuración inicial</button>
+  <button type="submit" id="btn-submit" class="btn btn-primary btn-next" onclick="trackClickEvent( 'TerminarConfigInicial' );">Terminar configuración inicial</button>
 </div>

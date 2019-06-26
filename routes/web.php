@@ -40,6 +40,8 @@ Route::post('/reportes/cuentas-contables', 'ReportsController@reporteCuentasCont
 Route::get('/reportes/resumen-ejecutivo', 'ReportsController@reporteEjecutivo');
 Route::post('/reportes/detalle-debito', 'ReportsController@reporteDetalleDebitoFiscal');
 Route::post('/reportes/detalle-credito', 'ReportsController@reporteDetalleCreditoFiscal');
+Route::post('/reportes/libro-ventas', 'ReportsController@reporteLibroVentas');
+Route::post('/reportes/libro-compras', 'ReportsController@reporteLibroCompras');
 
 //Cierres de mes
 Route::prefix('cierres')->group(function() {
@@ -47,8 +49,6 @@ Route::prefix('cierres')->group(function() {
     Route::patch('cerrar-mes/{id}', 'BookController@close');
     Route::patch('abrir-rectificacion/{id}', 'BookController@openForRectification');
 });
-
-
 
 // Rutas de empresa
 Route::prefix('empresas')->group(function() {

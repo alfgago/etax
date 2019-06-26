@@ -114,11 +114,25 @@ class InvoiceController extends Controller
     public function emitFactura()
     {
         $company = currentCompanyModel();
+
         $available_invoices = AvailableInvoices::where('company_id', $company->id)->first();
         $available_plan_invoices = $available_invoices->monthly_quota - $available_invoices->current_month_sent;
         if($available_plan_invoices < 1 && $company->additional_invoices < 1){
             return redirect()->back()->withError('No tiene facturas disponibles para emitir');
         }
+
+        if ($company->atv_validation == false) {
+            $apiHacienda = new BridgeHaciendaApi();
+            $token = $apiHacienda->login(false);
+            $validateAtv = $apiHacienda->validateAtv($token, $company);
+            if ($validateAtv['status'] == 400) {
+                return redirect('/empresas/editar')->withError($validateAtv['message']);
+            } else {
+                $company->atv_validation = true;
+                $company->save();
+            }
+        }
+
         if( ! isset($company->logo_url) ){
             return redirect('/empresas/editar')->withError('Para poder emitir facturas, debe subir un logo y certificado ATV');
         }
@@ -195,7 +209,7 @@ class InvoiceController extends Controller
 
                 //Datos generales y para Hacienda
                 $invoice->document_type = "01";
-                $invoice->hacienda_status = 01;
+                $invoice->hacienda_status = '01';
                 $invoice->payment_status = "01";
                 $invoice->payment_receipt = "";
                 $invoice->generation_method = "etax";
@@ -207,7 +221,7 @@ class InvoiceController extends Controller
                 $company->last_invoice_ref_number = $invoice->reference_number;
                 $company->last_document = $invoice->document_number;
                 $company->save();
-                if ($invoice->hacienda_status == 03) {
+                if ($invoice->hacienda_status == '03') {
                    // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
                 }
                 clearInvoiceCache($invoice);
@@ -217,7 +231,7 @@ class InvoiceController extends Controller
                 return back()->withError( 'Ha ocurrido un error al enviar factura.' );
             }
         } catch( \Exception $ex ) {
-            Log::error("ERROR Envio de factura a hacienda -> ".$ex);
+            Log::error("ERROR Envio de factura a hacienda -> ".$ex->getMessage());
             return back()->withError( 'Ha ocurrido un error al enviar factura.' );
         }
     }
@@ -497,7 +511,8 @@ class InvoiceController extends Controller
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3.
                         if( Invoice::saveInvoiceXML( $arr, 'XML' ) ) {
-                            Invoice::storeXML( $file, $consecutivoComprobante, $identificacionEmisor, $identificacionReceptor );
+                            $invoice = Invoice::where('company_id', $company->id)->where('document_number', $consecutivoComprobante)->first();
+                            Invoice::storeXML( $invoice, $file );
                         }
                     }else{
                         return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );

@@ -22,7 +22,11 @@
           <option value="/reportes/cuentas-contables" type="post" selected ano="1" mes="1">Cuentas contables</option>
           <option value="/reportes/detalle-debito" hideClass="#input-mes" type="post" ano="1" mes="1">Detalle de débito fiscal</option>
           <option value="/reportes/detalle-credito" hideClass="#input-mes" type="post" ano="1" mes="1">Detalle de crédito fiscal</option>
+          <option value="/reportes/libro-compras" hideClass=".opt-acumulado" >Libro de compras</option>
+          <option value="/reportes/libro-ventas" hideClass=".opt-acumulado" >Libro de ventas</option>
           <option value="/reportes/resumen-ejecutivo" hideClass=".opt-acumulado" type="iframe" >Resumen ejecutivo</option>
+          <option type="post">Reporte de proveedores (Muy pronto)</option>
+          <option type="post">Reporte de clientes (Muy pronto)</option>
           <option type="post">Borrador de presentación de IVA (Muy pronto)</option>
         </select>
       </div>

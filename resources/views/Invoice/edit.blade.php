@@ -191,7 +191,7 @@
 
                   <div class="form-group col-md-12">
                     <label for="description">Notas</label>
-                    <input type="text" class="form-control" name="description" id="notas" placeholder="" value="{{ $invoice->description }}">
+                    <input type="text" class="form-control" name="description" id="notas"  maxlength="200" placeholder="" value="{{ $invoice->description }}">
                   </div>
 
               </div>
@@ -305,9 +305,9 @@ $(document).ready(function(){
     total += t;	
   });
 
-  $('#subtotal').val(subtotal);
-  $('#monto_iva').val(monto_iva);
-  $('#total').val(total);
+  $('#subtotal').val( fixComas(subtotal) );
+  $('#monto_iva').val( fixComas(monto_iva) );
+  $('#total').val( fixComas(total) );
   
   toggleRetencion();
 });
