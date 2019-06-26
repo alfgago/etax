@@ -105,7 +105,8 @@
     @include( 'Invoice.import' )
     @include( 'Client.import' )
     @include( 'Provider.import' )
-    
+    @include( 'Product.import' )
+
     @include('layouts.helper-terms')
     
     <!-- Global site tag (gtag.js) - Google Analytics -->
