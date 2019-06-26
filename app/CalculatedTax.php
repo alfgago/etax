@@ -359,6 +359,10 @@ class CalculatedTax extends Model
               /***SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
               $porc_plena = $billItems[$i]->porc_identificacion_plena ? $billItems[$i]->porc_identificacion_plena : 0;
               
+              if ( $porc_plena == 1 || $porc_plena == 5 ) {
+                $porc_plena = 13;
+              } 
+              
               if( $ivaType == '041' || $ivaType == '051' || $ivaType == '061' || $ivaType == '071' )
               {
                 //Cuando es al 1%, se puede agreditar el 100%

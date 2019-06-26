@@ -121,6 +121,7 @@ class BookController extends Controller
             
             clearCierreCache($current_company, $mes, $ano);
             clearTaxesCache($current_company, $mes, $ano);
+            clearTaxesCache($current_company, $mes+1, $ano);
             $cacheKey = "cache-estadoCierre-$current_company-$mes-$ano";
             Cache::forever( $cacheKey, false );
         }
