@@ -26,6 +26,7 @@ Route::get('facturas-recibidas/exportar', 'BillController@export');
 // Rutas de importación
 Route::post('clientes/importar', 'ClientController@import');
 Route::post('proveedores/importar', 'ProviderController@import');
+Route::post('productos/importar', 'ProductController@import');
 Route::post('facturas-emitidas/importarExcel', 'InvoiceController@importExcel');
 Route::post('facturas-emitidas/importarXML', 'InvoiceController@importXML');
 Route::post('facturas-recibidas/importarExcel', 'BillController@importExcel');
