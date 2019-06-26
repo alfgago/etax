@@ -479,7 +479,7 @@ class Invoice extends Model
         $tipoDocumento = '01';
         if ( array_key_exists('Receptor', $arr) ){
           $correoCliente = $arr['Receptor']['CorreoElectronico'];
-          $telefonoCliente = $arr['Receptor']['Telefono']['NumTelefono'];
+          $telefonoCliente = isset($arr['Receptor']['Telefono']) ? $arr['Receptor']['Telefono']['NumTelefono'] : '';
           $tipoPersona = $arr['Receptor']['Identificacion']['Tipo'];
           $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
           $nombreCliente = $arr['Receptor']['Nombre'];
