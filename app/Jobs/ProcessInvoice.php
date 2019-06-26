@@ -176,6 +176,8 @@ class ProcessInvoice implements ShouldQueue
                         Log::info('Proceso de facturación finalizado con éxito.');
                     }
                 }
+            }else {
+                Log::warning('El job no se procesó, porque la empresa no tiene un certificado válido: '.$this->invoiceId.'-->>'.$e);
             }
         } catch ( \Exception $e) {
             Log::error('ERROR Enviando parametros  API HACIENDA Invoice: '.$this->invoiceId.'-->>'.$e);
