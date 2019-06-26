@@ -49,7 +49,8 @@ class Sales extends Model
         
         $sale = Sales::updateOrCreate (
             [ 
-                'user_id' => $user->id 
+                'user_id' => $user->id ,
+                'is_subscription' => true,
             ],
             [ 
                 'company_id' => $company->id,

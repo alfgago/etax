@@ -248,19 +248,19 @@ if (!function_exists('get_current_user_permissions')) {
 }
 
 /* Get current user active subscriptions */
-if (!function_exists('getCurrentUserSubscriptions')) {
+/*if (!function_exists('getCurrentUserSubscriptions')) {
 
     function getCurrentUserSubscriptions() {
 
         $user_id = auth()->user()->id;
 
-        $subscriptions = App\Subscription::where('user_id', $user_id)->where('status', '1')->get();
+        $subscriptions = App\Sales::where('user_id', $user_id)->where('status', '1')->get();
         
         return $subscriptions;
         
     }
 
-}
+}*/
 
 /* Get current user active subscriptions */
 if (!function_exists('getCurrentSubscription')) {
@@ -273,16 +273,14 @@ if (!function_exists('getCurrentSubscription')) {
         if( ! isset($sale) ) {
             $owner_id = $company->user_id;
             $sale = \App\Sales::where('user_id', $owner_id)
-                ->where('recurrency', '>', 0)
-                ->where('status', '1')
+                ->where('is_subscription', true)
                 ->first();
         }
         
         if( ! isset($sale) ) {
             $user_id = auth()->user()->id;
             $sale = \App\Sales::where('user_id', $user_id)
-                ->where('recurrency', '>', 0)
-                ->where('status', '1')
+                ->where('is_subscription', true)
                 ->first();
         }
         

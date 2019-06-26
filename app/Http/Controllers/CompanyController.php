@@ -82,8 +82,17 @@ class CompanyController extends Controller {
         ]);
 
         $company = new Company();
-        $id = auth()->user()->id;
-        $company->user_id = $id;
+        $userId = auth()->user()->id;
+        $company->user_id = $userId;
+        
+        $sale =  \App\Sales::where('user_id', $userId)
+                ->where('is_subscription', true)
+                ->where('status', 1)
+                ->first();
+                
+        if( !isset( $sale ) ) {
+            return redirect('/')->withError( 'Usted no cuenta con los permisos necesarios para crear una nueva empresa.' );
+        }
 
         $company->type = $request->tipo_persona;
         $company->id_number = preg_replace("/[^0-9]+/", "", $request->id_number);
@@ -103,28 +112,15 @@ class CompanyController extends Controller {
         $company->default_currency = !empty($request->default_currency) ? $request->default_currency : 'CRC';
 
         /* Add company to a plan */
-        $company->subscription_id = getCurrentUserSubscriptions()[0]->id;
-
+        $company->subscription_id = getCurrentSubscription()->id; //Solo el contador deberia poder, por lo que siempre va a existir un current user subscription.
         $company->save();
-        $start_date = Carbon::parse(now('America/Costa_Rica'));
-        $sale =Sales::where('company_id', $company->id)->first();
-        $subscriptionPlan = $sale->product->plan;
-        $available_invoices = AvailableInvoices::create(
-            [
-                'company_id' => $company->id,
-                'monthly_quota' => $subscriptionPlan->num_invoices,
-                'month' => $start_date->month,
-                'year' => $start_date->year,
-                'current_month_sent' => 0
-            ]
-        );
 
         /* Add Company to Team */
         $team = Team::firstOrCreate([
-                    'name' => "(".$company->id.") " . $company->id_number,
-                    'owner_id' => $id,
-                    'company_id' => $company->id
-                        ]
+                'name' => "(".$company->id.") " . $company->id_number,
+                'owner_id' => $userId,
+                'company_id' => $company->id
+            ]
         );
 
         auth()->user()->attachTeam($team);
@@ -364,10 +360,15 @@ class CompanyController extends Controller {
         if (!$company) {
             return redirect()->back()->withError('No se ha encontrado una compañía a su nombre.');
         }
+        
+        if ( !$company->use_invoicing || !$request->file('cert') ) {
+            return redirect()->back()->withError('Debe subir el certificado antes de guardar el formulario.');
+        }
 
         $team = Team::where('company_id', $company->id)->first();
 
         $id_number = $company->id_number;
+        
         if (Storage::exists("empresa-$id_number/$id_number.p12")) {
             Storage::delete("empresa-$id_number/$id_number.p12");
         }
@@ -389,7 +390,7 @@ class CompanyController extends Controller {
         
         $cert->save();
         
-        return redirect()->route('Company.edit_cert')->with('success', 'El certificado ATV ha sido actualizado.');
+        return redirect()->route('Company.edit_cert')->withMessage('El certificado ATV ha sido actualizado exitosamente.');
     }
 
     /**
@@ -447,13 +448,16 @@ class CompanyController extends Controller {
     }
 
     public function comprarFacturasVista(){
+        return back()->withError( 'Compra de facturas adicionales deshabilitada hasta el 1 de Julio.' );
+        
         $company = currentCompany();
         $sale = Sales::where('company_id', $company)->first();
         $producto = EtaxProducts::where('id', $sale->etax_product_id)->first();
         $availableInvoices = AvailableInvoices::where('company_id', $company)->first();
-        $productosEtax = EtaxProducts::where('isSubscription', 0)->where('id', '!=', 15)->get();
+        $productosEtax = EtaxProducts::where('is_subscription', 0)->where('id', '!=', 15)->get(); //El 15 es el producto de cálculos de prorrata, creado por seeders.
         $paymentmethods = PaymentMethod::where('user_id', auth()->user()->id)->get();
         $invoices = $availableInvoices->monthly_quota - $availableInvoices->current_month_sent;
+        
         return view('/Company/comprarFacturasView')->with('productosEtax', $productosEtax)
                                                         ->with('availableInvoices', $availableInvoices)
                                                         ->with('invoices', $invoices)

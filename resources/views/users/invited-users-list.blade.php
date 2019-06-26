@@ -23,7 +23,7 @@ Mis Planes Suscritos
                             <a class="nav-link" aria-selected="false" href="/usuario/seguridad">Seguridad</a>
                         </li>
                         <li class="active">
-                            <a class="nav-link" aria-selected="false" href="/usuario/cambiar-plan">Cambiar plan</a>
+                            <a class="nav-link" aria-selected="false" href="/cambiar-plan">Cambiar plan</a>
                         </li>
                         @if( auth()->user()->isContador() )
                             <li>

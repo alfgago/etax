@@ -97,7 +97,7 @@ Route::post('/store-wizard', 'WizardController@createWizard')->name('Wizard.stor
 
 //Rutas para suscripciones
 Route::get('/cambiar-plan', 'SubscriptionPlanController@changePlan')->name('Subscription.cambiar_plan');
-Route::get('/elegir-plan', 'SubscriptionPlanController@changePlan')->name('Subscription.select_plan');
+Route::get('/elegir-plan', 'SubscriptionPlanController@selectPlan')->name('Subscription.select_plan');
 Route::post('/confirmar-plan', 'SubscriptionPlanController@confirmPlanChange')->name('Subscription.confirmar_plan');
 
 // Rutas de usuario

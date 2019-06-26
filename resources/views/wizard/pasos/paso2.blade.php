@@ -6,32 +6,32 @@
 
 <div class="form-group col-md-4">
   <label for="country">País *</label>
-  <select class="form-control " name="country" id="country" value="{{ @$company->country }}" required >
+  <select class="form-control checkEmpty" name="country" id="country" value="{{ @$company->country }}" required >
     <option value="CR" selected>Costa Rica</option>
   </select>
 </div>
 
 <div class="form-group col-md-4">
-  <label for="state">Provincia </label>
-  <select class="form-control " name="state" id="state" value="{{ @$company->state }}" onchange="fillCantones();" required>
+  <label for="state">Provincia *</label>
+  <select class="form-control checkEmpty" name="state" id="state" value="{{ @$company->state }}" onchange="fillCantones();" required>
   </select>
 </div>
 
 <div class="form-group col-md-4">
-  <label for="city">Canton </label>
-  <select class="form-control " name="city" id="city" value="{{ @$company->city }}" onchange="fillDistritos();" required>
+  <label for="city">Cantón *</label>
+  <select class="form-control checkEmpty" name="city" id="city" value="{{ @$company->city }}" onchange="fillDistritos();" required>
   </select>
 </div>
 
 <div class="form-group col-md-4">
-  <label for="district">Distrito </label>
-  <select class="form-control " name="district" id="district" value="{{ @$company->district }}" onchange="fillZip();" required>
+  <label for="district">Distrito *</label>
+  <select class="form-control checkEmpty" name="district" id="district" value="{{ @$company->district }}" onchange="fillZip();" required>
   </select>
 </div>
 
 <div class="form-group col-md-4">
-  <label for="neighborhood">Barrio </label>
-  <input class="form-control " name="neighborhood" id="neighborhood" value="{{ @$company->neighborhood }}" >
+  <label for="neighborhood">Barrio *</label>
+  <input class="form-control" name="neighborhood" id="neighborhood" value="{{ @$company->neighborhood }}" >
   </select>
 </div>
 

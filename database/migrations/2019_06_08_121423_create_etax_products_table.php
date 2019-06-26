@@ -16,7 +16,7 @@ class CreateEtaxProductsTable extends Migration
         Schema::create('etax_products', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('subscription_plan_id')->nullable();
-            $table->boolean('isSubscription')->default(0);
+            $table->boolean('is_subscription')->default(false);
             $table->string('name')->nullable();
             $table->double('price')->default(0);
 

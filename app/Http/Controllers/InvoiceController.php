@@ -102,6 +102,19 @@ class InvoiceController extends Controller
      */
     public function create()
     {
+        $company = currentCompanyModel();
+        //Revisa límite de facturas emitidas en el mes actual1
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $month = $start_date->month;
+        $year = $start_date->year;
+        $available_invoices = $company->getAvailableInvoices( $year, $month );
+        
+        $available_plan_invoices = $available_invoices->monthly_quota - $available_invoices->current_month_sent;
+        if($available_plan_invoices < 1 && $company->additional_invoices < 1){
+            return redirect()->back()->withError('Usted ha sobrepasado el límite de facturas mensuales de su plan actual.');
+        }
+        //Termina de revisar limite de facturas.
+        
         $units = UnidadMedicion::all()->toArray();
         return view("Invoice/create-factura-manual", ['units' => $units]);
     }
@@ -115,11 +128,17 @@ class InvoiceController extends Controller
     {
         $company = currentCompanyModel();
 
-        $available_invoices = AvailableInvoices::where('company_id', $company->id)->first();
+        //Revisa límite de facturas emitidas en el mes actual
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $month = $start_date->month;
+        $year = $start_date->year;
+        $available_invoices = $company->getAvailableInvoices( $year, $month );
+        
         $available_plan_invoices = $available_invoices->monthly_quota - $available_invoices->current_month_sent;
         if($available_plan_invoices < 1 && $company->additional_invoices < 1){
-            return redirect()->back()->withError('No tiene facturas disponibles para emitir');
+            return redirect()->back()->withError('Usted ha sobrepasado el límite de facturas mensuales de su plan actual.');
         }
+        //Termina de revisar limite de facturas.
 
         if ($company->atv_validation == false) {
             $apiHacienda = new BridgeHaciendaApi();
@@ -182,7 +201,7 @@ class InvoiceController extends Controller
         $invoice->payment_receipt = "";
         $invoice->generation_method = "M";
         $invoice->setInvoiceData($request);
-        $company->current_month_sent = $company->current_month_sent + 1;
+        
         $company->save();
 
         clearInvoiceCache($invoice);
@@ -225,6 +244,7 @@ class InvoiceController extends Controller
                 }
                 $company->last_invoice_ref_number = $invoice->reference_number;
                 $company->last_document = $invoice->document_number;
+                
                 $company->save();
                 if ($invoice->hacienda_status == '03') {
                    // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
@@ -327,8 +347,9 @@ class InvoiceController extends Controller
 
         if( $collection[0]->count() < 2501 ){
             try {
-                $companyInvoices = 0;
-                $available = 0;
+                
+                /**Revisa limite de facturas**/
+                /*$available = 0;
                 $unicos = [];
                 foreach ($collection[0]->chunk(200) as $facturas) {
                     foreach ($facturas as $row) {
@@ -347,8 +368,9 @@ class InvoiceController extends Controller
                 }
                 if($totalFacturasExcel > $available){
                     return back()->withError('No puede pasarse de su cuota de facturas mensual');
-                }
-
+                }*/
+                /**END Revisa limite de facturas**/
+                
                 foreach ($collection[0]->chunk(200) as $facturas) {
 
                     \DB::transaction(function () use ($facturas, &$company, &$i, $available_invoices, $available_invoices_by_plan) {
@@ -356,7 +378,7 @@ class InvoiceController extends Controller
                         $inserts = array();
                         foreach ($facturas as $row){
                             $i++;
-                            $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
+                            
 
                             if($available_invoices_by_plan > 0){
                                 $available_invoices_by_plan = $available_invoices_by_plan - 1;
