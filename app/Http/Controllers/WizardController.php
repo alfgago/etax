@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\actividades;
 use Illuminate\Http\Request;
 use App\Company;
 use App\Invoice;
@@ -37,8 +38,7 @@ class WizardController extends Controller
       }
       
       $company = currentCompanyModel();
-      
-      return view('/wizard/index', compact( 'subscription', 'company' ) );
+      return view('/wizard/index', compact( 'subscription', 'company', 'actividades') );
 
     }
     

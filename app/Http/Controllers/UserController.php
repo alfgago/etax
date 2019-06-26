@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actividades;
 use App\Payment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -152,7 +153,7 @@ class UserController extends Controller {
         
         $data['class'] = '';
         $data['url'] = '/empresas/create';
-        
+
         try {
             $user = auth()->user();
             if( ! $user->isContador() ) {
@@ -168,11 +169,11 @@ class UserController extends Controller {
             } else {
                 //$teams = \Mpociot\Teamwork\TeamworkTeam::get();
             }
-    
+            $actividades = Actividades::all()->toArray();
+
             $available_companies_count = User::checkCountAvailableCompanies();
-            
             return view('users.companies', compact('data'))->with('teams', $teams);
-        
+
         }catch( \Throwable $ex ){
             return view('users.companies');
         }

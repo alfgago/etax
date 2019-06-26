@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actividades;
 use App\AvailableInvoices;
 use App\Company;
 use App\EtaxProducts;
@@ -62,8 +63,8 @@ class CompanyController extends Controller {
         if ($available_companies_count == 0) {
             return redirect()->route('User.companies')->withError('Su cuenta actual no permite más empresas.');
         }
-        
-        return view('Company.create');
+        $actividades = Actividades::all()->toArray();
+        return view('Company.create')->with('actividades', $actividades);
     }
 
     /**
@@ -110,6 +111,11 @@ class CompanyController extends Controller {
         $company->invoice_email = $request->invoice_email;
         $company->email = $request->email;
         $company->default_currency = !empty($request->default_currency) ? $request->default_currency : 'CRC';
+        $comercial_activities = $request->main_comercial_activity;
+        if($request->second_comercial_activity != ''){
+            $comercial_activities = $request->main_comercial_activity . ',' . $request->second_comercial_activity;
+        }
+        $company->comercial_activities = $comercial_activities;
 
         /* Add company to a plan */
         $company->subscription_id = getCurrentSubscription()->id; //Solo el contador deberia poder, por lo que siempre va a existir un current user subscription.
@@ -163,7 +169,8 @@ class CompanyController extends Controller {
         $team = Team::where('company_id', $company->id)->first();
 
         $certificate = AtvCertificate::where('company_id', $company->id)->first();
-        return view('Company.edit', compact('company', 'users', 'certificate', 'team'))->withTeam($team);
+        $actividades = Actividades::all()->toArray();
+        return view('Company.edit', compact('company', 'users', 'certificate', 'team', 'actividades'))->withTeam($team);
     }
     
     /**
@@ -293,6 +300,11 @@ class CompanyController extends Controller {
         $company->address = $request->address;
         $company->phone = $request->phone;
         $company->atv_validation = false;
+        $comercial_activities = $request->main_comercial_activity;
+        if($request->second_comercial_activity != ''){
+            $comercial_activities = $request->main_comercial_activity . ',' . $request->second_comercial_activity;
+        }
+        $company->comercial_activities = $comercial_activities;
         $company->save();
 
         //Update Team name based on company

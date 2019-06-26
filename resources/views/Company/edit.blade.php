@@ -159,7 +159,24 @@
 						      <label for="address">Dirección</label>
 						      <textarea class="form-control" name="address" id="address" >{{ @$company->address }}</textarea>
 						    </div>
-						    
+                              <div class="form-group col-md-12">
+                                  <label for="tipo_persona">Actividad Econ&oacute;mica Principal*</label>
+                                  <select class="form-control checkEmpty" name="main_comercial_activity" id="main_comercial_activity" required>
+                                      <option value='' selected>-- Seleccione un valor --</option>
+                                      @foreach ( $actividades as $actividad )
+                                          <option value="{{ $actividad['codigo'] }}" >{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
+                                      @endforeach
+                                  </select>
+                              </div>
+                              <div class="form-group col-md-12">
+                                  <label for="tipo_persona">Segunda Actividad Econ&oacute;mica (opcional)</label>
+                                  <select class="form-control checkEmpty" name="second_comercial_activity" id="second_comercial_activity">
+                                      <option value='' selected>-- No seleccionado --</option>
+                                      @foreach ( $actividades as $actividad )
+                                          <option value="{{ $actividad['codigo'] }}" >{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
+                                      @endforeach
+                                  </select>
+                              </div>
 						    <button id="btn-submit" type="submit" class="hidden btn btn-primary">Guardar información</button>          
 						    
 						  </div>
