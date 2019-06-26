@@ -11,6 +11,12 @@
       <i class="fa fa-ban" aria-hidden="true"></i>
     </a>
   </form>
+  <a href="#" title="Descargar PDF - Desactivado temporalmente hasta la 1pm." class="text-warning mr-2"> 
+    <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+  </a>
+  <a href="#" title="Reenvir correo electrónico - Desactivado temporalmente hasta la 1pm." class="text-dark mr-2"> 
+    <i class="fa fa-share" aria-hidden="true"></i>
+  </a>
   @else
   <a href="/facturas-emitidas/{{ $data->id }}/edit" title="Editar factura" class="text-success mr-2"> 
     <i class="fa fa-pencil" aria-hidden="true"></i>
