@@ -33,6 +33,11 @@ class Sales extends Model
     {
         return $this->belongsTo(SubscriptionPlan::class, 'id');
     }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
     
     public static function createUpdateSubscriptionSale ( $procuctId, $recurrency ) {
         $company = currentCompanyModel();

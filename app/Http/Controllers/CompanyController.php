@@ -2,7 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\AvailableInvoices;
 use App\Company;
+use App\EtaxProducts;
+use App\Payment;
+use App\PaymentMethod;
+use App\Sales;
+use App\SubscriptionPlan;
+use App\Utils\PaymentUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
@@ -15,6 +22,7 @@ use App\Mail\NewUser;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use stdClass;
 
 class CompanyController extends Controller {
     
@@ -98,6 +106,18 @@ class CompanyController extends Controller {
         $company->subscription_id = getCurrentUserSubscriptions()[0]->id;
 
         $company->save();
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $sale =Sales::where('company_id', $company->id)->first();
+        $subscriptionPlan = $sale->product->plan;
+        $available_invoices = AvailableInvoices::create(
+            [
+                'company_id' => $company->id,
+                'monthly_quota' => $subscriptionPlan->num_invoices,
+                'month' => $start_date->month,
+                'year' => $start_date->year,
+                'current_month_sent' => 0
+            ]
+        );
 
         /* Add Company to Team */
         $team = Team::firstOrCreate([
@@ -424,6 +444,107 @@ class CompanyController extends Controller {
         $company->save();
 
         return redirect('/facturas-emitidas')->with('success', 'Empiece calculando su prorrata 2018 ingresando todas sus facturas de dicho periodo.');
+    }
+
+    public function comprarFacturasVista(){
+        $company = currentCompany();
+        $sale = Sales::where('company_id', $company)->first();
+        $producto = EtaxProducts::where('id', $sale->etax_product_id)->first();
+        $availableInvoices = AvailableInvoices::where('company_id', $company)->first();
+        $productosEtax = EtaxProducts::where('isSubscription', 0)->where('id', '!=', 15)->get();
+        $paymentmethods = PaymentMethod::where('user_id', auth()->user()->id)->get();
+        $invoices = $availableInvoices->monthly_quota - $availableInvoices->current_month_sent;
+        return view('/Company/comprarFacturasView')->with('productosEtax', $productosEtax)
+                                                        ->with('availableInvoices', $availableInvoices)
+                                                        ->with('invoices', $invoices)
+                                                        ->with('paymentmethods', $paymentmethods);
+    }
+
+    public function seleccionarCliente(Request $request){
+        $request->product = json_decode($request->product);
+        $product = $request->product;
+        $payment_method = $request->payment_method;
+        $user = auth()->user();
+        if(isset($payment_method)){
+            return view('payment/clientDataSelect')->with('product', $product)
+                ->with('user', $user)
+                ->with('payment_method', $payment_method);
+        }else{
+            return redirect()->back()->withErrors('Debe seleccionar un metodo de pago');
+        }
+    }
+
+    public function comprarFacturas(Request $request){
+        $date = Carbon::parse(now('America/Costa_Rica'));
+        $current_company = currentCompany();
+        $company = get_company_details($current_company);
+        $available_company_invoices = ($company->additional_invoices == null) ? $available_company_invoices = 0 : $available_company_invoices = $company->additional_invoices;
+        $product_id = $request->product_id;
+        switch ($product_id){
+            case 9:
+                $additional_invoices = $available_company_invoices + 5;
+            break;
+            case 10:
+                $additional_invoices = $available_company_invoices + 25;
+            break;
+            case 11:
+                $additional_invoices = $available_company_invoices + 50;
+            break;
+            case 12:
+                $additional_invoices = $available_company_invoices + 250;
+            break;
+            case 13:
+                $additional_invoices = $available_company_invoices + 2000;
+            break;
+            case 14:
+                $additional_invoices = $available_company_invoices + 5000;
+            break;
+        }
+        $paymentUtils = new PaymentUtils();
+        if(isset($payment_method)){
+            $pagoProducto = $paymentUtils->comprarProductos($request);
+            if($pagoProducto){
+                $user = auth()->user();
+                $invoiceData = new stdClass();
+                $invoiceData->client_code = $request->id_number;
+                $invoiceData->client_id_number = $request->id_number;
+                $invoiceData->client_id = $request->user_id;
+                $invoiceData->tipo_persona = $request->tipo_persona;
+                $invoiceData->first_name = $request->first_name;
+                $invoiceData->last_name = $request->last_name;
+                $invoiceData->last_name2 = $request->last_name2;
+                $invoiceData->country = $request->country;
+                $invoiceData->state = $request->state;
+                $invoiceData->city = $request->city;
+                $invoiceData->district = $request->district;
+                $invoiceData->neighborhood = $request->neighborhood;
+                $invoiceData->zip = $request->zip;
+                $invoiceData->address = $request->address;
+                $invoiceData->phone = $request->phone;
+                $invoiceData->es_exento = $request->es_exento;
+                $invoiceData->email = $request->email;
+                $invoiceData->expiry = $date->toDateTimeString();
+                $invoiceData->amount = $request->product_price;
+                $invoiceData->subtotal = $request->product_price;
+
+                $item = new stdClass();
+                $item->total = $request->product_price;
+                $item->code = $request->product_id;
+                $item->name = $request->product_name;
+                $item->descuento = 0;
+                $item->cantidad = 1;
+
+                $invoiceData->items = [$item];
+                $procesoFactura = $paymentUtils->facturarProductosEtax($invoiceData);
+                $company->additional_invoices = $additional_invoices;
+                $company->save();
+                return redirect()->back()->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+            }else{
+                return redirect()->back()->withErrors('No pudo procesarse el pago');
+            }
+        }else{
+            return redirect()->back()->withErrors('Debe incluir un método de pago');
+        }
     }
 
     public function confirmCompanyDeactivation($token) {

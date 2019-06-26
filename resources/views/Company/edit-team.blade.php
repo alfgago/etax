@@ -19,10 +19,13 @@
                         <a class="nav-link " aria-selected="false" href="/empresas/configuracion">Configuración avanzada</a>
                     </li>
                     <li>
-                        <a class="nav-link " aria-selected="false" href="/empresas/certificado">Certificado digital</a>
-                    </li class="active">
+                        <a class="nav-link" aria-selected="false" href="/empresas/certificado">Certificado digital</a>
+                    </li >
                     <li>
                         <a class="nav-link active" aria-selected="true" href="/empresas/equipo">Equipo de trabajo</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" aria-selected="false" href="/empresas/comprar-facturas-vista">Comprar facturas</a>
                     </li>
                 </ul>
             </div>

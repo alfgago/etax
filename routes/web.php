@@ -61,6 +61,9 @@ Route::prefix('empresas')->group(function() {
     Route::patch('update-certificado/{id}', 'CompanyController@updateCertificado')->name('Company.update_cert');
     Route::get('company-profile/{id}', 'CompanyController@company_profile')->name('Company.company_profile');
     Route::get('set-prorrata-2018-facturas', 'CompanyController@setProrrata2018PorFacturas')->name('Company.set_prorrata_2018_facturas');
+    Route::get('comprar-facturas-vista', 'CompanyController@comprarFacturasVista')->name('Company.comprar_facturas_vista');
+    Route::patch('comprar-facturas', 'CompanyController@comprarFacturas')->name('Company.comprar_facturas');
+    Route::patch('seleccionar-cliente', 'CompanyController@seleccionarCliente')->name('Company.seleccionar_cliente');
 });
 
 // Rutas de facturación
@@ -109,21 +112,25 @@ Route::prefix('usuario')->group(function() {
     Route::get('usuarios-invitados', 'UserController@invitedUsersList')->name('User.invited-users-list');
     Route::get('zendesk-jwt', 'UserController@zendeskJwt')->name('User.zendesk_jwt');
     Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
-    Route::post('update-user-tutorial', 'UserController@updateUserTutorial')->name('User.update_user_tutorial');
+
 });
 
 //Rutas de Pagos de la aplicacion
 Route::prefix('payment')->group(function(){
-    Route::post('payment-create', 'PaymentController@create')->name('Payment.payment_create');
-    Route::get('payment-create-view', 'PaymentController@createView')->name('Payment.payment_create_view');
     Route::get('payment-crear', 'PaymentController@paymentCrear')->name('Payment.payment_crear');
-    //Route::get('payment-checkout', 'PaymentController@paymentCheckout')->name('Payment.payment_checkout');
     Route::post('confirm-payment', 'PaymentController@confirmPayment')->name('Payment.payment_card');
-    Route::get('payment-token-update-view/{id}', 'PaymentController@paymentTokenUpdateView')->name('Payment.payment_token_update_view');
-    Route::patch('payment-token-update', 'PaymentController@paymentTokenUpdate')->name('Payment.payment_tokenUpdate');
-    Route::delete('payment-token-delete/{id}', 'PaymentController@paymentTokenDelete')->name('Payment.payment_token_delete');
     Route::post('payment-token-transaction', 'PaymentController@paymentTokenTransaction')->name('Payment.payment_token_transaction');
     Route::post('payment-charge', 'PaymentController@paymentCharge')->name('Payment.payment_charge');
+    Route::get('pending-charges', 'PaymentController@pendingCharges')->name('Payment.pending_charges');
+});
+
+
+Route::prefix('payment-methods')->group(function(){
+    Route::get('payment-method-create-view', 'PaymentMethodController@createView')->name('PaymentMethod.payment_method_create_view');
+    Route::post('payment-method-create', 'PaymentMethodController@create')->name('PaymentMethod.payment_create');
+    Route::get('payment-method-token-update-view/{id}', 'PaymentMethodController@paymentMethodTokenUpdateView')->name('PaymentMethod.payment_method_token_update_view');
+    Route::patch('payment-method-token-update', 'PaymentMethodController@tokenUpdate')->name('Payment.payment_token_update');
+    Route::delete('payment-method-token-delete/{id}', 'PaymentMethodController@tokenDelete')->name('Payment.payment_token_delete');
 });
 
 // Rutas de API data para ajax
@@ -137,6 +144,7 @@ Route::get('/api/providers', 'ProviderController@indexData')->name('Provider.dat
 Route::get('/api/products', 'ProductController@indexData')->name('Product.data');
 Route::get('/api/books', 'BookController@indexData')->name('Book.data');
 Route::get('/api/payments', 'PaymentController@indexData')->name('Payment.data');
+Route::get('/api/paymentsMethods', 'PaymentMethodController@indexData')->name('PaymentMethod.data');
 
 
 //Rutas de recover
@@ -155,6 +163,7 @@ Route::resource('facturas-recibidas', 'BillController');
 Route::resource('plans', 'PlanController');
 Route::resource('empresas', 'CompanyController');
 Route::resource('payments', 'PaymentController');
+Route::resource('payments-methods', 'PaymentMethodController');
 
 //Middlewares de autenticación
 Route::group(['middleware' => ['auth']], function() {

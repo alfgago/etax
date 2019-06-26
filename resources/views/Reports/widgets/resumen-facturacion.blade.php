@@ -3,11 +3,12 @@
     <div class="row">
       <?php 
         $company = currentCompanyModel();
-        $availableBills = $company->checkCountAvailableBills();
+        $availableBills    = $company->checkCountAvailableBills();
         $availableInvoices = $company->checkCountAvailableInvoices();
+        $purchasedInvoices = $company->checkPurchasedInvoices();
       ?>
       <div class="col-md-12 dato-facturas">
-          <label><span>Facturas de venta</span></label>
+          <label><span>Facturas de venta procesadas</span></label>
           @if( $availableInvoices != -1 )
             <div class="barra-limites emitidas" >
               <div class="fill-bar" data-total="{{ $availableInvoices }}" data-fill="{{ number_format( $data->count_invoices ) }}"></div>
@@ -19,10 +20,11 @@
               <div class="barra-text">{{ number_format( $data->count_invoices ) }} de &infin;</div>
             </div>
           @endif
+
       </div>
       
       <div class="col-md-12 dato-facturas mt-2">
-          <label><span>Facturas de compra</span></label>
+          <label><span>Facturas de compra procesadas</span></label>
           @if( $availableBills != -1 )
             <div class="barra-limites recibidas">
               <div class="fill-bar" data-total="{{ $availableBills }}" data-fill="{{ number_format( $data->count_bills ) }}"></div>
@@ -35,7 +37,15 @@
             </div>
           @endif
       </div>
-      
+      <div class="col-md-12 dato-facturas mt-2">
+          @if( $purchasedInvoices > 0 )
+                <label><span>Facturas adicionales procesadas</span></label>
+                <div class="barra-limites emitidas" >
+                    <div class="fill-bar" data-total="{{ $purchasedInvoices }}" data-fill="{{ number_format( $data->count_invoices ) }}"></div>
+                    <div class="barra-text">{{ number_format( $data->count_invoices ) }} de {{ $purchasedInvoices }}</div>
+                </div>
+          @endif
+      </div>
       <div class="col-md-12 dato-facturas hidden">
         <a class="btn btn-secondary btn-sm" href="#">Comprar facturas</a>
       </div>

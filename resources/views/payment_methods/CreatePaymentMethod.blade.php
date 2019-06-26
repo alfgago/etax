@@ -8,7 +8,7 @@
     <div class="row">
         <div class="col-xl-9 col-lg-12 col-md-12">
 
-            <form method="POST" action="/payment/payment-create" class="tarjeta">
+            <form method="POST" action="/payment-methods/payment-method-create" class="tarjeta">
 
                 @csrf
                 @method('post')
@@ -18,7 +18,7 @@
                         <h3>
                             Informaci&oacute;n de la tarjeta:</h3>
                     </div>
-                    @include( 'payment.formCreate' )
+                    @include( 'payment_methods.formCreate' )
 
                 </div>
 
@@ -32,10 +32,15 @@
 
 @section('breadcrumb-buttons')
     <button onclick="$('#btn-submit').click();" class="btn btn-primary">Crear</button>
+    <button onclick="volver();" class="btn btn-primary">Volver</button>
 @endsection
 
 @section('footer-scripts')
 
-
+<script>
+    function volver() {
+        window.history.back();
+    }
+</script>
 
 @endsection
