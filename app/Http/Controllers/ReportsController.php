@@ -137,6 +137,9 @@ class ReportsController extends Controller
 
         $nombreMes = Variables::getMonthName($mes);
         $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
+        
+        currentCompanyModel()->setFirstAvailableInvoices( $ano, $mes, $dataMes->count_invoices );
+        
       }catch( \Exception $ex ){
           Log::error('Error al cargar dashboard' . $ex->getMessage());
       }catch( \Throwable $ex ){

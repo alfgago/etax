@@ -26,7 +26,14 @@ class SubscriptionPlanController extends Controller
         
     public function changePlan() {
         
-        $plans = EtaxProducts::where('isSubscription', true)->with('plan')->get();
+        $plans = EtaxProducts::where('is_subscription', true)->with('plan')->get();
+        return view( 'subscriptions/change-plan', compact('plans') );
+        
+    }
+    
+    public function selectPlan() {
+        
+        $plans = EtaxProducts::where('is_subscription', true)->with('plan')->get();
         return view( 'subscriptions/subscription-wizard', compact('plans') );
         
     }

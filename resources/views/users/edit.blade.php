@@ -24,7 +24,7 @@
                             <a class="nav-link" aria-selected="false" href="/usuario/seguridad">Seguridad</a>
                         </li>
                         <li>
-                            <a class="nav-link" aria-selected="false" href="/elegir-plan">Cambiar plan</a>
+                            <a class="nav-link" aria-selected="false" href="/cambiar-plan">Cambiar plan</a>
                         </li>
                         @if( auth()->user()->isContador() )
                             <li>

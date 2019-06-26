@@ -172,7 +172,11 @@ class Invoice extends Model
             $this->due_date = $fechaV;
             $this->year = $fecha->year;
             $this->month = $fecha->month;
-
+            
+            if( !$this->id ){
+              $this->company->addSentInvoice( $this->year, $this->month );
+            }
+            
             $this->save();
 
             $lids = array();

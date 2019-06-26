@@ -8,6 +8,10 @@
   
 </div>
 
+<div class="alert alert-info"> 
+   ¿No sabe cómo conseguir esta información? Contáctenos via chat, teléfono, o descarge el <a style="text-decoration:underline;" href="https://app.etaxcr.com/assets/files/guias/Manual-ConfiguracionEmpresa.pdf">Manual de configuración de empresa.</a>
+</div>
+
 <div class="form-group col-md-6">
   <label for="user">Usuario ATV *</label>
   <input type="text" class="form-control " name="user" id="user" value="{{ @$certificate->user }}">
