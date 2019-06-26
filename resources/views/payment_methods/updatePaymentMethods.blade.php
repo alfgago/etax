@@ -8,7 +8,7 @@
     <div class="row">
         <div class="col-xl-9 col-lg-12 col-md-12">
 
-            <form method="POST" action="/payment/payment-token-update" class="tarjeta">
+            <form method="POST" action="/payment-methods/payment-method-token-update" class="tarjeta">
 
                 @csrf
                 @method('patch')
@@ -19,7 +19,7 @@
                             Actualizaci&oacute;n del m&eacute;todo de pago
                         </h3>
                     </div>
-                    @include( 'Payment.form', ['payment' => $payment] )
+                    @include( 'Payment_Methods.form', ['payment_methods' => $paymentMethod] )
 
                 </div>
 
@@ -33,10 +33,15 @@
 
 @section('breadcrumb-buttons')
     <button onclick="$('#btn-submit').click();" class="btn btn-primary">Actualizar</button>
+    <button onclick="volver();" class="btn btn-primary">Volver</button>
 @endsection
 
 @section('footer-scripts')
 
-
+<script>
+    function volver() {
+        window.history.back();
+    }
+</script>
 
 @endsection

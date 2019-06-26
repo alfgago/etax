@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\AvailableInvoices;
 use App\UnidadMedicion;
 use App\Utils\BridgeHaciendaApi;
 use \Carbon\Carbon;
@@ -113,7 +114,13 @@ class InvoiceController extends Controller
     public function emitFactura()
     {
         $company = currentCompanyModel();
-        
+
+        $available_invoices = AvailableInvoices::where('company_id', $company->id)->first();
+        $available_plan_invoices = $available_invoices->monthly_quota - $available_invoices->current_month_sent;
+        if($available_plan_invoices < 1 && $company->additional_invoices < 1){
+            return redirect()->back()->withError('No tiene facturas disponibles para emitir');
+        }
+
         if ($company->atv_validation == false) {
             $apiHacienda = new BridgeHaciendaApi();
             $token = $apiHacienda->login(false);
@@ -175,6 +182,7 @@ class InvoiceController extends Controller
         $invoice->payment_receipt = "";
         $invoice->generation_method = "M";
         $invoice->setInvoiceData($request);
+        $company->current_month_sent = $company->current_month_sent + 1;
         $company->save();
 
         clearInvoiceCache($invoice);
@@ -314,19 +322,50 @@ class InvoiceController extends Controller
         }
         
         $company = currentCompanyModel();
+
         $i = 0;
-        
+
         if( $collection[0]->count() < 2501 ){
             try {
+                $companyInvoices = 0;
+                $available = 0;
+                $unicos = [];
                 foreach ($collection[0]->chunk(200) as $facturas) {
-                    \DB::transaction(function () use ($facturas, &$company, &$i) {
-                        
+                    foreach ($facturas as $row) {
+                        $consecutivoComprobante = $row['consecutivocomprobante'];
+                        array_push( $unicos, $consecutivoComprobante );
+                    }
+                }
+                $unicos =  array_unique($unicos);
+                $totalFacturasExcel = sizeof($unicos);
+
+                $available_invoices = AvailableInvoices::where('company_id',$company->id)->first();
+                $available_invoices_by_plan = $available_invoices->monthly_quota - $available_invoices->current_month_sent;
+
+                if($totalFacturasExcel > $available_invoices_by_plan){
+                    $available = $available_invoices_by_plan + $company->additional_invoices;
+                }
+                if($totalFacturasExcel > $available){
+                    return back()->withError('No puede pasarse de su cuota de facturas mensual');
+                }
+
+                foreach ($collection[0]->chunk(200) as $facturas) {
+
+                    \DB::transaction(function () use ($facturas, &$company, &$i, $available_invoices, $available_invoices_by_plan) {
+
                         $inserts = array();
                         foreach ($facturas as $row){
                             $i++;
-                            
+                            $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
+
+                            if($available_invoices_by_plan > 0){
+                                $available_invoices_by_plan = $available_invoices_by_plan - 1;
+                            }else{
+                                $company->additional_invoices = $company->additional_invoices - 1;
+                            }
+
                             $metodoGeneracion = "XLSX";
-                            
+
                             //Datos de proveedor
                             $nombreCliente = $row['nombrecliente'];
                             $codigoCliente = array_key_exists('codigocliente', $row) ? $row['codigocliente'] : '';
@@ -334,7 +373,7 @@ class InvoiceController extends Controller
                             $identificacionCliente = $row['identificacionreceptor'];
                             $correoCliente = $row['correoreceptor'];
                             $telefonoCliente = null;
-                                        
+
                             //Datos de factura
                             $consecutivoComprobante = $row['consecutivocomprobante'];
                             $claveFactura = array_key_exists('clavefactura', $row) ? $row['clavefactura'] : '';
@@ -342,14 +381,14 @@ class InvoiceController extends Controller
                             $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
                             $numeroLinea = array_key_exists('numerolinea', $row) ? $row['numerolinea'] : 1;
                             $fechaEmision = $row['fechaemision'];
-                            
+
                             $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
                             $idMoneda = $row['moneda'];
                             $tipoCambio = $row['tipocambio'];
                             $totalDocumento = $row['totaldocumento'];
                             $tipoDocumento = $row['tipodocumento'];
                             $descripcion = array_key_exists('descripcion', $row)  ? $row['descripcion'] : '';
-                            
+
                             //Datos de linea
                             $codigoProducto = $row['codigoproducto'];
                             $detalleProducto = $row['detalleproducto'];
@@ -362,23 +401,23 @@ class InvoiceController extends Controller
                             $codigoEtax = $row['codigoivaetax'];
                             $montoIva = (float)$row['montoiva'];
                             $totalNeto = 0;
-                            
+
                             $insert = Invoice::importInvoiceRow(
                                 $metodoGeneracion, 0, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
                                 $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
                                 $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
                                 $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, true, true
                             );
-                            
+
                             if( $insert ) {
                                 array_push( $inserts, $insert );
                             }
-                            
+
                         }
-                        
+
                         InvoiceItem::insert($inserts);
                     });
-                    
+
                 }
             }catch( \ErrorException $ex ){
                 Log::error('Error importando Excel' . $ex->getMessage());
@@ -395,6 +434,7 @@ class InvoiceController extends Controller
             }
             
             $company->save();
+            $available_invoices->save();
             
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
