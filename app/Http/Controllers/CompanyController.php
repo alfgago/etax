@@ -276,6 +276,7 @@ class CompanyController extends Controller {
         $company->zip = $request->zip;
         $company->address = $request->address;
         $company->phone = $request->phone;
+        $company->atv_validation = false;
         $company->save();
 
         //Update Team name based on company

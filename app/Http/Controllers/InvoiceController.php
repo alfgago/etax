@@ -113,6 +113,18 @@ class InvoiceController extends Controller
     public function emitFactura()
     {
         $company = currentCompanyModel();
+        if ($company->atv_validation == false) {
+            $apiHacienda = new BridgeHaciendaApi();
+            $token = $apiHacienda->login(false);
+            $validateAtv = $apiHacienda->validateAtv($token, $company);
+            if ($validateAtv['status'] == 400) {
+                return redirect('/empresas/editar')->withError($validateAtv['message']);
+            } else {
+                $company->atv_validation = true;
+                $company->save();
+            }
+        }
+
         if( ! isset($company->logo_url) ){
             return redirect('/empresas/editar')->withError('Para poder emitir facturas, debe subir un logo y certificado ATV');
         }
