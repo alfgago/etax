@@ -11,7 +11,7 @@ class AddNewTaxCodes extends Migration
      */
     public function up()
     {
-        /*Schema::table('books', function (Blueprint $table) {
+        Schema::table('books', function (Blueprint $table) {
             $table->double('cc_compras1')->default(0);
             $table->double('cc_compras2')->default(0);
             $table->double('cc_compras3')->default(0);
@@ -64,7 +64,7 @@ class AddNewTaxCodes extends Migration
         
         Schema::table('sales', function (Blueprint $table) {
             $table->boolean('isSubscription')->default(true);
-        });*/
+        });
     }
 
     /**
@@ -74,7 +74,7 @@ class AddNewTaxCodes extends Migration
      */
     public function down()
     {
-       /* Schema::table('books', function (Blueprint $table) {
+       Schema::table('books', function (Blueprint $table) {
             $table->dropColumn('cc_compras1');
             $table->dropColumn('cc_compras2');
             $table->dropColumn('cc_compras3');
@@ -127,6 +127,6 @@ class AddNewTaxCodes extends Migration
         
         Schema::table('sales', function ($table) {
             $table->dropColumn('isSubscription');
-        });*/
+        });
     }
 }

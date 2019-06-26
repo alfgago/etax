@@ -13,19 +13,19 @@
 
 <div class="form-group col-md-4">
   <label for="state">Provincia </label>
-  <select class="form-control " name="state" id="state" value="{{ @$company->state }}" onchange="fillCantones();">
+  <select class="form-control " name="state" id="state" value="{{ @$company->state }}" onchange="fillCantones();" required>
   </select>
 </div>
 
 <div class="form-group col-md-4">
   <label for="city">Canton </label>
-  <select class="form-control " name="city" id="city" value="{{ @$company->city }}" onchange="fillDistritos();">
+  <select class="form-control " name="city" id="city" value="{{ @$company->city }}" onchange="fillDistritos();" required>
   </select>
 </div>
 
 <div class="form-group col-md-4">
   <label for="district">Distrito </label>
-  <select class="form-control " name="district" id="district" value="{{ @$company->district }}" onchange="fillZip();" >
+  <select class="form-control " name="district" id="district" value="{{ @$company->district }}" onchange="fillZip();" required>
   </select>
 </div>
 
