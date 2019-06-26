@@ -323,8 +323,8 @@ class CalculatedTax extends Model
           
             if( !$billItems[$i]->bill->is_void && $billItems[$i]->bill->is_authorized && $billItems[$i]->bill->is_code_validated ) {
             
-              if( $billItems[$i]->invoice->currency == 'CRC' ) {
-                $billItems[$i]->invoice->currency_rate = 1;
+              if( $billItems[$i]->bill->currency == 'CRC' ) {
+                $billItems[$i]->bill->currency_rate = 1;
               }
             
               $subtotal = $billItems[$i]->subtotal * $billItems[$i]->bill->currency_rate;
