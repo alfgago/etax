@@ -34,7 +34,7 @@ class PaymentController extends Controller
     public function index()
     {
         $payments = auth()->user()->payments;
-        return view('payment/payment-history', compact('data'))->with('payments', $payments);
+        return view('payment/payment-history')->with('payments', $payments);
         /*$user = auth()->user();
         $cantidad = PaymentMethod::where('user_id', $user->id)->get()->count();
         return view('payment/index')->with('cantidad', $cantidad);*/
