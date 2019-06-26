@@ -1,4 +1,4 @@
-<div class="popup" id="importar-popup">
+<div class="popup" id="importar-proveedores-popup">
   <div class="popup-container item-proveedor-form form-row">
   	<div title="Cerrar ventana" class="close-popup" onclick="cerrarPopup('importar-popup');"> <i class="fa fa-times" aria-hidden="true"></i> </div>
 		<form method="POST" action="/proveedores/importar" enctype="multipart/form-data">
