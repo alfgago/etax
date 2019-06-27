@@ -147,8 +147,11 @@ class InvoiceController extends Controller
             
             if( $validateAtv ) {
                 if ($validateAtv['status'] == 400) {
+                    Log::info('Atv Not Validated Company: '. $company->id_number);
                     return redirect('/empresas/certificado')->withError( "Error al validar el certificado. " . $validateAtv['message'] );
+
                 } else {
+                    Log::info('Atv Validated Company: '. $company->id_number);
                     $company->atv_validation = true;
                     $company->save();
                 }

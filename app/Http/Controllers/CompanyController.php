@@ -329,6 +329,7 @@ class CompanyController extends Controller {
         $company->first_prorrata = $request->first_prorrata;
         $company->first_prorrata_type = $request->first_prorrata_type;
         $company->use_invoicing = $request->use_invoicing;
+        $company->atv_validation = false;
         
         if( $company->first_prorrata_type == 1 ) {
             $company->operative_prorrata = $request->first_prorrata;
@@ -355,6 +356,8 @@ class CompanyController extends Controller {
     public function updateCertificado(Request $request, $id) {
 
         $company = Company::find($id);
+        $company->atv_validation = false;
+        $company->save();
         $this->authorize('update', $company);
 
         if (!$company) {
