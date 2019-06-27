@@ -149,7 +149,10 @@ class InvoiceController extends Controller
             if( $validateAtv ) {
                 if ($validateAtv['status'] == 400) {
                     Log::info('Atv Not Validated Company: '. $company->id_number);
-                    return redirect('/empresas/certificado')->withError( "Error al validar el certificado. " . $validateAtv['message'] );
+                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                    }
+                    return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
 
                 } else {
                     Log::info('Atv Validated Company: '. $company->id_number);
