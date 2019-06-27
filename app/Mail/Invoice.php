@@ -7,6 +7,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use PDF;
+use App\Utils\InvoiceUtils;
 
 class Invoice extends Mailable
 {
@@ -29,20 +30,16 @@ class Invoice extends Mailable
      */
     public function build()
     {
+        $invoiceUtils = new InvoiceUtils();
         $message = $this->subject('Factura electrónica #' . $this->content['data_invoice']->document_number.
             ' De: '.$this->content['data_company']->business_name)->markdown('emails.invoice.paid')
             ->with(['data_invoice' => $this->content['data_invoice'], 'company' => $this->content['data_company']]);
+        
         $message->attachFromStorage($this->content['xml']);
-         $message->attachData($this->makePdf(), $this->content['data_invoice']->document_key.'.pdf', [
+        $message->attachData( $invoiceUtils->streamPdf( $this->content['data_invoice'], $this->content['data_company'] ), $this->content['data_invoice']->document_key.'.pdf', [
              'mime' => 'application/pdf',
          ]);
         return $message;
     }
 
-    private function makePdf()
-    {
-        $pdf = PDF::loadView('Pdf/invoice', ['data_invoice' => $this->content['data_invoice'],
-            'company' => $this->content['data_company']]);
-        return $pdf->stream('Invoice.pdf');
-    }
 }

@@ -77,6 +77,9 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('autorizaciones', 'InvoiceController@indexAuthorize')->name('Invoice.validaciones');
     Route::patch('confirmar-autorizacion/{id}', 'InvoiceController@authorizeInvoice')->name('Invoice.confirmar_validacion');
     Route::post('send', 'InvoiceController@sendHacienda')->name('Invoice.sendHacienda');
+    Route::get('download-pdf/{id}', 'InvoiceController@downloadPdf')->name('Invoice.downloadPdf');
+    Route::get('download-xml/{id}', 'InvoiceController@downloadXml')->name('Invoice.downloadXml');
+    Route::get('reenviar-email/{id}', 'InvoiceController@resendInvoiceEmail')->name('Invoice.resendInvoiceEmail');
 });
 
 // Rutas de facturacion recibida
