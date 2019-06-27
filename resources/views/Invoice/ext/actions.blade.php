@@ -11,13 +11,13 @@
       <i class="fa fa-ban" aria-hidden="true"></i>
     </a>
   </form>
-  <a href="#" title="Descargar PDF - Desactivado temporalmente hasta la 1pm." class="text-warning mr-2"> 
+  <a href="/facturas-emitidas/download-pdf/{{ $data->id }}" title="Descargar PDF" class="text-warning mr-2"> 
     <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
   </a>
-  <a href="#" title="Descargar XML - Desactivado temporalmente hasta la 1pm." class="text-info mr-2"> 
+  <a href="/facturas-emitidas/download-xml/{{ $data->id }}" title="Descargar XML" class="text-info mr-2"> 
     <i class="fa fa-file-text-o" aria-hidden="true"></i>
   </a>
-  <a href="#" title="Reenviar correo electrónico - Desactivado temporalmente hasta la 1pm." class="text-dark mr-2"> 
+  <a href="/facturas-emitidas/reenviar-email/{{ $data->id }}" title="Reenviar correo electrónico" class="text-dark mr-2"> 
     <i class="fa fa-share" aria-hidden="true"></i>
   </a>
   
