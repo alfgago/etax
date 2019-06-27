@@ -78,17 +78,9 @@ class BridgeHaciendaApi
                         $xml->xml = $path;
                         $xml->save();
                         Log::info('XML Guardado -->>' . 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml");
-                        
-                        /*if ( !empty($invoice->send_emails) ) {
-                            Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new \App\Mail\Invoice(['xml' => $path,
-                                'data_invoice' => $invoice, 'data_company' =>$company]));
-                        } else {
-                            Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['xml' => $path,
-                                'data_invoice' => $invoice, 'data_company' =>$company]));
-                        }*/
+
                         $invoiceUtils = new InvoiceUtils();
                         $file = $invoiceUtils->sendInvoiceEmail( $invoice, $company, $path );
-                        
                         //Send to queue invoice
                         ProcessInvoice::dispatch($invoice->id, $company->id, $token)
                             ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
