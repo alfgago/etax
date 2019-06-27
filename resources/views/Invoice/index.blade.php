@@ -89,7 +89,7 @@ function reloadDataTable() {
 function confirmDelete( id ) {
   var formId = "#delete-form-"+id;
   Swal.fire({
-    title: '¿Está seguro que desea eliminar la factura',
+    title: '¿Está seguro que desea eliminar la factura' ,
     text: "Este proceso la eliminará a nivel de cálculo en eTax, sin embargo no hace anulaciones ni revierte aceptaciones ante Hacienda. Usted podrá volver a importar la factura via XML o ingreso manual.",
     type: 'warning',
     showCloseButton: true,

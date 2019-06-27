@@ -476,6 +476,51 @@ class InvoiceController extends Controller
         return ((float) $usec + (float)$sec);
     }
 
+    public function anularInvoice($id)
+    {
+        try {
+            $apiHacienda = new BridgeHaciendaApi();
+            $tokenApi = $apiHacienda->login();
+            if ($tokenApi !== false) {
+                $invoice = Invoice::findOrFail($id);
+                $note = new Invoice();
+                $company = currentCompanyModel();
+                $invoice->company_id = $company->id;
+
+                //Datos generales y para Hacienda
+                $note->document_type = "03";
+                $note->hacienda_status = '01';
+                $note->payment_status = "01";
+                $note->payment_receipt = "";
+                $note->generation_method = "etax";
+                $note->reference_number = $company->last_note_ref_number + 1;
+                $note->save();
+                $noteData = $note->setNoteData($invoice);
+                if (!empty($noteData)) {
+                    $note = $apiHacienda->createInvoice($noteData, $tokenApi);
+                }
+                $company->last_note_ref_number = $note->reference_number;
+                $company->last_document_note = $note->document_number;
+
+                $company->save();
+                if ($note->hacienda_status == '03') {
+                    // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
+                }
+                clearInvoiceCache($invoice);
+
+                return redirect('/facturas-emitidas');
+
+            } else {
+                return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+            }
+
+        } catch ( \Exception $e) {
+            Log::error('Error al anular facturar -->'.$e);
+            return redirect('/facturas-emitidas')->withErrors('Error al anular factura');
+        }
+
+    }
+
     private function get_rates()
     {
         

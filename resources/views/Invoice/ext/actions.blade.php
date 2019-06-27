@@ -4,7 +4,7 @@
   <a href="/facturas-emitidas/{{ $data->id }}" title="Ver detalle de factura" class="text-info mr-2"> 
     <i class="fa fa-eye" aria-hidden="true"></i>
   </a>
-  <form id="anular-form-{{ $data->id }}/anular" class="inline-form" method="POST" action="/facturas-emitidas/{{  $data->id }}" >
+  <form id="anular-form-{{ $data->id }}" class="inline-form" method="POST" action="/facturas-emitidas/anular/{{  $data->id }}" >
     @csrf
     @method('patch')
     <a type="button" class="text-danger mr-2" title="Anular factura" onclick="confirmAnular({{  $data->id }});">

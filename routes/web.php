@@ -77,6 +77,7 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('autorizaciones', 'InvoiceController@indexAuthorize')->name('Invoice.validaciones');
     Route::patch('confirmar-autorizacion/{id}', 'InvoiceController@authorizeInvoice')->name('Invoice.confirmar_validacion');
     Route::post('send', 'InvoiceController@sendHacienda')->name('Invoice.sendHacienda');
+    Route::patch('/anular/{id}', 'InvoiceController@anularInvoice')->name('Invoice.anular');
 });
 
 // Rutas de facturacion recibida
