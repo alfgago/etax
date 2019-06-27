@@ -8,12 +8,12 @@
     <div class="form-group col-md-4">
       <label for="tipo_persona">Tipo de persona *</label>
       <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();">
-        <option value="F" {{ @$provider->tipo_persona == 1 ? 'selected' : '' }} >Física</option>
-        <option value="J" {{ @$provider->tipo_persona == 2 ? 'selected' : '' }}>Jurídica</option>
-        <option value="D" {{ @$provider->tipo_persona == 3 ? 'selected' : '' }}>DIMEX</option>
-        <option value="E" {{ @$provider->tipo_persona == 4 ? 'selected' : '' }}>Extranjero</option>
-        <option value="N" {{ @$provider->tipo_persona == 5 ? 'selected' : '' }}>NITE</option>
-        <option value="O" {{ @$provider->tipo_persona == 6 ? 'selected' : '' }}>Otro</option>
+        <option value="F" {{ @$provider->tipo_persona == 'F' ? 'selected' : '' }}>Física</option>
+        <option value="J" {{ @$provider->tipo_persona == 'J' ? 'selected' : '' }}>Jurídica</option>
+        <option value="D" {{ @$provider->tipo_persona == 'D' ? 'selected' : '' }}>DIMEX</option>
+        <option value="N" {{ @$provider->tipo_persona == 'N' ? 'selected' : '' }}>NITE</option>
+        <option value="E" {{ @$provider->tipo_persona == 'E' ? 'selected' : '' }}>Extranjero</option>
+        <option value="O" {{ @$provider->tipo_persona == 'O' ? 'selected' : '' }}>Otro</option>
       </select>
     </div>
     
