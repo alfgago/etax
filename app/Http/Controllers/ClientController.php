@@ -260,7 +260,7 @@ class ClientController extends Controller
                     'address' => $row['direccion'],
                     'phone_area' => $row['areatel'],
                     'phone' => $row['telefono'],
-                    'es_exento' => $row['exento'],
+                    'es_exento' => $row['exento'][0] == 'S',
                     'emisor_receptor' => $row['emisorreceptor']
                 ]
             );
