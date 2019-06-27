@@ -168,7 +168,9 @@
         <td colspan="2">
     <tr>
         <td class="title" style="width: 200px; height: 170px">
-            <img src="{{\Illuminate\Support\Facades\Storage::temporaryUrl($company->logo_url,  now()->addMinutes(1))}}" style="width:100%; max-width:150px; max-height: 150px">
+            @if( $company->logo_url )
+                <img src="{{\Illuminate\Support\Facades\Storage::temporaryUrl($company->logo_url,  now()->addMinutes(1))}}" style="width:100%; max-width:150px; max-height: 150px">
+            @endif
         </td>
 
         <td>
@@ -195,7 +197,6 @@
             <b>Receptor: </b> {{$data_invoice->client_first_name.' '.$data_invoice->client_last_name}} <br>
             <b>Cedula: </b> {{$data_invoice->client_id_number}}<br>
             <b>Tel: </b> {{$data_invoice->client_phone}}<br>
-            <b>Fax: </b> <br>
             <b>Correo: </b> {{$data_invoice->client_email}}<br>
             <b>Codigo Interno :</b> {{$data_invoice->id}}<br>
             <b>Direccion: </b> {{$data_invoice->client_address}}<br>

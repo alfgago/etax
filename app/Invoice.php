@@ -76,7 +76,7 @@ class Invoice extends Model
     //Relacion con hacienda
     public function xmlHacienda()
     {
-        return $this->belongsTo(XmlHacienda::class);
+        return $this->hasOne(XmlHacienda::class);
     }
     
     

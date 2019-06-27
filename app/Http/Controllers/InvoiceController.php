@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\AvailableInvoices;
 use App\UnidadMedicion;
 use App\Utils\BridgeHaciendaApi;
+use App\Utils\InvoiceUtils;
 use \Carbon\Carbon;
 use App\Invoice;
 use App\InvoiceItem;
@@ -160,9 +161,9 @@ class InvoiceController extends Controller
             }
         }
 
-        if( ! isset($company->logo_url) ){
+        /*if( ! isset($company->logo_url) ){
             return redirect('/empresas/editar')->withError('Para poder emitir facturas, debe subir un logo y certificado ATV');
-        }
+        }*/
         
         $units = UnidadMedicion::all()->toArray();
         return view("Invoice/create-factura", ['document_type' => '01', 'rate' => $this->get_rates(),
@@ -746,6 +747,59 @@ class InvoiceController extends Controller
         
         return redirect('/facturas-emitidas')->withMessage('La factura ha sido restaurada satisfactoriamente.');
     }  
+    
+    public function downloadPdf($id) {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        
+        $invoiceUtils = new InvoiceUtils();
+        $file = $invoiceUtils->downloadPdf( $invoice, currentCompanyModel() );
+        $filename = $invoice->document_key . '.pdf';
+        if( ! $invoice->document_key ) {
+            $filename = $invoice->document_number . '-' . $invoice->client_id . '.pdf';
+        }
+        
+        $headers = [
+            'Content-Type' => 'application/pdf', 
+            'Content-Description' => 'File Transfer',
+            'Content-Disposition' => "attachment; filename={$filename}",
+            'filename'=> $filename
+        ];
+        return response($file, 200, $headers);
+    }
+    
+    public function downloadXml($id) {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        
+        $invoiceUtils = new InvoiceUtils();
+        $file = $invoiceUtils->downloadXml( $invoice, currentCompanyModel() );
+        $filename = $invoice->document_key . '.xml';
+        if( ! $invoice->document_key ) {
+            $filename = $invoice->document_number . '-' . $invoice->client_id . '.xml';
+        }
+        
+        $headers = [
+            'Content-Type' => 'application/xml', 
+            'Content-Description' => 'File Transfer',
+            'Content-Disposition' => "attachment; filename={$filename}",
+            'filename'=> $filename
+        ];
+        return response($file, 200, $headers);
+    }
+    
+    public function resendInvoiceEmail($id) {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        
+        $company = currentCompanyModel();
+        
+        $invoiceUtils = new InvoiceUtils();
+        $path = $invoiceUtils->getXmlPath( $invoice, $company );
+        $invoiceUtils->sendInvoiceEmail( $invoice, $company, $path );
+        
+        return back()->withMessage( 'Se han reenviado los correos exitosamente.');
+    }
     
     private function getDocReference($docType) {
         $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;
