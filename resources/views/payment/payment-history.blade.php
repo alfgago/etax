@@ -36,7 +36,6 @@
                                 <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
                                     <thead>
                                     <tr>
-                                        <th>Id</th>
                                         <th>Fecha</th>
                                         <th>Monto</th>
                                         <th>Estado</th>
@@ -49,18 +48,7 @@
                                                 <tr>
                                                     <td>{{$payment->payment_date}}</td>
                                                     <td>{{$payment->amount}}</td>
-                                                    <td>{{$payment->payment_status}}</td>
-                                                    {{--<td>
-                                                        @if( auth()->user()->isOwnerOfTeam($team) )
-                                                            <form id="delete-form-{{ $company_detail->id }}" class="inline-form" method="POST" action="/empresas/{{ $company_detail->id }}" >
-                                                                @csrf
-                                                                @method('delete')
-                                                                <a type="button" class="text-danger mr-2" title="Eliminar empresa" style="display: inline-block; background: none; border: 0;" onclick="confirmDelete({{ $company_detail->id }});">
-                                                                    <i class="fa fa-ban" aria-hidden="true"></i>
-                                                                </a>
-                                                            </form>
-                                                        @endif
-                                                    </td>--}}
+                                                    <td>{{$payment->getStatusString() }}</td>
                                                 </tr>
                                             @endif
                                         @endforeach

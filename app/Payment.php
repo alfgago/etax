@@ -24,4 +24,16 @@ class Payment extends Model
     public function nextPaymentDate(){
         return $this->belongsTo(PaymentMethod::class);
     }
+    
+    public function getStatusString() {
+        //1: Pendiente, 2: Procesado, 0: Cancelado
+        $estado = "Pendiente";
+        if( $this->payment_status == 2 ){
+            $estado = "Procesado";
+        }else if( $this->payment_status == 0 ){
+            $estado = "Cancelado";
+        }
+        
+        return $estado;
+    }
 }

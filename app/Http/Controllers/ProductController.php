@@ -127,12 +127,12 @@ class ProductController extends Controller
                 ],
 
                 [
-                    'name' => $row['Nombre'],
-                    'measure_unit' => $row['UnidadMedida'],
-                    'unit_price' => $row['Precio'],
-                    'description' => $row['Descripcion'],
-                    'is_catalogue' => $row['Catalogo'],
-                    'default_iva_type' => $row['TipoIva']
+                    'name' => $row['nombre'],
+                    'measure_unit' => $row['unidadmedida'],
+                    'unit_price' => $row['precio'],
+                    'description' => $row['descripcion'],
+                    'is_catalogue' => true,
+                    'default_iva_type' => $row['codigoetax']
                 ]
             );
 
