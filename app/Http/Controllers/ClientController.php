@@ -237,6 +237,7 @@ class ClientController extends Controller
         $clientes = Excel::toCollection( new ClientImport(), request()->file('archivo') );
         $company_id = currentCompany();  
         foreach ($clientes[0] as $row){
+            dd($row);
             Client::updateOrCreate(
                 [
                     'id_number' => $row['identificacion'],
