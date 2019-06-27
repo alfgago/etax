@@ -205,6 +205,7 @@ Route::post('change-company', 'CompanyController@changeCompany');
 Route::get('company-deactivate/{token}', 'CompanyController@confirmCompanyDeactivation')->name('company-deactivate');
 Route::patch('/plans/cancel-plan/{planNo}', 'PlanController@cancelPlan')->name('Plan.cancel_plan');
 Route::get('/plans/confirm-cancel-plan/{token}', 'PlanController@confirmCancelPlan')->name('Plan.confirm-cancel-plan');
+Route::get('getproduct', 'ProductController@consultarProductos');
 
 //Temp Routing
 Route::get('show-plans', 'PlanController@show_plans')->name('plans.show-data');
