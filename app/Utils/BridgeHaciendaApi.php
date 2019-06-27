@@ -89,7 +89,6 @@ class BridgeHaciendaApi
                         $invoiceUtils = new InvoiceUtils();
                         $file = $invoiceUtils->sendInvoiceEmail( $invoice, $company, $path );
                         
-                        
                         //Send to queue invoice
                         ProcessInvoice::dispatch($invoice->id, $company->id, $token)
                             ->onConnection(config('etax.queue_connections'))->onQueue('invoices');

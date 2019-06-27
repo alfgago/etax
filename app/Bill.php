@@ -460,7 +460,11 @@ class Bill extends Model
         
         foreach( $lineas as $linea ) {
             $numeroLinea = $linea['NumeroLinea'];
-            $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] : '';
+            try {
+              $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] : '';
+            } catch( \Throwable $e ) {
+              $codigoProducto = "No indica";
+            }
             $detalleProducto = $linea['Detalle'];
             $unidadMedicion = $linea['UnidadMedida'];
             $cantidad = $linea['Cantidad'];
