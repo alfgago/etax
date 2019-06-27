@@ -244,7 +244,9 @@ class ProductController extends Controller
         }
         try {
             $code = $request->id;
-            $product = Product::where('code', $code)->first();
+            $product = Product::where( 'code', $code )
+                    ->where( 'company_id', currentCompany() )
+                    ->first();
         } catch( UserNotInTeamException $e ){}
         return $product;
     }
