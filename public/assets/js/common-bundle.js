@@ -400,6 +400,10 @@ toastr.options = {
     var porc_iva = parseFloat( $('#porc_iva').val() );
     var monto_iva = parseFloat( $('#item_iva_amount').val() );
     
+    if( !monto_iva ) {
+      monto_iva = 0;
+    }
+    
     if( precio_unitario && cantidad ){
       var subtotal = cantidad * precio_unitario;
       
@@ -435,6 +439,11 @@ toastr.options = {
     var precio_unitario = parseFloat( $('#precio_unitario').val() );
     var cantidad = parseInt( $('#cantidad').val() );
     var monto_iva = parseFloat( $('#item_iva_amount').val() );
+    
+    if( !monto_iva ) {
+      monto_iva = 0;
+      $('#item_iva_amount').val(0);
+    }
     
     if( precio_unitario && cantidad ){
       var subtotal = cantidad * precio_unitario;
@@ -525,6 +534,11 @@ toastr.options = {
     var monto_iva = $('#item_iva_amount').val();
     var subtotal = $('#item_subtotal').val();
     var total = $('#item_total').val();
+    
+    if( !monto_iva ) {
+      monto_iva = 0;
+      $('#item_iva_amount').val(0);
+    }
     
     if( $( '#document_number').val() == "TOTALES2018" ) {
       codigo = $('#codigo').val( "L" + numero  );
