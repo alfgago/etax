@@ -12,7 +12,7 @@
     <input type="hidden" class="form-control" id="item_id" value="">
     
     <div class="form-group col-md-6">
-        <div class="form-group col-md-12">
+        
             <label for="codigo">Código de producto</label>
             <div class="form-row">
                 <div class="col-md-8">
@@ -22,7 +22,7 @@
                     <div class="btn btn-agregar btn-agregar-cliente" onclick="buscarProducto();">Buscar</div>
                 </div>
             </div>
-        </div>
+        
     </div>
 
     <div class="form-group col-md-6">
@@ -74,12 +74,12 @@
 
     <div class="form-group col-md-3">
       <label for="unidad_medicion">Unidad de medición</label>
-        <input type="text" class="form-control" id="unidad_medicion" value=""  >
-      <!--select class="form-control" id="unidad_medicion" value="" >
+       
+      <select class="form-control" id="unidad_medicion" value="" >
         @foreach ($units as $unit )
           <option value="{{ $unit['code'] }}" >{{ $unit['name'] }}</option>
         @endforeach
-      </select-->
+      </select>
     </div>
     
     <div class="form-group col-md-3">
@@ -165,6 +165,7 @@
                     id: id
                 },
                 success: function (result) {
+                  if(result.name) {
                     $('#nombre').val(result.name);
                     $('#unidad_medicion').val(result.measure_unit);
                     $('#precio_unitario').val(result.unit_price);
@@ -173,6 +174,7 @@
 
                     $('#precio_unitario').change();
                     $('#tipo_iva').change();
+                  }
                 }
             });
         }else{
