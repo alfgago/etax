@@ -29,7 +29,7 @@ class Client extends Model
 
   public function getTipoPersona() {
     $tipoStr = 'Física';
-    if( $this->tipo_persona == 1 ) {
+    if( $this->tipo_persona == 1 || $this->tipo_persona == 'F' ) {
       $tipoStr = 'Física';
     }else if( $this->tipo_persona == 2 || $this->tipo_persona == 'J' ) {
       $tipoStr = 'Jurídica';

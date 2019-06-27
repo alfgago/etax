@@ -13,7 +13,7 @@ class ProviderImport implements WithHeadingRow, WithBatchInserts, WithChunkReadi
     
     public function headingRow(): int 
     {
-        return 1;
+        return 3;
     }
     
     public function batchSize(): int

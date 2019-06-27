@@ -13,7 +13,7 @@ class ClientImport implements WithHeadingRow, WithBatchInserts, WithChunkReading
     
     public function headingRow(): int 
     {
-        return 1;
+        return 3;
     }
     
     public function batchSize(): int
