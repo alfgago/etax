@@ -110,14 +110,14 @@ class ProcessCreditNote implements ShouldQueue
                             strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
                             Log::info('Consecutive repeated -->' . $invoice->document_number);
                             $lastRef = $invoice->reference_number;
-                            $invoice->reference_number = $company->last_invoice_ref_number + 1 == $lastRef ?
-                                $company->last_invoice_ref_number + 2 : $company->last_invoice_ref_number + 1;
+                            $invoice->reference_number = $company->last_note_ref_number + 1 == $lastRef ?
+                                $company->last_note_ref_number + 2 : $company->last_note_ref_number + 1;
                             $invoice->save();
-                            $invoice->document_number = getDocReference('01', $invoice->reference_number);
-                            $invoice->document_key = getDocumentKey('01', $invoice->reference_number, $company->id_number);
+                            $invoice->document_number = getDocReference('03', $invoice->reference_number);
+                            $invoice->document_key = getDocumentKey('03', $invoice->reference_number, $company->id_number);
                             $invoice->save();
-                            $company->last_invoice_ref_number = $invoice->reference_number;
-                            $company->last_document = $invoice->document_number;
+                            $company->last_note_ref_number = $invoice->reference_number;
+                            $company->last_document_note = $invoice->document_number;
                             $company->save();
                             Log::info('Resend with next consecutive -->' . $invoice->document_number);
                             $requestDetails = $this->setDetails($invoice->items);
