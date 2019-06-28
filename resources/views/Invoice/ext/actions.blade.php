@@ -4,6 +4,7 @@
   <a href="/facturas-emitidas/{{ $data->id }}" title="Ver detalle de factura" class="text-info mr-2"> 
     <i class="fa fa-eye" aria-hidden="true"></i>
   </a>
+  @if( $data->document_type == '01' &&  $data->reference_document_key == null)
   <form id="anular-form-{{ $data->id }}" class="inline-form" method="POST" action="/facturas-emitidas/anular/{{  $data->id }}" >
     @csrf
     @method('patch')
@@ -11,6 +12,7 @@
       <i class="fa fa-ban" aria-hidden="true"></i>
     </a>
   </form>
+  @endif
   <a href="/facturas-emitidas/download-pdf/{{ $data->id }}" title="Descargar PDF" class="text-warning mr-2"> 
     <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
   </a>

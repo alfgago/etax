@@ -10,6 +10,7 @@ namespace App\Utils;
 
 use App\Invoice;
 use App\InvoiceItem;
+use App\Jobs\ProcessCreditNote;
 use App\Jobs\ProcessInvoice;
 use App\XmlHacienda;
 use App\Utils\InvoiceUtils;
@@ -96,6 +97,21 @@ class BridgeHaciendaApi
         }
     }
 
+    public function createCreditNote(Invoice $invoice, $token) {
+        try {
+
+            $company = $invoice->company;
+            //Send to queue invoice
+            ProcessCreditNote::dispatch($invoice->id, $company->id, $token)
+                ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
+            return $invoice;
+
+        } catch (ClientException $error) {
+            Log::error('Error al crear factura en API HACIENDA -->>'. $error->getMessage() );
+            return $invoice;
+        }
+    }
+
     private function setDetails($data) {
         try {
             $details = null;
@@ -156,7 +172,7 @@ class BridgeHaciendaApi
                 'emisor_cedula' => $company->id_number ? preg_replace("/[^0-9]/", "", $company->id_number) : '',
                 'usuarioAtv' => $company->atv->user ?? '',
                 'passwordAtv' => $company->atv->password ?? '',
-                'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
+                'tipoAmbiente' => config('etax.hacienda_ambiente') ?? '01',
                 'atvcertPin' => $company->atv->pin ?? '',
                 'atvcertFile' => Storage::get($company->atv->key_url),
                 'detalle' => $details

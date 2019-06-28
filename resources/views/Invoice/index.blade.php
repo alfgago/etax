@@ -36,6 +36,7 @@
               <th data-priority="5">Monto IVA</th>
               <th data-priority="4">Total</th>
               <th data-priority="5">F. Generada</th>
+              <th data-priority="1">Estados</th>
               <th data-priority="1">Acciones</th>
             </tr>
           </thead>
@@ -74,6 +75,7 @@ $(function() {
       { data: 'iva_amount', name: 'iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
       { data: 'total', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
       { data: 'generated_date', name: 'generated_date' },
+      { data: 'hacienda_status', name: 'hacienda_status' },
       { data: 'actions', name: 'actions', orderable: false, searchable: false },
     ],
     language: {

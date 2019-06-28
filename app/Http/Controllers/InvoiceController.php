@@ -86,13 +86,23 @@ class InvoiceController extends Controller
             ->editColumn('client', function(Invoice $invoice) {
                 return $invoice->clientName();
             })
+            ->editColumn('hacienda_status', function(Invoice $invoice) {
+                if ($invoice->hacienda_status == '03') {
+                    return '<div class="green">  
+                                <span class="tooltiptext">Aceptada</span>
+                            </div>';
+                }
+                return '<div class="yellow">
+                            <span class="tooltiptext">Creada</span>
+                        </div>';
+            })
             ->editColumn('document_type', function(Invoice $invoice) {
                 return $invoice->documentTypeName();
             })
             ->editColumn('generated_date', function(Invoice $invoice) {
                 return $invoice->generatedDate()->format('d/m/Y');
             })
-            ->rawColumns(['actions'])
+            ->rawColumns(['actions', 'hacienda_status'])
             ->toJson();
     }
 
@@ -232,7 +242,7 @@ class InvoiceController extends Controller
             ]);
 
             $apiHacienda = new BridgeHaciendaApi();
-            $tokenApi = $apiHacienda->login();
+            $tokenApi = $apiHacienda->login(false);
             if ($tokenApi !== false) {
                 $invoice = new Invoice();
                 $company = currentCompanyModel();
@@ -489,9 +499,9 @@ class InvoiceController extends Controller
                 $invoice = Invoice::findOrFail($id);
                 $note = new Invoice();
                 $company = currentCompanyModel();
-                $invoice->company_id = $company->id;
 
                 //Datos generales y para Hacienda
+                $note->company_id = $company->id;
                 $note->document_type = "03";
                 $note->hacienda_status = '01';
                 $note->payment_status = "01";
@@ -501,18 +511,17 @@ class InvoiceController extends Controller
                 $note->save();
                 $noteData = $note->setNoteData($invoice);
                 if (!empty($noteData)) {
-                    $note = $apiHacienda->createInvoice($noteData, $tokenApi);
+                    $apiHacienda->createCreditNote($noteData, $tokenApi);
                 }
-                $company->last_note_ref_number = $note->reference_number;
-                $company->last_document_note = $note->document_number;
-
+                $company->last_note_ref_number = $noteData->reference_number;
+                $company->last_document_note = $noteData->document_number;
                 $company->save();
                 if ($note->hacienda_status == '03') {
                     // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
                 }
                 clearInvoiceCache($invoice);
 
-                return redirect('/facturas-emitidas');
+                return redirect('/facturas-emitidas')->withMessage('Nota de crédito creada.');
 
             } else {
                 return back()->withError( 'Ha ocurrido un error al enviar factura.' );
