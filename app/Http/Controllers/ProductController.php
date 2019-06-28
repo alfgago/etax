@@ -237,5 +237,17 @@ class ProductController extends Controller
         
         return redirect('/productos')->withMessage('El producto ha sido recuperado satisfactoriamente.');
     }    
-    
+
+    public function consultarProductos(Request $request){
+        if (!$request->ajax()) {
+            return redirect()->back()->withError('Ha ocurrido un error, inténtelo de nuevo.');
+        }
+        try {
+            $code = $request->id;
+            $product = Product::where( 'code', $code )
+                    ->where( 'company_id', currentCompany() )
+                    ->first();
+        } catch( UserNotInTeamException $e ){}
+        return $product;
+    }
 }

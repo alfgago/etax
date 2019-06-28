@@ -34,6 +34,11 @@ class Company extends Model {
     public function providers() {
         return $this->hasMany(Provider::class);
     }
+
+    //Relación con productos
+    public function products() {
+        return $this->hasMany(Product::class);
+    }
     
     //Relación con Certificado
     public function atv() {
