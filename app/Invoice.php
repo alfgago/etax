@@ -95,6 +95,7 @@ class Invoice extends Model
             $this->buy_order = $request->buy_order;
             $this->other_reference = $request->other_reference;
             $this->send_emails = $request->send_email ?? null;
+            $this->comercial_activity = $request->comercial_activity;
 
             //Datos de cliente. El cliente nuevo viene con ID = -1
             if( $request->client_id == '-1' ) {

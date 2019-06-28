@@ -108,7 +108,8 @@ class BridgeHaciendaApi
                     'montoTotal' => $value['item_count'] * $value['unit_price'] ?? '',
                     'montoTotalLinea' => $value['subtotal'] + $value['iva_amount'] ?? '',
                     'descuento' => $value['discount'] ?? '',
-                    'impuesto' => 0 // @todo 4.3
+                    'impuesto' => 0, // @todo 4.3
+                    'baseImponible' => 0
                 );
             }
             return json_encode($details, true);
@@ -130,6 +131,7 @@ class BridgeHaciendaApi
             $invoiceData = array(
                 'consecutivo' => $ref ?? '',
                 'fecha_emision' => $data['generated_date']->toDateTimeString() ?? '',
+                'codigo_actividad' => $data['comercial_activity'],
                 'receptor_nombre' => $data['client_first_name'].' '.$data['client_last_name'],
                 'receptor_ubicacion_provincia' => substr($receptorPostalCode,0,1),
                 'receptor_ubicacion_canton' => substr($receptorPostalCode,1,2),
