@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Subscription;
 use App\SubscriptionPlan;
+use App\CalculatedTax;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class Company extends Model {
 
@@ -83,6 +85,54 @@ class Company extends Model {
         } else {
             return false;
         }
+    }
+    
+    public function getProrrataOperativa( $ano ){
+      
+      $anoAnterior = $ano > 2018 ? $ano-1 : 2018;
+      
+      if($anoAnterior == 2018) {
+        if( $this->first_prorrata_type == 1 ){
+          $prorrataOperativa = $this->first_prorrata ? $this->first_prorrata / 100 : 1;
+        }else {
+          $anterior = CalculatedTax::getProrrataPeriodoAnterior( $anoAnterior );
+          $prorrataOperativa = $anterior->prorrata;
+        }
+      }else{
+        $anterior = CalculatedTax::getProrrataPeriodoAnterior( $anoAnterior );
+        $prorrataOperativa = $anterior->prorrata;
+      }
+
+      return $prorrataOperativa;
+    }
+    
+    public function getLastBalance($month, $year) {
+      
+      if( $year != 2018 ) {
+        
+        if( $month == 1 ) {
+          $month = 11;
+          $year = $year - 1;
+        } else {
+          $month = $month - 1;
+        }
+        
+        //Solicita a BD el saldo_favor del periodo anterior.
+        $lastBalance = CalculatedTax::where('company_id', $this->id)
+                              ->where('month', $month)
+                              ->where('year', $year)
+                              ->where('is_final', true)
+                              ->where('is_closed', true)
+                              ->value('saldo_favor');
+        //Si el saldo es mayor que nulo, lo pone en 0.                     
+        $lastBalance = $lastBalance ? $lastBalance : 0;
+        
+      }else{
+        $lastBalance = 0;
+      }
+      
+      return $lastBalance;
+      
     }
 
     /* Check if current company's plan has been paid and active */

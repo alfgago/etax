@@ -18,12 +18,13 @@
         <table id="bill-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
-              <th>Comprobante</th>
               <th>Emisor</th>
-              <th>Moneda</th>
-              <th>Subtotal</th>
-              <th>Monto IVA</th>
-              <th>Total</th>
+              <th>Comprobante</th>
+              <th>Total en <br>factura</th>
+              <th>Total en <br>aceptación (₡)</th>
+              <th>IVA <br>Total (₡)</th>
+              <th>IVA <br>Acreditable (₡)</th>
+              <th>IVA <br>Gasto (₡)</th>
               <th>F. Generada</th>
               <th data-priority="1">Acciones</th>
             </tr>
@@ -41,19 +42,20 @@
 @section('footer-scripts')
 
 <script>
-  
+
 $(function() {
   $('#bill-table').DataTable({
     processing: true,
     serverSide: true,
     ajax: "/api/billsAccepts",
     columns: [
-      { data: 'document_number', name: 'document_number' },
       { data: 'provider', name: 'provider.fullname' },
-      { data: 'currency', name: 'currency', orderable: false, searchable: false },
-      { data: 'subtotal', name: 'subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
-      { data: 'iva_amount', name: 'iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
-      { data: 'total', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
+      { data: 'document_number', name: 'document_number' },
+      { data: 'total', name: 'total' },
+      { data: 'accept_total_factura', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
+      { data: 'accept_iva_total', name: 'accept_iva_total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
+      { data: 'accept_iva_acreditable', name: 'accept_iva_acreditable', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
+      { data: 'accept_iva_gasto', name: 'accept_iva_gasto', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
       { data: 'generated_date', name: 'generated_date' },
       { data: 'actions', name: 'actions', orderable: false, searchable: false },
     ],

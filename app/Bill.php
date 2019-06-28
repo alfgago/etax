@@ -522,4 +522,29 @@ class Bill extends Model
         
     }
     
+    public function calculateAcceptFields() {
+      
+      
+        $company = currentCompanyModel();
+        $prorrataOperativa = $company->getProrrataOperativa( $this->year );
+        $calc = new CalculatedTax();
+        $lastBalance = 0;
+        $query = BillItem::with('bill')->where('bill_id', $this->id);
+        //$calc->setDatosEmitidos( $this->month, $this->year, $company->id );
+        $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query );
+        $calc->setCalculosIVA( $prorrataOperativa, $lastBalance );
+
+        $this->accept_iva_acreditable = $calc->iva_deducible_operativo;
+        $this->accept_iva_gasto = $calc->iva_no_deducible;
+        $this->accept_iva_total = $calc->total_bill_iva;
+        $this->accept_total_factura = $calc->bills_total;
+        $this->accept_id_number = $company->id_number;
+        
+        $this->save();
+        return $this;
+        
+    }
+      
+    
+    
 }

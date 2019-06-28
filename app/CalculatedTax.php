@@ -101,13 +101,19 @@ class CalculatedTax extends Model
   
     //Recibe fecha de inicio y fecha de fin en base a las cuales se desea calcular la prorrata.
     public function calcularFacturacion( $month, $year, $lastBalance, $prorrataOperativa ) {
-      $currentCompanyId = currentCompany();
+      $currentCompany = currentCompanyModel();
       //Si recibe el balance anterior en 0, intenta buscarlo.
       if( !$lastBalance ) {
-        $lastBalance = $this->getLastBalance($month, $year, $currentCompanyId);
+        $lastBalance = $currentCompany->getLastBalance($month, $year);
       }
-      $this->setDatosEmitidos( $month, $year, $currentCompanyId );
-      $this->setDatosSoportados( $month, $year, $currentCompanyId );
+      $this->setDatosEmitidos( $month, $year, $currentCompany->id );
+      
+      $query = BillItem::with('bill')
+                  ->where('company_id', $currentCompany->id)
+                  ->where('year', $year)
+                  ->where('month', $month);
+            
+      $this->setDatosSoportados( $month, $year, $currentCompany->id, $query );
       $this->setCalculosIVA( $prorrataOperativa, $lastBalance );
       
       return $this;
@@ -294,8 +300,8 @@ class CalculatedTax extends Model
     /**
     *   Recorre todas las facturas recibidas y aumenta los montos correspondientes.
     **/
-    public function setDatosSoportados ( $month, $year, $company ) {
-      $countBills = Bill::where('company_id', $company)->where('year', $year)->where('month', $month)->count();
+    public function setDatosSoportados ( $month, $year, $company, $query ) {
+      $countBills = $query->count();
   
       $billsTotal = 0;
       $billsSubtotal = 0;
@@ -307,11 +313,7 @@ class CalculatedTax extends Model
       $totalProveedoresContado = 0;
       $totalProveedoresCredito = 0;
       
-      BillItem::with('bill')
-                  ->where('company_id', $company)
-                  ->where('year', $year)
-                  ->where('month', $month)
-                  ->chunk( 2500,  function($billItems) use ($year, $month, &$company,
+      $query->chunk( 2500,  function($billItems) use ($year, $month, &$company,
        &$billsTotal, &$billsSubtotal, &$totalBillIva, &$basesIdentificacionPlena, &$basesNoDeducibles, &$ivaAcreditableIdentificacionPlena, 
        &$ivaNoAcreditableIdentificacionPlena, &$totalProveedoresContado, &$totalProveedoresCredito
       ) {
@@ -534,6 +536,152 @@ class CalculatedTax extends Model
       //Calcula el total deducible y no deducible en base a los ratios y los montos de facturas recibidas.
       $subtotalParaCFDP = $this->bills_subtotal - $this->bases_identificacion_plena - $this->bases_no_deducibles;
       
+      //Usa los subtotales de cada tarifa para hacer el calculo. Los subtotales no incluyen nada 100% acreditable.
+      $cfdpEstimado1 = $this->bills_subtotal1*$ratio1*0.01 + $this->bills_subtotal1*$ratio2*0.02 + $this->bills_subtotal1*$ratio3*0.13 + $this->bills_subtotal1*$ratio4*0.04 ; 
+      $cfdpEstimado2 = $this->bills_subtotal2*$ratio1*0.01 + $this->bills_subtotal2*$ratio2*0.02 + $this->bills_subtotal2*$ratio3*0.02 + $this->bills_subtotal2*$ratio4*0.02 ; 
+      $cfdpEstimado3 = $this->bills_subtotal3*$ratio1*0.01 + $this->bills_subtotal3*$ratio2*0.02 + $this->bills_subtotal3*$ratio3*0.13 + $this->bills_subtotal3*$ratio4*0.04 ; 
+      $cfdpEstimado4 = $this->bills_subtotal4*$ratio1*0.01 + $this->bills_subtotal4*$ratio2*0.02 + $this->bills_subtotal4*$ratio3*0.04 + $this->bills_subtotal4*$ratio4*0.04 ; 
+      $cfdpEstimado  = $cfdpEstimado1 + $cfdpEstimado2 + $cfdpEstimado3 + $cfdpEstimado4;
+      
+      //Calcula el balance estimado.
+      $ivaDeducibleEstimado = ($cfdpEstimado * $prorrata) + $this->iva_acreditable_identificacion_plena;
+      $balanceEstimado = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleEstimado;
+
+      $ratio1_operativo = $company->operative_ratio1 / 100;
+      $ratio2_operativo = $company->operative_ratio2 / 100;
+      $ratio3_operativo = $company->operative_ratio3 / 100;
+      $ratio4_operativo = $company->operative_ratio4 / 100;
+      
+      //Redondea ratios a 4 decimales (Al multiplicar por 100, queda en 2)
+      $ratio1_operativo = round($ratio1_operativo, 4);
+      $ratio2_operativo = round($ratio2_operativo, 4);
+      $ratio3_operativo = round($ratio3_operativo, 4);
+      $ratio4_operativo = round($ratio4_operativo, 4);
+      
+      $cfdp1 = $this->bills_subtotal1*$ratio1_operativo*0.01 + $this->bills_subtotal1*$ratio2_operativo*0.02 + $this->bills_subtotal1*$ratio3_operativo*0.13 + $this->bills_subtotal1*$ratio4_operativo*0.04 ; 
+      $cfdp2 = $this->bills_subtotal2*$ratio1_operativo*0.02 + $this->bills_subtotal2*$ratio2_operativo*0.02 + $this->bills_subtotal2*$ratio3_operativo*0.02 + $this->bills_subtotal2*$ratio4_operativo*0.02 ; 
+      $cfdp3 = $this->bills_subtotal3*$ratio1_operativo*0.13 + $this->bills_subtotal3*$ratio2_operativo*0.02 + $this->bills_subtotal3*$ratio3_operativo*0.13 + $this->bills_subtotal3*$ratio4_operativo*0.04 ; 
+      $cfdp4 = $this->bills_subtotal4*$ratio1_operativo*0.04 + $this->bills_subtotal4*$ratio2_operativo*0.02 + $this->bills_subtotal4*$ratio3_operativo*0.04 + $this->bills_subtotal4*$ratio4_operativo*0.04 ; 
+      $cfdp = $cfdp1 + $cfdp2 + $cfdp3 + $cfdp4;
+      $cfdp = round($cfdp, 2); 
+      
+      //Calcula el balance operativo.
+      $ivaDeducibleOperativo = ($cfdp * $prorrataOperativa) + $this->iva_acreditable_identificacion_plena;
+      $balanceOperativo = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleOperativo;
+      $ivaNoDeducible = $this->total_bill_iva - $ivaDeducibleOperativo;
+      
+      /*if( $this->month == 6) {
+        dd( "1: $cfdp1 - 2: $cfdp2 - 3: $cfdp3 - 4: $cfdp4 - PLENA: $this->iva_acreditable_identificacion_plena" );
+      }*/
+ 
+      $saldoFavor = $balanceOperativo - $this->iva_retenido;
+      $saldoFavor = $saldoFavor < 0 ? abs( $saldoFavor ) : 0;
+
+      $this->numerador_prorrata = $numeradorProrrata;
+      $this->denumerador_prorrata = $denumeradorProrrata;
+      $this->prorrata = $prorrata;
+      $this->prorrata_operativa = $prorrataOperativa;
+        
+      $this->subtotal_para_cfdp = $subtotalParaCFDP;
+      $this->cfdp = $cfdp;
+        
+      $this->iva_deducible_estimado = $ivaDeducibleEstimado;
+      $this->balance_estimado = $balanceEstimado;
+      $this->iva_deducible_operativo = $ivaDeducibleOperativo;
+      $this->balance_operativo = $balanceOperativo;
+      $this->iva_no_deducible = $ivaNoDeducible;
+      $this->iva_por_cobrar = $this->balance_operativo < 0 ? abs($this->balance_operativo) : 0;
+      $this->iva_por_pagar = $this->balance_operativo > 0 ? $this->balance_operativo : 0;
+      
+      $this->ratio1 = $ratio1;
+      $this->ratio2 = $ratio2;
+      $this->ratio3 = $ratio3;
+      $this->ratio4 = $ratio4;
+      
+      $this->fake_ratio1 = $fakeRatio1;
+      $this->fake_ratio2 = $fakeRatio2;
+      $this->fake_ratio3 = $fakeRatio3;
+      $this->fake_ratio4 = $fakeRatio4;
+      $this->fake_ratio_exento_sin_credito = $fakeRatioExentoSinCredito;
+      $this->fake_ratio_exento_con_credito = $fakeRatioExentoConCredito;
+      
+      $this->saldo_favor = $saldoFavor;
+      $this->saldo_favor_anterior = $lastBalance;
+      
+    }
+    
+    public function setCalculosPorFactura( $prorrataOperativa, $lastBalance ) {
+      
+      $company = currentCompanyModel();
+      
+      //Determina numerador y denominador de la prorrata.
+      $numeradorProrrata = $this->invoices_subtotal - $this->sum_repercutido_exento_sin_credito;
+      $denumeradorProrrata = $this->invoices_subtotal;
+      
+      //Otras variables relevantes
+      $prorrata = 1;
+      $ivaDeducibleEstimado = 0;
+      $balanceEstimado = 0;
+      $ivaDeducibleOperativo = 0;
+      $balanceOperativo = 0;
+      $ivaNoDeducible = 0;
+      $ratio1 = 0;
+      $ratio2 = 0;
+      $ratio3 = 0;
+      $ratio4 = 0;
+      $fakeRatio1 = 0;
+      $fakeRatio2 = 0;
+      $fakeRatio3 = 0;
+      $fakeRatio4 = 0;
+      $fakeRatioExentoSinCredito = 0;
+      $fakeRatioExentoConCredito = 0;
+      $subtotalParaCFDP = 0;
+      $cfdp = 0;
+      
+      //Primero revisa si la sumatoria de pro
+      if( $numeradorProrrata > 0 ){
+        
+        //Define los ratios por tipo para calculo de prorrata
+        $ratio1 = $this->sum_repercutido1 / $numeradorProrrata;
+        $ratio2 = $this->sum_repercutido2 / $numeradorProrrata;
+        $ratio3 = $this->sum_repercutido3 / $numeradorProrrata;
+        $ratio4 = $this->sum_repercutido4 / $numeradorProrrata;
+        
+        //Redondea todo a 2 decimales
+        $ratio1 = round($ratio1, 4);
+        $ratio2 = round($ratio2, 4);
+        $ratio3 = round($ratio3, 4);
+        $ratio4 = round($ratio4, 4);
+        
+        //Define los ratios por tipo para guardar
+        $fakeRatio1 = $this->sum_repercutido1 / $this->invoices_subtotal;
+        $fakeRatio2 = $this->sum_repercutido2 / $this->invoices_subtotal;
+        $fakeRatio3 = ($this->sum_repercutido3-$this->sum_repercutido_exento_con_credito) / $this->invoices_subtotal;
+        $fakeRatio4 = $this->sum_repercutido4 / $this->invoices_subtotal;
+        $fakeRatioExentoSinCredito = $this->sum_repercutido_exento_sin_credito / $this->invoices_subtotal;
+        $fakeRatioExentoConCredito = $this->sum_repercutido_exento_con_credito / $this->invoices_subtotal;
+        
+        //Calcula prorrata
+        $prorrata = $numeradorProrrata / $denumeradorProrrata;
+      } else {
+        $prorrata = 1;
+        $ratio1 = 0;
+        $ratio2 = 0;
+        $ratio3 = 0;
+        $ratio4 = 0;
+      
+        //Define los ratios por tipo para guardar
+        $fakeRatio1 = 0;
+        $fakeRatio2 = 0;
+        $fakeRatio3 = 0;
+        $fakeRatio4 = 0;
+        $fakeRatioExentoSinCredito = 0;
+        $fakeRatioExentoConCredito = 0;
+        
+      }
+      
+      //Calcula el total deducible y no deducible en base a los ratios y los montos de facturas recibidas.
+      $subtotalParaCFDP = $this->bills_subtotal - $this->bases_identificacion_plena - $this->bases_no_deducibles;
       
       //Usa los subtotales de cada tarifa para hacer el calculo. Los subtotales no incluyen nada 100% acreditable.
       $cfdpEstimado1 = $this->bills_subtotal1*$ratio1*0.01 + $this->bills_subtotal1*$ratio2*0.02 + $this->bills_subtotal1*$ratio3*0.13 + $this->bills_subtotal1*$ratio4*0.04 ; 
@@ -1122,35 +1270,6 @@ class CalculatedTax extends Model
             
             $this->b260 = 0;
             $this->i260 = 0;
-    }
-    
-    public function getLastBalance($month, $year, $currentCompanyId) {
-      
-      if( $year != 2018 ) {
-        
-        if( $month == 1 ) {
-          $month = 11;
-          $year = $year - 1;
-        } else {
-          $month = $month - 1;
-        }
-        
-        //Solicita a BD el saldo_favor del periodo anterior.
-        $lastBalance = CalculatedTax::where('company_id', $currentCompanyId)
-                              ->where('month', $month)
-                              ->where('year', $year)
-                              ->where('is_final', true)
-                              ->where('is_closed', true)
-                              ->value('saldo_favor');
-        //Si el saldo es mayor que nulo, lo pone en 0.                     
-        $lastBalance = $lastBalance ? $lastBalance : 0;
-        
-      }else{
-        $lastBalance = 0;
-      }
-      
-      return $lastBalance;
-      
     }
     
     private function microtime_float(){

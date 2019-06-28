@@ -421,12 +421,29 @@ class BillController extends Controller
      */
     public function indexAccepts()
     {
+        
+        $current_company = currentCompany();
+        $bills = Bill::where('bills.company_id', $current_company)
+        ->where('is_void', false)
+        ->where('accept_status', '0')
+        ->where('is_totales', false)
+        ->where('is_authorized', true)
+        ->with('provider')->get();
+        
+        foreach( $bills as $bill ){
+            $bill->calculateAcceptFields();
+        }
+        
         return view('Bill/index-aceptaciones-hacienda');
     }
     
     /**
      * Returns the required ajax data.
-     *
+     *  { data: 'document_number', name: 'document_number' },
+      { data: 'total', name: 'total' },
+      { data: 'accept_iva_total', name: 'accept_iva_total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
+      { data: 'accept_iva_acreditable', name: 'accept_iva_acreditable', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
+      { data: 'accept_iva_gasto', name: 'accept_iva_gasto', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
      * @return \Illuminate\Http\Response
      */
     public function indexDataAccepts() {
@@ -434,18 +451,32 @@ class BillController extends Controller
 
         $query = Bill::where('bills.company_id', $current_company)
         ->where('is_void', false)
-        ->where('status', '01')
+        ->where('accept_status', '0')
         ->where('is_totales', false)
         ->where('is_authorized', true)
         ->with('provider');
         
         return datatables()->eloquent( $query )
-            ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($bill) {
                 return view('Bill.ext.accept-actions', [
                     'id' => $bill->id
                 ])->render();
             }) 
+            ->editColumn('total', function(Bill $bill) {
+                return "$bill->currency $bill->total";
+            })
+            ->editColumn('accept_total_factura', function(Bill $bill) {
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_total";
+            })
+            ->editColumn('accept_iva_total', function(Bill $bill) {
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_total";
+            })
+            ->editColumn('accept_iva_acreditable', function(Bill $bill) {
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_acreditable";
+            })
+            ->editColumn('accept_iva_gasto', function(Bill $bill) {
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_gasto";
+            })
             ->editColumn('provider', function(Bill $bill) {
                 return $bill->provider->getFullName();
             })
