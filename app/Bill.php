@@ -460,7 +460,11 @@ class Bill extends Model
         
         foreach( $lineas as $linea ) {
             $numeroLinea = $linea['NumeroLinea'];
-            $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] : '';
+            try {
+              $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] : '';
+            } catch( \Throwable $e ) {
+              $codigoProducto = "No indica";
+            }
             $detalleProducto = $linea['Detalle'];
             $unidadMedicion = $linea['UnidadMedida'];
             $cantidad = $linea['Cantidad'];
@@ -517,5 +521,30 @@ class Bill extends Model
         return $path;
         
     }
+    
+    public function calculateAcceptFields() {
+      
+      if( $this->accept_iva_total == 0 && $this->xml_schema == 43 ) {
+        $company = currentCompanyModel();
+        $prorrataOperativa = $company->getProrrataOperativa( $this->year );
+        $calc = new CalculatedTax();
+        $lastBalance = 0;
+        $query = BillItem::with('bill')->where('bill_id', $this->id);
+        //$calc->setDatosEmitidos( $this->month, $this->year, $company->id );
+        $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query );
+        $calc->setCalculosPorFactura( $prorrataOperativa, $lastBalance );
+        $this->accept_iva_acreditable = $calc->iva_deducible_operativo;
+        $this->accept_iva_gasto = $calc->iva_no_deducible;
+        $this->accept_iva_total = $calc->total_bill_iva;
+        $this->accept_total_factura = $calc->bills_total;
+        $this->accept_id_number = $company->id_number;
+      }
+      
+      $this->save();
+      return $this;
+        
+    }
+      
+    
     
 }

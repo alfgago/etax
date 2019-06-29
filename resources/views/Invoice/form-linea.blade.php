@@ -12,13 +12,22 @@
     <input type="hidden" class="form-control" id="item_id" value="">
     
     <div class="form-group col-md-6">
-      <label for="codigo">Código de producto</label>
-      <input type="text" class="form-control" id="codigo" value="" >
+        
+            <label for="codigo">Código de producto</label>
+            <div class="form-row">
+                <div class="col-md-8">
+                    <input type="text" class="form-control" id="codigo" name="code">
+                </div>
+                <div class="col-md-3 pull-left-1" style="margin-left: -1em !important;">
+                    <div class="btn btn-agregar btn-agregar-cliente" onclick="buscarProducto();">Buscar</div>
+                </div>
+            </div>
+        
     </div>
 
     <div class="form-group col-md-6">
       <label for="nombre">Nombre / Descripción</label>
-      <input type="text" class="form-control" id="nombre" value="" >
+      <input type="text" class="form-control" id="nombre" value="" name="description">
     </div>
 
     <div class="form-group col-md-12">
@@ -40,7 +49,7 @@
     </div>
   
     <div class="form-group col-md-1">
-      <label for="nombre_cliente">% IVA</label>
+      <label for="porc_iva">% IVA</label>
       <input type="number" min="0" class="form-control pr-0" id="porc_iva" placeholder="13" value="13" readonly>
     </div>
     
@@ -65,6 +74,7 @@
 
     <div class="form-group col-md-3">
       <label for="unidad_medicion">Unidad de medición</label>
+       
       <select class="form-control" id="unidad_medicion" value="" >
         @foreach ($units as $unit )
           <option value="{{ $unit['code'] }}" >{{ $unit['name'] }}</option>
@@ -101,12 +111,12 @@
     </div>
 
     <div class="form-group col-md-3">
-      <label for="nombre_proveedor">Subtotal</label>
+      <label for="item_subtotal">Subtotal</label>
       <input type="text" class="form-control" id="item_subtotal" placeholder="" readonly="true" >
     </div>
 
     <div class="form-group col-md-3">
-      <label for="nombre_proveedor">Total item</label>
+      <label for="item_total">Total item</label>
       <input type="text" class="form-control" id="item_total" placeholder="" readonly="true" >
     </div>
     
@@ -130,3 +140,36 @@
 
   </div>
 </div>
+<script>
+    function buscarProducto() {
+        var id = $('#codigo').val();
+        if(id !== '' && id !== undefined){
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajax({
+                url: "/getproduct",
+                method: 'get',
+                data: {
+                    id: id
+                },
+                success: function (result) {
+                  if(result.name) {
+                    $('#nombre').val(result.name);
+                    $('#unidad_medicion').val(result.measure_unit);
+                    $('#precio_unitario').val(result.unit_price);
+                    $('#tipo_producto').val(result.product_category_id);
+                    $('#tipo_iva').val(result.default_iva_type);
+
+                    $('#precio_unitario').change();
+                    $('#tipo_iva').change();
+                  }
+                }
+            });
+        }else{
+            alert('Debe digitar un código numeral para la búsqueda');
+        }
+    }
+</script>

@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use \Carbon\Carbon;
 use App\Company;
 use App\Provider;
-use App\Exports\ClientExport;
-use App\Imports\ClientImport;
+use App\Exports\ProviderExport;
+use App\Imports\ProviderImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
@@ -232,16 +232,14 @@ class ProviderController extends Controller
                     'last_name' => $row['primerapellido'],
                     'last_name2' => $row['segundoapellido'],
                     'email' => $row['correo'],
-                    'billing_emails' => $row['correoscopia'],
                     'country' => $row['pais'],
                     'state' => $row['provincia'],
                     'city' => $row['canton'],
                     'district' => $row['distrito'],
                     'neighborhood' => $row['barrio'],
                     'address' => $row['direccion'],
-                    'phone_area' => $row['areatel'],
                     'phone' => $row['telefono'],
-                    'es_exento' => $row['exento']
+                    'es_exento' => false
                 ]
             );
             

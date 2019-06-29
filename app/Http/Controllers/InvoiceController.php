@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Actividades;
 use App\AvailableInvoices;
 use App\UnidadMedicion;
 use App\Utils\BridgeHaciendaApi;
+use App\Utils\InvoiceUtils;
 use \Carbon\Carbon;
 use App\Invoice;
 use App\InvoiceItem;
@@ -69,6 +71,10 @@ class InvoiceController extends Controller
             $query = $query->where('document_type', '03');
         }else if( $filtro == 4 ) {
             $query = $query->where('document_type', '04');
+        }else if( $filtro == 8 ) {
+            $query = $query->where('document_type', '08');
+        }else if( $filtro == 9 ) {
+            $query = $query->where('document_type', '09');
         }             
                 
         return datatables()->eloquent( $query )
@@ -85,13 +91,23 @@ class InvoiceController extends Controller
             ->editColumn('client', function(Invoice $invoice) {
                 return $invoice->clientName();
             })
+            ->editColumn('hacienda_status', function(Invoice $invoice) {
+                if ($invoice->hacienda_status == '03') {
+                    return '<div class="green">  
+                                <span class="tooltiptext">Aceptada</span>
+                            </div>';
+                }
+                return '<div class="yellow">
+                            <span class="tooltiptext">Creada</span>
+                        </div>';
+            })
             ->editColumn('document_type', function(Invoice $invoice) {
                 return $invoice->documentTypeName();
             })
             ->editColumn('generated_date', function(Invoice $invoice) {
                 return $invoice->generatedDate()->format('d/m/Y');
             })
-            ->rawColumns(['actions'])
+            ->rawColumns(['actions', 'hacienda_status'])
             ->toJson();
     }
 
@@ -113,10 +129,19 @@ class InvoiceController extends Controller
         if($available_plan_invoices < 1 && $company->additional_invoices < 1){
             return redirect()->back()->withError('Usted ha sobrepasado el límite de facturas mensuales de su plan actual.');
         }
+        $arrayActividades = array();
+        $actividadesCompany = explode(',', $company->activities);
+        for($i=0;$i<count($actividadesCompany);$i++){
+            $newValue = trim($actividadesCompany[$i]);
+            $actividad = Actividades::where('codigo', $newValue)->first();
+            array_push($arrayActividades, $actividad);
+        }
         //Termina de revisar limite de facturas.
-        
         $units = UnidadMedicion::all()->toArray();
-        return view("Invoice/create-factura-manual", ['units' => $units]);
+        if(count($arrayActividades) == 0){
+            return redirect()->back()->withErrors('No ha definido una Actividad Comercial para esta empresa');
+        }
+        return view("Invoice/create-factura-manual", ['units' => $units])->with('arrayActividades', $arrayActividades);
     }
 
     /**
@@ -147,8 +172,14 @@ class InvoiceController extends Controller
             
             if( $validateAtv ) {
                 if ($validateAtv['status'] == 400) {
-                    return redirect('/empresas/certificado')->withError($validateAtv['message']);
+                    Log::info('Atv Not Validated Company: '. $company->id_number);
+                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                    }
+                    return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
+
                 } else {
+                    Log::info('Atv Validated Company: '. $company->id_number);
                     $company->atv_validation = true;
                     $company->save();
                 }
@@ -157,14 +188,25 @@ class InvoiceController extends Controller
             }
         }
 
-        if( ! isset($company->logo_url) ){
+        /*if( ! isset($company->logo_url) ){
             return redirect('/empresas/editar')->withError('Para poder emitir facturas, debe subir un logo y certificado ATV');
-        }
+        }*/
         
         $units = UnidadMedicion::all()->toArray();
+
+        $arrayActividades = array();
+        $actividadesCompany = explode(',', $company->activities);
+        for($i=0;$i<count($actividadesCompany);$i++){
+            $newValue = trim($actividadesCompany[$i]);
+            $actividad = Actividades::where('codigo', $newValue)->first();
+            array_push($arrayActividades, $actividad);
+        }
+        if(count($arrayActividades) == 0){
+            return redirect('/empresas/editar')->withError('No ha definido una Actividad Comercial para esta empresa');
+        }
         return view("Invoice/create-factura", ['document_type' => '01', 'rate' => $this->get_rates(),
             'document_number' => $this->getDocReference('01'),
-            'document_key' => $this->getDocumentKey('01'), 'units' => $units]);
+            'document_key' => $this->getDocumentKey('01'), 'units' => $units])->with('arrayActividades', $arrayActividades);
     }
     
     /**
@@ -225,7 +267,7 @@ class InvoiceController extends Controller
             ]);
 
             $apiHacienda = new BridgeHaciendaApi();
-            $tokenApi = $apiHacienda->login();
+            $tokenApi = $apiHacienda->login(false);
             if ($tokenApi !== false) {
                 $invoice = new Invoice();
                 $company = currentCompanyModel();
@@ -473,6 +515,50 @@ class InvoiceController extends Controller
         return ((float) $usec + (float)$sec);
     }
 
+    public function anularInvoice($id)
+    {
+        try {
+            $apiHacienda = new BridgeHaciendaApi();
+            $tokenApi = $apiHacienda->login();
+            if ($tokenApi !== false) {
+                $invoice = Invoice::findOrFail($id);
+                $note = new Invoice();
+                $company = currentCompanyModel();
+
+                //Datos generales y para Hacienda
+                $note->company_id = $company->id;
+                $note->document_type = "03";
+                $note->hacienda_status = '01';
+                $note->payment_status = "01";
+                $note->payment_receipt = "";
+                $note->generation_method = "etax";
+                $note->reference_number = $company->last_note_ref_number + 1;
+                $note->save();
+                $noteData = $note->setNoteData($invoice);
+                if (!empty($noteData)) {
+                    $apiHacienda->createCreditNote($noteData, $tokenApi);
+                }
+                $company->last_note_ref_number = $noteData->reference_number;
+                $company->last_document_note = $noteData->document_number;
+                $company->save();
+                if ($note->hacienda_status == '03') {
+                    // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
+                }
+                clearInvoiceCache($invoice);
+
+                return redirect('/facturas-emitidas')->withMessage('Nota de crédito creada.');
+
+            } else {
+                return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+            }
+
+        } catch ( \Exception $e) {
+            Log::error('Error al anular facturar -->'.$e);
+            return redirect('/facturas-emitidas')->withErrors('Error al anular factura');
+        }
+
+    }
+
     private function get_rates()
     {
         
@@ -698,6 +784,59 @@ class InvoiceController extends Controller
         
         return redirect('/facturas-emitidas')->withMessage('La factura ha sido restaurada satisfactoriamente.');
     }  
+    
+    public function downloadPdf($id) {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        
+        $invoiceUtils = new InvoiceUtils();
+        $file = $invoiceUtils->downloadPdf( $invoice, currentCompanyModel() );
+        $filename = $invoice->document_key . '.pdf';
+        if( ! $invoice->document_key ) {
+            $filename = $invoice->document_number . '-' . $invoice->client_id . '.pdf';
+        }
+        
+        $headers = [
+            'Content-Type' => 'application/pdf', 
+            'Content-Description' => 'File Transfer',
+            'Content-Disposition' => "attachment; filename={$filename}",
+            'filename'=> $filename
+        ];
+        return response($file, 200, $headers);
+    }
+    
+    public function downloadXml($id) {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        
+        $invoiceUtils = new InvoiceUtils();
+        $file = $invoiceUtils->downloadXml( $invoice, currentCompanyModel() );
+        $filename = $invoice->document_key . '.xml';
+        if( ! $invoice->document_key ) {
+            $filename = $invoice->document_number . '-' . $invoice->client_id . '.xml';
+        }
+        
+        $headers = [
+            'Content-Type' => 'application/xml', 
+            'Content-Description' => 'File Transfer',
+            'Content-Disposition' => "attachment; filename={$filename}",
+            'filename'=> $filename
+        ];
+        return response($file, 200, $headers);
+    }
+    
+    public function resendInvoiceEmail($id) {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        
+        $company = currentCompanyModel();
+        
+        $invoiceUtils = new InvoiceUtils();
+        $path = $invoiceUtils->getXmlPath( $invoice, $company );
+        $invoiceUtils->sendInvoiceEmail( $invoice, $company, $path );
+        
+        return back()->withMessage( 'Se han reenviado los correos exitosamente.');
+    }
     
     private function getDocReference($docType) {
         $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;

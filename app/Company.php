@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Subscription;
 use App\SubscriptionPlan;
+use App\CalculatedTax;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class Company extends Model {
 
@@ -34,12 +36,21 @@ class Company extends Model {
     public function providers() {
         return $this->hasMany(Provider::class);
     }
+
+    //Relación con productos
+    public function products() {
+        return $this->hasMany(Product::class);
+    }
     
     //Relación con Certificado
     public function atv() {
         return $this->hasOne(AtvCertificate::class);
     }
-    
+
+    //Relacion con Actividades comerciales
+    public function actividades(){
+        return $this->hasOne(Actividades::class);
+    }
     //Revisa si el certificado existe
     public function certificateExists() {
         if( $this->atv ){
@@ -78,6 +89,54 @@ class Company extends Model {
         } else {
             return false;
         }
+    }
+    
+    public function getProrrataOperativa( $ano ){
+      
+      $anoAnterior = $ano > 2018 ? $ano-1 : 2018;
+      
+      if($anoAnterior == 2018) {
+        if( $this->first_prorrata_type == 1 ){
+          $prorrataOperativa = $this->first_prorrata ? $this->first_prorrata / 100 : 1;
+        }else {
+          $anterior = CalculatedTax::getProrrataPeriodoAnterior( $anoAnterior );
+          $prorrataOperativa = $anterior->prorrata;
+        }
+      }else{
+        $anterior = CalculatedTax::getProrrataPeriodoAnterior( $anoAnterior );
+        $prorrataOperativa = $anterior->prorrata;
+      }
+
+      return $prorrataOperativa;
+    }
+    
+    public function getLastBalance($month, $year) {
+      
+      if( $year != 2018 ) {
+        
+        if( $month == 1 ) {
+          $month = 11;
+          $year = $year - 1;
+        } else {
+          $month = $month - 1;
+        }
+        
+        //Solicita a BD el saldo_favor del periodo anterior.
+        $lastBalance = CalculatedTax::where('company_id', $this->id)
+                              ->where('month', $month)
+                              ->where('year', $year)
+                              ->where('is_final', true)
+                              ->where('is_closed', true)
+                              ->value('saldo_favor');
+        //Si el saldo es mayor que nulo, lo pone en 0.                     
+        $lastBalance = $lastBalance ? $lastBalance : 0;
+        
+      }else{
+        $lastBalance = 0;
+      }
+      
+      return $lastBalance;
+      
     }
 
     /* Check if current company's plan has been paid and active */
@@ -161,23 +220,24 @@ class Company extends Model {
         }
     }
     
-    public function addSentInvoice( $year, $month ){
-        try{
-        if( $month && $year ) {
-            $today = Carbon::parse(now('America/Costa_Rica'));
-            $month = $today->month;
-            $year = $today->year;
-        }
+    public function addSentInvoice($year, $month) {
+        try {
+            if($month && $year) {
+                $today = Carbon::parse(now('America/Costa_Rica'));
+                $month = $today->month;
+                $year = $today->year;
+            }
         
-        $available_invoices = AvailableInvoices::where('company_id', $this->id)
-                            ->where('month', $month)
-                            ->where('year', $year)
-                            ->first();
-        
-        $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
-        $available_invoices->save();
-        return $available_invoices;
-        }catch( \Throwable $ex ){
+            $available_invoices = AvailableInvoices::where('company_id', $this->id)
+                                ->where('month', $month)
+                                ->where('year', $year)
+                                ->first();
+
+            $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
+            $available_invoices->save();
+            return $available_invoices;
+
+        }catch (\Throwable $ex){
              Log::error('Error en addSentInvoice: ' . $ex->getMessage() );
         }
     }
@@ -185,6 +245,10 @@ class Company extends Model {
     public function setFirstAvailableInvoices( $year, $month, $count ) {
 
         try{
+            if( ( $month == 1 || $month == 2 || $month == 3 || $month == 4 || $month == 5 || $month == 6 ) && $year <= 2019) {
+                $count = 0;
+            }
+            
             $available_invoices = AvailableInvoices::where('company_id', $this->id)
                                 ->where('month', $month)
                                 ->where('year', $year)

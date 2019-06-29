@@ -199,6 +199,17 @@
                     </div>
                   </div>
 
+                  <div class="form-group col-md-12">
+                      <label for="payment_type">Actividad Comercial</label>
+                      <div class="input-group">
+                          <select id="comercial_activity" name="comercial_activity" class="form-control" required>
+                              @foreach ( $arrayActividades as $actividad )
+                                  <option value="{{ $actividad['codigo'] }}">{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
+                              @endforeach
+                          </select>
+                      </div>
+                  </div>
+
                   <div class="form-group col-md-6 not-required">
                     <label for="other_reference">Referencia</label>
                     <input type="text" class="form-control" name="other_reference" id="referencia" value="" >

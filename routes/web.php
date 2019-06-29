@@ -77,6 +77,10 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('autorizaciones', 'InvoiceController@indexAuthorize')->name('Invoice.validaciones');
     Route::patch('confirmar-autorizacion/{id}', 'InvoiceController@authorizeInvoice')->name('Invoice.confirmar_validacion');
     Route::post('send', 'InvoiceController@sendHacienda')->name('Invoice.sendHacienda');
+    Route::patch('/anular/{id}', 'InvoiceController@anularInvoice')->name('Invoice.anular');
+    Route::get('download-pdf/{id}', 'InvoiceController@downloadPdf')->name('Invoice.downloadPdf');
+    Route::get('download-xml/{id}', 'InvoiceController@downloadXml')->name('Invoice.downloadXml');
+    Route::get('reenviar-email/{id}', 'InvoiceController@resendInvoiceEmail')->name('Invoice.resendInvoiceEmail');
 });
 
 // Rutas de facturacion recibida
@@ -87,6 +91,9 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::patch('confirmar-validacion/{id}', 'BillController@confirmarValidacion')->name('Bill.confirmar_validacion');
     Route::get('autorizaciones', 'BillController@indexAuthorize')->name('Bill.validaciones');
     Route::patch('confirmar-autorizacion/{id}', 'BillController@authorizeBill')->name('Bill.confirmar_validacion');
+    Route::get('aceptaciones-otros', 'BillController@indexAcceptsOther')->name('Bill.acceptOthers');
+    Route::patch('confirmar-aceptacion-otros/{id}', 'BillController@correctAccepted')->name('Bill.correctAccepted');
+    Route::patch('marcar-para-aceptacion/{id}', 'BillController@markAsNotAccepted')->name('Bill.markAsNotAccepted');
 });
 
 // Rutas de Wizard
@@ -202,6 +209,7 @@ Route::post('change-company', 'CompanyController@changeCompany');
 Route::get('company-deactivate/{token}', 'CompanyController@confirmCompanyDeactivation')->name('company-deactivate');
 Route::patch('/plans/cancel-plan/{planNo}', 'PlanController@cancelPlan')->name('Plan.cancel_plan');
 Route::get('/plans/confirm-cancel-plan/{token}', 'PlanController@confirmCancelPlan')->name('Plan.confirm-cancel-plan');
+Route::get('getproduct', 'ProductController@consultarProductos');
 
 //Temp Routing
 Route::get('show-plans', 'PlanController@show_plans')->name('plans.show-data');

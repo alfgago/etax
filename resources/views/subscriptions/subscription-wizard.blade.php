@@ -147,13 +147,11 @@
           var precioDescuento = parseFloat(numero - descuento).toFixed(2);
           precioFinal = precioDescuento;
           etiqueta = '(descuento del Banco Nacional)';
+          $('#bncupon').val(1);
       }
 
       $(".precio-final").text('$' + precioFinal);
       $(".etiqueta-descuento").text(etiqueta);
-
-      $('#bncupon').val(1);
-
   }
   function fusb() {
       var exp = $("#expiry").val();

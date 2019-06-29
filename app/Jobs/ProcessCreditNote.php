@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Company;
 use App\Invoice;
+use App\Mail\CreditNoteNotificacion;
 use App\Utils\BridgeHaciendaApi;
 use App\XmlHacienda;
 use Carbon\Carbon;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
-class ProcessInvoice implements ShouldQueue
+class ProcessCreditNote implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -47,7 +48,7 @@ class ProcessInvoice implements ShouldQueue
     public function handle()
     {
         try {
-            Log::info('send job invoice id: '.$this->invoiceId);
+            Log::info('send job credit note id: '.$this->invoiceId);
             $client = new Client();
             $invoice = Invoice::find($this->invoiceId);
             $company = Company::find($this->companyId);
@@ -55,11 +56,12 @@ class ProcessInvoice implements ShouldQueue
                 if ($invoice->hacienda_status == '01') {
                     $requestDetails = $this->setDetails($invoice->items);
                     $requestData = $this->setInvoiceData($invoice, $requestDetails);
+                    Log::info('Request data'. json_encode($requestData));
                     $apiHacienda = new BridgeHaciendaApi();
                     $tokenApi = $apiHacienda->login(false);
                     if ($requestData !== false) {
-                        Log::info('Enviando Request  API HACIENDA -->>' . $this->invoiceId);
-                        $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice/create', [
+                        Log::info('Enviando Request Nota Credito  API HACIENDA -->>' . $this->invoiceId);
+                        $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice/credit', [
                             'headers' => [
                                 'Auth-Key' => config('etax.api_hacienda_key'),
                                 'Client-Service' => config('etax.api_hacienda_client'),
@@ -73,14 +75,14 @@ class ProcessInvoice implements ShouldQueue
                             'connect_timeout' => 20
                         ]);
                         $response = json_decode($result->getBody()->getContents(), true);
-                        Log::info('Response Api Hacienda '. json_encode($response));
+                        Log::info('Response Credit Note Api Hacienda '. json_encode($response));
                         if (isset($response['status']) && $response['status'] == 200) {
                             Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
                             $date = Carbon::now();
                             $invoice->hacienda_status = '03';
                             $invoice->save();
                             $path = 'empresa-' . $company->id_number .
-                                "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
+                                "/notas_credito_ventas/$date->year/$date->month/$invoice->document_key.xml";
                             $save = Storage::put(
                                 $path,
                                 ltrim($response['data']['xmlFirmado'], '\n'));
@@ -90,18 +92,16 @@ class ProcessInvoice implements ShouldQueue
                                 $xml->bill_id = 0;
                                 $xml->xml = $path;
                                 $xml->save();
-                                
+
                                 if ( !empty($invoice->send_emails) ) {
-                                    Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new \App\Mail\InvoiceNotification([
+                                    Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new CreditNoteNotificacion([
                                         'xml' => $path,
-                                        'data_invoice' => $invoice, 'data_company' => $company,
-                                        'xml' => ltrim($response['data']['response'], '\n')
+                                        'data_invoice' => $invoice, 'data_company' => $company
                                     ]));
                                 } else {
-                                    Mail::to($invoice->client_email)->send(new \App\Mail\InvoiceNotification([
+                                    Mail::to($invoice->client_email)->send(new CreditNoteNotificacion([
                                         'xml' => $path,
-                                        'data_invoice' => $invoice, 'data_company' => $company,
-                                        'xml' => ltrim($response['data']['response'], '\n')
+                                        'data_invoice' => $invoice, 'data_company' => $company
                                     ]));
                                 }
                             }
@@ -110,14 +110,14 @@ class ProcessInvoice implements ShouldQueue
                             strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
                             Log::info('Consecutive repeated -->' . $invoice->document_number);
                             $lastRef = $invoice->reference_number;
-                            $invoice->reference_number = $company->last_invoice_ref_number + 1 == $lastRef ?
-                            $company->last_invoice_ref_number + 2 : $company->last_invoice_ref_number + 1;
+                            $invoice->reference_number = $company->last_note_ref_number + 1 == $lastRef ?
+                                $company->last_note_ref_number + 2 : $company->last_note_ref_number + 1;
                             $invoice->save();
-                            $invoice->document_number = getDocReference('01', $invoice->reference_number);
-                            $invoice->document_key = getDocumentKey('01', $invoice->reference_number, $company->id_number);
+                            $invoice->document_number = getDocReference('03', $invoice->reference_number);
+                            $invoice->document_key = getDocumentKey('03', $invoice->reference_number, $company->id_number);
                             $invoice->save();
-                            $company->last_invoice_ref_number = $invoice->reference_number;
-                            $company->last_document = $invoice->document_number;
+                            $company->last_note_ref_number = $invoice->reference_number;
+                            $company->last_document_note = $invoice->document_number;
                             $company->save();
                             Log::info('Resend with next consecutive -->' . $invoice->document_number);
                             $requestDetails = $this->setDetails($invoice->items);
@@ -126,7 +126,7 @@ class ProcessInvoice implements ShouldQueue
                             $tokenApi = $apiHacienda->login(false);
                             if ($requestData !== false) {
                                 Log::info('Enviando Request  API HACIENDA -->>' . $this->invoiceId);
-                                $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice/create', [
+                                $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice/credit', [
                                     'headers' => [
                                         'Auth-Key' => config('etax.api_hacienda_key'),
                                         'Client-Service' => config('etax.api_hacienda_client'),
@@ -157,7 +157,7 @@ class ProcessInvoice implements ShouldQueue
                                         $xml->bill_id = 0;
                                         $xml->xml = $path;
                                         $xml->save();
-                                        
+
                                         if ( !empty($invoice->send_emails) ) {
                                             Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new \App\Mail\InvoiceNotification(['xml' => $path,
                                                 'data_invoice' => $invoice, 'data_company' => $company,
@@ -167,20 +167,20 @@ class ProcessInvoice implements ShouldQueue
                                                 'data_invoice' => $invoice, 'data_company' => $company,
                                                 'xml' => ltrim($response['data']['response'], '\n')]));
                                         }
-                                        
+
                                         Log::info('Resend completed');
                                     }
                                 }
                             }
                         }
-                        Log::info('Proceso de facturación finalizado con éxito.');
+                        Log::info('Proceso de nota de credito finalizado con éxito.');
                     }
                 }
             }else {
-                Log::warning('El job no se procesó, porque la empresa no tiene un certificado válido.');
+                Log::warning('El job no se procesó, porque la empresa no tiene un certificado válido: '.$this->invoiceId.'-->>');
             }
         } catch ( \Exception $e) {
-            Log::error('ERROR Enviando parametros  API HACIENDA Invoice: '.$this->invoiceId.'-->>'.$e);
+            Log::error('ERROR Enviando parametros  API HACIENDA Nota de credito: '.$this->invoiceId.'-->>'.$e);
         }
     }
 
@@ -219,6 +219,10 @@ class ProcessInvoice implements ShouldQueue
                 'usuarioAtv' => $company->atv->user ?? '',
                 'passwordAtv' => $company->atv->password ?? '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
+                'referencia_codigo' => '01',
+                'referencia_razon' => 'Anulacion de factura',
+                'fecha_emision_factura' => $data['reference_generated_date'],
+                'clave_factura' => $data['reference_document_key'],
                 'atvcertPin' => $company->atv->pin ?? '',
                 'atvcertFile' => Storage::get($company->atv->key_url),
                 'detalle' => $details

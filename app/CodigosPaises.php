@@ -5,9 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Actividades extends Model
+class CodigosPaises extends Model
 {
-    protected $guarded = [];
-
     use SoftDeletes;
 }

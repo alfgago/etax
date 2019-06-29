@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddCompanyAdditionalInvoices extends Migration
+class AddOtherDocument extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddCompanyAdditionalInvoices extends Migration
      */
     public function up()
     {
-        Schema::table('companies', function (Blueprint $table) {
-            $table->integer('additional_invoices')->default(0);
+        Schema::table('invoices', function (Blueprint $table) {
+            $table->string('reference_document_key')->nullable();
         });
     }
 
@@ -25,8 +25,8 @@ class AddCompanyAdditionalInvoices extends Migration
      */
     public function down()
     {
-        Schema::table('companies', function($table) {
-            $table->dropColumn('additional_invoices');
+        Schema::table('invoices', function($table) {
+            $table->dropColumn('reference_document_key');
         });
     }
 }
