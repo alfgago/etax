@@ -112,11 +112,11 @@
 
     <div class="form-group col-md-3">
       <label for="item_subtotal">Subtotal</label>
-      <input type="text" class="form-control" id="item_subtotal" placeholder="" readonly="true" >
+      <input type="number" min="0" class="form-control" id="item_subtotal" placeholder="" readonly="true" >
     </div>
 
     <div class="form-group col-md-3">
-      <label for="item_total">Total item</label>
+        <label for="item_total" id="etiqTotal">Monto Total Linea</label>
       <input type="text" class="form-control" id="item_total" placeholder="" readonly="true" >
     </div>
     
@@ -126,6 +126,55 @@
         <input type="checkbox" class="form-control" id="is_identificacion_especifica" placeholder="" readonly="true" >
       </label>
     </div>
+      <div class="form-group col-md-12 inline-form inline-checkbox">
+          <label for="checkExoneracion">
+              <span>Incluir exoneraci&oacute;n</span>
+              <input type="checkbox" class="form-control" id="checkExoneracion" onchange="mostrarCamposExoneracion();">
+          </label>
+      </div>
+      <div class="exoneracion-cont col-md-12" style="display:none;">
+          <div class="form-row">
+              <div class="col-md-6">
+                  <label for="typeDocument">Tipo de Documento de Exoneraci&oacute;n</label>
+                  <select class="form-control" id="typeDocument" name="typeDocument" value="" >
+                      <option value="" selected>-- Seleccione --</option>
+                      <option value="01">Compras Autorizadas</option>
+                      <option value="02">Ventas exentas a diplomáticos</option>
+                      <option value="03">Autorizado por Ley Especial</option>
+                      <option value="04">Exenciones Dirección General de Hacienda</option>
+                      <option value="05">Transitorio V</option>
+                      <option value="06">Transitorio IX</option>
+                      <option value="07">Transitorio XVII</option>
+                      <option value="99">Otros</option>
+                  </select>
+              </div>
+              <div class="form-group col-md-6">
+                  <label for="numeroDocumento">N&uacute;mero Documento de Exoneraci&oacute;n *</label>
+                  <input type="text" class="form-control" id="numeroDocumento" name="numeroDocumento" placeholder="Numero de documento">
+              </div>
+              <div class="form-group col-md-12">
+                  <label for="nombreInstitucion">Nombre de Instituci&oacute;n *</label>
+                  <input type="text" class="form-control" id="nombreInstitucion" name="nombreInstitucion" placeholder="Nombre de Instituci&oacute;n">
+              </div>
+
+              <div class="form-group col-md-1">
+                  <label for="porcentajeExoneracion">% *</label>
+                  <input type="text" class="form-control" id="porcentajeExoneracion" name="porcentajeExoneracion" placeholder="%" onkeyup="calcularMontoExoneracion();">
+              </div>
+              <div class="form-group col-md-3">
+                  <label for="montoExoneracion">Monto Exonerado *</label>
+                  <input type="text" class="form-control" id="montoExoneracion" name="montoExoneracion" readonly>
+              </div>
+              <div class="form-group col-md-4">
+                  <label for="impuestoNeto">Impuesto Neto </label>
+                  <input type="text" class="form-control" id="impuestoNeto" name="impuestoNeto" readonly>
+              </div>
+              <div class="form-group col-md-4">
+                  <label for="montoTotalLinea">Monto Total Linea </label>
+                  <input type="text" class="form-control" id="montoTotalLinea" name="montoTotalLinea" readonly>
+              </div>
+          </div>
+      </div>
 
     <div class="form-group col-md-12">
       <div class="botones-agregar">
@@ -165,20 +214,63 @@
                     id: id
                 },
                 success: function (result) {
-                  if(result.name) {
-                    $('#nombre').val(result.name);
-                    $('#unidad_medicion').val(result.measure_unit);
-                    $('#precio_unitario').val(result.unit_price);
-                    $('#tipo_producto').val(result.product_category_id);
-                    $('#tipo_iva').val(result.default_iva_type);
+                    if(result.name) {
+                        $('#nombre').val(result.name);
+                        $('#unidad_medicion').val(result.measure_unit);
+                        $('#precio_unitario').val(result.unit_price);
+                        $('#tipo_producto').val(result.product_category_id);
+                        $('#tipo_iva').val(result.default_iva_type);
 
-                    $('#precio_unitario').change();
-                    $('#tipo_iva').change();
-                  }
+                        $('#precio_unitario').change();
+                        $('#tipo_iva').change();
+                    }
                 }
             });
         }else{
             alert('Debe digitar un código numeral para la búsqueda');
+        }
+    }
+    function calcularMontoExoneracion() {
+        var porcentajeExonerado = $('#porcentajeExoneracion').val();
+        if(porcentajeExonerado > 0) {
+            var monto_iva_detalle = $('#item_iva_amount').val();
+            var monto = monto_iva_detalle * (porcentajeExonerado / 100);
+            var impNeto = monto_iva_detalle - monto;
+            var subTotal = $('#item_subtotal').val();
+            var montoTotal = parseFloat(subTotal) + parseFloat(impNeto);
+
+            $('#montoExoneracion').val(monto);
+            $('#impuestoNeto').val(impNeto);
+            $('#montoTotalLinea').val(montoTotal);
+
+        }
+    }
+    function mostrarCamposExoneracion() {
+
+        var checkExoneracion = $('#checkExoneracion').prop('checked');
+        console.log(checkExoneracion);
+        if(checkExoneracion === true){
+            $(".ayuda-cont").show();
+            $('#etiqTotal').text('');
+            $('#etiqTotal').text('Total sin exonerar');
+            $('#divTypeDocument').attr('hidden', false);
+            $('#divNumeroDocumento').attr('hidden', false);
+            $('#divNombreInstitucion').attr('hidden', false);
+            $('#divPorcentajeExoneracion').attr('hidden', false);
+            $('#divMontoExoneracion').attr('hidden', false);
+            $('#divMontoTotalLinea').attr('hidden', false);
+            $('#divImpuestoNeto').attr('hidden', false);
+        }else{
+            $(".ayuda-cont").hide();
+            $('#etiqTotal').text('');
+            $('#etiqTotal').text('Monto Total Linea');
+            $('#divTypeDocument').attr('hidden', true);
+            $('#divNumeroDocumento').attr('hidden', true);
+            $('#divNombreInstitucion').attr('hidden', true);
+            $('#divPorcentajeExoneracion').attr('hidden', true);
+            $('#divMontoExoneracion').attr('hidden', true);
+            $('#divMontoTotalLinea').attr('hidden', true);
+            $('#divImpuestoNeto').attr('hidden', true);
         }
     }
 </script>

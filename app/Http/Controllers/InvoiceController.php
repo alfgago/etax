@@ -380,7 +380,7 @@ class InvoiceController extends Controller
                 
                 foreach ($collection[0]->chunk(200) as $facturas) {
 
-                    \DB::transaction(function () use ($facturas, &$company, &$i, $available_invoices, $available_invoices_by_plan) {
+                    \DB::transaction(function () use ($facturas, &$company, &$i , $available_invoices, $available_invoices_by_plan) {
 
                         $inserts = array();
                         foreach ($facturas as $row){
@@ -430,6 +430,15 @@ class InvoiceController extends Controller
                             $codigoEtax = $row['codigoivaetax'];
                             $montoIva = (float)$row['montoiva'];
                             $totalNeto = 0;
+                            $arrayExoneracion = array();
+                            $tipoDocumentoExoneracion = $row['tipoDocumentoExoneracion'];
+                            $documentoExoneracion = $row['documentoExoneracion'];
+                            $companiaExoneracion = $row['companiaExoneracion'];
+                            $porcentajeExoneracion = $row['porcentajeExoneracion'];
+                            $montoExoneracion = $row['montoExoneracion'];
+                            $totalMontoLinea = $row['totalMontoLinea'];
+
+                            array_push($arrayExoneracion, $tipoDocumentoExoneracion, $documentoExoneracion, $companiaExoneracion, $porcentajeExoneracion);
 
                             $insert = Invoice::importInvoiceRow(
                                 $metodoGeneracion, 0, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
