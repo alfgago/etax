@@ -118,7 +118,8 @@ class ReportsController extends Controller
         $ano = $request->ano ? $request->ano : 2019;
         $mes = $request->mes ? $request->mes : 1;
         
-        $prorrataOperativa = $this->getProrrataOperativa($ano);
+        $company = currentCompanyModel();
+        $prorrataOperativa = $company->getProrrataOperativa($ano);
         
         $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
         $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
@@ -160,7 +161,8 @@ class ReportsController extends Controller
       $ano = $request->ano ? $request->ano : 2019;
       $mes = $request->mes ? $request->mes : 0;
       
-      $prorrataOperativa = $this->getProrrataOperativa($ano);
+      $company = currentCompanyModel();
+      $prorrataOperativa = $company->getProrrataOperativa($ano);
       
       $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
       $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
@@ -187,7 +189,8 @@ class ReportsController extends Controller
       $ano = $request->ano ? $request->ano : 2019;
       $mes = $request->mes ? $request->mes : 1;
       
-      $prorrataOperativa = $this->getProrrataOperativa($ano);
+      $company = currentCompanyModel();
+      $prorrataOperativa = $company->getProrrataOperativa($ano);
       
       $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
       $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
@@ -215,7 +218,8 @@ class ReportsController extends Controller
       $ano = $request->ano ? $request->ano : 2019;
       $mes = $request->mes ? $request->mes : 1;
       
-      $prorrataOperativa = $this->getProrrataOperativa($ano);
+      $company = currentCompanyModel();
+      $prorrataOperativa = $company->getProrrataOperativa($ano);
       
       $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
       $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
@@ -241,7 +245,8 @@ class ReportsController extends Controller
       $ano = $request->ano ? $request->ano : 2019;
       $mes = $request->mes ? $request->mes : 1;
       
-      $prorrataOperativa = $this->getProrrataOperativa($ano);
+      $company = currentCompanyModel();
+      $prorrataOperativa = $company->getProrrataOperativa($ano);
       
       $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
       $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
@@ -261,32 +266,7 @@ class ReportsController extends Controller
       return view('/Reports/reporte-detalle-credito-fiscal', compact( 'acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'ano' ));
 
     }
-    
-    public function getProrrataOperativa( $ano ){
-      
-      $anoAnterior = $ano > 2018 ? $ano-1 : 2018;
-      $company = currentCompanyModel();
-      
-      if($anoAnterior == 2018) {
-        if( $company->first_prorrata_type == 1 ){
-          $prorrataOperativa = $company->first_prorrata ? $company->first_prorrata / 100 : 1;
-        }else {
-          $anterior = CalculatedTax::getProrrataPeriodoAnterior( $anoAnterior );
-          $prorrataOperativa = $anterior->prorrata;
-        }
-      }else{
-        $anterior = CalculatedTax::getProrrataPeriodoAnterior( $anoAnterior );
-        $prorrataOperativa = $anterior->prorrata;
-      }
-
-      return $prorrataOperativa;
-    }
   
-    /** @author Akhil Bansal
-     * This Method is used to switch companies workspaces
-     * @param Request $request 
-     * @return $url
-     */
     public function changeCompany(Request $request) {
 
         if (!$request->ajax()) {

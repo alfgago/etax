@@ -9,13 +9,13 @@
      <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Resumen ejecutivo | eTax </title>
   
-
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/3.4.1/tippy.css" />
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/select2.min.css')}}">
-    <link rel="stylesheet" href="{{mix('assets/styles/css/themes/eva.min.css')}}?v=2.1">
+    <link rel="stylesheet" href="{{mix('assets/styles/css/themes/eva.min.css')}}?v=6">
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/perfect-scrollbar.css')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
     
-    <script src="https://app.calculodeiva.com/assets/js/common-bundle.js?v=2.5"></script>
+    <script src="https://app.calculodeiva.com/assets/js/common-bundle.js?v=6"></script>
 		<script src="{{asset('assets/js/vendor/echarts.min.js')}}"></script>
 		<script src="{{asset('assets/js/es5/echart.options.min.js')}}"></script>
 </head>

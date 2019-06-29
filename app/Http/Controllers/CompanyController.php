@@ -53,7 +53,7 @@ class CompanyController extends Controller {
      */
     public function create() {
         
-        if( ! auth()->user()->isContador() ) {
+        if( auth()->user()->isContador() ) {
             return redirect('/')->withMessage('Su cuenta actual no permite más empresas.');
         }
         
