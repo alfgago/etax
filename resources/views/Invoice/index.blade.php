@@ -39,6 +39,7 @@
               <th data-priority="5">Monto IVA</th>
               <th data-priority="4">Total</th>
               <th data-priority="5">F. Generada</th>
+              <th data-priority="1">Estados</th>
               <th data-priority="1">Acciones</th>
             </tr>
           </thead>
@@ -77,6 +78,7 @@ $(function() {
       { data: 'iva_amount', name: 'iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
       { data: 'total', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
       { data: 'generated_date', name: 'generated_date' },
+      { data: 'hacienda_status', name: 'hacienda_status' },
       { data: 'actions', name: 'actions', orderable: false, searchable: false },
     ],
     language: {
@@ -92,7 +94,7 @@ function reloadDataTable() {
 function confirmDelete( id ) {
   var formId = "#delete-form-"+id;
   Swal.fire({
-    title: '¿Está seguro que desea eliminar la factura',
+    title: '¿Está seguro que desea eliminar la factura' ,
     text: "Este proceso la eliminará a nivel de cálculo en eTax, sin embargo no hace anulaciones ni revierte aceptaciones ante Hacienda. Usted podrá volver a importar la factura via XML o ingreso manual.",
     type: 'warning',
     showCloseButton: true,
