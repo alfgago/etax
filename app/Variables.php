@@ -9,32 +9,32 @@ class Variables
   
   public static function tiposIVARepercutidos() {
     $lista = [
-      ['nombre'=>'101 - Ventas locales de bienes y servicios con derecho a crédito al 1%', 'codigo'=>'101', 'porcentaje'=>'1'],
-      ['nombre'=>'102 - Ventas locales de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'102', 'porcentaje'=>'2'],
-      ['nombre'=>'103 - Ventas locales de bienes y servicios con derecho a crédito al 13%', 'codigo'=>'103', 'porcentaje'=>'13'],
-      ['nombre'=>'104 - Ventas locales de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'104', 'porcentaje'=>'4'],
+      ['nombre'=>'101 - Ventas locales de bienes y servicios con derecho a crédito al 1%', 'codigo'=>'101', 'porcentaje'=>'1', 'codigo_tarifa' => '02'],
+      ['nombre'=>'102 - Ventas locales de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'102', 'porcentaje'=>'2', 'codigo_tarifa' => '03'],
+      ['nombre'=>'103 - Ventas locales de bienes y servicios con derecho a crédito al 13%', 'codigo'=>'103', 'porcentaje'=>'13', 'codigo_tarifa' => '08'],
+      ['nombre'=>'104 - Ventas locales de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'104', 'porcentaje'=>'4', 'codigo_tarifa' => '04'],
       
-      ['nombre'=>'114 - Ventas locales con tarifa transitoria del 4% con derecho a crédito  *vigente del 1-07-2020 al 30-06-2021', 'codigo'=>'114', 'porcentaje'=>'4', 'hide'=>true, 'hideMasiva'=>true],
-      ['nombre'=>'118 - Ventas locales con tarifa transitoria del 8% con derecho a crédito  *vigente del 1-07-2021 al 30-06-2022', 'codigo'=>'118', 'porcentaje'=>'8', 'hide'=>true, 'hideMasiva'=>true],
+      ['nombre'=>'114 - Ventas locales con tarifa transitoria del 4% con derecho a crédito  *vigente del 1-07-2020 al 30-06-2021', 'codigo'=>'114', 'porcentaje'=>'4', 'hide'=>true, 'hideMasiva'=>true, 'codigo_tarifa' => '06'],
+      ['nombre'=>'118 - Ventas locales con tarifa transitoria del 8% con derecho a crédito  *vigente del 1-07-2021 al 30-06-2022', 'codigo'=>'118', 'porcentaje'=>'8', 'hide'=>true, 'hideMasiva'=>true, 'codigo_tarifa' => '07'],
       
-      ['nombre'=>'121 - Autoconsumo de bienes y servicios con derecho a crédito al 1%', 'codigo'=>'121', 'porcentaje'=>'1', 'hideMasiva'=>true],
-      ['nombre'=>'122 - Autoconsumo de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'122', 'porcentaje'=>'2', 'hideMasiva'=>true],
-      ['nombre'=>'123 - Autoconsumo de bienes y servicios con derecho a crédito al 13%', 'codigo'=>'123', 'porcentaje'=>'13', 'hideMasiva'=>true],
-      ['nombre'=>'124 - Autoconsumo de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'124', 'porcentaje'=>'4', 'hideMasiva'=>true],
+      ['nombre'=>'121 - Autoconsumo de bienes y servicios con derecho a crédito al 1%', 'codigo'=>'121', 'porcentaje'=>'1', 'hideMasiva'=>true, 'codigo_tarifa' => '02'],
+      ['nombre'=>'122 - Autoconsumo de bienes y servicios con derecho a crédito al 2%', 'codigo'=>'122', 'porcentaje'=>'2', 'hideMasiva'=>true, 'codigo_tarifa' => '03'],
+      ['nombre'=>'123 - Autoconsumo de bienes y servicios con derecho a crédito al 13%', 'codigo'=>'123', 'porcentaje'=>'13', 'hideMasiva'=>true, 'codigo_tarifa' => '08'],
+      ['nombre'=>'124 - Autoconsumo de bienes y servicios con derecho a crédito al 4%', 'codigo'=>'124', 'porcentaje'=>'4', 'hideMasiva'=>true, 'codigo_tarifa' => '04'],
       
-      ['nombre'=>'130 - Ventas de bienes y servicios con límites sobrepasados al 13% con derecho a crédito', 'codigo'=>'130', 'porcentaje'=>'13', 'hideMasiva'=>true],
-      ['nombre'=>'140 - Inversion del sujeto pasivo', 'codigo'=>'140', 'porcentaje'=>'13', 'hideMasiva'=>true],
-      ['nombre'=>'150 - Ventas por exportación con derecho a crédito', 'codigo'=>'150', 'porcentaje'=>'0'],
-      ['nombre'=>'155 - Ventas con derecho a crédito por ventas con IVA recaudado desde aduanas.', 'codigo'=>'155', 'porcentaje'=>'0'],
-      ['nombre'=>'160 - Ventas al Estado e Instituciones con derecho a crédito', 'codigo'=>'160', 'porcentaje'=>'0'],
-      ['nombre'=>'165 - Ventas de canasta básica con tarifa transitoria de 0% con acreditación plena', 'codigo'=>'165', 'porcentaje'=>'0'],
-      ['nombre'=>'170 - Ventas a no sujetos y exentos con derecho a crédito', 'codigo'=>'170', 'porcentaje'=>'0'],
-      ['nombre'=>'200 - Ventas sin derecho a crédito por exenciones objetivas', 'codigo'=>'200', 'porcentaje'=>'0'],
-      ['nombre'=>'201 - Ventas sin derecho a crédito por exenciones objetivas con límite no sobrepasado', 'codigo'=>'201', 'porcentaje'=>'0'],
-      ['nombre'=>'240 - Autoconsumo sin derecho a crédito', 'codigo'=>'240', 'porcentaje'=>'0', 'hideMasiva'=>true],
-      ['nombre'=>'245 - Ventas locales con tarifa transitoria del 0% sin derecho a crédito', 'codigo'=>'245', 'porcentaje'=>'0'], //*vigente del 1-07-2019 al 30-06-2020
-      ['nombre'=>'250 - Ventas con IVA incluido en el precio', 'codigo'=>'250', 'porcentaje'=>'0', 'hide'=>true, 'hideMasiva'=>true],
-      ['nombre'=>'260 - Ventas sin derecho a crédito por ventas al Estado', 'codigo'=>'260', 'porcentaje'=>'0'],
+      ['nombre'=>'130 - Ventas de bienes y servicios con límites sobrepasados al 13% con derecho a crédito', 'codigo'=>'130', 'porcentaje'=>'13', 'hideMasiva'=>true, 'codigo_tarifa' => '08'],
+      ['nombre'=>'140 - Inversion del sujeto pasivo', 'codigo'=>'140', 'porcentaje'=>'13', 'hideMasiva'=>true, 'codigo_tarifa' => '08'],
+      ['nombre'=>'150 - Ventas por exportación con derecho a crédito', 'codigo'=>'150', 'porcentaje'=>'0', 'codigo_tarifa' => '01'],
+      ['nombre'=>'155 - Ventas con derecho a crédito por ventas con IVA recaudado desde aduanas.', 'codigo'=>'155', 'porcentaje'=>'0', 'codigo_tarifa' => '01'],
+      ['nombre'=>'160 - Ventas al Estado e Instituciones con derecho a crédito', 'codigo'=>'160', 'porcentaje'=>'0', 'codigo_tarifa' => '05'],
+      ['nombre'=>'165 - Ventas de canasta básica con tarifa transitoria de 0% con acreditación plena', 'codigo'=>'165', 'porcentaje'=>'0', 'codigo_tarifa' => '05'],
+      ['nombre'=>'170 - Ventas a no sujetos y exentos con derecho a crédito', 'codigo'=>'170', 'porcentaje'=>'0', 'codigo_tarifa' => '01'],
+      ['nombre'=>'200 - Ventas sin derecho a crédito por exenciones objetivas', 'codigo'=>'200', 'porcentaje'=>'0', 'codigo_tarifa' => '01'],
+      ['nombre'=>'201 - Ventas sin derecho a crédito por exenciones objetivas con límite no sobrepasado', 'codigo'=>'201', 'porcentaje'=>'0', 'codigo_tarifa' => '01'],
+      ['nombre'=>'240 - Autoconsumo sin derecho a crédito', 'codigo'=>'240', 'porcentaje'=>'0', 'hideMasiva'=>true, 'codigo_tarifa' => '01'],
+      ['nombre'=>'245 - Ventas locales con tarifa transitoria del 0% sin derecho a crédito', 'codigo'=>'245', 'porcentaje'=>'0', 'codigo_tarifa' => '01'], //*vigente del 1-07-2019 al 30-06-2020
+      ['nombre'=>'250 - Ventas con IVA incluido en el precio', 'codigo'=>'250', 'porcentaje'=>'0', 'hide'=>true, 'hideMasiva'=>true, 'codigo_tarifa' => '01'],
+      ['nombre'=>'260 - Ventas sin derecho a crédito por ventas al Estado', 'codigo'=>'260', 'porcentaje'=>'0', 'codigo_tarifa' => '01']
     ];
 
     return $lista;
@@ -146,6 +146,18 @@ class Variables
 
     return $lista;
   }
+
+  public static function getCodigoTarifaVentas( $codigo ) {
+      $lista = Variables::tiposIVARepercutidos();
+
+      foreach ($lista as $tipo) {
+          if( $codigo == $tipo['codigo'] ){
+              return $tipo['codigo_tarifa'];
+          }
+      }
+
+      return "08";
+  }
   
   public static function unidadesMedicion() {
     $lista = [
@@ -255,7 +267,7 @@ class Variables
     if($value == 'Otros'){
       return $value;
     }
-    
+
     $unid = UnidadMedicion::where('code', $value)->first();
     
     if( isset($unid) ){

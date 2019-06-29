@@ -95,6 +95,9 @@ class Invoice extends Model
             $this->buy_order = $request->buy_order;
             $this->other_reference = $request->other_reference;
             $this->send_emails = $request->send_email ?? null;
+            if($request->comercial_activity){
+                $this->comercial_activity = $request->comercial_activity;
+            }
 
             //Datos de cliente. El cliente nuevo viene con ID = -1
             if( $request->client_id == '-1' ) {
@@ -125,6 +128,7 @@ class Invoice extends Model
                         'neighborhood' => $request->neighborhood,
                         'zip' => $request->zip,
                         'address' => $request->address,
+                        'otrasSenasExtranjero' => $request->address,
                         'phone' => $request->phone,
                         'es_exento' => $request->es_exento,
                         'email' => $request->email,

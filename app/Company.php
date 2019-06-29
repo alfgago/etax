@@ -46,7 +46,11 @@ class Company extends Model {
     public function atv() {
         return $this->hasOne(AtvCertificate::class);
     }
-    
+
+    //Relacion con Actividades comerciales
+    public function actividades(){
+        return $this->hasOne(Actividades::class);
+    }
     //Revisa si el certificado existe
     public function certificateExists() {
         if( $this->atv ){

@@ -25,7 +25,7 @@ class AddCompanyAdditionalInvoices extends Migration
      */
     public function down()
     {
-        Schema::table('users', function($table) {
+        Schema::table('companies', function($table) {
             $table->dropColumn('additional_invoices');
         });
     }
