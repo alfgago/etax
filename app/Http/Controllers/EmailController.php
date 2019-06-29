@@ -65,11 +65,12 @@ class EmailController extends Controller
         $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
         $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
         $consecutivoComprobante = $arr['NumeroConsecutivo'];
+        $clave = $arr['Clave'];
         
         try {  
             if( Bill::saveBillXML( $arr, 'Email' ) ) {
                 $company = Company::where('id_number', $identificacionReceptor)->first();
-                $bill = Bill::where('company_id', $company->id)->where('document_number', $consecutivoComprobante)->first();
+                $bill = Bill::where('company_id', $company->id)->where('document_key', $clave)->first();
                 Bill::storeXML( $bill, $file );
                 Log::info( "Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor");
             }

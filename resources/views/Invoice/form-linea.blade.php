@@ -141,15 +141,6 @@
   </div>
 </div>
 <script>
-    function productName(){
-        var data = $('#codigo').val();
-        var datos = data.split("-");
-        var price = parseFloat(datos[3]).toFixed(2);
-        $('#nombre').val(datos[1]);
-        $('#unidad_medicion').val(datos[2]);
-        $('#precio_unitario').val(price);
-        $('#precio_unitario').change();
-    }
     function buscarProducto() {
         var id = $('#codigo').val();
         if(id !== '' && id !== undefined){

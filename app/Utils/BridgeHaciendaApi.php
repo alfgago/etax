@@ -10,7 +10,9 @@ namespace App\Utils;
 
 use App\Invoice;
 use App\InvoiceItem;
+use App\Jobs\ProcessCreditNote;
 use App\Jobs\ProcessInvoice;
+use App\Variables;
 use App\XmlHacienda;
 use App\Utils\InvoiceUtils;
 use Carbon\Carbon;
@@ -95,6 +97,21 @@ class BridgeHaciendaApi
         }
     }
 
+    public function createCreditNote(Invoice $invoice, $token) {
+        try {
+
+            $company = $invoice->company;
+            //Send to queue invoice
+            ProcessCreditNote::dispatch($invoice->id, $company->id, $token)
+                ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
+            return $invoice;
+
+        } catch (ClientException $error) {
+            Log::error('Error al crear factura en API HACIENDA -->>'. $error->getMessage() );
+            return $invoice;
+        }
+    }
+
     private function setDetails($data) {
         try {
             $details = null;
@@ -117,6 +134,36 @@ class BridgeHaciendaApi
             return false;
         }
     }
+    /*****************************************************************************************/
+    private function setDetails43($data) {
+        try {
+            $details = null;
+            foreach ($data as $key => $value) {
+                $details[$key] = array(
+                    'cantidad' => $value['item_count'] ?? '',
+                    'unidadMedida' => $value['measure_unit'] ?? '',
+                    'detalle' => $value['name'] ?? '',
+                    'precioUnitario' => $value['unit_price'] ?? '',
+                    'subtotal' => $value['subtotal'] ?? '',
+                    'montoTotal' => $value['item_count'] * $value['unit_price'] ?? '',
+                    'montoTotalLinea' => $value['subtotal'] + $value['iva_amount'] ?? '',
+                    'descuento' => $value['discount'] ?? '',
+                    'impuesto' => 0, // @todo 4.3
+                    'codigo' => '01',
+                    'baseImponible' => 0,
+                    'codigoTarifa' => Variables::getCodigoTarifaVentas($value['tipo_iva']),
+                    'tarifa' => $value['porc_iva'],
+                    'factorIVA' => $value['porc_iva'] / 100,
+                    'monto' => $value['item_iva_amount']
+                );
+            }
+            return json_encode($details, true);
+        } catch (ClientException $error) {
+            Log::error('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
+            return false;
+        }
+    }
+    /*****************************************************************************************/
 
     private function setInvoiceData(Invoice $data, $details) {
         try {
@@ -130,11 +177,13 @@ class BridgeHaciendaApi
             $invoiceData = array(
                 'consecutivo' => $ref ?? '',
                 'fecha_emision' => $data['generated_date']->toDateTimeString() ?? '',
+                'codigo_actividad' => $data['comercial_activity'],
                 'receptor_nombre' => $data['client_first_name'].' '.$data['client_last_name'],
                 'receptor_ubicacion_provincia' => substr($receptorPostalCode,0,1),
                 'receptor_ubicacion_canton' => substr($receptorPostalCode,1,2),
                 'receptor_ubicacion_distrito' => substr($receptorPostalCode,3),
                 'receptor_ubicacion_otras_senas' => $data['client_address'] ?? '',
+                'receptor_otras_senas_extranjero' => $data['otrasSenasExtranjero'] ?? '',
                 'receptor_email' => $data['client_email'] ?? '',
                 'receptor_cedula_numero' => $data['client_id_number'] ? preg_replace("/[^0-9]/", "", $data['client_id_number']) : '',
                 'receptor_postal_code' => $receptorPostalCode ?? '',
@@ -155,7 +204,7 @@ class BridgeHaciendaApi
                 'emisor_cedula' => $company->id_number ? preg_replace("/[^0-9]/", "", $company->id_number) : '',
                 'usuarioAtv' => $company->atv->user ?? '',
                 'passwordAtv' => $company->atv->password ?? '',
-                'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
+                'tipoAmbiente' => config('etax.hacienda_ambiente') ?? '01',
                 'atvcertPin' => $company->atv->pin ?? '',
                 'atvcertFile' => Storage::get($company->atv->key_url),
                 'detalle' => $details
@@ -180,7 +229,108 @@ class BridgeHaciendaApi
             return false;
         }
     }
-
+    /********************************************************************************************/
+    private function setInvoiceData43(Invoice $data, $details) {
+        try {
+            $company = $data->company;
+            $ref = getInvoiceReference($company->last_invoice_ref_number) + 1;
+            $data->reference_number = $ref;
+            $data->save();
+            $receptorPostalCode = $data['client_zip'];
+            $invoiceData = null;
+            $request = null;
+            $totalServiciosGravados = 0;
+            $totalServiciosExentos = 0;
+            $totalMercaderiasGravadas = 0;
+            $totalMercaderiasExentas = 0;
+            $totalDescuentos = 0;
+            $totalImpuestos = 0;
+            foreach ($details as $detail){
+                if($detail['measure_unit'] == 'Sp' && $detail['iva_amount'] == 0){
+                    $totalServiciosExentos .= $detail['total'];
+                }
+                if($detail['measure_unit'] == 'Sp' && $detail['iva_amount'] > 0){
+                    $totalServiciosGravados .= $detail['total'];
+                }
+                if($detail['measure_unit'] != 'Sp' && $detail['iva_amount'] == 0){
+                    $totalMercaderiasExentas .= $detail['total'];
+                }
+                if($detail['measure_unit'] != 'Sp' && $detail['iva_amount'] > 0){
+                    $totalMercaderiasGravadas .= $detail['total'];
+                }
+                $totalDescuentos .= $detail['discount'];
+                $totalImpuestos .= $detail['iva_amount'];
+            }
+            $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas;
+            $totalExento = $totalServiciosExentos + $totalMercaderiasExentas;
+            $totalVenta = $totalGravado + $totalExento;
+            $invoiceData = array(
+                'consecutivo' => $ref ?? '',
+                'fecha_emision' => $data['generated_date']->toDateTimeString() ?? '',
+                'codigo_actividad' => $data['comercial_activity'],
+                'receptor_nombre' => $data['client_first_name'].' '.$data['client_last_name'],
+                'receptor_ubicacion_provincia' => substr($receptorPostalCode,0,1),
+                'receptor_ubicacion_canton' => substr($receptorPostalCode,1,2),
+                'receptor_ubicacion_distrito' => substr($receptorPostalCode,3),
+                'receptor_ubicacion_otras_senas' => $data['client_address'] ?? '',
+                'receptor_otras_senas_extranjero' => $data['foreign_address'] ?? '',
+                'receptor_email' => $data['client_email'] ?? '',
+                'receptor_cedula_numero' => $data['client_id_number'] ? preg_replace("/[^0-9]/", "", $data['client_id_number']) : '',
+                'receptor_postal_code' => $receptorPostalCode ?? '',
+                'codigo_moneda' => $data['currency'] ?? '',
+                'tipocambio' => $data['currency_rate'] ?? '',
+                'tipo_documento' => $data['document_type'] ?? '',
+                'sucursal_nro' => '001',
+                'terminal_nro' => '00001',
+                'emisor_name' => $company->business_name ?? '',
+                'emisor_email' => $company->email ?? '',
+                'emisor_company' => $company->business_name ?? '',
+                'emisor_city' => $company->city ?? '',
+                'emisor_state' => $company->state ?? '',
+                'emisor_postal_code' => $company->zip ?? '',
+                'emisor_country' => $company->country ?? '',
+                'emisor_address' => $company->address ?? '',
+                'emisor_phone' => $company->phone ?? '',
+                'emisor_cedula' => $company->id_number ? preg_replace("/[^0-9]/", "", $company->id_number) : '',
+                'usuarioAtv' => $company->atv->user ?? '',
+                'passwordAtv' => $company->atv->password ?? '',
+                'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
+                'atvcertPin' => $company->atv->pin ?? '',
+                'atvcertFile' => Storage::get($company->atv->key_url),
+                'servgravados' => $totalServiciosGravados,
+                'servexentos' => $totalServiciosExentos,
+                'mercgravados' => $totalMercaderiasGravadas,
+                'mercexentos' => $totalMercaderiasExentas,
+                'totgravado' => $totalGravado,
+                'totexento' => $totalExento,
+                'totventa' => $totalVenta,
+                'totdescuentos' => $totalDescuentos,
+                'totventaneta' => $totalVenta - $totalDescuentos,
+                'totimpuestos' => $totalImpuestos,
+                'totcomprobante' => $totalVenta + $totalImpuestos,
+                'detalle' => $details
+            );
+            foreach ($invoiceData as $key => $values) {
+                if ($key == 'atvcertFile') {
+                    $request[]=array(
+                        'name' => $key,
+                        'contents' => $values,
+                        'filename' => $invoiceData['emisor_cedula'].'.p12'
+                    );
+                } else {
+                    $request[]=array(
+                        'name' => $key,
+                        'contents' => $values
+                    );
+                }
+            }
+            return $request;
+        } catch (ClientException $error) {
+            Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
+            return false;
+        }
+    }
+    /**************************************************************************************************/
     private function requestLogin() {
         $client = new Client();
         $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/auth/login', [

@@ -55,6 +55,7 @@ class BillController extends Controller
                 ->where('is_authorized', true)
                 ->where('is_code_validated', true)
                 ->where('is_totales', false)
+                ->where('accept_status', 1)
                 ->with('provider');
         
         $filtro = $request->get('filtro');
@@ -343,12 +344,13 @@ class BillController extends Controller
                     $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
                     $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
                     $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                    $clave = $arr['Clave'];
                     
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3
                         if( Bill::saveBillXML( $arr, 'XML' ) ) {
-                            $bill = Bill::where('company_id', $company->id)->where('document_number', $consecutivoComprobante)->first();
+                            $bill = Bill::where('company_id', $company->id)->where('document_key', $clave)->first();
                             Bill::storeXML( $bill, $file );
                         }
                     }else{
@@ -419,48 +421,6 @@ class BillController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexAccepts()
-    {
-        return view('Bill/index-aceptaciones-hacienda');
-    }
-    
-    /**
-     * Returns the required ajax data.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function indexDataAccepts() {
-        $current_company = currentCompany();
-
-        $query = Bill::where('bills.company_id', $current_company)
-        ->where('is_void', false)
-        ->where('status', '01')
-        ->where('is_totales', false)
-        ->where('is_authorized', true)
-        ->with('provider');
-        
-        return datatables()->eloquent( $query )
-            ->orderColumn('reference_number', '-reference_number $1')
-            ->addColumn('actions', function($bill) {
-                return view('Bill.ext.accept-actions', [
-                    'id' => $bill->id
-                ])->render();
-            }) 
-            ->editColumn('provider', function(Bill $bill) {
-                return $bill->provider->getFullName();
-            })
-            ->editColumn('generated_date', function(Bill $bill) {
-                return $bill->generatedDate()->format('d/m/Y');
-            })
-            ->rawColumns(['actions'])
-            ->toJson();
-    }
-    
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function indexAuthorize()
     {
         return view('Bill/index-autorizaciones');
@@ -505,7 +465,7 @@ class BillController extends Controller
         if ( $request->autorizar ) {
             $bill->is_authorized = true;
             $bill->save();
-            return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido autorizada');
+            return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido autorizada. Recuerde validar el código');
         }else {
             $bill->is_authorized = false;
             $bill->is_void = true;
@@ -513,6 +473,128 @@ class BillController extends Controller
             $bill->delete();
             return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido rechazada');
         }
+    }
+    
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexAccepts()
+    {
+        $query = Bill::where('bills.company_id', currentCompany())
+        ->where('is_void', false)
+        ->where('accept_status', '0')
+        ->where('is_totales', false)
+        ->where('is_authorized', true)
+        ->with('provider')->get();
+        
+        foreach ($query as $bill) {
+            $bill->calculateAcceptFields();
+        }
+        
+        $current_company = currentCompany();
+        
+        return view('Bill/index-aceptaciones-hacienda');
+    }
+    
+    /**
+     * Returns the required ajax data.
+     * @return \Illuminate\Http\Response
+     */
+    public function indexDataAccepts() {
+        $current_company = currentCompany();
+
+        $query = Bill::where('bills.company_id', $current_company)
+        ->where('is_void', false)
+        ->where('accept_status', '0')
+        ->where('is_totales', false)
+        ->where('is_authorized', true)
+        ->with('provider');
+        
+        return datatables()->eloquent( $query )
+            ->addColumn('actions', function($bill) {
+                return view('Bill.ext.accept-actions', [
+                    'bill' => $bill
+                ])->render();
+            }) 
+            ->editColumn('total', function(Bill $bill) {
+                return "$bill->currency $bill->total";
+            })
+            ->editColumn('accept_total_factura', function(Bill $bill) {
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_total_factura";
+            })
+            ->editColumn('accept_iva_total', function(Bill $bill) {
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_total";
+            })
+            ->editColumn('accept_iva_acreditable', function(Bill $bill) {
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_acreditable";
+            })
+            ->editColumn('accept_iva_gasto', function(Bill $bill) {
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_gasto";
+            })
+            ->editColumn('provider', function(Bill $bill) {
+                return $bill->provider->getFullName();
+            })
+            ->editColumn('generated_date', function(Bill $bill) {
+                return $bill->generatedDate()->format('d/m/Y');
+            })
+            ->rawColumns(['actions'])
+            ->toJson();
+    }
+    
+    public function indexAcceptsOther()
+    {
+        $bills = Bill::where('bills.company_id', currentCompany())
+        ->where('is_void', false)
+        ->where('accept_status', '0')
+        ->where('is_totales', false)
+        ->where('is_authorized', true)
+        ->with('provider')->paginate(10);
+        
+        return view('Bill/index-aceptaciones-otros', [
+          'bills' => $bills
+        ]);
+    }
+    
+    public function markAsNotAccepted ( $id )
+    {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+        
+        $bill->accept_status = 0;
+        $bill->save();
+        return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido incluida para aceptación');
+    }
+    
+    
+    /**
+     *  Metodo para hacer las aceptaciones
+     */
+    public function sendAcceptMessage ( Request $request, $id )
+    {
+        $bill = Bill::findOrFail($id);
+        
+        /*
+        $bill->accept_status = $request->accept_status;
+        $bill->save();
+        */
+        
+        return redirect('/facturas-recibidas/aceptaciones')->withError( 'La factura '. $bill->document_number . ' no pudo ser aceptada. Por favor contáctenos.');
+    }
+    
+    public function correctAccepted ( Request $request, $id )
+    {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+        
+        $bill->accept_iva_acreditable = $request->accept_iva_acreditable;
+        $bill->accept_iva_gasto = $request->accept_iva_gasto;
+        $bill->accept_status = 1;
+        $bill->accept_id_number = currentCompany();
+
+        $bill->save();
+        return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido aceptada');
     }
 
     /**

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddCompanyAdditionalInvoices extends Migration
+class AddActivityCompanyField extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class AddCompanyAdditionalInvoices extends Migration
     public function up()
     {
         Schema::table('companies', function (Blueprint $table) {
-            $table->integer('additional_invoices')->default(0);
+            $table->string('commercial_activities')->nullable();
         });
     }
 
@@ -25,8 +25,8 @@ class AddCompanyAdditionalInvoices extends Migration
      */
     public function down()
     {
-        Schema::table('companies', function($table) {
-            $table->dropColumn('additional_invoices');
+        Schema::table('companies', function (Blueprint $table) {
+            $table->dropColumn('commercial_activities')->nullable();
         });
     }
 }
