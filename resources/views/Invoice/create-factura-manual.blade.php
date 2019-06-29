@@ -142,6 +142,17 @@
                     </div>
                   </div>
                   
+                  <div class="form-group col-md-12">
+                      <label for="payment_type">Actividad Comercial</label>
+                      <div class="input-group">
+                          <select id="commercial_activity" name="commercial_activity" class="form-control" required>
+                              @foreach ( $arrayActividades as $actividad )
+                                  <option value="{{ $actividad->codigo }}">{{ $actividad->codigo }} - {{ $actividad->actividad }}</option>
+                              @endforeach
+                          </select>
+                      </div>
+                  </div>
+                  
                   <div class="form-group col-md-6">
                     <label for="sale_condition">Condición de venta</label>
                     <div class="input-group">
@@ -172,17 +183,6 @@
                         <option value="99">Otros</option>
                       </select>
                     </div>
-                  </div>
-
-                  <div class="form-group col-md-12">
-                      <label for="payment_type">Actividad Comercial</label>
-                      <div class="input-group">
-                          <select id="comercial_activity" name="comercial_activity" class="form-control" required>
-                              @foreach ( $arrayActividades as $actividad )
-                                  <option value="{{ $actividad['codigo'] }}">{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
-                              @endforeach
-                          </select>
-                      </div>
                   </div>
                   
                   <div class="form-group col-md-12" id="field-retencion" style="display:none;">

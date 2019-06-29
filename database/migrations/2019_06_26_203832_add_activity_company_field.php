@@ -13,8 +13,8 @@ class AddActivityCompanyField extends Migration
      */
     public function up()
     {
-        Schema::table('invoices', function (Blueprint $table) {
-            $table->string('comercial_activities')->nullable();
+        Schema::table('companies', function (Blueprint $table) {
+            $table->string('commercial_activities')->nullable();
         });
     }
 
@@ -25,6 +25,8 @@ class AddActivityCompanyField extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('comercial_activities');
+        Schema::table('companies', function (Blueprint $table) {
+            $table->dropColumn('commercial_activities')->nullable();
+        });
     }
 }

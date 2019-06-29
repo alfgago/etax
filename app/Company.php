@@ -51,6 +51,7 @@ class Company extends Model {
     public function actividades(){
         return $this->hasOne(Actividades::class);
     }
+    
     //Revisa si el certificado existe
     public function certificateExists() {
         if( $this->atv ){
@@ -73,6 +74,29 @@ class Company extends Model {
     //Relación con el plan
     public function subscription() {
         return $this->hasOne(Sales::class);
+    }
+    
+    public function getActivities() {
+        $arrayActividades = [];
+        
+        $arr = explode( ',', $this->commercial_activities );
+        $mainAct = '';
+    	$secondAct = '';
+    	
+    	if( array_key_exists(0, $arr) ) {
+    		$mainAct = $arr[0];
+    		$actividad1 = Actividades::where('codigo', $mainAct)->first();
+    		if($actividad1) {
+                array_push($arrayActividades, $actividad1);
+    		}
+    	}
+    	if( array_key_exists(1, $arr) ) {
+    		$secondAct = $arr[1];
+    		$actividad2 = Actividades::where('codigo', $mainAct)->first();
+            array_push($arrayActividades, $actividad2);
+    	}
+    	
+    	return $arrayActividades;
     }
 
     /* Changes the current selected company to chosen plan. As long as the plan has available company slots. */
