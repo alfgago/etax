@@ -15,7 +15,7 @@ class CreateCodigosPaisesTable extends Migration
     {
         Schema::create('codigos_paises', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedInteger('country_code')->nullable();
+            $table->string('country_code')->nullable();
             $table->string('country_name')->nullable();
             $table->softDeletes();
             $table->timestamps();
