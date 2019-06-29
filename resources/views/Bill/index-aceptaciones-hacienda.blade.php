@@ -5,7 +5,8 @@
 @endsection
 
 @section('breadcrumb-buttons')
-    
+    <div onclick="abrirPopup('importar-aceptacion-popup');" class="btn btn-primary">Importar facturas para aceptación</div>
+    <a href="/facturas-recibidas/aceptaciones-otros" class="btn btn-primary">Aceptación manual de facturas</a>
 @endsection 
 
 @section('content') 
@@ -35,7 +36,6 @@
   </div>  
 </div>
 
-@include('Bill.import-accepts')
 
 @endsection
 
@@ -64,6 +64,41 @@ $(function() {
     },
   });
 });
+
+function confirmAccept( id ) {
+  var formId = "#accept-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea aceptar la factura?',
+    text: "Al aceptarla, se enviará el mensaje de aceptación a Hacienda con los datos ingresados.",
+    type: 'success',
+    customContainerClass: 'container-success',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero aceptarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
+  
+function confirmDecline( id ) {
+  var formId = "#decline-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea rechazar la factura?',
+    text: "Al rechazarla, se enviará el mensaje de rechazo a Hacienda.",
+    type: 'warning',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero eliminarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
   
 </script>
 

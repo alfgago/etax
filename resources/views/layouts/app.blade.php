@@ -106,6 +106,7 @@
     @include( 'Client.import' )
     @include( 'Provider.import' )
     @include( 'Product.import' )
+    @include( 'Bill.import-accepts' )
 
     @include('layouts.helper-terms')
     

@@ -7,6 +7,7 @@
 @section('breadcrumb-buttons')
     <a type="submit" class="btn btn-primary" href="/facturas-recibidas/create">Ingresar factura nueva</a>
     <div onclick="abrirPopup('importar-recibidas-popup');" class="btn btn-primary">Importar facturas recibidas</div>
+    <a type="submit" class="btn btn-primary" href="/facturas-recibidas/aceptaciones">Aceptación de facturas</a>
 @endsection 
 
 @section('content') 
@@ -18,7 +19,6 @@
               <select id="filtro-select" name="filtro" onchange="reloadDataTable();">
                   <option value="99" selected>Todos los documentos</option>
                   <option value="1">Facturas electrónicas</option>
-                  <option value="4">Tiquete electrónico</option>
                   <option value="3">Notas de crédito</option>
                   <option value="0">Documentos eliminados</option>
               </select>
@@ -94,6 +94,25 @@ function confirmDelete( id ) {
     showCloseButton: true,
     showCancelButton: true,
     confirmButtonText: 'Sí, quiero eliminarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
+
+
+function condfirmEnvioAceptacion( id ) {
+  var formId = "#envioaceptacion-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea enviar la factura a aceptación?',
+    text: "Este proceso la marcará como no aceptada ante Hacienda. Podrá ya sea enviarla nuevamente, o aprobar manualmente si se equivocó al enviarla.",
+    type: 'warning',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero enviarla a aceptaciones'
+    customContainerClass: 'container-success',
   }).then((result) => {
     if (result.value) {
       $(formId).submit();

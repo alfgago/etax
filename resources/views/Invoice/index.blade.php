@@ -5,7 +5,8 @@
 @endsection
 
 @section('breadcrumb-buttons')
-    <a class="btn btn-primary" href="/facturas-emitidas/create">Ingresar factura nueva</a>
+    <a class="btn btn-primary" href="/facturas-emitidas/create">Ingresar factura existente</a>
+    <a class="btn btn-primary" href="/facturas-emitidas/emitir">Emitir factura nueva</a>
     <div onclick="abrirPopup('importar-emitidas-popup');" class="btn btn-primary">Importar facturas emitidas</div>
 @endsection 
 
@@ -20,6 +21,8 @@
                 <option value="1">Facturas electrónicas</option>
                 <option value="4">Tiquete electrónico</option>
                 <option value="3">Notas de crédito</option>
+                <option value="8">Factura de exportación</option>
+                <option value="9">Factura de compra</option>
                 <option value="0">Documentos eliminados</option>
             </select>
           </div>

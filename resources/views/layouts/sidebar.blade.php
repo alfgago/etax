@@ -42,7 +42,7 @@
             </li>
             
             <li class="nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" id="facturacion">
-                <a class="nav-item-hold" href="/facturas-recibidas">
+                <a class="nav-item-hold" href="/facturas-emitidas">
                     <img src="{{asset('assets/images/iconos/facturacion.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Facturación</span>
                 </a>

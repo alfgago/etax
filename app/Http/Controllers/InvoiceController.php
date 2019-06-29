@@ -70,6 +70,10 @@ class InvoiceController extends Controller
             $query = $query->where('document_type', '03');
         }else if( $filtro == 4 ) {
             $query = $query->where('document_type', '04');
+        }else if( $filtro == 8 ) {
+            $query = $query->where('document_type', '08');
+        }else if( $filtro == 9 ) {
+            $query = $query->where('document_type', '09');
         }             
                 
         return datatables()->eloquent( $query )
