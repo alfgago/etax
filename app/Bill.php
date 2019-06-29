@@ -524,7 +524,7 @@ class Bill extends Model
     
     public function calculateAcceptFields() {
       
-      
+      //if( $this->accept_iva_total == 0 && $this->xml_schema == 42 ) {
         $company = currentCompanyModel();
         $prorrataOperativa = $company->getProrrataOperativa( $this->year );
         $calc = new CalculatedTax();
@@ -533,15 +533,15 @@ class Bill extends Model
         //$calc->setDatosEmitidos( $this->month, $this->year, $company->id );
         $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query );
         $calc->setCalculosIVA( $prorrataOperativa, $lastBalance );
-
         $this->accept_iva_acreditable = $calc->iva_deducible_operativo;
         $this->accept_iva_gasto = $calc->iva_no_deducible;
         $this->accept_iva_total = $calc->total_bill_iva;
         $this->accept_total_factura = $calc->bills_total;
         $this->accept_id_number = $company->id_number;
+      //}
         
-        $this->save();
-        return $this;
+      $this->save();
+      return $this;
         
     }
       

@@ -240,6 +240,10 @@ class Company extends Model {
     public function setFirstAvailableInvoices( $year, $month, $count ) {
 
         try{
+            if( ( $month == 1 || $month == 2 || $month == 3 || $month == 4 || $month == 5 || $month == 6 ) && $year <= 2019) {
+                $count = 0;
+            }
+            
             $available_invoices = AvailableInvoices::where('company_id', $this->id)
                                 ->where('month', $month)
                                 ->where('year', $year)

@@ -14,13 +14,13 @@ class AddAcceptedBillFields extends Migration
     public function up()
     {
         Schema::table('invoices', function (Blueprint $table) {
-             $table->string('commercial_activity')->nullable();
+            $table->string('commercial_activity')->nullable();
             $table->integer('xml_schema')->default('42'); // 42 = 4.2, 43 = 4.3
         });
         
         Schema::table('bills', function (Blueprint $table) {
             $table->string('commercial_activity')->nullable();
-            $table->integer('accept_status')->default(0); //Codigo del mensaje de respuesta. 0: No ha elegido, 1 aceptado, 2 aceptado parcialmente, 3 rechazado
+            $table->integer('accept_status')->default(1); //Codigo del mensaje de respuesta. 0: No ha elegido, 1 aceptado, 2 aceptado parcialmente, 3 rechazado
             $table->timestamp('accept_date')->nullable();
             $table->string('accept_details')->nullable();
             $table->string('accept_iva_condition')->nullable();
@@ -43,6 +43,7 @@ class AddAcceptedBillFields extends Migration
     {
         Schema::table('invoices', function($table) {
             $table->dropColumn('commercial_activity');
+            $table->dropColumn('xml_schema');
         });
         
         Schema::table('bills', function($table) {
@@ -57,6 +58,7 @@ class AddAcceptedBillFields extends Migration
             $table->dropColumn('accept_total_factura');
             $table->dropColumn('accept_id_number');
             $table->dropColumn('accept_consecutive');
+            $table->dropColumn('xml_schema');
         });
     }
 }

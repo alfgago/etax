@@ -52,7 +52,7 @@ $(function() {
       { data: 'provider', name: 'provider.fullname' },
       { data: 'document_number', name: 'document_number' },
       { data: 'total', name: 'total' },
-      { data: 'accept_total_factura', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
+      { data: 'accept_total_factura', name: 'accept_total_factura', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
       { data: 'accept_iva_total', name: 'accept_iva_total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
       { data: 'accept_iva_acreditable', name: 'accept_iva_acreditable', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
       { data: 'accept_iva_gasto', name: 'accept_iva_gasto', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },

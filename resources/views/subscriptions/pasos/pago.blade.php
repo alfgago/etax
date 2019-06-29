@@ -81,5 +81,15 @@
             $('.precio-final').text( '$' + (parseFloat( $('.precio-inicial').text().slice(1) ) * 0.5) );
             $('.etiqueta-descuento').text('( Socios eTax 50% )');
         }
+        if( $('#coupon').val() == 'edgarmurillo' || $('#coupon').val() == 'EDGARMURILLO' ){
+            var descuento = parseFloat( $('.precio-inicial').text().slice(1) ) * 0.05;
+            $('.precio-final').text( '$' + (parseFloat( $('.precio-inicial').text().slice(1) ) * 0.05) );
+            $('.etiqueta-descuento').text('( Código Edgar Murillo )');
+            if( $('#coupon').val() == 1 ) {
+                var descuento = parseFloat( $('.precio-inicial').text().slice(1) ) * 0.15;
+                $('.precio-final').text( '$' + (parseFloat( $('.precio-inicial').text().slice(1) ) * 0.15) );
+                $('.etiqueta-descuento').text('( DESCUENTO: 5% Código Edgar Murillo + 10% BN Nacional)');
+            }
+        }
     }
 </script>
