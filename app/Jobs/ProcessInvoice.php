@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Company;
 use App\Invoice;
 use App\Utils\BridgeHaciendaApi;
+use App\Utils\InvoiceUtils;
 use App\XmlHacienda;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -47,6 +48,7 @@ class ProcessInvoice implements ShouldQueue
     public function handle()
     {
         try {
+            $invoiceUtils = new InvoiceUtils();
             Log::info('send job invoice id: '.$this->invoiceId);
             $client = new Client();
             $invoice = Invoice::find($this->invoiceId);
@@ -75,7 +77,7 @@ class ProcessInvoice implements ShouldQueue
                         $response = json_decode($result->getBody()->getContents(), true);
                         Log::info('Response Api Hacienda '. json_encode($response));
                         if (isset($response['status']) && $response['status'] == 200) {
-                            Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
+                            Log::info('API HACIENDA 200 :'. $invoice->document_number);
                             $date = Carbon::now();
                             $invoice->hacienda_status = '03';
                             $invoice->save();
@@ -91,19 +93,8 @@ class ProcessInvoice implements ShouldQueue
                                 $xml->xml = $path;
                                 $xml->save();
                                 
-                                if ( !empty($invoice->send_emails) ) {
-                                    Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new \App\Mail\InvoiceNotification([
-                                        'xml' => $path,
-                                        'data_invoice' => $invoice, 'data_company' => $company,
-                                        'xml' => ltrim($response['data']['response'], '\n')
-                                    ]));
-                                } else {
-                                    Mail::to($invoice->client_email)->send(new \App\Mail\InvoiceNotification([
-                                        'xml' => $path,
-                                        'data_invoice' => $invoice, 'data_company' => $company,
-                                        'xml' => ltrim($response['data']['response'], '\n')
-                                    ]));
-                                }
+                                $file = $invoiceUtils->sendInvoiceEmail( $invoice, $company, $path );
+
                             }
                             Log::info('Factura enviada y XML guardado.');
                         } else if (isset($response['status']) && $response['status'] == 400 &&
@@ -158,15 +149,7 @@ class ProcessInvoice implements ShouldQueue
                                         $xml->xml = $path;
                                         $xml->save();
                                         
-                                        if ( !empty($invoice->send_emails) ) {
-                                            Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new \App\Mail\InvoiceNotification(['xml' => $path,
-                                                'data_invoice' => $invoice, 'data_company' => $company,
-                                                'xml' => ltrim($response['data']['response'], '\n')]));
-                                        } else {
-                                            Mail::to($invoice->client_email)->send(new \App\Mail\InvoiceNotification(['xml' => $path,
-                                                'data_invoice' => $invoice, 'data_company' => $company,
-                                                'xml' => ltrim($response['data']['response'], '\n')]));
-                                        }
+                                        $file = $invoiceUtils->sendInvoiceEmail( $invoice, $company, $path );
                                         
                                         Log::info('Resend completed');
                                     }
