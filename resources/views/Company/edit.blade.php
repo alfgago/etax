@@ -109,15 +109,36 @@
 						      <input type="text" class="form-control" name="phone" id="phone" value="{{ @$company->phone }}" >
 						    </div>
 						    
-						    <div class="form-group col-md-12 hidden">
-						      <label for="activities">Actividades comerciales *</label>
-						      <select class="form-control select2-tags" name="activities" id="activities" required multiple>
-						        <option value="1" selected>General</option>
-						        <option value="2" >Actividad 2</option>
-						        <option value="3" >Actividad 3</option>
-						        <option value="4" >Actividad 4</option>
-						      </select>
-						    </div>
+						    <?php
+						    	$mainAct = '';
+						    	$secondAct = '';
+						    	$actArray = explode( ',', $company->commercial_activities );
+						    	if( array_key_exists(0, $actArray) ) {
+						    		$mainAct = $actArray[0];
+						    	}
+						    	if( array_key_exists(1, $actArray) ) {
+						    		$secondAct = $actArray[1];
+						    	}
+						    ?>
+						    
+						    <div class="form-group col-md-12">
+                    <label for="tipo_persona">Actividad comercial principal *</label>
+                    <select class="form-control checkEmpty select-search" name="main_comercial_activity" id="main_comercial_activity" required>
+                        <option value='' selected>-- No seleccionado --</option>
+                        @foreach ( $actividades as $actividad )
+                            <option value="{{ $actividad['codigo'] }}" {{ $mainAct == $actividad['codigo'] ? 'selected' : '' }}>{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group col-md-12">
+                    <label for="tipo_persona">Actividad comercial secundaria (opcional)</label>
+                    <select class="form-control checkEmpty select-search" name="second_comercial_activity" id="second_comercial_activity">
+                        <option value='' selected>-- No seleccionado --</option>
+                        @foreach ( $actividades as $actividad )
+                            <option value="{{ $actividad['codigo'] }}" {{ $secondAct == $actividad['codigo'] ? 'selected' : '' }}>{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
+                        @endforeach
+                    </select>
+                </div>
 						    
 						    <div class="form-group col-md-4">
 						      <label for="country">País *</label>
@@ -159,24 +180,7 @@
 						      <label for="address">Dirección</label>
 						      <textarea class="form-control" name="address" id="address" >{{ @$company->address }}</textarea>
 						    </div>
-                              <div class="form-group col-md-12">
-                                  <label for="tipo_persona">Actividad Econ&oacute;mica Principal*</label>
-                                  <select class="form-control checkEmpty" name="main_comercial_activity" id="main_comercial_activity" required>
-                                      <option value='' selected>-- Seleccione un valor --</option>
-                                      @foreach ( $actividades as $actividad )
-                                          <option value="{{ $actividad['codigo'] }}" >{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
-                                      @endforeach
-                                  </select>
-                              </div>
-                              <div class="form-group col-md-12">
-                                  <label for="tipo_persona">Segunda Actividad Econ&oacute;mica (opcional)</label>
-                                  <select class="form-control checkEmpty" name="second_comercial_activity" id="second_comercial_activity">
-                                      <option value='' selected>-- No seleccionado --</option>
-                                      @foreach ( $actividades as $actividad )
-                                          <option value="{{ $actividad['codigo'] }}" >{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
-                                      @endforeach
-                                  </select>
-                              </div>
+                              
 						    <button id="btn-submit" type="submit" class="hidden btn btn-primary">Guardar información</button>          
 						    
 						  </div>

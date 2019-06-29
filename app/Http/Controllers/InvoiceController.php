@@ -129,17 +129,13 @@ class InvoiceController extends Controller
         if($available_plan_invoices < 1 && $company->additional_invoices < 1){
             return redirect()->back()->withError('Usted ha sobrepasado el límite de facturas mensuales de su plan actual.');
         }
-        $arrayActividades = array();
-        $actividadesCompany = explode(',', $company->activities);
-        for($i=0;$i<count($actividadesCompany);$i++){
-            $newValue = trim($actividadesCompany[$i]);
-            $actividad = Actividades::where('codigo', $newValue)->first();
-            array_push($arrayActividades, $actividad);
-        }
+        
+        $arrayActividades = $company->getActivities();
+    
         //Termina de revisar limite de facturas.
         $units = UnidadMedicion::all()->toArray();
-        if(count($arrayActividades) == 0){
-            return redirect()->back()->withErrors('No ha definido una Actividad Comercial para esta empresa');
+        if( count($arrayActividades) == 0 ){
+            return redirect('/empresas/editar')->withErrors('No ha definido una actividad comercial para esta empresa');
         }
         return view("Invoice/create-factura-manual", ['units' => $units])->with('arrayActividades', $arrayActividades);
     }
@@ -194,15 +190,10 @@ class InvoiceController extends Controller
         
         $units = UnidadMedicion::all()->toArray();
 
-        $arrayActividades = array();
-        $actividadesCompany = explode(',', $company->activities);
-        for($i=0;$i<count($actividadesCompany);$i++){
-            $newValue = trim($actividadesCompany[$i]);
-            $actividad = Actividades::where('codigo', $newValue)->first();
-            array_push($arrayActividades, $actividad);
-        }
+        $arrayActividades = $company->getActivities();
+        
         if(count($arrayActividades) == 0){
-            return redirect('/empresas/editar')->withError('No ha definido una Actividad Comercial para esta empresa');
+            return redirect('/empresas/editar')->withError('No ha definido una actividad comercial para esta empresa');
         }
         return view("Invoice/create-factura", ['document_type' => '01', 'rate' => $this->get_rates(),
             'document_number' => $this->getDocReference('01'),
@@ -327,16 +318,21 @@ class InvoiceController extends Controller
      */
     public function edit($id)
     {
+        
+        $company = currentCompanyModel();
+        
         $invoice = Invoice::findOrFail($id);
         $units = UnidadMedicion::all()->toArray();
         $this->authorize('update', $invoice);
+      
+        $arrayActividades = $company->getActivities();
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
         if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
           return redirect('/facturas-emitidas');
         }  
       
-        return view('Invoice/edit', compact('invoice', 'units') );
+        return view('Invoice/edit', compact('invoice', 'units', 'arrayActividades') );
     }
 
     /**

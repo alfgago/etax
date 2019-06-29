@@ -344,12 +344,13 @@ class BillController extends Controller
                     $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
                     $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
                     $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                    $clave = $arr['Clave'];
                     
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3
                         if( Bill::saveBillXML( $arr, 'XML' ) ) {
-                            $bill = Bill::where('company_id', $company->id)->where('document_number', $consecutivoComprobante)->first();
+                            $bill = Bill::where('company_id', $company->id)->where('document_key', $clave)->first();
                             Bill::storeXML( $bill, $file );
                         }
                     }else{
@@ -464,7 +465,7 @@ class BillController extends Controller
         if ( $request->autorizar ) {
             $bill->is_authorized = true;
             $bill->save();
-            return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido autorizada');
+            return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido autorizada. Recuerde validar el código');
         }else {
             $bill->is_authorized = false;
             $bill->is_void = true;
@@ -514,7 +515,7 @@ class BillController extends Controller
         return datatables()->eloquent( $query )
             ->addColumn('actions', function($bill) {
                 return view('Bill.ext.accept-actions', [
-                    'id' => $bill->id
+                    'bill' => $bill
                 ])->render();
             }) 
             ->editColumn('total', function(Bill $bill) {
@@ -563,21 +564,23 @@ class BillController extends Controller
         
         $bill->accept_status = 0;
         $bill->save();
-        return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido incluida para aceptación');
+        return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido incluida para aceptación');
     }
     
     
     /**
      *  Metodo para hacer las aceptaciones
      */
-    public function sendAcceptMessage ( $id )
+    public function sendAcceptMessage ( Request $request, $id )
     {
         $bill = Bill::findOrFail($id);
-        $this->authorize('update', $bill);
         
-        $bill->is_authorized = true;
+        /*
+        $bill->accept_status = $request->accept_status;
         $bill->save();
-        return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido aceptada');
+        */
+        
+        return redirect('/facturas-recibidas/aceptaciones')->withError( 'La factura '. $bill->document_number . ' no pudo ser aceptada. Por favor contáctenos.');
     }
     
     public function correctAccepted ( Request $request, $id )

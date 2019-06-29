@@ -111,11 +111,11 @@ class CompanyController extends Controller {
         $company->invoice_email = $request->invoice_email;
         $company->email = $request->email;
         $company->default_currency = !empty($request->default_currency) ? $request->default_currency : 'CRC';
-        $comercial_activities = $request->main_comercial_activity;
+        $commercial_activities = $request->main_comercial_activity;
         if($request->second_comercial_activity != ''){
-            $comercial_activities = $request->main_comercial_activity . ',' . $request->second_comercial_activity;
+            $commercial_activities = $request->main_comercial_activity . ',' . $request->second_comercial_activity;
         }
-        $company->comercial_activities = $comercial_activities;
+        $company->commercial_activities = $commercial_activities;
 
         /* Add company to a plan */
         $company->subscription_id = getCurrentSubscription()->id; //Solo el contador deberia poder, por lo que siempre va a existir un current user subscription.
@@ -300,11 +300,12 @@ class CompanyController extends Controller {
         $company->address = $request->address;
         $company->phone = $request->phone;
         $company->atv_validation = false;
-        $comercial_activities = $request->main_comercial_activity;
+        $commercial_activities = $request->main_comercial_activity;
         if($request->second_comercial_activity != ''){
-            $comercial_activities = $request->main_comercial_activity . ',' . $request->second_comercial_activity;
+            $commercial_activities = $request->main_comercial_activity . ',' . $request->second_comercial_activity;
         }
-        $company->comercial_activities = $comercial_activities;
+        $company->commercial_activities = $commercial_activities;
+
         $company->save();
 
         //Update Team name based on company

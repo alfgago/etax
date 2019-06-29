@@ -325,6 +325,9 @@ class Bill extends Model
               $bill->generation_method = $metodoGeneracion;
               $bill->is_authorized = $isAuthorized;
               $bill->is_code_validated = $codeValidated;
+              if($metodoGeneracion == 'Email' || $metodoGeneracion == 'XML') {
+                $bill->accept_status == 0;
+              }
               $bill->is_void = false;
               $bill->hacienda_status = "03";
               
@@ -341,6 +344,8 @@ class Bill extends Model
               $bill->subtotal = 0;
               $bill->iva_amount = 0;
               $bill->total = $totalDocumento;
+              
+              
               
               $bill->save();
               $company->save();
@@ -524,20 +529,27 @@ class Bill extends Model
     
     public function calculateAcceptFields() {
       
-      if( $this->accept_iva_total == 0 && $this->xml_schema == 43 ) {
-        $company = currentCompanyModel();
-        $prorrataOperativa = $company->getProrrataOperativa( $this->year );
-        $calc = new CalculatedTax();
-        $lastBalance = 0;
-        $query = BillItem::with('bill')->where('bill_id', $this->id);
-        //$calc->setDatosEmitidos( $this->month, $this->year, $company->id );
-        $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query );
-        $calc->setCalculosPorFactura( $prorrataOperativa, $lastBalance );
-        $this->accept_iva_acreditable = $calc->iva_deducible_operativo;
-        $this->accept_iva_gasto = $calc->iva_no_deducible;
-        $this->accept_iva_total = $calc->total_bill_iva;
-        $this->accept_total_factura = $calc->bills_total;
-        $this->accept_id_number = $company->id_number;
+      if( $this->is_code_validated ) {
+        if( $this->accept_iva_total == 0 && $this->xml_schema == 43 ) {
+          $company = currentCompanyModel();
+          $prorrataOperativa = $company->getProrrataOperativa( $this->year );
+          $calc = new CalculatedTax();
+          $lastBalance = 0;
+          $query = BillItem::with('bill')->where('bill_id', $this->id);
+          //$calc->setDatosEmitidos( $this->month, $this->year, $company->id );
+          $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query );
+          $calc->setCalculosPorFactura( $prorrataOperativa, $lastBalance );
+          $this->accept_iva_acreditable = $calc->iva_deducible_operativo;
+          $this->accept_iva_gasto = $calc->iva_no_deducible;
+          $this->accept_iva_total = $calc->total_bill_iva;
+          $this->accept_total_factura = $calc->bills_total;
+          $this->accept_id_number = $company->id_number;
+        }
+      }else {
+        $this->accept_iva_acreditable = 0;
+        $this->accept_iva_gasto = 0;
+        $this->accept_iva_total = 0;
+        $this->accept_total_factura = 0;
       }
       
       $this->save();

@@ -87,6 +87,7 @@ Route::prefix('facturas-emitidas')->group(function() {
 Route::prefix('facturas-recibidas')->group(function() {
     Route::get('aceptaciones', 'BillController@indexAccepts')->name('Bill.accepts');
     Route::post('respondStatus', 'BillController@respondStatus')->name('Bill.respond');
+    Route::patch('respuesta-aceptacion/{id}', 'BillController@sendAcceptMessage')->name('Bill.sendAcceptMessage');
     Route::get('validaciones', 'BillController@indexValidaciones')->name('Bill.validaciones');
     Route::patch('confirmar-validacion/{id}', 'BillController@confirmarValidacion')->name('Bill.confirmar_validacion');
     Route::get('autorizaciones', 'BillController@indexAuthorize')->name('Bill.validaciones');
