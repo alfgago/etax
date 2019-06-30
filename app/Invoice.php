@@ -95,7 +95,7 @@ class Invoice extends Model
             $this->buy_order = $request->buy_order;
             $this->other_reference = $request->other_reference;
             $this->send_emails = $request->send_email ?? null;
-            if($request->commercial_activity){
+            if( $request->commercial_activity ){
                 $this->commercial_activity = $request->commercial_activity;
             }
 
