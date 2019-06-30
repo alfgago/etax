@@ -298,6 +298,18 @@ class WizardController extends Controller
                 $company->operative_ratio3 = $request->operative_ratio3;
                 $company->operative_ratio4 = $request->operative_ratio4;
             }
+
+            $id_number = $company->id_number;
+            $id_company = $company->id;
+            if ( $request->file('input_logo') ) {
+
+                $pathLogo = Storage::putFileAs(
+                    "empresa-$id_number", $request->file('input_logo'),
+                    "logo.".$request->file('input_logo')->getClientOriginalExtension()
+                );
+                $company->logo_url = $pathLogo;
+                
+            }
             
             $company->wizard_finished = true;
             $company->save();
