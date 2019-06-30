@@ -246,7 +246,6 @@
         }
     }
     function mostrarCamposExoneracion() {
-
         var checkExoneracion = $('#checkExoneracion').prop('checked');
         console.log(checkExoneracion);
         if(checkExoneracion === true){

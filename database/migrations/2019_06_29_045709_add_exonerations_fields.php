@@ -19,6 +19,7 @@ class AddExonerationsFields extends Migration
             $table->string('exoneration_company_name')->nullable();
             $table->string('exoneration_porcent')->nullable();
             $table->double('exoneration_amount')->default(0);
+            $table->double('impuestoNeto')->default(0);
             $table->double('exoneration_total_amount')->default(0);
         });
 
@@ -28,6 +29,7 @@ class AddExonerationsFields extends Migration
             $table->string('exoneration_company_name')->nullable();
             $table->string('exoneration_porcent')->nullable();
             $table->double('exoneration_amount')->default(0);
+            $table->double('impuestoNeto')->default(0);
             $table->double('exoneration_total_amount')->default(0);
         });
     }
@@ -45,6 +47,7 @@ class AddExonerationsFields extends Migration
             $table->dropColumn('exoneration_company_name');
             $table->dropColumn('exoneration_porcent');
             $table->dropColumn('exoneration_amount');
+            $table->dropColumn('impuestoNeto');
             $table->dropColumn('exoneration_total_amount');
         });
 
@@ -54,6 +57,7 @@ class AddExonerationsFields extends Migration
             $table->dropColumn('exoneration_company_name');
             $table->dropColumn('exoneration_porcent');
             $table->dropColumn('exoneration_amount');
+            $table->dropColumn('impuestoNeto');
             $table->dropColumn('exoneration_total_amount');
         });
     }
