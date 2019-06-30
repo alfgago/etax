@@ -326,7 +326,9 @@ class Bill extends Model
               $bill->is_authorized = $isAuthorized;
               $bill->is_code_validated = $codeValidated;
               if($metodoGeneracion == 'Email' || $metodoGeneracion == 'XML') {
-                $bill->accept_status == 0;
+                $bill->accept_status = 0;
+              }else{
+                $bill->accept_status = 1;
               }
               $bill->is_void = false;
               $bill->hacienda_status = "03";

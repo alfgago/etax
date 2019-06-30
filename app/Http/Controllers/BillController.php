@@ -132,6 +132,7 @@ class BillController extends Controller
         $bill->payment_receipt = "";
         $bill->generation_method = "M";
         $bill->reference_number = $company->last_bill_ref_number + 1;
+        $bill->accept_status = 1;
         
         $bill->setBillData($request);
         
