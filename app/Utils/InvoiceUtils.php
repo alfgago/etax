@@ -118,6 +118,57 @@ class InvoiceUtils
         }
     }
     
+     public function sendInvoiceNotificationEmail( $invoice, $company, $xmlPath ) {
+        
+        try{
+            $cc = [];
+            //Primero revisa si el invoice tiene un client_id
+            if ( isset( $invoice->client_id ) ) {
+                $client_billing_emails = $invoice->client->billing_emails;
+                if ( isset($client_billing_emails) ){
+                    //Si existen, empieza con eso.
+                    $arr = explode(",", $client_billing_emails);
+                    foreach($arr as $correo) {
+                        $correo = filter_var($correo, FILTER_SANITIZE_EMAIL);
+                        
+                        // Validate e-mail
+                        if (filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+                             array_push( $cc,  $correo );
+                        }
+                       
+                    }
+                }
+            }
+            
+            //Si ademas de los billing emails se tiene send_emails, tambien los agrega.
+            if( isset($invoice->send_emails) ) {
+                array_push( $cc,  $invoice->send_emails );
+            }
+            
+            if( isset($invoice->client_email) ) {
+                array_push( $cc, $invoice->client_email );
+            }
+            
+            if ( !empty($cc) ) {
+                Mail::to($cc)->send(new \App\Mail\InvoiceNotification([	
+                                        'xml' => $xmlPath,	
+                                        'data_invoice' => $invoice, 'data_company' => $company,	
+                                        'xml' => ltrim($response['data']['response'], '\n')	
+                                    ]));
+            } else {
+                Mail::to($invoice->client_email)->send(new \App\Mail\InvoiceNotification([	
+                                        'xml' => $xmlPath,	
+                                        'data_invoice' => $invoice, 'data_company' => $company,	
+                                        'xml' => ltrim($response['data']['response'], '\n')	
+                                    ]));
+            }
+            Log::info('Se enviaron correos con PDF y XML: ' .$invoice->id );
+        }catch( \Throwable $e ){
+            Log::error('Fallo el envío de correos: ' .$invoice->id );
+        }
+    }
+    
+    
     public function getXmlPath( $invoice, $company )
     {
         $xml = $invoice->xmlHacienda;
