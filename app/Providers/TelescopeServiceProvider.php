@@ -47,6 +47,8 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         }
 
         Telescope::hideRequestParameters(['_token']);
+        Telescope::hideRequestParameters(['number']);
+        Telescope::hideRequestParameters(['cvc']);
 
         Telescope::hideRequestHeaders([
             'cookie',
@@ -67,6 +69,8 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         Gate::define('viewTelescope', function ($user) {
             return in_array($user->email, [
                 'alfgago@gmail.com',
+                'xavierperna@gmail.com',
+                '611digital@gmail.com',
                 'alfredo@5e.cr'
             ]);
         });
