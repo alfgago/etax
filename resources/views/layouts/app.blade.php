@@ -23,8 +23,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css" />
     
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=6.1">
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=6.1"></script>
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=6.2">
+    <script src="{{asset('assets/js/common-bundle.js')}}?v=6.2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
   
     @yield('header-scripts')
@@ -106,6 +106,7 @@
     @include( 'Client.import' )
     @include( 'Provider.import' )
     @include( 'Product.import' )
+    @include( 'Bill.import-accepts' )
 
     @include('layouts.helper-terms')
     

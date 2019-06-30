@@ -95,6 +95,9 @@ class Invoice extends Model
             $this->buy_order = $request->buy_order;
             $this->other_reference = $request->other_reference;
             $this->send_emails = $request->send_email ?? null;
+            if( $request->commercial_activity ){
+                $this->commercial_activity = $request->commercial_activity;
+            }
 
             //Datos de cliente. El cliente nuevo viene con ID = -1
             if( $request->client_id == '-1' ) {
@@ -125,6 +128,7 @@ class Invoice extends Model
                         'neighborhood' => $request->neighborhood,
                         'zip' => $request->zip,
                         'address' => $request->address,
+                        'otrasSenasExtranjero' => $request->address,
                         'phone' => $request->phone,
                         'es_exento' => $request->es_exento,
                         'email' => $request->email,
@@ -647,6 +651,77 @@ class Invoice extends Model
         
         return $path;
         
+    }
+
+    public function setNoteData($invoiceReference) {
+        try {
+            $this->document_key = getDocumentKey('03', $this->reference_number, $invoiceReference->company->id_number);
+            $this->document_number = getDocReference('03', $this->reference_number);;
+            $this->sale_condition = $invoiceReference->sale_condition;
+            $this->payment_type = $invoiceReference->payment_type;
+            $this->retention_percent = $invoiceReference->retention_percent;
+            $this->credit_time = $invoiceReference->credit_time;
+            $this->buy_order = $invoiceReference->buy_order;
+            $this->other_reference = $invoiceReference->reference_number;
+            $this->reference_document_key = $invoiceReference->document_key;
+            $this->reference_generated_date = $invoiceReference->generated_date;
+            $this->send_emails = $invoiceReference->send_email ?? null;
+            $invoiceReference->reference_document_key = $this->document_key;
+            $invoiceReference->save();
+            $this->save();
+            $this->client_id = $invoiceReference->client_id;
+
+            //Datos de factura
+            $this->description = $invoiceReference->description;
+            $this->subtotal = floatval( str_replace(",","", $invoiceReference->subtotal ));
+            $this->currency = $invoiceReference->currency;
+            $this->currency_rate = floatval( str_replace(",","", $invoiceReference->currency_rate ));
+            $this->total = floatval( str_replace(",","", $invoiceReference->total ));
+            $this->iva_amount = floatval( str_replace(",","", $invoiceReference->iva_amount ));
+
+
+            $this->client_first_name = $invoiceReference->client_first_name;
+            $this->client_last_name = $invoiceReference->client_last_name;
+            $this->client_last_name2 = $invoiceReference->client_last_name2;
+            $this->client_email = $invoiceReference->client_email;
+            $this->client_address = $invoiceReference->client_address;
+            $this->client_country = $invoiceReference->client_country;
+            $this->client_state = $invoiceReference->client_state;
+            $this->client_city = $invoiceReference->client_city;
+            $this->client_district = $invoiceReference->client_district;
+            $this->client_zip = $invoiceReference->client_zip;
+            $this->client_phone = $invoiceReference->client_phone;
+            $this->client_id_number = $invoiceReference->client_id_number;
+
+            $fecha = Carbon::parse(now('America/Costa_Rica'));
+            $this->generated_date = $fecha;
+            $fechaV = $fecha;
+            $this->due_date = $fechaV;
+            $this->year = Carbon::now()->year;
+            $this->month = Carbon::now()->month;
+            $this->save();
+
+            $lids = array();
+            $dataItems = $invoiceReference->items->toArray();
+            foreach($dataItems as $item) {
+                $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
+                $item['item_id'] = $item['id'] ? $item['id'] : 0;
+                $item_modificado = $this->addEditItem($item);
+
+                array_push( $lids, $item_modificado->id );
+            }
+
+            foreach ( $this->items as $item ) {
+                if( !in_array( $item->id, $lids ) ) {
+                    $item->delete();
+                }
+            }
+            return $this;
+
+        } catch (\Exception $e) {
+            Log::error('Error al crear factura: '.$e->getMessage());
+            return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
+        }
     }
 
 }

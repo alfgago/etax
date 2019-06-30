@@ -3,7 +3,7 @@
   Certificado digital
   </h3>
   <p class="description">
-    <b style="font-size: 1rem; display: block; color: red;">Si usted <u>no</u> va a facturar con eTax, puede ignorar este paso.</b>
+    <b style="font-size: 1rem; display: block; color: red;">Si usted <u>no</u> va a facturar ni aceptar facturas con eTax, puede ignorar este paso.</b>
   </p>
   
 </div>
@@ -14,7 +14,10 @@
 
 <div class="form-group col-md-6">
   <label for="user">Usuario ATV *</label>
-  <input type="text" class="form-control " name="user" id="user" value="{{ @$certificate->user }}">
+  <input type="email" class="form-control " name="user" id="user" value="{{ @$certificate->user }}">
+  <div class="description">
+      El formato de este campo debe verse similar a este: cpj-x-xxx-xxxxxx@prod.comprobanteselectronicos.go.cr
+  </div>
 </div>
 
 <div class="form-group col-md-6">

@@ -12,7 +12,7 @@
 
 @section('content') 
 <div class="wizard-container">
-  <div class="wizard-popup">
+  <div class="wizard-popup" id="wizard-popup">
   	
    	<div class="titulo-bienvenida">
     	<h2>Configuración inicial</h2>

@@ -142,6 +142,17 @@
                     </div>
                   </div>
                   
+                  <div class="form-group col-md-12">
+                      <label for="payment_type">Actividad Comercial</label>
+                      <div class="input-group">
+                          <select id="commercial_activity" name="commercial_activity" class="form-control" required>
+                              @foreach ( $arrayActividades as $actividad )
+                                  <option value="{{ $actividad->codigo }}">{{ $actividad->codigo }} - {{ $actividad->actividad }}</option>
+                              @endforeach
+                          </select>
+                      </div>
+                  </div>
+                  
                   <div class="form-group col-md-6">
                     <label for="sale_condition">Condición de venta</label>
                     <div class="input-group">
@@ -152,6 +163,9 @@
                         <option value="04">Apartado</option>
                         <option value="05">Arrendamiento con opción de compra</option>
                         <option value="06">Arrendamiento en función financiera</option>
+                        <option value="07">Cobro a favor de un tercero</option>
+                        <option value="08">Servicios prestados al estado a credito</option>
+                        <option value="09">Pago del servicio prestado al estado</option>
                         <option value="99">Otros</option>
                       </select>
                     </div>

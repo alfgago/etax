@@ -115,6 +115,7 @@ class ClientController extends Controller
         $cliente->neighborhood = $request->neighborhood;
         $cliente->zip = $request->zip;
         $cliente->address = $request->address;
+        $cliente->foreign_address = $request->foreign_address;
         $cliente->phone = $request->phone;
         $cliente->es_exento = $request->es_exento;
         $cliente->billing_emails = $request->billing_emails;

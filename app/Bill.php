@@ -251,13 +251,7 @@ class Bill extends Model
       }
     }
     
-    public static function importBillRow (
-        $arrayImportBill
-        /*$metodoGeneracion, $idReceptor, $nombreProveedor, $codigoProveedor, $tipoPersona, $identificacionProveedor, $correoProveedor, $telefonoProveedor,
-        $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
-        $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
-        $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, $isAuthorized, $codeValidated
-    */) {
+    public static function importBillRow ( $arrayImportBill ) {
       
       //Revisa si el método es por correo electrónico. De ser así, usa busca la compañia por cedula.
       if( $arrayImportBill['metodoGeneracion'] != "Email" ){
@@ -329,10 +323,16 @@ class Bill extends Model
               $bill->payment_type = $arrayImportBill['metodoPago'];
               $bill->credit_time = 0;
               $bill->description = $arrayImportBill['descripcion'];
-              
+
               $bill->generation_method = $arrayImportBill['metodoGeneracion'];
               $bill->is_authorized = $arrayImportBill['isAuthorized'];
               $bill->is_code_validated = $arrayImportBill['codeValidated'];
+              if($arrayImportBill['metodoGeneracion'] == 'Email' || $arrayImportBill['metodoGeneracion'] == 'XML') {
+                $bill->accept_status = 0;
+              }else{
+                $bill->accept_status = 1;
+              }
+
               $bill->is_void = false;
               $bill->hacienda_status = "03";
               
@@ -586,5 +586,37 @@ class Bill extends Model
         return $path;
         
     }
+    
+    public function calculateAcceptFields() {
+      
+      if( $this->is_code_validated ) {
+        if( $this->accept_iva_total == 0 && $this->xml_schema == 43 ) {
+          $company = currentCompanyModel();
+          $prorrataOperativa = $company->getProrrataOperativa( $this->year );
+          $calc = new CalculatedTax();
+          $lastBalance = 0;
+          $query = BillItem::with('bill')->where('bill_id', $this->id);
+          //$calc->setDatosEmitidos( $this->month, $this->year, $company->id );
+          $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query );
+          $calc->setCalculosPorFactura( $prorrataOperativa, $lastBalance );
+          $this->accept_iva_acreditable = $calc->iva_deducible_operativo;
+          $this->accept_iva_gasto = $calc->iva_no_deducible;
+          $this->accept_iva_total = $calc->total_bill_iva;
+          $this->accept_total_factura = $calc->bills_total;
+          $this->accept_id_number = $company->id_number;
+        }
+      }else {
+        $this->accept_iva_acreditable = 0;
+        $this->accept_iva_gasto = 0;
+        $this->accept_iva_total = 0;
+        $this->accept_total_factura = 0;
+      }
+      
+      $this->save();
+      return $this;
+        
+    }
+      
+    
     
 }

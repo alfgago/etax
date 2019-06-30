@@ -15,7 +15,16 @@
       <i class="fa fa-trash-o" aria-hidden="true"></i>
     </a>
   </form>
+   
+  </a>
   @endif
+  <form id="envioaceptacion-form-{{  $data->id }}" class="inline-form" method="POST" action="/facturas-recibidas/marcar-para-aceptacion/{{ $data->id }}" >
+    @csrf
+    @method('patch')
+    <a type="button" class="text-info mr-2" title="Enviar a aceptación o rechazo con Hacienda" onclick="condfirmEnvioAceptacion({{  $data->id }});">
+       <i class="fa fa-handshake-o" aria-hidden="true"></i>
+    </a>
+  </form>
 
 @else
 

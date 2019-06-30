@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actividades;
 use Illuminate\Http\Request;
 use App\Company;
 use App\Invoice;
@@ -37,8 +38,8 @@ class WizardController extends Controller
       }
       
       $company = currentCompanyModel();
-      
-      return view('/wizard/index', compact( 'subscription', 'company' ) );
+      $actividades = Actividades::all();
+      return view('/wizard/index', compact( 'subscription', 'company', 'actividades') );
 
     }
     
@@ -131,7 +132,6 @@ class WizardController extends Controller
      */
     public function updateWizard(Request $request)
     {
-        try {
 
             $company = currentCompanyModel();
             if( $company->id_number != $request->id_number ) {
@@ -151,15 +151,15 @@ class WizardController extends Controller
             $team = Team::where('company_id', $company->id)->first();
 
             /* Only owner of company or user invited as admin for that company can edit company details */
-            if (!auth()->user()->isOwnerOfTeam($team) || (get_plan_invitation($company->id, auth()->user()->id) &&
-                    get_plan_invitation($company->id, auth()->user()->id)->is_admin != '1')) {
+            if ( !auth()->user()->isOwnerOfTeam($team) ) 
+            {
                 abort(403);
             }
 
             $company->type = $request->tipo_persona;
             $company->id_number = preg_replace("/[^0-9]+/", "", $request->id_number);
             $company->business_name = $request->business_name;
-            $company->activities = $request->activities;
+            $company->commercial_activities = $request->commercial_activities;
             $company->name = $request->name;
             $company->last_name = $request->last_name;
             $company->last_name2 = $request->last_name2;
@@ -242,10 +242,7 @@ class WizardController extends Controller
             }
 
             return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento.');
-        } catch( \Exception $ex ) {
-            Log::error('Error al crear compania: '.$ex->getMessage());
-            return back()->withError('Ha ocurrido un error al registrar la compañía' . $ex->getMessage());
-        }
+        
     }
     
     /**
@@ -271,7 +268,7 @@ class WizardController extends Controller
             $company->type = $request->tipo_persona;
             $company->id_number = preg_replace("/[^0-9]+/", "", $request->id_number);
             $company->business_name = $request->business_name;
-            $company->activities = $request->activities;
+            $company->commercial_activities = $request->commercial_activities;
             $company->name = $request->name;
             $company->last_name = $request->last_name;
             $company->last_name2 = $request->last_name2;
@@ -300,6 +297,18 @@ class WizardController extends Controller
                 $company->operative_ratio2 = $request->operative_ratio2;
                 $company->operative_ratio3 = $request->operative_ratio3;
                 $company->operative_ratio4 = $request->operative_ratio4;
+            }
+
+            $id_number = $company->id_number;
+            $id_company = $company->id;
+            if ( $request->file('input_logo') ) {
+
+                $pathLogo = Storage::putFileAs(
+                    "empresa-$id_number", $request->file('input_logo'),
+                    "logo.".$request->file('input_logo')->getClientOriginalExtension()
+                );
+                $company->logo_url = $pathLogo;
+                
             }
             
             $company->wizard_finished = true;

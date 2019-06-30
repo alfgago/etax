@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actividades;
 use App\AvailableInvoices;
 use App\UnidadMedicion;
 use App\Utils\BridgeHaciendaApi;
@@ -70,6 +71,10 @@ class InvoiceController extends Controller
             $query = $query->where('document_type', '03');
         }else if( $filtro == 4 ) {
             $query = $query->where('document_type', '04');
+        }else if( $filtro == 8 ) {
+            $query = $query->where('document_type', '08');
+        }else if( $filtro == 9 ) {
+            $query = $query->where('document_type', '09');
         }             
                 
         return datatables()->eloquent( $query )
@@ -86,13 +91,23 @@ class InvoiceController extends Controller
             ->editColumn('client', function(Invoice $invoice) {
                 return $invoice->clientName();
             })
+            ->editColumn('hacienda_status', function(Invoice $invoice) {
+                if ($invoice->hacienda_status == '03') {
+                    return '<div class="green">  
+                                <span class="tooltiptext">Aceptada</span>
+                            </div>';
+                }
+                return '<div class="yellow">
+                            <span class="tooltiptext">Creada</span>
+                        </div>';
+            })
             ->editColumn('document_type', function(Invoice $invoice) {
                 return $invoice->documentTypeName();
             })
             ->editColumn('generated_date', function(Invoice $invoice) {
                 return $invoice->generatedDate()->format('d/m/Y');
             })
-            ->rawColumns(['actions'])
+            ->rawColumns(['actions', 'hacienda_status'])
             ->toJson();
     }
 
@@ -114,10 +129,15 @@ class InvoiceController extends Controller
         if($available_plan_invoices < 1 && $company->additional_invoices < 1){
             return redirect()->back()->withError('Usted ha sobrepasado el límite de facturas mensuales de su plan actual.');
         }
-        //Termina de revisar limite de facturas.
         
+        $arrayActividades = $company->getActivities();
+    
+        //Termina de revisar limite de facturas.
         $units = UnidadMedicion::all()->toArray();
-        return view("Invoice/create-factura-manual", ['units' => $units]);
+        if( count($arrayActividades) == 0 ){
+            return redirect('/empresas/editar')->withErrors('No ha definido una actividad comercial para esta empresa');
+        }
+        return view("Invoice/create-factura-manual", ['units' => $units])->with('arrayActividades', $arrayActividades);
     }
 
     /**
@@ -169,9 +189,15 @@ class InvoiceController extends Controller
         }*/
         
         $units = UnidadMedicion::all()->toArray();
+
+        $arrayActividades = $company->getActivities();
+        
+        if(count($arrayActividades) == 0){
+            return redirect('/empresas/editar')->withError('No ha definido una actividad comercial para esta empresa');
+        }
         return view("Invoice/create-factura", ['document_type' => '01', 'rate' => $this->get_rates(),
             'document_number' => $this->getDocReference('01'),
-            'document_key' => $this->getDocumentKey('01'), 'units' => $units]);
+            'document_key' => $this->getDocumentKey('01'), 'units' => $units])->with('arrayActividades', $arrayActividades);
     }
     
     /**
@@ -232,7 +258,7 @@ class InvoiceController extends Controller
             ]);
 
             $apiHacienda = new BridgeHaciendaApi();
-            $tokenApi = $apiHacienda->login();
+            $tokenApi = $apiHacienda->login(false);
             if ($tokenApi !== false) {
                 $invoice = new Invoice();
                 $company = currentCompanyModel();
@@ -292,16 +318,21 @@ class InvoiceController extends Controller
      */
     public function edit($id)
     {
+        
+        $company = currentCompanyModel();
+        
         $invoice = Invoice::findOrFail($id);
         $units = UnidadMedicion::all()->toArray();
         $this->authorize('update', $invoice);
+      
+        $arrayActividades = $company->getActivities();
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
         if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
           return redirect('/facturas-emitidas');
         }  
       
-        return view('Invoice/edit', compact('invoice', 'units') );
+        return view('Invoice/edit', compact('invoice', 'units', 'arrayActividades') );
     }
 
     /**
@@ -518,6 +549,50 @@ class InvoiceController extends Controller
     {
         list($usec, $sec) = explode(" ", microtime());
         return ((float) $usec + (float)$sec);
+    }
+
+    public function anularInvoice($id)
+    {
+        try {
+            $apiHacienda = new BridgeHaciendaApi();
+            $tokenApi = $apiHacienda->login();
+            if ($tokenApi !== false) {
+                $invoice = Invoice::findOrFail($id);
+                $note = new Invoice();
+                $company = currentCompanyModel();
+
+                //Datos generales y para Hacienda
+                $note->company_id = $company->id;
+                $note->document_type = "03";
+                $note->hacienda_status = '01';
+                $note->payment_status = "01";
+                $note->payment_receipt = "";
+                $note->generation_method = "etax";
+                $note->reference_number = $company->last_note_ref_number + 1;
+                $note->save();
+                $noteData = $note->setNoteData($invoice);
+                if (!empty($noteData)) {
+                    $apiHacienda->createCreditNote($noteData, $tokenApi);
+                }
+                $company->last_note_ref_number = $noteData->reference_number;
+                $company->last_document_note = $noteData->document_number;
+                $company->save();
+                if ($note->hacienda_status == '03') {
+                    // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
+                }
+                clearInvoiceCache($invoice);
+
+                return redirect('/facturas-emitidas')->withMessage('Nota de crédito creada.');
+
+            } else {
+                return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+            }
+
+        } catch ( \Exception $e) {
+            Log::error('Error al anular facturar -->'.$e);
+            return redirect('/facturas-emitidas')->withErrors('Error al anular factura');
+        }
+
     }
 
     private function get_rates()

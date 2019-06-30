@@ -26,6 +26,10 @@
     position: relative;
 }
 
+.wizard-popup  .select2-container--open .select2-dropdown--above {
+    font-size: 10px;
+}
+
 .wizard-container:before {
     content: '';
     position: absolute;
