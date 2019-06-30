@@ -57,24 +57,17 @@
     <input name="input_logo" id="input_logo" class="form-control " type="file" multiple="false" >
   </div>
 </div>
+
 <div class="form-group col-md-12">
-    <label for="tipo_persona">Actividad Econ&oacute;mica Principal*</label>
-    <select class="form-control checkEmpty select-search2" name="main_comercial_activity" id="main_comercial_activity" required>
-        <option value='' selected>-- Seleccione un valor --</option>
-        @foreach ( $actividades as $actividad )
+  <label for="tipo_persona">Actividad comercial principal *</label>
+  <select class="form-control checkEmpty select-search-wizard" name="commercial_activities" id="commercial_activities" required>
+      <option value='' selected>-- No seleccionado --</option>
+      @foreach ( $actividades as $actividad )
           <option value="{{ $actividad['codigo'] }}" >{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
-        @endforeach
-    </select>
+      @endforeach
+  </select>
 </div>
-<div class="form-group col-md-12 hidden ">
-    <label for="tipo_persona">Segunda Actividad Econ&oacute;mica (opcional)</label>
-    <select class="form-control " name="second_comercial_activity" id="second_comercial_activity">
-    <option value='' selected>-- No seleccionado --</option>
-    @foreach ( $actividades as $actividad )
-        <option value="{{ $actividad['codigo'] }}" >{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
-        @endforeach
-    </select>
-</div>
+
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step2');">Siguiente paso</button>
 </div>

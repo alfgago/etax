@@ -1,1 +1,252 @@
-!function(e){var n={};function t(r){if(n[r])return n[r].exports;var o=n[r]={i:r,l:!1,exports:{}};return e[r].call(o.exports,o,o.exports,t),o.l=!0,o.exports}t.m=e,t.c=n,t.d=function(e,n,r){t.o(e,n)||Object.defineProperty(e,n,{enumerable:!0,get:r})},t.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},t.t=function(e,n){if(1&n&&(e=t(e)),8&n)return e;if(4&n&&"object"==typeof e&&e&&e.__esModule)return e;var r=Object.create(null);if(t.r(r),Object.defineProperty(r,"default",{enumerable:!0,value:e}),2&n&&"string"!=typeof e)for(var o in e)t.d(r,o,function(n){return e[n]}.bind(null,o));return r},t.n=function(e){var n=e&&e.__esModule?function(){return e.default}:function(){return e};return t.d(n,"a",n),n},t.o=function(e,n){return Object.prototype.hasOwnProperty.call(e,n)},t.p="/",t(t.s=32)}({32:function(e,n,t){e.exports=t(33)},33:function(e,n,t){"use strict";var r=$(".menu-toggle"),o=$(".sidebar-left"),c=$(".sidebar-left-secondary"),a=$(".sidebar-overlay"),l=$(".main-content-wrap"),i=$(".nav-item"),s=$(".search-bar input"),u=$(".search-close");function d(){o.removeClass("open"),l.removeClass("sidenav-open")}function f(){c.addClass("open"),a.addClass("open")}function p(){c.removeClass("open"),a.removeClass("open")}function v(){return window&&window.matchMedia("(max-width: 767px)").matches}$(window).on("resize",function(e){v()&&(d(),p())}),i.each(function(e){var n=$(this);if(n.hasClass("active")){var t=n.data("item");c.find('[data-parent="'.concat(t,'"]')).show()}}),v()&&(d(),p()),o.find(".nav-item").on("mouseenter",function(e){var n,t=$(e.currentTarget),r=t.data("item");r?(n=t,$(".nav-item").removeClass("active"),n.addClass("active"),f()):p(),c.find(".childNav").hide(),c.find('[data-parent="'.concat(r,'"]')).show()}),a.on("click",function(e){v()&&d(),p()}),r.on("click",function(e){var n=o.hasClass("open"),t=c.hasClass("open");n&&t&&v()?(d(),p()):n&&t?p():n?d():n||t||(o.addClass("open"),l.addClass("sidenav-open"),f())});var m=$(".search-ui");s.on("focus",function(){m.addClass("open")}),u.on("click",function(){m.removeClass("open")}),$(".perfect-scrollbar, [data-perfect-scrollbar]").each(function(e){var n=$(this);new PerfectScrollbar(this,{suppressScrollX:n.data("suppress-scroll-x"),suppressScrollY:n.data("suppress-scroll-y")})}),$("[data-fullscreen]").on("click",function(){var e=document.body;return document.fullScreenElement&&null!==document.fullScreenElement||document.mozFullScreen||document.webkitIsFullScreen?function(e){var n=e.cancelFullScreen||e.webkitCancelFullScreen||e.mozCancelFullScreen||e.exitFullscreen;if(n)n.call(e);else if(void 0!==window.ActiveXObject){var t=new ActiveXObject("WScript.Shell");null!==t&&t.SendKeys("{F11}")}}(document):function(e){var n=e.requestFullScreen||e.webkitRequestFullScreen||e.mozRequestFullScreen||e.msRequestFullscreen;if(n)n.call(e);else if(void 0!==window.ActiveXObject){var t=new ActiveXObject("WScript.Shell");null!==t&&t.SendKeys("{F11}")}}(e),!1})}});
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "/";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 34);
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ 34:
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(35);
+
+
+/***/ }),
+
+/***/ 35:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var $sidebarToggle = $(".menu-toggle");
+var $sidebarLeft = $(".sidebar-left");
+var $sidebarLeftSecondary = $(".sidebar-left-secondary");
+var $sidebarOverlay = $(".sidebar-overlay");
+var $mainContentWrap = $(".main-content-wrap");
+var $sideNavItem = $(".nav-item");
+var $searchInput = $(".search-bar input");
+var $searchCloseBtn = $(".search-close");
+
+function openSidebar() {
+    $sidebarLeft.addClass("open");
+    $mainContentWrap.addClass("sidenav-open");
+}
+function closeSidebar() {
+    $sidebarLeft.removeClass("open");
+    $mainContentWrap.removeClass("sidenav-open");
+}
+function openSidebarSecondary() {
+    $sidebarLeftSecondary.addClass("open");
+    $sidebarOverlay.addClass("open");
+}
+function closeSidebarSecondary() {
+    $sidebarLeftSecondary.removeClass("open");
+    $sidebarOverlay.removeClass("open");
+}
+function openSidebarOverlay() {
+    $sidebarOverlay.addClass("open");
+}
+function closeSidebarOverlay() {
+    $sidebarOverlay.removeClass("open");
+}
+function navItemToggleActive($activeItem) {
+    var $navItem = $(".nav-item");
+    $navItem.removeClass("active");
+    $activeItem.addClass("active");
+}
+function isMobile() {
+    return window && window.matchMedia("(max-width: 767px)").matches;
+}
+
+function initLayout() {
+    // Makes secondary menu selected on page load
+    $sideNavItem.each(function (index) {
+        var $item = $(this);
+        if ($item.hasClass("active")) {
+            var dataItem = $item.data("item");
+            $sidebarLeftSecondary.find("[data-parent=\"" + dataItem + "\"]").show();
+        }
+    });
+    if (isMobile()) {
+        closeSidebar();
+        closeSidebarSecondary();
+    }
+}
+
+$(window).on("resize", function (event) {
+    if (isMobile()) {
+        closeSidebar();
+        closeSidebarSecondary();
+    }
+    // console.log("desktop")
+});
+
+initLayout();
+
+// Show Secondary menu area on hover on side menu item;
+$sidebarLeft.find(".nav-item").on("mouseenter", function (event) {
+    var $navItem = $(event.currentTarget);
+    var dataItem = $navItem.data("item");
+
+    if (dataItem) {
+        navItemToggleActive($navItem);
+        openSidebarSecondary();
+    } else {
+        closeSidebarSecondary();
+    }
+    $sidebarLeftSecondary.find(".childNav").hide();
+    $sidebarLeftSecondary.find("[data-parent=\"" + dataItem + "\"]").show();
+});
+
+// Hide secondary menu on click on overlay
+$sidebarOverlay.on("click", function (event) {
+    if (isMobile()) {
+        closeSidebar();
+    }
+    closeSidebarSecondary();
+});
+
+// Toggle menus on click on header toggle icon
+$sidebarToggle.on("click", function (event) {
+    var isSidebarOpen = $sidebarLeft.hasClass("open");
+    var isSidebarSecOpen = $sidebarLeftSecondary.hasClass("open");
+    if (isSidebarOpen && isSidebarSecOpen && isMobile()) {
+        closeSidebar();
+        closeSidebarSecondary();
+    } else if (isSidebarOpen && isSidebarSecOpen) {
+        closeSidebarSecondary();
+    } else if (isSidebarOpen) {
+        closeSidebar();
+    } else if (!isSidebarOpen && !isSidebarSecOpen) {
+        openSidebar();
+        openSidebarSecondary();
+    }
+});
+
+// Search toggle
+var $searchUI = $(".search-ui");
+$searchInput.on("focus", function () {
+    $searchUI.addClass("open");
+});
+$searchCloseBtn.on("click", function () {
+    $searchUI.removeClass("open");
+});
+
+// Perfect scrollbar
+$('.perfect-scrollbar, [data-perfect-scrollbar]').each(function (index) {
+    var $el = $(this);
+    var ps = new PerfectScrollbar(this, {
+        suppressScrollX: $el.data('suppress-scroll-x'),
+        suppressScrollY: $el.data('suppress-scroll-y')
+    });
+});
+
+// Full screen
+function cancelFullScreen(el) {
+    var requestMethod = el.cancelFullScreen || el.webkitCancelFullScreen || el.mozCancelFullScreen || el.exitFullscreen;
+    if (requestMethod) {
+        // cancel full screen.
+        requestMethod.call(el);
+    } else if (typeof window.ActiveXObject !== "undefined") {
+        // Older IE.
+        var wscript = new ActiveXObject("WScript.Shell");
+        if (wscript !== null) {
+            wscript.SendKeys("{F11}");
+        }
+    }
+}
+
+function requestFullScreen(el) {
+    // Supports most browsers and their versions.
+    var requestMethod = el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+
+    if (requestMethod) {
+        // Native full screen.
+        requestMethod.call(el);
+    } else if (typeof window.ActiveXObject !== "undefined") {
+        // Older IE.
+        var wscript = new ActiveXObject("WScript.Shell");
+        if (wscript !== null) {
+            wscript.SendKeys("{F11}");
+        }
+    }
+    return false;
+}
+
+function toggleFullscreen() {
+    var elem = document.body;
+    var isInFullScreen = document.fullScreenElement && document.fullScreenElement !== null || document.mozFullScreen || document.webkitIsFullScreen;
+
+    if (isInFullScreen) {
+        cancelFullScreen(document);
+    } else {
+        requestFullScreen(elem);
+    }
+    return false;
+}
+$('[data-fullscreen]').on('click', toggleFullscreen);
+
+/***/ })
+
+/******/ });
