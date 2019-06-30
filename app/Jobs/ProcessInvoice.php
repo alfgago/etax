@@ -149,7 +149,7 @@ class ProcessInvoice implements ShouldQueue
                                         $xml->xml = $path;
                                         $xml->save();
                                         
-                                        $file = $invoiceUtils->sendInvoiceEmail( $invoice, $company, $path );
+                                        $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path );
                                         
                                         Log::info('Resend completed');
                                     }
