@@ -43,7 +43,8 @@ class ResendInvoices extends Command
     {
         try {
             $this->info('Sending invoices to Hacienda....');
-            $invoices = Invoice::where('hacienda_status', 1)->where('generation_method', 'etax')->get();
+            $invoices = Invoice::where('hacienda_status', '01')->where('generation_method', 'etax')
+                ->where('document_type', '01')->get();
             $this->info('Sending invoices ....'. count($invoices));
             $this->info('Get Token Api Hacienda ....');
             $apiHacienda = new BridgeHaciendaApi();
