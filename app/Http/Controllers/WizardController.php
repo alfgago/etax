@@ -38,6 +38,7 @@ class WizardController extends Controller
       }
       
       $company = currentCompanyModel();
+      $actividades = Actividades::all();
       return view('/wizard/index', compact( 'subscription', 'company', 'actividades') );
 
     }
