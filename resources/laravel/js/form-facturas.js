@@ -139,7 +139,14 @@
     var monto_iva = $('#item_iva_amount').val();
     var subtotal = $('#item_subtotal').val();
     var total = $('#item_total').val();
-    
+    var typeDocument = $('#typeDocument').val();
+    var numeroDocumento = $('#numeroDocumento').val();
+    var nombreInstitucion = $('#nombreInstitucion').val();
+    var porcentajeExoneracion = $('#porcentajeExoneracion').val();
+    var montoExoneracion = $('#montoExoneracion').val();
+    var impuestoNeto = $('#impuestoNeto').val();
+    var montoTotalLinea = $('#montoTotalLinea').val();
+
     if( !monto_iva ) {
       monto_iva = 0;
       $('#item_iva_amount').val(0);
@@ -164,7 +171,7 @@
       var row_id  = "item-tabla-"+numero;
       
       var inputFields = "<div class='hidden'>" +
-                   "<input type='hidden' class='numero' name='items["+index+"][item_number]' value='"+(numero+1)+"'>" + 
+                   "<input type='hidden' class='numero' name='items["+index+"][item_number]' value='"+(numero+1)+"'>" +
                    "<input class='item_id' type='hidden' name='items["+index+"][id]' value='"+item_id+"'>" +
                    "<input type='hidden' class='codigo' name='items["+index+"][code]' value='"+codigo+"'>" +
                    "<input type='hidden' class='nombre' name='items["+index+"][name]' value='"+nombre+"'>" +
@@ -173,17 +180,24 @@
                    "<input type='hidden' class='unidad_medicion' name='items["+index+"][measure_unit]' value='"+unidad_medicion+"'>" +
                    "<input type='hidden' class='precio_unitario' name='items["+index+"][unit_price]' value='"+precio_unitario+"'>" +
                    "<input type='hidden' class='tipo_iva' name='items["+index+"][iva_type]' value='"+tipo_iva+"'>" +
-                   "<input type='hidden' class='porc_identificacion_plena' name='items["+index+"][porc_identificacion_plena]' value='"+porc_identificacion_plena+"'>" + 
-                   "<input type='hidden' class='discount_type' name='items["+index+"][discount_type]' value='"+tipo_descuento+"'>" + 
+                   "<input type='hidden' class='porc_identificacion_plena' name='items["+index+"][porc_identificacion_plena]' value='"+porc_identificacion_plena+"'>" +
+                   "<input type='hidden' class='discount_type' name='items["+index+"][discount_type]' value='"+tipo_descuento+"'>" +
                    "<input type='hidden' class='discount' name='items["+index+"][discount]' value='"+descuento+"'>" +
                    "<input type='hidden' class='subtotal' name='items["+index+"][subtotal]' value='"+subtotal+"'>" +
                    "<input type='hidden' class='porc_iva' name='items["+index+"][iva_percentage]' value='"+porc_iva+"'>" +
                    "<input type='hidden' class='monto_iva' name='items["+index+"][iva_amount]' value='"+monto_iva+"'> " +
                    "<input type='hidden' class='total' name='items["+index+"][total]' value='"+total+"'>" +
                    "<input type='hidden' class='is_identificacion_especifica' name='items["+index+"][is_identificacion_especifica]' value='"+is_identificacion_especifica+"'>" +
-                   "</div>"
+                   "<input type='hidden' class='typeDocument' name='items["+index+"][typeDocument]' value='"+typeDocument+"'>" +
+                   "<input type='hidden' class='numeroDocumento' name='items["+index+"][numeroDocumento]' value='"+numeroDocumento+"'>" +
+                   "<input type='hidden' class='nombreInstitucion' name='items["+index+"][nombreInstitucion]' value='"+nombreInstitucion+"'>" +
+                   "<input type='hidden' class='porcentajeExoneracion' name='items["+index+"][porcentajeExoneracion]' value='"+porcentajeExoneracion+"'>" +
+                   "<input type='hidden' class='montoExoneracion' name='items["+index+"][montoExoneracion]' value='"+montoExoneracion+"'>" +
+                   "<input type='hidden' class='impuestoNeto' name='items["+index+"][impuestoNeto]' value='"+impuestoNeto+"'>" +
+                   "<input type='hidden' class='montoTotalLinea' name='items["+index+"][montoTotalLinea]' value='"+montoTotalLinea+"'>" +
+              "</div>"
                    ;
-      
+
       //Crea la fila en la tabla
       var htmlCols = "<td><span class='numero-fila'>"+(numero+1)+"</span> </td>";
         htmlCols += "<td>"+codigo + inputFields + " </td>";
@@ -267,6 +281,15 @@
     $('#porc_iva').val( item.find('.porc_iva ').val() );
     $('#item_iva_amount').val( item.find('.monto_iva ').val() );
     $('#porc_identificacion_plena').val( item.find('.porc_identificacion_plena ').val() );
+
+    $('#typeDocument').val( item.find('.typeDocument ').val() );
+    $('#numeroDocumento').val( item.find('.numeroDocumento ').val() );
+    $('#nombreInstitucion').val( item.find('.nombreInstitucion ').val() );
+    $('#porcentajeExoneracion').val( item.find('.porcentajeExoneracion ').val() );
+    $('#montoExoneracion').val( item.find('.montoExoneracion ').val() );
+    $('#impuestoNeto').val( item.find('.impuestoNeto ').val() );
+    $('#montoTotalLinea').val( item.find('.montoTotalLinea ').val() );
+
     
     if( parseInt(item.find('.is_identificacion_especifica').val()) ) {
       $('#is_identificacion_especifica').prop( 'checked', true );

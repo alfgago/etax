@@ -283,15 +283,66 @@ class BillController extends Controller
                             $codigoEtax = $row['codigoivaetax'];
                             $montoIva = (float)$row['montoiva'];
                             $totalNeto = 0;
-                            
+                            $tipoDocumentoExoneracion = $row['tipoDocumentoExoneracion'];
+                            $documentoExoneracion = $row['documentoExoneracion'];
+                            $companiaExoneracion = $row['companiaExoneracion'];
+                            $porcentajeExoneracion = $row['porcentajeExoneracion'];
+                            $montoExoneracion = $row['montoExoneracion'];
+                            $impuestoNeto = $row['impuestoNeto'];
+                            $totalMontoLinea = $row['totalMontoLinea'];
+
                             $codigoEtax = str_pad($codigoEtax, 3, '0', STR_PAD_LEFT);
+
+                            $arrayImportBill = array(
+                                'metodoGeneracion' => $metodoGeneracion,
+                                'idReceptor' => 0,
+                                'nombreProveedor' => $nombreProveedor,
+                                'codigoProveedor' => $codigoProveedor,
+                                'tipoPersona' => $tipoPersona,
+                                'identificacionProveedor' => $identificacionProveedor,
+                                'correoProveedor' => $correoProveedor,
+                                'telefonoProveedor' => $telefonoProveedor,
+                                'claveFactura' => $claveFactura,
+                                'consecutivoComprobante' => $consecutivoComprobante,
+                                'condicionVenta' => $condicionVenta,
+                                'metodoPago' => $metodoPago,
+                                'numeroLinea' => $numeroLinea,
+                                'fechaEmision' => $fechaEmision,
+                                'fechaVencimiento' => $fechaVencimiento,
+                                'idMoneda' => $idMoneda,
+                                'tipoCambio' => $tipoCambio,
+                                'totalDocumento' => $totalDocumento,
+                                'totalNeto' => $totalNeto,
+                                'tipoDocumento' => $tipoDocumento,
+                                'codigoProducto' => $codigoProducto,
+                                'detalleProducto' => $detalleProducto,
+                                'unidadMedicion' => $unidadMedicion,
+                                'cantidad' => $cantidad,
+                                'precioUnitario' => $precioUnitario,
+                                'subtotalLinea' => $subtotalLinea,
+                                'totalLinea' => $totalLinea,
+                                'montoDescuento' => $montoDescuento,
+                                'codigoEtax' => $codigoEtax,
+                                'montoIva' => $montoIva,
+                                'descripcion' => $descripcion,
+                                'isAuthorized' => true,
+                                'codeValidated' => true,
+                                'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
+                                'documentoExoneracion' => $documentoExoneracion,
+                                'companiaExoneracion' => $companiaExoneracion,
+                                'porcentajeExoneracion' => $porcentajeExoneracion,
+                                'montoExoneracion' => $montoExoneracion,
+                                'impuestoNeto' => $impuestoNeto,
+                                'totalMontoLinea' => $totalMontoLinea
+                            );
                             
-                            $insert = Bill::importBillRow(
-                                $metodoGeneracion, 0, $nombreProveedor, $codigoProveedor, $tipoPersona, $identificacionProveedor, $correoProveedor, $telefonoProveedor,
+                            $insert = Bill::importBillRow( $arrayImportBill );
+                                /*$metodoGeneracion, 0, $nombreProveedor, $codigoProveedor, $tipoPersona, $identificacionProveedor, $correoProveedor, $telefonoProveedor,
                                 $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
                                 $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
-                                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, true, true
-                            );
+                                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, true, true,
+                                $tipoDocumentoExoneracion, $documentoExoneracion, $companiaExoneracion, $porcentajeExoneracion, $montoExoneracion, $impuestoNeto, $totalMontoLinea
+                            );*/
                             
                             if( $insert ) {
                                 array_push( $inserts, $insert );
