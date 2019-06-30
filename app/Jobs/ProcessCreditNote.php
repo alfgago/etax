@@ -53,7 +53,7 @@ class ProcessCreditNote implements ShouldQueue
             $invoice = Invoice::find($this->invoiceId);
             $company = Company::find($this->companyId);
             if ( $company->atv_validation ) {
-                if ($invoice->hacienda_status == '01') {
+                if ($invoice->hacienda_status == '01' && $invoice->document_type == '03') {
                     $requestDetails = $this->setDetails($invoice->items);
                     $requestData = $this->setInvoiceData($invoice, $requestDetails);
                     Log::info('Request data'. json_encode($requestData));
@@ -140,7 +140,7 @@ class ProcessCreditNote implements ShouldQueue
                                     'connect_timeout' => 20
                                 ]);
                                 $response = json_decode($result->getBody()->getContents(), true);
-                                Log::info('Response Api Hacienda '. json_encode($response));
+                                Log::info('Credit Note Response Api Hacienda '. json_encode($response));
                                 if (isset($response['status']) && $response['status'] == 200) {
                                     Log::info('API HACIENDA 200 :'. $invoice->document_number);
                                     $date = Carbon::now();
@@ -243,7 +243,7 @@ class ProcessCreditNote implements ShouldQueue
             }
             return $request;
         } catch (ClientException $error) {
-            Log::info('Error al crear data para request en API HACIENDA -->>'. $error);
+            Log::info('Error al crear data para request en Credit Note API HACIENDA -->>'. $error);
             return false;
         }
     }
@@ -266,7 +266,7 @@ class ProcessCreditNote implements ShouldQueue
             }
             return json_encode($details, true);
         } catch (ClientException $error) {
-            Log::info('Error al iniciar session en API HACIENDA -->>'. $error);
+            Log::info('Error al crear parametros en Credit Note API HACIENDA -->>'. $error);
             return false;
         }
     }
