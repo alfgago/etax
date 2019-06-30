@@ -81,11 +81,11 @@ class ProcessInvoice implements ShouldQueue
                             $date = Carbon::now();
                             $invoice->hacienda_status = '03';
                             $invoice->save();
-                            $path = 'empresa-' . $company->id_number .
-                                "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
+                            $path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
                             $save = Storage::put(
                                 $path,
-                                ltrim($response['data']['xmlFirmado'], '\n'));
+                                ltrim($response['data']['xmlFirmado'], '\n')
+                            );
                             if ($save) {
                                 $xml = new XmlHacienda();
                                 $xml->invoice_id = $invoice->id;
@@ -93,7 +93,8 @@ class ProcessInvoice implements ShouldQueue
                                 $xml->xml = $path;
                                 $xml->save();
                                 
-                                $file = $invoiceUtils->sendInvoiceEmail( $invoice, $company, $path );
+                                $xmlExtract = ltrim($response['data']['response'], '\n');
+                                $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $xmlExtract );
 
                             }
                             Log::info('Factura enviada y XML guardado.');
@@ -149,7 +150,8 @@ class ProcessInvoice implements ShouldQueue
                                         $xml->xml = $path;
                                         $xml->save();
                                         
-                                        $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path );
+                                        $xmlExtract = ltrim($response['data']['response'], '\n');
+                                        $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $xmlExtract );
                                         
                                         Log::info('Resend completed');
                                     }
