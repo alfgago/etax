@@ -136,7 +136,7 @@ class PaymentController extends Controller
                 if( $cuponConsultado->code == '$$$ETAX100DESCUENTO!' || $cuponConsultado->code == '$$$ETAXTRANSFERENCIA!' ){
                     return $this->skipPaymentCoupon( $request, $cuponConsultado );
                 }
-                $descuento = ($cuponConsultado->discount_percentage) / 100;
+                $descuento = $descuento + ( ($cuponConsultado->discount_percentage) / 100 );
             } else {
                 $descuento = 0;
             }
@@ -415,7 +415,8 @@ class PaymentController extends Controller
             $company->last_document = $invoice->document_number;
             $company->save();
             clearInvoiceCache($invoice);
-
+            
+            Log::info( 'Nueva suscripción exitosa.' );
             return true;
         } else {
             return false;
