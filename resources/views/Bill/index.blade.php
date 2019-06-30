@@ -111,7 +111,7 @@ function condfirmEnvioAceptacion( id ) {
     type: 'warning',
     showCloseButton: true,
     showCancelButton: true,
-    confirmButtonText: 'Sí, quiero enviarla a aceptaciones'
+    confirmButtonText: 'Sí, quiero enviarla a aceptaciones',
     customContainerClass: 'container-success',
   }).then((result) => {
     if (result.value) {
