@@ -177,7 +177,7 @@ class BridgeHaciendaApi
             $invoiceData = array(
                 'consecutivo' => $ref ?? '',
                 'fecha_emision' => $data['generated_date']->toDateTimeString() ?? '',
-                'codigo_actividad' => $data['comercial_activity'],
+                'codigo_actividad' => $data['commercial_activity'],
                 'receptor_nombre' => $data['client_first_name'].' '.$data['client_last_name'],
                 'receptor_ubicacion_provincia' => substr($receptorPostalCode,0,1),
                 'receptor_ubicacion_canton' => substr($receptorPostalCode,1,2),
@@ -267,7 +267,7 @@ class BridgeHaciendaApi
             $invoiceData = array(
                 'consecutivo' => $ref ?? '',
                 'fecha_emision' => $data['generated_date']->toDateTimeString() ?? '',
-                'codigo_actividad' => $data['comercial_activity'],
+                'codigo_actividad' => $data['commercial_activity'],
                 'receptor_nombre' => $data['client_first_name'].' '.$data['client_last_name'],
                 'receptor_ubicacion_provincia' => substr($receptorPostalCode,0,1),
                 'receptor_ubicacion_canton' => substr($receptorPostalCode,1,2),

@@ -335,6 +335,8 @@ class PaymentController extends Controller
             $data->codigo_cliente = $invoiceData->client_code;
             $data->code = $invoiceData->client_code;
             $data->id_number = $invoiceData->client_id_number;
+            
+            $data->commercial_activity = 722003;
 
             $data->client_code = $invoiceData->client_id_number;
             $data->client_id_number = $invoiceData->client_id_number;
@@ -405,7 +407,9 @@ class PaymentController extends Controller
                 if ( !empty($invoiceDataSent) ) {
                     $invoice = $apiHacienda->createInvoice($invoiceDataSent, $tokenApi);
                 }
-            }catch(\Throwable $e){}
+            }catch(\Throwable $e){
+                Log::error('Error al crear factura de compra eTax. ' . $e->getMessage() );
+            }
 
             $company->last_invoice_ref_number = $invoice->reference_number;
             $company->last_document = $invoice->document_number;
