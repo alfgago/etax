@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\actividades;
+use App\Actividades;
 use Illuminate\Http\Request;
 use App\Company;
 use App\Invoice;
