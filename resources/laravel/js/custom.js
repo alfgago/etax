@@ -207,6 +207,10 @@ $(document).ready(function() {
       return data.text;
     }
   });
+  
+  $('.select-search-wizard').select2({
+    dropdownParent: $('#wizard-popup')
+  });
 
   $('.select2-tags').select2();
 	  
