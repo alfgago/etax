@@ -6,7 +6,7 @@
 
 @section('breadcrumb-buttons')
     <a class="btn btn-primary" href="/facturas-emitidas/create">Ingresar factura existente</a>
-    <a class="btn btn-primary" href="/facturas-emitidas/facturas-emitidas/emitir-factura">Emitir factura nueva</a>
+    <a class="btn btn-primary" href="/facturas-emitidas/emitir-factura">Emitir factura nueva</a>
     <div onclick="abrirPopup('importar-emitidas-popup');" class="btn btn-primary">Importar facturas emitidas</div>
 @endsection 
 
