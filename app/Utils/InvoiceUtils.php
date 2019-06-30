@@ -152,19 +152,19 @@ class InvoiceUtils
             if ( !empty($cc) ) {
                 Mail::to($cc)->send(new \App\Mail\InvoiceNotification([	
                                         'xml' => $xmlPath,	
-                                        'data_invoice' => $invoice, 'data_company' => $company,	
-                                        'xml' => ltrim($response['data']['response'], '\n')	
+                                        'data_invoice' => $invoice, 
+                                        'data_company' => $company	
                                     ]));
             } else {
                 Mail::to($invoice->client_email)->send(new \App\Mail\InvoiceNotification([	
                                         'xml' => $xmlPath,	
-                                        'data_invoice' => $invoice, 'data_company' => $company,	
-                                        'xml' => ltrim($response['data']['response'], '\n')	
+                                        'data_invoice' => $invoice, 
+                                        'data_company' => $company
                                     ]));
             }
-            Log::info('Se enviaron correos con PDF y XML: ' .$invoice->id );
+            Log::info('Se enviaron correos de notififación de factura aprobada: ' .$invoice->id );
         }catch( \Throwable $e ){
-            Log::error('Fallo el envío de correos: ' .$invoice->id );
+            Log::error('Fallo el envío de correos de notififación de factura aprobada: ' .$invoice->id );
         }
     }
     
