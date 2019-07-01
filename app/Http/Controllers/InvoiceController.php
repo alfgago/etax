@@ -460,14 +460,16 @@ class InvoiceController extends Controller
                             $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
                             $codigoEtax = $row['codigoivaetax'];
                             $montoIva = (float)$row['montoiva'];
+                            
+                            //Exoneraciones
                             $totalNeto = 0;
-                            $tipoDocumentoExoneracion = $row['tipoDocumentoExoneracion'];
-                            $documentoExoneracion = $row['documentoExoneracion'];
-                            $companiaExoneracion = $row['companiaExoneracion'];
-                            $porcentajeExoneracion = $row['porcentajeExoneracion'];
-                            $montoExoneracion = $row['montoExoneracion'];
-                            $impuestoNeto = $row['impuestoNeto'];
-                            $totalMontoLinea = $row['totalMontoLinea'];
+                            $tipoDocumentoExoneracion = $row['tipoDocumentoExoneracion'] ?? null;
+                            $documentoExoneracion = $row['documentoExoneracion'] ?? null;
+                            $companiaExoneracion = $row['companiaExoneracion'] ?? null;
+                            $porcentajeExoneracion = $row['porcentajeExoneracion'] ?? 0;
+                            $montoExoneracion = $row['montoExoneracion'] ?? 0;
+                            $impuestoNeto = $row['impuestoNeto'] ?? 0;
+                            $totalMontoLinea = $row['totalMontoLinea'] ?? 0;
                             //
                             $arrayInsert = array(
                                 'metodoGeneracion' => $metodoGeneracion,
@@ -502,12 +504,7 @@ class InvoiceController extends Controller
                                 'totalMontoLinea' => $totalMontoLinea
                             );
 
-                            $insert = Invoice::importInvoiceRow( $arrayInsert
-                                /*$metodoGeneracion, 0, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
-                                $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
-                                $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
-                                $tipoDocumentoExoneracion, $documentoExoneracion, $companiaExoneracion, $porcentajeExoneracion, $montoExoneracion, $impuestoNeto, $totalMontoLinea*/
-                            );
+                            $insert = Invoice::importInvoiceRow( $arrayInsert );
 
                             if( $insert ) {
                                 array_push( $inserts, $insert );
@@ -850,6 +847,10 @@ class InvoiceController extends Controller
         $filename = $invoice->document_key . '.xml';
         if( ! $invoice->document_key ) {
             $filename = $invoice->document_number . '-' . $invoice->client_id . '.xml';
+        }
+        
+        if( !isset($file) ){
+            return redirect()->back()->withError('No se encontró el XML de la factura. Por favor contacte a soporte.');
         }
         
         $headers = [
