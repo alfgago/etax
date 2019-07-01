@@ -13,7 +13,7 @@
   <div class="col-md-12">
         <div class="descripcion mb-4">
           Las facturas enviadas a <b>facturas@etaxcr.com</b> se verán reflejadas en esta pantalla automáticamente. <br><br>
-          Este proceso NO crea la aceptación o rechazo ante Hacienda, la funcionalidad de aceptaciones ante Hacienda estará habilitada a partir del 7 de Junio.
+          Este proceso NO crea la aceptación o rechazo ante Hacienda, la funcionalidad de aceptaciones se encuentra en: <a href="/facturas-recibidas/aceptaciones">este enlace</a>.
         </div>
           
         <table id="bill-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">

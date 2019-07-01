@@ -461,15 +461,19 @@ class InvoiceController extends Controller
                             $codigoEtax = $row['codigoivaetax'];
                             $montoIva = (float)$row['montoiva'];
                             
+                            $codigoActividad = $row['codigoactividad'] ?? $company->getActivities()[0];
+                            $xmlSchema = $row['xmlschema'] ?? 42;
+                            
                             //Exoneraciones
                             $totalNeto = 0;
-                            $tipoDocumentoExoneracion = $row['tipoDocumentoExoneracion'] ?? null;
-                            $documentoExoneracion = $row['documentoExoneracion'] ?? null;
-                            $companiaExoneracion = $row['companiaExoneracion'] ?? null;
-                            $porcentajeExoneracion = $row['porcentajeExoneracion'] ?? 0;
-                            $montoExoneracion = $row['montoExoneracion'] ?? 0;
-                            $impuestoNeto = $row['impuestoNeto'] ?? 0;
-                            $totalMontoLinea = $row['totalMontoLinea'] ?? 0;
+                            $tipoDocumentoExoneracion = $row['tipodocumentoexoneracion'] ?? null;
+                            $documentoExoneracion = $row['documentoexoneracion'] ?? null;
+                            $companiaExoneracion = $row['companiaexoneracion'] ?? null;
+                            $porcentajeExoneracion = $row['porcentajeexoneracion'] ?? 0;
+                            $montoExoneracion = $row['montoexoneracion'] ?? 0;
+                            $impuestoNeto = $row['impuestoneto'] ?? 0;
+                            $totalMontoLinea = $row['totalmontolinea'] ?? 0;
+                            
                             //
                             $arrayInsert = array(
                                 'metodoGeneracion' => $metodoGeneracion,
@@ -501,7 +505,9 @@ class InvoiceController extends Controller
                                 'porcentajeExoneracion' => $porcentajeExoneracion,
                                 'montoExoneracion' => $montoExoneracion,
                                 'impuestoNeto' => $impuestoNeto,
-                                'totalMontoLinea' => $totalMontoLinea
+                                'totalMontoLinea' => $totalMontoLinea,
+                                'xmlSchema' => $xmlSchema,
+                                'codigoActividad' => $codigoActividad
                             );
 
                             $insert = Invoice::importInvoiceRow( $arrayInsert );

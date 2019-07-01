@@ -282,14 +282,19 @@ class BillController extends Controller
                             $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
                             $codigoEtax = $row['codigoivaetax'];
                             $montoIva = (float)$row['montoiva'];
+                            
+                            $codigoActividad = $row['codigoactividad'] ?? $company->getActivities()[0];
+                            $xmlSchema = $row['xmlschema'] ?? 42;
+                            
+                            //Datos de exoneracion
                             $totalNeto = 0;
-                            $tipoDocumentoExoneracion = $row['tipoDocumentoExoneracion'];
-                            $documentoExoneracion = $row['documentoExoneracion'];
-                            $companiaExoneracion = $row['companiaExoneracion'];
-                            $porcentajeExoneracion = $row['porcentajeExoneracion'];
-                            $montoExoneracion = $row['montoExoneracion'];
-                            $impuestoNeto = $row['impuestoNeto'];
-                            $totalMontoLinea = $row['totalMontoLinea'];
+                            $tipoDocumentoExoneracion = $row['tipodocumentoexoneracion'] ?? null;
+                            $documentoExoneracion = $row['documentoexoneracion'] ?? null;
+                            $companiaExoneracion = $row['companiaexoneracion'] ?? null;
+                            $porcentajeExoneracion = $row['porcentajeexoneracion'] ?? 0;
+                            $montoExoneracion = $row['montoexoneracion'] ?? 0;
+                            $impuestoNeto = $row['impuestoneto'] ?? 0;
+                            $totalMontoLinea = $row['totalmontolinea'] ?? 0;
 
                             $codigoEtax = str_pad($codigoEtax, 3, '0', STR_PAD_LEFT);
 
@@ -333,16 +338,12 @@ class BillController extends Controller
                                 'porcentajeExoneracion' => $porcentajeExoneracion,
                                 'montoExoneracion' => $montoExoneracion,
                                 'impuestoNeto' => $impuestoNeto,
-                                'totalMontoLinea' => $totalMontoLinea
+                                'totalMontoLinea' => $totalMontoLinea,
+                                'xmlSchema' => $xmlSchema,
+                                'codigoActividad' => $codigoActividad
                             );
                             
                             $insert = Bill::importBillRow( $arrayImportBill );
-                                /*$metodoGeneracion, 0, $nombreProveedor, $codigoProveedor, $tipoPersona, $identificacionProveedor, $correoProveedor, $telefonoProveedor,
-                                $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
-                                $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
-                                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, true, true,
-                                $tipoDocumentoExoneracion, $documentoExoneracion, $companiaExoneracion, $porcentajeExoneracion, $montoExoneracion, $impuestoNeto, $totalMontoLinea
-                            );*/
                             
                             if( $insert ) {
                                 array_push( $inserts, $insert );

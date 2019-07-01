@@ -116,85 +116,96 @@ class PaymentController extends Controller
     }
 
     public function confirmPayment(Request $request){
-        $user = auth()->user();
-        $paymentUtils = new PaymentUtils();
         
-        $request->number = preg_replace('/\s+/', '',  $request->number);
-        $start_date = Carbon::parse(now('America/Costa_Rica'));
-        
-        //El descuento por defecto es cero.
-        $descuento = 0;
-        //Aplica descuento del Banco Nacional
-        if( $request->bncupon ) {
-            $descuento = 0.1;
-        }
-        
-        //Si tiene un cupon adicional, este aplica sobre el de la tarjeta del BN.
-        if ( isset($request->coupon) ) {
-            $cuponConsultado = Coupon::where('code', $request->coupon)->first();
-            if ( isset($cuponConsultado) ) {
-                if( $cuponConsultado->code == '$$$ETAX100DESCUENTO!' || $cuponConsultado->code == '$$$ETAXTRANSFERENCIA!' ){
-                    return $this->skipPaymentCoupon( $request, $cuponConsultado );
-                }
-                $descuento = $descuento + ( ($cuponConsultado->discount_percentage) / 100 );
-            } else {
-                $descuento = 0;
+        try{
+            $user = auth()->user();
+            $paymentUtils = new PaymentUtils();
+            
+            $request->number = preg_replace('/\s+/', '',  $request->number);
+            $start_date = Carbon::parse(now('America/Costa_Rica'));
+            
+            $razonDescuento = null;
+            //El descuento por defecto es cero.
+            $descuento = 0;
+            //Aplica descuento del Banco Nacional
+            if( $request->bncupon ) {
+                $descuento = 0.1;
+                $razonDescuento = "Cupón BN";
             }
-        }
-        
-        //Crea el sale de suscripción
-        $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
-
-        //Revisa recurrencia para definir el costo.
-        $recurrency = $request->recurrency;
-        $subscriptionPlan = $sale->product->plan;
-        switch ($recurrency) {
-            case 1:
-                $costo = $subscriptionPlan->monthly_price;
-                $nextPaymentDate = $start_date->addMonths(1);
-                $descriptionMessage = 'Mensual';
-                break;
-            case 6:
-                $costo = $subscriptionPlan->six_price * 6;
-                $nextPaymentDate = $start_date->addMonths(6);
-                $descriptionMessage = 'Semestral';
-                break;
-            case 12:
-                $costo = $subscriptionPlan->annual_price * 12;
-                $nextPaymentDate = $start_date->addMonths(12);
-                $descriptionMessage = 'Anual';
-                break;
-        }
-        
-        //Calcula el monto con descuentos aplicados.
-        $montoDescontado = $costo * $descuento;
-        $subtotal = ($costo - $montoDescontado);
-        $iv = $subtotal * 0;
-        $amount = $subtotal + $iv;
-        $cards = array(
-            $request->number
-        );
-        $cardYear = substr($request->expiry, -2);
-        $cardMonth = substr($request->expiry, 0 , 2);
-        
-        //Cupon para pruebas, hace pagos por $1.
-        if( $request->coupon == "!!CUPON1!!" ) {
-            $amount = 1;
-        }
-        
-        foreach ($cards as $c) {
-            $check = $paymentUtils->checkCC($c, true);
-            //if ($check !== false) {
-                $typeCard = $check;
-            //}
-        }
-        $last_4digits = substr($request->number, -4);
-        $nameCard = $typeCard ? $typeCard : 'Visa';
-        $cardDescripcion = "Tarjeta $last_4digits de usuario: " . auth()->user()->user_name;
-        
-        //Revisa si el API del BN esta arriba.
-        $bnStatus = $paymentUtils->statusBNAPI();
-        if($bnStatus['apiStatus'] == 'Successful'){
+           
+            //Si tiene un cupon adicional, este aplica sobre el de la tarjeta del BN.
+            if ( isset($request->coupon) ) {
+                $cuponConsultado = Coupon::where('code', $request->coupon)->first();
+                if ( isset($cuponConsultado) ) {
+                    if( $cuponConsultado->code == '$$$ETAX100DESCUENTO!' || $cuponConsultado->code == '$$$ETAXTRANSFERENCIA!' ){
+                        return $this->skipPaymentCoupon( $request, $cuponConsultado );
+                    }
+                    $descuento = $descuento + ( ($cuponConsultado->discount_percentage) / 100 );
+                    $razonDescuento = "Cupón $cuponConsultado->code";
+                    if( $request->bncupon ) {
+                        $razonDescuento = "Cupón BN + $cuponConsultado->code";
+                    }
+                }
+            }
+            
+            //Crea el sale de suscripción
+            $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
+    
+            //Revisa recurrencia para definir el costo.
+            $recurrency = $request->recurrency;
+            $subscriptionPlan = $sale->product->plan;
+            switch ($recurrency) {
+                case 1:
+                    $costo = $subscriptionPlan->monthly_price;
+                    $nextPaymentDate = $start_date->addMonths(1);
+                    $descriptionMessage = 'Mensual';
+                    break;
+                case 6:
+                    $costo = $subscriptionPlan->six_price * 6;
+                    $nextPaymentDate = $start_date->addMonths(6);
+                    $descriptionMessage = 'Semestral';
+                    break;
+                case 12:
+                    $costo = $subscriptionPlan->annual_price * 12;
+                    $nextPaymentDate = $start_date->addMonths(12);
+                    $descriptionMessage = 'Anual';
+                    break;
+            }
+            
+            //Calcula el monto con descuentos aplicados.
+            $montoDescontado = $costo * $descuento;
+            $subtotal = ($costo - $montoDescontado);
+            $iv = $subtotal * 0.13;
+            $amount = $subtotal + $iv;
+            
+            $cards = array(
+                $request->number
+            );
+            $cardYear = substr($request->expiry, -2);
+            $cardMonth = substr($request->expiry, 0 , 2);
+            
+            //Cupon para pruebas, hace pagos por $1 sin IVA. Estas hay que anularlas luego.
+            if( $request->coupon == "!!CUPON1!!" ) {
+                $amount = 1;
+            }
+            
+            foreach ($cards as $c) {
+                $check = $paymentUtils->checkCC($c, true);
+                //if ($check !== false) {
+                    $typeCard = $check;
+                //}
+            }
+            $last_4digits = substr($request->number, -4);
+            $nameCard = $typeCard ? $typeCard : 'Visa';
+            $cardDescripcion = "Tarjeta $last_4digits de usuario: " . auth()->user()->user_name;
+            
+            //Revisa si el API del BN esta arriba.
+            $bnStatus = $paymentUtils->statusBNAPI();
+            if($bnStatus['apiStatus'] != 'Successful'){
+                $mensaje = 'Pagos en Linea esta fuera de servicio. Dirijase a Configuraciones->Gestion de Pagos- para agregar una tarjeta';
+                return redirect('wizard')->withError($mensaje)->withInput();
+            }
+            
             //Agrega la tarjeta al API del BN.
             $card = $paymentUtils->userCardInclusion($request->number, $cardDescripcion, $cardMonth, $cardYear, $request->cvc);
             if($card['apiStatus'] == 'Successful'){
@@ -278,14 +289,21 @@ class PaymentController extends Controller
                 $invoiceData->email = $request->email;
                 $invoiceData->expiry = $request->expiry;
                 $invoiceData->amount = $amount;
-                $invoiceData->subtotal = $amount;
+                $invoiceData->subtotal = $subtotal;
+                $invoiceData->iva_amount = $iv;
+                $invoiceData->discount_reason = $razonDescuento;
 
                 $item = new stdClass();
                 $item->total = $amount;
                 $item->code = $sale->etax_product_id;
-                $item->name = $sale->product->name;
-                $item->descuento = $descuento;
+                $item->name = $sale->product->name . " / $recurrency meses";
+                $item->descuento = $montoDescontado;
+                $item->discount_reason = $razonDescuento;
                 $item->cantidad = 1;
+                $item->iva_amount = $iv;
+                $item->unit_price = $costo;
+                $item->subtotal = $subtotal;
+                $item->total = $amount;
                 
                 $invoiceData->items = [$item];
                 $factura = $this->crearFacturaClienteEtax($invoiceData);
@@ -296,11 +314,12 @@ class PaymentController extends Controller
                 $mensaje = 'El pago ha sido denegado';
                 return redirect()->back()->withError($mensaje)->withInput();
             }
-            
-        }else{
-            $mensaje = 'Pagos en Linea esta fuera de servicio. Dirijase a Configuraciones->Gestion de Pagos- para agregar una tarjeta';
-            return redirect('wizard')->withError($mensaje)->withInput();
+        
+        }catch( \Throwable $e ){
+            Log::error( "Error en suscripciones ". $e->getMessage() );
+            return redirect()->back()->withError("Hubo un error al realizar la suscripción. Por favor reintente o contacte a soporte.")->withInput();
         }
+        
     }
 
   
@@ -360,10 +379,10 @@ class PaymentController extends Controller
             $data->other_reference = '';
             $data->currency_rate = get_rates();
             $data->description = 'Factura de Etax';
-            $data->subtotal = $invoiceData->items[0]->cantidad * $invoiceData->amount;
+            $data->subtotal = $invoiceData->subtotal;
             $data->currency = 'USD';
-            $data->total = $invoiceData->items[0]->cantidad * $invoiceData->amount;
-            $data->iva_amount = 0;
+            $data->total = $invoiceData->amount;
+            $data->iva_amount = $invoiceData->iva_amount;
             $data->generated_date = Carbon::now()->format('d/m/Y');
             $data->hora = Carbon::now()->format('g:i A');
             $data->due_date = Carbon::now()->addDays(7)->format('d/m/Y');
@@ -377,25 +396,18 @@ class PaymentController extends Controller
             $item['product_type'] = 'Plan';
             $item['measure_unit'] = 'Sp';
             $item['item_count'] = $invoiceData->items[0]->cantidad;
-            $item['unit_price'] = $invoiceData->amount;
-            $item['subtotal'] = $invoiceData->items[0]->cantidad * $invoiceData->amount;
+            $item['unit_price'] = $invoiceData->items[0]->unit_price;
+            $item['subtotal'] = $invoiceData->items[0]->subtotal;
 
-            if($invoiceData->items[0]->descuento > 0){
-                $discount_reason = 'Cupón de descuento';
-                $discount = $invoiceData->items[0]->descuento;
-            }else{
-                $discount_reason = null;
-                $discount = 0;
-            }
             $item['discount_percentage'] = $invoiceData->items[0]->descuento;
-            $item['discount_reason'] = $discount_reason;
-            $item['discount'] = $discount;
+            $item['discount_reason'] = $invoiceData->items[0]->discount_reason;
+            $item['discount'] = $invoiceData->items[0]->descuento;
 
             $item['iva_type'] = '103';
-            $item['iva_percentage'] = 0;
-            $item['iva_amount'] = 0;
+            $item['iva_percentage'] = 13;
+            $item['iva_amount'] = $invoiceData->items[0]->iva_amount;
 
-            $item['total'] = $invoiceData->subtotal + 0;//$data->items->iva_amount;
+            $item['total'] = $invoiceData->items[0]->total;
             $item['is_identificacion_especifica'] = 0;
             $item['is_exempt'] = 0;
 
@@ -403,6 +415,7 @@ class PaymentController extends Controller
             
             try{
                 $invoiceDataSent = $invoice->setInvoiceData($data);
+                
                 Log::info('Suscriptor: '. $data->client_id_number . ", Nombre: " . $data->first_name . " " . $data->last_name . " " . $data->last_name2 . ", Plan:" . $invoiceData->items[0]->name );
                 if ( !empty($invoiceDataSent) ) {
                     $invoice = $apiHacienda->createInvoice($invoiceDataSent, $tokenApi);

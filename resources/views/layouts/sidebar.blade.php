@@ -18,6 +18,7 @@
                 
                 <div class="subitems">
                     <a href="/facturas-emitidas">Ver todas</a>
+                    <a href="/facturas-emitidas/emitir-factura">Emitir factura electrónica</a>
                     <a href="/facturas-emitidas/create">Registrar factura existente</a>
                     <a href="#" onclick="abrirPopup('importar-emitidas-popup');">Importar facturas</a>
                     <a href="/facturas-emitidas/validaciones">Validar facturas</a>
@@ -50,6 +51,9 @@
                 <div class="subitems">
                     <a href="/facturas-emitidas">Ver documentos emitidos</a>
                     <a href="/facturas-emitidas/emitir-factura">Emitir factura electrónica</a>
+                    <a href="/facturas-emitidas/emitir-factura">Emitir factura electrónica de exportación</a>
+                    <a href="/facturas-emitidas/emitir-factura">Emitir factura electrónica de compra</a>
+                    <a href="/facturas-emitidas/emitir-factura">Emitir nota de débito</a>
                     <a href="/facturas-emitidas/emitir-factura">Emitir tiquete electrónico</a>
                     <a href="/facturas-emitidas/emitir-factura">Emitir nota de débito</a>
                     <a href="/facturas-recibidas/aceptaciones">Aceptación de facturas recibidas</a>

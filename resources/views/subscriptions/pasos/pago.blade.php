@@ -44,7 +44,7 @@
 
 <div class="form-group col-md-12 mt-4">
 	<span class="precio-container">
-		Precio total: <span class="precio-text precio-final">9.99</span> <span class="recurrencia-text">/ mes</span> <span class="etiqueta-descuento"></span>
+		Precio total: <span class="precio-text precio-final">9.99</span> <span class="recurrencia-text">/ mes</span> <span class="etiqueta-descuento"></span> + IVA
 	</span>
 	<p class="description">* No se aceptan tarjetas American Express</p>
 </div>
@@ -81,13 +81,14 @@
             $('.precio-final').text( '$' + (parseFloat( $('.precio-inicial').text().slice(1) ) * 0.5) );
             $('.etiqueta-descuento').text('( Socios eTax 50% )');
         }
-        if( $('#coupon').val() == 'edgarmurillo' || $('#coupon').val() == 'EDGARMURILLO' ){
+        if( $('#coupon').val() == 'edgarmurillo' || $('#coupon').val() == 'EDGARMURILLO'  ){
             var descuento = parseFloat( $('.precio-inicial').text().slice(1) ) * 0.05;
-            $('.precio-final').text( '$' + (parseFloat( $('.precio-inicial').text().slice(1) ) * 0.05) );
-            $('.etiqueta-descuento').text('( Código Edgar Murillo )');
+            $('.precio-final').text( '$' + (parseFloat( $('.precio-inicial').text().slice(1) ) - descuento) );
+            $('.etiqueta-descuento').text('( DESCUENTO: 5% Código Edgar Murillo )');
+            
             if( $('#coupon').val() == 1 ) {
                 var descuento = parseFloat( $('.precio-inicial').text().slice(1) ) * 0.15;
-                $('.precio-final').text( '$' + (parseFloat( $('.precio-inicial').text().slice(1) ) * 0.15) );
+                $('.precio-final').text( '$' + (parseFloat( $('.precio-inicial').text().slice(1) ) - descuento) );
                 $('.etiqueta-descuento').text('( DESCUENTO: 5% Código Edgar Murillo + 10% BN Nacional)');
             }
         }

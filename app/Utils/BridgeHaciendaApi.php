@@ -211,7 +211,7 @@ class BridgeHaciendaApi
                 'atvcertFile' => Storage::get($company->atv->key_url),
                 'detalle' => $details
             );
-            Log::info('Factura INFO: '. implode( '; ', $invoiceData ) );
+            
             foreach ($invoiceData as $key => $values) {
                 if ($key == 'atvcertFile') {
                     $request[]=array(
