@@ -541,6 +541,7 @@ toastr.options = {
     var typeDocument = $('#typeDocument').val();
     var numeroDocumento = $('#numeroDocumento').val();
     var nombreInstitucion = $('#nombreInstitucion').val();
+    var exoneration_date = $('#exoneration_date').val();
     var porcentajeExoneracion = $('#porcentajeExoneracion').val();
     var montoExoneracion = $('#montoExoneracion').val();
     var impuestoNeto = $('#impuestoNeto').val();
@@ -590,11 +591,13 @@ toastr.options = {
                    "<input type='hidden' class='typeDocument' name='items["+index+"][typeDocument]' value='"+typeDocument+"'>" +
                    "<input type='hidden' class='numeroDocumento' name='items["+index+"][numeroDocumento]' value='"+numeroDocumento+"'>" +
                    "<input type='hidden' class='nombreInstitucion' name='items["+index+"][nombreInstitucion]' value='"+nombreInstitucion+"'>" +
+                   "<input type='hidden' class='exoneration_date' name='items["+index+"][exoneration_date]' value='"+exoneration_date+"'>" +
                    "<input type='hidden' class='porcentajeExoneracion' name='items["+index+"][porcentajeExoneracion]' value='"+porcentajeExoneracion+"'>" +
                    "<input type='hidden' class='montoExoneracion' name='items["+index+"][montoExoneracion]' value='"+montoExoneracion+"'>" +
                    "<input type='hidden' class='impuestoNeto' name='items["+index+"][impuestoNeto]' value='"+impuestoNeto+"'>" +
                    "<input type='hidden' class='montoTotalLinea' name='items["+index+"][montoTotalLinea]' value='"+montoTotalLinea+"'>" +
               "</div>"
+
                    ;
 
       //Crea la fila en la tabla

@@ -265,13 +265,16 @@ class Invoice extends Model
                   'iva_percentage' => $data['iva_percentage'] ?? '',
                   'iva_amount' => $data['iva_amount'] ?? '',
                   'is_exempt' => $data['is_exempt'] ?? false,
-                  'is_identificacion_especifica' =>  $data['is_identificacion_especifica'] ?? '',
-                  'exoneration_document_type' =>$data['typeDocument'] ?? null,
-                  'exoneration_document_number' =>$data['numeroDocumento'] ?? null,
-                  'exoneration_company_name' =>$data['nombreInstitucion'] ?? null,
-                  'exoneration_porcent' =>$data['porcentajeExoneracion'] ?? 0,
-                  'exoneration_amount' =>$data['montoExoneracion'] ?? 0,
-                  'exoneration_total_amount' =>$data['impuestoNeto'] ?? 0
+                  'is_identificacion_especifica' => $data['is_identificacion_especifica'] ?? '',
+                  'exoneration_document_type' => $data['typeDocument'] ?? null,
+                  'exoneration_document_number' => $data['numeroDocumento'] ?? null,
+                  'exoneration_company_name' => $data['nombreInstitucion'] ?? null,
+                  'exoneration_porcent' => $data['porcentajeExoneracion'] ?? 0,
+                  'exoneration_amount' => $data['montoExoneracion'] ?? 0,
+                  'exoneration_date' => !empty($data['exoneration_date']) ? Carbon::createFromFormat('d/m/Y', $data['exoneration_date']) : null,
+                  'exoneration_total_amount' => $data['impuestoNeto'] ?? 0,
+                  'impuesto_neto' => isset($data['montoExoneracion']) ? $data['iva_amount'] - $data['montoExoneracion']
+                      : $data['iva_amount']
               ]
           );
           return $item;

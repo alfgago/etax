@@ -289,6 +289,7 @@ class InvoiceController extends Controller
                 return back()->withError( 'Ha ocurrido un error al enviar factura.' );
             }
         } catch( \Exception $ex ) {
+            dd($ex);
             Log::error("ERROR Envio de factura a hacienda -> ".$ex->getMessage());
             return back()->withError( 'Ha ocurrido un error al enviar factura.' );
         }
