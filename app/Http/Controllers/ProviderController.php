@@ -111,7 +111,7 @@ class ProviderController extends Controller
         $provider->neighborhood = $request->neighborhood;
         $provider->zip = $request->zip;
         $provider->address = $request->address ?? null;
-        $provider->foreign_address = $request->foreign_address ?? null;
+        $provider->foreign_address = $request->foreign_address ?? $provider->address;
         $provider->phone = $request->phone;
         $provider->email = $request->email;
         $provider->fullname = $provider->toString();
@@ -179,7 +179,7 @@ class ProviderController extends Controller
         $provider->neighborhood = $request->neighborhood;
         $provider->zip = $request->zip;
         $provider->address = $request->address ?? null;
-        $provider->foreign_address = $request->foreign_address ?? null;
+        $provider->foreign_address = $request->foreign_address ?? $provider->address;
         $provider->phone = $request->phone;
         $provider->email = $request->email;
         $provider->fullname = $provider->toString();
