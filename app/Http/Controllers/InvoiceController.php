@@ -145,7 +145,7 @@ class InvoiceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function emitFactura()
+    public function emitFactura($tipoDocumento)
     {
         $company = currentCompanyModel();
 
@@ -195,7 +195,7 @@ class InvoiceController extends Controller
         if(count($arrayActividades) == 0){
             return redirect('/empresas/editar')->withError('No ha definido una actividad comercial para esta empresa');
         }
-        return view("Invoice/create-factura", ['document_type' => '01', 'rate' => $this->get_rates(),
+        return view("Invoice/create-factura", ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
             'document_number' => $this->getDocReference('01'),
             'document_key' => $this->getDocumentKey('01'), 'units' => $units])->with('arrayActividades', $arrayActividades);
     }
@@ -250,6 +250,7 @@ class InvoiceController extends Controller
      */
     public function sendHacienda(Request $request)
     {
+        //revision de branch para segmentacion de funcionalidades por tipo de documento
         try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
             $request->validate([

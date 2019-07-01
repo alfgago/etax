@@ -9,6 +9,12 @@
   }else if($document_type == "04"){
     $tipoHacienda = "TE";
     $titulo = "tiquete electrónico";
+  }else if($document_type == "08"){
+      $tipoHacienda = "FEE";
+      $titulo = "Factura Electrónica de Exportación";
+  }else if($document_type == "09"){
+      $tipoHacienda = "FEE";
+      $titulo = "Factura Electrónica de Compra";
   }
 
 ?>
