@@ -117,6 +117,7 @@ class Bill extends Model
           $provider->neighborhood = $request->neighborhood;
           $provider->zip = $request->zip;
           $provider->address = $request->address;
+          $provider->foreign_address = $request->foreign_address ?? null;
           $provider->phone = $request->phone;
           $provider->es_exento = $request->es_exento;
           $provider->email = $request->email;
@@ -222,27 +223,27 @@ class Bill extends Model
                   'company_id' => $this->company_id,
                   'year'  => $this->year,
                   'month' => $this->month,
-                  'name'  => $data['name'] ?? '',
-                  'product_type' => $data['product_type'] ?? '',
-                  'measure_unit' => $data['measure_unit'] ?? '',
-                  'item_count'   => $data['item_count'] ?? '',
-                  'unit_price'   => $data['unit_price'] ?? '',
-                  'subtotal'     => $data['subtotal'] ?? '',
-                  'total' => $data['total'] ?? '',
+                  'name'  => $data['name'] ?? null,
+                  'product_type' => $data['product_type'] ?? '1',
+                  'measure_unit' => $data['measure_unit'] ?? 'Unid',
+                  'item_count'   => $data['item_count'] ?? 1,
+                  'unit_price'   => $data['unit_price'] ?? 0,
+                  'subtotal'     => $data['subtotal'] ?? 0,
+                  'total' => $data['total'] ?? 0,
                   'discount_type' => $data['discount_type'] ?? null,
                   'discount' => $data['discount'] ?? 0,
-                  'iva_type' => $data['iva_type'] ?? '',
-                  'iva_percentage' => $data['iva_percentage'] ?? '',
-                  'iva_amount' => $data['iva_amount'] ?? '',
+                  'iva_type' => $data['iva_type'] ?? null,
+                  'iva_percentage' => $data['iva_percentage'] ?? 0,
+                  'iva_amount' => $data['iva_amount'] ?? 0,
                   'is_exempt' => $data['is_exempt'] ?? false,
-                  'porc_identificacion_plena' =>  $data['porc_identificacion_plena'] ?? '',
-                  'exoneration_document_type' => $data['exoneration_document_type'] ?? '',
-                  'exoneration_document_number' => $data['exoneration_document_number'] ?? '',
-                  'exoneration_company_name' => $data['exoneration_company_name'] ?? '',
+                  'porc_identificacion_plena' =>  $data['porc_identificacion_plena'] ?? 0,
+                  'exoneration_document_type' => $data['exoneration_document_type'] ?? null,
+                  'exoneration_document_number' => $data['exoneration_document_number'] ?? null,
+                  'exoneration_company_name' => $data['exoneration_company_name'] ?? null,
                   'exoneration_porcent' => $data['exoneration_porcent'] ?? 0,
                   'exoneration_amount' => $data['exoneration_amount'] ?? 0,
-                  'impuestoNeto' => $data['impuestoNeto'] ?? 0,
-                  'exoneration_total_amount' => $data['exoneration_total_amount'] ?? ''
+                  'impuesto_neto' => $data['impuesto_neto'] ?? 0,
+                  'exoneration_total_amount' => $data['exoneration_total_amount'] ?? 0
               ]
           );
           return $item;

@@ -128,7 +128,7 @@ class Invoice extends Model
                         'neighborhood' => $request->neighborhood,
                         'zip' => $request->zip,
                         'address' => $request->address,
-                        'otrasSenasExtranjero' => $request->address,
+                        'foreign_address' => $request->address,
                         'phone' => $request->phone,
                         'es_exento' => $request->es_exento,
                         'email' => $request->email,
@@ -230,13 +230,13 @@ class Invoice extends Model
         'iva_amount' => $iva_amount,
         'is_exempt' => $is_exempt,
         'is_identificacion_especifica' => $isIdentificacion,
-        'exoneration_document_type' => $typeDocument,
-        'exoneration_document_number' => $numeroDocumento,
-        'exoneration_company_name' => $nombreInstitucion,
-        'exoneration_porcent' => $porcentajeExoneracion,
-        'exoneration_amount' => $montoExoneracion,
-        'impuestoNeto' => $impuestoNeto,
-        'exoneration_total_amount' => $montoTotalLinea
+        'exoneration_document_type' => $typeDocument ?? null,
+        'exoneration_document_number' => $numeroDocumento ?? null,
+        'exoneration_company_name' => $nombreInstitucion ?? null,
+        'exoneration_porcent' => $porcentajeExoneracion ?? 0,
+        'exoneration_amount' => $montoExoneracion ?? 0,
+        'impuestoNeto' => $impuestoNeto ?? 0,
+        'exoneration_total_amount' => $montoTotalLinea ?? 0
       ]);
       
     }
@@ -266,12 +266,12 @@ class Invoice extends Model
                   'iva_amount' => $data['iva_amount'] ?? '',
                   'is_exempt' => $data['is_exempt'] ?? false,
                   'is_identificacion_especifica' =>  $data['is_identificacion_especifica'] ?? '',
-                  'exoneration_document_type' =>$data['typeDocument'] ?? '',
-                  'exoneration_document_number' =>$data['numeroDocumento'] ?? '',
-                  'exoneration_company_name' =>$data['nombreInstitucion'] ?? '',
+                  'exoneration_document_type' =>$data['typeDocument'] ?? null,
+                  'exoneration_document_number' =>$data['numeroDocumento'] ?? null,
+                  'exoneration_company_name' =>$data['nombreInstitucion'] ?? null,
                   'exoneration_porcent' =>$data['porcentajeExoneracion'] ?? 0,
                   'exoneration_amount' =>$data['montoExoneracion'] ?? 0,
-                  'exoneration_total_amount' =>$data['impuestoNeto'] ?? ''
+                  'exoneration_total_amount' =>$data['impuestoNeto'] ?? 0
               ]
           );
           return $item;

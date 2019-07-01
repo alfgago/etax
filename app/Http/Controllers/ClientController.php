@@ -114,8 +114,8 @@ class ClientController extends Controller
         $cliente->district = $request->district;
         $cliente->neighborhood = $request->neighborhood;
         $cliente->zip = $request->zip;
-        $cliente->address = $request->address;
-        $cliente->foreign_address = $request->foreign_address;
+        $cliente->address = $request->address ?? null;
+        $cliente->foreign_address = $request->foreign_address ?? null;
         $cliente->phone = $request->phone;
         $cliente->es_exento = $request->es_exento;
         $cliente->billing_emails = $request->billing_emails;
@@ -192,7 +192,8 @@ class ClientController extends Controller
         $cliente->district = $request->district;
         $cliente->neighborhood = $request->neighborhood;
         $cliente->zip = $request->zip;
-        $cliente->address = $request->address;
+        $cliente->address = $request->address ?? null;
+        $cliente->foreign_address = $request->foreign_address ?? null;
         $cliente->phone = $request->phone;
         $cliente->es_exento = $request->es_exento;
         $cliente->billing_emails = $request->billing_emails;
@@ -259,6 +260,7 @@ class ClientController extends Controller
                     'district' => $row['distrito'],
                     'neighborhood' => $row['barrio'],
                     'address' => $row['direccion'],
+                    'foreign_address' => $row['direccion'],
                     'phone_area' => $row['areatel'],
                     'phone' => $row['telefono'],
                     'es_exento' => $row['exento'][0] == 'S',
