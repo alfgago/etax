@@ -90,6 +90,7 @@ class BridgeHaciendaApi
                     }
                 }else{
                     Log::warning('Error en respuesta de firma -->>'. json_encode($response) );
+                    Log::warning('Factura fallida: '. json_encode( $request ) );
                 }
                 return $invoice;
             }
