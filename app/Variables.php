@@ -126,21 +126,21 @@ class Variables
   
    public static function tiposSoportados() {
     $lista = [
-      ['nombre'=>'Bienes generales', 'codigo_iva'=>'3'],
-      ['nombre'=>'Exportaciones/Importaciones', 'codigo_iva'=>'13'],
-      ['nombre'=>'Servicios profesionales', 'codigo_iva'=>'3'],
-      ['nombre'=>'Canasta básica', 'codigo_iva'=>'1'],
-      ['nombre'=>'Servicios médicos', 'codigo_iva'=>'4'],
-      ['nombre'=>'Medicamentos', 'codigo_iva'=>'2'],
-      ['nombre'=>'Turismo', 'codigo_iva'=>'77'],
-      ['nombre'=>'Libros', 'codigo_iva'=>'70'],
-      ['nombre'=>'Arrendamiento de menos de 640mil colones', 'codigo_iva'=>'3'],
-      ['nombre'=>'Arrendamiento de más de 640mil colones', 'codigo_iva'=>'70'],
-      ['nombre'=>'Energía residencial', 'codigo_iva'=>'70'],
-      ['nombre'=>'Agua residencial', 'codigo_iva'=>'70'],
-      ['nombre'=>'Sillas de ruedas y similares', 'codigo_iva'=>'70'],
-      ['nombre'=>'Cuota de colegio profesional', 'codigo_iva'=>'77'],
-      ['nombre'=>'Otros', 'codigo_iva'=>'3']
+      ['nombre'=>'Bienes generales', 'codigo_iva'=>'003'],
+      ['nombre'=>'Exportaciones/Importaciones', 'codigo_iva'=>'013'],
+      ['nombre'=>'Servicios profesionales', 'codigo_iva'=>'003'],
+      ['nombre'=>'Canasta básica', 'codigo_iva'=>'001'],
+      ['nombre'=>'Servicios médicos', 'codigo_iva'=>'004'],
+      ['nombre'=>'Medicamentos', 'codigo_iva'=>'002'],
+      ['nombre'=>'Turismo', 'codigo_iva'=>'077'],
+      ['nombre'=>'Libros', 'codigo_iva'=>'070'],
+      ['nombre'=>'Arrendamiento de menos de 640mil colones', 'codigo_iva'=>'003'],
+      ['nombre'=>'Arrendamiento de más de 640mil colones', 'codigo_iva'=>'070'],
+      ['nombre'=>'Energía residencial', 'codigo_iva'=>'070'],
+      ['nombre'=>'Agua residencial', 'codigo_iva'=>'070'],
+      ['nombre'=>'Sillas de ruedas y similares', 'codigo_iva'=>'070'],
+      ['nombre'=>'Cuota de colegio profesional', 'codigo_iva'=>'077'],
+      ['nombre'=>'Otros', 'codigo_iva'=>'003']
     ];
 
     return $lista;

@@ -88,6 +88,8 @@ class BridgeHaciendaApi
                             ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
                         return $invoice;
                     }
+                }else{
+                    Log::warning('Error en respuesta de firma -->>'. json_encode($response) );
                 }
                 return $invoice;
             }
@@ -214,6 +216,7 @@ class BridgeHaciendaApi
                 'atvcertFile' => Storage::get($company->atv->key_url),
                 'detalle' => $details
             );
+            
             foreach ($invoiceData as $key => $values) {
                 if ($key == 'atvcertFile') {
                     $request[]=array(
@@ -228,10 +231,13 @@ class BridgeHaciendaApi
                     );
                 }
             }
+            
             return $request;
         } catch (ClientException $error) {
-            Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
+            Log::error('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
             return false;
+        } catch ( \Throwable $error ) {
+            Log::error('Error en facturacion -->>'. $error->getMessage() );
         }
     }
 

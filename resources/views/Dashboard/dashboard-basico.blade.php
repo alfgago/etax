@@ -80,7 +80,8 @@
         <div class="card-title">Notificaciones</div>
     
         <div class="notificaciones-container">
-          <div class="notificacion"><span class="fecha">17/06/2019</span> Facturación habilitada en eTax.</div>
+          <div class="notificacion"><span class="fecha">01/06/2019</span> La emisión de tiquetes y notas de débito se encuentra temporalmente deshabilitada.</div>
+          <div class="notificacion"><span class="fecha">01/06/2019</span> Facturación con IVA habilitada en eTax.</div>
         </div>
         
       </div>
