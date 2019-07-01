@@ -229,8 +229,10 @@ class BridgeHaciendaApi
             
             return $request;
         } catch (ClientException $error) {
-            Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
+            Log::error('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
             return false;
+        } catch ( \Throwable $error ) {
+            Log::error('Error en facturacion -->>'. $error->getMessage() );
         }
     }
     /********************************************************************************************/
