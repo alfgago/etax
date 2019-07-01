@@ -22,7 +22,7 @@ class AtvCertificate extends Model
     
     
     public function certificateExists() {
-        return Storage::exists( $this->key_url );
+        return Storage::exists($this->key_url);
     }
     
 }
