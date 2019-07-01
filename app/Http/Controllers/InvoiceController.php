@@ -270,6 +270,7 @@ class InvoiceController extends Controller
                 $invoice->payment_status = "01";
                 $invoice->payment_receipt = "";
                 $invoice->generation_method = "etax";
+                $invoice->xml_schema = 43;
                 $invoice->reference_number = $company->last_invoice_ref_number + 1;
                 $invoiceData = $invoice->setInvoiceData($request);
                 if (!empty($invoiceData)) {
