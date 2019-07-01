@@ -154,28 +154,38 @@
             
             <div class="form-group col-md-6">
                 <label for="numeroDocumento">N&uacute;mero Documento de Exoneraci&oacute;n *</label>
-                <input type="text" class="form-control" id="numeroDocumento" name="numeroDocumento" placeholder="">
+                <input type="text" class="form-control" id="numeroDocumento" placeholder="">
             </div>
-            <div class="form-group col-md-12">
+            <div class="form-group col-md-6">
                 <label for="nombreInstitucion">Nombre de Instituci&oacute;n *</label>
-                <input type="text" class="form-control" id="nombreInstitucion" name="nombreInstitucion" placeholder="">
+                <input type="text" class="form-control" id="nombreInstitucion" placeholder="">
+            </div>
+
+            <div class="form-group col-md-6">
+                <label for="exoneration_date">Fecha</label>
+                <div class='input-group date inputs-fecha'>
+                    <input id="exoneration_date" class="form-control input-fecha" placeholder="dd/mm/yyyy"  value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
+                    <span class="input-group-addon">
+                          <i class="icon-regular i-Calendar-4"></i>
+                        </span>
+                </div>
             </div>
 
             <div class="form-group col-md-1">
                 <label for="porcentajeExoneracion">% *</label>
-                <input type="text" class="form-control" id="porcentajeExoneracion" name="porcentajeExoneracion" placeholder="%" onkeyup="calcularMontoExoneracion();">
+                <input type="text" class="form-control" id="porcentajeExoneracion" placeholder="%" onkeyup="calcularMontoExoneracion();">
             </div>
             <div class="form-group col-md-3">
                 <label for="montoExoneracion">Monto Exonerado *</label>
-                <input type="text" class="form-control" id="montoExoneracion" name="montoExoneracion" readonly>
+                <input type="text" class="form-control" id="montoExoneracion"  readonly>
             </div>
             <div class="form-group col-md-4">
                 <label for="impuestoNeto">Impuesto Neto </label>
-                <input type="text" class="form-control" id="impuestoNeto" name="impuestoNeto" readonly>
+                <input type="text" class="form-control" id="impuestoNeto"  readonly>
             </div>
             <div class="form-group col-md-4">
                 <label for="montoTotalLinea">Monto Total Linea </label>
-                <input type="text" class="form-control" id="montoTotalLinea" name="montoTotalLinea" readonly>
+                <input type="text" class="form-control" id="montoTotalLinea"  readonly>
             </div>
         </div>
     </div>

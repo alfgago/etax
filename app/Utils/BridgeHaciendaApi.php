@@ -43,13 +43,13 @@ class BridgeHaciendaApi
 
     public function createInvoice(Invoice $invoice, $token) {
         try {
-            $requestDetails = $this->setDetails($invoice->items);
+            $requestDetails = $this->setDetails43($invoice->items);
             $company = $invoice->company;
-            $requestData = $this->setInvoiceData($invoice, $requestDetails);
+            $requestData = $this->setInvoiceData43($invoice, $requestDetails);
             if ($requestData !== false) {
                 $client = new Client();
                 Log::info('Enviando parametros  API HACIENDA -->>' . $invoice->id);
-                $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice/signxml', [
+                $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice43/signxml', [
                     'headers' => [
                         'Auth-Key'  => config('etax.api_hacienda_key'),
                         'Client-Service' => config('etax.api_hacienda_client'),
@@ -136,7 +136,7 @@ class BridgeHaciendaApi
             return false;
         }
     }
-    /*****************************************************************************************/
+
     private function setDetails43($data) {
         try {
             $details = null;
@@ -150,13 +150,19 @@ class BridgeHaciendaApi
                     'montoTotal' => $value['item_count'] * $value['unit_price'] ?? '',
                     'montoTotalLinea' => $value['subtotal'] + $value['iva_amount'] ?? '',
                     'descuento' => $value['discount'] ?? '',
-                    'impuesto' => 0, // @todo 4.3
-                    'codigo' => '01',
-                    'baseImponible' => 0,
-                    'codigoTarifa' => Variables::getCodigoTarifaVentas($value['tipo_iva']),
-                    'tarifa' => $value['porc_iva'],
-                    'factorIVA' => $value['porc_iva'] / 100,
-                    'monto' => $value['item_iva_amount']
+                    'impuesto_codigo' => '01',
+                    'impuesto_codigo_tarifa' => Variables::getCodigoTarifaVentas($value['tipo_iva']),
+                    'impuesto_tarifa' => $value['iva_percentage'] ?? '',
+                    'impuesto_factor_IVA' => $value['iva_percentage'] / 100,
+                    'impuesto_monto' => $value['iva_amount'] ?? '',
+                    'exoneracion_tipo_documento' => $value['exoneration_document_type'] ?? '',
+                    'exoneracion_numero_documento' => $value['exoneration_document_number'] ?? '',
+                    'exoneracion_fecha_emision' => $value['exoneration_date'] ?? '',
+                    'exoneracion_porcentaje' => $value['exoneration_porcent'] ?? '',
+                    'exoneracion_monto' => $value['exoneration_amount'] ?? '',
+                    'exoneracion_company' => $value['exoneration_company_name'] ?? '',
+                    'impuesto_neto' => $value['impuesto_neto'] ?? '',
+                    'base_imponible' => 0,
                 );
             }
             return json_encode($details, true);
@@ -165,7 +171,6 @@ class BridgeHaciendaApi
             return false;
         }
     }
-    /*****************************************************************************************/
 
     private function setInvoiceData(Invoice $data, $details) {
         try {
@@ -211,7 +216,7 @@ class BridgeHaciendaApi
                 'atvcertFile' => Storage::get($company->atv->key_url),
                 'detalle' => $details
             );
-            Log::info('Factura INFO: '. implode( '; ', $invoiceData ) );
+            
             foreach ($invoiceData as $key => $values) {
                 if ($key == 'atvcertFile') {
                     $request[]=array(
@@ -235,7 +240,7 @@ class BridgeHaciendaApi
             Log::error('Error en facturacion -->>'. $error->getMessage() );
         }
     }
-    /********************************************************************************************/
+
     private function setInvoiceData43(Invoice $data, $details) {
         try {
             $company = $data->company;
@@ -251,21 +256,22 @@ class BridgeHaciendaApi
             $totalMercaderiasExentas = 0;
             $totalDescuentos = 0;
             $totalImpuestos = 0;
-            foreach ($details as $detail){
-                if($detail['measure_unit'] == 'Sp' && $detail['iva_amount'] == 0){
-                    $totalServiciosExentos .= $detail['total'];
+            $itemDetails = json_decode($details);
+            foreach ($itemDetails as $detail){
+                if($detail->unidadMedida == 'Sp' && $detail->impuesto_monto == 0){
+                    $totalServiciosExentos += $detail->montoTotal;
                 }
-                if($detail['measure_unit'] == 'Sp' && $detail['iva_amount'] > 0){
-                    $totalServiciosGravados .= $detail['total'];
+                if($detail->unidadMedida == 'Sp' && $detail->impuesto_monto > 0){
+                    $totalServiciosGravados += $detail->montoTotal;
                 }
-                if($detail['measure_unit'] != 'Sp' && $detail['iva_amount'] == 0){
-                    $totalMercaderiasExentas .= $detail['total'];
+                if($detail->unidadMedida != 'Sp' && $detail->impuesto_monto == 0){
+                    $totalMercaderiasExentas += $detail->montoTotal;
                 }
-                if($detail['measure_unit'] != 'Sp' && $detail['iva_amount'] > 0){
-                    $totalMercaderiasGravadas .= $detail['total'];
+                if($detail->unidadMedida != 'Sp' && $detail->impuesto_monto > 0){
+                    $totalMercaderiasGravadas += $detail->montoTotal;
                 }
-                $totalDescuentos .= $detail['discount'];
-                $totalImpuestos .= $detail['iva_amount'];
+                $totalDescuentos += $detail->descuento;
+                $totalImpuestos += $detail->impuesto_monto;
             }
             $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas;
             $totalExento = $totalServiciosExentos + $totalMercaderiasExentas;
@@ -273,7 +279,7 @@ class BridgeHaciendaApi
             $invoiceData = array(
                 'consecutivo' => $ref ?? '',
                 'fecha_emision' => $data['generated_date']->toDateTimeString() ?? '',
-                'codigo_actividad' => $data['commercial_activity'],
+                'codigo_actividad' => str_pad($data['commercial_activity'], 6, '0', STR_PAD_LEFT),
                 'receptor_nombre' => $data['client_first_name'].' '.$data['client_last_name'],
                 'receptor_ubicacion_provincia' => substr($receptorPostalCode,0,1),
                 'receptor_ubicacion_canton' => substr($receptorPostalCode,1,2),
@@ -336,7 +342,7 @@ class BridgeHaciendaApi
             return false;
         }
     }
-    /**************************************************************************************************/
+
     private function requestLogin() {
         $client = new Client();
         $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/auth/login', [

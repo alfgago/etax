@@ -318,6 +318,8 @@ class Bill extends Model
               $bill->reference_number = $company->last_bill_ref_number + 1;
               $bill->document_number =  $arrayImportBill['consecutivoComprobante'];
               $bill->document_key =  $arrayImportBill['claveFactura'];
+              $bill->xml_schema =  $arrayImportBill['xmlSchema'] ?? 43;
+              $bill->commercial_activity =  $arrayImportBill['codigoActividad'] ?? '0';
               
               //Datos generales
               $bill->sale_condition = $arrayImportBill['condicionVenta'];
@@ -436,6 +438,7 @@ class Bill extends Model
         $inserts = array();
         
         $claveFactura = $arr['Clave'];
+        $codigoActividad = $arr['CodigoActividad'] ?? 0;
         $consecutivoComprobante = $arr['NumeroConsecutivo'];
         $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10))->format('d/m/Y');
         $fechaVencimiento = $fechaEmision;
@@ -460,7 +463,7 @@ class Bill extends Model
         $tipoCambio = array_key_exists('TipoCambio', $arr['ResumenFactura']) ? $arr['ResumenFactura']['TipoCambio'] : '1';
         $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
         $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
-        $tipoDocumento = '01';
+        $tipoDocumento = $arr['TipoDoc+'] ?? '01';
         $descripcion = $arr['ResumenFactura']['CodigoMoneda'];
         
         $authorize = true;
@@ -539,14 +542,11 @@ class Bill extends Model
                 'porcentajeExoneracion' => $porcentajeExoneracion,
                 'montoExoneracion' => $montoExoneracion,
                 'impuestoNeto' => $impuestoNeto,
-                'totalMontoLinea' => $totalMontoLinea
+                'totalMontoLinea' => $totalMontoLinea,
+                'xmlSchema' => $codigoActividad ? 43 : 42,
+                'codigoActividad' => $codigoActividad
             );
-            $insert = Bill::importBillRow( $arrayImportBillRow
-                /*$metodoGeneracion, $identificacionReceptor, $nombreProveedor, $codigoProveedor, $tipoPersona, $identificacionProveedor, $correoProveedor, $telefonoProveedor,
-                $claveFactura, $consecutivoComprobante, $condicionVenta, $medioPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
-                $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
-                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, $authorize, false*/
-            );
+            $insert = Bill::importBillRow( $arrayImportBillRow );
             
             if( $insert ) {
                 array_push( $inserts, $insert );

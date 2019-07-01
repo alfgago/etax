@@ -12,9 +12,11 @@
 @section('content') 
 <div class="row">
   <div class="col-md-12">
-        <div class="descripcion mb-4">
+        <div class="descripcion mb-2">
           Este proceso genera la aceptación o rechazo ante Hacienda.
         </div>
+        
+        <h2 class="mt-4 mb-4" style="color: red;">Asegúrese de tener la prorrata y proporcionalidad correctas antes de aceptar su primera factura en 4.3</h2>
           
         <table id="bill-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
