@@ -411,13 +411,13 @@ class InvoiceController extends Controller
                 
                 foreach ($collection[0]->chunk(200) as $facturas) {
 
-                    \DB::transaction(function () use ($facturas, &$company, &$i, $available_invoices, $available_invoices_by_plan) {
+                    \DB::transaction(function () use ($facturas, &$company, &$i , $available_invoices, $available_invoices_by_plan) {
 
                         $inserts = array();
                         foreach ($facturas as $row){
                             $i++;
                             
-
+                            $arrayRow = array();
                             if($available_invoices_by_plan > 0){
                                 $available_invoices_by_plan = $available_invoices_by_plan - 1;
                             }else{
@@ -461,12 +461,52 @@ class InvoiceController extends Controller
                             $codigoEtax = $row['codigoivaetax'];
                             $montoIva = (float)$row['montoiva'];
                             $totalNeto = 0;
+                            $tipoDocumentoExoneracion = $row['tipoDocumentoExoneracion'];
+                            $documentoExoneracion = $row['documentoExoneracion'];
+                            $companiaExoneracion = $row['companiaExoneracion'];
+                            $porcentajeExoneracion = $row['porcentajeExoneracion'];
+                            $montoExoneracion = $row['montoExoneracion'];
+                            $impuestoNeto = $row['impuestoNeto'];
+                            $totalMontoLinea = $row['totalMontoLinea'];
+                            //
+                            $arrayInsert = array(
+                                'metodoGeneracion' => $metodoGeneracion,
+                                'idEmisor' => 0,
+                                'nombreCliente' => $nombreCliente,
+                                'codigoCliente' => $codigoCliente,
+                                'tipoPersona' => tipoPersona,
+                                'identificacionCliente' => $identificacionCliente,
+                                'correoCliente' => $correoCliente,
+                                'telefonoCliente' => $telefonoCliente,
+                                'claveFactura' => $claveFactura,
+                                'consecutivoComprobante' => $consecutivoComprobante,
+                                'condicionVenta' => $condicionVenta,
+                                'metodoPago' => $metodoPago,
+                                'numeroLinea' => $numeroLinea,
+                                'fechaEmision' => $fechaEmision,
+                                'fechaVencimiento' => $fechaVencimiento,
+                                'idMoneda' => $idMoneda,
+                                'tipoCambio' => $tipoCambio,
+                                'totalDocumento' => $totalDocumento,
+                                'totalNeto' => $totalNeto,
+                                'tipoDocumento' => $tipoDocumento,
+                                'codigoProducto' => $codigoProducto,
+                                'detalleProducto' => $detalleProducto,
+                                'unidadMedicion' => $unidadMedicion,
+                                'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
+                                'documentoExoneracion' => $documentoExoneracion,
+                                'companiaExoneracion' => $companiaExoneracion,
+                                'porcentajeExoneracion' => $porcentajeExoneracion,
+                                'montoExoneracion' => $montoExoneracion,
+                                'impuestoNeto' => $impuestoNeto,
+                                'totalMontoLinea' => $totalMontoLinea
+                            );
 
-                            $insert = Invoice::importInvoiceRow(
-                                $metodoGeneracion, 0, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
+                            $insert = Invoice::importInvoiceRow( $arrayInsert
+                                /*$metodoGeneracion, 0, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
                                 $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
                                 $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
-                                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, true, true
+                                $tipoDocumentoExoneracion, $documentoExoneracion, $companiaExoneracion, $porcentajeExoneracion, $montoExoneracion, $impuestoNeto, $totalMontoLinea*/
                             );
 
                             if( $insert ) {

@@ -112,19 +112,72 @@
 
     <div class="form-group col-md-3">
       <label for="item_subtotal">Subtotal</label>
-      <input type="text" class="form-control" id="item_subtotal" placeholder="" readonly="true" >
+      <input type="number" min="0" class="form-control" id="item_subtotal" placeholder="" readonly="true" >
     </div>
 
     <div class="form-group col-md-3">
-      <label for="item_total">Total item</label>
+        <label for="item_total" id="etiqTotal">Monto Total Linea</label>
       <input type="text" class="form-control" id="item_total" placeholder="" readonly="true" >
     </div>
     
-    <div class="form-group col-md-12 inline-form inline-checkbox">
+    <div class="form-group col-md-12 inline-form inline-checkbox hidden">
       <label for="is_identificacion_especifica">
         <span>¿Asociado a compras con identificación específica?</span>
         <input type="checkbox" class="form-control" id="is_identificacion_especifica" placeholder="" readonly="true" >
       </label>
+    </div>
+    
+    <div class="form-group col-md-12 inline-form inline-checkbox">
+        <label for="checkExoneracion">
+            <span>Incluir exoneraci&oacute;n</span>
+            <input type="checkbox" class="form-control" id="checkExoneracion" onchange="mostrarCamposExoneracion();">
+        </label>
+    </div>
+    
+    <div class="exoneracion-cont col-md-12" style="display:none;">
+        <div class="form-row">
+          
+            <div class="form-group col-md-6">
+                <label for="typeDocument">Tipo de Documento de Exoneraci&oacute;n</label>
+                <select class="form-control" id="typeDocument" name="typeDocument" value="" >
+                    <option value="" selected>-- Seleccione --</option>
+                    <option value="01">Compras Autorizadas</option>
+                    <option value="02">Ventas exentas a diplomáticos</option>
+                    <option value="03">Autorizado por Ley Especial</option>
+                    <option value="04">Exenciones Dirección General de Hacienda</option>
+                    <option value="05">Transitorio V</option>
+                    <option value="06">Transitorio IX</option>
+                    <option value="07">Transitorio XVII</option>
+                    <option value="99">Otros</option>
+                </select>
+            </div>
+            
+            <div class="form-group col-md-6">
+                <label for="numeroDocumento">N&uacute;mero Documento de Exoneraci&oacute;n *</label>
+                <input type="text" class="form-control" id="numeroDocumento" name="numeroDocumento" placeholder="">
+            </div>
+            <div class="form-group col-md-12">
+                <label for="nombreInstitucion">Nombre de Instituci&oacute;n *</label>
+                <input type="text" class="form-control" id="nombreInstitucion" name="nombreInstitucion" placeholder="">
+            </div>
+
+            <div class="form-group col-md-1">
+                <label for="porcentajeExoneracion">% *</label>
+                <input type="text" class="form-control" id="porcentajeExoneracion" name="porcentajeExoneracion" placeholder="%" onkeyup="calcularMontoExoneracion();">
+            </div>
+            <div class="form-group col-md-3">
+                <label for="montoExoneracion">Monto Exonerado *</label>
+                <input type="text" class="form-control" id="montoExoneracion" name="montoExoneracion" readonly>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="impuestoNeto">Impuesto Neto </label>
+                <input type="text" class="form-control" id="impuestoNeto" name="impuestoNeto" readonly>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="montoTotalLinea">Monto Total Linea </label>
+                <input type="text" class="form-control" id="montoTotalLinea" name="montoTotalLinea" readonly>
+            </div>
+        </div>
     </div>
 
     <div class="form-group col-md-12">
@@ -140,36 +193,5 @@
 
   </div>
 </div>
-<script>
-    function buscarProducto() {
-        var id = $('#codigo').val();
-        if(id !== '' && id !== undefined){
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            jQuery.ajax({
-                url: "/getproduct",
-                method: 'get',
-                data: {
-                    id: id
-                },
-                success: function (result) {
-                  if(result.name) {
-                    $('#nombre').val(result.name);
-                    $('#unidad_medicion').val(result.measure_unit);
-                    $('#precio_unitario').val(result.unit_price);
-                    $('#tipo_producto').val(result.product_category_id);
-                    $('#tipo_iva').val(result.default_iva_type);
 
-                    $('#precio_unitario').change();
-                    $('#tipo_iva').change();
-                  }
-                }
-            });
-        }else{
-            alert('Debe digitar un código numeral para la búsqueda');
-        }
-    }
-</script>
+
