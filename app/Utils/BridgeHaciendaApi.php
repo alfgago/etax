@@ -90,7 +90,6 @@ class BridgeHaciendaApi
                     }
                 }else{
                     Log::warning('Error en respuesta de firma -->>'. json_encode($response) );
-                    Log::warning('Factura fallida: '. implode( '; ', $requestData ) );
                 }
                 return $invoice;
             }
@@ -212,6 +211,7 @@ class BridgeHaciendaApi
                 'atvcertFile' => Storage::get($company->atv->key_url),
                 'detalle' => $details
             );
+            Log::info('Factura INFO: '. implode( '; ', $invoiceData ) );
             foreach ($invoiceData as $key => $values) {
                 if ($key == 'atvcertFile') {
                     $request[]=array(
@@ -226,6 +226,7 @@ class BridgeHaciendaApi
                     );
                 }
             }
+            
             return $request;
         } catch (ClientException $error) {
             Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
