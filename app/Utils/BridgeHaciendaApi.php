@@ -88,6 +88,8 @@ class BridgeHaciendaApi
                             ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
                         return $invoice;
                     }
+                }else{
+                    Log::warning('Error en respuesta de firma -->>'. json_encode($response) );
                 }
                 return $invoice;
             }
