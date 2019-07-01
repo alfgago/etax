@@ -494,13 +494,13 @@ class Bill extends Model
             $codigoEtax = '003'; //De momento asume que todo en 4.2 es al 13%.
             $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
 
-            $tipoDocumentoExoneracion = $linea['tipoDocumentoExoneracion'];
-            $documentoExoneracion = $linea['documentoExoneracion'];
-            $companiaExoneracion = $linea['companiaExoneracion'];
-            $porcentajeExoneracion = $linea['porcentajeExoneracion'];
-            $montoExoneracion = $linea['montoExoneracion'];
-            $impuestoNeto = $linea['impuestoNeto'];
-            $totalMontoLinea = $linea['totalMontoLinea'];
+            $tipoDocumentoExoneracion = $linea['tipoDocumentoExoneracion'] ?? null;
+            $documentoExoneracion = $linea['documentoExoneracion']  ?? null;
+            $companiaExoneracion = $linea['companiaExoneracion'] ?? null;
+            $porcentajeExoneracion = $linea['porcentajeExoneracion'] ?? 0;
+            $montoExoneracion = $linea['montoExoneracion'] ?? 0;
+            $impuestoNeto = $linea['impuestoNeto'] ?? 0;
+            $totalMontoLinea = $linea['totalMontoLinea'] ?? 0;
 
             $arrayImportBillRow = array(
                 'metodoGeneracion' => $metodoGeneracion,
