@@ -102,19 +102,16 @@ class User extends Authenticatable {
 
     public static function checkCountAvailableCompanies() {
 
-        $user_id = auth()->user()->id;
-
-        $subscriptions = Subscription::where('user_id', $user_id)->where('status', '1')->get();
+        $subscription = getCurrentSubscription();
         
-        $availableCompanies = 0;
-        foreach ($subscriptions as $subscription) {
-            if ( $subscription->num_companies == 0 ) {
-                return -1;
-            } else {
-                $countRegistered = \App\Company::where('user_id', $user_id)->where('subscription_id', $subscription->id)->count();
-                $availableCompanies += $subscription->num_companies - $countRegistered;
-            }
-        }
+        $availableCompanies = 25;
+        
+        /*if ( $subscription->num_companies == 0 ) {
+            return -1;
+        } else {
+            $countRegistered = \App\Company::where('user_id', $user_id)->where('subscription_id', $subscription->id)->count();
+            $availableCompanies += $subscription->num_companies - $countRegistered;
+        }*/
 
         return $availableCompanies;
         
