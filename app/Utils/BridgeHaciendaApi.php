@@ -89,7 +89,7 @@ class BridgeHaciendaApi
                         return $invoice;
                     }
                 }else{
-                    Log::warning('Error en respuesta de firma -->>'. $response['status'] );
+                    Log::warning('Error en respuesta de firma -->>'. json_encode($response) );
                 }
                 return $invoice;
             }
