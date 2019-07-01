@@ -18559,7 +18559,8 @@ input.type-zone {
   margin-top: 0.33rem;
 }
 
-.ayuda-cont {
+.ayuda-cont,
+.exoneracion-cont {
   background: #f5f5f5;
   padding: 0.66rem 1rem !important;
   padding-bottom: 0 !important;
@@ -18568,7 +18569,8 @@ input.type-zone {
   margin-bottom: .5rem;
 }
 
-.ayuda-cont .form-group label {
+.ayuda-cont .form-group label,
+.exoneracion-cont .form-group label {
   font-size: 0.6875rem;
   line-height: 1.3;
 }

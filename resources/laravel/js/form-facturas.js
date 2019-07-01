@@ -357,6 +357,83 @@
       $("#field-retencion").hide();
     }
   }
+  
+  window.buscarProducto = function() {
+        var id = $('#codigo').val();
+        if(id !== '' && id !== undefined){
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajax({
+                url: "/getproduct",
+                method: 'get',
+                data: {
+                    id: id
+                },
+                success: function (result) {
+                    if(result.name) {
+                        $('#nombre').val(result.name);
+                        $('#unidad_medicion').val(result.measure_unit);
+                        $('#precio_unitario').val(result.unit_price);
+                        $('#tipo_producto').val(result.product_category_id);
+                        $('#tipo_iva').val(result.default_iva_type);
+
+                        $('#precio_unitario').change();
+                        $('#tipo_iva').change();
+                    }
+                }
+            });
+        }else{
+            alert('Debe digitar un código numeral para la búsqueda');
+        }
+    }
+    
+   window.calcularMontoExoneracion = function() {
+        var porcentajeExonerado = $('#porcentajeExoneracion').val();
+        if(porcentajeExonerado > 0) {
+            var monto_iva_detalle = $('#item_iva_amount').val();
+            var monto = monto_iva_detalle * (porcentajeExonerado / 100);
+            var impNeto = monto_iva_detalle - monto;
+            var subTotal = $('#item_subtotal').val();
+            var montoTotal = parseFloat(subTotal) + parseFloat(impNeto);
+
+            $('#montoExoneracion').val(monto);
+            $('#impuestoNeto').val(impNeto);
+            $('#montoTotalLinea').val(montoTotal);
+
+        }
+    }
+    
+    window.mostrarCamposExoneracion = function() {
+        var checkExoneracion = $('#checkExoneracion').prop('checked');
+        console.log(checkExoneracion);
+        if(checkExoneracion === true){
+            $(".exoneracion-cont").show();
+            $('#etiqTotal').text('');
+            $('#etiqTotal').text('Total sin exonerar');
+            $('#divTypeDocument').attr('hidden', false);
+            $('#divNumeroDocumento').attr('hidden', false);
+            $('#divNombreInstitucion').attr('hidden', false);
+            $('#divPorcentajeExoneracion').attr('hidden', false);
+            $('#divMontoExoneracion').attr('hidden', false);
+            $('#divMontoTotalLinea').attr('hidden', false);
+            $('#divImpuestoNeto').attr('hidden', false);
+        }else{
+            $(".exoneracion-cont").hide();
+            $('#etiqTotal').text('');
+            $('#etiqTotal').text('Monto Total Linea');
+            $('#divTypeDocument').attr('hidden', true);
+            $('#divNumeroDocumento').attr('hidden', true);
+            $('#divNombreInstitucion').attr('hidden', true);
+            $('#divPorcentajeExoneracion').attr('hidden', true);
+            $('#divMontoExoneracion').attr('hidden', true);
+            $('#divMontoTotalLinea').attr('hidden', true);
+            $('#divImpuestoNeto').attr('hidden', true);
+        }
+    }
+  
 
 $( document ).ready(function() {
 
@@ -377,6 +454,9 @@ $( document ).ready(function() {
     });
   
     $('#tipo_producto').on('change', function(){
+      
+      if( $(this).val() == 2 ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
+      
       presetTipoIVA();
       presetPorcentaje();
       calcularSubtotalItem();
