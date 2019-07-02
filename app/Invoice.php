@@ -364,7 +364,7 @@ class Invoice extends Model
               
               $invoice->generation_method = $data['metodoGeneracion'];
               $invoice->is_authorized = $data['isAuthorized'];
-              $invoice->is_code_validated = false;
+              $invoice->is_code_validated = $data['codeValidated'];
               $invoice->hacienda_status = "03";
               
               //Datos de factura
@@ -442,7 +442,7 @@ class Invoice extends Model
               'exoneration_company_name' => $data['companiaExoneracion'],
               'exoneration_porcent' => $data['porcentajeExoneracion'],
               'exoneration_amount' => $data['montoExoneracion'],
-              'impuesto_Neto' => $data['impuestoNeto'],
+              'impuesto_neto' => $data['impuestoNeto'],
               'exoneration_total_amount' => $data['totalMontoLinea']
           ];
       }
@@ -608,12 +608,6 @@ class Invoice extends Model
             );
 
             $insert = Invoice::importInvoiceRow( $arrayInsert );
-                /*$metodoGeneracion, $identificacionProveedor, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
-                $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
-                $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
-                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, $authorize, false,
-                $tipoDocumentoExoneracion, $documentoExoneracion, $companiaExoneracion, $porcentajeExoneracion, $montoExoneracion, $impuestoNeto, $totalMontoLinea
-            );*/
             
             if( $insert ) {
                 array_push( $inserts, $insert );

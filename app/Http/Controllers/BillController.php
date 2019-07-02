@@ -283,7 +283,8 @@ class BillController extends Controller
                             $codigoEtax = $row['codigoivaetax'];
                             $montoIva = (float)$row['montoiva'];
                             
-                            $codigoActividad = $row['codigoactividad'] ?? $company->getActivities()[0];
+                            $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
+                            $codigoActividad = $row['codigoactividad'] ?? $mainAct;
                             $xmlSchema = $row['xmlschema'] ?? 42;
                             
                             //Datos de exoneracion
