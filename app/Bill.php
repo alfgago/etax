@@ -418,7 +418,7 @@ class Bill extends Model
               'exoneration_company_name' => $arrayImportBill['companiaExoneracion'],
               'exoneration_porcent' => $arrayImportBill['porcentajeExoneracion'],
               'exoneration_amount' => $arrayImportBill['montoExoneracion'],
-              'impuestoNeto' => $arrayImportBill['impuestoNeto'],
+              'impuesto_Neto' => $arrayImportBill['impuestoNeto'],
               'exoneration_total_amount' => $arrayImportBill['totalMontoLinea']
           ];
       }
@@ -514,7 +514,7 @@ class Bill extends Model
                 'claveFactura' => $claveFactura,
                 'consecutivoComprobante' => $consecutivoComprobante,
                 'condicionVenta' => $condicionVenta,
-                'medioPago' => $medioPago,
+                'metodoPago' => $medioPago,
                 'numeroLinea' => $numeroLinea,
                 'fechaEmision' => $fechaEmision,
                 'fechaVencimiento' => $fechaVencimiento,
@@ -534,7 +534,7 @@ class Bill extends Model
                 'codigoEtax' => $codigoEtax,
                 'montoIva' => $montoIva,
                 'descripcion' => $descripcion,
-                'authorize' => $authorize,
+                'isAuthorized' => $authorize,
                 'codeValidated' => false,
                 'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
                 'documentoExoneracion' => $documentoExoneracion,
