@@ -418,7 +418,7 @@ class Bill extends Model
               'exoneration_company_name' => $arrayImportBill['companiaExoneracion'],
               'exoneration_porcent' => $arrayImportBill['porcentajeExoneracion'],
               'exoneration_amount' => $arrayImportBill['montoExoneracion'],
-              'impuestoNeto' => $arrayImportBill['impuestoNeto'],
+              'impuesto_Neto' => $arrayImportBill['impuestoNeto'],
               'exoneration_total_amount' => $arrayImportBill['totalMontoLinea']
           ];
       }
@@ -494,13 +494,13 @@ class Bill extends Model
             $codigoEtax = '003'; //De momento asume que todo en 4.2 es al 13%.
             $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
 
-            $tipoDocumentoExoneracion = $linea['tipoDocumentoExoneracion'];
-            $documentoExoneracion = $linea['documentoExoneracion'];
-            $companiaExoneracion = $linea['companiaExoneracion'];
-            $porcentajeExoneracion = $linea['porcentajeExoneracion'];
-            $montoExoneracion = $linea['montoExoneracion'];
-            $impuestoNeto = $linea['impuestoNeto'];
-            $totalMontoLinea = $linea['totalMontoLinea'];
+            $tipoDocumentoExoneracion = $linea['tipoDocumentoExoneracion'] ?? null;
+            $documentoExoneracion = $linea['documentoExoneracion']  ?? null;
+            $companiaExoneracion = $linea['companiaExoneracion'] ?? null;
+            $porcentajeExoneracion = $linea['porcentajeExoneracion'] ?? 0;
+            $montoExoneracion = $linea['montoExoneracion'] ?? 0;
+            $impuestoNeto = $linea['impuestoNeto'] ?? 0;
+            $totalMontoLinea = $linea['totalMontoLinea'] ?? 0;
 
             $arrayImportBillRow = array(
                 'metodoGeneracion' => $metodoGeneracion,
@@ -514,7 +514,7 @@ class Bill extends Model
                 'claveFactura' => $claveFactura,
                 'consecutivoComprobante' => $consecutivoComprobante,
                 'condicionVenta' => $condicionVenta,
-                'medioPago' => $medioPago,
+                'metodoPago' => $medioPago,
                 'numeroLinea' => $numeroLinea,
                 'fechaEmision' => $fechaEmision,
                 'fechaVencimiento' => $fechaVencimiento,
@@ -534,7 +534,7 @@ class Bill extends Model
                 'codigoEtax' => $codigoEtax,
                 'montoIva' => $montoIva,
                 'descripcion' => $descripcion,
-                'authorize' => $authorize,
+                'isAuthorized' => $authorize,
                 'codeValidated' => false,
                 'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
                 'documentoExoneracion' => $documentoExoneracion,

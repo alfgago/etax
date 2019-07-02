@@ -375,9 +375,9 @@ class InvoiceController extends Controller
         try {
             $collection = Excel::toCollection( new InvoiceImport(), request()->file('archivo') );
         }catch( \Exception $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.' );
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. IC 378' );
         }catch( \Throwable $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.' );
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. IC 380' );
         }
         
         $company = currentCompanyModel();
@@ -412,18 +412,18 @@ class InvoiceController extends Controller
                 
                 foreach ($collection[0]->chunk(200) as $facturas) {
 
-                    \DB::transaction(function () use ($facturas, &$company, &$i , $available_invoices, $available_invoices_by_plan) {
+                    \DB::transaction(function () use ($facturas, &$company, &$i /*, $available_invoices, $available_invoices_by_plan*/) {
 
                         $inserts = array();
                         foreach ($facturas as $row){
                             $i++;
-                            
+                            //dd($row);
                             $arrayRow = array();
-                            if($available_invoices_by_plan > 0){
+                            /*if($available_invoices_by_plan > 0){
                                 $available_invoices_by_plan = $available_invoices_by_plan - 1;
                             }else{
                                 $company->additional_invoices = $company->additional_invoices - 1;
-                            }
+                            }*/
 
                             $metodoGeneracion = "XLSX";
 
@@ -480,8 +480,9 @@ class InvoiceController extends Controller
                                 'metodoGeneracion' => $metodoGeneracion,
                                 'idEmisor' => 0,
                                 'nombreCliente' => $nombreCliente,
+                                'descripcion' => $descripcion,
                                 'codigoCliente' => $codigoCliente,
-                                'tipoPersona' => tipoPersona,
+                                'tipoPersona' => $tipoPersona,
                                 'identificacionCliente' => $identificacionCliente,
                                 'correoCliente' => $correoCliente,
                                 'telefonoCliente' => $telefonoCliente,
@@ -496,6 +497,13 @@ class InvoiceController extends Controller
                                 'tipoCambio' => $tipoCambio,
                                 'totalDocumento' => $totalDocumento,
                                 'totalNeto' => $totalNeto,
+                                'cantidad' => $cantidad,
+                                'precioUnitario' => $precioUnitario,
+                                'totalLinea' => $totalLinea,
+                                'montoIva' => $montoIva,
+                                'codigoEtax' => $codigoEtax,
+                                'montoDescuento' => $montoDescuento,
+                                'subtotalLinea' => $subtotalLinea,
                                 'tipoDocumento' => $tipoDocumento,
                                 'codigoProducto' => $codigoProducto,
                                 'detalleProducto' => $detalleProducto,
@@ -508,7 +516,8 @@ class InvoiceController extends Controller
                                 'impuestoNeto' => $impuestoNeto,
                                 'totalMontoLinea' => $totalMontoLinea,
                                 'xmlSchema' => $xmlSchema,
-                                'codigoActividad' => $codigoActividad
+                                'codigoActividad' => $codigoActividad,
+                                'isAuthorized' => true
                             );
 
                             $insert = Invoice::importInvoiceRow( $arrayInsert );
@@ -534,11 +543,11 @@ class InvoiceController extends Controller
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Error en la fila. '.$i);
             }catch( \Throwable $ex ){
                 Log::error('Error importando Excel' . $ex->getMessage());
-                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i);
+                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. IC 537'.$i);
             }
             
             $company->save();
-            $available_invoices->save();
+            //$available_invoices->save();
             
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
@@ -678,10 +687,10 @@ class InvoiceController extends Controller
 
         }catch( \Exception $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido. 681');
         }catch( \Throwable $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido. 684');
         }
         
         return redirect('/facturas-emitidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
