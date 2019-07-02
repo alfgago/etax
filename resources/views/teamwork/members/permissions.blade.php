@@ -19,8 +19,9 @@ Editar permisos de equipo "{{$team->name}}"
 <div class="row">
     <div class="col-md-12">
 
-        <form method="POST" action="/permissions/{{$team->id}}">
+        <form method="POST" action="/companies/permissions-user/{{$team->id}}">
             @csrf
+            @method('patch')
 
             <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
                 <thead>                

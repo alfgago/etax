@@ -38,9 +38,10 @@ class TeamMemberController extends Controller {
     }
 
     public function permissions($id) {
+        //dd($id);
         $teamModel = config('teamwork.team_model');
         $team = $teamModel::findOrFail($id);
-            
+
         if (empty($team)) {
             return redirect()->back()->withError('Usted no está autorizado para acceder a esta información');
         }
@@ -60,7 +61,7 @@ class TeamMemberController extends Controller {
     }
 
     public function assignPermission(Request $request, $team_id) {
-
+        //dd($request);
         $teamModel = config('teamwork.team_model');
         $team = $teamModel::findOrFail($team_id);
 
