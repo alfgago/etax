@@ -375,9 +375,9 @@ class InvoiceController extends Controller
         try {
             $collection = Excel::toCollection( new InvoiceImport(), request()->file('archivo') );
         }catch( \Exception $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. IC 378' );
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.' );
         }catch( \Throwable $ex ){
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. IC 380' );
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.' );
         }
         
         $company = currentCompanyModel();
@@ -462,7 +462,8 @@ class InvoiceController extends Controller
                             $codigoEtax = $row['codigoivaetax'];
                             $montoIva = (float)$row['montoiva'];
                             
-                            $codigoActividad = $row['codigoactividad'] ?? $company->getActivities()[0];
+                            $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
+                            $codigoActividad = $row['codigoactividad'] ?? $mainAct;
                             $xmlSchema = $row['xmlschema'] ?? 42;
                             
                             //Exoneraciones
@@ -517,7 +518,8 @@ class InvoiceController extends Controller
                                 'totalMontoLinea' => $totalMontoLinea,
                                 'xmlSchema' => $xmlSchema,
                                 'codigoActividad' => $codigoActividad,
-                                'isAuthorized' => true
+                                'isAuthorized' => true,
+                                'codeValidated' => true
                             );
 
                             $insert = Invoice::importInvoiceRow( $arrayInsert );
@@ -687,10 +689,10 @@ class InvoiceController extends Controller
 
         }catch( \Exception $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido. 681');
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML de factura válida.');
         }catch( \Throwable $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido. 684');
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML de factura válida.');
         }
         
         return redirect('/facturas-emitidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');

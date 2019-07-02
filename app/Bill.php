@@ -330,6 +330,7 @@ class Bill extends Model
               $bill->generation_method = $arrayImportBill['metodoGeneracion'];
               $bill->is_authorized = $arrayImportBill['isAuthorized'];
               $bill->is_code_validated = $arrayImportBill['codeValidated'];
+              
               if($arrayImportBill['metodoGeneracion'] == 'Email' || $arrayImportBill['metodoGeneracion'] == 'XML') {
                 $bill->accept_status = 0;
               }else{
@@ -418,7 +419,7 @@ class Bill extends Model
               'exoneration_company_name' => $arrayImportBill['companiaExoneracion'],
               'exoneration_porcent' => $arrayImportBill['porcentajeExoneracion'],
               'exoneration_amount' => $arrayImportBill['montoExoneracion'],
-              'impuesto_Neto' => $arrayImportBill['impuestoNeto'],
+              'impuesto_neto' => $arrayImportBill['impuestoNeto'],
               'exoneration_total_amount' => $arrayImportBill['totalMontoLinea']
           ];
       }
