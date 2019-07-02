@@ -284,7 +284,6 @@ class Invoice extends Model
     }
     
     public static function importInvoiceRow ( $data ) {
-      
       //Revisa si el método es por correo electrónico. De ser así, usa busca la compañia por cedula.
       if( $data['metodoGeneracion'] != "Email" ){
         $company = currentCompanyModel();
@@ -323,10 +322,10 @@ class Invoice extends Model
         }
         $cliente = Cache::get($clientCacheKey);
         $idCliente = $cliente->id;
+        $tipoDocumento = $data['tipoDocumento'];
       } else {
         $tipoDocumento = '04';
       }
-      
       $idCliente = preg_replace("/[^0-9]/", "", $idCliente );
       $invoiceCacheKey = "import-factura-" . $data['nombreCliente'] . $company->id . "-" . $data['consecutivoComprobante'];
       if ( !Cache::has($invoiceCacheKey) ) {
@@ -341,7 +340,6 @@ class Invoice extends Model
           );
           
           if( !$invoice->exists ) {
-              
               $invoice->company_id = $company->id;
               $invoice->client_id = $idCliente;    
       
@@ -366,7 +364,7 @@ class Invoice extends Model
               
               $invoice->generation_method = $data['metodoGeneracion'];
               $invoice->is_authorized = $data['isAuthorized'];
-              $invoice->is_code_validated = $data['codeValidated'];
+              $invoice->is_code_validated = false;
               $invoice->hacienda_status = "03";
               
               //Datos de factura
@@ -444,7 +442,7 @@ class Invoice extends Model
               'exoneration_company_name' => $data['companiaExoneracion'],
               'exoneration_porcent' => $data['porcentajeExoneracion'],
               'exoneration_amount' => $data['montoExoneracion'],
-              'impuestoNeto' => $data['impuestoNeto'],
+              'impuesto_Neto' => $data['impuestoNeto'],
               'exoneration_total_amount' => $data['totalMontoLinea']
           ];
       }
@@ -556,13 +554,13 @@ class Invoice extends Model
             $codigoEtax = '103'; //De momento asume que todo en 4.2 es al 13%.
             $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
 
-            $tipoDocumentoExoneracion = $linea['tipoDocumentoExoneracion'];
-            $documentoExoneracion = $linea['documentoExoneracion'];
-            $companiaExoneracion = $linea['companiaExoneracion'];
-            $porcentajeExoneracion = $linea['porcentajeExoneracion'];
-            $montoExoneracion = $linea['montoExoneracion'];
-            $impuestoNeto = $linea['impuestoNeto'];
-            $totalMontoLinea = $linea['totalMontoLinea'];
+            $tipoDocumentoExoneracion = $linea['tipoDocumentoExoneracion'] ?? null;
+            $documentoExoneracion = $linea['documentoExoneracion'] ?? null;
+            $companiaExoneracion = $linea['companiaExoneracion'] ?? null;
+            $porcentajeExoneracion = $linea['porcentajeExoneracion'] ?? 0;
+            $montoExoneracion = $linea['montoExoneracion'] ?? 0;
+            $impuestoNeto = $linea['impuestoNeto'] ?? 0;
+            $totalMontoLinea = $linea['totalMontoLinea'] ?? 0;
 
             $arrayInsert = array(
                 'metodoGeneracion' => $metodoGeneracion,
@@ -596,7 +594,7 @@ class Invoice extends Model
                 'codigoEtax' => $codigoEtax,
                 'montoIva' => $montoIva,
                 'descripcion' => $descripcion,
-                'authorize' => $authorize,
+                'isAuthorized' => $authorize,
                 'codeValidated' => false,
                 'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
                 'documentoExoneracion' => $documentoExoneracion,

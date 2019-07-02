@@ -19,7 +19,14 @@ class FixIsSubscription extends Migration
                 $table->dropColumn('isSubscription');
             });
         }
-        
+        if (Schema::hasColumn('sales', 'is_subscription'))
+        {
+            Schema::table('sales', function (Blueprint $table)
+            {
+                $table->dropColumn('is_subscription');
+            });
+        }
+
         Schema::table('sales', function (Blueprint $table) {
             $table->boolean('is_subscription')->default(true);
         });
@@ -31,7 +38,14 @@ class FixIsSubscription extends Migration
                 $table->dropColumn('isSubscription');
             });
         }
-        
+        if (Schema::hasColumn('etax_products', 'is_subscription'))
+        {
+            Schema::table('etax_products', function (Blueprint $table)
+            {
+                $table->dropColumn('is_subscription');
+            });
+        }
+
         Schema::table('etax_products', function (Blueprint $table) {
             $table->boolean('is_subscription')->default(true);
         });
