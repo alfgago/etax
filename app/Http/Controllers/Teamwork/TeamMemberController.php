@@ -38,7 +38,6 @@ class TeamMemberController extends Controller {
     }
 
     public function permissions($id) {
-        //dd($id);
         $teamModel = config('teamwork.team_model');
         $team = $teamModel::findOrFail($id);
 
@@ -61,9 +60,9 @@ class TeamMemberController extends Controller {
     }
 
     public function assignPermission(Request $request, $team_id) {
-        //dd($request);
         $teamModel = config('teamwork.team_model');
         $team = $teamModel::findOrFail($team_id);
+        //dd($team);
 
         if (empty($team)) {
             return redirect()->back()->withError('Usted no está autorizado para actualizar a esta información');
@@ -73,7 +72,6 @@ class TeamMemberController extends Controller {
         if (!auth()->user()->isOwnerOfTeam($team)) {
             return redirect()->back()->withError('Usted no está autorizado para actualizar a esta información');
         }
-
         if (!empty($request->permissions)) {
             foreach ($request->permissions as $key => $value) {
                 foreach ($value as $row) {
@@ -88,8 +86,7 @@ class TeamMemberController extends Controller {
             UserCompanyPermission::where(array('company_id' => $team['company_id']))->delete();
             UserCompanyPermission::insert($insert_arr);
         }
-
-        return redirect()->back()->with('success', 'Permissions has been assigned to user successfully.');
+        return redirect()->back()->withMessage('Se han actualizado los permisos exitosamente');
     }
 
     /**
