@@ -394,7 +394,7 @@ class BillController extends Controller
                     $json = json_encode( $xml ); // convert the XML string to JSON
                     $arr = json_decode( $json, TRUE );
                     
-                    $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
+                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
                     $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
                     $consecutivoComprobante = $arr['NumeroConsecutivo'];
                     $clave = $arr['Clave'];
@@ -415,11 +415,11 @@ class BillController extends Controller
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
         }catch( \Exception $ex ){
-            Log::error('Error importando Excel' . $ex->getMessage());
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. 419');
+            Log::error('Error importando XML ' . $ex->getMessage());
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
         }catch( \Throwable $ex ){
-            Log::error('Error importando Excel' . $ex->getMessage());
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. 422');
+            Log::error('Error importando XML ' . $ex->getMessage());
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
         }
 
         return redirect('/facturas-recibidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');

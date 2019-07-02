@@ -55,7 +55,7 @@ class CompanyController extends Controller {
     public function create() {
         
         if( ! auth()->user()->isContador() ) {
-            return redirect('/')->withMessage('Su cuenta actual no permite más empresas.');
+            return redirect('/')->withMessage('Usted no tiene una cuenta de contador.');
         }
         
         $available_companies_count = User::checkCountAvailableCompanies();
