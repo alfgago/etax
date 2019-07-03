@@ -515,7 +515,11 @@ class Invoice extends Model
         $tipoDocumento = '01';
         if ( array_key_exists('Receptor', $arr) ){
           $correoCliente = $arr['Receptor']['CorreoElectronico'];
-          $telefonoCliente = isset($arr['Receptor']['Telefono']) ? $arr['Receptor']['Telefono']['NumTelefono'] : '';
+          if ( isset($arr['Receptor']['Telefono']) ) {
+            $telefonoCliente = $arr['Receptor']['Telefono']['NumTelefono'] ?? null;
+          }else {
+            $telefonoCliente = null;
+          }
           $tipoPersona = $arr['Receptor']['Identificacion']['Tipo'];
           $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
           $nombreCliente = $arr['Receptor']['Nombre'];
@@ -536,11 +540,17 @@ class Invoice extends Model
           $metodoPago = $metodoPago[0];
         }
         
-        $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
-        $tipoCambio = array_key_exists('TipoCambio', $arr['ResumenFactura']) ? $arr['ResumenFactura']['TipoCambio'] : '1';
+        if( array_key_exists( 'CodigoTipoMoneda', $arr['ResumenFactura'] ) ) {
+          $idMoneda = $arr['ResumenFactura']['CodigoTipoMoneda']['CodigoMoneda'] ?? '';
+          $tipoCambio = $arr['ResumenFactura']['CodigoTipoMoneda']['TipoCambio'] ?? 1;
+        }else {
+          $idMoneda = $arr['ResumenFactura']['CodigoMoneda'] ?? '';
+          $tipoCambio = array_key_exists('TipoCambio', $arr['ResumenFactura']) ? $arr['ResumenFactura']['TipoCambio'] : '1';
+        }
+        
         $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
         $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
-        $descripcion = $arr['ResumenFactura']['CodigoMoneda'];
+        $descripcion = 'XML Importado';
         
         $authorize = true;
         if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
@@ -555,7 +565,11 @@ class Invoice extends Model
         
         foreach( $lineas as $linea ) {
             $numeroLinea = $linea['NumeroLinea'];
-            $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] : '';
+            try {
+              $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] ?? '' : '';
+            } catch( \Throwable $e ) {
+              $codigoProducto = "No indica";
+            }
             $detalleProducto = $linea['Detalle'];
             $unidadMedicion = $linea['UnidadMedida'];
             $cantidad = $linea['Cantidad'];
@@ -565,6 +579,12 @@ class Invoice extends Model
             $montoDescuento = array_key_exists('MontoDescuento', $linea) ? $linea['MontoDescuento'] : 0;
             $codigoEtax = '103'; //De momento asume que todo en 4.2 es al 13%.
             $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
+            
+            if( array_key_exists('Impuesto', $linea) ) {
+              //$codigoEtax = $this->getCodigoSoportadoFromXML( $linea['Impuesto']['CodigoTarifa'], $linea['UnidadMedida'] );
+              
+              $montoIva = $linea['Impuesto']['Monto'];
+            }
 
             $tipoDocumentoExoneracion = $linea['tipoDocumentoExoneracion'] ?? null;
             $documentoExoneracion = $linea['documentoExoneracion'] ?? null;
