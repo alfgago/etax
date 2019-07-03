@@ -21,7 +21,6 @@
         <table id="bill-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
-
               <th>Comprobante</th>
               <th>Emisor</th>
               <th>Total en <br>factura</th>
@@ -53,7 +52,7 @@ $(function() {
     ajax: "/api/billsAccepts",
     columns: [
       { data: 'document_number', name: 'document_number' },
-      { data: 'provider', name: 'provider.fullname' },
+      { data: 'provider', name: 'provider.id' },
       { data: 'total', name: 'total' },
       { data: 'accept_total_factura', name: 'accept_total_factura', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
       { data: 'accept_iva_total', name: 'accept_iva_total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
