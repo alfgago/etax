@@ -300,12 +300,12 @@ class CompanyController extends Controller {
         $company->address = $request->address;
         $company->phone = $request->phone;
         $company->atv_validation = false;
-        $commercial_activities = $request->main_comercial_activity;
-        if($request->second_comercial_activity != ''){
-            $commercial_activities = $request->main_comercial_activity . ',' . $request->second_comercial_activity;
+        
+        $company->commercial_activities = $request->commercial_activities;
+        if ( is_array($company->commercial_activities) ) {
+            $company->commercial_activities = implode( ", ", $company->commercial_activities );
         }
-        $company->commercial_activities = $commercial_activities;
-
+        
         $company->save();
 
         //Update Team name based on company

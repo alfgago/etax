@@ -340,6 +340,20 @@ input.type-zone {
     background: #eee;
 }
 
+#select2-commercial_activities-results {
+    font-size: 10px;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: #fff;
+}
+
+.select2-container--default .select2-selection__choice {
+    font-size: 10px;
+    background: #34438F !important;
+    color: #fff;
+}
+
 .btn.btn-agregar.btn-agregar-cliente {
     margin-left: 1rem;
     color: #fff;

@@ -420,15 +420,15 @@ class PaymentController extends Controller
                 if ( !empty($invoiceDataSent) ) {
                     $invoice = $apiHacienda->createInvoice($invoiceDataSent, $tokenApi);
                 }
+                $company->last_invoice_ref_number = $invoice->reference_number;
+                $company->last_document = $invoice->document_number;
+                $company->save();
+                clearInvoiceCache($invoice);
+                
             }catch(\Throwable $e){
                 Log::error('Error al crear factura de compra eTax. ' . $e->getMessage() );
             }
 
-            $company->last_invoice_ref_number = $invoice->reference_number;
-            $company->last_document = $invoice->document_number;
-            $company->save();
-            clearInvoiceCache($invoice);
-            
             Log::info( 'Nueva suscripción exitosa.' );
             return true;
         } else {
