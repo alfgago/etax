@@ -178,6 +178,12 @@ class PaymentController extends Controller
             $iv = $subtotal * 0.13;
             $amount = $subtotal + $iv;
             
+            $montoDescontado = round( $montoDescontado, 2 );
+            $descuento = round( $descuento, 2 );
+            $subtotal = round( $subtotal, 2 );
+            $iv = round( $iv, 2 );
+            $amount = round( $amount, 2 );
+            
             $cards = array(
                 $request->number
             );
