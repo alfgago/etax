@@ -117,6 +117,8 @@ class ProcessReception implements ShouldQueue
                             Log::info('Failed Job');
 
 
+                        } else {
+                            Log::error('ERROR Enviando parametros  API HACIENDA Reception: '.$this->billId);
                         }
                         Log::info('Proceso de Reception finalizado con éxito.');
                     }
@@ -132,11 +134,12 @@ class ProcessReception implements ShouldQueue
     private function setReceptionData(Bill $data, $ref) {
         try {
             $company = $data->company;
+            $provider = $data->provider;
             $invoiceData = null;
             $request = null;
             $invoiceData = [
                 'clave' => $data['document_key'],
-                'cedula_emisor' => $data['provider_id_number'],
+                'cedula_emisor' => !empty($data['provider_id_number']) ? $data['provider_id_number'] : $provider->id_number,
                 'fecha_emision' => $data['generated_date'] ?? '',
                 'cod_mensaje' => $data['accept_status'] ?? 1,
                 'detalle' => 'Detalle',
@@ -176,11 +179,12 @@ class ProcessReception implements ShouldQueue
     private function setReceptionData43(Bill $data, $ref) {
         try {
             $company = $data->company;
+            $provider = $data->provider;
             $invoiceData = null;
             $request = null;
             $invoiceData = [
                 'clave' => $data['document_key'],
-                'cedula_emisor' => $data['provider_id_number'],
+                'cedula_emisor' => !empty($data['provider_id_number']) ? $data['provider_id_number'] : $provider->id_number,
                 'fecha_emision' => $data['generated_date'] ?? '',
                 'cod_mensaje' => $data['accept_status'] ?? 1,
                 'detalle' => 'Detalle',
