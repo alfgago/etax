@@ -8,7 +8,7 @@
 <div class="row form-container">
   <div class="col-md-12">
         
-        <h2 style="color: red;">Esta pantalla es utilizada únicamente para calcular la prorrata operativa del año 2018.</h2>
+        <h2 style="color: red;">Esta pantalla es utilizada únicamente para calcular la prorrata operativa del año 2018. Debe ingresar los montos en una misma moneda.</h2>
         
         <form method="POST" action="/update-totales-2018">
 
@@ -195,7 +195,6 @@
                     <th>#</th>
                     <th>Código</th>
                     <th>Nombre</th>
-                    <th>Tipo producto</th>
                     <th>Cant.</th>
                     <th>Unidad</th>
                     <th>Precio unitario</th>
@@ -212,7 +211,6 @@
                       <td><span class="numero-fila">{{ $loop->index+1 }}</span>
                       <td>{{ $item->code }}</td>
                       <td>{{ $item->name }}</td>
-                      <td></td>
                       <td>{{ $item->item_count }}</td>
                       <td>{{ \App\Variables::getUnidadMedicionName($item->measure_unit) }}</td>
                       <td>{{ $item->unit_price }} </td>
@@ -284,12 +282,10 @@ $(document).ready(function(){
   div#tabla-items-factura td:nth-of-type(5),
   div#tabla-items-factura th:nth-of-type(6),
   div#tabla-items-factura td:nth-of-type(6),
+  div#tabla-items-factura th:nth-of-type(9),
+  div#tabla-items-factura td:nth-of-type(9),
   div#tabla-items-factura th:nth-of-type(10),
-  div#tabla-items-factura td:nth-of-type(10),
-  div#tabla-items-factura th:nth-of-type(11),
-  div#tabla-items-factura td:nth-of-type(11),
-  div#tabla-items-factura th:nth-of-type(7),
-  div#tabla-items-factura td:nth-of-type(7) {
+  div#tabla-items-factura td:nth-of-type(10) {
       display: none;
   }
 </style>
