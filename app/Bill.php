@@ -462,9 +462,14 @@ class Bill extends Model
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
         $codigoProveedor = $identificacionProveedor;
         $correoProveedor = $arr['Emisor']['CorreoElectronico'];
+        
+        
         if ( isset($arr['Emisor']['Telefono']) ) {
-            $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'] ?? null;
+          $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'] ?? null;
+        }else{
+          $telefonoProveedor = null;
         }
+        
         $tipoIdReceptor = $arr['Receptor']['Identificacion']['Tipo'];
         $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
         $nombreReceptor = $arr['Receptor']['Nombre'];
