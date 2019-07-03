@@ -188,8 +188,6 @@ if (!function_exists('allowTo')) {
         $companyId = currentCompany();
         $user = auth()->user();
         
-        $user = App\User::find(16);
-        
         $cacheKey = "cache-allow-$companyId-$user->id";
         if ( !Illuminate\Support\Facades\Cache::has($cacheKey) ) {
         
