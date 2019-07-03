@@ -352,7 +352,7 @@ class Bill extends Model
               }
 
               $bill->is_void = false;
-              $bill->hacienda_status = "03";
+              $bill->hacienda_status = "01";
               
               //Datos de factura
               $bill->currency = $arrayImportBill['idMoneda'];
