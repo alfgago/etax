@@ -330,6 +330,20 @@ class Bill extends Model
               $bill->generation_method = $arrayImportBill['metodoGeneracion'];
               $bill->is_authorized = $arrayImportBill['isAuthorized'];
               $bill->is_code_validated = $arrayImportBill['codeValidated'];
+
+
+              $bill->provider_id_number = preg_replace("/[^0-9]/", "", $arrayImportBill['identificacionProveedor']);
+              $bill->provider_first_name = $arrayImportBill['nombreProveedor'];
+              $bill->provider_last_name = '';
+              $bill->provider_last_name2 = '';
+              $bill->provider_email = $arrayImportBill['correoProveedor'];
+              $bill->provider_address = '';
+              $bill->provider_country = '';
+              $bill->provider_city = '';
+              $bill->provider_state = '';
+              $bill->provider_district = '';
+              $bill->provider_phone = $arrayImportBill['telefonoProveedor'];
+              $bill->provider_zip = '';
               
               if($arrayImportBill['metodoGeneracion'] == 'Email' || $arrayImportBill['metodoGeneracion'] == 'XML') {
                 $bill->accept_status = 0;
