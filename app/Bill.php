@@ -539,6 +539,7 @@ class Bill extends Model
             $arrayImportBillRow = array(
                 'metodoGeneracion' => $metodoGeneracion,
                 'identificacionReceptor' => $identificacionReceptor,
+                'idReceptor' => $identificacionReceptor,
                 'nombreProveedor' => $nombreProveedor,
                 'codigoProveedor' => $codigoProveedor,
                 'tipoPersona' => $tipoPersona,
