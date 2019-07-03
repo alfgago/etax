@@ -270,7 +270,7 @@
           
           @include( 'Invoice.form-linea' )
           @include( 'Invoice.form-nuevo-cliente' )
-
+            <input type="text" hidden value="{{ $document_type }}" name="document_type" id="document_type">
           <div class="btn-holder hidden">
             <button id="btn-submit" type="submit" class="btn btn-primary">Enviar factura electrónica</button>
           </div>

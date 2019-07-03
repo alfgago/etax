@@ -250,6 +250,7 @@ class InvoiceController extends Controller
      */
     public function sendHacienda(Request $request)
     {
+        dd($request);
         //revision de branch para segmentacion de funcionalidades por tipo de documento
         try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
@@ -266,7 +267,7 @@ class InvoiceController extends Controller
                 $invoice->company_id = $company->id;
 
                 //Datos generales y para Hacienda
-                $invoice->document_type = "01";
+                $invoice->document_type = $request->document_type;
                 $invoice->hacienda_status = '01';
                 $invoice->payment_status = "01";
                 $invoice->payment_receipt = "";
