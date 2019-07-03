@@ -597,6 +597,7 @@ class Invoice extends Model
             $arrayInsert = array(
                 'metodoGeneracion' => $metodoGeneracion,
                 'identificacionProveedor' => $identificacionProveedor,
+                'idEmisor' => $identificacionProveedor,
                 'nombreCliente' => $nombreCliente,
                 'codigoCliente' => $codigoCliente,
                 'tipoPersona' => $tipoPersona,
