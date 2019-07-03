@@ -157,4 +157,29 @@ class User extends Authenticatable {
         return false;
     }
 
+    public function Wallet_details(){
+        $total_ingresos  = DB::table('coupons')
+            ->join('payments', 'payments.coupon_id', 'coupons.id')
+            ->where('user_id', auth()->user()->id)
+            ->sum('amount');
+        $total_retiros = DB::table('wallet_transactions')
+            ->wherewhere('user_id', auth()->user()->id)
+            ->sum('amount');
+        $ingresos  = DB::table('coupons')
+            ->join('payments', 'payments.coupon_id', 'coupons.id')
+            ->where('user_id', auth()->user()->id)
+            ->count('amount');
+        $retiros = DB::table('wallet_transactions')
+            ->wherewhere('user_id', auth()->user()->id)
+            ->count('amount');
+        $saldo = $total_ingresos - $total_retiros;
+        $retorno = array(
+            "ingresos" => $ingresos,
+            "retiros" => $retiros,
+            "monto_ingresos" => $total_ingresos,
+            "monto_retiros" => $total_retiros,
+            "saldo" => $saldo,
+        );
+    }
+
 }
