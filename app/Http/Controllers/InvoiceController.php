@@ -97,6 +97,11 @@ class InvoiceController extends Controller
                                 <span class="tooltiptext">Aceptada</span>
                             </div>';
                 }
+                if ($invoice->hacienda_status == '04') {
+                    return '<div class="red">  
+                                <span class="tooltiptext">Rechazada</span>
+                            </div>';
+                }
                 return '<div class="yellow">
                             <span class="tooltiptext">Creada</span>
                         </div>';
@@ -595,9 +600,7 @@ class InvoiceController extends Controller
                 $company->last_note_ref_number = $noteData->reference_number;
                 $company->last_document_note = $noteData->document_number;
                 $company->save();
-                if ($note->hacienda_status == '03') {
-                    // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
-                }
+
                 clearInvoiceCache($invoice);
 
                 return redirect('/facturas-emitidas')->withMessage('Nota de crédito creada.');

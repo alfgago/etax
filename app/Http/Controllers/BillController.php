@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Invoice;
 use App\UnidadMedicion;
+use App\Utils\BridgeHaciendaApi;
 use \Carbon\Carbon;
 use App\Bill;
 use App\BillItem;
@@ -547,7 +549,11 @@ class BillController extends Controller
             $bill->calculateAcceptFields();
         }
         
-        $current_company = currentCompany();
+        $current_company = currentCompanyModel();
+
+        if (empty($current_company->last_rec_ref_number)) {
+            return redirect('/empresas/configuracion')->withError( "No ha ingresado ultimo consecutivo de recepcion");
+        }
         
         return view('Bill/index-aceptaciones-hacienda');
     }
@@ -558,14 +564,13 @@ class BillController extends Controller
      */
     public function indexDataAccepts() {
         $current_company = currentCompany();
-
         $query = Bill::where('bills.company_id', $current_company)
         ->where('is_void', false)
         ->where('accept_status', '0')
         ->where('is_totales', false)
         ->where('is_authorized', true)
         ->with('provider');
-        
+
         return datatables()->eloquent( $query )
             ->addColumn('actions', function($bill) {
                 return view('Bill.ext.accept-actions', [
@@ -625,16 +630,35 @@ class BillController extends Controller
     /**
      *  Metodo para hacer las aceptaciones
      */
-    public function sendAcceptMessage ( Request $request, $id )
+    public function sendAcceptMessage (Request $request, $id)
     {
-        $bill = Bill::findOrFail($id);
-        
-        /*
-        $bill->accept_status = $request->accept_status;
-        $bill->save();
-        */
-        
-        return redirect('/facturas-recibidas/aceptaciones')->withError( 'La factura '. $bill->document_number . ' no pudo ser aceptada. Por favor contáctenos.');
+        try {
+            $apiHacienda = new BridgeHaciendaApi();
+            $tokenApi = $apiHacienda->login(false);
+            if ($tokenApi !== false) {
+                $bill = Bill::findOrFail($id);
+                $company = currentCompanyModel();
+                if (!empty($bill)) {
+                    $bill->accept_status = $request->respuesta;
+                    $bill->save();
+                    $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
+                    $company->save();
+                    $company->last_document_rec = getDocReference($company->last_rec_ref_number);
+                    $company->save();
+
+                    $apiHacienda->acceptInvoice($bill, $tokenApi);
+                }
+                clearInvoiceCache($bill);
+                return redirect('/facturas-recibidas/aceptaciones')->withMessage('Acceptacion Enviada.');
+
+            } else {
+                return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+            }
+
+        } catch ( Exception $e) {
+            Log::error ("Error al crear aceptacion de factura");
+            return redirect('/facturas-recibidas/aceptaciones')->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');
+        }
     }
     
     public function correctAccepted ( Request $request, $id )

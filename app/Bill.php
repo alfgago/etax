@@ -330,6 +330,20 @@ class Bill extends Model
               $bill->generation_method = $arrayImportBill['metodoGeneracion'];
               $bill->is_authorized = $arrayImportBill['isAuthorized'];
               $bill->is_code_validated = $arrayImportBill['codeValidated'];
+
+
+              $bill->provider_id_number = preg_replace("/[^0-9]/", "", $arrayImportBill['identificacionProveedor']);
+              $bill->provider_first_name = $arrayImportBill['nombreProveedor'];
+              $bill->provider_last_name = '';
+              $bill->provider_last_name2 = '';
+              $bill->provider_email = $arrayImportBill['correoProveedor'];
+              $bill->provider_address = '';
+              $bill->provider_country = '';
+              $bill->provider_city = '';
+              $bill->provider_state = '';
+              $bill->provider_district = '';
+              $bill->provider_phone = $arrayImportBill['telefonoProveedor'];
+              $bill->provider_zip = '';
               
               if($arrayImportBill['metodoGeneracion'] == 'Email' || $arrayImportBill['metodoGeneracion'] == 'XML') {
                 $bill->accept_status = 0;
@@ -448,7 +462,9 @@ class Bill extends Model
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
         $codigoProveedor = $identificacionProveedor;
         $correoProveedor = $arr['Emisor']['CorreoElectronico'];
-        $telefonoProveedor = isset($arr['Emisor']['Telefono']) ? $arr['Emisor']['Telefono']['NumTelefono'] : '';
+        if ( isset($arr['Emisor']['Telefono']) ) {
+            $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'] ?? null;
+        }
         $tipoIdReceptor = $arr['Receptor']['Identificacion']['Tipo'];
         $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
         $nombreReceptor = $arr['Receptor']['Nombre'];
@@ -460,12 +476,19 @@ class Bill extends Model
           $medioPago = $medioPago[0];
         }
         
-        $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
-        $tipoCambio = array_key_exists('TipoCambio', $arr['ResumenFactura']) ? $arr['ResumenFactura']['TipoCambio'] : '1';
+        if( array_key_exists( 'CodigoTipoMoneda', $arr['ResumenFactura'] ) ) {
+          $idMoneda = $arr['ResumenFactura']['CodigoTipoMoneda']['CodigoMoneda'] ?? '';
+          $tipoCambio = $arr['ResumenFactura']['CodigoTipoMoneda']['TipoCambio'] ?? 1;
+        }else {
+          $idMoneda = $arr['ResumenFactura']['CodigoMoneda'] ?? '';
+          $tipoCambio = array_key_exists('TipoCambio', $arr['ResumenFactura']) ? $arr['ResumenFactura']['TipoCambio'] : '1';
+        }
+        
         $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
         $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
-        $tipoDocumento = $arr['TipoDoc+'] ?? '01';
-        $descripcion = $arr['ResumenFactura']['CodigoMoneda'];
+        
+        $tipoDocumento = $arr['TipoDoc'] ?? '01';
+        $descripcion = 'XML Importado';
         
         $authorize = true;
         if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
@@ -481,7 +504,7 @@ class Bill extends Model
         foreach( $lineas as $linea ) {
             $numeroLinea = $linea['NumeroLinea'];
             try {
-              $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] : '';
+              $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] ?? '' : '';
             } catch( \Throwable $e ) {
               $codigoProducto = "No indica";
             }
@@ -494,6 +517,11 @@ class Bill extends Model
             $montoDescuento = array_key_exists('MontoDescuento', $linea) ? $linea['MontoDescuento'] : 0;
             $codigoEtax = '003'; //De momento asume que todo en 4.2 es al 13%.
             $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
+
+            if( array_key_exists('Impuesto', $linea) ) {
+              //$codigoEtax = $linea['Impuesto']['CodigoTarifa'];
+              $montoIva = $linea['Impuesto']['Monto'];
+            }
 
             $tipoDocumentoExoneracion = $linea['tipoDocumentoExoneracion'] ?? null;
             $documentoExoneracion = $linea['documentoExoneracion']  ?? null;

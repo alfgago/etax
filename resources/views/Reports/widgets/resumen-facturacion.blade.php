@@ -1,5 +1,7 @@
 <div class="sidebar-dashboard">
     <div class="card-title">{{ $titulo }}</div>
+@if( allowTo('reports') )       
+    
     <div class="row">
       <?php 
         $company = currentCompanyModel();
@@ -64,4 +66,12 @@
       </style>
         
     </div>
+    
+@else
+  <div class="not-allowed-message">
+    Usted actualmente no tiene permisos para ver los reportes.
+  </div>
+@endif     
+    
+    
  </div>  
