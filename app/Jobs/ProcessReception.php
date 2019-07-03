@@ -126,7 +126,7 @@ class ProcessReception implements ShouldQueue
                     Log::info('Proceso de Reception Factura ya habia sido enviada.');
                 }
             }else {
-                Log::warning('El job no se procesó, porque la empresa no tiene un certificado válido: '.$this->billId.'-->>');
+                Log::warning('El job Receptions no se procesó, porque la empresa no tiene un certificado válido: Cedula '.$company->id_number.' Id Bill'.$this->billId.'-->>');
             }
         } catch ( \Exception $e) {
             Log::error('ERROR Enviando parametros  API HACIENDA Reception: '.$this->billId.'-->>'.$e);
