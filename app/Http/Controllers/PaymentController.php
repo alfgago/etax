@@ -6,6 +6,7 @@ use App\Company;
 use App\EtaxProducts;
 use App\Coupon;
 use App\Invoice;
+use App\Mail\SubscriptionPaymentFailure;
 use App\Payment;
 use App\Sales;
 use App\Subscription;
@@ -254,7 +255,7 @@ class PaymentController extends Controller
             $data->amount = $amount;
             $data->user_name = $user->user_name;
             
-            //Si no hay un chage token, significa que no ha sido aplicado. Entonces va y lo aplica
+            //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
             if( ! isset($payment->charge_token) ) {
                 $chargeIncluded = $paymentUtils->paymentIncludeCharge($data);
                 $chargeTokenId = $chargeIncluded['chargeTokenId'];
@@ -491,7 +492,7 @@ class PaymentController extends Controller
         $date = Carbon::parse(now('America/Costa_Rica'));
         $bnStatus = $paymentUtils->statusBNAPI();
         if($bnStatus['apiStatus'] == 'Successful') {
-            $unpaidSubscriptions = Sale::where('status', 2)->where('recurrency', '!=', '0');
+            $unpaidSubscriptions = Sales::where('status', 2)->where('recurrency', '!=', '0')->get();
             foreach($unpaidSubscriptions as $sale){
                 $payment = Payment::updateOrCreate(
                     [
@@ -500,36 +501,114 @@ class PaymentController extends Controller
                     [
                         'payment_date' => $date,
                         'payment_status' => 1,
-                        'amount' => $sale->price
+                        'amount' => $sale->product->plan->monthly_price
                     ]
                 );
-                $paymentMethod = PaymentMethod::where('user_id', $sale->user->id)->where('default', true)->first();
-                $data = new stdClass();
-                $data->description = '';
-                $data->amount = $sale->price;
-                $data->user_name = $sale->user->username;
-                $data->cardTokenId = $paymentMethod->token_bn;
+                $paymentMethod = PaymentMethod::where('user_id', $sale->user->id)->where('default_card', true)->first();
+                $company_id = $sale->company_id;
+                $company = get_company_details($company_id);
+                if($paymentMethod){
+                    /***********************************************/
+                    $data = new stdClass();
+                    $data->description = 'Pago suscripción etax';
+                    $data->amount = $sale->product->plan->monthly_price;
+                    $data->user_name = $sale->user->username;
 
-                $payment = $this->paymentCharge($data);
-                if ($payment['apiStatus'] == "Successful") {
-                    $sale->next_payment_date = $date->addMonth($sale->recurrency);
-                    $sale->status = 1;
-                    $sale->save();
-                    $payment->payment_status = 2;
+                    $chargeIncluded = $paymentUtils->paymentIncludeCharge($data);
+                    $chargeTokenId = $chargeIncluded['chargeTokenId'];
+                    $payment->charge_token = $chargeTokenId;
                     $payment->save();
-                    //$Invoice = InvoiceController::sendHacienda();
+
+                    $data->chargeTokenId = $payment->charge_token;
+                    $data->cardTokenId = $paymentMethod->token_bn;
+
+                    $appliedCharge = $paymentUtils->paymentApplyCharge($data);
+                    /**********************************************/
+                    switch ($sale->recurrency){
+                        case 1:
+                            $recurrency = 'monthly_price';
+                            break;
+                        case 6:
+                            $recurrency = 'six_price';
+                            break;
+                        case 12:
+                            $recurrency = 'annual_price';
+                            break;
+                    }
+                    if ($appliedCharge['apiStatus'] == "Successful") {
+                        $iv = $sale->product->plan->$recurrency * 0.13;
+                        $sale->next_payment_date = $date->addMonth($sale->recurrency);
+                        $sale->status = 1;
+                        $sale->save();
+                        $payment->payment_status = 2;
+                        $payment->save();
+                        $invoiceData = new stdClass();
+                        $invoiceData->client_code = $company->id_number;
+                        $invoiceData->client_id_number = $company->id_number;
+                        $invoiceData->client_id = $company->id_number;
+                        $invoiceData->tipo_persona = $company->tipo_persona;
+                        $invoiceData->first_name = $company->first_name;
+                        $invoiceData->last_name = $company->last_name;
+                        $invoiceData->last_name2 = $company->last_name2;
+                        $invoiceData->country = $company->country;
+                        $invoiceData->state = $company->state;
+                        $invoiceData->city = $company->city;
+                        $invoiceData->district = $company->district;
+                        $invoiceData->neighborhood = $company->neighborhood;
+                        $invoiceData->zip = $company->zip;
+                        $invoiceData->address = $company->address;
+                        $invoiceData->phone = $company->phone;
+                        $invoiceData->es_exento = $company->es_exento;
+                        $invoiceData->email = $company->email;
+                        $invoiceData->expiry = $company->expiry;
+                        $invoiceData->amount = $sale->product->plan->$recurrency;
+                        $invoiceData->subtotal = $sale->product->plan->$recurrency;
+                        $invoiceData->iva_amount = $iv;
+                        $invoiceData->discount_reason = ' ';
+
+                        $item = new stdClass();
+                        $item->total = $sale->product->plan->$recurrency;
+                        $item->code = $sale->etax_product_id;
+                        $item->name = $sale->product->name . " / $sale->recurrency meses";
+                        $item->descuento = 0;
+                        $item->discount_reason = ' ';
+                        $item->cantidad = 1;
+                        $item->iva_amount = $iv;
+                        $item->unit_price = $sale->product->plan->$recurrency;
+                        $item->subtotal = $sale->product->plan->$recurrency;
+                        $item->total = $sale->product->plan->$recurrency + $iv;
+
+                        $invoiceData->items = [$item];
+                        $factura = $this->crearFacturaClienteEtax($invoiceData);
+                    }else{
+                        \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
+                            [
+                                'name' => $company->name . ' ' . $company->last_name,
+                                'product' => $sale->product->plan->plan_type,
+                                'card' => $paymentMethod->masked_card
+                            ]
+                        ));
+                    }
+                }else{
+                    \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
+                        [
+                            'name' => $company->name . ' ' . $company->last_name,
+                            'product' => $sale->product->plan->plan_type,
+                            'card' => $paymentMethod->masked_card
+                        ]
+                    ));
                 }
             }
-        }else{
-            return false;
         }
+        return true;
     }
 
     public function updateAllSubscriptions(){
-        $activeSubscriptions = Sale::where('status', 1);
-        $date = Carbon::parse(now('America/Costa_Rica'));
+        $activeSubscriptions = \App\Sales::where('status', 1)->get();
+        $now = \Carbon\Carbon::now();
         foreach($activeSubscriptions as $activeSubscription){
-            if($date >= $activeSubscription->next_payment_date){
+            $nextPaymentDate = Carbon\Carbon::parse($activeSubscription['next_payment_date']);
+            if($now->day == $nextPaymentDate->day && $now->month == $nextPaymentDate->month && $now->year == $nextPaymentDate->year){
                 $activeSubscription->status=2;
                 $activeSubscription->save();
             }
