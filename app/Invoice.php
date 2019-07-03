@@ -85,7 +85,7 @@ class Invoice extends Model
     **/
     public function setInvoiceData($request)
     {
-        try {
+        //try {
             $this->document_key = $request->document_key;
             $this->document_number = $request->document_number;
             $this->sale_condition = $request->sale_condition;
@@ -199,10 +199,10 @@ class Invoice extends Model
             }
             return $this;
 
-        } catch (\Exception $e) {
+        /*} catch (\Exception $e) {
             Log::error('Error al crear factura: '.$e->getMessage());
             return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
-        }
+        }*/
     }
   
     public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, 
@@ -243,7 +243,9 @@ class Invoice extends Model
   
     public function addEditItem(array $data)
     {
+      
       if(isset($data['item_number'])) {
+
           $item = InvoiceItem::updateOrCreate([
               'item_number' => $data['item_number'],
               'invoice_id' => $this->id,
@@ -252,31 +254,41 @@ class Invoice extends Model
                   'company_id' => $this->company_id,
                   'year'  => $this->year,
                   'month' => $this->month,
-                  'name'  => $data['name'] ?? '',
-                  'product_type' => $data['product_type'] ?? '',
-                  'measure_unit' => $data['measure_unit'] ?? '',
-                  'item_count'   => $data['item_count'] ?? '',
-                  'unit_price'   => $data['unit_price'] ?? '',
-                  'subtotal'     => $data['subtotal'] ?? '',
-                  'total' => $data['total'] ?? '',
+                  'name'  => $data['name'] ?? null,
+                  'product_type' => $data['product_type'] ?? null,
+                  'measure_unit' => $data['measure_unit'] ?? 'Unid',
+                  'item_count'   => $data['item_count'] ?? 1,
+                  'unit_price'   => $data['unit_price'] ?? 0,
+                  'subtotal'     => $data['subtotal'] ?? 0,
+                  'total' => $data['total'] ?? 0,
                   'discount_type' => $data['discount_type'] ?? null,
                   'discount' => $data['discount'] ?? 0,
-                  'iva_type' => $data['iva_type'] ?? '',
-                  'iva_percentage' => $data['iva_percentage'] ?? '',
-                  'iva_amount' => $data['iva_amount'] ?? '',
+                  'iva_type' => $data['iva_type'] ?? null,
+                  'iva_percentage' => $data['iva_percentage'] ?? 0,
+                  'iva_amount' => $data['iva_amount'] ?? 0,
                   'is_exempt' => $data['is_exempt'] ?? false,
-                  'is_identificacion_especifica' => $data['is_identificacion_especifica'] ?? '',
-                  'exoneration_document_type' => $data['typeDocument'] ?? null,
-                  'exoneration_document_number' => $data['numeroDocumento'] ?? null,
-                  'exoneration_company_name' => $data['nombreInstitucion'] ?? null,
-                  'exoneration_porcent' => $data['porcentajeExoneracion'] ?? 0,
-                  'exoneration_amount' => $data['montoExoneracion'] ?? 0,
-                  'exoneration_date' => !empty($data['exoneration_date']) ? Carbon::createFromFormat('d/m/Y', $data['exoneration_date']) : null,
-                  'exoneration_total_amount' => $data['impuestoNeto'] ?? 0,
-                  'impuesto_neto' => isset($data['montoExoneracion']) ? $data['iva_amount'] - $data['montoExoneracion']
-                      : $data['iva_amount']
+                  'is_identificacion_especifica' => $data['is_identificacion_especifica'] ?? false
               ]
           );
+          
+          
+          try {
+            $exonerationDate = isset( $data['exoneration_date'] )  ? Carbon::createFromFormat('d/m/Y', $data['exoneration_date']) : null;
+          }catch( \Exception $e ) {
+            $exonerationDate = 0;
+          }
+          if( $exonerationDate && $data['typeDocument'] && $data['numeroDocumento'] ) {
+            $item->exoneration_document_type = $data['typeDocument'] ?? null;
+            $item->exoneration_document_number = $data['numeroDocumento'] ?? null;
+            $item->exoneration_company_name = $data['nombreInstitucion'] ?? null;
+            $item->exoneration_porcent = $data['porcentajeExoneracion'] ?? 0;
+            $item->exoneration_amount = $data['montoExoneracion'] ?? 0;
+            $item->exoneration_date = $exonerationDate;
+            $item->exoneration_total_amount = $data['impuestoNeto'] ?? 0;
+            $item->impuesto_neto = isset($data['montoExoneracion']) ? $data['iva_amount'] - $data['montoExoneracion'] : $data['iva_amount'];
+            $item->save();
+          }
+          
           return $item;
       } else {
           return false;
