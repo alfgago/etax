@@ -78,22 +78,13 @@ class Company extends Model {
     
     public function getActivities() {
         $arrayActividades = [];
-        
-        $arr = explode( ',', $this->commercial_activities );
-        $mainAct = '';
-    	$secondAct = '';
+        $companyActivities = explode( ',', $this->commercial_activities );
     	
-    	if( array_key_exists(0, $arr) ) {
-    		$mainAct = $arr[0];
-    		$actividad1 = Actividades::where('codigo', $mainAct)->first();
-    		if($actividad1) {
-                array_push($arrayActividades, $actividad1);
-    		}
-    	}
-    	if( array_key_exists(1, $arr) ) {
-    		$secondAct = $arr[1];
-    		$actividad2 = Actividades::where('codigo', $mainAct)->first();
-            array_push($arrayActividades, $actividad2);
+    	foreach( $companyActivities as $a ){
+    	    $act = Actividades::where('codigo', trim($a))->first();
+    	    if( $act ) {
+    	        array_push($arrayActividades, $act);
+    	    }
     	}
     	
     	return $arrayActividades;

@@ -305,9 +305,12 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::findOrFail($id);
         $this->authorize('update', $invoice);
+        
+        $company = currentCompanyModel();
+        $arrayActividades = $company->getActivities();
 
         $units = UnidadMedicion::all()->toArray();
-        return view('Invoice/show', compact('invoice','units') );
+        return view('Invoice/show', compact('invoice','units', 'arrayActividades') );
     }
 
 
