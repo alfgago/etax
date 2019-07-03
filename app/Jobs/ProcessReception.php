@@ -59,7 +59,12 @@ class ProcessReception implements ShouldQueue
             $company = Company::find($bill->company_id);
             if ( $company->atv_validation ) {
                 if ($bill->hacienda_status == '01' && $bill->document_type == '01') {
-                    $requestData = $this->setReceptionData($bill, $this->ref);
+                    if($bill->xml_schema == 42) {
+                        $requestData = $this->setReceptionData($bill, $this->ref);
+                    } else {
+                        $this->setReceptionData43($bill, $this->ref);
+                        return false;
+                    }
                     Log::info('Request data'. json_encode($requestData));
                     $apiHacienda = new BridgeHaciendaApi();
                     $tokenApi = $apiHacienda->login(false);
@@ -125,6 +130,50 @@ class ProcessReception implements ShouldQueue
     }
 
     private function setReceptionData(Bill $data, $ref) {
+        try {
+            $company = $data->company;
+            $invoiceData = null;
+            $request = null;
+            $invoiceData = [
+                'clave' => $data['document_key'],
+                'cedula_emisor' => $data['provider_id_number'],
+                'fecha_emision' => $data['generated_date'] ?? '',
+                'cod_mensaje' => $data['accept_status'] ?? 1,
+                'detalle' => 'Detalle',
+                'total' => $data['total'],
+                'cedula_receptor' => $company->id_number,
+                'consecutivo' => getDocReference('05', $ref),
+                'tipo_documento' => '05',
+
+                'usuarioAtv' => $company->atv->user ?? '',
+                'passwordAtv' => $company->atv->password ?? '',
+                'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
+                'atvcertPin' => $company->atv->pin ?? '',
+                'atvcertFile' => Storage::get($company->atv->key_url),
+            ];
+
+            foreach ($invoiceData as $key => $values) {
+                if ($key == 'atvcertFile') {
+                    $request[]=array(
+                        'name' => $key,
+                        'contents' => $values,
+                        'filename' => $invoiceData['cedula_emisor'].'.p12'
+                    );
+                } else {
+                    $request[]=array(
+                        'name' => $key,
+                        'contents' => $values
+                    );
+                }
+            }
+            return $request;
+        } catch (ClientException $error) {
+            Log::info('Error al crear data para request en Credit Note API HACIENDA -->>'. $error);
+            return false;
+        }
+    }
+
+    private function setReceptionData43(Bill $data, $ref) {
         try {
             $company = $data->company;
             $invoiceData = null;
