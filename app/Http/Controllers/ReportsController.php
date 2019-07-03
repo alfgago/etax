@@ -59,6 +59,10 @@ class ReportsController extends Controller
           return redirect('/elegir-plan');
       }
       
+      if( $subscription->status != 1 ){
+        return redirect('/elegir-plan');
+      }
+      
       if( ! currentCompanyModel()->wizard_finished ) {
         return redirect('/wizard');
       }
