@@ -58,7 +58,7 @@
                     <a href="/facturas-emitidas/emitir-factura">Emitir factura electrónica</a>
                     <a href="/facturas-emitidas/emitir-factura">Emitir factura electrónica de exportación</a>
                     <a href="/facturas-emitidas/emitir-factura">Emitir factura electrónica de compra</a>
-                    <a href="/facturas-emitidas/emitir-factura">Emitir nota de débito</a>
+                    <!--a href="/facturas-emitidas/emitir-factura">Emitir nota de débito</a-->
                     <a href="/facturas-emitidas/emitir-factura">Emitir tiquete electrónico</a>
                     <a href="/facturas-emitidas/emitir-factura">Emitir nota de débito</a>
                     <a href="/facturas-recibidas/aceptaciones">Aceptación de facturas recibidas</a>
