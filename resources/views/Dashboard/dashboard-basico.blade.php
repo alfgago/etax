@@ -18,6 +18,7 @@
       
     </div>
     
+    
     <div class="col-lg-6 mb-4" id="reporteMes">
       @include('Reports.widgets.resumen-basico', ['titulo' => "Resumen de $nombreMes $ano", 'data' => $dataMes])
     </div>
