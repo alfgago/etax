@@ -238,9 +238,7 @@ class ProcessInvoice implements ShouldQueue
     private function setInvoiceData43(Invoice $data, $details) {
         try {
             $company = $data->company;
-            $ref = getInvoiceReference($company->last_invoice_ref_number) + 1;
-            $data->reference_number = $ref;
-            $data->save();
+            $ref = $data->reference_number;
             $receptorPostalCode = $data['client_zip'];
             $invoiceData = null;
             $request = null;

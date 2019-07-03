@@ -97,6 +97,11 @@ class InvoiceController extends Controller
                                 <span class="tooltiptext">Aceptada</span>
                             </div>';
                 }
+                if ($invoice->hacienda_status == '04') {
+                    return '<div class="red">  
+                                <span class="tooltiptext">Rechazada</span>
+                            </div>';
+                }
                 return '<div class="yellow">
                             <span class="tooltiptext">Creada</span>
                         </div>';
