@@ -53,7 +53,7 @@ class ProcessReception implements ShouldQueue
     public function handle()
     {
         try {
-            Log::info('send job credit note id: '.$this->billId);
+            Log::info('send job reception id: '.$this->billId);
             $client = new Client();
             $bill = Bill::find($this->billId);
             $company = Company::find($bill->company_id);
@@ -69,7 +69,7 @@ class ProcessReception implements ShouldQueue
                     $apiHacienda = new BridgeHaciendaApi();
                     $tokenApi = $apiHacienda->login(false);
                     if ($requestData !== false) {
-                        Log::info('Enviando Request Nota Credito  API HACIENDA -->>' . $this->billId);
+                        Log::info('Enviando Request Reception  API HACIENDA -->>' . $this->billId);
                         $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice/aceptacionxml', [
                             'headers' => [
                                 'Auth-Key' => config('etax.api_hacienda_key'),
@@ -84,7 +84,7 @@ class ProcessReception implements ShouldQueue
                             'connect_timeout' => 20
                         ]);
                         $response = json_decode($result->getBody()->getContents(), true);
-                        Log::info('Response Credit Note Api Hacienda '. json_encode($response));
+                        Log::info('Response Reception Api Hacienda '. json_encode($response));
                         if (isset($response['status']) && $response['status'] == 200) {
                             Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
                             $date = Carbon::now();
@@ -109,7 +109,7 @@ class ProcessReception implements ShouldQueue
                                     'data_company' => $company
                                 ]));
                             }
-                            Log::info('Factura enviada y XML guardado.');
+                            Log::info('Reception enviada y XML guardado.');
                         } else if (isset($response['status']) && $response['status'] == 400 &&
                             strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
                             $bill->accept_status = 0;
@@ -118,14 +118,14 @@ class ProcessReception implements ShouldQueue
 
 
                         }
-                        Log::info('Proceso de nota de credito finalizado con éxito.');
+                        Log::info('Proceso de Reception finalizado con éxito.');
                     }
                 }
             }else {
                 Log::warning('El job no se procesó, porque la empresa no tiene un certificado válido: '.$this->billId.'-->>');
             }
         } catch ( \Exception $e) {
-            Log::error('ERROR Enviando parametros  API HACIENDA Nota de credito: '.$this->billId.'-->>'.$e);
+            Log::error('ERROR Enviando parametros  API HACIENDA Reception: '.$this->billId.'-->>'.$e);
         }
     }
 
