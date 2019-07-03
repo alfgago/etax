@@ -257,18 +257,26 @@ class BridgeHaciendaApi
             $totalDescuentos = 0;
             $totalImpuestos = 0;
             $itemDetails = json_decode($details);
+            //Spe, St, Al, Alc, Cm, I, Os
             foreach ($itemDetails as $detail){
-                if($detail->unidadMedida == 'Sp' && $detail->impuesto_monto == 0){
-                    $totalServiciosExentos += $detail->montoTotal;
-                }
-                if($detail->unidadMedida == 'Sp' && $detail->impuesto_monto > 0){
-                    $totalServiciosGravados += $detail->montoTotal;
-                }
-                if($detail->unidadMedida != 'Sp' && $detail->impuesto_monto == 0){
-                    $totalMercaderiasExentas += $detail->montoTotal;
-                }
-                if($detail->unidadMedida != 'Sp' && $detail->impuesto_monto > 0){
-                    $totalMercaderiasGravadas += $detail->montoTotal;
+
+                if($detail->unidadMedida == 'Sp' || $detail->unidadMedida == 'Spe' || $detail->unidadMedida == 'St'
+                    || $detail->unidadMedida == 'Al' || $detail->unidadMedida == 'Alc' || $detail->unidadMedida == 'Cm'
+                    || $detail->unidadMedida == 'I' || $detail->unidadMedida == 'Os'){
+
+                    if($detail->impuesto_monto == 0){
+                        $totalServiciosExentos += $detail->montoTotal;
+                    }else{
+                        $totalServiciosGravados += $detail->montoTotal;
+                    }
+
+                } else {
+
+                    if($detail->impuesto_monto == 0){
+                        $totalMercaderiasExentas += $detail->montoTotal;
+                    }else{
+                        $totalMercaderiasGravadas += $detail->montoTotal;
+                    }
                 }
                 $totalDescuentos += $detail->descuento;
                 $totalImpuestos += $detail->impuesto_monto;

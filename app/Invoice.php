@@ -264,6 +264,7 @@ class Invoice extends Model
                   'iva_type' => $data['iva_type'] ?? '',
                   'iva_percentage' => $data['iva_percentage'] ?? '',
                   'iva_amount' => $data['iva_amount'] ?? '',
+                  'tariff_heading' => $data['tariff_heading'] ?? 0,
                   'is_exempt' => $data['is_exempt'] ?? false,
                   'is_identificacion_especifica' => $data['is_identificacion_especifica'] ?? '',
                   'exoneration_document_type' => $data['typeDocument'] ?? null,
