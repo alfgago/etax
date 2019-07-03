@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Teamwork;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Cache;
 use Mpociot\Teamwork\Facades\Teamwork;
 use Mpociot\Teamwork\TeamInvite;
 use App\Mail\InviteMail;
@@ -72,6 +73,8 @@ class TeamMemberController extends Controller {
         if (!auth()->user()->isOwnerOfTeam($team)) {
             return redirect()->back()->withError('Usted no está autorizado para actualizar a esta información');
         }
+        
+        $companyId = $team['company_id'];
         if (!empty($request->permissions)) {
             foreach ($request->permissions as $key => $value) {
                 foreach ($value as $row) {
@@ -81,6 +84,9 @@ class TeamMemberController extends Controller {
                         'permission_id' => $row
                     ];
                 }
+                
+                $cacheKey = "cache-allow-$companyId-$key";
+                Cache::forget($cacheKey);
             }
 
             UserCompanyPermission::where(array('company_id' => $team['company_id']))->delete();

@@ -1,10 +1,15 @@
+
+    
+
+
 <div class="sidebar-dashboard">
     <div class="card-title">
       {{ $titulo }} 
       <span class="helper helper-resumen-mensual" def="helper-resumen-mensual">  <i class="fa fa-question-circle" aria-hidden="true"></i> </span> 
     </div>
     
-    
+@if( allowTo('reports') )
+
     <div class="row">
         
       @if( $data->balance_operativo != 0)
@@ -73,5 +78,11 @@
         </div>
         
     </div>
+    
+@else
+  <div class="not-allowed-message">
+    Usted actualmente no tiene permisos para ver los reportes.
+  </div>
+@endif    
     
  </div>  

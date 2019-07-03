@@ -179,6 +179,67 @@ if (!function_exists('currentCompanyModel')) {
 
 }
 
+
+/* Get current user permission company wise */
+if (!function_exists('allowTo')) {
+
+    function allowTo( $permiso ) {
+        
+        $companyId = currentCompany();
+        $user = auth()->user();
+        
+        $user = App\User::find(16);
+        
+        $cacheKey = "cache-allow-$companyId-$user->id";
+        if ( !Illuminate\Support\Facades\Cache::has($cacheKey) ) {
+        
+            $team = App\Team::where('company_id', $companyId)->first();
+            if( $user->isOwnerOfTeam($team) ) {
+                return true;
+            }
+            
+            $userId = $user->id;
+            
+            $permisoId = 1;
+            if( $permiso == 'admin') {
+                $permisoId = 1;
+            }else if( $permiso == 'invoicing') {
+                $permisoId = 2;
+            }else if( $permiso == 'billing') {
+                $permisoId = 3;
+            }else if( $permiso == 'validation') {
+                $permisoId = 4;
+            }else if( $permiso == 'books') {
+                $permisoId = 5;
+            }else if( $permiso == 'reports') {
+                $permisoId = 6;
+            }else if( $permiso == 'catalogue') {
+                $permisoId = 7;
+            }
+            
+            $hasPermisoAdmin = App\UserCompanyPermission::where(  [    
+                'company_id' => $companyId,
+                'user_id' => $userId,
+                'permission_id' => 1 
+            ])->count();
+            
+            $hasPermiso = App\UserCompanyPermission::where(  [    
+                'company_id' => $companyId,
+                'user_id' => $userId,
+                'permission_id' => $permisoId 
+            ])->count();
+            
+            $allowed = $hasPermiso + $hasPermisoAdmin;
+            
+            Illuminate\Support\Facades\Cache::put($cacheKey, $allowed, now()->addDays(120));
+            
+        }
+        
+        return Illuminate\Support\Facades\Cache::get($cacheKey);;
+    }
+
+}
+
 /* Get company wise permissions of user */
 if (!function_exists('get_user_company_permissions')) {
 

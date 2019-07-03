@@ -222,10 +222,7 @@ class CompanyController extends Controller {
             return redirect('/');
         }
 
-        $users = User::with(['roles' => function($q) {
-                        $q->where('name', 'admin');
-                    }])->get();
-                    
+        $users = User::with(['roles' => function($q) { $q->where('name', 'admin'); }])->get();
         $team = Team::where('company_id', $company->id)->first();
 
         /* Only owner of company can edit that company */

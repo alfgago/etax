@@ -40,7 +40,10 @@
       </div>
     </form>
   </div>
-  
+
+
+@if( allowTo('reports') )     
+
   <div class="toggle-vista filters">
     <label id="vistabasica">Vista de dashboard</label>
     <div class="">
@@ -50,6 +53,9 @@
       </select>
     </div>
   </div>
+  
+@endif    
+  
 </div>
 @endsection 
 
