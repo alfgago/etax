@@ -1,4 +1,5 @@
 @if( $bill->is_code_validated)
+  {{ $bill->id }}
 <form id="accept-form-{{ $bill->id }}" class="inline-form por-etax" method="POST" action="/facturas-recibidas/respuesta-aceptacion/{{ $bill->id }}" >
   @csrf
   @method('patch')

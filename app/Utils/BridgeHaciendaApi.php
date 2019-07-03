@@ -8,10 +8,12 @@
 
 namespace App\Utils;
 
+use App\Bill;
 use App\Invoice;
 use App\InvoiceItem;
 use App\Jobs\ProcessCreditNote;
 use App\Jobs\ProcessInvoice;
+use App\Jobs\ProcessReception;
 use App\Variables;
 use App\XmlHacienda;
 use App\Utils\InvoiceUtils;
@@ -111,6 +113,20 @@ class BridgeHaciendaApi
         } catch (ClientException $error) {
             Log::error('Error al crear factura en API HACIENDA -->>'. $error->getMessage() );
             return $invoice;
+        }
+    }
+
+    public function acceptInvoice(Bill $bill, $token) {
+        try {
+            $provider = $bill->provider;
+            $ref = currentCompanyModel()->last_rec_ref_number;
+            ProcessReception::dispatch($bill->id, $provider->id, $token, $ref)
+                ->onConnection(config('etax.queue_connections'))->onQueue('receptions');
+            return $bill;
+
+        } catch (ClientException $error) {
+            Log::error('Error al crear factura en API HACIENDA -->>'. $error->getMessage() );
+            return $bill;
         }
     }
 
