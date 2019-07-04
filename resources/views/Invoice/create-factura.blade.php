@@ -5,16 +5,16 @@
   $titulo = "Factura electrónica";
   if($document_type == "01"){
     $tipoHacienda = "FE";
-    $titulo = "factura electrónica";
+    $titulo = "Factura electrónica";
   }else if($document_type == "04"){
     $tipoHacienda = "TE";
-    $titulo = "tiquete electrónico";
+    $titulo = "Tiquete electrónico";
   }else if($document_type == "08"){
       $tipoHacienda = "FEE";
-      $titulo = "Factura Electrónica de Exportación";
+      $titulo = "Factura electrónica de exportación";
   }else if($document_type == "09"){
       $tipoHacienda = "FEE";
-      $titulo = "Factura Electrónica de Compra";
+      $titulo = "Factura electrónica de compra";
   }
 
 ?>
