@@ -68,8 +68,9 @@ class ProcessReception implements ShouldQueue
                     $apiHacienda = new BridgeHaciendaApi();
                     $tokenApi = $apiHacienda->login(false);
                     if ($requestData !== false) {
+                        $endpoint = $bill->xml_schema == 42 ? 'invoice' : 'invoice43';
                         Log::info('Enviando Request Reception  API HACIENDA -->>' . $this->billId);
-                        $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice/aceptacionxml', [
+                        $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/aceptacionxml', [
                             'headers' => [
                                 'Auth-Key' => config('etax.api_hacienda_key'),
                                 'Client-Service' => config('etax.api_hacienda_client'),
@@ -102,10 +103,10 @@ class ProcessReception implements ShouldQueue
                                 $xml->bill_id = $bill->id;
                                 $xml->xml = $path;
                                 $xml->save();
-
+                                $xmlExtract = ltrim($response['data']['response'], '\n');
                                 Mail::to($bill->provider_email)->cc($company->email)->send(new ReceptionNotification([
                                     'xml' => $path, 'xmlFE' => $pathFE,  'data_invoice' => $bill,
-                                    'data_company' => $company
+                                    'data_company' => $company, 'response' => $xmlExtract
                                 ]));
                             }
                             Log::info('Reception enviada y XML guardado.');
