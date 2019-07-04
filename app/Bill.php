@@ -652,7 +652,7 @@ class Bill extends Model
             $this->accept_iva_condition = '04'; //Si todo lo pagao de IVa va al gasto
           }
           
-          $sinIdentificacion = ($calc->iva_acreditable_identificacion_plena != $calc->total_bill_iva) ;
+          $sinIdentificacion = ($calc->iva_acreditable_identificacion_plena != $calc->total_bill_iva && $calc->iva_acreditable_identificacion_plena > 0) ;
           if( $sinIdentificacion ) {
             $this->accept_iva_condition = '05'; //Si exista minimo 1 linea sin identificación específica.
           }
