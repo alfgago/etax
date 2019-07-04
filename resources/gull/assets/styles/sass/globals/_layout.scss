@@ -345,6 +345,8 @@
     }
 }
 
+
+
 @media (max-width: 1400px) {
     
     .main-content-wrap.sidenav-open {
@@ -353,8 +355,22 @@
 
 }
 
-@media (max-width: 576px) {
+@media only screen and (min-width: 767px) {
+    .main-content-wrap {
+        width: calc(100% - 10rem) !important;
+    }
+    
+    .sidebar-left { 
+        left: 0 !important;
+    }
+    
+    .menu-toggle {
+        display: none !important;
+    }
+}
 
+@media (max-width: 767px) {
+    
     .main-content-wrap {
         padding: 1.5rem;
         padding-bottom: 0; 
