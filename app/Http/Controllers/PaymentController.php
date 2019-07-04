@@ -621,10 +621,14 @@ class PaymentController extends Controller
         $now = \Carbon\Carbon::now();
         foreach($activeSubscriptions as $activeSubscription){
             $nextPaymentDate = Carbon\Carbon::parse($activeSubscription['next_payment_date']);
-            if($now->day == $nextPaymentDate->day && $now->month == $nextPaymentDate->month && $now->year == $nextPaymentDate->year){
-                $activeSubscription->status=2;
-                $activeSubscription->save();
+            if( $nextPaymentDate <= $now ){
+                $activeSubscription->status = 2;
             }
+            if( $nextPaymentDate->addDays(3) <= $now ){
+                $activeSubscription->status = 4;
+            }
+            
+            $activeSubscription->save();
         }
     }
 
