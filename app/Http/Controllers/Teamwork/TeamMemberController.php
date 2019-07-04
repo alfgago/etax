@@ -179,7 +179,7 @@ class TeamMemberController extends Controller {
                     ['team' => $invite->team, 
                     'invite' => $invite, 
                     'path' => $path,
-                    'name' => $invite->team->name = currentCompanyModel()->name
+                    'name' => currentCompanyModel()->name
                     ]));
                 // Send email to user
                 flash('User ' . $invite->email . ' ha sido invitado.')->success()->important();
@@ -219,6 +219,7 @@ class TeamMemberController extends Controller {
             'team' => $invite->team, 
             'invite' => $invite, 
             'path' => $path,
+            'name' => currentCompanyModel()->name
         ]));
 
         /* Old Code
