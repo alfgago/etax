@@ -14,7 +14,7 @@ class AddInvoiceItemTariffHeading extends Migration
     public function up()
     {
         Schema::table('invoice_items', function (Blueprint $table) {
-            $table->double('tariff_heading')->default(0);
+            $table->string('tariff_heading')->nullable();
         });
     }
 
