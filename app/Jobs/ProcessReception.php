@@ -118,6 +118,8 @@ class ProcessReception implements ShouldQueue
 
 
                         } else {
+                            $bill->accept_status = 0;
+                            $bill->save();
                             Log::error('ERROR Enviando parametros  API HACIENDA Reception: '.$this->billId);
                         }
                         Log::info('Proceso de Reception finalizado con éxito.');
