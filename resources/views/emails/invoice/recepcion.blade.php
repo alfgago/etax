@@ -8,7 +8,8 @@
 
         Documento (Clave): {{$data_invoice->document_key}}
         <br><br>
-
+        <b>Respuesta de Hacienda: </b> {{$response}}
+        <br><br>
         ¡Muchas Gracias!
     </p>
 @endcomponent

@@ -42,6 +42,10 @@ class InvoiceController extends Controller
      */
     public function index()
     {
+        $company = currentCompanyModel();
+        if(empty($company->last_note_ref_number)){
+            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
+        }
         return view('Invoice/index');
     }
     
@@ -199,6 +203,9 @@ class InvoiceController extends Controller
         
         if(count($arrayActividades) == 0){
             return redirect('/empresas/editar')->withError('No ha definido una actividad comercial para esta empresa');
+        }
+        if(empty($company->last_note_ref_number)){
+            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
         }
         return view("Invoice/create-factura", ['document_type' => '01', 'rate' => $this->get_rates(),
             'document_number' => $this->getDocReference('01'),
