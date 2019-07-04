@@ -24,13 +24,22 @@
             </div>
         
     </div>
-
     <div class="form-group col-md-6">
-      <label for="nombre">Nombre / Descripción</label>
-      <input type="text" class="form-control" id="nombre" value="" name="description">
+        <label for="nombre">Nombre / Descripción</label>
+        <input type="text" class="form-control" id="nombre" value="" name="description">
     </div>
+    <?php if( $document_type == "08"){ ?>
+        <div class="form-group col-md-4">
+            <label for="nombre">Partida Arancelaria</label>
+            <input type="text" class="form-control" id="tariff_heading" value="" name="tariff_heading">
+        </div>
+    <?php
+        $class = 'form-group col-md-8';
+      }else{
+          $class = 'form-group col-md-12';
+      } ?>
 
-    <div class="form-group col-md-12">
+    <div class="<?php echo $class ?>">
       <label for="tipo_producto">Tipo de producto</label>
       <select class="form-control" id="tipo_producto" >
         @foreach ( \App\ProductCategory::all() as $tipo )
