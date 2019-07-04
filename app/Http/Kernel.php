@@ -87,18 +87,7 @@ class Kernel extends HttpKernel
         \Illuminate\Auth\Middleware\Authorize::class,
     ];
     protected function schedule(Schedule $schedule){
-        $schedule->call(function () {
-            $suscriptionsUpdate = PaymentController::updateAllSubscriptions();
-        })->dailyAt('01:00');
-        $schedule->call(function () {
-            $makePayment = PaymentController::dailySubscriptionsPayment();
-            if($makePayment == false){
-
-            }
-        })->dailyAt('07:00');
-        $schedule->call(function () {
-            $makePayment = PaymentController::dailySubscriptionsPayment();
-        })->dailyAt('10:00');
+        
     }
 
 }
