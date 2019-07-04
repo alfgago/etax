@@ -241,9 +241,9 @@ class PaymentController extends Controller
             $payment = Payment::updateOrCreate(
                 [
                     'sale_id' => $sale->id,
+                    'payment_status' => 1,
                 ],
                 [
-                    'payment_status' => 1,
                     'payment_method_id' => $paymentMethod->id,
                     'payment_date' => $start_date,
                     'amount' => $amount
@@ -492,56 +492,69 @@ class PaymentController extends Controller
         $date = Carbon::parse(now('America/Costa_Rica'));
         $bnStatus = $paymentUtils->statusBNAPI();
         if($bnStatus['apiStatus'] == 'Successful') {
+
             $unpaidSubscriptions = Sales::where('status', 2)->where('recurrency', '!=', '0')->get();
             foreach($unpaidSubscriptions as $sale){
-                $payment = Payment::updateOrCreate(
-                    [
-                        'sale_id' => $sale->id
-                    ],
-                    [
-                        'payment_date' => $date,
-                        'payment_status' => 1,
-                        'amount' => $sale->product->plan->monthly_price
-                    ]
-                );
+                
+                $subtotal = $sale->product->plan->monthly_price;
+                switch ($sale->recurrency){
+                    case 1:
+                        $subtotal = $sale->product->plan->monthly_price;
+                        break;
+                    case 6:
+                        $subtotal = $sale->product->plan->six_price;
+                        break;
+                    case 12:
+                        $subtotal = $sale->product->plan->annual_price;
+                        break;
+                }
+                
+                $iv = $subtotal * 0.13;
+                $amount = $subtotal + $iv;
+
                 $paymentMethod = PaymentMethod::where('user_id', $sale->user->id)->where('default_card', true)->first();
-                $company_id = $sale->company_id;
-                $company = get_company_details($company_id);
+                $company = $sale->company;
+                
                 if($paymentMethod){
-                    /***********************************************/
+                    $payment = Payment::updateOrCreate(
+                        [
+                            'sale_id' => $sale->id,
+                            'payment_status' => 1,
+                        ],
+                        [
+                            'payment_date' => $date,
+                            'payment_method_id' => $paymentMethod->id,
+                            'amount' => $amount
+                        ]
+                    );
+                    
                     $data = new stdClass();
-                    $data->description = 'Pago suscripción etax';
-                    $data->amount = $sale->product->plan->monthly_price;
+                    $data->description = 'Pago suscripción eTax';
+                    $data->amount = $amount;
                     $data->user_name = $sale->user->username;
 
-                    $chargeIncluded = $paymentUtils->paymentIncludeCharge($data);
-                    $chargeTokenId = $chargeIncluded['chargeTokenId'];
-                    $payment->charge_token = $chargeTokenId;
-                    $payment->save();
+                    if( ! isset($payment->charge_token) ) {
+                        $chargeIncluded = $paymentUtils->paymentIncludeCharge($data);
+                        $chargeTokenId = $chargeIncluded['chargeTokenId'];
+                        $payment->charge_token = $chargeTokenId;
+                        $payment->save();
+                    }
 
                     $data->chargeTokenId = $payment->charge_token;
                     $data->cardTokenId = $paymentMethod->token_bn;
 
                     $appliedCharge = $paymentUtils->paymentApplyCharge($data);
                     /**********************************************/
-                    switch ($sale->recurrency){
-                        case 1:
-                            $recurrency = 'monthly_price';
-                            break;
-                        case 6:
-                            $recurrency = 'six_price';
-                            break;
-                        case 12:
-                            $recurrency = 'annual_price';
-                            break;
-                    }
+                    
                     if ($appliedCharge['apiStatus'] == "Successful") {
-                        $iv = $sale->product->plan->$recurrency * 0.13;
+                        $payment->proof = $appliedCharge['retrievalRefNo'];
+                        $payment->payment_status = 2;
+                        $payment->save();
+
                         $sale->next_payment_date = $date->addMonth($sale->recurrency);
                         $sale->status = 1;
                         $sale->save();
-                        $payment->payment_status = 2;
-                        $payment->save();
+                        
                         $invoiceData = new stdClass();
                         $invoiceData->client_code = $company->id_number;
                         $invoiceData->client_id_number = $company->id_number;
@@ -561,22 +574,22 @@ class PaymentController extends Controller
                         $invoiceData->es_exento = $company->es_exento;
                         $invoiceData->email = $company->email;
                         $invoiceData->expiry = $company->expiry;
-                        $invoiceData->amount = $sale->product->plan->$recurrency;
-                        $invoiceData->subtotal = $sale->product->plan->$recurrency;
+                        $invoiceData->amount = $amount;
+                        $invoiceData->subtotal = $subtotal;
                         $invoiceData->iva_amount = $iv;
-                        $invoiceData->discount_reason = ' ';
+                        $invoiceData->discount_reason = null;
 
                         $item = new stdClass();
-                        $item->total = $sale->product->plan->$recurrency;
+                        $item->total = $amount;
                         $item->code = $sale->etax_product_id;
                         $item->name = $sale->product->name . " / $sale->recurrency meses";
                         $item->descuento = 0;
-                        $item->discount_reason = ' ';
+                        $item->discount_reason = null;
                         $item->cantidad = 1;
                         $item->iva_amount = $iv;
-                        $item->unit_price = $sale->product->plan->$recurrency;
-                        $item->subtotal = $sale->product->plan->$recurrency;
-                        $item->total = $sale->product->plan->$recurrency + $iv;
+                        $item->unit_price = $subtotal;
+                        $item->subtotal = $subtotal;
+                        $item->total = $amount;
 
                         $invoiceData->items = [$item];
                         $factura = $this->crearFacturaClienteEtax($invoiceData);
