@@ -633,11 +633,11 @@ class CalculatedTax extends Model
       $cfdp2 = $this->bills_subtotal2*$ratio1_operativo*0.02 + $this->bills_subtotal2*$ratio2_operativo*0.02 + $this->bills_subtotal2*$ratio3_operativo*0.02 + $this->bills_subtotal2*$ratio4_operativo*0.02 ; 
       $cfdp3 = $this->bills_subtotal3*$ratio1_operativo*0.13 + $this->bills_subtotal3*$ratio2_operativo*0.02 + $this->bills_subtotal3*$ratio3_operativo*0.13 + $this->bills_subtotal3*$ratio4_operativo*0.04 ; 
       $cfdp4 = $this->bills_subtotal4*$ratio1_operativo*0.04 + $this->bills_subtotal4*$ratio2_operativo*0.02 + $this->bills_subtotal4*$ratio3_operativo*0.04 + $this->bills_subtotal4*$ratio4_operativo*0.04 ; 
-      $cfdp = $cfdp1 + $cfdp2*$prorrataOperativa + $cfdp3 + $cfdp4*$prorrataOperativa;
+      $cfdp = $cfdp1 + $cfdp2 + $cfdp3 + $cfdp4;
       $cfdp = round($cfdp, 2); 
       
       //Calcula el balance operativo.
-      $ivaDeducibleOperativo = ($cfdp) + $this->iva_acreditable_identificacion_plena;
+      $ivaDeducibleOperativo = ($cfdp*$prorrataOperativa) + $this->iva_acreditable_identificacion_plena;
       $ivaNoDeducible = $this->total_bill_iva - $ivaDeducibleOperativo;
       
       if( !$this->total_bill_iva ) {
