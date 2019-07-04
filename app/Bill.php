@@ -347,12 +347,13 @@ class Bill extends Model
               
               if($arrayImportBill['metodoGeneracion'] == 'Email' || $arrayImportBill['metodoGeneracion'] == 'XML') {
                 $bill->accept_status = 0;
+                $bill->hacienda_status = "01";
               }else{
                 $bill->accept_status = 1;
+                $bill->hacienda_status = "03";
               }
 
               $bill->is_void = false;
-              $bill->hacienda_status = "01";
               
               //Datos de factura
               $bill->currency = $arrayImportBill['idMoneda'];
@@ -635,17 +636,42 @@ class Bill extends Model
           //$calc->setDatosEmitidos( $this->month, $this->year, $company->id );
           $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query );
           $calc->setCalculosPorFactura( $prorrataOperativa, $lastBalance );
+          
           $this->accept_iva_acreditable = $calc->iva_deducible_operativo;
           $this->accept_iva_gasto = $calc->iva_no_deducible;
           $this->accept_iva_total = $calc->total_bill_iva;
           $this->accept_total_factura = $calc->bills_total;
           $this->accept_id_number = $company->id_number;
+          
+          $this->accept_iva_condition = '02';
+          if( $this->accept_iva_total == 0 ) {
+            $this->accept_iva_condition = '01'; //Si no hay IVA
+          }else if( $this->accept_iva_gasto == 0 ) {
+            $this->accept_iva_condition = '01'; //Si todo lo pagado de IVA es acreditable
+          }else if( $this->accept_iva_acreditable == 0) {
+            $this->accept_iva_condition = '04'; //Si todo lo pagao de IVa va al gasto
+          }
+          
+          $sinIdentificacion = ($calc->iva_acreditable_identificacion_plena != $calc->total_bill_iva) ;
+          if( $bienesCapital ) {
+            $this->accept_iva_condition = '05'; //Si exista minimo 1 linea sin identificación específica.
+          }
+          
+          $bienesCapital = $calc->b011 + $calc->b031 + $calc->b051 + $calc->b071 + $calc->b015  + $calc->b035 +
+             $calc->b012 + $calc->b032 + $calc->b052 + $calc->b072 +
+             $calc->b013 + $calc->b033 + $calc->b053 + $calc->b073 + $calc->b016 + $calc->b036 +
+             $calc->b014 + $calc->b034 + $calc->b054 + $calc->b074;
+          if( $bienesCapital ) {
+            $this->accept_iva_condition = '03'; // Si son propiedad, planta o equipo (Bienes de capital)
+          }
+          
         }
       }else {
         $this->accept_iva_acreditable = 0;
         $this->accept_iva_gasto = 0;
         $this->accept_iva_total = 0;
         $this->accept_total_factura = 0;
+        $this->accept_iva_condition = '01';
       }
       
       $this->save();

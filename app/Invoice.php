@@ -468,11 +468,14 @@ class Invoice extends Model
         $invoice->subtotal = $data['totalNeto'];
       }
       
-        $invoice->save();
+      $invoice->save();
 
-        $available_invoices = AvailableInvoices::where('company_id', $company->id)->first();
-        $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
-        $available_invoices->save();
+      $available_invoices = AvailableInvoices::where('company_id', $company->id)
+                            ->where('year', $invoice->year)
+                            ->where('month', $invoice->month)
+                            ->first();
+      $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
+      $available_invoices->save();
       
       return $insert;
       

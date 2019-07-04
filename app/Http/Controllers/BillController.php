@@ -128,7 +128,7 @@ class BillController extends Controller
 
         //Datos generales y para Hacienda
         $bill->document_type = "01";
-        $bill->hacienda_status = "01";
+        $bill->hacienda_status = "03";
         $bill->status = "02";
         $bill->payment_status = "01";
         $bill->payment_receipt = "";
@@ -669,6 +669,7 @@ class BillController extends Controller
         $bill->accept_iva_acreditable = $request->accept_iva_acreditable;
         $bill->accept_iva_gasto = $request->accept_iva_gasto;
         $bill->accept_status = 1;
+        $bill->hacienda_status = "01";
         $bill->accept_id_number = currentCompany();
 
         $bill->save();
