@@ -29,9 +29,10 @@ class ReceptionNotification extends Mailable
      */
     public function build()
     {
+        $response = substr($this->content['response'], -169);
         $message = $this->subject('Recepcion factura electrónica #' . $this->content['data_invoice']->document_number.
             ' De: '.$this->content['data_company']->business_name)->markdown('emails.invoice.recepcion')
-            ->with(['data_invoice' => $this->content['data_invoice'], 'company' => $this->content['data_company']]);
+            ->with(['data_invoice' => $this->content['data_invoice'], 'company' => $this->content['data_company'], 'response' => $response]);
         $message->attachFromStorage($this->content['xml']);
         $message->attachFromStorage($this->content['xmlFE']);
 

@@ -62,15 +62,15 @@ class ProcessReception implements ShouldQueue
                     if($bill->xml_schema == 42) {
                         $requestData = $this->setReceptionData($bill, $this->ref);
                     } else {
-                        $this->setReceptionData43($bill, $this->ref);
-                        return false;
+                        $requestData = $this->setReceptionData43($bill, $this->ref);
                     }
                     Log::info('Request data'. json_encode($requestData));
                     $apiHacienda = new BridgeHaciendaApi();
                     $tokenApi = $apiHacienda->login(false);
                     if ($requestData !== false) {
+                        $endpoint = $bill->xml_schema == 42 ? 'invoice' : 'invoice43';
                         Log::info('Enviando Request Reception  API HACIENDA -->>' . $this->billId);
-                        $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice/aceptacionxml', [
+                        $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/aceptacionxml', [
                             'headers' => [
                                 'Auth-Key' => config('etax.api_hacienda_key'),
                                 'Client-Service' => config('etax.api_hacienda_client'),
@@ -103,10 +103,10 @@ class ProcessReception implements ShouldQueue
                                 $xml->bill_id = $bill->id;
                                 $xml->xml = $path;
                                 $xml->save();
-
+                                $xmlExtract = ltrim($response['data']['response'], '\n');
                                 Mail::to($bill->provider_email)->cc($company->email)->send(new ReceptionNotification([
                                     'xml' => $path, 'xmlFE' => $pathFE,  'data_invoice' => $bill,
-                                    'data_company' => $company
+                                    'data_company' => $company, 'response' => $xmlExtract
                                 ]));
                             }
                             Log::info('Reception enviada y XML guardado.');
@@ -118,6 +118,8 @@ class ProcessReception implements ShouldQueue
 
 
                         } else {
+                            $bill->accept_status = 0;
+                            $bill->save();
                             Log::error('ERROR Enviando parametros  API HACIENDA Reception: '.$this->billId);
                         }
                         Log::info('Proceso de Reception finalizado con éxito.');
@@ -126,7 +128,7 @@ class ProcessReception implements ShouldQueue
                     Log::info('Proceso de Reception Factura ya habia sido enviada.');
                 }
             }else {
-                Log::warning('El job no se procesó, porque la empresa no tiene un certificado válido: '.$this->billId.'-->>');
+                Log::warning('El job Receptions no se procesó, porque la empresa no tiene un certificado válido: Cedula '.$company->id_number.' Id Bill'.$this->billId.'-->>');
             }
         } catch ( \Exception $e) {
             Log::error('ERROR Enviando parametros  API HACIENDA Reception: '.$this->billId.'-->>'.$e);
@@ -190,11 +192,15 @@ class ProcessReception implements ShouldQueue
                 'fecha_emision' => $data['generated_date'] ?? '',
                 'cod_mensaje' => $data['accept_status'] ?? 1,
                 'detalle' => 'Detalle',
-                'total' => $data['total'],
+                'total' => $data['accept_total_factura'],
                 'cedula_receptor' => $company->id_number,
                 'consecutivo' => getDocReference('05', $ref),
                 'tipo_documento' => '05',
-
+                'total_impuesto' => $data['accept_iva_total'],
+                'cod_actividad' => $data['commercial_activity'],
+                'cond_impuesto' => empty($data['accept_iva_condition']) ? '02' : $data['accept_iva_condition'],
+                'total_imp_acredit' => $data['accept_iva_acreditable'],
+                'total_gastos' => $data['accept_iva_gasto'],
                 'usuarioAtv' => $company->atv->user ?? '',
                 'passwordAtv' => $company->atv->password ?? '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
