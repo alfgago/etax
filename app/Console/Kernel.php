@@ -35,18 +35,20 @@ class Kernel extends ConsoleKernel
         $schedule->command('queue:restart')->timezone(config('app.timezone'))->daily();
         $schedule->command('invoice:resend')->timezone(config('app.timezone'))->hourly();
         $schedule->command('telescope:prune')->daily();
-        
-        $schedule->call(function () {
+
+        $schedule->command('subscription:checkout')->timezone(config('app.timezone'))->dailyAt('15:15');
+        $schedule->command('subscription:payment')->timezone(config('app.timezone'))->dailyAt('15:17');
+        /*$schedule->call(function () {
             $suscriptionsUpdate = PaymentController::updateAllSubscriptions();
-        })->dailyAt('01:00');
+        })->dailyAt('14:17');
         
         $schedule->call(function () {
             $makePayment = PaymentController::dailySubscriptionsPayment();
-        })->dailyAt('03:00');
+        })->dailyAt('14:18');
         
         $schedule->call(function () {
             $makePayment = PaymentController::dailySubscriptionsPayment();
-        })->dailyAt('5:00');
+        })->dailyAt('5:00');*/
         
     }
 
