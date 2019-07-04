@@ -627,7 +627,7 @@ class Bill extends Model
     public function calculateAcceptFields() {
       
       if( $this->is_code_validated ) {
-        if( $this->accept_iva_total == 0 && $this->xml_schema == 43 ) {
+        if( $this->xml_schema == 43 ) {
           $company = currentCompanyModel();
           $prorrataOperativa = $company->getProrrataOperativa( $this->year );
           $calc = new CalculatedTax();
@@ -653,7 +653,7 @@ class Bill extends Model
           }
           
           $sinIdentificacion = ($calc->iva_acreditable_identificacion_plena != $calc->total_bill_iva) ;
-          if( $bienesCapital ) {
+          if( $sinIdentificacion ) {
             $this->accept_iva_condition = '05'; //Si exista minimo 1 linea sin identificación específica.
           }
           
