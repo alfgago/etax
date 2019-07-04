@@ -62,8 +62,7 @@ class ProcessReception implements ShouldQueue
                     if($bill->xml_schema == 42) {
                         $requestData = $this->setReceptionData($bill, $this->ref);
                     } else {
-                        $this->setReceptionData43($bill, $this->ref);
-                        return false;
+                        $requestData = $this->setReceptionData43($bill, $this->ref);
                     }
                     Log::info('Request data'. json_encode($requestData));
                     $apiHacienda = new BridgeHaciendaApi();
@@ -190,11 +189,15 @@ class ProcessReception implements ShouldQueue
                 'fecha_emision' => $data['generated_date'] ?? '',
                 'cod_mensaje' => $data['accept_status'] ?? 1,
                 'detalle' => 'Detalle',
-                'total' => $data['total'],
+                'total' => $data['accept_total_factura'],
                 'cedula_receptor' => $company->id_number,
                 'consecutivo' => getDocReference('05', $ref),
                 'tipo_documento' => '05',
-
+                'total_impuesto' => $data['accept_iva_total'],
+                'cod_actividad' => $data['commercial_activity'],
+                'cond_impuesto' => empty($data['accept_iva_condition']) ? '02' : $data['accept_iva_condition'],
+                'total_imp_acredit' => $data['accept_iva_acreditable'],
+                'total_gastos' => $data['accept_iva_gasto'],
                 'usuarioAtv' => $company->atv->user ?? '',
                 'passwordAtv' => $company->atv->password ?? '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
