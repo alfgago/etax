@@ -85,7 +85,7 @@ class Invoice extends Model
     **/
     public function setInvoiceData($request)
     {
-        try {
+        //try {
             $this->document_key = $request->document_key;
             $this->document_number = $request->document_number;
             $this->sale_condition = $request->sale_condition;
@@ -199,10 +199,10 @@ class Invoice extends Model
             }
             return $this;
 
-        } catch (\Exception $e) {
+        /*} catch (\Exception $e) {
             Log::error('Error al crear factura: '.$e->getMessage());
             return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
-        }
+        }*/
     }
   
     public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, 
@@ -243,7 +243,9 @@ class Invoice extends Model
   
     public function addEditItem(array $data)
     {
+      
       if(isset($data['item_number'])) {
+
           $item = InvoiceItem::updateOrCreate([
               'item_number' => $data['item_number'],
               'invoice_id' => $this->id,
@@ -252,32 +254,43 @@ class Invoice extends Model
                   'company_id' => $this->company_id,
                   'year'  => $this->year,
                   'month' => $this->month,
-                  'name'  => $data['name'] ?? '',
-                  'product_type' => $data['product_type'] ?? '',
-                  'measure_unit' => $data['measure_unit'] ?? '',
-                  'item_count'   => $data['item_count'] ?? '',
-                  'unit_price'   => $data['unit_price'] ?? '',
-                  'subtotal'     => $data['subtotal'] ?? '',
-                  'total' => $data['total'] ?? '',
+                  'name'  => $data['name'] ?? null,
+                  'product_type' => $data['product_type'] ?? null,
+                  'measure_unit' => $data['measure_unit'] ?? 'Unid',
+                  'item_count'   => $data['item_count'] ?? 1,
+                  'unit_price'   => $data['unit_price'] ?? 0,
+                  'subtotal'     => $data['subtotal'] ?? 0,
+                  'total' => $data['total'] ?? 0,
                   'discount_type' => $data['discount_type'] ?? null,
                   'discount' => $data['discount'] ?? 0,
-                  'iva_type' => $data['iva_type'] ?? '',
-                  'iva_percentage' => $data['iva_percentage'] ?? '',
-                  'iva_amount' => $data['iva_amount'] ?? '',
-                  'tariff_heading' => $data['tariff_heading'] ?? 0,
+                  'iva_type' => $data['iva_type'] ?? null,
+                  'iva_percentage' => $data['iva_percentage'] ?? 0,
+                  'iva_amount' => $data['iva_amount'] ?? 0,
+                  'tariff_heading' => $data['tariff_heading'] ?? null,
+
                   'is_exempt' => $data['is_exempt'] ?? false,
-                  'is_identificacion_especifica' => $data['is_identificacion_especifica'] ?? '',
-                  'exoneration_document_type' => $data['typeDocument'] ?? null,
-                  'exoneration_document_number' => $data['numeroDocumento'] ?? null,
-                  'exoneration_company_name' => $data['nombreInstitucion'] ?? null,
-                  'exoneration_porcent' => $data['porcentajeExoneracion'] ?? 0,
-                  'exoneration_amount' => $data['montoExoneracion'] ?? 0,
-                  'exoneration_date' => !empty($data['exoneration_date']) ? Carbon::createFromFormat('d/m/Y', $data['exoneration_date']) : null,
-                  'exoneration_total_amount' => $data['impuestoNeto'] ?? 0,
-                  'impuesto_neto' => isset($data['montoExoneracion']) ? $data['iva_amount'] - $data['montoExoneracion']
-                      : $data['iva_amount']
+                  'is_identificacion_especifica' => $data['is_identificacion_especifica'] ?? false
               ]
           );
+          
+          
+          try {
+            $exonerationDate = isset( $data['exoneration_date'] )  ? Carbon::createFromFormat('d/m/Y', $data['exoneration_date']) : null;
+          }catch( \Exception $e ) {
+            $exonerationDate = 0;
+          }
+          if( $exonerationDate && $data['typeDocument'] && $data['numeroDocumento'] ) {
+            $item->exoneration_document_type = $data['typeDocument'] ?? null;
+            $item->exoneration_document_number = $data['numeroDocumento'] ?? null;
+            $item->exoneration_company_name = $data['nombreInstitucion'] ?? null;
+            $item->exoneration_porcent = $data['porcentajeExoneracion'] ?? 0;
+            $item->exoneration_amount = $data['montoExoneracion'] ?? 0;
+            $item->exoneration_date = $exonerationDate;
+            $item->exoneration_total_amount = $data['impuestoNeto'] ?? 0;
+            $item->impuesto_neto = isset($data['montoExoneracion']) ? $data['iva_amount'] - $data['montoExoneracion'] : $data['iva_amount'];
+            $item->save();
+          }
+          
           return $item;
       } else {
           return false;
@@ -285,7 +298,6 @@ class Invoice extends Model
     }
     
     public static function importInvoiceRow ( $data ) {
-      
       //Revisa si el método es por correo electrónico. De ser así, usa busca la compañia por cedula.
       if( $data['metodoGeneracion'] != "Email" ){
         $company = currentCompanyModel();
@@ -324,10 +336,10 @@ class Invoice extends Model
         }
         $cliente = Cache::get($clientCacheKey);
         $idCliente = $cliente->id;
+        $tipoDocumento = $data['tipoDocumento'];
       } else {
         $tipoDocumento = '04';
       }
-      
       $idCliente = preg_replace("/[^0-9]/", "", $idCliente );
       $invoiceCacheKey = "import-factura-" . $data['nombreCliente'] . $company->id . "-" . $data['consecutivoComprobante'];
       if ( !Cache::has($invoiceCacheKey) ) {
@@ -342,7 +354,6 @@ class Invoice extends Model
           );
           
           if( !$invoice->exists ) {
-              
               $invoice->company_id = $company->id;
               $invoice->client_id = $idCliente;    
       
@@ -445,7 +456,7 @@ class Invoice extends Model
               'exoneration_company_name' => $data['companiaExoneracion'],
               'exoneration_porcent' => $data['porcentajeExoneracion'],
               'exoneration_amount' => $data['montoExoneracion'],
-              'impuestoNeto' => $data['impuestoNeto'],
+              'impuesto_neto' => $data['impuestoNeto'],
               'exoneration_total_amount' => $data['totalMontoLinea']
           ];
       }
@@ -459,11 +470,14 @@ class Invoice extends Model
         $invoice->subtotal = $data['totalNeto'];
       }
       
-        $invoice->save();
+      $invoice->save();
 
-        $available_invoices = AvailableInvoices::where('company_id', $company->id)->first();
-        $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
-        $available_invoices->save();
+      $available_invoices = AvailableInvoices::where('company_id', $company->id)
+                            ->where('year', $invoice->year)
+                            ->where('month', $invoice->month)
+                            ->first();
+      $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
+      $available_invoices->save();
       
       return $insert;
       
@@ -506,7 +520,11 @@ class Invoice extends Model
         $tipoDocumento = '01';
         if ( array_key_exists('Receptor', $arr) ){
           $correoCliente = $arr['Receptor']['CorreoElectronico'];
-          $telefonoCliente = isset($arr['Receptor']['Telefono']) ? $arr['Receptor']['Telefono']['NumTelefono'] : '';
+          if ( isset($arr['Receptor']['Telefono']) ) {
+            $telefonoCliente = $arr['Receptor']['Telefono']['NumTelefono'] ?? null;
+          }else {
+            $telefonoCliente = null;
+          }
           $tipoPersona = $arr['Receptor']['Identificacion']['Tipo'];
           $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
           $nombreCliente = $arr['Receptor']['Nombre'];
@@ -527,11 +545,17 @@ class Invoice extends Model
           $metodoPago = $metodoPago[0];
         }
         
-        $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
-        $tipoCambio = array_key_exists('TipoCambio', $arr['ResumenFactura']) ? $arr['ResumenFactura']['TipoCambio'] : '1';
+        if( array_key_exists( 'CodigoTipoMoneda', $arr['ResumenFactura'] ) ) {
+          $idMoneda = $arr['ResumenFactura']['CodigoTipoMoneda']['CodigoMoneda'] ?? '';
+          $tipoCambio = $arr['ResumenFactura']['CodigoTipoMoneda']['TipoCambio'] ?? 1;
+        }else {
+          $idMoneda = $arr['ResumenFactura']['CodigoMoneda'] ?? '';
+          $tipoCambio = array_key_exists('TipoCambio', $arr['ResumenFactura']) ? $arr['ResumenFactura']['TipoCambio'] : '1';
+        }
+        
         $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
         $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
-        $descripcion = $arr['ResumenFactura']['CodigoMoneda'];
+        $descripcion = 'XML Importado';
         
         $authorize = true;
         if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
@@ -546,7 +570,11 @@ class Invoice extends Model
         
         foreach( $lineas as $linea ) {
             $numeroLinea = $linea['NumeroLinea'];
-            $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] : '';
+            try {
+              $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] ?? '' : '';
+            } catch( \Throwable $e ) {
+              $codigoProducto = "No indica";
+            }
             $detalleProducto = $linea['Detalle'];
             $unidadMedicion = $linea['UnidadMedida'];
             $cantidad = $linea['Cantidad'];
@@ -556,18 +584,25 @@ class Invoice extends Model
             $montoDescuento = array_key_exists('MontoDescuento', $linea) ? $linea['MontoDescuento'] : 0;
             $codigoEtax = '103'; //De momento asume que todo en 4.2 es al 13%.
             $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
+            
+            if( array_key_exists('Impuesto', $linea) ) {
+              //$codigoEtax = $this->getCodigoSoportadoFromXML( $linea['Impuesto']['CodigoTarifa'], $linea['UnidadMedida'] );
+              
+              $montoIva = $linea['Impuesto']['Monto'];
+            }
 
-            $tipoDocumentoExoneracion = $linea['tipoDocumentoExoneracion'];
-            $documentoExoneracion = $linea['documentoExoneracion'];
-            $companiaExoneracion = $linea['companiaExoneracion'];
-            $porcentajeExoneracion = $linea['porcentajeExoneracion'];
-            $montoExoneracion = $linea['montoExoneracion'];
-            $impuestoNeto = $linea['impuestoNeto'];
-            $totalMontoLinea = $linea['totalMontoLinea'];
+            $tipoDocumentoExoneracion = $linea['tipoDocumentoExoneracion'] ?? null;
+            $documentoExoneracion = $linea['documentoExoneracion'] ?? null;
+            $companiaExoneracion = $linea['companiaExoneracion'] ?? null;
+            $porcentajeExoneracion = $linea['porcentajeExoneracion'] ?? 0;
+            $montoExoneracion = $linea['montoExoneracion'] ?? 0;
+            $impuestoNeto = $linea['impuestoNeto'] ?? 0;
+            $totalMontoLinea = $linea['totalMontoLinea'] ?? 0;
 
             $arrayInsert = array(
                 'metodoGeneracion' => $metodoGeneracion,
                 'identificacionProveedor' => $identificacionProveedor,
+                'idEmisor' => $identificacionProveedor,
                 'nombreCliente' => $nombreCliente,
                 'codigoCliente' => $codigoCliente,
                 'tipoPersona' => $tipoPersona,
@@ -597,7 +632,7 @@ class Invoice extends Model
                 'codigoEtax' => $codigoEtax,
                 'montoIva' => $montoIva,
                 'descripcion' => $descripcion,
-                'authorize' => $authorize,
+                'isAuthorized' => $authorize,
                 'codeValidated' => false,
                 'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
                 'documentoExoneracion' => $documentoExoneracion,
@@ -611,12 +646,6 @@ class Invoice extends Model
             );
 
             $insert = Invoice::importInvoiceRow( $arrayInsert );
-                /*$metodoGeneracion, $identificacionProveedor, $nombreCliente, $codigoCliente, $tipoPersona, $identificacionCliente, $correoCliente, $telefonoCliente,
-                $claveFactura, $consecutivoComprobante, $condicionVenta, $metodoPago, $numeroLinea, $fechaEmision, $fechaVencimiento,
-                $idMoneda, $tipoCambio, $totalDocumento, $totalNeto, $tipoDocumento, $codigoProducto, $detalleProducto, $unidadMedicion,
-                $cantidad, $precioUnitario, $subtotalLinea, $totalLinea, $montoDescuento, $codigoEtax, $montoIva, $descripcion, $authorize, false,
-                $tipoDocumentoExoneracion, $documentoExoneracion, $companiaExoneracion, $porcentajeExoneracion, $montoExoneracion, $impuestoNeto, $totalMontoLinea
-            );*/
             
             if( $insert ) {
                 array_push( $inserts, $insert );

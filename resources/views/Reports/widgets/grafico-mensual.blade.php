@@ -1,7 +1,17 @@
 <div class="widget ">
   <div class="card-title">{{ $titulo }}</div>
+@if( allowTo('reports') )       
   <div id="echartBar" style="height: 300px;"></div>
+  
+@else
+  <div class="not-allowed-message">
+    Usted actualmente no tiene permisos para ver los reportes.
+  </div>
+@endif      
+  
 </div>
+
+@if( allowTo('reports') )       
 
 <script>
 
@@ -216,3 +226,5 @@ function initBarChart() {
 
 
 </script>
+
+@endif    

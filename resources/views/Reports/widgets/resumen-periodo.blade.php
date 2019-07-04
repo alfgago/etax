@@ -1,5 +1,8 @@
 <div class="sidebar-dashboard">
     <div class="card-title">{{ $titulo }}</div>
+    
+@if( allowTo('reports') )       
+    
     <div class="row">
         
         <div class="col-md-12 dato-iva dato-compras compras">
@@ -69,5 +72,12 @@
             @endif  
         @endif 
     </div>
+    
+@else
+  <div class="not-allowed-message">
+    Usted actualmente no tiene permisos para ver los reportes.
+  </div>
+@endif      
+    
  </div>  
  

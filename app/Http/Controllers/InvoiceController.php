@@ -42,6 +42,10 @@ class InvoiceController extends Controller
      */
     public function index()
     {
+        $company = currentCompanyModel();
+        if(empty($company->last_note_ref_number)){
+            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
+        }
         return view('Invoice/index');
     }
     
@@ -95,6 +99,11 @@ class InvoiceController extends Controller
                 if ($invoice->hacienda_status == '03') {
                     return '<div class="green">  
                                 <span class="tooltiptext">Aceptada</span>
+                            </div>';
+                }
+                if ($invoice->hacienda_status == '04') {
+                    return '<div class="red">  
+                                <span class="tooltiptext">Rechazada</span>
                             </div>';
                 }
                 return '<div class="yellow">
@@ -195,7 +204,12 @@ class InvoiceController extends Controller
         if(count($arrayActividades) == 0){
             return redirect('/empresas/editar')->withError('No ha definido una actividad comercial para esta empresa');
         }
+
+        if(empty($company->last_note_ref_number)){
+            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
+        }
         return view("Invoice/create-factura", ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
+
             'document_number' => $this->getDocReference('01'),
             'document_key' => $this->getDocumentKey('01'), 'units' => $units])->with('arrayActividades', $arrayActividades);
     }
@@ -306,9 +320,12 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::findOrFail($id);
         $this->authorize('update', $invoice);
+        
+        $company = currentCompanyModel();
+        $arrayActividades = $company->getActivities();
 
         $units = UnidadMedicion::all()->toArray();
-        return view('Invoice/show', compact('invoice','units') );
+        return view('Invoice/show', compact('invoice','units', 'arrayActividades') );
     }
 
 
@@ -413,18 +430,18 @@ class InvoiceController extends Controller
                 
                 foreach ($collection[0]->chunk(200) as $facturas) {
 
-                    \DB::transaction(function () use ($facturas, &$company, &$i , $available_invoices, $available_invoices_by_plan) {
+                    \DB::transaction(function () use ($facturas, &$company, &$i /*, $available_invoices, $available_invoices_by_plan*/) {
 
                         $inserts = array();
                         foreach ($facturas as $row){
                             $i++;
-                            
+                            //dd($row);
                             $arrayRow = array();
-                            if($available_invoices_by_plan > 0){
+                            /*if($available_invoices_by_plan > 0){
                                 $available_invoices_by_plan = $available_invoices_by_plan - 1;
                             }else{
                                 $company->additional_invoices = $company->additional_invoices - 1;
-                            }
+                            }*/
 
                             $metodoGeneracion = "XLSX";
 
@@ -463,7 +480,8 @@ class InvoiceController extends Controller
                             $codigoEtax = $row['codigoivaetax'];
                             $montoIva = (float)$row['montoiva'];
                             
-                            $codigoActividad = $row['codigoactividad'] ?? $company->getActivities()[0];
+                            $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
+                            $codigoActividad = $row['codigoactividad'] ?? $mainAct;
                             $xmlSchema = $row['xmlschema'] ?? 42;
                             
                             //Exoneraciones
@@ -481,8 +499,9 @@ class InvoiceController extends Controller
                                 'metodoGeneracion' => $metodoGeneracion,
                                 'idEmisor' => 0,
                                 'nombreCliente' => $nombreCliente,
+                                'descripcion' => $descripcion,
                                 'codigoCliente' => $codigoCliente,
-                                'tipoPersona' => tipoPersona,
+                                'tipoPersona' => $tipoPersona,
                                 'identificacionCliente' => $identificacionCliente,
                                 'correoCliente' => $correoCliente,
                                 'telefonoCliente' => $telefonoCliente,
@@ -497,6 +516,13 @@ class InvoiceController extends Controller
                                 'tipoCambio' => $tipoCambio,
                                 'totalDocumento' => $totalDocumento,
                                 'totalNeto' => $totalNeto,
+                                'cantidad' => $cantidad,
+                                'precioUnitario' => $precioUnitario,
+                                'totalLinea' => $totalLinea,
+                                'montoIva' => $montoIva,
+                                'codigoEtax' => $codigoEtax,
+                                'montoDescuento' => $montoDescuento,
+                                'subtotalLinea' => $subtotalLinea,
                                 'tipoDocumento' => $tipoDocumento,
                                 'codigoProducto' => $codigoProducto,
                                 'detalleProducto' => $detalleProducto,
@@ -509,7 +535,9 @@ class InvoiceController extends Controller
                                 'impuestoNeto' => $impuestoNeto,
                                 'totalMontoLinea' => $totalMontoLinea,
                                 'xmlSchema' => $xmlSchema,
-                                'codigoActividad' => $codigoActividad
+                                'codigoActividad' => $codigoActividad,
+                                'isAuthorized' => true,
+                                'codeValidated' => true
                             );
 
                             $insert = Invoice::importInvoiceRow( $arrayInsert );
@@ -535,11 +563,11 @@ class InvoiceController extends Controller
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Error en la fila. '.$i);
             }catch( \Throwable $ex ){
                 Log::error('Error importando Excel' . $ex->getMessage());
-                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. '.$i);
+                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. IC 537'.$i);
             }
             
             $company->save();
-            $available_invoices->save();
+            //$available_invoices->save();
             
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
@@ -582,9 +610,7 @@ class InvoiceController extends Controller
                 $company->last_note_ref_number = $noteData->reference_number;
                 $company->last_document_note = $noteData->document_number;
                 $company->save();
-                if ($note->hacienda_status == '03') {
-                    // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
-                }
+
                 clearInvoiceCache($invoice);
 
                 return redirect('/facturas-emitidas')->withMessage('Nota de crédito creada.');
@@ -679,10 +705,10 @@ class InvoiceController extends Controller
 
         }catch( \Exception $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML de factura válida.');
         }catch( \Throwable $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML válido.');
+            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML de factura válida.');
         }
         
         return redirect('/facturas-emitidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');

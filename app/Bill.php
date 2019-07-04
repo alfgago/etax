@@ -330,14 +330,30 @@ class Bill extends Model
               $bill->generation_method = $arrayImportBill['metodoGeneracion'];
               $bill->is_authorized = $arrayImportBill['isAuthorized'];
               $bill->is_code_validated = $arrayImportBill['codeValidated'];
+
+
+              $bill->provider_id_number = preg_replace("/[^0-9]/", "", $arrayImportBill['identificacionProveedor']);
+              $bill->provider_first_name = $arrayImportBill['nombreProveedor'];
+              $bill->provider_last_name = '';
+              $bill->provider_last_name2 = '';
+              $bill->provider_email = $arrayImportBill['correoProveedor'];
+              $bill->provider_address = '';
+              $bill->provider_country = '';
+              $bill->provider_city = '';
+              $bill->provider_state = '';
+              $bill->provider_district = '';
+              $bill->provider_phone = $arrayImportBill['telefonoProveedor'];
+              $bill->provider_zip = '';
+              
               if($arrayImportBill['metodoGeneracion'] == 'Email' || $arrayImportBill['metodoGeneracion'] == 'XML') {
                 $bill->accept_status = 0;
+                $bill->hacienda_status = "01";
               }else{
                 $bill->accept_status = 1;
+                $bill->hacienda_status = "03";
               }
 
               $bill->is_void = false;
-              $bill->hacienda_status = "03";
               
               //Datos de factura
               $bill->currency = $arrayImportBill['idMoneda'];
@@ -418,7 +434,7 @@ class Bill extends Model
               'exoneration_company_name' => $arrayImportBill['companiaExoneracion'],
               'exoneration_porcent' => $arrayImportBill['porcentajeExoneracion'],
               'exoneration_amount' => $arrayImportBill['montoExoneracion'],
-              'impuestoNeto' => $arrayImportBill['impuestoNeto'],
+              'impuesto_neto' => $arrayImportBill['impuestoNeto'],
               'exoneration_total_amount' => $arrayImportBill['totalMontoLinea']
           ];
       }
@@ -447,7 +463,14 @@ class Bill extends Model
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
         $codigoProveedor = $identificacionProveedor;
         $correoProveedor = $arr['Emisor']['CorreoElectronico'];
-        $telefonoProveedor = isset($arr['Emisor']['Telefono']) ? $arr['Emisor']['Telefono']['NumTelefono'] : '';
+        
+        
+        if ( isset($arr['Emisor']['Telefono']) ) {
+          $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'] ?? null;
+        }else{
+          $telefonoProveedor = null;
+        }
+        
         $tipoIdReceptor = $arr['Receptor']['Identificacion']['Tipo'];
         $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
         $nombreReceptor = $arr['Receptor']['Nombre'];
@@ -459,12 +482,19 @@ class Bill extends Model
           $medioPago = $medioPago[0];
         }
         
-        $idMoneda = $arr['ResumenFactura']['CodigoMoneda'];
-        $tipoCambio = array_key_exists('TipoCambio', $arr['ResumenFactura']) ? $arr['ResumenFactura']['TipoCambio'] : '1';
+        if( array_key_exists( 'CodigoTipoMoneda', $arr['ResumenFactura'] ) ) {
+          $idMoneda = $arr['ResumenFactura']['CodigoTipoMoneda']['CodigoMoneda'] ?? '';
+          $tipoCambio = $arr['ResumenFactura']['CodigoTipoMoneda']['TipoCambio'] ?? 1;
+        }else {
+          $idMoneda = $arr['ResumenFactura']['CodigoMoneda'] ?? '';
+          $tipoCambio = array_key_exists('TipoCambio', $arr['ResumenFactura']) ? $arr['ResumenFactura']['TipoCambio'] : '1';
+        }
+        
         $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
         $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
-        $tipoDocumento = $arr['TipoDoc+'] ?? '01';
-        $descripcion = $arr['ResumenFactura']['CodigoMoneda'];
+        
+        $tipoDocumento = $arr['TipoDoc'] ?? '01';
+        $descripcion = 'XML Importado';
         
         $authorize = true;
         if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
@@ -480,7 +510,7 @@ class Bill extends Model
         foreach( $lineas as $linea ) {
             $numeroLinea = $linea['NumeroLinea'];
             try {
-              $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] : '';
+              $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] ?? '' : '';
             } catch( \Throwable $e ) {
               $codigoProducto = "No indica";
             }
@@ -494,17 +524,23 @@ class Bill extends Model
             $codigoEtax = '003'; //De momento asume que todo en 4.2 es al 13%.
             $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
 
-            $tipoDocumentoExoneracion = $linea['tipoDocumentoExoneracion'];
-            $documentoExoneracion = $linea['documentoExoneracion'];
-            $companiaExoneracion = $linea['companiaExoneracion'];
-            $porcentajeExoneracion = $linea['porcentajeExoneracion'];
-            $montoExoneracion = $linea['montoExoneracion'];
-            $impuestoNeto = $linea['impuestoNeto'];
-            $totalMontoLinea = $linea['totalMontoLinea'];
+            if( array_key_exists('Impuesto', $linea) ) {
+              //$codigoEtax = $linea['Impuesto']['CodigoTarifa'];
+              $montoIva = $linea['Impuesto']['Monto'];
+            }
+
+            $tipoDocumentoExoneracion = $linea['tipoDocumentoExoneracion'] ?? null;
+            $documentoExoneracion = $linea['documentoExoneracion']  ?? null;
+            $companiaExoneracion = $linea['companiaExoneracion'] ?? null;
+            $porcentajeExoneracion = $linea['porcentajeExoneracion'] ?? 0;
+            $montoExoneracion = $linea['montoExoneracion'] ?? 0;
+            $impuestoNeto = $linea['impuestoNeto'] ?? 0;
+            $totalMontoLinea = $linea['totalMontoLinea'] ?? 0;
 
             $arrayImportBillRow = array(
                 'metodoGeneracion' => $metodoGeneracion,
                 'identificacionReceptor' => $identificacionReceptor,
+                'idReceptor' => $identificacionReceptor,
                 'nombreProveedor' => $nombreProveedor,
                 'codigoProveedor' => $codigoProveedor,
                 'tipoPersona' => $tipoPersona,
@@ -514,7 +550,7 @@ class Bill extends Model
                 'claveFactura' => $claveFactura,
                 'consecutivoComprobante' => $consecutivoComprobante,
                 'condicionVenta' => $condicionVenta,
-                'medioPago' => $medioPago,
+                'metodoPago' => $medioPago,
                 'numeroLinea' => $numeroLinea,
                 'fechaEmision' => $fechaEmision,
                 'fechaVencimiento' => $fechaVencimiento,
@@ -534,7 +570,7 @@ class Bill extends Model
                 'codigoEtax' => $codigoEtax,
                 'montoIva' => $montoIva,
                 'descripcion' => $descripcion,
-                'authorize' => $authorize,
+                'isAuthorized' => $authorize,
                 'codeValidated' => false,
                 'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
                 'documentoExoneracion' => $documentoExoneracion,
@@ -591,7 +627,7 @@ class Bill extends Model
     public function calculateAcceptFields() {
       
       if( $this->is_code_validated ) {
-        if( $this->accept_iva_total == 0 && $this->xml_schema == 43 ) {
+        if( $this->xml_schema == 43 ) {
           $company = currentCompanyModel();
           $prorrataOperativa = $company->getProrrataOperativa( $this->year );
           $calc = new CalculatedTax();
@@ -600,17 +636,42 @@ class Bill extends Model
           //$calc->setDatosEmitidos( $this->month, $this->year, $company->id );
           $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query );
           $calc->setCalculosPorFactura( $prorrataOperativa, $lastBalance );
+          
           $this->accept_iva_acreditable = $calc->iva_deducible_operativo;
           $this->accept_iva_gasto = $calc->iva_no_deducible;
           $this->accept_iva_total = $calc->total_bill_iva;
           $this->accept_total_factura = $calc->bills_total;
           $this->accept_id_number = $company->id_number;
+          
+          $this->accept_iva_condition = '02';
+          if( $this->accept_iva_total == 0 ) {
+            $this->accept_iva_condition = '01'; //Si no hay IVA
+          }else if( $this->accept_iva_gasto == 0 ) {
+            $this->accept_iva_condition = '01'; //Si todo lo pagado de IVA es acreditable
+          }else if( $this->accept_iva_acreditable == 0) {
+            $this->accept_iva_condition = '04'; //Si todo lo pagao de IVa va al gasto
+          }
+          
+          $sinIdentificacion = ($calc->iva_acreditable_identificacion_plena != $calc->total_bill_iva && $calc->iva_acreditable_identificacion_plena > 0) ;
+          if( $sinIdentificacion ) {
+            $this->accept_iva_condition = '05'; //Si exista minimo 1 linea sin identificación específica.
+          }
+          
+          $bienesCapital = $calc->b011 + $calc->b031 + $calc->b051 + $calc->b071 + $calc->b015  + $calc->b035 +
+             $calc->b012 + $calc->b032 + $calc->b052 + $calc->b072 +
+             $calc->b013 + $calc->b033 + $calc->b053 + $calc->b073 + $calc->b016 + $calc->b036 +
+             $calc->b014 + $calc->b034 + $calc->b054 + $calc->b074;
+          if( $bienesCapital ) {
+            $this->accept_iva_condition = '03'; // Si son propiedad, planta o equipo (Bienes de capital)
+          }
+          
         }
       }else {
         $this->accept_iva_acreditable = 0;
         $this->accept_iva_gasto = 0;
         $this->accept_iva_total = 0;
         $this->accept_total_factura = 0;
+        $this->accept_iva_condition = '01';
       }
       
       $this->save();

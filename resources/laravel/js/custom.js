@@ -212,7 +212,10 @@ $(document).ready(function() {
     dropdownParent: $('#wizard-popup')
   });
 
-  $('.select2-tags').select2();
+  $('.select2-tags').select2({
+    tags: true,
+    tokenSeparators: [',', ' ']
+  });
 	  
 	toggleTiposImportacion();
 	initHelpers();
