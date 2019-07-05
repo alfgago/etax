@@ -28,7 +28,7 @@
         <label for="nombre">Nombre / Descripción</label>
         <input type="text" class="form-control" id="nombre" value="" name="description">
     </div>
-    <?php if( $document_type == "08"){ ?>
+    <?php if( @$document_type == "08"){ ?>
         <div class="form-group col-md-4">
             <label for="nombre">Partida Arancelaria</label>
             <input type="text" class="form-control" id="tariff_heading" value="" name="tariff_heading">

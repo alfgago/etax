@@ -206,9 +206,9 @@
             <b>Factura Electrónica N°: </b>{{$data_invoice->document_number}} <br>
             <b>Clave Numérica: </b> {{$data_invoice->document_key}}<br>
             <br><br>
-            <b>Fecha de Emisión: </b> {{$data_invoice->generated_date}}<br>
-            <b>Condición Venta: </b> Contado<br>
-            <b>Medio de Pago: </b> Efectivo<br>
+            <b>Fecha de Emisión: </b> {{ $data_invoice->generated_date }}<br>
+            <b>Condición Venta: </b> {{ $data_invoice->getCondicionVenta() }}<br>
+            <b>Medio de Pago: </b> {{ $data_invoice->getMetodoPago() }}<br>
         </td>
     </tr>
 </table>
