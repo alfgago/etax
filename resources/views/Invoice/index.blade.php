@@ -6,6 +6,8 @@
 
 @section('breadcrumb-buttons')
     <a class="btn btn-primary" href="/facturas-emitidas/emitir-factura/01">Emitir factura nueva</a>
+    <a class="btn btn-primary" href="/facturas-emitidas/create">Ingresar factura existente</a>
+    <!--
     <div class="btn-group" role="group">
         <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Ingresar factura existente
@@ -14,8 +16,9 @@
             <a class="dropdown-item" href="/facturas-emitidas/emitir-factura/01">Factura electrónica</a>
             <a class="dropdown-item" href="/facturas-emitidas/emitir-factura/08">Factura electrónica de exportación</a>
             <a class="dropdown-item" href="/facturas-emitidas/emitir-factura/09">Factura electrónica de compra</a>
-        </div>
+        </div> 
     </div>
+    -->
     <div onclick="abrirPopup('importar-emitidas-popup');" class="btn btn-primary">Importar facturas emitidas</div>
 @endsection 
 

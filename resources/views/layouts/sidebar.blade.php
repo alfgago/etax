@@ -21,10 +21,9 @@
                 <div class="subitems">
                     <a href="/facturas-emitidas">Ver todas</a>
                     <a href="/facturas-emitidas/emitir-factura/01">Emitir factura electrónica</a>
-                    <!--a href="/facturas-emitidas/create" id="factExistente">Registrar factura existente</a-->
-                    <!--a href="#" id="factExistente">Registrar factura existente</a-->
+                    <a href="/facturas-emitidas/create" >Registrar factura existente</a>
 
-                    <ul id="factExistente">
+                    <!--<ul id="factExistente">
                         <a class="nav-item-hold"  style="margin-left:-3em;">Registrar factura existente</a>
                         <li class="nav-item">
                             <div class="subitemsFactExistente subitems" style="margin-top:-4em;">
@@ -33,7 +32,7 @@
                                 <a href="/facturas-emitidas/emitir-factura/09" id="factExistente03" hidden>Emitir factura electrónica de compra</a>
                             </div>
                         </li>
-                    </ul>
+                    </ul>-->
                     <a href="#" onclick="abrirPopup('importar-emitidas-popup');">Importar facturas</a>
                     <a href="/facturas-emitidas/validaciones">Validar facturas</a>
                     <a href="/facturas-emitidas/autorizaciones">Autorizar facturas por email</a>

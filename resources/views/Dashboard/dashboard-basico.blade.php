@@ -6,7 +6,7 @@
         <div id=""></div>
       <div class="card-title" id="escritorio">Enlaces rápidos</div>
       <div class="quicklinks">
-        <a class="btn btn-primary" href="/facturas-emitidas/emitir-factura">Emitir facturas</a>
+        <a class="btn btn-primary" href="/facturas-emitidas/emitir-factura/01">Emitir facturas</a>
         <a class="btn btn-primary" href="#" onclick="abrirPopup('importar-emitidas-popup');">Importar facturas de venta</a>
         <a class="btn btn-primary" href="#" onclick="abrirPopup('importar-recibidas-popup');">Importar facturas de compra</a>
         <a class="btn btn-primary" href="/cierres">Cierres de mes</a>
