@@ -17,11 +17,23 @@
                     <img src="{{asset('assets/images/iconos/ventas.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Ventas</span>
                 </a>
-                
+
                 <div class="subitems">
                     <a href="/facturas-emitidas">Ver todas</a>
-                    <a href="/facturas-emitidas/emitir-factura">Emitir factura electrónica</a>
-                    <a href="/facturas-emitidas/create">Registrar factura existente</a>
+                    <a href="/facturas-emitidas/emitir-factura/01">Emitir factura electrónica</a>
+                    <!--a href="/facturas-emitidas/create" id="factExistente">Registrar factura existente</a-->
+                    <!--a href="#" id="factExistente">Registrar factura existente</a-->
+
+                    <ul id="factExistente">
+                        <a class="nav-item-hold"  style="margin-left:-3em;">Registrar factura existente</a>
+                        <li class="nav-item">
+                            <div class="subitemsFactExistente subitems" style="margin-top:-4em;">
+                                <a href="/facturas-emitidas/emitir-factura/01" id="factExistente01" hidden>Emitir factura electrónica</a>
+                                <a href="/facturas-emitidas/emitir-factura/08" id="factExistente02" hidden>Emitir factura electrónica de exportación</a>
+                                <a href="/facturas-emitidas/emitir-factura/09" id="factExistente03" hidden>Emitir factura electrónica de compra</a>
+                            </div>
+                        </li>
+                    </ul>
                     <a href="#" onclick="abrirPopup('importar-emitidas-popup');">Importar facturas</a>
                     <a href="/facturas-emitidas/validaciones">Validar facturas</a>
                     <a href="/facturas-emitidas/autorizaciones">Autorizar facturas por email</a>
@@ -58,8 +70,8 @@
                     <a href="/facturas-emitidas/emitir-factura/01">Emitir factura electrónica</a>
                     <a href="/facturas-emitidas/emitir-factura/08">Emitir factura electrónica de exportación</a>
                     <a href="/facturas-emitidas/emitir-factura/09">Emitir factura electrónica de compra</a>
-                    <a href="/facturas-emitidas/emitir-factura">Emitir tiquete electrónico</a>
-                    <a href="/facturas-emitidas/emitir-factura">Emitir nota de débito</a>
+                    <a href="/facturas-emitidas/emitir-factura/04">Emitir tiquete electrónico</a>
+                    <a href="/facturas-emitidas/emitir-factura/02">Emitir nota de débito</a>
                     <a href="/facturas-recibidas/aceptaciones">Aceptación de facturas recibidas</a>
                 </div>
             </li>
@@ -149,4 +161,16 @@
           </ul>
       </div>
   </div>
+  <script>
+      $( "#factExistente" ).mouseover(function() {
+          $( "#factExistente01" ).attr('hidden', false);
+          $( "#factExistente02" ).attr('hidden', false);
+          $( "#factExistente03" ).attr('hidden', false);
+      });
+      $( "#factExistente" ).mouseleave(function() {
+          $( "#factExistente01" ).attr('hidden', true);
+          $( "#factExistente02" ).attr('hidden', true);
+          $( "#factExistente03" ).attr('hidden', true);
+      });
+  </script>
   <!--=============== Left side End ================-->
