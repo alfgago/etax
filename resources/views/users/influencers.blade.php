@@ -30,9 +30,11 @@ Billetera
                                 <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
                             </li>
                         @endif
+                         @if( auth()->user()->isInfluencers())
                          <li>
                                 <a class="nav-link" aria-selected="false" href="/usuario/wallet">Billetera</a>
                            </li>
+                        @endif
                     </ul>
                 </div>
                 <div class="col-9">
@@ -49,7 +51,7 @@ Billetera
                             				<th>Porcentaje</th>
                             				<th>Ganancia</th>
                             			</tr>
-                            			@foreach( $lista_ingresos as $row ):
+                            			@foreach( $lista_ingresos as $row )
 											<tr>
 	                            				<td>{{@$row["codigo"]}}</td>
 	                            				<td>{{@$row["cantidad"]}}</td>
@@ -59,11 +61,11 @@ Billetera
 	                            			</tr>
                             			@endforeach
 											<tr>
-	                            				<td></td>
-	                            				<td>{{@$saldos["ingresos"]}}</td>
-	                            				<td></td>
-	                            				<td></td>
-	                            				<td>{{@$saldos["monto_ingresos"]}}</td>
+	                            				<th></th>
+	                            				<th>{{@$saldos["ingresos"]}}</th>
+	                            				<th></th>
+	                            				<th></th>
+	                            				<th>{{@$saldos["monto_ingresos"]}}</th>
 	                            			</tr>
                             		</table>
                             		<br>
@@ -76,9 +78,9 @@ Billetera
                             				<th>Transferencia</th>
                             				<th>Estado</th>
                             			</tr>
-                            			@foreach( $lista_retiros as $row ):
+                            			@foreach( $lista_retiros as $row )
 											<tr>
-	                            				<td>{{@$row["payment_status"]}}</td>
+	                            				<td>{{@$row["payment_date"]}}</td>
 	                            				<td>{{@$row["amount"]}}</td>
 	                            				<td>{{@$row["account"]}}</td>
 	                            				<td>{{@$row["proof"]}}</td>
@@ -86,11 +88,11 @@ Billetera
 	                            			</tr>
                             			@endforeach
 											<tr>
-	                            				<td></td>
-	                            				<td>{{@$saldos["total_retiros"]}}</td>
-	                            				<td></td>
-	                            				<td></td>
-	                            				<td></td>
+	                            				<th></th>
+	                            				<th>{{@$saldos["monto_retiros"]}}</th>
+	                            				<th></th>
+	                            				<th></th>
+	                            				<th></th>
 	                            			</tr>
                             		</table>
                             	</div>
@@ -105,7 +107,7 @@ Billetera
                             			<tr>
                             				<td>Retiros</td>
                             				<td>{{@$saldos["retiros"]}}</td>
-                            				<td>{{@$saldos["total_retiros"]}}</td>
+                            				<td>{{@$saldos["monto_retiros"]}}</td>
                             			</tr>
                             			<tr>
                             				<th>Total</th>
@@ -115,21 +117,33 @@ Billetera
                             		</table>
                             		<br>
                             		<h3 class="card-title">Solicite retiro</h3>
-                            		<form id="retiro_dinero" action="{{ url('usuario/add-retiro') }}" method="post">
-                            			<div class="form-group">
-                            				<label>Monto</label>
-                            				<input type="number" id="monto_retiro" class="form-control monto_retiro">
-                            			</div>
-                            			<div class="form-group">
-                            				<label>Cuenta</label>
-                            				<input type="text" id="cuenta_retiro" class="form-control cuenta_retiro">
-                            			</div>
-                            			<div class="form-group">
-                            				<label>Cedula</label>
-                            				<input type="text" id="cedula_retiro" class="form-control cedula_retiro">
-                            			</div>
-  										<button type="submit" class="btn btn-primary">Solicitar</button>
-                            		</form> 
+									{!! Form::open(['route' => 'Influencers.retiro' ,'class' => 'form']) !!}
+
+									<div class="form-group">
+									    {!! Form::label('monto', 'Monto') !!}
+									    {!! Form::number('monto', $saldos["saldo"],['min'=>0,'max'=>$saldos["saldo"], 'class' => 'form-control', 'required'=>'required'] ) !!}
+									</div>
+
+									<div class="form-group">
+									    {!! Form::label('cuenta', 'Cuenta') !!}
+									    {!! Form::text('cuenta', null, ['class' => 'form-control', 'required'=>'required']) !!}
+									</div>
+									<div class="form-group">
+									    {!! Form::label('cedula', 'Cedula') !!}
+									    {!! Form::text('cedula', null, ['class' => 'form-control', 'required'=>'required']) !!}
+									</div>
+
+
+									@if ($saldos["saldo"] >= 1)
+									    {!! Form::submit('Solicitar', ['class' => 'btn btn-info']) !!}
+									@else
+									    {!! Form::submit('Solicitar', ['class' => 'btn btn-info', 'disabled'=> 'disabled']) !!}
+									@endif
+
+									
+
+									{!! Form::close() !!}
+
                             	</div>
                             </div>
                         </div>
