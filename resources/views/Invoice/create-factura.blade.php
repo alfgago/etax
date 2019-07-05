@@ -5,12 +5,23 @@
   $titulo = "Factura electrónica";
   if($document_type == "01"){
     $tipoHacienda = "FE";
-    $titulo = "factura electrónica";
+    $titulo = "Factura electrónica";
   }else if($document_type == "04"){
     $tipoHacienda = "TE";
-    $titulo = "tiquete electrónico";
+    $titulo = "Tiquete electrónico";
+  }else if($document_type == "08"){
+      $tipoHacienda = "FEE";
+      $titulo = "Factura electrónica de exportación";
+  }else if($document_type == "09"){
+      $tipoHacienda = "FEC";
+      $titulo = "Factura electrónica de compra";
+  }else if($document_type == "02"){
+      $tipoHacienda = "ND";
+      $titulo = "Nota de débito";
   }
-
+if(!isset($document_type)){
+    $document_type = '01';
+}
 ?>
 @section('title') 
   Enviar {{ $titulo }}
@@ -264,7 +275,7 @@
           
           @include( 'Invoice.form-linea' )
           @include( 'Invoice.form-nuevo-cliente' )
-
+            <input type="text" hidden value="{{ $document_type }}" name="document_type" id="document_type">
           <div class="btn-holder hidden">
             <button id="btn-submit" type="submit" class="btn btn-primary">Enviar factura electrónica</button>
           </div>

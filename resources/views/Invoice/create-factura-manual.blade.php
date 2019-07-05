@@ -62,8 +62,20 @@
                     </div>
                   </div>
                 </div>
+                  <div class="form-group col-md-12">
+                      <label for="sale_condition">Tipo de Documento</label>
+                      <div class="input-group">
+                          <select id="document_type" name="document_type" class="form-control" required>
+                              <option selected value="01">Factura electronica</option>
+                              <option value="08">Factura de compra</option>
+                              <option value="09">Factura de exportaci&oacute;n</option>
+                              <option value="04">Apartado</option>
+                          </select>
+                      </div>
+                  </div>
               </div>
-              
+
+
               <div class="form-row">    
                 <div class="form-group col-md-12">
                   <h3>

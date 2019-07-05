@@ -154,7 +154,7 @@ class InvoiceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function emitFactura()
+    public function emitFactura($tipoDocumento)
     {
         $company = currentCompanyModel();
 
@@ -204,10 +204,12 @@ class InvoiceController extends Controller
         if(count($arrayActividades) == 0){
             return redirect('/empresas/editar')->withError('No ha definido una actividad comercial para esta empresa');
         }
+
         if(empty($company->last_note_ref_number)){
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
         }
-        return view("Invoice/create-factura", ['document_type' => '01', 'rate' => $this->get_rates(),
+        return view("Invoice/create-factura", ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
+
             'document_number' => $this->getDocReference('01'),
             'document_key' => $this->getDocumentKey('01'), 'units' => $units])->with('arrayActividades', $arrayActividades);
     }
@@ -262,6 +264,7 @@ class InvoiceController extends Controller
      */
     public function sendHacienda(Request $request)
     {
+        //revision de branch para segmentacion de funcionalidades por tipo de documento
         try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
             $request->validate([
@@ -277,7 +280,7 @@ class InvoiceController extends Controller
                 $invoice->company_id = $company->id;
 
                 //Datos generales y para Hacienda
-                $invoice->document_type = "01";
+                $invoice->document_type = $request->document_type;
                 $invoice->hacienda_status = '01';
                 $invoice->payment_status = "01";
                 $invoice->payment_receipt = "";

@@ -79,6 +79,43 @@ class Invoice extends Model
         return $this->hasOne(XmlHacienda::class);
     }
     
+    public function getCondicionVenta() {
+      
+      $str = "Contado";
+      if( $this->sale_condition == '02' ) {
+        $str == "Crédito";
+      } else if( $this->sale_condition == '03' ) {
+        $str == "Consignación";
+      } else if( $this->sale_condition == '04' ) {
+        $str == "Apartado";
+      } else if( $this->sale_condition == '05' ) {
+        $str == "Arrendamiento con opción de compra";
+      } else if( $this->sale_condition == '06' ) {
+         $str == "Arrendamiento en función financiera";
+      } else if( $this->sale_condition == '99' ) {
+        $str == "Otros";
+      }
+      return $str;
+      
+    }
+    
+    public function getMetodoPago() {
+      
+      $str = "Efectivo";
+      if( $this->payment_type == '02' ) {
+        $str == "Tarjeta";
+      } else if( $this->payment_type == '03' ) {
+        $str == "Cheque";
+      } else if( $this->payment_type == '04' ) {
+        $str == "Transferencia-Depósito Bancario";
+      } else if( $this->payment_type == '05' ) {
+        $str == "Recaudado por terceros";
+      } else if( $this->payment_type == '99' ) {
+        $str == "Otros";
+      }
+      return $str;
+      
+    }
     
     /**
     * Asigna los datos de la factura segun el request recibido
@@ -266,6 +303,8 @@ class Invoice extends Model
                   'iva_type' => $data['iva_type'] ?? null,
                   'iva_percentage' => $data['iva_percentage'] ?? 0,
                   'iva_amount' => $data['iva_amount'] ?? 0,
+                  'tariff_heading' => $data['tariff_heading'] ?? null,
+
                   'is_exempt' => $data['is_exempt'] ?? false,
                   'is_identificacion_especifica' => $data['is_identificacion_especifica'] ?? false
               ]
