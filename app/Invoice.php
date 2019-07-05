@@ -45,6 +45,10 @@ class Invoice extends Model
         $tipo = "Nota de crédito";
       }else if( $this->document_type == '04' ) {
         $tipo = "Tiquete";
+      }else if( $this->document_type == '08' ) {
+        $tipo = "Factura de exportación";
+      }else if( $this->document_type == '09' ) {
+        $tipo = "Factura de compra";
       }else if( $this->document_type == '02' ) {
         $tipo = "Nota de débito";
       }else if( $this->document_type == '1' ) {
@@ -203,6 +207,21 @@ class Invoice extends Model
               $this->client_id_number = $client->id_number;
             }else{
               $this->client_first_name = 'N/A';
+            }
+            
+            if( $this->document_type == '09' ) {
+              $this->client_first_name = $this->company->name;
+              $this->client_last_name = $this->company->last_name;
+              $this->client_last_name2 = $this->company->last_name2;
+              $this->client_email = $this->company->email;
+              $this->client_address = $this->company->address;
+              $this->client_country = $this->company->country;
+              $this->client_state = $this->company->state;
+              $this->client_city = $this->company->city;
+              $this->client_district = $this->company->district;
+              $this->client_zip = $this->company->zip;
+              $this->client_phone = $this->company->phone;
+              $this->client_id_number = $this->company->id_number;
             }
             
             //Fechas
