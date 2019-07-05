@@ -13,10 +13,15 @@
       $tipoHacienda = "FEE";
       $titulo = "Factura electrónica de exportación";
   }else if($document_type == "09"){
-      $tipoHacienda = "FEE";
+      $tipoHacienda = "FEC";
       $titulo = "Factura electrónica de compra";
+  }else if($document_type == "02"){
+      $tipoHacienda = "ND";
+      $titulo = "Nota de débito";
   }
-
+if(!isset($document_type)){
+    $document_type = '01';
+}
 ?>
 @section('title') 
   Enviar {{ $titulo }}
