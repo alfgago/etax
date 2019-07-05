@@ -225,7 +225,7 @@
                       <td>{{ \App\Variables::getTipoSoportadoIVAName($item->iva_type) }} </td>
                       <td>{{ $item->subtotal }}</td>
                       <td>{{ $item->iva_amount }}</td>
-                      <td>{{ $item->total }}</td>
+                      <td>{{ $item->total }} </td>
                       <td class='acciones'>
                         <span title='Editar linea' class='btn-editar-item text-success mr-2' onclick="abrirPopup('linea-popup'); cargarFormItem({{ $loop->index }});"> <i class="fa fa-pencil" aria-hidden="true"></i> </span> 
                         <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ $loop->index }});' > <i class="fa fa-trash-o" aria-hidden="true"></i> </span> 
