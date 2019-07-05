@@ -45,6 +45,10 @@ class Invoice extends Model
         $tipo = "Nota de crédito";
       }else if( $this->document_type == '04' ) {
         $tipo = "Tiquete";
+      }else if( $this->document_type == '08' ) {
+        $tipo = "Factura de exportación";
+      }else if( $this->document_type == '09' ) {
+        $tipo = "Factura de compra";
       }else if( $this->document_type == '02' ) {
         $tipo = "Nota de débito";
       }else if( $this->document_type == '1' ) {

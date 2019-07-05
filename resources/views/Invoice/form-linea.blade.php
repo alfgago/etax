@@ -99,7 +99,7 @@
 
     <div class="form-group col-md-3">
       <label for="precio_unitario">Precio unitario</label>
-      @if( $document_type != "09"  )
+      @if( @$document_type != "09"  )
       <input type="number" min="0" class="form-control" id="precio_unitario" value="" number >
       @else
       <input type="number" min="0" class="form-control" id="precio_unitario" readonly value="0" number >
@@ -108,7 +108,7 @@
 
     <div class="form-group col-md-3">
       <label for="item_iva">Monto IVA</label>
-      <input type="number" min="0" class="form-control {{ $document_type == '09' ? 'is-fec' : 'not-fec' }}" id="item_iva_amount" placeholder="" >
+      <input type="number" min="0" class="form-control {{ @$document_type == '09' ? 'is-fec' : 'not-fec' }}" id="item_iva_amount" placeholder="" >
     </div>
 
     <div class="form-group col-md-3">
@@ -141,7 +141,7 @@
       </label>
     </div>
     
-    <div class="form-group col-md-12 inline-form inline-checkbox {{ $document_type == '09' ? 'hidden' : '' }}">
+    <div class="form-group col-md-12 inline-form inline-checkbox {{ @$document_type == '08' || @$document_type == '09' ? 'hidden' : '' }}">
         <label for="checkExoneracion">
             <span>Incluir exoneraci&oacute;n</span>
             <input type="checkbox" class="form-control" id="checkExoneracion" onchange="mostrarCamposExoneracion();">
