@@ -357,7 +357,6 @@ class UserController extends Controller {
     }
 
     public function cancelar(){
-        Mail::to("juan@5e.cr")->send(new NotifyCancellation(['team' => "$company->name"]));
         return view('users.cancelar');
     }
     public function updatecancelar(Request $request){
@@ -365,8 +364,10 @@ class UserController extends Controller {
         $user_id = auth()->user()->companies->first()->user_id;
         Sales::where('user_id', $user_id)
                ->where('company_id', $company_id)
-               ->update(['status' => 4, 'cancellation_reason']);
+               ->update(['status' => 4, 'cancellation_reason' => $request->motivo]);
+        Mail::to("juan@5e.cr")->send(new \App\Mail\NotifyCancellation(auth()->user()->companies->first()));
         Auth::logout();
+        return redirect("login")->withError('Su subscripción se ha cancelado');
     }
 
 

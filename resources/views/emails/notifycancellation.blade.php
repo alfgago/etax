@@ -1,12 +1,9 @@
 @component('mail::message')
-<strong>¡Hola !</strong>
-<p>Usted ha sido invitado a unirse al equipo de empresa: {{ $content['name'] }}</p>
+<strong>¡Hola {{@$content->first_name}} {{@$content->last_name}} {{@$content->last_name2}}!</strong>
+<p>Se ha cancelado el plan de su cuenta en eTax.</p>
 
-@component('mail::button', ['url' => route($content['path'], $content['invite']->accept_token)])
- Únase ya
-@endcomponent
 
-Si cree que esta invitación le ha llegado por error, ignore este correo.<br>
+Si desea reactivar su cuenta por favor comuniquese con nosotros dentro de los próximos 15 días.<br>
 
 Saludos de parte de todo el equipo de eTax.
 @endcomponent
