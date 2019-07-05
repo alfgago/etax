@@ -872,7 +872,7 @@ $( document ).ready(function() {
       calcularConIvaManual();
     });
     
-    $('#item_iva_amount').on('click', function(){
+    $('#item_iva_amount.not-fec').on('click', function(){
       alert('Puede cambiar el monto de IVA manualmente, pero se recomienda utilizar el monto calculado automáticamente.');
     });
     

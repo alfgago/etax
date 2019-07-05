@@ -205,6 +205,21 @@ class Invoice extends Model
               $this->client_first_name = 'N/A';
             }
             
+            if( $this->document_type == '09' ) {
+              $this->client_first_name = $this->company->name;
+              $this->client_last_name = $this->company->last_name;
+              $this->client_last_name2 = $this->company->last_name2;
+              $this->client_email = $this->company->email;
+              $this->client_address = $this->company->address;
+              $this->client_country = $this->company->country;
+              $this->client_state = $this->company->state;
+              $this->client_city = $this->company->city;
+              $this->client_district = $this->company->district;
+              $this->client_zip = $this->company->zip;
+              $this->client_phone = $this->company->phone;
+              $this->client_id_number = $this->company->id_number;
+            }
+            
             //Fechas
             $fecha = Carbon::createFromFormat('d/m/Y g:i A',
                 $request->generated_date . ' ' . $request->hora);

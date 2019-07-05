@@ -22,12 +22,9 @@
 if(!isset($document_type)){
     $document_type = '01';
 }
-
-$company = currentCompanyModel();
-
 ?>
 @section('title') 
-  Enviar {{ $titulo }}
+  Enviar Factura electrónica de compra
 @endsection
 
 @section('content') 
@@ -37,7 +34,7 @@ $company = currentCompanyModel();
 
           @csrf
           
-          @if( ! @$company->certificateExists() )
+          @if( ! @currentCompanyModel()->certificateExists() )
             <div class="alert alert-warning">Usted aún no ha subido su certificado ATV, requerido para la facturación electrónica. Para subirlo ingrese a <a href="http://app.calculodeiva.com/empresas/certificado">este enlace</a>.</div>
           @endif
           
@@ -46,37 +43,10 @@ $company = currentCompanyModel();
           <div class="form-row">
             <div class="col-md">
               <div class="form-row">
+                
                 <div class="col-md-6">
                   <div class="form-row">
-                    @if( $document_type != "09"  )
-                    <div class="form-group col-md-12">
-                      <h3>
-                        Cliente
-                      </h3>
-                      <div onclick="abrirPopup('nuevo-cliente-popup');" class="btn btn-agregar btn-agregar-cliente">Nuevo cliente</div>
-                    </div>  
                     
-                    <div class="form-group col-md-12 with-button">
-                      <label for="cliente">Seleccione el cliente</label>
-                      <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
-                        <option value='' selected>-- Seleccione un cliente --</option>
-                        @foreach ( currentCompanyModel()->clients as $cliente )
-                          <option value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
-                        @endforeach
-                      </select>
-                    </div>
-                    @else
-                      <div class="form-group col-md-12">
-                        <h3>
-                          Cliente
-                        </h3>
-                      </div>
-                      <div class="form-group col-md-12">
-                        <label for="actual">Empresa actual</label>
-                        <input disabled readonly class="form-control" type="text" value="{{ $company->id_number . ' - ' . $company->name.' '.$company->last_name.' '.$company->last_name2 }}">
-                      </div>
-                      
-                    @endif
                     <div class="form-group col-md-12">
                       <label for="send_email">Enviar copia a:</label>
                       <input type="email" class="form-control" name="send_email" id="send_email" value="">
@@ -293,7 +263,6 @@ $company = currentCompanyModel();
           @include( 'Invoice.form-nuevo-cliente' )
             <input type="text" hidden value="{{ $document_type }}" name="document_type" id="document_type">
           <div class="btn-holder hidden">
-           
             <button id="btn-submit" type="submit" class="btn btn-primary">Enviar factura electrónica</button>
           </div>
 
@@ -303,11 +272,7 @@ $company = currentCompanyModel();
 @endsection
 
 @section('breadcrumb-buttons')
-@if( $document_type != "09"  )
   <button id='btn-submit-fe' onclick="$('#btn-submit').click();" class="btn btn-primary">Enviar factura electrónica</button>
-@else
-  <p class="description mt-4">FEC temporalmente deshabilitada. Muy pronto en funcionamiento al finalizar el día. Nos disculpamos por la inconveniencia.</p>
- @endif
 @endsection
 
 @section('footer-scripts')
