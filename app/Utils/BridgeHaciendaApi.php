@@ -45,8 +45,10 @@ class BridgeHaciendaApi
 
     public function createInvoice(Invoice $invoice, $token) {
         try {
+            $invoiceUtils = new InvoiceUtils();
             $requestDetails = $invoiceUtils->setDetails43($invoice->items);
             $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
+
             $company = $invoice->company;
             if ($requestData !== false) {
                 $client = new Client();
@@ -83,7 +85,7 @@ class BridgeHaciendaApi
                         $xml->save();
                         Log::info('XML Guardado -->>' . 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml");
 
-                        $invoiceUtils = new InvoiceUtils();
+                       
                         $file = $invoiceUtils->sendInvoiceEmail( $invoice, $company, $path );
                         //Send to queue invoice
                         ProcessInvoice::dispatch($invoice->id, $company->id, $token)

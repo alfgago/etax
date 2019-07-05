@@ -7,6 +7,7 @@ use App\Company;
 use App\Invoice;
 
 use App\AvailableInvoices;
+use App\Variables;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -205,7 +206,7 @@ class InvoiceUtils
     }
     
     
-        private function setDetails43($data) {
+    public function setDetails43($data) {
         try {
             $details = null;
             foreach ($data as $key => $value) {
@@ -219,8 +220,8 @@ class InvoiceUtils
                     'montoTotalLinea' => $value['subtotal'] + $value['iva_amount'] ?? '',
                     'descuento' => $value['discount'] ?? '',
                     'impuesto_codigo' => '01',
-                    'tipo_iva' => $value['tipo_iva'],
-                    'impuesto_codigo_tarifa' => Variables::getCodigoTarifaVentas($value['tipo_iva']),
+                    'tipo_iva' => $value['iva_type'],
+                    'impuesto_codigo_tarifa' => Variables::getCodigoTarifaVentas($value['iva_type']),
                     'impuesto_tarifa' => $value['iva_percentage'] ?? '',
                     'impuesto_factor_IVA' => $value['iva_percentage'] / 100,
                     'impuesto_monto' => $value['iva_amount'] ?? '',
@@ -241,7 +242,7 @@ class InvoiceUtils
         }
     }
     
-    private function setInvoiceData43( Invoice $data, $details ) {
+    public function setInvoiceData43( Invoice $data, $details ) {
         try {
             $company = $data->company;
             /*$ref = getInvoiceReference($company->last_invoice_ref_number) + 1;

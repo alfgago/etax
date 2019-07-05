@@ -58,6 +58,7 @@ class ProcessInvoice implements ShouldQueue
                 if ($invoice->hacienda_status == '01' && $invoice->document_type == '01') {
                     $requestDetails = $invoiceUtils->setDetails43($invoice->items);
                     $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
+                    
                     $apiHacienda = new BridgeHaciendaApi();
                     $tokenApi = $apiHacienda->login(false);
                     if ($requestData !== false) {
