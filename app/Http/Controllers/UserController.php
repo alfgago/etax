@@ -10,6 +10,7 @@ use App\User;
 use App\Sales;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\Mail;
 use DB;
 use Hash;
 use Auth;
@@ -354,4 +355,19 @@ class UserController extends Controller {
             }
         }
     }
+
+    public function cancelar(){
+        Mail::to("juan@5e.cr")->send(new NotifyCancellation(['team' => "$company->name"]));
+        return view('users.cancelar');
+    }
+    public function updatecancelar(Request $request){
+        $company_id = auth()->user()->companies->first()->id;
+        $user_id = auth()->user()->companies->first()->user_id;
+        Sales::where('user_id', $user_id)
+               ->where('company_id', $company_id)
+               ->update(['status' => 4, 'cancellation_reason']);
+        Auth::logout();
+    }
+
+
 }
