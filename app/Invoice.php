@@ -532,8 +532,10 @@ class Invoice extends Model
                             ->where('year', $invoice->year)
                             ->where('month', $invoice->month)
                             ->first();
-      $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
-      $available_invoices->save();
+      if( isset($available_invoices) ) {
+        $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
+        $available_invoices->save();
+      }
       
       return $insert;
       
