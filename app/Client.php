@@ -26,6 +26,21 @@ class Client extends Model
   public function toString() {
     return $this->id_number . " - " . $this->getFullName();
   }
+  
+  public function canInvoice() {
+    $allow = true;
+    if( isset($this->email) ) {
+      $allow = false;
+    }
+    if( isset($this->district) ) {
+      $allow = false;
+    }
+    if( isset($this->zip) ) {
+      $allow = false;
+    }
+    
+    return $allow;
+  }
 
   public function getTipoPersona() {
     $tipoStr = 'Física';
