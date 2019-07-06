@@ -110,7 +110,7 @@ class InvoiceUtils
                 Mail::to($cc)->send(new \App\Mail\Invoice(['xml' => $xmlPath,
                     'data_invoice' => $invoice, 'data_company' =>$company]));
             } else {
-                Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['xml' => $xmlPath,
+                Mail::to(!empty($invoice->client_email) ? $invoice->client_email : $company->email)->send(new \App\Mail\Invoice(['xml' => $xmlPath,
                     'data_invoice' => $invoice, 'data_company' =>$company]));
             }
             Log::info('Se enviaron correos con PDF y XML: ' .$invoice->id );
@@ -232,6 +232,7 @@ class InvoiceUtils
                     'exoneracion_monto' => $value['exoneration_amount'] ?? '',
                     'exoneracion_company' => $value['exoneration_company_name'] ?? '',
                     'impuesto_neto' => $value['impuesto_neto'] ?? '',
+                    'tariff_heading' => $value['tariff_heading'] ?? '',
                     'base_imponible' => 0,
                 );
             }
@@ -295,10 +296,11 @@ class InvoiceUtils
                 'receptor_ubicacion_canton' => substr($receptorPostalCode,1,2),	
                 'receptor_ubicacion_distrito' => substr($receptorPostalCode,3),	
                 'receptor_ubicacion_otras_senas' => $data['client_address'] ?? '',	
-                'receptor_otras_senas_extranjero' => $data['foreign_address'] ?? '',	
-                'receptor_email' => $data['client_email'] ?? '',	
+                'receptor_otras_senas_extranjero' => $data['client_address'] ?? '',
+                'receptor_email' => $data['client_email'] ?? '',
+                'receptor_phone' => !empty($data['client_phone']) ? $data['client_phone'] : '00000000',
                 'receptor_cedula_numero' => $data['client_id_number'] ? preg_replace("/[^0-9]/", "", $data['client_id_number']) : '',	
-                'receptor_postal_code' => $receptorPostalCode ?? '',	
+                'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',	
                 'tipocambio' => $data['currency_rate'] ?? '',	
                 'tipo_documento' => $data['document_type'] ?? '',	

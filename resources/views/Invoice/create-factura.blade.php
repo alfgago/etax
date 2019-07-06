@@ -10,11 +10,11 @@
     $tipoHacienda = "TE";
     $titulo = "Tiquete electrónico";
   }else if($document_type == "08"){
-      $tipoHacienda = "FEE";
-      $titulo = "Factura electrónica de exportación";
-  }else if($document_type == "09"){
       $tipoHacienda = "FEC";
       $titulo = "Factura electrónica de compra";
+  }else if($document_type == "09"){
+      $tipoHacienda = "FEE";
+      $titulo = "Factura electrónica de exportación";
   }else if($document_type == "02"){
       $tipoHacienda = "ND";
       $titulo = "Nota de débito";
@@ -37,9 +37,9 @@ $company = currentCompanyModel();
 
           @csrf
           
-          @if( ! @$company->certificateExists() )
-            <div class="alert alert-warning">Usted aún no ha subido su certificado ATV, requerido para la facturación electrónica. Para subirlo ingrese a <a href="http://app.calculodeiva.com/empresas/certificado">este enlace</a>.</div>
-          @endif
+{{--          @if( ! @$company->certificateExists() )--}}
+{{--            <div class="alert alert-warning">Usted aún no ha subido su certificado ATV, requerido para la facturación electrónica. Para subirlo ingrese a <a href="http://app.calculodeiva.com/empresas/certificado">este enlace</a>.</div>--}}
+{{--          @endif--}}
           
           <input type="hidden" id="current-index" value="0">
 
@@ -48,7 +48,7 @@ $company = currentCompanyModel();
               <div class="form-row">
                 <div class="col-md-6">
                   <div class="form-row">
-                    @if( $document_type != "09"  )
+                    @if( $document_type != "08"  )
                     <div class="form-group col-md-12">
                       <h3>
                         Cliente
@@ -305,11 +305,11 @@ $company = currentCompanyModel();
 @endsection
 
 @section('breadcrumb-buttons')
-@if( $document_type != "09"  )
+{{--@if( $document_type != "09"  )--}}
   <button id='btn-submit-fe' onclick="$('#btn-submit').click();" class="btn btn-primary">Enviar factura electrónica</button>
-@else
-  <p class="description mt-4">FEC temporalmente deshabilitada. Muy pronto en funcionamiento al finalizar el día. Nos disculpamos por la inconveniencia.</p>
- @endif
+{{--@else--}}
+{{--  <p class="description mt-4">FEC temporalmente deshabilitada. Muy pronto en funcionamiento al finalizar el día. Nos disculpamos por la inconveniencia.</p>--}}
+{{-- @endif--}}
 @endsection
 
 @section('footer-scripts')

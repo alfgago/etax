@@ -67,8 +67,8 @@
                 <div class="subitems">
                     <a href="/facturas-emitidas">Ver documentos emitidos</a>
                     <a href="/facturas-emitidas/emitir-factura/01">Emitir factura electrónica</a>
-                    <a href="/facturas-emitidas/emitir-factura/08">Emitir factura electrónica de exportación</a>
-                    <a href="/facturas-emitidas/emitir-factura/09">Emitir factura electrónica de compra</a>
+                    <a href="/facturas-emitidas/emitir-factura/09">Emitir factura electrónica de exportación</a>
+                    <a href="/facturas-emitidas/emitir-factura/08">Emitir factura electrónica de compra</a>
                     <a href="/facturas-emitidas/emitir-factura/04">Emitir tiquete electrónico</a>
                     <a href="/facturas-emitidas/emitir-factura/02">Emitir nota de débito</a>
                     <a href="/facturas-recibidas/aceptaciones">Aceptación de facturas recibidas</a>

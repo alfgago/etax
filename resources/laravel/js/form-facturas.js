@@ -147,6 +147,7 @@
     var montoExoneracion = $('#montoExoneracion').val();
     var impuestoNeto = $('#impuestoNeto').val();
     var montoTotalLinea = $('#montoTotalLinea').val();
+    var tariff_heading = $('#tariff_heading').val();
 
     if( !monto_iva ) {
       monto_iva = 0;
@@ -207,6 +208,7 @@
                    "<input type='hidden' class='montoExoneracion' name='items["+index+"][montoExoneracion]' value='"+montoExoneracion+"'>" +
                    "<input type='hidden' class='impuestoNeto' name='items["+index+"][impuestoNeto]' value='"+impuestoNeto+"'>" +
                    "<input type='hidden' class='montoTotalLinea' name='items["+index+"][montoTotalLinea]' value='"+montoTotalLinea+"'>" +
+                   "<input type='hidden' class='tariff_heading' name='items["+index+"][tariff_heading]' value='"+tariff_heading+"'>" +
               "</div>"
 
                    ;

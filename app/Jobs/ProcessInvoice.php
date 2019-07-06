@@ -55,7 +55,7 @@ class ProcessInvoice implements ShouldQueue
             $invoice = Invoice::find($this->invoiceId);
             $company = Company::find($this->companyId);
             if ( $company->atv_validation ) {
-                if ($invoice->hacienda_status == '01' && $invoice->document_type == '01') {
+                if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '08' || '09'))) {
                     $requestDetails = $invoiceUtils->setDetails43($invoice->items);
                     $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
                     
