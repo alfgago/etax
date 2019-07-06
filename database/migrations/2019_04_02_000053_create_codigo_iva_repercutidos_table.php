@@ -13,12 +13,20 @@ class CreateCodigoIvaRepercutidosTable extends Migration
      */
     public function up()
     {
+        $this->down();
         Schema::create('codigo_iva_repercutidos', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->string('id')->primary();
             $table->string('code')->nullable();
             $table->string('name')->nullable();
+            $table->string('invoice_code')->nullable();
             $table->double('percentage')->default(0);
             $table->boolean('hidden')->default(false);
+            $table->boolean('hidden2018')->default(false);
+            $table->boolean('is_estado')->default(false);
+            $table->boolean('is_bienes')->default(false);
+            $table->boolean('is_servicio')->default(false);
+            $table->boolean('is_capital')->default(false);
+            $table->boolean('is_gravado')->default(false);
             $table->timestamps();
         });
     }

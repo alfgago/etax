@@ -556,6 +556,16 @@ toastr.options = {
       $('#item_iva_amount').val(0);
     }
     
+    if( !precio_unitario ) {
+      precio_unitario = 0;
+      $('#precio_unitario').val(0);
+    }
+    
+    if( !cantidad ) {
+      cantidad = 1;
+      $('#cantidad').val(1);
+    }
+    
     if( $( '#document_number').val() == "TOTALES2018" ) {
       codigo = $('#codigo').val( "L" + numero  );
       nombre = $('#nombre').val( "TIPO-" + tipo_iva  );
