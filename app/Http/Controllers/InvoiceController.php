@@ -210,8 +210,8 @@ class InvoiceController extends Controller
         }
         return view("Invoice/create-factura", ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
 
-            'document_number' => $this->getDocReference('01'),
-            'document_key' => $this->getDocumentKey('01'), 'units' => $units])->with('arrayActividades', $arrayActividades);
+            'document_number' => $this->getDocReference($tipoDocumento),
+            'document_key' => $this->getDocumentKey($tipoDocumento), 'units' => $units])->with('arrayActividades', $arrayActividades);
     }
     
     /**
@@ -286,14 +286,33 @@ class InvoiceController extends Controller
                 $invoice->payment_receipt = "";
                 $invoice->generation_method = "etax";
                 $invoice->xml_schema = 43;
-                $invoice->reference_number = $company->last_invoice_ref_number + 1;
+                if ($request->document_type == '01') {
+                    $invoice->reference_number = $company->last_invoice_ref_number + 1;
+                }
+                if ($request->document_type == '08') {
+                    $invoice->reference_number = $company->last_invoice_pur_ref_number + 1;
+                }
+                if ($request->document_type == '09') {
+                    $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
+                }
+
                 $invoiceData = $invoice->setInvoiceData($request);
                 if (!empty($invoiceData)) {
                     $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
                 }
-                $company->last_invoice_ref_number = $invoice->reference_number;
-                $company->last_document = $invoice->document_number;
-                
+                if ($request->document_type == '01') {
+                    $company->last_invoice_ref_number = $invoice->reference_number;
+                    $company->last_document = $invoice->document_number;
+
+                } elseif ($request->document_type == '08') {
+                    $company->last_invoice_pur_ref_number = $invoice->reference_number;
+                    $company->last_document_invoice_pur = $invoice->document_number;
+
+                }  elseif ($request->document_type == '09') {
+                    $company->last_invoice_exp_ref_number = $invoice->reference_number;
+                    $company->last_document_invoice_exp = $invoice->document_number;
+                }
+
                 $company->save();
                 if ($invoice->hacienda_status == '03') {
                    // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
@@ -910,7 +929,15 @@ class InvoiceController extends Controller
     }
     
     private function getDocReference($docType) {
-        $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;
+        if ($docType == '01') {
+            $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;
+        }
+        if ($docType == '08') {
+            $lastSale = currentCompanyModel()->last_invoice_pur_ref_number + 1;
+        }
+        if ($docType == '09') {
+            $lastSale = currentCompanyModel()->last_invoice_exp_ref_number + 1;
+        }
         $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
 
         return $consecutive;
@@ -919,8 +946,17 @@ class InvoiceController extends Controller
     private function getDocumentKey($docType) {
         $company = currentCompanyModel();
         $invoice = new Invoice();
+        if ($docType == '01') {
+            $ref = $company->last_invoice_ref_number + 1;
+        }
+        if ($docType == '08') {
+            $ref = $company->last_invoice_pur_ref_number + 1;
+        }
+        if ($docType == '09') {
+            $ref = $company->last_invoice_exp_ref_number + 1;
+        }
         $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
-            '1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
+            '1'.$invoice->getHashFromRef($ref);
 
         return $key;
     }

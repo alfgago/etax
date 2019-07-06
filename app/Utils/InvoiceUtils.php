@@ -110,7 +110,7 @@ class InvoiceUtils
                 Mail::to($cc)->send(new \App\Mail\Invoice(['xml' => $xmlPath,
                     'data_invoice' => $invoice, 'data_company' =>$company]));
             } else {
-                Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['xml' => $xmlPath,
+                Mail::to(!empty($invoice->client_email) ? $invoice->client_email : $company->email)->send(new \App\Mail\Invoice(['xml' => $xmlPath,
                     'data_invoice' => $invoice, 'data_company' =>$company]));
             }
             Log::info('Se enviaron correos con PDF y XML: ' .$invoice->id );
