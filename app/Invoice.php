@@ -46,9 +46,9 @@ class Invoice extends Model
       }else if( $this->document_type == '04' ) {
         $tipo = "Tiquete";
       }else if( $this->document_type == '08' ) {
-        $tipo = "Factura de exportación";
-      }else if( $this->document_type == '09' ) {
         $tipo = "Factura de compra";
+      }else if( $this->document_type == '09' ) {
+        $tipo = "Factura de exportación";
       }else if( $this->document_type == '02' ) {
         $tipo = "Nota de débito";
       }else if( $this->document_type == '1' ) {
@@ -324,7 +324,6 @@ class Invoice extends Model
                   'iva_amount' => $data['iva_amount'] ?? 0,
                   'tariff_heading' => $data['tariff_heading'] ?? null,
                   'is_exempt' => $data['is_exempt'] ?? false,
-                  'is_identificacion_especifica' => $data['is_identificacion_especifica'] ?? false
               ]
           );
           

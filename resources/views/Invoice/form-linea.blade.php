@@ -32,7 +32,7 @@
     <?php if( @$document_type == "09"){ ?>
         <div class="form-group col-md-4">
             <label for="nombre">Partida Arancelaria</label>
-            <input type="text" class="form-control" id="tariff_heading" value="" name="tariff_heading">
+            <input type="text" class="form-control" id="tariff_heading" value="">
         </div>
     <?php
       $class = 'form-group col-md-8';

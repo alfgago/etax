@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actividades;
 use App\AvailableInvoices;
+use App\CodigosPaises;
 use App\UnidadMedicion;
 use App\Utils\BridgeHaciendaApi;
 use App\Utils\InvoiceUtils;
@@ -93,7 +94,7 @@ class InvoiceController extends Controller
                 ])->render();
             }) 
             ->editColumn('client', function(Invoice $invoice) {
-                return $invoice->clientName();
+                return !empty($invoice->client_first_name) ? $invoice->client_first_name.' '.$invoice->client_last_name : $invoice->clientName();
             })
             ->editColumn('hacienda_status', function(Invoice $invoice) {
                 if ($invoice->hacienda_status == '03') {
@@ -198,6 +199,7 @@ class InvoiceController extends Controller
         }*/
         
         $units = UnidadMedicion::all()->toArray();
+        $countries  = CodigosPaises::all()->toArray();
 
         $arrayActividades = $company->getActivities();
         
@@ -211,7 +213,7 @@ class InvoiceController extends Controller
         return view("Invoice/create-factura", ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
 
             'document_number' => $this->getDocReference($tipoDocumento),
-            'document_key' => $this->getDocumentKey($tipoDocumento), 'units' => $units])->with('arrayActividades', $arrayActividades);
+            'document_key' => $this->getDocumentKey($tipoDocumento), 'units' => $units, 'countries' => $countries])->with('arrayActividades', $arrayActividades);
     }
     
     /**
@@ -265,6 +267,7 @@ class InvoiceController extends Controller
     public function sendHacienda(Request $request)
     {
         //revision de branch para segmentacion de funcionalidades por tipo de documento
+
         try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
             $request->validate([
