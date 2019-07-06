@@ -64,9 +64,12 @@
       <label for="country">País *</label>
       <select class="form-control checkEmpty" name="country" id="country" >
         <option value="CR" selected>Costa Rica</option>
+        @foreach ($countries as $country )
+          <option value="{{ $country['country_code'] }}" >{{ $country['country_name'] }}</option>
+        @endforeach
       </select>
     </div>
-    
+
     <div class="form-group col-md-4">
       <label for="state">Provincia</label>
       <select class="form-control" name="state" id="state" onchange="fillCantones();">

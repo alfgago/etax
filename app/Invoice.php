@@ -46,9 +46,9 @@ class Invoice extends Model
       }else if( $this->document_type == '04' ) {
         $tipo = "Tiquete";
       }else if( $this->document_type == '08' ) {
-        $tipo = "Factura de exportación";
-      }else if( $this->document_type == '09' ) {
         $tipo = "Factura de compra";
+      }else if( $this->document_type == '09' ) {
+        $tipo = "Factura de exportación";
       }else if( $this->document_type == '02' ) {
         $tipo = "Nota de débito";
       }else if( $this->document_type == '1' ) {
@@ -126,7 +126,7 @@ class Invoice extends Model
     **/
     public function setInvoiceData($request)
     {
-        //try {
+        try {
             $this->document_key = $request->document_key;
             $this->document_number = $request->document_number;
             $this->sale_condition = $request->sale_condition;
@@ -209,7 +209,7 @@ class Invoice extends Model
               $this->client_first_name = 'N/A';
             }
             
-            if( $this->document_type == '09' ) {
+            if( $this->document_type == '08' ) {
               $this->client_first_name = $this->company->name;
               $this->client_last_name = $this->company->last_name;
               $this->client_last_name2 = $this->company->last_name2;
@@ -255,10 +255,10 @@ class Invoice extends Model
             }
             return $this;
 
-        /*} catch (\Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error al crear factura: '.$e->getMessage());
             return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
-        }*/
+        }
     }
   
     public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, 
@@ -323,9 +323,7 @@ class Invoice extends Model
                   'iva_percentage' => $data['iva_percentage'] ?? 0,
                   'iva_amount' => $data['iva_amount'] ?? 0,
                   'tariff_heading' => $data['tariff_heading'] ?? null,
-
                   'is_exempt' => $data['is_exempt'] ?? false,
-                  'is_identificacion_especifica' => $data['is_identificacion_especifica'] ?? false
               ]
           );
           

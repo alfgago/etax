@@ -549,10 +549,21 @@ toastr.options = {
     var montoExoneracion = $('#montoExoneracion').val();
     var impuestoNeto = $('#impuestoNeto').val();
     var montoTotalLinea = $('#montoTotalLinea').val();
+    var tariff_heading = $('#tariff_heading').val();
 
     if( !monto_iva ) {
       monto_iva = 0;
       $('#item_iva_amount').val(0);
+    }
+    
+    if( !precio_unitario ) {
+      precio_unitario = 0;
+      $('#precio_unitario').val(0);
+    }
+    
+    if( !cantidad ) {
+      cantidad = 1;
+      $('#cantidad').val(1);
     }
     
     if( $( '#document_number').val() == "TOTALES2018" ) {
@@ -599,6 +610,7 @@ toastr.options = {
                    "<input type='hidden' class='montoExoneracion' name='items["+index+"][montoExoneracion]' value='"+montoExoneracion+"'>" +
                    "<input type='hidden' class='impuestoNeto' name='items["+index+"][impuestoNeto]' value='"+impuestoNeto+"'>" +
                    "<input type='hidden' class='montoTotalLinea' name='items["+index+"][montoTotalLinea]' value='"+montoTotalLinea+"'>" +
+                   "<input type='hidden' class='tariff_heading' name='items["+index+"][tariff_heading]' value='"+tariff_heading+"'>" +
               "</div>"
 
                    ;
