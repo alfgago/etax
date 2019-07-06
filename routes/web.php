@@ -224,3 +224,6 @@ Route::get('/private/exportar', 'SubscriptionPlanController@exportar')->name('su
 
 Route::get('/admin/impersonate/{id}', 'UserController@impersonate');
 Route::get('/admin/leave', 'UserController@leaveImpersonation');
+
+Route::get('consolidar-tarjetas', 'PaymentMethodController@consolidar_tarjetas')->name('PaymentMethod.consolidar_tarjetas');
+Route::post('confirmar-pago-tarjeta', 'PaymentMethodController@confirmar_pago_tarjeta')->name('PaymentMethod.confirmar_pago_tarjeta');

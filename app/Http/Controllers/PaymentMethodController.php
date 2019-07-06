@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\PaymentMethod;
+use App\Invoice;
 use App\Utils\PaymentUtils;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -226,6 +227,26 @@ class PaymentMethodController extends Controller
             $mensaje = 'Transacción no disponible en este momento';
             return redirect()->back()->withError($mensaje);
         }
+    }
+
+
+    public function consolidar_tarjetas(){
+        //dd(auth()->user()->companies->first()->id);
+       $invoices = Invoice::where()
+                    ->where(['payment_type','=','02'],
+                        ['company_id','=',auth()->user()->companies->first()->id])
+                    ->orWhere(['payment_type','=','02'],
+                        ['company_id','=',auth()->user()->companies->first()->id])
+                    ->get();
+
+        //dd($invoices);
+        return view('payment_methods.consolidar_tarjetas')->with('invoices',$invoices);
+    }
+
+    public function confirmar_pago_tarjeta(Request $request ){
+        Invoice::where('id', $request->documento)
+                ->update(['confirm_payment_card' => $request->confirmacion]);
+        return response()->json(['success'=>$request->confirmacion]);
     }
 
     /**
