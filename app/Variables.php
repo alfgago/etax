@@ -151,6 +151,9 @@ class Variables
 
       foreach ($lista as $tipo) {
           if( $codigo == $tipo['codigo'] ){
+              if($codigo > 200) {
+                return null;
+              }
               return $tipo['codigo_tarifa'];
           }
       }
