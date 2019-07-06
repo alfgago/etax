@@ -551,7 +551,7 @@ class BillController extends Controller
         
         $current_company = currentCompanyModel();
 
-        if (empty($current_company->last_rec_ref_number)) {
+        if ($current_company->last_rec_ref_number == null) {
             return redirect('/empresas/configuracion')->withError( "No ha ingresado ultimo consecutivo de recepcion");
         }
         
