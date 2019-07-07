@@ -39,14 +39,21 @@ class EmailController extends Controller
             $file = $request->file('attachment1');
             EmailController::processAttachment( $file );
         }catch( \Throwable $ex ){
-            Log::warning( "Hubo un error durante el proceso de guardar la factura via Email. Mensaje:" . $ex->getMessage());
+            
         }
         
         try {
             $file2 = $request->file('attachment2');
             EmailController::processAttachment( $file2 );
         }catch( \Throwable $ex ){
-            Log::warning( "Hubo un error durante el proceso de guardar la factura2 via Email. Mensaje:" . $ex->getMessage());
+            
+        }
+        
+        try {
+            $file3 = $request->file('attachment3');
+            EmailController::processAttachment( $file3 );
+        }catch( \Throwable $ex ){
+            
         }
         
         return response()->json([
@@ -75,7 +82,7 @@ class EmailController extends Controller
                 Log::info( "Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor");
             }
         }catch( \Throwable $ex ){
-            Log::warning( "No se pudo guardar la factura de compra via Email. Mensaje:" . $ex->getMessage());
+            //Log::warning( "No se pudo guardar la factura de compra via Email. Mensaje:" . $ex->getMessage());
         }
        
         try {  
@@ -86,7 +93,7 @@ class EmailController extends Controller
                 Log::info( "Se registró la factura de venta $consecutivoComprobante para la empresa $identificacionEmisor");
             }
         }catch( \Throwable $ex ){
-            Log::warning( "No se pudo guardar la factura de venta via Email. Mensaje:" . $ex->getMessage());
+            //Log::warning( "No se pudo guardar la factura de venta via Email. Mensaje:" . $ex->getMessage());
         }
         
         return true;

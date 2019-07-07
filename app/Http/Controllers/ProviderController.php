@@ -220,6 +220,24 @@ class ProviderController extends Controller
         $proveedors = Excel::toCollection( new ProviderImport(), request()->file('archivo') );
         $company_id = currentCompany(); 
         foreach ($proveedors[0] as $row){
+            
+            $zip = 0;
+            
+            if( $row['canton'] ) {
+                if( strlen( (int)$row['canton'] ) <= 2 ) {
+                    $row['canton'] = (int)$row['provincia'] . str_pad((int)$row['canton'], 2, '0', STR_PAD_LEFT);
+                }
+            }
+            
+            if( $row['distrito'] ) {
+                if( strlen( $row['distrito'] ) > 4 ) {
+                    $zip = (int)$row['distrito'];
+                }else{
+                    $row['distrito'] = (int)$row['canton'] . str_pad((int)$row['distrito'], 2, '0', STR_PAD_LEFT);
+                    $zip = $row['distrito'];
+                }
+            }
+            
             Provider::updateOrCreate(
                 [
                     'id_number' => $row['identificacion'],
@@ -238,6 +256,7 @@ class ProviderController extends Controller
                     'state' => $row['provincia'],
                     'city' => $row['canton'],
                     'district' => $row['distrito'],
+                    'zip' => $zip,
                     'neighborhood' => $row['barrio'],
                     'address' => $row['direccion'],
                     'phone' => $row['telefono'],
