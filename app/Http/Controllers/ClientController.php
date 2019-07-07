@@ -239,13 +239,35 @@ class ClientController extends Controller
         $clientes = Excel::toCollection( new ClientImport(), request()->file('archivo') );
         $company_id = currentCompany();  
         foreach ($clientes[0] as $row){
+            
+            $zip = 0;
+            
+            if( $row['canton'] ) {
+                if( strlen( (int)$row['canton'] ) <= 2 ) {
+                    $row['canton'] = (int)$row['provincia'] . str_pad((int)$row['canton'], 2, '0', STR_PAD_LEFT);
+                }
+            }
+            
+            if( $row['distrito'] ) {
+                if( strlen( $row['distrito'] ) > 4 ) {
+                    $zip = (int)$row['distrito'];
+                }else{
+                    $row['distrito'] = (int)$row['canton'] . str_pad((int)$row['distrito'], 2, '0', STR_PAD_LEFT);
+                    $zip = $row['distrito'];
+                }
+            }
+            
+            $correosCopia = $row['correoscopia'];
+            $correosCopia = str_replace(";", ",", $correosCopia);
+            
+            
             Client::updateOrCreate(
                 [
                     'id_number' => $row['identificacion'],
                     'company_id' => $company_id,
                 ],
                 [
-                    'code' => $row['codigo'] ? $row['codigo'] : '',
+                    'code' => $row['codigo'] ? $row['codigo'] : 'No indica',
                     'company_id' => $company_id,
                     'tipo_persona' => $row['tipopersona'],
                     'id_number' => $row['identificacion'],
@@ -253,11 +275,12 @@ class ClientController extends Controller
                     'last_name' => $row['primerapellido'],
                     'last_name2' => $row['segundoapellido'],
                     'email' => $row['correo'],
-                    'billing_emails' => $row['correoscopia'],
+                    'billing_emails' => $correosCopia,
                     'country' => $row['pais'],
                     'state' => $row['provincia'],
                     'city' => $row['canton'],
                     'district' => $row['distrito'],
+                    'zip' => $zip,
                     'neighborhood' => $row['barrio'],
                     'address' => $row['direccion'],
                     'foreign_address' => $row['direccion'],
