@@ -143,11 +143,12 @@ class InvoiceController extends Controller
         $arrayActividades = $company->getActivities();
     
         //Termina de revisar limite de facturas.
+        $countries  = CodigosPaises::all()->toArray();
         $units = UnidadMedicion::all()->toArray();
         if( count($arrayActividades) == 0 ){
             return redirect('/empresas/editar')->withErrors('No ha definido una actividad comercial para esta empresa');
         }
-        return view("Invoice/create-factura-manual", ['units' => $units])->with('arrayActividades', $arrayActividades);
+        return view("Invoice/create-factura-manual", ['units' => $units, 'countries' => $countries])->with('arrayActividades', $arrayActividades);
     }
 
     /**
