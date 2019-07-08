@@ -365,7 +365,7 @@ class UserController extends Controller {
         Sales::where('user_id', $user_id)
                ->where('company_id', $company_id)
                ->update(['status' => 4, 'cancellation_reason' => $request->motivo]);
-        Mail::to("juan@5e.cr")->send(new \App\Mail\NotifyCancellation(auth()->user()->companies->first()));
+        Mail::to(auth()->user()->companies->first()->email)->send(new \App\Mail\NotifyCancellation(auth()->user()->companies->first()));
         Auth::logout();
         return redirect("login")->withError('Su subscripción se ha cancelado');
     }
