@@ -640,7 +640,7 @@ class BillController extends Controller
                 $bill = Bill::findOrFail($id);
                 $company = currentCompanyModel();
                 if (!empty($bill)) {
-                    if( $bill->provider_zip ) {
+                    if( !$bill->provider_zip ) {
                         $bill->accept_status = $request->respuesta;
                         $bill->save();
                         $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
