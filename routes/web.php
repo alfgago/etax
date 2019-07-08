@@ -236,3 +236,8 @@ Route::prefix('bank-account')->group(function() {
     Route::get('/editar/{id}', 'Bank_accountController@editar')->name('Bank_account.editar');
     Route::post('/actualizar', 'Bank_accountController@actualizar')->name('Bank_account.actualizar');
 });
+
+
+Route::prefix('consolidad_pagos')->group(function() {
+    Route::get('/', 'InvoicesPaymentsController@lista')->name('InvoicesPaymentsController.lista');
+});
