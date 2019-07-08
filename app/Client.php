@@ -29,14 +29,17 @@ class Client extends Model
   
   public function canInvoice() {
     $allow = true;
-    if( isset($this->email) ) {
+    if( empty($this->email) ) {
       $allow = false;
     }
-    if( isset($this->district) ) {
-      $allow = false;
-    }
-    if( isset($this->zip) ) {
-      $allow = false;
+    
+    if( $this->country == 'CR' ) {
+      if( empty($this->district) ) {
+        $allow = false;
+      }
+      if( empty($this->zip) ) {
+        $allow = false;
+      }
     }
     
     return $allow;
