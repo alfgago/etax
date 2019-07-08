@@ -722,6 +722,7 @@ class BillController extends Controller
         $bills = Bill::where('generation_method', 'Email')->orWhere('generation_method', 'XML')->get();
 
         foreach($bills as $bill) {
+            try {
             if( !$bill->provider_zip ){
                 $file = $billUtils->downloadXml( $bill, $bill->company_id );
                 if($file) {
@@ -730,6 +731,9 @@ class BillController extends Controller
                     $arr = json_decode( $json, TRUE );
                     $bill = Bill::saveBillXML( $arr, $bill->generation_method );
                 }
+            }
+            }catch(\Throwable $e){
+                Log::warning("No se pudo arreglar la $bill->id " . $e->getMessage());
             }
         }
         
