@@ -51,6 +51,8 @@ Route::prefix('cierres')->group(function() {
     Route::patch('abrir-rectificacion/{id}', 'BookController@openForRectification');
 });
 
+
+
 // Rutas de empresa
 Route::prefix('empresas')->group(function() {
     Route::get('editar', 'CompanyController@edit')->name('Company.edit');
@@ -225,3 +227,12 @@ Route::get('/private/exportar', 'SubscriptionPlanController@exportar')->name('su
 Route::get('/admin/impersonate/{id}', 'UserController@impersonate');
 Route::get('/admin/leave', 'UserController@leaveImpersonation');
 
+
+//rutas cuentas bancarias
+Route::prefix('bank-account')->group(function() {
+    Route::get('/', 'Bank_accountController@index')->name('Bank_account.index');
+    Route::get('/crear', 'Bank_accountController@crear')->name('Bank_account.crear');
+    Route::post('/guardar', 'Bank_accountController@guardar')->name('Bank_account.guardar');
+    Route::get('/editar/{id}', 'Bank_accountController@editar')->name('Bank_account.editar');
+    Route::post('/actualizar', 'Bank_accountController@actualizar')->name('Bank_account.actualizar');
+});
