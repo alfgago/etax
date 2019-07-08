@@ -173,11 +173,6 @@ class CalculatedTax extends Model
               if( $invoiceItems[$i]->invoice->currency == 'CRC' ) {
                 $invoiceItems[$i]->invoice->currency_rate = 1;
               }
-              
-              if( $invoiceItems[$i]->invoice->document_type == '03' ) {
-                $invoiceItems[$i]->subtotal = $invoiceItems[$i]->subtotal * -1;
-                $invoiceItems[$i]->iva_amount = $invoiceItems[$i]->iva_amount * -1;
-              }
             
               $subtotal = $invoiceItems[$i]->subtotal * $invoiceItems[$i]->invoice->currency_rate;
               //$currentTotal = $invoiceItems[$i]->total * $invoiceItems[$i]->invoice->currency_rate;
@@ -189,6 +184,12 @@ class CalculatedTax extends Model
               $subtotal = round($subtotal, 2);
               $invoiceIva = round($invoiceIva, 2);
               $currentTotal = round($currentTotal, 2);
+              
+              if( $invoiceItems[$i]->invoice->document_type == '03' ) {
+                $subtotal = $subtotal * -1;
+                $invoiceIva = $invoiceIva * -1;
+                $currentTotal = $currentTotal * -1;
+              }
               
               $ivaType = $ivaType ? $ivaType : '103';
               
