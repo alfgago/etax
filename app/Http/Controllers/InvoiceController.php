@@ -346,9 +346,10 @@ class InvoiceController extends Controller
         
         $company = currentCompanyModel();
         $arrayActividades = $company->getActivities();
+        $countries  = CodigosPaises::all()->toArray();
 
         $units = UnidadMedicion::all()->toArray();
-        return view('Invoice/show', compact('invoice','units', 'arrayActividades') );
+        return view('Invoice/show', compact('invoice','units','arrayActividades','countries') );
     }
 
 
@@ -458,7 +459,7 @@ class InvoiceController extends Controller
                         $inserts = array();
                         foreach ($facturas as $row){
                             $i++;
-                            //dd($row);
+                            
                             $arrayRow = array();
                             /*if($available_invoices_by_plan > 0){
                                 $available_invoices_by_plan = $available_invoices_by_plan - 1;
@@ -713,8 +714,8 @@ class InvoiceController extends Controller
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3.
-                        if( Invoice::saveInvoiceXML( $arr, 'XML' ) ) {
-                            $invoice = Invoice::where('company_id', $company->id)->where('document_number', $consecutivoComprobante)->first();
+                        $invoice = Invoice::saveInvoiceXML( $arr, 'XML' );
+                        if( $invoice ) {
                             Invoice::storeXML( $invoice, $file );
                         }
                     }else{
@@ -963,5 +964,25 @@ class InvoiceController extends Controller
             '1'.$invoice->getHashFromRef($ref);
 
         return $key;
+    }
+    
+    public function fixImports() {
+        $invoiceUtils = new InvoiceUtils();
+        $invoices = Invoice::where('generation_method', 'Email')->orWhere('generation_method', 'XML')->get();
+        
+        foreach($invoices as $invoice) {
+            if( !$invoice->client_zip ){
+                $file = $invoiceUtils->downloadXml( $invoice, $invoice->company_id );
+                if($file) {
+                    $xml = simplexml_load_string($file);
+                    $json = json_encode( $xml ); // convert the XML string to JSON
+                    $arr = json_decode( $json, TRUE );
+                    $invoice = Invoice::saveInvoiceXML( $arr, $invoice->generation_method );
+                }
+            }
+        }
+        
+        dd($invoices);
+        return true;
     }
 }

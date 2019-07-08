@@ -75,6 +75,12 @@ class Bill extends Model
         return Carbon::parse($this->due_date);
     }
     
+    //Relacion con hacienda
+    public function xmlHacienda()
+    {
+        return $this->hasOne(XmlHacienda::class);
+    }
+    
     /**
     * Asigna los datos de la factura segun el request recibido
     **/
@@ -88,7 +94,6 @@ class Bill extends Model
       $this->buy_order = $request->buy_order;
       $this->other_reference = $request->other_reference;
     
-      //$provider;
       //Datos de proveedor
       if( $request->provider_id == '-1' ){
           $tipo_persona = $request->tipo_persona;
@@ -181,36 +186,7 @@ class Bill extends Model
       return $this;
       
     }
-  
-    /*public function addItem( 
-      $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, $total, $discount_percentage, 
-      $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $porc_identificacion_plena, $is_exempt )
-    {
-      return BillItem::create([
-        'bill_id' => $this->id,
-        'company_id' => $this->company_id,
-        'year' => $this->year,
-        'month' => $this->month,
-        'item_number' => $item_number,
-        'code' => $code,
-        'name' => $name,
-        'product_type' => $product_type,
-        'measure_unit' => $measure_unit,
-        'item_count' => $item_count,
-        'unit_price' => $unit_price,
-        'subtotal' => $subtotal,
-        'total' => $total,
-        'discount_type' => '01',
-        'discount' => $discount_percentage,
-        'iva_type' => $iva_type,
-        'iva_percentage' => $iva_percentage,
-        'iva_amount' => $iva_amount,
-        'is_exempt' => $is_exempt,
-        'porc_identificacion_plena' => $porc_identificacion_plena
-      ]);
-      
-    }*/
-
+    
 
     public function addEditItem(array $data)
     {
@@ -236,251 +212,75 @@ class Bill extends Model
                   'iva_percentage' => $data['iva_percentage'] ?? 0,
                   'iva_amount' => $data['iva_amount'] ?? 0,
                   'is_exempt' => $data['is_exempt'] ?? false,
-                  'porc_identificacion_plena' =>  $data['porc_identificacion_plena'] ?? 0,
-                  'exoneration_document_type' => $data['exoneration_document_type'] ?? null,
-                  'exoneration_document_number' => $data['exoneration_document_number'] ?? null,
-                  'exoneration_company_name' => $data['exoneration_company_name'] ?? null,
-                  'exoneration_porcent' => $data['exoneration_porcent'] ?? 0,
-                  'exoneration_amount' => $data['exoneration_amount'] ?? 0,
-                  'impuesto_neto' => $data['impuesto_neto'] ?? 0,
-                  'exoneration_total_amount' => $data['exoneration_total_amount'] ?? 0
+                  'porc_identificacion_plena' =>  $data['porc_identificacion_plena'] ?? 0
               ]
           );
+          
+          try {
+            $exonerationDate = isset( $data['exoneration_date'] )  ? Carbon::createFromFormat('d/m/Y', $data['exoneration_date']) : null;
+          }catch( \Exception $e ) {
+            $exonerationDate = null;
+          }
+          if( $exonerationDate && $data['exoneration_document_type'] && $data['exoneration_document_number'] ) {
+            $item->exoneration_document_type = $data['exoneration_document_type'] ?? null;
+            $item->exoneration_document_number = $data['exoneration_document_number'] ?? null;
+            $item->exoneration_company_name = $data['exoneration_company_name'] ?? null;
+            $item->exoneration_porcent = $data['exoneration_porcent'] ?? 0;
+            $item->exoneration_amount = $data['exoneration_amount'] ?? 0;
+            $item->exoneration_date = $exonerationDate;
+            $item->exoneration_total_amount = $data['exoneration_total_amount'] ?? 0;
+            $item->impuesto_neto = isset($data['impuesto_neto']) ? $data['iva_amount'] - $data['montoExoneracion'] : $data['iva_amount'];
+            $item->save();
+          }
+          
           return $item;
       } else {
           return false;
       }
     }
     
-    public static function importBillRow ( $arrayImportBill ) {
-      
-      //Revisa si el método es por correo electrónico. De ser así, usa busca la compañia por cedula.
-      if( $arrayImportBill['metodoGeneracion'] != "Email" ){
-        $company = currentCompanyModel();
-      }else{
-        //Si es email, busca por ID del receptor para encontrar la compañia
-        $company = Company::where('id_number', $arrayImportBill['idReceptor'])->first();
-      }
-      
-      if( ! $company ) {
-        return false;
-      }
-      
-      $identificacionProveedor = preg_replace("/[^0-9]/", "", $arrayImportBill['identificacionProveedor']);
-      $providerCacheKey = "import-proveedors-$identificacionProveedor-".$company->id;
-      if ( !Cache::has($providerCacheKey) ) {
-          $proveedorCache =  Provider::firstOrCreate(
-              [
-                  'id_number' => $identificacionProveedor,
-                  'company_id' => $company->id,
-              ],
-              [
-                  'code' => $arrayImportBill['codigoProveedor'],
-                  'company_id' => $company->id,
-                  'tipo_persona' => str_pad($arrayImportBill['tipoPersona'], 2, '0', STR_PAD_LEFT),
-                  'id_number' => $identificacionProveedor,
-                  'first_name' => $arrayImportBill['nombreProveedor'],
-                  'email' => $arrayImportBill['correoProveedor'],
-                  'phone' => $arrayImportBill['telefonoProveedor'],
-                  'fullname' => "$identificacionProveedor - " . $arrayImportBill['nombreProveedor']
-              ]
-          );
-          Cache::put($providerCacheKey, $proveedorCache, 30);
-          $proveedorCache->save();
-      }
-      $proveedor = Cache::get($providerCacheKey);
-      
-      $billCacheKey = "import-factura-$identificacionProveedor-" . $company->id . "-" . $arrayImportBill['consecutivoComprobante'];
-      if ( !Cache::has($billCacheKey) ) {
-      
-          $bill = Bill::firstOrNew(
-              [
-                  'company_id' => $company->id,
-                  'provider_id' => $proveedor->id,
-                  'document_number' => $arrayImportBill['consecutivoComprobante'],
-                  'document_key' => $arrayImportBill['claveFactura'],
-              ]
-          );
-          
-          if( !$bill->exists ) {
-              
-              $bill->company_id = $company->id;
-              $bill->provider_id = $proveedor->id;    
-      
-              //Datos generales y para Hacienda
-              if( $arrayImportBill['tipoDocumento'] == '01' || $arrayImportBill['tipoDocumento'] == '02' || $arrayImportBill['tipoDocumento'] == '03' || $arrayImportBill['tipoDocumento'] == '04'
-                  || $arrayImportBill['tipoDocumento'] == '05' || $arrayImportBill['tipoDocumento'] == '06' || $arrayImportBill['tipoDocumento'] == '07' || $arrayImportBill['tipoDocumento'] == '08' || $arrayImportBill['tipoDocumento'] == '99' ) {
-                  $bill->document_type = $arrayImportBill['tipoDocumento'];
-              } else {
-                 $bill->document_type = '01'; 
-              }
-              
-              $bill->reference_number = $company->last_bill_ref_number + 1;
-              $bill->document_number =  $arrayImportBill['consecutivoComprobante'];
-              $bill->document_key =  $arrayImportBill['claveFactura'];
-              $bill->xml_schema =  $arrayImportBill['xmlSchema'] ?? 43;
-              $bill->commercial_activity =  $arrayImportBill['codigoActividad'] ?? '0';
-              
-              //Datos generales
-              $bill->sale_condition = $arrayImportBill['condicionVenta'];
-              $bill->payment_type = $arrayImportBill['metodoPago'];
-              $bill->credit_time = 0;
-              $bill->description = $arrayImportBill['descripcion'];
-
-              $bill->generation_method = $arrayImportBill['metodoGeneracion'];
-              $bill->is_authorized = $arrayImportBill['isAuthorized'];
-              $bill->is_code_validated = $arrayImportBill['codeValidated'];
-
-
-              $bill->provider_id_number = preg_replace("/[^0-9]/", "", $arrayImportBill['identificacionProveedor']);
-              $bill->provider_first_name = $arrayImportBill['nombreProveedor'];
-              $bill->provider_last_name = '';
-              $bill->provider_last_name2 = '';
-              $bill->provider_email = $arrayImportBill['correoProveedor'];
-              $bill->provider_address = '';
-              $bill->provider_country = '';
-              $bill->provider_city = '';
-              $bill->provider_state = '';
-              $bill->provider_district = '';
-              $bill->provider_phone = $arrayImportBill['telefonoProveedor'];
-              $bill->provider_zip = '';
-              
-              if($arrayImportBill['metodoGeneracion'] == 'Email' || $arrayImportBill['metodoGeneracion'] == 'XML') {
-                $bill->accept_status = 0;
-                $bill->hacienda_status = "01";
-              }else{
-                $bill->accept_status = 1;
-                $bill->hacienda_status = "03";
-              }
-
-              $bill->is_void = false;
-              
-              //Datos de factura
-              $bill->currency = $arrayImportBill['idMoneda'];
-              if( $bill->currency == 1 ) { $bill->currency = "CRC"; }
-              if( $bill->currency == 2 ) { $bill->currency = "USD"; }
-                  
-              $bill->currency_rate = $arrayImportBill['tipoCambio'];
-              //$bill->description = $row['description'] ? $row['description'] : '';
-            
-              $company->last_bill_ref_number = $bill->reference_number;
-              
-              $bill->subtotal = 0;
-              $bill->iva_amount = 0;
-              $bill->total = $arrayImportBill['totalDocumento'];
-              
-              $bill->save();
-              $company->save();
-              
-          }   
-          Cache::put($billCacheKey, $bill, 30);
-      }
-      $bill = Cache::get($billCacheKey);
-      
-      try{
-        $bill->generated_date = Carbon::createFromFormat('d/m/Y', $arrayImportBill['fechaEmision']);
-      }catch( \Exception $ex ){
-        $dt =\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($arrayImportBill['fechaEmision']);
-        $bill->generated_date = Carbon::instance($dt);
-      }
-      
-      try{
-        $bill->due_date = Carbon::createFromFormat('d/m/Y', $arrayImportBill['fechaVencimiento']);
-      }catch( \Exception $ex ){
-        $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($arrayImportBill['fechaVencimiento']);
-        $bill->due_date = Carbon::instance($dt);
-      }
-      
-      $year = $bill->generated_date->year;
-      $month = $bill->generated_date->month;
-      
-      $bill->year = $year;
-      $bill->month = $month;
-    
-      /**LINEA DE FACTURA**/
-      $item = BillItem::firstOrNew(
-          [
-              'bill_id' => $bill->id,
-              'item_number' => $arrayImportBill['numeroLinea'],
-          ]
-      );
-      
-      $insert = false;
-      
-      if( !$item->exists ) {
-          $bill->subtotal = $bill->subtotal + $arrayImportBill['subtotalLinea'];
-          $bill->iva_amount = $bill->iva_amount + $arrayImportBill['montoIva'];
-          
-          $insert = [
-              'bill_id' => $bill->id,
-              'company_id' => $company->id,
-              'year' => $year,
-              'month' => $month,
-              'item_number' => $arrayImportBill['numeroLinea'],
-              'code' => $arrayImportBill['codigoProducto'],
-              'name' => $arrayImportBill['detalleProducto'],
-              'product_type' => 1,
-              'measure_unit' => $arrayImportBill['unidadMedicion'],
-              'item_count' => $arrayImportBill['cantidad'],
-              'unit_price' => $arrayImportBill['precioUnitario'],
-              'subtotal' => $arrayImportBill['subtotalLinea'],
-              'total' => $arrayImportBill['totalLinea'],
-              'discount_type' => '01',
-              'discount' => $arrayImportBill['montoDescuento'],
-              'iva_type' => $arrayImportBill['codigoEtax'],
-              'iva_amount' => $arrayImportBill['montoIva'],
-              'exoneration_document_type' => $arrayImportBill['tipoDocumentoExoneracion'],
-              'exoneration_document_number' => $arrayImportBill['documentoExoneracion'],
-              'exoneration_company_name' => $arrayImportBill['companiaExoneracion'],
-              'exoneration_porcent' => $arrayImportBill['porcentajeExoneracion'],
-              'exoneration_amount' => $arrayImportBill['montoExoneracion'],
-              'impuesto_neto' => $arrayImportBill['impuestoNeto'],
-              'exoneration_total_amount' => $arrayImportBill['totalMontoLinea']
-          ];
-      }
-      
-      clearBillCache($bill);
-      
-      if( $arrayImportBill['totalNeto'] != 0 ) {
-        $bill->subtotal = $arrayImportBill['totalNeto'];
-      }
-      
-      $bill->save();
-      return $insert;
-      
-    }
     
     public static function saveBillXML( $arr, $metodoGeneracion ) {
-        $inserts = array();
-        
-        $claveFactura = $arr['Clave'];
-        $codigoActividad = $arr['CodigoActividad'] ?? 0;
-        $consecutivoComprobante = $arr['NumeroConsecutivo'];
-        $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10))->format('d/m/Y');
-        $fechaVencimiento = $fechaEmision;
-        $nombreProveedor = $arr['Emisor']['Nombre'];
-        $tipoPersona = $arr['Emisor']['Identificacion']['Tipo'];
-        $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
-        $codigoProveedor = $identificacionProveedor;
-        $correoProveedor = $arr['Emisor']['CorreoElectronico'];
-        
-        
-        if ( isset($arr['Emisor']['Telefono']) ) {
-          $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'] ?? null;
+      
+        $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
+        if( $metodoGeneracion != "Email" ){
+          $company = currentCompanyModel();
         }else{
-          $telefonoProveedor = null;
+          //Si es email, busca por ID del receptor para encontrar la compañia
+          $company = Company::where('id_number', $identificacionReceptor)->first();
         }
         
-        $tipoIdReceptor = $arr['Receptor']['Identificacion']['Tipo'];
-        $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
-        $nombreReceptor = $arr['Receptor']['Nombre'];
-        $condicionVenta = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
-        $plazoCredito = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
-        $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
+        if( ! $company ) {
+          return false;
+        }
+      
+        $bill = Bill::firstOrNew(
+              [
+                  'company_id' => $company->id,
+                  'document_number' => $arr['NumeroConsecutivo'],
+                  'document_key' => $arr['Clave'],
+              ]
+        );
         
+        $bill->commercial_activity = $arr['CodigoActividad'] ?? 0;
+        $bill->xml_schema = $bill->commercial_activity ? 43 : 42;
+        $bill->sale_condition = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
+        $bill->credit_time = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
+        $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
         if ( is_array($medioPago) ) {
           $medioPago = $medioPago[0];
         }
+        $bill->payment_type = $medioPago;
+        
+        //Fechas
+        $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10));
+        $bill->generated_date = $fechaEmision;
+        $bill->due_date = $fechaEmision;
+        
+        $month = $fechaEmision->month;
+        $year = $fechaEmision->year;
+        $bill->month = $month;
+        $bill->year = $year;
         
         if( array_key_exists( 'CodigoTipoMoneda', $arr['ResumenFactura'] ) ) {
           $idMoneda = $arr['ResumenFactura']['CodigoTipoMoneda']['CodigoMoneda'] ?? '';
@@ -489,26 +289,126 @@ class Bill extends Model
           $idMoneda = $arr['ResumenFactura']['CodigoMoneda'] ?? '';
           $tipoCambio = array_key_exists('TipoCambio', $arr['ResumenFactura']) ? $arr['ResumenFactura']['TipoCambio'] : '1';
         }
+        $bill->currency = $idMoneda;
+        $bill->currency_rate = $tipoCambio;
         
-        $totalDocumento = $arr['ResumenFactura']['TotalComprobante'];
-        $totalNeto = $arr['ResumenFactura']['TotalVentaNeta'];
-        
-        $tipoDocumento = $arr['TipoDoc'] ?? '01';
-        $descripcion = 'XML Importado';
+        $bill->description = 'XML Importado';
+        $bill->document_type = $arr['TipoDoc'] ?? '01';
+        $bill->total = $arr['ResumenFactura']['TotalComprobante'];
         
         $authorize = true;
         if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
             $authorize = false;
         }
         
-        $lineas = $arr['DetalleServicio']['LineaDetalle'];
+        $bill->accept_status = 0;
+        $bill->hacienda_status = "03";
+        $bill->payment_status = "01";
+        $bill->generation_method = $metodoGeneracion;
+        $bill->is_authorized = $authorize;
+        $bill->is_code_validated = false;
+        
+        //Start DATOS PROVEEDOR
+              $nombreProveedor = $arr['Emisor']['Nombre'];
+              $tipoPersona = $arr['Emisor']['Identificacion']['Tipo'];
+              $tipoPersona = str_pad($tipoPersona, 2, '0', STR_PAD_LEFT);
+              $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
+              $codigoProveedor = $identificacionProveedor;
+              $correoProveedor = $arr['Emisor']['CorreoElectronico'];
+              
+              if ( isset($arr['Emisor']['Ubicacion']) ) {
+                $provinciaProveedor = $arr['Emisor']['Ubicacion']['Provincia'];
+                $cantonProveedor = $arr['Emisor']['Ubicacion']['Canton'];
+                $distritoProveedor = $arr['Emisor']['Ubicacion']['Distrito'];
+                $otrasSenas = $arr['Emisor']['Ubicacion']['OtrasSenas'] ?? null;
+                
+                $zipProveedor = 0;
+                if( $cantonProveedor ) {
+                    if( strlen( (int)$cantonProveedor ) <= 2 ) {
+                        $cantonProveedor = (int)$provinciaProveedor . str_pad((int)$cantonProveedor, 2, '0', STR_PAD_LEFT);
+                    }
+                }
+                if( $distritoProveedor ) {
+                    if( strlen( $distritoProveedor ) > 4 ) {
+                        $zipProveedor = $distritoProveedor;
+                    }else{
+                        $distritoProveedor = (int)$cantonProveedor . str_pad((int)$distritoProveedor, 2, '0', STR_PAD_LEFT);
+                        $zipProveedor = $distritoProveedor;
+                    }
+                }
+              }else{
+                $provinciaProveedor = '1';
+                $cantonProveedor = '101';
+                $distritoProveedor = '10101';
+                $zipProveedor = '10101';
+                $otrasSenas = null;
+              }
+              
+              if ( isset($arr['Emisor']['Telefono']) ) {
+                $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'] ?? null;
+              }else{
+                $telefonoProveedor = null;
+              }
+              
+              $providerCacheKey = "import-proveedors-$identificacionProveedor-".$company->id;
+              if ( !Cache::has($providerCacheKey) ) {
+                  $proveedorCache =  Provider::updateOrCreate(
+                      [
+                          'id_number' => $identificacionProveedor,
+                          'company_id' => $company->id,
+                      ],
+                      [
+                          'code' => $codigoProveedor,
+                          'company_id' => $company->id,
+                          'tipo_persona' => $tipoPersona,
+                          'id_number' => $identificacionProveedor,
+                          'first_name' => $nombreProveedor,
+                          'email' => $correoProveedor,
+                          'phone' => $telefonoProveedor,
+                          'fullname' => "$identificacionProveedor - " . $nombreProveedor,
+                          'country' => 'CR',
+                          'state' => $provinciaProveedor,
+                          'city' => $cantonProveedor,
+                          'district' => $distritoProveedor,
+                          'zip' => $zipProveedor,
+                          'address' => $otrasSenas,
+                      ]
+                  );
+                  Cache::put($providerCacheKey, $proveedorCache, 30);
+              }
+              $proveedor = Cache::get($providerCacheKey);
+              
+              $bill->provider_id = $proveedor->id;
+              $bill->provider_id_number = $identificacionProveedor;
+              $bill->provider_first_name = $nombreProveedor;
+              $bill->provider_email = $correoProveedor;
+              $bill->provider_address = $otrasSenas;
+              $bill->provider_country = 'CR';
+              $bill->provider_state = $provinciaProveedor;
+              $bill->provider_city = $cantonProveedor;
+              $bill->provider_district = $distritoProveedor;
+              $bill->provider_zip = $zipProveedor;
+              $bill->provider_phone = $telefonoProveedor;
+              
+        //End DATOS PROVEEDOR
+        
+        //El subtotal y iva_amount inicia en 0, lo va sumando conforme recorre las lineas.
+        $bill->subtotal = 0;
+        $bill->iva_amount = 0;
+        
         //Revisa si es una sola linea. Si solo es una linea, lo hace un array para poder entrar en el foreach.
+        $lineas = $arr['DetalleServicio']['LineaDetalle'];
         if( array_key_exists( 'NumeroLinea', $lineas ) ) {
             $lineas = [$arr['DetalleServicio']['LineaDetalle']];
         }
         
+        $bill->save();
+        
+        $lids = array();
+        $items = array();
+        $numeroLinea = 0;
         foreach( $lineas as $linea ) {
-            $numeroLinea = $linea['NumeroLinea'];
+            $numeroLinea++;
             try {
               $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] ?? '' : '';
             } catch( \Throwable $e ) {
@@ -523,75 +423,76 @@ class Bill extends Model
             $montoDescuento = array_key_exists('MontoDescuento', $linea) ? $linea['MontoDescuento'] : 0;
             $codigoEtax = '003'; //De momento asume que todo en 4.2 es al 13%.
             $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
-
+            $porcentajeIva = null;
+            $impuestoNeto = $linea['ImpuestoNeto'] ?? 0;
+            $totalMontoLinea = $linea['MontoTotalLinea'] ?? 0;
+            
+            $tipoDocumentoExoneracion = null;
+            $documentoExoneracion = null;
+            $companiaExoneracion = null;
+            $fechaExoneracion = null;
+            $porcentajeExoneracion = 0;
+            $montoExoneracion = 0;
             if( array_key_exists('Impuesto', $linea) ) {
               //$codigoEtax = $linea['Impuesto']['CodigoTarifa'];
               $montoIva = $linea['Impuesto']['Monto'];
+              $porcentajeIva = $linea['Impuesto']['Tarifa'];
+              
+              if( array_key_exists('Exoneracion', $linea['Impuesto']) ) {
+                $tipoDocumentoExoneracion = $linea['Impuesto']['Exoneracion']['TipoDocumento'] ?? null;
+                $documentoExoneracion = $linea['Impuesto']['Exoneracion']['NumeroDocumento']  ?? null;
+                $companiaExoneracion = $linea['Impuesto']['Exoneracion']['NombreInstitucion'] ?? null;
+                $fechaExoneracion = $linea['Impuesto']['Exoneracion']['FechaEmision'] ?? null;
+                $porcentajeExoneracion = $linea['Impuesto']['Exoneracion']['PorcentajeExoneracion'] ?? 0;
+                $montoExoneracion = $linea['Impuesto']['Exoneracion']['MontoExoneracion'] ?? 0;
+              }
+              
             }
-
-            $tipoDocumentoExoneracion = $linea['tipoDocumentoExoneracion'] ?? null;
-            $documentoExoneracion = $linea['documentoExoneracion']  ?? null;
-            $companiaExoneracion = $linea['companiaExoneracion'] ?? null;
-            $porcentajeExoneracion = $linea['porcentajeExoneracion'] ?? 0;
-            $montoExoneracion = $linea['montoExoneracion'] ?? 0;
-            $impuestoNeto = $linea['impuestoNeto'] ?? 0;
-            $totalMontoLinea = $linea['totalMontoLinea'] ?? 0;
-
-            $arrayImportBillRow = array(
-                'metodoGeneracion' => $metodoGeneracion,
-                'identificacionReceptor' => $identificacionReceptor,
-                'idReceptor' => $identificacionReceptor,
-                'nombreProveedor' => $nombreProveedor,
-                'codigoProveedor' => $codigoProveedor,
-                'tipoPersona' => $tipoPersona,
-                'identificacionProveedor' => $identificacionProveedor,
-                'correoProveedor' => $correoProveedor,
-                'telefonoProveedor' => $telefonoProveedor,
-                'claveFactura' => $claveFactura,
-                'consecutivoComprobante' => $consecutivoComprobante,
-                'condicionVenta' => $condicionVenta,
-                'metodoPago' => $medioPago,
-                'numeroLinea' => $numeroLinea,
-                'fechaEmision' => $fechaEmision,
-                'fechaVencimiento' => $fechaVencimiento,
-                'idMoneda' => $idMoneda,
-                'tipoCambio' => $tipoCambio,
-                'totalDocumento' => $totalDocumento,
-                'totalNeto' => $totalNeto,
-                'tipoDocumento' => $tipoDocumento,
-                'codigoProducto' => $codigoProducto,
-                'detalleProducto' => $detalleProducto,
-                'unidadMedicion' => $unidadMedicion,
-                'cantidad' => $cantidad,
-                'precioUnitario' => $precioUnitario,
-                'subtotalLinea' => $subtotalLinea,
-                'totalLinea' => $totalLinea,
-                'montoDescuento' => $montoDescuento,
-                'codigoEtax' => $codigoEtax,
-                'montoIva' => $montoIva,
-                'descripcion' => $descripcion,
-                'isAuthorized' => $authorize,
-                'codeValidated' => false,
-                'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
-                'documentoExoneracion' => $documentoExoneracion,
-                'companiaExoneracion' => $companiaExoneracion,
-                'porcentajeExoneracion' => $porcentajeExoneracion,
-                'montoExoneracion' => $montoExoneracion,
-                'impuestoNeto' => $impuestoNeto,
-                'totalMontoLinea' => $totalMontoLinea,
-                'xmlSchema' => $codigoActividad ? 43 : 42,
-                'codigoActividad' => $codigoActividad
-            );
-            $insert = Bill::importBillRow( $arrayImportBillRow );
             
-            if( $insert ) {
-                array_push( $inserts, $insert );
-            }
+            $bill->subtotal = $bill->subtotal + $subtotalLinea;
+            $bill->iva_amount = $bill->iva_amount + $montoIva;
+
+            $item = array(
+              'id' => 0,
+              'item_number' => $numeroLinea,
+              'code' => $codigoProducto,
+              'name' => $detalleProducto,
+              'measure_unit' => $unidadMedicion,
+              'item_count' => $cantidad,
+              'unit_price' => $precioUnitario,
+              'subtotal' => $subtotalLinea,
+              'total' => $totalLinea,
+              'discount_type' => 'No indica',
+              'discount_reason' => 'No indica',
+              'discount_percentage' => $montoDescuento,
+              'discount' => $montoDescuento,
+              'iva_type' => $codigoEtax,
+              'iva_percentage' => $porcentajeIva,
+              'iva_amount' => $montoIva,
+              'impuesto_neto' => $impuestoNeto,
+              'exoneration_date' => $fechaExoneracion,
+              'exoneration_document_type' => $tipoDocumentoExoneracion,
+              'exoneration_document_number' => $documentoExoneracion,
+              'exoneration_company_name' => $companiaExoneracion,
+              'exoneration_porcent' => $porcentajeExoneracion,
+              'exoneration_amount' => $montoExoneracion,
+              'exoneration_total_amount' => $totalMontoLinea,
+              'is_exempt' => false,
+              'porc_identificacion_plena' => 13,
+            );
+            
+            $item_modificado = $bill->addEditItem($item);
+            array_push( $lids, $item_modificado->id );
         }
         
-        $items = BillItem::insert($inserts);
+        foreach ( $bill->items as $item ) {
+          if( !in_array( $item->id, $lids ) ) {
+            $item->delete();
+          }
+        }
+        $bill->save();
         
-        return $items;
+        return $bill;
     }
     
     
@@ -622,6 +523,203 @@ class Bill extends Model
         
         return $path;
         
+    }
+    
+    public static function importBillRow ( $data ) {
+      
+      //Revisa si el método es por correo electrónico. De ser así, usa busca la compañia por cedula.
+      if( $data['metodoGeneracion'] != "Email" ){
+        $company = currentCompanyModel();
+      }else{
+        //Si es email, busca por ID del receptor para encontrar la compañia
+        $company = Company::where('id_number', $data['idReceptor'])->first();
+      }
+      
+      if( ! $company ) {
+        return false;
+      }
+      
+      $identificacionProveedor = preg_replace("/[^0-9]/", "", $data['identificacionProveedor']);
+      $providerCacheKey = "import-proveedors-$identificacionProveedor-".$company->id;
+      if ( !Cache::has($providerCacheKey) ) {
+          $proveedorCache =  Provider::firstOrCreate(
+              [
+                  'id_number' => $identificacionProveedor,
+                  'company_id' => $company->id,
+              ],
+              [
+                  'code' => $data['codigoProveedor'],
+                  'company_id' => $company->id,
+                  'tipo_persona' => str_pad($data['tipoPersona'], 2, '0', STR_PAD_LEFT),
+                  'id_number' => $identificacionProveedor,
+                  'first_name' => $data['nombreProveedor'],
+                  'email' => $data['correoProveedor'],
+                  'phone' => $data['telefonoProveedor'],
+                  'fullname' => "$identificacionProveedor - " . $data['nombreProveedor']
+              ]
+          );
+          Cache::put($providerCacheKey, $proveedorCache, 30);
+          $proveedorCache->save();
+      }
+      $proveedor = Cache::get($providerCacheKey);
+      
+      $billCacheKey = "import-factura-$identificacionProveedor-" . $company->id . "-" . $data['consecutivoComprobante'];
+      if ( !Cache::has($billCacheKey) ) {
+      
+          $bill = Bill::firstOrNew(
+              [
+                  'company_id' => $company->id,
+                  'provider_id' => $proveedor->id,
+                  'document_number' => $data['consecutivoComprobante'],
+                  'document_key' => $data['claveFactura'],
+              ]
+          );
+          
+          if( !$bill->exists ) {
+              
+              $bill->company_id = $company->id;
+              $bill->provider_id = $proveedor->id;    
+      
+              //Datos generales y para Hacienda
+              if( $data['tipoDocumento'] == '01' || $data['tipoDocumento'] == '02' || $data['tipoDocumento'] == '03' || $data['tipoDocumento'] == '04'
+                  || $data['tipoDocumento'] == '05' || $data['tipoDocumento'] == '06' || $data['tipoDocumento'] == '07' || $data['tipoDocumento'] == '08' || $data['tipoDocumento'] == '99' ) {
+                  $bill->document_type = $data['tipoDocumento'];
+              } else {
+                 $bill->document_type = '01'; 
+              }
+              
+              $bill->reference_number = $company->last_bill_ref_number + 1;
+              $bill->document_number =  $data['consecutivoComprobante'];
+              $bill->document_key =  $data['claveFactura'];
+              $bill->xml_schema =  $data['xmlSchema'] ?? 43;
+              $bill->commercial_activity =  $data['codigoActividad'] ?? '0';
+              
+              //Datos generales
+              $bill->sale_condition = $data['condicionVenta'];
+              $bill->payment_type = $data['metodoPago'];
+              $bill->credit_time = 0;
+              $bill->description = $data['descripcion'];
+
+              $bill->generation_method = $data['metodoGeneracion'];
+              $bill->is_authorized = $data['isAuthorized'];
+              $bill->is_code_validated = $data['codeValidated'];
+
+              $bill->provider_id_number = preg_replace("/[^0-9]/", "", $data['identificacionProveedor']);
+              $bill->provider_first_name = $data['nombreProveedor'] ?? null;
+              $bill->provider_last_name = '';
+              $bill->provider_last_name2 = '';
+              $bill->provider_email = $data['correoProveedor'] ?? null;
+              $bill->provider_address = $data['otrasSenas'] ?? null;
+              $bill->provider_country = '';
+              $bill->provider_city = $data['provinciaProveedor'] ?? null;
+              $bill->provider_state = $data['cantonProveedor'] ?? null;
+              $bill->provider_district = $data['distritoProveedor'] ?? null;
+              $bill->provider_phone = $data['telefonoProveedor'] ?? null;
+              $bill->provider_zip = $data['zipProveedor'] ?? null;
+              
+              if($data['metodoGeneracion'] == 'Email' || $data['metodoGeneracion'] == 'XML') {
+                $bill->accept_status = 0;
+                $bill->hacienda_status = "01";
+              }else{
+                $bill->accept_status = 1;
+                $bill->hacienda_status = "03";
+              }
+
+              $bill->is_void = false;
+              
+              //Datos de factura
+              $bill->currency = $data['idMoneda'];
+              if( $bill->currency == 1 ) { $bill->currency = "CRC"; }
+              if( $bill->currency == 2 ) { $bill->currency = "USD"; }
+                  
+              $bill->currency_rate = $data['tipoCambio'];
+              //$bill->description = $row['description'] ? $row['description'] : '';
+            
+              $company->last_bill_ref_number = $bill->reference_number;
+              
+              $bill->subtotal = 0;
+              $bill->iva_amount = 0;
+              $bill->total = $data['totalDocumento'];
+              
+              $bill->save();
+              $company->save();
+              
+          }   
+          Cache::put($billCacheKey, $bill, 30);
+      }
+      $bill = Cache::get($billCacheKey);
+      
+      try{
+        $bill->generated_date = Carbon::createFromFormat('d/m/Y', $data['fechaEmision']);
+      }catch( \Exception $ex ){
+        $dt =\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaEmision']);
+        $bill->generated_date = Carbon::instance($dt);
+      }
+      
+      try{
+        $bill->due_date = Carbon::createFromFormat('d/m/Y', $data['fechaVencimiento']);
+      }catch( \Exception $ex ){
+        $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaVencimiento']);
+        $bill->due_date = Carbon::instance($dt);
+      }
+      
+      $year = $bill->generated_date->year;
+      $month = $bill->generated_date->month;
+      
+      $bill->year = $year;
+      $bill->month = $month;
+    
+      /**LINEA DE FACTURA**/
+      $item = BillItem::firstOrNew(
+          [
+              'bill_id' => $bill->id,
+              'item_number' => $data['numeroLinea'],
+          ]
+      );
+      
+      $insert = false;
+      
+      if( !$item->exists ) {
+          $bill->subtotal = $bill->subtotal + $data['subtotalLinea'];
+          $bill->iva_amount = $bill->iva_amount + $data['montoIva'];
+          
+          $insert = [
+              'bill_id' => $bill->id,
+              'company_id' => $company->id,
+              'year' => $year,
+              'month' => $month,
+              'item_number' => $data['numeroLinea'],
+              'code' => $data['codigoProducto'],
+              'name' => $data['detalleProducto'],
+              'product_type' => 1,
+              'measure_unit' => $data['unidadMedicion'],
+              'item_count' => $data['cantidad'],
+              'unit_price' => $data['precioUnitario'],
+              'subtotal' => $data['subtotalLinea'],
+              'total' => $data['totalLinea'],
+              'discount_type' => '01',
+              'discount' => $data['montoDescuento'],
+              'iva_type' => $data['codigoEtax'],
+              'iva_amount' => $data['montoIva'],
+              'exoneration_document_type' => $data['tipoDocumentoExoneracion'],
+              'exoneration_document_number' => $data['documentoExoneracion'],
+              'exoneration_company_name' => $data['companiaExoneracion'],
+              'exoneration_porcent' => $data['porcentajeExoneracion'],
+              'exoneration_amount' => $data['montoExoneracion'],
+              'impuesto_neto' => $data['impuestoNeto'],
+              'exoneration_total_amount' => $data['totalMontoLinea']
+          ];
+      }
+      
+      clearBillCache($bill);
+      
+      if( $data['totalNeto'] != 0 ) {
+        $bill->subtotal = $data['totalNeto'];
+      }
+      
+      $bill->save();
+      return $insert;
+      
     }
     
     public function calculateAcceptFields() {

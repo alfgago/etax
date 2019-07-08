@@ -74,10 +74,9 @@ class EmailController extends Controller
         $consecutivoComprobante = $arr['NumeroConsecutivo'];
         $clave = $arr['Clave'];
         
-        try {  
-            if( Bill::saveBillXML( $arr, 'Email' ) ) {
-                $company = Company::where('id_number', $identificacionReceptor)->first();
-                $bill = Bill::where('company_id', $company->id)->where('document_key', $clave)->first();
+        try {
+            $bill = Bill::saveBillXML( $arr, 'Email' );
+            if( $bill ) {
                 Bill::storeXML( $bill, $file );
                 Log::info( "Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor");
             }
@@ -85,10 +84,9 @@ class EmailController extends Controller
             //Log::warning( "No se pudo guardar la factura de compra via Email. Mensaje:" . $ex->getMessage());
         }
        
-        try {  
-            if( Invoice::saveInvoiceXML( $arr, 'Email' ) ) {
-                $company = Company::where('id_number', $identificacionEmisor)->first();
-                $invoice = Invoice::where('company_id', $company->id)->where('document_number', $consecutivoComprobante)->first();
+        try {
+            $invoice = Invoice::saveInvoiceXML( $arr, 'Email' );
+            if( $invoice ) {
                 Invoice::storeXML( $invoice, $file );
                 Log::info( "Se registró la factura de venta $consecutivoComprobante para la empresa $identificacionEmisor");
             }
