@@ -37,10 +37,6 @@ $company = currentCompanyModel();
 
           @csrf
           
-{{--          @if( ! @$company->certificateExists() )--}}
-{{--            <div class="alert alert-warning">Usted aún no ha subido su certificado ATV, requerido para la facturación electrónica. Para subirlo ingrese a <a href="http://app.calculodeiva.com/empresas/certificado">este enlace</a>.</div>--}}
-{{--          @endif--}}
-          
           <input type="hidden" id="current-index" value="0">
 
           <div class="form-row">
