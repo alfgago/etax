@@ -360,12 +360,14 @@ class UserController extends Controller {
         return view('users.cancelar');
     }
     public function updatecancelar(Request $request){
-        $company_id = currentCompanyModel();
+        $company = currentCompanyModel();
         $user_id = auth()->user()->companies->first()->user_id;
+       
         Sales::where('user_id', $user_id)
-               ->where('company_id', $company_id)
+               ->where('company_id', $company->id)
                ->update(['status' => 4, 'cancellation_reason' => $request->motivo]);
-        Mail::to(auth()->user()->companies->first()->email)->send(new \App\Mail\NotifyCancellation(auth()->user()->companies->first()));
+
+        Mail::to($company->email)->send(new \App\Mail\NotifyCancellation(auth()->user()->companies->first()));
         Auth::logout();
         return redirect("login")->withError('Su subscripción se ha cancelado');
     }
