@@ -360,7 +360,7 @@ class UserController extends Controller {
         return view('users.cancelar');
     }
     public function updatecancelar(Request $request){
-        $company_id = auth()->user()->companies->first()->id;
+        $company_id = currentCompanyModel();
         $user_id = auth()->user()->companies->first()->user_id;
         Sales::where('user_id', $user_id)
                ->where('company_id', $company_id)
