@@ -280,12 +280,99 @@
     <hr class="barra" style="margin-top: 150px">
     <table width="100%" class="total">
         <tr class="item">
-            <td class="title-total">
+            <th class="title-total">
+                Observaciones (Otros)
+            </th>
+            <th class="box-total">
+                Totales
+            </th>
+        </tr>
+        <tr>
+            <td>
 
             </td>
+            <td>
+                <b>Total servicios gravados {{ $data_invoice->currency }}:</b><span>{{round($data_invoice->total, 2)}}</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
 
-            <td class="box-total">
-                <b>Total {{ $data_invoice->currency }}: </b> {{round($data_invoice->total, 2)}}
+            </td>
+            <td>
+                <b>Total servicios exentos {{ $data_invoice->currency }}: </b> <span>{{round($data_invoice->total, 2)}}</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+
+            </td>
+            <td>
+                <b>Total mercancías gravadas {{ $data_invoice->currency }}: </b> <span>{{round($data_invoice->total, 2)}}</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+
+            </td>
+            <td>
+                <b>Total mercancías exentas {{ $data_invoice->currency }}: </b> <span>{{round($data_invoice->total, 2)}}</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+
+            </td>
+            <td>
+                <b>Total gravado {{ $data_invoice->currency }}: </b> <span>{{round($data_invoice->total, 2)}}</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+
+            </td>
+            <td>
+                <b>Total exento {{ $data_invoice->currency }}: </b> <span>{{round($data_invoice->total, 2)}}</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+
+            </td>
+            <td>
+                <b>Total venta {{ $data_invoice->currency }}: </b> <span>{{round($data_invoice->total, 2)}}</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+
+            </td>
+            <td>
+                <b>Total descuento {{ $data_invoice->currency }}: </b> <span>{{round($data_invoice->total, 2)}}</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+
+            </td>
+            <td>
+                <b>Total venta neta {{ $data_invoice->currency }}: </b> <span>{{round($data_invoice->total, 2)}}</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+
+            </td>
+            <td>
+                <b>Total impuestos {{ $data_invoice->currency }}: </b> <span>{{round($data_invoice->total, 2)}}</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+
+            </td>
+            <td>
+                <b>Total comprobante {{ $data_invoice->currency }}: </b> <span>{{round($data_invoice->total, 2)}}</span>
             </td>
         </tr>
     </table>
