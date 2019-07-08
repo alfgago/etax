@@ -2,9 +2,9 @@
 
 namespace App;
 
+use App\InvoiceItem;
 use \Carbon\Carbon;
 use App\Company;
-use App\InvoiceItem;
 use App\Client;
 use App\XmlHacienda;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -299,56 +299,60 @@ class Invoice extends Model
   
     public function addEditItem(array $data)
     {
-      
-      if(isset($data['item_number'])) {
+        try {
+            if(isset($data['item_number'])) {
 
-          $item = InvoiceItem::updateOrCreate([
-              'item_number' => $data['item_number'],
-              'invoice_id' => $this->id,
-              'code'=> $data['code']
-          ], [
-                  'company_id' => $this->company_id,
-                  'year'  => $this->year,
-                  'month' => $this->month,
-                  'name'  => $data['name'] ?? null,
-                  'product_type' => $data['product_type'] ?? null,
-                  'measure_unit' => $data['measure_unit'] ?? 'Unid',
-                  'item_count'   => $data['item_count'] ?? 1,
-                  'unit_price'   => $data['unit_price'] ?? 0,
-                  'subtotal'     => $data['subtotal'] ?? 0,
-                  'total' => $data['total'] ?? 0,
-                  'discount_type' => $data['discount_type'] ?? null,
-                  'discount' => $data['discount'] ?? 0,
-                  'iva_type' => $data['iva_type'] ?? null,
-                  'iva_percentage' => $data['iva_percentage'] ?? 0,
-                  'iva_amount' => $data['iva_amount'] ?? 0,
-                  'tariff_heading' => $data['tariff_heading'] ?? null,
-                  'is_exempt' => $data['is_exempt'] ?? false,
-              ]
-          );
-          
-          
-          try {
-            $exonerationDate = isset( $data['exoneration_date'] )  ? Carbon::createFromFormat('d/m/Y', $data['exoneration_date']) : null;
-          }catch( \Exception $e ) {
-            $exonerationDate = null;
-          }
-          if( $exonerationDate && $data['exoneration_document_type'] && $data['exoneration_document_number'] ) {
-            $item->exoneration_document_type = $data['exoneration_document_type'] ?? null;
-            $item->exoneration_document_number = $data['exoneration_document_number'] ?? null;
-            $item->exoneration_company_name = $data['exoneration_company_name'] ?? null;
-            $item->exoneration_porcent = $data['exoneration_porcent'] ?? 0;
-            $item->exoneration_amount = $data['exoneration_amount'] ?? 0;
-            $item->exoneration_date = $exonerationDate;
-            $item->exoneration_total_amount = $data['exoneration_total_amount'] ?? 0;
-            $item->impuesto_neto = isset($data['impuesto_neto']) ? $data['iva_amount'] - $data['montoExoneracion'] : $data['iva_amount'];
-            $item->save();
-          }
-          
-          return $item;
-      } else {
-          return false;
-      }
+                $item = InvoiceItem::updateOrCreate([
+                    'item_number' => $data['item_number'],
+                    'invoice_id' => $this->id,
+                    'code'=> $data['code']
+                ], [
+                        'company_id' => $this->company_id,
+                        'year'  => $this->year,
+                        'month' => $this->month,
+                        'name'  => $data['name'] ?? null,
+                        'product_type' => $data['product_type'] ?? null,
+                        'measure_unit' => $data['measure_unit'] ?? 'Unid',
+                        'item_count'   => $data['item_count'] ?? 1,
+                        'unit_price'   => $data['unit_price'] ?? 0,
+                        'subtotal'     => $data['subtotal'] ?? 0,
+                        'total' => $data['total'] ?? 0,
+                        'discount_type' => $data['discount_type'] ?? null,
+                        'discount' => $data['discount'] ?? 0,
+                        'iva_type' => $data['iva_type'] ?? null,
+                        'iva_percentage' => $data['iva_percentage'] ?? 0,
+                        'iva_amount' => $data['iva_amount'] ?? 0,
+                        'tariff_heading' => $data['tariff_heading'] ?? null,
+                        'is_exempt' => $data['is_exempt'] ?? false,
+                    ]
+                );
+
+                try {
+                    $exonerationDate = isset( $data['exoneration_date'] )  ? Carbon::createFromFormat('d/m/Y', $data['exoneration_date']) : null;
+                }catch( \Exception $e ) {
+                    $exonerationDate = null;
+                }
+                if ($exonerationDate && isset($data['exoneration_document_type']) && isset($data['exoneration_document_number'])) {
+                    $item->exoneration_document_type = $data['exoneration_document_type'] ?? null;
+                    $item->exoneration_document_number = $data['exoneration_document_number'] ?? null;
+                    $item->exoneration_company_name = $data['exoneration_company_name'] ?? null;
+                    $item->exoneration_porcent = $data['exoneration_porcent'] ?? 0;
+                    $item->exoneration_amount = $data['exoneration_amount'] ?? 0;
+                    $item->exoneration_date = $exonerationDate;
+                    $item->exoneration_total_amount = $data['exoneration_total_amount'] ?? 0;
+                    $item->impuesto_neto = isset($data['impuesto_neto']) ? $data['iva_amount'] - $data['montoExoneracion'] : $data['iva_amount'];
+                    $item->save();
+                }
+
+                return $item;
+            } else {
+                return false;
+            }
+        } catch ( \Exception $e) {
+            Log::error("Error en lineas de factura-->> $e");
+            return false;
+        }
+
     }
     
     public static function importInvoiceRow ( $data ) {
