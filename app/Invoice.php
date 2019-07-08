@@ -698,6 +698,7 @@ class Invoice extends Model
                             'district' => $distritoCliente,
                             'zip' => $zipCliente,
                             'address' => $otrasSenas,
+                            'foreign_address' => $otrasSenas,
                         ]
                     );
                     Cache::put($clientCacheKey, $clienteCache, 30);
@@ -715,6 +716,7 @@ class Invoice extends Model
                 $invoice->client_district = $distritoCliente;
                 $invoice->client_zip = $zipCliente;
                 $invoice->client_phone = $telefonoCliente;
+                $invoice->foreign_address = $otrasSenas;
                 
               }else{
                 $invoice->client_email = 'N/A';
