@@ -725,6 +725,7 @@ class BillController extends Controller
             if( !$bill->provider_zip ){
                 $file = $billUtils->downloadXml( $bill, $bill->company_id );
                 if($file) {
+                    Log::info("Fixing $bill->id");
                     $xml = simplexml_load_string($file);
                     $json = json_encode( $xml ); // convert the XML string to JSON
                     $arr = json_decode( $json, TRUE );
