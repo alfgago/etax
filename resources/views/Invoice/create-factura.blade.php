@@ -57,7 +57,7 @@ $company = currentCompanyModel();
                       <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
                         <option value='' selected>-- Seleccione un cliente --</option>
                         @foreach ( currentCompanyModel()->clients as $cliente )
-                          @if( @$cliente->canInvoice() )
+                          @if( @$cliente->canInvoice($document_type) )
                             <option value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
                           @endif
                         @endforeach
