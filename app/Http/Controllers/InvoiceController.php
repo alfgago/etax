@@ -369,13 +369,14 @@ class InvoiceController extends Controller
         $this->authorize('update', $invoice);
       
         $arrayActividades = $company->getActivities();
+        $countries  = CodigosPaises::all()->toArray();
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
         if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
           return redirect('/facturas-emitidas');
         }  
       
-        return view('Invoice/edit', compact('invoice', 'units', 'arrayActividades') );
+        return view('Invoice/edit', compact('invoice', 'units', 'arrayActividades', 'countries') );
     }
 
     /**

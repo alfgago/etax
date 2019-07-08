@@ -27,16 +27,23 @@ class Client extends Model
     return $this->id_number . " - " . $this->getFullName();
   }
   
-  public function canInvoice() {
+  public function canInvoice( $tipoDoc = '01' ) {
     $allow = true;
     if(empty($this->email)) {
       $allow = false;
     }
-    if($this->country == 'CR') {
-      if(empty($this->district)) {
-        $allow = false;
-      }
-      if(empty($this->zip)) {
+    
+    if( $tipoDoc != '09' ){
+      
+        if( empty($this->district) ) {
+          $allow = false;
+        }
+        if( empty($this->zip) ) {
+          $allow = false;
+        }
+      
+    }else {
+      if( $this->country == 'CR' ) {
         $allow = false;
       }
     }

@@ -37,10 +37,6 @@ $company = currentCompanyModel();
 
           @csrf
           
-{{--          @if( ! @$company->certificateExists() )--}}
-{{--            <div class="alert alert-warning">Usted aún no ha subido su certificado ATV, requerido para la facturación electrónica. Para subirlo ingrese a <a href="http://app.calculodeiva.com/empresas/certificado">este enlace</a>.</div>--}}
-{{--          @endif--}}
-          
           <input type="hidden" id="current-index" value="0">
 
           <div class="form-row">
@@ -61,7 +57,7 @@ $company = currentCompanyModel();
                       <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
                         <option value='' selected>-- Seleccione un cliente --</option>
                         @foreach ( currentCompanyModel()->clients as $cliente )
-                          @if( @$cliente->canInvoice() )
+                          @if( @$cliente->canInvoice($document_type) )
                             <option value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
                           @endif
                         @endforeach
