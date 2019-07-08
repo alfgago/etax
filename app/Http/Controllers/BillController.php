@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Invoice;
 use App\UnidadMedicion;
 use App\Utils\BridgeHaciendaApi;
+use App\Utils\BillUtils;
 use \Carbon\Carbon;
 use App\Bill;
 use App\BillItem;
@@ -405,8 +406,8 @@ class BillController extends Controller
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3
-                        if( Bill::saveBillXML( $arr, 'XML' ) ) {
-                            $bill = Bill::where('company_id', $company->id)->where('document_key', $clave)->first();
+                        $bill = Bill::saveBillXML( $arr, 'XML' );
+                        if( $bill ) {
                             Bill::storeXML( $bill, $file );
                         }
                     }else{
@@ -639,14 +640,18 @@ class BillController extends Controller
                 $bill = Bill::findOrFail($id);
                 $company = currentCompanyModel();
                 if (!empty($bill)) {
-                    $bill->accept_status = $request->respuesta;
-                    $bill->save();
-                    $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
-                    $company->save();
-                    $company->last_document_rec = getDocReference($company->last_rec_ref_number);
-                    $company->save();
-
-                    $apiHacienda->acceptInvoice($bill, $tokenApi);
+                    if( $bill->provider_zip ) {
+                        $bill->accept_status = $request->respuesta;
+                        $bill->save();
+                        $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
+                        $company->save();
+                        $company->last_document_rec = getDocReference($company->last_rec_ref_number);
+                        $company->save();
+    
+                        $apiHacienda->acceptInvoice($bill, $tokenApi);
+                    }else{
+                        return redirect('/facturas-recibidas/aceptaciones')->withMessage('Esta factura no contiene datos de ubicación de proveedor. Intente volver a subir el XML o contacte a soporte si el error persiste.');
+                    }
                 }
                 clearInvoiceCache($bill);
                 return redirect('/facturas-recibidas/aceptaciones')->withMessage('Acceptacion Enviada.');
@@ -711,5 +716,25 @@ class BillController extends Controller
         
         return redirect('/facturas-recibidas')->withMessage('La factura ha sido restaurada satisfactoriamente.');
     }  
+    
+    public function fixImports() {
+        $billUtils = new BillUtils();
+        $bills = Bill::where('generation_method', 'Email')->orWhere('generation_method', 'XML')->get();
+
+        foreach($bills as $bill) {
+            if( !$bill->provider_zip ){
+                $file = $billUtils->downloadXml( $bill, $bill->company_id );
+                if($file) {
+                    $xml = simplexml_load_string($file);
+                    $json = json_encode( $xml ); // convert the XML string to JSON
+                    $arr = json_decode( $json, TRUE );
+                    $bill = Bill::saveBillXML( $arr, $bill->generation_method );
+                }
+            }
+        }
+        
+        dd($bills);
+        return true;
+    }
     
 }
