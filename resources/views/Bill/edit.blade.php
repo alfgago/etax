@@ -13,6 +13,8 @@
 
           <input type="hidden" id="current-index" value="{{ count($bill->items) }}">
 
+          <input type="hidden" id="is-compra" value="1">
+
           <div class="form-row">
             <div class="col-md">
               <div class="form-row">

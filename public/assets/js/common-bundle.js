@@ -489,8 +489,17 @@ toastr.options = {
 
   window.presetTipoIVA = function(){
     if( ! $('#cliente_exento:checked').length ){
+      
+      var posibles = $('#tipo_producto :selected').attr('posibles');
+      var arrPosibles = posibles.split(",");
+      var tipo;
+      $('#tipo_iva option').hide();
+      for( tipo of arrPosibles ) {
+      	$('#tipo_iva option[value='+tipo+']').show();
+      }
+      
       var tipoIVA = $('#tipo_producto :selected').attr('codigo');
-      $('#tipo_iva').val( tipoIVA );
+      $('#tipo_iva').val( tipoIVA ).change();
     }else{
       $('#tipo_iva').val( '260' );
     }
@@ -498,9 +507,9 @@ toastr.options = {
 
   window.togglePorcentajeIdentificacionPlena = function(){
     if( ('#field_porc_identificacion_plena').length ){
-      var tipo_iva = parseFloat( $('#tipo_iva').val() );
+      var is_identificacion_plena = parseInt( $('#tipo_iva :selected').attr('is_identificacion_plena') );
       
-      if( tipo_iva >= 40 && tipo_iva <= 74 ){
+      if( is_identificacion_plena ){
          $('#field_porc_identificacion_plena').show();
       }else{
         $('#field_porc_identificacion_plena').hide();
@@ -644,7 +653,7 @@ toastr.options = {
       recalcularNumerosItem();
       
       //Calcula total de factura
-      calcularTotalFactura();
+      calcularTotalFactura();                                                                                                            
       
       //Aumenta el indice de filas para evitar cualquier conflicto si hubo eliminados. El index nunca debe cambiar ni repetirse, los números pueden cambiar.
       $('#current-index').val(index);
@@ -655,8 +664,14 @@ toastr.options = {
       cerrarPopup('linea-popup');
       
       //Fuerza un reset en la ayuda al marcar preguntas.
-      $('#p1').prop('checked', false);
-      $('#p1').change();
+      /*$('#p1').prop('checked', false);
+      $('#p1').change();*/
+      
+      if( $('#is-compra').length ){
+        $('#tipo_producto').val(49).change();
+      }else {
+        $('#tipo_producto').val(17).change();
+      }
       
     }else{
       alert('Debe completar los datos de la linea antes de guardarla');
@@ -669,7 +684,11 @@ toastr.options = {
       $('.item-factura-form input, .item-factura-form select').val('');
       $('.item-factura-form input[type=checkbox]').prop('checked', false);
       
-      $('#tipo_producto').val(1).change();
+      if( $('#is-compra').length ){
+        $('#tipo_producto').val(49).change();
+      }else {
+        $('#tipo_producto').val(17).change();
+      }
       $('#unidad_medicion').val('Unid');
       $('#cantidad').val(1);
       $('#porc_identificacion_plena').val(1);
@@ -798,6 +817,7 @@ toastr.options = {
                         $('#tipo_iva').val(result.default_iva_type);
 
                         $('#precio_unitario').change();
+                        $('#tipo_producto').change();
                         $('#tipo_iva').change();
                     }
                 }
@@ -868,16 +888,17 @@ $( document ).ready(function() {
       presetPorcentaje();
       calcularSubtotalItem();
       togglePorcentajeIdentificacionPlena();
+      if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
     });
   
     $('#tipo_producto').on('change', function(){
-      
-      if( $(this).val() == 2 ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
       
       presetTipoIVA();
       presetPorcentaje();
       calcularSubtotalItem();
       togglePorcentajeIdentificacionPlena();
+      if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
+      
     });
     
     $('#item_iva_amount').on('change', function(){
@@ -936,6 +957,19 @@ $( document ).ready(function() {
                 close: 'fa fa-calendar-times-o'
           }
     });
+    
+  }else{
+    
+    if( $("#tipo_producto").length && $("#tipo_iva").length ) {
+      $('#tipo_iva').on('change', function(){
+        if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
+      });
+    
+      $('#tipo_producto').on('change', function(){
+        presetTipoIVA();
+        if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
+      });
+    }
     
   }
   
