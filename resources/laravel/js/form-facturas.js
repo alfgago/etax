@@ -23,13 +23,13 @@
         subtotal = subtotal - discount;
       }
       
-      $('#item_subtotal').val( subtotal );
+      $('#item_subtotal').val( subtotal.toFixed(2) );
       if( $('#porc_iva').val().length ){
         monto_iva = subtotal * porc_iva / 100;
-        $('#item_iva_amount').val( monto_iva );
-        $('#item_total').val( subtotal + monto_iva );
+        $('#item_iva_amount').val( monto_iva.toFixed(2) );
+        $('#item_total').val( (subtotal + monto_iva).toFixed(2) );
       }else{
-        $('#item_total').val( subtotal );
+        $('#item_total').val( subtotal.toFixed(2) );
       }
     }else{
       $('#item_subtotal').val( 0 );
@@ -61,11 +61,11 @@
         subtotal = subtotal - discount;
       }
       
-      $('#item_subtotal').val( subtotal );
+      $('#item_subtotal').val( subtotal.toFixed(2));
       if( monto_iva ){
-        $('#item_total').val( subtotal + monto_iva );
+        $('#item_total').val( (subtotal + monto_iva).toFixed(2) );
       }else{
-        $('#item_total').val( subtotal );
+        $('#item_total').val( subtotal.toFixed(2) );
       }
     }else{
       $('#item_subtotal').val( 0 );
