@@ -27,6 +27,7 @@ class Client extends Model
     return $this->id_number . " - " . $this->getFullName();
   }
   
+
   public function canInvoice( $tipoDoc = '01' ) {
     $allow = true;
     if(empty($this->email)) {

@@ -32,6 +32,24 @@
           </div>
           
           <div class="form-group col-md-6">
+            <label for="product_category_id">Tipo de producto</label>
+            <select class="form-control select-search" name="product_category_id" id="tipo_producto" required>
+              @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
+                <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
+              @endforeach
+            </select>
+          </div>
+          
+          <div class="form-group col-md-6">
+            <label for="default_iva_type">Tipo de IVA</label>
+            <select class="form-control" name="default_iva_type" id="tipo_iva" required>
+              @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
+                <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}">{{ $tipo['name'] }}</option>
+              @endforeach
+            </select>
+          </div>
+          
+          <div class="form-group col-md-6">
             <label for="measure_unit">Unidad de medición</label>
             <select class="form-control" name="measure_unit" id="unidad_medicion" value="" required>
               @foreach ($units as $unit )
@@ -50,24 +68,6 @@
             <label for="description">Descripción</label>
             <textarea class="form-control" name="description" id="descripcion" value="" ></textarea>
           </div>
-          
-          <div class="form-group col-md-6">
-            <label for="product_category_id">Tipo de producto</label>
-            <select class="form-control" name="product_category_id" id="tipo_producto" required>
-              @foreach ( \App\ProductCategory::all() as $tipo )
-                <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" >{{ $tipo['name'] }}</option>
-              @endforeach
-            </select>
-          </div>
-          
-          <div class="form-group col-md-6">
-            <label for="default_iva_type">Tipo de IVA</label>
-            <select class="form-control" name="default_iva_type" id="tipo_iva" required>
-              @foreach ( \App\Variables::tiposIVARepercutidos() as $tipo )
-                <option value="{{ $tipo['codigo'] }}" attr-iva="{{ $tipo['porcentaje'] }}">{{ $tipo['nombre'] }}</option>
-              @endforeach
-            </select>
-          </div>
 
         </div>
 
@@ -84,6 +84,6 @@
 
 @section('footer-scripts')
   <script>
-    $('#tipo_iva').val(103);
+    $('#tipo_producto').val(17).change();
   </script>
 @endsection

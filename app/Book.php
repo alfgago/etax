@@ -15,12 +15,12 @@ class Book extends Model
     //Relacion con la empresa
     public function company()
     {
-        return $calculos->belongsTo(Company::class);
+        return $ivaData->belongsTo(Company::class);
     }
     
     public function calculos()
     {
-        return $calculos->belongsTo(CalculatedTax::class, 'calculated_tax_id');
+        return $ivaData->belongsTo(CalculatedTax::class, 'calculated_tax_id');
     }
     
     public static function calcularAsientos( $calculos ){
@@ -41,43 +41,61 @@ class Book extends Model
     }
     
     public function setCuentaContableCompras( $calculos ){
-      //Debe BASES
-      $this->cc_compras1 = $calculos->b001 + $calculos->b061; 
-      $this->cc_compras2 = $calculos->b002 + $calculos->b062;
-      $this->cc_compras3 = $calculos->b003 + $calculos->b063;
-      $this->cc_compras4 = $calculos->b004 + $calculos->b064;
-                              
-      $this->cc_importaciones1 = $calculos->b021 + $calculos->b041;
-      $this->cc_importaciones2 = $calculos->b022 + $calculos->b042;
-      $this->cc_importaciones3 = $calculos->b023 + $calculos->b043;
-      $this->cc_importaciones4 = $calculos->b024 + $calculos->b044;
+      $ivaData = json_decode( $calculos->iva_data ) ?? new \stdClass();
       
-      $this->cc_propiedades1 = $calculos->b011 + $calculos->b031 + $calculos->b051 + $calculos->b071 + $calculos->b015  + $calculos->b035;
-      $this->cc_propiedades2 = $calculos->b012 + $calculos->b032 + $calculos->b052 + $calculos->b072;
-      $this->cc_propiedades3 = $calculos->b013 + $calculos->b033 + $calculos->b053 + $calculos->b073 + $calculos->b016  + $calculos->b036;
-      $this->cc_propiedades4 = $calculos->b014 + $calculos->b034 + $calculos->b054 + $calculos->b074;
+      //Debe BASES
+      $this->cc_compras1 = $ivaData->bB001 + $ivaData->bB061 +
+                           $ivaData->bS001 + $ivaData->bS061; 
+      $this->cc_compras2 = $ivaData->bB002 + $ivaData->bB062 +
+                           $ivaData->bS002 + $ivaData->bS062;
+      $this->cc_compras3 = $ivaData->bB003 + $ivaData->bB063 +
+                           $ivaData->bS003 + $ivaData->bS063;
+      $this->cc_compras4 = $ivaData->bB004 + $ivaData->bB064 +
+                           $ivaData->bS004 + $ivaData->bS064;
+                              
+      $this->cc_importaciones1 = $ivaData->bB021 + $ivaData->bB041 +
+                                 $ivaData->bS021 + $ivaData->bS041;
+      $this->cc_importaciones2 = $ivaData->bB022 + $ivaData->bB042 +
+                                 $ivaData->bS022 + $ivaData->bS042;
+      $this->cc_importaciones3 = $ivaData->bB023 + $ivaData->bB043 +
+                                 $ivaData->bS023 + $ivaData->bS043;
+      $this->cc_importaciones4 = $ivaData->bB024 + $ivaData->bB044 +
+                                 $ivaData->bS024 + $ivaData->bS044;
+      
+      $this->cc_propiedades1 = $ivaData->bB011 + $ivaData->bB031 + $ivaData->bB051 + $ivaData->bB071 + $ivaData->bB015  + $ivaData->bB035;
+      $this->cc_propiedades2 = $ivaData->bB012 + $ivaData->bB032 + $ivaData->bB052 + $ivaData->bB072;
+      $this->cc_propiedades3 = $ivaData->bB013 + $ivaData->bB033 + $ivaData->bB053 + $ivaData->bB073 + $ivaData->bB016  + $ivaData->bB036;
+      $this->cc_propiedades4 = $ivaData->bB014 + $ivaData->bB034 + $ivaData->bB054 + $ivaData->bB074;
       
       //Debe IVAS
-      $this->cc_iva_compras1 = $calculos->i001 + $calculos->i061; 
-      $this->cc_iva_compras2 = $calculos->i002 + $calculos->i062;
-      $this->cc_iva_compras3 = $calculos->i003 + $calculos->i063;
-      $this->cc_iva_compras4 = $calculos->i004 + $calculos->i064;
+      $this->cc_iva_compras1 = $ivaData->iB001 + $ivaData->iB061 + 
+                               $ivaData->iS001 + $ivaData->iS061; 
+      $this->cc_iva_compras2 = $ivaData->iB002 + $ivaData->iB062 +
+                               $ivaData->iS002 + $ivaData->iS062;
+      $this->cc_iva_compras3 = $ivaData->iB003 + $ivaData->iB063 +
+                               $ivaData->iS003 + $ivaData->iS063;
+      $this->cc_iva_compras4 = $ivaData->iB004 + $ivaData->iB064 +
+                               $ivaData->iS004 + $ivaData->iS064;
                               
-      $this->cc_iva_importaciones1 = $calculos->i021 + $calculos->i041 + $calculos->i015  + $calculos->i035;
-      $this->cc_iva_importaciones2 = $calculos->i022 + $calculos->i042;
-      $this->cc_iva_importaciones3 = $calculos->i023 + $calculos->i043 + $calculos->i015  + $calculos->i035;
-      $this->cc_iva_importaciones4 = $calculos->i024 + $calculos->i044;
+      $this->cc_iva_importaciones1 = $ivaData->iB021 + $ivaData->iB041 + $ivaData->iB015 + $ivaData->iB035 +
+                                     $ivaData->iS021 + $ivaData->iS041;
+      $this->cc_iva_importaciones2 = $ivaData->iB022 + $ivaData->iB042 +
+                                     $ivaData->iS022 + $ivaData->iS042;
+      $this->cc_iva_importaciones3 = $ivaData->iB023 + $ivaData->iB043 + $ivaData->iB016 + $ivaData->iB036 +
+                                     $ivaData->iS023 + $ivaData->iS043;
+      $this->cc_iva_importaciones4 = $ivaData->iB024 + $ivaData->iB044 +
+                                     $ivaData->iS024 + $ivaData->iS044;
       
-      $this->cc_iva_propiedades1 = $calculos->i011 + $calculos->i031 + $calculos->i051 + $calculos->i071;
-      $this->cc_iva_propiedades2 = $calculos->i012 + $calculos->i032 + $calculos->i052 + $calculos->i072;
-      $this->cc_iva_propiedades3 = $calculos->i013 + $calculos->i033 + $calculos->i053 + $calculos->i073;
-      $this->cc_iva_propiedades4 = $calculos->i014 + $calculos->i034 + $calculos->i054 + $calculos->i074;
+      $this->cc_iva_propiedades1 = $ivaData->iB011 + $ivaData->iB031 + $ivaData->iB051 + $ivaData->iB071;
+      $this->cc_iva_propiedades2 = $ivaData->iB012 + $ivaData->iB032 + $ivaData->iB052 + $ivaData->iB072;
+      $this->cc_iva_propiedades3 = $ivaData->iB013 + $ivaData->iB033 + $ivaData->iB053 + $ivaData->iB073;
+      $this->cc_iva_propiedades4 = $ivaData->iB014 + $ivaData->iB034 + $ivaData->iB054 + $ivaData->iB074;
       
-      $this->cc_compras_exentas = $calculos->i040 + $calculos->i050 + $calculos->i060 + $calculos->i070 +
-                                  $calculos->b040 + $calculos->b050 + $calculos->b060 + $calculos->b070;
+      $this->cc_compras_exentas = $ivaData->iB040 + $ivaData->iB050 + $ivaData->iB060 + $ivaData->iB070 + $ivaData->bB040 + $ivaData->bB050 + $ivaData->bB060 + $ivaData->bB070 +
+                                  $ivaData->iS040 + $ivaData->iS060 + $ivaData->bS040 + $ivaData->bS060;
       
-      $this->cc_compras_sin_derecho = $calculos->b080 + $calculos->b090 + $calculos->b097 + $calculos->b098 + $calculos->b099 +
-                                      $calculos->i080 + $calculos->i090 + $calculos->i097 + $calculos->i098 + $calculos->i099;                                
+      $this->cc_compras_sin_derecho = $ivaData->bB080 + $ivaData->bB090 + $ivaData->bB097 + $ivaData->b098 + $ivaData->b099 +
+                                      $ivaData->iB080 + $ivaData->iB090 + $ivaData->iB097 + $ivaData->i098 + $ivaData->i099;                                
       
       $this->cc_compras_sum = $this->cc_compras1 + $this->cc_compras2 + $this->cc_compras3 + $this->cc_compras4 + 
                               $this->cc_importaciones1 + $this->cc_importaciones2 + $this->cc_importaciones3 + $this->cc_importaciones4 +
@@ -93,22 +111,33 @@ class Book extends Model
     }
     
     public function setCuentaContableVentas( $calculos ){
+      $ivaData = json_decode( $calculos->iva_data ) ?? new \stdClass();
+      
       //Haber 2 
-      $this->cc_ventas_1 = $calculos->b101 + $calculos->b121;
-      $this->cc_ventas_2 = $calculos->b102 + $calculos->b122;
-      $this->cc_ventas_13 = $calculos->b103 + $calculos->b123 + $calculos->b130 + $calculos->b140;
-      $this->cc_ventas_4 = $calculos->b104 + $calculos->b124 + + $calculos->b114;
-      $this->cc_ventas_exp = $calculos->b150;
-      $this->cc_ventas_estado = $calculos->b160;
-      $this->cc_ventas_exentas = $calculos->b170;
-      $this->cc_ventas_canasta = $calculos->b165;
-      $this->cc_ventas_aduana = $calculos->b155 + $calculos->i155;
-      $this->cc_ventas_1_iva = $calculos->i101 + $calculos->i121;
-      $this->cc_ventas_2_iva = $calculos->i102 + $calculos->i122;
-      $this->cc_ventas_13_iva = $calculos->i103 + $calculos->i123 + $calculos->i130 + $calculos->i140;
-      $this->cc_ventas_4_iva = $calculos->i104 + $calculos->i124 + + $calculos->i114;
-      $this->cc_ventas_sin_derecho = $calculos->b200 + $calculos->b201 + $calculos->b240 + $calculos->b245 + $calculos->b250 + $calculos->b260
-                                     + $calculos->i200 + $calculos->i201 + $calculos->i240 + $calculos->i245 + $calculos->i250 + $calculos->i260;
+      $this->cc_ventas_1 = $ivaData->bB101 + $ivaData->bB121 +
+                           $ivaData->bS101 + $ivaData->bS121;
+      $this->cc_ventas_2 = $ivaData->bB102 + $ivaData->bB122 +
+                           $ivaData->bS102 + $ivaData->bS122;
+      $this->cc_ventas_13 = $ivaData->bB103 + $ivaData->bB123 + $ivaData->bB130 + $ivaData->bS140 +
+                            $ivaData->bS103 + $ivaData->bS123 + $ivaData->bS130;
+      $this->cc_ventas_4 = $ivaData->bB104 + $ivaData->bB124 + + $ivaData->bB114 +
+                           $ivaData->bS104 + $ivaData->bS124 + + $ivaData->bS114;
+      $this->cc_ventas_exp = $ivaData->bB150 + $ivaData->bS150;
+      $this->cc_ventas_estado = $ivaData->bB160 + $ivaData->bS160;
+      $this->cc_ventas_exentas = $ivaData->bB170 + $ivaData->bS170;
+      $this->cc_ventas_canasta = $ivaData->bB165 + $ivaData->bS165;
+      $this->cc_ventas_aduana = $ivaData->bB155 + $ivaData->iB155 +
+                                $ivaData->bS155 + $ivaData->iS155;
+      $this->cc_ventas_1_iva = $ivaData->iB101 + $ivaData->iB121 +
+                               $ivaData->iS101 + $ivaData->iS121;
+      $this->cc_ventas_2_iva = $ivaData->iB102 + $ivaData->iB122 +
+                               $ivaData->iS102 + $ivaData->iS122;
+      $this->cc_ventas_13_iva = $ivaData->iB103 + $ivaData->iB123 + $ivaData->iB130 + $ivaData->iS140 +
+                                $ivaData->iS103 + $ivaData->iS123 + $ivaData->iS130;
+      $this->cc_ventas_4_iva = $ivaData->iB104 + $ivaData->iB124 + + $ivaData->iB114 +
+                               $ivaData->iS104 + $ivaData->iS124 + + $ivaData->iS114;
+      $this->cc_ventas_sin_derecho = $ivaData->bB200 + $ivaData->bB201 + $ivaData->bB240 + $ivaData->bB245 + $ivaData->bB250 + $ivaData->bB260 + $ivaData->iB200 + $ivaData->iB201 + $ivaData->iB240 + $ivaData->iB245 + $ivaData->iB250 + $ivaData->iB260 +
+                                     $ivaData->bS200 + $ivaData->bS201 + $ivaData->bS240 + $ivaData->bS245 + $ivaData->bS250 + $ivaData->bS260 + $ivaData->iS200 + $ivaData->iS201 + $ivaData->iS240 + $ivaData->iS245 + $ivaData->iS250 + $ivaData->iS260;
       $this->cc_ventas_sum = $this->cc_ventas_1 + $this->cc_ventas_2 + $this->cc_ventas_13 + $this->cc_ventas_4 + 
                                  $this->cc_ventas_1_iva + $this->cc_ventas_2_iva + $this->cc_ventas_13_iva + $this->cc_ventas_4_iva + 
                                  $this->cc_ventas_exp + $this->cc_ventas_estado + $this->cc_ventas_sin_derecho + $this->cc_ventas_exentas +
@@ -126,6 +155,8 @@ class Book extends Model
     }
     
     public function setCuentaContableAjustes( $calculos ){
+      $ivaData = json_decode( $calculos->iva_data ) ?? new \stdClass();
+      
       $company = currentCompanyModel();
       
       $prorrataOperativa = $company->operative_prorrata / 100;
@@ -135,44 +166,61 @@ class Book extends Model
       $ratio4_operativo = $company->operative_ratio4 / 100;
       
       //Haber 3
-        $iva_no_acreditables = $calculos->i080 + $calculos->i090 + $calculos->i097 + $calculos->i098 + $calculos->i099;
+        $iva_no_acreditables = $ivaData->iB080 + $ivaData->iB090 + $ivaData->iB097 + $ivaData->i098 + $ivaData->i099 +
+                               $ivaData->iS080 + $ivaData->iS090 + $ivaData->iS097;
       
-        $this->cc_ppp_1 = $calculos->i011 + $calculos->i031 + $calculos->i051 + $calculos->i071;
-        $this->cc_ppp_2 = $calculos->i012 + $calculos->i032 + $calculos->i052 + $calculos->i072;
-        $this->cc_ppp_3 = $calculos->i013 + $calculos->i033 + $calculos->i053 + $calculos->i073;
-        $this->cc_ppp_4 = $calculos->i014 + $calculos->i034 + $calculos->i054 + $calculos->i074;
+        $this->cc_ppp_1 = $ivaData->iB011 + $ivaData->iB031 + $ivaData->iB051 + $ivaData->iB071;
+        $this->cc_ppp_2 = $ivaData->iB012 + $ivaData->iB032 + $ivaData->iB052 + $ivaData->iB072;
+        $this->cc_ppp_3 = $ivaData->iB013 + $ivaData->iB033 + $ivaData->iB053 + $ivaData->iB073;
+        $this->cc_ppp_4 = $ivaData->iB014 + $ivaData->iB034 + $ivaData->iB054 + $ivaData->iB074;
         
-        $this->cc_bs_1 = $calculos->i001 + $calculos->i021 + $calculos->i041 + $calculos->i061;
-        $this->cc_bs_2 = $calculos->i002 + $calculos->i022 + $calculos->i042 + $calculos->i062;
-        $this->cc_bs_3 = $calculos->i003 + $calculos->i023 + $calculos->i043 + $calculos->i063 + $iva_no_acreditables;
-        $this->cc_bs_4 = $calculos->i004 + $calculos->i024 + $calculos->i044 + $calculos->i064;
+        $this->cc_bs_1 = $ivaData->iB001 + $ivaData->iB021 + $ivaData->iB041 + $ivaData->iB061 +
+                         $ivaData->iS001 + $ivaData->iS021 + $ivaData->iS041 + $ivaData->iS061;
+        $this->cc_bs_2 = $ivaData->iB002 + $ivaData->iB022 + $ivaData->iB042 + $ivaData->iB062 +
+                         $ivaData->iS002 + $ivaData->iS022 + $ivaData->iS042 + $ivaData->iS062;
+        $this->cc_bs_3 = $ivaData->iB003 + $ivaData->iB023 + $ivaData->iB043 + $ivaData->iB063 + $iva_no_acreditables +
+                         $ivaData->iS003 + $ivaData->iS023 + $ivaData->iS043 + $ivaData->iS063;
+        $this->cc_bs_4 = $ivaData->iB004 + $ivaData->iB024 + $ivaData->iB044 + $ivaData->iB064 +
+                         $ivaData->iS004 + $ivaData->iS024 + $ivaData->iS044 + $ivaData->iS064;
         
         $this->cc_por_pagar = $calculos->balance_operativo;
       
       //Debe 3 
-        $this->cc_iva_emitido_1 = $calculos->i101 + $calculos->i121;
-        $this->cc_iva_emitido_2 = $calculos->i102 + $calculos->i122;
-        $this->cc_iva_emitido_3 = $calculos->i103 + $calculos->i123 + $calculos->i130 + $calculos->i140;
-        $this->cc_iva_emitido_4 = $calculos->i104 + $calculos->i124;  
+        $this->cc_iva_emitido_1 = $ivaData->iB101 + $ivaData->iB121 +
+                                  $ivaData->iS101 + $ivaData->iS121;
+        $this->cc_iva_emitido_2 = $ivaData->iB102 + $ivaData->iB122 +
+                                  $ivaData->iS102 + $ivaData->iS122;
+        $this->cc_iva_emitido_3 = $ivaData->iB103 + $ivaData->iB123 + $ivaData->iB130 + $ivaData->iS140 +
+                                  $ivaData->iS103 + $ivaData->iS123 + $ivaData->iS130;
+        $this->cc_iva_emitido_4 = $ivaData->iB104 + $ivaData->iB124 +
+                                  $ivaData->iS104 + $ivaData->iS124;  
         
-        $bases_bs1 = $calculos->b001 + $calculos->b021;
-        $bases_ppp1 = $calculos->b011 + $calculos->b031;
-        $bases_bs2 = $calculos->b002 + $calculos->b022;
-        $bases_ppp2 = $calculos->b012 + $calculos->b032;
-        $bases_bs3 = $calculos->b003 + $calculos->b023;
-        $bases_ppp3 = $calculos->b013 + $calculos->b033;
-        $bases_bs4 = $calculos->b004 + $calculos->b024;
-        $bases_ppp4 = $calculos->b014 + $calculos->b034;
+        $bases_bs1 = $ivaData->bB001 + $ivaData->bB021 +
+                     $ivaData->bS001 + $ivaData->bS021;
+        $bases_ppp1 = $ivaData->bB011 + $ivaData->bB031;
+        $bases_bs2 = $ivaData->bB002 + $ivaData->bB022 +
+                     $ivaData->bS002 + $ivaData->bS022;
+        $bases_ppp2 = $ivaData->bB012 + $ivaData->bB032;
+        $bases_bs3 = $ivaData->bB003 + $ivaData->bB023 +
+                     $ivaData->bS003 + $ivaData->bS023;
+        $bases_ppp3 = $ivaData->bB013 + $ivaData->bB033;
+        $bases_bs4 = $ivaData->bB004 + $ivaData->bB024 +
+                     $ivaData->bS004 + $ivaData->bS024;
+        $bases_ppp4 = $ivaData->bB014 + $ivaData->bB034;
         
-        $this->cc_aj_ppp_1 = $calculos->i011 + $calculos->i031;
-        $this->cc_aj_ppp_2 = $calculos->i012 + $calculos->i032;
-        $this->cc_aj_ppp_3 = $calculos->i013 + $calculos->i033;
-        $this->cc_aj_ppp_4 = $calculos->i014 + $calculos->i034;
+        $this->cc_aj_ppp_1 = $ivaData->iB011 + $ivaData->iB031;
+        $this->cc_aj_ppp_2 = $ivaData->iB012 + $ivaData->iB032;
+        $this->cc_aj_ppp_3 = $ivaData->iB013 + $ivaData->iB033;
+        $this->cc_aj_ppp_4 = $ivaData->iB014 + $ivaData->iB034;
         
-        $this->cc_aj_bs_1 = $calculos->i001 + $calculos->i021 ;
-        $this->cc_aj_bs_2 = $calculos->i002 + $calculos->i022 ;
-        $this->cc_aj_bs_3 = $calculos->i003 + $calculos->i023 ;
-        $this->cc_aj_bs_4 = $calculos->i004 + $calculos->i024 ;
+        $this->cc_aj_bs_1 = $ivaData->iB001 + $ivaData->iB021 +
+                            $ivaData->iS001 + $ivaData->iS021;
+        $this->cc_aj_bs_2 = $ivaData->iB002 + $ivaData->iB022 +
+                            $ivaData->iS002 + $ivaData->iS022;
+        $this->cc_aj_bs_3 = $ivaData->iB003 + $ivaData->iB023 +
+                            $ivaData->iS003 + $ivaData->iS023;
+        $this->cc_aj_bs_4 = $ivaData->iB004 + $ivaData->iB024 +
+                            $ivaData->iS004 + $ivaData->iS024;
         
         $acreditable_bs1  = ( ($bases_bs1 * $ratio1_operativo * 0.01) + ($bases_bs1 * $ratio2_operativo * 0.02) + ($bases_bs1 * $ratio3_operativo * 0.13) + ($bases_bs1 * $ratio4_operativo * 0.04) ) * $prorrataOperativa;
         $acreditable_bs2  = ( ($bases_bs2 * $ratio1_operativo * 0.02) + ($bases_bs2 * $ratio2_operativo * 0.02) + ($bases_bs2 * $ratio3_operativo * 0.02) + ($bases_bs2 * $ratio4_operativo * 0.02) ) * $prorrataOperativa;
@@ -203,10 +251,7 @@ class Book extends Model
             $this->cc_sum1 = $this->cc_iva_emitido_1 + $this->cc_iva_emitido_2 + $this->cc_iva_emitido_3 + 
             $this->cc_iva_emitido_4 + $this->cc_ajuste_ppp + $this->cc_ajuste_bs + abs($this->cc_por_pagar) + $this->cc_gasto_no_acreditable;
         }
-        
-        if($calculos->month == 6) {
-          //dd($this);
-        }
+
     }
     
 }
