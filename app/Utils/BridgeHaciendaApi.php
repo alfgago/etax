@@ -124,7 +124,6 @@ class BridgeHaciendaApi
             ProcessReception::dispatch($bill->id, $provider->id, $token, $ref)
                 ->onConnection(config('etax.queue_connections'))->onQueue('receptions');
             return $bill;
-
         } catch (ClientException $error) {
             Log::error('Error al crear factura en API HACIENDA -->>'. $error->getMessage() );
             return $bill;
