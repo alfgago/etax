@@ -224,7 +224,7 @@ class InvoiceUtils
                     'impuesto_codigo_tarifa' => Variables::getCodigoTarifaVentas($value['iva_type']),
                     'impuesto_tarifa' => $value['iva_percentage'] ?? '',
                     'impuesto_factor_IVA' => $value['iva_percentage'] / 100,
-                    'impuesto_monto' => $value['iva_amount'] ?? '',
+                    'impuesto_monto' => $value['iva_amount'] ? round($value['iva_amount'], 5) : '',
                     'exoneracion_tipo_documento' => $value['exoneration_document_type'] ?? '',
                     'exoneracion_numero_documento' => $value['exoneration_document_number'] ?? '',
                     'exoneracion_fecha_emision' => $value['exoneration_date'] ?? '',
@@ -334,6 +334,14 @@ class InvoiceUtils
                 'totcomprobante' => $totalVenta + $totalImpuestos,	
                 'detalle' => $details
             );
+            if ($data['document_type'] == '03') {
+                $invoiceData['totalivadevuelto'] = 0;
+                $invoiceData['referencia_doc_type'] = $data['reference_doc_type'];
+                $invoiceData['referencia_codigo'] = '01';
+                $invoiceData['referencia_razon'] = 'Anular Factura';
+                $invoiceData['fecha_emision_factura'] = $data['reference_generated_date'];
+                $invoiceData['clave_factura'] = $data['reference_document_key'];
+            }
             foreach ($invoiceData as $key => $values) {
                 if ($key == 'atvcertFile') {
                     $request[]=array(
@@ -353,6 +361,13 @@ class InvoiceUtils
             Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
             return false;
         }
+    }
+
+    public  function validateZip($invoice) {
+        if ($invoice->reference_doc_type != '09') {
+            return empty($invoice->client_zip) ? false : true;
+        }
+        return true;
     }
     
 }
