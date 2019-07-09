@@ -871,7 +871,9 @@ class Invoice extends Model
             $this->other_reference = $invoiceReference->reference_number;
             $this->reference_document_key = $invoiceReference->document_key;
             $this->reference_generated_date = $invoiceReference->generated_date;
+            $this->reference_doc_type = $invoiceReference->document_type;
             $this->send_emails = $invoiceReference->send_email ?? null;
+            $this->xml_schema = $invoiceReference->xml_schema;
             $invoiceReference->reference_document_key = $this->document_key;
             $invoiceReference->save();
             $this->save();

@@ -612,6 +612,7 @@ class InvoiceController extends Controller
     public function anularInvoice($id)
     {
         try {
+            Log::info('Anulacion de facturar -->'.$id);
             $apiHacienda = new BridgeHaciendaApi();
             $tokenApi = $apiHacienda->login();
             if ($tokenApi !== false) {

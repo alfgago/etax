@@ -8,10 +8,7 @@
   <form id="anular-form-{{ $data->id }}" class="inline-form" method="POST" action="/facturas-emitidas/anular/{{  $data->id }}" >
     @csrf
     @method('patch')
-    <a type="button" class="text-danger mr-2" 
-    title="Anulación de facturas temporalmente deshabilitada por problemas en NC de 4.3, se rehabilitarán cuanto antes. Las anulaciones ya iniciadas se procesarán sin problema apenas se rehabilite la funcionalidad. " 
-    onclick="" disabled>
-      
+    <a type="button" class="text-danger mr-2" title="Anular factura" onclick="confirmAnular({{  $data->id }});">
       <i class="fa fa-ban" aria-hidden="true"></i>
     </a>
   </form>
