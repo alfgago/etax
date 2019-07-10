@@ -5,7 +5,7 @@
         la clave <b>{{$data_invoice->document_key}}</b> fue recibida por el Ministerio de Hacienda y se encuentra en
         condición de aceptado.
         <br><br>
-        <b>Respuesta de Hacienda: </b> {{$xml}}
+
         ¡Muchas Gracias!
     </p>
 @endcomponent
