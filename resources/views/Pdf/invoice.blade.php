@@ -284,16 +284,16 @@
                 || $item->measure_unit == 'I' || $item->measure_unit == 'Os'){
                  
                 if($item->iva_amount == 0 && !$item->ivaType->is_gravado ){
-                    $totalServiciosExentos += $item->total;
+                    $totalServiciosExentos += $item->subtotal;
                 }else{
-                    $totalServiciosGravados += $item->total;
+                    $totalServiciosGravados += $item->subtotal;
                 }
 
             } else {
                 if($item->iva_amount == 0 && !$item->ivaType->is_gravado ){
-                    $totalMercaderiasExentas += $item->total;
+                    $totalMercaderiasExentas += $item->subtotal;
                 }else{
-                    $totalMercaderiasGravadas += $item->total;
+                    $totalMercaderiasGravadas += $item->subtotal;
                 }
             }
             $totalDescuentos += $item->discount;
