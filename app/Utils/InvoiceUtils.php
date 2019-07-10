@@ -120,7 +120,7 @@ class InvoiceUtils
         }
     }
     
-     public function sendInvoiceNotificationEmail( $invoice, $company, $xmlPath ) {
+     public function sendInvoiceNotificationEmail($invoice, $company, $xmlPath, $xmlMH) {
         
         try{
             $cc = [];
@@ -155,13 +155,15 @@ class InvoiceUtils
                 Mail::to($cc)->send(new \App\Mail\InvoiceNotification([	
                                         'xml' => $xmlPath,	
                                         'data_invoice' => $invoice, 
-                                        'data_company' => $company	
+                                        'data_company' => $company,
+                                        'xmlMH' => $xmlMH
                                     ]));
             } else {
                 Mail::to($invoice->client_email)->send(new \App\Mail\InvoiceNotification([	
                                         'xml' => $xmlPath,	
                                         'data_invoice' => $invoice, 
-                                        'data_company' => $company
+                                        'data_company' => $company,
+                                        'xmlMH' => $xmlMH
                                     ]));
             }
             Log::info('Se enviaron correos de notififación de factura aprobada: ' .$invoice->id );

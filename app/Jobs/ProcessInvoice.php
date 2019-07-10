@@ -88,15 +88,19 @@ class ProcessInvoice implements ShouldQueue
                                 $path,
                                 ltrim($response['data']['xmlFirmado'], '\n')
                             );
+                            $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
+                            $saveMH = Storage::put(
+                                $pathMH,
+                                ltrim($response['data']['mensajeHacienda'], '\n')
+                            );
                             if ($save) {
                                 $xml = new XmlHacienda();
                                 $xml->invoice_id = $invoice->id;
                                 $xml->bill_id = 0;
                                 $xml->xml = $path;
                                 $xml->save();
-                                
-                                $xmlExtract = ltrim($response['data']['response'], '\n');
-                                $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $xmlExtract );
+
+                                $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH);
 
                             }
                             Log::info('Factura enviada y XML guardado.');
