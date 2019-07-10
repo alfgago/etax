@@ -640,19 +640,13 @@ class BillController extends Controller
                 $bill = Bill::findOrFail($id);
                 $company = currentCompanyModel();
                 if (!empty($bill)) {
-                    if( !$bill->provider_zip ) {
-                        $bill->accept_status = $request->respuesta;
-                        $bill->save();
-                        
-                        $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
-                        $company->save();
-                        $company->last_document_rec = getDocReference($company->last_rec_ref_number);
-                        $company->save();
-    
-                        $apiHacienda->acceptInvoice($bill, $tokenApi);
-                    }else{
-                        return redirect('/facturas-recibidas/aceptaciones')->withError('Esta factura no contiene datos de ubicación de proveedor. Intente volver a subir el XML o contacte a soporte si el error persiste.');
-                    }
+                    $bill->accept_status = $request->respuesta;
+                    $bill->save();
+                    $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
+                    $company->save();
+                    $company->last_document_rec = getDocReference($company->last_rec_ref_number);
+                    $company->save();
+                    $apiHacienda->acceptInvoice($bill, $tokenApi);
                 }
                 clearInvoiceCache($bill);
                 return redirect('/facturas-recibidas/aceptaciones')->withMessage('Acceptacion Enviada.');
@@ -660,7 +654,6 @@ class BillController extends Controller
             } else {
                 return back()->withError( 'Ha ocurrido un error al enviar factura.' );
             }
-
         } catch ( Exception $e) {
             Log::error ("Error al crear aceptacion de factura");
             return redirect('/facturas-recibidas/aceptaciones')->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');

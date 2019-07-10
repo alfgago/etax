@@ -120,7 +120,9 @@ class CodigosSeeder extends Seeder
               'is_identificacion_plena' => $codigo['is_identificacion_plena'] ?? false,
               'is_gravado' => !isset($codigo['is_gravado']) ? true : $codigo['is_gravado']
           ]);
-          }catch(\Throwable $e){}
+          }catch(\Throwable $e){
+              \Illuminate\Support\Facades\Log::error('Error codigo seeder'. $e);
+          }
         }
         
     }
@@ -213,10 +215,11 @@ class CodigosSeeder extends Seeder
               'is_estado' => $codigo['is_estado'] ?? false,
               'is_bienes' => $codigo['is_bienes'] ?? false,
               'is_servicio' => $codigo['is_servicio'] ?? false,
-              'is_servicio' => $codigo['is_servicio'] ?? false,
               'is_gravado' => $codigo['is_gravado'] ?? false
           ]);
-          }catch(\Throwable $e){}
+          }catch(\Throwable $e){
+              \Illuminate\Support\Facades\Log::error('Error codigo seeder'. $e);
+          }
         }
         
     }

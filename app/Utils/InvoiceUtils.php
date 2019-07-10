@@ -218,7 +218,8 @@ class InvoiceUtils
                     'subtotal' => $value['subtotal'] ?? '',
                     'montoTotal' => $value['item_count'] * $value['unit_price'] ?? '',
                     'montoTotalLinea' => $value['subtotal'] + $value['iva_amount'] ?? '',
-                    'descuento' => $value['discount'] ?? '',
+                    'descuento' => $value['discount'] ? $this->discountCalculator($value['discount_type'], $value['discount'],
+                        $value['item_count'] * $value['unit_price'] ?? 0) : 0,
                     'impuesto_codigo' => '01',
                     'tipo_iva' => $value['iva_type'],
                     'impuesto_codigo_tarifa' => Variables::getCodigoTarifaVentas($value['iva_type']),
@@ -274,7 +275,6 @@ class InvoiceUtils
                     }
 
                 } else {
-
                     if($detail->impuesto_monto == 0 && $detail->tipo_iva > 200 ){
                         $totalMercaderiasExentas += $detail->montoTotal;
                     }else{
@@ -321,17 +321,17 @@ class InvoiceUtils
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,	
                 'atvcertPin' => $company->atv->pin ?? '',	
                 'atvcertFile' => Storage::get($company->atv->key_url),	
-                'servgravados' => $totalServiciosGravados,	
-                'servexentos' => $totalServiciosExentos,	
-                'mercgravados' => $totalMercaderiasGravadas,	
-                'mercexentos' => $totalMercaderiasExentas,	
-                'totgravado' => $totalGravado,	
-                'totexento' => $totalExento,	
-                'totventa' => $totalVenta,	
+                'servgravados' => $totalServiciosGravados - $totalDescuentos,
+                'servexentos' => $totalServiciosExentos > 0 ? $totalServiciosExentos - $totalDescuentos : $totalServiciosExentos,
+                'mercgravados' => $totalMercaderiasGravadas > 0 ? $totalMercaderiasGravadas - $totalDescuentos : $totalMercaderiasGravadas,
+                'mercexentos' => $totalMercaderiasExentas > 0 ? $totalMercaderiasExentas - $totalDescuentos : $totalMercaderiasExentas,
+                'totgravado' => $totalGravado - $totalDescuentos,
+                'totexento' => $totalExento > 0 ? $totalExento - $totalDescuentos : $totalExento,
+                'totventa' => $totalVenta - $totalDescuentos,
                 'totdescuentos' => $totalDescuentos,	
                 'totventaneta' => $totalVenta - $totalDescuentos,	
                 'totimpuestos' => $totalImpuestos,	
-                'totcomprobante' => $totalVenta + $totalImpuestos,	
+                'totcomprobante' => ($totalVenta - $totalDescuentos) + $totalImpuestos,
                 'detalle' => $details
             );
             if ($data['document_type'] == '03') {
@@ -368,6 +368,15 @@ class InvoiceUtils
             return empty($invoice->client_zip) ? false : true;
         }
         return true;
+    }
+
+    private function discountCalculator($descType, $value, $amount) {
+        if($descType == "01" && $value > 0 ) {
+             $discount = $amount * ($value / 100);
+        } else {
+            $discount= $value;
+        }
+        return $discount;
     }
     
 }
