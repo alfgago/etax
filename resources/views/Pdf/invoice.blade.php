@@ -42,7 +42,7 @@
         }
 
         .invoice-box table tr.information table td {
-            padding-bottom: 40px;
+            padding-bottom: 20px;
         }
 
         .invoice-box table tr.heading td {
@@ -113,13 +113,13 @@
         .barra {
             background: black;
             color: black;
-            height: 25px;
+            height: 5px;
             margin-bottom: 15px;
         }
 
         .total {
-            margin-top: 40px;
-            height: 60px;
+            margin-top: 30px;
+            height: 40px;
         }
 
         .title-total {
@@ -130,7 +130,7 @@
         .box-total {
             background: black;
             color: white;
-            font-size: 16px;
+            font-size: 14px;
             text-align: center;
         }
         .tb-header {
@@ -143,7 +143,7 @@
             border-bottom: 1px solid #ddd;
             /* font-weight: bold; */
             height: auto;
-            font-size: 12px;
+            font-size: 10px;
             line-height: 1;
             color: white;
             text-align: center;
@@ -152,66 +152,84 @@
         }
 
         .footer {
-            margin-top: 130px;
+            margin-top: 100px;
             height: 100px;
         }
         td {
             font-family: Pangram, sans-serif;
-            font-size: 12px;
+            font-size: 10px;
         }
     </style>
 </head>
-
 <body>
     <table width="100%" cellpadding="0" cellspacing="0">
-    <tr class="top">
-        <td colspan="2">
-    <tr>
-        <td class="title" style="width: 200px; height: 170px">
-            @if( $company->logo_url )
-                <img src="{{\Illuminate\Support\Facades\Storage::temporaryUrl($company->logo_url,  now()->addMinutes(1))}}" style="width:100%; max-width:150px; max-height: 150px">
-            @endif
-        </td>
+        <tr class="top">
+            <td colspan="2">
+        <tr>
+            <td class="title" style="width: 180px; height: 100px">
+                @if( $company->logo_url )
+                    <img src="{{\Illuminate\Support\Facades\Storage::temporaryUrl($company->logo_url,  now()->addMinutes(1))}}" style="width:100%; max-width:150px; max-height: 150px">
+                @endif
+            </td>
 
-        <td>
-            <b>{{$company->business_name}}</b><br>
-            <b>Cedula:</b> {{$company->id_number}}<br>
-            <b>Tel:</b> {{$company->phone}}<br>
-            <b>Fax:</b> <br>
-            <b>Correo: {{$company->email}}</b> <br>
+            <td>
+                <b>{{$company->business_name}}</b><br>
+                <b>Cedula:</b> {{$company->id_number}}<br>
+                <b>Tel:</b> {{$company->phone}}<br>
+                <b>Fax:</b> <br>
+                <b>Correo: {{$company->email}}</b> <br>
+            </td>
+            <td style="padding: 40px 0px 0px 30px; text-align: right;">
+                <b>Direccion:</b>
+                {{$company->address. " ".$company->zip}}<br>
+            </td>
+        </tr>
         </td>
-        <td style="padding: 80px 0px 0px 30px; text-align: right;">
-            <b>Direccion:</b>
-            {{$company->address. " ".$company->zip}}<br>
-        </td>
-    </tr>
-    </td>
-    </tr>
-</table>
+        </tr>
+    </table>
+    <?php
+        switch ($data_invoice->document_type){
+            case '01':
+                $documentType = 'Factura electrónica';
+            break;
+            case '02':
+                $documentType = 'Nota de crédito electrónica';
+            break;
+            case '03':
+                $documentType = 'Nota de débito electrónica';
+            break;
+            case '08':
+                $documentType = 'Factura de exportación';
+            break;
+            case '09':
+                $documentType = 'Factura de compra';
+            break;
+        }
+    ?>
     <table width="100%">
         <hr class="barra">
     </table>
     <table width="100%">
-    <tr class="details">
-        <td style="width: 42%">
-            <b>Receptor: </b> {{$data_invoice->client_first_name.' '.$data_invoice->client_last_name}} <br>
-            <b>Cedula: </b> {{$data_invoice->client_id_number}}<br>
-            <b>Tel: </b> {{$data_invoice->client_phone}}<br>
-            <b>Correo: </b> {{$data_invoice->client_email}}<br>
-            <b>Codigo Interno :</b> {{$data_invoice->id}}<br>
-            <b>Direccion: </b> {{$data_invoice->client_address}}<br>
-        </td>
+        <tr class="details">
+            <td style="width: 40%;margin-top: 0.75% !important;">
+                <b>Receptor: </b> {{$data_invoice->client_first_name.' '.$data_invoice->client_last_name}} <br>
+                <b>Cedula: </b> {{$data_invoice->client_id_number}}<br>
+                <b>Tel: </b> {{$data_invoice->client_phone}}<br>
+                <b>Correo: </b> {{$data_invoice->client_email}}<br>
+                <b>Codigo Interno :</b> {{$data_invoice->id}}<br>
+                <b>Direccion: </b> {{$data_invoice->client_address}}<br>
+            </td>
 
-        <td>
-            <b>Factura Electrónica N°: </b>{{$data_invoice->document_number}} <br>
-            <b>Clave Numérica: </b> {{$data_invoice->document_key}}<br>
-            <br><br>
-            <b>Fecha de Emisión: </b> {{ $data_invoice->generated_date }}<br>
-            <b>Condición Venta: </b> {{ $data_invoice->getCondicionVenta() }}<br>
-            <b>Medio de Pago: </b> {{ $data_invoice->getMetodoPago() }}<br>
-        </td>
-    </tr>
-</table>
+            <td style="width: 42%;margin-top: 0.75% !important;">
+                <b>Factura Electrónica N°: </b>{{$data_invoice->document_number}} <br>
+                <b>Clave Numérica: </b> {{$data_invoice->document_key}}<br>
+                <b>Tipo de Documento: </b> {{ $documentType }}<br>
+                <b>Fecha de Emisión: </b> {{ $data_invoice->generated_date }}<br>
+                <b>Condición Venta: </b> {{ $data_invoice->getCondicionVenta() }}<br>
+                <b>Medio de Pago: </b> {{ $data_invoice->getMetodoPago() }}<br>
+            </td>
+        </tr>
+    </table>
     <table width="100%" style="margin-top: 10px">
     <tr class="heading">
         <td class="tb-header">
@@ -244,7 +262,42 @@
         </td>
 
     </tr>
+    <?php
+        $serviciosgravados = 0;
+        $serviciosexentos = 0;
+        $mercanciasgravadas = 0;
+        $mercanciasexentas = 0;
+        $gravado = 0;
+        $exento = 0;
+        $venta = 0;
+        $descuento = 0;
+        $ventaneta = 0;
+        $impuestos = 0;
+        $itemType = array('Sp', 'Spe', 'St', 'Al', 'Alc', 'Cm', 'I', 'Os');
+    ?>
     @foreach($data_invoice->items as $item)
+        <?php if($item->discount > 0){
+                $descuento .= $item->discount;
+            }
+
+            if( in_array($item->measure_unit, $itemType) ){
+                if($item->iva_amount > 0){
+                    $serviciosgravados .= $item->subtotal;
+                }else{
+                    $serviciosexentos .= $item->subtotal;
+                }
+            }else{
+                if($item->iva_amount > 0){
+                    $mercanciasgravadas .= $item->subtotal;
+                }else{
+                    $mercanciasexentas .= $item->subtotal;
+                }
+            }
+            $impuestos .= $item->iva_amount;
+            $gravado = $serviciosgravados + $mercanciasgravadas;
+            $exento = $serviciosexentos + $mercanciasexentas;
+            $venta = $gravado + $exento;
+        ?>
         <tr class="item">
             <td>
                 {{$item->code ?? ''}}
@@ -277,17 +330,75 @@
         </tr>
     @endforeach
 </table>
-    <hr class="barra" style="margin-top: 150px">
+    <hr class="barra" style="margin-top: 60px">
     <table width="100%" class="total">
-        <tr class="item">
-            <td class="title-total">
-
-            </td>
-
-            <td class="box-total">
-                <b>Total {{ $data_invoice->currency }}: </b> {{round($data_invoice->total, 2)}}
-            </td>
-        </tr>
+        <thead>
+            <tr class="item">
+                <th class="title-total">
+                    Observaciones (Otros)
+                </th>
+                <th class="box-total" colspan="2">
+                    Totales
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td></td>
+                <td><b>Total servicios gravados</b></td>
+                <td><span>{{ $data_invoice->currency }}: {{round($serviciosgravados, 2)}}</span></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><b>Total servicios exentos</b></td>
+                <td><span>{{ $data_invoice->currency }}: {{round($serviciosexentos, 2)}}</span></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><b>Total mercancías gravadas</b></td>
+                <td><span>{{ $data_invoice->currency }}: {{round($mercanciasgravadas, 2)}}</span></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><b>Total mercancías exentas</b></td>
+                <td><span>{{ $data_invoice->currency }}: {{round($mercanciasexentas, 2)}}</span></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><b>Total gravado</b></td>
+                <td><span>{{ $data_invoice->currency }}: {{round($gravado, 2)}}</span></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><b>Total exento</b></td>
+                <td><span>{{ $data_invoice->currency }}: {{round($exento, 2)}}</span></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><b>Total venta</b></td>
+                <td><span>{{ $data_invoice->currency }}: {{round($venta, 2)}}</span></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><b>Total descuento</b></td>
+                <td><span>{{ $data_invoice->currency }}: {{round($descuento, 2)}}</span></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><b>Total venta neta</b></td>
+                <td><span>{{ $data_invoice->currency }}: {{round($data_invoice->subtotal, 2)}}</span></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><b>Total impuestos</b></td>
+                <td><span>{{ $data_invoice->currency }}: {{round($impuestos, 2)}}</span></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><b>Total comprobante</b></td>
+                <td><span>{{ $data_invoice->currency }}: {{round($data_invoice->total, 2)}}</span></td>
+            </tr>
+        </tbody>
     </table>
     <table width="100%" class="footer">
         <tr class="item">
