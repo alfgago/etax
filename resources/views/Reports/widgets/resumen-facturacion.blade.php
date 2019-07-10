@@ -13,8 +13,8 @@
           <label><span>Facturas de venta procesadas</span></label>
           @if( $availableInvoices )
             <div class="barra-limites emitidas" >
-              <div class="fill-bar" data-total="{{ $availableInvoices }}" data-fill="{{ number_format( $data->count_invoices ) }}"></div>
-              <div class="barra-text">{{ number_format( $availableInvoices->current_month_sent ) }} de {{ $availableInvoices->monthly_quota  }}</div>
+              <div class="fill-bar" data-total="{{ number_format($availableInvoices) }}" data-fill="{{ number_format( $data->count_invoices ) }}"></div>
+              <div class="barra-text">{{ number_format( $availableInvoices->current_month_sent ) }} de {{ number_format($availableInvoices->monthly_quota)  }}</div>
             </div>
           @else
             <div class="barra-limites emitidas" >
@@ -29,8 +29,8 @@
           <label><span>Facturas de compra procesadas</span></label>
           @if( $countAvailableBills != -1 )
             <div class="barra-limites recibidas">
-              <div class="fill-bar" data-total="{{ $countAvailableBills }}" data-fill="{{ number_format( $data->count_bills ) }}"></div>
-              <div class="barra-text">{{ number_format( $data->count_bills ) }} de {{ $countAvailableBills }}</div>
+              <div class="fill-bar" data-total="{{ number_format($countAvailableBills) }}" data-fill="{{ number_format( $data->count_bills ) }}"></div>
+              <div class="barra-text">{{ number_format( $data->count_bills ) }} de {{ number_format($countAvailableBills) }}</div>
             </div>
           @else
             <div class="barra-limites recibidas">
@@ -42,7 +42,7 @@
       <div class="col-md-12 dato-facturas mt-2">
           @if( $countPurchasedInvoices > 0 )
             <label><span>Facturas prepago disponibles</span></label>
-            <div> {{ $countPurchasedInvoices }} </div>
+            <div> {{ number_format($countPurchasedInvoices) }} </div>
           @endif
       </div>
       <div class="col-md-12 dato-facturas hidden">

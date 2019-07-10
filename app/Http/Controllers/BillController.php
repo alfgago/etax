@@ -579,19 +579,20 @@ class BillController extends Controller
                 ])->render();
             }) 
             ->editColumn('total', function(Bill $bill) {
-                return "$bill->currency $bill->total";
+                $total = number_format($bill->total);
+                return "$bill->currency $total";
             })
             ->editColumn('accept_total_factura', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_total_factura";
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  number_format($bill->accept_total_factura);
             })
             ->editColumn('accept_iva_total', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_total";
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  number_format($bill->accept_iva_total);
             })
             ->editColumn('accept_iva_acreditable', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_acreditable";
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  number_format($bill->accept_iva_acreditable);
             })
             ->editColumn('accept_iva_gasto', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_gasto";
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  number_format($bill->accept_iva_gasto);
             })
             ->editColumn('provider', function(Bill $bill) {
                 return $bill->provider->getFullName();
