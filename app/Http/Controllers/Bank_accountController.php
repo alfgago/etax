@@ -12,7 +12,7 @@ class Bank_accountController extends Controller
 
     public function index(){
     
-    	$company = auth()->user()->companies->first()->id;
+        $company = currentCompanyModel()->id;
     	$cuentas = BankAccount::where('company_id',$company)->get();
     	//dd($cuentas);
     	return view('bank_account.index')->with('cuentas',$cuentas);
@@ -24,7 +24,7 @@ class Bank_accountController extends Controller
 
     public function guardar(Request $request){
         $fecha = Carbon::now()->setTimezone('America/Costa_Rica')->format('Y-m-d h:m:s');
-        $company = auth()->user()->companies->first()->id;
+        $company = currentCompanyModel()->id;
         BankAccount::insert([
             ['account' => $request->account,
              'company_id' => $company,
@@ -38,7 +38,7 @@ class Bank_accountController extends Controller
 
 
     public function editar($id){
-        $company = auth()->user()->companies->first()->id;
+        $company = currentCompanyModel()->id;
         $cuenta = BankAccount::where('company_id',$company)
                 ->where('id',$id)->first();
         //dd($cuenta);
@@ -47,7 +47,7 @@ class Bank_accountController extends Controller
 
     public function actualizar(Request $request){
         $fecha = Carbon::now()->setTimezone('America/Costa_Rica')->format('Y-m-d h:m:s');
-        $company = auth()->user()->companies->first()->id;
+        $company = currentCompanyModel()->id;
         BankAccount:: where('id', $request->bank_account_id)->where('company_id', $company)
             ->update(['account' => $request->account,
             'bank' =>  $request->bank,

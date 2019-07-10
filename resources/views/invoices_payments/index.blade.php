@@ -16,6 +16,7 @@
             <tr>
               <th># Factura</th>
               <th>Fecha emitida</th>
+              <th>Cliente</th>
               <th>Monto</th>
               <th>Banco</th>
               <th>Transferencia</th>
@@ -29,13 +30,14 @@
 
                 <tr>
                     <td>{{@$invoice->document_number}}</td>
-                    <td>{{@$invoice->created_at}}</td>
+                    <td>{{@$invoice->generated_date}}</td>
                     <td>{{@$invoice->amount}}</td>
-                    <td>{{@$invoice->bank_account_id}}</td>
+                    <td>{{@$invoice->client_first_name}} {{@$invoice->client_last_name}} {{@$invoice->client_last_name2}}</td>
+                    <td>{{@$invoice->bank}}</td>
                     <td>{{@$invoice->proof}}</td>
                     <td>{{@$invoice->payment_date}}</td>
                     <td class="text-center">
-                        <button type="button" class="btn btn-primary levantar_modal" titulo="Consolidar Pago" link="/consolidad_pagos/consolidar/" nid="{{@$invoice->id}}" data-toggle="modal" data-target="#modal_estandar">Consolidar</button>
+                        <a  class="btn btn-primary" href="/consolidad_pagos/consolidar/{{@$invoice->invoice_id}}">Consolidar</a>
                     </td>
                 </tr>
             @endforeach
@@ -51,22 +53,6 @@
   
 
 $(function() {
-
-  
-  $(".levantar_modal").click(function(){
-      console.log('asdsdas');
-      $("#titulo_modal_estandar").html($(this).attr("titulo"));
-      $.ajax({
-          type:'POST',
-          url:'/getmsg',
-          data:'_token = <?php echo csrf_token() ?>',
-          success:function(data) {
-              $("#msg").html(data.msg);
-          }
-      });
-  });
-
-
   $('#invoices-payments-table').DataTable({
     language: {
       url: "/lang/datatables-es_ES.json",

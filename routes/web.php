@@ -239,5 +239,8 @@ Route::prefix('bank-account')->group(function() {
 
 
 Route::prefix('consolidad_pagos')->group(function() {
-    Route::get('/', 'InvoicesPaymentsController@lista')->name('InvoicesPaymentsController.lista');
+    Route::get('/', 'InvoicesPaymentsController@lista')->name('InvoicesPayments.lista');
+    Route::get('/consolidar/{id}', 'InvoicesPaymentsController@consolidar')->name('InvoicesPayments.consolidar');
+    Route::get('/new_payment_form/{i}', 'InvoicesPaymentsController@new_payment_form')->name('InvoicesPayments.new_payment_form');
+    Route::post('/actualizar-consolidacion', 'InvoicesPaymentsController@actualizar_consolidacion')->name('InvoicesPayments.actualizar_consolidacion');
 });
