@@ -26,7 +26,7 @@
             @if ( $invoices->count() )
               @foreach ( $invoices as $invoice )
                 <tr>
-                  <td>{{$invoice->generation_method}}</td>
+                  <td>{{$invoice->generated_date}}</td>
                   <td>{{$invoice->document_number}}</td>
                   <td>{{$invoice->client_first_name}} {{$invoice->client_last_name}} {{$invoice->client_last_name2}}</td>
                   <td>₡{{ number_format( $invoice->total, 0 ) }}</td>

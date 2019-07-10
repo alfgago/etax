@@ -145,7 +145,7 @@ class BookController extends Controller
         $year = $cierres->year;
         $cerrado = $cierres->is_closed;
         $total_retenido = $cierres->retention_by_card;
-        $invoices = Invoice::select('generation_method', 'document_number', 'client_first_name', 'client_last_name', 'client_last_name2','total','total as retencion')
+        $invoices = Invoice::select('generated_date', 'document_number', 'client_first_name', 'client_last_name', 'client_last_name2','total','total as retencion')
             ->where('company_id',$company->id)
             ->whereYear('generated_date',$year)
             ->whereMonth('generated_date',$month)
