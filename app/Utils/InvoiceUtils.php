@@ -275,7 +275,6 @@ class InvoiceUtils
                     }
 
                 } else {
-
                     if($detail->impuesto_monto == 0 && $detail->tipo_iva > 200 ){
                         $totalMercaderiasExentas += $detail->montoTotal;
                     }else{
@@ -322,17 +321,17 @@ class InvoiceUtils
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,	
                 'atvcertPin' => $company->atv->pin ?? '',	
                 'atvcertFile' => Storage::get($company->atv->key_url),	
-                'servgravados' => $totalServiciosGravados,	
-                'servexentos' => $totalServiciosExentos,	
-                'mercgravados' => $totalMercaderiasGravadas,	
-                'mercexentos' => $totalMercaderiasExentas,	
-                'totgravado' => $totalGravado,	
-                'totexento' => $totalExento,	
-                'totventa' => $totalVenta,	
+                'servgravados' => $totalServiciosGravados - $totalDescuentos,
+                'servexentos' => $totalServiciosExentos - $totalDescuentos,
+                'mercgravados' => $totalMercaderiasGravadas - $totalDescuentos,
+                'mercexentos' => $totalMercaderiasExentas - $totalDescuentos,
+                'totgravado' => $totalGravado - $totalDescuentos,
+                'totexento' => $totalExento - $totalDescuentos,
+                'totventa' => $totalVenta - $totalDescuentos,
                 'totdescuentos' => $totalDescuentos,	
                 'totventaneta' => $totalVenta - $totalDescuentos,	
                 'totimpuestos' => $totalImpuestos,	
-                'totcomprobante' => $totalVenta + $totalImpuestos,	
+                'totcomprobante' => ($totalVenta - $totalDescuentos) + $totalImpuestos,
                 'detalle' => $details
             );
             if ($data['document_type'] == '03') {
