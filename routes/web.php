@@ -43,6 +43,7 @@ Route::post('/reportes/detalle-debito', 'ReportsController@reporteDetalleDebitoF
 Route::post('/reportes/detalle-credito', 'ReportsController@reporteDetalleCreditoFiscal');
 Route::post('/reportes/libro-ventas', 'ReportsController@reporteLibroVentas');
 Route::post('/reportes/libro-compras', 'ReportsController@reporteLibroCompras');
+Route::get('/reportes/borrador-iva', 'ReportsController@reporteBorradorIVA');
 
 //Cierres de mes
 Route::prefix('cierres')->group(function() {

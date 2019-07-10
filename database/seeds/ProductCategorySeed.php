@@ -1,0 +1,109 @@
+<?php
+
+use Illuminate\Database\Seeder;
+
+class ProductCategorySeed extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+              
+        $listaVentas = [
+          //Ventas al 1%
+          ['nombre'=>'Bienes generales al 1%', 'invoice_iva_code'=>'B101', 'open_codes'=>'B101,B161'],
+          ['nombre'=>'Bienes de capital al 1%', 'invoice_iva_code'=>'B171', 'open_codes'=>'B171'],
+          ['nombre'=>'Servicios al 1%', 'invoice_iva_code'=>'S101', 'open_codes'=>'S101,S161'],
+          ['nombre'=>'Uso o consumo personal de mercancias y servicios al 1%', 'invoice_iva_code'=>'B121', 'open_codes'=>'B121,S121'],
+          ['nombre'=>'Transferenccias sin contraprestación a terceros 1%', 'invoice_iva_code'=>'B125', 'open_codes'=>'S125,B125'],
+          //Ventas al 2%
+          ['nombre'=>'Medicamentos, materias primas, insumos, maquinaria, equipo y reactivos para su producción', 'invoice_iva_code'=>'B102', 'open_codes'=>'B102,S102,B162,S162,B122,S122,B126,S126,B172'],
+          ['nombre'=>'Primas de seguros personales', 'invoice_iva_code'=>'S102', 'open_codes'=>'S102'],
+          ['nombre'=>'Bienes y servicios que hagan las instituciones estatles de educación superior y otras autorizadas', 'invoice_iva_code'=>'S102', 'open_codes'=>'B102,S102,B162,S162,B122,S122,B126,S126,B172'],
+          ['nombre'=>'Otros servicios de educación privada no acreditados por el MEP y/o CONESUP', 'invoice_iva_code'=>'S102', 'open_codes'=>'B102,S102,B162,S162,B122,S122,B126,S126,B172'],
+          //Ventas al 4%
+          ['nombre'=>'Boletos o pasajes aéreos nacionales', 'invoice_iva_code'=>'S104', 'open_codes'=>'S104,B104,S128,S124'],
+          ['nombre'=>'Boletos o pasajes aéreos internacionales', 'invoice_iva_code'=>'S104', 'open_codes'=>'S104,B104,S128,S124'],
+          ['nombre'=>'Servicios de salud privados', 'invoice_iva_code'=>'S104', 'open_codes'=>'S104,B104,S128,S124'],
+          ['nombre'=>'Servicios de ingeniería, arquitectura, topografía, y construcción de obra civil', 'invoice_iva_code'=>'S245', 'open_codes'=>'S114,S118,S245'],
+          ['nombre'=>'Servicios de recolección, clasificación y almacenamiento de bienes reciclables y reutilizables, inscritos ante la AT y el Ministerio de Salud', 'invoice_iva_code'=>'S245', 'open_codes'=>'S114,S118,S245'],
+          //Ventas al 13%
+          ['nombre'=>'Bienes generales al 13%', 'invoice_iva_code'=>'B103', 'open_codes'=>'B103,B130,B163'],
+          ['nombre'=>'Bienes de capital al 13%', 'invoice_iva_code'=>'B173', 'open_codes'=>'B173'],
+          ['nombre'=>'Servicios al 13%', 'invoice_iva_code'=>'S103', 'open_codes'=>'S103,S130,S163'],
+          ['nombre'=>'Uso o consumo personal de mercancias y servicios al 13%', 'invoice_iva_code'=>'B123', 'open_codes'=>'B123,S123'],
+          ['nombre'=>'Transferenccias sin contraprestación a terceros 13%', 'invoice_iva_code'=>'B127', 'open_codes'=>'S127,B127'],
+          //Rubros incluidos como gasto en base imponible
+          ['nombre'=>'Incrementos en la base imponible por recaudación a nivel de mayorista', 'invoice_iva_code'=>'S250', 'open_codes'=>'S250,B250'],
+          ['nombre'=>'Servicios adquiridos desde el exterior', 'invoice_iva_code'=>'S140', 'open_codes'=>'S140'],
+          //Ventas exentas
+          ['nombre'=>'Exportaciones de bienes', 'invoice_iva_code'=>'B150', 'open_codes'=>'B150'],
+          ['nombre'=>'Exportaciones de servicios', 'invoice_iva_code'=>'S150', 'open_codes'=>'S150'],
+          ['nombre'=>'Venta local de bienes exentos', 'invoice_iva_code'=>'B200', 'open_codes'=>'B200'],
+          ['nombre'=>'Venta local de servicios exentos', 'invoice_iva_code'=>'S200', 'open_codes'=>'S200'],
+          ['nombre'=>'Créditos para descuentos de facturas y arrendamientos financieros', 'invoice_iva_code'=>'S200', 'open_codes'=>'S200'],
+          ['nombre'=>'Arrendamientos destinados a viviendas y accesorios, así como los lugares de culto religioso', 'invoice_iva_code'=>'S201', 'open_codes'=>'S201'],
+          ['nombre'=>'Arrendamientos utilizados por micro y pequeñas empresas', 'invoice_iva_code'=>'S201', 'open_codes'=>'S201'],
+          ['nombre'=>'Suministro de energía eléctrica residencial no mayor a 280 KW/H', 'invoice_iva_code'=>'S201', 'open_codes'=>'S201'],
+          ['nombre'=>'Venta o entrega de agua residencial no mayor a 30 M3', 'invoice_iva_code'=>'S201', 'open_codes'=>'S201'],
+          ['nombre'=>'Autoconsumo de bienes y servicios sin aplicación de créditos total o parcial', 'invoice_iva_code'=>'B240', 'open_codes'=>'B240,S240'],
+          ['nombre'=>'Venta de sillas de ruedas y similares, equipo ortopédico, prótesis y equipo', 'invoice_iva_code'=>'B200', 'open_codes'=>'B200,S200'],
+          ['nombre'=>'Venta de bienes y servicios a instituciones públicas y privadas exentas', 'invoice_iva_code'=>'B260', 'open_codes'=>'B260,S260'],
+          ['nombre'=>'Aranceles por matrícula y créditos de cursos en universidades públicas y privadas exentas', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
+          ['nombre'=>'Servicios de transporte terrestre de pasajeros y cabotaje de personas con concesión', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
+          ['nombre'=>'Venta, arrendamiento y leasing de autobuses y embarcaciones', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
+          ['nombre'=>'Comisiones por el servicio de subasta ganadera y transacción de animales', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
+          ['nombre'=>'Venta, comercialización y matanza de animales vivos', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
+          //Ventas autorizadas sin impuesto
+          ['nombre'=>'Ventas sin impuesto a clientes autorizados por la Dirección General de Hacienda', 'invoice_iva_code'=>'B170', 'open_codes'=>'B170,S170'],
+          ['nombre'=>'Ventas sin impuesto a clientes autorizados por la Dirección General de Tributación', 'invoice_iva_code'=>'B170', 'open_codes'=>'B170,S170'],
+          ['nombre'=>'Ventas sin impuesto a clientes exonerados por ley especial', 'invoice_iva_code'=>'B170', 'open_codes'=>'B170,S170'],
+          ['nombre'=>'Ventas de bienes y servicios relacionados a la canasta básica tributarioa exentos el 1er año de la ley', 'invoice_iva_code'=>'B165', 'open_codes'=>'B165,S165'],
+          ['nombre'=>'Servicios de ingeniería, arquitectura, topografía y construcción de obra civil con planos visados antes del 1 de octubre del 2019', 'invoice_iva_code'=>'S245', 'open_codes'=>'S245'],
+          ['nombre'=>'Servicios turísticos inscritos ante el Instituto Costarricense de Turismo', 'invoice_iva_code'=>'S245', 'open_codes'=>'S245'],
+          ['nombre'=>'Servicios de recolección, clasificación y almacenamiento de bienes reciclables y reutilizables, inscritos ante la Administración Tributaria y el Ministerio de Salud', 'invoice_iva_code'=>'S245', 'open_codes'=>'S245'],
+          //Ventas no sujetas
+          ['nombre'=>'Bienes y servicios a la Caja Costarricense de Seguro Social', 'invoice_iva_code'=>'B170', 'open_codes'=>'B170,S170'],
+          ['nombre'=>'Bienes y servicios a las corporaciones municipales', 'invoice_iva_code'=>'B170', 'open_codes'=>'B170,S170'],
+          ['nombre'=>'Otras ventas no sujetas', 'invoice_iva_code'=>'B170', 'open_codes'=>'B170,S170']
+        ];
+        
+        $listaCompras = [
+          ['nombre'=>'Compras locales de bienes utilizados en operaciones sujetas y no exentas', 'bill_iva_code'=>'B003', 'open_codes'=>'B003,B063,B008,B068,B004,B064,B002,B062,B001,B011'],
+          ['nombre'=>'Compras locales de servicios utilizados en operaciones sujetas y no exentas', 'bill_iva_code'=>'S003', 'open_codes'=>'S003,S063,S008,S068,S004,S064,S002,S062,S001,S011'],
+          ['nombre'=>'Compras locales de bienes de capital utilizados en operaciones sujetas y no exentas', 'bill_iva_code'=>'B013', 'open_codes'=>'B013,S013,B016,S016,B073,S073,B018,B078,B014,B012,B072,B015,S015,B011,S011,B071,S071'],
+          ['nombre'=>'Importaciones de bienes utilizados en operaciones sujetas y no exentas', 'bill_iva_code'=>'B023', 'open_codes'=>'B023,B043,B028,B048,B024,B044,B022,B042,B021,B041'],
+          ['nombre'=>'Importaciones de servicios utilizados en operaciones sujetas y no exentas', 'bill_iva_code'=>'S023', 'open_codes'=>'S023,S043,S028,S048,S024,S044,S022,S042,S021,S041'],
+          ['nombre'=>'Importaciones de bienes de capital utilizados en operaciones sujetas y no exentas', 'bill_iva_code'=>'B033', 'open_codes'=>'B033,B036,S033,S036,B053,S053,B038,S038,B058,S058,B034,B054,S034,S054,B032,B052,S052,S032,B031,B035,B051,S031,S035,S051'],
+          ['nombre'=>'Compras locales de bienes y servicios exentos', 'bill_iva_code'=>'B060', 'open_codes'=>'B060,S060,B070,S070'],
+          ['nombre'=>'Importaciones de bienes y servicios exentos', 'bill_iva_code'=>'B040', 'open_codes'=>'B040,S040,B050,S050'],
+          ['nombre'=>'Compras locales de bienes y servicios no relacionados directamente con la actividad', 'bill_iva_code'=>'B097', 'open_codes'=>'B097,S097'],
+          ['nombre'=>'Importaciones de bienes y servicios no relacionados directamente con la actividad', 'bill_iva_code'=>'B090', 'open_codes'=>'B090,S090,099'],
+        ];
+      
+        foreach( $listaVentas as $categoria ) {
+          try{
+            App\ProductCategory::create([
+                'name' => $categoria['nombre'],
+                'bill_iva_code' => $categoria['bill_iva_code'] ?? null,
+                'invoice_iva_code' => $categoria['invoice_iva_code'] ?? null,
+                'open_codes' => $categoria['open_codes'],
+            ]);
+          }catch(\Throwable $e){}
+        }
+        
+        foreach( $listaCompras as $categoria ) {
+          try{
+            App\ProductCategory::create([
+                'name' => $categoria['nombre'],
+                'bill_iva_code' => $categoria['bill_iva_code'] ?? null,
+                'invoice_iva_code' => $categoria['invoice_iva_code'] ?? null,
+                'open_codes' => $categoria['open_codes'],
+            ]);
+          }catch(\Throwable $e){}
+        }
+    }
+}

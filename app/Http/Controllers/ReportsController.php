@@ -217,6 +217,22 @@ class ReportsController extends Controller
 
     }
     
+    public function reporteBorradorIVA( Request $request ) {
+      
+      $ano = $request->ano ? $request->ano : 2019;
+      $mes = $request->mes ? $request->mes : 7;
+      
+      $company = currentCompanyModel();
+      $prorrataOperativa = $company->getProrrataOperativa($ano);
+
+      $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
+      $nombreMes = Variables::getMonthName($mes);
+      $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
+
+      return view('/Reports/reporte-borrador-iva', compact('data', 'ano', 'nombreMes') );
+      
+    }
+    
     public function reporteDetalleDebitoFiscal( Request $request ) {
       
       $ano = $request->ano ? $request->ano : 2019;
