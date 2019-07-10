@@ -268,7 +268,6 @@ class InvoiceController extends Controller
     public function sendHacienda(Request $request)
     {
         //revision de branch para segmentacion de funcionalidades por tipo de documento
-
         try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
             $request->validate([
@@ -278,6 +277,7 @@ class InvoiceController extends Controller
 
             $apiHacienda = new BridgeHaciendaApi();
             $tokenApi = $apiHacienda->login(false);
+
             if ($tokenApi !== false) {
                 $invoice = new Invoice();
                 $company = currentCompanyModel();

@@ -21,6 +21,7 @@ class InvoiceUtils
 
     public function streamPdf( $invoice, $company )
     {
+        
         $pdf = PDF::loadView('Pdf/invoice', [
             'data_invoice' => $invoice,
             'company' => $company
@@ -30,7 +31,7 @@ class InvoiceUtils
     }
 	
 	
-		public function downloadPdf( $invoice, $company )
+	public function downloadPdf( $invoice, $company )
     {
         $pdf = PDF::loadView('Pdf/invoice', [
             'data_invoice' => $invoice,
@@ -211,27 +212,28 @@ class InvoiceUtils
             $details = null;
             foreach ($data as $key => $value) {
                 $details[$key] = array(
-                    'cantidad' => $value['item_count'] ?? '',
+                    'cantidad' => $value['item_count'] ?? 1,
                     'unidadMedida' => $value['measure_unit'] ?? '',
                     'detalle' => $value['name'] ?? '',
-                    'precioUnitario' => $value['unit_price'] ?? '',
-                    'subtotal' => $value['subtotal'] ?? '',
-                    'montoTotal' => $value['item_count'] * $value['unit_price'] ?? '',
-                    'montoTotalLinea' => $value['subtotal'] + $value['iva_amount'] ?? '',
-                    'descuento' => $value['discount'] ?? '',
+                    'precioUnitario' => $value['unit_price'] ?? 0,
+                    'subtotal' => $value['subtotal'] ?? 0,
+                    'montoTotal' => $value['item_count'] * $value['unit_price'] ?? 0,
+                    'montoTotalLinea' => $value['subtotal'] + $value['iva_amount'] ?? 0,
+                    'descuento' => $value['discount'] ? $this->discountCalculator($value['discount_type'], $value['discount'],
+                        $value['item_count'] * $value['unit_price'] ?? 0) : 0,
                     'impuesto_codigo' => '01',
                     'tipo_iva' => $value['iva_type'],
                     'impuesto_codigo_tarifa' => Variables::getCodigoTarifaVentas($value['iva_type']),
-                    'impuesto_tarifa' => $value['iva_percentage'] ?? '',
+                    'impuesto_tarifa' => $value['iva_percentage'] ?? 0,
                     'impuesto_factor_IVA' => $value['iva_percentage'] / 100,
-                    'impuesto_monto' => $value['iva_amount'] ? round($value['iva_amount'], 5) : '',
+                    'impuesto_monto' => $value['iva_amount'] ? round($value['iva_amount'], 5) : 0,
                     'exoneracion_tipo_documento' => $value['exoneration_document_type'] ?? '',
                     'exoneracion_numero_documento' => $value['exoneration_document_number'] ?? '',
                     'exoneracion_fecha_emision' => $value['exoneration_date'] ?? '',
-                    'exoneracion_porcentaje' => $value['exoneration_porcent'] ?? '',
-                    'exoneracion_monto' => $value['exoneration_amount'] ?? '',
+                    'exoneracion_porcentaje' => $value['exoneration_porcent'] ?? 0,
+                    'exoneracion_monto' => $value['exoneration_amount'] ?? 0,
                     'exoneracion_company' => $value['exoneration_company_name'] ?? '',
-                    'impuesto_neto' => $value['impuesto_neto'] ?? '',
+                    'impuesto_neto' => $value['impuesto_neto'] ?? 0,
                     'tariff_heading' => $value['tariff_heading'] ?? '',
                     'base_imponible' => 0,
                 );
@@ -262,20 +264,21 @@ class InvoiceUtils
             $itemDetails = json_decode($details);
             //Spe, St, Al, Alc, Cm, I, Os
             foreach ($itemDetails as $detail){
-
+                $cod = \App\CodigoIvaRepercutido::find($detail->tipo_iva);
+                $isGravado = isset($cod) ? $cod->is_gravado : false;
+                
                 if($detail->unidadMedida == 'Sp' || $detail->unidadMedida == 'Spe' || $detail->unidadMedida == 'St'
                     || $detail->unidadMedida == 'Al' || $detail->unidadMedida == 'Alc' || $detail->unidadMedida == 'Cm'
                     || $detail->unidadMedida == 'I' || $detail->unidadMedida == 'Os'){
-
-                    if($detail->impuesto_monto == 0 && $detail->tipo_iva > 200 ){
+                
+                    if($detail->impuesto_monto == 0  && !$isGravado ){
                         $totalServiciosExentos += $detail->montoTotal;
                     }else{
                         $totalServiciosGravados += $detail->montoTotal;
                     }
 
                 } else {
-
-                    if($detail->impuesto_monto == 0 && $detail->tipo_iva > 200 ){
+                    if($detail->impuesto_monto == 0 && !$isGravado ){
                         $totalMercaderiasExentas += $detail->montoTotal;
                     }else{
                         $totalMercaderiasGravadas += $detail->montoTotal;
@@ -321,19 +324,20 @@ class InvoiceUtils
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,	
                 'atvcertPin' => $company->atv->pin ?? '',	
                 'atvcertFile' => Storage::get($company->atv->key_url),	
-                'servgravados' => $totalServiciosGravados,	
-                'servexentos' => $totalServiciosExentos,	
-                'mercgravados' => $totalMercaderiasGravadas,	
-                'mercexentos' => $totalMercaderiasExentas,	
-                'totgravado' => $totalGravado,	
-                'totexento' => $totalExento,	
-                'totventa' => $totalVenta,	
+                'servgravados' => $totalServiciosGravados - $totalDescuentos,
+                'servexentos' => $totalServiciosExentos > 0 ? $totalServiciosExentos - $totalDescuentos : $totalServiciosExentos,
+                'mercgravados' => $totalMercaderiasGravadas > 0 ? $totalMercaderiasGravadas - $totalDescuentos : $totalMercaderiasGravadas,
+                'mercexentos' => $totalMercaderiasExentas > 0 ? $totalMercaderiasExentas - $totalDescuentos : $totalMercaderiasExentas,
+                'totgravado' => $totalGravado - $totalDescuentos,
+                'totexento' => $totalExento > 0 ? $totalExento - $totalDescuentos : $totalExento,
+                'totventa' => $totalVenta - $totalDescuentos,
                 'totdescuentos' => $totalDescuentos,	
                 'totventaneta' => $totalVenta - $totalDescuentos,	
                 'totimpuestos' => $totalImpuestos,	
-                'totcomprobante' => $totalVenta + $totalImpuestos,	
+                'totcomprobante' => ($totalVenta - $totalDescuentos) + $totalImpuestos,
                 'detalle' => $details
             );
+            
             if ($data['document_type'] == '03') {
                 $invoiceData['totalivadevuelto'] = 0;
                 $invoiceData['referencia_doc_type'] = $data['reference_doc_type'];
@@ -368,6 +372,15 @@ class InvoiceUtils
             return empty($invoice->client_zip) ? false : true;
         }
         return true;
+    }
+
+    private function discountCalculator($descType, $value, $amount) {
+        if($descType == "01" && $value > 0 ) {
+             $discount = $amount * ($value / 100);
+        } else {
+            $discount= $value;
+        }
+        return $discount;
     }
     
 }

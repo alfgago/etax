@@ -76,7 +76,7 @@ class Invoice extends Model
     {
         return Carbon::parse($this->due_date);
     }
-
+    
     //Relacion con hacienda
     public function xmlHacienda()
     {
@@ -185,7 +185,7 @@ class Invoice extends Model
 
             $request->currency_rate = $request->currency_rate ? $request->currency_rate : 1;
             //Datos de factura
-            $this->description = $request->description;
+            $this->description = $request->notas ?? null;
             $this->subtotal = floatval( str_replace(",","", $request->subtotal ));
             $this->currency = $request->currency;
             $this->currency_rate = floatval( str_replace(",","", $request->currency_rate ));
@@ -236,16 +236,16 @@ class Invoice extends Model
             if( !$this->id ){
               $this->company->addSentInvoice( $this->year, $this->month );
             }
-            
             $this->save();
 
             $lids = array();
+            $i = 1;
             foreach($request->items as $item) {
-                $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
+                $item['item_number'] = $i;
                 $item['item_id'] = $item['id'] ? $item['id'] : 0;
                 $item_modificado = $this->addEditItem($item);
-
                 array_push( $lids, $item_modificado->id );
+                $i++;
             }
 
             foreach ( $this->items as $item ) {
