@@ -643,6 +643,7 @@ class BillController extends Controller
                     if( !$bill->provider_zip ) {
                         $bill->accept_status = $request->respuesta;
                         $bill->save();
+                        
                         $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
                         $company->save();
                         $company->last_document_rec = getDocReference($company->last_rec_ref_number);
@@ -650,7 +651,7 @@ class BillController extends Controller
     
                         $apiHacienda->acceptInvoice($bill, $tokenApi);
                     }else{
-                        return redirect('/facturas-recibidas/aceptaciones')->withMessage('Esta factura no contiene datos de ubicación de proveedor. Intente volver a subir el XML o contacte a soporte si el error persiste.');
+                        return redirect('/facturas-recibidas/aceptaciones')->withError('Esta factura no contiene datos de ubicación de proveedor. Intente volver a subir el XML o contacte a soporte si el error persiste.');
                     }
                 }
                 clearInvoiceCache($bill);

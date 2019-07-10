@@ -240,12 +240,13 @@ class Invoice extends Model
             $this->save();
 
             $lids = array();
+            $i = 1;
             foreach($request->items as $item) {
-                $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
+                $item['item_number'] = $i;
                 $item['item_id'] = $item['id'] ? $item['id'] : 0;
                 $item_modificado = $this->addEditItem($item);
-
                 array_push( $lids, $item_modificado->id );
+                $i++;
             }
 
             foreach ( $this->items as $item ) {

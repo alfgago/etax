@@ -15883,7 +15883,7 @@ h6,
   z-index: inherit;
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 1660px) {
   .main-content-wrap.sidenav-open {
     padding-left: 2rem;
   }
