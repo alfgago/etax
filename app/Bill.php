@@ -94,6 +94,8 @@ class Bill extends Model
       $this->buy_order = $request->buy_order;
       $this->other_reference = $request->other_reference;
     
+      $this->xml_schema = $this->commercial_activity ? 43 : 42;
+      dd( $this->xml_schema );
       //Datos de proveedor
       if( $request->provider_id == '-1' ){
           $tipo_persona = $request->tipo_persona;
@@ -729,6 +731,7 @@ class Bill extends Model
           $company = currentCompanyModel();
           $prorrataOperativa = $company->getProrrataOperativa( $this->year );
           $calc = new CalculatedTax();
+          $calc->resetVars();
           $lastBalance = 0;
           $query = BillItem::with('bill')->where('bill_id', $this->id);
           //$calc->setDatosEmitidos( $this->month, $this->year, $company->id );

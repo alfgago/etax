@@ -22,21 +22,23 @@
 	            </thead>
 	            <tbody>
 	            	@foreach($data as $item)
-	              <tr>
-	              	<?php 
-	              		$factor = $item->invoice->document_type != '03' ? 1 : -1;
-	              	?>
-	                <td>{{ $item->invoice->generatedDate()->format('d/m/Y') }}</td>
-	                <td>{{ @$item->invoice->client ? $item->invoice->client->getFullName() : 'N/A' }}</td>
-	                <td>{{ $item->invoice->document_number }}</td>
-	                <td>{{ $item->item_number }}</td>
-	                <td>{{ $item->name }}</td>
-	                <td>{{ $item->invoice->currency }}</td>
-	                <td>{{ number_format( $item->subtotal, 0) }}</td>
-	                <td>{{ $item->iva_percentage }}%</td>
-	                <td>{{ number_format( $item->iva_amount, 0) }}</td>
-	                <td>{{ number_format( $item->total*$factor, 0) }}</td>
-	              </tr>
+		            	@if( !$item->invoice->is_void && $item->invoice->is_authorized && $item->invoice->is_code_validated )
+		              <tr>
+		              	<?php 
+		              		$factor = $item->invoice->document_type != '03' ? 1 : -1;
+		              	?>
+		                <td>{{ $item->invoice->generatedDate()->format('d/m/Y') }}</td>
+		                <td>{{ @$item->invoice->client ? $item->invoice->client->getFullName() : 'N/A' }}</td>
+		                <td>{{ $item->invoice->document_number }}</td>
+		                <td>{{ $item->item_number }}</td>
+		                <td>{{ $item->name }}</td>
+		                <td>{{ $item->invoice->currency }}</td>
+		                <td>{{ number_format( $item->subtotal, 2) }}</td>
+		                <td>{{ $item->iva_percentage }}%</td>
+		                <td>{{ number_format( $item->iva_amount, 2) }}</td>
+		                <td>{{ number_format( $item->total*$factor, 2) }}</td>
+		              </tr>
+		              @endif
 	              @endforeach
 	            </tbody>
 	            

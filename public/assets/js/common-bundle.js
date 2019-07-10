@@ -501,7 +501,7 @@ toastr.options = {
       var tipoIVA = $('#tipo_producto :selected').attr('codigo');
       $('#tipo_iva').val( tipoIVA ).change();
     }else{
-      $('#tipo_iva').val( '260' );
+      $('#tipo_iva').val( 'B260' );
     }
   }
 
@@ -691,7 +691,7 @@ toastr.options = {
       }
       $('#unidad_medicion').val('Unid');
       $('#cantidad').val(1);
-      $('#porc_identificacion_plena').val(1);
+      $('#porc_identificacion_plena').val(13);
       $('#discount_type').val('01');
       $('#discount').val(0);
       $('#tipo_producto').change();
