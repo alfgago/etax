@@ -20,6 +20,8 @@
           @csrf
           
           <input type="hidden" id="current-index" value="0">
+          <input type="hidden" id="is-compra" value="1">
+
 
           <div class="form-row">
             <div class="col-md">
