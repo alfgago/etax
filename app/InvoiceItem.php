@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Invoice;
+use App\CodigoIvaRepercutido;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -18,7 +19,10 @@ class InvoiceItem extends Model
         return $this->belongsTo(Invoice::class, 'invoice_id');
     }
     
-        
+    public function ivaType() {
+      return $this->belongsTo(CodigoIvaRepercutido::class, 'iva_type');
+    }
+
     public function fixIvaType() {
       $initial = $this->iva_type[0];
       if( $initial != 'S' && $initial != 'B' && 

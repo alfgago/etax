@@ -3,6 +3,10 @@
 <head>
     <meta charset="utf-8">
     <style>
+        * {
+            font-family: Pangram, sans-serif;
+        }
+    
         .invoice-box {
             /*max-width: 700px;*/
             /*margin: auto;*/
@@ -82,6 +86,10 @@
             height: 25px;
         }
 
+        .resumen-totales td {
+            border-bottom: 1px solid #ccc;
+        }
+
         @media only screen and (max-width: 600px) {
             .invoice-box table tr.top table td {
                 width: 100%;
@@ -122,7 +130,7 @@
             height: 40px;
         }
 
-        .title-total {
+        .currency }}otal {
             background: #3333;
             width: 50%;
             text-align: center;
@@ -263,41 +271,39 @@
 
     </tr>
     <?php
-        $serviciosgravados = 0;
-        $serviciosexentos = 0;
-        $mercanciasgravadas = 0;
-        $mercanciasexentas = 0;
-        $gravado = 0;
-        $exento = 0;
-        $venta = 0;
-        $descuento = 0;
-        $ventaneta = 0;
-        $impuestos = 0;
-        $itemType = array('Sp', 'Spe', 'St', 'Al', 'Alc', 'Cm', 'I', 'Os');
+        $totalServiciosGravados = 0;
+        $totalServiciosExentos = 0;
+        $totalMercaderiasGravadas = 0;
+        $totalMercaderiasExentas = 0;
+        $totalDescuentos = 0;
+        $totalImpuestos = 0;
+        foreach ($data_invoice->items as $item){
+            
+            if($item->measure_unit == 'Sp' || $item->measure_unit == 'Spe' || $item->measure_unit == 'St'
+                || $item->measure_unit == 'Al' || $item->measure_unit == 'Alc' || $item->measure_unit == 'Cm'
+                || $item->measure_unit == 'I' || $item->measure_unit == 'Os'){
+                
+                if($item->iva_amount == 0 && !$item->ivaType->is_gravado ){
+                    $totalServiciosExentos += $item->total;
+                }else{
+                    $totalServiciosGravados += $item->total;
+                }
+
+            } else {
+                if($item->iva_amount == 0 && !$item->ivaType->is_gravado ){
+                    $totalMercaderiasExentas += $item->total;
+                }else{
+                    $totalMercaderiasGravadas += $item->total;
+                }
+            }
+            $totalDescuentos += $item->discount;
+            $totalImpuestos += $item->iva_amount;
+        }
+        $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas;
+        $totalExento = $totalServiciosExentos + $totalMercaderiasExentas;
+        $totalVenta = $totalGravado + $totalExento;
     ?>
     @foreach($data_invoice->items as $item)
-        <?php if($item->discount > 0){
-                $descuento .= $item->discount;
-            }
-
-            if( in_array($item->measure_unit, $itemType) ){
-                if($item->iva_amount > 0){
-                    $serviciosgravados .= $item->subtotal;
-                }else{
-                    $serviciosexentos .= $item->subtotal;
-                }
-            }else{
-                if($item->iva_amount > 0){
-                    $mercanciasgravadas .= $item->subtotal;
-                }else{
-                    $mercanciasexentas .= $item->subtotal;
-                }
-            }
-            $impuestos .= $item->iva_amount;
-            $gravado = $serviciosgravados + $mercanciasgravadas;
-            $exento = $serviciosexentos + $mercanciasexentas;
-            $venta = $gravado + $exento;
-        ?>
         <tr class="item">
             <td>
                 {{$item->code ?? ''}}
@@ -313,19 +319,19 @@
                 {{$item->name ?? ''}}
             </td>
             <td>
-                {{$item->unit_price ? round($item->unit_price, 2) : ''}}
+                {{$item->unit_price ? number_format($item->unit_price, 2) : ''}}
             </td>
             <td>
-                {{$item->discount ? round($item->discount, 2) : ''}}
+                {{$item->discount ? number_format($item->discount, 2) : ''}}
             </td>
             <td>
                 {{$item->discount_reason ?? ''}}
             </td>
             <td>
-                {{$item->subtotal ? round($item->subtotal, 2) : ''}}
+                {{$item->subtotal ? number_format($item->subtotal, 2) : ''}}
             </td>
             <td>
-                {{$item->iva_amount ? round($item->iva_amount, 2) : ''}}
+                {{$item->iva_amount ? number_format($item->iva_amount, 2) : ''}}
             </td>
         </tr>
     @endforeach
@@ -334,75 +340,73 @@
     <table width="100%" class="total">
         <thead>
             <tr class="item">
-                <th class="title-total">
-                    Observaciones (Otros)
+                <th class="obs">
+                    Observaciones
                 </th>
-                <th class="box-total" colspan="2">
-                    Totales
+                <th class="box-total">
+                    Totales ({{ $data_invoice->currency }})
                 </th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td></td>
-                <td><b>Total servicios gravados</b></td>
-                <td><span>{{ $data_invoice->currency }}: {{round($serviciosgravados, 2)}}</span></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td><b>Total servicios exentos</b></td>
-                <td><span>{{ $data_invoice->currency }}: {{round($serviciosexentos, 2)}}</span></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td><b>Total mercancías gravadas</b></td>
-                <td><span>{{ $data_invoice->currency }}: {{round($mercanciasgravadas, 2)}}</span></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td><b>Total mercancías exentas</b></td>
-                <td><span>{{ $data_invoice->currency }}: {{round($mercanciasexentas, 2)}}</span></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td><b>Total gravado</b></td>
-                <td><span>{{ $data_invoice->currency }}: {{round($gravado, 2)}}</span></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td><b>Total exento</b></td>
-                <td><span>{{ $data_invoice->currency }}: {{round($exento, 2)}}</span></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td><b>Total venta</b></td>
-                <td><span>{{ $data_invoice->currency }}: {{round($venta, 2)}}</span></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td><b>Total descuento</b></td>
-                <td><span>{{ $data_invoice->currency }}: {{round($descuento, 2)}}</span></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td><b>Total venta neta</b></td>
-                <td><span>{{ $data_invoice->currency }}: {{round($data_invoice->subtotal, 2)}}</span></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td><b>Total impuestos</b></td>
-                <td><span>{{ $data_invoice->currency }}: {{round($impuestos, 2)}}</span></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td><b>Total comprobante</b></td>
-                <td><span>{{ $data_invoice->currency }}: {{round($data_invoice->total, 2)}}</span></td>
-            </tr>
+            <td class="espacio-observaciones" style="vertical-align: top; padding-right: 15px; color: #444; width: 50%;">
+                {{ $data_invoice->description }}
+            </td>
+            <td style="width: 50%;">
+                
+                <table class="resumen-totales">
+                    <tr>
+                        <td style="padding-right: 30px;"><b>Total servicios gravados</b></td>
+                        <td><span>{{ number_format($totalServiciosGravados, 2) }}</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>Total servicios exentos</b></td>
+                        <td><span>{{ number_format($totalServiciosExentos, 2)}}</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>Total mercancías gravadas</b></td>
+                        <td><span>{{ number_format($totalMercaderiasGravadas, 2)}}</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>Total mercancías exentas</b></td>
+                        <td><span>{{ number_format($totalMercaderiasExentas, 2)}}</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>Total gravado</b></td>
+                        <td><span>{{ number_format($totalGravado, 2)}}</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>Total exento</b></td>
+                        <td><span>{{ number_format($totalExento, 2)}}</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>Total venta</b></td>
+                        <td><span>{{ number_format($totalVenta, 2)}}</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>Total descuento</b></td>
+                        <td><span>{{ number_format($totalDescuentos, 2)}}</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>Total venta neta</b></td>
+                        <td><span>{{ number_format( ($totalVenta - $totalDescuentos), 2)}}</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>Total impuestos</b></td>
+                        <td><span>{{ number_format($totalImpuestos, 2)}}</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>Total comprobante</b></td>
+                        <td><span>{{ number_format( ($totalVenta - $totalDescuentos + $totalImpuestos) , 2)}}</span></td>
+                    </tr>
+                </table>
+                
+            </thead>
         </tbody>
     </table>
     <table width="100%" class="footer">
         <tr class="item">
-            <td class="title-total">
+            <td class="currency total">
                 Emitida conforme lo establecido en la resolución de Facturación Electrónica, N°DGT-R-48-2016 siete de
                 octubre de dos mildieciséis de la Dirección General de Tributación v.4.3 <br>
                 eTax - La herramienta para resolver el IVA. | Ofiplaza del Este. 200m al oeste de la Rotonda de la Bandera,
