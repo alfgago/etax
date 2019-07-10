@@ -218,7 +218,8 @@ class InvoiceUtils
                     'subtotal' => $value['subtotal'] ?? '',
                     'montoTotal' => $value['item_count'] * $value['unit_price'] ?? '',
                     'montoTotalLinea' => $value['subtotal'] + $value['iva_amount'] ?? '',
-                    'descuento' => $value['discount'] ?? '',
+                    'descuento' => $value['discount'] ? $this->discountCalculator($value['discount_type'], $value['discount'],
+                        $value['item_count'] * $value['unit_price'] ?? 0) : 0,
                     'impuesto_codigo' => '01',
                     'tipo_iva' => $value['iva_type'],
                     'impuesto_codigo_tarifa' => Variables::getCodigoTarifaVentas($value['iva_type']),
@@ -368,6 +369,15 @@ class InvoiceUtils
             return empty($invoice->client_zip) ? false : true;
         }
         return true;
+    }
+
+    private function discountCalculator($descType, $value, $amount) {
+        if($descType == "01" && $value > 0 ) {
+             $discount = $amount * ($value / 100);
+        } else {
+            $discount= $value;
+        }
+        return $discount;
     }
     
 }
