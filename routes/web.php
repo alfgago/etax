@@ -84,6 +84,7 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('download-pdf/{id}', 'InvoiceController@downloadPdf')->name('Invoice.downloadPdf');
     Route::get('download-xml/{id}', 'InvoiceController@downloadXml')->name('Invoice.downloadXml');
     Route::get('reenviar-email/{id}', 'InvoiceController@resendInvoiceEmail')->name('Invoice.resendInvoiceEmail');
+    Route::get('consult/{id}', 'InvoiceController@consultInvoice')->name('Invoice.consultInvoice');
 });
 
 // Rutas de facturacion recibida

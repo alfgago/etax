@@ -8,6 +8,7 @@ use App\Invoice;
 
 use App\AvailableInvoices;
 use App\Variables;
+use App\XmlHacienda;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -41,11 +42,28 @@ class InvoiceUtils
         return $pdf->download('Invoice.pdf');
     }
     
-    public function downloadXml( $invoice, $company )
+    public function downloadXml( $invoice, $company, $type = null)
     {
+
         $xml = $invoice->xmlHacienda;
-        
         $file = false;
+        if ($type !== null && !empty($xml)) {
+            $path = $xml->xml_message;
+            if (Storage::exists($path)) {
+                $file = Storage::get($path);
+            }
+
+            if (!$file) {
+                $path = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/MH-$invoice->document_key.xml";
+                if ( Storage::exists($path)) {
+                    $file = Storage::get($path);
+                    $xml = XmlHacienda::where('invoice_id', $invoice->id)->update(['xml_message' => $path]);
+
+                }
+            }
+            return $file;
+        }
+
         if( isset($xml) ) {
         	$path = $xml->xml;
         	if ( Storage::exists($path)) {
