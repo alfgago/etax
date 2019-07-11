@@ -6,6 +6,7 @@ use \Carbon\Carbon;
 use App\Company;
 use App\CalculatedTax;
 use App\Book;
+use App\Invoice;
 use App\Http\Controllers\CacheController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
@@ -135,6 +136,51 @@ class BookController extends Controller
         return ((float) $usec + (float)$sec);
     }
     
+
+    public function retenciones_tarjeta($id){
+        $company = currentCompanyModel();
+        $cierres = CalculatedTax::where('company_id', $company->id)
+            ->where('id',$id)->first();
+        $month = $cierres->month;
+        $year = $cierres->year;
+        $cerrado = $cierres->is_closed;
+        $total_retenido = $cierres->retention_by_card;
+        $invoices = Invoice::select('generated_date', 'document_number', 'client_first_name', 'client_last_name', 'client_last_name2','total','total as retencion')
+            ->where('company_id',$company->id)
+            ->whereYear('generated_date',$year)
+            ->whereMonth('generated_date',$month)
+            ->where('payment_type','02')
+            ->get();
+        $total_facturado = 0;
+        $total_retencion = 0;
+        foreach($invoices as $invoice){
+            $total = $invoice->total;
+            $invoice->retencion = $total * 0.06;
+            $total_facturado += $total;
+            $total_retencion += $total * 0.06;
+        }
+        $data = array(
+            'cierre' => $id,
+            'mes' => $month,
+            'year' => $year,
+            'cerrado'  => $cerrado,
+            'total_facturado' => $total_facturado,
+            'total_retencion' => $total_retencion,
+            'total_retenido' => $total_retenido
+        );
+        //dd($data);
+        return view('Book.retenciones_tarjeta')->with('invoices', $invoices)->with('data', $data);
+    }
+
+    public function actualizar_retencion_tarjeta(Request $request){
+        $company = currentCompanyModel();
+        CalculatedTax::where('company_id', $company->id)
+            ->where('id',$request->cierre)
+            ->where('is_closed',0)
+            ->update(['retention_by_card' => $request->total_retenido]);
+        //dd($request);
+        return redirect('/cierres')->withMessage('Retención por tarjeta actualizada exitosamente.');
+    }
 
     
 }

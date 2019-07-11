@@ -23,6 +23,7 @@
               <th>IVA acreditable</th>
               <th>IVA por pagar</th>
               <th>IVA por cobrar</th>
+              <th>Rentención</th>
               <th>Estado</th>
               <th></th>
             </tr>
@@ -39,8 +40,12 @@
                   <td>₡{{ number_format( $data->iva_deducible_operativo, 0 ) }}</td>
                   <td>₡{{ $data->balance_operativo > 0 ? number_format( $data->balance_operativo, 0 ) : 0 }} </td>
                   <td>₡{{ $data->balance_operativo < 0 ? number_format( abs($data->balance_operativo), 0 ) : 0 }} </td>
+                  <td>₡{{ number_format( $data->retention_by_card, 0 ) }}</td>
                   <td>{{ $data->is_closed ? 'Cerrado' : 'Abierto' }}</td>
                   <td> 
+                      <a href="/cierres/retenciones-tarjeta/{{ $data->id }}" title="Retenciones {{ $data->month }}-{{ $data->year }}" class="btn btn-danger m-0" style=" font-size: 0.9em;">
+                          Retenciones
+                        </a>
                     @if( !$data->is_closed  )
                       <form class="inline-form" method="POST" action="/cierres/cerrar-mes/{{ $data->id }}" >
                         @csrf

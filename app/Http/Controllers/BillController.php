@@ -11,7 +11,10 @@ use App\Bill;
 use App\BillItem;
 use App\Company;
 use App\Provider;
+use App\Actividades;
 use App\CalculatedTax;
+use App\CodigoIvaSoportado;
+use App\ProductCategory;
 use App\Http\Controllers\CacheController;
 use App\Exports\BillExport;
 use App\Imports\BillImport;
@@ -450,6 +453,40 @@ class BillController extends Controller
           'bills' => $bills
         ]);
     }
+
+
+
+    public function validar($id){
+        $current_company = currentCompany();
+        $company = Company::select('commercial_activities')->where('id', $current_company)->first();
+        $activities_company = explode(", ", $company->commercial_activities);
+        $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
+        $bills = Bill::where('id', $id)->first();
+        $codigos_etax = CodigoIvaSoportado::get();
+        $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
+        $data = array(
+                "bills" => $bills,
+                "commercial_activities" => $commercial_activities,
+                "codigos_etax" => $codigos_etax,
+                "categoria_productos" => $categoria_productos,
+            );
+        //dd($data);
+        return view('Bill/validar', [
+          'data' => $data
+        ]);
+    }
+
+    public function guardar_validar(Request $request)
+    {
+        Bill::where('id',$request->bill)
+            ->update(['product_category_verification' => $request->category_product,
+                'activity_company_verification' => $request->actividad_comercial,
+                'codigo_iva_verification' => $request->codigo_etax,
+                'identificacion_plena_verification' => $request->impuesto_identificacion_plena,
+                'is_code_validated' => true]);
+        $bill = Bill::where('id', $request->bill)->first();
+        return redirect('/facturas-recibidas/validaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
+    }
     
     public function confirmarValidacion( Request $request, $id )
     {
@@ -579,19 +616,20 @@ class BillController extends Controller
                 ])->render();
             }) 
             ->editColumn('total', function(Bill $bill) {
-                return "$bill->currency $bill->total";
+                $total = number_format($bill->total);
+                return "$bill->currency $total";
             })
             ->editColumn('accept_total_factura', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_total_factura";
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  number_format($bill->accept_total_factura);
             })
             ->editColumn('accept_iva_total', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_total";
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  number_format($bill->accept_iva_total);
             })
             ->editColumn('accept_iva_acreditable', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_acreditable";
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  number_format($bill->accept_iva_acreditable);
             })
             ->editColumn('accept_iva_gasto', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_gasto";
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  number_format($bill->accept_iva_gasto);
             })
             ->editColumn('provider', function(Bill $bill) {
                 return $bill->provider->getFullName();
