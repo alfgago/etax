@@ -35,7 +35,7 @@
                   <td>{{ number_format( $data->iva_amount, 2 ) }}</td>
                   <td>{{ number_format( $data->total, 2 ) }}</td>
                   <td>
-                    <button link="/facturas-recibidas/validar/{{ $data->id }}" class="btn btn-primary m-0" data-toggle="modal" data-target="#exampleModalLong">Validar</a>
+                    <button link="/facturas-recibidas/validar/{{ $data->id }}" titulo="Verificación Compra" class="btn btn-primary m-0 verificar_compra" data-toggle="modal" data-target="#modal_estandar">Validar</a>
                     <!--<form class="inline-form validaciones" method="POST" action="/facturas-recibidas/confirmar-validacion/{{ $data->id }}">
                       @csrf
                       @method('patch')
@@ -84,7 +84,21 @@
 </style>
 <script>
   $(function(){
+      $(".verificar_compra").click(function(){
+        var link = $(this).attr("link");
+        var titulo = $(this).attr("titulo");
+        $("#titulo_modal_estandar").html(titulo);
+        $.ajax({
+           type:'GET',
+           url:link,
+           success:function(data){
+              
+                $("#body_modal_estandar").html(data);
 
+           }
+
+        });
+      });
 
   });
 

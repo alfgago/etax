@@ -1,20 +1,15 @@
-@extends('layouts/app')
 
-@section('title') 
-  Validar Factura
-@endsection
-
-@section('content') 
 <div class="row form-container">
-  <div class="col-md-4">
+  <div class="col-md-12">
     <b>Combrobante: </b>{{ $data['bills']->document_number }} <br>
     <b>Emisor: </b>{{ @$data['bills']->provider->fullname }} <br>
     <b>Moneda: </b>{{ $data['bills']->currency }} <br>
     <b>Subtotal: </b>{{ number_format( $data['bills']->subtotal, 2 ) }} <br>
     <b>Monto IVA: </b>{{ number_format( $data['bills']->iva_amount, 2 ) }} <br>
-    <b>Total: </b>{{ number_format( $data['bills']->total, 2 ) }} <br>
+    <b>Total: </b>{{ number_format( $data['bills']->total, 2 ) }} 
+    <hr>
   </div>
-  <div class="col-md-8">
+  <div class="col-md-12">
     <form method="POST" action="/facturas-recibidas/guardar-validar">
       @csrf
       @method('post') 
@@ -69,8 +64,6 @@
   </div>
 </div>
 
-@endsection
-@section('footer-scripts')
 <script>
   
 $(document).ready(function(){
@@ -96,4 +89,3 @@ $(document).ready(function(){
 });
       
 </script>
-@endsection
