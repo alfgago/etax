@@ -478,13 +478,32 @@ class BillController extends Controller
 
     public function guardar_validar(Request $request)
     {
+        $bill = Bill::findOrFail($request->bill);
+        
+        $bill->product_category_verification = $request->category_product;
+        $bill->activity_company_verification = $request->actividad_comercial;
+        $bill->codigo_iva_verification = $request->codigo_etax;
+        $bill->identificacion_plena_verification = $request->impuesto_identificacion_plena;
+        $bill->is_code_validated = true;
+        
+        $bill->save();
+        
         Bill::where('id',$request->bill)
             ->update(['product_category_verification' => $request->category_product,
                 'activity_company_verification' => $request->actividad_comercial,
                 'codigo_iva_verification' => $request->codigo_etax,
                 'identificacion_plena_verification' => $request->impuesto_identificacion_plena,
                 'is_code_validated' => true]);
-        $bill = Bill::where('id', $request->bill)->first();
+                
+        foreach( $bill->items as $item ) {
+            $item->iva_type = $request->codigo_etax;
+            $item->product_type = $request->category_product;
+            if( isset($request->impuesto_identificacion_plena) ) {
+                $item->porc_identificacion_plena = $request->impuesto_identificacion_plena;
+            }
+            $item->save();
+        }
+        
         return redirect('/facturas-recibidas/validaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
     }
     
