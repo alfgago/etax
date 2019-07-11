@@ -409,7 +409,7 @@
                         <td><span>{{ number_format( ($totalNeta), 2)}}</span></td>
                     </tr>
                     <tr>
-                        <td><b>Total impuestos</b></td>
+                        <td><b>Total IVA</b></td>
                         <td><span>{{ number_format($totalImpuestos, 2)}}</span></td>
                     </tr>
                     <tr>
