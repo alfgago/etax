@@ -55,7 +55,7 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'B053 - Importaciones con IVA al 13% de propiedad planta y equipo de acreditación plena con identificación específica', 'codigo'=>'B053', 'porcentaje'=>'13', 'is_servicio'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
           ['nombre'=>'B054 - Importaciones con IVA al 4% de propiedad planta y equipo de acreditación plena con identificación específica', 'codigo'=>'B054', 'porcentaje'=>'4', 'is_servicio'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
           
-          ['nombre'=>'B060 - Compras locales de bienes', 'codigo'=>'B060', 'porcentaje'=>'0', 'is_bienes'=>true],
+          ['nombre'=>'B060 - Compras locales de bienes exentos', 'codigo'=>'B060', 'porcentaje'=>'0', 'is_bienes'=>true],
           ['nombre'=>'B061 - Compras locales con IVA al 1% de bienes de acreditación plena con identificación específica', 'codigo'=>'B061', 'porcentaje'=>'1', 'is_bienes'=>true, 'is_identificacion_plena'=>true],
           ['nombre'=>'B062 - Compras locales con IVA al 2% de bienes de acreditación plena con identificación específica', 'codigo'=>'B062', 'porcentaje'=>'2', 'is_bienes'=>true, 'is_identificacion_plena'=>true],
           ['nombre'=>'B063 - Compras locales con IVA al 13% de bienes de acreditación plena con identificación específica', 'codigo'=>'B063', 'porcentaje'=>'13', 'is_bienes'=>true, 'is_identificacion_plena'=>true],

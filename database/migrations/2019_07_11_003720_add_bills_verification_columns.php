@@ -15,8 +15,8 @@ class AddBillsVerificationColumns extends Migration
     {
          Schema::table('bills', function (Blueprint $table) {
             $table->integer('product_category_verification')->default(0);
-            $table->text('activity_company_verification')->nulleable();
-            $table->text('codigo_iva_verification')->nulleable();
+            $table->text('activity_company_verification')->nullable();
+            $table->text('codigo_iva_verification')->nullable();
             $table->float('identificacion_plena_verification')->default(0);
         });
     }
