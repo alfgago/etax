@@ -50,6 +50,8 @@ Route::prefix('cierres')->group(function() {
     Route::get('/', 'BookController@index');
     Route::patch('cerrar-mes/{id}', 'BookController@close');
     Route::patch('abrir-rectificacion/{id}', 'BookController@openForRectification');
+    Route::get('/retenciones-tarjeta/{id}', 'BookController@retenciones_tarjeta')->name('Book.retenciones_tarjeta');
+    Route::post('/actualizar-retencion-tarjeta', 'BookController@actualizar_retencion_tarjeta')->name('Book.actualizar_retencion_tarjeta');
 });
 
 // Rutas de empresa
@@ -96,6 +98,8 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::get('aceptaciones-otros', 'BillController@indexAcceptsOther')->name('Bill.acceptOthers');
     Route::patch('confirmar-aceptacion-otros/{id}', 'BillController@correctAccepted')->name('Bill.correctAccepted');
     Route::patch('marcar-para-aceptacion/{id}', 'BillController@markAsNotAccepted')->name('Bill.markAsNotAccepted');
+    Route::get('validar/{id}', 'BillController@validar')->name('Bill.validar');
+    Route::post('guardar-validar', 'BillController@guardar_validar')->name('Bill.guardar_validar');
 });
 
 // Rutas de Wizard

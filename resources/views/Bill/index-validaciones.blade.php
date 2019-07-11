@@ -35,7 +35,8 @@
                   <td>{{ number_format( $data->iva_amount, 2 ) }}</td>
                   <td>{{ number_format( $data->total, 2 ) }}</td>
                   <td>
-                    <form class="inline-form validaciones" method="POST" action="/facturas-recibidas/confirmar-validacion/{{ $data->id }}">
+                    <button link="/facturas-recibidas/validar/{{ $data->id }}" class="btn btn-primary m-0" data-toggle="modal" data-target="#exampleModalLong">Validar</a>
+                    <!--<form class="inline-form validaciones" method="POST" action="/facturas-recibidas/confirmar-validacion/{{ $data->id }}">
                       @csrf
                       @method('patch')
                       
@@ -51,7 +52,7 @@
                       <button type="submit" class="text-success mr-2" title="Confirmar código" style="display: inline-block; background: none;">
                       	<i class="fa fa-check mr-2" aria-hidden="true"></i> Confirmar código
                       </button>
-                    </form>
+                    </form>-->
                   </td>
                 </tr>
               @endforeach
@@ -81,5 +82,11 @@
 	}
 
 </style>
+<script>
+  $(function(){
 
+
+  });
+
+</script>
 @endsection
