@@ -231,15 +231,16 @@ class InvoiceUtils
         try {
             $details = null;
             foreach ($data as $key => $value) {
-                $cod = \App\CodigoIvaRepercutido::find($value->tipo_iva);
+
+                $cod = \App\CodigoIvaRepercutido::find($value->iva_type);
                 $isGravado = isset($cod) ? $cod->is_gravado : true;
                 $iva_amount = 0;
                 if( $isGravado ) {
                     $iva_amount = $value['iva_amount'] ? round($value['iva_amount'], 5) : 0;
                 }else {
-                    $iva_amount = false;
+                    $iva_amount = 'false';
                 }
-            
+
                 $details[$key] = array(
                     'cantidad' => $value['item_count'] ?? 1,
                     'unidadMedida' => $value['measure_unit'] ?? '',
@@ -313,7 +314,11 @@ class InvoiceUtils
                     }
                 }
                 $totalDescuentos += $detail->descuento;
-                $totalImpuestos += $detail->impuesto_monto;
+
+                if ($detail->impuesto_monto !== 'false') {
+                    $totalImpuestos += $detail->impuesto_monto;
+                }
+
             }
             $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas;
             $totalExento = $totalServiciosExentos + $totalMercaderiasExentas;
