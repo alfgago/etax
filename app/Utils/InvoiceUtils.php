@@ -219,8 +219,7 @@ class InvoiceUtils
                     'subtotal' => $value['subtotal'] ?? 0,
                     'montoTotal' => $value['item_count'] * $value['unit_price'] ?? 0,
                     'montoTotalLinea' => $value['subtotal'] + $value['iva_amount'] ?? 0,
-                    'descuento' => $value['discount'] ? $this->discountCalculator($value['discount_type'], $value['discount'],
-                        $value['item_count'] * $value['unit_price'] ?? 0) : 0,
+                    'descuento' => $value['discount'] ? $this->discountCalculator($value['discount_type'], $value['discount'], $value['item_count'] * $value['unit_price'] ?? 0) : 0,
                     'impuesto_codigo' => '01',
                     'tipo_iva' => $value['iva_type'],
                     'impuesto_codigo_tarifa' => Variables::getCodigoTarifaVentas($value['iva_type']),
@@ -290,6 +289,9 @@ class InvoiceUtils
             $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas;
             $totalExento = $totalServiciosExentos + $totalMercaderiasExentas;
             $totalVenta = $totalGravado + $totalExento;
+            $totalNeta = $totalVenta - $totalDescuentos;
+            $totalComprobante = $totalNeta + $totalImpuestos;
+            
             $invoiceData = array(
                 'consecutivo' => $ref ?? '',	
                 'fecha_emision' => $data['generated_date'] ?? '',	
@@ -324,17 +326,17 @@ class InvoiceUtils
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,	
                 'atvcertPin' => $company->atv->pin ?? '',	
                 'atvcertFile' => Storage::get($company->atv->key_url),	
-                'servgravados' => $totalServiciosGravados - $totalDescuentos,
-                'servexentos' => $totalServiciosExentos > 0 ? $totalServiciosExentos - $totalDescuentos : $totalServiciosExentos,
-                'mercgravados' => $totalMercaderiasGravadas > 0 ? $totalMercaderiasGravadas - $totalDescuentos : $totalMercaderiasGravadas,
-                'mercexentos' => $totalMercaderiasExentas > 0 ? $totalMercaderiasExentas - $totalDescuentos : $totalMercaderiasExentas,
-                'totgravado' => $totalGravado - $totalDescuentos,
-                'totexento' => $totalExento > 0 ? $totalExento - $totalDescuentos : $totalExento,
-                'totventa' => $totalVenta - $totalDescuentos,
+                'servgravados' => $totalServiciosGravados,
+                'servexentos' => $totalServiciosExentos,
+                'mercgravados' => $totalMercaderiasGravadas,
+                'mercexentos' => $totalMercaderiasExentas,
+                'totgravado' => $totalGravado,
+                'totexento' => $totalExento,
+                'totventa' => $totalVenta,
                 'totdescuentos' => $totalDescuentos,	
-                'totventaneta' => $totalVenta - $totalDescuentos,	
+                'totventaneta' => $totalNeta,	
                 'totimpuestos' => $totalImpuestos,	
-                'totcomprobante' => ($totalVenta - $totalDescuentos) + $totalImpuestos,
+                'totcomprobante' => $totalComprobante,
                 'detalle' => $details
             );
             
