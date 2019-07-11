@@ -36,23 +36,6 @@
                   <td>{{ number_format( $data->total, 2 ) }}</td>
                   <td>
                     <button link="/facturas-recibidas/validar/{{ $data->id }}" titulo="Verificación Compra" class="btn btn-primary m-0 verificar_compra" data-toggle="modal" data-target="#modal_estandar">Validar</a>
-                    <!--<form class="inline-form validaciones" method="POST" action="/facturas-recibidas/confirmar-validacion/{{ $data->id }}">
-                      @csrf
-                      @method('patch')
-                      
-                      <div class="input-validate-iva">
-										      <select class="form-control" id="tipo_iva" name="tipo_iva" >
-										        @foreach ( \App\Variables::tiposIVASoportados() as $tipo )
-										          <option value="{{ $tipo['codigo'] }}" {{ $tipo['codigo'] == '003' ? 'selected' : '' }}
-										          	porcentaje="{{ $tipo['porcentaje'] }}" class="{{ @$tipo['hide'] ? 'hidden' : '' }}" >{{ $tipo['nombre'] }}</option>
-										        @endforeach
-										      </select>
-										  </div>
-										                      
-                      <button type="submit" class="text-success mr-2" title="Confirmar código" style="display: inline-block; background: none;">
-                      	<i class="fa fa-check mr-2" aria-hidden="true"></i> Confirmar código
-                      </button>
-                    </form>-->
                   </td>
                 </tr>
               @endforeach
