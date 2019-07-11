@@ -112,15 +112,6 @@ class ProcessInvoice implements ShouldQueue
                             $invoice->save();
 
 
-                        } else {
-                            $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
-                            $saveMH = Storage::put(
-                                $pathMH,
-                                ltrim($response['data']['mensajeHacienda'], '\n')
-                            );
-                            if ($saveMH) {
-                                $xml = XmlHacienda::where('invoice_id', $invoice->id)->update(['xml_message' => $pathMH]);
-                            }
                         }
                         Log::info('Proceso de facturación finalizado con éxito.');
                     }
