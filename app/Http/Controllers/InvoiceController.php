@@ -1004,7 +1004,7 @@ class InvoiceController extends Controller
         }
 
         if(!$file) {
-            return redirect()->back()->withError('No se encontró el XML de Mensaje Hacienda. Por favor intente reenviendo la recepcion.');
+            return redirect()->back()->withError('No se encontró el XML de Mensaje Hacienda. Por favor intente reenviar consulta ha hacienda.');
         }
 
         $headers = [

@@ -17,7 +17,7 @@
     <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
   </a>
   <a href="/facturas-emitidas/download-xml/{{ $data->id }}" title="Descargar XML" class="text-info mr-2"> 
-    <i class="fa fa-file-text-o green" aria-hidden="true"></i>
+    <i class="fa fa-file-text-o" aria-hidden="true"></i>
   </a>
   <a href="/facturas-emitidas/consult/{{ $data->id }}" title="Descargar XML Respuesta Hacienda" class="text-info mr-2">
     <i class="fa fa-file-text-o text-success" aria-hidden="true"></i>
