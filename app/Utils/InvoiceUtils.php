@@ -231,7 +231,7 @@ class InvoiceUtils
         try {
             $details = null;
             foreach ($data as $key => $value) {
-                $cod = \App\CodigoIvaRepercutido::find($value->tipo_iva);
+                $cod = \App\CodigoIvaRepercutido::find($value['iva_type']);
                 $isGravado = isset($cod) ? $cod->is_gravado : true;
                 $iva_amount = 0;
                 if( $isGravado ) {
