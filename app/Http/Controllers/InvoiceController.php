@@ -820,6 +820,15 @@ class InvoiceController extends Controller
             ->editColumn('generated_date', function(Invoice $invoice) {
                 return $invoice->generatedDate()->format('d/m/Y');
             })
+            ->editColumn('subtotal', function(Invoice $invoice) {
+                return number_format($invoice->subtotal);
+            })
+            ->editColumn('iva_amount', function(Invoice $invoice) {
+                return number_format($invoice->iva_amount);
+            })
+            ->editColumn('total', function(Invoice $invoice) {
+                return number_format($invoice->total);
+            })
             ->rawColumns(['actions'])
             ->toJson();
     }
