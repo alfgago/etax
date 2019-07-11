@@ -98,6 +98,8 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::get('aceptaciones-otros', 'BillController@indexAcceptsOther')->name('Bill.acceptOthers');
     Route::patch('confirmar-aceptacion-otros/{id}', 'BillController@correctAccepted')->name('Bill.correctAccepted');
     Route::patch('marcar-para-aceptacion/{id}', 'BillController@markAsNotAccepted')->name('Bill.markAsNotAccepted');
+    Route::get('validar/{id}', 'BillController@validar')->name('Bill.validar');
+    Route::post('guardar-validar', 'BillController@guardar_validar')->name('Bill.guardar_validar');
 });
 
 // Rutas de Wizard
