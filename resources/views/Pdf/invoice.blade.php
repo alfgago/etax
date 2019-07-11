@@ -279,19 +279,24 @@
         $totalImpuestos = 0;
         
         foreach ($data_invoice->items as $item){
-            
+            $productType = $item->ivaType;
+            if( !isset($productType) ){
+                $item->fixIvaType();
+                $productType = $item->ivaType;
+            }
             $netaLinea = $item->item_count * $item->unit_price;
+            
             if($item->measure_unit == 'Sp' || $item->measure_unit == 'Spe' || $item->measure_unit == 'St'
                 || $item->measure_unit == 'Al' || $item->measure_unit == 'Alc' || $item->measure_unit == 'Cm'
                 || $item->measure_unit == 'I' || $item->measure_unit == 'Os'){
-                if($item->iva_amount == 0 && !$item->iva_type->is_gravado ){
+                if($item->iva_amount == 0 && !$productType->is_gravado ){
                     $totalServiciosExentos += $netaLinea;
                 }else{
                     $totalServiciosGravados += $netaLinea;
                 }
 
             } else {
-                if($item->iva_amount == 0 && !$item->iva_type->is_gravado ){
+                if($item->iva_amount == 0 && !$productType->is_gravado ){
                     $totalMercaderiasExentas += $netaLinea;
                 }else{
                     $totalMercaderiasGravadas += $netaLinea;
@@ -331,10 +336,10 @@
                 {{$item->name ?? ''}}
             </td>
             <td>
-                {{$item->unit_price ? number_format($item->unit_price, 2) : ''}}
+                {{$item->unit_price ? number_format($item->unit_price, 2) : '0'}}
             </td>
             <td>
-                {{$item->discount ? number_format($item->discount, 2) : ''}}
+                {{$item->discount ? number_format($item->discount, 0) : '0'}}
             </td>
             <td>
                 {{$item->discount_reason ?? ''}}
@@ -343,7 +348,7 @@
                 {{$item->subtotal ? number_format($item->subtotal, 2) : ''}}
             </td>
             <td>
-                {{$item->iva_amount ? number_format($item->iva_amount, 2) : ''}}
+                {{$item->iva_amount ? number_format($item->iva_amount, 2) : '0'}}
             </td>
         </tr>
     @endforeach

@@ -175,7 +175,9 @@ class CalculatedTax extends Model
               if( $invoiceItems[$i]->invoice->currency == 'CRC' ) {
                 $invoiceItems[$i]->invoice->currency_rate = 1;
               }
-            
+              
+              $invoiceItems[$i]->fixIvaType();
+              
               $subtotal = $invoiceItems[$i]->subtotal * $invoiceItems[$i]->invoice->currency_rate;
               //$currentTotal = $invoiceItems[$i]->total * $invoiceItems[$i]->invoice->currency_rate;
               $ivaType = $invoiceItems[$i]->iva_type;
@@ -185,7 +187,7 @@ class CalculatedTax extends Model
               
               $prodType = $prodType ? $prodType : '17';
               
-              $invoiceItems[$i]->fixIvaType();
+              
               
               //Redondea todo a 2 decimales
               $subtotal = round($subtotal, 2);
@@ -367,6 +369,9 @@ class CalculatedTax extends Model
                 $billItems[$i]->bill->currency_rate = 1;
               }
             
+              //Arrela el IVATYPE la primera vez en caso de ser codigos anteriores.
+              $billItems[$i]->fixIvaType();
+              
               $subtotal = $billItems[$i]->subtotal * $billItems[$i]->bill->currency_rate;
               $ivaType = $billItems[$i]->iva_type;
               $prodType = $billItems[$i]->product_id;
@@ -374,8 +379,6 @@ class CalculatedTax extends Model
               $currentTotal = $subtotal + $billIva;
               
               $prodType = $prodType ? $prodType : '49';
-              //Arrela el IVATYPE la primera vez en caso de ser codigos anteriores.
-              $billItems[$i]->fixIvaType();
               
               //Redondea todo a 2 decimales
               $subtotal = round($subtotal, 2);

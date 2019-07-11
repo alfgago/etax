@@ -87,17 +87,17 @@ class Invoice extends Model
       
       $str = "Contado";
       if( $this->sale_condition == '02' ) {
-        $str == "Crédito";
+        $str = "Crédito";
       } else if( $this->sale_condition == '03' ) {
-        $str == "Consignación";
+        $str = "Consignación";
       } else if( $this->sale_condition == '04' ) {
-        $str == "Apartado";
+        $str = "Apartado";
       } else if( $this->sale_condition == '05' ) {
-        $str == "Arrendamiento con opción de compra";
+        $str = "Arrendamiento con opción de compra";
       } else if( $this->sale_condition == '06' ) {
          $str == "Arrendamiento en función financiera";
       } else if( $this->sale_condition == '99' ) {
-        $str == "Otros";
+        $str = "Otros";
       }
       return $str;
       
@@ -107,15 +107,15 @@ class Invoice extends Model
       
       $str = "Efectivo";
       if( $this->payment_type == '02' ) {
-        $str == "Tarjeta";
+        $str = "Tarjeta";
       } else if( $this->payment_type == '03' ) {
-        $str == "Cheque";
+        $str = "Cheque";
       } else if( $this->payment_type == '04' ) {
-        $str == "Transferencia-Depósito Bancario";
+        $str = "Transferencia-Depósito Bancario";
       } else if( $this->payment_type == '05' ) {
-        $str == "Recaudado por terceros";
+        $str = "Recaudado por terceros";
       } else if( $this->payment_type == '99' ) {
-        $str == "Otros";
+        $str = "Otros";
       }
       return $str;
       
