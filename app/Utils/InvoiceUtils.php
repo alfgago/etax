@@ -231,6 +231,15 @@ class InvoiceUtils
         try {
             $details = null;
             foreach ($data as $key => $value) {
+                $cod = \App\CodigoIvaRepercutido::find($value->tipo_iva);
+                $isGravado = isset($cod) ? $cod->is_gravado : true;
+                $iva_amount = 0;
+                if( $isGravado ) {
+                    $iva_amount = $value['iva_amount'] ? round($value['iva_amount'], 5) : 0;
+                }else {
+                    $iva_amount = false;
+                }
+            
                 $details[$key] = array(
                     'cantidad' => $value['item_count'] ?? 1,
                     'unidadMedida' => $value['measure_unit'] ?? '',
@@ -245,7 +254,7 @@ class InvoiceUtils
                     'impuesto_codigo_tarifa' => Variables::getCodigoTarifaVentas($value['iva_type']),
                     'impuesto_tarifa' => $value['iva_percentage'] ?? 0,
                     'impuesto_factor_IVA' => $value['iva_percentage'] / 100,
-                    'impuesto_monto' => $value['iva_amount'] ? round($value['iva_amount'], 5) : 0,
+                    'impuesto_monto' => $iva_amount,
                     'exoneracion_tipo_documento' => $value['exoneration_document_type'] ?? '',
                     'exoneracion_numero_documento' => $value['exoneration_document_number'] ?? '',
                     'exoneracion_fecha_emision' => $value['exoneration_date'] ?? '',
@@ -284,7 +293,7 @@ class InvoiceUtils
             //Spe, St, Al, Alc, Cm, I, Os
             foreach ($itemDetails as $detail){
                 $cod = \App\CodigoIvaRepercutido::find($detail->tipo_iva);
-                $isGravado = isset($cod) ? $cod->is_gravado : false;
+                $isGravado = isset($cod) ? $cod->is_gravado : true;
                 
                 if($detail->unidadMedida == 'Sp' || $detail->unidadMedida == 'Spe' || $detail->unidadMedida == 'St'
                     || $detail->unidadMedida == 'Al' || $detail->unidadMedida == 'Alc' || $detail->unidadMedida == 'Cm'
