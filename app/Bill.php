@@ -95,7 +95,7 @@ class Bill extends Model
       $this->other_reference = $request->other_reference;
     
       $this->xml_schema = $this->commercial_activity ? 43 : 42;
-      dd( $this->xml_schema );
+
       //Datos de proveedor
       if( $request->provider_id == '-1' ){
           $tipo_persona = $request->tipo_persona;
@@ -725,8 +725,14 @@ class Bill extends Model
     }
     
     public function calculateAcceptFields() {
+        
+      if( !$this->xml_schema ){
+        $this->xml_schema = $this->commercial_activity ? 43 : 42;
+        $this->is_code_validated = false;
+      }
       
       if( $this->is_code_validated ) {
+        
         if( $this->xml_schema == 43 ) {
           $company = currentCompanyModel();
           $prorrataOperativa = $company->getProrrataOperativa( $this->year );

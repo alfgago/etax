@@ -77,10 +77,10 @@ class ProcessInvoice implements ShouldQueue
                             'connect_timeout' => 20
                         ]);
                         $response = json_decode($result->getBody()->getContents(), true);
+                        $date = Carbon::now();
                         Log::info('Response Api Hacienda '. json_encode($response));
                         if (isset($response['status']) && $response['status'] == 200) {
                             Log::info('API HACIENDA 200 :'. $invoice->document_number);
-                            $date = Carbon::now();
                             $invoice->hacienda_status = '03';
                             $invoice->save();
                             $path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
@@ -98,6 +98,7 @@ class ProcessInvoice implements ShouldQueue
                                 $xml->invoice_id = $invoice->id;
                                 $xml->bill_id = 0;
                                 $xml->xml = $path;
+                                $xml->xml_message = $pathMH;
                                 $xml->save();
 
                                 $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH);

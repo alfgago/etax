@@ -277,31 +277,48 @@
         $totalMercaderiasExentas = 0;
         $totalDescuentos = 0;
         $totalImpuestos = 0;
+        
         foreach ($data_invoice->items as $item){
+            $productType = $item->ivaType;
+            if( !isset($productType) ){
+                $item->fixIvaType();
+                $productType = $item->ivaType;
+            }
+            $netaLinea = $item->item_count * $item->unit_price;
             
             if($item->measure_unit == 'Sp' || $item->measure_unit == 'Spe' || $item->measure_unit == 'St'
                 || $item->measure_unit == 'Al' || $item->measure_unit == 'Alc' || $item->measure_unit == 'Cm'
                 || $item->measure_unit == 'I' || $item->measure_unit == 'Os'){
-                 
-                if($item->iva_amount == 0 && !$item->ivaType->is_gravado ){
-                    $totalServiciosExentos += $item->subtotal;
+                if($item->iva_amount == 0 && !$productType->is_gravado ){
+                    $totalServiciosExentos += $netaLinea;
                 }else{
-                    $totalServiciosGravados += $item->subtotal;
+                    $totalServiciosGravados += $netaLinea;
                 }
 
             } else {
-                if($item->iva_amount == 0 && !$item->ivaType->is_gravado ){
-                    $totalMercaderiasExentas += $item->subtotal;
+                if($item->iva_amount == 0 && !$productType->is_gravado ){
+                    $totalMercaderiasExentas += $netaLinea;
                 }else{
-                    $totalMercaderiasGravadas += $item->subtotal;
+                    $totalMercaderiasGravadas += $netaLinea;
                 }
             }
-            $totalDescuentos += $item->discount;
+            $discount = 0;
+            if( $item['discount'] ) {
+                if($item['discount_type'] == "01" && $item['discount'] > 0 ) {
+                     $discount = $netaLinea * ($item['discount'] / 100);
+                } else {
+                    $discount= $item['discount'];
+                }
+            }
+            
+            $totalDescuentos += $discount;
             $totalImpuestos += $item->iva_amount;
         }
         $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas;
         $totalExento = $totalServiciosExentos + $totalMercaderiasExentas;
         $totalVenta = $totalGravado + $totalExento;
+        $totalNeta = $totalVenta - $totalDescuentos;
+        $totalComprobante = $totalNeta + $totalImpuestos;
     ?>
     @foreach($data_invoice->items as $item)
         <tr class="item">
@@ -319,10 +336,10 @@
                 {{$item->name ?? ''}}
             </td>
             <td>
-                {{$item->unit_price ? number_format($item->unit_price, 2) : ''}}
+                {{$item->unit_price ? number_format($item->unit_price, 2) : '0'}}
             </td>
             <td>
-                {{$item->discount ? number_format($item->discount, 2) : ''}}
+                {{$item->discount ? number_format($item->discount, 0) : '0'}}
             </td>
             <td>
                 {{$item->discount_reason ?? ''}}
@@ -331,7 +348,7 @@
                 {{$item->subtotal ? number_format($item->subtotal, 2) : ''}}
             </td>
             <td>
-                {{$item->iva_amount ? number_format($item->iva_amount, 2) : ''}}
+                {{$item->iva_amount ? number_format($item->iva_amount, 2) : '0'}}
             </td>
         </tr>
     @endforeach
@@ -389,7 +406,7 @@
                     </tr>
                     <tr>
                         <td><b>Total venta neta</b></td>
-                        <td><span>{{ number_format( ($totalVenta - $totalDescuentos), 2)}}</span></td>
+                        <td><span>{{ number_format( ($totalNeta), 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total impuestos</b></td>
@@ -397,7 +414,7 @@
                     </tr>
                     <tr>
                         <td><b>Total comprobante</b></td>
-                        <td><span>{{ number_format( ($totalVenta - $totalDescuentos + $totalImpuestos) , 2)}}</span></td>
+                        <td><span>{{ number_format( ($totalComprobante) , 2)}}</span></td>
                     </tr>
                 </table>
                 

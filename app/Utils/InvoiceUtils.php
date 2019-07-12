@@ -8,6 +8,7 @@ use App\Invoice;
 
 use App\AvailableInvoices;
 use App\Variables;
+use App\XmlHacienda;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -41,11 +42,28 @@ class InvoiceUtils
         return $pdf->download('Invoice.pdf');
     }
     
-    public function downloadXml( $invoice, $company )
+    public function downloadXml( $invoice, $company, $type = null)
     {
+
         $xml = $invoice->xmlHacienda;
-        
         $file = false;
+        if ($type !== null && !empty($xml)) {
+            $path = $xml->xml_message;
+            if (Storage::exists($path)) {
+                $file = Storage::get($path);
+            }
+
+            if (!$file) {
+                $path = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/MH-$invoice->document_key.xml";
+                if ( Storage::exists($path)) {
+                    $file = Storage::get($path);
+                    $xml = XmlHacienda::where('invoice_id', $invoice->id)->update(['xml_message' => $path]);
+
+                }
+            }
+            return $file;
+        }
+
         if( isset($xml) ) {
         	$path = $xml->xml;
         	if ( Storage::exists($path)) {
@@ -213,6 +231,15 @@ class InvoiceUtils
         try {
             $details = null;
             foreach ($data as $key => $value) {
+                $cod = \App\CodigoIvaRepercutido::find($value->tipo_iva);
+                $isGravado = isset($cod) ? $cod->is_gravado : true;
+                $iva_amount = 0;
+                if( $isGravado ) {
+                    $iva_amount = $value['iva_amount'] ? round($value['iva_amount'], 5) : 0;
+                }else {
+                    $iva_amount = false;
+                }
+            
                 $details[$key] = array(
                     'cantidad' => $value['item_count'] ?? 1,
                     'unidadMedida' => $value['measure_unit'] ?? '',
@@ -221,14 +248,13 @@ class InvoiceUtils
                     'subtotal' => $value['subtotal'] ?? 0,
                     'montoTotal' => $value['item_count'] * $value['unit_price'] ?? 0,
                     'montoTotalLinea' => $value['subtotal'] + $value['iva_amount'] ?? 0,
-                    'descuento' => $value['discount'] ? $this->discountCalculator($value['discount_type'], $value['discount'],
-                        $value['item_count'] * $value['unit_price'] ?? 0) : 0,
+                    'descuento' => $value['discount'] ? $this->discountCalculator($value['discount_type'], $value['discount'], $value['item_count'] * $value['unit_price'] ?? 0) : 0,
                     'impuesto_codigo' => '01',
                     'tipo_iva' => $value['iva_type'],
                     'impuesto_codigo_tarifa' => Variables::getCodigoTarifaVentas($value['iva_type']),
                     'impuesto_tarifa' => $value['iva_percentage'] ?? 0,
                     'impuesto_factor_IVA' => $value['iva_percentage'] / 100,
-                    'impuesto_monto' => $value['iva_amount'] ? round($value['iva_amount'], 5) : 0,
+                    'impuesto_monto' => $iva_amount,
                     'exoneracion_tipo_documento' => $value['exoneration_document_type'] ?? '',
                     'exoneracion_numero_documento' => $value['exoneration_document_number'] ?? '',
                     'exoneracion_fecha_emision' => $value['exoneration_date'] ?? '',
@@ -267,7 +293,7 @@ class InvoiceUtils
             //Spe, St, Al, Alc, Cm, I, Os
             foreach ($itemDetails as $detail){
                 $cod = \App\CodigoIvaRepercutido::find($detail->tipo_iva);
-                $isGravado = isset($cod) ? $cod->is_gravado : false;
+                $isGravado = isset($cod) ? $cod->is_gravado : true;
                 
                 if($detail->unidadMedida == 'Sp' || $detail->unidadMedida == 'Spe' || $detail->unidadMedida == 'St'
                     || $detail->unidadMedida == 'Al' || $detail->unidadMedida == 'Alc' || $detail->unidadMedida == 'Cm'
@@ -292,6 +318,9 @@ class InvoiceUtils
             $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas;
             $totalExento = $totalServiciosExentos + $totalMercaderiasExentas;
             $totalVenta = $totalGravado + $totalExento;
+            $totalNeta = $totalVenta - $totalDescuentos;
+            $totalComprobante = $totalNeta + $totalImpuestos;
+            
             $invoiceData = array(
                 'consecutivo' => $ref ?? '',	
                 'fecha_emision' => $data['generated_date'] ?? '',	
@@ -326,17 +355,17 @@ class InvoiceUtils
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,	
                 'atvcertPin' => $company->atv->pin ?? '',	
                 'atvcertFile' => Storage::get($company->atv->key_url),	
-                'servgravados' => $totalServiciosGravados - $totalDescuentos,
-                'servexentos' => $totalServiciosExentos > 0 ? $totalServiciosExentos - $totalDescuentos : $totalServiciosExentos,
-                'mercgravados' => $totalMercaderiasGravadas > 0 ? $totalMercaderiasGravadas - $totalDescuentos : $totalMercaderiasGravadas,
-                'mercexentos' => $totalMercaderiasExentas > 0 ? $totalMercaderiasExentas - $totalDescuentos : $totalMercaderiasExentas,
-                'totgravado' => $totalGravado - $totalDescuentos,
-                'totexento' => $totalExento > 0 ? $totalExento - $totalDescuentos : $totalExento,
-                'totventa' => $totalVenta - $totalDescuentos,
+                'servgravados' => $totalServiciosGravados,
+                'servexentos' => $totalServiciosExentos,
+                'mercgravados' => $totalMercaderiasGravadas,
+                'mercexentos' => $totalMercaderiasExentas,
+                'totgravado' => $totalGravado,
+                'totexento' => $totalExento,
+                'totventa' => $totalVenta,
                 'totdescuentos' => $totalDescuentos,	
-                'totventaneta' => $totalVenta - $totalDescuentos,	
+                'totventaneta' => $totalNeta,	
                 'totimpuestos' => $totalImpuestos,	
-                'totcomprobante' => ($totalVenta - $totalDescuentos) + $totalImpuestos,
+                'totcomprobante' => $totalComprobante,
                 'detalle' => $details
             );
             

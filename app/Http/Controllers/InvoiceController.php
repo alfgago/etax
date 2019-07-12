@@ -101,18 +101,12 @@ class InvoiceController extends Controller
             })
             ->editColumn('hacienda_status', function(Invoice $invoice) {
                 if ($invoice->hacienda_status == '03') {
-                    return '<div class="green">  
-                                <span class="tooltiptext">Aceptada</span>
-                            </div>';
+                    return '<div class="green">  <span class="tooltiptext">Aceptada</span></div>';
                 }
                 if ($invoice->hacienda_status == '04') {
-                    return '<div class="red">  
-                                <span class="tooltiptext">Rechazada</span>
-                            </div>';
+                    return '<div class="red"> <span class="tooltiptext">Rechazada</span></div>';
                 }
-                return '<div class="yellow">
-                            <span class="tooltiptext">Creada</span>
-                        </div>';
+                return '<div class="yellow"><span class="tooltiptext">Creada</span></div>';
             })
             ->editColumn('document_type', function(Invoice $invoice) {
                 return $invoice->documentTypeName();
@@ -892,6 +886,15 @@ class InvoiceController extends Controller
             ->editColumn('generated_date', function(Invoice $invoice) {
                 return $invoice->generatedDate()->format('d/m/Y');
             })
+            ->editColumn('subtotal', function(Invoice $invoice) {
+                return number_format($invoice->subtotal);
+            })
+            ->editColumn('iva_amount', function(Invoice $invoice) {
+                return number_format($invoice->iva_amount);
+            })
+            ->editColumn('total', function(Invoice $invoice) {
+                return number_format($invoice->total);
+            })
             ->rawColumns(['actions'])
             ->toJson();
     }
@@ -981,7 +984,7 @@ class InvoiceController extends Controller
             $filename = $invoice->document_number . '-' . $invoice->client_id . '.xml';
         }
         
-        if( !isset($file) ){
+        if(!$file) {
             return redirect()->back()->withError('No se encontró el XML de la factura. Por favor contacte a soporte.');
         }
         
@@ -1058,5 +1061,30 @@ class InvoiceController extends Controller
         
         dd($invoices);
         return true;
+    }
+
+    public function consultInvoice($id) {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+
+        $invoiceUtils = new InvoiceUtils();
+        $file = $invoiceUtils->downloadXml( $invoice, currentCompanyModel(), 'MH' );
+
+        $filename = 'MH-'.$invoice->document_key . '.xml';
+        if( ! $invoice->document_key ) {
+            $filename = $invoice->document_number . '-' . $invoice->client_id . '.xml';
+        }
+
+        if(!$file) {
+            return redirect()->back()->withError('No se encontró el XML de Mensaje Hacienda. Por favor intente reenviar consulta ha hacienda.');
+        }
+
+        $headers = [
+            'Content-Type' => 'application/xml',
+            'Content-Description' => 'File Transfer',
+            'Content-Disposition' => "attachment; filename={$filename}",
+            'filename'=> $filename
+        ];
+        return response($file, 200, $headers);
     }
 }
