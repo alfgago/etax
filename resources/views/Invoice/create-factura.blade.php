@@ -75,10 +75,6 @@ $company = currentCompanyModel();
                       </div>
                       
                     @endif
-                    <div class="form-group col-md-12">
-                      <label for="send_email">Enviar copia a:</label>
-                      <input type="email" class="form-control" name="send_email" id="send_email" value="">
-                    </div>
                   </div>
                 </div>
                 
@@ -105,7 +101,61 @@ $company = currentCompanyModel();
                   </div>
                 </div>
               </div>
-              
+
+              <div class="form-row">    
+                <div class="form-group col-md-12">
+                  <h3>
+                    Datos de envio
+                  </h3>
+                </div>
+              </div>
+              <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="send_email">Enviar copia a:</label>
+                    <input type="email" class="form-control" name="send_email" id="send_email" value="">
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label for="send_date">Fecha de envio:</label>
+                    <input type="date" class="form-control" name="fecha_envio" id="fecha_envio" value="{{@$date_Today}}" min="{{@$date_Today}}">
+                  </div>
+              </div>
+              <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="send_email">Envio:</label>
+                     <select name="envio_factura" class="form-control" id="envio_factura">
+                          <option value="1">Si</option>
+                          <option value="0">No</option>
+                  </select>
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label for="send_date">Factura recurrente:</label>
+                     <select name="factura_recurrente" class="form-control" id="select_factura_recurrente">
+                          <option value="0">No</option>
+                          <option value="1">Si</option>
+                  </select>
+                  </div>
+              </div>
+              <div class="form-row" id="div_factura_recurrente">    
+                 <div class="form-group col-md-6">
+                  <label for="subtotal">Recurrencia: </label>
+                  <select name="frecuencia" class="form-control" id="frecuencia">
+                          <option value="0">Nunca</option>
+                          <option value="1">Semanal</option>
+                          <option value="2">Quincenal</option>
+                          <option value="3">Mensual</option>
+                          <option value="4">Bimensual</option>
+                          <option value="5">Trimestral</option>
+                          <option value="6">Cuatrimestral</option>
+                          <option value="7">Semestral</option>
+                          <option value="8">Anual</option>
+                          <option value="9">Cantidad de días</option>
+                  </select>
+                <input type="text" name="opciones_recurrencia" id="opciones_recurrencia"  class="form-control">
+                </div>
+                <div class="form-group col-md-6" id="div_opcciones_frecuencia">
+                  
+                </div>
+              </div>
               <div class="form-row">    
                 <div class="form-group col-md-12">
                   <h3>
@@ -321,7 +371,156 @@ $(document).ready(function(){
       $('#tipo_cambio').val('1.00')
     }
   });
+
+  $("#frecuencia").change(function(){
+      var frecuencia = $(this).val();
+      var html = '';
+      if(frecuencia == 0){
+        $("#div_opcciones_frecuencia").html('');
+        $("#opciones_recurrencia").val();
+      }
+      if(frecuencia == 1){
+          html = '<label for="subtotal">Día de la semana: </label><select  class="form-control" id="frecuencia_option_semanal"><option value="0">Domingo</option><option value="1">Lunes</option><option value="2">Martes</option><option value="3">Miercoles</option><option value="4">Jueves</option><option value="5">Viernes</option><option value="6">Sabado</option></select>';
+          $("#div_opcciones_frecuencia").html(html);
+          get_options_semanal();
+      }
+      if(frecuencia == 2){
+          html = '<label for="subtotal">Día de la primer quincena: </label><select  class="form-control" id="frecuencia_option_1_quincenal"></select><label for="subtotal">Día de la segunda quincena: </label><select  class="form-control" id="frecuencia_option_2_quincenal"></select>';
+          $("#div_opcciones_frecuencia").html(html);
+          opciones_quincenal();
+          get_options_quincenal();
+      }
+      if(frecuencia == 3){
+          html = '<label for="subtotal">Día del mes: </label><select  class="form-control" id="frecuencia_option_mensual"></select>';
+          $("#div_opcciones_frecuencia").html(html);
+          opciones_mes();
+          get_options_mes();
+      }
+
+      if(frecuencia == 4){
+          html = '<label for="subtotal">Día del mes: </label><select  class="form-control" id="frecuencia_option_mensual"></select>';
+          $("#div_opcciones_frecuencia").html(html);
+          opciones_mes();
+          get_options_mes();
+      }
+
+      if(frecuencia == 5){
+          html = '<label for="subtotal">Día del mes: </label><select  class="form-control" id="frecuencia_option_mensual"></select>';
+          $("#div_opcciones_frecuencia").html(html);
+          opciones_mes();
+          get_options_mes();
+      }
+
+      if(frecuencia == 6){
+          html = '<label for="subtotal">Día del mes: </label><select  class="form-control" id="frecuencia_option_mensual"></select>';
+          $("#div_opcciones_frecuencia").html(html);
+          opciones_mes();
+          get_options_mes();
+      }
+
+      if(frecuencia == 7){
+          html = '<label for="subtotal">Día del mes: </label><select  class="form-control" id="frecuencia_option_mensual"></select>';
+          $("#div_opcciones_frecuencia").html(html);
+          opciones_mes();
+          get_options_mes();
+      }
+
+      if(frecuencia == 8){
+          html = '<label for="subtotal">Día: </label><select  class="form-control" id="frecuencia_option_mensual"></select><label for="subtotal">Mes: </label><select  class="form-control" id="frecuencia_option_mes"><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Setiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select>';
+          $("#div_opcciones_frecuencia").html(html);
+          opciones_mes();
+          get_options_anual();
+      }
+
+      if(frecuencia == 9){
+          html = '<label for="subtotal">Cantidad de días: </label><input type="number"  class="form-control" id="cantidad_dias"/>';
+          $("#div_opcciones_frecuencia").html(html);
+          get_options_cantidad();
+      }
+  });
+
+    $("#div_factura_recurrente").addClass("hidden");
+    $("#select_factura_recurrente").change(function(){
+        var recurrente = $(this).val();
+        if(recurrente == 1){
+            $("#div_factura_recurrente").removeClass("hidden");
+        }else{
+            $("#div_factura_recurrente").addClass("hidden");
+        }
+    });
+
+
 });
+
+function opciones_quincenal(){
+  var options = '';
+  for(var i = 1; i <= 15; i++){
+      options += '<option value="'+i+'">'+i+'</option>';
+  }
+  $('#frecuencia_option_1_quincenal').html(options);
+  options = '';
+  for(var i = 15; i <= 31; i++){
+      options += '<option value="'+i+'">'+i+'</option>';
+  }
+  $('#frecuencia_option_2_quincenal').html(options);
+
+}
+function opciones_mes(){
+  var options = '';
+  for(var i = 1; i <= 31; i++){
+      options += '<option value="'+i+'">'+i+'</option>';
+  }
+  $('#frecuencia_option_mensual').html(options);
+
+}
+
+function get_options_semanal(){
+  $("#opciones_recurrencia").val(0);
+  $("#frecuencia_option_semanal").change(function(){
+        var option = $(this).val();
+        $("#opciones_recurrencia").val(option);
+  });
+}
+function get_options_quincenal(){
+  $("#opciones_recurrencia").val('1,15');
+  $("#frecuencia_option_1_quincenal").change(function(){
+        var option1 = $("#frecuencia_option_1_quincenal").val();
+        var option2 = $("#frecuencia_option_2_quincenal").val();
+        $("#opciones_recurrencia").val(option1+','+option2);
+  });
+  $("#frecuencia_option_2_quincenal").change(function(){
+        var option1 = $("#frecuencia_option_1_quincenal").val();
+        var option2 = $("#frecuencia_option_2_quincenal").val();
+        $("#opciones_recurrencia").val(option1+','+option2);
+  });
+}
+function get_options_mes(){
+  $("#opciones_recurrencia").val('1');
+  $("#frecuencia_option_mensual").change(function(){
+        var option = $(this).val();
+        $("#opciones_recurrencia").val(option);
+  });
+}
+function get_options_anual(){
+  $("#opciones_recurrencia").val('1/1');
+  $("#frecuencia_option_mensual").change(function(){
+        var dia = $("#frecuencia_option_mensual").val();
+        var mes = $("#frecuencia_option_mes").val();
+        $("#opciones_recurrencia").val(dia+'/'+mes);
+  });
+  $("#frecuencia_option_mes").change(function(){
+        var dia = $("#frecuencia_option_mensual").val();
+        var mes = $("#frecuencia_option_mes").val();
+        $("#opciones_recurrencia").val(dia+'/'+mes);
+  });
+}
+function get_options_cantidad(){
+  $("#opciones_recurrencia").val("");
+  $("#cantidad_dias").change(function(){
+        var option = $(this).val();
+        $("#opciones_recurrencia").val(option);
+  });
+}
 
 function toggleRetencion() {
   var metodo = $("#medio_pago").val();

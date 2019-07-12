@@ -11,6 +11,9 @@ use App\Utils\InvoiceUtils;
 use \Carbon\Carbon;
 use App\Invoice;
 use App\InvoiceItem;
+use App\PreInvoices;
+use App\ScheduledInvoices;
+use App\RecurringInvoices;
 use App\Exports\InvoiceExport;
 use App\Imports\InvoiceImport;
 use GuzzleHttp\Exception\RequestException;
@@ -162,6 +165,7 @@ class InvoiceController extends Controller
 
         //Revisa límite de facturas emitidas en el mes actual
         $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $date_Today = $start_date->format('Y-m-d');   
         $month = $start_date->month;
         $year = $start_date->year;
         $available_invoices = $company->getAvailableInvoices( $year, $month );
@@ -214,7 +218,7 @@ class InvoiceController extends Controller
         return view("Invoice/create-factura", ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
 
             'document_number' => $this->getDocReference($tipoDocumento),
-            'document_key' => $this->getDocumentKey($tipoDocumento), 'units' => $units, 'countries' => $countries])->with('arrayActividades', $arrayActividades);
+            'document_key' => $this->getDocumentKey($tipoDocumento), 'units' => $units, 'countries' => $countries])->with('arrayActividades', $arrayActividades)->with('date_Today',$date_Today);
     }
     
     /**
@@ -258,14 +262,83 @@ class InvoiceController extends Controller
       
         return redirect('/facturas-emitidas');
     }
-    
+
+
+    public function EnviarProgramadas(){
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $date_Today = $start_date->format('Y-m-d'); 
+        $date_Today = '2019-07-13';
+        $pre_invoices = ScheduledInvoices::join('pre_invoices','pre_invoices.id','scheduled_invoices.pre_invoice_id')
+                ->where('send_date',$date_Today)->get();
+        foreach ($pre_invoices as $invoice ) {
+            //$this->sendHacienda(json_decode($invoice->body));
+        }
+        
+        dd($pre_invoices);  
+    }
+
+
+    public function GuardarInvoice(Request $request){
+        $company = currentCompanyModel();
+
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $date_Today = $start_date->format('Y-m-d');   
+        $pre_invoices_create = 0;
+        if($request->factura_recurrente == 1){
+            $pre_invoices_create = 1;
+        }
+        if($request->envio_factura == 1){
+            if($request->fecha_envio != $date_Today){
+                $pre_invoices_create = 1;
+            }
+        }
+        if($pre_invoices_create == 1){
+
+            PreInvoices::insert([
+                ['company_id' => $company->id,
+                'cliente_id' => $request->client_id,
+                'body' => json_encode($request),
+                'status' => 1,
+                'created_at' => $start_date]
+            ]);
+            $pre_invoices = PreInvoices::where('company_id', $company->id)->where('cliente_id', $request->client_id)
+                        ->where('created_at', $start_date)->first();
+        }
+        if($request->factura_recurrente == 1){
+
+           
+            RecurringInvoices::insert([
+                    ['pre_invoice_id' => $pre_invoices->id,
+                     'company_id' => $company->id,
+                     'frecuency' => $request->frecuencia,
+                     'options' => $request->opciones_recurrencia,
+                     'status' => 1,
+                    'created_at' => $start_date]
+                ]);
+        }
+        if($request->envio_factura == 1){
+            if($request->fecha_envio == $date_Today){
+                return $this->sendHacienda($request);
+            }else{
+                ScheduledInvoices::insert([
+                    ['pre_invoice_id' => $pre_invoices->id,
+                     'company_id' => $company->id,
+                    'send_date' => $request->fecha_envio,
+                     'status' => 1,
+                    'created_at' => $start_date]
+                ]);
+            }
+        }
+
+        return redirect('/facturas-emitidas');
+    }
     /**
      * Envía la factura electrónica a Hacienda
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function sendHacienda(Request $request)
+    public function sendHacienda($request)
     {
         //revision de branch para segmentacion de funcionalidades por tipo de documento
         try {
@@ -277,7 +350,6 @@ class InvoiceController extends Controller
 
             $apiHacienda = new BridgeHaciendaApi();
             $tokenApi = $apiHacienda->login(false);
-
             if ($tokenApi !== false) {
                 $invoice = new Invoice();
                 $company = currentCompanyModel();

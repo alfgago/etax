@@ -13,11 +13,11 @@ class CreateScheduledInvoicesTable extends Migration
      */
     public function up()
     {
-        Schema::create('sheduled_invoices', function (Blueprint $table) {
+        Schema::create('scheduled_invoices', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('pre_invoice_id')->default(0);
             $table->integer('company_id')->default(0);
-            $table->datetime('send_date')->nullable();
+            $table->date('send_date')->nullable();
             $table->integer('status')->default(1);
             $table->softDeletes();
             $table->timestamps();
@@ -31,6 +31,6 @@ class CreateScheduledInvoicesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sheduled_invoices');
+        Schema::dropIfExists('scheduled_invoices');
     }
 }
