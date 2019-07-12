@@ -291,7 +291,7 @@ class InvoiceController extends Controller
             PreInvoices::insert([
                 ['company_id' => $company->id,
                 'cliente_id' => $request->client_id,
-                'body' => json_encode($request),
+                'body' => json_encode($request->all()),
                 'status' => 1,
                 'created_at' => $start_date]
             ]);
@@ -310,18 +310,16 @@ class InvoiceController extends Controller
                     'created_at' => $start_date]
                 ]);
         }
-        if($request->envio_factura == 1){
-            if($request->fecha_envio == $date_Today){
-                return $this->sendHacienda($request);
-            }else{
-                ScheduledInvoices::insert([
-                    ['pre_invoice_id' => $pre_invoices->id,
-                     'company_id' => $company->id,
-                    'send_date' => $request->fecha_envio,
-                     'status' => 1,
-                    'created_at' => $start_date]
-                ]);
-            }
+        if($request->fecha_envio == $date_Today){
+            return $this->sendHacienda($request);
+        }else{
+            ScheduledInvoices::insert([
+                ['pre_invoice_id' => $pre_invoices->id,
+                'company_id' => $company->id,
+                'send_date' => $request->fecha_envio,
+                'status' => 1,
+                'created_at' => $start_date]
+            ]);
         }
 
         return redirect('/facturas-emitidas');
