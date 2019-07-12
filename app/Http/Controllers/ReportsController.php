@@ -13,6 +13,9 @@ use App\PlansInvitation;
 use Mpociot\Teamwork\Facades\Teamwork;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Exports\ReportsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Controllers\Controller;
 
 class ReportsController extends Controller
 {
@@ -312,6 +315,184 @@ class ReportsController extends Controller
     private function microtime_float(){
         list($usec, $sec) = explode(" ", microtime());
         return ((float) $usec + (float)$sec);
-    }  
-  
+    }
+    /*
+1    Cuentas contables
+2    Detalle de débito fiscal
+3    Detalle de crédito fiscal
+4    Libro de compras
+5    Libro de ventas
+6    Resumen ejecutivo
+7    Reporte de proveedores
+8    Reporte de clientes
+9    Declaración de IVA
+10    Borrador de declaración de IVA*/
+
+    public function exportCuentasContables(Request $request){
+        $time_start = $this->microtime_float();
+
+        $ano = $request->ano ? $request->ano : 2019;
+        $mes = $request->mes ? $request->mes : 0;
+
+        $company = currentCompanyModel();
+        $prorrataOperativa = $company->getProrrataOperativa($ano);
+
+        $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
+        $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
+        $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0, $prorrataOperativa );
+        $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0, $prorrataOperativa );
+        $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0, $prorrataOperativa );
+        $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0, $prorrataOperativa );
+        $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0, $prorrataOperativa );
+        $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0, $prorrataOperativa );
+        $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0, $prorrataOperativa );
+        $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0, $prorrataOperativa );
+        $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0, $prorrataOperativa );
+        $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, $prorrataOperativa );
+
+        $data2 = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
+        $data = json_encode($data2);
+        $nombreMes = Variables::getMonthName($mes);
+        //return Excel::download($data, 'etax_Reporte_CuentasContables.xlsx');
+        return $data;
+    }
+
+    public function exportDetalleDebitoFiscal(Request $request){
+        $ano = $request->ano ? $request->ano : 2019;
+        $mes = $request->mes ? $request->mes : 1;
+
+        $company = currentCompanyModel();
+        $prorrataOperativa = $company->getProrrataOperativa($ano);
+
+        $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
+        $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
+        $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0, $prorrataOperativa );
+        $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0, $prorrataOperativa );
+        $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0, $prorrataOperativa );
+        $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0, $prorrataOperativa );
+        $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0, $prorrataOperativa );
+        $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0, $prorrataOperativa );
+        $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0, $prorrataOperativa );
+        $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0, $prorrataOperativa );
+        $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0, $prorrataOperativa );
+        $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, $prorrataOperativa );
+
+        $acumulado1 = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
+        $acumulado = json_encode($acumulado1);
+        return $acumulado;
+    }
+
+    public function exportDetalleCreditoFiscal(Request $request){
+        $ano = $request->ano ? $request->ano : 2019;
+        $mes = $request->mes ? $request->mes : 1;
+
+        $company = currentCompanyModel();
+        $prorrataOperativa = $company->getProrrataOperativa($ano);
+
+        $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
+        $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
+        $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0, $prorrataOperativa );
+        $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0, $prorrataOperativa );
+        $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0, $prorrataOperativa );
+        $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0, $prorrataOperativa );
+        $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0, $prorrataOperativa );
+        $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0, $prorrataOperativa );
+        $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0, $prorrataOperativa );
+        $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0, $prorrataOperativa );
+        $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0, $prorrataOperativa );
+        $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, $prorrataOperativa );
+
+        $acumulado1 = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
+
+        $acumulado = json_encode($acumulado1);
+        return $acumulado;
+    }
+
+    public function exportLibroCompras(Request $request){
+        $ano = $request->ano ? $request->ano : 2019;
+        $mes = $request->mes ? $request->mes : 1;
+
+        $companyID = currentCompany();
+
+        $data1 = BillItem::where('month', $mes)
+            ->where('year', $ano)
+            ->where('company_id', $companyID)
+            ->with('bill', 'bill.provider')
+            ->orderBy('created_at', 'ASC')
+            ->orderBy('item_number', 'ASC')
+            ->get();
+
+        $nombreMes = Variables::getMonthName($mes);
+        $data = json_encode($data1);
+        return $data;
+    }
+
+    public function exportLibroVentas(Request $request){
+        $ano = $request->ano ? $request->ano : 2019;
+        $mes = $request->mes ? $request->mes : 1;
+
+        $companyID = currentCompany();
+
+        $data1 = InvoiceItem::where('month', $mes)
+            ->where('year', $ano)
+            ->where('company_id', $companyID)
+            ->with('invoice', 'invoice.client')
+            ->orderBy('created_at', 'ASC')
+            ->orderBy('item_number', 'ASC')
+            ->get();
+
+        $nombreMes = Variables::getMonthName($mes);
+
+        $data = json_encode($data1);
+        return $data;
+    }
+
+    public function exportResumenEjecutivo(Request $request){
+        $ano = $request->ano ? $request->ano : 2019;
+        $mes = $request->mes ? $request->mes : 1;
+
+        $company = currentCompanyModel();
+        $prorrataOperativa = $company->getProrrataOperativa($ano);
+
+        $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
+        $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
+        $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0, $prorrataOperativa );
+        $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0, $prorrataOperativa );
+        $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0, $prorrataOperativa );
+        $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0, $prorrataOperativa );
+        $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0, $prorrataOperativa );
+        $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0, $prorrataOperativa );
+        $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0, $prorrataOperativa );
+        $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0, $prorrataOperativa );
+        $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0, $prorrataOperativa );
+        $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, $prorrataOperativa );
+
+        $acumulado1 = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
+        $nombreMes = Variables::getMonthName($mes);
+        $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
+
+        $acumulado = json_encode($acumulado1);
+        return $acumulado;
+    }
+
+    public function exportReporteProveedores(Request $request){
+
+        return false;
+    }
+
+    public function exportReporteClientes(Request $request){
+
+        return false;
+    }
+
+    public function exportDeclaracionIVA(Request $request){
+
+        return false;
+    }
+
+    public function exportBorradorDeclaracionIVA(Request $request){
+
+        return false;
+    }
+
 }
