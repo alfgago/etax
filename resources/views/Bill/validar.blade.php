@@ -45,12 +45,13 @@
                   <option value="{{@$codigos_etax->code}}" identificacion="{{@$codigos_etax->is_identificacion_plena}}">{{@$codigos_etax->name}}</option>
               @endforeach
           </select>
+          <input hidden  readonly id="impuesto_identificacion_plena" name="impuesto_identificacion_plena" value="0" required>
       </div>
     </div>
       <div class="form-row">
-      <div  class="form-group col-md-12 " id="identificacion_plena"  placeholde="Seleccione un impuesto">
+      <div  class="form-group col-md-12 hidden" id="identificacion_plena"  >
        <b>Seleccione % de impuesto:</b>
-          <select class="form-control" name="impuesto_identificacion_plena" id="impuesto_identificacion_plena" >
+          <select class="form-control" name="impuesto_identificacion_plena_select" id="impuesto_identificacion_plena_select" >
               <option value="1" >1%</option>
               <option value="2" >2%</option>
               <option value="4" >4%</option>
@@ -67,7 +68,6 @@
   
 $(document).ready(function(){
 
-          $("#identificacion_plena").addClass("hidden");
     $("#category_product").change(function(){
       var posibles = $('#category_product :selected').attr('posibles');
       var arrPosibles = posibles.split(",");
@@ -81,14 +81,22 @@ $(document).ready(function(){
     $("#codigo_etax").change(function(){
       var identificacion = $('#codigo_etax :selected').attr('identificacion');
       if(identificacion == 1){
+          $("#impuesto_identificacion_plena").val('1');
           $("#identificacion_plena").removeClass("hidden");
           $("#impuesto_identificacion_plena").attr("required");
+          $("#impuesto_identificacion_plena_select").val('1');
       }else{
           $("#identificacion_plena").addClass("hidden");
           $("#impuesto_identificacion_plena").val("0");
           $("#impuesto_identificacion_plena").removeAttr("required");
       }
     });
+
+    $("#impuesto_identificacion_plena_select").change(function(){
+      var valor = $('#impuesto_identificacion_plena_select').val();
+      $("#impuesto_identificacion_plena").val(valor);
+    });
+
 });
       
 </script>

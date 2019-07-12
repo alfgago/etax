@@ -497,7 +497,7 @@ class BillController extends Controller
             $item->save();
         }
         
-        return redirect('/facturas-recibidas/validaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
+        return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
     }
     
     public function confirmarValidacion( Request $request, $id )
@@ -550,7 +550,8 @@ class BillController extends Controller
             ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($bill) {
                 return view('Bill.ext.auth-actions', [
-                    'id' => $bill->id
+                    'id' => $bill->id,
+                    'is_code_validated' => $bill->is_code_validated
                 ])->render();
             }) 
             ->editColumn('provider', function(Bill $bill) {
