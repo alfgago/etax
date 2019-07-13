@@ -203,7 +203,7 @@ class Invoice extends Model
               $this->client_city = $client->city;
               $this->client_district = $client->district;
               $this->client_zip = $client->zip;
-              $this->client_phone = $client->phone;
+              $this->client_phone = preg_replace('/[^0-9]/', '', $client->phone);
               $this->client_id_number = $client->id_number;
             }else{
               $this->client_first_name = 'N/A';
@@ -220,7 +220,7 @@ class Invoice extends Model
               $this->client_city = $this->company->city;
               $this->client_district = $this->company->district;
               $this->client_zip = $this->company->zip;
-              $this->client_phone = $this->company->phone;
+              $this->client_phone = preg_replace('/[^0-9]/', '', $this->company->phone);
               $this->client_id_number = $this->company->id_number;
             }
             

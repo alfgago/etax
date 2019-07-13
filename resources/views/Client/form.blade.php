@@ -45,7 +45,7 @@
     
     <div class="form-group col-md-4">
       <label for="phone">Teléfono</label>
-      <input type="text" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" >
+      <input type="number" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" >
     </div>
     
     <div class="form-group col-md-4"></div>
