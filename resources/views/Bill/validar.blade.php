@@ -19,17 +19,19 @@
           <b>Actividad Comercial:</b>
           <select class="form-control" name="actividad_comercial" id="actividad_comercial" placeholder="Seleccione una actividad Comercial" required >
               
-              <option value="0">Otro</option>
               @foreach($data['commercial_activities'] as $commercial)
                   <option value="{{@$commercial->codigo}}">{{@$commercial->actividad}}</option>
               @endforeach
+              
+              <option value="0">No asignar actividad comercial</option>
+              
           </select>
       </div>
     </div>
       <div class="form-row">
       <div class="form-group col-md-12">
-          <b>Categoria de Producto:</b>
-          <select class="form-control" name="category_product" id="category_product" placeholde="Seleccione una categoría de producto" required>
+          <b>Categoría de Producto:</b>
+          <select class="form-control" name="category_product" id="category_product" placeholder="Seleccione una categoría de producto" required>
 
               @foreach($data['categoria_productos'] as $categoria_productos)
                   <option value="{{@$categoria_productos->id}}" posibles="{{@$categoria_productos->open_codes}}">{{@$categoria_productos->name}}</option>
@@ -39,8 +41,8 @@
     </div>
       <div class="form-row">
       <div class="form-group col-md-12">
-          <b>Codigo eTax:</b>
-          <select class="form-control" name="codigo_etax" id="codigo_etax" placeholde="Seleccione un codigo eTax" required >
+          <b>Código eTax:</b>
+          <select class="form-control" name="codigo_etax" id="codigo_etax" placeholder="Seleccione un código eTax" required >
               @foreach($data['codigos_etax'] as $codigos_etax)
                   <option value="{{@$codigos_etax->code}}" identificacion="{{@$codigos_etax->is_identificacion_plena}}">{{@$codigos_etax->name}}</option>
               @endforeach
@@ -50,16 +52,16 @@
     </div>
       <div class="form-row">
       <div  class="form-group col-md-12 hidden" id="identificacion_plena"  >
-       <b>Seleccione % de impuesto:</b>
+       <b>Seleccione % de impuesto al que saldrá la compra:</b>
           <select class="form-control" name="impuesto_identificacion_plena_select" id="impuesto_identificacion_plena_select" >
               <option value="1" >1%</option>
               <option value="2" >2%</option>
               <option value="4" >4%</option>
-              <option value="13" >13%</option>
+              <option selected value="13" >13%</option>
           </select>
       </div>      
     </div>                        
-        <button id="btn-submit" type="submit" class="btn btn-dark">Guardar</button>
+        <button id="btn-submit" type="submit" class="btn btn-dark">Confirmar</button>
     </form>
   </div>
 </div>
