@@ -61,8 +61,8 @@ $(function() {
       url: "/lang/datatables-es_ES.json",
     },
   });
+  ValidarFactura();
 });
-  
   
 function confirmAuthorize( id ) {
   var formId = "#accept-form-"+id;

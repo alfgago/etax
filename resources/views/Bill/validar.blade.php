@@ -17,8 +17,9 @@
       <div class="form-row">
       <div class="form-group col-md-12">
           <b>Actividad Comercial:</b>
-          <select class="form-control" name="actividad_comercial" id="actividad_comercial" >
-              <option>Seleccione una actividad Comercial</option>
+          <select class="form-control" name="actividad_comercial" id="actividad_comercial" placeholder="Seleccione una actividad Comercial" required >
+              
+              <option value="0">Otro</option>
               @foreach($data['commercial_activities'] as $commercial)
                   <option value="{{@$commercial->codigo}}">{{@$commercial->actividad}}</option>
               @endforeach
@@ -28,8 +29,8 @@
       <div class="form-row">
       <div class="form-group col-md-12">
           <b>Categoria de Producto:</b>
-          <select class="form-control" name="category_product" id="category_product" >
-              <option>Seleccione una categoría de producto</option>
+          <select class="form-control" name="category_product" id="category_product" placeholde="Seleccione una categoría de producto" required>
+
               @foreach($data['categoria_productos'] as $categoria_productos)
                   <option value="{{@$categoria_productos->id}}" posibles="{{@$categoria_productos->open_codes}}">{{@$categoria_productos->name}}</option>
               @endforeach
@@ -39,19 +40,18 @@
       <div class="form-row">
       <div class="form-group col-md-12">
           <b>Codigo eTax:</b>
-          <select class="form-control" name="codigo_etax" id="codigo_etax" >
-              <option>Seleccione un codigo eTax</option>
+          <select class="form-control" name="codigo_etax" id="codigo_etax" placeholde="Seleccione un codigo eTax" required >
               @foreach($data['codigos_etax'] as $codigos_etax)
                   <option value="{{@$codigos_etax->code}}" identificacion="{{@$codigos_etax->is_identificacion_plena}}">{{@$codigos_etax->name}}</option>
               @endforeach
           </select>
+          <input hidden  readonly id="impuesto_identificacion_plena" name="impuesto_identificacion_plena" value="0" required>
       </div>
     </div>
       <div class="form-row">
-      <div  class="form-group col-md-12 hidden" id="identificacion_plena">
+      <div  class="form-group col-md-12 hidden" id="identificacion_plena"  >
        <b>Seleccione % de impuesto:</b>
-          <select class="form-control" name="impuesto_identificacion_plena" id="impuesto_identificacion_plena" >
-              <option value="0">Seleccione un impuesto</option>
+          <select class="form-control" name="impuesto_identificacion_plena_select" id="impuesto_identificacion_plena_select" >
               <option value="1" >1%</option>
               <option value="2" >2%</option>
               <option value="4" >4%</option>
@@ -67,6 +67,7 @@
 <script>
   
 $(document).ready(function(){
+
     $("#category_product").change(function(){
       var posibles = $('#category_product :selected').attr('posibles');
       var arrPosibles = posibles.split(",");
@@ -80,12 +81,22 @@ $(document).ready(function(){
     $("#codigo_etax").change(function(){
       var identificacion = $('#codigo_etax :selected').attr('identificacion');
       if(identificacion == 1){
+          $("#impuesto_identificacion_plena").val('1');
           $("#identificacion_plena").removeClass("hidden");
+          $("#impuesto_identificacion_plena").attr("required");
+          $("#impuesto_identificacion_plena_select").val('1');
       }else{
           $("#identificacion_plena").addClass("hidden");
           $("#impuesto_identificacion_plena").val("0");
+          $("#impuesto_identificacion_plena").removeAttr("required");
       }
     });
+
+    $("#impuesto_identificacion_plena_select").change(function(){
+      var valor = $('#impuesto_identificacion_plena_select').val();
+      $("#impuesto_identificacion_plena").val(valor);
+    });
+
 });
       
 </script>
