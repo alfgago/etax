@@ -98,12 +98,27 @@ class InvoiceController extends Controller
             })
             ->editColumn('hacienda_status', function(Invoice $invoice) {
                 if ($invoice->hacienda_status == '03') {
-                    return '<div class="green">  <span class="tooltiptext">Aceptada</span></div>';
+                    return '<div class="green">  <span class="tooltiptext">Aceptada</span></div>
+                        <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
+                            <i class="fa fa-refresh" aria-hidden="true"></i>
+                          </a>';
                 }
                 if ($invoice->hacienda_status == '04') {
-                    return '<div class="red"> <span class="tooltiptext">Rechazada</span></div>';
+                    return '<div class="red"> <span class="tooltiptext">Rechazada</span></div>
+                        <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
+                            <i class="fa fa-refresh" aria-hidden="true"></i>
+                          </a>';
                 }
-                return '<div class="yellow"><span class="tooltiptext">Creada</span></div>';
+                if ($invoice->hacienda_status == '05') {
+                    return '<div class="orange"> <span class="tooltiptext">No recibidia</span></div>
+                        <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
+                            <i class="fa fa-refresh" aria-hidden="true"></i>
+                          </a>';
+                }
+                return '<div class="yellow"><span class="tooltiptext">Creada</span></div>
+                    <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
+                        <i class="fa fa-refresh" aria-hidden="true"></i>
+                      </a>';
             })
             ->editColumn('document_type', function(Invoice $invoice) {
                 return $invoice->documentTypeName();
@@ -1014,5 +1029,38 @@ class InvoiceController extends Controller
             'filename'=> $filename
         ];
         return response($file, 200, $headers);
+    }
+
+    public function queryInvoice($id) {
+        try {
+            $invoice = Invoice::findOrFail($id);
+            $this->authorize('update', $invoice);
+
+            $apiHacienda = new BridgeHaciendaApi();
+            $tokenApi = $apiHacienda->login(false);
+
+            if ($tokenApi !== false) {
+                $company = currentCompanyModel();
+                $result = $apiHacienda->queryHacienda($invoice, $tokenApi, $company);
+                if ($result == false) {
+                    return redirect()->back()->withErrors('Comprobante no ha sido recibido por hacienda');
+                }
+                $filename = 'MH-'.$invoice->document_key . '.xml';
+                if( ! $invoice->document_key ) {
+                    $filename = $invoice->document_number . '-' . $invoice->client_id . '.xml';
+                }
+                $headers = [
+                    'Content-Type' => 'application/xml',
+                    'Content-Description' => 'File Transfer',
+                    'Content-Disposition' => "attachment; filename={$filename}",
+                    'filename'=> $filename
+                ];
+                return response($result, 200, $headers);
+            }
+
+        } catch (\Exception $e) {
+            Log::error("Error consultado factura -->" .$e);
+            return redirect()->back()->withErrors('Error al consultar comprobante en hacienda');
+        }
     }
 }
