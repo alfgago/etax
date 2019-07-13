@@ -276,6 +276,12 @@ class InvoiceUtils
     public function setInvoiceData43( Invoice $data, $details ) {
         try {
             $company = $data->company;
+            
+            if( !$company->id_number ) {
+                Log::info('Error enviando factura: No se encuentra company' );
+                return false;
+            }
+            
             /*$ref = getInvoiceReference($company->last_invoice_ref_number) + 1;
             $data->reference_number = $ref;
             $data->save();*/
@@ -332,7 +338,7 @@ class InvoiceUtils
                 'receptor_ubicacion_otras_senas' => $data['client_address'] ?? '',	
                 'receptor_otras_senas_extranjero' => $data['client_address'] ?? '',
                 'receptor_email' => $data['client_email'] ?? '',
-                'receptor_phone' => !empty($data['client_phone']) ? $data['client_phone'] : '00000000',
+                'receptor_phone' => !empty($data['client_phone']) ? reg_replace('/[^0-9]/', '', $data['client_phone']) : '00000000',
                 'receptor_cedula_numero' => $data['client_id_number'] ? preg_replace("/[^0-9]/", "", $data['client_id_number']) : '',	
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',	
@@ -348,7 +354,7 @@ class InvoiceUtils
                 'emisor_postal_code' => $company->zip ?? '',	
                 'emisor_country' => $company->country ?? '',	
                 'emisor_address' => $company->address ?? '',	
-                'emisor_phone' => $company->phone ?? '',	
+                'emisor_phone' => $company->phone ? preg_replace('/[^0-9]/', '', $company->phone) : '',
                 'emisor_cedula' => $company->id_number ? preg_replace("/[^0-9]/", "", $company->id_number) : '',	
                 'usuarioAtv' => $company->atv->user ?? '',	
                 'passwordAtv' => $company->atv->password ?? '',	

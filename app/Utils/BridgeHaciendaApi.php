@@ -188,7 +188,7 @@ class BridgeHaciendaApi
                 'emisor_postal_code' => $company->zip ?? '',
                 'emisor_country' => $company->country ?? '',
                 'emisor_address' => $company->address ?? '',
-                'emisor_phone' => $company->phone ?? '',
+                'emisor_phone' => $company->phone ? preg_replace('/[^0-9]/', '', $company->phone) : '',
                 'emisor_cedula' => $company->id_number ? preg_replace("/[^0-9]/", "", $company->id_number) : '',
                 'usuarioAtv' => $company->atv->user ?? '',
                 'passwordAtv' => $company->atv->password ?? '',
