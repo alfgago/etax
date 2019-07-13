@@ -229,17 +229,17 @@ class InvoiceUtils
     
     public function setDetails43($data) {
         try {
-            $details = null;
             foreach ($data as $key => $value) {
-                $cod = \App\CodigoIvaRepercutido::find($value['iva_type']);
+
+                $cod = \App\CodigoIvaRepercutido::find($value->iva_type);
                 $isGravado = isset($cod) ? $cod->is_gravado : true;
                 $iva_amount = 0;
                 if( $isGravado ) {
                     $iva_amount = $value['iva_amount'] ? round($value['iva_amount'], 5) : 0;
                 }else {
-                    $iva_amount = false;
+                    $iva_amount = 'false';
                 }
-            
+
                 $details[$key] = array(
                     'cantidad' => $value['item_count'] ?? 1,
                     'unidadMedida' => $value['measure_unit'] ?? '',
@@ -272,7 +272,7 @@ class InvoiceUtils
             return false;
         }
     }
-    
+
     public function setInvoiceData43( Invoice $data, $details ) {
         try {
             $company = $data->company;
@@ -286,6 +286,7 @@ class InvoiceUtils
             $data->reference_number = $ref;
             $data->save();*/
             $ref = $data->reference_number;
+            Log::info("Set request parameters invoice id: $data->id consutivo: $ref Clave: $data->document_key");
             $receptorPostalCode = $data['client_zip'];
             $invoiceData = null;
             $request = null;
@@ -300,11 +301,11 @@ class InvoiceUtils
             foreach ($itemDetails as $detail){
                 $cod = \App\CodigoIvaRepercutido::find($detail->tipo_iva);
                 $isGravado = isset($cod) ? $cod->is_gravado : true;
-                
+
                 if($detail->unidadMedida == 'Sp' || $detail->unidadMedida == 'Spe' || $detail->unidadMedida == 'St'
                     || $detail->unidadMedida == 'Al' || $detail->unidadMedida == 'Alc' || $detail->unidadMedida == 'Cm'
                     || $detail->unidadMedida == 'I' || $detail->unidadMedida == 'Os'){
-                
+
                     if($detail->impuesto_monto == 0  && !$isGravado ){
                         $totalServiciosExentos += $detail->montoTotal;
                     }else{
@@ -319,48 +320,54 @@ class InvoiceUtils
                     }
                 }
                 $totalDescuentos += $detail->descuento;
-                $totalImpuestos += $detail->impuesto_monto;
+
+                if ($detail->impuesto_monto !== 'false') {
+                    $totalImpuestos += $detail->impuesto_monto;
+                }
+
             }
             $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas;
             $totalExento = $totalServiciosExentos + $totalMercaderiasExentas;
             $totalVenta = $totalGravado + $totalExento;
             $totalNeta = $totalVenta - $totalDescuentos;
             $totalComprobante = $totalNeta + $totalImpuestos;
-            
+
             $invoiceData = array(
-                'consecutivo' => $ref ?? '',	
-                'fecha_emision' => $data['generated_date'] ?? '',	
-                'codigo_actividad' => str_pad($data['commercial_activity'], 6, '0', STR_PAD_LEFT),	
-                'receptor_nombre' => $data['client_first_name'].' '.$data['client_last_name'],	
-                'receptor_ubicacion_provincia' => substr($receptorPostalCode,0,1),	
-                'receptor_ubicacion_canton' => substr($receptorPostalCode,1,2),	
-                'receptor_ubicacion_distrito' => substr($receptorPostalCode,3),	
-                'receptor_ubicacion_otras_senas' => $data['client_address'] ?? '',	
+                'consecutivo' => $ref ?? '',
+                'fecha_emision' => $data['generated_date'] ?? '',
+                'codigo_actividad' => str_pad($data['commercial_activity'], 6, '0', STR_PAD_LEFT),
+                'receptor_nombre' => $data['client_first_name'].' '.$data['client_last_name'],
+                'receptor_ubicacion_provincia' => substr($receptorPostalCode,0,1),
+                'receptor_ubicacion_canton' => substr($receptorPostalCode,1,2),
+                'receptor_ubicacion_distrito' => substr($receptorPostalCode,3),
+                'receptor_ubicacion_otras_senas' => $data['client_address'] ?? '',
                 'receptor_otras_senas_extranjero' => $data['client_address'] ?? '',
                 'receptor_email' => $data['client_email'] ?? '',
+
                 'receptor_phone' => !empty($data['client_phone']) ? reg_replace('/[^0-9]/', '', $data['client_phone']) : '00000000',
-                'receptor_cedula_numero' => $data['client_id_number'] ? preg_replace("/[^0-9]/", "", $data['client_id_number']) : '',	
+                'receptor_cedula_numero' => $data['client_id_number'] ? preg_replace("/[^0-9]/", "", $data['client_id_number']) : '',
                 'receptor_postal_code' => $receptorPostalCode ?? '',
-                'codigo_moneda' => $data['currency'] ?? '',	
-                'tipocambio' => $data['currency_rate'] ?? '',	
-                'tipo_documento' => $data['document_type'] ?? '',	
-                'sucursal_nro' => '001',	
-                'terminal_nro' => '00001',	
-                'emisor_name' => $company->business_name ?? '',	
-                'emisor_email' => $company->email ?? '',	
-                'emisor_company' => $company->business_name ?? '',	
-                'emisor_city' => $company->city ?? '',	
-                'emisor_state' => $company->state ?? '',	
-                'emisor_postal_code' => $company->zip ?? '',	
-                'emisor_country' => $company->country ?? '',	
-                'emisor_address' => $company->address ?? '',	
-                'emisor_phone' => $company->phone ? preg_replace('/[^0-9]/', '', $company->phone) : '',
-                'emisor_cedula' => $company->id_number ? preg_replace("/[^0-9]/", "", $company->id_number) : '',	
-                'usuarioAtv' => $company->atv->user ?? '',	
-                'passwordAtv' => $company->atv->password ?? '',	
-                'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,	
-                'atvcertPin' => $company->atv->pin ?? '',	
-                'atvcertFile' => Storage::get($company->atv->key_url),	
+                'codigo_moneda' => $data['currency'] ?? '',
+                'tipocambio' => $data['currency_rate'] ?? '',
+                'tipo_documento' => $data['document_type'] ?? '',
+                'sucursal_nro' => '001',
+                'terminal_nro' => '00001',
+                'emisor_name' => $company->business_name ?? '',
+                'emisor_email' => $company->email ?? '',
+                'emisor_company' => $company->business_name ?? '',
+                'emisor_city' => $company->city ?? '',
+                'emisor_state' => $company->state ?? '',
+                'emisor_postal_code' => $company->zip ?? '',
+                'emisor_country' => $company->country ?? '',
+                'emisor_address' => $company->address ?? '',
+                'emisor_phone' => $company->phone ?? '',
+                'emisor_cedula' => $company->id_number ? preg_replace("/[^0-9]/", "", $company->id_number) : '',
+                'usuarioAtv' => $company->atv->user ?? '',
+                'passwordAtv' => $company->atv->password ?? '',
+                'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
+                'atvcertPin' => $company->atv->pin ?? '',
+                'atvcertFile' => Storage::get($company->atv->key_url),
+
                 'servgravados' => $totalServiciosGravados,
                 'servexentos' => $totalServiciosExentos,
                 'mercgravados' => $totalMercaderiasGravadas,
@@ -368,13 +375,13 @@ class InvoiceUtils
                 'totgravado' => $totalGravado,
                 'totexento' => $totalExento,
                 'totventa' => $totalVenta,
-                'totdescuentos' => $totalDescuentos,	
-                'totventaneta' => $totalNeta,	
-                'totimpuestos' => $totalImpuestos,	
+                'totdescuentos' => $totalDescuentos,
+                'totventaneta' => $totalNeta,
+                'totimpuestos' => $totalImpuestos,
                 'totcomprobante' => $totalComprobante,
                 'detalle' => $details
             );
-            
+
             if ($data['document_type'] == '03') {
                 $invoiceData['totalivadevuelto'] = 0;
                 $invoiceData['referencia_doc_type'] = $data['reference_doc_type'];
@@ -419,5 +426,6 @@ class InvoiceUtils
         }
         return $discount;
     }
-    
+
 }
+            $details = null;
