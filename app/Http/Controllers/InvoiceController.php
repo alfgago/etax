@@ -109,12 +109,6 @@ class InvoiceController extends Controller
                             <i class="fa fa-refresh" aria-hidden="true"></i>
                           </a>';
                 }
-                if ($invoice->hacienda_status == '05') {
-                    return '<div class="orange"> <span class="tooltiptext">No recibidia</span></div>
-                        <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
-                            <i class="fa fa-refresh" aria-hidden="true"></i>
-                          </a>';
-                }
                 return '<div class="yellow"><span class="tooltiptext">Creada</span></div>
                     <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
                         <i class="fa fa-refresh" aria-hidden="true"></i>
