@@ -276,10 +276,17 @@ class InvoiceUtils
     public function setInvoiceData43( Invoice $data, $details ) {
         try {
             $company = $data->company;
+            
+            if( !$company->id_number ) {
+                Log::info('Error enviando factura: No se encuentra company' );
+                return false;
+            }
+            
             /*$ref = getInvoiceReference($company->last_invoice_ref_number) + 1;
             $data->reference_number = $ref;
             $data->save();*/
             $ref = $data->reference_number;
+            Log::info("Set request parameters invoice id: $data->id consutivo: $ref Clave: $data->document_key");
             $receptorPostalCode = $data['client_zip'];
             $invoiceData = null;
             $request = null;
@@ -336,7 +343,8 @@ class InvoiceUtils
                 'receptor_ubicacion_otras_senas' => $data['client_address'] ?? '',
                 'receptor_otras_senas_extranjero' => $data['client_address'] ?? '',
                 'receptor_email' => $data['client_email'] ?? '',
-                'receptor_phone' => !empty($data['client_phone']) ? $data['client_phone'] : '00000000',
+
+                'receptor_phone' => !empty($data['client_phone']) ? preg_replace('/[^0-9]/', '', $data['client_phone']) : '00000000',
                 'receptor_cedula_numero' => $data['client_id_number'] ? preg_replace("/[^0-9]/", "", $data['client_id_number']) : '',
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',
@@ -359,6 +367,7 @@ class InvoiceUtils
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
                 'atvcertPin' => $company->atv->pin ?? '',
                 'atvcertFile' => Storage::get($company->atv->key_url),
+
                 'servgravados' => $totalServiciosGravados,
                 'servexentos' => $totalServiciosExentos,
                 'mercgravados' => $totalMercaderiasGravadas,

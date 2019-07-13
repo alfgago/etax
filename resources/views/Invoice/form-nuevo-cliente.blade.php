@@ -55,7 +55,7 @@
     
     <div class="form-group col-md-4">
       <label for="phone">Teléfono</label>
-      <input type="text" class="form-control" name="phone" id="phone" >
+      <input type="number" class="form-control" name="phone" id="phone" >
     </div>
     
     <div></div>

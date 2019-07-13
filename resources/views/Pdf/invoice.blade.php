@@ -284,19 +284,20 @@
                 $item->fixIvaType();
                 $productType = $item->ivaType;
             }
+            $isGravado = isset($productType) ? $productType->is_gravado : true;
             $netaLinea = $item->item_count * $item->unit_price;
             
             if($item->measure_unit == 'Sp' || $item->measure_unit == 'Spe' || $item->measure_unit == 'St'
                 || $item->measure_unit == 'Al' || $item->measure_unit == 'Alc' || $item->measure_unit == 'Cm'
                 || $item->measure_unit == 'I' || $item->measure_unit == 'Os'){
-                if($item->iva_amount == 0 && !$productType->is_gravado ){
+                if($item->iva_amount == 0 && !$isGravado ){
                     $totalServiciosExentos += $netaLinea;
                 }else{
                     $totalServiciosGravados += $netaLinea;
                 }
 
             } else {
-                if($item->iva_amount == 0 && !$productType->is_gravado ){
+                if($item->iva_amount == 0 && !$isGravado ){
                     $totalMercaderiasExentas += $netaLinea;
                 }else{
                     $totalMercaderiasGravadas += $netaLinea;

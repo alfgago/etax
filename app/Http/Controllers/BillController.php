@@ -498,7 +498,7 @@ class BillController extends Controller
         $bill->is_code_validated = true;
         
         $bill->save();
-                
+
         foreach( $bill->items as $item ) {
             $item->iva_type = $request->codigo_etax;
             $item->product_type = $request->category_product;
@@ -509,8 +509,9 @@ class BillController extends Controller
         }
         
         clearBillCache($bill);
-        
-        return redirect('/facturas-recibidas/validaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
+
+        return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
+
     }
     
     public function confirmarValidacion( Request $request, $id )
@@ -563,7 +564,8 @@ class BillController extends Controller
             ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($bill) {
                 return view('Bill.ext.auth-actions', [
-                    'id' => $bill->id
+                    'id' => $bill->id,
+                    'is_code_validated' => $bill->is_code_validated
                 ])->render();
             }) 
             ->editColumn('provider', function(Bill $bill) {

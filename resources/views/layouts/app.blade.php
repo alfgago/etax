@@ -25,6 +25,7 @@
     
     <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=8">
     <script src="{{asset('assets/js/common-bundle.js')}}?v=8"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
   
     @yield('header-scripts')
