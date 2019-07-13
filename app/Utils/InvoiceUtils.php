@@ -280,6 +280,7 @@ class InvoiceUtils
             $data->reference_number = $ref;
             $data->save();*/
             $ref = $data->reference_number;
+            Log::info("Set request parameters invoice id: $data->id consutivo: $ref Clave: $data->document_key");
             $receptorPostalCode = $data['client_zip'];
             $invoiceData = null;
             $request = null;

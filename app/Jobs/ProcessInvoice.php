@@ -110,8 +110,11 @@ class ProcessInvoice implements ShouldQueue
                             Log::info('Consecutive repeated -->' . $invoice->document_number);
                             $invoice->hacienda_status = '04';
                             $invoice->save();
-
-
+                        } else if (isset($response['status']) && $response['status'] == 400 &&
+                            strpos($response['message'], 'archivo XML ya existe en nuestras bases de datos') <> false) {
+                            Log::info('Consecutive repeated -->' . $invoice->document_number);
+                            $invoice->hacienda_status = '04';
+                            $invoice->save();
                         }
                         Log::info('Proceso de facturación finalizado con éxito.');
                     }
