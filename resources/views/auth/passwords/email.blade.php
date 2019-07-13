@@ -12,7 +12,7 @@
 
                     <form method="POST" action="{{ route('password.email') }}">
                         @csrf
-                      
+                          @honeypot
                       <div class="form-row">
 
                         <div class="form-group col-md-12 text-center">
