@@ -23,7 +23,7 @@
 	<style>
 	    
 	    html, body {
-	        font-size: 16px !important;
+	        font-size: 13px !important;
 	    }
 			
 			body * {
@@ -52,7 +52,8 @@
 			}
 			
 			body {
-			    max-width: 1000px;
+			    max-width: 1200px;
+			    width: 100%;
 			    margin: auto;
 			    padding: 0;
 			}
@@ -100,9 +101,28 @@
 			}
 			
 			td input {
-				width: 120px;
+				width: 100px;
 				background: #f5f5f5;
 				padding: 3px;
+			}
+			
+			.card-title {
+			    font-size: 2rem;
+			    margin-bottom: 3rem;
+			    border-bottom: 0.45rem solid #F0C962;
+			    display: inline-block;
+			}
+			
+			.card-subtitle {
+			    font-size: 1.2rem;
+			    margin-bottom: 1.25rem;
+			    margin-top: 3rem;
+			    border-bottom: 0.45rem solid #ccc;
+			    display: inline-block;
+			}
+			
+			tr.header-tarifas {
+			    text-align: center;
 			}
         
       @media print {
@@ -142,101 +162,144 @@
         
         <a class='btn btn-imprimir' onclick='window.print();return false;'> <i class="fa fa-print" style="margin-top: -75px; margin-right: 10px;" aria-hidden="true"></i> Imprimir reporte</a>
         
-        <div class='print-content'  style="padding-top: 100px;">
+        <div class='print-content'  style="">
         	<div class="container-fluid" >
 						<div class="row">
-							
-						  <div class="col-sm-12">
-			          <table class="text-12 text-muted m-0 p-2 ivas-table bigtext borrador-presentacion">
-			            <thead>
-			              <tr>
-			                <th>Rubro</th>
-			                <th>1%</th>
-			                <th>2%</th>
-			                <th>13%</th>
-			                <th>4%</th>
-			              </tr>
-			            </thead>
-			            <tbody>
-			            	
-										@foreach( \App\ProductCategory::all() as $tipo )
+							<h1 class="card-title">Declaración de IVA {{ $nombreMes }} {{ $ano }} </h1>
+						  <div class="col-sm-12 pl-0 pr-0">
+						  	
+						  	@foreach( $arrayActividades as $act )
+						  		<h3 class="card-subtitle">ACTIVIDAD COMERCIAL: {{ $act->codigo }} - {{ $act->actividad }}</h3>
+						  		@include('Reports.widgets.borrador-iva-loop', ['actividad' => $act->codigo, 'data' => $data])	
+						  	@endforeach
+						  	
+						  	<h3 class="card-subtitle sub2">ESTIMACIÓN Y LIQUIDACIÓN ANUAL DE LA PROPORCIONALIDAD</h3>
+						  	
+						  	<table class="text-12 text-muted m-0 p-2 ivas-table bigtext borrador-presentacion" style="width:100%;">
+									<tbody>
 										<?php
-											$varName = "type$tipo->id";
 											$ivaData = json_decode($data->iva_data);
 										?>
-										@if($loop->index == 0)
 											<tr class="macro-title">
-				                <th colspan="5">TOTAL DE VENTAS , SUJETAS, EXENTAS Y NO SUJETAS</th>
-				              </tr>
-				              <tr class="sub-title">
-				                <th colspan="5">BIENES Y SERVICIOS AFECTOS AL 1%</th>
-				              </tr>
-										@endif
-										@if($loop->index == 5)
-											<tr class="sub-title">
-				                <th colspan="5">BIENES Y SERVICIOS AFECTOS AL 2%</th>
-				              </tr>
-										@endif
-										@if($loop->index == 9)
-											<tr class="sub-title">
-				                <th colspan="5">BIENES Y SERVICIOS AFECTOS AL 4%</th>
-				              </tr>
-										@endif
-										@if($loop->index == 14)
-											<tr class="sub-title">
-				                <th colspan="5">BIENES Y SERVICIOS AFECTOS AL 13%</th>
-				              </tr>
-										@endif
-										@if($loop->index == 19)
-											<tr class="sub-title">
-				                <th colspan="5">TOTAL OTROS RUBROS A INCLUIR EN LA BASE IMPONIBLE</th>
-				              </tr>
-										@endif
-										@if($loop->index == 21)
-											<tr class="sub-title">
-				                <th colspan="5">VENTAS EXENTAS</th>
-				              </tr>
-										@endif
-										@if($loop->index == 38)
-											<tr class="sub-title">
-				                <th colspan="5">VENTAS AUTORIZADAS SIN IMPUESTO (órdenes especiales y otros transitorios)</th>
-				              </tr>
-										@endif
-										@if($loop->index == 45)
-											<tr class="sub-title">
-				                <th colspan="5">VENTAS A NO SUJETOS</th>
-				              </tr>
-										@endif
-										@if($loop->index == 48)
+										    <th colspan="6">Estimación del porcentaje final de la regla de proporcionalidad</th>
+										  </tr>
+										  <tr class="header-tarifas">
+										    <th>Rubro</th>
+										    <th colspan="5"> Monto </th>
+										  </tr>
+										  <tr>
+										    <th>Monto anual de ventas con derecho a crédito fiscal aplicados</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->numerador_prorrata, 0) }}" > </td>
+										  </tr>
+										  <tr>
+										    <th>Monto anual de ventas con derecho y sin derecho a crédito fiscal</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->invoices_subtotal, 0) }}" > </td>
+										  </tr>
+										  <tr>
+										    <th>Porcentaje a aplicar como liquidación final</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->prorrata*100, 0) }}%" > </td>
+										  </tr>
+										  
+										  
 											<tr class="macro-title">
-				                <th colspan="5">TOTAL DE COMPRAS</th>
-				              </tr>
-				              <tr class="sub-title">
-				                <th colspan="5">Compras de bienes y servicios locales utilizados en operaciones sujetas y no exentas</th>
-				              </tr>
-										@endif
-										@if($loop->index == 51)
-											<tr class="sub-title">
-				                <th colspan="5">Importaciones de bienes y adquisición de servicios del exterior utilizadas en operaciones sujetas y no exentas</th>
-				              </tr>
-										@endif
-										@if($loop->index == 54)
-											<tr class="sub-title">
-				                <th colspan="5">Compras sin derecho a crédito fiscal</th>
-				              </tr>
-										@endif
-										
-										
-			              <tr>
-			                <th>{{ $tipo->name }}</th>
-			                <td><input readonly value="{{ number_format( $ivaData->$varName, 2 ) }}"/></td>
-			                <td><input readonly /></td>
-			                <td><input readonly /></td>
-			                <td><input readonly /></td>
-			              </tr>
-			              @endforeach
-			            </tbody>
-			          </table>
+										    <th colspan="6">Liquidación final de la regla de la proporcionalidad</th>
+										  </tr>
+										  <tr class="header-tarifas">
+										    <th>Rubro</th>
+										    <th colspan="5"> Monto </th>
+										  </tr>
+										  <tr>
+										    <th>Crédito fiscal anual sobre el que se aplica el porcentaje de proporcionalidad</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->total_bill_iva, 0) }}" > </td>
+										  </tr>
+										  <tr>
+										    <th>Crédito fiscal generado por aplicación final del porcentaje de proporcionalidad</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->iva_deducible_estimado, 0) }}" > </td>
+										  </tr>
+										  
+										  
+											<tr class="macro-title">
+										    <th colspan="6">Crédito aplicado de enero a la fecha de la liquidación final según regla de proporcionalidad</th>
+										  </tr>
+										  <tr class="header-tarifas">
+										    <th>Rubro</th>
+										    <th colspan="5"> Monto </th>
+										  </tr>
+										    <th>Saldo a favor en aplicación del porcentaje de la liquidación final</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->iva_por_cobrar, 0) }}" > </td>
+										  </tr>
+										  <tr>
+										    <th>Saldo deudor en aplicación del porcentaje de la liquidación final</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->iva_por_pagar, 0) }}" > </td>
+										  </tr>
+										  
+										  
+											<tr class="macro-title">
+										    <th colspan="6">Determinación del impuesto por operaciones gravadas del periodo</th>
+										  </tr>
+										  <tr class="header-tarifas">
+										    <th>Rubro</th>
+										    <th colspan="5"> Monto </th>
+										  </tr>
+										 	<tr>
+										    <th>Impuesto generado por operaciones gravadas</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->total_invoice_iva, 0) }}" > </td>
+										  </tr>
+										 	<tr>
+										    <th>Total de créditos del periodo</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->iva_deducible_operativo, 0) }}" > </td>
+										  </tr>
+										 	<tr>
+										    <th>Devolución del IVA por servicios de salud privada pagados con tarjeta de crédito y/o débito</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( 0, 0) }}" > </td>
+										  </tr>
+										 	<tr>
+										    <th>Saldo a favor del periodo</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->iva_por_cobrar, 0) }}" > </td>
+										  </tr>
+										 	<tr>
+										    <th>Impuesto neto del periodo (saldo deudor)</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->iva_por_pagar, 0) }}" > </td>
+										  </tr>
+										 	<tr>
+										    <th>Saldo a favor en aplicación del porcentaje de la liquidación final</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->iva_por_cobrar, 0) }}" > </td>
+										  </tr>
+										 	<tr>
+										    <th>Saldo deudor en aplicación del porcentaje de la liquidación final</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->iva_por_pagar, 0) }}" > </td>
+										  </tr>
+										 	<tr>
+										    <th>Saldo a favor final</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->saldo_favor, 0) }}" > </td>
+										  </tr>
+										 	<tr>
+										    <th>Impuesto final</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->numerador_prorrata, 0) }}" > </td>
+										  </tr>
+										  
+										  
+											<tr class="macro-title">
+										    <th colspan="6">Liquidación deuda tributaria</th>
+										  </tr>
+										  <tr class="header-tarifas">
+										    <th>Rubro</th>
+										    <th colspan="5"> Monto </th>
+										  </tr>
+										    <th>Retenciones pagos a cuenta del impuesto</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->numerador_prorrata, 0) }}" > </td>
+										  </tr>
+										  <tr>
+										    <th>Saldo a favor de periodos anteriores</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->sum_repercutido_exento_sin_credito, 0) }}" > </td>
+										  </tr>
+										  <tr>
+										    <th>Solicito compensar con crédito a mi favor por el monto de:</th>
+										    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->sum_repercutido_exento_sin_credito, 0) }}" > </td>
+										  </tr>
+								  	</tbody>
+								  </table>
+														  	
 			        </div>
 						  
 						</div>

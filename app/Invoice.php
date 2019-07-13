@@ -31,6 +31,11 @@ class Invoice extends Model
         return $this->belongsTo(Client::class);
     }
     
+    public function activity()
+    {
+        return $this->belongsTo(Actividades::class, 'commercial_activity');
+    }
+    
     public function clientName() {
       if( isset($this->client_id) ) {
         return $this->client->getFullName();

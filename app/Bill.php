@@ -33,6 +33,11 @@ class Bill extends Model
         return $this->belongsTo(Provider::class);
     }
     
+    public function activity()
+    {
+        return $this->belongsTo(Actividades::class, 'activity_company_verification');
+    }
+    
     public function providerName() {
       if( isset($this->provider_id) ) {
         return $this->provider->getFullName();
@@ -167,6 +172,28 @@ class Bill extends Model
       
       $this->year = $fecha->year;
       $this->month = $fecha->month;
+      
+      if( $request->xml_schema ){
+        $this->xml_schema = $request->xml_schema;
+      }
+      if( $request->activity_company_verification ){
+        $this->activity_company_verification = $request->activity_company_verification;
+      }
+      
+      $this->accept_status = $request->accept_status ? 1 : 0;
+      if( !$this->accept_status ) {
+        $this->is_code_validated = false;
+      }
+      
+      if( $request->accept_iva_condition ){
+        $this->accept_iva_condition = $request->accept_iva_condition;
+      }
+      if( $request->accept_iva_acreditable ){
+        $this->accept_iva_acreditable = $request->accept_iva_acreditable;
+      }
+      if( $request->accept_iva_gasto ){
+        $this->accept_iva_gasto = $request->accept_iva_gasto;
+      }
     
       $this->save();
     
@@ -744,6 +771,7 @@ class Bill extends Model
           $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query );
           $calc->setCalculosPorFactura( $prorrataOperativa, $lastBalance );
           
+          
           $this->accept_iva_acreditable = $calc->iva_deducible_operativo;
           $this->accept_iva_gasto = $calc->iva_no_deducible;
           $this->accept_iva_total = $calc->total_bill_iva;
@@ -767,10 +795,15 @@ class Bill extends Model
             $this->accept_iva_condition = '05'; //Si exista minimo 1 linea sin identificación específica.
           }
           
-          $bienesCapital = $calc->b011 + $calc->b031 + $calc->b051 + $calc->b071 + $calc->b015  + $calc->b035 +
-             $calc->b012 + $calc->b032 + $calc->b052 + $calc->b072 +
-             $calc->b013 + $calc->b033 + $calc->b053 + $calc->b073 + $calc->b016 + $calc->b036 +
-             $calc->b014 + $calc->b034 + $calc->b054 + $calc->b074;
+          $bienesCapital = $calc->bB11 + $calc->bB31 + $calc->bB51 + $calc->bB71 + $calc->bB15  + $calc->bB35 +
+             $calc->bB12 + $calc->bB32 + $calc->bB52 + $calc->bB72 +
+             $calc->bB13 + $calc->bB33 + $calc->bB53 + $calc->bB73 + $calc->bB16 + $calc->bB36 +
+             $calc->bB14 + $calc->bB34 + $calc->bB54 + $calc->bB74
+             +
+             $calc->bS11 + $calc->bS31 + $calc->bS51 + $calc->bS71 + $calc->bS15  + $calc->bS35 +
+             $calc->bS12 + $calc->bS32 + $calc->bS52 + $calc->bS72 +
+             $calc->bS13 + $calc->bS33 + $calc->bS53 + $calc->bS73 + $calc->bS16 + $calc->bS36 +
+             $calc->bS14 + $calc->bS34 + $calc->bS54 + $calc->bS74;
           if( $bienesCapital ) {
             $this->accept_iva_condition = '03'; // Si son propiedad, planta o equipo (Bienes de capital)
           }

@@ -35,6 +35,26 @@ class InvoiceItem extends Model
           }
           $this->save();
       }
+    
+      //Asigna Prod Type;
+      $cat = $this->product_type;
+      if( !$cat ){
+        $cat = ProductCategory::where('invoice_iva_code', $this->iva_type)->first();
+        if( $cat ){
+          $this->product_type = $cat->id;
+        }else{
+          foreach( ProductCategory::get() as $c ) {
+            if (strpos($c->open_codes, $this->iva_type) !== false) {
+              $this->product_type = $c->id;
+            }
+          }
+        }
+      }
+      
+      if($cat == 'Plan') {
+        $this->product_type = 17;
+      }
+    
     }
     
 }

@@ -27,8 +27,7 @@
           <option value="/reportes/resumen-ejecutivo" hideClass=".opt-acumulado" type="iframe" >Resumen ejecutivo</option>
           <option type="post">Reporte de proveedores (Muy pronto)</option>
           <option type="post">Reporte de clientes (Muy pronto)</option>
-          <option type="post">Declaración de IVA (Muy pronto)</option>
-          <option style="display:none;" value="/reportes/borrador-iva" hideClass=".opt-acumulado" type="iframe">Borrador de declaración de IVA (Muy pronto)</option>
+          <option style="" value="/reportes/borrador-iva" hideClass=".opt-acumulado" type="iframe">Borrador de declaración de IVA</option>
         </select>
       </div>
       
@@ -157,7 +156,7 @@
     position: relative;
     width: 67.67rem;
     max-width: 100%;
-    padding-bottom: 4300px;
+    padding-bottom: 9000px;
     overflow: hidden;
 }
 </style>

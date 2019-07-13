@@ -226,10 +226,13 @@ class ReportsController extends Controller
       $prorrataOperativa = $company->getProrrataOperativa($ano);
 
       $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
+      $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
       $nombreMes = Variables::getMonthName($mes);
-      $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
+      $arrayActividades = $company->getActivities();
+      
+      //dd( json_decode($data->iva_data));
 
-      return view('/Reports/reporte-borrador-iva', compact('data', 'ano', 'nombreMes') );
+      return view('/Reports/reporte-borrador-iva', compact('data', 'mes', 'ano', 'nombreMes', 'arrayActividades', 'acumulado') );
       
     }
     

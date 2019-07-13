@@ -108,8 +108,12 @@ class BillController extends Controller
      */
     public function create()
     {
+        $company = currentCompanyModel();
+        
         $units = UnidadMedicion::all()->toArray();
-        return view("Bill/create", ['units' => $units]);
+        $arrayActividades = $company->getActivities();
+        
+        return view("Bill/create", compact('units', 'arrayActividades') );
     }
 
     /**
@@ -158,11 +162,15 @@ class BillController extends Controller
      */
     public function show($id)
     {
+        $company = currentCompanyModel();
+        
         $bill = Bill::findOrFail($id);
-        $units = UnidadMedicion::all()->toArray();
         $this->authorize('update', $bill);
+        
+        $units = UnidadMedicion::all()->toArray();
+        $arrayActividades = $company->getActivities();
       
-        return view('Bill/show', compact('bill', 'units') );
+        return view('Bill/show', compact('bill', 'units', 'arrayActividades') );
     }
 
     /**
@@ -173,6 +181,8 @@ class BillController extends Controller
      */
     public function edit($id)
     {
+        $company = currentCompanyModel();
+        
         $bill = Bill::findOrFail($id);
         $units = UnidadMedicion::all()->toArray();
         $this->authorize('update', $bill);
@@ -181,8 +191,9 @@ class BillController extends Controller
         if( $bill->generation_method != 'M' && $bill->generation_method != 'XLSX' ){
           return redirect('/facturas-recibidas');
         } 
+        $arrayActividades = $company->getActivities();
       
-        return view('Bill/edit', compact('bill', 'units') );
+        return view('Bill/edit', compact('bill', 'units', 'arrayActividades') );
     }
 
     /**
@@ -487,13 +498,6 @@ class BillController extends Controller
         $bill->is_code_validated = true;
         
         $bill->save();
-        
-        Bill::where('id',$request->bill)
-            ->update(['product_category_verification' => $request->category_product,
-                'activity_company_verification' => $request->actividad_comercial,
-                'codigo_iva_verification' => $request->codigo_etax,
-                'identificacion_plena_verification' => $request->impuesto_identificacion_plena,
-                'is_code_validated' => true]);
                 
         foreach( $bill->items as $item ) {
             $item->iva_type = $request->codigo_etax;
@@ -503,6 +507,8 @@ class BillController extends Controller
             }
             $item->save();
         }
+        
+        clearBillCache($bill);
         
         return redirect('/facturas-recibidas/validaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
     }
@@ -524,7 +530,7 @@ class BillController extends Controller
         if( $bill->year == 2018 ) {
             clearLastTaxesCache($bill->company->id, 2018);
         }
-        clearInvoiceCache($bill);
+        clearBillCache($bill);
         
         return redirect('/facturas-recibidas/validaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido validada');
     }
@@ -639,16 +645,16 @@ class BillController extends Controller
                 return "$bill->currency $total";
             })
             ->editColumn('accept_total_factura', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  number_format($bill->accept_total_factura);
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_total_factura;
             })
             ->editColumn('accept_iva_total', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  number_format($bill->accept_iva_total);
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_iva_total;
             })
             ->editColumn('accept_iva_acreditable', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  number_format($bill->accept_iva_acreditable);
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_iva_acreditable;
             })
             ->editColumn('accept_iva_gasto', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  number_format($bill->accept_iva_gasto);
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_iva_gasto;
             })
             ->editColumn('provider', function(Bill $bill) {
                 return $bill->provider->getFullName();
@@ -705,7 +711,7 @@ class BillController extends Controller
                     $company->save();
                     $apiHacienda->acceptInvoice($bill, $tokenApi);
                 }
-                clearInvoiceCache($bill);
+                clearBillCache($bill);
                 return redirect('/facturas-recibidas/aceptaciones')->withMessage('Acceptacion Enviada.');
 
             } else {
@@ -722,6 +728,7 @@ class BillController extends Controller
         $bill = Bill::findOrFail($id);
         $this->authorize('update', $bill);
         
+        $bill->accept_iva_condition = $request->accept_iva_condition ? $request->accept_iva_condition : '02';
         $bill->accept_iva_acreditable = $request->accept_iva_acreditable;
         $bill->accept_iva_gasto = $request->accept_iva_gasto;
         $bill->accept_status = 1;
@@ -729,6 +736,7 @@ class BillController extends Controller
         $bill->accept_id_number = currentCompany();
 
         $bill->save();
+        clearBillCache($bill);
         return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido aceptada');
     }
 

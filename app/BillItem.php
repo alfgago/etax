@@ -18,17 +18,42 @@ class BillItem extends Model
         return $this->belongsTo(Bill::class, 'bill_id');
     }
     
+    public function ivaType() {
+      return $this->belongsTo(CodigoIvaSoportado::class, 'iva_type');
+    }    
+    
     public function fixIvaType() {
-      $initial = $this->iva_type[0];
-      if( $initial != 'S' && $initial != 'B' && 
-          $this->iva_type != '098' && $this->iva_type != '099' ){
-          $um = $this->measure_unit;
-          if($um == 'Sp' || $um == 'Spe' || $um == 'St' || $um == 'Al' || $um == 'Alc' || $um == 'Cm' || $um == 'I' || $um == 'Os'){
-            $this->iva_type = "S$this->iva_type";
+      try{
+        
+        $initial = $this->iva_type[0];
+        if( $initial != 'S' && $initial != 'B' && 
+            $this->iva_type != '098' && $this->iva_type != '099' ){
+            $um = $this->measure_unit;
+            if($um == 'Sp' || $um == 'Spe' || $um == 'St' || $um == 'Al' || $um == 'Alc' || $um == 'Cm' || $um == 'I' || $um == 'Os'){
+              $this->iva_type = "S$this->iva_type";
+            }else{
+              $this->iva_type = "B$this->iva_type";
+            }
+            $this->save();
+        }
+      
+        //Asigna Prod Type;
+        $cat = $this->product_type;
+        if( !$cat ){
+          $cat = ProductCategory::where('bill_iva_code', $this->iva_type)->first();
+          if( $cat ){
+            $this->product_type = $cat->id;
           }else{
-            $this->iva_type = "B$this->iva_type";
+            foreach( ProductCategory::get() as $c ) {
+              if (strpos($c->open_codes, $this->iva_type) !== false) {
+                $this->product_type = $c->id;
+              }
+            }
           }
-          $this->save();
+        }
+        
+      }catch(\Throwable $e){
+        Log::warning('No pudo asignar un codigo de producto a legacy bill. ' . $e->getMessage());
       }
     }
  
