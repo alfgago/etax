@@ -316,8 +316,6 @@ class BridgeHaciendaApi
                     $invoice->save();
                 }
             } else {
-                $invoice->hacienda_status = '05';
-                $invoice->save();
                 return false;
             }
             return $file;
