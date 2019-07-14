@@ -39,7 +39,7 @@ class BillItem extends Model
       
         //Asigna Prod Type;
         $cat = $this->product_type;
-        if( !$cat ){
+        if( !$cat || $cat < 49 ){
           $cat = ProductCategory::where('bill_iva_code', $this->iva_type)->first();
           if( $cat ){
             $this->product_type = $cat->id;

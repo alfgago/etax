@@ -302,7 +302,7 @@ class Bill extends Model
         $bill->payment_type = $medioPago;
         
         //Fechas
-        $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10));
+        $fechaEmision = Carbon::createFromFormat('Y-m-d', subS0tr($arr['FechaEmision'], 0, 10));
         $bill->generated_date = $fechaEmision;
         $bill->due_date = $fechaEmision;
         
@@ -795,15 +795,15 @@ class Bill extends Model
             $this->accept_iva_condition = '05'; //Si exista minimo 1 linea sin identificación específica.
           }
           
-          $bienesCapital = $calc->bB11 + $calc->bB31 + $calc->bB51 + $calc->bB71 + $calc->bB15  + $calc->bB35 +
-             $calc->bB12 + $calc->bB32 + $calc->bB52 + $calc->bB72 +
-             $calc->bB13 + $calc->bB33 + $calc->bB53 + $calc->bB73 + $calc->bB16 + $calc->bB36 +
-             $calc->bB14 + $calc->bB34 + $calc->bB54 + $calc->bB74
+          $bienesCapital = $calc->bB011 + $calc->bB031 + $calc->bB051 + $calc->bB071 + $calc->bB015  + $calc->bB035 +
+             $calc->bB012 + $calc->bB032 + $calc->bB052 + $calc->bB072 +
+             $calc->bB013 + $calc->bB033 + $calc->bB053 + $calc->bB073 + $calc->bB016 + $calc->bB036 +
+             $calc->bB014 + $calc->bB034 + $calc->bB054 + $calc->bB074
              +
-             $calc->bS11 + $calc->bS31 + $calc->bS51 + $calc->bS71 + $calc->bS15  + $calc->bS35 +
-             $calc->bS12 + $calc->bS32 + $calc->bS52 + $calc->bS72 +
-             $calc->bS13 + $calc->bS33 + $calc->bS53 + $calc->bS73 + $calc->bS16 + $calc->bS36 +
-             $calc->bS14 + $calc->bS34 + $calc->bS54 + $calc->bS74;
+             $calc->bS011 + $calc->bS031 + $calc->bS051 + $calc->bS071 + $calc->bS015  + $calc->bS035 +
+             $calc->bS012 + $calc->bS032 + $calc->bS052 + $calc->bS072 +
+             $calc->bS013 + $calc->bS033 + $calc->bS053 + $calc->bS073 + $calc->bS016 + $calc->bS036 +
+             $calc->bS014 + $calc->bS034 + $calc->bS054 + $calc->bS074;
           if( $bienesCapital ) {
             $this->accept_iva_condition = '03'; // Si son propiedad, planta o equipo (Bienes de capital)
           }

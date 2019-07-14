@@ -229,8 +229,6 @@ class ReportsController extends Controller
       $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
       $nombreMes = Variables::getMonthName($mes);
       $arrayActividades = $company->getActivities();
-      
-      //dd( json_decode($data->iva_data));
 
       return view('/Reports/reporte-borrador-iva', compact('data', 'mes', 'ano', 'nombreMes', 'arrayActividades', 'acumulado') );
       

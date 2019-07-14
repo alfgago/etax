@@ -510,7 +510,7 @@ class BillController extends Controller
         
         clearBillCache($bill);
 
-        return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
+        return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
 
     }
     
@@ -688,6 +688,7 @@ class BillController extends Controller
         $this->authorize('update', $bill);
         
         $bill->accept_status = 0;
+        $bill->is_code_validated = false;
         $bill->save();
         return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido incluida para aceptación');
     }

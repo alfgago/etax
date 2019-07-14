@@ -35,6 +35,44 @@ class CalculatedTax extends Model
         return $this->hasOne(Book::class, 'calculated_tax_id');
     }
     
+    public function parsedIvaData() {
+      try{
+        return json_decode($this->iva_data);
+      }catch(\Throwable $e){
+        return false;
+      }
+    }
+    
+    public function applyRatios( $porc, $value ) {
+      
+      $company = currentCompanyModel();
+     
+      $ratio1_operativo = $company->operative_ratio1 / 100;
+      $ratio2_operativo = $company->operative_ratio2 / 100;
+      $ratio3_operativo = $company->operative_ratio3 / 100;
+      $ratio4_operativo = $company->operative_ratio4 / 100;
+      
+      //Redondea ratios a 4 decimales (Al multiplicar por 100, queda en 2)
+      $ratio1_operativo = round($ratio1_operativo, 4);
+      $ratio2_operativo = round($ratio2_operativo, 4);
+      $ratio3_operativo = round($ratio3_operativo, 4);
+      $ratio4_operativo = round($ratio4_operativo, 4);
+      
+      if( $porc = 1 ){
+        return $value*$ratio1_operativo*0.01 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.13 + $value*$ratio4_operativo*0.04 ;
+      }
+      if( $porc = 2 ){
+        return $value*$ratio1_operativo*0.02 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.02 + $value*$ratio4_operativo*0.02 ;
+      }
+      if( $porc = 13 ){
+        return $value*$ratio1_operativo*0.13 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.13 + $value*$ratio4_operativo*0.04 ; 
+      }
+      if( $porc = 4 ){
+        return $value*$ratio1_operativo*0.04 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.04 + $value*$ratio4_operativo*0.04 ; 
+      }
+      
+    }
+    
     
     /**
      * Calcula y devuelve los datos del mes para dashboard y reportes
@@ -303,10 +341,10 @@ class CalculatedTax extends Model
               $ivaData->$bVar += $subtotal;
               $ivaData->$iVar += $invoiceIva;
               
-              $typeVar = "type$prodType";
-              $typeVarPorc = "type$prodType-$prodPorc";
-              $typeVarActividad = $currActivity."-".$typeVar;
-              $typeVarPorcActividad = $currActivity."-".$typeVarPorc;
+              $typeVar = "type$prodType"; //Ej. type103
+              $typeVarPorc = "type$prodType-$prodPorc"; //Ej. type103-4
+              $typeVarActividad = $currActivity."-".$typeVar; //Ej. 706903-type103
+              $typeVarPorcActividad = $currActivity."-".$typeVarPorc; //Ej. 706903-type103-4
               
               if(!isset($ivaData->$typeVar)) {
                 $ivaData->$typeVar = 0;
@@ -324,7 +362,6 @@ class CalculatedTax extends Model
               $ivaData->$typeVarPorc += $subtotal;
               $ivaData->$typeVarActividad += $subtotal;
               $ivaData->$typeVarPorcActividad += $subtotal;
-              
             }
             
           }catch( \Exception $ex ){
@@ -413,6 +450,7 @@ class CalculatedTax extends Model
               $billIva = round($billIva, 2);
               $currentTotal = round($currentTotal, 2);
               
+                
               $ivaType = $ivaType ? $ivaType : '003';
               $ivaType = str_pad($ivaType, 3, '0', STR_PAD_LEFT);
               
