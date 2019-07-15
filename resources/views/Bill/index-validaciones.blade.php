@@ -40,7 +40,6 @@
                 </tr>
               @endforeach
             @endif
-
           </tbody>
         </table>
         {{ $bills->links() }}
@@ -52,7 +51,6 @@
 @section('footer-scripts')
 
 <style>
-
 	form.inline-form.validaciones,
 	form.inline-form.validaciones .input-validate-iva, 
 	form.inline-form.validaciones .input-validate-iva select {
