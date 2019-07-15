@@ -27,7 +27,7 @@
 		              <tr>
 		                <td>{{ $item->bill->generatedDate()->format('d/m/Y') }}</td>
 		                <td>{{ $item->bill->provider->getFullName() }}</td>
-		                <td>{{ @$item->bill->provider->activity_company_verification ?? 'No indica' }}</td>
+		                <td>{{ @$item->bill->activity_company_verification ?? 'No indica' }}</td>
 		                <td>{{ $item->bill->document_number }}</td>
 		                <td>{{ $item->item_number }}</td>
 		                <td>{{ $item->name }}</td>

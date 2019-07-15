@@ -715,7 +715,7 @@ class BillController extends Controller
                     $apiHacienda->acceptInvoice($bill, $tokenApi);
                 }
                 clearBillCache($bill);
-                return redirect('/facturas-recibidas/aceptaciones')->withMessage('Acceptacion Enviada.');
+                return redirect('/facturas-recibidas/aceptaciones')->withMessage('Aceptación enviada.');
 
             } else {
                 return back()->withError( 'Ha ocurrido un error al enviar factura.' );

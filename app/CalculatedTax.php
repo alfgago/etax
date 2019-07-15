@@ -58,19 +58,21 @@ class CalculatedTax extends Model
       $ratio3_operativo = round($ratio3_operativo, 4);
       $ratio4_operativo = round($ratio4_operativo, 4);
       
-      if( $porc = 1 ){
-        return $value*$ratio1_operativo*0.01 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.13 + $value*$ratio4_operativo*0.04 ;
+      $applied = 0;
+      if( $porc == 1 ){
+        $applied =  $value*$ratio1_operativo*0.01 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.13 + $value*$ratio4_operativo*0.04 ;
       }
-      if( $porc = 2 ){
-        return $value*$ratio1_operativo*0.02 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.02 + $value*$ratio4_operativo*0.02 ;
+      if( $porc == 2 ){
+        $applied =  $value*$ratio1_operativo*0.02 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.02 + $value*$ratio4_operativo*0.02 ;
       }
-      if( $porc = 13 ){
-        return $value*$ratio1_operativo*0.13 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.13 + $value*$ratio4_operativo*0.04 ; 
+      if( $porc == 13 ){
+        $applied =  $value*$ratio1_operativo*0.13 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.13 + $value*$ratio4_operativo*0.04 ; 
       }
-      if( $porc = 4 ){
-        return $value*$ratio1_operativo*0.04 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.04 + $value*$ratio4_operativo*0.04 ; 
+      if( $porc == 4 ){
+        $applied =  $value*$ratio1_operativo*0.04 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.04 + $value*$ratio4_operativo*0.04 ; 
       }
       
+      return $applied;
     }
     
     
@@ -88,7 +90,7 @@ class CalculatedTax extends Model
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
       
-      //if ( !Cache::has($cacheKey) ) {
+      if ( !Cache::has($cacheKey) ) {
           
           //Busca el calculo del mes en Base de Datos.
           $data = CalculatedTax::firstOrNew(
@@ -130,7 +132,7 @@ class CalculatedTax extends Model
             
           Cache::put($cacheKey, $data, now()->addDays(120));
           
-      //}
+      }
       
       $data = Cache::get($cacheKey);
       return $data;
@@ -341,10 +343,10 @@ class CalculatedTax extends Model
               $ivaData->$bVar += $subtotal;
               $ivaData->$iVar += $invoiceIva;
               
-              $typeVar = "type$prodType"; //Ej. type103
-              $typeVarPorc = "type$prodType-$prodPorc"; //Ej. type103-4
-              $typeVarActividad = $currActivity."-".$typeVar; //Ej. 706903-type103
-              $typeVarPorcActividad = $currActivity."-".$typeVarPorc; //Ej. 706903-type103-4
+              $typeVar = "type$prodType"; //Ej. type17
+              $typeVarPorc = "type$prodType-$prodPorc"; //Ej. type17-4
+              $typeVarActividad = $currActivity."-".$typeVar; //Ej. 706903-type17
+              $typeVarPorcActividad = $currActivity."-".$typeVarPorc; //Ej. 706903-type17-4
               
               if(!isset($ivaData->$typeVar)) {
                 $ivaData->$typeVar = 0;
@@ -362,6 +364,7 @@ class CalculatedTax extends Model
               $ivaData->$typeVarPorc += $subtotal;
               $ivaData->$typeVarActividad += $subtotal;
               $ivaData->$typeVarPorcActividad += $subtotal;
+              
             }
             
           }catch( \Exception $ex ){
@@ -426,7 +429,6 @@ class CalculatedTax extends Model
               if( $billItems[$i]->bill->currency == 'CRC' ) {
                 $billItems[$i]->bill->currency_rate = 1;
               }
-            
               //Arrela el IVATYPE la primera vez en caso de ser codigos anteriores.
               $billItems[$i]->fixIvaType();
               
@@ -582,6 +584,7 @@ class CalculatedTax extends Model
         }
         
       });
+              
       
       $this->iva_data = json_encode( $ivaData );
       $this->count_bills = $countBills;

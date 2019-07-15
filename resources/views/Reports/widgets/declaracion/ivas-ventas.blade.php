@@ -24,19 +24,19 @@
 	<tr class="true-blocked">
 	  <th>Impuesto generado por operaciones gravadas</th>
 	  <td>
-	  	<input readonly value="{{ number_format( $ventas1, 0 ) }}"/>
+	  	<input readonly value="{{ number_format( $ventas13, 0 ) }}"/>
 	  </td>
 	  <td>
 	  	<input readonly value="{{ number_format( 0, 0 ) }}"/>
 	  </td>
 	  <td>
+	  	<input readonly value="{{ number_format( $ventas4, 0 ) }}"/>
+	  </td>
+	  <td>
 	  	<input readonly value="{{ number_format( $ventas2, 0 ) }}"/>
 	  </td>
 	  <td>
-	  	<input readonly value="{{ number_format( $ventas13, 0 ) }}"/>
-	  </td>
-	  <td>
-	  	<input readonly value="{{ number_format( $ventas4, 0 ) }}" />
+	  	<input readonly value="{{ number_format( $ventas1, 0 ) }}" />
 	  </td>
 	  <td>
 	  	<input readonly value="{{ number_format( $ventasTotal, 0 ) }}" />
@@ -44,24 +44,24 @@
 	</tr>
 	
 	<tr class="sub-title desplegar-false">
-    <th class="marcar-td" colspan="2">
+    <th class="marcar-td" colspan="1">
   		<span class="marcar">
   			¿Aplica?
   			<span class="si">Sí</span>
   			<span class="no">No</span>
   		</span>
     </th>
-  	<th colspan="5">Casinos y juegos de azar</th>
+  	<th colspan="6">Casinos y juegos de azar</th>
   </tr>
 	<tr class="sub-title desplegar-false">
-    <th class="marcar-td" colspan="2">
+    <th class="marcar-td" colspan="1">
   		<span class="marcar">
   			¿Aplica?
   			<span class="si">Sí</span>
   			<span class="no">No</span>
   		</span>
     </th>
-  	<th colspan="5">Bienes usados</th>
+  	<th colspan="6">Bienes usados</th>
   </tr>
 	
 	</tbody>

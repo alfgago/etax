@@ -101,6 +101,11 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'S090 - Importaciones de servicios con IVA no acreditable desde origen', 'codigo'=>'S090', 'porcentaje'=>'0', 'is_servicio'=>true, 'is_gravado'=>false],
           ['nombre'=>'S097 - Compras de servicios con IVA no acreditable por gastos no deducibles', 'codigo'=>'S097', 'porcentaje'=>'0', 'is_servicio'=>true, 'is_gravado'=>false],
           
+          ['nombre'=>'B091 - Compras de bienes con IVA no acreditable desde origen', 'codigo'=>'B091', 'porcentaje'=>'1', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'B092 - Compras de bienes con IVA no acreditable desde origen', 'codigo'=>'B092', 'porcentaje'=>'2', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'B093 - Compras de bienes con IVA no acreditable desde origen', 'codigo'=>'B093', 'porcentaje'=>'13', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'B094 - Compras de bienes con IVA no acreditable desde origen', 'codigo'=>'B094', 'porcentaje'=>'4', 'is_bienes'=>true, 'is_gravado'=>true],
+          
           ['nombre'=>'098 - Inversion del sujeto pasivo base', 'codigo'=>'098', 'porcentaje'=>'0', 'is_gravado'=>false],
           ['nombre'=>'099 - Inversion del sujeto pasivo base no acreditable', 'codigo'=>'099', 'porcentaje'=>'0', 'is_gravado'=>false]
         ];

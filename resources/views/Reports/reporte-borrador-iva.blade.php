@@ -122,26 +122,30 @@
 			}
 			
 			h2.card-subtitle {
-			    font-size: 2.5rem;
+			    font-size: 2.1rem;
 			    margin-bottom: 1rem;
-			    margin-top: 1.5rem;
+			    margin-top: 2rem;
 			    display: inline-block;
 			}
 			
 			h3.card-subtitle {
-			    font-size: 1.25rem;
+			    font-size: 2rem;
 			    margin-bottom: 1.25rem;
 			    margin-top: 1rem;
 			    border-bottom: 0.45rem solid #ccc;
 			    display: inline-block;
-					margin-bottom: 0;
+			    margin-bottom: .5rem !important;
 			    border: 0;
-			    padding-bottom: .5rem;
+			    padding: .5rem 1rem;
+			    background: #000;
+			    color: #fff;
+			    width: 100%;
 			}
 			
 			.declaracion-content {
 				border: 5px solid #ccc;
 				padding: .5rem;
+				margin-top: .5rem;
 			}
 
 			tr.header-tarifas {
@@ -208,10 +212,10 @@
 			}
 			
 			
-			.borrador-presentacion input,
-			.true input {
+			.borrador-presentacion input, .true input {
 			    background: #f5f5f5;
 			    border: 1px solid #000;
+			    padding: .25rem 1em;
 			}
 			
 			.false {
@@ -226,6 +230,21 @@
 			.true-blocked input {
 			    background: #ddd;
 			    border: 1px solid #000;
+			}
+						
+			.borrador-presentacion .macro-title th,
+			.borrador-presentacion.ivas-table.bigtext th.posrel {
+			    position: relative !important;
+			    padding-right: 12rem !important;
+			}
+			
+			.borrador-presentacion .macro-title input,
+			.borrador-presentacion .sub-title input {
+			    position:absolute;
+			    width: 11rem;
+			    top: 50%;
+			    transform: translateY(-50%);
+			    right: .4rem;
 			}
 			
           table tr
@@ -284,18 +303,18 @@
 						  <div class="col-sm-12 pl-0 pr-0">
 						  	
 						  	<h2 class="card-subtitle">Consolidado de compras y ventas</h2>
-						  	@foreach( $arrayActividades as $act )
+						  	@foreach( $actividadDataArray as $actividad )
 						  		<div class="declaracion-content">
-						  			<h3 class="card-subtitle m-0">Actividad comercial: {{ $act->codigo }} - {{ $act->actividad }}</h3>
-						  			@include('Reports.widgets.declaracion.loop-actividades', ['actividad' => $act->codigo, 'data' => $data])	
+						  			<h3 class="card-subtitle m-0">Actividad comercial: {{ $actividad['codigo'] }} - {{ $actividad['titulo'] }}</h3>
+						  			@include('Reports.widgets.declaracion.loop-actividades', ['actividad' => $actividad])	
 						  		</div>
 						  	@endforeach
 						  	
 						  	<h2 class="card-subtitle sub2">Impuesto por ventas y transacciones sujetas</h2>
-						  	@include('Reports.widgets.declaracion.ivas-compras', ['data' => $data])	
+						  	@include('Reports.widgets.declaracion.ivas-ventas', ['data' => $data])	
 						  	
 						  	<h2 class="card-subtitle sub2">Créditos fiscales generados por compras</h2>
-						  	@include('Reports.widgets.declaracion.ivas-ventas', ['data' => $data])	
+						  	@include('Reports.widgets.declaracion.ivas-compras', ['data' => $data])	
 						  	
 						  	<h2 class="card-subtitle sub2">Estimación y liquidación anual de la proporcionalidad</h2>
 						  	@include('Reports.widgets.declaracion.estimacion-liquidacion', ['data' => $data])	

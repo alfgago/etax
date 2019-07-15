@@ -768,10 +768,9 @@ class Bill extends Model
           $lastBalance = 0;
           $query = BillItem::with('bill')->where('bill_id', $this->id);
           //$calc->setDatosEmitidos( $this->month, $this->year, $company->id );
-          $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query );
+          $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query, true );
           $calc->setCalculosPorFactura( $prorrataOperativa, $lastBalance );
-          
-          
+
           $this->accept_iva_acreditable = $calc->iva_deducible_operativo;
           $this->accept_iva_gasto = $calc->iva_no_deducible;
           $this->accept_iva_total = $calc->total_bill_iva;

@@ -59,10 +59,16 @@
 	    <th>Saldo deudor en aplicación del porcentaje de la liquidación final</th>
 	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->iva_por_pagar, 0) }}" > </td>
 	  </tr>
-	  
-	  
+	</tbody>
+</table>
+
+
+
+<h2 class="card-subtitle sub2">Determinación del impuesto por operaciones gravadas del periodo</h2>
+<table class="text-12 text-muted m-0 p-2 ivas-table bigtext borrador-presentacion" style="width:100%;">
+	<tbody>	  
 		<tr class="macro-title">
-	    <th colspan="6">Determinación del impuesto por operaciones gravadas del periodo</th>
+	    <th colspan="6"></th>
 	  </tr>
 	  <tr class="header-tarifas">
 	    <th>Detalle</th>
@@ -102,12 +108,18 @@
 	  </tr>
 	 	<tr>
 	    <th>Impuesto final</th>
-	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->numerador_prorrata, 0) }}" > </td>
+	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->iva_por_pagar, 0) }}" > </td>
 	  </tr>
 	  
-	  
+	</tbody>
+</table>
+
+
+<h2 class="card-subtitle sub2">Liquidación deuda tributaria</h2>
+<table class="text-12 text-muted m-0 p-2 ivas-table bigtext borrador-presentacion" style="width:100%;">
+	<tbody>
 		<tr class="macro-title">
-	    <th colspan="6">Liquidación deuda tributaria</th>
+	    <th colspan="6"></th>
 	  </tr>
 	  <tr class="header-tarifas">
 	    <th>Detalle</th>
