@@ -13,12 +13,12 @@
     
     <div class="form-group col-md-6">
       <label for="codigo">Código</label>
-      <input type="text" class="form-control" id="codigo" value="" >
+      <input type="text" class="form-control" id="codigo" value="" maxlength="20">
     </div>
 
     <div class="form-group col-md-6">
       <label for="nombre">Nombre / Descripción</label>
-      <input type="text" class="form-control" id="nombre" value="" >
+      <input type="text" class="form-control" id="nombre" value="" maxlength="200">
     </div>
     
     <div class="form-group col-md-12">
@@ -131,3 +131,39 @@
 
   </div>
 </div>
+<script>
+    $(function () {
+        $("#cantidad").keydown(function () {
+            // Save old value.
+            if (!$(this).val() || parseInt($(this).val()) >= 0)
+                $(this).data("old", $(this).val());
+        });
+        $("#cantidad").keyup(function () {
+            // Check correct, else revert back to old value.
+            if (!$(this).val() ||  parseInt($(this).val()) >= 0)
+                ;
+            else
+                $(this).val($(this).data("old"));
+        });
+        $("#precio_unitario").keydown(function () {
+            // Save old value.
+            if (!$(this).val() || parseInt($(this).val()) >= 0)
+                $(this).data("old1", $(this).val());
+        });
+        $("#precio_unitario").keyup(function () {
+            // Check correct, else revert back to old value.
+            if (!$(this).val() ||  parseInt($(this).val()) >= 0)
+                ;
+            else
+                $(this).val($(this).data("old1"));
+        });
+        $('#item_iva_amount').change(function () {
+            if (!$(this).val() || parseInt($(this).val()) >= 0)
+                $(this).data("old2", $(this).val());
+            else if (!$(this).val() ||  parseInt($(this).val()) >= 0)
+                ;
+            else
+                $(this).val($(this).data("old2"));
+        })
+    });
+</script>

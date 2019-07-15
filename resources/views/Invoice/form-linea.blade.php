@@ -16,7 +16,7 @@
             <label for="codigo">Código de producto</label>
             <div class="form-row">
                 <div class="col-md-8">
-                    <input type="text" class="form-control" id="codigo" name="code">
+                    <input type="text" class="form-control" id="codigo" name="code" maxlength="13">
                 </div>
                 <div class="col-md-3 pull-left-1" style="margin-left: -1em !important;">
                     <div class="btn btn-agregar btn-agregar-cliente" onclick="buscarProducto();">Buscar</div>
@@ -26,13 +26,13 @@
     </div>
     <div class="form-group col-md-6">
         <label for="nombre">Nombre / Descripción</label>
-        <input type="text" class="form-control" id="nombre" value="" name="description">
+        <input type="text" class="form-control" id="nombre" value="" name="description" maxlength="200">
     </div>
 
     <?php if( @$document_type == "09"){ ?>
         <div class="form-group col-md-4">
             <label for="nombre">Partida Arancelaria</label>
-            <input type="text" class="form-control" id="tariff_heading" value="">
+            <input type="text" class="form-control" id="tariff_heading" value="" maxlength="12">
         </div>
     <?php
       $class = 'form-group col-md-8';
@@ -168,11 +168,11 @@
             
             <div class="form-group col-md-6">
                 <label for="numeroDocumento">N&uacute;mero Documento de Exoneraci&oacute;n *</label>
-                <input type="text" class="form-control" id="numeroDocumento" placeholder="">
+                <input type="text" class="form-control" id="numeroDocumento" placeholder="" maxlength="40">
             </div>
             <div class="form-group col-md-6">
                 <label for="nombreInstitucion">Nombre de Instituci&oacute;n *</label>
-                <input type="text" class="form-control" id="nombreInstitucion" placeholder="">
+                <input type="text" class="form-control" id="nombreInstitucion" placeholder="" maxlength="160">
             </div>
 
             <div class="form-group col-md-6">
@@ -185,15 +185,15 @@
                 </div>
             </div>
 
-            <div class="form-group col-md-1">
+            <div class="form-group col-md-2">
                 <label for="porcentajeExoneracion">% *</label>
-                <input type="text" class="form-control" id="porcentajeExoneracion" placeholder="%" onkeyup="calcularMontoExoneracion();">
+                <input type="number" class="form-control" max="100" min="0" maxlength="3" id="porcentajeExoneracion" placeholder="0%" onkeyup="calcularMontoExoneracion();">
             </div>
             <div class="form-group col-md-3">
                 <label for="montoExoneracion">Monto Exonerado *</label>
                 <input type="text" class="form-control" id="montoExoneracion"  readonly>
             </div>
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-3">
                 <label for="impuestoNeto">Impuesto Neto </label>
                 <input type="text" class="form-control" id="impuestoNeto"  readonly>
             </div>
@@ -217,5 +217,57 @@
 
   </div>
 </div>
+<script>
+    $(function () {
+        $("#porcentajeExoneracion").keydown(function () {
+            // Save old value.
+            if (!$(this).val() || (parseInt($(this).val()) <= 100 && parseInt($(this).val()) >= 0))
+                $(this).data("old", $(this).val());
+        });
+        $("#porcentajeExoneracion").keyup(function () {
+            // Check correct, else revert back to old value.
+            if (!$(this).val() || (parseInt($(this).val()) <= 100 && parseInt($(this).val()) >= 0))
+                ;
+            else
+                $(this).val($(this).data("old"));
+        });
+        $("#cantidad").keydown(function () {
+            // Save old value.
+            if (!$(this).val() ||  parseInt($(this).val()) > 0)
+                $(this).data("old", $(this).val());
+        });
+        $("#cantidad").keyup(function () {
+            // Check correct, else revert back to old value.
+            if (!$(this).val() ||  parseInt($(this).val()) > 0)
+                ;
+            else
+                $(this).val($(this).data("old"));
+        });
+        $("#precio_unitario").keydown(function () {
+            // Save old value.
+            if (!$(this).val() ||  parseInt($(this).val()) > 0)
+                $(this).data("old", $(this).val());
+        });
+        $("#precio_unitario").keyup(function () {
+            // Check correct, else revert back to old value.
+            if (!$(this).val() ||  parseInt($(this).val()) > 0)
+                ;
+            else
+                $(this).val($(this).data("old"));
+        });
+        $("#item_iva_amount").change(function () {
+            // Save old value.
+            if (!$(this).val() ||  parseInt($(this).val()) > 0)
+                $(this).data("old", $(this).val());
+        });
+        $("#item_iva_amount").change(function () {
+            // Check correct, else revert back to old value.
+            if (!$(this).val() ||  parseInt($(this).val()) > 0)
+                ;
+            else
+                $(this).val($(this).data("old"));
+        });
+    });
+</script>
 
 
