@@ -223,8 +223,6 @@ class ReportsController extends Controller
     }
     
     public function reporteBorradorIVA( Request $request ) {
-      
-     
         $ano = $request->ano ? $request->ano : 2019;
         $mes = $request->mes ? $request->mes : 7;
         
@@ -236,6 +234,10 @@ class ReportsController extends Controller
         $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
         $nombreMes = Variables::getMonthName($mes);
         $arrayActividades = $company->getActivities();
+        
+        if( !$data->book ) {
+          return view('/Reports/no-data', compact('nombreMes') );
+        }
         
         $actividadDataArray = array();
         foreach( $arrayActividades as $act ){
