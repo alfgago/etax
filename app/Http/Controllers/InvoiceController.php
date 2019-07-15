@@ -261,14 +261,23 @@ class InvoiceController extends Controller
     public function EnviarProgramadas(){
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $date_Today = $start_date->format('Y-m-d'); 
-        $date_Today = '2019-07-13';
+        $day = $start_date->format('d');
+        //dd($day);
+        $dayOfTheWeek = $start_date->dayOfWeek;
+        $recurrentes = RecurringInvoices::where('frecuency',1)->where('send_date','!=',$date_Today)->where('options',$dayOfTheWeek)
+            ->get();
+        $recurrentes = RecurringInvoices::where('frecuency',2)->where('send_date','!=',$date_Today)->whereIn($day,'[15,25]')
+            ->get();
+        dd($recurrentes);
+        $recurrentes = RecurringInvoices::where('frecuency',3)->where('send_date','!=',$date_Today)->where('options',$day)
+            ->get();
         $pre_invoices = ScheduledInvoices::join('pre_invoices','pre_invoices.id','scheduled_invoices.pre_invoice_id')
                 ->where('send_date',$date_Today)->get();
         foreach ($pre_invoices as $invoice ) {
-            //$this->sendHacienda(json_decode($invoice->body));
+            //$retorno = $this->sendHacienda(json_decode($invoice->body));
+            //dd(json_decode($invoice->body));
         }
-        
-        dd($pre_invoices);  
+        //dd($pre_invoices);                                                 
     }
 
 
@@ -302,16 +311,34 @@ class InvoiceController extends Controller
 
            
             RecurringInvoices::insert([
-                    ['pre_invoice_id' => $pre_invoices->id,
-                     'company_id' => $company->id,
-                     'frecuency' => $request->frecuencia,
-                     'options' => $request->opciones_recurrencia,
-                     'status' => 1,
-                    'created_at' => $start_date]
-                ]);
+                ['pre_invoice_id' => $pre_invoices->id,
+                'company_id' => $company->id,
+                'frecuency' => $request->frecuencia,
+                'options' => $request->opciones_recurrencia,
+                'status' => 1,
+                'created_at' => $start_date,
+                'send_date' => $request->fecha_envio]
+            ]);
         }
         if($request->fecha_envio == $date_Today){
-            return $this->sendHacienda($request);
+          /*  try {
+                Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
+            */    $request->validate([
+                    'subtotal' => 'required',
+                    'items' => 'required',
+                ]);
+                $retorno = $this->sendHacienda($request);
+                
+                if($retorno == true){
+                     return redirect('/facturas-emitidas');
+                } else {
+                    return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+                }
+
+           /* } catch( \Exception $ex ) {
+                Log::error("ERROR Envio de factura a hacienda -> ".$ex->getMessage());
+                return back()->withError( 'Ha ocurrido un error al enviar fddddactura.' );
+            }*/
         }else{
             ScheduledInvoices::insert([
                 ['pre_invoice_id' => $pre_invoices->id,
@@ -333,12 +360,7 @@ class InvoiceController extends Controller
     public function sendHacienda($request)
     {
         //revision de branch para segmentacion de funcionalidades por tipo de documento
-        try {
-            Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
-            $request->validate([
-                'subtotal' => 'required',
-                'items' => 'required',
-            ]);
+        
 
             $apiHacienda = new BridgeHaciendaApi();
             $tokenApi = $apiHacienda->login(false);
@@ -387,14 +409,10 @@ class InvoiceController extends Controller
                 }
                 clearInvoiceCache($invoice);
 
-                return redirect('/facturas-emitidas');
+                return true;
             } else {
-                return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+                return false;
             }
-        } catch( \Exception $ex ) {
-            Log::error("ERROR Envio de factura a hacienda -> ".$ex->getMessage());
-            return back()->withError( 'Ha ocurrido un error al enviar factura.' );
-        }
     }
 
     /**
