@@ -30,6 +30,11 @@ class ReportsController extends Controller
     public function dashboard() {
       
       $user = auth()->user();
+      
+      if (strpos($user->email, '.ru') !== false) {
+            return redirect('127.0.0.1');
+      }
+      
       if( !$user->has_klap_user ) {
           $user->createKlapUser();
       }
