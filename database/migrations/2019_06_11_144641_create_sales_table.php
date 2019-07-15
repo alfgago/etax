@@ -19,7 +19,7 @@ class CreateSalesTable extends Migration
             $table->unsignedBigInteger('company_id')->default(0);
             $table->unsignedBigInteger('etax_product_id')->nullable();
 
-            //1 = Activo, 2 = Activo con pago pendiente, 3 = Inactivo, 4 = Cancelado
+            //1 = Activo, 2 = Activo con pago pendiente, 3 = Inactivo, 4 = En periodo de pruebas
             $table->enum('status', ['1', '2', '3', '4'])->default(1);
 
             //1 = Activo, 2 = Activo con pago pendiente, 3 = Inactivo, 4 = Cancelado

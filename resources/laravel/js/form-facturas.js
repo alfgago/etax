@@ -304,13 +304,13 @@
     $('#item_id').val( item.find('.item_id ').val() );
     $('#codigo').val( item.find('.codigo ').val() );
     $('#nombre').val( item.find('.nombre ').val() );
-    $('#tipo_producto').val( item.find('.tipo_producto ').val() );
+    $('#tipo_producto').val( item.find('.tipo_producto ').val() ).change();
     $('#discount').val( item.find('.discount ').val() );
     $('#discount_type').val( item.find('.discount_type ').val() );
     $('#cantidad').val( item.find('.cantidad ').val() );
     $('#unidad_medicion').val( item.find('.unidad_medicion ').val() );
     $('#precio_unitario').val( item.find('.precio_unitario ').val() );
-    $('#tipo_iva').val( item.find('.tipo_iva ').val() );
+    $('#tipo_iva').val( item.find('.tipo_iva ').val() ).change();
     $('#item_subtotal').val( item.find('.subtotal ').val() );
     $('#porc_iva').val( item.find('.porc_iva ').val() );
     $('#item_iva_amount').val( item.find('.monto_iva ').val() );
