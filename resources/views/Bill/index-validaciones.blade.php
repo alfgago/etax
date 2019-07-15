@@ -5,6 +5,7 @@
 @endsection
 
 @section('breadcrumb-buttons')
+    <a  class="btn btn-primary" href="/facturas-recibidas/aceptaciones">Aceptación de facturas</a>
     <div onclick="abrirPopup('importar-recibidas-popup');" class="btn btn-primary">Importar facturas recibidas</div>
 @endsection 
 

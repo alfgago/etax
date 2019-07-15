@@ -33,6 +33,11 @@ class Bill extends Model
         return $this->belongsTo(Provider::class);
     }
     
+    public function activity()
+    {
+        return $this->belongsTo(Actividades::class, 'activity_company_verification');
+    }
+    
     public function providerName() {
       if( isset($this->provider_id) ) {
         return $this->provider->getFullName();
@@ -167,6 +172,28 @@ class Bill extends Model
       
       $this->year = $fecha->year;
       $this->month = $fecha->month;
+      
+      if( $request->xml_schema ){
+        $this->xml_schema = $request->xml_schema;
+      }
+      if( $request->activity_company_verification ){
+        $this->activity_company_verification = $request->activity_company_verification;
+      }
+      
+      $this->accept_status = $request->accept_status ? 1 : 0;
+      if( !$this->accept_status ) {
+        $this->is_code_validated = false;
+      }
+      
+      if( $request->accept_iva_condition ){
+        $this->accept_iva_condition = $request->accept_iva_condition;
+      }
+      if( $request->accept_iva_acreditable ){
+        $this->accept_iva_acreditable = $request->accept_iva_acreditable;
+      }
+      if( $request->accept_iva_gasto ){
+        $this->accept_iva_gasto = $request->accept_iva_gasto;
+      }
     
       $this->save();
     
@@ -275,7 +302,7 @@ class Bill extends Model
         $bill->payment_type = $medioPago;
         
         //Fechas
-        $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10));
+        $fechaEmision = Carbon::createFromFormat('Y-m-d', subS0tr($arr['FechaEmision'], 0, 10));
         $bill->generated_date = $fechaEmision;
         $bill->due_date = $fechaEmision;
         
@@ -741,9 +768,9 @@ class Bill extends Model
           $lastBalance = 0;
           $query = BillItem::with('bill')->where('bill_id', $this->id);
           //$calc->setDatosEmitidos( $this->month, $this->year, $company->id );
-          $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query );
+          $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query, true );
           $calc->setCalculosPorFactura( $prorrataOperativa, $lastBalance );
-          
+
           $this->accept_iva_acreditable = $calc->iva_deducible_operativo;
           $this->accept_iva_gasto = $calc->iva_no_deducible;
           $this->accept_iva_total = $calc->total_bill_iva;
@@ -767,10 +794,15 @@ class Bill extends Model
             $this->accept_iva_condition = '05'; //Si exista minimo 1 linea sin identificación específica.
           }
           
-          $bienesCapital = $calc->b011 + $calc->b031 + $calc->b051 + $calc->b071 + $calc->b015  + $calc->b035 +
-             $calc->b012 + $calc->b032 + $calc->b052 + $calc->b072 +
-             $calc->b013 + $calc->b033 + $calc->b053 + $calc->b073 + $calc->b016 + $calc->b036 +
-             $calc->b014 + $calc->b034 + $calc->b054 + $calc->b074;
+          $bienesCapital = $calc->bB011 + $calc->bB031 + $calc->bB051 + $calc->bB071 + $calc->bB015  + $calc->bB035 +
+             $calc->bB012 + $calc->bB032 + $calc->bB052 + $calc->bB072 +
+             $calc->bB013 + $calc->bB033 + $calc->bB053 + $calc->bB073 + $calc->bB016 + $calc->bB036 +
+             $calc->bB014 + $calc->bB034 + $calc->bB054 + $calc->bB074
+             +
+             $calc->bS011 + $calc->bS031 + $calc->bS051 + $calc->bS071 + $calc->bS015  + $calc->bS035 +
+             $calc->bS012 + $calc->bS032 + $calc->bS052 + $calc->bS072 +
+             $calc->bS013 + $calc->bS033 + $calc->bS053 + $calc->bS073 + $calc->bS016 + $calc->bS036 +
+             $calc->bS014 + $calc->bS034 + $calc->bS054 + $calc->bS074;
           if( $bienesCapital ) {
             $this->accept_iva_condition = '03'; // Si son propiedad, planta o equipo (Bienes de capital)
           }
