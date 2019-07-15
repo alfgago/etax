@@ -262,28 +262,73 @@ class InvoiceController extends Controller
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $date_Today = $start_date->format('Y-m-d'); 
         $day = $start_date->format('d');
+        $mes = $start_date->format('m');
+        $compare_year = $day.'/'.$mes;
         //dd($day);
         $dayOfTheWeek = $start_date->dayOfWeek;
         $recurrentes = RecurringInvoices::where('frecuency',1)->where('send_date','!=',$date_Today)->where('options',$dayOfTheWeek)
             ->get();
-        $recurrentes = RecurringInvoices::where('frecuency',2)->where('send_date','!=',$date_Today)->whereIn($day,'[15,25]')
-            ->get();
-        dd($recurrentes);
+        foreach ($recurrentes as $recurrente) {
+            ScheduledInvoices::insert([
+                ['pre_invoice_id' => $recurrente->pre_invoice_id,
+                'company_id' => $recurrente->company_id,
+                'send_date' => $date_Today,
+                'status' => 1,
+                'created_at' => $start_date]
+            ]);
+             
+        }
+        $recurrentes = RecurringInvoices::where('frecuency',2)->where('send_date','!=',$date_Today)->get();
+        foreach ($recurrentes as $recurrente) {
+            $options = explode(",", $recurrente->options);
+            foreach ($options as $option) {
+                if($day == $option){
+                    ScheduledInvoices::insert([
+                        ['pre_invoice_id' => $recurrente->pre_invoice_id,
+                        'company_id' => $recurrente->company_id,
+                        'send_date' => $date_Today,
+                        'status' => 1,
+                        'created_at' => $start_date]
+                    ]);
+                }
+            }
+        }
         $recurrentes = RecurringInvoices::where('frecuency',3)->where('send_date','!=',$date_Today)->where('options',$day)
             ->get();
+        foreach ($recurrentes as $recurrente) {
+            ScheduledInvoices::insert([
+                ['pre_invoice_id' => $recurrente->pre_invoice_id,
+                'company_id' => $recurrente->company_id,
+                'send_date' => $date_Today,
+                'status' => 1,
+                'created_at' => $start_date]
+            ]);
+             
+        }
+        $recurrentes = RecurringInvoices::where('frecuency',8)->where('send_date','!=',$date_Today)->where('options',$compare_year)
+            ->get();
+        foreach ($recurrentes as $recurrente) {
+            ScheduledInvoices::insert([
+                ['pre_invoice_id' => $recurrente->pre_invoice_id,
+                'company_id' => $recurrente->company_id,
+                'send_date' => $date_Today,
+                'status' => 1,
+                'created_at' => $start_date]
+            ]);
+             
+        }
         $pre_invoices = ScheduledInvoices::join('pre_invoices','pre_invoices.id','scheduled_invoices.pre_invoice_id')
                 ->where('send_date',$date_Today)->get();
         foreach ($pre_invoices as $invoice ) {
-            //$retorno = $this->sendHacienda(json_decode($invoice->body));
+            $retorno = $this->sendHacienda(json_decode($invoice->body));
             //dd(json_decode($invoice->body));
         }
-        //dd($pre_invoices);                                                 
+        dd($pre_invoices);                                                 
     }
 
 
     public function GuardarInvoice(Request $request){
         $company = currentCompanyModel();
-
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $date_Today = $start_date->format('Y-m-d');   
         $pre_invoices_create = 0;
@@ -321,9 +366,9 @@ class InvoiceController extends Controller
             ]);
         }
         if($request->fecha_envio == $date_Today){
-          /*  try {
+            try {
                 Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
-            */    $request->validate([
+                $request->validate([
                     'subtotal' => 'required',
                     'items' => 'required',
                 ]);
@@ -335,10 +380,10 @@ class InvoiceController extends Controller
                     return back()->withError( 'Ha ocurrido un error al enviar factura.' );
                 }
 
-           /* } catch( \Exception $ex ) {
+            } catch( \Exception $ex ) {
                 Log::error("ERROR Envio de factura a hacienda -> ".$ex->getMessage());
                 return back()->withError( 'Ha ocurrido un error al enviar fddddactura.' );
-            }*/
+            }
         }else{
             ScheduledInvoices::insert([
                 ['pre_invoice_id' => $pre_invoices->id,
@@ -361,7 +406,7 @@ class InvoiceController extends Controller
     {
         //revision de branch para segmentacion de funcionalidades por tipo de documento
         
-
+            
             $apiHacienda = new BridgeHaciendaApi();
             $tokenApi = $apiHacienda->login(false);
             if ($tokenApi !== false) {

@@ -441,7 +441,7 @@ $(document).ready(function(){
       }
 
       if(frecuencia == 8){
-          html = '<label for="subtotal">Día: </label><select  class="form-control" id="frecuencia_option_mensual"></select><label for="subtotal">Mes: </label><select  class="form-control" id="frecuencia_option_mes"><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Setiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select>';
+          html = '<label for="subtotal">Día: </label><select  class="form-control" id="frecuencia_option_mensual"></select><label for="subtotal">Mes: </label><select  class="form-control" id="frecuencia_option_mes"><option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option><option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option><option value="07">Julio</option><option value="08">Agosto</option><option value="09">Setiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select>';
           $("#div_opcciones_frecuencia").html(html);
           opciones_mes();
           get_options_anual();
@@ -482,12 +482,21 @@ $("#programar_envio_btn").click(function(){
 function opciones_quincenal(){
   var options = '';
   for(var i = 1; i <= 15; i++){
+    if (i > 9){
       options += '<option value="'+i+'">'+i+'</option>';
+    }else{
+        options += '<option value="0'+i+'">0'+i+'</option>';
+    }
   }
   $('#frecuencia_option_1_quincenal').html(options);
   options = '';
   for(var i = 15; i <= 31; i++){
+      
+    if (i > 9){
       options += '<option value="'+i+'">'+i+'</option>';
+    }else{
+        options += '<option value="0'+i+'">0'+i+'</option>';
+    }
   }
   $('#frecuencia_option_2_quincenal').html(options);
 
@@ -495,7 +504,12 @@ function opciones_quincenal(){
 function opciones_mes(){
   var options = '';
   for(var i = 1; i <= 31; i++){
+      
+    if (i > 9){
       options += '<option value="'+i+'">'+i+'</option>';
+    }else{
+        options += '<option value="0'+i+'">0'+i+'</option>';
+    }
   }
   $('#frecuencia_option_mensual').html(options);
 

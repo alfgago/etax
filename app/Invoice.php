@@ -132,7 +132,7 @@ class Invoice extends Model
             $this->sale_condition = $request->sale_condition;
             $this->payment_type = $request->payment_type;
             $this->retention_percent = $request->retention_percent;
-            $this->credit_time = $request->credit_time;
+            $this->credit_time = $request->credit_time ?? null;
             $this->buy_order = $request->buy_order;
             $this->other_reference = $request->other_reference;
             $this->send_emails = $request->send_email ?? null;
@@ -255,7 +255,7 @@ class Invoice extends Model
             }
             return $this;
 
-        } catch (\Exception $e) {
+       } catch (\Exception $e) {
             Log::error('Error al crear factura: '.$e->getMessage());
             return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
         }
