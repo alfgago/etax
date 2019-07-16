@@ -501,7 +501,7 @@ toastr.options = {
       var tipoIVA = $('#tipo_producto :selected').attr('codigo');
       $('#tipo_iva').val( tipoIVA ).change();
     }else{
-      $('#tipo_iva').val( '260' );
+      $('#tipo_iva').val( 'B260' );
     }
   }
 
@@ -691,7 +691,7 @@ toastr.options = {
       }
       $('#unidad_medicion').val('Unid');
       $('#cantidad').val(1);
-      $('#porc_identificacion_plena').val(1);
+      $('#porc_identificacion_plena').val(13);
       $('#discount_type').val('01');
       $('#discount').val(0);
       $('#tipo_producto').change();
@@ -706,13 +706,13 @@ toastr.options = {
     $('#item_id').val( item.find('.item_id ').val() );
     $('#codigo').val( item.find('.codigo ').val() );
     $('#nombre').val( item.find('.nombre ').val() );
-    $('#tipo_producto').val( item.find('.tipo_producto ').val() );
+    $('#tipo_producto').val( item.find('.tipo_producto ').val() ).change();
     $('#discount').val( item.find('.discount ').val() );
     $('#discount_type').val( item.find('.discount_type ').val() );
     $('#cantidad').val( item.find('.cantidad ').val() );
     $('#unidad_medicion').val( item.find('.unidad_medicion ').val() );
     $('#precio_unitario').val( item.find('.precio_unitario ').val() );
-    $('#tipo_iva').val( item.find('.tipo_iva ').val() );
+    $('#tipo_iva').val( item.find('.tipo_iva ').val() ).change();
     $('#item_subtotal').val( item.find('.subtotal ').val() );
     $('#porc_iva').val( item.find('.porc_iva ').val() );
     $('#item_iva_amount').val( item.find('.monto_iva ').val() );

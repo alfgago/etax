@@ -149,7 +149,7 @@ class PaymentController extends Controller
                 }
             }
             
-            //Crea el sale de suscripción
+            //Crea/actualiza el sale de suscripción
             $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
     
             //Revisa recurrencia para definir el costo.
@@ -209,7 +209,7 @@ class PaymentController extends Controller
             //Revisa si el API del BN esta arriba.
             $bnStatus = $paymentUtils->statusBNAPI();
             if($bnStatus['apiStatus'] != 'Successful'){
-                $mensaje = 'Pagos en Linea esta fuera de servicio. Dirijase a Configuraciones->Gestion de Pagos- para agregar una tarjeta';
+                $mensaje = 'Hubo un error procesando el pago. Por favor contacte a nuestro centro de servicios o vuelva a intentar en unos minutos.';
                 return redirect('wizard')->withError($mensaje)->withInput();
             }
             
@@ -400,7 +400,7 @@ class PaymentController extends Controller
             $item['id'] = 0;
             $item['code'] = $invoiceData->items[0]->code;
             $item['name'] = $invoiceData->items[0]->name;
-            $item['product_type'] = 'Plan';
+            $item['product_type'] = '17';
             $item['measure_unit'] = 'Sp';
             $item['item_count'] = $invoiceData->items[0]->cantidad;
             $item['unit_price'] = $invoiceData->items[0]->unit_price;
@@ -410,7 +410,7 @@ class PaymentController extends Controller
             $item['discount_reason'] = $invoiceData->items[0]->discount_reason;
             $item['discount'] = $invoiceData->items[0]->descuento;
 
-            $item['iva_type'] = '103';
+            $item['iva_type'] = 'S103';
             $item['iva_percentage'] = 13;
             $item['iva_amount'] = $invoiceData->items[0]->iva_amount;
 

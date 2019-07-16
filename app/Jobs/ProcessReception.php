@@ -58,7 +58,7 @@ class ProcessReception implements ShouldQueue
             $bill = Bill::find($this->billId);
             $company = Company::find($bill->company_id);
             if ( $company->atv_validation ) {
-                if ($bill->hacienda_status == '01' && $bill->document_type == '01' && $bill->provider_zip ) {
+                if ($bill->hacienda_status == '01' && $bill->document_type == '01') {
                     if($bill->xml_schema == 42) {
                         $requestData = $this->setReceptionData($bill, $this->ref);
                     } else {
@@ -205,8 +205,10 @@ class ProcessReception implements ShouldQueue
                 'passwordAtv' => $company->atv->password ?? '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
                 'atvcertPin' => $company->atv->pin ?? '',
-                'atvcertFile' => Storage::get($company->atv->key_url),
+               // 'atvcertFile' => Storage::get($company->atv->key_url),
             ];
+            Log::info("Request Data from invoices id: $data->id  --> ".json_encode($invoiceData));
+            $invoiceData['atvcertFile'] = Storage::get($company->atv->key_url);
 
             foreach ($invoiceData as $key => $values) {
                 if ($key == 'atvcertFile') {

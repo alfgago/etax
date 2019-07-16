@@ -35,6 +35,8 @@ class InvoiceNotification extends Mailable
                 'data_invoice' => $this->content['data_invoice'], 
                 'xml' => $string]
             );
+        $message->attachFromStorage($this->content['xmlMH']);
+        $message->attachFromStorage($this->content['xml']);
         return $message;
     }
 }

@@ -26,7 +26,9 @@
         "maatwebsite/excel": "^3.1",
         "oliuz/teamwork": "^5.3",
         "orchestra/parser": "^3.8",
+        "potelo/laravel-block-bots": "^0.1.5",
         "predis/predis": "^1.1",
+        "spatie/laravel-honeypot": "^1.3",
         "spatie/laravel-permission": "^2.37",
         "yajra/laravel-datatables-buttons": "^4.6",
         "yajra/laravel-datatables-oracle": "~9.2"

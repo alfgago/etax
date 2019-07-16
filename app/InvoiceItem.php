@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Invoice;
+use App\CodigoIvaRepercutido;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -18,7 +19,10 @@ class InvoiceItem extends Model
         return $this->belongsTo(Invoice::class, 'invoice_id');
     }
     
-        
+    public function ivaType() {
+      return $this->belongsTo(CodigoIvaRepercutido::class, 'iva_type');
+    }
+
     public function fixIvaType() {
       $initial = $this->iva_type[0];
       if( $initial != 'S' && $initial != 'B' && 
@@ -31,6 +35,29 @@ class InvoiceItem extends Model
           }
           $this->save();
       }
+      //Asigna Prod Type;
+      $cat = $this->product_type;
+    
+      if( !$cat || $cat > 49 || ( $cat < 6 && $this->percentage != 1 )
+          || ( $cat > 6 && $cat <= 10 && $this->percentage != 2 )
+          || ( $cat < 10 && $cat <= 14 && $this->percentage != 4 ) 
+          || ( $cat < 14 && $cat <= 19  && $this->percentage != 13 ) ){
+        $cat = ProductCategory::where('invoice_iva_code', $this->iva_type)->first();
+        if( $cat ){
+          $this->product_type = $cat->id;
+        }else{
+          foreach( ProductCategory::get() as $c ) {
+            if (strpos($c->open_codes, $this->iva_type) !== false) {
+              $this->product_type = $c->id;
+            }
+          }
+        }
+      }
+      
+      if($cat == 'Plan') {
+        $this->product_type = 17;
+      }
+    
     }
     
 }

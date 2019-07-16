@@ -35,6 +35,46 @@ class CalculatedTax extends Model
         return $this->hasOne(Book::class, 'calculated_tax_id');
     }
     
+    public function parsedIvaData() {
+      try{
+        return json_decode($this->iva_data);
+      }catch(\Throwable $e){
+        return false;
+      }
+    }
+    
+    public function applyRatios( $porc, $value ) {
+      
+      $company = currentCompanyModel();
+     
+      $ratio1_operativo = $company->operative_ratio1 / 100;
+      $ratio2_operativo = $company->operative_ratio2 / 100;
+      $ratio3_operativo = $company->operative_ratio3 / 100;
+      $ratio4_operativo = $company->operative_ratio4 / 100;
+      
+      //Redondea ratios a 4 decimales (Al multiplicar por 100, queda en 2)
+      $ratio1_operativo = round($ratio1_operativo, 4);
+      $ratio2_operativo = round($ratio2_operativo, 4);
+      $ratio3_operativo = round($ratio3_operativo, 4);
+      $ratio4_operativo = round($ratio4_operativo, 4);
+      
+      $applied = 0;
+      if( $porc == 1 ){
+        $applied =  $value*$ratio1_operativo*0.01 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.13 + $value*$ratio4_operativo*0.04 ;
+      }
+      if( $porc == 2 ){
+        $applied =  $value*$ratio1_operativo*0.02 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.02 + $value*$ratio4_operativo*0.02 ;
+      }
+      if( $porc == 13 ){
+        $applied =  $value*$ratio1_operativo*0.13 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.13 + $value*$ratio4_operativo*0.04 ; 
+      }
+      if( $porc == 4 ){
+        $applied =  $value*$ratio1_operativo*0.04 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.04 + $value*$ratio4_operativo*0.04 ; 
+      }
+      
+      return $applied;
+    }
+    
     
     /**
      * Calcula y devuelve los datos del mes para dashboard y reportes
@@ -50,7 +90,7 @@ class CalculatedTax extends Model
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
       
-      //if ( !Cache::has($cacheKey) ) {
+      if ( !Cache::has($cacheKey) ) {
           
           //Busca el calculo del mes en Base de Datos.
           $data = CalculatedTax::firstOrNew(
@@ -92,7 +132,7 @@ class CalculatedTax extends Model
             
           Cache::put($cacheKey, $data, now()->addDays(120));
           
-      //}
+      }
       
       $data = Cache::get($cacheKey);
       return $data;
@@ -155,7 +195,7 @@ class CalculatedTax extends Model
       $ivaRetenido = 0;
       
       $ivaData = json_decode( $this->iva_data ) ?? new \stdClass();
-      
+
       InvoiceItem::with('invoice')
                   ->where('company_id', $company)
                   ->where('year', $year)
@@ -166,7 +206,7 @@ class CalculatedTax extends Model
       ) {
         
         $countInvoiceItems = $invoiceItems->count();
-        
+
         //Recorre las lineas de factura
         for ($i = 0; $i < $countInvoiceItems; $i++) {
           try {
@@ -175,17 +215,23 @@ class CalculatedTax extends Model
               if( $invoiceItems[$i]->invoice->currency == 'CRC' ) {
                 $invoiceItems[$i]->invoice->currency_rate = 1;
               }
-            
+              
+              $invoiceItems[$i]->fixIvaType();
+              
               $subtotal = $invoiceItems[$i]->subtotal * $invoiceItems[$i]->invoice->currency_rate;
               //$currentTotal = $invoiceItems[$i]->total * $invoiceItems[$i]->invoice->currency_rate;
               $ivaType = $invoiceItems[$i]->iva_type;
-              $prodType = $invoiceItems[$i]->product_id;
+              $prodType = $invoiceItems[$i]->product_type;
               $invoiceIva = $invoiceItems[$i]->iva_amount * $invoiceItems[$i]->invoice->currency_rate;
               $currentTotal = $subtotal + $invoiceIva;
               
+              $prodPorc = $invoiceItems[$i]->ivaType ? $invoiceItems[$i]->ivaType->percentage : '13';
               $prodType = $prodType ? $prodType : '17';
-              
-              $invoiceItems[$i]->fixIvaType();
+              $currActivity = $invoiceItems[$i]->invoice->commercial_activity;
+              if( !isset($currActivity) ){
+                $arrayActividades = currentCompanyModel()->getActivities();
+                $currActivity = $arrayActividades[0]->codigo;
+              }
               
               //Redondea todo a 2 decimales
               $subtotal = round($subtotal, 2);
@@ -297,11 +343,28 @@ class CalculatedTax extends Model
               $ivaData->$bVar += $subtotal;
               $ivaData->$iVar += $invoiceIva;
               
-              $typeVar = "type$prodType";
+              $typeVar = "type$prodType"; //Ej. type17
+              $typeVarPorc = "type$prodType-$prodPorc"; //Ej. type17-4
+              $typeVarActividad = $currActivity."-".$typeVar; //Ej. 706903-type17
+              $typeVarPorcActividad = $currActivity."-".$typeVarPorc; //Ej. 706903-type17-4
+              
               if(!isset($ivaData->$typeVar)) {
                 $ivaData->$typeVar = 0;
               }
+              if(!isset($ivaData->$typeVarPorc)) {
+                $ivaData->$typeVarPorc = 0;
+              }
+              if(!isset($ivaData->$typeVarActividad)) {
+                $ivaData->$typeVarActividad = 0;
+              }
+              if(!isset($ivaData->$typeVarPorcActividad)) {
+                $ivaData->$typeVarPorcActividad = 0;
+              }
               $ivaData->$typeVar += $subtotal;
+              $ivaData->$typeVarPorc += $subtotal;
+              $ivaData->$typeVarActividad += $subtotal;
+              $ivaData->$typeVarPorcActividad += $subtotal;
+              
             }
             
           }catch( \Exception $ex ){
@@ -337,7 +400,7 @@ class CalculatedTax extends Model
     /**
     *   Recorre todas las facturas recibidas y aumenta los montos correspondientes.
     **/
-    public function setDatosSoportados ( $month, $year, $company, $query ) {
+    public function setDatosSoportados ( $month, $year, $company, $query, $singleBill = false ) {
       $countBills = $query->count();
   
       $billsTotal = 0;
@@ -351,7 +414,7 @@ class CalculatedTax extends Model
       $totalProveedoresCredito = 0;
       $ivaData = json_decode( $this->iva_data ) ?? new \stdClass();
       
-      $query->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$ivaData,
+      $query->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$ivaData, &$singleBill,
        &$billsTotal, &$billsSubtotal, &$totalBillIva, &$basesIdentificacionPlena, &$basesNoDeducibles, &$ivaAcreditableIdentificacionPlena, 
        &$ivaNoAcreditableIdentificacionPlena, &$totalProveedoresContado, &$totalProveedoresCredito
       ) {
@@ -359,29 +422,37 @@ class CalculatedTax extends Model
 
         for ($i = 0; $i < $countBillItems; $i++) {
           
-          try {
-          
-            if( !$billItems[$i]->bill->is_void && $billItems[$i]->bill->is_authorized && $billItems[$i]->bill->is_code_validated ) {
+          try{
+            if( !$billItems[$i]->bill->is_void && $billItems[$i]->bill->is_authorized && $billItems[$i]->bill->is_code_validated &&
+                ( $singleBill || $billItems[$i]->bill->accept_status == 1 ) ) {
             
               if( $billItems[$i]->bill->currency == 'CRC' ) {
                 $billItems[$i]->bill->currency_rate = 1;
               }
-            
+              //Arrela el IVATYPE la primera vez en caso de ser codigos anteriores.
+              $billItems[$i]->fixIvaType();
+              
               $subtotal = $billItems[$i]->subtotal * $billItems[$i]->bill->currency_rate;
               $ivaType = $billItems[$i]->iva_type;
-              $prodType = $billItems[$i]->product_id;
+              $prodType = $billItems[$i]->product_type;
               $billIva = $billItems[$i]->iva_amount * $billItems[$i]->bill->currency_rate;
               $currentTotal = $subtotal + $billIva;
               
+              $prodPorc = $billItems[$i]->ivaType ? $billItems[$i]->ivaType->percentage : '13';
               $prodType = $prodType ? $prodType : '49';
-              //Arrela el IVATYPE la primera vez en caso de ser codigos anteriores.
-              $billItems[$i]->fixIvaType();
+              
+              $currActivity = $billItems[$i]->bill->activity_company_verification;
+              if( !isset($currActivity) ){
+                $arrayActividades = currentCompanyModel()->getActivities();
+                $currActivity = $arrayActividades[0]->codigo;
+              }
               
               //Redondea todo a 2 decimales
               $subtotal = round($subtotal, 2);
               $billIva = round($billIva, 2);
               $currentTotal = round($currentTotal, 2);
               
+                
               $ivaType = $ivaType ? $ivaType : '003';
               $ivaType = str_pad($ivaType, 3, '0', STR_PAD_LEFT);
               
@@ -480,10 +551,20 @@ class CalculatedTax extends Model
               $ivaData->$iVar += $billIva;
               
               $typeVar = "type$prodType";
+              $typeVarPorc = "type$prodType-$prodPorc";
+              $typeVarActividad = $currActivity."-".$typeVar;
+              $typeVarPorcActividad = $currActivity."-".$typeVarPorc;
+              
               if(!isset($ivaData->$typeVar)) {
                 $ivaData->$typeVar = 0;
+                $ivaData->$typeVarPorc = 0;
+                $ivaData->$typeVarActividad = 0;
+                $ivaData->$typeVarPorcActividad = 0;
               }
               $ivaData->$typeVar += $subtotal;
+              $ivaData->$typeVarPorc += $subtotal;
+              $ivaData->$typeVarActividad += $subtotal;
+              $ivaData->$typeVarPorcActividad += $subtotal;
               
               //Cuenta contable de proveedor
               $tipoVenta = $billItems[$i]->bill->sale_condition;
@@ -494,15 +575,16 @@ class CalculatedTax extends Model
               }
               
             }  
-            
           }catch( \Exception $ex ){
             Log::error('Error leer factura para cálculo' . $ex->getMessage());
           }catch( \Throwable $ex ){
             Log::error('Error leer factura para cálculo' . $ex->getMessage());
           }
+          
         }
         
       });
+              
       
       $this->iva_data = json_encode( $ivaData );
       $this->count_bills = $countBills;
@@ -878,176 +960,43 @@ class CalculatedTax extends Model
     			
     			foreach( ProductCategory::all() as $codigo ) {
     			  $varName = "type$codigo->id";
+    			  $varName0 = "type$codigo->id-0";
+    			  $varName1 = "type$codigo->id-1";
+    			  $varName2 = "type$codigo->id-2";
+    			  $varName4 = "type$codigo->id-4";
+    			  $varName8 = "type$codigo->id-8";
+    			  $varName3 = "type$codigo->id-13";
+    			  
     			  $ivaData->$varName += $ivaDataAnterior->$varName;
+    			  $ivaData->$varName0 += $ivaDataAnterior->$varName0;
+    			  $ivaData->$varName1 += $ivaDataAnterior->$varName1;
+    			  $ivaData->$varName2 += $ivaDataAnterior->$varName2;
+    			  $ivaData->$varName4 += $ivaDataAnterior->$varName4;
+    			  $ivaData->$varName8 += $ivaDataAnterior->$varName8;
+    			  $ivaData->$varName3 += $ivaDataAnterior->$varName3;
+    			  
+    			  $arrayActividades = currentCompanyModel()->getActivities();
+            foreach( $arrayActividades as $act){
+              $typeVarAct = "$act->codigo-$varName";
+              $typeVarAct0 = "$act->codigo-$varName0";
+              $typeVarAct1 = "$act->codigo-$varName1";
+              $typeVarAct2 = "$act->codigo-$varName2";
+              $typeVarAct4 = "$act->codigo-$varName4";
+              $typeVarAct8 = "$act->codigo-$varName8";
+              $typeVarAct3 = "$act->codigo-$varName3";
+              
+      			  $ivaData->$typeVarAct += $ivaDataAnterior->$typeVarAct;
+      			  $ivaData->$typeVarAct0 += $ivaDataAnterior->$typeVarAct0;
+      			  $ivaData->$typeVarAct1 += $ivaDataAnterior->$typeVarAct1;
+      			  $ivaData->$typeVarAct2 += $ivaDataAnterior->$typeVarAct2;
+      			  $ivaData->$typeVarAct4 += $ivaDataAnterior->$typeVarAct4;
+      			  $ivaData->$typeVarAct8 += $ivaDataAnterior->$typeVarAct8;
+      			  $ivaData->$typeVarAct3 += $ivaDataAnterior->$typeVarAct3;
+            }
     			}
     			
     			$this->iva_data = json_encode($ivaData);
     			
-    			/*$this->b001 += $calculosAnteriores[$i]->b001;
-          $this->i001 += $calculosAnteriores[$i]->i001;
-          $this->b002 += $calculosAnteriores[$i]->b002;
-          $this->i002 += $calculosAnteriores[$i]->i002;
-          $this->b003 += $calculosAnteriores[$i]->b003;
-          $this->i003 += $calculosAnteriores[$i]->i003;
-          $this->b004 += $calculosAnteriores[$i]->b004;
-          $this->i004 += $calculosAnteriores[$i]->i004;
-          
-          $this->b011 += $calculosAnteriores[$i]->b011;
-          $this->i011 += $calculosAnteriores[$i]->i011;
-          $this->b012 += $calculosAnteriores[$i]->b012;
-          $this->i012 += $calculosAnteriores[$i]->i012;
-          $this->b013 += $calculosAnteriores[$i]->b013;
-          $this->i013 += $calculosAnteriores[$i]->i013;
-          $this->b014 += $calculosAnteriores[$i]->b014;
-          $this->i014 += $calculosAnteriores[$i]->i014;
-          
-          $this->b021 += $calculosAnteriores[$i]->b021;
-          $this->i021 += $calculosAnteriores[$i]->i021;
-          $this->b022 += $calculosAnteriores[$i]->b022;
-          $this->i022 += $calculosAnteriores[$i]->i022;
-          $this->b023 += $calculosAnteriores[$i]->b023;
-          $this->i023 += $calculosAnteriores[$i]->i023;
-          $this->b024 += $calculosAnteriores[$i]->b024;
-          $this->i024 += $calculosAnteriores[$i]->i024;
-          
-          $this->b031 += $calculosAnteriores[$i]->b031;
-          $this->i031 += $calculosAnteriores[$i]->i031;
-          $this->b032 += $calculosAnteriores[$i]->b032;
-          $this->i032 += $calculosAnteriores[$i]->i032;
-          $this->b033 += $calculosAnteriores[$i]->b033;
-          $this->i033 += $calculosAnteriores[$i]->i033;
-          $this->b034 += $calculosAnteriores[$i]->b034;
-          $this->i034 += $calculosAnteriores[$i]->i034;
-
-          $this->b015 += $calculosAnteriores[$i]->b015;
-          $this->i015 += $calculosAnteriores[$i]->i015;
-          $this->b016 += $calculosAnteriores[$i]->b016;
-          $this->i016 += $calculosAnteriores[$i]->i016;
-          
-          $this->b035 += $calculosAnteriores[$i]->b035;
-          $this->i035 += $calculosAnteriores[$i]->i035;
-          $this->b036 += $calculosAnteriores[$i]->b036;
-          $this->i036 += $calculosAnteriores[$i]->i036;
-          
-          $this->b040 += $calculosAnteriores[$i]->b040;
-          $this->i040 += $calculosAnteriores[$i]->i040;
-          $this->b041 += $calculosAnteriores[$i]->b041;
-          $this->i041 += $calculosAnteriores[$i]->i041;
-          $this->b042 += $calculosAnteriores[$i]->b042;
-          $this->i042 += $calculosAnteriores[$i]->i042;
-          $this->b043 += $calculosAnteriores[$i]->b043;
-          $this->i043 += $calculosAnteriores[$i]->i043;
-          $this->b044 += $calculosAnteriores[$i]->b044;
-          $this->i044 += $calculosAnteriores[$i]->i044;
-          
-          $this->b050 += $calculosAnteriores[$i]->b050;
-          $this->i050 += $calculosAnteriores[$i]->b050;
-          $this->b051 += $calculosAnteriores[$i]->b051;
-          $this->i051 += $calculosAnteriores[$i]->i051;
-          $this->b052 += $calculosAnteriores[$i]->b052;
-          $this->i052 += $calculosAnteriores[$i]->i052;
-          $this->b053 += $calculosAnteriores[$i]->b053;
-          $this->i053 += $calculosAnteriores[$i]->i053;
-          $this->b054 += $calculosAnteriores[$i]->b054;
-          $this->i054 += $calculosAnteriores[$i]->i054;
-          
-          $this->b060 += $calculosAnteriores[$i]->b060;
-          $this->i060 += $calculosAnteriores[$i]->i060;
-          $this->b061 += $calculosAnteriores[$i]->b061;
-          $this->i061 += $calculosAnteriores[$i]->i061;
-          $this->b062 += $calculosAnteriores[$i]->b062;
-          $this->i062 += $calculosAnteriores[$i]->i062;
-          $this->b063 += $calculosAnteriores[$i]->b063;
-          $this->i063 += $calculosAnteriores[$i]->i063;
-          $this->b064 += $calculosAnteriores[$i]->b064;
-          $this->i064 += $calculosAnteriores[$i]->i064;
-          
-          $this->b070 += $calculosAnteriores[$i]->b070;
-          $this->i070 += $calculosAnteriores[$i]->i070;
-          $this->b071 += $calculosAnteriores[$i]->b071;
-          $this->i071 += $calculosAnteriores[$i]->i071;
-          $this->b072 += $calculosAnteriores[$i]->b072;
-          $this->i072 += $calculosAnteriores[$i]->i072;
-          $this->b073 += $calculosAnteriores[$i]->b073;
-          $this->i073 += $calculosAnteriores[$i]->i073;
-          $this->b074 += $calculosAnteriores[$i]->b074;
-          $this->i074 += $calculosAnteriores[$i]->i074;
-          
-          $this->b080 += $calculosAnteriores[$i]->b080;
-          $this->i080 += $calculosAnteriores[$i]->i080;
-          $this->b090 += $calculosAnteriores[$i]->b090;
-          $this->i090 += $calculosAnteriores[$i]->i090;
-          $this->b097 += $calculosAnteriores[$i]->b097;
-          $this->i097 += $calculosAnteriores[$i]->i097;
-          $this->b098 += $calculosAnteriores[$i]->b098;
-          $this->i098 += $calculosAnteriores[$i]->i098;
-          $this->b099 += $calculosAnteriores[$i]->b099;
-          $this->i099 += $calculosAnteriores[$i]->i099;
-        
-          $this->b101 += $calculosAnteriores[$i]->b101;
-          $this->i101 += $calculosAnteriores[$i]->i101;
-          $this->b102 += $calculosAnteriores[$i]->b102;
-          $this->i102 += $calculosAnteriores[$i]->i102;
-          $this->b103 += $calculosAnteriores[$i]->b103;
-          $this->i103 += $calculosAnteriores[$i]->i103;
-          $this->b104 += $calculosAnteriores[$i]->b104;
-          $this->i104 += $calculosAnteriores[$i]->i104;
-          
-          $this->b121 += $calculosAnteriores[$i]->b121;
-          $this->i121 += $calculosAnteriores[$i]->i121;
-          $this->b122 += $calculosAnteriores[$i]->b122;
-          $this->i122 += $calculosAnteriores[$i]->i122;
-          $this->b123 += $calculosAnteriores[$i]->b123;
-          $this->i123 += $calculosAnteriores[$i]->i123;
-          $this->b124 += $calculosAnteriores[$i]->b124;
-          $this->i124 += $calculosAnteriores[$i]->i124;
-          
-          $this->b130 += $calculosAnteriores[$i]->b130;
-          $this->i130 += $calculosAnteriores[$i]->i130;
-          $this->b140 += $calculosAnteriores[$i]->b140;
-          $this->i140 += $calculosAnteriores[$i]->i140;
-          
-          $this->b141 += $calculosAnteriores[$i]->b141;
-          $this->i141 += $calculosAnteriores[$i]->i141;
-          $this->b142 += $calculosAnteriores[$i]->b142;
-          $this->i142 += $calculosAnteriores[$i]->i142;
-          $this->b143 += $calculosAnteriores[$i]->b143;
-          $this->i143 += $calculosAnteriores[$i]->i143;
-          $this->b144 += $calculosAnteriores[$i]->b144;
-          $this->i144 += $calculosAnteriores[$i]->i144;
-          
-          $this->b150 += $calculosAnteriores[$i]->b150;
-          $this->i150 += $calculosAnteriores[$i]->i150;
-          
-          $this->b155 += $calculosAnteriores[$i]->b155;
-          $this->i155 += $calculosAnteriores[$i]->i155;
-          
-          $this->b160 += $calculosAnteriores[$i]->b160;
-          $this->i160 += $calculosAnteriores[$i]->i160;
-          
-          $this->b165 += $calculosAnteriores[$i]->b165;
-          $this->i165 += $calculosAnteriores[$i]->i165;
-          
-          $this->b170 += $calculosAnteriores[$i]->b170;
-          $this->i170 += $calculosAnteriores[$i]->i170;
-          
-          $this->b200 += $calculosAnteriores[$i]->b200;
-          $this->i200 += $calculosAnteriores[$i]->i200;
-          
-          $this->b201 += $calculosAnteriores[$i]->b201;
-          $this->i201 += $calculosAnteriores[$i]->i201;
-          
-          $this->b240 += $calculosAnteriores[$i]->b240;
-          $this->i240 += $calculosAnteriores[$i]->i240;
-          
-          $this->b250 += $calculosAnteriores[$i]->b250;
-          $this->i250 += $calculosAnteriores[$i]->i250;
-          
-          $this->b245 += $calculosAnteriores[$i]->b245;
-          $this->i245 += $calculosAnteriores[$i]->i245;
-          
-          $this->b260 += $calculosAnteriores[$i]->b260;
-          $this->i260 += $calculosAnteriores[$i]->i260;   */
       }
       
     }
@@ -1108,178 +1057,43 @@ class CalculatedTax extends Model
 			
 			foreach( ProductCategory::all() as $codigo ) {
 			  $varName = "type$codigo->id";
+			  $varName0 = "type$codigo->id-0";
+			  $varName1 = "type$codigo->id-1";
+			  $varName2 = "type$codigo->id-2";
+			  $varName4 = "type$codigo->id-4";
+			  $varName8 = "type$codigo->id-8";
+			  $varName3 = "type$codigo->id-13";
+			  
 			  $ivaData->$varName = 0;
+			  $ivaData->$varName0 = 0;
+			  $ivaData->$varName1 = 0;
+			  $ivaData->$varName2 = 0;
+			  $ivaData->$varName4 = 0;
+			  $ivaData->$varName8 = 0;
+			  $ivaData->$varName3 = 0;
+			  
+        $arrayActividades = currentCompanyModel()->getActivities();
+        foreach( $arrayActividades as $act){
+          $typeVarAct = "$act->codigo-$varName";
+          $typeVarAct0 = "$act->codigo-$varName0";
+          $typeVarAct1 = "$act->codigo-$varName1";
+          $typeVarAct2 = "$act->codigo-$varName2";
+          $typeVarAct4 = "$act->codigo-$varName4";
+          $typeVarAct8 = "$act->codigo-$varName8";
+          $typeVarAct3 = "$act->codigo-$varName3";
+          
+          $ivaData->$typeVarAct = 0;
+  			  $ivaData->$typeVarAct0 = 0;
+  			  $ivaData->$typeVarAct1 = 0;
+  			  $ivaData->$typeVarAct2 = 0;
+  			  $ivaData->$typeVarAct4 = 0;
+  			  $ivaData->$typeVarAct8 = 0;
+  			  $ivaData->$typeVarAct3 = 0;
+        }
+			  
 			}
 			
 			$this->iva_data = json_encode($ivaData);
-
-      //Debitos
-      /*      $this->b001 = 0;
-            $this->i001 = 0;
-            $this->b002 = 0;
-            $this->i002 = 0;
-            $this->b003 = 0;
-            $this->i003 = 0;
-            $this->b004 = 0;
-            $this->i004 = 0;
-            
-            $this->b011 = 0;
-            $this->i011 = 0;
-            $this->b012 = 0;
-            $this->i012 = 0;
-            $this->b013 = 0;
-            $this->i013 = 0;
-            $this->b014 = 0;
-            $this->i014 = 0;
-            
-            $this->b021 = 0;
-            $this->i021 = 0;
-            $this->b022 = 0;
-            $this->i022 = 0;
-            $this->b023 = 0;
-            $this->i023 = 0;
-            $this->b024 = 0;
-            $this->i024 = 0;
-            
-            $this->b031 = 0;
-            $this->i031 = 0;
-            $this->b032 = 0;
-            $this->i032 = 0;
-            $this->b033 = 0;
-            $this->i033 = 0;
-            $this->b034 = 0;
-            $this->i034 = 0;
-            
-            $this->b015 = 0;
-            $this->i015 = 0;
-            $this->b016 = 0;
-            $this->i016 = 0;
-            
-            $this->b035 = 0;
-            $this->i035 = 0;
-            $this->b036 = 0;
-            $this->i036 = 0;
-            
-            $this->b040 = 0;
-            $this->i040 = 0;
-            $this->b041 = 0;
-            $this->i041 = 0;
-            $this->b042 = 0;
-            $this->i042 = 0;
-            $this->b043 = 0;
-            $this->i043 = 0;
-            $this->b044 = 0;
-            $this->i044 = 0;
-            
-            $this->b050 = 0;
-            $this->i050 = 0;
-            $this->b051 = 0;
-            $this->i051 = 0;
-            $this->b052 = 0;
-            $this->i052 = 0;
-            $this->b053 = 0;
-            $this->i053 = 0;
-            $this->b054 = 0;
-            $this->i054 = 0;
-            
-            $this->b060 = 0;
-            $this->i060 = 0;
-            $this->b061 = 0;
-            $this->i061 = 0;
-            $this->b062 = 0;
-            $this->i062 = 0;
-            $this->b063 = 0;
-            $this->i063 = 0;
-            $this->b064 = 0;
-            $this->i064 = 0;
-            
-            $this->b070 = 0;
-            $this->i070 = 0;
-            $this->b071 = 0;
-            $this->i071 = 0;
-            $this->b072 = 0;
-            $this->i072 = 0;
-            $this->b073 = 0;
-            $this->i073 = 0;
-            $this->b074 = 0;
-            $this->i074 = 0;
-            
-            $this->b080 = 0;
-            $this->i080 = 0;
-            $this->b090 = 0;
-            $this->i090 = 0;
-            $this->b097 = 0;
-            $this->i097 = 0;
-            $this->b098 = 0;
-            $this->i098 = 0;
-            $this->b099 = 0;
-            $this->i099 = 0;
-          
-            //Creditos
-            $this->b101 = 0;
-            $this->i101 = 0;
-            $this->b102 = 0;
-            $this->i102 = 0;
-            $this->b103 = 0;
-            $this->i103 = 0;
-            $this->b104 = 0;
-            $this->i104 = 0;
-            
-            $this->b121 = 0;
-            $this->i121 = 0;
-            $this->b122 = 0;
-            $this->i122 = 0;
-            $this->b123 = 0;
-            $this->i123 = 0;
-            $this->b124 = 0;
-            $this->i124 = 0;
-            
-            $this->b130 = 0;
-            $this->i130 = 0;
-            $this->b140 = 0;
-            $this->i140 = 0;
-            
-            $this->b141 = 0;
-            $this->i141 = 0;
-            $this->b142 = 0;
-            $this->i142 = 0;
-            $this->b143 = 0;
-            $this->i143 = 0;
-            $this->b144 = 0;
-            $this->i144 = 0;
-            
-            $this->b150 = 0;
-            $this->i150 = 0;
-            
-            $this->b155 = 0;
-            $this->i155 = 0;
-            
-            $this->b160 = 0;
-            $this->i160 = 0;
-            
-            $this->b165 = 0;
-            $this->i165 = 0;
-            
-            $this->b170 = 0;
-            $this->i170 = 0;
-            
-            $this->b200 = 0;
-            $this->i200 = 0;
-            
-            $this->b201 = 0;
-            $this->i201 = 0;
-            
-            $this->b240 = 0;
-            $this->i240 = 0;
-            
-            $this->b245 = 0;
-            $this->i245 = 0;
-            
-            $this->b250 = 0;
-            $this->i250 = 0;
-            
-            $this->b260 = 0;
-            $this->i260 = 0;*/
     }
     
     private function microtime_float(){

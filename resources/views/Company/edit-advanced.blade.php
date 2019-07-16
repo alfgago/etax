@@ -30,7 +30,7 @@
                 <li>
                     <a class="nav-link" aria-selected="false" href="/empresas/equipo">Equipo de trabajo</a>
                 </li>
-                <li>
+                <li class="hidden">
                     <a class="nav-link" aria-selected="false" href="/empresas/comprar-facturas-vista">Comprar facturas</a>
                 </li>
             </ul>

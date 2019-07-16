@@ -84,6 +84,8 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('download-pdf/{id}', 'InvoiceController@downloadPdf')->name('Invoice.downloadPdf');
     Route::get('download-xml/{id}', 'InvoiceController@downloadXml')->name('Invoice.downloadXml');
     Route::get('reenviar-email/{id}', 'InvoiceController@resendInvoiceEmail')->name('Invoice.resendInvoiceEmail');
+    Route::get('consult/{id}', 'InvoiceController@consultInvoice')->name('Invoice.consultInvoice');
+    Route::get('query-invoice/{id}', 'InvoiceController@queryInvoice')->name('Invoice.queryInvoice');
 });
 
 // Rutas de facturacion recibida
@@ -98,6 +100,10 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::get('aceptaciones-otros', 'BillController@indexAcceptsOther')->name('Bill.acceptOthers');
     Route::patch('confirmar-aceptacion-otros/{id}', 'BillController@correctAccepted')->name('Bill.correctAccepted');
     Route::patch('marcar-para-aceptacion/{id}', 'BillController@markAsNotAccepted')->name('Bill.markAsNotAccepted');
+    Route::get('validar/{id}', 'BillController@validar')->name('Bill.validar');
+    Route::post('guardar-validar', 'BillController@guardar_validar')->name('Bill.guardar_validar');
+    Route::get('edit-aceptacion', 'BillController@editAccept')->name('Bill.editAccept');
+    Route::get('update-aceptacion', 'BillController@updateAccept')->name('Bill.updateAccept');
 });
 
 // Rutas de Wizard
@@ -110,7 +116,9 @@ Route::post('/store-wizard', 'WizardController@createWizard')->name('Wizard.stor
 //Rutas para suscripciones
 Route::get('/cambiar-plan', 'SubscriptionPlanController@changePlan')->name('Subscription.cambiar_plan');
 Route::get('/elegir-plan', 'SubscriptionPlanController@selectPlan')->name('Subscription.select_plan');
+Route::get('/periodo-pruebas', 'SubscriptionPlanController@startTrial')->name('Subscription.startTrial');
 Route::post('/confirmar-plan', 'SubscriptionPlanController@confirmPlanChange')->name('Subscription.confirmar_plan');
+Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');
 
 // Rutas de usuario
 Route::prefix('usuario')->group(function() {

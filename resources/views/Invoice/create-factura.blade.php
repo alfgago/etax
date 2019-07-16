@@ -247,7 +247,7 @@ $company = currentCompanyModel();
 
                   <div class="form-group col-md-12">
                     <label for="description">Notas</label>
-                    <textarea class="form-control" name="description" id="notas"  maxlength="200" placeholder=""> {{ @currentCompanyModel()->default_invoice_notes }}  </textarea>
+                    <textarea class="form-control" name="notas" id="notas"  maxlength="200" placeholder=""> {{ @currentCompanyModel()->default_invoice_notes }}  </textarea>
                   </div>
 
               </div>

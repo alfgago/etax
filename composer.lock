@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fda29604932424e576a84b5754206879",
+    "content-hash": "a27ca4cf5a6c6e94fdf4b541689e4179",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -3103,6 +3103,48 @@
             "time": "2015-07-25T16:39:46+00:00"
         },
         {
+            "name": "potelo/laravel-block-bots",
+            "version": "0.1.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Potelo/laravel-block-bots.git",
+                "reference": "db30bdb7cc7f32247c8a66f6665c92a3493d0411"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Potelo/laravel-block-bots/zipball/db30bdb7cc7f32247c8a66f6665c92a3493d0411",
+                "reference": "db30bdb7cc7f32247c8a66f6665c92a3493d0411",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^5.5",
+                "php": "^7.0",
+                "predis/predis": "^1.1"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Potelo\\LaravelBlockBots\\BlockBotsServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Potelo\\LaravelBlockBots\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Bruno Cabral",
+                    "email": "bruno@potelo.com.br"
+                }
+            ],
+            "description": "Block bots and high traffic offenders using Redis",
+            "time": "2018-09-28T23:36:48+00:00"
+        },
+        {
             "name": "predis/predis",
             "version": "v1.1.1",
             "source": {
@@ -3585,6 +3627,66 @@
                 "stylesheet"
             ],
             "time": "2016-07-19T19:14:21+00:00"
+        },
+        {
+            "name": "spatie/laravel-honeypot",
+            "version": "1.3.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/laravel-honeypot.git",
+                "reference": "730d3a78a25e410ee8dc6c3d7fcc5c37ff4992be"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/laravel-honeypot/zipball/730d3a78a25e410ee8dc6c3d7fcc5c37ff4992be",
+                "reference": "730d3a78a25e410ee8dc6c3d7fcc5c37ff4992be",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "5.8.*",
+                "illuminate/encryption": "5.8.*",
+                "illuminate/http": "5.8.*",
+                "illuminate/support": "5.8.*",
+                "illuminate/validation": "5.8.*",
+                "nesbot/carbon": "^2.0",
+                "php": "^7.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "3.8.*",
+                "spatie/phpunit-snapshot-assertions": "^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Spatie\\Honeypot\\HoneypotServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\Honeypot\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Preventing spam submitted through forms",
+            "homepage": "https://github.com/spatie/laravel-honeypot",
+            "keywords": [
+                "laravel-honeypot",
+                "spatie"
+            ],
+            "time": "2019-06-12T06:35:23+00:00"
         },
         {
             "name": "spatie/laravel-permission",

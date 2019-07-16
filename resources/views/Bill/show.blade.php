@@ -58,6 +58,64 @@
                   </div>
                 </div>
               </div>  
+              
+              <div class="form-row">  
+              
+                <div class="form-group col-md-12">
+                  <h3>
+                    Datos de aceptación
+                  </h3>
+                </div>
+                
+                <div class="form-group col-md-3">
+                  <label for="currency">XML de factura</label>
+                  <input type="text" class="form-control" readonly="true" value="{{ $bill->xml_schema == 43 ? '4.3' : '4.2' }}">
+                </div>
+                  
+                <div class="form-group col-md-9">
+                    <label for="activity_company_verification">Actividad Comercial</label>
+                    <div class="input-group">
+                      <select id="activity_company_verification" name="activity_company_verification" class="form-control" required disabled readonly>
+                          @foreach ( $arrayActividades as $actividad )
+                              <option {{ $bill->activity_company_verification == $actividad->codigo ? 'selected' : '' }} value="{{ $actividad->codigo }}" >{{ $actividad->codigo }} - {{ $actividad->actividad }}</option>
+                          @endforeach
+                      </select>
+                    </div>
+                </div>
+                  
+                <div class="form-group col-md-12 inline-form inline-checkbox">
+                  <label for="accept_status">
+                    <span>¿Aceptada desde otro proveedor?</span>
+                    <input type="checkbox" class="form-control" id="accept_status" name="accept_status" onchange="toggleInfoAceptacion();" disabled readonly {{ $bill->accept_status == 1 ? 'checked' : '' }} >
+                  </label>
+                </div>
+                              
+                <div class="form-group col-md-4">
+                    <label for="accept_iva_condition">Condición de acceptación</label>
+                    <select class="form-control" name="accept_iva_condition" id="accept_iva_condition" disabled readonly>
+                      <option value="01" {{ $bill->accept_iva_condition == "01" ? 'selected' : '' }}>Genera crédito IVA</option>
+                      <option value="02" {{ $bill->accept_iva_condition == "02" ? 'selected' : '' }}>Genera crédito parcial del IVA</option>
+                      <option value="03" {{ $bill->accept_iva_condition == "03" ? 'selected' : '' }}>Bienes de capital</option>
+                      <option value="04" {{ $bill->accept_iva_condition == "04" ? 'selected' : '' }}>Gasto corriente (no genera IVA)</option>
+                      <option value="05" {{ $bill->accept_iva_condition == "05" ? 'selected' : '' }}>Proporcionalidad</option>
+                    </select>
+                </div>
+                              
+                <div class="form-group col-md-4">
+                    <label for="accept_iva_acreditable">IVA acreditable</label>
+                    <div class="input-group">
+                      <input type="number" id="accept_iva_acreditable" name="accept_iva_acreditable" class="form-control" value="{{ $bill->accept_iva_acreditable }}" disabled readonly />
+                    </div>
+                </div>
+                              
+                <div class="form-group col-md-4">
+                    <label for="accept_iva_gasto">IVA al gasto</label>
+                    <div class="input-group">
+                      <input type="number" id="accept_iva_gasto" name="accept_iva_gasto" class="form-control" value="{{ $bill->accept_iva_gasto }}" disabled readonly />
+                    </div>
+                </div>
+    
+              </div>
 
               <div class="form-row">    
                 <div class="form-group col-md-12">

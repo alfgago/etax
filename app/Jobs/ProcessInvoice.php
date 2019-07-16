@@ -77,10 +77,10 @@ class ProcessInvoice implements ShouldQueue
                             'connect_timeout' => 20
                         ]);
                         $response = json_decode($result->getBody()->getContents(), true);
+                        $date = Carbon::now();
                         Log::info('Response Api Hacienda '. json_encode($response));
                         if (isset($response['status']) && $response['status'] == 200) {
                             Log::info('API HACIENDA 200 :'. $invoice->document_number);
-                            $date = Carbon::now();
                             $invoice->hacienda_status = '03';
                             $invoice->save();
                             $path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
@@ -88,15 +88,20 @@ class ProcessInvoice implements ShouldQueue
                                 $path,
                                 ltrim($response['data']['xmlFirmado'], '\n')
                             );
+                            $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
+                            $saveMH = Storage::put(
+                                $pathMH,
+                                ltrim($response['data']['mensajeHacienda'], '\n')
+                            );
                             if ($save) {
                                 $xml = new XmlHacienda();
                                 $xml->invoice_id = $invoice->id;
                                 $xml->bill_id = 0;
                                 $xml->xml = $path;
+                                $xml->xml_message = $pathMH;
                                 $xml->save();
-                                
-                                $xmlExtract = ltrim($response['data']['response'], '\n');
-                                $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $xmlExtract );
+
+                                $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH);
 
                             }
                             Log::info('Factura enviada y XML guardado.');
@@ -105,8 +110,11 @@ class ProcessInvoice implements ShouldQueue
                             Log::info('Consecutive repeated -->' . $invoice->document_number);
                             $invoice->hacienda_status = '04';
                             $invoice->save();
-
-
+                        } else if (isset($response['status']) && $response['status'] == 400 &&
+                            strpos($response['message'], 'archivo XML ya existe en nuestras bases de datos') <> false) {
+                            Log::info('Consecutive repeated -->' . $invoice->document_number);
+                            $invoice->hacienda_status = '04';
+                            $invoice->save();
                         }
                         Log::info('Proceso de facturación finalizado con éxito.');
                     }

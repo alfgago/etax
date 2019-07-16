@@ -23,24 +23,24 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'B003 - Compras locales de bienes con IVA al 13% sin identificación específica ', 'codigo'=>'B003', 'porcentaje'=>'13', 'is_bienes'=>true],
           ['nombre'=>'B004 - Compras locales de bienes con IVA al 4% sin identificación específica', 'codigo'=>'B004', 'porcentaje'=>'4', 'is_bienes'=>true],
           
-          ['nombre'=>'B011 - Compras locales de propiedad planta y equipo con IVA al 1% sin identificación específica', 'codigo'=>'B011', 'porcentaje'=>'1', 'is_servicio'=>true],
-          ['nombre'=>'B012 - Compras locales de propiedad planta y equipo con IVA al 2% sin identificación específica', 'codigo'=>'B012', 'porcentaje'=>'2', 'is_servicio'=>true],
-          ['nombre'=>'B013 - Compras locales de propiedad planta y equipo con IVA al 13% sin identificación específica', 'codigo'=>'B013', 'porcentaje'=>'13', 'is_servicio'=>true],
-          ['nombre'=>'B014 - Compras locales de propiedad planta y equipo con IVA al 4% sin identificación específica', 'codigo'=>'B014', 'porcentaje'=>'4', 'is_servicio'=>true],
-          ['nombre'=>'B015 - Compras locales de propiedad planta y equipo con IVA al 1% sin identificación específica. Con costo superior a 15 salarios base', 'codigo'=>'B015', 'porcentaje'=>'1', 'is_servicio'=>true],
-          ['nombre'=>'B016 - Compras locales de propiedad planta y equipo con IVA al 13% sin identificación específica. Con costo superior a 15 salarios base', 'codigo'=>'B016', 'porcentaje'=>'13', 'is_servicio'=>true],
+          ['nombre'=>'B011 - Compras locales de bienes de capital con IVA al 1% sin identificación específica', 'codigo'=>'B011', 'porcentaje'=>'1', 'is_servicio'=>true],
+          ['nombre'=>'B012 - Compras locales de bienes de capital con IVA al 2% sin identificación específica', 'codigo'=>'B012', 'porcentaje'=>'2', 'is_servicio'=>true],
+          ['nombre'=>'B013 - Compras locales de bienes de capital con IVA al 13% sin identificación específica', 'codigo'=>'B013', 'porcentaje'=>'13', 'is_servicio'=>true],
+          ['nombre'=>'B014 - Compras locales de bienes de capital con IVA al 4% sin identificación específica', 'codigo'=>'B014', 'porcentaje'=>'4', 'is_servicio'=>true],
+          ['nombre'=>'B015 - Compras locales de bienes de capital con IVA al 1% sin identificación específica. Con costo superior a 15 salarios base', 'codigo'=>'B015', 'porcentaje'=>'1', 'is_servicio'=>true],
+          ['nombre'=>'B016 - Compras locales de bienes de capital con IVA al 13% sin identificación específica. Con costo superior a 15 salarios base', 'codigo'=>'B016', 'porcentaje'=>'13', 'is_servicio'=>true],
           
           ['nombre'=>'B021 - Importaciones de bienes con IVA al 1% sin identificación específica', 'codigo'=>'B021', 'porcentaje'=>'1', 'is_bienes'=>true, 'is_importacion'=>true],
           ['nombre'=>'B022 - Importaciones de bienes con IVA al 2% sin identificación específica', 'codigo'=>'B022', 'porcentaje'=>'2', 'is_bienes'=>true, 'is_importacion'=>true],
           ['nombre'=>'B023 - Importaciones de bienes con IVA al 13% sin identificación específica', 'codigo'=>'B023', 'porcentaje'=>'13', 'is_bienes'=>true, 'is_importacion'=>true],
           ['nombre'=>'B024 - Importaciones de bienes con IVA al 4% sin identificación específica', 'codigo'=>'B024', 'porcentaje'=>'4', 'is_bienes'=>true, 'is_importacion'=>true],
           
-          ['nombre'=>'B031 - Importaciones de propiedad planta y equipo con IVA al 1% sin identificación específica', 'codigo'=>'B031', 'porcentaje'=>'1', 'is_servicio'=>true, 'is_importacion'=>true],
-          ['nombre'=>'B032 - Importaciones de propiedad planta y equipo con IVA al 2% sin identificación específica', 'codigo'=>'B032', 'porcentaje'=>'2', 'is_servicio'=>true, 'is_importacion'=>true],
-          ['nombre'=>'B033 - Importaciones de propiedad planta y equipo con IVA al 13% sin identificación específica', 'codigo'=>'B033', 'porcentaje'=>'13', 'is_servicio'=>true, 'is_importacion'=>true],
-          ['nombre'=>'B034 - Importaciones de propiedad planta y equipo con IVA al 4% sin identificación específica', 'codigo'=>'B034', 'porcentaje'=>'4', 'is_servicio'=>true, 'is_importacion'=>true],
-          ['nombre'=>'B035 - Importaciones de propiedad planta y equipo con IVA al 1% sin identificación específica Con costo superior a 15 salarios base', 'codigo'=>'B035', 'porcentaje'=>'1', 'is_servicio'=>true, 'is_importacion'=>true],
-          ['nombre'=>'B036 - Importaciones de propiedad planta y equipo con IVA al 13% sin identificación específica Con costo superior a 15 salarios base', 'codigo'=>'B036', 'porcentaje'=>'13', 'is_servicio'=>true, 'is_importacion'=>true],
+          ['nombre'=>'B031 - Importaciones de bienes de capital con IVA al 1% sin identificación específica', 'codigo'=>'B031', 'porcentaje'=>'1', 'is_servicio'=>true, 'is_importacion'=>true],
+          ['nombre'=>'B032 - Importaciones de bienes de capital con IVA al 2% sin identificación específica', 'codigo'=>'B032', 'porcentaje'=>'2', 'is_servicio'=>true, 'is_importacion'=>true],
+          ['nombre'=>'B033 - Importaciones de bienes de capital con IVA al 13% sin identificación específica', 'codigo'=>'B033', 'porcentaje'=>'13', 'is_servicio'=>true, 'is_importacion'=>true],
+          ['nombre'=>'B034 - Importaciones de bienes de capital con IVA al 4% sin identificación específica', 'codigo'=>'B034', 'porcentaje'=>'4', 'is_servicio'=>true, 'is_importacion'=>true],
+          ['nombre'=>'B035 - Importaciones de bienes de capital con IVA al 1% sin identificación específica Con costo superior a 15 salarios base', 'codigo'=>'B035', 'porcentaje'=>'1', 'is_servicio'=>true, 'is_importacion'=>true],
+          ['nombre'=>'B036 - Importaciones de bienes de capital con IVA al 13% sin identificación específica Con costo superior a 15 salarios base', 'codigo'=>'B036', 'porcentaje'=>'13', 'is_servicio'=>true, 'is_importacion'=>true],
           
           //Con identificación específica
           ['nombre'=>'B040 - Importaciones de bienes exentos', 'codigo'=>'B040', 'porcentaje'=>'0', 'is_bienes'=>true, 'is_importacion'=>true],
@@ -49,23 +49,23 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'B043 - Importaciones con IVA al 13% de bienes de acreditación plena con identificación específica', 'codigo'=>'B043', 'porcentaje'=>'13', 'is_bienes'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
           ['nombre'=>'B044 - Importaciones con IVA al 4% de bienes de acreditación plena con identificación específica', 'codigo'=>'B044', 'porcentaje'=>'4', 'is_bienes'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
           
-          ['nombre'=>'B050 - Importaciones de propiedad planta y equipo exentos', 'codigo'=>'B050', 'porcentaje'=>'0', 'is_servicio'=>true, 'is_importacion'=>true],
-          ['nombre'=>'B051 - Importaciones con IVA al 1% de propiedad planta y equipo de acreditación plena con identificación específica', 'codigo'=>'B051', 'porcentaje'=>'1', 'is_servicio'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
-          ['nombre'=>'B052 - Importaciones con IVA al 2% de propiedad planta y equipo de acreditación plena con identificación específica', 'codigo'=>'B052', 'porcentaje'=>'2', 'is_servicio'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
-          ['nombre'=>'B053 - Importaciones con IVA al 13% de propiedad planta y equipo de acreditación plena con identificación específica', 'codigo'=>'B053', 'porcentaje'=>'13', 'is_servicio'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
-          ['nombre'=>'B054 - Importaciones con IVA al 4% de propiedad planta y equipo de acreditación plena con identificación específica', 'codigo'=>'B054', 'porcentaje'=>'4', 'is_servicio'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B050 - Importaciones de bienes de capital exentos', 'codigo'=>'B050', 'porcentaje'=>'0', 'is_servicio'=>true, 'is_importacion'=>true],
+          ['nombre'=>'B051 - Importaciones con IVA al 1% de bienes de capital de acreditación plena con identificación específica', 'codigo'=>'B051', 'porcentaje'=>'1', 'is_servicio'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B052 - Importaciones con IVA al 2% de bienes de capital de acreditación plena con identificación específica', 'codigo'=>'B052', 'porcentaje'=>'2', 'is_servicio'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B053 - Importaciones con IVA al 13% de bienes de capital de acreditación plena con identificación específica', 'codigo'=>'B053', 'porcentaje'=>'13', 'is_servicio'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B054 - Importaciones con IVA al 4% de bienes de capital de acreditación plena con identificación específica', 'codigo'=>'B054', 'porcentaje'=>'4', 'is_servicio'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
           
-          ['nombre'=>'B060 - Compras locales de bienes', 'codigo'=>'B060', 'porcentaje'=>'0', 'is_bienes'=>true],
+          ['nombre'=>'B060 - Compras locales de bienes exentos', 'codigo'=>'B060', 'porcentaje'=>'0', 'is_bienes'=>true],
           ['nombre'=>'B061 - Compras locales con IVA al 1% de bienes de acreditación plena con identificación específica', 'codigo'=>'B061', 'porcentaje'=>'1', 'is_bienes'=>true, 'is_identificacion_plena'=>true],
           ['nombre'=>'B062 - Compras locales con IVA al 2% de bienes de acreditación plena con identificación específica', 'codigo'=>'B062', 'porcentaje'=>'2', 'is_bienes'=>true, 'is_identificacion_plena'=>true],
           ['nombre'=>'B063 - Compras locales con IVA al 13% de bienes de acreditación plena con identificación específica', 'codigo'=>'B063', 'porcentaje'=>'13', 'is_bienes'=>true, 'is_identificacion_plena'=>true],
           ['nombre'=>'B064 - Compras locales con IVA al 4% de bienes de acreditación plena con identificación específica', 'codigo'=>'B064', 'porcentaje'=>'4', 'is_bienes'=>true, 'is_identificacion_plena'=>true],
           
-          ['nombre'=>'B070 - Compras locales de  propiedad planta y equipo exentos.', 'codigo'=>'B070', 'porcentaje'=>'0', 'is_servicio'=>true, 'is_importacion'=>true],
-          ['nombre'=>'B071 - Compras locales con IVA al 1% de propiedad planta y equipo de acreditación plena con identificación específica.', 'codigo'=>'B071', 'porcentaje'=>'1', 'is_servicio'=>true, 'is_identificacion_plena'=>true],
-          ['nombre'=>'B072 - Compras locales con IVA al 2% de propiedad planta y equipo de acreditación plena con identificación específica.', 'codigo'=>'B072', 'porcentaje'=>'2', 'is_servicio'=>true, 'is_identificacion_plena'=>true],
-          ['nombre'=>'B073 - Compras locales con IVA al 13% de propiedad planta y equipo de acreditación plena con identificación específica.', 'codigo'=>'B073', 'porcentaje'=>'13', 'is_servicio'=>true, 'is_identificacion_plena'=>true],
-          ['nombre'=>'B074 - Compras locales con IVA al 4% de propiedad planta y equipo de acreditación plena con identificación específica.', 'codigo'=>'B074', 'porcentaje'=>'4', 'is_servicio'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B070 - Compras locales de  bienes de capital exentos.', 'codigo'=>'B070', 'porcentaje'=>'0', 'is_servicio'=>true, 'is_importacion'=>true],
+          ['nombre'=>'B071 - Compras locales con IVA al 1% de bienes de capital de acreditación plena con identificación específica.', 'codigo'=>'B071', 'porcentaje'=>'1', 'is_servicio'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B072 - Compras locales con IVA al 2% de bienes de capital de acreditación plena con identificación específica.', 'codigo'=>'B072', 'porcentaje'=>'2', 'is_servicio'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B073 - Compras locales con IVA al 13% de bienes de capital de acreditación plena con identificación específica.', 'codigo'=>'B073', 'porcentaje'=>'13', 'is_servicio'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B074 - Compras locales con IVA al 4% de bienes de capital de acreditación plena con identificación específica.', 'codigo'=>'B074', 'porcentaje'=>'4', 'is_servicio'=>true, 'is_identificacion_plena'=>true],
           
           //No acreditables
           ['nombre'=>'B080 - Compras de bienes con IVA no acreditable desde origen', 'codigo'=>'B080', 'porcentaje'=>'0', 'is_bienes'=>true, 'is_gravado'=>false],
@@ -101,6 +101,11 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'S090 - Importaciones de servicios con IVA no acreditable desde origen', 'codigo'=>'S090', 'porcentaje'=>'0', 'is_servicio'=>true, 'is_gravado'=>false],
           ['nombre'=>'S097 - Compras de servicios con IVA no acreditable por gastos no deducibles', 'codigo'=>'S097', 'porcentaje'=>'0', 'is_servicio'=>true, 'is_gravado'=>false],
           
+          ['nombre'=>'B091 - Compras de bienes con IVA no acreditable desde origen', 'codigo'=>'B091', 'porcentaje'=>'1', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'B092 - Compras de bienes con IVA no acreditable desde origen', 'codigo'=>'B092', 'porcentaje'=>'2', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'B093 - Compras de bienes con IVA no acreditable desde origen', 'codigo'=>'B093', 'porcentaje'=>'13', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'B094 - Compras de bienes con IVA no acreditable desde origen', 'codigo'=>'B094', 'porcentaje'=>'4', 'is_bienes'=>true, 'is_gravado'=>true],
+          
           ['nombre'=>'098 - Inversion del sujeto pasivo base', 'codigo'=>'098', 'porcentaje'=>'0', 'is_gravado'=>false],
           ['nombre'=>'099 - Inversion del sujeto pasivo base no acreditable', 'codigo'=>'099', 'porcentaje'=>'0', 'is_gravado'=>false]
         ];
@@ -120,7 +125,9 @@ class CodigosSeeder extends Seeder
               'is_identificacion_plena' => $codigo['is_identificacion_plena'] ?? false,
               'is_gravado' => !isset($codigo['is_gravado']) ? true : $codigo['is_gravado']
           ]);
-          }catch(\Throwable $e){}
+          }catch(\Throwable $e){
+              \Illuminate\Support\Facades\Log::error('Error codigo seeder'. $e);
+          }
         }
         
     }
@@ -213,10 +220,11 @@ class CodigosSeeder extends Seeder
               'is_estado' => $codigo['is_estado'] ?? false,
               'is_bienes' => $codigo['is_bienes'] ?? false,
               'is_servicio' => $codigo['is_servicio'] ?? false,
-              'is_servicio' => $codigo['is_servicio'] ?? false,
               'is_gravado' => $codigo['is_gravado'] ?? false
           ]);
-          }catch(\Throwable $e){}
+          }catch(\Throwable $e){
+              \Illuminate\Support\Facades\Log::error('Error codigo seeder'. $e);
+          }
         }
         
     }

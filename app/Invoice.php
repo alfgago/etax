@@ -31,6 +31,11 @@ class Invoice extends Model
         return $this->belongsTo(Client::class);
     }
     
+    public function activity()
+    {
+        return $this->belongsTo(Actividades::class, 'commercial_activity');
+    }
+    
     public function clientName() {
       if( isset($this->client_id) ) {
         return $this->client->getFullName();
@@ -76,7 +81,7 @@ class Invoice extends Model
     {
         return Carbon::parse($this->due_date);
     }
-
+    
     //Relacion con hacienda
     public function xmlHacienda()
     {
@@ -87,17 +92,17 @@ class Invoice extends Model
       
       $str = "Contado";
       if( $this->sale_condition == '02' ) {
-        $str == "Crédito";
+        $str = "Crédito";
       } else if( $this->sale_condition == '03' ) {
-        $str == "Consignación";
+        $str = "Consignación";
       } else if( $this->sale_condition == '04' ) {
-        $str == "Apartado";
+        $str = "Apartado";
       } else if( $this->sale_condition == '05' ) {
-        $str == "Arrendamiento con opción de compra";
+        $str = "Arrendamiento con opción de compra";
       } else if( $this->sale_condition == '06' ) {
          $str == "Arrendamiento en función financiera";
       } else if( $this->sale_condition == '99' ) {
-        $str == "Otros";
+        $str = "Otros";
       }
       return $str;
       
@@ -107,15 +112,15 @@ class Invoice extends Model
       
       $str = "Efectivo";
       if( $this->payment_type == '02' ) {
-        $str == "Tarjeta";
+        $str = "Tarjeta";
       } else if( $this->payment_type == '03' ) {
-        $str == "Cheque";
+        $str = "Cheque";
       } else if( $this->payment_type == '04' ) {
-        $str == "Transferencia-Depósito Bancario";
+        $str = "Transferencia-Depósito Bancario";
       } else if( $this->payment_type == '05' ) {
-        $str == "Recaudado por terceros";
+        $str = "Recaudado por terceros";
       } else if( $this->payment_type == '99' ) {
-        $str == "Otros";
+        $str = "Otros";
       }
       return $str;
       
@@ -185,7 +190,7 @@ class Invoice extends Model
 
             $request->currency_rate = $request->currency_rate ? $request->currency_rate : 1;
             //Datos de factura
-            $this->description = $request->description;
+            $this->description = $request->notas ?? null;
             $this->subtotal = floatval( str_replace(",","", $request->subtotal ));
             $this->currency = $request->currency;
             $this->currency_rate = floatval( str_replace(",","", $request->currency_rate ));
@@ -203,7 +208,7 @@ class Invoice extends Model
               $this->client_city = $client->city;
               $this->client_district = $client->district;
               $this->client_zip = $client->zip;
-              $this->client_phone = $client->phone;
+              $this->client_phone = preg_replace('/[^0-9]/', '', $client->phone);
               $this->client_id_number = $client->id_number;
             }else{
               $this->client_first_name = 'N/A';
@@ -220,7 +225,7 @@ class Invoice extends Model
               $this->client_city = $this->company->city;
               $this->client_district = $this->company->district;
               $this->client_zip = $this->company->zip;
-              $this->client_phone = $this->company->phone;
+              $this->client_phone = preg_replace('/[^0-9]/', '', $this->company->phone);
               $this->client_id_number = $this->company->id_number;
             }
             
@@ -236,16 +241,16 @@ class Invoice extends Model
             if( !$this->id ){
               $this->company->addSentInvoice( $this->year, $this->month );
             }
-            
             $this->save();
 
             $lids = array();
+            $i = 1;
             foreach($request->items as $item) {
-                $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
+                $item['item_number'] = $i;
                 $item['item_id'] = $item['id'] ? $item['id'] : 0;
                 $item_modificado = $this->addEditItem($item);
-
                 array_push( $lids, $item_modificado->id );
+                $i++;
             }
 
             foreach ( $this->items as $item ) {
@@ -597,7 +602,8 @@ class Invoice extends Model
         $invoice->commercial_activity = $arr['CodigoActividad'] ?? 0;
         $invoice->xml_schema = $invoice->commercial_activity ? 43 : 42;
         $invoice->sale_condition = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
-        $invoice->credit_time = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
+        //$invoice->credit_time = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
+        $invoice->credit_time = null;
         $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
         if ( is_array($medioPago) ) {
           $medioPago = $medioPago[0];
