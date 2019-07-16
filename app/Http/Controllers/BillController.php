@@ -616,6 +616,29 @@ class BillController extends Controller
         
         $current_company = currentCompanyModel();
 
+        if ($current_company->atv_validation == false) {
+            $apiHacienda = new BridgeHaciendaApi();
+            $token = $apiHacienda->login(false);
+            $validateAtv = $apiHacienda->validateAtv($token, $current_company);
+
+            if($validateAtv) {
+                if ($validateAtv['status'] == 400) {
+                    Log::info('Atv Not Validated Company: '. $current_company->id_number);
+                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                    }
+                    return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
+
+                } else {
+                    Log::info('Atv Validated Company: '. $current_company->id_number);
+                    $current_company->atv_validation = true;
+                    $current_company->save();
+                }
+            }else {
+                return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
+            }
+        }
+
         if ($current_company->last_rec_ref_number == null) {
             return redirect('/empresas/configuracion')->withError( "No ha ingresado ultimo consecutivo de recepcion");
         }
