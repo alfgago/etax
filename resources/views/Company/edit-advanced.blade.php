@@ -151,6 +151,16 @@
                   </select>
 						    </div>
 						    
+						    <div class="form-group col-md-6">
+						      <label for="default_vat_code">% Retención Tarjeta Credito</label>
+						      <select class="form-control" id="default_retention_card" name="default_retention_card" >
+						          <option value="0">0%</option>
+						          <option value="3">3%</option>
+						          <option value="6">6%</option>
+						          <option value="9">9%</option>
+						      </select>
+						    </div>
+
 						     <div class="form-group col-md-12">
 						      <label for="default_invoice_notes">Notas por defecto</label>
 						      <textarea class="form-control" name="default_invoice_notes" id="default_invoice_notes"  maxlength="190" >{{ @$company->default_invoice_notes }}</textarea>
