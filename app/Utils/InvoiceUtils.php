@@ -366,7 +366,7 @@ class InvoiceUtils
                 'passwordAtv' => $company->atv->password ?? '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
                 'atvcertPin' => $company->atv->pin ?? '',
-                'atvcertFile' => Storage::get($company->atv->key_url),
+                //'atvcertFile' => Storage::get($company->atv->key_url),
 
                 'servgravados' => $totalServiciosGravados,
                 'servexentos' => $totalServiciosExentos,
@@ -390,6 +390,9 @@ class InvoiceUtils
                 $invoiceData['fecha_emision_factura'] = $data['reference_generated_date'];
                 $invoiceData['clave_factura'] = $data['reference_document_key'];
             }
+            Log::info("Request Data from invoices id: $data->id  --> ".json_encode($invoiceData));
+            $invoiceData['atvcertFile'] = Storage::get($company->atv->key_url);
+
             foreach ($invoiceData as $key => $values) {
                 if ($key == 'atvcertFile') {
                     $request[]=array(
