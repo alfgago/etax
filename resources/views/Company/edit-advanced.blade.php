@@ -152,13 +152,11 @@
 						    </div>
 						    
 						    <div class="form-group col-md-6">
-						      <label for="default_vat_code">% Retención Tarjeta Credito</label>
-						      <select class="form-control" id="default_retention_card" name="default_retention_card" >
-						          <option value="0">0%</option>
-						          <option value="3">3%</option>
-						          <option value="6">6%</option>
-						          <option value="9">9%</option>
-						      </select>
+						      <label for="card_retention">% Retención Tarjeta Credito</label>
+						      <select class="form-control" id="card_retention" name="card_retention" >
+						          <option value="0" {{ @$company->card_retention == 0 ? 'selected' : '' }}>0%</option>
+						          <option value="3" {{ @$company->card_retention == 3 ? 'selected' : '' }}>3%</option>
+						          <option value="6" {{ @$company->card_retention == 6 ? 'selected' : '' }}>6%</option>
 						    </div>
 
 						     <div class="form-group col-md-12">
