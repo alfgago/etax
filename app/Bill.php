@@ -302,7 +302,7 @@ class Bill extends Model
         $bill->payment_type = $medioPago;
         
         //Fechas
-        $fechaEmision = Carbon::createFromFormat('Y-m-d', subS0tr($arr['FechaEmision'], 0, 10));
+        $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10));
         $bill->generated_date = $fechaEmision;
         $bill->due_date = $fechaEmision;
         
