@@ -261,6 +261,7 @@ class InvoiceController extends Controller
     public function EnviarProgramadas(){
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $date_Today = $start_date->format('Y-m-d'); 
+        $generated_date = $start_date->format('d/m/Y'); 
         $day = $start_date->format('d');
         $mes = $start_date->format('m');
         $compare_year = $day.'/'.$mes;
@@ -320,8 +321,11 @@ class InvoiceController extends Controller
         $pre_invoices = ScheduledInvoices::join('pre_invoices','pre_invoices.id','scheduled_invoices.pre_invoice_id')
                 ->where('send_date',$date_Today)->get();
         foreach ($pre_invoices as $invoice ) {
-            $retorno = $this->sendHacienda(json_decode($invoice->body));
-            //dd(json_decode($invoice->body));
+            $request = json_decode($invoice->body);
+            //dd($request);
+            $request->generated_date = $generated_date;
+            $retorno = $this->sendHacienda($request);
+           // dd($request);
         }
         dd($pre_invoices);                                                 
     }
@@ -330,7 +334,7 @@ class InvoiceController extends Controller
     public function GuardarInvoice(Request $request){
         $company = currentCompanyModel();
         $start_date = Carbon::parse(now('America/Costa_Rica'));
-        $date_Today = $start_date->format('Y-m-d');   
+        $date_Today = $start_date->format('Y-m-d');
         $pre_invoices_create = 0;
         if($request->factura_recurrente == 1){
             $pre_invoices_create = 1;
@@ -430,7 +434,8 @@ class InvoiceController extends Controller
                 if ($request->document_type == '09') {
                     $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
                 }
-
+                $invoice->document_number = $this->getDocReference($request->document_type);
+                $invoice->document_key = $this->getDocumentKey($request->document_type);
                 $invoiceData = $invoice->setInvoiceData($request);
                 if (!empty($invoiceData)) {
                     $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);

@@ -240,7 +240,9 @@ class Invoice extends Model
 
             $lids = array();
             $i = 1;
+
             foreach($request->items as $item) {
+                $item =  (array) $item;
                 $item['item_number'] = $i;
                 $item['item_id'] = $item['id'] ? $item['id'] : 0;
                 $item_modificado = $this->addEditItem($item);
