@@ -117,6 +117,11 @@ class ProcessReception implements ShouldQueue
                             Log::info('Failed Job');
 
 
+                        } else if (isset($response['status']) && $response['status'] == 400 &&
+                            strpos($response['message'], 'archivo XML ya existe en nuestras bases de datos') <> false) {
+                            $bill->accept_status = 0;
+                            $bill->save();
+                            Log::info('Failed Job');
                         } else {
                             $bill->accept_status = 0;
                             $bill->save();
