@@ -181,6 +181,8 @@ class WizardController extends Controller
             $company->first_prorrata = $request->first_prorrata;
             $company->first_prorrata_type = $request->first_prorrata_type;
             $company->use_invoicing = $request->use_invoicing;
+            $company->card_retention = $request->card_retention;
+            $company->default_product_category = $request->default_category_producto_code;
             
             if( $company->first_prorrata_type == 1 ) {
                 $company->operative_prorrata = $request->first_prorrata;

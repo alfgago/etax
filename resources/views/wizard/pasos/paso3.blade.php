@@ -22,7 +22,7 @@
   <label for="default_category_producto_code">Categoria productos</label>
   <select class="form-control" id="default_category_producto_code" name="default_category_producto_code">
     @foreach ( \App\ProductCategory::all() as $category )
-      <option value="{{ $category['invoice_iva_code'] }}" options="{{ $category['open_codes'] }}" >{{ $category['name'] }}</option>
+      <option value="{{ $category['invoice_iva_code'] }}" posibles="{{ $category['open_codes'] }}" >{{ $category['invoice_iva_code'] }} {{ $category['name'] }}</option>
     @endforeach
   </select>
 </div>  
@@ -64,3 +64,22 @@
   <button type="button" class="btn btn-primary btn-prev" onclick="toggleStep('step2');">Paso anterior</button>
   <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step4');">Siguiente paso</button>
 </div>
+
+<script>
+  
+$(document).ready(function(){
+
+    $("#default_category_producto_code").change(function(){
+      var posibles = $('#default_category_producto_code :selected').attr('posibles');
+      var arrPosibles = posibles.split(",");
+      var tipo;
+      $('#default_vat_code option').hide();
+      for( tipo of arrPosibles ) {
+        $('#default_vat_code option[value='+tipo+']').show();
+      }
+    });
+
+
+});
+      
+</script>
