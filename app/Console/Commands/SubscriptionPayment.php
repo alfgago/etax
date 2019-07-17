@@ -49,15 +49,17 @@ class SubscriptionPayment extends Command
 
     public function dailySubscriptionsPayment(){
         try{
-            $this->info('Iniciando comando');
+            Log::info('Iniciando comando de pagos pendientes');
             $paymentUtils = new PaymentUtils();
             $date = Carbon::parse(now('America/Costa_Rica'));
+            
             $bnStatus = $paymentUtils->statusBNAPI();
             if($bnStatus['apiStatus'] == 'Successful') {
 
-                $unpaidSubscriptions = Sales::where('status', 2)->where('recurrency', '!=', '0')->get();
+                $unpaidSubscriptions = Sales::where('status', 2)->where('is_subscription', true)->get();
                 foreach($unpaidSubscriptions as $sale){
-
+                    
+                    Log::info("Procesando cobro $sale->company_id");
                     $subtotal = $sale->product->plan->monthly_price;
                     switch ($sale->recurrency){
                         case 1:
@@ -74,9 +76,9 @@ class SubscriptionPayment extends Command
                     $iv = $subtotal * 0.13;
                     $amount = $subtotal + $iv;
 
-                    $paymentMethod = PaymentMethod::where('user_id', $sale->user->id)->where('default_card', true)->first();
+                    $paymentMethod = PaymentMethod::where('user_id', $sale->user_id)->where('default_card', true)->first();
                     $company = $sale->company;
-
+                    
                     if($paymentMethod){
                         $payment = Payment::updateOrCreate(
                             [
@@ -120,7 +122,7 @@ class SubscriptionPayment extends Command
                             $invoiceData = new stdClass();
                             $invoiceData->client_code = $company->id_number;
                             $invoiceData->client_id_number = $company->id_number;
-                            $invoiceData->client_id = $company->id_number;
+                            $invoiceData->client_id = '-1';
                             $invoiceData->tipo_persona = $company->tipo_persona;
                             $invoiceData->first_name = $company->first_name;
                             $invoiceData->last_name = $company->last_name;
@@ -131,11 +133,11 @@ class SubscriptionPayment extends Command
                             $invoiceData->district = $company->district;
                             $invoiceData->neighborhood = $company->neighborhood;
                             $invoiceData->zip = $company->zip;
-                            $invoiceData->address = $company->address;
-                            $invoiceData->phone = $company->phone;
-                            $invoiceData->es_exento = $company->es_exento;
+                            $invoiceData->address = $company->address ?? null;
+                            $invoiceData->phone = $company->phone ?? null;
+                            $invoiceData->es_exento = false;
                             $invoiceData->email = $company->email;
-                            $invoiceData->expiry = $company->expiry;
+                            //$invoiceData->expiry = $company->expiry;
                             $invoiceData->amount = $amount;
                             $invoiceData->subtotal = $subtotal;
                             $invoiceData->iva_amount = $iv;
@@ -154,7 +156,8 @@ class SubscriptionPayment extends Command
                             $item->total = $amount;
 
                             $invoiceData->items = [$item];
-                            $factura = $this->crearFacturaClienteEtax($invoiceData);
+                            Log::error("Creando factur de cliente");
+                            $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
                         }else{
                             \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
                                 [
@@ -165,6 +168,7 @@ class SubscriptionPayment extends Command
                             ));
                         }
                     }else{
+                        Log::warning("Error en cobro de $company->name");
                         \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
                             [
                                 'name' => $company->name . ' ' . $company->last_name,
@@ -174,6 +178,8 @@ class SubscriptionPayment extends Command
                         ));
                     }
                 }
+            }else{
+                Log::error("Error en API Klap: ".$bnStatus['apiStatus']);
             }
             return true;
         }catch( \Exception $ex ) {

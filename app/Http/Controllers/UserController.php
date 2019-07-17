@@ -326,9 +326,10 @@ class UserController extends Controller {
     
     public function impersonate( $id ) {
         
-        $user = User::findOrFail($id);
-        
-        Auth::user()->impersonate($user);
+        if( Auth::user()->canImpersonate()  ) {
+            $user = User::findOrFail($id);
+            Auth::user()->impersonate($user);
+        }
         return redirect( '/' );
         
     }

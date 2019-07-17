@@ -69,7 +69,14 @@ class User extends Authenticatable {
     
     public function canImpersonate()
     {
-        return $this->user_name == "alfgago";
+        $allow = false;
+        if( 
+            $this->user_name == "alfgago" || 
+            $this->user_name == "aligguillen@gmail.com" 
+        ) {
+            $allow = true;
+        }
+        return $allow;
     }
 
     public function addCompany() {
