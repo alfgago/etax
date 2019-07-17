@@ -29,12 +29,14 @@ class InvoiceNotification extends Mailable
     public function build()
     {
         $string = substr($this->content['xml'], -169);
+        
+        $fromName = $this->content['data_company']->business_name;
         $message = $this->subject('Confirmación Factura electrónica #' . $this->content['data_invoice']->document_number.
             ' De: '.$this->content['data_company']->business_name)->markdown('emails.invoice.confirmation')
             ->with([
                 'data_invoice' => $this->content['data_invoice'], 
                 'xml' => $string]
-            );
+            )->from('info@etaxcr.com', $fromName);;
         $message->attachFromStorage($this->content['xmlMH']);
         $message->attachFromStorage($this->content['xml']);
         return $message;
