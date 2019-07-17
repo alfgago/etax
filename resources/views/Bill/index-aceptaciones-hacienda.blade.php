@@ -16,8 +16,13 @@
           Este proceso genera la aceptación o rechazo ante Hacienda.
         </div>
         
+        @if( currentCompanyModel()->use_invoicing )
         <h2 class="mt-4 mb-4" style="color: red;">Asegúrese de tener la prorrata y proporcionalidad correctas antes de aceptar su primera factura en 4.3</h2>
-          
+        @else
+        <h2 class="mt-4 mb-4" style="color: red;">
+          Usted no tiene un facturación con eTax habilitada, por lo que esta pantalla únicamente incluirá o no las facturas en eTax para cálculo, y <b><u>no</u></b> realizará aceptaciones con Hacienda.
+        </h2>
+        @endif
         <table id="bill-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
