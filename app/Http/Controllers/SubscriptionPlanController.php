@@ -50,7 +50,7 @@ class SubscriptionPlanController extends Controller
         $user = auth()->user();
         $sale = Sales::startTrial( $request->product_id, $request->recurrency );
         Log::info('Nuevo suscriptor ha iniciado periodo de pruebas: ' . $user->email);
-        return redirect('/wizard')->withMessage('¡Felicidades! Ha iniciado du prueba en eTax.');
+        return redirect('/wizard')->withMessage('¡Felicidades! Ha iniciado su prueba en eTax.');
         
     }
     
