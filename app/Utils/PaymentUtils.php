@@ -270,19 +270,26 @@ class PaymentUtils
         }
     }
 
-    private function getDocReference($docType) {
-        $company = currentCompany();
-        $lastSale = Company::find($company)->last_invoice_ref_number + 1;
+    private function getDocReference($docType, $companyId = null) {
+        if( $companyId ){
+            $company = Company::find($companyId);
+        }else{
+            $company = currentCompanyModel();
+        }
+        $lastSale = $company->last_invoice_ref_number + 1;
         $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
 
         return $consecutive;
     }
 
-    private function getDocumentKey($docType) {
-        $companyId = currentCompany();
-        $company = Company::find($companyId);
+    private function getDocumentKey($docType, $companyId = null) {
+        if( $companyId ){
+            $company = Company::find($companyId);
+        }else{
+            $company = currentCompanyModel();
+        }
         $invoice = new Invoice();
-        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
+        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType, 1).
             '1'.$invoice->getHashFromRef($company->last_invoice_ref_number + 1);
 
         return $key;
@@ -343,6 +350,119 @@ class PaymentUtils
         ]);
         $charges = json_decode($userRequestCharges->getBody()->getContents(), true);
         return $charges;
+    }
+    
+    public function crearFacturaClienteEtax($invoiceData){
+        $apiHacienda = new BridgeHaciendaApi();
+        $tokenApi = $apiHacienda->login(false);
+        if ($tokenApi !== false) {
+            $invoice = new Invoice();
+            $company = Company::find(1);
+            $invoice->company_id = 1;
+            $document_key = $this->getDocumentKey('01', 1);
+            $document_number = $this->getDocReference('01', 1);
+
+            //Datos generales y para Hacienda
+            $invoice->document_type = "01";
+            $invoice->hacienda_status = "01";
+            $invoice->payment_status = "01";
+            $invoice->payment_receipt = "";
+            $invoice->generation_method = "etax";
+            $invoice->reference_number = $company->last_invoice_ref_number + 1;
+
+            $data = new stdClass();
+            $data->document_key = $document_key;
+            $data->document_number = $document_number;
+            $data->sale_condition = '01';
+            $data->payment_type = "02";
+            $data->retention_percent = "6";
+            $data->credit_time = "0";
+
+            $data->tipo_persona = "02";
+            $data->identificacion_cliente = $invoiceData->client_id_number;
+            $data->codigo_cliente = $invoiceData->client_code;
+            $data->code = $invoiceData->client_code;
+            $data->id_number = $invoiceData->client_id_number;
+            
+            $data->commercial_activity = 722003;
+
+            $data->client_code = $invoiceData->client_id_number;
+            $data->client_id_number = $invoiceData->client_id_number;
+            $data->client_id = '-1';
+            $data->tipo_persona = $invoiceData->tipo_persona;
+            $data->first_name = $invoiceData->first_name;
+            $data->last_name = $invoiceData->last_name;
+            $data->last_name2 = $invoiceData->last_name2;
+            $data->country = $invoiceData->country;
+            $data->state = $invoiceData->state;
+            $data->city = $invoiceData->city;
+            $data->district = $invoiceData->district;
+            $data->neighborhood = $invoiceData->neighborhood;
+            $data->zip = $invoiceData->zip;
+            $data->address = $invoiceData->address;
+            $data->phone = $invoiceData->phone;
+            $data->es_exento = $invoiceData->es_exento;
+            $data->email = $invoiceData->email;
+            $data->buy_order = '';
+            $data->due_date =
+            $data->other_reference = '';
+            $data->currency_rate = get_rates();
+            $data->description = 'Factura de Etax';
+            $data->subtotal = $invoiceData->subtotal;
+            $data->currency = 'USD';
+            $data->total = $invoiceData->amount;
+            $data->iva_amount = $invoiceData->iva_amount;
+            $data->generated_date = Carbon::now()->format('d/m/Y');
+            $data->hora = Carbon::now()->format('g:i A');
+            $data->due_date = Carbon::now()->addDays(7)->format('d/m/Y');
+
+            $item = array();
+
+            $item['item_number'] = 1;
+            $item['id'] = 0;
+            $item['code'] = $invoiceData->items[0]->code;
+            $item['name'] = $invoiceData->items[0]->name;
+            $item['product_type'] = '17';
+            $item['measure_unit'] = 'Sp';
+            $item['item_count'] = $invoiceData->items[0]->cantidad;
+            $item['unit_price'] = $invoiceData->items[0]->unit_price;
+            $item['subtotal'] = $invoiceData->items[0]->subtotal;
+
+            $item['discount_percentage'] = $invoiceData->items[0]->descuento;
+            $item['discount_reason'] = $invoiceData->items[0]->discount_reason;
+            $item['discount'] = $invoiceData->items[0]->descuento;
+
+            $item['iva_type'] = 'S103';
+            $item['iva_percentage'] = 13;
+            $item['iva_amount'] = $invoiceData->items[0]->iva_amount;
+
+            $item['total'] = $invoiceData->items[0]->total;
+            $item['is_identificacion_especifica'] = 0;
+            $item['is_exempt'] = 0;
+
+            $data->items = [ $item ];
+            
+            try{
+                $invoiceDataSent = $invoice->setInvoiceData($data);
+                
+                Log::info('Suscriptor: '. $data->client_id_number . ", Nombre: " . $data->first_name . " " . $data->last_name . " " . $data->last_name2 . ", Plan:" . $invoiceData->items[0]->name );
+                if ( !empty($invoiceDataSent) ) {
+                    $invoice = $apiHacienda->createInvoice($invoiceDataSent, $tokenApi);
+                }
+                $company->last_invoice_ref_number = $invoice->reference_number;
+                $company->last_document = $invoice->document_number;
+                $company->save();
+                clearInvoiceCache($invoice);
+                
+            }catch(\Throwable $e){
+                Log::error('Error al crear factura de compra eTax. ' . $e->getMessage() );
+            }
+
+            Log::info( 'Nueva suscripción exitosa.' );
+            return true;
+        } else {
+            return false;
+        }
     }
 	
 }
