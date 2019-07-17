@@ -23,7 +23,7 @@
 	            </thead>
 	            <tbody>
 	            	@foreach($data as $item)
-		            	@if( !$item->bill->is_void && $item->bill->is_authorized && $item->bill->is_code_validated )
+		            	@if( !$item->bill->is_void && $item->bill->is_authorized && $item->bill->is_code_validated && $item->bill->accept_status == 1 )
 		              <tr>
 		                <td>{{ $item->bill->generatedDate()->format('d/m/Y') }}</td>
 		                <td>{{ $item->bill->provider->getFullName() }}</td>

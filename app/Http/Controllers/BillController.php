@@ -616,27 +616,31 @@ class BillController extends Controller
         
         $current_company = currentCompanyModel();
 
-        if ($current_company->atv_validation == false) {
-            $apiHacienda = new BridgeHaciendaApi();
-            $token = $apiHacienda->login(false);
-            $validateAtv = $apiHacienda->validateAtv($token, $current_company);
-
-            if($validateAtv) {
-                if ($validateAtv['status'] == 400) {
-                    Log::info('Atv Not Validated Company: '. $current_company->id_number);
-                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
-                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+        if( $current_company->use_invoicing ) {
+            if ($current_company->atv_validation == false) {
+                $apiHacienda = new BridgeHaciendaApi();
+                $token = $apiHacienda->login(false);
+                $validateAtv = $apiHacienda->validateAtv($token, $current_company);
+    
+                if($validateAtv) {
+                    if ($validateAtv['status'] == 400) {
+                        Log::info('Atv Not Validated Company: '. $current_company->id_number);
+                        if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                            $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                        }
+                        return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
+    
+                    } else {
+                        Log::info('Atv Validated Company: '. $current_company->id_number);
+                        $current_company->atv_validation = true;
+                        $current_company->save();
                     }
-                    return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
-
-                } else {
-                    Log::info('Atv Validated Company: '. $current_company->id_number);
-                    $current_company->atv_validation = true;
-                    $current_company->save();
+                }else {
+                    return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
                 }
-            }else {
-                return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
             }
+        }else{
+            return view('Bill/index-aceptaciones-hacienda')->withMessage('Usted no tiene un facturación con eTax activada, por lo que esta pantalla únicamente validará los códigos eTax para cálculo y no realizará aceptaciones con Hacienda.');
         }
 
         if ($current_company->last_rec_ref_number == null) {
@@ -723,25 +727,34 @@ class BillController extends Controller
     public function sendAcceptMessage (Request $request, $id)
     {
         try {
-            $apiHacienda = new BridgeHaciendaApi();
-            $tokenApi = $apiHacienda->login(false);
-            if ($tokenApi !== false) {
-                $bill = Bill::findOrFail($id);
-                $company = currentCompanyModel();
+            $company = currentCompanyModel();
+            $bill = Bill::findOrFail($id);
+            if( currentCompanyModel()->use_invoicing ) {
+                $apiHacienda = new BridgeHaciendaApi();
+                $tokenApi = $apiHacienda->login(false);
+                if ($tokenApi !== false) {
+                    if (!empty($bill)) {
+                        $bill->accept_status = $request->respuesta;
+                        $bill->save();
+                        $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
+                        $company->save();
+                        $company->last_document_rec = getDocReference($company->last_rec_ref_number);
+                        $company->save();
+                        $apiHacienda->acceptInvoice($bill, $tokenApi);
+                    }
+                    clearBillCache($bill);
+                    return redirect('/facturas-recibidas/aceptaciones')->withMessage('Aceptación enviada.');
+    
+                } else {
+                    return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+                }
+            } else {
                 if (!empty($bill)) {
                     $bill->accept_status = $request->respuesta;
                     $bill->save();
-                    $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
-                    $company->save();
-                    $company->last_document_rec = getDocReference($company->last_rec_ref_number);
-                    $company->save();
-                    $apiHacienda->acceptInvoice($bill, $tokenApi);
                 }
                 clearBillCache($bill);
-                return redirect('/facturas-recibidas/aceptaciones')->withMessage('Aceptación enviada.');
-
-            } else {
-                return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+                return redirect('/facturas-recibidas/aceptaciones')->withMessage('Factura aceptada para cálculo en eTax.');
             }
         } catch ( Exception $e) {
             Log::error ("Error al crear aceptacion de factura");
