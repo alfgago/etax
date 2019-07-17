@@ -429,6 +429,5 @@ class InvoiceUtils
         }
         return $discount;
     }
-
+    
 }
-            $details = null;
