@@ -19,7 +19,7 @@
               <th>Documento</th>
               <th>Cliente</th>
               <th>Monto</th>
-              <th>Retencion 6%</th>
+              <th>Retencion {{$data['retencion_porcentaje']}}%</th>
             </tr>
           </thead>
           <tbody>
@@ -51,15 +51,15 @@
           @method('post') 
     <div class="form-group">
       <label for="total_vendido">TOTAL VENTAS EN TARJETAS</label>
-      <input type="number" class="form-control" id="total_vendido" name="total_vendido" disabled value="{{@$data['total_facturado']}}">
+      <input type="text" class="form-control" id="total_vendido" name="total_vendido" disabled value="₡{{ number_format( $data['total_facturado'], 0 ) }}">
     </div>
     <div class="form-group">
-      <label for="total_retencion">RETENCION PREDEFINIDA 6%</label>
-      <input type="number" class="form-control" id="total_retencion" name="total_retencion" disabled value="{{@$data['total_retencion']}}">
+      <label for="total_retencion">RETENCION PREDEFINIDA {{$data['retencion_porcentaje']}}%</label>
+      <input type="text" class="form-control" id="total_retencion" name="total_retencion" disabled value="₡{{ number_format( $data['total_retencion'], 0 ) }}">
     </div>
     <div class="form-group">
       <label for="total_retenido">SALDO REAL RETENIDO</label>
-      <input type="number" class="form-control" id="total_retenido" @if($data['cerrado'] === 1) disabled @endif name="total_retenido" value="{{@$data['total_retenido']}}">
+      <input type="number" class="form-control" id="total_retenido" @if($data['cerrado'] === 1) disabled @endif name="total_retenido" value="{{ $data['total_retencion'] }}">
     </div>
     @if($data['cerrado'] === 0) 
         <input type="number" class="form-control" id="cierre" name="cierre" hidden value="{{@$data['cierre']}}">
