@@ -302,11 +302,12 @@ class InvoiceController extends Controller
                     $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
                 }
 
+                $invoiceData = $invoice->setInvoiceData($request);
+                
                 $invoice->document_key = $this->getDocumentKey($request->document_type);
                 $invoice->document_number = $this->getDocReference($request->document_type);
                 $invoice->save();
-
-                $invoiceData = $invoice->setInvoiceData($request);
+                
                 if (!empty($invoiceData)) {
                     $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
                 }
