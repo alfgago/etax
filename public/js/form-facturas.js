@@ -161,7 +161,7 @@ function agregarLinea() {
     //alert('Debe completar los datos de la linea antes de continuar');
       Swal.fire({
           type: 'error',
-          title: 'Info',
+          title: 'Error',
           text: 'Debe completar los datos de la linea antes de guardarla'
       })
       return false;
@@ -187,7 +187,7 @@ function calcularTotalFactura() {
     }else{
         Swal.fire({
             type: 'error',
-            title: 'Info',
+            title: 'Error',
             text: 'No pueden enviarse valores negativos'
         })
         return false;
