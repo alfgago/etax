@@ -133,15 +133,24 @@
 								  <input type="text" class="form-control" name="last_document_note" id="last_document_note" value="{{ @$company->last_document_note }}" required>
 								  <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
 							  </div>
-						    
-						    <div class="form-group col-md-12">
-						      <label for="default_vat_code">Tipo de IVA por defecto</label>
-						      <select class="form-control" id="default_vat_code" name="default_vat_code" >
-						        @foreach ( \App\Variables::tiposIVARepercutidos() as $tipo )
-						          <option value="{{ $tipo['codigo'] }}" porcentaje="{{ $tipo['porcentaje'] }}" {{ @$company->default_vat_code == $tipo['codigo']  ? 'selected' : '' }}>{{ $tipo['nombre'] }}</option>
-						        @endforeach
-						      </select>
-						    </div>
+							  
+								<div class="form-group col-md-12">
+								  <label for="default_category_producto_code">Categoría de declaración por defecto</label>
+								  <select class="form-control" id="default_category_producto_code" name="default_category_producto_code">
+								    @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $category )
+								      <option value="{{ $category['id'] }}" posibles="{{ $category['open_codes'] }}" {{ @$company->default_category_producto_code == $tipo['id']  ? 'selected' : '' }}>{{ $category['name'] }}</option>
+								    @endforeach
+								  </select>
+								</div>  
+								
+								<div class="form-group col-md-12">
+								  <label for="default_vat_code">Tipo de IVA por defecto</label>
+								  <select class="form-control" id="default_vat_code" name="default_vat_code">
+								    @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
+								      <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }} {{ @$tipo['hideMasiva'] ? 'hidden' : '' }}" {{ @$company->default_vat_code == $tipo['codigo']  ? 'selected' : '' }}>{{ $tipo['name'] }}</option>
+								    @endforeach
+								  </select>
+								</div> 
 						    
 						    <div class="form-group col-md-6">
 						      <label for="default_currency">Tipo de moneda por defecto</label>
@@ -149,6 +158,15 @@
                     <option value="crc" {{ @$company->default_currency == 'crc' ? 'selected' : '' }}>CRC</option>
                     <option value="usd" {{ @$company->default_currency == 'usd' ? 'selected' : '' }}>USD</option>
                   </select>
+						    </div>
+						    
+						    <div class="form-group col-md-6">
+						      <label for="card_retention">% Retención Tarjetas</label>
+						      <select class="form-control" id="card_retention" name="card_retention" >
+				                    <option value="0" {{ @$company->card_retention == 0 ? 'selected' : '' }}>0%</option>
+				                    <option value="3" {{ @$company->card_retention == 3 ? 'selected' : '' }}>3%</option>
+				                    <option value="6" {{ @$company->card_retention == 6 ? 'selected' : '' }}>6%</option>
+						      </select>
 						    </div>
 						    
 						     <div class="form-group col-md-12">
@@ -185,6 +203,16 @@
 		  
 		  toggleTipoProrrata();
 		  
+	    $("#default_category_producto_code").change(function(){
+	      var posibles = $('#default_category_producto_code :selected').attr('posibles');
+	      var arrPosibles = posibles.split(",");
+	      var tipo;
+	      $('#default_vat_code option').hide();
+	      for( tipo of arrPosibles ) {
+	        $('#default_vat_code option[value='+tipo+']').show();
+	      }
+	    });
+
 		});
 				
 	</script>

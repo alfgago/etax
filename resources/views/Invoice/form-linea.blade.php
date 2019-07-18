@@ -41,7 +41,7 @@
     } ?>
 
     <div class="form-group col-md-12">
-      <label for="tipo_producto">Tipo de producto</label>
+      <label for="tipo_producto">Categoría de declaración</label>
       <select class="form-control select-search" id="tipo_producto" >
         @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
           <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
@@ -94,7 +94,7 @@
     
     <div class="form-group col-md-3">
       <label for="cantidad">Cantidad</label>
-      <input type="number" min="1" class="form-control" id="cantidad" value="1"  >
+      <input type="number" min="1" step="0.1" class="form-control" id="cantidad" value="1"  >
     </div>
 
     <div class="form-group col-md-3">

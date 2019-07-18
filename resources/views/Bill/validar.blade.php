@@ -30,7 +30,7 @@
     </div>
       <div class="form-row">
       <div class="form-group col-md-12">
-          <b>Categoría de Producto:</b>
+          <b>Categoría de declaración:</b>
           <select class="form-control" name="category_product" id="category_product" placeholder="Seleccione una categoría de producto" required>
 
               @foreach($data['categoria_productos'] as $categoria_productos)
