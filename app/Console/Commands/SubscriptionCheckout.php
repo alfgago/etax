@@ -50,9 +50,7 @@ class SubscriptionCheckout extends Command
     public function updateAllSubscriptions(){
         try {
             $now = Carbon::parse(now('America/Costa_Rica'));
-            Log::info('Revisa si hay pagos pendientes.' . $now);
             $activeSubscriptions = Sales::whereIn('status', [1, 2])->where('is_subscription', true)->whereDate('next_payment_date', '<=', $now)->get();
-            
             foreach ($activeSubscriptions as $activeSubscription) {
                 $activeSubscription->status = 2;
                 Log::info('Procesando estado de pago: ' . $activeSubscription->id);
@@ -64,6 +62,14 @@ class SubscriptionCheckout extends Command
                 $activeSubscription->save();
             }
             Log::info('Estados de pago procesados.');
+            
+            $trialEndedSubscriptions = Sales::whereIn('status', 4)->where('is_subscription', true)->whereDate('trial_end_date', '<=', $now)->get();
+            foreach ($trialEndedSubscriptions as $sub) {
+                $sub->status = 3; //Pone status inactivo, para que vaya a hacer el cobro apenas la persona inicie sesión
+                $sub->save();
+                Log::info('Vence el trial a:' . $sub->id);
+            }
+            Log::info('Suscripciones en prueba gratis actualizadas.');
         }catch( \Exception $ex ) {
             Log::error("Error en correr comando" . $ex->getMessage());
         }

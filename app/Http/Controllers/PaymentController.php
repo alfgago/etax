@@ -315,7 +315,7 @@ class PaymentController extends Controller
                 $invoiceData->items = [$item];
                 $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
                 if($factura){
-                    return redirect('/wizard')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+                    return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
                 }
             } else {
                 $mensaje = 'El pago ha sido denegado';
@@ -372,7 +372,7 @@ class PaymentController extends Controller
             ]
         );
         
-        return redirect('/wizard')->withMessage('Se aplicó el cupón exitosamente');
+        return redirect('/')->withMessage('Se aplicó el cupón exitosamente');
            
     }
 
