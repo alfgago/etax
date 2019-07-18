@@ -19,10 +19,10 @@
 </div>
 
 <div class="form-group col-md-12">
-  <label for="default_category_producto_code">Categoria productos</label>
+  <label for="default_category_producto_code">Categoría de declaración por defecto</label>
   <select class="form-control" id="default_category_producto_code" name="default_category_producto_code">
     @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $category )
-      <option value="{{ $category['invoice_iva_code'] }}" posibles="{{ $category['open_codes'] }}" >{{ $category['invoice_iva_code'] }} {{ $category['name'] }}</option>
+      <option value="{{ $category['id'] }}" posibles="{{ $category['open_codes'] }}" >{{ $category['name'] }}</option>
     @endforeach
   </select>
 </div>  
