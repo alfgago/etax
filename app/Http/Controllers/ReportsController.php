@@ -31,10 +31,6 @@ class ReportsController extends Controller
       
       $user = auth()->user();
       
-      if (strpos($user->email, '.ru') !== false) {
-            return redirect('127.0.0.1');
-      }
-      
       if( !$user->has_klap_user ) {
           $user->createKlapUser();
       }
@@ -68,7 +64,7 @@ class ReportsController extends Controller
         return redirect('/elegir-plan');
       }
       
-      if( ! currentCompanyModel()->wizard_finished ) {
+      if( !currentCompanyModel()->wizard_finished ) {
         return redirect('/wizard');
       }
 
