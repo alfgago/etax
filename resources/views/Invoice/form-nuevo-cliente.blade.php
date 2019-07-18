@@ -171,8 +171,12 @@
             var email = $('#email').val();
             var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             if(re.test(String(email).toLowerCase()) != true){
-                alert('La direccion de correo electronico no coincide con ningun formato de correo');
                 $('#email').addClass('error');
+                Swal.fire({
+                    type: 'error',
+                    title: 'Info:',
+                    text: 'La direccion de correo electronico no coincide con ningun formato de correo'
+                });
             }else{
                 $('#email').removeClass('error');
             }

@@ -101,7 +101,7 @@
 						    
 						    <div class="form-group col-md-6">
 						      <label for="saldo_favor_2018">Ingrese su saldo a favor acumulado de periodos anteriores</label>
-						      <input type="number" class="form-control" name="saldo_favor_2018" id="saldo_favor_2018" step="0.01" value="{{ @$company->saldo_favor_2018 ? $company->saldo_favor_2018 : 0 }}">
+						      <input type="numeric" class="form-control" name="saldo_favor_2018" id="saldo_favor_2018" step="0.01" value="{{ @$company->saldo_favor_2018 ? $company->saldo_favor_2018 : 0 }}">
 						    </div>
 						    
 						    <div class="form-group col-md-12">
@@ -172,6 +172,33 @@
 @endsection
 
 @section('footer-scripts')
+    <script>
+        $(document).ready(function(){
+            $('#saldo_favor_2018').on('keyup',function(){
+                $(this).manageCommas();
+            });
+            //then sanatize on leave
+            // if sanitizing needed on form submission time,
+            //then comment beloc function here and call in in form submit function.
+            $('#saldo_favor_2018').on('focus',function(){
+                $(this).santizeCommas();
+            });
+        });
+
+        String.prototype.addComma = function() {
+            return this.replace(/(.)(?=(.{3})+$)/g,"$1,").replace(',.', '.');
+        }
+        //Jquery global extension method
+        $.fn.manageCommas = function () {
+            return this.each(function () {
+                $(this).val($(this).val().replace(/(,|)/g,'').addComma());
+            });
+        }
+
+        $.fn.santizeCommas = function() {
+            return $(this).val($(this).val().replace(/(,| )/g,''));
+        }
+    </script>
 
 	<script>
 		

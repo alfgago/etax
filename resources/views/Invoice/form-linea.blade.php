@@ -94,21 +94,21 @@
     
     <div class="form-group col-md-3">
       <label for="cantidad">Cantidad</label>
-      <input type="number" min="1" class="form-control" id="cantidad" value="1"  >
+      <input type="text" min="1" class="form-control" id="cantidad" value="1"  >
     </div>
 
     <div class="form-group col-md-3">
       <label for="precio_unitario">Precio unitario</label>
       @if( @$document_type != "08"  )
-      <input type="number" min="0" class="form-control" id="precio_unitario" value="" number >
+      <input type="text" min="0" class="form-control" id="precio_unitario" placeholder="0" number >
       @else
-      <input type="number" min="0" class="form-control" id="precio_unitario" readonly value="0" number >
+      <input type="text" min="0" class="form-control" id="precio_unitario" readonly value="0" number >
       @endif
     </div>
 
     <div class="form-group col-md-3">
       <label for="item_iva">Monto IVA</label>
-      <input type="number" min="0" class="form-control {{ @$document_type == '08' ? 'is-fec' : 'not-fec' }}" id="item_iva_amount" placeholder="" >
+      <input type="text" min="0" class="form-control {{ @$document_type == '08' ? 'is-fec' : 'not-fec' }}" id="item_iva_amount" placeholder="" >
     </div>
 
     <div class="form-group col-md-3">
@@ -121,12 +121,12 @@
 
     <div class="form-group col-md-3">
       <label for="discount">Descuento</label>
-      <input type="number" min="0" max="100" class="form-control" id="discount" value="0" >
+      <input type="text" min="0" class="form-control" id="discount" placeholder="0" >
     </div>
 
     <div class="form-group col-md-3">
       <label for="item_subtotal">Subtotal</label>
-      <input type="number" min="0" class="form-control" id="item_subtotal" placeholder="" readonly="true" >
+      <input type="text" min="0" class="form-control" id="item_subtotal" placeholder="" readonly="true" >
     </div>
 
     <div class="form-group col-md-3">
@@ -219,54 +219,73 @@
 </div>
 <script>
     $(function () {
-        $("#porcentajeExoneracion").keydown(function () {
-            // Save old value.
-            if (!$(this).val() || (parseInt($(this).val()) <= 100 && parseInt($(this).val()) >= 0))
-                $(this).data("old", $(this).val());
+        /*campo cantidad*/
+        $('#cantidad').on('keyup',function(){
+            $(this).manageCommas();
         });
-        $("#porcentajeExoneracion").keyup(function () {
-            // Check correct, else revert back to old value.
-            if (!$(this).val() || (parseInt($(this).val()) <= 100 && parseInt($(this).val()) >= 0))
-                ;
-            else
-                $(this).val($(this).data("old"));
+        $('#cantidad').on('focus',function(){
+            $(this).santizeCommas();
         });
-        $("#cantidad").keydown(function () {
-            // Save old value.
-            if (!$(this).val() ||  parseInt($(this).val()) > 0)
-                $(this).data("old", $(this).val());
+        /*fin campo cantidad*/
+        /*campo precio_unitario*/
+        $('#precio_unitario').on('keyup',function(){
+            $(this).manageCommas();
         });
-        $("#cantidad").keyup(function () {
-            // Check correct, else revert back to old value.
-            if (!$(this).val() ||  parseInt($(this).val()) > 0)
-                ;
-            else
-                $(this).val($(this).data("old"));
+        $('#precio_unitario').on('focus',function(){
+            $(this).santizeCommas();
         });
-        $("#precio_unitario").keydown(function () {
-            // Save old value.
-            if (!$(this).val() ||  parseInt($(this).val()) > 0)
-                $(this).data("old", $(this).val());
+        /*fin campo precio_unitario*/
+        /*campo item_iva_amount*/
+        $('#item_iva_amount').on('change',function(){
+            $(this).manageCommas();
         });
-        $("#precio_unitario").keyup(function () {
-            // Check correct, else revert back to old value.
-            if (!$(this).val() ||  parseInt($(this).val()) > 0)
-                ;
-            else
-                $(this).val($(this).data("old"));
+        $('#item_iva_amount').on('change',function(){
+            $(this).santizeCommas();
         });
-        $("#item_iva_amount").change(function () {
-            // Save old value.
-            if (!$(this).val() ||  parseInt($(this).val()) > 0)
-                $(this).data("old", $(this).val());
+        /*fin campo item_iva_amount*/
+        /*campo discount*/
+        $('#discount').on('keyup',function(){
+            $(this).manageCommas();
         });
-        $("#item_iva_amount").change(function () {
-            // Check correct, else revert back to old value.
-            if (!$(this).val() ||  parseInt($(this).val()) > 0)
-                ;
-            else
-                $(this).val($(this).data("old"));
+        $('#discount').on('focus',function(){
+            $(this).santizeCommas();
         });
+        /*fin campo discount*/
+        /*campo item_total*/
+        document.getElementById("item_total").addEventListener('change', doThing);
+
+        /* function */
+        function doThing(){
+            console.log('Horray! Someone wrote "' + this.value + '"!');
+        }
+        /*var activities = document.getElementById("item_total");
+        activities.addEventListener("change", function() {
+            if(activities.value != 0){
+                $(this).manageCommas();
+            }
+            if(activities.value != 0) {
+                $(this).santizeCommas();
+            }
+        });*/
+        /*$('#item_total').on('change',function(){
+            $(this).manageCommas();
+        });
+        $('#item_total').on('change',function(){
+            $(this).santizeCommas();
+        });*/
+        /*fin campo item_total*/
+
+        String.prototype.addComma = function() {
+            return this.replace(/(.)(?=(.{3})+$)/g,"$1,").replace(',.', '.');
+        }
+        $.fn.manageCommas = function () {
+            return this.each(function () {
+                $(this).val($(this).val().replace(/(,|)/g,'').addComma());
+            });
+        }
+        $.fn.santizeCommas = function() {
+            return $(this).val($(this).val().replace(/(,| )/g,''));
+        }
     });
 </script>
 

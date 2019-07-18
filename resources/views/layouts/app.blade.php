@@ -71,11 +71,7 @@
     <script src="https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
-    <script src="/assets/js/hopscotch.js"></script>
     <script src="/assets/js/hopscotch.min.js"></script>
-    <script src="/assets/js/hopscotch.script.js"></script>
-    <script src="/assets/js/hopscotch_amd.js"></script>
-    <script src="/assets/js/hopscotch_amd.min.js"></script>
 
 
     @if( session()->has('message') )
