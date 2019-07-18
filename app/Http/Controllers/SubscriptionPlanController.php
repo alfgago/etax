@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\UsersExport;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class SubscriptionPlanController extends Controller
 {
@@ -39,8 +40,23 @@ class SubscriptionPlanController extends Controller
         
     }
     
-    public function confirmPlanChange(Request $request) {
+    public function startTrial() {
+        
+        $plans = EtaxProducts::where('is_subscription', true)->with('plan')->get();
+        return view( 'subscriptions/subscription-wizard-trial', compact('plans') );
+        
+    }
     
+    public function confirmStartTrial(Request $request) {
+        $user = auth()->user();
+        $sale = Sales::startTrial( $request->product_id, $request->recurrency );
+        Log::info('Nuevo suscriptor ha iniciado periodo de pruebas: ' . $user->email);
+        return redirect('/wizard')->withMessage('¡Felicidades! Ha iniciado su prueba en eTax.');
+        
+    }
+    
+    public function confirmPlanChange(Request $request) {
+        
         $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
         return redirect('/');
         

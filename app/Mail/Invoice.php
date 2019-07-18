@@ -31,9 +31,19 @@ class Invoice extends Mailable
     public function build()
     {
         $invoiceUtils = new InvoiceUtils();
-        $message = $this->subject('Factura electrónica #' . $this->content['data_invoice']->document_number.
-            ' De: '.$this->content['data_company']->business_name)->markdown('emails.invoice.paid')
-            ->with(['data_invoice' => $this->content['data_invoice'], 'company' => $this->content['data_company']]);
+        if ($this->content['data_invoice']->document_type == '08') {
+            $title = 'compra';
+        } elseif ($this->content['data_invoice']->document_type == '09') {
+            $title = 'exportacion';
+        } else {
+            $title = '';
+        }
+        $fromName = $this->content['data_company']->business_name;
+        $message = $this->subject('Factura electrónica '.$title.' #' . $this->content['data_invoice']->document_number.
+            ' De: '.$this->content['data_company']->business_name)
+                    ->markdown('emails.invoice.paid')
+                    ->with(['data_invoice' => $this->content['data_invoice'], 'company' => $this->content['data_company']])
+                    ->from('info@etaxcr.com', "$fromName");
         
         $message->attachFromStorage($this->content['xml']);
         $message->attachData( $invoiceUtils->streamPdf( $this->content['data_invoice'], $this->content['data_company'] ), $this->content['data_invoice']->document_key.'.pdf', [

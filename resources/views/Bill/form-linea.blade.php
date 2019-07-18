@@ -20,12 +20,12 @@
       <label for="nombre">Nombre / Descripción</label>
       <input type="text" class="form-control" id="nombre" value="" >
     </div>
-
+    
     <div class="form-group col-md-12">
-      <label for="tipo_producto">Tipo de producto</label>
-      <select class="form-control" id="tipo_producto" >
-        @foreach ( \App\ProductCategory::all() as $tipo )
-          <option value="{{ $tipo->id }}" codigo="{{ $tipo->bill_iva_code }}" >{{ $tipo->name }}</option>
+      <label for="tipo_producto">Categoría de declaración</label>
+      <select class="form-control select-search" id="tipo_producto" >
+        @foreach ( \App\ProductCategory::whereNotNull('bill_iva_code')->get() as $tipo )
+          <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['bill_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
         @endforeach
       </select>
     </div>
@@ -33,18 +33,18 @@
     <div class="form-group col-md-11">
       <label for="tipo_iva">Tipo de IVA</label>
       <select class="form-control" id="tipo_iva" >
-        @foreach ( \App\Variables::tiposIVASoportados() as $tipo )
-          <option value="{{ $tipo['codigo'] }}" porcentaje="{{ $tipo['porcentaje'] }}">{{ $tipo['nombre'] }}</option>
+        @foreach ( \App\CodigoIvaSoportado::all() as $tipo )
+          <option value="{{ $tipo['code'] }}" is_identificacion_plena="{{ $tipo['is_identificacion_plena'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
         @endforeach
       </select>
     </div>
-  
+
     <div class="form-group col-md-1">
       <label for="nombre_cliente">% IVA</label>
       <input type="number" min="0" class="form-control pr-0" id="porc_iva" placeholder="13" value="13" readonly>
     </div>
     
-    <div class="form-group col-md-12 inline-form inline-checkbox">
+    <div class="form-group col-md-12 inline-form inline-checkbox hidden">
       <label for="p1">
         <span>¿Requiere ayuda adicional para elegir el tipo de IVA?</span>
         <input type="checkbox" class="form-control" id="p1" placeholder="" readonly="true" onchange="toggleAyudaTipoIVa();" >

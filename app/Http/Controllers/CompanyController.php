@@ -222,10 +222,7 @@ class CompanyController extends Controller {
             return redirect('/');
         }
 
-        $users = User::with(['roles' => function($q) {
-                        $q->where('name', 'admin');
-                    }])->get();
-                    
+        $users = User::with(['roles' => function($q) { $q->where('name', 'admin'); }])->get();
         $team = Team::where('company_id', $company->id)->first();
 
         /* Only owner of company can edit that company */
@@ -300,12 +297,12 @@ class CompanyController extends Controller {
         $company->address = $request->address;
         $company->phone = $request->phone;
         $company->atv_validation = false;
-        $commercial_activities = $request->main_comercial_activity;
-        if($request->second_comercial_activity != ''){
-            $commercial_activities = $request->main_comercial_activity . ',' . $request->second_comercial_activity;
+        
+        $company->commercial_activities = $request->commercial_activities;
+        if ( is_array($company->commercial_activities) ) {
+            $company->commercial_activities = implode( ", ", $company->commercial_activities );
         }
-        $company->commercial_activities = $commercial_activities;
-
+        
         $company->save();
 
         //Update Team name based on company
@@ -323,7 +320,6 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function updateConfig(Request $request, $id) {
-
         $company = Company::find($id);
 
         if (!$company) {
@@ -339,10 +335,14 @@ class CompanyController extends Controller {
         $company->default_vat_code = $request->default_vat_code;
         $company->last_document = $request->last_document;
         $company->last_invoice_ref_number = $request->last_document ? getInvoiceReference($request->last_document) : 0;
+        $company->last_document_rec = $request->last_document_rec;
+        $company->last_rec_ref_number = $request->last_document_rec ? getInvoiceReference($request->last_document_rec) : 0;
+        $company->last_document_note = $request->last_document_note;
+        $company->last_note_ref_number = $request->last_document_note ? getInvoiceReference($request->last_document_note) : 0;
         $company->first_prorrata = $request->first_prorrata;
         $company->first_prorrata_type = $request->first_prorrata_type;
         $company->use_invoicing = $request->use_invoicing;
-        $company->atv_validation = false;
+        $company->card_retention  =  $request->card_retention;
         
         if( $company->first_prorrata_type == 1 ) {
             $company->operative_prorrata = $request->first_prorrata;

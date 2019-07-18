@@ -19,7 +19,7 @@ Editar permisos de equipo "{{$team->name}}"
 <div class="row">
     <div class="col-md-12">
 
-        <form method="POST" action="/permissions/{{$team->id}}">
+        <form method="POST" action="/companies/permissions/{{$team->id}}">
             @csrf
 
             <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
@@ -71,7 +71,7 @@ Editar permisos de equipo "{{$team->name}}"
                 </tbody>
             </table>
             @if ($team->users->count() > 1)
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary">Confirmar permisos</button>
             @endif
         </form>
         <input type="hidden" id="is-company-edit" value="3">

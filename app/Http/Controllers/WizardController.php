@@ -112,8 +112,8 @@ class WizardController extends Controller
         
         $calc = CalculatedTax::getProrrataPeriodoAnterior(2018);
         
-        $company->operative_prorrata = $calc->prorrata*100;
-        $company->first_prorrata = $calc->prorrata*100;
+        $company->operative_prorrata = number_format( $calc->prorrata*100, 2);
+        $company->first_prorrata   = number_format( $calc->prorrata*100, 2);
         $company->operative_ratio1 = number_format( $calc->ratio1*100, 2);
         $company->operative_ratio2 = number_format( $calc->ratio2*100, 2);
         $company->operative_ratio3 = number_format( $calc->ratio3*100, 2);
@@ -181,6 +181,8 @@ class WizardController extends Controller
             $company->first_prorrata = $request->first_prorrata;
             $company->first_prorrata_type = $request->first_prorrata_type;
             $company->use_invoicing = $request->use_invoicing;
+            $company->card_retention = $request->card_retention;
+            $company->default_product_category = $request->default_category_producto_code;
             
             if( $company->first_prorrata_type == 1 ) {
                 $company->operative_prorrata = $request->first_prorrata;

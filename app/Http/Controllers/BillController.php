@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Invoice;
 use App\UnidadMedicion;
+use App\Utils\BridgeHaciendaApi;
+use App\Utils\BillUtils;
 use \Carbon\Carbon;
 use App\Bill;
 use App\BillItem;
 use App\Company;
 use App\Provider;
+use App\Actividades;
 use App\CalculatedTax;
+use App\CodigoIvaSoportado;
+use App\ProductCategory;
 use App\Http\Controllers\CacheController;
 use App\Exports\BillExport;
 use App\Imports\BillImport;
@@ -102,8 +108,12 @@ class BillController extends Controller
      */
     public function create()
     {
+        $company = currentCompanyModel();
+        
         $units = UnidadMedicion::all()->toArray();
-        return view("Bill/create", ['units' => $units]);
+        $arrayActividades = $company->getActivities();
+        
+        return view("Bill/create", compact('units', 'arrayActividades') );
     }
 
     /**
@@ -152,11 +162,15 @@ class BillController extends Controller
      */
     public function show($id)
     {
+        $company = currentCompanyModel();
+        
         $bill = Bill::findOrFail($id);
-        $units = UnidadMedicion::all()->toArray();
         $this->authorize('update', $bill);
+        
+        $units = UnidadMedicion::all()->toArray();
+        $arrayActividades = $company->getActivities();
       
-        return view('Bill/show', compact('bill', 'units') );
+        return view('Bill/show', compact('bill', 'units', 'arrayActividades') );
     }
 
     /**
@@ -167,6 +181,8 @@ class BillController extends Controller
      */
     public function edit($id)
     {
+        $company = currentCompanyModel();
+        
         $bill = Bill::findOrFail($id);
         $units = UnidadMedicion::all()->toArray();
         $this->authorize('update', $bill);
@@ -175,8 +191,9 @@ class BillController extends Controller
         if( $bill->generation_method != 'M' && $bill->generation_method != 'XLSX' ){
           return redirect('/facturas-recibidas');
         } 
+        $arrayActividades = $company->getActivities();
       
-        return view('Bill/edit', compact('bill', 'units') );
+        return view('Bill/edit', compact('bill', 'units', 'arrayActividades') );
     }
 
     /**
@@ -403,8 +420,8 @@ class BillController extends Controller
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3
-                        if( Bill::saveBillXML( $arr, 'XML' ) ) {
-                            $bill = Bill::where('company_id', $company->id)->where('document_key', $clave)->first();
+                        $bill = Bill::saveBillXML( $arr, 'XML' );
+                        if( $bill ) {
                             Bill::storeXML( $bill, $file );
                         }
                     }else{
@@ -423,7 +440,7 @@ class BillController extends Controller
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
         }
 
-        return redirect('/facturas-recibidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
+        return redirect('/facturas-recibidas/aceptaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
 
     }
     
@@ -435,7 +452,8 @@ class BillController extends Controller
      */
     public function indexValidaciones()
     {
-        $current_company = currentCompany();
+        return redirect('/facturas-recibidas/aceptaciones');
+        /*$current_company = currentCompany();
         $bills = Bill::where('company_id', $current_company)
                         ->where('is_void', false)
                         ->where('is_totales', false)
@@ -445,7 +463,56 @@ class BillController extends Controller
                         ->orderBy('reference_number', 'DESC')->paginate(10);
         return view('Bill/index-validaciones', [
           'bills' => $bills
+        ]);*/
+    }
+
+
+
+    public function validar($id){
+        $current_company = currentCompany();
+        $company = Company::select('commercial_activities')->where('id', $current_company)->first();
+        $activities_company = explode(", ", $company->commercial_activities);
+        $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
+        $bills = Bill::where('id', $id)->first();
+        $codigos_etax = CodigoIvaSoportado::get();
+        $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
+        $data = array(
+                "bills" => $bills,
+                "commercial_activities" => $commercial_activities,
+                "codigos_etax" => $codigos_etax,
+                "categoria_productos" => $categoria_productos,
+            );
+        //dd($data);
+        return view('Bill/validar', [
+          'data' => $data
         ]);
+    }
+
+    public function guardar_validar(Request $request)
+    {
+        $bill = Bill::findOrFail($request->bill);
+        
+        $bill->product_category_verification = $request->category_product;
+        $bill->activity_company_verification = $request->actividad_comercial;
+        $bill->codigo_iva_verification = $request->codigo_etax;
+        $bill->identificacion_plena_verification = $request->impuesto_identificacion_plena;
+        $bill->is_code_validated = true;
+        
+        $bill->save();
+
+        foreach( $bill->items as $item ) {
+            $item->iva_type = $request->codigo_etax;
+            $item->product_type = $request->category_product;
+            if( isset($request->impuesto_identificacion_plena) ) {
+                $item->porc_identificacion_plena = $request->impuesto_identificacion_plena;
+            }
+            $item->save();
+        }
+        
+        clearBillCache($bill);
+
+        return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
+
     }
     
     public function confirmarValidacion( Request $request, $id )
@@ -465,9 +532,9 @@ class BillController extends Controller
         if( $bill->year == 2018 ) {
             clearLastTaxesCache($bill->company->id, 2018);
         }
-        clearInvoiceCache($bill);
+        clearBillCache($bill);
         
-        return redirect('/facturas-recibidas/validaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido validada');
+        return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido validada');
     }
     
     /**
@@ -498,7 +565,8 @@ class BillController extends Controller
             ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($bill) {
                 return view('Bill.ext.auth-actions', [
-                    'id' => $bill->id
+                    'id' => $bill->id,
+                    'is_code_validated' => $bill->is_code_validated
                 ])->render();
             }) 
             ->editColumn('provider', function(Bill $bill) {
@@ -547,7 +615,38 @@ class BillController extends Controller
             $bill->calculateAcceptFields();
         }
         
-        $current_company = currentCompany();
+        $current_company = currentCompanyModel();
+
+        if( $current_company->use_invoicing ) {
+            if ($current_company->atv_validation == false) {
+                $apiHacienda = new BridgeHaciendaApi();
+                $token = $apiHacienda->login(false);
+                $validateAtv = $apiHacienda->validateAtv($token, $current_company);
+    
+                if($validateAtv) {
+                    if ($validateAtv['status'] == 400) {
+                        Log::info('Atv Not Validated Company: '. $current_company->id_number);
+                        if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                            $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                        }
+                        return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
+    
+                    } else {
+                        Log::info('Atv Validated Company: '. $current_company->id_number);
+                        $current_company->atv_validation = true;
+                        $current_company->save();
+                    }
+                }else {
+                    return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
+                }
+            }
+        }else{
+            return view('Bill/index-aceptaciones-hacienda')->withMessage('Usted no tiene un facturación con eTax activada, por lo que esta pantalla únicamente validará los códigos eTax para cálculo y no realizará aceptaciones con Hacienda.');
+        }
+
+        if ($current_company->last_rec_ref_number == null) {
+            return redirect('/empresas/configuracion')->withError( "No ha ingresado ultimo consecutivo de recepcion");
+        }
         
         return view('Bill/index-aceptaciones-hacienda');
     }
@@ -558,14 +657,13 @@ class BillController extends Controller
      */
     public function indexDataAccepts() {
         $current_company = currentCompany();
-
         $query = Bill::where('bills.company_id', $current_company)
         ->where('is_void', false)
         ->where('accept_status', '0')
         ->where('is_totales', false)
         ->where('is_authorized', true)
         ->with('provider');
-        
+
         return datatables()->eloquent( $query )
             ->addColumn('actions', function($bill) {
                 return view('Bill.ext.accept-actions', [
@@ -573,19 +671,20 @@ class BillController extends Controller
                 ])->render();
             }) 
             ->editColumn('total', function(Bill $bill) {
-                return "$bill->currency $bill->total";
+                $total = $bill->total;
+                return "$bill->currency $total";
             })
             ->editColumn('accept_total_factura', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_total_factura";
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_total_factura;
             })
             ->editColumn('accept_iva_total', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_total";
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_iva_total;
             })
             ->editColumn('accept_iva_acreditable', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_acreditable";
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_iva_acreditable;
             })
             ->editColumn('accept_iva_gasto', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  "$bill->accept_iva_gasto";
+                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_iva_gasto;
             })
             ->editColumn('provider', function(Bill $bill) {
                 return $bill->provider->getFullName();
@@ -617,6 +716,7 @@ class BillController extends Controller
         $this->authorize('update', $bill);
         
         $bill->accept_status = 0;
+        $bill->is_code_validated = false;
         $bill->save();
         return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido incluida para aceptación');
     }
@@ -625,16 +725,42 @@ class BillController extends Controller
     /**
      *  Metodo para hacer las aceptaciones
      */
-    public function sendAcceptMessage ( Request $request, $id )
+    public function sendAcceptMessage (Request $request, $id)
     {
-        $bill = Bill::findOrFail($id);
-        
-        /*
-        $bill->accept_status = $request->accept_status;
-        $bill->save();
-        */
-        
-        return redirect('/facturas-recibidas/aceptaciones')->withError( 'La factura '. $bill->document_number . ' no pudo ser aceptada. Por favor contáctenos.');
+        try {
+            $company = currentCompanyModel();
+            $bill = Bill::findOrFail($id);
+            if( currentCompanyModel()->use_invoicing ) {
+                $apiHacienda = new BridgeHaciendaApi();
+                $tokenApi = $apiHacienda->login(false);
+                if ($tokenApi !== false) {
+                    if (!empty($bill)) {
+                        $bill->accept_status = $request->respuesta;
+                        $bill->save();
+                        $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
+                        $company->save();
+                        $company->last_document_rec = getDocReference($company->last_rec_ref_number);
+                        $company->save();
+                        $apiHacienda->acceptInvoice($bill, $tokenApi);
+                    }
+                    clearBillCache($bill);
+                    return redirect('/facturas-recibidas/aceptaciones')->withMessage('Aceptación enviada.');
+    
+                } else {
+                    return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+                }
+            } else {
+                if (!empty($bill)) {
+                    $bill->accept_status = $request->respuesta;
+                    $bill->save();
+                }
+                clearBillCache($bill);
+                return redirect('/facturas-recibidas/aceptaciones')->withMessage('Factura aceptada para cálculo en eTax.');
+            }
+        } catch ( Exception $e) {
+            Log::error ("Error al crear aceptacion de factura");
+            return redirect('/facturas-recibidas/aceptaciones')->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');
+        }
     }
     
     public function correctAccepted ( Request $request, $id )
@@ -642,12 +768,15 @@ class BillController extends Controller
         $bill = Bill::findOrFail($id);
         $this->authorize('update', $bill);
         
+        $bill->accept_iva_condition = $request->accept_iva_condition ? $request->accept_iva_condition : '02';
         $bill->accept_iva_acreditable = $request->accept_iva_acreditable;
         $bill->accept_iva_gasto = $request->accept_iva_gasto;
         $bill->accept_status = 1;
+        $bill->hacienda_status = "01";
         $bill->accept_id_number = currentCompany();
 
         $bill->save();
+        clearBillCache($bill);
         return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido aceptada');
     }
 
@@ -686,5 +815,29 @@ class BillController extends Controller
         
         return redirect('/facturas-recibidas')->withMessage('La factura ha sido restaurada satisfactoriamente.');
     }  
+    
+    public function fixImports() {
+        $billUtils = new BillUtils();
+        $bills = Bill::where('generation_method', 'Email')->orWhere('generation_method', 'XML')->get();
+
+        foreach($bills as $bill) {
+            try {
+            if( !$bill->provider_zip ){
+                $file = $billUtils->downloadXml( $bill, $bill->company_id );
+                if($file) {
+                    $xml = simplexml_load_string($file);
+                    $json = json_encode( $xml ); // convert the XML string to JSON
+                    $arr = json_decode( $json, TRUE );
+                    $bill = Bill::saveBillXML( $arr, $bill->generation_method );
+                }
+            }
+            }catch(\Throwable $e){
+                Log::warning("No se pudo arreglar la $bill->id " . $e->getMessage());
+            }
+        }
+        
+        dd($bills);
+        return true;
+    }
     
 }

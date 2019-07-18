@@ -27,12 +27,17 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')
         //          ->hourly();
         //Invoice Queue
-        $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=1 --queue=invoices')
-            ->timezone(config('app.timezone'))->everyThirtyMinutes();
+        $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=1 --queue=receptions') ->timezone(config('app.timezone'))->everyTenMinutes();
+        $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=1 --queue=invoices') ->timezone(config('app.timezone'))->everyThirtyMinutes();
         //Emails Queue Restart
-        $schedule->command('queue:restart')->timezone(config('app.timezone'))->daily();
         $schedule->command('invoice:resend')->timezone(config('app.timezone'))->hourly();
+        //Comandos de checkout
+        $schedule->command('subscription:checkout')->timezone(config('app.timezone'))->dailyAt('01:30');
+        $schedule->command('subscription:payment')->timezone(config('app.timezone'))->dailyAt('06:00');
+        $schedule->command('subscription:payment')->timezone(config('app.timezone'))->dailyAt('09:00');
+        //Comandos generales
         $schedule->command('telescope:prune')->daily();
+        $schedule->command('queue:restart')->timezone(config('app.timezone'))->daily();
     }
 
     /**

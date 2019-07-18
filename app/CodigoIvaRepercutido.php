@@ -3,9 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CodigoIvaRepercutido extends Model
 {
-    use SoftDeletes;
+    
+    protected $casts = ['id' => 'string'];
+    public $incrementing = false;
+    protected $keyType = 'string';
+    
 }

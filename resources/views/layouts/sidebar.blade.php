@@ -10,23 +10,26 @@
                 
             </li>
             
+            
+            @if( allowTo('invoicing') )
             <li class="nav-item {{ request()->is('facturas-emitidas/*') || request()->is('facturas-emitidas') ? 'active' : '' }}" id="ventas">
                 <a class="nav-item-hold" href="/facturas-emitidas">
                     <img src="{{asset('assets/images/iconos/ventas.png')}}" class="sidemenu-icon">
                     <span class="nav-text">Ventas</span>
                 </a>
-                
+
                 <div class="subitems">
                     <a href="/facturas-emitidas">Ver todas</a>
-                    <a href="/facturas-emitidas/emitir-factura">Emitir factura electrónica</a>
-                    <a href="/facturas-emitidas/create">Registrar factura existente</a>
+                    <a href="/facturas-emitidas/emitir-factura/01">Emitir factura electrónica</a>
+                    <a href="/facturas-emitidas/create" >Registrar factura existente</a>
                     <a href="#" onclick="abrirPopup('importar-emitidas-popup');">Importar facturas</a>
                     <a href="/facturas-emitidas/validaciones">Validar facturas</a>
                     <a href="/facturas-emitidas/autorizaciones">Autorizar facturas por email</a>
                 </div>
-                
             </li>
+            @endif
             
+            @if( allowTo('billing') )
             <li class="nav-item {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" id="compras">
                 <a class="nav-item-hold" href="/facturas-recibidas">
                     <img src="{{asset('assets/images/iconos/compras.png')}}" class="sidemenu-icon">
@@ -35,13 +38,15 @@
                 
                 <div class="subitems">
                     <a href="/facturas-recibidas">Ver todas</a>
-                    <a href="/facturas-recibidas/create">Registrar factura recibida</a>
+                    <a href="/facturas-recibidas/create">Registrar factura existente</a>
                     <a href="#" onclick="abrirPopup('importar-recibidas-popup');">Importar facturas</a>
-                    <a href="/facturas-recibidas/validaciones">Validar facturas</a>
+                    <a href="/facturas-recibidas/aceptaciones">Aceptación de facturas recibidas</a>
                     <a href="/facturas-recibidas/autorizaciones">Autorizar facturas por email</a>
                 </div>
             </li>
+            @endif
             
+            @if( allowTo('validation') )
             <li class="nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" id="facturacion">
                 <a class="nav-item-hold" href="/facturas-emitidas">
                     <img src="{{asset('assets/images/iconos/facturacion.png')}}" class="sidemenu-icon">
@@ -50,15 +55,15 @@
                 
                 <div class="subitems">
                     <a href="/facturas-emitidas">Ver documentos emitidos</a>
-                    <a href="/facturas-emitidas/emitir-factura">Emitir factura electrónica</a>
-                    <a href="/facturas-emitidas/emitir-factura">Emitir factura electrónica de exportación</a>
-                    <a href="/facturas-emitidas/emitir-factura">Emitir factura electrónica de compra</a>
-                    <a href="/facturas-emitidas/emitir-factura">Emitir nota de débito</a>
-                    <a href="/facturas-emitidas/emitir-factura">Emitir tiquete electrónico</a>
-                    <a href="/facturas-emitidas/emitir-factura">Emitir nota de débito</a>
+                    <a href="/facturas-emitidas/emitir-factura/01">Emitir factura electrónica</a>
+                    <a href="/facturas-emitidas/emitir-factura/09">Emitir factura electrónica de exportación</a>
+                    <a href="/facturas-emitidas/emitir-factura/08">Emitir factura electrónica de compra</a>
+                    <a style="display:none; !important" href="/facturas-emitidas/emitir-factura/04">Emitir tiquete electrónico</a>
+                    <a style="display:none; !important" href="/facturas-emitidas/emitir-factura/02">Emitir nota de débito</a>
                     <a href="/facturas-recibidas/aceptaciones">Aceptación de facturas recibidas</a>
                 </div>
             </li>
+            @endif
             
             <style>
                 li.hidden.nav-item.small-nav {
@@ -79,6 +84,7 @@
                 }
             </style>
             
+            @if( allowTo('books') )
             <li class="nav-item small-nav {{ request()->is('reportes/*') || request()->is('reportes') ? 'active' : '' }}" id="cierresmes">
                 <a class="nav-item-hold" href="/cierres">
                     <img src="{{asset('assets/images/iconos/report.png')}}" class="sidemenu-icon">
@@ -86,7 +92,9 @@
                 </a>
                 
             </li>
+            @endif
             
+            @if( allowTo('reports') )
             <li class="nav-item small-nav {{ request()->is('reportes/*') || request()->is('reportes') ? 'active' : '' }}" id="reportes">
                 <a class="nav-item-hold" href="/reportes">
                     <img src="{{asset('assets/images/iconos/report.png')}}" class="sidemenu-icon">
@@ -94,7 +102,9 @@
                 </a>
                 
             </li>
+            @endif
             
+            @if( allowTo('catalogue') )
             <li class="nav-item small-nav {{ request()->is('clientes/*') || request()->is('clientes') ? 'active' : '' }}" id="clientes">
                 <a class="nav-item-hold" href="/clientes">
                     <img src="{{asset('assets/images/iconos/cliente.png')}}" class="sidemenu-icon">
@@ -134,7 +144,21 @@
                     <a href="#" onclick="abrirPopup('importar-productos-popup');">Importar productos</a>
                 </div>
             </li>
+            @endif
+            
           </ul>
       </div>
   </div>
+  <script>
+      /*$( "#factExistente" ).mouseover(function() {
+          $( "#factExistente01" ).attr('hidden', false);
+          $( "#factExistente02" ).attr('hidden', false);
+          $( "#factExistente03" ).attr('hidden', false);
+      });
+      $( "#factExistente" ).mouseleave(function() {
+          $( "#factExistente01" ).attr('hidden', true);
+          $( "#factExistente02" ).attr('hidden', true);
+          $( "#factExistente03" ).attr('hidden', true);
+      });*/
+  </script>
   <!--=============== Left side End ================-->

@@ -39,13 +39,12 @@ class Sales extends Model
         return $this->hasMany(Payment::class);
     }
     
-    public static function createUpdateSubscriptionSale ( $procuctId, $recurrency ) {
+    public static function createUpdateSubscriptionSale ( $productId, $recurrency ) {
         $company = currentCompanyModel();
         $user = auth()->user();
         
         $start_date = Carbon::parse( now('America/Costa_Rica') );
-        $trial_end_date = $start_date->addDays(1);
-        $next_payment_date = $start_date->addMonths(1);
+        $next_payment_date = Carbon::parse( now('America/Costa_Rica') )->addMonths(1);
         
         $sale = Sales::updateOrCreate (
             [ 
@@ -54,14 +53,24 @@ class Sales extends Model
             ],
             [ 
                 'company_id' => $company->id,
-                'status'  => 2,
+                'status'  => 3,
                 'recurrency' => $recurrency,
-                'trial_end_date' => $trial_end_date,
                 'start_date' => $start_date, 
                 'next_payment_date' => $next_payment_date, 
-                'etax_product_id' => $procuctId
+                'etax_product_id' => $productId
             ]
         );
+        
+        return $sale;
+    }
+    
+    public static function startTrial ( $productId, $recurrency ) {
+        $trial_end_date = Carbon::parse( now('America/Costa_Rica') )->addDays(2);
+        
+        $sale = Sales::createUpdateSubscriptionSale ( $productId, $recurrency );
+        $sale->status = 4;
+        $sale->trial_end_date = $trial_end_date;
+        $sale->save();
         
         return $sale;
     }

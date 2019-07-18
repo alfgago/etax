@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App;
 
 class Variables
@@ -151,6 +150,9 @@ class Variables
 
       foreach ($lista as $tipo) {
           if( $codigo == $tipo['codigo'] ){
+              if($codigo > 200) {
+                return null;
+              }
               return $tipo['codigo_tarifa'];
           }
       }
@@ -277,48 +279,36 @@ class Variables
   }
   
   public static function getTipoSoportadoIVAName($codigo){
-    $lista = Variables::tiposIVASoportados();
-    
-    foreach ($lista as $unidades) {
-      if( $codigo == $unidades['codigo'] ){
-        return $unidades['nombre'];
-      }
+    $codigo = CodigoIvaSoportado::find($codigo);
+    if($codigo) {
+      return $codigo->name;
     }
     
     return "Otros";
   }
   
   public static function getTipoRepercutidoIVAName($codigo){
-    $lista = Variables::tiposIVARepercutidos();
-    
-    foreach ($lista as $tipo) {
-      if( $codigo == $tipo['codigo'] ){
-        return $tipo['nombre'];
-      }
+    $codigo = CodigoIvaRepercutido::find($codigo);
+    if($codigo) {
+      return $codigo->name;
     }
     
     return "Otros";
   }
   
   public static function getTipoSoportadoIVAPorc($codigo){
-    $lista = Variables::tiposIVASoportados();
-    
-    foreach ($lista as $tipo) {
-      if( $codigo == $tipo['codigo'] ){
-        return $tipo['porcentaje'];
-      }
+    $codigo = CodigoIvaSoportado::find($codigo);
+    if($codigo) {
+      return $codigo->percentage;
     }
     
     return "Otros";
   }
   
   public static function getTipoRepercutidoIVAPorc($codigo){
-    $lista = Variables::tiposIVARepercutidos();
-    
-    foreach ($lista as $tipo) {
-      if( $codigo == $tipo['codigo'] ){
-        return $tipo['porcentaje'];
-      }
+    $codigo = CodigoIvaRepercutido::find($codigo);
+    if($codigo) {
+      return $codigo->percentage;
     }
     
     return "Otros";

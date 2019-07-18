@@ -21,20 +21,20 @@
       <input type="text" class="form-control" id="nombre" value="2018" >
     </div>
 
-    <div class="form-group col-md-12 hidden">
-      <label for="tipo_producto">Tipo de producto</label>
-      <select class="form-control" id="tipo_producto" >
-        @foreach ( \App\ProductCategory::all() as $tipo )
-          <option value="{{ $tipo->id }}" codigo="{{ $tipo->invoice_iva_code }}" >{{ $tipo->name }}</option>
+    <div class="form-group col-md-12">
+      <label for="tipo_producto">Categoría de producto</label>
+      <select class="form-control select-search" id="tipo_producto" >
+        @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
+          <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
         @endforeach
       </select>
     </div>
-
+    
     <div class="form-group col-md-12">
       <label for="tipo_iva">Tipo de IVA</label>
       <select class="form-control" id="tipo_iva" >
-        @foreach ( \App\Variables::tiposIVARepercutidos() as $tipo )
-          <option value="{{ $tipo['codigo'] }}" porcentaje="{{ $tipo['porcentaje'] }}" class="{{ @$tipo['hideMasiva'] ? 'hidden' : '' }}">{{ $tipo['nombre'] }}</option>
+        @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
+          <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }} {{ @$tipo['hideMasiva'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
         @endforeach
       </select>
     </div>
@@ -44,7 +44,7 @@
       <input type="text" class="form-control" id="porc_iva" placeholder="13" value="13" readonly>
     </div>
     
-    <div class="form-group col-md-12 inline-form inline-checkbox">
+    <div class="form-group col-md-12 inline-form inline-checkbox hidden">
       <label for="p1">
         <span>¿Requiere ayuda adicional para elegir el tipo de IVA?</span>
         <input type="checkbox" class="form-control" id="p1" placeholder="" readonly="true" onchange="toggleAyudaTipoIVa();" >

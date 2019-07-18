@@ -345,7 +345,9 @@
     }
 }
 
-@media (max-width: 1400px) {
+
+
+@media (max-width: 1660px) {
     
     .main-content-wrap.sidenav-open {
         padding-left: 2rem;
@@ -353,8 +355,22 @@
 
 }
 
-@media (max-width: 576px) {
+@media only screen and (min-width: 767px) {
+    .main-content-wrap {
+        width: calc(100% - 10rem) !important;
+    }
+    
+    .sidebar-left { 
+        left: 0 !important;
+    }
+    
+    .menu-toggle {
+        display: none !important;
+    }
+}
 
+@media (max-width: 767px) {
+    
     .main-content-wrap {
         padding: 1.5rem;
         padding-bottom: 0; 

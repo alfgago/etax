@@ -16,7 +16,6 @@ echo ""
 
 docker-compose down --remove-orphans
 docker-compose up --build -d redis mysql php nginx phpmyadmin
-docker exec php composer update
 docker exec php php artisan config:clear
 docker exec php php artisan config:clear
 docker exec php php artisan route:clear

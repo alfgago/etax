@@ -3,13 +3,25 @@
     <div class="card-title"> {{ $titulo }} 
       <span class="helper helper-proporcion" def="helper-proporcion">  <i class="fa fa-question-circle" aria-hidden="true"></i> </span> 
     </div>
+@if( allowTo('reports') )    
+
+
     @if( $data->count_invoices  )
       <div id="echartPie" style="height: 15rem; max-width: 25rem;"></div>
     @else
       <div class="descripcion">La empresa aún no registra ventas durante el año. Empiece ingresando sus facturas de venta o emitiéndolas por medio de eTax</div>
     @endif
+    
+    
+@else
+  <div class="not-allowed-message">
+    Usted actualmente no tiene permisos para ver los reportes.
+  </div>
+@endif 
+
 </div>
 
+@if( allowTo('reports') )
 <script>
 
   $(document).ready(function() {
@@ -115,3 +127,5 @@
   });
 
 </script>
+
+@endif 

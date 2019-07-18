@@ -33,7 +33,9 @@
                       <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
                         <option value='' selected>-- Seleccione un cliente --</option>
                         @foreach ( currentCompanyModel()->clients as $cliente )
+                          @if( @$cliente->canInvoice() )
                           <option value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
+                          @endif
                         @endforeach
                       </select>
                     </div>
@@ -62,8 +64,20 @@
                     </div>
                   </div>
                 </div>
+                  <div class="form-group col-md-12">
+                      <label for="sale_condition">Tipo de Documento</label>
+                      <div class="input-group">
+                          <select id="document_type" name="document_type" class="form-control" required>
+                              <option selected value="01">Factura electronica</option>
+                              <option value="08">Factura de compra</option>
+                              <option value="09">Factura de exportaci&oacute;n</option>
+                              <option value="04">Apartado</option>
+                          </select>
+                      </div>
+                  </div>
               </div>
-              
+
+
               <div class="form-row">    
                 <div class="form-group col-md-12">
                   <h3>
@@ -268,7 +282,7 @@
 
 <script>
 $(document).ready(function(){
-  $('#tipo_iva').val('103');
+  $('#tipo_producto').val(17).change();
 });
 
 function toggleRetencion() {

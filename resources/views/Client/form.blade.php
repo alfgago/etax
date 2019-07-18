@@ -45,17 +45,17 @@
     
     <div class="form-group col-md-4">
       <label for="phone">Teléfono</label>
-      <input type="text" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" >
+      <input type="number" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" >
     </div>
     
     <div class="form-group col-md-4"></div>
     <div class="form-group col-md-4">
       <label for="country">País *</label>
       <select class="form-control" name="country" id="country" value="{{ @$client->country }}" required>
+          <option value="CR">CR - Costa Rica</option>
           @foreach ( \App\CodigosPaises::all() as $pais )
-              <option value="{{ $pais['country_code'] }}">{{ $pais['country_code'] }} - {{ $pais['country_name'] }}</option>
+              <option value="{{ $pais['country_code'] }}" {{ $pais['country_code'] == @$client->country ? 'selected' : ''}}>{{ $pais['country_code'] }} - {{ $pais['country_name'] }}</option>
           @endforeach
-        <option value="CR" selected>Costa Rica</option>
       </select>
     </div>
 
@@ -123,26 +123,29 @@
         </select>
     </div>
 <script>
-    function cambiarDireccion(){
+    function cambiarDireccion() {
         var tipoPersona = $('#tipo_persona').val();
-        if(tipoPersona === 'E'){
-            $('#divState').hide('slow');
-            $('#divCity').hide('slow');
-            $('#divDistrict').hide('slow');
-            $('#divNeighborhood').hide('slow');
-            $('#divZip').hide('slow');
-            $('#divAddress').hide('slow');
+        if(tipoPersona != undefined){
+            if (tipoPersona === 'E') {
+                $('#divState').hide('slow');
+                $('#divCity').hide('slow');
+                $('#divDistrict').hide('slow');
+                $('#divNeighborhood').hide('slow');
+                $('#divZip').hide('slow');
+                $('#divAddress').hide('slow');
 
-            $('#extranjero').removeAttr('hidden');
-        }else{
-            $('#divState').show('slow');
-            $('#divCity').show('slow');
-            $('#divDistrict').show('slow');
-            $('#divNeighborhood').show('slow');
-            $('#divZip').show('slow');
-            $('#divAddress').show('slow');
+                $('#extranjero').removeAttr('hidden');
+            } else {
+                $('#divState').show('slow');
+                $('#divCity').show('slow');
+                $('#divDistrict').show('slow');
+                $('#divNeighborhood').show('slow');
+                $('#divZip').show('slow');
+                $('#divAddress').show('slow');
 
-            $('#extranjero').attr("hidden", true);
+                $('#extranjero').attr("hidden", true);
+            }
         }
     }
+    cambiarDireccion();
 </script>

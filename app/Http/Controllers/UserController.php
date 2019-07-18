@@ -10,6 +10,7 @@ use App\User;
 use App\Sales;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\Mail;
 use DB;
 use Hash;
 use Auth;
@@ -325,9 +326,10 @@ class UserController extends Controller {
     
     public function impersonate( $id ) {
         
-        $user = User::findOrFail($id);
-        
-        Auth::user()->impersonate($user);
+        if( Auth::user()->canImpersonate()  ) {
+            $user = User::findOrFail($id);
+            Auth::user()->impersonate($user);
+        }
         return redirect( '/' );
         
     }
@@ -354,4 +356,22 @@ class UserController extends Controller {
             }
         }
     }
+
+    public function cancelar(){
+        return view('users.cancelar');
+    }
+    public function updatecancelar(Request $request){
+        $company = currentCompanyModel();
+        $user_id = auth()->user()->companies->first()->user_id;
+       
+        Sales::where('user_id', $user_id)
+               ->where('company_id', $company->id)
+               ->update(['status' => 4, 'cancellation_reason' => $request->motivo]);
+
+        Mail::to($company->email)->send(new \App\Mail\NotifyCancellation(auth()->user()->companies->first()));
+        Auth::logout();
+        return redirect("login")->withError('Su subscripción se ha cancelado');
+    }
+
+
 }

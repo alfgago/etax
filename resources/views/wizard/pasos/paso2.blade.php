@@ -37,7 +37,7 @@
 
 <div class="form-group col-md-4">
   <label for="zip">Zip</label>
-  <input type="text" class="form-control" name="zip" id="zip" value="{{ @$company->zip }}" readonly >
+  <input type="text" class="form-control" name="zip" id="zip" value="{{ @$company->zip }}" readonly required>
 </div>
 
 <div class="form-group col-md-12">

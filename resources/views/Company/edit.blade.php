@@ -28,7 +28,7 @@
                 <li>
                     <a class="nav-link" aria-selected="false" href="/empresas/equipo">Equipo de trabajo</a>
                 </li>
-                <li>
+                <li class="hidden">
                     <a class="nav-link" aria-selected="false" href="/empresas/comprar-facturas-vista">Comprar facturas</a>
                 </li>
             </ul>
@@ -109,33 +109,11 @@
 						      <input type="text" class="form-control" name="phone" id="phone" value="{{ @$company->phone }}" >
 						    </div>
 						    
-						    <?php
-						    	$mainAct = '';
-						    	$secondAct = '';
-						    	$actArray = explode( ',', $company->commercial_activities );
-						    	if( array_key_exists(0, $actArray) ) {
-						    		$mainAct = $actArray[0];
-						    	}
-						    	if( array_key_exists(1, $actArray) ) {
-						    		$secondAct = $actArray[1];
-						    	}
-						    ?>
-						    
 						    <div class="form-group col-md-12">
-                    <label for="tipo_persona">Actividad comercial principal *</label>
-                    <select class="form-control checkEmpty select-search" name="main_comercial_activity" id="main_comercial_activity" required>
-                        <option value='' selected>-- No seleccionado --</option>
+                    <label for="tipo_persona">Actividades comerciales *</label>
+                    <select class="form-control checkEmpty select2-tags" name="commercial_activities[]" id="commercial_activities" multiple required>
                         @foreach ( $actividades as $actividad )
-                            <option value="{{ $actividad['codigo'] }}" {{ $mainAct == $actividad['codigo'] ? 'selected' : '' }}>{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="form-group col-md-12">
-                    <label for="tipo_persona">Actividad comercial secundaria (opcional)</label>
-                    <select class="form-control checkEmpty select-search" name="second_comercial_activity" id="second_comercial_activity">
-                        <option value='' selected>-- No seleccionado --</option>
-                        @foreach ( $actividades as $actividad )
-                            <option value="{{ $actividad['codigo'] }}" {{ $secondAct == $actividad['codigo'] ? 'selected' : '' }}>{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
+                            <option value="{{ $actividad['codigo'] }}" {{ (strpos($company->commercial_activities, $actividad['codigo']) !== false) ? 'selected' : '' }}>{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
                         @endforeach
                     </select>
                 </div>

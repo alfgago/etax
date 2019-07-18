@@ -24,26 +24,36 @@
             </div>
         
     </div>
-
     <div class="form-group col-md-6">
-      <label for="nombre">Nombre / Descripción</label>
-      <input type="text" class="form-control" id="nombre" value="" name="description">
+        <label for="nombre">Nombre / Descripción</label>
+        <input type="text" class="form-control" id="nombre" value="" name="description">
     </div>
 
+    <?php if( @$document_type == "09"){ ?>
+        <div class="form-group col-md-4">
+            <label for="nombre">Partida Arancelaria</label>
+            <input type="text" class="form-control" id="tariff_heading" value="">
+        </div>
+    <?php
+      $class = 'form-group col-md-8';
+    }else{
+        $class = 'form-group col-md-12';
+    } ?>
+
     <div class="form-group col-md-12">
-      <label for="tipo_producto">Tipo de producto</label>
-      <select class="form-control" id="tipo_producto" >
-        @foreach ( \App\ProductCategory::all() as $tipo )
-          <option value="{{ $tipo->id }}" codigo="{{ $tipo->invoice_iva_code }}" >{{ $tipo->name }}</option>
+      <label for="tipo_producto">Categoría de declaración</label>
+      <select class="form-control select-search" id="tipo_producto" >
+        @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
+          <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
         @endforeach
       </select>
     </div>
-
+    
     <div class="form-group col-md-11">
       <label for="tipo_iva">Tipo de IVA</label>
       <select class="form-control" id="tipo_iva" >
-        @foreach ( \App\Variables::tiposIVARepercutidos() as $tipo )
-          <option value="{{ $tipo['codigo'] }}" porcentaje="{{ $tipo['porcentaje'] }}" class="{{ @$tipo['hide'] ? 'hidden' : '' }}" >{{ $tipo['nombre'] }}</option>
+        @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
+          <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
         @endforeach
       </select>
     </div>
@@ -53,7 +63,7 @@
       <input type="number" min="0" class="form-control pr-0" id="porc_iva" placeholder="13" value="13" readonly>
     </div>
     
-    <div class="form-group col-md-12 inline-form inline-checkbox">
+    <div class="form-group col-md-12 inline-form inline-checkbox hidden">
       <label for="p1">
         <span>¿Requiere ayuda adicional para elegir el tipo de IVA?</span>
         <input type="checkbox" class="form-control" id="p1" placeholder="" readonly="true" onchange="toggleAyudaTipoIVa();" >
@@ -84,17 +94,21 @@
     
     <div class="form-group col-md-3">
       <label for="cantidad">Cantidad</label>
-      <input type="number" min="1" class="form-control" id="cantidad" value="1"  >
+      <input type="number" min="1" step="0.1" class="form-control" id="cantidad" value="1"  >
     </div>
 
     <div class="form-group col-md-3">
       <label for="precio_unitario">Precio unitario</label>
+      @if( @$document_type != "08"  )
       <input type="number" min="0" class="form-control" id="precio_unitario" value="" number >
+      @else
+      <input type="number" min="0" class="form-control" id="precio_unitario" readonly value="0" number >
+      @endif
     </div>
 
     <div class="form-group col-md-3">
       <label for="item_iva">Monto IVA</label>
-      <input type="number" min="0" class="form-control" id="item_iva_amount" placeholder="" >
+      <input type="number" min="0" class="form-control {{ @$document_type == '08' ? 'is-fec' : 'not-fec' }}" id="item_iva_amount" placeholder="" >
     </div>
 
     <div class="form-group col-md-3">
@@ -127,7 +141,7 @@
       </label>
     </div>
     
-    <div class="form-group col-md-12 inline-form inline-checkbox">
+    <div class="form-group col-md-12 inline-form inline-checkbox {{ @$document_type == '08' || @$document_type == '09' ? 'hidden' : '' }}">
         <label for="checkExoneracion">
             <span>Incluir exoneraci&oacute;n</span>
             <input type="checkbox" class="form-control" id="checkExoneracion" onchange="mostrarCamposExoneracion();">

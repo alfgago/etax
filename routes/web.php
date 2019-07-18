@@ -43,12 +43,15 @@ Route::post('/reportes/detalle-debito', 'ReportsController@reporteDetalleDebitoF
 Route::post('/reportes/detalle-credito', 'ReportsController@reporteDetalleCreditoFiscal');
 Route::post('/reportes/libro-ventas', 'ReportsController@reporteLibroVentas');
 Route::post('/reportes/libro-compras', 'ReportsController@reporteLibroCompras');
+Route::get('/reportes/borrador-iva', 'ReportsController@reporteBorradorIVA');
 
 //Cierres de mes
 Route::prefix('cierres')->group(function() {
     Route::get('/', 'BookController@index');
     Route::patch('cerrar-mes/{id}', 'BookController@close');
     Route::patch('abrir-rectificacion/{id}', 'BookController@openForRectification');
+    Route::get('/retenciones-tarjeta/{id}', 'BookController@retenciones_tarjeta')->name('Book.retenciones_tarjeta');
+    Route::post('/actualizar-retencion-tarjeta', 'BookController@actualizar_retencion_tarjeta')->name('Book.actualizar_retencion_tarjeta');
 });
 
 // Rutas de empresa
@@ -69,7 +72,7 @@ Route::prefix('empresas')->group(function() {
 
 // Rutas de facturación
 Route::prefix('facturas-emitidas')->group(function() {
-    Route::get('emitir-factura', 'InvoiceController@emitFactura')->name('Invoice.emit_01');
+    Route::get('emitir-factura/{tipoDocumento}', 'InvoiceController@emitFactura')->name('Invoice.emit_01');
     Route::get('emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
     Route::post('enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
     Route::get('validaciones', 'InvoiceController@indexValidaciones')->name('Invoice.validaciones');
@@ -81,6 +84,8 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('download-pdf/{id}', 'InvoiceController@downloadPdf')->name('Invoice.downloadPdf');
     Route::get('download-xml/{id}', 'InvoiceController@downloadXml')->name('Invoice.downloadXml');
     Route::get('reenviar-email/{id}', 'InvoiceController@resendInvoiceEmail')->name('Invoice.resendInvoiceEmail');
+    Route::get('consult/{id}', 'InvoiceController@consultInvoice')->name('Invoice.consultInvoice');
+    Route::get('query-invoice/{id}', 'InvoiceController@queryInvoice')->name('Invoice.queryInvoice');
 });
 
 // Rutas de facturacion recibida
@@ -95,6 +100,10 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::get('aceptaciones-otros', 'BillController@indexAcceptsOther')->name('Bill.acceptOthers');
     Route::patch('confirmar-aceptacion-otros/{id}', 'BillController@correctAccepted')->name('Bill.correctAccepted');
     Route::patch('marcar-para-aceptacion/{id}', 'BillController@markAsNotAccepted')->name('Bill.markAsNotAccepted');
+    Route::get('validar/{id}', 'BillController@validar')->name('Bill.validar');
+    Route::post('guardar-validar', 'BillController@guardar_validar')->name('Bill.guardar_validar');
+    Route::get('edit-aceptacion', 'BillController@editAccept')->name('Bill.editAccept');
+    Route::get('update-aceptacion', 'BillController@updateAccept')->name('Bill.updateAccept');
 });
 
 // Rutas de Wizard
@@ -107,8 +116,10 @@ Route::post('/store-wizard', 'WizardController@createWizard')->name('Wizard.stor
 //Rutas para suscripciones
 Route::get('/cambiar-plan', 'SubscriptionPlanController@changePlan')->name('Subscription.cambiar_plan');
 Route::get('/elegir-plan', 'SubscriptionPlanController@selectPlan')->name('Subscription.select_plan');
+Route::get('/periodo-pruebas', 'SubscriptionPlanController@startTrial')->name('Subscription.startTrial');
 Route::post('/confirmar-plan', 'SubscriptionPlanController@confirmPlanChange')->name('Subscription.confirmar_plan');
 Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}', 'SubscriptionPlanController@confirmCode')->name('Subscription.confirmar_code');
+Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');
 
 // Rutas de usuario
 Route::prefix('usuario')->group(function() {
@@ -125,6 +136,8 @@ Route::prefix('usuario')->group(function() {
     Route::post('update-user-tutorial', 'UserController@updateUserTutorial')->name('User.update_user_tutorial');
     Route::get('wallet', 'InfluencersController@wallet')->name('Influencers.wallet');
     Route::post('add-retiro', 'InfluencersController@retiro')->name('Influencers.retiro');
+    Route::get('cancelar', 'UserController@cancelar')->name('User.cancelar');
+    Route::patch('update-cancelar', 'UserController@updatecancelar')->name('User.updatecancelar');
 });
 
 //Rutas de Pagos de la aplicacion
@@ -227,3 +240,4 @@ Route::get('/private/exportar', 'SubscriptionPlanController@exportar')->name('su
 
 Route::get('/admin/impersonate/{id}', 'UserController@impersonate');
 Route::get('/admin/leave', 'UserController@leaveImpersonation');
+
