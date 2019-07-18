@@ -138,7 +138,7 @@
 								  <label for="default_category_producto_code">Categoría de declaración por defecto</label>
 								  <select class="form-control" id="default_category_producto_code" name="default_category_producto_code">
 								    @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $category )
-								      <option value="{{ $category['id'] }}" posibles="{{ $category['open_codes'] }}" {{ @$company->default_category_producto_code == $tipo['id']  ? 'selected' : '' }}>{{ $category['name'] }}</option>
+								      <option value="{{ $category['id'] }}" posibles="{{ $category['open_codes'] }}" {{ @$company->default_category_producto_code == $category['id']  ? 'selected' : '' }}>{{ $category['name'] }}</option>
 								    @endforeach
 								  </select>
 								</div>  
