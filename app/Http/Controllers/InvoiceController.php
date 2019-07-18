@@ -215,7 +215,6 @@ class InvoiceController extends Controller
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
         }
         return view("Invoice/create-factura", ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
-
             'document_number' => $this->getDocReference($tipoDocumento),
             'document_key' => $this->getDocumentKey($tipoDocumento), 'units' => $units, 'countries' => $countries])->with('arrayActividades', $arrayActividades);
     }
@@ -321,9 +320,6 @@ class InvoiceController extends Controller
                 }
 
                 $company->save();
-                if ($invoice->hacienda_status == '03') {
-                   // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
-                }
                 clearInvoiceCache($invoice);
 
                 return redirect('/facturas-emitidas');
