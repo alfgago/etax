@@ -41,10 +41,9 @@
                       
                       <div class="input-validate-iva">
 										      <select class="form-control" id="tipo_iva" name="tipo_iva">
-										        @foreach ( \App\Variables::tiposIVARepercutidos() as $tipo )
-										          <option value="{{ $tipo['codigo'] }}" {{ $tipo['codigo'] == '103' ? 'selected' : '' }}
-										          	porcentaje="{{ $tipo['porcentaje'] }}" class="{{ @$tipo['hide'] ? 'hidden' : '' }}" >{{ $tipo['nombre'] }}</option>
-										        @endforeach
+										        @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
+                              <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" {{ $tipo['codigo'] == '103' ? 'selected' : '' }} porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
+                            @endforeach
 										      </select>
 										  </div>
 										                      

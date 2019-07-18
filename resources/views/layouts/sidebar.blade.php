@@ -40,7 +40,7 @@
                     <a href="/facturas-recibidas">Ver todas</a>
                     <a href="/facturas-recibidas/create">Registrar factura existente</a>
                     <a href="#" onclick="abrirPopup('importar-recibidas-popup');">Importar facturas</a>
-                    <a href="/facturas-recibidas/validaciones">Validar facturas</a>
+                    <a href="/facturas-recibidas/aceptaciones">Aceptación de facturas recibidas</a>
                     <a href="/facturas-recibidas/autorizaciones">Autorizar facturas por email</a>
                 </div>
             </li>

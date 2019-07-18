@@ -23,8 +23,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css" />
     
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=8">
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=8"></script>
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=8.1">
+    <script src="{{asset('assets/js/common-bundle.js')}}?v=8.1"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
   
@@ -71,11 +71,7 @@
     <script src="https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
-    <script src="/assets/js/hopscotch.js"></script>
     <script src="/assets/js/hopscotch.min.js"></script>
-    <script src="/assets/js/hopscotch.script.js"></script>
-    <script src="/assets/js/hopscotch_amd.js"></script>
-    <script src="/assets/js/hopscotch_amd.min.js"></script>
 
 
     @if( session()->has('message') )

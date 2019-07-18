@@ -440,7 +440,7 @@ class BillController extends Controller
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
         }
 
-        return redirect('/facturas-recibidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
+        return redirect('/facturas-recibidas/aceptaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
 
     }
     
@@ -452,7 +452,8 @@ class BillController extends Controller
      */
     public function indexValidaciones()
     {
-        $current_company = currentCompany();
+        return redirect('/facturas-recibidas/aceptaciones');
+        /*$current_company = currentCompany();
         $bills = Bill::where('company_id', $current_company)
                         ->where('is_void', false)
                         ->where('is_totales', false)
@@ -462,7 +463,7 @@ class BillController extends Controller
                         ->orderBy('reference_number', 'DESC')->paginate(10);
         return view('Bill/index-validaciones', [
           'bills' => $bills
-        ]);
+        ]);*/
     }
 
 
@@ -533,7 +534,7 @@ class BillController extends Controller
         }
         clearBillCache($bill);
         
-        return redirect('/facturas-recibidas/validaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido validada');
+        return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido validada');
     }
     
     /**

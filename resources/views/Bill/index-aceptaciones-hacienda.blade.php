@@ -5,8 +5,9 @@
 @endsection
 
 @section('breadcrumb-buttons')
-    <div onclick="abrirPopup('importar-aceptacion-popup');" class="btn btn-primary">Importar facturas para aceptación</div>
+    <div onclick="abrirPopup('importar-aceptacion-popup');" class="btn btn-primary hidden">Importar facturas para aceptación</div>
     <a href="/facturas-recibidas/aceptaciones-otros" class="btn btn-primary">Aceptación manual de facturas</a>
+    <a href="/facturas-recibidas/autorizaciones" class="btn btn-primary">Autorizar facturas por email</a>
 @endsection 
 
 @section('content') 
