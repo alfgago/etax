@@ -67,4 +67,21 @@ if (!function_exists('clearLastTaxesCache')) {
     
 }
 
+if (!function_exists('clearPermissionsCache')) {  
+
+function clearPermissionsCache($companyId, $userId) {
+    
+    $cacheKey = "cache-allow-$companyId-$userId";
+    Cache::forget("$cacheKey-admin");
+    Cache::forget("$cacheKey-invoicing");
+    Cache::forget("$cacheKey-billing");
+    Cache::forget("$cacheKey-validation");
+    Cache::forget("$cacheKey-books");
+    Cache::forget("$cacheKey-reports");
+    Cache::forget("$cacheKey-catalogue");
+    
+}
+
+}
+
 ?>

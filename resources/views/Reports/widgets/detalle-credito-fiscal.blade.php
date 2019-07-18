@@ -77,7 +77,7 @@
                                     $iVar = "i".$tipo->id;
                                 ?>
                                 <tr class="r-{{ $tipo['codigo'] }}">
-                                    <th>{{ $tipo['nombre'] }}</th>
+                                    <th>{{ $tipo->name }}</th>
                                     <td>{{ @$data1->$bVar ? number_format( $data1->$bVar, 0 ) : '-' }}</td>
                                     <td>{{ @$data1->$iVar ? number_format( $data1->$iVar, 0 ) : '-' }}</td>
                                     <td>{{ @$data2->$bVar ? number_format( $data2->$bVar, 0 ) : '-' }}</td>
