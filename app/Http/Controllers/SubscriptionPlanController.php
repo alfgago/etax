@@ -6,6 +6,7 @@ use App\User;
 use App\SubscriptionPlan;
 use App\EtaxProducts;
 use App\Sales;
+use App\Coupon;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\UsersExport;
@@ -61,6 +62,37 @@ class SubscriptionPlanController extends Controller
         
     }
 
+    public function confirmCode(Request $request){
+
+
+        $code = Coupon::where('code', $request->codigo)->first();
+        $retorno = array(
+            "precio" => $request->precio,
+            "nota" => ''
+        );
+        if( $request->codigo == $code->code ){
+            $descuento = ($request->precio * $code->discount_percentage);
+            $precio_final = $request->precio - $descuento;
+            $nota = $code->promotion_name;
+            if( $request->banco == 1 ) {
+                $descuento = ($precio_final * 0.1);
+                $precio_final = $precio_final - $descuento;
+                $nota = $code->promotion_name .' + 10% BN Nacional ';
+            }
+            if($precio_final < 0){
+                $precio_final = 0;
+            }
+            $nota = '( DESCUENTO: '.$code->discount_percentage .'% '. $nota .')';
+            $retorno = array(
+                "precio" => $precio_final,
+                "nota" => $nota
+            );
+        }
+            
+        return $retorno;
+
+
+    }
     /**
      * Remove the specified resource from storage.
      *

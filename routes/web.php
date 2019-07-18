@@ -118,6 +118,7 @@ Route::get('/cambiar-plan', 'SubscriptionPlanController@changePlan')->name('Subs
 Route::get('/elegir-plan', 'SubscriptionPlanController@selectPlan')->name('Subscription.select_plan');
 Route::get('/periodo-pruebas', 'SubscriptionPlanController@startTrial')->name('Subscription.startTrial');
 Route::post('/confirmar-plan', 'SubscriptionPlanController@confirmPlanChange')->name('Subscription.confirmar_plan');
+Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}', 'SubscriptionPlanController@confirmCode')->name('Subscription.confirmar_code');
 Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');
 
 // Rutas de usuario
@@ -133,6 +134,8 @@ Route::prefix('usuario')->group(function() {
     Route::get('zendesk-jwt', 'UserController@zendeskJwt')->name('User.zendesk_jwt');
     Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
     Route::post('update-user-tutorial', 'UserController@updateUserTutorial')->name('User.update_user_tutorial');
+    Route::get('wallet', 'InfluencersController@wallet')->name('Influencers.wallet');
+    Route::post('add-retiro', 'InfluencersController@retiro')->name('Influencers.retiro');
     Route::get('cancelar', 'UserController@cancelar')->name('User.cancelar');
     Route::patch('update-cancelar', 'UserController@updatecancelar')->name('User.updatecancelar');
 });
