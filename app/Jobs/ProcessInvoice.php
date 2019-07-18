@@ -68,8 +68,8 @@ class ProcessInvoice implements ShouldQueue
                     $tokenApi = $apiHacienda->login(false);
                     if ($requestData !== false) {
                         $endpoint = $invoice->xml_schema == 42 ? 'invoice' : 'invoice43';
+                        sleep(15);
                         Log::info('Enviando Request  API HACIENDA -->>' . $this->invoiceId);
-                        sleep(4);
                         $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/create', [
                             'headers' => [
                                 'Auth-Key' => config('etax.api_hacienda_key'),
