@@ -63,7 +63,7 @@ class SubscriptionCheckout extends Command
             }
             Log::info('Estados de pago procesados.');
             
-            $trialEndedSubscriptions = Sales::whereIn('status', 4)->where('is_subscription', true)->whereDate('trial_end_date', '<=', $now)->get();
+            $trialEndedSubscriptions = Sales::where('status', 4)->where('is_subscription', true)->whereDate('trial_end_date', '<=', $now)->get();
             foreach ($trialEndedSubscriptions as $sub) {
                 $sub->status = 3; //Pone status inactivo, para que vaya a hacer el cobro apenas la persona inicie sesión
                 $sub->save();
