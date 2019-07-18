@@ -1,7 +1,7 @@
   window.calcularSubtotalItem = function(){
 
     var precio_unitario = parseFloat( $('#precio_unitario').val() );
-    var cantidad = parseInt( $('#cantidad').val() );
+    var cantidad = parseFloat( $('#cantidad').val() );
     var porc_iva = parseFloat( $('#porc_iva').val() );
     var monto_iva = parseFloat( $('#item_iva_amount').val() );
     
@@ -42,7 +42,7 @@
   window.calcularConIvaManual = function(){
     
     var precio_unitario = parseFloat( $('#precio_unitario').val() );
-    var cantidad = parseInt( $('#cantidad').val() );
+    var cantidad = parseFloat( $('#cantidad').val() );
     var monto_iva = parseFloat( $('#item_iva_amount').val() );
     
     if( !monto_iva ) {
