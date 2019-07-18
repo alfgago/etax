@@ -24,6 +24,9 @@ Información general del perfil
                         <li>
                             <a class="nav-link" aria-selected="false" href="/elegir-plan">Cambiar plan</a>
                         </li>
+                        <li>
+                            <a class="nav-link" aria-selected="false" href="/influencers">Influencers</a>
+                        </li>
                         @if( auth()->user()->isContador() )
                             <li>
                                 <a class="nav-link active" aria-selected="true" href="/usuario/empresas">Empresas</a>

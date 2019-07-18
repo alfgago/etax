@@ -31,6 +31,10 @@ Change Password
                                 <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
                             </li>
                         @endif
+                        
+                         <li>
+                                <a class="nav-link" aria-selected="false" href="/usuario/wallet">Billetera</a>
+                           </li>
                     </ul>
                 </div>
                 <div class="col-9">
