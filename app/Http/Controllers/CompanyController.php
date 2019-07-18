@@ -320,7 +320,6 @@ class CompanyController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function updateConfig(Request $request, $id) {
-        dd($request);
         $company = Company::find($id);
 
         if (!$company) {
