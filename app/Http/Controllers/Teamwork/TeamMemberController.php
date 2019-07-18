@@ -60,6 +60,7 @@ class TeamMemberController extends Controller {
         return view('teamwork.members.permissions', compact('permissions'))->withTeam($team);
     }
 
+
     public function assignPermission(Request $request, $team_id) {
         $teamModel = config('teamwork.team_model');
         $team = $teamModel::findOrFail($team_id);
@@ -85,8 +86,7 @@ class TeamMemberController extends Controller {
                     ];
                 }
                 
-                $cacheKey = "cache-allow-$companyId-$key";
-                Cache::forget($cacheKey);
+                clearPermissionsCache($companyId, $key);
             }
 
             UserCompanyPermission::where(array('company_id' => $team['company_id']))->delete();
