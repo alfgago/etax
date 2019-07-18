@@ -139,8 +139,7 @@ class BookController extends Controller
 
     public function retenciones_tarjeta($id){
         $company = currentCompanyModel();
-        $retencion_porcentaje = Company::select('card_retention')->where('id',$company->id)->first();
-        $retencion_porcentaje = $retencion_porcentaje->card_retention;
+        $retencion_porcentaje = $company->card_retention;
         $cierres = CalculatedTax::where('company_id', $company->id)
             ->where('id',$id)->first();
         $month = $cierres->month;

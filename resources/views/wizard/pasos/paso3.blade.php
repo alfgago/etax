@@ -21,7 +21,7 @@
 <div class="form-group col-md-12">
   <label for="default_category_producto_code">Categoria productos</label>
   <select class="form-control" id="default_category_producto_code" name="default_category_producto_code">
-    @foreach ( \App\ProductCategory::all() as $category )
+    @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $category )
       <option value="{{ $category['invoice_iva_code'] }}" posibles="{{ $category['open_codes'] }}" >{{ $category['invoice_iva_code'] }} {{ $category['name'] }}</option>
     @endforeach
   </select>
