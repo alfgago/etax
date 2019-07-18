@@ -14,7 +14,7 @@ class AddCompaniesDefaultProductCategoryColumn extends Migration
      public function up()
     {
         Schema::table('companies', function (Blueprint $table) {
-            $table->text('default_product_category')->nulleable();
+            $table->text('default_product_category')->nullable();
         });
     }
 
