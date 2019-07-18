@@ -56,15 +56,21 @@ class ProcessInvoice implements ShouldQueue
             $company = Company::find($this->companyId);
             if ( $company->atv_validation ) {
                 if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '08' || '09'))) {
-                    $requestDetails = $invoiceUtils->setDetails43($invoice->items);
-                    $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
+                    if ($invoice->xml_schema == 43) {
+                        $requestDetails = $invoiceUtils->setDetails43($invoice->items);
+                        $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
+                    } else {
+                        $requestDetails = $this->setDetails($invoice->items);
+                        $requestData = $this->setInvoiceData($invoice, $requestDetails);
+                    }
                     
                     $apiHacienda = new BridgeHaciendaApi();
                     $tokenApi = $apiHacienda->login(false);
                     if ($requestData !== false) {
+                        $endpoint = $invoice->xml_schema == 42 ? 'invoice' : 'invoice43';
                         Log::info('Enviando Request  API HACIENDA -->>' . $this->invoiceId);
                         sleep(4);
-                        $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice43/create', [
+                        $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/create', [
                             'headers' => [
                                 'Auth-Key' => config('etax.api_hacienda_key'),
                                 'Client-Service' => config('etax.api_hacienda_client'),
