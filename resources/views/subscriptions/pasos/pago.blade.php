@@ -77,20 +77,18 @@
 
 <script>
     function checkCupon() {
-        if( $('#coupon').val() == '!!S0C10S3T4X!!' ){
-            $('.precio-final').text( '$' + (parseFloat( $('.precio-inicial').text().slice(1) ) * 0.5) );
-            $('.etiqueta-descuento').text('( Socios eTax 50% )');
-        }
-        if( $('#coupon').val() == 'edgarmurillo' || $('#coupon').val() == 'EDGARMURILLO'  ){
-            var descuento = parseFloat( $('.precio-inicial').text().slice(1) ) * 0.05;
-            $('.precio-final').text( '$' + (parseFloat( $('.precio-inicial').text().slice(1) ) - descuento) );
-            $('.etiqueta-descuento').text('( DESCUENTO: 5% Código Edgar Murillo )');
-            
-            if( $('#coupon').val() == 1 ) {
-                var descuento = parseFloat( $('.precio-inicial').text().slice(1) ) * 0.15;
-                $('.precio-final').text( '$' + (parseFloat( $('.precio-inicial').text().slice(1) ) - descuento) );
-                $('.etiqueta-descuento').text('( DESCUENTO: 5% Código Edgar Murillo + 10% BN Nacional)');
-            }
-        }
+        var codigo = $('#coupon').val();
+        var precio =  parseFloat( $('.precio-inicial').text().slice(1) );
+        var banco =  $('#bncupon').val();
+        var url = '/confirmar-codigo/'+codigo+'/'+precio+'/'+banco;
+        $.ajax({
+           type:'GET',
+           url:url,
+           data:{},
+           success:function(data){
+                $('.precio-final').text( '$' + data.precio );
+                $('.etiqueta-descuento').text(data.nota);
+           }
+        });
     }
 </script>
