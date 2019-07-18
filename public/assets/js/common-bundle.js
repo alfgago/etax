@@ -425,13 +425,13 @@ toastr.options = {
         subtotal = subtotal - discount;
       }
       
-      $('#item_subtotal').val( subtotal.toFixed(2) );
+      $('#item_subtotal').val( subtotal.toFixed(5) );
       if( $('#porc_iva').val().length ){
         monto_iva = subtotal * porc_iva / 100;
-        $('#item_iva_amount').val( monto_iva.toFixed(2) );
-        $('#item_total').val( (subtotal + monto_iva).toFixed(2) );
+        $('#item_iva_amount').val( monto_iva.toFixed(5) );
+        $('#item_total').val( (subtotal + monto_iva).toFixed(5) );
       }else{
-        $('#item_total').val( subtotal.toFixed(2) );
+        $('#item_total').val( subtotal.toFixed(5) );
       }
     }else{
       $('#item_subtotal').val( 0 );
@@ -463,11 +463,11 @@ toastr.options = {
         subtotal = subtotal - discount;
       }
       
-      $('#item_subtotal').val( subtotal.toFixed(2));
+      $('#item_subtotal').val( subtotal.toFixed(5));
       if( monto_iva ){
-        $('#item_total').val( (subtotal + monto_iva).toFixed(2) );
+        $('#item_total').val( (subtotal + monto_iva).toFixed(5) );
       }else{
-        $('#item_total').val( subtotal.toFixed(2) );
+        $('#item_total').val( subtotal.toFixed(5) );
       }
     }else{
       $('#item_subtotal').val( 0 );
