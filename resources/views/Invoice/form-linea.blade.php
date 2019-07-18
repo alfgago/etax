@@ -251,30 +251,7 @@
             $(this).santizeCommas();
         });
         /*fin campo discount*/
-        /*campo item_total*/
-        document.getElementById("item_total").addEventListener('change', doThing);
-
-        /* function */
-        function doThing(){
-            console.log('Horray! Someone wrote "' + this.value + '"!');
-        }
-        /*var activities = document.getElementById("item_total");
-        activities.addEventListener("change", function() {
-            if(activities.value != 0){
-                $(this).manageCommas();
-            }
-            if(activities.value != 0) {
-                $(this).santizeCommas();
-            }
-        });*/
-        /*$('#item_total').on('change',function(){
-            $(this).manageCommas();
-        });
-        $('#item_total').on('change',function(){
-            $(this).santizeCommas();
-        });*/
-        /*fin campo item_total*/
-
+       
         String.prototype.addComma = function() {
             return this.replace(/(.)(?=(.{3})+$)/g,"$1,").replace(',.', '.');
         }
