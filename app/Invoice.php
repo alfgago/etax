@@ -132,8 +132,6 @@ class Invoice extends Model
     public function setInvoiceData($request)
     {
         try {
-            $this->document_key = $request->document_key;
-            $this->document_number = $request->document_number;
             $this->sale_condition = $request->sale_condition;
             $this->payment_type = $request->payment_type;
             $this->retention_percent = $request->retention_percent;
