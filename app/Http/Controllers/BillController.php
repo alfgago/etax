@@ -671,7 +671,7 @@ class BillController extends Controller
                 ])->render();
             }) 
             ->editColumn('total', function(Bill $bill) {
-                $total = number_format($bill->total);
+                $total = $bill->total;
                 return "$bill->currency $total";
             })
             ->editColumn('accept_total_factura', function(Bill $bill) {
