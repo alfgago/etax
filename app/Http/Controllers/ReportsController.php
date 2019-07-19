@@ -219,72 +219,75 @@ class ReportsController extends Controller
     }
     
     public function reporteBorradorIVA( Request $request ) {
-        $ano = $request->ano ? $request->ano : 2019;
-        $mes = $request->mes ? $request->mes : 7;
-        
-        $company = currentCompanyModel();
-        $prorrataOperativa = $company->getProrrataOperativa($ano);
-  
-        $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
-  			$ivaData = json_decode($data->iva_data);
-        $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
-        $nombreMes = Variables::getMonthName($mes);
-        $arrayActividades = $company->getActivities();
-        
-        if( !$data->book ) {
-          return view('/Reports/no-data', compact('nombreMes') );
-        }
-        
-        $actividadDataArray = array();
-        foreach( $arrayActividades as $act ){
-          $actividadData = array();
-          $actividadData['codigo'] = $act->codigo;
-          $actividadData['titulo'] = $act->actividad;
-          $actividadData['V1'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 1%", "cats"=>[]];
-          $actividadData['V2'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 2%", "cats"=>[]];
-          $actividadData['V4'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 4%", "cats"=>[]];
-          $actividadData['V13'] = ["title" => "BIENES Y SERVICIOS AFECTOS AL 13%", "cats"=>[]];
-          $actividadData['BI'] =  ["title" => "TOTAL OTROS DETALLES A INCLUIR EN LA BASE IMPONIBLE", "cats"=>[]];
-          $actividadData['VEX'] = ["title" => "VENTAS EXENTAS", "cats"=>[]];
-          $actividadData['VAS'] = ["title" => "VENTAS AUTORIZADAS SIN IMPUESTO (órdenes especiales y otros transitorios)", "cats"=>[]];
-          $actividadData['VNS'] = ["title" => "VENTAS A NO SUJETOS", "cats"=>[]];
-          $actividadData['CL'] =  ["title" => "Compras de bienes y servicios locales utilizados en operaciones sujetas y no exentas", "cats"=>[]];
-          $actividadData['CI'] =  ["title" => "Importaciones de bienes y adquisición de servicios del exterior utilizadas en operaciones sujetas y no exentas", "cats"=>[]];
-          $actividadData['CE'] =  ["title" => "Compras sin derecho a crédito fiscal", "cats"=>[]];
-          $actividadData['CN'] =  ["title" => "Compras de bienes con IVA no acreditable por gastos no deducibles", "cats"=>[]];
+        try {
+            $ano = $request->ano ? $request->ano : 2019;
+            $mes = $request->mes ? $request->mes : 7;
 
-          foreach( \App\ProductCategory::all() as $cat ) {
-            $tipoID = $cat->id;
-            $varName = "$act->codigo-type$tipoID";
-      			$varName0 = "$act->codigo-type$tipoID-0";
-      			$varName1 = "$act->codigo-type$tipoID-1";
-      			$varName2 = "$act->codigo-type$tipoID-2";
-      			$varName3 = "$act->codigo-type$tipoID-13";
-      			$varName4 = "$act->codigo-type$tipoID-4";
-      			$info = [
-      			  "name"   => $cat->name,
-      			  "monto0" => $ivaData->$varName0,
-      			  "monto1" => $ivaData->$varName1,
-      			  "monto2" => $ivaData->$varName2,
-      			  "monto3" => $ivaData->$varName3,
-      			  "monto4" => $ivaData->$varName4,
-      			];
-      			
-      			if( ! isset($actividadData[$cat->group]["totales"]) ){
-      			  $actividadData[$cat->group]["totales"] = 0;
-      			}
-      			$actividadData[$cat->group]["totales"] = $actividadData[$cat->group]["totales"] + ($ivaData->$varName0 + $ivaData->$varName1 + $ivaData->$varName2 + $ivaData->$varName3 + $ivaData->$varName4);
-  
-      			//Agrega la información al grupo respectivo.
-      			array_push($actividadData["$cat->group"]["cats"], $info);
-          }
-          array_push( $actividadDataArray, $actividadData );
+            $company = currentCompanyModel();
+            $prorrataOperativa = $company->getProrrataOperativa($ano);
+
+            $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
+            $ivaData = json_decode($data->iva_data);
+            $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
+            $nombreMes = Variables::getMonthName($mes);
+            $arrayActividades = $company->getActivities();
+
+            if( !$data->book ) {
+                return view('/Reports/no-data', compact('nombreMes') );
+            }
+
+            $actividadDataArray = array();
+            foreach( $arrayActividades as $act ){
+                $actividadData = array();
+                $actividadData['codigo'] = $act->codigo;
+                $actividadData['titulo'] = $act->actividad;
+                $actividadData['V1'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 1%", "cats"=>[]];
+                $actividadData['V2'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 2%", "cats"=>[]];
+                $actividadData['V4'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 4%", "cats"=>[]];
+                $actividadData['V13'] = ["title" => "BIENES Y SERVICIOS AFECTOS AL 13%", "cats"=>[]];
+                $actividadData['BI'] =  ["title" => "TOTAL OTROS DETALLES A INCLUIR EN LA BASE IMPONIBLE", "cats"=>[]];
+                $actividadData['VEX'] = ["title" => "VENTAS EXENTAS", "cats"=>[]];
+                $actividadData['VAS'] = ["title" => "VENTAS AUTORIZADAS SIN IMPUESTO (órdenes especiales y otros transitorios)", "cats"=>[]];
+                $actividadData['VNS'] = ["title" => "VENTAS A NO SUJETOS", "cats"=>[]];
+                $actividadData['CL'] =  ["title" => "Compras de bienes y servicios locales utilizados en operaciones sujetas y no exentas", "cats"=>[]];
+                $actividadData['CI'] =  ["title" => "Importaciones de bienes y adquisición de servicios del exterior utilizadas en operaciones sujetas y no exentas", "cats"=>[]];
+                $actividadData['CE'] =  ["title" => "Compras sin derecho a crédito fiscal", "cats"=>[]];
+                $actividadData['CN'] =  ["title" => "Compras de bienes con IVA no acreditable por gastos no deducibles", "cats"=>[]];
+
+                foreach( \App\ProductCategory::all() as $cat ) {
+                    $tipoID = $cat->id;
+                    $varName = "$act->codigo-type$tipoID";
+                    $varName0 = "$act->codigo-type$tipoID-0";
+                    $varName1 = "$act->codigo-type$tipoID-1";
+                    $varName2 = "$act->codigo-type$tipoID-2";
+                    $varName3 = "$act->codigo-type$tipoID-13";
+                    $varName4 = "$act->codigo-type$tipoID-4";
+                    $info = [
+                        "name"   => $cat->name,
+                        "monto0" => $ivaData->$varName0,
+                        "monto1" => $ivaData->$varName1,
+                        "monto2" => $ivaData->$varName2,
+                        "monto3" => $ivaData->$varName3,
+                        "monto4" => $ivaData->$varName4,
+                    ];
+
+                    if( ! isset($actividadData[$cat->group]["totales"]) ){
+                        $actividadData[$cat->group]["totales"] = 0;
+                    }
+                    $actividadData[$cat->group]["totales"] = $actividadData[$cat->group]["totales"] + ($ivaData->$varName0 + $ivaData->$varName1 + $ivaData->$varName2 + $ivaData->$varName3 + $ivaData->$varName4);
+
+                    //Agrega la información al grupo respectivo.
+                    array_push($actividadData["$cat->group"]["cats"], $info);
+                }
+                array_push( $actividadDataArray, $actividadData );
+            }
+
+            return view('/Reports/reporte-borrador-iva', compact('data', 'mes', 'ano', 'nombreMes', 'actividadDataArray', 'acumulado') );
+
+        } catch ( \Exception $e) {
+            Log::error('Error creando borrandor de IVA');
+            return redirect()->back()->withErrors('Error creando borrador');
         }
-        
-        return view('/Reports/reporte-borrador-iva', compact('data', 'mes', 'ano', 'nombreMes', 'actividadDataArray', 'acumulado') );
-      
-      
-      
     }
     
     public function reporteDetalleDebitoFiscal( Request $request ) {
