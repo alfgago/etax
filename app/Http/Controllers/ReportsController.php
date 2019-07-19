@@ -264,11 +264,11 @@ class ReportsController extends Controller
                     $varName4 = "$act->codigo-type$tipoID-4";
                     $info = [
                         "name"   => $cat->name,
-                        "monto0" => $ivaData->$varName0,
-                        "monto1" => $ivaData->$varName1,
-                        "monto2" => $ivaData->$varName2,
-                        "monto3" => $ivaData->$varName3,
-                        "monto4" => $ivaData->$varName4,
+                        "monto0" => $ivaData->$varName0 ?? 0,
+                        "monto1" => $ivaData->$varName1 ?? 0,
+                        "monto2" => $ivaData->$varName2 ?? 0,
+                        "monto3" => $ivaData->$varName3 ?? 0,
+                        "monto4" => $ivaData->$varName4 ?? 0,
                     ];
 
                     if( ! isset($actividadData[$cat->group]["totales"]) ){
