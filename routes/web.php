@@ -66,7 +66,6 @@ Route::prefix('empresas')->group(function() {
     Route::get('company-profile/{id}', 'CompanyController@company_profile')->name('Company.company_profile');
     Route::get('set-prorrata-2018-facturas', 'CompanyController@setProrrata2018PorFacturas')->name('Company.set_prorrata_2018_facturas');
     Route::get('comprar-facturas-vista', 'CompanyController@comprarFacturasVista')->name('Company.comprar_facturas_vista');
-    Route::patch('comprar-facturas', 'CompanyController@comprarFacturas')->name('Company.comprar_facturas');
     Route::patch('seleccionar-cliente', 'CompanyController@seleccionarCliente')->name('Company.seleccionar_cliente');
 });
 
@@ -147,6 +146,7 @@ Route::prefix('payment')->group(function(){
     Route::post('payment-token-transaction', 'PaymentController@paymentTokenTransaction')->name('Payment.payment_token_transaction');
     Route::post('payment-charge', 'PaymentController@paymentCharge')->name('Payment.payment_charge');
     Route::get('pending-charges', 'PaymentController@pendingCharges')->name('Payment.pending_charges');
+    Route::post('comprar-facturas', 'PaymentController@comprarFacturas')->name('Payment.comprar_facturas');
 });
 
 

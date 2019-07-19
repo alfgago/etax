@@ -314,6 +314,7 @@ class PaymentController extends Controller
                 
                 $invoiceData->items = [$item];
                 $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
+                
                 if($factura){
                     return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
                 }
@@ -329,8 +330,100 @@ class PaymentController extends Controller
         
     }
 
-  
-    
+    public function comprarFacturas(Request $request){
+        $date = Carbon::parse(now('America/Costa_Rica'));
+        $company = currentCompanyModel();
+        $available_company_invoices = !$company->additional_invoices ? $available_company_invoices = 0 : $company->additional_invoices;
+        $product_id = $request->product_id;
+        $product = EtaxProducts::find($product_id);
+
+        switch ($product_id){
+            case 9:
+                $additional_invoices = $available_company_invoices + 5;
+            break;
+            case 10:
+                $additional_invoices = $available_company_invoices + 25;
+            break;
+            case 11:
+                $additional_invoices = $available_company_invoices + 50;
+            break;
+            case 12:
+                $additional_invoices = $available_company_invoices + 250;
+            break;
+            case 13:
+                $additional_invoices = $available_company_invoices + 2000;
+            break;
+            case 14:
+                $additional_invoices = $available_company_invoices + 5000;
+            break;
+        }
+
+        $subtotal = $product->price;
+        $iv = $subtotal * 0.13;
+        $amount = $subtotal + $iv;
+        
+        $paymentUtils = new PaymentUtils();
+        if(isset($request->payment_method)){
+            $pagoProducto = $paymentUtils->comprarProductos($request, $product, $amount);
+            if($pagoProducto){
+                $user = auth()->user();
+                
+                $client = \App\Client::where('company_id', $company->id)->where('id_number', $request->id_number)->first();
+                
+                $invoiceData = new stdClass();
+                $invoiceData->client_code = $request->id_number;
+                $invoiceData->client_id_number = $request->id_number;
+                if($client){
+                    $invoiceData->client_id = $client->id;
+                }else{
+                    $invoiceData->client_id = '-1';
+                }
+                $invoiceData->tipo_persona = $request->tipo_persona;
+                $invoiceData->first_name = $request->first_name;
+                $invoiceData->last_name = $request->last_name;
+                $invoiceData->last_name2 = $request->last_name2;
+                $invoiceData->country = $request->country;
+                $invoiceData->state = $request->state;
+                $invoiceData->city = $request->city;
+                $invoiceData->district = $request->district;
+                $invoiceData->neighborhood = $request->neighborhood;
+                $invoiceData->zip = $request->zip;
+                $invoiceData->address = $request->address;
+                $invoiceData->phone = $request->phone;
+                $invoiceData->es_exento = false;
+                $invoiceData->email = $request->email;
+                $invoiceData->expiry = $request->expiry;
+                $invoiceData->amount = $amount;
+                $invoiceData->subtotal = $subtotal;
+                $invoiceData->iva_amount = $iv;
+                $invoiceData->discount_reason = null;
+
+                $item = new stdClass();
+                $item->total = $amount;
+                $item->code = $product->id;
+                $item->name = $product->name;
+                $item->descuento = 0;
+                $item->discount_reason = null;
+                $item->cantidad = 1;
+                $item->iva_amount = $iv;
+                $item->unit_price = $subtotal;
+                $item->subtotal = $subtotal;
+                $item->total = $amount;
+
+                $invoiceData->items = [$item];
+                $procesoFactura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
+                
+                $company->additional_invoices = $additional_invoices;
+                $company->save();
+                
+                return redirect('/empresas/comprar-facturas-vista')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+            }else{
+                return redirect('/empresas/comprar-facturas-vista')->withErrors('No pudo procesarse el pago');
+            }
+        }else{
+            return redirect('/empresas/comprar-facturas-vista')->withErrors('Debe seleccionar un método de pago');
+        }
+    }
     
     public function skipPaymentCoupon( $request, $coupon ) {
         $user = auth()->user();
@@ -460,7 +553,7 @@ class PaymentController extends Controller
                         $invoiceData->zip = $company->zip;
                         $invoiceData->address = $company->address;
                         $invoiceData->phone = $company->phone;
-                        $invoiceData->es_exento = $company->es_exento;
+                        $invoiceData->es_exento = false;
                         $invoiceData->email = $company->email;
                         $invoiceData->expiry = $company->expiry;
                         $invoiceData->amount = $amount;
