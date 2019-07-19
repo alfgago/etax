@@ -550,6 +550,14 @@ class CalculatedTax extends Model
               $ivaData->$bVar += $subtotal;
               $ivaData->$iVar += $billIva;
               
+              //Cuenta contable de proveedor
+              $tipoVenta = $billItems[$i]->bill->sale_condition;
+              if( $tipoVenta == '01' ) {
+                $totalProveedoresContado += $currentTotal;
+              }else{
+                $totalProveedoresCredito += $currentTotal;
+              }
+              
               $typeVar = "type$prodType";
               $typeVarPorc = "type$prodType-$prodPorc";
               $typeVarActividad = $currActivity."-".$typeVar;
@@ -565,14 +573,6 @@ class CalculatedTax extends Model
               $ivaData->$typeVarPorc += $subtotal;
               $ivaData->$typeVarActividad += $subtotal;
               $ivaData->$typeVarPorcActividad += $subtotal;
-              
-              //Cuenta contable de proveedor
-              $tipoVenta = $billItems[$i]->bill->sale_condition;
-              if( $tipoVenta == '01' ) {
-                $totalProveedoresContado += $currentTotal;
-              }else{
-                $totalProveedoresCredito += $currentTotal;
-              }
               
             }  
           }catch( \Exception $ex ){
