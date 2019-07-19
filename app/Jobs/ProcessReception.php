@@ -148,19 +148,18 @@ class ProcessReception implements ShouldQueue
             $request = null;
             $invoiceData = [
                 'clave' => $data['document_key'],
-                'cedula_emisor' => !empty($data['provider_id_number']) ? $data['provider_id_number'] : $provider->id_number,
+                'cedula_emisor' => !empty($data['provider_id_number']) ? trim($data['provider_id_number']) : $provider->id_number,
                 'fecha_emision' => $data['generated_date'] ?? '',
                 'cod_mensaje' => $data['accept_status'] ?? 1,
                 'detalle' => 'Detalle',
                 'total' => $data['total'],
-                'cedula_receptor' => $company->id_number,
+                'cedula_receptor' => trim($company->id_number),
                 'consecutivo' => getDocReference('05', $ref),
                 'tipo_documento' => '05',
-
-                'usuarioAtv' => $company->atv->user ?? '',
-                'passwordAtv' => $company->atv->password ?? '',
+                'usuarioAtv' => $company->atv->user ? trim($company->atv->user) : '',
+                'passwordAtv' => $company->atv->password ? trim($company->atv->password) : '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
-                'atvcertPin' => $company->atv->pin ?? '',
+                'atvcertPin' => $company->atv->pin ? trim($company->atv->pin) : '',
                 'atvcertFile' => Storage::get($company->atv->key_url),
             ];
 
@@ -193,12 +192,12 @@ class ProcessReception implements ShouldQueue
             $request = null;
             $invoiceData = [
                 'clave' => $data['document_key'],
-                'cedula_emisor' => !empty($data['provider_id_number']) ? $data['provider_id_number'] : $provider->id_number,
+                'cedula_emisor' => !empty($data['provider_id_number']) ? trim($data['provider_id_number']) : trim($provider->id_number),
                 'fecha_emision' => $data['generated_date'] ?? '',
                 'cod_mensaje' => $data['accept_status'] ?? 1,
                 'detalle' => 'Detalle',
                 'total' => $data['accept_total_factura'],
-                'cedula_receptor' => $company->id_number,
+                'cedula_receptor' => trim($company->id_number),
                 'consecutivo' => getDocReference('05', $ref),
                 'tipo_documento' => '05',
                 'total_impuesto' => $data['accept_iva_total'],
@@ -206,10 +205,10 @@ class ProcessReception implements ShouldQueue
                 'cond_impuesto' => empty($data['accept_iva_condition']) ? '02' : $data['accept_iva_condition'],
                 'total_imp_acredit' => $data['accept_iva_acreditable'],
                 'total_gastos' => $data['accept_iva_gasto'],
-                'usuarioAtv' => $company->atv->user ?? '',
-                'passwordAtv' => $company->atv->password ?? '',
+                'usuarioAtv' => $company->atv->user ? trim($company->atv->user) : '',
+                'passwordAtv' => $company->atv->password ? trim($company->atv->password) : '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
-                'atvcertPin' => $company->atv->pin ?? '',
+                'atvcertPin' => $company->atv->pin ? trim($company->atv->pin) : '',
                // 'atvcertFile' => Storage::get($company->atv->key_url),
             ];
             Log::info("Request Data from invoices id: $data->id  --> ".json_encode($invoiceData));
