@@ -102,35 +102,49 @@ class PaymentUtils
         return $cards;
     }
 
-    public function comprarProductos($request){
+    public function comprarProductos($request, $producto, $amount){
         $bnStatus = $this->statusBNAPI();
         if($bnStatus['apiStatus'] == 'Successful'){
             $date = Carbon::parse(now('America/Costa_Rica'));
             $user = auth()->user();
             $data = new stdClass();
-            $data->description = 'Compra de ' . $request->product_name . ' eTax';
+            $data->description = 'Compra de ' . $producto->name . ' eTax';
             $data->user_name = $user->user_name;
-            $data->amount = $request->product_price;
+            $data->amount = $amount;
 
             $chargeCreated = $this->paymentIncludeCharge($data);
             if($chargeCreated['apiStatus'] == "Successful"){
                 $paymentMethod = PaymentMethod::where('id', $request->payment_method)->first();
-                $current_company = currentCompany();
+                $company = currentCompanyModel();
                 $date = Carbon::parse(now('America/Costa_Rica'));
-                $sale = Sales::create([
+                $sale = Sales::updateOrCreate([
                     "user_id" => $user->id,
-                    "company_id" => $current_company,
-                    "etax_product_id" => $request->product_id,
-                    "status" => 1,
+                    "company_id" => $company->id,
+                    "etax_product_id" => $producto->id,
+                    "status" => 2,
                     "recurrency" => '0'
                 ]);
-                $payment = Payment::create([
-                    'sale_id' => $sale->id,
-                    'payment_date' => $date,
-                    'payment_status' => 1,
-                    'amount' => $request->product_price
-                ]);
+                
+                $payment = Payment::updateOrCreate(
+                    [
+                        'sale_id' => $sale->id,
+                        'payment_status' => 1,
+                    ],
+                    [
+                        'payment_method_id' => $paymentMethod->id,
+                        'payment_date' => $date,
+                        'amount' => $producto->price
+                    ]
+                );
 
+                //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
+                if( ! isset($payment->charge_token) ) {
+                    $chargeIncluded = $paymentUtils->paymentIncludeCharge($data);
+                    $chargeTokenId = $chargeIncluded['chargeTokenId'];
+                    $payment->charge_token = $chargeTokenId;
+                    $payment->save();
+                }
+                
                 $chargeTokenId = $chargeCreated['chargeTokenId'];
                 $charge = new stdClass();
                 $charge->cardTokenId = $paymentMethod->token_bn;
@@ -139,6 +153,7 @@ class PaymentUtils
 
                 $apliedCharge = $this->paymentApplyCharge($charge);
                 if($apliedCharge['apiStatus'] == "Successful"){
+                    $payment->proof = $appliedCharge['retrievalRefNo'];
                     $payment->payment_status = 2;
                     $payment->save();
                     $sale->status = 1;
@@ -148,6 +163,7 @@ class PaymentUtils
                 }else{
                     return false;
                 }
+                return true;
             }else{
                 return false;
             }
@@ -156,7 +172,7 @@ class PaymentUtils
         }
     }
 
-    public function facturarProductosEtax($invoiceData){
+    /*public function facturarProductosEtax($invoiceData){
         $apiHacienda = new BridgeHaciendaApi();
         $tokenApi = $apiHacienda->login();
         if ($tokenApi !== false) {
@@ -268,7 +284,7 @@ class PaymentUtils
         } else {
             return false;
         }
-    }
+    }*/
 
     private function getDocReference($docType, $companyId = null) {
         if( $companyId ){
