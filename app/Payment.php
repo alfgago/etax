@@ -16,6 +16,11 @@ class Payment extends Model
         return $this->belongsTo(Sales::class);
     }
 
+    public function coupon()
+    {
+        return $this->belongsTo(Coupons::class);
+    }
+    //
     public function paymentMethod()
     {
         return $this->belongsTo(PaymentMethod::class);

@@ -282,7 +282,7 @@
 
 <script>
 $(document).ready(function(){
-  $('#tipo_iva').val('103');
+  $('#tipo_producto').val(17).change();
 });
 
 function toggleRetencion() {

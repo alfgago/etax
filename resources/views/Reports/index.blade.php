@@ -25,10 +25,10 @@
           <option value="/reportes/libro-compras" hideClass=".opt-acumulado" >Libro de compras</option>
           <option value="/reportes/libro-ventas" hideClass=".opt-acumulado" >Libro de ventas</option>
           <option value="/reportes/resumen-ejecutivo" hideClass=".opt-acumulado" type="iframe" >Resumen ejecutivo</option>
-          <option value="/reportes/reporte-proveedores" type="post">Reporte de proveedores (Muy pronto)</option>
-          <option value="/reportes/reporte-clientes" type="post">Reporte de clientes (Muy pronto)</option>
-          <option value="/reportes/reporte-iva" type="post">Declaración de IVA (Muy pronto)</option>
-          <option style="display:none;" value="/reportes/borrador-iva" hideClass=".opt-acumulado" type="iframe">Borrador de declaración de IVA (Muy pronto)</option>
+          <option type="post">Reporte de proveedores (Muy pronto)</option>
+          <option type="post">Reporte de clientes (Muy pronto)</option>
+          <option style="" value="/reportes/borrador-iva" hideClass=".opt-acumulado" type="iframe">Borrador de declaración de IVA</option>
+
         </select>
       </div>
       
@@ -70,6 +70,7 @@
         
       </div>
 
+
       <div class="col-lg-12 col-md-12 hidden reporte" style="padding: 3rem 15px;" id="reporte-detalle-debito">
         
       </div>
@@ -83,8 +84,7 @@
       </div>
         <div class="col-md-1" hidden id="export_btn" style="margin-top:-2em;">
             <button id="btnExport" onclick="Exportar();" class="btn btn-primary form-btn">Descargar</button>
-        </div>
-      
+        </div>      
     </div>
   </div>
 </div>
@@ -148,7 +148,7 @@
         
       }else{
         reporteView = reporteView + "?ano="+ano+"&mes="+mes;
-        $('#reporte-container').html( "<div class='iframe-container'> <iframe src='"+reporteView+"'></iframe> </div>" );
+        $('#reporte-container').html( "<div class='iframe-container'> <iframe id='report-iframe' onload='resizeIframe(this);' src='"+reporteView+"'></iframe> </div>" );
       }
       
     }else{
@@ -159,6 +159,11 @@
   $( document ).ready(function() {
     clearEmptyRows();
   });
+  
+  function resizeIframe() {
+    var iframe = document.getElementById('report-iframe');
+    iframe.style.height = iframe.contentWindow.document.body.offsetHeight + 'px';
+  }
   
   function clearEmptyRows() {
     $(".ivas-table tbody tr").each( function(){
@@ -179,9 +184,19 @@
     position: relative;
     width: 67.67rem;
     max-width: 100%;
-    padding-bottom: 4300px;
     overflow: hidden;
-}
+    height: auto;
+    padding-bottom: 3rem;
+  }
+  
+  .iframe-container iframe {
+      position: relative;
+      top: 0;
+      left: 0;
+      width: 100%;
+      border: 0;
+  }
+  
 </style>
 
 @endsection

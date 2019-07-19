@@ -11,6 +11,7 @@ use Mpociot\Teamwork\Traits\UserHasTeams;
 use Lab404\Impersonate\Models\Impersonate;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use App\Coupon;
 
 class User extends Authenticatable {
 
@@ -69,7 +70,14 @@ class User extends Authenticatable {
     
     public function canImpersonate()
     {
-        return $this->user_name == "alfgago";
+        $allow = false;
+        if( 
+            $this->user_name == "alfgago" || 
+            $this->user_name == "aligguillen@gmail.com" 
+        ) {
+            $allow = true;
+        }
+        return $allow;
     }
 
     public function addCompany() {
@@ -156,5 +164,17 @@ class User extends Authenticatable {
         
         return false;
     }
+
+    public function isInfluencers() {
+        try{
+            $cupones = Coupon::where('user_id', auth()->user()->id)->count();
+            if( $cupones > 0 ) {
+                return true;
+            }
+        }catch( \Throwable $e) { return false; }
+        
+        return false;
+    }
+
 
 }

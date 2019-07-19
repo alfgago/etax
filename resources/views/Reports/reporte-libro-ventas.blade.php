@@ -9,7 +9,8 @@
 	            <thead>
 	              <tr>
 	                <th>Fecha</th>
-	                <th>Proveedor</th>
+	                <th>Cliente</th>
+	                <th>Actividad</th>
 	                <th>Consecutivo</th>
 	                <th># Línea</th>
 	                <th>Producto</th>
@@ -29,6 +30,7 @@
 		              	?>
 		                <td>{{ $item->invoice->generatedDate()->format('d/m/Y') }}</td>
 		                <td>{{ @$item->invoice->client ? $item->invoice->client->getFullName() : 'N/A' }}</td>
+		                <td>{{ @$item->invoice->commercial_activity ?? 'No indica' }}</td>
 		                <td>{{ $item->invoice->document_number }}</td>
 		                <td>{{ $item->item_number }}</td>
 		                <td>{{ $item->name }}</td>

@@ -55,7 +55,7 @@
     
     <div class="form-group col-md-4">
       <label for="phone">Teléfono</label>
-      <input type="text" class="form-control" name="phone" id="phone" >
+      <input type="number" class="form-control" name="phone" id="phone" >
     </div>
     
     <div></div>
@@ -71,20 +71,20 @@
     </div>
 
     <div class="form-group col-md-4">
-      <label for="state">Provincia</label>
-      <select class="form-control" name="state" id="state" onchange="fillCantones();">
+      <label for="state">Provincia *</label>
+      <select class="form-control checkEmpty" name="state" id="state" onchange="fillCantones();">
       </select>
     </div>
     
     <div class="form-group col-md-4">
-      <label for="city">Canton</label>
-      <select class="form-control" name="city" id="city" onchange="fillDistritos();">
+      <label for="city">Canton *</label>
+      <select class="form-control checkEmpty" name="city" id="city" onchange="fillDistritos();">
       </select>
     </div>
     
     <div class="form-group col-md-4">
-      <label for="district">Distrito</label>
-      <select class="form-control" name="district" id="district" onchange="fillZip();" >
+      <label for="district">Distrito *</label>
+      <select class="form-control checkEmpty" name="district" id="district" onchange="fillZip();" >
       </select>
     </div>
     

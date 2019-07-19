@@ -36,11 +36,11 @@
                 <tr id="row-index-{{ $loop->index }}">
                   <td>{{ @$data->provider->getFullName() }}</td>
                   <td>{{ $data->document_number }}</td>
-                  <td>{{ "$data->currency $data->total" }}</td>
-                  <td>{{ $data->accept_total_factura }}</td>
-                  <td>{{ $data->accept_iva_total }}</td>
-                  <td><input style="max-width:90px;" type="number" min="0" step="0.01" class="accept_iva_acreditable-linea" value="{{ $data->accept_iva_acreditable }}" onkeyup="setTo('{{ $loop->index }}', 'accept_iva_acreditable', this.value)" /></td>
-                  <td><input style="max-width:90px;" type="number" min="0" step="0.01" class="accept_iva_gasto-linea" value="{{ $data->accept_iva_gasto }}" onkeyup="setTo('{{ $loop->index }}', 'accept_iva_gasto', this.value)" /></td>
+                  <td>{{ $data->currency }} {{ number_format($data->total) }}</td>
+                  <td>{{ number_format($data->accept_total_factura) }}</td>
+                  <td>{{ number_format($data->accept_iva_total) }}</td>
+                  <td><input style="max-width:90px;" type="number" min="0" step="0.01" class="accept_iva_acreditable-linea" value="{{ number_format($data->accept_iva_acreditable) }}" onkeyup="setTo('{{ $loop->index }}', 'accept_iva_acreditable', this.value)" /></td>
+                  <td><input style="max-width:90px;" type="number" min="0" step="0.01" class="accept_iva_gasto-linea" value="{{ number_format($data->accept_iva_gasto) }}" onkeyup="setTo('{{ $loop->index }}', 'accept_iva_gasto', this.value)" /></td>
                   <td>{{ $data->generatedDate()->format('d/m/Y') }}</td>
                   <td>
                     <form id="accept-form-{{ $data->id }}" class="inline-form por-etax" method="POST" action="/facturas-recibidas/confirmar-aceptacion-otros/{{ $data->id }}" >

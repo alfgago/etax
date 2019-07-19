@@ -56,14 +56,21 @@ class ProcessInvoice implements ShouldQueue
             $company = Company::find($this->companyId);
             if ( $company->atv_validation ) {
                 if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '08' || '09'))) {
-                    $requestDetails = $invoiceUtils->setDetails43($invoice->items);
-                    $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
+                    if ($invoice->xml_schema == 43) {
+                        $requestDetails = $invoiceUtils->setDetails43($invoice->items);
+                        $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
+                    } else {
+                        $requestDetails = $this->setDetails($invoice->items);
+                        $requestData = $this->setInvoiceData($invoice, $requestDetails);
+                    }
                     
                     $apiHacienda = new BridgeHaciendaApi();
                     $tokenApi = $apiHacienda->login(false);
                     if ($requestData !== false) {
+                        $endpoint = $invoice->xml_schema == 42 ? 'invoice' : 'invoice43';
+                        sleep(15);
                         Log::info('Enviando Request  API HACIENDA -->>' . $this->invoiceId);
-                        $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice43/create', [
+                        $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/create', [
                             'headers' => [
                                 'Auth-Key' => config('etax.api_hacienda_key'),
                                 'Client-Service' => config('etax.api_hacienda_client'),
@@ -77,10 +84,10 @@ class ProcessInvoice implements ShouldQueue
                             'connect_timeout' => 20
                         ]);
                         $response = json_decode($result->getBody()->getContents(), true);
+                        $date = Carbon::now();
                         Log::info('Response Api Hacienda '. json_encode($response));
                         if (isset($response['status']) && $response['status'] == 200) {
                             Log::info('API HACIENDA 200 :'. $invoice->document_number);
-                            $date = Carbon::now();
                             $invoice->hacienda_status = '03';
                             $invoice->save();
                             $path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
@@ -98,6 +105,7 @@ class ProcessInvoice implements ShouldQueue
                                 $xml->invoice_id = $invoice->id;
                                 $xml->bill_id = 0;
                                 $xml->xml = $path;
+                                $xml->xml_message = $pathMH;
                                 $xml->save();
 
                                 $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH);
@@ -109,8 +117,11 @@ class ProcessInvoice implements ShouldQueue
                             Log::info('Consecutive repeated -->' . $invoice->document_number);
                             $invoice->hacienda_status = '04';
                             $invoice->save();
-
-
+                        } else if (isset($response['status']) && $response['status'] == 400 &&
+                            strpos($response['message'], 'archivo XML ya existe en nuestras bases de datos') <> false) {
+                            Log::info('Consecutive repeated -->' . $invoice->document_number);
+                            $invoice->hacienda_status = '04';
+                            $invoice->save();
                         }
                         Log::info('Proceso de facturación finalizado con éxito.');
                     }
@@ -132,33 +143,33 @@ class ProcessInvoice implements ShouldQueue
             $invoiceData = [
                 'consecutivo' => $data['reference_number'] ?? '',
                 'fecha_emision' => $data['generated_date'] ?? '',
-                'receptor_nombre' => $data['client_first_name'].' '.$data['client_last_name'],
+                'receptor_nombre' => trim($data['client_first_name'].' '.$data['client_last_name']),
                 'receptor_ubicacion_provincia' => substr($receptorPostalCode,0,1),
                 'receptor_ubicacion_canton' => substr($receptorPostalCode,1,2),
                 'receptor_ubicacion_distrito' => substr($receptorPostalCode,3),
                 'receptor_ubicacion_otras_senas' => $data['client_address'] ?? '',
-                'receptor_email' => $data['client_email'] ?? '',
-                'receptor_cedula_numero' => $data['client_id_number'] ?? '',
+                'receptor_email' => $data['client_email'] ? trim($data['client_email']) : '',
+                'receptor_cedula_numero' => $data['client_id_number'] ? trim($data['client_id_number']) : '',
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',
                 'tipocambio' => $data['currency_rate'] ?? '',
                 'tipo_documento' => $data['document_type'] ?? '',
                 'sucursal_nro' => '001',
                 'terminal_nro' => '00001',
-                'emisor_name' => $company->business_name ?? '',
-                'emisor_email' => $company->email ?? '',
-                'emisor_company' => $company->business_name ?? '',
+                'emisor_name' => $company->business_name ? trim($company->business_name) : '',
+                'emisor_email' => $company->email ? trim($company->email) : '',
+                'emisor_company' => $company->business_name ? trim($company->business_name) : '',
                 'emisor_city' => $company->city ?? '',
                 'emisor_state' => $company->state ?? '',
                 'emisor_postal_code' => $company->zip ?? '',
                 'emisor_country' => $company->country ?? '',
-                'emisor_address' => $company->address ?? '',
-                'emisor_phone' => $company->phone ?? '',
-                'emisor_cedula' => $company->id_number ?? '',
-                'usuarioAtv' => $company->atv->user ?? '',
-                'passwordAtv' => $company->atv->password ?? '',
+                'emisor_address' => $company->address ? trim($company->address) : '',
+                'emisor_phone' => $company->phone ? trim($company->phone) :  '',
+                'emisor_cedula' => $company->id_number ? trim($company->id_number) : '',
+                'usuarioAtv' => $company->atv->user ? trim($company->atv->user) : '',
+                'passwordAtv' => $company->atv->password ? trim($company->atv->password) : '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
-                'atvcertPin' => $company->atv->pin ?? '',
+                'atvcertPin' => $company->atv->pin ? trim($company->atv->pin) : '',
                 'atvcertFile' => Storage::get($company->atv->key_url),
                 'detalle' => $details
             ];
@@ -190,7 +201,7 @@ class ProcessInvoice implements ShouldQueue
                 $details[$key] = array(
                     'cantidad' => $value['item_count'] ?? '',
                     'unidadMedida' => $value['measure_unit'] ?? '',
-                    'detalle' => $value['name'] ?? '',
+                    'detalle' => $value['name'] ? trim($value['name']) : '',
                     'precioUnitario' => $value['unit_price'] ?? '',
                     'subtotal' => $value['subtotal'] ?? '',
                     'montoTotal' => $value['item_count'] * $value['unit_price'] ?? '',

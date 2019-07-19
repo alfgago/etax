@@ -1,3 +1,21 @@
+          <?php
+          
+          $data1 = $e->parsedIvaData();
+          $data2 = $f->parsedIvaData();
+          $data3 = $m->parsedIvaData();
+          $data4 = $a->parsedIvaData();
+          $data5 = $y->parsedIvaData();
+          $data6 = $j->parsedIvaData();
+          $data7 = $l->parsedIvaData();
+          $data8 = $g->parsedIvaData();
+          $data9 = $s->parsedIvaData();
+          $data10 = $c->parsedIvaData();
+          $data11 = $n->parsedIvaData();
+          $data12 = $d->parsedIvaData();
+          $data0 = $acumulado->parsedIvaData();
+          
+          ?>
+
 <div class="car o-hidden mb-4">
   <div class="car-body">
       <h3 class="card-title">{{ $titulo }}</h3>
@@ -53,39 +71,39 @@
                   </tr>
               </thead>
               <tbody>
-                  @foreach ( \App\Variables::tiposIVARepercutidos() as $tipo )
+                  @foreach ( \App\CodigoIvaRepercutido::get() as $tipo )
                     <?php 
-                        $bVar = "b".$tipo['codigo'];
-                        $iVar = "i".$tipo['codigo'];
+                        $bVar = "b".$tipo->id;
+                        $iVar = "i".$tipo->id;
                     ?>
                     <tr class="r-{{ $tipo['codigo'] }}">
-                        <th>{{ $tipo['nombre'] }}</th>
-                        <td>{{ $e->$bVar ? number_format( $e->$bVar, 0 ) : '-' }}</td>
-                        <td>{{ $e->$iVar ? number_format( $e->$iVar, 0 ) : '-' }}</td>
-                        <td>{{ $f->$bVar ? number_format( $f->$bVar, 0 ) : '-' }}</td>
-                        <td>{{ $f->$iVar ? number_format( $f->$iVar, 0 ) : '-' }}</td>
-                        <td>{{ $m->$bVar ? number_format( $m->$bVar, 0 ) : '-' }}</td>
-                        <td>{{ $m->$iVar ? number_format( $m->$iVar, 0 ) : '-' }}</td>
-                        <td>{{ $a->$bVar ? number_format( $a->$bVar, 0 ) : '-' }}</td>
-                        <td>{{ $a->$iVar ? number_format( $a->$iVar, 0 ) : '-' }}</td>
-                        <td>{{ $y->$bVar ? number_format( $y->$bVar, 0 ) : '-' }}</td>
-                        <td>{{ $y->$iVar ? number_format( $y->$iVar, 0 ) : '-' }}</td>
-                        <td>{{ $j->$bVar ? number_format( $j->$bVar, 0 ) : '-' }}</td>
-                        <td>{{ $j->$iVar ? number_format( $j->$iVar, 0 ) : '-' }}</td>
-                        <td>{{ $l->$bVar ? number_format( $l->$bVar, 0 ) : '-' }}</td>
-                        <td>{{ $l->$iVar ? number_format( $l->$iVar, 0 ) : '-' }}</td>
-                        <td>{{ $g->$bVar ? number_format( $g->$bVar, 0 ) : '-' }}</td>
-                        <td>{{ $g->$iVar ? number_format( $g->$iVar, 0 ) : '-' }}</td>
-                        <td>{{ $s->$bVar ? number_format( $s->$bVar, 0 ) : '-' }}</td>
-                        <td>{{ $s->$iVar ? number_format( $s->$iVar, 0 ) : '-' }}</td>
-                        <td>{{ $c->$bVar ? number_format( $c->$bVar, 0 ) : '-' }}</td>
-                        <td>{{ $c->$iVar ? number_format( $c->$iVar, 0 ) : '-' }}</td>
-                        <td>{{ $n->$bVar ? number_format( $n->$bVar, 0 ) : '-' }}</td>
-                        <td>{{ $n->$iVar ? number_format( $n->$iVar, 0 ) : '-' }}</td>
-                        <td>{{ $d->$bVar ? number_format( $d->$bVar, 0 ) : '-' }}</td>
-                        <td>{{ $d->$iVar ? number_format( $d->$iVar, 0 ) : '-' }}</td>
-                        <td>{{ $acumulado->$bVar ? number_format( $acumulado->$bVar, 0 ) : '-' }}</td>
-                        <td>{{ $acumulado->$iVar ? number_format( $acumulado->$iVar, 0 ) : '-' }}</td>
+                        <th>{{ $tipo->name }}</th>
+                        <td>{{ @$data1->$bVar ? number_format( $data1->$bVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data1->$iVar ? number_format( $data1->$iVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data2->$bVar ? number_format( $data2->$bVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data2->$iVar ? number_format( $data2->$iVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data3->$bVar ? number_format( $data3->$bVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data3->$iVar ? number_format( $data3->$iVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data4->$bVar ? number_format( $data4->$bVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data4->$iVar ? number_format( $data4->$iVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data5->$bVar ? number_format( $data5->$bVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data5->$iVar ? number_format( $data5->$iVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data6->$bVar ? number_format( $data6->$bVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data6->$iVar ? number_format( $data6->$iVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data7->$bVar ? number_format( $data7->$bVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data7->$iVar ? number_format( $data7->$iVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data8->$bVar ? number_format( $data8->$bVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data8->$iVar ? number_format( $data8->$iVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data9->$bVar ? number_format( $data9->$bVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data9->$iVar ? number_format( $data9->$iVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data10->$bVar ? number_format( $data10->$bVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data10->$iVar ? number_format( $data10->$iVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data11->$bVar ? number_format( $data11->$bVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data11->$iVar ? number_format( $data11->$iVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data12->$bVar ? number_format( $data12->$bVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data12->$iVar ? number_format( $data12->$iVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data0->$bVar ? number_format( $data0->$bVar, 0 ) : '-' }}</td>
+                        <td>{{ @$data0->$iVar ? number_format( $data0->$iVar, 0 ) : '-' }}</td>
                     </tr>
                   @endforeach
 

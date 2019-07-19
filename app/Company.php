@@ -201,7 +201,7 @@ class Company extends Model {
     public function getAvailableInvoices( $year, $month ) {
 
         try{
-            if( $month && $year ) {
+            if( !$month || !$year ) {
                 $today = Carbon::parse(now('America/Costa_Rica'));
                 $month = $today->month;
                 $year = $today->year;

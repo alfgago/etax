@@ -61,6 +61,8 @@ Route::prefix('cierres')->group(function() {
     Route::get('/', 'BookController@index');
     Route::patch('cerrar-mes/{id}', 'BookController@close');
     Route::patch('abrir-rectificacion/{id}', 'BookController@openForRectification');
+    Route::get('/retenciones-tarjeta/{id}', 'BookController@retenciones_tarjeta')->name('Book.retenciones_tarjeta');
+    Route::post('/actualizar-retencion-tarjeta', 'BookController@actualizar_retencion_tarjeta')->name('Book.actualizar_retencion_tarjeta');
 });
 
 // Rutas de empresa
@@ -75,7 +77,6 @@ Route::prefix('empresas')->group(function() {
     Route::get('company-profile/{id}', 'CompanyController@company_profile')->name('Company.company_profile');
     Route::get('set-prorrata-2018-facturas', 'CompanyController@setProrrata2018PorFacturas')->name('Company.set_prorrata_2018_facturas');
     Route::get('comprar-facturas-vista', 'CompanyController@comprarFacturasVista')->name('Company.comprar_facturas_vista');
-    Route::patch('comprar-facturas', 'CompanyController@comprarFacturas')->name('Company.comprar_facturas');
     Route::patch('seleccionar-cliente', 'CompanyController@seleccionarCliente')->name('Company.seleccionar_cliente');
 });
 
@@ -93,6 +94,8 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('download-pdf/{id}', 'InvoiceController@downloadPdf')->name('Invoice.downloadPdf');
     Route::get('download-xml/{id}', 'InvoiceController@downloadXml')->name('Invoice.downloadXml');
     Route::get('reenviar-email/{id}', 'InvoiceController@resendInvoiceEmail')->name('Invoice.resendInvoiceEmail');
+    Route::get('consult/{id}', 'InvoiceController@consultInvoice')->name('Invoice.consultInvoice');
+    Route::get('query-invoice/{id}', 'InvoiceController@queryInvoice')->name('Invoice.queryInvoice');
 });
 
 // Rutas de facturacion recibida
@@ -107,6 +110,10 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::get('aceptaciones-otros', 'BillController@indexAcceptsOther')->name('Bill.acceptOthers');
     Route::patch('confirmar-aceptacion-otros/{id}', 'BillController@correctAccepted')->name('Bill.correctAccepted');
     Route::patch('marcar-para-aceptacion/{id}', 'BillController@markAsNotAccepted')->name('Bill.markAsNotAccepted');
+    Route::get('validar/{id}', 'BillController@validar')->name('Bill.validar');
+    Route::post('guardar-validar', 'BillController@guardar_validar')->name('Bill.guardar_validar');
+    Route::get('edit-aceptacion', 'BillController@editAccept')->name('Bill.editAccept');
+    Route::get('update-aceptacion', 'BillController@updateAccept')->name('Bill.updateAccept');
 });
 
 // Rutas de Wizard
@@ -119,7 +126,10 @@ Route::post('/store-wizard', 'WizardController@createWizard')->name('Wizard.stor
 //Rutas para suscripciones
 Route::get('/cambiar-plan', 'SubscriptionPlanController@changePlan')->name('Subscription.cambiar_plan');
 Route::get('/elegir-plan', 'SubscriptionPlanController@selectPlan')->name('Subscription.select_plan');
+Route::get('/periodo-pruebas', 'SubscriptionPlanController@startTrial')->name('Subscription.startTrial');
 Route::post('/confirmar-plan', 'SubscriptionPlanController@confirmPlanChange')->name('Subscription.confirmar_plan');
+Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}', 'SubscriptionPlanController@confirmCode')->name('Subscription.confirmar_code');
+Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');
 
 // Rutas de usuario
 Route::prefix('usuario')->group(function() {
@@ -134,6 +144,8 @@ Route::prefix('usuario')->group(function() {
     Route::get('zendesk-jwt', 'UserController@zendeskJwt')->name('User.zendesk_jwt');
     Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
     Route::post('update-user-tutorial', 'UserController@updateUserTutorial')->name('User.update_user_tutorial');
+    Route::get('wallet', 'InfluencersController@wallet')->name('Influencers.wallet');
+    Route::post('add-retiro', 'InfluencersController@retiro')->name('Influencers.retiro');
     Route::get('cancelar', 'UserController@cancelar')->name('User.cancelar');
     Route::patch('update-cancelar', 'UserController@updatecancelar')->name('User.updatecancelar');
 });
@@ -145,6 +157,7 @@ Route::prefix('payment')->group(function(){
     Route::post('payment-token-transaction', 'PaymentController@paymentTokenTransaction')->name('Payment.payment_token_transaction');
     Route::post('payment-charge', 'PaymentController@paymentCharge')->name('Payment.payment_charge');
     Route::get('pending-charges', 'PaymentController@pendingCharges')->name('Payment.pending_charges');
+    Route::post('comprar-facturas', 'PaymentController@comprarFacturas')->name('Payment.comprar_facturas');
 });
 
 

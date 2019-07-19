@@ -31,6 +31,11 @@ class Invoice extends Model
         return $this->belongsTo(Client::class);
     }
     
+    public function activity()
+    {
+        return $this->belongsTo(Actividades::class, 'commercial_activity');
+    }
+    
     public function clientName() {
       if( isset($this->client_id) ) {
         return $this->client->getFullName();
@@ -87,17 +92,17 @@ class Invoice extends Model
       
       $str = "Contado";
       if( $this->sale_condition == '02' ) {
-        $str == "Crédito";
+        $str = "Crédito";
       } else if( $this->sale_condition == '03' ) {
-        $str == "Consignación";
+        $str = "Consignación";
       } else if( $this->sale_condition == '04' ) {
-        $str == "Apartado";
+        $str = "Apartado";
       } else if( $this->sale_condition == '05' ) {
-        $str == "Arrendamiento con opción de compra";
+        $str = "Arrendamiento con opción de compra";
       } else if( $this->sale_condition == '06' ) {
          $str == "Arrendamiento en función financiera";
       } else if( $this->sale_condition == '99' ) {
-        $str == "Otros";
+        $str = "Otros";
       }
       return $str;
       
@@ -107,15 +112,15 @@ class Invoice extends Model
       
       $str = "Efectivo";
       if( $this->payment_type == '02' ) {
-        $str == "Tarjeta";
+        $str = "Tarjeta";
       } else if( $this->payment_type == '03' ) {
-        $str == "Cheque";
+        $str = "Cheque";
       } else if( $this->payment_type == '04' ) {
-        $str == "Transferencia-Depósito Bancario";
+        $str = "Transferencia-Depósito Bancario";
       } else if( $this->payment_type == '05' ) {
-        $str == "Recaudado por terceros";
+        $str = "Recaudado por terceros";
       } else if( $this->payment_type == '99' ) {
-        $str == "Otros";
+        $str = "Otros";
       }
       return $str;
       
@@ -134,8 +139,8 @@ class Invoice extends Model
             $this->retention_percent = $request->retention_percent;
             $this->credit_time = $request->credit_time;
             $this->buy_order = $request->buy_order;
-            $this->other_reference = $request->other_reference;
-            $this->send_emails = $request->send_email ?? null;
+            $this->other_reference = trim($request->other_reference);
+            $this->send_emails = $request->send_email ? trim($request->send_email) : null;
             if( $request->commercial_activity ){
                 $this->commercial_activity = $request->commercial_activity;
             }
@@ -156,24 +161,24 @@ class Invoice extends Model
                         'code' => $codigo_cliente ,
                         'company_id' => $this->company_id,
                         'tipo_persona' => $tipo_persona,
-                        'id_number' => $identificacion_cliente,
-                        'first_name' => $request->first_name,
-                        'last_name' => $request->last_name,
-                        'last_name2' => $request->last_name2,
-                        'fullname' => $request->first_name.' '.$request->last_name.' '.$request->last_name2,
+                        'id_number' => trim($identificacion_cliente),
+                        'first_name' => trim($request->first_name),
+                        'last_name' => trim($request->last_name),
+                        'last_name2' => trim($request->last_name2),
+                        'fullname' => trim($request->first_name.' '.$request->last_name.' '.$request->last_name2),
                         'emisor_receptor' => 'ambos',
                         'country' => $request->country,
                         'state' => $request->state,
                         'city' => $request->city,
                         'district' => $request->district,
-                        'neighborhood' => $request->neighborhood,
+                        'neighborhood' => trim($request->neighborhood),
                         'zip' => $request->zip,
-                        'address' => $request->address,
-                        'foreign_address' => $request->address,
-                        'phone' => $request->phone,
+                        'address' => trim($request->address),
+                        'foreign_address' => trim($request->address),
+                        'phone' => trim($request->phone),
                         'es_exento' => $request->es_exento,
-                        'email' => $request->email,
-                        'billing_emails' => $request->billing_emails ?? $request->email
+                        'email' => trim($request->email),
+                        'billing_emails' => $request->billing_emails ? trim($request->billing_emails) : $request->email
                     ]
                 );
 
@@ -203,25 +208,25 @@ class Invoice extends Model
               $this->client_city = $client->city;
               $this->client_district = $client->district;
               $this->client_zip = $client->zip;
-              $this->client_phone = $client->phone;
+              $this->client_phone = preg_replace('/[^0-9]/', '', $client->phone);
               $this->client_id_number = $client->id_number;
             }else{
               $this->client_first_name = 'N/A';
             }
             
             if( $this->document_type == '08' ) {
-              $this->client_first_name = $this->company->name;
-              $this->client_last_name = $this->company->last_name;
-              $this->client_last_name2 = $this->company->last_name2;
-              $this->client_email = $this->company->email;
-              $this->client_address = $this->company->address;
+              $this->client_first_name = trim($this->company->name);
+              $this->client_last_name = trim($this->company->last_name);
+              $this->client_last_name2 = trim($this->company->last_name2);
+              $this->client_email = trim($this->company->email);
+              $this->client_address = trim($this->company->address);
               $this->client_country = $this->company->country;
               $this->client_state = $this->company->state;
               $this->client_city = $this->company->city;
               $this->client_district = $this->company->district;
               $this->client_zip = $this->company->zip;
-              $this->client_phone = $this->company->phone;
-              $this->client_id_number = $this->company->id_number;
+              $this->client_phone = preg_replace('/[^0-9]/', '', $this->company->phone);
+              $this->client_id_number = trim($this->company->id_number);
             }
             
             //Fechas
@@ -310,10 +315,10 @@ class Invoice extends Model
                         'company_id' => $this->company_id,
                         'year'  => $this->year,
                         'month' => $this->month,
-                        'name'  => $data['name'] ?? null,
+                        'name'  => $data['name'] ? trim($data['name']) : null,
                         'product_type' => $data['product_type'] ?? null,
                         'measure_unit' => $data['measure_unit'] ?? 'Unid',
-                        'item_count'   => $data['item_count'] ?? 1,
+                        'item_count'   => $data['item_count'] ? trim($data['item_count']) : 1,
                         'unit_price'   => $data['unit_price'] ?? 0,
                         'subtotal'     => $data['subtotal'] ?? 0,
                         'total' => $data['total'] ?? 0,
@@ -597,7 +602,8 @@ class Invoice extends Model
         $invoice->commercial_activity = $arr['CodigoActividad'] ?? 0;
         $invoice->xml_schema = $invoice->commercial_activity ? 43 : 42;
         $invoice->sale_condition = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
-        $invoice->credit_time = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
+        //$invoice->credit_time = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
+        $invoice->credit_time = null;
         $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
         if ( is_array($medioPago) ) {
           $medioPago = $medioPago[0];

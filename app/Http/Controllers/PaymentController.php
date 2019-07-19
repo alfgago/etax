@@ -149,7 +149,7 @@ class PaymentController extends Controller
                 }
             }
             
-            //Crea el sale de suscripción
+            //Crea/actualiza el sale de suscripción
             $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
     
             //Revisa recurrencia para definir el costo.
@@ -209,7 +209,7 @@ class PaymentController extends Controller
             //Revisa si el API del BN esta arriba.
             $bnStatus = $paymentUtils->statusBNAPI();
             if($bnStatus['apiStatus'] != 'Successful'){
-                $mensaje = 'Pagos en Linea esta fuera de servicio. Dirijase a Configuraciones->Gestion de Pagos- para agregar una tarjeta';
+                $mensaje = 'Hubo un error procesando el pago. Por favor contacte a nuestro centro de servicios o vuelva a intentar en unos minutos.';
                 return redirect('wizard')->withError($mensaje)->withInput();
             }
             
@@ -313,9 +313,10 @@ class PaymentController extends Controller
                 $item->total = $amount;
                 
                 $invoiceData->items = [$item];
-                $factura = $this->crearFacturaClienteEtax($invoiceData);
+                $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
+                
                 if($factura){
-                    return redirect('/wizard')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+                    return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
                 }
             } else {
                 $mensaje = 'El pago ha sido denegado';
@@ -329,117 +330,98 @@ class PaymentController extends Controller
         
     }
 
-  
-    public function crearFacturaClienteEtax($invoiceData){
-        $apiHacienda = new BridgeHaciendaApi();
-        $tokenApi = $apiHacienda->login();
-        if ($tokenApi !== false) {
-            $invoice = new Invoice();
-            $company = Company::find(1);
-            $invoice->company_id = 1;
-            $document_key = $this->getDocumentKey('01');
-            $document_number = $this->getDocReference('01');
+    public function comprarFacturas(Request $request){
+        $date = Carbon::parse(now('America/Costa_Rica'));
+        $company = currentCompanyModel();
+        $available_company_invoices = !$company->additional_invoices ? $available_company_invoices = 0 : $company->additional_invoices;
+        $product_id = $request->product_id;
+        $product = EtaxProducts::find($product_id);
 
-            //Datos generales y para Hacienda
-            $invoice->document_type = "01";
-            $invoice->hacienda_status = "01";
-            $invoice->payment_status = "01";
-            $invoice->payment_receipt = "";
-            $invoice->generation_method = "etax";
-            $invoice->reference_number = $company->last_invoice_ref_number + 1;
+        switch ($product_id){
+            case 9:
+                $additional_invoices = $available_company_invoices + 5;
+            break;
+            case 10:
+                $additional_invoices = $available_company_invoices + 25;
+            break;
+            case 11:
+                $additional_invoices = $available_company_invoices + 50;
+            break;
+            case 12:
+                $additional_invoices = $available_company_invoices + 250;
+            break;
+            case 13:
+                $additional_invoices = $available_company_invoices + 2000;
+            break;
+            case 14:
+                $additional_invoices = $available_company_invoices + 5000;
+            break;
+        }
 
-            $data = new stdClass();
-            $data->document_key = $document_key;
-            $data->document_number = $document_number;
-            $data->sale_condition = '01';
-            $data->payment_type = "02";
-            $data->retention_percent = "6";
-            $data->credit_time = "0";
-
-            $data->tipo_persona = "02";
-            $data->identificacion_cliente = $invoiceData->client_id_number;
-            $data->codigo_cliente = $invoiceData->client_code;
-            $data->code = $invoiceData->client_code;
-            $data->id_number = $invoiceData->client_id_number;
-            
-            $data->commercial_activity = 722003;
-
-            $data->client_code = $invoiceData->client_id_number;
-            $data->client_id_number = $invoiceData->client_id_number;
-            $data->client_id = '-1';
-            $data->tipo_persona = $invoiceData->tipo_persona;
-            $data->first_name = $invoiceData->first_name;
-            $data->last_name = $invoiceData->last_name;
-            $data->last_name2 = $invoiceData->last_name2;
-            $data->country = $invoiceData->country;
-            $data->state = $invoiceData->state;
-            $data->city = $invoiceData->city;
-            $data->district = $invoiceData->district;
-            $data->neighborhood = $invoiceData->neighborhood;
-            $data->zip = $invoiceData->zip;
-            $data->address = $invoiceData->address;
-            $data->phone = $invoiceData->phone;
-            $data->es_exento = $invoiceData->es_exento;
-            $data->email = $invoiceData->email;
-            $data->buy_order = '';
-            $data->due_date =
-            $data->other_reference = '';
-            $data->currency_rate = get_rates();
-            $data->description = 'Factura de Etax';
-            $data->subtotal = $invoiceData->subtotal;
-            $data->currency = 'USD';
-            $data->total = $invoiceData->amount;
-            $data->iva_amount = $invoiceData->iva_amount;
-            $data->generated_date = Carbon::now()->format('d/m/Y');
-            $data->hora = Carbon::now()->format('g:i A');
-            $data->due_date = Carbon::now()->addDays(7)->format('d/m/Y');
-
-            $item = array();
-
-            $item['item_number'] = 1;
-            $item['id'] = 0;
-            $item['code'] = $invoiceData->items[0]->code;
-            $item['name'] = $invoiceData->items[0]->name;
-            $item['product_type'] = 'Plan';
-            $item['measure_unit'] = 'Sp';
-            $item['item_count'] = $invoiceData->items[0]->cantidad;
-            $item['unit_price'] = $invoiceData->items[0]->unit_price;
-            $item['subtotal'] = $invoiceData->items[0]->subtotal;
-
-            $item['discount_percentage'] = $invoiceData->items[0]->descuento;
-            $item['discount_reason'] = $invoiceData->items[0]->discount_reason;
-            $item['discount'] = $invoiceData->items[0]->descuento;
-
-            $item['iva_type'] = '103';
-            $item['iva_percentage'] = 13;
-            $item['iva_amount'] = $invoiceData->items[0]->iva_amount;
-
-            $item['total'] = $invoiceData->items[0]->total;
-            $item['is_identificacion_especifica'] = 0;
-            $item['is_exempt'] = 0;
-
-            $data->items = [ $item ];
-            
-            try{
-                $invoiceDataSent = $invoice->setInvoiceData($data);
+        $subtotal = $product->price;
+        $iv = $subtotal * 0.13;
+        $amount = $subtotal + $iv;
+        
+        $paymentUtils = new PaymentUtils();
+        if(isset($request->payment_method)){
+            $pagoProducto = $paymentUtils->comprarProductos($request, $product, $amount);
+            if($pagoProducto){
+                $user = auth()->user();
                 
-                Log::info('Suscriptor: '. $data->client_id_number . ", Nombre: " . $data->first_name . " " . $data->last_name . " " . $data->last_name2 . ", Plan:" . $invoiceData->items[0]->name );
-                if ( !empty($invoiceDataSent) ) {
-                    $invoice = $apiHacienda->createInvoice($invoiceDataSent, $tokenApi);
+                $client = \App\Client::where('company_id', $company->id)->where('id_number', $request->id_number)->first();
+                
+                $invoiceData = new stdClass();
+                $invoiceData->client_code = $request->id_number;
+                $invoiceData->client_id_number = $request->id_number;
+                if($client){
+                    $invoiceData->client_id = $client->id;
+                }else{
+                    $invoiceData->client_id = '-1';
                 }
-                $company->last_invoice_ref_number = $invoice->reference_number;
-                $company->last_document = $invoice->document_number;
-                $company->save();
-                clearInvoiceCache($invoice);
-                
-            }catch(\Throwable $e){
-                Log::error('Error al crear factura de compra eTax. ' . $e->getMessage() );
-            }
+                $invoiceData->tipo_persona = $request->tipo_persona;
+                $invoiceData->first_name = $request->first_name;
+                $invoiceData->last_name = $request->last_name;
+                $invoiceData->last_name2 = $request->last_name2;
+                $invoiceData->country = $request->country;
+                $invoiceData->state = $request->state;
+                $invoiceData->city = $request->city;
+                $invoiceData->district = $request->district;
+                $invoiceData->neighborhood = $request->neighborhood;
+                $invoiceData->zip = $request->zip;
+                $invoiceData->address = $request->address;
+                $invoiceData->phone = $request->phone;
+                $invoiceData->es_exento = false;
+                $invoiceData->email = $request->email;
+                $invoiceData->expiry = $request->expiry;
+                $invoiceData->amount = $amount;
+                $invoiceData->subtotal = $subtotal;
+                $invoiceData->iva_amount = $iv;
+                $invoiceData->discount_reason = null;
 
-            Log::info( 'Nueva suscripción exitosa.' );
-            return true;
-        } else {
-            return false;
+                $item = new stdClass();
+                $item->total = $amount;
+                $item->code = $product->id;
+                $item->name = $product->name;
+                $item->descuento = 0;
+                $item->discount_reason = null;
+                $item->cantidad = 1;
+                $item->iva_amount = $iv;
+                $item->unit_price = $subtotal;
+                $item->subtotal = $subtotal;
+                $item->total = $amount;
+
+                $invoiceData->items = [$item];
+                $procesoFactura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
+                
+                $company->additional_invoices = $additional_invoices;
+                $company->save();
+                
+                return redirect('/empresas/comprar-facturas-vista')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+            }else{
+                return redirect('/empresas/comprar-facturas-vista')->withErrors('No pudo procesarse el pago');
+            }
+        }else{
+            return redirect('/empresas/comprar-facturas-vista')->withErrors('Debe seleccionar un método de pago');
         }
     }
     
@@ -483,7 +465,7 @@ class PaymentController extends Controller
             ]
         );
         
-        return redirect('/wizard')->withMessage('Se aplicó el cupón exitosamente');
+        return redirect('/')->withMessage('Se aplicó el cupón exitosamente');
            
     }
 
@@ -571,7 +553,7 @@ class PaymentController extends Controller
                         $invoiceData->zip = $company->zip;
                         $invoiceData->address = $company->address;
                         $invoiceData->phone = $company->phone;
-                        $invoiceData->es_exento = $company->es_exento;
+                        $invoiceData->es_exento = false;
                         $invoiceData->email = $company->email;
                         $invoiceData->expiry = $company->expiry;
                         $invoiceData->amount = $amount;
@@ -592,7 +574,7 @@ class PaymentController extends Controller
                         $item->total = $amount;
 
                         $invoiceData->items = [$item];
-                        $factura = $this->crearFacturaClienteEtax($invoiceData);
+                        $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
                     }else{
                         \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
                             [

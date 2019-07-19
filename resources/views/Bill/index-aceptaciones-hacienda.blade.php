@@ -5,8 +5,9 @@
 @endsection
 
 @section('breadcrumb-buttons')
-    <div onclick="abrirPopup('importar-aceptacion-popup');" class="btn btn-primary">Importar facturas para aceptación</div>
+    <div onclick="abrirPopup('importar-aceptacion-popup');" class="btn btn-primary hidden">Importar facturas para aceptación</div>
     <a href="/facturas-recibidas/aceptaciones-otros" class="btn btn-primary">Aceptación manual de facturas</a>
+    <a href="/facturas-recibidas/autorizaciones" class="btn btn-primary">Autorizar facturas por email</a>
 @endsection 
 
 @section('content') 
@@ -16,8 +17,13 @@
           Este proceso genera la aceptación o rechazo ante Hacienda.
         </div>
         
+        @if( currentCompanyModel()->use_invoicing )
         <h2 class="mt-4 mb-4" style="color: red;">Asegúrese de tener la prorrata y proporcionalidad correctas antes de aceptar su primera factura en 4.3</h2>
-          
+        @else
+        <h2 class="mt-4 mb-4" style="color: red;">
+          Usted no tiene un facturación con eTax habilitada, por lo que esta pantalla únicamente incluirá o no las facturas en eTax para cálculo, y <b><u>no</u></b> realizará aceptaciones con Hacienda.
+        </h2>
+        @endif
         <table id="bill-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>

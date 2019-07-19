@@ -10,5 +10,8 @@ class Coupon extends Model
     use SoftDeletes;
 
 	protected $guarded = [];
-    //
+
+	public function payment(){
+        return $this->belongsTo(Payment::class);
+    }
 }
