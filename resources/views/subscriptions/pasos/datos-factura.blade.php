@@ -1,3 +1,10 @@
+<?php
+    $company = currentCompanyModel();
+    if( isset($old)) {
+        $company = $old;
+    }
+?>
+
 <div class="form-group col-md-12">
   <h3 class="mt-0">
     Datos de facturación
@@ -19,32 +26,32 @@
 
 <div class="form-group col-md-4" style="white-space: nowrap;">
     <label for="id_number">Número de identificación *</label>
-    <input type="number" class="form-control checkEmpty" name="id_number" id="id_number" onchange="getJSONCedula(this.value);" value="{{ @old('id_number') }}">
+    <input type="number" class="form-control checkEmpty" name="id_number" id="id_number" onchange="getJSONCedula(this.value);" value="{{ @$company->id_number }}">
 </div>
 
 <div class="form-group col-md-4">
     <label for="first_name">Nombre *</label>
-    <input type="text" class="form-control checkEmpty" name="first_name" id="first_name" value="{{ @old('first_name') }}" >
+    <input type="text" class="form-control checkEmpty" name="first_name" id="first_name" value="{{ @$company->name }}" >
 </div>
 
 <div class="form-group col-md-4">
     <label for="last_name">Apellido</label>
-    <input type="text" class="form-control " name="last_name" id="last_name" value="{{ @old('last_name') }}" >
+    <input type="text" class="form-control " name="last_name" id="last_name" value="{{ @$company->last_name }}" >
 </div>
 
 <div class="form-group col-md-4">
     <label for="last_name2">Segundo apellido</label>
-    <input type="text" class="form-control " name="last_name2" id="last_name2" value="{{ @old('last_name2') }}" >
+    <input type="text" class="form-control " name="last_name2" id="last_name2" value="{{ @$company->last_name2 }}" >
 </div>
 
 <div class="form-group col-md-4">
     <label for="email">Correo electrónico *</label>
-    <input type="text" class="form-control checkEmpty" name="email" id="email" value="{{ @old('email') }}" >
+    <input type="text" class="form-control checkEmpty" name="email" id="email" value="{{ @$company->email }}" >
 </div>
 
 <div class="form-group col-md-4">
     <label for="phone">Teléfono</label>
-    <input type="text" class="form-control checkEmpty" name="phone" id="phone" value="{{ @old('phone') }}" >
+    <input type="text" class="form-control checkEmpty" name="phone" id="phone" value="{{ @$company->phone }}" >
 </div>
 
 <div></div>
@@ -76,7 +83,7 @@
 
 <div class="form-group col-md-4">
     <label for="neighborhood">Barrio</label>
-    <input class="form-control" name="neighborhood" id="neighborhood" value="{{ @old('neighborhood') }}" >
+    <input class="form-control" name="neighborhood" id="neighborhood" value="{{ @$company->neighborhood }}" >
     </select>
 </div>
 
@@ -86,7 +93,7 @@
 </div>
 <div class="form-group col-md-8">
     <label for="address">Dirección</label>
-    <input class="form-control checkEmpty" name="address" id="address" value="{{ @old('address') }}">
+    <input class="form-control checkEmpty" name="address" id="address" value="{{ @$company->address }}">
 </div>
 
 <div class="form-group col-md-4 hidden">
