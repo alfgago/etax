@@ -464,7 +464,7 @@ class CompanyController extends Controller {
     }
 
     public function comprarFacturasVista(){
-        return back()->withError( 'Compra de facturas adicionales deshabilitada hasta el 1 de Julio.' );
+        //return back()->withError( 'Compra de facturas adicionales deshabilitada hasta el 1 de Julio.' );
         
         $company = currentCompany();
         $sale = Sales::where('company_id', $company)->first();
@@ -520,8 +520,9 @@ class CompanyController extends Controller {
                 $additional_invoices = $available_company_invoices + 5000;
             break;
         }
+
         $paymentUtils = new PaymentUtils();
-        if(isset($payment_method)){
+        if(isset($request->payment_method)){
             $pagoProducto = $paymentUtils->comprarProductos($request);
             if($pagoProducto){
                 $user = auth()->user();
@@ -558,12 +559,12 @@ class CompanyController extends Controller {
                 $procesoFactura = $paymentUtils->facturarProductosEtax($invoiceData);
                 $company->additional_invoices = $additional_invoices;
                 $company->save();
-                return redirect()->back()->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+                return redirect('/empresas/comprar-facturas-vista')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
             }else{
-                return redirect()->back()->withErrors('No pudo procesarse el pago');
+                return redirect('/empresas/comprar-facturas-vista')->withErrors('No pudo procesarse el pago');
             }
         }else{
-            return redirect()->back()->withErrors('Debe incluir un método de pago');
+            return redirect('/empresas/comprar-facturas-vista')->withErrors('Debe incluir un método de pago');
         }
     }
 

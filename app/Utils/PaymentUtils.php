@@ -117,12 +117,12 @@ class PaymentUtils
                 $paymentMethod = PaymentMethod::where('id', $request->payment_method)->first();
                 $current_company = currentCompany();
                 $date = Carbon::parse(now('America/Costa_Rica'));
-                $sale = Sale::create([
-                    "user_id" => $user->user_id,
+                $sale = Sales::create([
+                    "user_id" => $user->id,
                     "company_id" => $current_company,
                     "etax_product_id" => $request->product_id,
                     "status" => 1,
-                    "recurrency" => 0
+                    "recurrency" => '0'
                 ]);
                 $payment = Payment::create([
                     'sale_id' => $sale->id,
@@ -206,7 +206,7 @@ class PaymentUtils
             $data->es_exento = $invoiceData->es_exento;
             $data->email = $invoiceData->email;
             $data->buy_order = '';
-            $data->due_date =
+            $data->due_date = Carbon::now()->addDays(30);
             $data->other_reference = '';
             $data->currency_rate = get_rates();
             $data->description = 'Factura de Etax';
@@ -245,7 +245,7 @@ class PaymentUtils
             $item['iva_percentage'] = 0;
             $item['iva_amount'] = 0;
 
-            $item['total'] = $invoiceData->subtotal + 0;//$data->items->iva_amount;
+            $item['total'] = $invoiceData->subtotal + 0;
             $item['is_identificacion_especifica'] = 0;
             $item['is_exempt'] = 0;
 

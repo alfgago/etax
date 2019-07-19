@@ -56,9 +56,8 @@
                                     @foreach($productosEtax as $producto)
                                     <?php $checked = ($cnt == 1) ? 'checked="checked"' : ''; ?>
                                         <div class="form-group col-md-12">
-                                            <label for="id_number">
-                                                <input type="radio" name="product" id="product" value="{{$producto}}" <?php echo $checked ?> onchange="getRadioValue(this.value);"> {{ $producto->name }} -- Precio del paquete ${{$producto->price}}
-                                            </label>
+                                            <input type="radio" name="product" id="product" value="{{$producto}}" <?php echo $checked ?> onchange="getRadioValue(this.value);">
+                                            <label for="product">Precio del {{ $producto->name }}: ${{$producto->price}}</label>
                                         </div>
                                         <?php
                                         $cnt++;
