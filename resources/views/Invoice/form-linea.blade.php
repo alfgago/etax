@@ -99,11 +99,7 @@
 
     <div class="form-group col-md-3">
       <label for="precio_unitario">Precio unitario</label>
-      @if( @$document_type != "08"  )
       <input type="number" min="0" class="form-control" id="precio_unitario" value="" number >
-      @else
-      <input type="number" min="0" class="form-control" id="precio_unitario" readonly value="0" number >
-      @endif
     </div>
 
     <div class="form-group col-md-3">

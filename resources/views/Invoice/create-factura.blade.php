@@ -63,15 +63,22 @@ $company = currentCompanyModel();
                         @endforeach
                       </select>
                     </div>
-                    @else
+                    @elseif( $document_type == "08"  )
                       <div class="form-group col-md-12">
                         <h3>
-                          Cliente
+                          Proveedor
                         </h3>
                       </div>
                       <div class="form-group col-md-12">
-                        <label for="actual">Empresa actual</label>
-                        <input disabled readonly class="form-control" type="text" value="{{ $company->id_number . ' - ' . $company->name.' '.$company->last_name.' '.$company->last_name2 }}">
+                        <label for="actual">Proveedor</label>
+                          <select class="form-control select-search" name="provider_id" id="provider_id" placeholder="" required>
+                              <option value='' selected>Proveedor extranjero: --</option>
+                              @foreach ( currentCompanyModel()->providers as $provider )
+                                  @if( @$provider->tipo_persona == 'E' )
+                                      <option value="{{ $provider->id }}" >{{ $provider->toString() }}</option>
+                                  @endif
+                              @endforeach
+                          </select>
                       </div>
                       
                     @endif
@@ -143,17 +150,23 @@ $company = currentCompanyModel();
                     Datos generales
                   </h3>
                 </div>
-
-                  <div class="form-group col-md-6">
-                    <label for="document_number">Número de documento</label>
-                    <input type="text" class="form-control" name="document_number" id="document_number" value="{{$document_number}}" required readonly="readonly">
-                  </div>
-  
-                  <div class="form-group col-md-6 not-required">
-                    <label for="document_key">Clave de factura</label>
-                    <input type="text" class="form-control" name="document_key" id="document_key" value="{{$document_key}}" required readonly="readonly">
+                  @if( $document_type == "08" )
+                  <div class="form-group col-md-12">
+                    <label for="document_number">Número de factura o documento</label>
+                    <input type="text" class="form-control" name="document_number" id="document_number" required>
                   </div>
 
+                  @else
+                      <div class="form-group col-md-6">
+                          <label for="document_number">Número de documento</label>
+                          <input type="text" class="form-control" name="document_number" id="document_number" value="{{$document_number}}" required readonly="readonly">
+                      </div>
+
+                      <div class="form-group col-md-6 not-required">
+                          <label for="document_key">Clave de factura</label>
+                          <input type="text" class="form-control" name="document_key" id="document_key" value="{{$document_key}}" required readonly="readonly">
+                      </div>
+                  @endif
                   <div class="form-group col-md-4 hidden">
                     <label for="generated_date">Fecha</label>
                     <div class='input-group date inputs-fecha'>
@@ -183,7 +196,7 @@ $company = currentCompanyModel();
                       </span>
                     </div>
                   </div>
-
+                  @if( $document_type != "08" )
                   <div class="form-group col-md-12">
                       <label for="payment_type">Actividad Comercial</label>
                       <div class="input-group">
@@ -194,8 +207,7 @@ $company = currentCompanyModel();
                           </select>
                       </div>
                   </div>
-                  
-                  <div class="form-group col-md-6">
+                  @endif                  <div class="form-group col-md-6">
                     <label for="sale_condition">Condición de venta</label>
                     <div class="input-group">
                       <select id="condicion_venta" name="sale_condition" class="form-control" required>
