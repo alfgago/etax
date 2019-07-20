@@ -140,7 +140,7 @@ class Invoice extends Model
             $this->credit_time = $request->credit_time;
             $this->buy_order = $request->buy_order;
             $this->other_reference = trim($request->other_reference);
-            $this->send_emails = $request->send_email ? trim($request->send_email) : null;
+            $this->send_emails = isset($request->send_email) ? trim($request->send_email) : null;
             if( $request->commercial_activity ){
                 $this->commercial_activity = $request->commercial_activity;
             }
