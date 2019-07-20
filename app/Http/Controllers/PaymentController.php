@@ -589,7 +589,7 @@ class PaymentController extends Controller
                         [
                             'name' => $company->name . ' ' . $company->last_name,
                             'product' => $sale->product->plan->plan_type,
-                            'card' => $paymentMethod->masked_card
+                            'card' => "No indica"
                         ]
                     ));
                 }

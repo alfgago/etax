@@ -33,8 +33,7 @@ class EmailController extends Controller
 
     
     public function receiveEmailXML(Request $request) {
-        Log::info( "Se recibió una solicitud de factura por correo electrónico." );
-        
+ 
         try {  
             $file = $request->file('attachment1');
             EmailController::processAttachment( $file );
