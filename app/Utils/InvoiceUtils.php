@@ -235,7 +235,7 @@ class InvoiceUtils
                 $isGravado = isset($cod) ? $cod->is_gravado : true;
                 $iva_amount = 0;
                 if( $isGravado ) {
-                    $iva_amount = $value['iva_amount'] ? round($value['iva_amount'], 5) : 0;
+                    $iva_amount = $value['iva_amount'] ? round($value['iva_amount'], 2) : 0;
                 }else {
                     $iva_amount = 'false';
                 }
