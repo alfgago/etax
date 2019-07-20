@@ -73,7 +73,9 @@ class SubscriptionPayment extends Command
                             break;
                     }
 
+                    $subtotal = round($subtotal, 2);
                     $iv = $subtotal * 0.13;
+                    $iv = round($iv, 2);
                     $amount = $subtotal + $iv;
 
                     $paymentMethod = PaymentMethod::where('user_id', $sale->user_id)->where('default_card', true)->first();
@@ -97,23 +99,22 @@ class SubscriptionPayment extends Command
                         );
 
                         $data = new stdClass();
-                        $data->description = 'Pago suscripción eTax';
+                        $data->description = 'Pago suscripción etax';
                         $data->amount = $amount;
-                        $data->user_name = $sale->user->username;
-
+                        $data->user_name = $sale->user->user_name;
+                        
+                        //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
                         if( ! isset($payment->charge_token) ) {
                             $chargeIncluded = $paymentUtils->paymentIncludeCharge($data);
                             $chargeTokenId = $chargeIncluded['chargeTokenId'];
                             $payment->charge_token = $chargeTokenId;
                             $payment->save();
                         }
-
+                        
                         $data->chargeTokenId = $payment->charge_token;
                         $data->cardTokenId = $paymentMethod->token_bn;
-
+                        
                         $appliedCharge = $paymentUtils->paymentApplyCharge($data);
-                        /**********************************************/
-
                         if ($appliedCharge['apiStatus'] == "Successful") {
                             $payment->proof = $appliedCharge['retrievalRefNo'];
                             $payment->payment_status = 2;
