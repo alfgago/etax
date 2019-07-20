@@ -12,6 +12,7 @@ use App\Sales;
 use App\Subscription;
 use App\PaymentMethod;
 use App\SubscriptionPlan;
+use App\AvailableInvoices;
 use Carbon\Carbon;
 use CybsSoapClient;
 use Illuminate\Http\Request;
@@ -110,10 +111,44 @@ class PaymentController extends Controller
         $cliente->email = $request->email;
         $cliente->fullname = $cliente->toString();
         $cliente->billing_emails = $request->email;
-
         $cliente->save();
 
         return $cliente;
+    }
+
+    public function CompanyDisponible(){
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $company = currentCompanyModel();
+        $user_id = $company->user_id;
+        $companies = Company::where('user_id',$user_id)->get();
+        dd($companies);
+    }
+
+
+    public function FacturasDisponibles(){
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $mes = $start_date->format("m");
+        $mes = intval($mes);
+        $year = $start_date->format("Y");
+        $company = currentCompanyModel();
+        $sale = Sales::where('company_id',$company->id)->first();
+        $plan = $sale->etax_product_id;
+        $porduct_etax = EtaxProducts::join('subscription_plans','subscription_plans.id','etax_products.subscription_plan_id')->where('etax_products.id',$plan)->first();
+        $num_invoices = $porduct_etax->num_invoices;
+        $AvailableInvoices = AvailableInvoices::where('company_id',$company->id)->where('month',$mes)->where('year',$year)->first();
+        if($AvailableInvoices != null){
+            if($num_invoices > $AvailableInvoices->monthly_quota){
+                AvailableInvoices::where('id', $AvailableInvoices->id)
+                    ->update(['monthly_quota' => $num_invoices],['updated_at',$start_date]);
+            }
+        }else{
+            AvailableInvoices::insert([
+                ['company_id' => $company->id, 'monthly_quota' => $num_invoices, 
+                'month' => $mes, 'year' => $year, 
+                'current_month_sent' => 0, 'created_at' => $start_date, 'updated_at' => $start_date]
+            ]);
+
+        }
     }
 
     public function confirmPayment(Request $request){
@@ -315,6 +350,7 @@ class PaymentController extends Controller
                 $invoiceData->items = [$item];
                 $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
                 if($factura){
+                    $this->FacturasDisponibles();
                     return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
                 }
             } else {
@@ -340,7 +376,6 @@ class PaymentController extends Controller
             $nextPaymentDate = Carbon::parse(now('America/Costa_Rica'))->addYears(10);
             $proof = "Equipo de eTax";
         }
-        
         $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
         $sale->status = 1;
         $sale->next_payment_date = $nextPaymentDate;
@@ -372,6 +407,8 @@ class PaymentController extends Controller
             ]
         );
         
+        
+        $this->FacturasDisponibles();
         return redirect('/')->withMessage('Se aplicó el cupón exitosamente');
            
     }

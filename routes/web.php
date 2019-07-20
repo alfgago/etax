@@ -146,6 +146,7 @@ Route::prefix('payment')->group(function(){
     Route::post('payment-token-transaction', 'PaymentController@paymentTokenTransaction')->name('Payment.payment_token_transaction');
     Route::post('payment-charge', 'PaymentController@paymentCharge')->name('Payment.payment_charge');
     Route::get('pending-charges', 'PaymentController@pendingCharges')->name('Payment.pending_charges');
+    Route::get('pruebas', 'PaymentController@CompanyDisponible')->name('Payment.CompanyDisponible');
 });
 
 
