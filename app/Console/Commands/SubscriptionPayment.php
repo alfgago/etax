@@ -79,6 +79,10 @@ class SubscriptionPayment extends Command
                     $paymentMethod = PaymentMethod::where('user_id', $sale->user_id)->where('default_card', true)->first();
                     $company = $sale->company;
                     
+                    if(!$paymentMethod){
+                        $paymentMethod = PaymentMethod::where('user_id', $sale->user_id)->first();
+                    }
+                    
                     if($paymentMethod){
                         $payment = Payment::updateOrCreate(
                             [
@@ -168,7 +172,7 @@ class SubscriptionPayment extends Command
                             ));
                         }
                     }else{
-                        Log::warning("Error en cobro de $sale->company_id, no se encontró tarjeta");
+                        Log::warning("Error en cobro de $sale->user_id, no se encontró tarjeta");
                     }
                 }
             }else{
