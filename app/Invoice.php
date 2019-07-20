@@ -151,6 +151,8 @@ class Invoice extends Model
                 $tipo_persona = $request->tipo_persona;
                 $identificacion_cliente = preg_replace("/[^0-9]/", "", $request->id_number );
                 $codigo_cliente = $request->code;
+                
+                $billing_emails = isset($request->billing_emails) ? trim($request->billing_emails) : $request->email;
 
                 $client = Client::updateOrCreate(
                     [
@@ -178,7 +180,7 @@ class Invoice extends Model
                         'phone' => trim($request->phone),
                         'es_exento' => $request->es_exento,
                         'email' => trim($request->email),
-                        'billing_emails' => $request->billing_emails ? trim($request->billing_emails) : $request->email
+                        'billing_emails' => $billing_emails
                     ]
                 );
 
