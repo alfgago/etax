@@ -28,7 +28,6 @@ class ReportsController extends Controller
     }
   
     public function dashboard() {
-      
       $user = auth()->user();
       
       if( !$user->has_klap_user ) {
@@ -69,6 +68,7 @@ class ReportsController extends Controller
       }
 
       return view('/Dashboard/index', compact( 'subscription' ) );
+      
     }
     
     public function reports() {

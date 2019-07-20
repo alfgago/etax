@@ -156,7 +156,7 @@ class SubscriptionPayment extends Command
                             $item->total = $amount;
 
                             $invoiceData->items = [$item];
-                            Log::error("Creando factur de cliente");
+                            Log::info("Creando factura de cliente");
                             $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
                         }else{
                             \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
@@ -168,14 +168,7 @@ class SubscriptionPayment extends Command
                             ));
                         }
                     }else{
-                        Log::warning("Error en cobro de $company->name");
-                        \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
-                            [
-                                'name' => $company->name . ' ' . $company->last_name,
-                                'product' => $sale->product->plan->plan_type,
-                                'card' => $paymentMethod->masked_card
-                            ]
-                        ));
+                        Log::warning("Error en cobro de $sale->company_id, no se encontró tarjeta");
                     }
                 }
             }else{
