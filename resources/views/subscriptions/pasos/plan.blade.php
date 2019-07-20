@@ -25,7 +25,10 @@
   	<option class="c" value="7" monthly="${{ $plans[6]->plan->monthly_price }}" six="${{ $plans[6]->plan->six_price * 6 }}" annual="${{ $plans[6]->plan->annual_price * 12 }}" >Pro</option>
   </select>
 </div>
-
+<div class="form-group col-md-6" id="cantidadContabilidades">
+    <label for="recurrency">Cantidad de Contabilidades</label>
+    <input type="number" min="10" class="form-control" name="num_companies" id="num_companies" value="10" onblur="validarCantidad();" onkeyup="sumarPrecioContabilidades();">
+</div>
 <div class="form-group col-md-6">
   <label for="recurrency">Recurrencia de pagos </label>
   <select class="form-control " name="recurrency" id="recurrency" onchange="togglePrice();">
@@ -45,7 +48,13 @@
   <a class="btn btn-primary btn-prev" target="_blank" href="https://etaxcr.com/planes">Ver detalle de planes</a>
   <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step2');" onclick="trackClickEvent( 'PagosPaso2' );">Siguiente paso</button>
 </div>
-
+<style>
+    .biginputs .form-group select, .biginputs .form-group input {
+        font-size: 1.5rem;
+        line-height: 1.1;
+        height: 38px;
+    }
+</style>
  @if( !empty( auth()->user()->teams ) )
     @if( sizeof(auth()->user()->teams) > 1 )
       <div class="companyParent suscripciones">

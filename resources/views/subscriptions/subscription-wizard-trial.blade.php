@@ -51,7 +51,7 @@
             </div>
               <div class="form-group col-md-6" id="cantidadContabilidades">
                   <label for="recurrency">Cantidad de Contabilidades</label>
-                  <input type="number" min="10" class="form-control" name="cantidadEmpresas" id="cantidadEmpresas" value="10" onblur="validarCantidad();" onkeyup="sumarPrecioContabilidades();">
+                  <input type="number" min="10" class="form-control" name="num_companies" id="num_companies" value="10" onblur="validarCantidad();" onkeyup="sumarPrecioContabilidades();">
               </div>
             <div class="form-group col-md-6">
               <label for="recurrency">Recurrencia de pagos </label>
@@ -223,19 +223,19 @@
         $("#deviceFingerPrintID").val(FingerprintID);
     }
     function validarCantidad(){
-        var cantidad = $('#cantidadEmpresas').val();
+        var cantidad = $('#num_companies').val();
         //cantidad = parseInt(cantidad, 10);
         if(cantidad != '' && cantidad != undefined){
             if(cantidad < 10){
                 alert('Este plan solo es valido a partir de las 10 (diez) contabilidades');
-                $('#cantidadEmpresas').val(10);
+                $('#num_companies').val(10);
             }
         }else{
-            $('#cantidadEmpresas').val(10);
+            $('#num_companies').val(10);
         }
     }
     function sumarPrecioContabilidades() {
-        var cantidad = parseFloat($('#cantidadEmpresas').val());
+        var cantidad = parseFloat($('#num_companies').val());
         var total = 149.99;
         if (cantidad > 10) {
             if (cantidad <= 25) {
@@ -246,9 +246,6 @@
             if (cantidad >= 26) {
                 var subtotal = parseFloat((cantidad  - 25) * 8);
                 var precioFinal = parseFloat(parseFloat(subtotal) + 150 + total).toFixed(2);
-                console.log(subtotal);
-                console.log(total);
-                console.log(precioFinal);
                 $(".precio-text").text('$' + precioFinal);
             }
         }
