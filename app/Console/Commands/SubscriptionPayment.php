@@ -163,13 +163,14 @@ class SubscriptionPayment extends Command
                             Log::info("Creando factura de cliente");
                             $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
                         }else{
-                            \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
+                            Log::warning("Error en cobro: ".$appliedCharge['apiStatus']);
+                            /*\Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
                                 [
                                     'name' => $company->name . ' ' . $company->last_name,
                                     'product' => $sale->product->plan->plan_type,
                                     'card' => $paymentMethod->masked_card
                                 ]
-                            ));
+                            ));*/
                         }
                     }else{
                         Log::warning("Error en cobro de usuario: $sale->user_id / empresa: $sale->company_id, no se encontró tarjeta");
