@@ -129,9 +129,9 @@ class SubscriptionPayment extends Command
                             $invoiceData->client_id_number = $company->id_number;
                             $invoiceData->client_id = '-1';
                             $invoiceData->tipo_persona = $company->tipo_persona;
-                            $invoiceData->first_name = $company->first_name;
-                            $invoiceData->last_name = $company->last_name;
-                            $invoiceData->last_name2 = $company->last_name2;
+                            $invoiceData->first_name = $company->business_name;
+                            $invoiceData->last_name = null;
+                            $invoiceData->last_name2 = null;
                             $invoiceData->country = $company->country;
                             $invoiceData->state = $company->state;
                             $invoiceData->city = $company->city;
@@ -165,13 +165,6 @@ class SubscriptionPayment extends Command
                             $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
                         }else{
                             Log::warning("Error en cobro: ".$appliedCharge['apiStatus']);
-                            /*\Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
-                                [
-                                    'name' => $company->name . ' ' . $company->last_name,
-                                    'product' => $sale->product->plan->plan_type,
-                                    'card' => $paymentMethod->masked_card
-                                ]
-                            ));*/
                         }
                     }else{
                         Log::warning("Error en cobro de usuario: $sale->user_id / empresa: $sale->company_id, no se encontró tarjeta");

@@ -420,6 +420,7 @@ class PaymentUtils
             $data->phone = $invoiceData->phone;
             $data->es_exento = $invoiceData->es_exento;
             $data->email = $invoiceData->email;
+            $data->send_email = "info@etaxcr.com";
             $data->buy_order = '';
             $data->due_date =
             $data->other_reference = '';
@@ -475,7 +476,7 @@ class PaymentUtils
                 Log::error('Error al crear factura de compra eTax. ' . $e->getMessage() );
             }
 
-            Log::info( 'Nueva suscripción exitosa.' );
+            Log::info( 'Factura de suscripción exitosa.' );
             return true;
         } else {
             return false;
