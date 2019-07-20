@@ -19,12 +19,16 @@
     <div class="form-group col-md-4">
       <label for="tipo_persona">Tipo de persona *</label>
       <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();">
+      <?php if(@$document_type != '08' && @$document_type != '09'){ ?>
         <option value="F" >Física</option>
         <option value="J" >Jurídica</option>
         <option value="D" >DIMEX</option>
         <option value="N" >NITE</option>
+      <?php } ?>
+      <?php if(@$document_type == '08' || @$document_type == '09'){ ?>
         <option value="E" >Extranjero</option>
         <option value="O" >Otro</option>
+      <?php } ?>
       </select>
     </div>
     
@@ -63,13 +67,18 @@
     <div class="form-group col-md-4">
       <label for="country">País *</label>
       <select class="form-control checkEmpty" name="country" id="country" >
-        <option value="CR" selected>Costa Rica</option>
+        <?php if(@$document_type != '08' && @$document_type != '09'){ ?>
+            <option value="CR" selected>Costa Rica</option>
+        <?php } ?>
+        <?php if(@$document_type == '08' || @$document_type == '09'){ ?>
+            <option value="US" selected>United States</option>
+        <?php } ?>
         @foreach ($countries as $country )
           <option value="{{ $country['country_code'] }}" >{{ $country['country_name'] }}</option>
         @endforeach
       </select>
     </div>
-
+      <?php if(@$document_type != '08' && @$document_type != '09'){ ?>
     <div class="form-group col-md-4">
       <label for="state">Provincia *</label>
       <select class="form-control checkEmpty" name="state" id="state" onchange="fillCantones();">
@@ -103,7 +112,14 @@
       <label for="address">Dirección</label>
       <textarea class="form-control" name="address" id="address" ></textarea>
     </div>
-    
+    <?php } ?>
+    <?php if(@$document_type == '08' || @$document_type == '09'){ ?>
+      <div class="form-group col-md-12">
+          <label for="address">Otras señas extranjero</label>
+          <textarea class="form-control" name="address" id="address" ></textarea>
+      </div>
+    <?php } ?>
+
     <div class="form-group col-md-4">
         <label for="es_exento">Exento de IVA</label>
         <select class="form-control" name="es_exento" id="es_exento" >
