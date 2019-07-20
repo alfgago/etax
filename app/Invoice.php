@@ -856,7 +856,6 @@ class Invoice extends Model
           $xmlHacienda->bill_id = 0;
           $xmlHacienda->invoice_id = $invoice->id;
           $xmlHacienda->save();
-          Log::info( 'XMLHacienda guardado : ' . $invoice->id );
         }catch( \Throwable $e ){
           Log::error( 'Error al registrar en tabla XMLHacienda: ' . $e->getMessage() );
         }
