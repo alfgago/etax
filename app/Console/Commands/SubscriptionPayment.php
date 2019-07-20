@@ -58,6 +58,7 @@ class SubscriptionPayment extends Command
 
                 $unpaidSubscriptions = Sales::where('status', 2)->where('is_subscription', true)->get();
                 foreach($unpaidSubscriptions as $sale){
+                    sleep(3);
                     
                     Log::info("Procesando cobro $sale->company_id");
                     $subtotal = $sale->product->plan->monthly_price;
