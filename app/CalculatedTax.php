@@ -447,8 +447,8 @@ class CalculatedTax extends Model
               if( !isset($currActivity) ){
                 $arrayActividades = currentCompanyModel()->getActivities();
                 $currActivity = $arrayActividades[0]->codigo;
-                $billItems[$i]->invoice->commercial_activity = $currActivity;
-                $billItems[$i]->invoice->save();
+                $billItems[$i]->bill->commercial_activity = $currActivity;
+                $billItems[$i]->bill->save();
               }
               
               //Redondea todo a 2 decimales

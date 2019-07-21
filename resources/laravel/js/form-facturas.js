@@ -1,18 +1,13 @@
   window.calcularSubtotalItem = function(){
 
     var precio_unitario = parseFloat( $('#precio_unitario').val() );
-
-      precio_unitario = precio_unitario.replace(/,/g,'');
       precio_unitario = parseFloat(precio_unitario);
     var cantidad = parseFloat( $('#cantidad').val() );
-      cantidad = cantidad.replace(/,/g,'');
       cantidad = parseFloat(cantidad);
 
     var porc_iva = parseFloat( $('#porc_iva').val() );
-      porc_iva = porc_iva.replace(/,/g,'');
       porc_iva = parseFloat(porc_iva);
     var monto_iva = parseFloat( $('#item_iva_amount').val() );
-      monto_iva = monto_iva.replace(/,/g,'');
       monto_iva = parseFloat(monto_iva);
     
     if( !monto_iva ) {
@@ -23,24 +18,22 @@
       var subtotal = cantidad * precio_unitario;
       
       var discount = $('#discount').val();
-        discount = discount.replace(/,/g,'');
         discount = parseFloat(discount);
       if( !discount ) {
-          discount = 0;
+        discount = 0;
         $('#discount').val(0);
       }
       var discount_type = $('#discount_type').val();
-      console.log(discount_type);
       if( discount_type == "01" && discount > 0 ) {
         subtotal = subtotal - ( subtotal * (discount / 100) );
       }else if( discount_type == "02" && discount > 0 ) {
         subtotal = parseFloat(subtotal - discount).toFixed(2);
       }
       
-      $('#item_subtotal').val( subtotal );
+      $('#item_subtotal').val( subtotal.toFixed(2) );
       if( $('#porc_iva').val().length ){
-        monto_iva = parseFloat(subtotal * porc_iva / 100).toFixed(2);
-        $('#item_iva_amount').val( monto_iva );
+        monto_iva = parseFloat(subtotal * porc_iva / 100);
+        $('#item_iva_amount').val( monto_iva.toFixed(2) );
         $('#item_total').val( (subtotal + monto_iva).toFixed(2) );
       }else{
         $('#item_total').val( subtotal );
@@ -68,7 +61,6 @@
       var subtotal = cantidad * precio_unitario;
       
       var discount = $('#discount').val();
-        discount = discount.replace(/,/g,'');
         discount = parseFloat(discount);
       var discount_type = $('#discount_type').val();
       if( discount_type == "01" && discount > 0 ) {
@@ -152,29 +144,23 @@
     var nombre = $('#nombre').val();
     var tipo_producto = $('#tipo_producto').val();
     var cantidad = $('#cantidad').val();
-    cantidad = cantidad.replace(/,/g,'');
     cantidad = parseFloat(cantidad);
     var unidad_medicion = $('#unidad_medicion').val();
     var precio_unitario = $('#precio_unitario').val();
-    precio_unitario = precio_unitario.replace(/,/g,'');
     precio_unitario = parseFloat(precio_unitario);
     var porc_identificacion_plena = $('#porc_identificacion_plena').val();
     var is_identificacion_especifica = $('#is_identificacion_especifica:checked').length;
     var descuento = $('#discount').val();
-    descuento = descuento.replace(/,/g,'');
     descuento = parseFloat(descuento);
     var tipo_descuento = $('#discount_type').val();
     var tipo_iva = $('#tipo_iva').val();
     var tipo_iva_text = $('#tipo_iva :selected').text();
     var porc_iva = $('#porc_iva').val();
     var monto_iva = $('#item_iva_amount').val();
-    monto_iva = monto_iva.replace(/,/g,'');
     monto_iva = parseFloat(monto_iva);
     var subtotal = $('#item_subtotal').val();
-    subtotal = subtotal.replace(/,/g,'');
     subtotal = parseFloat(subtotal);
     var total = $('#item_total').val();
-    total = total.replace(/,/g,'');
     total = parseFloat(total);
     var typeDocument = $('#typeDocument').val();
     var numeroDocumento = $('#numeroDocumento').val();
@@ -191,7 +177,7 @@
       $('#item_iva_amount').val(0);
     }
     if( !descuento ) {
-        descuento = 0;
+      descuento = 0;
       $('#discount').val(0);
     }
 
@@ -209,9 +195,9 @@
       codigo = $('#codigo').val( "L" + numero  );
       nombre = $('#nombre').val( "TIPO-" + tipo_iva  );
     }
-    
+
     //Se asegura de que los campos hayan sido llenados
-    if( subtotal && codigo && nombre && precio_unitario && cantidad && tipo_iva){
+    if( subtotal && codigo && nombre && precio_unitario && cantidad && tipo_iva && total > 0){
       
       //Crear el ID de la fila.
       var itemExistente = false;
@@ -309,7 +295,7 @@
         Swal.fire({
             type: 'error',
             title: 'Error',
-            text: 'Debe completar los datos de la linea antes de guardarla'
+            text: 'Por favor, asegúrese que todos los datos sean válidos antes de continuar.'
         })
         return false;
     }
@@ -410,20 +396,6 @@
       monto_iva += m;	
       total += t;	
     });
-    if(total > 0){
-        console.log('if');
-        $('#subtotal').val(subtotal);
-        $('#monto_iva').val(monto_iva);
-        $('#total').val(total);
-    }else{
-        console.log('else');
-        Swal.fire({
-            type: 'error',
-            title: 'Error',
-            text: 'Los valores no pueden ser negativos'
-        })
-        return false;
-    }
   }
   
   window.fixComas = function( numero ) {

@@ -301,11 +301,7 @@ $company = currentCompanyModel();
 @endsection
 
 @section('breadcrumb-buttons')
-{{--@if( $document_type != "09"  )--}}
   <button id='btn-submit-fe' onclick="$('#btn-submit').click();" class="btn btn-primary">Enviar factura electrónica</button>
-{{--@else--}}
-{{--  <p class="description mt-4">FEC temporalmente deshabilitada. Muy pronto en funcionamiento al finalizar el día. Nos disculpamos por la inconveniencia.</p>--}}
-{{-- @endif--}}
 @endsection
 
 @section('footer-scripts')

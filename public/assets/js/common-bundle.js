@@ -402,17 +402,15 @@ toastr.options = {
 }
   window.calcularSubtotalItem = function(){
 
-    var precio_unitario = $('#precio_unitario').val() ;
-    precio_unitario = precio_unitario.replace(/,/g,'');
-    precio_unitario = parseFloat(precio_unitario);
-    var cantidad = $('#cantidad').val();
-    cantidad = cantidad.replace(/,/g,'');
-    cantidad = parseFloat(cantidad);
+    var precio_unitario = parseFloat( $('#precio_unitario').val() );
+      precio_unitario = parseFloat(precio_unitario);
+    var cantidad = parseFloat( $('#cantidad').val() );
+      cantidad = parseFloat(cantidad);
 
     var porc_iva = parseFloat( $('#porc_iva').val() );
-    var monto_iva = $('#item_iva_amount').val();
-    monto_iva = monto_iva.replace(/,/g,'');
-    monto_iva = parseFloat(monto_iva);
+      porc_iva = parseFloat(porc_iva);
+    var monto_iva = parseFloat( $('#item_iva_amount').val() );
+      monto_iva = parseFloat(monto_iva);
     
     if( !monto_iva ) {
       monto_iva = 0;
@@ -422,42 +420,25 @@ toastr.options = {
       var subtotal = cantidad * precio_unitario;
       
       var discount = $('#discount').val();
-        discount = discount.replace(/,/g,'');
         discount = parseFloat(discount);
       if( !discount ) {
+        discount = 0;
         $('#discount').val(0);
       }
       var discount_type = $('#discount_type').val();
       if( discount_type == "01" && discount > 0 ) {
-        subtotal = parseFloat(subtotal - ( subtotal * (discount / 100) )).toFixed(2);
-      }else if( discount_type == "02" && discount > 0 ){
+        subtotal = subtotal - ( subtotal * (discount / 100) );
+      }else if( discount_type == "02" && discount > 0 ) {
         subtotal = parseFloat(subtotal - discount).toFixed(2);
       }
-
+      
+      $('#item_subtotal').val( subtotal.toFixed(2) );
       if( $('#porc_iva').val().length ){
-        monto_iva = parseFloat(subtotal * porc_iva / 100).toFixed(2);
-        if(subtotal < 0){
-            Swal.fire({
-                type: 'error',
-                title: 'Error',
-                text: 'Los valores no pueden ser negativos'
-            });
-            $('#item_subtotal').val( 0 );
-            $('#item_total').val( 0 );
-            $('#item_iva_amount').val( 0 );
-            return false;
-        }else{
-            var total = parseFloat(parseFloat(subtotal) + parseFloat(monto_iva)).toFixed(2);
-            total = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            subtotal = subtotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            monto_iva = monto_iva.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            $('#item_subtotal').val(subtotal);
-            $('#item_iva_amount').val( monto_iva );
-            $('#item_total').val( total );
-        }
+        monto_iva = parseFloat(subtotal * porc_iva / 100);
+        $('#item_iva_amount').val( monto_iva.toFixed(2) );
+        $('#item_total').val( (subtotal + monto_iva).toFixed(2) );
       }else{
-          subtotal = subtotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-          $('#item_total').val(subtotal);
+        $('#item_total').val( subtotal );
       }
     }else{
       $('#item_subtotal').val( 0 );
@@ -469,16 +450,9 @@ toastr.options = {
 
   window.calcularConIvaManual = function(){
     
-    var precio_unitario = $('#precio_unitario').val() ;
-    precio_unitario = precio_unitario.replace(/,/g,'');
-    precio_unitario = parseFloat(precio_unitario);
-    var cantidad = $('#cantidad').val();
-      cantidad = cantidad.replace(/,/g,'');
-      cantidad = parseFloat(cantidad);
-    var monto_iva = $('#item_iva_amount').val();
-      monto_iva = monto_iva.replace(/,/g,'');
-      monto_iva = parseFloat(monto_iva);
-
+    var precio_unitario = parseFloat( $('#precio_unitario').val() );
+    var cantidad = parseFloat( $('#cantidad').val() );
+    var monto_iva = parseFloat( $('#item_iva_amount').val() );
     
     if( !monto_iva ) {
       monto_iva = 0;
@@ -486,29 +460,25 @@ toastr.options = {
     }
     
     if( precio_unitario && cantidad ){
-      var subtotal = parseFloat(cantidad * precio_unitario);
+      var subtotal = cantidad * precio_unitario;
       
-      var discount = parseFloat( $('#discount').val() );
+      var discount = $('#discount').val();
+        discount = parseFloat(discount);
       var discount_type = $('#discount_type').val();
       if( discount_type == "01" && discount > 0 ) {
-        subtotal = parseFloat(subtotal - parseFloat( subtotal * parseFloat(discount / 100) ));
-      }else {
-        subtotal = parseFloat(subtotal - discount);
+        subtotal = subtotal - ( subtotal * (discount / 100) );
+      }else if( discount_type == "02" && discount > 0 ){
+        subtotal = subtotal - discount;
       }
-
+      
+      $('#item_subtotal').val( subtotal.toFixed(2));
       if( monto_iva ){
-          var total = parseFloat(subtotal + monto_iva);
-          total = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        $('#item_total').val( total );
+        $('#item_total').val( (subtotal + monto_iva).toFixed(2) );
       }else{
-          subtotal = subtotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        $('#item_total').val( subtotal );
+        $('#item_total').val( subtotal.toFixed(2) );
       }
-        subtotal = subtotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        $('#item_subtotal').val(subtotal);
     }else{
       $('#item_subtotal').val( 0 );
-        monto_iva = monto_iva.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       $('#item_total').val( monto_iva );
     }
     
@@ -565,7 +535,7 @@ toastr.options = {
   }
   
   window.agregarEditarItem = function() {
-
+    
     //Si esta editando, usa lnum y item_id para identificar la fila.
     var lnum = $('#lnum').val() ? $('#lnum').val() : '';
     var item_id = $('#item_id').val() ? $('#item_id').val() : '';
@@ -576,29 +546,23 @@ toastr.options = {
     var nombre = $('#nombre').val();
     var tipo_producto = $('#tipo_producto').val();
     var cantidad = $('#cantidad').val();
-    cantidad = cantidad.replace(/,/g,'');
     cantidad = parseFloat(cantidad);
     var unidad_medicion = $('#unidad_medicion').val();
     var precio_unitario = $('#precio_unitario').val();
-    precio_unitario = precio_unitario.replace(/,/g,'');
     precio_unitario = parseFloat(precio_unitario);
     var porc_identificacion_plena = $('#porc_identificacion_plena').val();
     var is_identificacion_especifica = $('#is_identificacion_especifica:checked').length;
     var descuento = $('#discount').val();
-    descuento = descuento.replace(/,/g,'');
     descuento = parseFloat(descuento);
     var tipo_descuento = $('#discount_type').val();
     var tipo_iva = $('#tipo_iva').val();
     var tipo_iva_text = $('#tipo_iva :selected').text();
     var porc_iva = $('#porc_iva').val();
     var monto_iva = $('#item_iva_amount').val();
-    monto_iva = monto_iva.replace(/,/g,'');
     monto_iva = parseFloat(monto_iva);
     var subtotal = $('#item_subtotal').val();
-    subtotal = subtotal.replace(/,/g,'');
     subtotal = parseFloat(subtotal);
     var total = $('#item_total').val();
-    total = total.replace(/,/g,'');
     total = parseFloat(total);
     var typeDocument = $('#typeDocument').val();
     var numeroDocumento = $('#numeroDocumento').val();
@@ -614,7 +578,11 @@ toastr.options = {
       monto_iva = 0;
       $('#item_iva_amount').val(0);
     }
-    
+    if( !descuento ) {
+      descuento = 0;
+      $('#discount').val(0);
+    }
+
     if( !precio_unitario ) {
       precio_unitario = 0;
       $('#precio_unitario').val(0);
@@ -629,9 +597,9 @@ toastr.options = {
       codigo = $('#codigo').val( "L" + numero  );
       nombre = $('#nombre').val( "TIPO-" + tipo_iva  );
     }
-    
+
     //Se asegura de que los campos hayan sido llenados
-    if( subtotal && codigo && nombre && precio_unitario && cantidad && tipo_iva){
+    if( subtotal && codigo && nombre && precio_unitario && cantidad && tipo_iva && total > 0){
       
       //Crear el ID de la fila.
       var itemExistente = false;
@@ -642,9 +610,6 @@ toastr.options = {
         itemExistente.html("");
       }
       var row_id  = "item-tabla-"+numero;
-        /*var num_parts = total.toString().split(".");
-        num_parts[0] = num_parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        total = num_parts.join(".");*/
       
       var inputFields = "<div class='hidden'>" +
                    "<input type='hidden' class='numero' name='items["+index+"][item_number]' value='"+(numero+1)+"'>" +
@@ -706,16 +671,16 @@ toastr.options = {
       recalcularNumerosItem();
       
       //Calcula total de factura
-      calcularTotalFactura();                                                                                                            
+      calcularTotalFactura();
       
       //Aumenta el indice de filas para evitar cualquier conflicto si hubo eliminados. El index nunca debe cambiar ni repetirse, los números pueden cambiar.
       $('#current-index').val(index);
       
       //Si estaba editando, quita la clase
       $('.item-factura-form').removeClass('editando');
-      
+
       cerrarPopup('linea-popup');
-      
+
       //Fuerza un reset en la ayuda al marcar preguntas.
       /*$('#p1').prop('checked', false);
       $('#p1').change();*/
@@ -727,11 +692,12 @@ toastr.options = {
       }
       
     }else{
-      //alert('Debe completar los datos de la linea antes de guardarla');
+      /*alert('Debe completar los datos de la linea antes de guardarla');
+      return false;*/
         Swal.fire({
             type: 'error',
             title: 'Error',
-            text: 'Debe completar los datos de la linea antes de guardarla'
+            text: 'Por favor, asegúrese que todos los datos sean válidos antes de continuar.'
         })
         return false;
     }
@@ -832,23 +798,6 @@ toastr.options = {
       monto_iva += m;	
       total += t;	
     });
-    if(total > 0){
-        var num_parts = total.toString().split(".");
-        num_parts[0] = num_parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        total = num_parts.join(".");
-
-        $('#subtotal').val(subtotal);
-        $('#monto_iva').val(monto_iva);
-        $('#total').val(total);
-    }else{
-        Swal.fire({
-            type: 'error',
-            title: 'Error',
-            text: 'Los valores no pueden ser negativos'
-        })
-        return false;
-    }
-
   }
   
   window.fixComas = function( numero ) {
@@ -902,13 +851,9 @@ toastr.options = {
         var porcentajeExonerado = $('#porcentajeExoneracion').val();
         if(porcentajeExonerado > 0) {
             var monto_iva_detalle = $('#item_iva_amount').val();
-            monto_iva_detalle = monto_iva_detalle.replace(/,/g,'');
-            monto_iva_detalle = parseFloat(monto_iva_detalle);
             var monto = monto_iva_detalle * (porcentajeExonerado / 100);
             var impNeto = monto_iva_detalle - monto;
             var subTotal = $('#item_subtotal').val();
-            subTotal = subTotal.replace(/,/g,'');
-            subTotal = parseFloat(subTotal );
             var montoTotal = parseFloat(subTotal) + parseFloat(impNeto);
 
             $('#montoExoneracion').val(monto);
