@@ -121,7 +121,7 @@ class SubscriptionPayment extends Command
                             $payment->payment_status = 2;
                             $payment->save();
 
-                            $sale->next_payment_date = $date->addMonths($sale->recurrency);
+                            $sale->next_payment_date = Carbon::parse(now('America/Costa_Rica'))->addMonths($sale->recurrency);
                             $sale->status = 1;
                             $sale->save();
 
