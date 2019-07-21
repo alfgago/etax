@@ -431,9 +431,9 @@ class PaymentUtils
             $data->currency = 'USD';
             $data->total = $invoiceData->amount;
             $data->iva_amount = $invoiceData->iva_amount;
-            $data->generated_date = Carbon::now()->format('d/m/Y');
-            $data->hora = Carbon::now()->format('g:i A');
-            $data->due_date = Carbon::now()->addDays(7)->format('d/m/Y');
+            $data->generated_date = Carbon::parse(now('America/Costa_Rica'))->format('d/m/Y');
+            $data->hora = Carbon::parse(now('America/Costa_Rica'))->format('g:i A');
+            $data->due_date = Carbon::parse(now('America/Costa_Rica'))->addDays(7)->format('d/m/Y');
 
             $item = array();
 

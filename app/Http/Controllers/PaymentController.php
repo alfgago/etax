@@ -123,7 +123,6 @@ class PaymentController extends Controller
             $paymentUtils = new PaymentUtils();
             
             $request->number = preg_replace('/\s+/', '',  $request->number);
-            $start_date = Carbon::parse(now('America/Costa_Rica'));
             
             $razonDescuento = null;
             //El descuento por defecto es cero.
@@ -158,17 +157,17 @@ class PaymentController extends Controller
             switch ($recurrency) {
                 case 1:
                     $costo = $subscriptionPlan->monthly_price;
-                    $nextPaymentDate = $start_date->addMonths(1);
+                    $nextPaymentDate = Carbon::parse(now('America/Costa_Rica'))->addMonths(1);
                     $descriptionMessage = 'Mensual';
                     break;
                 case 6:
                     $costo = $subscriptionPlan->six_price * 6;
-                    $nextPaymentDate = $start_date->addMonths(6);
+                    $nextPaymentDate = Carbon::parse(now('America/Costa_Rica'))->addMonths(6);
                     $descriptionMessage = 'Semestral';
                     break;
                 case 12:
                     $costo = $subscriptionPlan->annual_price * 12;
-                    $nextPaymentDate = $start_date->addMonths(12);
+                    $nextPaymentDate = Carbon::parse(now('America/Costa_Rica'))->addMonths(12);
                     $descriptionMessage = 'Anual';
                     break;
             }
@@ -245,7 +244,7 @@ class PaymentController extends Controller
                 ],
                 [
                     'payment_method_id' => $paymentMethod->id,
-                    'payment_date' => $start_date,
+                    'payment_date' => Carbon::parse(now('America/Costa_Rica')),
                     'amount' => $amount
                 ]
             );
