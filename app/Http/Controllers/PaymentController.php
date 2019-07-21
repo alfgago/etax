@@ -534,7 +534,7 @@ class PaymentController extends Controller
                         $payment->payment_status = 2;
                         $payment->save();
 
-                        $sale->next_payment_date = $date->addMonth($sale->recurrency);
+                        $sale->next_payment_date = $date->addMonths($sale->recurrency);
                         $sale->status = 1;
                         $sale->save();
                         

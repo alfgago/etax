@@ -122,7 +122,7 @@ class PaymentUtils
                     "company_id" => $company->id,
                     "etax_product_id" => $producto->id,
                     "status" => 2,
-                    "recurrency" => '0'
+                    "recurrency" => false
                 ]);
                 
                 $payment = Payment::updateOrCreate(
