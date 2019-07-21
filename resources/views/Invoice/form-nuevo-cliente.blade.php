@@ -19,12 +19,15 @@
     <div class="form-group col-md-4">
       <label for="tipo_persona">Tipo de persona *</label>
       <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();" onchange="cambiarDireccion();">
+      @if(@$document_type != '09')
         <option value="F" >Física</option>
         <option value="J" >Jurídica</option>
         <option value="D" >DIMEX</option>
         <option value="N" >NITE</option>
+      @else
         <option value="E" >Extranjero</option>
         <option value="O" >Otro</option>
+      @endif
       </select>
     </div>
     
@@ -63,51 +66,58 @@
     <div class="form-group col-md-4">
       <label for="country">País *</label>
       <select class="form-control checkEmpty" name="country" id="country" >
-        <option value="CR" selected>Costa Rica</option>
+        @if(@$document_type != '09')
+            <option value="CR" selected>Costa Rica</option>
+        @else
+            <option value="US" selected>United States</option>
+        @endif
         @foreach ($countries as $country )
           <option value="{{ $country['country_code'] }}" >{{ $country['country_name'] }}</option>
         @endforeach
       </select>
     </div>
+    
+    @if(@$document_type != '09')
+      <div class="form-group col-md-4" id="divState">
+        <label for="state">Provincia *</label>
+        <select class="form-control" checkEmpty name="state" id="state" onchange="fillCantones();">
+        </select>
+      </div>
 
-    <div class="form-group col-md-4" id="divState">
-      <label for="state">Provincia *</label>
-      <select class="form-control" checkEmpty name="state" id="state" onchange="fillCantones();">
-      </select>
-    </div>
-    
-    <div class="form-group col-md-4" id="divCity">
-      <label for="city">Canton *</label>
-      <select class="form-control" checkEmpty name="city" id="city" onchange="fillDistritos();">
-      </select>
-    </div>
-    
-    <div class="form-group col-md-4" id="divDistrict">
-      <label for="district">Distrito *</label>
-      <select class="form-control" checkEmpty name="district" id="district" onchange="fillZip();" >
-      </select>
-    </div>
-    
-    <div class="form-group col-md-4" id="divNeighborhood">
-      <label for="neighborhood">Barrio</label>
-      <input class="form-control" name="neighborhood" id="neighborhood" maxlength="150">
-      </select>
-    </div>
-    
-    <div class="form-group col-md-4" id="divZip">
-      <label for="zip">Zip</label>
-      <input type="text" class="form-control" name="zip" id="zip" readonly >
-    </div>
-    
-    <div class="form-group col-md-12" id="divAddress">
-      <label for="address">Dirección</label>
-      <textarea class="form-control" name="address" id="address" maxlength="250"></textarea>
-    </div>
-      <div class="form-group col-md-12" id="extranjero" hidden>
-          <label for="address">Otras Señas Extranjero</label>
+      <div class="form-group col-md-4" id="divCity">
+        <label for="city">Canton *</label>
+        <select class="form-control" checkEmpty name="city" id="city" onchange="fillDistritos();">
+        </select>
+      </div>
+
+      <div class="form-group col-md-4" id="divDistrict">
+        <label for="district">Distrito *</label>
+        <select class="form-control" checkEmpty name="district" id="district" onchange="fillZip();" >
+        </select>
+      </div>
+
+      <div class="form-group col-md-4" id="divNeighborhood">
+        <label for="neighborhood">Barrio</label>
+        <input class="form-control" name="neighborhood" id="neighborhood" maxlength="150">
+        </select>
+      </div>
+
+      <div class="form-group col-md-4" id="divZip">
+        <label for="zip">Zip</label>
+        <input type="text" class="form-control" name="zip" id="zip" readonly >
+      </div>
+
+      <div class="form-group col-md-12" id="divAddress">
+        <label for="address">Dirección</label>
+        <textarea class="form-control" name="address" id="address" maxlength="250"></textarea>
+      </div>
+    @else
+      <div class="form-group col-md-12">
+          <label for="address">Otras señas extranjero</label>
           <textarea class="form-control" name="foreign_address" id="foreign_address" maxlength="300">{{ @$client->foreign_address }}</textarea>
       </div>
-    
+    @endif
+
     <div class="form-group col-md-4">
         <label for="es_exento">Exento de IVA</label>
         <select class="form-control" name="es_exento" id="es_exento" >
