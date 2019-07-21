@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9960fcf52cdfebe741416e1c59626859",
+    "content-hash": "a27ca4cf5a6c6e94fdf4b541689e4179",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -3101,6 +3101,48 @@
                 "type"
             ],
             "time": "2015-07-25T16:39:46+00:00"
+        },
+        {
+            "name": "potelo/laravel-block-bots",
+            "version": "0.1.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Potelo/laravel-block-bots.git",
+                "reference": "db30bdb7cc7f32247c8a66f6665c92a3493d0411"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Potelo/laravel-block-bots/zipball/db30bdb7cc7f32247c8a66f6665c92a3493d0411",
+                "reference": "db30bdb7cc7f32247c8a66f6665c92a3493d0411",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^5.5",
+                "php": "^7.0",
+                "predis/predis": "^1.1"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Potelo\\LaravelBlockBots\\BlockBotsServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Potelo\\LaravelBlockBots\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Bruno Cabral",
+                    "email": "bruno@potelo.com.br"
+                }
+            ],
+            "description": "Block bots and high traffic offenders using Redis",
+            "time": "2018-09-28T23:36:48+00:00"
         },
         {
             "name": "predis/predis",

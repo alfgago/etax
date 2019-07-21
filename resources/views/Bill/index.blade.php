@@ -8,6 +8,7 @@
     <a type="submit" class="btn btn-primary" href="/facturas-recibidas/create">Ingresar factura existente</a>
     <div onclick="abrirPopup('importar-recibidas-popup');" class="btn btn-primary">Importar facturas recibidas</div>
     <a type="submit" class="btn btn-primary" href="/facturas-recibidas/aceptaciones">Aceptación de facturas</a>
+    <a href="/facturas-recibidas/autorizaciones" class="btn btn-primary">Autorizar facturas por email</a>
 @endsection 
 
 @section('content') 

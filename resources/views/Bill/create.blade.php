@@ -308,7 +308,7 @@
 
 <script>
 $(document).ready(function(){
-  $('#tipo_iva').val('003');
+  $('#tipo_producto').val(49).change();
 });
 $(function () {
     $("#accept_iva_acreditable").keydown(function () {

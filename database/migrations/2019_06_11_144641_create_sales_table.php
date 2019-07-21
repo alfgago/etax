@@ -22,7 +22,7 @@ class CreateSalesTable extends Migration
             //1 = Activo, 2 = Activo con pago pendiente, 3 = Inactivo, 4 = En periodo de pruebas
             $table->enum('status', ['1', '2', '3', '4'])->default(1);
 
-            //1 = Activo, 2 = Activo con pago pendiente, 3 = Inactivo, 4 = Cancelado
+            //1 = Activo, 2 = Activo con pago pendiente, 3 = Inactivo, 4 = En periodo de pruebas
             $table->enum('recurrency', ['0', '1', '6', '12'])->default(0);
 
             $table->dateTime('trial_end_date')->nullable();

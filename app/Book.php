@@ -94,8 +94,11 @@ class Book extends Model
       $this->cc_compras_exentas = $ivaData->iB040 + $ivaData->iB050 + $ivaData->iB060 + $ivaData->iB070 + $ivaData->bB040 + $ivaData->bB050 + $ivaData->bB060 + $ivaData->bB070 +
                                   $ivaData->iS040 + $ivaData->iS060 + $ivaData->bS040 + $ivaData->bS060;
       
-      $this->cc_compras_sin_derecho = $ivaData->bB080 + $ivaData->bB090 + $ivaData->bB097 + $ivaData->b098 + $ivaData->b099 +
-                                      $ivaData->iB080 + $ivaData->iB090 + $ivaData->iB097 + $ivaData->i098 + $ivaData->i099;                                
+      $this->cc_compras_sin_derecho = $ivaData->bB080 + $ivaData->bB090 + $ivaData->bB097 + $ivaData->b098 + $ivaData->b099 + 
+                                      $ivaData->iB080 + $ivaData->iB090 + $ivaData->iB097 + $ivaData->i098 + $ivaData->i099 +
+                                      $ivaData->bS080 + $ivaData->bS090 + $ivaData->bS097 +
+                                      $ivaData->iS080 + $ivaData->iS090 + $ivaData->iS097 +
+                                      $ivaData->bB091 + $ivaData->bB092 + $ivaData->bB093 + $ivaData->bB094 + $ivaData->iB091 + $ivaData->iB092 + $ivaData->iB093 + $ivaData->iB094;                                
       
       $this->cc_compras_sum = $this->cc_compras1 + $this->cc_compras2 + $this->cc_compras3 + $this->cc_compras4 + 
                               $this->cc_importaciones1 + $this->cc_importaciones2 + $this->cc_importaciones3 + $this->cc_importaciones4 +
@@ -167,7 +170,8 @@ class Book extends Model
       
       //Haber 3
         $iva_no_acreditables = $ivaData->iB080 + $ivaData->iB090 + $ivaData->iB097 + $ivaData->i098 + $ivaData->i099 +
-                               $ivaData->iS080 + $ivaData->iS090 + $ivaData->iS097;
+                               $ivaData->iS080 + $ivaData->iS090 + $ivaData->iS097 +
+                               $ivaData->bB091 + $ivaData->bB092 + $ivaData->bB093 + $ivaData->bB094 + $ivaData->iB091 + $ivaData->iB092 + $ivaData->iB093 + $ivaData->iB094;
       
         $this->cc_ppp_1 = $ivaData->iB011 + $ivaData->iB031 + $ivaData->iB051 + $ivaData->iB071;
         $this->cc_ppp_2 = $ivaData->iB012 + $ivaData->iB032 + $ivaData->iB052 + $ivaData->iB072;

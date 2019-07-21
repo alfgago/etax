@@ -401,12 +401,14 @@ toastr.options = {
   "hideMethod": "fadeOut"
 }
   window.calcularSubtotalItem = function(){
+
     var precio_unitario = $('#precio_unitario').val() ;
     precio_unitario = precio_unitario.replace(/,/g,'');
     precio_unitario = parseFloat(precio_unitario);
     var cantidad = $('#cantidad').val();
     cantidad = cantidad.replace(/,/g,'');
     cantidad = parseFloat(cantidad);
+
     var porc_iva = parseFloat( $('#porc_iva').val() );
     var monto_iva = $('#item_iva_amount').val();
     monto_iva = monto_iva.replace(/,/g,'');
@@ -476,6 +478,7 @@ toastr.options = {
     var monto_iva = $('#item_iva_amount').val();
       monto_iva = monto_iva.replace(/,/g,'');
       monto_iva = parseFloat(monto_iva);
+
     
     if( !monto_iva ) {
       monto_iva = 0;

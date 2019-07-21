@@ -215,7 +215,6 @@ class InvoiceController extends Controller
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
         }
         return view("Invoice/create-factura", ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
-
             'document_number' => $this->getDocReference($tipoDocumento),
             'document_key' => $this->getDocumentKey($tipoDocumento), 'units' => $units, 'countries' => $countries])->with('arrayActividades', $arrayActividades);
     }
@@ -304,6 +303,11 @@ class InvoiceController extends Controller
                 }
 
                 $invoiceData = $invoice->setInvoiceData($request);
+                
+                $invoice->document_key = $this->getDocumentKey($request->document_type);
+                $invoice->document_number = $this->getDocReference($request->document_type);
+                $invoice->save();
+                
                 if (!empty($invoiceData)) {
                     $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
                 }
@@ -321,9 +325,6 @@ class InvoiceController extends Controller
                 }
 
                 $company->save();
-                if ($invoice->hacienda_status == '03') {
-                   // Mail::to($invoice->client_email)->send(new \App\Mail\Invoice(['new_plan_details' => $newPlanDetails, 'old_plan_details' => $plan]));
-                }
                 clearInvoiceCache($invoice);
 
                 return redirect('/facturas-emitidas');
@@ -824,13 +825,13 @@ class InvoiceController extends Controller
                 return $invoice->generatedDate()->format('d/m/Y');
             })
             ->editColumn('subtotal', function(Invoice $invoice) {
-                return number_format($invoice->subtotal);
+                return $invoice->subtotal;
             })
             ->editColumn('iva_amount', function(Invoice $invoice) {
-                return number_format($invoice->iva_amount);
+                return $invoice->iva_amount;
             })
             ->editColumn('total', function(Invoice $invoice) {
-                return number_format($invoice->total);
+                return $invoice->total;
             })
             ->rawColumns(['actions'])
             ->toJson();

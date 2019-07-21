@@ -1,11 +1,13 @@
   window.calcularSubtotalItem = function(){
 
     var precio_unitario = parseFloat( $('#precio_unitario').val() );
+
       precio_unitario = precio_unitario.replace(/,/g,'');
       precio_unitario = parseFloat(precio_unitario);
     var cantidad = parseFloat( $('#cantidad').val() );
       cantidad = cantidad.replace(/,/g,'');
       cantidad = parseFloat(cantidad);
+
     var porc_iva = parseFloat( $('#porc_iva').val() );
       porc_iva = porc_iva.replace(/,/g,'');
       porc_iva = parseFloat(porc_iva);

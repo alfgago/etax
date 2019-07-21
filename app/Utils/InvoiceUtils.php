@@ -235,10 +235,13 @@ class InvoiceUtils
                 $isGravado = isset($cod) ? $cod->is_gravado : true;
                 $iva_amount = 0;
                 if( $isGravado ) {
-                    $iva_amount = $value['iva_amount'] ? round($value['iva_amount'], 5) : 0;
+                    $iva_amount = $value['iva_amount'] ? round($value['iva_amount'], 2) : 0;
                 }else {
                     $iva_amount = 'false';
                 }
+                
+                $montoSinIva = ($value['unit_price'] && $value['item_count']) ? round($value['item_count'] * $value['unit_price'], 2) : 0;
+                $montoDescuento = $value['discount'] ? $this->discountCalculator($value['discount_type'], $value['discount'], $montoSinIva ) : 0;
 
                 $details[$key] = array(
                     'cantidad' => $value['item_count'] ?? 1,
@@ -246,9 +249,9 @@ class InvoiceUtils
                     'detalle' => $value['name'] ?? '',
                     'precioUnitario' => $value['unit_price'] ?? 0,
                     'subtotal' => $value['subtotal'] ?? 0,
-                    'montoTotal' => $value['item_count'] * $value['unit_price'] ?? 0,
+                    'montoTotal' =>  $montoSinIva,
                     'montoTotalLinea' => $value['subtotal'] + $value['iva_amount'] ?? 0,
-                    'descuento' => $value['discount'] ? $this->discountCalculator($value['discount_type'], $value['discount'], $value['item_count'] * $value['unit_price'] ?? 0) : 0,
+                    'descuento' => $montoDescuento,
                     'impuesto_codigo' => '01',
                     'tipo_iva' => $value['iva_type'],
                     'impuesto_codigo_tarifa' => Variables::getCodigoTarifaVentas($value['iva_type']),
@@ -336,13 +339,13 @@ class InvoiceUtils
                 'consecutivo' => $ref ?? '',
                 'fecha_emision' => $data['generated_date'] ?? '',
                 'codigo_actividad' => str_pad($data['commercial_activity'], 6, '0', STR_PAD_LEFT),
-                'receptor_nombre' => $data['client_first_name'].' '.$data['client_last_name'],
+                'receptor_nombre' => trim($data['client_first_name'].' '.$data['client_last_name']),
                 'receptor_ubicacion_provincia' => substr($receptorPostalCode,0,1),
                 'receptor_ubicacion_canton' => substr($receptorPostalCode,1,2),
                 'receptor_ubicacion_distrito' => substr($receptorPostalCode,3),
-                'receptor_ubicacion_otras_senas' => $data['client_address'] ?? '',
-                'receptor_otras_senas_extranjero' => $data['client_address'] ?? '',
-                'receptor_email' => $data['client_email'] ?? '',
+                'receptor_ubicacion_otras_senas' => $data['client_address'] ? trim($data['client_address']) : '',
+                'receptor_otras_senas_extranjero' => $data['client_address'] ? trim($data['client_address']) : '',
+                'receptor_email' => $data['client_email'] ? trim($data['client_email']) :  '',
 
                 'receptor_phone' => !empty($data['client_phone']) ? preg_replace('/[^0-9]/', '', $data['client_phone']) : '00000000',
                 'receptor_cedula_numero' => $data['client_id_number'] ? preg_replace("/[^0-9]/", "", $data['client_id_number']) : '',
@@ -352,21 +355,21 @@ class InvoiceUtils
                 'tipo_documento' => $data['document_type'] ?? '',
                 'sucursal_nro' => '001',
                 'terminal_nro' => '00001',
-                'emisor_name' => $company->business_name ?? '',
-                'emisor_email' => $company->email ?? '',
-                'emisor_company' => $company->business_name ?? '',
+                'emisor_name' => $company->business_name ? trim($company->business_name) : '',
+                'emisor_email' => $company->email ? trim($company->email) : '',
+                'emisor_company' => $company->business_name ? trim($company->business_name) :  '',
                 'emisor_city' => $company->city ?? '',
                 'emisor_state' => $company->state ?? '',
                 'emisor_postal_code' => $company->zip ?? '',
                 'emisor_country' => $company->country ?? '',
                 'emisor_address' => $company->address ?? '',
-                'emisor_phone' => $company->phone ?? '',
+                'emisor_phone' => $company->phone ? trim($company->phone) : '',
                 'emisor_cedula' => $company->id_number ? preg_replace("/[^0-9]/", "", $company->id_number) : '',
-                'usuarioAtv' => $company->atv->user ?? '',
-                'passwordAtv' => $company->atv->password ?? '',
+                'usuarioAtv' => $company->atv->user ? trim($company->atv->user) :  '',
+                'passwordAtv' => $company->atv->password ? trim($company->atv->password) : '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
-                'atvcertPin' => $company->atv->pin ?? '',
-                'atvcertFile' => Storage::get($company->atv->key_url),
+                'atvcertPin' => $company->atv->pin ? trim($company->atv->pin) : '',
+                //'atvcertFile' => Storage::get($company->atv->key_url),
 
                 'servgravados' => $totalServiciosGravados,
                 'servexentos' => $totalServiciosExentos,
@@ -390,6 +393,9 @@ class InvoiceUtils
                 $invoiceData['fecha_emision_factura'] = $data['reference_generated_date'];
                 $invoiceData['clave_factura'] = $data['reference_document_key'];
             }
+            Log::info("Request Data from invoices id: $data->id  --> ".json_encode($invoiceData));
+            $invoiceData['atvcertFile'] = Storage::get($company->atv->key_url);
+
             foreach ($invoiceData as $key => $values) {
                 if ($key == 'atvcertFile') {
                     $request[]=array(
@@ -426,6 +432,5 @@ class InvoiceUtils
         }
         return $discount;
     }
-
+    
 }
-            $details = null;

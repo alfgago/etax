@@ -231,6 +231,8 @@ class CalculatedTax extends Model
               if( !isset($currActivity) ){
                 $arrayActividades = currentCompanyModel()->getActivities();
                 $currActivity = $arrayActividades[0]->codigo;
+                $invoiceItems[$i]->invoice->commercial_activity = $currActivity;
+                $invoiceItems[$i]->invoice->save();
               }
               
               //Redondea todo a 2 decimales
@@ -445,6 +447,8 @@ class CalculatedTax extends Model
               if( !isset($currActivity) ){
                 $arrayActividades = currentCompanyModel()->getActivities();
                 $currActivity = $arrayActividades[0]->codigo;
+                $billItems[$i]->invoice->commercial_activity = $currActivity;
+                $billItems[$i]->invoice->save();
               }
               
               //Redondea todo a 2 decimales
@@ -550,6 +554,14 @@ class CalculatedTax extends Model
               $ivaData->$bVar += $subtotal;
               $ivaData->$iVar += $billIva;
               
+              //Cuenta contable de proveedor
+              $tipoVenta = $billItems[$i]->bill->sale_condition;
+              if( $tipoVenta == '01' ) {
+                $totalProveedoresContado += $currentTotal;
+              }else{
+                $totalProveedoresCredito += $currentTotal;
+              }
+              
               $typeVar = "type$prodType";
               $typeVarPorc = "type$prodType-$prodPorc";
               $typeVarActividad = $currActivity."-".$typeVar;
@@ -565,14 +577,6 @@ class CalculatedTax extends Model
               $ivaData->$typeVarPorc += $subtotal;
               $ivaData->$typeVarActividad += $subtotal;
               $ivaData->$typeVarPorcActividad += $subtotal;
-              
-              //Cuenta contable de proveedor
-              $tipoVenta = $billItems[$i]->bill->sale_condition;
-              if( $tipoVenta == '01' ) {
-                $totalProveedoresContado += $currentTotal;
-              }else{
-                $totalProveedoresCredito += $currentTotal;
-              }
               
             }  
           }catch( \Exception $ex ){
@@ -977,7 +981,7 @@ class CalculatedTax extends Model
     			  
     			  $arrayActividades = currentCompanyModel()->getActivities();
             foreach( $arrayActividades as $act){
-              $typeVarAct = "$act->codigo-$varName";
+              $typeVarAct  = "$act->codigo-$varName";
               $typeVarAct0 = "$act->codigo-$varName0";
               $typeVarAct1 = "$act->codigo-$varName1";
               $typeVarAct2 = "$act->codigo-$varName2";
@@ -985,7 +989,7 @@ class CalculatedTax extends Model
               $typeVarAct8 = "$act->codigo-$varName8";
               $typeVarAct3 = "$act->codigo-$varName3";
               
-      			  $ivaData->$typeVarAct += $ivaDataAnterior->$typeVarAct;
+      			  $ivaData->$typeVarAct  += $ivaDataAnterior->$typeVarAct;
       			  $ivaData->$typeVarAct0 += $ivaDataAnterior->$typeVarAct0;
       			  $ivaData->$typeVarAct1 += $ivaDataAnterior->$typeVarAct1;
       			  $ivaData->$typeVarAct2 += $ivaDataAnterior->$typeVarAct2;
@@ -1056,7 +1060,7 @@ class CalculatedTax extends Model
 			}
 			
 			foreach( ProductCategory::all() as $codigo ) {
-			  $varName = "type$codigo->id";
+			  $varName  = "type$codigo->id";
 			  $varName0 = "type$codigo->id-0";
 			  $varName1 = "type$codigo->id-1";
 			  $varName2 = "type$codigo->id-2";
@@ -1074,7 +1078,7 @@ class CalculatedTax extends Model
 			  
         $arrayActividades = currentCompanyModel()->getActivities();
         foreach( $arrayActividades as $act){
-          $typeVarAct = "$act->codigo-$varName";
+          $typeVarAct  = "$act->codigo-$varName";
           $typeVarAct0 = "$act->codigo-$varName0";
           $typeVarAct1 = "$act->codigo-$varName1";
           $typeVarAct2 = "$act->codigo-$varName2";

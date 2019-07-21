@@ -33,8 +33,7 @@ class EmailController extends Controller
 
     
     public function receiveEmailXML(Request $request) {
-        Log::info( "Se recibió una solicitud de factura por correo electrónico." );
-        
+ 
         try {  
             $file = $request->file('attachment1');
             EmailController::processAttachment( $file );
@@ -81,7 +80,7 @@ class EmailController extends Controller
                 Log::info( "Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor");
             }
         }catch( \Throwable $ex ){
-            //Log::warning( "No se pudo guardar la factura de compra via Email. Mensaje:" . $ex->getMessage());
+            Log::warning( "No se pudo guardar la factura de compra via Email. Mensaje:" . $ex->getMessage());
         }
        
         try {
@@ -91,7 +90,7 @@ class EmailController extends Controller
                 Log::info( "Se registró la factura de venta $consecutivoComprobante para la empresa $identificacionEmisor");
             }
         }catch( \Throwable $ex ){
-            //Log::warning( "No se pudo guardar la factura de venta via Email. Mensaje:" . $ex->getMessage());
+            Log::warning( "No se pudo guardar la factura de venta via Email. Mensaje:" . $ex->getMessage());
         }
         
         return true;

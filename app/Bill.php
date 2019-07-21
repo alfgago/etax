@@ -294,7 +294,7 @@ class Bill extends Model
         $bill->commercial_activity = $arr['CodigoActividad'] ?? 0;
         $bill->xml_schema = $bill->commercial_activity ? 43 : 42;
         $bill->sale_condition = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
-        $bill->credit_time = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
+        $bill->credit_time = null;
         $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
         if ( is_array($medioPago) ) {
           $medioPago = $medioPago[0];
@@ -302,7 +302,7 @@ class Bill extends Model
         $bill->payment_type = $medioPago;
         
         //Fechas
-        $fechaEmision = Carbon::createFromFormat('Y-m-d', subS0tr($arr['FechaEmision'], 0, 10));
+        $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10));
         $bill->generated_date = $fechaEmision;
         $bill->due_date = $fechaEmision;
         
@@ -545,7 +545,6 @@ class Bill extends Model
           $xmlHacienda->bill_id = $bill->id;
           $xmlHacienda->invoice_id = 0;
           $xmlHacienda->save();
-          Log::info( 'XMLHacienda guardado: ' . $bill->id );
         }catch( \Throwable $e ){
           Log::error( 'Error al registrar en tabla XMLHacienda: ' . $e->getMessage() );
         }

@@ -201,10 +201,10 @@
                 $documentType = 'Factura electrónica';
             break;
             case '02':
-                $documentType = 'Nota de crédito electrónica';
+                $documentType = 'Nota de débito electrónica';
             break;
             case '03':
-                $documentType = 'Nota de débito electrónica';
+                $documentType = 'Nota de crédito electrónica';
             break;
             case '08':
                 $documentType = 'Factura de exportación';

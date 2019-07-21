@@ -44,6 +44,17 @@ Route::post('/reportes/detalle-credito', 'ReportsController@reporteDetalleCredit
 Route::post('/reportes/libro-ventas', 'ReportsController@reporteLibroVentas');
 Route::post('/reportes/libro-compras', 'ReportsController@reporteLibroCompras');
 Route::get('/reportes/borrador-iva', 'ReportsController@reporteBorradorIVA');
+/**/
+Route::post('/reportes/export-cuentas-contables', 'ReportsController@exportCuentasContables');
+Route::post('/reportes/export-detalle-debito-fiscal', 'ReportsController@exportDetalleDebitoFiscal');
+Route::post('/reportes/export-detalle-credito-fiscal', 'ReportsController@exportDetalleCreditoFiscal');
+Route::post('/reportes/export-libro-compras', 'ReportsController@exportLibroCompras');
+Route::post('/reportes/export-libro-ventas', 'ReportsController@exportLibroVentas');
+Route::post('/reportes/export-resumen-ejecutivo', 'ReportsController@exportResumenEjecutivo');
+Route::post('/reportes/export-reporte-proveedores', 'ReportsController@exportReporteProveedores');
+Route::post('/reportes/export-reporte-clientes', 'ReportsController@exportReporteClientes');
+Route::post('/reportes/export-declaracion-iva', 'ReportsController@exportDeclaracionIVA');
+/**/
 
 //Cierres de mes
 Route::prefix('cierres')->group(function() {
@@ -66,7 +77,6 @@ Route::prefix('empresas')->group(function() {
     Route::get('company-profile/{id}', 'CompanyController@company_profile')->name('Company.company_profile');
     Route::get('set-prorrata-2018-facturas', 'CompanyController@setProrrata2018PorFacturas')->name('Company.set_prorrata_2018_facturas');
     Route::get('comprar-facturas-vista', 'CompanyController@comprarFacturasVista')->name('Company.comprar_facturas_vista');
-    Route::patch('comprar-facturas', 'CompanyController@comprarFacturas')->name('Company.comprar_facturas');
     Route::patch('seleccionar-cliente', 'CompanyController@seleccionarCliente')->name('Company.seleccionar_cliente');
 });
 
@@ -118,6 +128,7 @@ Route::get('/cambiar-plan', 'SubscriptionPlanController@changePlan')->name('Subs
 Route::get('/elegir-plan', 'SubscriptionPlanController@selectPlan')->name('Subscription.select_plan');
 Route::get('/periodo-pruebas', 'SubscriptionPlanController@startTrial')->name('Subscription.startTrial');
 Route::post('/confirmar-plan', 'SubscriptionPlanController@confirmPlanChange')->name('Subscription.confirmar_plan');
+Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}', 'SubscriptionPlanController@confirmCode')->name('Subscription.confirmar_code');
 Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');
 
 // Rutas de usuario
@@ -133,6 +144,8 @@ Route::prefix('usuario')->group(function() {
     Route::get('zendesk-jwt', 'UserController@zendeskJwt')->name('User.zendesk_jwt');
     Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
     Route::post('update-user-tutorial', 'UserController@updateUserTutorial')->name('User.update_user_tutorial');
+    Route::get('wallet', 'InfluencersController@wallet')->name('Influencers.wallet');
+    Route::post('add-retiro', 'InfluencersController@retiro')->name('Influencers.retiro');
     Route::get('cancelar', 'UserController@cancelar')->name('User.cancelar');
     Route::patch('update-cancelar', 'UserController@updatecancelar')->name('User.updatecancelar');
 });
@@ -144,6 +157,7 @@ Route::prefix('payment')->group(function(){
     Route::post('payment-token-transaction', 'PaymentController@paymentTokenTransaction')->name('Payment.payment_token_transaction');
     Route::post('payment-charge', 'PaymentController@paymentCharge')->name('Payment.payment_charge');
     Route::get('pending-charges', 'PaymentController@pendingCharges')->name('Payment.pending_charges');
+    Route::post('comprar-facturas', 'PaymentController@comprarFacturas')->name('Payment.comprar_facturas');
 });
 
 

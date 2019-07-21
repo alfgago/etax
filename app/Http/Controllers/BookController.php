@@ -139,6 +139,7 @@ class BookController extends Controller
 
     public function retenciones_tarjeta($id){
         $company = currentCompanyModel();
+        $retencion_porcentaje = $company->card_retention;
         $cierres = CalculatedTax::where('company_id', $company->id)
             ->where('id',$id)->first();
         $month = $cierres->month;
@@ -155,9 +156,9 @@ class BookController extends Controller
         $total_retencion = 0;
         foreach($invoices as $invoice){
             $total = $invoice->total;
-            $invoice->retencion = $total * 0.06;
+            $invoice->retencion = $total * $retencion_porcentaje / 100;
             $total_facturado += $total;
-            $total_retencion += $total * 0.06;
+            $total_retencion += $total * $retencion_porcentaje / 100;
         }
         $data = array(
             'cierre' => $id,
@@ -166,7 +167,8 @@ class BookController extends Controller
             'cerrado'  => $cerrado,
             'total_facturado' => $total_facturado,
             'total_retencion' => $total_retencion,
-            'total_retenido' => $total_retenido
+            'total_retenido' => $total_retenido,
+            'retencion_porcentaje' => $retencion_porcentaje
         );
         //dd($data);
         return view('Book.retenciones_tarjeta')->with('invoices', $invoices)->with('data', $data);

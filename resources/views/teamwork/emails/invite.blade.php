@@ -1,6 +1,6 @@
 @component('mail::message')
-Hello,
-<p>You have been invited to join team {{$team->name}}</p>
+Hola,
+<p>Usted ha sido invitado a unirse a {{$team->name}} en eTax</p>
 
 <table class="action" align="center" width="100%" cellpadding="0" cellspacing="0">
     <tr>
@@ -11,7 +11,7 @@ Hello,
                         <table border="0" cellpadding="0" cellspacing="0">
                             <tr>
                                 <td>
-                                    <a href="{{ route('teams.accept_invite', $invite->accept_token) }}" class="button button-primary}}">Join Team</a>
+                                    <a href="{{ route('teams.accept_invite', $invite->accept_token) }}" class="button button-primary}}">Unirse a equipo</a>
                                 </td>
                             </tr>
                         </table>
@@ -22,6 +22,6 @@ Hello,
     </tr>
 </table>
 
-Thanks,<br>
+Gracias,<br>
 {{ config('app.name') }}
 @endcomponent

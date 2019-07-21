@@ -120,6 +120,11 @@ class ProcessCreditNote implements ShouldQueue
                             $invoice->hacienda_status = '04';
                             $invoice->save();
 
+                        } else if (isset($response['status']) && $response['status'] == 400 &&
+                            strpos($response['message'], 'archivo XML ya existe en nuestras bases de datos') <> false) {
+                            Log::info('Consecutive repeated -->' . $invoice->document_number);
+                            $invoice->hacienda_status = '04';
+                            $invoice->save();
                         }
                         Log::info('Proceso de nota de credito finalizado con éxito.');
                     }
@@ -141,37 +146,37 @@ class ProcessCreditNote implements ShouldQueue
             $invoiceData = [
                 'consecutivo' => $data['reference_number'] ?? '',
                 'fecha_emision' => $data['generated_date'] ?? '',
-                'receptor_nombre' => $data['client_first_name'].' '.$data['client_last_name'],
+                'receptor_nombre' => trim($data['client_first_name'].' '.$data['client_last_name']),
                 'receptor_ubicacion_provincia' => substr($receptorPostalCode,0,1),
                 'receptor_ubicacion_canton' => substr($receptorPostalCode,1,2),
                 'receptor_ubicacion_distrito' => substr($receptorPostalCode,3),
-                'receptor_ubicacion_otras_senas' => $data['client_address'] ?? '',
-                'receptor_email' => $data['client_email'] ?? '',
-                'receptor_cedula_numero' => $data['client_id_number'] ?? '',
+                'receptor_ubicacion_otras_senas' => $data['client_address'] ? trim($data['client_address']) : '',
+                'receptor_email' => $data['client_email'] ? trim($data['client_email']) : '',
+                'receptor_cedula_numero' => $data['client_id_number'] ? trim($data['client_id_number']): '',
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',
                 'tipocambio' => $data['currency_rate'] ?? '',
                 'tipo_documento' => $data['document_type'] ?? '',
                 'sucursal_nro' => '001',
                 'terminal_nro' => '00001',
-                'emisor_name' => $company->business_name ?? '',
-                'emisor_email' => $company->email ?? '',
-                'emisor_company' => $company->business_name ?? '',
+                'emisor_name' => $company->business_name ? trim($company->business_name) : '',
+                'emisor_email' => $company->email ? trim($company->email) : '',
+                'emisor_company' => $company->business_name ? trim($company->business_name) : '',
                 'emisor_city' => $company->city ?? '',
                 'emisor_state' => $company->state ?? '',
                 'emisor_postal_code' => $company->zip ?? '',
                 'emisor_country' => $company->country ?? '',
-                'emisor_address' => $company->address ?? '',
-                'emisor_phone' => $company->phone ?? '',
-                'emisor_cedula' => $company->id_number ?? '',
-                'usuarioAtv' => $company->atv->user ?? '',
-                'passwordAtv' => $company->atv->password ?? '',
+                'emisor_address' => $company->address ? trim($company->address) : '',
+                'emisor_phone' => $company->phone ? trim($company->phone) : '',
+                'emisor_cedula' => $company->id_number ? trim($company->id_number) : '',
+                'usuarioAtv' => $company->atv->user ? trim($company->atv->user) : '',
+                'passwordAtv' => $company->atv->password ? trim($company->atv->password) : '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
                 'referencia_codigo' => '01',
                 'referencia_razon' => 'Anulacion de factura',
                 'fecha_emision_factura' => $data['reference_generated_date'],
                 'clave_factura' => $data['reference_document_key'],
-                'atvcertPin' => $company->atv->pin ?? '',
+                'atvcertPin' => $company->atv->pin ? trim($company->atv->pin) : '',
                 'atvcertFile' => Storage::get($company->atv->key_url),
                 'detalle' => $details
             ];

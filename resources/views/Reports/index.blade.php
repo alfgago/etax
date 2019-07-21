@@ -10,7 +10,7 @@
 @endsection
 
 @section('content')
-
+<meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
 <div class="row">
   <div class="col-md-12">
     <div class="row">
@@ -28,6 +28,7 @@
           <option type="post">Reporte de proveedores (Muy pronto)</option>
           <option type="post">Reporte de clientes (Muy pronto)</option>
           <option style="" value="/reportes/borrador-iva" hideClass=".opt-acumulado" type="iframe">Borrador de declaración de IVA</option>
+
         </select>
       </div>
       
@@ -59,15 +60,31 @@
           </div>
         </div>
       </div>
-      
-      <div class="form-group col-md-12">
+    <div class="col-md-12">
+      <div class="col-md-1">
           <button onclick="verReporte();" class="btn btn-primary form-btn">Ver reporte</button>
       </div>
-      
+    </div>
+
       <div id="reporte-container" class="col-md-12 mb-4 reporte" style="padding: 3rem 15px;">
         
       </div>
+
+
+      <div class="col-lg-12 col-md-12 hidden reporte" style="padding: 3rem 15px;" id="reporte-detalle-debito">
+        
+      </div>
+    
+      <div class="col-lg-12 col-md-12 hidden reporte" style="padding: 3rem 15px;" id="reporte-detalle-credito">
+        
+      </div>
       
+      <div class="col-lg-12 col-md-12  reporte" style="padding: 3rem 15px; margin-left: -15px;" id="reporte-resumen-ejecutivo">
+        
+      </div>
+        <div class="col-md-1" hidden id="export_btn" style="margin-top:-2em;">
+            <button id="btnExport" onclick="Exportar();" class="btn btn-primary form-btn">Descargar</button>
+        </div>      
     </div>
   </div>
 </div>
@@ -84,6 +101,20 @@
     $(hideClass).hide();
     $("#input-mes").val(1);
     
+  }
+
+ function Exportar(){
+      var uri = 'data:application/vnd.ms-excel;base64,'
+          , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8"><head></head><body><table>{table}</table></body></html>'
+          , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+          , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+
+      var table = 'reporte-container';
+      var name = 'nombre_hoja_calculo';
+
+      if (!table.nodeType) table = document.getElementById(table)
+      var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+      window.location.href = uri + base64(format(template, ctx))
   }
   
   function verReporte() {
@@ -107,6 +138,10 @@
           success : function( response ) {
             $('#reporte-container').html(response);
             clearEmptyRows();
+              setTimeout(function(){
+                $("table").attr('id', 'reporte-container');
+                $('#export_btn').attr('hidden', false);
+              }, 1000);
           },
           async: true
         });  
