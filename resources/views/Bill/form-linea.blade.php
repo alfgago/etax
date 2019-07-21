@@ -132,7 +132,7 @@
   </div>
 </div>
 <script>
-    $(function () {
+    /*$(function () {
         $("#cantidad").keydown(function () {
             // Save old value.
             if (!$(this).val() || parseInt($(this).val()) >= 0)
@@ -165,5 +165,5 @@
             else
                 $(this).val($(this).data("old2"));
         })
-    });
+    });*/
 </script>

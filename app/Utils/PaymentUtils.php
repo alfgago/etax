@@ -139,7 +139,7 @@ class PaymentUtils
 
                 //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
                 if( ! isset($payment->charge_token) ) {
-                    $chargeIncluded = $paymentUtils->paymentIncludeCharge($data);
+                    $chargeIncluded = $this->paymentIncludeCharge($data);
                     $chargeTokenId = $chargeIncluded['chargeTokenId'];
                     $payment->charge_token = $chargeTokenId;
                     $payment->save();

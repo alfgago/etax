@@ -253,7 +253,7 @@ class Company extends Model {
             return $available_invoices;
 
         }catch (\Throwable $ex){
-             Log::error('Error en addSentInvoice: ' . $ex->getMessage() );
+             Log::warning('Error en addSentInvoice: ' . $ex->getMessage() );
         }
     }
     

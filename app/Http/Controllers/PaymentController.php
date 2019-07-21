@@ -331,6 +331,7 @@ class PaymentController extends Controller
     }
 
     public function comprarFacturas(Request $request){
+        
         $date = Carbon::parse(now('America/Costa_Rica'));
         $company = currentCompanyModel();
         $available_company_invoices = !$company->additional_invoices ? $available_company_invoices = 0 : $company->additional_invoices;

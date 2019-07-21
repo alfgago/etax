@@ -191,7 +191,7 @@
 
 @section('footer-scripts')
     <script>
-        $(document).ready(function(){
+        /*$(document).ready(function(){
             $('#saldo_favor_2018').on('keyup',function(){
                 $(this).manageCommas();
             });
@@ -215,7 +215,7 @@
 
         $.fn.santizeCommas = function() {
             return $(this).val($(this).val().replace(/(,| )/g,''));
-        }
+        }*/
     </script>
 
 	<script>

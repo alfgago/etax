@@ -218,39 +218,34 @@
   </div>
 </div>
 <script>
-    $(function () {
-        /*campo cantidad*/
+    /*$(function () {
         $('#cantidad').on('keyup',function(){
             $(this).manageCommas();
         });
         $('#cantidad').on('focus',function(){
             $(this).santizeCommas();
         });
-        /*fin campo cantidad*/
-        /*campo precio_unitario*/
+        
         $('#precio_unitario').on('keyup',function(){
             $(this).manageCommas();
         });
         $('#precio_unitario').on('focus',function(){
             $(this).santizeCommas();
         });
-        /*fin campo precio_unitario*/
-        /*campo item_iva_amount*/
+       
         $('#item_iva_amount').on('change',function(){
             $(this).manageCommas();
         });
         $('#item_iva_amount').on('change',function(){
             $(this).santizeCommas();
         });
-        /*fin campo item_iva_amount*/
-        /*campo discount*/
+        
         $('#discount').on('keyup',function(){
             $(this).manageCommas();
         });
         $('#discount').on('focus',function(){
             $(this).santizeCommas();
         });
-        /*fin campo discount*/
        
         String.prototype.addComma = function() {
             return this.replace(/(.)(?=(.{3})+$)/g,"$1,").replace(',.', '.');
@@ -263,7 +258,7 @@
         $.fn.santizeCommas = function() {
             return $(this).val($(this).val().replace(/(,| )/g,''));
         }
-    });
+    });*/
 </script>
 
 
