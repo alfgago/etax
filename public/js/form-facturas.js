@@ -158,7 +158,13 @@ function agregarLinea() {
 
     calcularTotalFactura();
   } else {
-    alert('Debe completar los datos de la linea antes de continuar');
+    //alert('Debe completar los datos de la linea antes de continuar');
+      Swal.fire({
+          type: 'error',
+          title: 'Error',
+          text: 'Debe completar los datos de la linea antes de guardarla'
+      })
+      return false;
   }
 }
 
@@ -174,10 +180,18 @@ function calcularTotalFactura() {
     monto_iva += s * m;
     total += t;
   });
-
-  $('#subtotal').val(subtotal);
-  $('#monto_iva').val(monto_iva);
-  $('#total').val(total);
+    if(total > 0){
+        $('#subtotal').val(subtotal);
+        $('#monto_iva').val(monto_iva);
+        $('#total').val(total);
+    }else{
+        Swal.fire({
+            type: 'error',
+            title: 'Error',
+            text: 'No pueden enviarse valores negativos'
+        })
+        return false;
+    }
 }
 
 $(document).ready(function () {

@@ -421,6 +421,7 @@ class PaymentUtils
             $data->es_exento = $invoiceData->es_exento;
             $data->email = $invoiceData->email;
             $data->send_email = "info@etaxcr.com";
+            $data->billing_emails = null;
             $data->buy_order = '';
             $data->due_date =
             $data->other_reference = '';

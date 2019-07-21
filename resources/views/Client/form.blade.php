@@ -20,7 +20,7 @@
     
     <div class="form-group col-md-4">
       <label for="id_number">Número de identificación *</label>
-      <input type="number" class="form-control" name="id_number" id="id_number" value="{{ @$client->id_number }}" required onchange="getJSONCedula(this.value);">
+      <input type="text" class="form-control" name="id_number" id="id_number" value="{{ @$client->id_number }}" required onchange="getJSONCedula(this.value);" maxlength="20">
     </div>
 
     <div class="form-group col-md-4">
@@ -40,12 +40,12 @@
     
     <div class="form-group col-md-4">
       <label for="email">Correo electrónico *</label>
-      <input type="text" class="form-control" name="email" id="email" value="{{ @$client->email }}" required>
+      <input type="text" class="form-control" name="email" id="email" value="{{ @$client->email }}" required onblur="validateEmail();" maxlength="160">
     </div>
     
     <div class="form-group col-md-4">
       <label for="phone">Teléfono</label>
-      <input type="number" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" >
+      <input type="number" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" maxlength="20">
     </div>
     
     <div class="form-group col-md-4"></div>
@@ -95,7 +95,7 @@
 
     <div class="form-group col-md-12" id="extranjero" hidden>
         <label for="address">Otras Señas Extranjero</label>
-        <textarea class="form-control" name="foreign_address" id="foreign_address" >{{ @$client->foreign_address }}</textarea>
+        <textarea class="form-control" name="foreign_address" id="foreign_address" maxlength="160">{{ @$client->foreign_address }}</textarea>
     </div>
     <div class="form-group col-md-12">
       <label for="billing_emails">Correos electrónicos para facturación</label>
@@ -122,6 +122,11 @@
           <option value="1" {{ @$client->es_exento ? 'selected' : '' }}>Sí</option>
         </select>
     </div>
+<style>
+    .error {
+        border:1px solid red;
+    }
+</style>
 <script>
     function cambiarDireccion() {
         var tipoPersona = $('#tipo_persona').val();
@@ -148,4 +153,17 @@
         }
     }
     cambiarDireccion();
+    $("#id_number").keyup(function() {
+        $("#id_number").val(this.value.match(/[0-9]*/));
+    });
+    function validateEmail() {
+        var email = $('#email').val();
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if(re.test(String(email).toLowerCase()) != true){
+            alert('La direccion de correo electronico no coincide con ningun formato de correo');
+            $('#email').addClass('error');
+        }else{
+            $('#email').removeClass('error');
+        }
+    }
 </script>
