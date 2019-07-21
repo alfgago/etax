@@ -172,8 +172,8 @@
     subtotal = subtotal.replace(/,/g,'');
     subtotal = parseFloat(subtotal);
     var total = $('#item_total').val();
-    item_total = item_total.replace(/,/g,'');
-    item_total = parseFloat(item_total);
+    total = total.replace(/,/g,'');
+    total = parseFloat(total);
     var typeDocument = $('#typeDocument').val();
     var numeroDocumento = $('#numeroDocumento').val();
     var nombreInstitucion = $('#nombreInstitucion').val();
@@ -190,7 +190,7 @@
     }
     if( !descuento ) {
         descuento = 0;
-      $('#discount').val('');
+      $('#discount').val(0);
     }
 
     if( !precio_unitario ) {
@@ -328,7 +328,7 @@
       $('#cantidad').val(1);
       $('#porc_identificacion_plena').val(13);
       $('#discount_type').val('01');
-      $('#discount').val('');
+      $('#discount').val(0);
       $('#tipo_producto').change();
   }
 
