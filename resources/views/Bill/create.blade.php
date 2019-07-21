@@ -307,9 +307,46 @@
 @section('footer-scripts')
 
 <script>
-
 $(document).ready(function(){
   $('#tipo_producto').val(49).change();
+});
+$(function () {
+    $("#accept_iva_acreditable").keydown(function () {
+        // Save old value.
+        if (!$(this).val() || parseInt($(this).val()) >= 0)
+            $(this).data("old", $(this).val());
+    });
+    $("#accept_iva_acreditable").keyup(function () {
+        // Check correct, else revert back to old value.
+        if (!$(this).val() || parseInt($(this).val()) >= 0)
+            ;
+        else
+            $(this).val($(this).data("old"));
+    });
+    $("#accept_iva_gasto").keydown(function () {
+        // Save old value.
+        if (!$(this).val() || parseInt($(this).val()) >= 0)
+            $(this).data("old", $(this).val());
+    });
+    $("#accept_iva_gasto").keyup(function () {
+        // Check correct, else revert back to old value.
+        if (!$(this).val() || parseInt($(this).val()) >= 0)
+            ;
+        else
+            $(this).val($(this).data("old"));
+    });
+    $("#tipo_cambio").keydown(function () {
+        // Save old value.
+        if (!$(this).val() || parseInt($(this).val()) >= 0)
+            $(this).data("old", $(this).val());
+    });
+    $("#tipo_cambio").keyup(function () {
+        // Check correct, else revert back to old value.
+        if (!$(this).val() || parseInt($(this).val()) >= 0)
+            ;
+        else
+            $(this).val($(this).data("old"));
+    });
 });
 
 </script>
