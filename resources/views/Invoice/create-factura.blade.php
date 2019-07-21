@@ -177,7 +177,7 @@ $company = currentCompanyModel();
                   <div class="form-group col-md-6">
                     <label for="due_date">Fecha de vencimiento</label>
                     <div class='input-group date inputs-fecha'>
-                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->addDays(3)->format('d/m/Y') }}">
+                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->addDays(3)->format('d/m/Y') }}" maxlength="10">
                       <span class="input-group-addon">
                         <i class="icon-regular i-Calendar-4"></i>
                       </span>
@@ -301,11 +301,7 @@ $company = currentCompanyModel();
 @endsection
 
 @section('breadcrumb-buttons')
-{{--@if( $document_type != "09"  )--}}
   <button id='btn-submit-fe' onclick="$('#btn-submit').click();" class="btn btn-primary">Enviar factura electrónica</button>
-{{--@else--}}
-{{--  <p class="description mt-4">FEC temporalmente deshabilitada. Muy pronto en funcionamiento al finalizar el día. Nos disculpamos por la inconveniencia.</p>--}}
-{{-- @endif--}}
 @endsection
 
 @section('footer-scripts')

@@ -16,7 +16,7 @@
             <label for="codigo">Código de producto</label>
             <div class="form-row">
                 <div class="col-md-8">
-                    <input type="text" class="form-control" id="codigo" name="code">
+                    <input type="text" class="form-control" id="codigo" name="code" maxlength="13">
                 </div>
                 <div class="col-md-3 pull-left-1" style="margin-left: -1em !important;">
                     <div class="btn btn-agregar btn-agregar-cliente" onclick="buscarProducto();">Buscar</div>
@@ -26,13 +26,13 @@
     </div>
     <div class="form-group col-md-6">
         <label for="nombre">Nombre / Descripción</label>
-        <input type="text" class="form-control" id="nombre" value="" name="description">
+        <input type="text" class="form-control" id="nombre" value="" name="description" maxlength="200">
     </div>
 
     <?php if( @$document_type == "09"){ ?>
         <div class="form-group col-md-4">
             <label for="nombre">Partida Arancelaria</label>
-            <input type="text" class="form-control" id="tariff_heading" value="">
+            <input type="text" class="form-control" id="tariff_heading" value="" maxlength="12">
         </div>
     <?php
       $class = 'form-group col-md-8';
@@ -94,21 +94,21 @@
     
     <div class="form-group col-md-3">
       <label for="cantidad">Cantidad</label>
-      <input type="number" min="1" step="0.1" class="form-control" id="cantidad" value="1"  >
+      <input type="text" min="1" class="form-control" id="cantidad" value="1"  >
     </div>
 
     <div class="form-group col-md-3">
       <label for="precio_unitario">Precio unitario</label>
       @if( @$document_type != "08"  )
-      <input type="number" min="0" class="form-control" id="precio_unitario" value="" number >
+      <input type="text" min="0" class="form-control" id="precio_unitario" placeholder="0" number >
       @else
-      <input type="number" min="0" class="form-control" id="precio_unitario" readonly value="0" number >
+      <input type="text" min="0" class="form-control" id="precio_unitario" readonly value="0" number >
       @endif
     </div>
 
     <div class="form-group col-md-3">
       <label for="item_iva">Monto IVA</label>
-      <input type="number" min="0" class="form-control {{ @$document_type == '08' ? 'is-fec' : 'not-fec' }}" id="item_iva_amount" placeholder="" >
+      <input type="text" min="0" class="form-control {{ @$document_type == '08' ? 'is-fec' : 'not-fec' }}" id="item_iva_amount" placeholder="" >
     </div>
 
     <div class="form-group col-md-3">
@@ -121,12 +121,12 @@
 
     <div class="form-group col-md-3">
       <label for="discount">Descuento</label>
-      <input type="number" min="0" max="100" class="form-control" id="discount" value="0" >
+      <input type="text" min="0" class="form-control" id="discount" placeholder="0" >
     </div>
 
     <div class="form-group col-md-3">
       <label for="item_subtotal">Subtotal</label>
-      <input type="number" min="0" class="form-control" id="item_subtotal" placeholder="" readonly="true" >
+      <input type="text" min="0" class="form-control" id="item_subtotal" placeholder="" readonly="true" >
     </div>
 
     <div class="form-group col-md-3">
@@ -168,11 +168,11 @@
             
             <div class="form-group col-md-6">
                 <label for="numeroDocumento">N&uacute;mero Documento de Exoneraci&oacute;n *</label>
-                <input type="text" class="form-control" id="numeroDocumento" placeholder="">
+                <input type="text" class="form-control" id="numeroDocumento" placeholder="" maxlength="40">
             </div>
             <div class="form-group col-md-6">
                 <label for="nombreInstitucion">Nombre de Instituci&oacute;n *</label>
-                <input type="text" class="form-control" id="nombreInstitucion" placeholder="">
+                <input type="text" class="form-control" id="nombreInstitucion" placeholder="" maxlength="160">
             </div>
 
             <div class="form-group col-md-6">
@@ -185,15 +185,15 @@
                 </div>
             </div>
 
-            <div class="form-group col-md-1">
+            <div class="form-group col-md-2">
                 <label for="porcentajeExoneracion">% *</label>
-                <input type="text" class="form-control" id="porcentajeExoneracion" placeholder="%" onkeyup="calcularMontoExoneracion();">
+                <input type="number" class="form-control" max="100" min="0" maxlength="3" id="porcentajeExoneracion" placeholder="0%" onkeyup="calcularMontoExoneracion();">
             </div>
             <div class="form-group col-md-3">
                 <label for="montoExoneracion">Monto Exonerado *</label>
                 <input type="text" class="form-control" id="montoExoneracion"  readonly>
             </div>
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-3">
                 <label for="impuestoNeto">Impuesto Neto </label>
                 <input type="text" class="form-control" id="impuestoNeto"  readonly>
             </div>
@@ -217,5 +217,48 @@
 
   </div>
 </div>
+<script>
+    /*$(function () {
+        $('#cantidad').on('keyup',function(){
+            $(this).manageCommas();
+        });
+        $('#cantidad').on('focus',function(){
+            $(this).santizeCommas();
+        });
+        
+        $('#precio_unitario').on('keyup',function(){
+            $(this).manageCommas();
+        });
+        $('#precio_unitario').on('focus',function(){
+            $(this).santizeCommas();
+        });
+       
+        $('#item_iva_amount').on('change',function(){
+            $(this).manageCommas();
+        });
+        $('#item_iva_amount').on('change',function(){
+            $(this).santizeCommas();
+        });
+        
+        $('#discount').on('keyup',function(){
+            $(this).manageCommas();
+        });
+        $('#discount').on('focus',function(){
+            $(this).santizeCommas();
+        });
+       
+        String.prototype.addComma = function() {
+            return this.replace(/(.)(?=(.{3})+$)/g,"$1,").replace(',.', '.');
+        }
+        $.fn.manageCommas = function () {
+            return this.each(function () {
+                $(this).val($(this).val().replace(/(,|)/g,'').addComma());
+            });
+        }
+        $.fn.santizeCommas = function() {
+            return $(this).val($(this).val().replace(/(,| )/g,''));
+        }
+    });*/
+</script>
 
 

@@ -33,8 +33,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('invoice:resend')->timezone(config('app.timezone'))->hourly();
         //Comandos de checkout
         $schedule->command('subscription:checkout')->timezone(config('app.timezone'))->dailyAt('01:30');
-        $schedule->command('subscription:payment')->timezone(config('app.timezone'))->dailyAt('06:00');
-        $schedule->command('subscription:payment')->timezone(config('app.timezone'))->dailyAt('09:00');
+        $schedule->command('subscription:payment')->timezone(config('app.timezone'))->dailyAt('06:00'); //Una vez al día. Aveces se acumulan porque por alguna vez no correo y puede haber doble cargo. Hya un sleep de 3s entre cobro
+        //$schedule->command('subscription:payment')->timezone(config('app.timezone'))->dailyAt('09:00');
         //Comandos generales
         $schedule->command('telescope:prune')->daily();
         $schedule->command('queue:restart')->timezone(config('app.timezone'))->daily();

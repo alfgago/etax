@@ -403,9 +403,14 @@ toastr.options = {
   window.calcularSubtotalItem = function(){
 
     var precio_unitario = parseFloat( $('#precio_unitario').val() );
+      precio_unitario = parseFloat(precio_unitario);
     var cantidad = parseFloat( $('#cantidad').val() );
+      cantidad = parseFloat(cantidad);
+
     var porc_iva = parseFloat( $('#porc_iva').val() );
+      porc_iva = parseFloat(porc_iva);
     var monto_iva = parseFloat( $('#item_iva_amount').val() );
+      monto_iva = parseFloat(monto_iva);
     
     if( !monto_iva ) {
       monto_iva = 0;
@@ -414,24 +419,26 @@ toastr.options = {
     if( precio_unitario && cantidad ){
       var subtotal = cantidad * precio_unitario;
       
-      var discount = parseFloat( $('#discount').val() );
+      var discount = $('#discount').val();
+        discount = parseFloat(discount);
       if( !discount ) {
+        discount = 0;
         $('#discount').val(0);
       }
       var discount_type = $('#discount_type').val();
       if( discount_type == "01" && discount > 0 ) {
         subtotal = subtotal - ( subtotal * (discount / 100) );
-      }else {
-        subtotal = subtotal - discount;
+      }else if( discount_type == "02" && discount > 0 ) {
+        subtotal = parseFloat(subtotal - discount).toFixed(2);
       }
       
       $('#item_subtotal').val( subtotal.toFixed(2) );
       if( $('#porc_iva').val().length ){
-        monto_iva = subtotal * porc_iva / 100;
+        monto_iva = parseFloat(subtotal * porc_iva / 100);
         $('#item_iva_amount').val( monto_iva.toFixed(2) );
         $('#item_total').val( (subtotal + monto_iva).toFixed(2) );
       }else{
-        $('#item_total').val( subtotal.toFixed(2) );
+        $('#item_total').val( subtotal );
       }
     }else{
       $('#item_subtotal').val( 0 );
@@ -455,11 +462,12 @@ toastr.options = {
     if( precio_unitario && cantidad ){
       var subtotal = cantidad * precio_unitario;
       
-      var discount = parseFloat( $('#discount').val() );
+      var discount = $('#discount').val();
+        discount = parseFloat(discount);
       var discount_type = $('#discount_type').val();
       if( discount_type == "01" && discount > 0 ) {
         subtotal = subtotal - ( subtotal * (discount / 100) );
-      }else {
+      }else if( discount_type == "02" && discount > 0 ){
         subtotal = subtotal - discount;
       }
       
@@ -538,18 +546,24 @@ toastr.options = {
     var nombre = $('#nombre').val();
     var tipo_producto = $('#tipo_producto').val();
     var cantidad = $('#cantidad').val();
+    cantidad = parseFloat(cantidad);
     var unidad_medicion = $('#unidad_medicion').val();
     var precio_unitario = $('#precio_unitario').val();
+    precio_unitario = parseFloat(precio_unitario);
     var porc_identificacion_plena = $('#porc_identificacion_plena').val();
     var is_identificacion_especifica = $('#is_identificacion_especifica:checked').length;
     var descuento = $('#discount').val();
+    descuento = parseFloat(descuento);
     var tipo_descuento = $('#discount_type').val();
     var tipo_iva = $('#tipo_iva').val();
     var tipo_iva_text = $('#tipo_iva :selected').text();
     var porc_iva = $('#porc_iva').val();
     var monto_iva = $('#item_iva_amount').val();
+    monto_iva = parseFloat(monto_iva);
     var subtotal = $('#item_subtotal').val();
+    subtotal = parseFloat(subtotal);
     var total = $('#item_total').val();
+    total = parseFloat(total);
     var typeDocument = $('#typeDocument').val();
     var numeroDocumento = $('#numeroDocumento').val();
     var nombreInstitucion = $('#nombreInstitucion').val();
@@ -564,7 +578,11 @@ toastr.options = {
       monto_iva = 0;
       $('#item_iva_amount').val(0);
     }
-    
+    if( !descuento ) {
+      descuento = 0;
+      $('#discount').val(0);
+    }
+
     if( !precio_unitario ) {
       precio_unitario = 0;
       $('#precio_unitario').val(0);
@@ -579,9 +597,9 @@ toastr.options = {
       codigo = $('#codigo').val( "L" + numero  );
       nombre = $('#nombre').val( "TIPO-" + tipo_iva  );
     }
-    
+
     //Se asegura de que los campos hayan sido llenados
-    if( subtotal && codigo && nombre && precio_unitario && cantidad && tipo_iva){
+    if( subtotal && codigo && nombre && precio_unitario && cantidad && tipo_iva && total > 0){
       
       //Crear el ID de la fila.
       var itemExistente = false;
@@ -653,16 +671,16 @@ toastr.options = {
       recalcularNumerosItem();
       
       //Calcula total de factura
-      calcularTotalFactura();                                                                                                            
+      calcularTotalFactura();
       
       //Aumenta el indice de filas para evitar cualquier conflicto si hubo eliminados. El index nunca debe cambiar ni repetirse, los números pueden cambiar.
       $('#current-index').val(index);
       
       //Si estaba editando, quita la clase
       $('.item-factura-form').removeClass('editando');
-      
+
       cerrarPopup('linea-popup');
-      
+
       //Fuerza un reset en la ayuda al marcar preguntas.
       /*$('#p1').prop('checked', false);
       $('#p1').change();*/
@@ -674,7 +692,14 @@ toastr.options = {
       }
       
     }else{
-      alert('Debe completar los datos de la linea antes de guardarla');
+      /*alert('Debe completar los datos de la linea antes de guardarla');
+      return false;*/
+        Swal.fire({
+            type: 'error',
+            title: 'Error',
+            text: 'Por favor, asegúrese que todos los datos sean válidos antes de continuar.'
+        })
+        return false;
     }
     
   }
@@ -773,11 +798,6 @@ toastr.options = {
       monto_iva += m;	
       total += t;	
     });
-    
-    $('#subtotal').val(subtotal);
-    $('#monto_iva').val(monto_iva);
-    $('#total').val(total);
-    
   }
   
   window.fixComas = function( numero ) {

@@ -13,6 +13,9 @@ use App\PlansInvitation;
 use Mpociot\Teamwork\Facades\Teamwork;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Exports\ReportsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Controllers\Controller;
 
 class ReportsController extends Controller
 {
@@ -373,6 +376,6 @@ class ReportsController extends Controller
     private function microtime_float(){
         list($usec, $sec) = explode(" ", microtime());
         return ((float) $usec + (float)$sec);
-    }  
-  
+    }
+
 }
