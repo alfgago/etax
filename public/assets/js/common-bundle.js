@@ -798,6 +798,11 @@ toastr.options = {
       monto_iva += m;	
       total += t;	
     });
+    
+    $('#subtotal').val(subtotal);
+    $('#monto_iva').val(monto_iva);
+    $('#total').val(total);
+    
   }
   
   window.fixComas = function( numero ) {
