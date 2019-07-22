@@ -568,11 +568,13 @@ class InvoiceController extends Controller
                                 'isAuthorized' => true,
                                 'codeValidated' => true
                             );
-
-                            $insert = Invoice::importInvoiceRow( $arrayInsert );
-
-                            if( $insert ) {
-                                array_push( $inserts, $insert );
+                            
+                            if( $consecutivoComprobante ) {
+                                $insert = Invoice::importInvoiceRow( $arrayInsert );
+    
+                                if( $insert ) {
+                                    array_push( $inserts, $insert );
+                                }
                             }
 
                         }
@@ -582,16 +584,16 @@ class InvoiceController extends Controller
 
                 }
             }catch( \ErrorException $ex ){
-                Log::error('Error importando Excel' . $ex->getMessage());
+                Log::error('Error importando Excel ' . $ex->getMessage());
                 return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila: '.$i);
             }catch( \InvalidArgumentException $ex ){
-                Log::error('Error importando Excel' . $ex->getMessage());
+                Log::error('Error importando Excel ' . $ex->getMessage());
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
             }catch( \Exception $ex ){
-                Log::error('Error importando Excel' . $ex->getMessage());
+                Log::error('Error importando Excel ' . $ex->getMessage());
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Error en la fila. '.$i);
             }catch( \Throwable $ex ){
-                Log::error('Error importando Excel' . $ex->getMessage());
+                Log::error('Error importando Excel ' . $ex->getMessage());
                 return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. IC 537'.$i);
             }
             
