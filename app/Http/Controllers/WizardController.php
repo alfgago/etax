@@ -324,9 +324,9 @@ class WizardController extends Controller
                     'year' => 2018
                 ]
             );
-            $subscription_plan = SubscriptionPlan::create([
+            /*$subscription_plan = SubscriptionPlan::create([
                 'num_companies'=> $request->num_companies
-            ]);
+            ]);*/
 
             $team = new Team();
     		$team->name = "(".$company->id.") " . $company->id_number;
