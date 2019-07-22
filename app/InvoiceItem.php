@@ -37,7 +37,6 @@ class InvoiceItem extends Model
       }
       //Asigna Prod Type;
       $cat = $this->product_type;
-    
       if( !$cat || $cat > 49 || ( $cat < 6 && $this->percentage != 1 )
           || ( $cat > 6 && $cat <= 10 && $this->percentage != 2 )
           || ( $cat < 10 && $cat <= 14 && $this->percentage != 4 ) 
