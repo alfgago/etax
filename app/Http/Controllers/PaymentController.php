@@ -177,7 +177,6 @@ class PaymentController extends Controller
             $subtotal = ($costo - $montoDescontado);
             $iv = $subtotal * 0.13;
             $amount = $subtotal + $iv;
-            
             $montoDescontado = round( $montoDescontado, 2 );
             $descuento = round( $descuento, 2 );
             $subtotal = round( $subtotal, 2 );
@@ -190,9 +189,12 @@ class PaymentController extends Controller
             $cardYear = substr($request->expiry, -2);
             $cardMonth = substr($request->expiry, 0 , 2);
             
-            //Cupon para pruebas, hace pagos por $1 sin IVA. Estas hay que anularlas luego.
+            //Cupon para pruebas, hace pagos por $1 sin IVA. Deberian ser anuladas luego.
             if( $request->coupon == "!!CUPON1!!" ) {
+                $subtotal = 1;
                 $amount = 1;
+                $descuento = 0;
+                $iv = 0;
             }
             
             foreach ($cards as $c) {
