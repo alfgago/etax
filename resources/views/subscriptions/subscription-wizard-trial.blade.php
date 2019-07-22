@@ -49,7 +49,10 @@
               	<option class="c" value="7" monthly="${{ $plans[6]->plan->monthly_price }}" six="${{ $plans[6]->plan->six_price * 6 }}" annual="${{ $plans[6]->plan->annual_price * 12 }}" >Pro</option>
               </select>
             </div>
-            
+              <div class="form-group col-md-6" id="cantidadContabilidades">
+                  <label for="recurrency">Cantidad de Contabilidades</label>
+                  <input type="number" min="10" class="form-control" name="num_companies" id="num_companies" value="10" onblur="validarCantidad();" onkeyup="sumarPrecioContabilidades();">
+              </div>
             <div class="form-group col-md-6">
               <label for="recurrency">Recurrencia de pagos </label>
               <select class="form-control " name="recurrency" id="recurrency" onchange="togglePrice();">
@@ -58,7 +61,6 @@
               	<option value="12">Anual</option>
               </select>
             </div>
-            
             <div class="form-group col-md-12 mt-4">
             	<span class="precio-container">
             		Precio de <span class="precio-text precio-inicial">9.99</span> <span class="recurrencia-text">/ mes</span> + IVA
@@ -110,115 +112,146 @@
   .wizard-popup .form-container {
       margin-right: 0;
   }
+  .biginputs .form-group select, .biginputs .form-group input {
+      font-size: 1.5rem;
+      line-height: 1.1;
+      height: 38px;
+  }
 </style>
 
 <script>
-  function toggleStep(id) {
-    var fromId = $('.step-btn.is-active').attr('id');
-    var allow = checkEmptyFields(fromId);
-    if( allow )	{
-      $('.step-section, .step-btn').removeClass('is-active');
-      $('.'+id).addClass('is-active');
-      $('.wizard-container').prop('class', id+'-selected wizard-container');
+    function toggleStep(id) {
+        var fromId = $('.step-btn.is-active').attr('id');
+        var allow = checkEmptyFields(fromId);
+        if( allow )	{
+            $('.step-section, .step-btn').removeClass('is-active');
+            $('.'+id).addClass('is-active');
+            $('.wizard-container').prop('class', id+'-selected wizard-container');
+        }
     }
-  }
-  function checkEmptyFields(containerId) {
-    var allow = true;
-    $('.'+containerId+' .checkEmpty').each( function() {
-      if( $(this).val() && $(this).val() != "" ) {
-        $(this).removeClass('isEmptyRequired');
-      }
-      else {
-        $(this).addClass('isEmptyRequired');
-        allow = false;
-      }
-      //Revisa que el campo de correo este correcto
-      var email = $('#email').val();
-      allowEmails = validateEmail(email);
-      if( !allowEmails ) {
-        allow = false;
-      }
+    function checkEmptyFields(containerId) {
+        var allow = true;
+        $('.'+containerId+' .checkEmpty').each( function() {
+                if( $(this).val() && $(this).val() != "" ) {
+                    $(this).removeClass('isEmptyRequired');
+                }
+                else {
+                    $(this).addClass('isEmptyRequired');
+                    allow = false;
+                }
+                //Revisa que el campo de correo este correcto
+                var email = $('#email').val();
+                allowEmails = validateEmail(email);
+                if( !allowEmails ) {
+                    allow = false;
+                }
+            }
+        );
+        return allow;
     }
-                                          );
-    return allow;
-  }
-  function validateEmail(email) {
-    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email);
-  }
-  function togglePlan() {
-    var planId = $("#plan-sel").val();
-    $("#product_id option").hide();
-    $("#product_id ."+planId).show();
-    $("#product_id").val( $("#product_id ."+planId).first().val() );
-    togglePrice();
-  }
-  function togglePrice() {
-    var recurrency = $('#recurrency :selected').val();
-    if( recurrency == 1 ) {
-      var precio = $('#product_id :selected').attr('monthly');
-      var rtext = '/ mes';
+    function validateEmail(email) {
+        var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
     }
-    else if( recurrency == 6 ) {
-      var precio = $('#product_id :selected').attr('six');
-      var rtext = '/ semestre';
+    function togglePlan() {
+        var planId = $("#plan-sel").val();
+        $("#product_id option").hide();
+        $("#product_id ." + planId).show();
+        $("#product_id").val( $("#product_id ."+planId).first().val() );
+        togglePrice();
+        if(planId == 'c'){
+            $('#cantidadContabilidades').show();
+            $('.hide-contador').hide();
+        }else{
+            $('#cantidadContabilidades').hide();
+            $('.hide-contador').show();
+        }
     }
-    else if( recurrency == 12 ) {
-      var precio = $('#product_id :selected').attr('annual');
-      var rtext = '/ año';
+    function togglePrice() {
+        var recurrency = $('#recurrency :selected').val();
+        if( recurrency == 1 ) {
+            var precio = $('#product_id :selected').attr('monthly');
+            var rtext = '/ mes';
+        }
+        else if( recurrency == 6 ) {
+            var precio = $('#product_id :selected').attr('six');
+            var rtext = '/ semestre';
+        }
+        else if( recurrency == 12 ) {
+            var precio = $('#product_id :selected').attr('annual');
+            var rtext = '/ año';
+        }
+        $(".precio-text").text(precio);
+        $(".recurrencia-text").text(rtext);
     }
-    $(".precio-text").text(precio);
-    $(".recurrencia-text").text(rtext);
-  }
-  $.getJSON('https://api.ipify.org?format=json', function(data){
-      $("#IpAddress").val(data.ip);
-  });
-  function cambiarPrecio() {
-      var precio = $(".precio-inicial").text().replace('$', "");
-      var numero = parseFloat(precio);
+    function cambiarPrecio() {
+        var precio = $(".precio-inicial").text().replace('$', "");
+        var numero = parseFloat(precio);
 
-      var binsBn = ['541254', '493824', '450777', '451418', '410865', '419556', '512905', '518668',
-          '518439', '450776', '404144', '552882', '524471', '456949', '514006', '480853', '529164', '542178',
-          '527552', '529060', '520026', '510980', '477280', '548711', '493823', '525843', '281010', '517784',
-          '410864', '483126', '456337', '502107', '411061', '483189', '523587', '523592', '483190', '456338',
-          '464137', '552450', '528080', '478019', '402520', '502108', '101001', '404980', '461131', '483103',
-          '489353', '515575', '516681', '517588', '517871', '518214', '518541', '519995', '519996', '523671',
-          '524308', '531643', '542133', '551898', '557683', '559727'];
-      var tarjeta = $('#number').val();
-      var tarjeta1 = tarjeta.replace(/ /g, "");
-      var binEnviado = tarjeta1.substr(0, 6);
-      var binDescuento = binsBn.indexOf(binEnviado);
+        var binsBn = ['541254', '493824', '450777', '451418', '410865', '419556', '512905', '518668',
+            '518439', '450776', '404144', '552882', '524471', '456949', '514006', '480853', '529164', '542178',
+            '527552', '529060', '520026', '510980', '477280', '548711', '493823', '525843', '281010', '517784',
+            '410864', '483126', '456337', '502107', '411061', '483189', '523587', '523592', '483190', '456338',
+            '464137', '552450', '528080', '478019', '402520', '502108', '101001', '404980', '461131', '483103',
+            '489353', '515575', '516681', '517588', '517871', '518214', '518541', '519995', '519996', '523671',
+            '524308', '531643', '542133', '551898', '557683', '559727'];
+        var tarjeta = $('#number').val();
+        var tarjeta1 = tarjeta.replace(/ /g, "");
+        var binEnviado = tarjeta1.substr(0, 6);
+        var binDescuento = binsBn.indexOf(binEnviado);
 
-      var precioFinal = numero;
-      var etiqueta = '';
-      if(binDescuento != -1){
-          var descuento = parseFloat(numero * 0.1);
-          var precioDescuento = parseFloat(numero - descuento).toFixed(2);
-          precioFinal = precioDescuento;
-          etiqueta = '(descuento del Banco Nacional)';
-          $('#bncupon').val(1);
-      }
-
-      $(".precio-final").text('$' + precioFinal);
-      $(".etiqueta-descuento").text(etiqueta);
-  }
-  function fusb() {
-      var exp = $("#expiry").val();
-      console.log(exp);
-  }
-  function CambiarNombre() {
-      var exp = $("#expiry").val();
-      $('#cardMonth').val(exp.substr(0,2));
-      $('#cardYear').val(exp.substring(exp.length - 2, exp.length));
-      var FingerprintID = cybs_dfprofiler("tc_cr_011007172","test");
-      $("#deviceFingerPrintID").val(FingerprintID);
-  }
-  
-
-
-  $( document ).ready(function() {
-	    togglePlan();
-  	}
-  );
+        var precioFinal = numero;
+        var etiqueta = '';
+        if(binDescuento != -1){
+            var descuento = parseFloat(numero * 0.1);
+            var precioDescuento = parseFloat(numero - descuento).toFixed(2);
+            precioFinal = precioDescuento;
+            etiqueta = '(descuento del Banco Nacional)';
+            $('#bncupon').val(1);
+        }
+        $(".precio-final").text('$' + precioFinal);
+        $(".etiqueta-descuento").text(etiqueta);
+    }
+    function fusb() {
+        var exp = $("#expiry").val();
+    }
+    function CambiarNombre() {
+        var exp = $("#expiry").val();
+        $('#cardMonth').val(exp.substr(0,2));
+        $('#cardYear').val(exp.substring(exp.length - 2, exp.length));
+        var FingerprintID = cybs_dfprofiler("tc_cr_011007172","test");
+        $("#deviceFingerPrintID").val(FingerprintID);
+    }
+    function validarCantidad(){
+        var cantidad = $('#num_companies').val();
+        //cantidad = parseInt(cantidad, 10);
+        if(cantidad != '' && cantidad != undefined){
+            if(cantidad < 10){
+                alert('Este plan solo es valido a partir de las 10 (diez) contabilidades');
+                $('#num_companies').val(10);
+            }
+        }else{
+            $('#num_companies').val(10);
+        }
+    }
+    function sumarPrecioContabilidades() {
+        var cantidad = parseFloat($('#num_companies').val());
+        var total = 149.99;
+        if (cantidad > 10) {
+            if (cantidad <= 25) {
+                var subtotal = parseFloat((cantidad - 10) * 10);
+                var precioFinal = parseFloat(parseFloat(subtotal) + total).toFixed(2);
+                $(".precio-text").text('$' + precioFinal);
+            }
+            if (cantidad >= 26) {
+                var subtotal = parseFloat((cantidad  - 25) * 8);
+                var precioFinal = parseFloat(parseFloat(subtotal) + 150 + total).toFixed(2);
+                $(".precio-text").text('$' + precioFinal);
+            }
+        }
+    }
+    $( document ).ready(function() {
+        togglePlan();
+    });
 </script>
 @endsection

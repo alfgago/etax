@@ -103,6 +103,13 @@
     $("#product_id ."+planId).show();
     $("#product_id").val( $("#product_id ."+planId).first().val() );
     togglePrice();
+      if(planId == 'c'){
+          $('#cantidadContabilidades').show();
+          $('.hide-contador').hide();
+      }else{
+          $('#cantidadContabilidades').hide();
+          $('.hide-contador').show();
+      }
   }
   function togglePrice() {
     var recurrency = $('#recurrency :selected').val();
@@ -192,7 +199,34 @@
           cambiarPrecio();
       }
   }
-
+  function validarCantidad(){
+      var cantidad = $('#cantidadEmpresas').val();
+      //cantidad = parseInt(cantidad, 10);
+      if(cantidad != '' && cantidad != undefined){
+          if(cantidad < 10){
+              alert('Este plan solo es valido a partir de las 10 (diez) contabilidades');
+              $('#cantidadEmpresas').val(10);
+          }
+      }else{
+          $('#cantidadEmpresas').val(10);
+      }
+  }
+  function sumarPrecioContabilidades() {
+      var cantidad = parseFloat($('#cantidadEmpresas').val());
+      var total = 149.99;
+      if (cantidad > 10) {
+          if (cantidad <= 25) {
+              var subtotal = parseFloat((cantidad - 10) * 10);
+              var precioFinal = parseFloat(parseFloat(subtotal) + total).toFixed(2);
+              $(".precio-text").text('$' + precioFinal);
+          }
+          if (cantidad >= 26) {
+              var subtotal = parseFloat((cantidad  - 25) * 8);
+              var precioFinal = parseFloat(parseFloat(subtotal) + 150 + total).toFixed(2);
+              $(".precio-text").text('$' + precioFinal);
+          }
+      }
+  }
 
   $( document ).ready(function() {
 	    fillProvincias();

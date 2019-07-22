@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actividades;
+use App\SubscriptionPlan;
 use Illuminate\Http\Request;
 use App\Company;
 use App\Invoice;
@@ -323,6 +324,9 @@ class WizardController extends Controller
                     'year' => 2018
                 ]
             );
+            /*$subscription_plan = SubscriptionPlan::create([
+                'num_companies'=> $request->num_companies
+            ]);*/
 
             $team = new Team();
     		$team->name = "(".$company->id.") " . $company->id_number;
