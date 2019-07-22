@@ -120,11 +120,28 @@ class PaymentController extends Controller
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $company = currentCompanyModel();
         $user_id = $company->user_id;
-        $companies = Company::where('user_id',$user_id)->get();
-        dd($companies);
+        $companies_tengo = Company::where('user_id',$user_id)->where('status',1)->count();
+        $sale = Sales::where('company_id',$company->id)->first();
+        $plan = $sale->etax_product_id;
+        $porduct_etax = EtaxProducts::join('subscription_plans','subscription_plans.id','etax_products.subscription_plan_id')->where('etax_products.id',$plan)->first();
+        $companies_puedo = $porduct_etax->num_companies;
+        $companies_puedo += -1 ;
+        if($companies_tengo >  $companies_puedo  ){
+            $companies = Company::where('user_id',$user_id)->where('id','!=',$company->id)->where('status',1)->get();
+            foreach ($companies as $company) {
+                $companies_puedo += -1 ;
+                if($companies_puedo < 0){
+                    //Company::where('id', $company->id)
+                    //->update(['status' => 0],['updated_at',$start_date]);
+                    $companies = Company::where('user_id',$user_id)->get();
+                }
+
+            }
+            $companies_puedo = $porduct_etax->num_companies;
+            return view('payment.companySelect')->with('companies',$companies)->with('companies_puedo',$companies_puedo);
+        }
     }
-
-
+ 
     public function FacturasDisponibles(){
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $mes = $start_date->format("m");
@@ -351,6 +368,7 @@ class PaymentController extends Controller
                 $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
                 if($factura){
                     $this->FacturasDisponibles();
+                    $this->CompanyDisponible();
                     return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
                 }
             } else {
@@ -409,6 +427,7 @@ class PaymentController extends Controller
         
         
         $this->FacturasDisponibles();
+        $this->CompanyDisponible();
         return redirect('/')->withMessage('Se aplicó el cupón exitosamente');
            
     }
