@@ -110,13 +110,13 @@
 						    </div>
 						    
 						    <div class="form-group col-md-12">
-                    <label for="tipo_persona">Actividades comerciales *</label>
-                    <select class="form-control checkEmpty select2-tags" name="commercial_activities[]" id="commercial_activities" multiple required>
-                        @foreach ( $actividades as $actividad )
-                            <option value="{{ $actividad['codigo'] }}" {{ (strpos($company->commercial_activities, $actividad['codigo']) !== false) ? 'selected' : '' }}>{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                                <label for="tipo_persona">Actividades comerciales *</label>
+                                <select class="form-control checkEmpty select2-tags" name="commercial_activities[]" id="commercial_activities" multiple required>
+                                    @foreach ( $actividades as $actividad )
+                                        <option value="{{ $actividad['codigo'] }}" {{ (strpos($company->commercial_activities, $actividad['codigo']) !== false) ? 'selected' : '' }}>{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 						    
 						    <div class="form-group col-md-4">
 						      <label for="country">País *</label>
@@ -177,7 +177,14 @@
 @section('footer-scripts')
 	
 	<script>
-	  
+        var last_valid_selection = null;
+        $('#commercial_activities').change(function(event) {
+            if ($(this).val().length > 2) {
+                $(this).val(last_valid_selection);
+            } else {
+                last_valid_selection = $(this).val();
+            }
+        });
 	  $(document).ready(function(){
 	    
 	  	fillProvincias();
