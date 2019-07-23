@@ -30,6 +30,7 @@ class ClientController extends Controller
      */
     public function index()
     {
+
         return view('Client/index');
     }
     
@@ -86,16 +87,15 @@ class ClientController extends Controller
      */
     public function store(Request $request)
     {
-        
+        $company_id = currentCompany();
         $request->validate([
           'tipo_persona' => 'required',
           'id_number' => 'required',
-          'code' => 'required',
+          'code' => 'required|unique:clients,code,NULL,id,company_id,' . $company_id,
           'first_name' => 'required',
           'email' => 'required',
           'country' => 'required'
         ]);
-      
         $cliente = new Client();
         $company = currentCompanyModel();    
         $cliente->company_id = $company->id;
@@ -167,15 +167,6 @@ class ClientController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-          'tipo_persona' => 'required',
-          'id_number' => 'required',
-          'code' => 'required',
-          'first_name' => 'required',
-          'email' => 'required',
-          'country' => 'required'
-        ]);
-      
         $cliente = Client::findOrFail($id);
         $this->authorize('update', $cliente);
       
@@ -205,7 +196,7 @@ class ClientController extends Controller
       
         $cliente->save();
       
-        return redirect('/clientes');
+        return redirect('/clientes')->withMessage('Registro actualizado');
     }
 
     /**
@@ -226,22 +217,37 @@ class ClientController extends Controller
     public function export() {
         return Excel::download(new ClientExport(), 'clientes.xlsx');
     }
+
+    public function validateId($codigo = null, $identificacion = null){
+        $clientesIdNumber = Client::where('company_id', currentCompany())->pluck('id_number');
+        $clientesCode = Client::where('company_id', currentCompany())->pluck('code');
+        for($i=0;$i<$clientesIdNumber->count();$i++){
+            if ($identificacion == $clientesIdNumber[$i]) {
+                return false;
+            }
+        }
+        for($i=0;$i<$clientesCode->count();$i++){
+            if ($codigo == $clientesCode[$i]) {
+                return false;
+            }
+        }
+        return true;
+    }
     
     public function import() {
-        
         request()->validate([
           'archivo' => 'required',
           'tipo_archivo' => 'required',
         ]);
-      
         $time_start = getMicrotime();
-        
         $clientes = Excel::toCollection( new ClientImport(), request()->file('archivo') );
-        $company_id = currentCompany();  
+        $company_id = currentCompany();
+
         foreach ($clientes[0] as $row){
-            
             $zip = 0;
-            
+            if(!$this->validateId($row['codigo'], $row['identificacion'])){
+                return redirect('/clientes')->withErrors('El código: ' . $row['codigo'] . ', identificacion: ' . $row['identificacion'] . ' ya existe en los registros');
+            }
             if( $row['canton'] ) {
                 if( strlen( (int)$row['canton'] ) <= 2 ) {
                     $row['canton'] = (int)$row['provincia'] . str_pad((int)$row['canton'], 2, '0', STR_PAD_LEFT);
@@ -259,15 +265,18 @@ class ClientController extends Controller
             
             $correosCopia = $row['correoscopia'];
             $correosCopia = str_replace(";", ",", $correosCopia);
-            
-            
+
+            $codigo = $row['codigo'];
+            if(!$codigo) {
+                $codigo = $row['identificacion'];
+            }
             Client::updateOrCreate(
                 [
                     'id_number' => $row['identificacion'],
                     'company_id' => $company_id,
                 ],
                 [
-                    'code' => $row['codigo'] ? $row['codigo'] : 'No indica',
+                    'code' => $codigo,
                     'company_id' => $company_id,
                     'tipo_persona' => $row['tipopersona'],
                     'id_number' => $row['identificacion'],

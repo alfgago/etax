@@ -3,7 +3,7 @@
     
     <div class="form-group col-md-4">
       <label for="code">Código *</label>
-      <input type="text" class="form-control" name="code" id="code" value="{{ @$client->code }}" required>
+      <input type="text" class="form-control" name="code" id="code" value="{{ @$client->code }}" required <?php echo (!@$client->code) ? '' : 'disabled'; ?>>
     </div>
     
     <div class="form-group col-md-4">

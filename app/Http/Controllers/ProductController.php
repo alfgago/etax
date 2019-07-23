@@ -75,7 +75,15 @@ class ProductController extends Controller
         $units = UnidadMedicion::all()->toArray();
         return view("Product/create", ['units' => $units]);
     }
-
+    public function validateId($codigo = null){
+        $productosCode = Product::where('company_id', currentCompany())->pluck('code');
+        for($i=0;$i<$productosCode->count();$i++){
+            if ($codigo == $productosCode[$i]) {
+                return false;
+            }
+        }
+        return true;
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -84,8 +92,9 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        $company_id = currentCompany();
         $request->validate([
-          'code' => 'required',
+          'code' => 'required|unique:products,code,NULL,id,company_id,' . $company_id,
           'name' => 'required',
           'measure_unit' => 'required',
           'unit_price' => 'required',
@@ -112,7 +121,6 @@ class ProductController extends Controller
     }
 
     public function import() {
-
         request()->validate([
             'archivo' => 'required',
             'tipo_archivo' => 'required',
@@ -120,6 +128,9 @@ class ProductController extends Controller
         $productos = Excel::toCollection( new ProductImport(), request()->file('archivo') );
         $company_id = currentCompany();
         foreach ($productos[0] as $row){
+            if(!$this->validateId($row['codigo'])){
+                return redirect('/productos')->withErrors('El código: ' . $row['codigo'] . ' ya existe en los registros');
+            }
             Product::updateOrCreate(
                 [
                     'code' => $row['codigo'] ? $row['codigo'] : '',
@@ -179,16 +190,7 @@ class ProductController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {      
-        $request->validate([
-          'code' => 'required',
-          'name' => 'required',
-          'measure_unit' => 'required',
-          'unit_price' => 'required',
-          'product_category_id' => 'required',
-          'default_iva_type' => 'required',
-        ]);
-      
+    {
         $product = Product::findOrFail($id);
         $this->authorize('update', $product);
       

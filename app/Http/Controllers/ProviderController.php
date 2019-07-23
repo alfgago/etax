@@ -85,10 +85,11 @@ class ProviderController extends Controller
      */
     public function store(Request $request)
     {
+        $company_id = currentCompany();
         $request->validate([
+          'code' => 'required|unique:providers,code,NULL,id,company_id,' . $company_id,
           'tipo_persona' => 'required',
           'id_number' => 'required',
-          'code' => 'required',
           'first_name' => 'required',
           'email' => 'required',
           'country' => 'required'
@@ -144,7 +145,15 @@ class ProviderController extends Controller
         $this->authorize('update', $provider);
         return view('Provider/edit', compact('provider') );
     }
-
+    public function validateId($codigo = null){
+        $providerCode = Provider::where('company_id', currentCompany())->pluck('code');
+        for($i=0;$i<$providerCode->count();$i++){
+            if ($codigo == $providerCode[$i]) {
+                return false;
+            }
+        }
+        return true;
+    }
     /**
      * Update the specified resource in storage.
      *
@@ -153,11 +162,12 @@ class ProviderController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {      
+    {
+        $company_id = currentCompany();
         $request->validate([
           'tipo_persona' => 'required',
           'id_number' => 'required',
-          'code' => 'required',
+          'code' => 'required|unique:providers,code,NULL,id,company_id,' . $company_id,
           'first_name' => 'required',
           'email' => 'required',
           'country' => 'required'
@@ -220,7 +230,9 @@ class ProviderController extends Controller
         $proveedors = Excel::toCollection( new ProviderImport(), request()->file('archivo') );
         $company_id = currentCompany(); 
         foreach ($proveedors[0] as $row){
-            
+            if(!$this->validateId($row['codigo'])){
+                return redirect('/proveedores')->withErrors('El código: ' . $row['codigo'] . ' ya existe en los registros');
+            }
             $zip = 0;
             
             if( $row['canton'] ) {
