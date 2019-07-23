@@ -48,14 +48,103 @@ class SubscriptionPlanController extends Controller
     }
     
     public function confirmStartTrial(Request $request) {
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
         $user = auth()->user();
+        if($request->plan_sel == "c"){
+            $plan_tier = "Contador-".$user->id;
+            $cantidad = $request->num_companies;
+            $total_extras = 0;
+            if($cantidad > 25){
+               $total_extras = ($cantidad - 25) * 8;
+               $cantidad = 25;
+            }
+            if($cantidad > 10){
+               $total_extras += ($cantidad - 10) * 10;
+               $cantidad = 10;
+            }
+            $monthly_price = $cantidad * 14.999;
+            $six_price = $cantidad * 13.740;
+            $annual_price = $cantidad * 12.491;
+            $monthly_price += $total_extras;
+            $six_price += $total_extras;
+            $annual_price += $total_extras;
+            $six_price = $six_price * 6;
+            $annual_price = $annual_price * 12;
+            $plan = SubscriptionPlan::updateOrCreate(
+                ['plan_tier' => $plan_tier],
+                ['plan_type' => 'Contador',
+                'num_companies' => $request->num_companies,
+                'num_users' => 10,
+                'num_invoices' => 5000,
+                'ticket_sla' => 1,
+                'call_center_vip' => 1,
+                'setup_help' => 1,
+                'multicurrency' => 1,
+                'e_invoicing' => 1,
+                'pre_invoicing' => 1,
+                'vat_declaration' => 1,
+                'basic_reports' => 1,
+                'intermediate_reports' => 1,
+                'advanced_reports' => 1,
+                'monthly_price' => round($monthly_price,2),
+                'six_price' => round($six_price,2),
+                'annual_price' => round($annual_price,2),
+                'created_at' => $start_date]
+            );
+            $request->product_id = $plan->id;
+        }
+        //dd($request->product_id);
         $sale = Sales::startTrial( $request->product_id, $request->recurrency );
         Log::info('Nuevo suscriptor ha iniciado periodo de pruebas: ' . $user->email);
         return redirect('/wizard')->withMessage('¡Felicidades! Ha iniciado su prueba en eTax.');
     }
     
     public function confirmPlanChange(Request $request) {
-        
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $user = auth()->user();
+        if($request->plan_sel == "c"){
+            $plan_tier = "Contador-".$user->id;
+            $cantidad = $request->num_companies;
+            $total_extras = 0;
+            if($cantidad > 25){
+               $total_extras = ($cantidad - 25) * 8;
+               $cantidad = 25;
+            }
+            if($cantidad > 10){
+               $total_extras += ($cantidad - 10) * 10;
+               $cantidad = 10;
+            }
+            $monthly_price = $cantidad * 14.999;
+            $six_price = $cantidad * 13.740;
+            $annual_price = $cantidad * 12.491;
+            $monthly_price += $total_extras;
+            $six_price += $total_extras;
+            $annual_price += $total_extras;
+            $six_price = $six_price * 6;
+            $annual_price = $annual_price * 12;
+            $plan = SubscriptionPlan::updateOrCreate(
+                ['plan_tier' => $plan_tier],
+                ['plan_type' => 'Contador',
+                'num_companies' => $request->num_companies,
+                'num_users' => 10,
+                'num_invoices' => 5000,
+                'ticket_sla' => 1,
+                'call_center_vip' => 1,
+                'setup_help' => 1,
+                'multicurrency' => 1,
+                'e_invoicing' => 1,
+                'pre_invoicing' => 1,
+                'vat_declaration' => 1,
+                'basic_reports' => 1,
+                'intermediate_reports' => 1,
+                'advanced_reports' => 1,
+                'monthly_price' => round($monthly_price,2),
+                'six_price' => round($six_price,2),
+                'annual_price' => round($annual_price,2),
+                'created_at' => $start_date]
+            );
+            $request->product_id = $plan->id;
+        }
         $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
         return redirect('/');
         

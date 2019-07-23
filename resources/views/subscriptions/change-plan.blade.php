@@ -95,8 +95,7 @@
       if( !allowEmails ) {
         allow = false;
       }
-    }
-                                          );
+    });
     return allow;
   }
   function validateEmail(email) {
@@ -108,14 +107,16 @@
     $("#product_id option").hide();
     $("#product_id ."+planId).show();
     $("#product_id").val( $("#product_id ."+planId).first().val() );
+
     togglePrice();
-      if(planId == 'c'){
-          $('#cantidadContabilidades').show();
-          $('.hide-contador').hide();
-      }else{
-          $('#cantidadContabilidades').hide();
-          $('.hide-contador').show();
-      }
+    if(planId == 'c'){
+        $('#cantidadContabilidades').show();
+        $('.hide-contador').hide();
+    }else{
+        $('#cantidadContabilidades').hide();
+        $('.hide-contador').show();
+    }
+
   }
   function togglePrice() {
       var planId = $("#plan-sel").val();

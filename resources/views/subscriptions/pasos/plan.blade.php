@@ -6,7 +6,7 @@
 
 <div class="form-group col-md-6">
   <label for="plan-sel">Plan </label>
-  <select class="form-control " name="plan-sel" id="plan-sel" onchange="togglePlan();">
+  <select class="form-control " name="plan_sel" id="plan-sel" onchange="togglePlan();">
   	<option value="p" selected>Profesional</option>
   	<option value="e">Empresarial</option>
   	<option value="c">Contador</option>

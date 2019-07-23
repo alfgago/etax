@@ -30,7 +30,7 @@
             
             <div class="form-group col-md-6">
               <label for="plan-sel">Plan </label>
-              <select class="form-control " name="plan-sel" id="plan-sel" onchange="togglePlan();">
+              <select class="form-control " name="plan_sel" id="plan-sel" onchange="togglePlan();">
               	<option value="p" >Profesional</option>
               	<option value="e" selected>Empresarial</option>
               	<option value="c">Contador</option>
@@ -55,7 +55,7 @@
               </div>
             <div class="form-group col-md-6">
               <label for="recurrency">Recurrencia de pagos </label>
-              <select class="form-control " name="recurrency" id="recurrency" onchange="togglePrice();">
+              <select class="form-control " name="recurrency" id="recurrency" onchange="togglePrice();" onchange="sumarPrecioContabilidades();">
               	<option value="1" selected>Mensual</option>
               	<option value="6">Semestral</option>
               	<option value="12">Anual</option>
@@ -241,29 +241,35 @@
     }
     function calcularPrecioContabilidades() {
         var cantidad = parseFloat($('#num_companies').val());
-        var recurrency = parseFloat($('#recurrency :selected').val());
-        if( recurrency == 1 ) {
-            var inicial = $('#product_id :selected').attr('monthly').substring(1);
-            var rtext = '/ mes';
-        }else if( recurrency == 6 ) {
-            var inicial = $('#product_id :selected').attr('six').substring(1);
-            var rtext = '/ semestre';
-        }else if( recurrency == 12 ) {
-            var inicial = $('#product_id :selected').attr('annual').substring(1);
-            var rtext = '/ año';
+
+        var recurrency = $('#recurrency').val();
+        var total = 0;
+        var total_extras = 0;
+        if(cantidad > 25){
+            total_extras = (cantidad - 25) * 8;
+            cantidad = 25;
         }
-        if (cantidad > 10) {
-            var costoUnitario = 10;
-            if (cantidad >= 26) {
-                costoUnitario = 8;
-            }
-            var costoContabilidades = (cantidad-10)*recurrency * costoUnitario;
-            var precioFinal = (parseFloat(inicial) + costoContabilidades).toFixed(2);
-        }else {
-            var precioFinal = parseFloat(inicial);
+        if(cantidad > 10){
+            total_extras += (cantidad - 10) * 10;
+            cantidad = 10;
         }
+        if(recurrency == 1){
+            total = cantidad * 14.999;
+            total = total + total_extras;
+        }
+        if(recurrency == 6){
+          total = cantidad * 13.740;
+          total = total + total_extras;
+          total = total * 6;
+        }
+        if(recurrency == 12){
+          total = cantidad * 12.491;
+          total = total + total_extras;
+          total = total * 12;
+        }
+        var precioFinal = parseFloat(total).toFixed(2);
         $(".precio-text").text('$' + precioFinal);
-        $(".recurrencia-text").text(rtext);
+
     }
     
     $( document ).ready(function() {
