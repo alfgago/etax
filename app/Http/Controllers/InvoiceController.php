@@ -215,7 +215,7 @@ class InvoiceController extends Controller
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
         }
         if($company->last_ticket_ref_number == null) {
-            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de tiquites');
+            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de tiquetes');
         }
         return view("Invoice/create-factura", ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
             'document_number' => $this->getDocReference($tipoDocumento),
