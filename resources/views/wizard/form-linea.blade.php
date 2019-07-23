@@ -130,7 +130,7 @@
   </div>
 </div>
 <script>
-    $(document).ready(function(){
+    /*$(document).ready(function(){
         $('#precio_unitario').on('keyup',function(){
             $(this).manageCommas();
         });
@@ -149,6 +149,6 @@
 
     $.fn.santizeCommas = function() {
         return $(this).val($(this).val().replace(/(,| )/g,''));
-    }
+    }*/
 </script>
 

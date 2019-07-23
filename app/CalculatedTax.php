@@ -217,7 +217,7 @@ class CalculatedTax extends Model
           try {
             
             if( !$invoiceItems[$i]->invoice->is_void && $invoiceItems[$i]->invoice->is_authorized && $invoiceItems[$i]->invoice->is_code_validated 
-            && $invoiceItems[$i]->invoice->is_totales == $filterTotales && $invoiceItems[$i]->invoice->hacienda_status != 04  ) {
+            && $invoiceItems[$i]->invoice->is_totales == $filterTotales ) {
             
               if( $invoiceItems[$i]->invoice->currency == 'CRC' ) {
                 $invoiceItems[$i]->invoice->currency_rate = 1;
@@ -1002,13 +1002,17 @@ class CalculatedTax extends Model
               $typeVarAct8 = "$act->codigo-$varName8";
               $typeVarAct3 = "$act->codigo-$varName3";
               
-      			  $ivaData->$typeVarAct  += $ivaDataAnterior->$typeVarAct  ?? 0;
-      			  $ivaData->$typeVarAct0 += $ivaDataAnterior->$typeVarAct0 ?? 0;
-      			  $ivaData->$typeVarAct1 += $ivaDataAnterior->$typeVarAct1 ?? 0;
-      			  $ivaData->$typeVarAct2 += $ivaDataAnterior->$typeVarAct2 ?? 0;
-      			  $ivaData->$typeVarAct4 += $ivaDataAnterior->$typeVarAct4 ?? 0;
-      			  $ivaData->$typeVarAct8 += $ivaDataAnterior->$typeVarAct8 ?? 0;
-      			  $ivaData->$typeVarAct3 += $ivaDataAnterior->$typeVarAct3 ?? 0;
+              try{
+        			  $ivaData->$typeVarAct  += $ivaDataAnterior->$typeVarAct ;
+        			  $ivaData->$typeVarAct0 += $ivaDataAnterior->$typeVarAct0 ;
+        			  $ivaData->$typeVarAct1 += $ivaDataAnterior->$typeVarAct1 ;
+        			  $ivaData->$typeVarAct2 += $ivaDataAnterior->$typeVarAct2 ;
+        			  $ivaData->$typeVarAct4 += $ivaDataAnterior->$typeVarAct4 ;
+        			  $ivaData->$typeVarAct8 += $ivaDataAnterior->$typeVarAct8 ;
+        			  $ivaData->$typeVarAct3 += $ivaDataAnterior->$typeVarAct3 ;
+              }catch(\Throwable $e){
+                Log::warning("error en calculo IVA: " . $e->getMessage() );
+              }
             }
     			}
     			
