@@ -19,12 +19,19 @@
     <div class="form-group col-md-4">
       <label for="tipo_persona">Tipo de persona *</label>
       <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();" onchange="cambiarDireccion();">
-      @if(@$document_type != '09')
+      @if(@$document_type == '01' || $document_type == '08')
         <option value="F" >Física</option>
         <option value="J" >Jurídica</option>
         <option value="D" >DIMEX</option>
         <option value="N" >NITE</option>
-      @else
+      @elseif(@$document_type == '04')
+        <option value="F" >Física</option>
+        <option value="J" >Jurídica</option>
+        <option value="D" >DIMEX</option>
+        <option value="N" >NITE</option>
+        <option value="E" >Extranjero</option>
+        <option value="O" >Otro</option>
+        @else
         <option value="E" >Extranjero</option>
         <option value="O" >Otro</option>
       @endif
@@ -33,12 +40,12 @@
     
     <div class="form-group col-md-4">
       <label for="id_number">Número de identificación *</label>
-      <input type="text" class="form-control checkEmpty" name="id_number" id="id_number" onchange="getJSONCedula(this.value);" maxlength="20">
+      <input type="text" class="form-control @if(@$document_type !== '04') checkEmpty @endif" name="id_number" id="id_number" onchange="getJSONCedula(this.value);" maxlength="20">
     </div>
     
     <div class="form-group col-md-4">
       <label for="first_name">Nombre *</label>
-      <input type="text" class="form-control checkEmpty" name="first_name" id="first_name" maxlength="80">
+      <input type="text" class="form-control @if(@$document_type !== '04') checkEmpty @endif" name="first_name" id="first_name" maxlength="80">
     </div>
     
     <div class="form-group col-md-4">
@@ -53,7 +60,7 @@
     
     <div class="form-group col-md-4">
       <label for="email">Correo electrónico *</label>
-      <input type="text" class="form-control checkEmpty" name="email" id="email" onblur="validateEmail();" maxlength="160">
+      <input type="text" class="form-control @if(@$document_type !== '04') checkEmpty @endif" name="email" id="email" onblur="validateEmail();" maxlength="160">
     </div>
     
     <div class="form-group col-md-4">
@@ -65,7 +72,7 @@
     
     <div class="form-group col-md-4">
       <label for="country">País *</label>
-      <select class="form-control checkEmpty" name="country" id="country" >
+      <select class="form-control @if(@$document_type !== '04') checkEmpty @endif" name="country" id="country" >
         @if(@$document_type != '09')
             <option value="CR" selected>Costa Rica</option>
         @else
@@ -80,19 +87,19 @@
     @if(@$document_type != '09')
       <div class="form-group col-md-4" id="divState">
         <label for="state">Provincia *</label>
-        <select class="form-control" checkEmpty name="state" id="state" onchange="fillCantones();">
+        <select class="form-control @if(@$document_type !== '04') checkEmpty @endif" name="state" id="state" onchange="fillCantones();">
         </select>
       </div>
 
       <div class="form-group col-md-4" id="divCity">
         <label for="city">Canton *</label>
-        <select class="form-control" checkEmpty name="city" id="city" onchange="fillDistritos();">
+        <select class="form-control @if(@$document_type !== '04') checkEmpty @endif" name="city" id="city" onchange="fillDistritos();">
         </select>
       </div>
 
       <div class="form-group col-md-4" id="divDistrict">
         <label for="district">Distrito *</label>
-        <select class="form-control" checkEmpty name="district" id="district" onchange="fillZip();" >
+        <select class="form-control @if(@$document_type !== '04') checkEmpty @endif" name="district" id="district" onchange="fillZip();" >
         </select>
       </div>
 
