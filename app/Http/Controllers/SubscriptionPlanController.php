@@ -70,7 +70,7 @@ class SubscriptionPlanController extends Controller
             $annual_price += $total_extras;
             $six_price = $six_price * 6;
             $annual_price = $annual_price * 12;
-            SubscriptionPlan::updateOrCreate(
+            $plan = SubscriptionPlan::updateOrCreate(
                 ['plan_tier' => $plan_tier],
                 ['plan_type' => 'Contador',
                 'num_companies' => $request->num_companies,
@@ -91,7 +91,6 @@ class SubscriptionPlanController extends Controller
                 'annual_price' => round($annual_price,2),
                 'created_at' => $start_date]
             );
-            $plan = SubscriptionPlan::where('plan_tier', $plan_tier)->first();
             $request->product_id = $plan->id;
         }
         //dd($request->product_id);
