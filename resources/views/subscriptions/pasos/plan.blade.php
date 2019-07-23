@@ -16,18 +16,18 @@
 <div class="form-group col-md-6 hide-contador">
   <label for="product_id">Tipo </label>
   <select class="form-control " name="product_id" id="product_id" onchange="togglePrice();">
-  	<option class="p" value="1" monthly="${{ $plans[0]->plan->monthly_price }}" six="${{ $plans[0]->plan->six_price * 6 }}" annual="${{ $plans[0]->plan->annual_price * 12 }}">Básico</option>
-  	<option class="p" value="2" monthly="${{ $plans[1]->plan->monthly_price }}" six="${{ $plans[1]->plan->six_price * 6 }}" annual="${{ $plans[1]->plan->annual_price * 12 }}" >Intermedio</option>
-  	<option class="p" value="3" monthly="${{ $plans[2]->plan->monthly_price }}" six="${{ $plans[2]->plan->six_price * 6 }}" annual="${{ $plans[2]->plan->annual_price * 12 }}" >Pro</option>
-  	<option class="e" value="4" monthly="${{ $plans[3]->plan->monthly_price }}" six="${{ $plans[3]->plan->six_price * 6 }}" annual="${{ $plans[3]->plan->annual_price * 12 }}" >Básico</option>
-  	<option class="e" value="5" monthly="${{ $plans[4]->plan->monthly_price }}" six="${{ $plans[4]->plan->six_price * 6 }}" annual="${{ $plans[4]->plan->annual_price * 12 }}" >Intermedio</option>
-  	<option class="e" value="6" monthly="${{ $plans[5]->plan->monthly_price }}" six="${{ $plans[5]->plan->six_price * 6 }}" annual="${{ $plans[5]->plan->annual_price * 12 }}" >Pro</option>
-  	<option class="c" value="7" monthly="${{ $plans[6]->plan->monthly_price }}" six="${{ $plans[6]->plan->six_price * 6 }}" annual="${{ $plans[6]->plan->annual_price * 12 }}" >Pro</option>
+  	<option class="p" value="1" monthly="${{ $plans[0]->monthly_price }}" six="${{ $plans[0]->six_price * 6 }}" annual="${{ $plans[0]->annual_price * 12 }}">Básico</option>
+  	<option class="p" value="2" monthly="${{ $plans[1]->monthly_price }}" six="${{ $plans[1]->six_price * 6 }}" annual="${{ $plans[1]->annual_price * 12 }}" >Intermedio</option>
+  	<option class="p" value="3" monthly="${{ $plans[2]->monthly_price }}" six="${{ $plans[2]->six_price * 6 }}" annual="${{ $plans[2]->annual_price * 12 }}" >Pro</option>
+  	<option class="e" value="4" monthly="${{ $plans[3]->monthly_price }}" six="${{ $plans[3]->six_price * 6 }}" annual="${{ $plans[3]->annual_price * 12 }}" >Básico</option>
+  	<option class="e" value="5" monthly="${{ $plans[4]->monthly_price }}" six="${{ $plans[4]->six_price * 6 }}" annual="${{ $plans[4]->annual_price * 12 }}" >Intermedio</option>
+  	<option class="e" value="6" monthly="${{ $plans[5]->monthly_price }}" six="${{ $plans[5]->six_price * 6 }}" annual="${{ $plans[5]->annual_price * 12 }}" >Pro</option>
+  	<option class="c" value="7" monthly="${{ $plans[6]->monthly_price }}" six="${{ $plans[6]->six_price * 6 }}" annual="${{ $plans[6]->annual_price * 12 }}" >Pro</option>
   </select>
 </div>
 <div class="form-group col-md-6" id="cantidadContabilidades">
     <label for="recurrency">Cantidad de Contabilidades</label>
-    <input type="number" min="10" class="form-control" name="num_companies" id="num_companies" value="10" onblur="validarCantidad();" onkeyup="calcularPrecioContabilidades();">
+    <input type="number" min="10" class="form-control" name="num_companies" id="num_companies" minlength="2" value="10" onblur="validarCantidad();" onchange="calcularPrecioContabilidades();" onkeyup="calcularPrecioContabilidades();">
 </div>
 <div class="form-group col-md-6">
   <label for="recurrency">Recurrencia de pagos </label>
