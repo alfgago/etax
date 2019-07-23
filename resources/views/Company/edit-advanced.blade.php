@@ -133,6 +133,12 @@
 								  <input type="text" class="form-control" name="last_document_note" id="last_document_note" value="{{ @$company->last_document_note }}" required>
 								  <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
 							  </div>
+
+							  <div class="form-group col-md-6">
+								  <label for="last_document_ticket">Último documento emitio tiquete electronico</label>
+								  <input type="text" class="form-control" name="last_document_ticket" id="last_document_ticket" value="{{ @$company->last_document_ticket }}" required>
+								  <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
+							  </div>
 							  
 								<div class="form-group col-md-12">
 								  <label for="default_category_producto_code">Categoría de declaración por defecto</label>
