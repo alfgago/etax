@@ -28,10 +28,19 @@ class Sales extends Model
     {
         return $this->belongsTo(EtaxProducts::class, 'etax_product_id');
     }
+    
+    public function plan()
+    {
+        if($this->is_subscription){
+            return $this->belongsTo(SubscriptionPlan::class, 'etax_product_id');
+        }else{
+            return $this->belongsTo(EtaxProducts::class, 'etax_product_id'); 
+        }
+    }
 
     public function subscription_plan()
     {
-        return $this->belongsTo(SubscriptionPlan::class, 'id');
+        return $this->belongsTo(SubscriptionPlan::class, 'subscription_plan_id');
     }
 
     public function payments()

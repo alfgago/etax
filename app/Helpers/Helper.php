@@ -329,6 +329,12 @@ if (!function_exists('getCurrentSubscription')) {
         $sale = $company->subscription;
         
         if( ! isset($sale) ) {
+            $sale = \App\Sales::where('company_id', $company->id)
+                ->where('is_subscription', true)
+                ->first();
+        }
+        
+        if( ! isset($sale) ) {
             $owner_id = $company->user_id;
             $sale = \App\Sales::where('user_id', $owner_id)
                 ->where('is_subscription', true)

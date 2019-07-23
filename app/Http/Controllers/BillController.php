@@ -492,22 +492,20 @@ class BillController extends Controller
     {
         $bill = Bill::findOrFail($request->bill);
         
-        $bill->product_category_verification = $request->category_product;
         $bill->activity_company_verification = $request->actividad_comercial;
         $bill->codigo_iva_verification = $request->codigo_etax;
-        $bill->identificacion_plena_verification = $request->impuesto_identificacion_plena;
         $bill->is_code_validated = true;
+
+        foreach( $request->items as $item ) {
+            BillItem::where('id', $item['id'])
+            ->update([
+              'iva_type' =>  $item['iva_type'],
+              'product_type' =>  $item['product_type'],
+              'porc_identificacion_plena' =>  $item['porc_identificacion_plena']
+            ]);
+        }
         
         $bill->save();
-
-        foreach( $bill->items as $item ) {
-            $item->iva_type = $request->codigo_etax;
-            $item->product_type = $request->category_product;
-            if( isset($request->impuesto_identificacion_plena) ) {
-                $item->porc_identificacion_plena = $request->impuesto_identificacion_plena;
-            }
-            $item->save();
-        }
         
         clearBillCache($bill);
 

@@ -59,18 +59,18 @@ class SubscriptionPayment extends Command
                 $unpaidSubscriptions = Sales::where('status', 2)->where('is_subscription', true)->get();
                 foreach($unpaidSubscriptions as $sale){
                     sleep(1);
-                    
+                    $subscriptionPlan = $sale->plan;
                     Log::info("Procesando cobro $sale->company_id");
-                    $subtotal = $sale->product->plan->monthly_price;
+                    $subtotal = $subscriptionPlan->monthly_price;
                     switch ($sale->recurrency){
                         case 1:
-                            $subtotal = $sale->product->plan->monthly_price;
+                            $subtotal = $subscriptionPlan->monthly_price;
                             break;
                         case 6:
-                            $subtotal = $sale->product->plan->six_price;
+                            $subtotal = $subscriptionPlan->six_price;
                             break;
                         case 12:
-                            $subtotal = $sale->product->plan->annual_price;
+                            $subtotal = $subscriptionPlan->annual_price;
                             break;
                     }
 
@@ -100,7 +100,7 @@ class SubscriptionPayment extends Command
                         );
 
                         $data = new stdClass();
-                        $data->description = 'Pago suscripción etax';
+                        $data->description = "Renovación plan etax $subscriptionPlan->name";
                         $data->amount = $amount;
                         $data->user_name = $sale->user->user_name;
                         

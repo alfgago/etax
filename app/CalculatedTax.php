@@ -200,18 +200,18 @@ class CalculatedTax extends Model
       }
       
       $ivaData = json_decode( $this->iva_data ) ?? new \stdClass();
+      $arrayActividades = currentCompanyModel()->getActivities();
 
       InvoiceItem::with('invoice')
                   ->where('company_id', $company)
                   ->where('year', $year)
                   ->where('month', $month)
-                  ->chunk( 2500,  function($invoiceItems) use ($year, $month, &$company, &$ivaData, $filterTotales,
+                  ->chunk( 2500,  function($invoiceItems) use ($year, $month, &$company, &$ivaData, $filterTotales, $arrayActividades,
        &$invoicesTotal, &$invoicesSubtotal, &$totalInvoiceIva, &$totalClientesContadoExp, &$totalClientesCreditoExp, &$totalClientesContadoLocal, &$totalClientesCreditoLocal,&$ivaRetenido,
        &$sumRepercutido1, &$sumRepercutido2, &$sumRepercutido3, &$sumRepercutido4, &$sumRepercutidoExentoConCredito, &$sumRepercutidoExentoSinCredito, &$basesVentasConIdentificacion, &$ivasVentasConIdentificacion
       ) {
         
         $countInvoiceItems = $invoiceItems->count();
-        $arrayActividades = currentCompanyModel()->getActivities();
         //Recorre las lineas de factura
         for ($i = 0; $i < $countInvoiceItems; $i++) {
           try {
@@ -423,13 +423,13 @@ class CalculatedTax extends Model
       $totalProveedoresContado = 0;
       $totalProveedoresCredito = 0;
       $ivaData = json_decode( $this->iva_data ) ?? new \stdClass();
+      $arrayActividades = currentCompanyModel()->getActivities();
 
-      $query->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$ivaData, &$singleBill,
+      $query->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$ivaData, &$singleBill, $arrayActividades,
        &$billsTotal, &$billsSubtotal, &$totalBillIva, &$basesIdentificacionPlena, &$basesNoDeducibles, &$ivaAcreditableIdentificacionPlena, 
        &$ivaNoAcreditableIdentificacionPlena, &$totalProveedoresContado, &$totalProveedoresCredito
       ) {
         $countBillItems = count( $billItems );
-        $arrayActividades = currentCompanyModel()->getActivities();
 
         for ($i = 0; $i < $countBillItems; $i++) {
           
@@ -461,9 +461,9 @@ class CalculatedTax extends Model
               }
               
               //Redondea todo a 2 decimales
-              $subtotal = round($subtotal, 2);
-              $billIva = round($billIva, 2);
-              $currentTotal = round($currentTotal, 2);
+              $subtotal = $subtotal;
+              $billIva = $billIva;
+              $currentTotal = $currentTotal;
               
                 
               $ivaType = $ivaType ? $ivaType : '003';
@@ -533,9 +533,13 @@ class CalculatedTax extends Model
                   $menor = $porc_plena > 13 ? 13 : $porc_plena;
                 }
                 $menor_porc = $menor/100;
-                
-                $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
-                $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
+                if( $menor != $porc_plena) { 
+                  $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
+                  $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
+                }else{
+                  $ivaAcreditableIdentificacionPlena += $billIva;
+                  $ivaNoAcreditableIdentificacionPlena += 0;
+                }
               }
               if( $ivaType == 'B044' || $ivaType == 'B054' || $ivaType == 'B064' || $ivaType == 'B074' ||
                   $ivaType == 'S044' || $ivaType == 'S054' || $ivaType == 'S064' || $ivaType == 'S074' )
@@ -919,6 +923,7 @@ class CalculatedTax extends Model
 			$this->total_proveedores_credito = 0;
 			$this->iva_retenido = 0;
       
+    	$arrayActividades = currentCompanyModel()->getActivities();
       for ($i = 0; $i < $countAnteriores; $i++) {
         
         if( !( $calculosAnteriores[$i]->year == 2019 && $calculosAnteriores[$i]->month < 7 ) ){
@@ -988,7 +993,6 @@ class CalculatedTax extends Model
     			  $ivaData->$varName8 += $ivaDataAnterior->$varName8;
     			  $ivaData->$varName3 += $ivaDataAnterior->$varName3;
     			  
-    			  $arrayActividades = currentCompanyModel()->getActivities();
             foreach( $arrayActividades as $act){
               $typeVarAct  = "$act->codigo-$varName";
               $typeVarAct0 = "$act->codigo-$varName0";
@@ -1068,6 +1072,7 @@ class CalculatedTax extends Model
 			  $ivaData->$iVar = 0;
 			}
 			
+      $arrayActividades = currentCompanyModel()->getActivities();
 			foreach( ProductCategory::all() as $codigo ) {
 			  $varName  = "type$codigo->id";
 			  $varName0 = "type$codigo->id-0";
@@ -1085,7 +1090,6 @@ class CalculatedTax extends Model
 			  $ivaData->$varName8 = 0;
 			  $ivaData->$varName3 = 0;
 			  
-        $arrayActividades = currentCompanyModel()->getActivities();
         foreach( $arrayActividades as $act){
           $typeVarAct  = "$act->codigo-$varName";
           $typeVarAct0 = "$act->codigo-$varName0";
