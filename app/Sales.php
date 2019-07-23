@@ -31,7 +31,7 @@ class Sales extends Model
 
     public function subscription_plan()
     {
-        return $this->belongsTo(SubscriptionPlan::class, 'id');
+        return $this->belongsTo(SubscriptionPlan::class, 'subscription_plan_id');
     }
 
     public function payments()

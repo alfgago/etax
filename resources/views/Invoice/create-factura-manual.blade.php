@@ -149,7 +149,7 @@
                   <div class="form-group col-md-4">
                     <label for="due_date">Fecha de vencimiento</label>
                     <div class='input-group date inputs-fecha'>
-                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
+                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}" maxlength="10">
                       <span class="input-group-addon">
                         <i class="icon-regular i-Calendar-4"></i>
                       </span>

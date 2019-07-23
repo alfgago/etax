@@ -147,7 +147,7 @@ class CalculatedTax extends Model
         $lastBalance = $currentCompany->getLastBalance($month, $year);
       }
       
-      if( $year >= 2018 && !( $year == 2019 && $month < 7 ) ) {
+      if( $year >= 2018 ) {
         $this->setDatosEmitidos( $month, $year, $currentCompany->id );
         $query = BillItem::with('bill')
                     ->where('company_id', $currentCompany->id)
@@ -194,23 +194,30 @@ class CalculatedTax extends Model
       $ivasVentasConIdentificacion = 0;
       $ivaRetenido = 0;
       
+      $filterTotales = false;
+      if( $month == 0 && $year == 2018 && currentCompanyModel()->first_prorrata_type == 2 ) {
+        $filterTotales = true;
+      }
+      
       $ivaData = json_decode( $this->iva_data ) ?? new \stdClass();
+      $arrayActividades = currentCompanyModel()->getActivities();
 
       InvoiceItem::with('invoice')
                   ->where('company_id', $company)
                   ->where('year', $year)
                   ->where('month', $month)
-                  ->chunk( 2500,  function($invoiceItems) use ($year, $month, &$company, &$ivaData,
+                  ->chunk( 2500,  function($invoiceItems) use ($year, $month, &$company, &$ivaData, $filterTotales, $arrayActividades,
        &$invoicesTotal, &$invoicesSubtotal, &$totalInvoiceIva, &$totalClientesContadoExp, &$totalClientesCreditoExp, &$totalClientesContadoLocal, &$totalClientesCreditoLocal,&$ivaRetenido,
        &$sumRepercutido1, &$sumRepercutido2, &$sumRepercutido3, &$sumRepercutido4, &$sumRepercutidoExentoConCredito, &$sumRepercutidoExentoSinCredito, &$basesVentasConIdentificacion, &$ivasVentasConIdentificacion
       ) {
         
         $countInvoiceItems = $invoiceItems->count();
-
         //Recorre las lineas de factura
         for ($i = 0; $i < $countInvoiceItems; $i++) {
           try {
-            if( !$invoiceItems[$i]->invoice->is_void && $invoiceItems[$i]->invoice->is_authorized && $invoiceItems[$i]->invoice->is_code_validated ) {
+            
+            if( !$invoiceItems[$i]->invoice->is_void && $invoiceItems[$i]->invoice->is_authorized && $invoiceItems[$i]->invoice->is_code_validated 
+            && $invoiceItems[$i]->invoice->is_totales == $filterTotales ) {
             
               if( $invoiceItems[$i]->invoice->currency == 'CRC' ) {
                 $invoiceItems[$i]->invoice->currency_rate = 1;
@@ -228,9 +235,11 @@ class CalculatedTax extends Model
               $prodPorc = $invoiceItems[$i]->ivaType ? $invoiceItems[$i]->ivaType->percentage : '13';
               $prodType = $prodType ? $prodType : '17';
               $currActivity = $invoiceItems[$i]->invoice->commercial_activity;
+              
               if( !isset($currActivity) ){
-                $arrayActividades = currentCompanyModel()->getActivities();
                 $currActivity = $arrayActividades[0]->codigo;
+                $invoiceItems[$i]->invoice->commercial_activity = $currActivity;
+                $invoiceItems[$i]->invoice->save();
               }
               
               //Redondea todo a 2 decimales
@@ -364,7 +373,7 @@ class CalculatedTax extends Model
               $ivaData->$typeVarPorc += $subtotal;
               $ivaData->$typeVarActividad += $subtotal;
               $ivaData->$typeVarPorcActividad += $subtotal;
-              
+
             }
             
           }catch( \Exception $ex ){
@@ -375,6 +384,7 @@ class CalculatedTax extends Model
         }
         
       });
+      
       
       $this->iva_data = json_encode( $ivaData );
       $this->count_invoices = $countInvoices;
@@ -413,8 +423,9 @@ class CalculatedTax extends Model
       $totalProveedoresContado = 0;
       $totalProveedoresCredito = 0;
       $ivaData = json_decode( $this->iva_data ) ?? new \stdClass();
-      
-      $query->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$ivaData, &$singleBill,
+      $arrayActividades = currentCompanyModel()->getActivities();
+
+      $query->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$ivaData, &$singleBill, $arrayActividades,
        &$billsTotal, &$billsSubtotal, &$totalBillIva, &$basesIdentificacionPlena, &$basesNoDeducibles, &$ivaAcreditableIdentificacionPlena, 
        &$ivaNoAcreditableIdentificacionPlena, &$totalProveedoresContado, &$totalProveedoresCredito
       ) {
@@ -423,6 +434,7 @@ class CalculatedTax extends Model
         for ($i = 0; $i < $countBillItems; $i++) {
           
           try{
+            
             if( !$billItems[$i]->bill->is_void && $billItems[$i]->bill->is_authorized && $billItems[$i]->bill->is_code_validated &&
                 ( $singleBill || $billItems[$i]->bill->accept_status == 1 ) ) {
             
@@ -443,14 +455,15 @@ class CalculatedTax extends Model
               
               $currActivity = $billItems[$i]->bill->activity_company_verification;
               if( !isset($currActivity) ){
-                $arrayActividades = currentCompanyModel()->getActivities();
                 $currActivity = $arrayActividades[0]->codigo;
+                $billItems[$i]->bill->commercial_activity = $currActivity;
+                $billItems[$i]->bill->save();
               }
               
               //Redondea todo a 2 decimales
-              $subtotal = round($subtotal, 2);
-              $billIva = round($billIva, 2);
-              $currentTotal = round($currentTotal, 2);
+              $subtotal = $subtotal;
+              $billIva = $billIva;
+              $currentTotal = $currentTotal;
               
                 
               $ivaType = $ivaType ? $ivaType : '003';
@@ -520,9 +533,13 @@ class CalculatedTax extends Model
                   $menor = $porc_plena > 13 ? 13 : $porc_plena;
                 }
                 $menor_porc = $menor/100;
-                
-                $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
-                $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
+                if( $menor != $porc_plena) { 
+                  $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
+                  $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
+                }else{
+                  $ivaAcreditableIdentificacionPlena += $billIva;
+                  $ivaNoAcreditableIdentificacionPlena += 0;
+                }
               }
               if( $ivaType == 'B044' || $ivaType == 'B054' || $ivaType == 'B064' || $ivaType == 'B074' ||
                   $ivaType == 'S044' || $ivaType == 'S054' || $ivaType == 'S064' || $ivaType == 'S074' )
@@ -723,10 +740,6 @@ class CalculatedTax extends Model
       $ivaDeducibleOperativo = ($cfdp  * $prorrataOperativa) + $this->iva_acreditable_identificacion_plena;
       $balanceOperativo = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleOperativo;
       $ivaNoDeducible = $this->total_bill_iva - $ivaDeducibleOperativo;
-
-      if( $this->month == 7) {
-       //dd( "1: $cfdp1, 2: $cfdp2, 3: $cfdp3, 4: $cfdp4, PLENA: $this->iva_acreditable_identificacion_plena, deducible: $ivaDeducibleOperativo" );
-      }
  
       $saldoFavor = $balanceOperativo - $this->iva_retenido;
       $saldoFavor = $saldoFavor < 0 ? abs( $saldoFavor ) : 0;
@@ -817,7 +830,7 @@ class CalculatedTax extends Model
                 'is_final' => true,
             ]
         );
-        
+
         if($anoAnterior == 2018 && $currentCompany->first_prorrata_type == 2 ){
           
           if( !$data->is_closed ) {
@@ -836,8 +849,6 @@ class CalculatedTax extends Model
             
         }else {
           if( !$data->is_closed ) {
-            
-              
               $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $anoAnterior, 0, 100 );
               $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $anoAnterior, 0, 100 );
               $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $anoAnterior, 0, 100 );
@@ -850,20 +861,24 @@ class CalculatedTax extends Model
               $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $anoAnterior, 0, 100 );
               $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $anoAnterior, 0, 100 );
               $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $anoAnterior, 0, 100 );
-            
               $data->resetVars();
               $data->calcularFacturacionAcumulado( $anoAnterior, 1 );
-              
               if( $data->count_invoices || $data->count_bills ) {
                 $data->save();
                 $book = Book::calcularAsientos( $data );
                 $book->save();
                 $data->book = $book;
               }
-            
           }
+          $currentCompany->operative_prorrata = number_format( $data->prorrata*100, 2);
+          $currentCompany->first_prorrata   = number_format( $data->prorrata*100, 2);
+          $currentCompany->operative_ratio1 = number_format( $data->ratio1*100, 2);
+          $currentCompany->operative_ratio2 = number_format( $data->ratio2*100, 2);
+          $currentCompany->operative_ratio3 = number_format( $data->ratio3*100, 2);
+          $currentCompany->operative_ratio4 = number_format( $data->ratio4*100, 2);
+          $currentCompany->save();
         }
-        Cache::put($cacheKey, $data, now()->addDays(120));
+        Cache::put($cacheKey, $data, now()->addDays(365));
       }
       
       return Cache::get($cacheKey);
@@ -908,7 +923,10 @@ class CalculatedTax extends Model
 			$this->total_proveedores_credito = 0;
 			$this->iva_retenido = 0;
       
+    	$arrayActividades = currentCompanyModel()->getActivities();
       for ($i = 0; $i < $countAnteriores; $i++) {
+        
+        if( !( $calculosAnteriores[$i]->year == 2019 && $calculosAnteriores[$i]->month < 7 ) ){
           $this->count_invoices += $calculosAnteriores[$i]->count_invoices;
     			$this->invoices_total += $calculosAnteriores[$i]->invoices_total;
     			$this->invoices_subtotal += $calculosAnteriores[$i]->invoices_subtotal;
@@ -975,9 +993,8 @@ class CalculatedTax extends Model
     			  $ivaData->$varName8 += $ivaDataAnterior->$varName8;
     			  $ivaData->$varName3 += $ivaDataAnterior->$varName3;
     			  
-    			  $arrayActividades = currentCompanyModel()->getActivities();
             foreach( $arrayActividades as $act){
-              $typeVarAct = "$act->codigo-$varName";
+              $typeVarAct  = "$act->codigo-$varName";
               $typeVarAct0 = "$act->codigo-$varName0";
               $typeVarAct1 = "$act->codigo-$varName1";
               $typeVarAct2 = "$act->codigo-$varName2";
@@ -985,7 +1002,7 @@ class CalculatedTax extends Model
               $typeVarAct8 = "$act->codigo-$varName8";
               $typeVarAct3 = "$act->codigo-$varName3";
               
-      			  $ivaData->$typeVarAct += $ivaDataAnterior->$typeVarAct;
+      			  $ivaData->$typeVarAct  += $ivaDataAnterior->$typeVarAct;
       			  $ivaData->$typeVarAct0 += $ivaDataAnterior->$typeVarAct0;
       			  $ivaData->$typeVarAct1 += $ivaDataAnterior->$typeVarAct1;
       			  $ivaData->$typeVarAct2 += $ivaDataAnterior->$typeVarAct2;
@@ -996,7 +1013,7 @@ class CalculatedTax extends Model
     			}
     			
     			$this->iva_data = json_encode($ivaData);
-    			
+        }		
       }
       
     }
@@ -1055,8 +1072,9 @@ class CalculatedTax extends Model
 			  $ivaData->$iVar = 0;
 			}
 			
+      $arrayActividades = currentCompanyModel()->getActivities();
 			foreach( ProductCategory::all() as $codigo ) {
-			  $varName = "type$codigo->id";
+			  $varName  = "type$codigo->id";
 			  $varName0 = "type$codigo->id-0";
 			  $varName1 = "type$codigo->id-1";
 			  $varName2 = "type$codigo->id-2";
@@ -1072,9 +1090,8 @@ class CalculatedTax extends Model
 			  $ivaData->$varName8 = 0;
 			  $ivaData->$varName3 = 0;
 			  
-        $arrayActividades = currentCompanyModel()->getActivities();
         foreach( $arrayActividades as $act){
-          $typeVarAct = "$act->codigo-$varName";
+          $typeVarAct  = "$act->codigo-$varName";
           $typeVarAct0 = "$act->codigo-$varName0";
           $typeVarAct1 = "$act->codigo-$varName1";
           $typeVarAct2 = "$act->codigo-$varName2";

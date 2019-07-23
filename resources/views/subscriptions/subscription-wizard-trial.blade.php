@@ -51,7 +51,7 @@
             </div>
               <div class="form-group col-md-6" id="cantidadContabilidades">
                   <label for="recurrency">Cantidad de Contabilidades</label>
-                  <input type="number" min="10" class="form-control" name="num_companies" id="num_companies" value="10" onblur="validarCantidad();" onkeyup="sumarPrecioContabilidades();">
+                  <input type="number" min="10" class="form-control" name="num_companies" id="num_companies" value="10" onblur="validarCantidad();" onkeyup="calcularPrecioContabilidades();">
               </div>
             <div class="form-group col-md-6">
               <label for="recurrency">Recurrencia de pagos </label>
@@ -168,21 +168,26 @@
         }
     }
     function togglePrice() {
-        var recurrency = $('#recurrency :selected').val();
-        if( recurrency == 1 ) {
-            var precio = $('#product_id :selected').attr('monthly');
-            var rtext = '/ mes';
+        var planId = $("#plan-sel").val();
+        if(planId != 'c'){
+          var recurrency = $('#recurrency :selected').val();
+          if( recurrency == 1 ) {
+              var precio = $('#product_id :selected').attr('monthly');
+              var rtext = '/ mes';
+          }
+          else if( recurrency == 6 ) {
+              var precio = $('#product_id :selected').attr('six');
+              var rtext = '/ semestre';
+          }
+          else if( recurrency == 12 ) {
+              var precio = $('#product_id :selected').attr('annual');
+              var rtext = '/ año';
+          }
+          $(".precio-text").text(precio);
+          $(".recurrencia-text").text(rtext);
+        }else{
+          calcularPrecioContabilidades();
         }
-        else if( recurrency == 6 ) {
-            var precio = $('#product_id :selected').attr('six');
-            var rtext = '/ semestre';
-        }
-        else if( recurrency == 12 ) {
-            var precio = $('#product_id :selected').attr('annual');
-            var rtext = '/ año';
-        }
-        $(".precio-text").text(precio);
-        $(".recurrencia-text").text(rtext);
     }
     function cambiarPrecio() {
         var precio = $(".precio-inicial").text().replace('$', "");
@@ -227,15 +232,16 @@
         //cantidad = parseInt(cantidad, 10);
         if(cantidad != '' && cantidad != undefined){
             if(cantidad < 10){
-                alert('Este plan solo es valido a partir de las 10 (diez) contabilidades');
+                alert('Este plan requiere un mínimo de 10 (diez) contabilidades');
                 $('#num_companies').val(10);
             }
         }else{
             $('#num_companies').val(10);
         }
     }
-    function sumarPrecioContabilidades() {
+    function calcularPrecioContabilidades() {
         var cantidad = parseFloat($('#num_companies').val());
+
         var recurrency = $('#recurrency').val();
         var total = 0;
         var total_extras = 0;
@@ -263,7 +269,9 @@
         }
         var precioFinal = parseFloat(total).toFixed(2);
         $(".precio-text").text('$' + precioFinal);
+
     }
+    
     $( document ).ready(function() {
         togglePlan();
     });

@@ -50,18 +50,18 @@
                 </div>
                 
                  <div class="form-group col-md-4">
-                  <label for="subtotal">Total </label>
-                  <input type="text" class="form-control" name="subtotal" id="subtotal" placeholder="" readonly="true" required value="{{ @$totales->subtotal }}">
+                  <label for="subtotal">Total</label>
+                  <input type="text" class="form-control" name="subtotal" id="subtotal" placeholder="" readonly="true" required value="{{ number_format( @$totales->subtotal, 0) }}">
                 </div>
     
                 <div class="form-group col-md-4 hidden">
                   <label for="iva_amount">Monto IVA </label>
-                  <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required value="{{ @$totales->monto_iva }}">
+                  <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required value="{{ number_format(  @$totales->monto_iva , 0) }}">
                 </div>
     
                 <div class="form-group col-md-4 hidden">
                   <label for="total">Total</label>
-                  <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" required value="{{ @$totales->total }}">
+                  <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" required value="{{ number_format( @$totales->total, 0)}}">
                 </div>
                 
                 <div class="form-group col-md-12">

@@ -140,7 +140,7 @@ class Invoice extends Model
             $this->credit_time = $request->credit_time;
             $this->buy_order = $request->buy_order;
             $this->other_reference = trim($request->other_reference);
-            $this->send_emails = $request->send_email ? trim($request->send_email) : null;
+            $this->send_emails = isset($request->send_email) ? trim($request->send_email) : null;
             if( $request->commercial_activity ){
                 $this->commercial_activity = $request->commercial_activity;
             }
@@ -151,6 +151,8 @@ class Invoice extends Model
                 $tipo_persona = $request->tipo_persona;
                 $identificacion_cliente = preg_replace("/[^0-9]/", "", $request->id_number );
                 $codigo_cliente = $request->code;
+                
+                $billing_emails = isset($request->billing_emails) ? trim($request->billing_emails) : $request->email;
 
                 $client = Client::updateOrCreate(
                     [
@@ -178,7 +180,7 @@ class Invoice extends Model
                         'phone' => trim($request->phone),
                         'es_exento' => $request->es_exento,
                         'email' => trim($request->email),
-                        'billing_emails' => $request->billing_emails ? trim($request->billing_emails) : $request->email
+                        'billing_emails' => $billing_emails
                     ]
                 );
 
@@ -361,6 +363,7 @@ class Invoice extends Model
     }
     
     public static function importInvoiceRow ( $data ) {
+      
       //Revisa si el método es por correo electrónico. De ser así, usa busca la compañia por cedula.
       if( $data['metodoGeneracion'] != "Email" ){
         $company = currentCompanyModel();
@@ -389,11 +392,12 @@ class Invoice extends Model
                     'tipo_persona' => str_pad($data['tipoPersona'], 2, '0', STR_PAD_LEFT),
                     'id_number' => $identificacionCliente,
                     'first_name' => $data['nombreCliente'],
-                    'email' => $data['correoCliente'],
                     'phone' => $data['telefonoCliente'],
                     'fullname' => "$identificacionCliente - " . $data['nombreCliente']
                 ]
             );
+            $correoCliente = $data['correoCliente'] ? $data['correoCliente'] : $clienteCache->email;
+            $clienteCache->email = $correoCliente;
             $clienteCache->save();
             Cache::put($clientCacheKey, $clienteCache, 30);
         }
@@ -401,7 +405,7 @@ class Invoice extends Model
         $idCliente = $cliente->id;
         $tipoDocumento = $data['tipoDocumento'];
       } else {
-        $tipoDocumento = '04';
+        $tipoDocumento = '04'; //Si no trae cliente, es un tiquete.
       }
       $idCliente = preg_replace("/[^0-9]/", "", $idCliente );
       $invoiceCacheKey = "import-factura-" . $data['nombreCliente'] . $company->id . "-" . $data['consecutivoComprobante'];
@@ -453,12 +457,11 @@ class Invoice extends Model
               $invoice->currency = $data['idMoneda'];
               if( $invoice->currency == 1 ) { $invoice->currency = "CRC"; }
               if( $invoice->currency == 2 ) { $invoice->currency = "USD"; }
-              
+
               $invoice->currency_rate = $data['tipoCambio'];
               $invoice->subtotal = 0;
               $invoice->iva_amount = 0;
               $invoice->total = $data['totalDocumento'];
-              
               $invoice->save();
           }   
           Cache::put($invoiceCacheKey, $invoice, 30);
@@ -537,7 +540,6 @@ class Invoice extends Model
       if( $data['totalNeto'] != 0 ) {
         $invoice->subtotal = $data['totalNeto'];
       }
-      
       $invoice->save();
 
       $available_invoices = AvailableInvoices::where('company_id', $company->id)
@@ -856,7 +858,6 @@ class Invoice extends Model
           $xmlHacienda->bill_id = 0;
           $xmlHacienda->invoice_id = $invoice->id;
           $xmlHacienda->save();
-          Log::info( 'XMLHacienda guardado : ' . $invoice->id );
         }catch( \Throwable $e ){
           Log::error( 'Error al registrar en tabla XMLHacienda: ' . $e->getMessage() );
         }

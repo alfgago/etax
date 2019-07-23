@@ -71,6 +71,7 @@ $(function() {
       url: "/lang/datatables-es_ES.json",
     },
   });
+  
 });
 
 function confirmAccept( id ) {
@@ -105,6 +106,22 @@ function confirmDecline( id ) {
       $(formId).submit();
     }
   })
+  
+}
+
+function validarPopup(obj) {
+  
+    var link = $(obj).attr("link");
+    var titulo = $(obj).attr("titulo");
+    $("#titulo_modal_estandar").html(titulo);
+    $.ajax({
+       type:'GET',
+       url:link,
+       success:function(data){
+          $("#body_modal_estandar").html(data);
+       }
+  
+    });
   
 }
   

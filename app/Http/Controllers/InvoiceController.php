@@ -214,6 +214,9 @@ class InvoiceController extends Controller
         if($company->last_note_ref_number == null) {
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
         }
+        if($company->last_ticket_ref_number == null) {
+            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de tiquetes');
+        }
         return view("Invoice/create-factura", ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
             'document_number' => $this->getDocReference($tipoDocumento),
             'document_key' => $this->getDocumentKey($tipoDocumento), 'units' => $units, 'countries' => $countries])->with('arrayActividades', $arrayActividades);
@@ -301,6 +304,9 @@ class InvoiceController extends Controller
                 if ($request->document_type == '09') {
                     $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
                 }
+                if ($request->document_type == '04') {
+                    $invoice->reference_number = $company->last_ticket_ref_number + 1;
+                }
 
                 $invoiceData = $invoice->setInvoiceData($request);
                 
@@ -319,9 +325,12 @@ class InvoiceController extends Controller
                     $company->last_invoice_pur_ref_number = $invoice->reference_number;
                     $company->last_document_invoice_pur = $invoice->document_number;
 
-                }  elseif ($request->document_type == '09') {
+                } elseif ($request->document_type == '09') {
                     $company->last_invoice_exp_ref_number = $invoice->reference_number;
                     $company->last_document_invoice_exp = $invoice->document_number;
+                } elseif ($request->document_type == '04') {
+                    $company->last_ticket_ref_number = $invoice->reference_number;
+                    $company->last_document_ticket = $invoice->document_number;
                 }
 
                 $company->save();
@@ -568,11 +577,13 @@ class InvoiceController extends Controller
                                 'isAuthorized' => true,
                                 'codeValidated' => true
                             );
-
-                            $insert = Invoice::importInvoiceRow( $arrayInsert );
-
-                            if( $insert ) {
-                                array_push( $inserts, $insert );
+                            
+                            if( $consecutivoComprobante ) {
+                                $insert = Invoice::importInvoiceRow( $arrayInsert );
+    
+                                if( $insert ) {
+                                    array_push( $inserts, $insert );
+                                }
                             }
 
                         }
@@ -582,16 +593,16 @@ class InvoiceController extends Controller
 
                 }
             }catch( \ErrorException $ex ){
-                Log::error('Error importando Excel' . $ex->getMessage());
+                Log::error('Error importando Excel ' . $ex->getMessage());
                 return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila: '.$i);
             }catch( \InvalidArgumentException $ex ){
-                Log::error('Error importando Excel' . $ex->getMessage());
+                Log::error('Error importando Excel ' . $ex->getMessage());
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
             }catch( \Exception $ex ){
-                Log::error('Error importando Excel' . $ex->getMessage());
+                Log::error('Error importando Excel ' . $ex->getMessage());
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Error en la fila. '.$i);
             }catch( \Throwable $ex ){
-                Log::error('Error importando Excel' . $ex->getMessage());
+                Log::error('Error importando Excel ' . $ex->getMessage());
                 return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. IC 537'.$i);
             }
             
@@ -958,6 +969,9 @@ class InvoiceController extends Controller
         if ($docType == '09') {
             $lastSale = currentCompanyModel()->last_invoice_exp_ref_number + 1;
         }
+        if ($docType == '04') {
+            $lastSale = currentCompanyModel()->last_ticket_ref_number + 1;
+        }
         $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
 
         return $consecutive;
@@ -974,6 +988,9 @@ class InvoiceController extends Controller
         }
         if ($docType == '09') {
             $ref = $company->last_invoice_exp_ref_number + 1;
+        }
+        if ($docType == '04') {
+            $ref = $company->last_ticket_ref_number + 1;
         }
         $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
             '1'.$invoice->getHashFromRef($ref);

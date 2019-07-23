@@ -58,6 +58,7 @@ class SubscriptionPayment extends Command
 
                 $unpaidSubscriptions = Sales::where('status', 2)->where('is_subscription', true)->get();
                 foreach($unpaidSubscriptions as $sale){
+                    sleep(1);
                     
                     Log::info("Procesando cobro $sale->company_id");
                     $subtotal = $sale->product->plan->monthly_price;
@@ -73,13 +74,19 @@ class SubscriptionPayment extends Command
                             break;
                     }
 
+                    $subtotal = round($subtotal, 2);
                     $iv = $subtotal * 0.13;
+                    $iv = round($iv, 2);
                     $amount = $subtotal + $iv;
 
                     $paymentMethod = PaymentMethod::where('user_id', $sale->user_id)->where('default_card', true)->first();
                     $company = $sale->company;
                     
-                    if($paymentMethod){
+                    if(!$paymentMethod){
+                        $paymentMethod = PaymentMethod::where('user_id', $sale->user_id)->first();
+                    }
+                    
+                    if($paymentMethod && $company->email){
                         $payment = Payment::updateOrCreate(
                             [
                                 'sale_id' => $sale->id,
@@ -93,29 +100,28 @@ class SubscriptionPayment extends Command
                         );
 
                         $data = new stdClass();
-                        $data->description = 'Pago suscripción eTax';
+                        $data->description = 'Renovación plan etax';
                         $data->amount = $amount;
-                        $data->user_name = $sale->user->username;
-
+                        $data->user_name = $sale->user->user_name;
+                        
+                        //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
                         if( ! isset($payment->charge_token) ) {
                             $chargeIncluded = $paymentUtils->paymentIncludeCharge($data);
                             $chargeTokenId = $chargeIncluded['chargeTokenId'];
                             $payment->charge_token = $chargeTokenId;
                             $payment->save();
                         }
-
+                        
                         $data->chargeTokenId = $payment->charge_token;
                         $data->cardTokenId = $paymentMethod->token_bn;
-
+                        
                         $appliedCharge = $paymentUtils->paymentApplyCharge($data);
-                        /**********************************************/
-
                         if ($appliedCharge['apiStatus'] == "Successful") {
                             $payment->proof = $appliedCharge['retrievalRefNo'];
                             $payment->payment_status = 2;
                             $payment->save();
 
-                            $sale->next_payment_date = $date->addMonth($sale->recurrency);
+                            $sale->next_payment_date = Carbon::parse(now('America/Costa_Rica'))->addMonths($sale->recurrency);
                             $sale->status = 1;
                             $sale->save();
 
@@ -124,9 +130,9 @@ class SubscriptionPayment extends Command
                             $invoiceData->client_id_number = $company->id_number;
                             $invoiceData->client_id = '-1';
                             $invoiceData->tipo_persona = $company->tipo_persona;
-                            $invoiceData->first_name = $company->first_name;
-                            $invoiceData->last_name = $company->last_name;
-                            $invoiceData->last_name2 = $company->last_name2;
+                            $invoiceData->first_name = $company->business_name;
+                            $invoiceData->last_name = null;
+                            $invoiceData->last_name2 = null;
                             $invoiceData->country = $company->country;
                             $invoiceData->state = $company->state;
                             $invoiceData->city = $company->city;
@@ -156,26 +162,13 @@ class SubscriptionPayment extends Command
                             $item->total = $amount;
 
                             $invoiceData->items = [$item];
-                            Log::error("Creando factur de cliente");
+                            Log::info("Creando factura de cliente");
                             $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
                         }else{
-                            \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
-                                [
-                                    'name' => $company->name . ' ' . $company->last_name,
-                                    'product' => $sale->product->plan->plan_type,
-                                    'card' => $paymentMethod->masked_card
-                                ]
-                            ));
+                            Log::warning("Error en cobro: ".$appliedCharge['apiStatus']);
                         }
                     }else{
-                        Log::warning("Error en cobro de $company->name");
-                        \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
-                            [
-                                'name' => $company->name . ' ' . $company->last_name,
-                                'product' => $sale->product->plan->plan_type,
-                                'card' => $paymentMethod->masked_card
-                            ]
-                        ));
+                        Log::warning("Error en cobro de usuario: $sale->user_id / empresa: $sale->company_id, no se encontró tarjeta");
                     }
                 }
             }else{

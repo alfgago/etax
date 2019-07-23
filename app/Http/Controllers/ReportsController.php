@@ -13,6 +13,9 @@ use App\PlansInvitation;
 use Mpociot\Teamwork\Facades\Teamwork;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Exports\ReportsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Controllers\Controller;
 
 class ReportsController extends Controller
 {
@@ -28,7 +31,6 @@ class ReportsController extends Controller
     }
   
     public function dashboard() {
-      
       $user = auth()->user();
       
       if( !$user->has_klap_user ) {
@@ -69,6 +71,7 @@ class ReportsController extends Controller
       }
 
       return view('/Dashboard/index', compact( 'subscription' ) );
+      
     }
     
     public function reports() {
@@ -255,25 +258,32 @@ class ReportsController extends Controller
 
           foreach( \App\ProductCategory::all() as $cat ) {
             $tipoID = $cat->id;
-            $varName = "$act->codigo-type$tipoID";
+            $varName  = "$act->codigo-type$tipoID";
       			$varName0 = "$act->codigo-type$tipoID-0";
       			$varName1 = "$act->codigo-type$tipoID-1";
       			$varName2 = "$act->codigo-type$tipoID-2";
       			$varName3 = "$act->codigo-type$tipoID-13";
       			$varName4 = "$act->codigo-type$tipoID-4";
+      			
+      			$m0 = $ivaData->$varName0 ?? 0;
+      			$m1 = $ivaData->$varName1 ?? 0;
+      			$m2 = $ivaData->$varName2 ?? 0;
+      			$m3 = $ivaData->$varName3 ?? 0;
+      			$m4 = $ivaData->$varName4 ?? 0;
+      			
       			$info = [
       			  "name"   => $cat->name,
-      			  "monto0" => $ivaData->$varName0,
-      			  "monto1" => $ivaData->$varName1,
-      			  "monto2" => $ivaData->$varName2,
-      			  "monto3" => $ivaData->$varName3,
-      			  "monto4" => $ivaData->$varName4,
+      			  "monto0" => $m0,
+      			  "monto1" => $m1,
+      			  "monto2" => $m2,
+      			  "monto3" => $m3,
+      			  "monto4" => $m4,
       			];
       			
       			if( ! isset($actividadData[$cat->group]["totales"]) ){
       			  $actividadData[$cat->group]["totales"] = 0;
       			}
-      			$actividadData[$cat->group]["totales"] = $actividadData[$cat->group]["totales"] + ($ivaData->$varName0 + $ivaData->$varName1 + $ivaData->$varName2 + $ivaData->$varName3 + $ivaData->$varName4);
+      			$actividadData[$cat->group]["totales"] = $actividadData[$cat->group]["totales"] + ($m0+$m1+$m2+$m3+$m4);
   
       			//Agrega la información al grupo respectivo.
       			array_push($actividadData["$cat->group"]["cats"], $info);
@@ -366,6 +376,6 @@ class ReportsController extends Controller
     private function microtime_float(){
         list($usec, $sec) = explode(" ", microtime());
         return ((float) $usec + (float)$sec);
-    }  
-  
+    }
+
 }

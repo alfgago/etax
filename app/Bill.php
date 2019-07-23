@@ -545,7 +545,6 @@ class Bill extends Model
           $xmlHacienda->bill_id = $bill->id;
           $xmlHacienda->invoice_id = 0;
           $xmlHacienda->save();
-          Log::info( 'XMLHacienda guardado: ' . $bill->id );
         }catch( \Throwable $e ){
           Log::error( 'Error al registrar en tabla XMLHacienda: ' . $e->getMessage() );
         }
@@ -777,32 +776,26 @@ class Bill extends Model
           $this->accept_total_factura = $calc->bills_total;
           $this->accept_id_number = $company->id_number;
           
-          $this->accept_iva_condition = '02';
-          if( $this->accept_iva_total == 0 ) {
-            $this->accept_iva_condition = '01'; //Si no hay IVA
-          }else if( $this->accept_iva_gasto == 0 ) {
-            $this->accept_iva_condition = '01'; //Si todo lo pagado de IVA es acreditable
-          }else if( $this->accept_iva_acreditable == 0) {
-            $this->accept_iva_condition = '04'; //Si todo lo pagao de IVa va al gasto
+          if( $calc->iva_acreditable_identificacion_plena > 0) {
+            $this->accept_iva_condition = '02';
+            if( $this->accept_iva_total == 0 ||
+                $this->accept_iva_gasto == 0 ) {
+              $this->accept_iva_condition = '01'; //Si no hay IVA o si todo lo pagado de IVA es acreditable
+            }
+          }else{
+            $this->accept_iva_condition = '05'; //Prorratea
           }
           
-          $sinIdentificacion = ($calc->iva_acreditable_identificacion_plena != $calc->total_bill_iva 
-                                  && $calc->iva_acreditable_identificacion_plena != 0
-                                  && $calc->accept_iva_acreditable != $calc->total_bill_iva
-                              );
-          if( $sinIdentificacion ) {
-            $this->accept_iva_condition = '05'; //Si exista minimo 1 linea sin identificación específica.
+          if( $this->accept_iva_acreditable == 0) {
+            $this->accept_iva_condition = '04'; //Si todo lo pagado de IVA va al gasto
           }
           
-          $bienesCapital = $calc->bB011 + $calc->bB031 + $calc->bB051 + $calc->bB071 + $calc->bB015  + $calc->bB035 +
-             $calc->bB012 + $calc->bB032 + $calc->bB052 + $calc->bB072 +
-             $calc->bB013 + $calc->bB033 + $calc->bB053 + $calc->bB073 + $calc->bB016 + $calc->bB036 +
-             $calc->bB014 + $calc->bB034 + $calc->bB054 + $calc->bB074
-             +
-             $calc->bS011 + $calc->bS031 + $calc->bS051 + $calc->bS071 + $calc->bS015  + $calc->bS035 +
-             $calc->bS012 + $calc->bS032 + $calc->bS052 + $calc->bS072 +
-             $calc->bS013 + $calc->bS033 + $calc->bS053 + $calc->bS073 + $calc->bS016 + $calc->bS036 +
-             $calc->bS014 + $calc->bS034 + $calc->bS054 + $calc->bS074;
+          $ivaData = json_decode( $calc->iva_data ) ?? new \stdClass();
+          $cc_propiedades1 = $ivaData->bB011 + $ivaData->bB031 + $ivaData->bB051 + $ivaData->bB071 + $ivaData->bB015  + $ivaData->bB035;
+          $cc_propiedades2 = $ivaData->bB012 + $ivaData->bB032 + $ivaData->bB052 + $ivaData->bB072;
+          $cc_propiedades3 = $ivaData->bB013 + $ivaData->bB033 + $ivaData->bB053 + $ivaData->bB073 + $ivaData->bB016  + $ivaData->bB036;
+          $cc_propiedades4 = $ivaData->bB014 + $ivaData->bB034 + $ivaData->bB054 + $ivaData->bB074;
+          $bienesCapital = $cc_propiedades1 + $cc_propiedades2 + $cc_propiedades3 + $cc_propiedades4;
           if( $bienesCapital ) {
             $this->accept_iva_condition = '03'; // Si son propiedad, planta o equipo (Bienes de capital)
           }

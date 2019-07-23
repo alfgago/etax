@@ -235,10 +235,13 @@ class InvoiceUtils
                 $isGravado = isset($cod) ? $cod->is_gravado : true;
                 $iva_amount = 0;
                 if( $isGravado ) {
-                    $iva_amount = $value['iva_amount'] ? round($value['iva_amount'], 5) : 0;
+                    $iva_amount = $value['iva_amount'] ? round($value['iva_amount'], 2) : 0;
                 }else {
                     $iva_amount = 'false';
                 }
+                
+                $montoSinIva = ($value['unit_price'] && $value['item_count']) ? round($value['item_count'] * $value['unit_price'], 2) : 0;
+                $montoDescuento = $value['discount'] ? $this->discountCalculator($value['discount_type'], $value['discount'], $montoSinIva ) : 0;
 
                 $details[$key] = array(
                     'cantidad' => $value['item_count'] ?? 1,
@@ -246,9 +249,9 @@ class InvoiceUtils
                     'detalle' => $value['name'] ?? '',
                     'precioUnitario' => $value['unit_price'] ?? 0,
                     'subtotal' => $value['subtotal'] ?? 0,
-                    'montoTotal' => $value['item_count'] * $value['unit_price'] ?? 0,
+                    'montoTotal' =>  $montoSinIva,
                     'montoTotalLinea' => $value['subtotal'] + $value['iva_amount'] ?? 0,
-                    'descuento' => $value['discount'] ? $this->discountCalculator($value['discount_type'], $value['discount'], $value['item_count'] * $value['unit_price'] ?? 0) : 0,
+                    'descuento' => $montoDescuento,
                     'impuesto_codigo' => '01',
                     'tipo_iva' => $value['iva_type'],
                     'impuesto_codigo_tarifa' => Variables::getCodigoTarifaVentas($value['iva_type']),

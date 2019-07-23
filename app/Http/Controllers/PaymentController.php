@@ -123,7 +123,6 @@ class PaymentController extends Controller
             $paymentUtils = new PaymentUtils();
             
             $request->number = preg_replace('/\s+/', '',  $request->number);
-            $start_date = Carbon::parse(now('America/Costa_Rica'));
             
             $razonDescuento = null;
             //El descuento por defecto es cero.
@@ -158,17 +157,17 @@ class PaymentController extends Controller
             switch ($recurrency) {
                 case 1:
                     $costo = $subscriptionPlan->monthly_price;
-                    $nextPaymentDate = $start_date->addMonths(1);
+                    $nextPaymentDate = Carbon::parse(now('America/Costa_Rica'))->addMonths(1);
                     $descriptionMessage = 'Mensual';
                     break;
                 case 6:
                     $costo = $subscriptionPlan->six_price * 6;
-                    $nextPaymentDate = $start_date->addMonths(6);
+                    $nextPaymentDate = Carbon::parse(now('America/Costa_Rica'))->addMonths(6);
                     $descriptionMessage = 'Semestral';
                     break;
                 case 12:
                     $costo = $subscriptionPlan->annual_price * 12;
-                    $nextPaymentDate = $start_date->addMonths(12);
+                    $nextPaymentDate = Carbon::parse(now('America/Costa_Rica'))->addMonths(12);
                     $descriptionMessage = 'Anual';
                     break;
             }
@@ -178,7 +177,6 @@ class PaymentController extends Controller
             $subtotal = ($costo - $montoDescontado);
             $iv = $subtotal * 0.13;
             $amount = $subtotal + $iv;
-            
             $montoDescontado = round( $montoDescontado, 2 );
             $descuento = round( $descuento, 2 );
             $subtotal = round( $subtotal, 2 );
@@ -191,9 +189,12 @@ class PaymentController extends Controller
             $cardYear = substr($request->expiry, -2);
             $cardMonth = substr($request->expiry, 0 , 2);
             
-            //Cupon para pruebas, hace pagos por $1 sin IVA. Estas hay que anularlas luego.
+            //Cupon para pruebas, hace pagos por $1 sin IVA. Deberian ser anuladas luego.
             if( $request->coupon == "!!CUPON1!!" ) {
+                $subtotal = 1;
                 $amount = 1;
+                $descuento = 0;
+                $iv = 0;
             }
             
             foreach ($cards as $c) {
@@ -245,7 +246,7 @@ class PaymentController extends Controller
                 ],
                 [
                     'payment_method_id' => $paymentMethod->id,
-                    'payment_date' => $start_date,
+                    'payment_date' => Carbon::parse(now('America/Costa_Rica')),
                     'amount' => $amount
                 ]
             );
@@ -331,6 +332,7 @@ class PaymentController extends Controller
     }
 
     public function comprarFacturas(Request $request){
+        
         $date = Carbon::parse(now('America/Costa_Rica'));
         $company = currentCompanyModel();
         $available_company_invoices = !$company->additional_invoices ? $available_company_invoices = 0 : $company->additional_invoices;
@@ -533,7 +535,7 @@ class PaymentController extends Controller
                         $payment->payment_status = 2;
                         $payment->save();
 
-                        $sale->next_payment_date = $date->addMonth($sale->recurrency);
+                        $sale->next_payment_date = $date->addMonths($sale->recurrency);
                         $sale->status = 1;
                         $sale->save();
                         
@@ -589,7 +591,7 @@ class PaymentController extends Controller
                         [
                             'name' => $company->name . ' ' . $company->last_name,
                             'product' => $sale->product->plan->plan_type,
-                            'card' => $paymentMethod->masked_card
+                            'card' => "No indica"
                         ]
                     ));
                 }

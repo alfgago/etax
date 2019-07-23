@@ -28,6 +28,7 @@
           <option type="post">Reporte de proveedores (Muy pronto)</option>
           <option type="post">Reporte de clientes (Muy pronto)</option>
           <option style="" value="/reportes/borrador-iva" hideClass=".opt-acumulado" type="iframe">Borrador de declaración de IVA</option>
+
         </select>
       </div>
       
@@ -59,21 +60,25 @@
           </div>
         </div>
       </div>
-      
-      <div class="form-group col-md-12">
-          <button onclick="verReporte();" class="btn btn-primary form-btn">Ver reporte</button>
+      <div class="col-md-12">
+        <button onclick="verReporte();" class="btn btn-primary form-btn">Ver reporte</button>
       </div>
-      
+
       <div id="reporte-container" class="col-md-12 mb-4 reporte" style="padding: 3rem 15px;">
         
       </div>
+      
+      <div class="col-md-12" hidden id="export-btn-container" style="margin-top:-2em;">
+        <a id="btnExport" download='reporteEtax' href='javascript:exportarTablas()' class="btn btn-primary form-btn">Descargar</a>
+      </div>  
       
     </div>
   </div>
 </div>
 
-@endsection @section('footer-scripts')
+@endsection 
 
+@section('footer-scripts')
 
 <script>
   
@@ -84,6 +89,26 @@
     $(hideClass).hide();
     $("#input-mes").val(1);
     
+  }
+
+ function exportarTablas(){
+      var uri = 'data:application/vnd.ms-excel;base64,',
+          template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><meta http-equiv="content-type" content="application/vnd.ms-excel;charset=UTF-8;base64"><head></head><body><table>{table}</table></body></html>',
+          base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) },
+          format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+
+      var table = 'reporte-container';
+      var name = 'nombre_hoja_calculo';
+
+      if (!table.nodeType) table = document.getElementById(table);
+      var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML };
+      
+      var link = document.createElement("a");
+          link.download = "reporte-etax.xls";
+          link.href = uri + base64(format(template, ctx));
+          link.click();
+      
+      //window.location.href = uri + base64(format(template, ctx));
   }
   
   function verReporte() {
@@ -107,6 +132,10 @@
           success : function( response ) {
             $('#reporte-container').html(response);
             clearEmptyRows();
+              setTimeout(function(){
+                $("table").attr('id', 'reporte-container');
+                $('#export-btn-container').attr('hidden', false);
+              }, 1000);
           },
           async: true
         });  
