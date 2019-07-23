@@ -6,7 +6,15 @@
 
 @section('slug', 'wizard')
 
-@section('content') 
+@section('content')
+
+<?php
+    $company = currentCompanyModel();
+    if( isset($old)) {
+        $company = $old;
+    }
+?>
+
 <div class="wizard-container">
   
   <div class="wizard-popup">
@@ -89,8 +97,7 @@
       if( !allowEmails ) {
         allow = false;
       }
-    }
-                                          );
+    });
     return allow;
   }
   function validateEmail(email) {
@@ -112,21 +119,26 @@
       }
   }
   function togglePrice() {
-    var recurrency = $('#recurrency :selected').val();
-    if( recurrency == 1 ) {
-      var precio = $('#product_id :selected').attr('monthly');
-      var rtext = '/ mes';
-    }
-    else if( recurrency == 6 ) {
-      var precio = $('#product_id :selected').attr('six');
-      var rtext = '/ semestre';
-    }
-    else if( recurrency == 12 ) {
-      var precio = $('#product_id :selected').attr('annual');
-      var rtext = '/ año';
-    }
-    $(".precio-text").text(precio);
-    $(".recurrencia-text").text(rtext);
+      var planId = $("#plan-sel").val();
+      if(planId != 'c'){
+        var recurrency = $('#recurrency :selected').val();
+        if( recurrency == 1 ) {
+            var precio = $('#product_id :selected').attr('monthly');
+            var rtext = '/ mes';
+        }
+        else if( recurrency == 6 ) {
+            var precio = $('#product_id :selected').attr('six');
+            var rtext = '/ semestre';
+        }
+        else if( recurrency == 12 ) {
+            var precio = $('#product_id :selected').attr('annual');
+            var rtext = '/ año';
+        }
+        $(".precio-text").text(precio);
+        $(".recurrencia-text").text(rtext);
+      }else{
+        calcularPrecioContabilidades();
+      }
   }
   $.getJSON('https://api.ipify.org?format=json', function(data){
       $("#IpAddress").val(data.ip);
@@ -211,26 +223,37 @@
           $('#cantidadEmpresas').val(10);
       }
   }
-  function sumarPrecioContabilidades() {
-      var cantidad = parseFloat($('#cantidadEmpresas').val());
-      var total = 149.99;
-      if (cantidad > 10) {
-          if (cantidad <= 25) {
-              var subtotal = parseFloat((cantidad - 10) * 10);
-              var precioFinal = parseFloat(parseFloat(subtotal) + total).toFixed(2);
-              $(".precio-text").text('$' + precioFinal);
-          }
-          if (cantidad >= 26) {
-              var subtotal = parseFloat((cantidad  - 25) * 8);
-              var precioFinal = parseFloat(parseFloat(subtotal) + 150 + total).toFixed(2);
-              $(".precio-text").text('$' + precioFinal);
-          }
+  function calcularPrecioContabilidades() {
+      var cantidad = parseFloat($('#num_companies').val());
+      var recurrency = parseFloat($('#recurrency :selected').val());
+      if( recurrency == 1 ) {
+          var inicial = $('#product_id :selected').attr('monthly').substring(1);
+          var rtext = '/ mes';
+      }else if( recurrency == 6 ) {
+          var inicial = $('#product_id :selected').attr('six').substring(1);
+          var rtext = '/ semestre';
+      }else if( recurrency == 12 ) {
+          var inicial = $('#product_id :selected').attr('annual').substring(1);
+          var rtext = '/ año';
       }
+      if (cantidad > 10) {
+          var costoUnitario = 10;
+          if (cantidad >= 26) {
+              costoUnitario = 8;
+          }
+          var costoContabilidades = (cantidad-10)*recurrency * costoUnitario;
+          var precioFinal = (parseFloat(inicial) + costoContabilidades).toFixed(2);
+      }else {
+          var precioFinal = parseFloat(inicial);
+      }
+      $(".precio-text").text('$' + precioFinal);
+      $(".recurrencia-text").text(rtext);
   }
 
   $( document ).ready(function() {
 	    fillProvincias();
 	    togglePlan();
+		  toggleApellidos();
 
 		  var card = new Card({
 		      form: 'form.tarjeta',
@@ -239,6 +262,20 @@
 		          nameInput: 'input[name="first_name_card"], input[name="last_name_card"]'
 		      }
 		  });
+		  
+		  @if( @$company->state )
+	    	$('#state').val( {{ $company->state }} );
+	    	fillCantones();
+	    	@if( @$company->city )
+		    	$('#city').val( {{ $company->city }} );
+		    	fillDistritos();
+		    	@if( @$company->district )
+			    	$('#district').val( {{ $company->district }} );
+			    	fillZip();
+			    @endif
+		    @endif
+	    @endif
+		  
   	}
   );
 </script>

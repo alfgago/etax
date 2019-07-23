@@ -51,7 +51,7 @@
             </div>
               <div class="form-group col-md-6" id="cantidadContabilidades">
                   <label for="recurrency">Cantidad de Contabilidades</label>
-                  <input type="number" min="10" class="form-control" name="num_companies" id="num_companies" value="10" onblur="validarCantidad();" onkeyup="sumarPrecioContabilidades();">
+                  <input type="number" min="10" class="form-control" name="num_companies" id="num_companies" value="10" onblur="validarCantidad();" onkeyup="calcularPrecioContabilidades();">
               </div>
             <div class="form-group col-md-6">
               <label for="recurrency">Recurrencia de pagos </label>
@@ -168,21 +168,26 @@
         }
     }
     function togglePrice() {
-        var recurrency = $('#recurrency :selected').val();
-        if( recurrency == 1 ) {
-            var precio = $('#product_id :selected').attr('monthly');
-            var rtext = '/ mes';
+        var planId = $("#plan-sel").val();
+        if(planId != 'c'){
+          var recurrency = $('#recurrency :selected').val();
+          if( recurrency == 1 ) {
+              var precio = $('#product_id :selected').attr('monthly');
+              var rtext = '/ mes';
+          }
+          else if( recurrency == 6 ) {
+              var precio = $('#product_id :selected').attr('six');
+              var rtext = '/ semestre';
+          }
+          else if( recurrency == 12 ) {
+              var precio = $('#product_id :selected').attr('annual');
+              var rtext = '/ año';
+          }
+          $(".precio-text").text(precio);
+          $(".recurrencia-text").text(rtext);
+        }else{
+          calcularPrecioContabilidades();
         }
-        else if( recurrency == 6 ) {
-            var precio = $('#product_id :selected').attr('six');
-            var rtext = '/ semestre';
-        }
-        else if( recurrency == 12 ) {
-            var precio = $('#product_id :selected').attr('annual');
-            var rtext = '/ año';
-        }
-        $(".precio-text").text(precio);
-        $(".recurrencia-text").text(rtext);
     }
     function cambiarPrecio() {
         var precio = $(".precio-inicial").text().replace('$', "");
@@ -227,29 +232,40 @@
         //cantidad = parseInt(cantidad, 10);
         if(cantidad != '' && cantidad != undefined){
             if(cantidad < 10){
-                alert('Este plan solo es valido a partir de las 10 (diez) contabilidades');
+                alert('Este plan requiere un mínimo de 10 (diez) contabilidades');
                 $('#num_companies').val(10);
             }
         }else{
             $('#num_companies').val(10);
         }
     }
-    function sumarPrecioContabilidades() {
+    function calcularPrecioContabilidades() {
         var cantidad = parseFloat($('#num_companies').val());
-        var total = 149.99;
-        if (cantidad > 10) {
-            if (cantidad <= 25) {
-                var subtotal = parseFloat((cantidad - 10) * 10);
-                var precioFinal = parseFloat(parseFloat(subtotal) + total).toFixed(2);
-                $(".precio-text").text('$' + precioFinal);
-            }
-            if (cantidad >= 26) {
-                var subtotal = parseFloat((cantidad  - 25) * 8);
-                var precioFinal = parseFloat(parseFloat(subtotal) + 150 + total).toFixed(2);
-                $(".precio-text").text('$' + precioFinal);
-            }
+        var recurrency = parseFloat($('#recurrency :selected').val());
+        if( recurrency == 1 ) {
+            var inicial = $('#product_id :selected').attr('monthly').substring(1);
+            var rtext = '/ mes';
+        }else if( recurrency == 6 ) {
+            var inicial = $('#product_id :selected').attr('six').substring(1);
+            var rtext = '/ semestre';
+        }else if( recurrency == 12 ) {
+            var inicial = $('#product_id :selected').attr('annual').substring(1);
+            var rtext = '/ año';
         }
+        if (cantidad > 10) {
+            var costoUnitario = 10;
+            if (cantidad >= 26) {
+                costoUnitario = 8;
+            }
+            var costoContabilidades = (cantidad-10)*recurrency * costoUnitario;
+            var precioFinal = (parseFloat(inicial) + costoContabilidades).toFixed(2);
+        }else {
+            var precioFinal = parseFloat(inicial);
+        }
+        $(".precio-text").text('$' + precioFinal);
+        $(".recurrencia-text").text(rtext);
     }
+    
     $( document ).ready(function() {
         togglePlan();
     });

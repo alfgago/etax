@@ -100,7 +100,7 @@ class SubscriptionPayment extends Command
                         );
 
                         $data = new stdClass();
-                        $data->description = 'Pago suscripción etax';
+                        $data->description = 'Renovación plan etax';
                         $data->amount = $amount;
                         $data->user_name = $sale->user->user_name;
                         

@@ -16,8 +16,18 @@ class Subscription extends Model {
     }
 
     //Relación con Usuario
-    public function owner() {
+    public function user() {
         return $this->belongsTo(User::class);
+    }
+    
+    //Relación con la venta
+    public function sale() {
+        return $this->belongsTo(Sale::class);
+    }
+    
+    //Relación con las empresas
+    public function companies() {
+        return $this->hasMany(Company::class);
     }
 
 }

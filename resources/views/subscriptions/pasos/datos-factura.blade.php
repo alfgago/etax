@@ -1,26 +1,20 @@
-<?php
-    $company = currentCompanyModel();
-    if( isset($old)) {
-        $company = $old;
-    }
-?>
 
 <div class="form-group col-md-12">
   <h3 class="mt-0">
     Datos de facturación
   </h3>
-  <p class="description">Ingrese los datos del receptor de la factura de su suscripción a eTax.</p>
+  <p class="">Ingrese los datos del receptor de la factura de su suscripción a eTax. <u>Cambiar los datos para facturación no altera la información de su empresa.</u></p>
 </div>
 
 <div class="form-group col-md-4">
     <label for="tipo_persona">Tipo de persona *</label>
     <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();">
-        <option value="F" >Física</option>
-        <option value="J" >Jurídica</option>
-        <option value="D" >DIMEX</option>
-        <option value="N" >NITE</option>
-        <option value="E" >Extranjero</option>
-        <option value="O" >Otro</option>
+        <option value="F" {{ @$company->type == 'F' ? 'selected' : '' }} >Física</option>
+        <option value="J" {{ @$company->type == 'J' ? 'selected' : '' }}>Jurídica</option>
+        <option value="D" {{ @$company->type == 'D' ? 'selected' : '' }}>DIMEX</option>
+        <option value="N" {{ @$company->type == 'N' ? 'selected' : '' }}>NITE</option>
+        <option value="E" {{ @$company->type == 'E' ? 'selected' : '' }}>Extranjero</option>
+        <option value="O" {{ @$company->type == 'O' ? 'selected' : '' }}>Otro</option>
     </select>
 </div>
 
