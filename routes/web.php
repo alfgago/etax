@@ -130,6 +130,9 @@ Route::get('/periodo-pruebas', 'SubscriptionPlanController@startTrial')->name('S
 Route::post('/confirmar-plan', 'SubscriptionPlanController@confirmPlanChange')->name('Subscription.confirmar_plan');
 Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}', 'SubscriptionPlanController@confirmCode')->name('Subscription.confirmar_code');
 Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');
+Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');
+Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}', 'SubscriptionPlanController@confirmCode')->name('Subscription.confirmar_code');
+
 
 // Rutas de usuario
 Route::prefix('usuario')->group(function() {
@@ -146,8 +149,10 @@ Route::prefix('usuario')->group(function() {
     Route::post('update-user-tutorial', 'UserController@updateUserTutorial')->name('User.update_user_tutorial');
     Route::get('wallet', 'InfluencersController@wallet')->name('Influencers.wallet');
     Route::post('add-retiro', 'InfluencersController@retiro')->name('Influencers.retiro');
+
     Route::get('cancelar', 'UserController@cancelar')->name('User.cancelar');
     Route::patch('update-cancelar', 'UserController@updatecancelar')->name('User.updatecancelar');
+
 });
 
 //Rutas de Pagos de la aplicacion
@@ -158,6 +163,7 @@ Route::prefix('payment')->group(function(){
     Route::post('payment-charge', 'PaymentController@paymentCharge')->name('Payment.payment_charge');
     Route::get('pending-charges', 'PaymentController@pendingCharges')->name('Payment.pending_charges');
     Route::post('comprar-facturas', 'PaymentController@comprarFacturas')->name('Payment.comprar_facturas');
+    Route::get('pruebas', 'PaymentController@CompanyDisponible')->name('Payment.CompanyDisponible');
 });
 
 
