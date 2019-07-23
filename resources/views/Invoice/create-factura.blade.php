@@ -54,7 +54,7 @@ $company = currentCompanyModel();
                     
                     <div class="form-group col-md-12 with-button">
                       <label for="cliente">Seleccione el cliente</label>
-                      <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
+                      <select class="form-control select-search" name="client_id" id="client_id" placeholder="" @if(@$document_type !== '04') required @endif>
                         <option value='' selected>-- Seleccione un cliente --</option>
                         @foreach ( currentCompanyModel()->clients as $cliente )
                           @if( @$cliente->canInvoice($document_type) )
