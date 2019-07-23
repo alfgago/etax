@@ -87,8 +87,7 @@
       if( !allowEmails ) {
         allow = false;
       }
-    }
-                                          );
+    });
     return allow;
   }
   function validateEmail(email) {
@@ -100,7 +99,7 @@
     $("#product_id option").hide();
     $("#product_id ."+planId).show();
     $("#product_id").val( $("#product_id ."+planId).first().val() );
-    togglePrice();
+    togglePrice(); n--
   }
   function togglePrice() {
     var recurrency = $('#recurrency :selected').val();
