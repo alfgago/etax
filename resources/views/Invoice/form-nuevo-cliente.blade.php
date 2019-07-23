@@ -19,7 +19,7 @@
     <div class="form-group col-md-4">
       <label for="tipo_persona">Tipo de persona *</label>
       <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();" onchange="cambiarDireccion();">
-      @if(@$document_type == '01' || $document_type == '08')
+      @if(@$document_type == '01' || @$document_type == '08')
         <option value="F" >Física</option>
         <option value="J" >Jurídica</option>
         <option value="D" >DIMEX</option>

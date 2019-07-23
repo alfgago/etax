@@ -46,7 +46,7 @@
             </li>
             @endif
             
-            @if( allowTo('validation') )
+            @if( allowTo('invoicing') || allowTo('billing') )
             <li class="nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" id="facturacion">
                 <a class="nav-item-hold" href="/facturas-emitidas">
                     <img src="{{asset('assets/images/iconos/facturacion.png')}}" class="sidemenu-icon">
@@ -54,13 +54,17 @@
                 </a>
                 
                 <div class="subitems">
+                    @if( allowTo('invoicing') )
                     <a href="/facturas-emitidas">Ver documentos emitidos</a>
                     <a href="/facturas-emitidas/emitir-factura/01">Emitir factura electrónica</a>
                     <a href="/facturas-emitidas/emitir-factura/09">Emitir factura electrónica de exportación</a>
                     <a href="/facturas-emitidas/emitir-factura/08">Emitir factura electrónica de compra</a>
                     <a href="/facturas-emitidas/emitir-factura/04">Emitir tiquete electrónico</a>
                     <a style="display:none; !important" href="/facturas-emitidas/emitir-factura/02">Emitir nota de débito</a>
+                    @endif
+                    @if( allowTo('invoicing') )
                     <a href="/facturas-recibidas/aceptaciones">Aceptación de facturas recibidas</a>
+                    @endif
                 </div>
             </li>
             @endif
