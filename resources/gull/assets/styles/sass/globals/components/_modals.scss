@@ -121,3 +121,65 @@
 .swal2-container.container-success .swal2-styled:not(.swal2-cancel) {
     background: #158e5d!important;
 }
+
+
+  .modal-open .modal:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: -webkit-gradient(linear, left top, right top, from(#2852A6), to(#392993));
+      background: linear-gradient(90deg, #2852A6 0%, #392993 100%);
+      opacity: 0.6;
+  }
+  
+  .modal-header .close {
+      font-size: 4rem;
+      opacity: 1;
+      line-height: 1;
+      padding: 0 1rem;
+  }
+  
+  .modal.show .modal-dialog {
+      margin: auto;
+  }
+  
+  .modal-open .modal {
+      display: flex !important;
+  }
+  
+  .modal-content {
+      max-height: 95vh;
+  }
+
+  .validate-table select,
+  .validate-table {
+    font-size: 10px;
+    line-height: 1;
+  }
+  
+  .validate-table select {
+    
+  }
+  
+  .validate-table th,
+  .validate-table td {
+      padding: .5rem;
+      vertical-align: middle;
+  }
+  
+  .modal-lg {
+      max-width: 80rem;
+  }
+
+  .modal-content .btn-primary {
+      margin: 0;
+  }
+  .modal-content {
+      max-height: 95vh;
+      width: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+  }

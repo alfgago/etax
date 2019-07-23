@@ -27,7 +27,7 @@
 </div>
 <div class="form-group col-md-6" id="cantidadContabilidades">
     <label for="recurrency">Cantidad de Contabilidades</label>
-    <input type="number" min="10" class="form-control" name="num_companies" id="num_companies" value="10" onblur="validarCantidad();" onkeyup="sumarPrecioContabilidades();">
+    <input type="number" min="10" class="form-control" name="num_companies" id="num_companies" value="10" onblur="validarCantidad();" onkeyup="calcularPrecioContabilidades();">
 </div>
 <div class="form-group col-md-6">
   <label for="recurrency">Recurrencia de pagos </label>
