@@ -1,8 +1,6 @@
-
-
-    <div class="form-group col-md-4">
+   <div class="form-group col-md-4">
       <label for="code">Código *</label>
-      <input type="text" class="form-control" name="code" id="code" value="{{ @$provider->code }}" required <?php echo (!@$provider->code) ? '' : 'disabled' ?>>
+      <input type="text" class="form-control" name="code" id="code" value="{{ @$provider->code }}" required>
     </div>
     
     <div class="form-group col-md-4">

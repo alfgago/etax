@@ -163,16 +163,6 @@ class ProviderController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $company_id = currentCompany();
-        $request->validate([
-          'tipo_persona' => 'required',
-          'id_number' => 'required',
-          'code' => 'required|unique:providers,code,NULL,id,company_id,' . $company_id,
-          'first_name' => 'required',
-          'email' => 'required',
-          'country' => 'required'
-        ]);
-      
         $provider = Provider::findOrFail($id);
         $this->authorize('update', $provider);
       
