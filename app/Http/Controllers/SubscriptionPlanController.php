@@ -28,21 +28,21 @@ class SubscriptionPlanController extends Controller
         
     public function changePlan() {
         
-        $plans = EtaxProducts::where('is_subscription', true)->with('plan')->get();
+        $plans = SubscriptionPlan::get();
         return view( 'subscriptions/change-plan', compact('plans') );
         
     }
     
     public function selectPlan() {
         
-        $plans = EtaxProducts::where('is_subscription', true)->with('plan')->get();
+        $plans = SubscriptionPlan::get();
         return view( 'subscriptions/subscription-wizard', compact('plans') );
         
     }
     
     public function startTrial() {
         
-        $plans = EtaxProducts::where('is_subscription', true)->with('plan')->get();
+        $plans = SubscriptionPlan::get();
         return view( 'subscriptions/subscription-wizard-trial', compact('plans') );
         
     }
@@ -51,7 +51,7 @@ class SubscriptionPlanController extends Controller
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $user = auth()->user();
         if($request->plan_sel == "c"){
-            $plan_tier = "Contador-".$user->id;
+            $plan_tier = "Pro ($user->id)";
             $cantidad = $request->num_companies;
             $total_extras = 0;
             if($cantidad > 25){
@@ -75,7 +75,7 @@ class SubscriptionPlanController extends Controller
                 ['plan_type' => 'Contador',
                 'num_companies' => $request->num_companies,
                 'num_users' => 10,
-                'num_invoices' => 5000,
+                'num_invoices' => 10000,
                 'ticket_sla' => 1,
                 'call_center_vip' => 1,
                 'setup_help' => 1,
@@ -103,7 +103,7 @@ class SubscriptionPlanController extends Controller
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $user = auth()->user();
         if($request->plan_sel == "c"){
-            $plan_tier = "Contador-".$user->id;
+            $plan_tier = "Pro ($user->id)";
             $cantidad = $request->num_companies;
             $total_extras = 0;
             if($cantidad > 25){
@@ -127,7 +127,7 @@ class SubscriptionPlanController extends Controller
                 ['plan_type' => 'Contador',
                 'num_companies' => $request->num_companies,
                 'num_users' => 10,
-                'num_invoices' => 5000,
+                'num_invoices' => 10000,
                 'ticket_sla' => 1,
                 'call_center_vip' => 1,
                 'setup_help' => 1,

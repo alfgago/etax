@@ -51,7 +51,7 @@
             </div>
               <div class="form-group col-md-6" id="cantidadContabilidades">
                   <label for="recurrency">Cantidad de Contabilidades</label>
-                  <input type="number" min="10" class="form-control" name="num_companies" id="num_companies" value="10" onblur="validarCantidad();" onkeyup="calcularPrecioContabilidades();">
+                  <input type="number" min="10" class="form-control" name="num_companies" id="num_companies" value="10" onblur="validarCantidad();" onkeyup="calcularPrecioContabilidades();" onchange="calcularPrecioContabilidades();">
               </div>
             <div class="form-group col-md-6">
               <label for="recurrency">Recurrencia de pagos </label>
@@ -233,10 +233,10 @@
         if(cantidad != '' && cantidad != undefined){
             if(cantidad < 10){
                 alert('Este plan requiere un mínimo de 10 (diez) contabilidades');
-                $('#num_companies').val(10);
+                $('#num_companies').val(10).change();
             }
         }else{
-            $('#num_companies').val(10);
+            $('#num_companies').val(10).change();
         }
     }
     function calcularPrecioContabilidades() {

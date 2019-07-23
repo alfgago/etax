@@ -76,13 +76,12 @@
       </div>
     </div>
     
-    <div class="col-lg-12 mb-4">
+    <div class="col-lg-12 mb-4 hidden">
       <div class="sidebar-dashboard">
         <div class="card-title">Notificaciones</div>
     
         <div class="notificaciones-container">
-          <div class="notificacion"><span class="fecha">01/06/2019</span> La emisión de tiquetes y notas de débito se encuentra temporalmente deshabilitada.</div>
-          <div class="notificacion"><span class="fecha">01/06/2019</span> Facturación con IVA habilitada en eTax.</div>
+          
         </div>
         
       </div>
@@ -101,7 +100,10 @@
             {{ $empresa->id_number }} {{ $empresa->business_name ? " - ".$empresa->business_name : ''}}
           </div>
           <div class="dato-empresa">
-            <b>Plan actual:</b> {{ getCurrentSubscription()->product->plan->getName() }}
+            <b>Plan actual:</b> {{ getCurrentSubscription()->plan->getName() }}
+          </div>
+          <div class="dato-empresa">
+            <b>Empresas disponibles:</b> {{ getCurrentSubscription()->plan->num_companies }}
           </div>
           <div class="dato-empresa">
             <b>Facturación electrónica:</b> Habilitada

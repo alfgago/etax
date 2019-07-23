@@ -72,6 +72,11 @@ class Company extends Model {
     }
     
     //Relación con el plan
+    public function plan() {
+        return $this->belongsTo(SubscriptionPlan::class, 'subscription_id');
+    }
+    
+    //Relación con el plan
     public function subscription() {
         return $this->hasOne(Sales::class);
     }
