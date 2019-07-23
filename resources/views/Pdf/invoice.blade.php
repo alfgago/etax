@@ -206,6 +206,9 @@
             case '03':
                 $documentType = 'Nota de crédito electrónica';
             break;
+            case '04':
+                $documentType = 'Tiquete electrónica';
+                break;
             case '08':
                 $documentType = 'Factura de exportación';
             break;
