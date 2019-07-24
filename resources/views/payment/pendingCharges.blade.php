@@ -43,10 +43,10 @@
                                         @foreach($charges['userCharges'] as $charge)
                                             @if($charge)
                                                 <tr>
-                                                    <td>{{$charge->chargeDescription}}</td>
-                                                    <td>{{$charge->transactionAmount}}</td>
-                                                    <td>{{$charge->transactionCurrency}}</td>
-                                                    <td>{{$charge->chargeDateTime}}</td>
+                                                    <td>{{$charge['chargeDescription']}}</td>
+                                                    <td>{{$charge['transactionAmount']}}</td>
+                                                    <td>{{$charge['transactionCurrency']}}</td>
+                                                    <td>{{$charge['chargeDateTime']}}</td>
                                                     {{--<td>
                                                         @if( auth()->user()->isOwnerOfTeam($team) )
                                                             <form id="delete-form-{{ $company_detail->id }}" class="inline-form" method="POST" action="/empresas/{{ $company_detail->id }}" >
