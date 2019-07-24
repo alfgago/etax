@@ -8,6 +8,7 @@
     <div onclick="abrirPopup('importar-aceptacion-popup');" class="btn btn-primary hidden">Importar facturas para aceptación</div>
     <a href="/facturas-recibidas/aceptaciones-otros" class="btn btn-primary">Aceptación manual de facturas</a>
     <a href="/facturas-recibidas/autorizaciones" class="btn btn-primary">Autorizar facturas por email</a>
+    <a href="/facturas-recibidas/validaciones" class="btn btn-primary">Validar facturas</a>
 @endsection 
 
 @section('content') 
