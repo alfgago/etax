@@ -17,10 +17,15 @@
       </select>
     </div>
     
-    <div class="form-group col-md-4">
+    <div class="form-group col-md-4" id="divNac">
       <label for="id_number">Número de identificación *</label>
-      <input type="number" class="form-control" name="id_number" id="id_number" value="{{ @$provider->id_number }}" required onchange="getJSONCedula(this.value);">
+      <input max="12" maxlength="12" class="form-control" name="id" value="{{ @$provider->id_number }}" required onchange="getJSONCedula(this.value);" onkeyup="validateIdentificationLenght();">
     </div>
+    <div class="form-group col-md-4" id="divExtr">
+       <label for="id_number">Número de identificación *</label>
+       <input max="20" maxlength="20" class="form-control" name="idExt" value="{{ @$provider->id_number }}" required onchange="getJSONCedula(this.value);" onkeyup="validateIdentificationLenght();">
+    </div>
+    <input hidden id="id_number" name="id_number">
     
     <div class="form-group col-md-4">
       <label for="first_name">Nombre *</label>
@@ -199,5 +204,17 @@
                   $('#extranjero').attr("hidden", true);
               }
           }
-		  
+          function validateIdentificationLenght(){
+              var ced = $('#tipo_persona').val();
+              if(ced == 'E'){
+                  $('#divNac').hide();
+                  $('#divExtr').show();
+                  $('#id_number').val($("input[name*='idExt']").val());
+              }else{
+                  $('#divExtr').hide();
+                  $('#divNac').show();
+                  $('#id_number').val($("input[name*='id']").val());
+              }
+          }
+          validateIdentificationLenght();
 		</script>

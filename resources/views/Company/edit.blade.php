@@ -64,7 +64,7 @@
 						    
 						    <div class="form-group col-md-4">
 						      <label for="tipo_persona">Tipo de persona *</label>
-						      <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();">
+						      <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();" onchange="validateIdentificationLenght();">
 						        <option value="F" {{ @$company->type == 'F' ? 'selected' : '' }} >Física</option>
 						        <option value="J" {{ @$company->type == 'J' ? 'selected' : '' }}>Jurídica</option>
 						        <option value="D" {{ @$company->type == 'D' ? 'selected' : '' }}>DIMEX</option>
@@ -74,11 +74,15 @@
 						      </select>
 						    </div>
 						    
-						    <div class="form-group col-md-4">
+						    <div class="form-group col-md-4" id="divNac">
 						      <label for="id_number">Número de identificación *</label>
-						      <input type="number" class="form-control" name="id_number" id="id_number" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);">
+						      <input max="12" maxlength="12" name="id" class="form-control" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);" onkeyup="validateIdentificationLenght();">
 						    </div>
-						    
+						    <div class="form-group col-md-4" id="divExtr">
+						      <label for="id_number">Número de identificación *</label>
+						      <input max="20" maxlength="20" name="idExt" class="form-control" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);" onkeyup="validateIdentificationLenght();">
+						    </div>
+
 						    <div class="form-group col-md-4">
 						      <label for="business_name">Razón Social *</label>
 						      <input type="text" class="form-control" name="business_name" id="business_name" value="{{ @$company->business_name }}" required>
@@ -158,7 +162,7 @@
 						      <label for="address">Dirección</label>
 						      <textarea class="form-control" name="address" id="address" >{{ @$company->address }}</textarea>
 						    </div>
-                              
+                              <input hidden id="id_number" name="id_number">
 						    <button id="btn-submit" type="submit" class="hidden btn btn-primary">Guardar información</button>          
 						    
 						  </div>
@@ -175,22 +179,18 @@
 @endsection
 
 @section('footer-scripts')
-	
 	<script>
-	  
 	  $(document).ready(function(){
-	    
+          $('#divExtr').hide();
 	  	fillProvincias();
-	  	
 	    $("#billing_emails").tagging({
 	      "forbidden-chars":[",",'"',"'","?"],
 	      "forbidden-chars-text": "Caracter inválido: ",
 	      "edit-on-delete": false,
 	      "tag-char": "@"
 	    });
-	    
 	    toggleApellidos();
-	    
+	    validateIdentificationLenght();
 	    //Revisa si tiene estado, canton y distrito marcados.
 	    @if( @$company->state )
 	    	$('#state').val( "{{ $company->state }}" );
@@ -204,9 +204,18 @@
 			    @endif
 		    @endif
 	    @endif
-	    
 	  });
-	  
-	</script>
-
+	  function validateIdentificationLenght(){
+          var ced = $('#tipo_persona').val();
+          if(ced == 'E'){
+              $('#divNac').hide();
+              $('#divExtr').show();
+              $('#id_number').val($("input[name*='idExt']").val());
+          }else{
+              $('#divExtr').hide();
+              $('#divNac').show();
+              $('#id_number').val($("input[name*='id']").val());
+          }
+      }
+    </script>
 @endsection

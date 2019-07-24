@@ -96,6 +96,9 @@ class CompanyController extends Controller {
         }
 
         $company->type = $request->tipo_persona;
+        if($request->tipo_persona == 'E'){
+            $request->id_number = $request->idExt;
+        }
         $company->id_number = preg_replace("/[^0-9]+/", "", $request->id_number);
         $company->name = $request->name;
         $company->last_name = $request->last_name;
@@ -261,7 +264,9 @@ class CompanyController extends Controller {
                 'id_number' => 'required|unique:companies',
             ]);
         }
-
+        if($request->tipo_persona == 'E'){
+            $request->id_number = $request->idExt;
+        }
         $team = Team::where('company_id', $company->id)->first();
         
         if ($request->file('input_logo')) {
