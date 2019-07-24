@@ -78,7 +78,7 @@
         if(tipoPersona != 'E'){
             if(phone.length == 8){
                 var init = phone.substr(0,1);
-                if(init != '5' && init != '6' && init != '7' && init != '8'){
+                if(init == '1' || init == '3'){
                     alert('Debe incluir un número de celular válido');
                     $('#phone').val('');
                 }
