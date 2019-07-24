@@ -233,6 +233,7 @@ Route::group(['prefix' => 'companies', 'namespace' => 'Teamwork', 'middleware' =
 
 //OM Routing
 Route::get('invite/register/{token}', 'InviteController@index')->name('invites.accept_invite');
+Route::delete('invite/delete/{id}', 'InviteController@removeInvitation')->name('teams.members.removeInvitation');
 Route::post('change-company', 'CompanyController@changeCompany');
 Route::get('company-deactivate/{token}', 'CompanyController@confirmCompanyDeactivation')->name('company-deactivate');
 Route::patch('/plans/cancel-plan/{planNo}', 'PlanController@cancelPlan')->name('Plan.cancel_plan');

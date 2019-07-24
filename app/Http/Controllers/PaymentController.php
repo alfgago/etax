@@ -51,7 +51,7 @@ class PaymentController extends Controller
 
         return datatables()->of( $payments )
             ->addColumn('sale', function(Payment $payment) {
-                return $payment->sale->product->name;
+                return $payment->sale->plan->name;
             })
             ->toJson();
     }
@@ -350,7 +350,7 @@ class PaymentController extends Controller
                 $item = new stdClass();
                 $item->total = $amount;
                 $item->code = $sale->etax_product_id;
-                $item->name = $sale->product->name . " / $recurrency meses";
+                $item->name = $sale->plan->name . " / $recurrency meses";
                 $item->descuento = $montoDescontado;
                 $item->discount_reason = $razonDescuento;
                 $item->cantidad = 1;
@@ -526,16 +526,16 @@ class PaymentController extends Controller
             $unpaidSubscriptions = Sales::where('status', 2)->where('recurrency', '!=', '0')->get();
             foreach($unpaidSubscriptions as $sale){
                 
-                $subtotal = $sale->product->plan->monthly_price;
+                $subtotal = $sale->plan->monthly_price;
                 switch ($sale->recurrency){
                     case 1:
-                        $subtotal = $sale->product->plan->monthly_price;
+                        $subtotal = $sale->plan->monthly_price;
                         break;
                     case 6:
-                        $subtotal = $sale->product->plan->six_price;
+                        $subtotal = $sale->plan->six_price;
                         break;
                     case 12:
-                        $subtotal = $sale->product->plan->annual_price;
+                        $subtotal = $sale->plan->annual_price;
                         break;
                 }
                 
@@ -612,7 +612,7 @@ class PaymentController extends Controller
                         $item = new stdClass();
                         $item->total = $amount;
                         $item->code = $sale->etax_product_id;
-                        $item->name = $sale->product->name . " / $sale->recurrency meses";
+                        $item->name = $sale->plan->name . " / $sale->recurrency meses";
                         $item->descuento = 0;
                         $item->discount_reason = null;
                         $item->cantidad = 1;
@@ -627,7 +627,7 @@ class PaymentController extends Controller
                         \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
                             [
                                 'name' => $company->name . ' ' . $company->last_name,
-                                'product' => $sale->product->plan->plan_type,
+                                'product' => $sale->plan->plan_type,
                                 'card' => $paymentMethod->masked_card
                             ]
                         ));
@@ -636,7 +636,7 @@ class PaymentController extends Controller
                     \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
                         [
                             'name' => $company->name . ' ' . $company->last_name,
-                            'product' => $sale->product->plan->plan_type,
+                            'product' => $sale->plan->plan_type,
                             'card' => "No indica"
                         ]
                     ));

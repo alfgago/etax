@@ -1011,7 +1011,7 @@ class CalculatedTax extends Model
         			  $ivaData->$typeVarAct8 += $ivaDataAnterior->$typeVarAct8 ;
         			  $ivaData->$typeVarAct3 += $ivaDataAnterior->$typeVarAct3 ;
               }catch(\Throwable $e){
-                Log::warning("error en calculo IVA: " . $e->getMessage() );
+                Log::warning("Error en calculo IVA: " . $e->getMessage() );
               }
             }
     			}

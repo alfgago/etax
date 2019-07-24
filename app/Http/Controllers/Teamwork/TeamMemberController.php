@@ -233,4 +233,5 @@ class TeamMemberController extends Controller {
         return redirect()->back()->withMessage('Se ha re-enviado invitación a ' . $invite->email . ' satisfactoriamente.');
     }
 
+
 }
