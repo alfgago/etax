@@ -7,7 +7,7 @@
 <div class="form-group col-md-4">
   <label for="tipo_persona">Tipo de persona *</label> 
   <select class="form-control checkEmpty" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();">
-    <option value="F" {{ @$company->type == 'F' ? 'selected' : '' }} >Física</option>
+    <option value="F" {{ @$company->type == 'F' ? 'selected' : '' }}>Física</option>
     <option value="J" {{ @$company->type == 'J' ? 'selected' : '' }}>Jurídica</option>
     <option value="D" {{ @$company->type == 'D' ? 'selected' : '' }}>DIMEX</option>
     <option value="N" {{ @$company->type == 'N' ? 'selected' : '' }}>NITE</option>
@@ -18,7 +18,7 @@
 
 <div class="form-group col-md-4" style="white-space: nowrap;">
   <label for="id_number">Número de identificación *</label>
-  <input type="number" class="form-control checkEmpty" name="id_number" id="id_number" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);">
+  <input type="number" class="form-control checkEmpty" name="id_number" id="id_number" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);" onblur="validateIdentificationLenght();">
 </div>
 
 <div class="form-group col-md-4">
@@ -71,3 +71,45 @@
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step2');">Siguiente paso</button>
 </div>
+<script>
+    function validateIdentificationLenght(){
+        var tCed = $('#tipo_persona').val();
+        var identificacion = $('#id_number').val();
+        switch (tCed){
+            case 'F':
+                if(identificacion.length != 9){
+                    alert('Utilice 9 dígitos numerales para este tipo de documento');
+                    $('#id_number').val('');
+                }
+                break;
+            case 'J':
+                if(identificacion.length != 10){
+                    alert('Utilice 10 dígitos numerales para este tipo de documento');
+                    $('#id_number').val('');
+                }
+                break;
+            case 'D':
+                if(identificacion.length != 11 || identificacion.length != 12) {
+                    alert('Utilice 11 ó 12 dígitos numerales para este tipo de documento');
+                    $('#id_number').val('');
+                }
+                break;
+            case 'N':
+                if(identificacion.length != 10){
+                    alert('Utilice 10 dígitos numerales para este tipo de documento');
+                    $('#id_number').val('');
+                }
+                break;
+            case 'E':
+                if(identificacion.length > 20){
+                    alert('Utilice un máximo de 20 dígitos numerales para este tipo de documento');
+                    $('#id_number').val('');
+                }
+                break;
+            default:
+                alert('Debe seleccionar un tipo de persona');
+                $('#id_number').val('');
+            break;
+        }
+    }
+</script>

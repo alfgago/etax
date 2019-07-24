@@ -74,13 +74,9 @@
 						      </select>
 						    </div>
 						    
-						    <div class="form-group col-md-4" id="divNac">
+						    <div class="form-group col-md-4">
 						      <label for="id_number">Número de identificación *</label>
-						      <input max="12" maxlength="12" name="id" class="form-control" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);" onkeyup="validateIdentificationLenght();">
-						    </div>
-						    <div class="form-group col-md-4" id="divExtr">
-						      <label for="id_number">Número de identificación *</label>
-						      <input max="20" maxlength="20" name="idExt" class="form-control" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);" onkeyup="validateIdentificationLenght();">
+						      <input max="20" maxlength="20" id="id_number" name="id_number" class="form-control" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);" onblur="validateIdentificationLenght();">
 						    </div>
 
 						    <div class="form-group col-md-4">
@@ -162,7 +158,6 @@
 						      <label for="address">Dirección</label>
 						      <textarea class="form-control" name="address" id="address" >{{ @$company->address }}</textarea>
 						    </div>
-                              <input hidden id="id_number" name="id_number">
 						    <button id="btn-submit" type="submit" class="hidden btn btn-primary">Guardar información</button>          
 						    
 						  </div>
@@ -190,7 +185,6 @@
 	      "tag-char": "@"
 	    });
 	    toggleApellidos();
-	    validateIdentificationLenght();
 	    //Revisa si tiene estado, canton y distrito marcados.
 	    @if( @$company->state )
 	    	$('#state').val( "{{ $company->state }}" );
@@ -205,16 +199,44 @@
 		    @endif
 	    @endif
 	  });
-	  function validateIdentificationLenght(){
-          var ced = $('#tipo_persona').val();
-          if(ced == 'E'){
-              $('#divNac').hide();
-              $('#divExtr').show();
-              $('#id_number').val($("input[name*='idExt']").val());
-          }else{
-              $('#divExtr').hide();
-              $('#divNac').show();
-              $('#id_number').val($("input[name*='id']").val());
+      function validateIdentificationLenght(){
+          var tCed = $('#tipo_persona').val();
+          var identificacion = $('#id_number').val();
+          switch (tCed){
+              case 'F':
+                  if(identificacion.length != 9){
+                      alert('Utilice 9 dígitos numerales para este tipo de documento');
+                      $('#id_number').val('');
+                  }
+                  break;
+              case 'J':
+                  if(identificacion.length != 10){
+                      alert('Utilice 10 dígitos numerales para este tipo de documento');
+                      $('#id_number').val('');
+                  }
+                  break;
+              case 'D':
+                  if(identificacion.length != 11 || identificacion.length != 12) {
+                      alert('Utilice 11 ó 12 dígitos numerales para este tipo de documento');
+                      $('#id_number').val('');
+                  }
+                  break;
+              case 'N':
+                  if(identificacion.length != 10){
+                      alert('Utilice 10 dígitos numerales para este tipo de documento');
+                      $('#id_number').val('');
+                  }
+                  break;
+              case 'E':
+                  if(identificacion.length > 20){
+                      alert('Utilice un máximo de 20 dígitos numerales para este tipo de documento');
+                      $('#id_number').val('');
+                  }
+                  break;
+              default:
+                  alert('Debe seleccionar un tipo de persona');
+                  $('#id_number').val('');
+              break;
           }
       }
     </script>

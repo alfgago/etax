@@ -89,7 +89,7 @@ class ClientController extends Controller
         
         $request->validate([
           'tipo_persona' => 'required',
-          'id_number' => 'required',
+          'id_number' => 'required|unique:clients',
           'code' => 'required',
           'first_name' => 'required',
           'email' => 'required',
@@ -101,8 +101,9 @@ class ClientController extends Controller
         $cliente->company_id = $company->id;
       
         $cliente->tipo_persona = $request->tipo_persona;
-        if($request->tipo_persona == 'E'){
-            $request->id_number = $request->idExt;
+        $respValidateIdNumber = validate_IdNumber($request->id_number, $request->tipo_persona);
+        if($respValidateIdNumber != true){
+            return redirect()->back()->withError('Verifique la cantidad de dígitos de la identificación');
         }
         $cliente->id_number = preg_replace("/[^0-9]/", "", $request->id_number );
         
@@ -181,8 +182,9 @@ class ClientController extends Controller
       
         $cliente = Client::findOrFail($id);
         $this->authorize('update', $cliente);
-        if($request->tipo_persona == 'E'){
-            $request->id_number = $request->idExt;
+        $respValidateIdNumber = validate_IdNumber($request->id_number, $request->tipo_persona);
+        if($respValidateIdNumber != true){
+            return redirect()->back()->withError('Verifique la cantidad de dígitos de la identificación');
         }
       
         $cliente->tipo_persona = $request->tipo_persona;

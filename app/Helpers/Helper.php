@@ -645,4 +645,49 @@ if (!function_exists('get_rates')) {
         }
 
     }
+
+    if(!function_exists('validate_IdNumber')){
+        function validate_IdNumber($cedIdent, $tipo_persona){
+            switch ($tipo_persona){
+                case 'F':
+                    if(is_numeric($cedIdent) && strlen((string)$cedIdent) == 9){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                    break;
+                case 'J':
+                    if(is_numeric($cedIdent) && strlen((string)$cedIdent) == 10){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                    break;
+                case 'D':
+                    if((strlen((string)$cedIdent) == 11 || strlen((string)$cedIdent) == 12) && is_numeric($cedIdent)){
+                            return true;
+                    }else{
+                        return false;
+                    }
+                    break;
+                case 'N':
+                    if(is_numeric($cedIdent) && strlen((string)$cedIdent) == 10){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                    break;
+                case 'E':
+                    if(is_numeric($cedIdent) && strlen((string)$cedIdent) <= 20){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                    break;
+                default:
+                    return false;
+                break;
+            }
+        }
+    }
 }

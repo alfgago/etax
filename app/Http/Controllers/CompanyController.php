@@ -96,8 +96,10 @@ class CompanyController extends Controller {
         }
 
         $company->type = $request->tipo_persona;
-        if($request->tipo_persona == 'E'){
-            $request->id_number = $request->idExt;
+
+        $respValidateIdNumber = validate_IdNumber($request->id_number, $request->tipo_persona);
+        if($respValidateIdNumber != true){
+            return redirect()->back()->withError('Verifique la cantidad de dígitos de la identificación');
         }
         $company->id_number = preg_replace("/[^0-9]+/", "", $request->id_number);
         $company->name = $request->name;
@@ -264,9 +266,6 @@ class CompanyController extends Controller {
                 'id_number' => 'required|unique:companies',
             ]);
         }
-        if($request->tipo_persona == 'E'){
-            $request->id_number = $request->idExt;
-        }
         $team = Team::where('company_id', $company->id)->first();
         
         if ($request->file('input_logo')) {
@@ -285,6 +284,10 @@ class CompanyController extends Controller {
         }
 
         $company->type = $request->tipo_persona;
+        $respValidateIdNumber = validate_IdNumber($request->id_number, $request->tipo_persona);
+        if($respValidateIdNumber != true){
+            return redirect()->back()->withError('Verifique la cantidad de dígitos de la identificación');
+        }
         $company->id_number = preg_replace("/[^0-9]+/", "", $request->id_number);
         $company->business_name = $request->business_name;
         $company->activities = $request->activities;

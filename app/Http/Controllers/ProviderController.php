@@ -99,8 +99,9 @@ class ProviderController extends Controller
         $provider->company_id = $company->id;
       
         $provider->tipo_persona = $request->tipo_persona;
-        if($request->tipo_persona == 'E'){
-            $request->id_number = $request->idExt;
+        $respValidateIdNumber = validate_IdNumber($request->id_number, $request->tipo_persona);
+        if($respValidateIdNumber != true){
+            return redirect()->back()->withError('Verifique la cantidad de dígitos de la identificación');
         }
         $provider->id_number = preg_replace("/[^0-9]/", "", $request->id_number );
         $provider->code = $request->code;
@@ -170,8 +171,9 @@ class ProviderController extends Controller
         $this->authorize('update', $provider);
       
         $provider->tipo_persona = $request->tipo_persona;
-        if($request->tipo_persona == 'E'){
-            $request->id_number = $request->idExt;
+        $respValidateIdNumber = validate_IdNumber($request->id_number, $request->tipo_persona);
+        if($respValidateIdNumber != true){
+            return redirect()->back()->withError('Verifique la cantidad de dígitos de la identificación');
         }
         $provider->id_number = preg_replace("/[^0-9]/", "", $request->id_number );
         $provider->code = $request->code;
