@@ -217,7 +217,7 @@
                       }
                       break;
                   case 'D':
-                      if(identificacion.length != 11 || identificacion.length != 12) {
+                      if(identificacion.length != 11 && identificacion.length != 12) {
                           alert('Utilice 11 ó 12 dígitos numerales para este tipo de documento');
                           $('#id_number').val('');
                       }
