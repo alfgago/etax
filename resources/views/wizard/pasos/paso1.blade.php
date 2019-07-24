@@ -76,7 +76,7 @@
         var tipoPersona = $('#tipo_persona').val();
         var phone = $('#phone').val();
         if(tipoPersona != 'E'){
-            if(phone.length == 8){
+            if(phone.length >= 20){
                 var init = phone.substr(0,1);
                 if(init == '1' || init == '3'){
                     alert('Debe incluir un número de celular válido');
