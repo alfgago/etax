@@ -211,10 +211,10 @@ class InvoiceController extends Controller
             return redirect('/empresas/editar')->withError('No ha definido una actividad comercial para esta empresa');
         }
 
-        if($company->last_note_ref_number == null) {
+        if($company->last_note_ref_number === null) {
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
         }
-        if($company->last_ticket_ref_number == null) {
+        if($company->last_ticket_ref_number === null) {
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de tiquetes');
         }
         return view("Invoice/create-factura", ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),

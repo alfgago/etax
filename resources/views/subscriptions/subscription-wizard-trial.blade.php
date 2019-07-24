@@ -253,22 +253,27 @@
             total_extras += (cantidad - 10) * 10;
             cantidad = 10;
         }
+        var recurrencia_texto = "";
         if(recurrency == 1){
             total = cantidad * 14.999;
             total = total + total_extras;
+            recurrencia_texto = "mes";
         }
         if(recurrency == 6){
           total = cantidad * 13.740;
           total = total + total_extras;
           total = total * 6;
+          recurrencia_texto = "semestre";
         }
         if(recurrency == 12){
           total = cantidad * 12.491;
           total = total + total_extras;
           total = total * 12;
+          recurrencia_texto = "año";
         }
         var precioFinal = parseFloat(total).toFixed(2);
         $(".precio-text").text('$' + precioFinal);
+        $(".recurrencia-text").text('/ '+ recurrencia_texto);
 
     }
     
