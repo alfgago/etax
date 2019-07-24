@@ -100,7 +100,7 @@ class InvoiceUtils
             $cc = [];
             //Primero revisa si el invoice tiene un client_id
             if ( isset( $invoice->client_id ) ) {
-                $client_billing_emails = $invoice->client->billing_emails;
+                $client_billing_emails = trim($invoice->client->billing_emails);
                 if ( isset($client_billing_emails) ){
                     //Si existen, empieza con eso.
                     $arr = explode(",", $client_billing_emails);
@@ -129,7 +129,7 @@ class InvoiceUtils
                 Mail::to($cc)->send(new \App\Mail\Invoice(['xml' => $xmlPath,
                     'data_invoice' => $invoice, 'data_company' =>$company]));
             } else {
-                Mail::to(!empty($invoice->client_email) ? $invoice->client_email : $company->email)->send(new \App\Mail\Invoice(['xml' => $xmlPath,
+                Mail::to(!empty($invoice->client_email) ? trim($invoice->client_email) : trim($company->email))->send(new \App\Mail\Invoice(['xml' => $xmlPath,
                     'data_invoice' => $invoice, 'data_company' =>$company]));
             }
             Log::info('Se enviaron correos con PDF y XML: ' .$invoice->id );
