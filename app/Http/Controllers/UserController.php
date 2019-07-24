@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
 use App\Sales;
+use App\EtaxProducts;
+use App\PaymentMethod;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Mail;
@@ -371,6 +373,25 @@ class UserController extends Controller {
         Mail::to($company->email)->send(new \App\Mail\NotifyCancellation(auth()->user()->companies->first()));
         Auth::logout();
         return redirect("login")->withError('Su subscripción se ha cancelado');
+    }
+
+    public function CompraContabilidades(){
+        $company = currentCompanyModel();
+        $sale = Sales::where('company_id', $company->id)->where('is_subscription', 1)->first();
+        if( !$sale ){
+            return back()->withError( 'Solamente el administrador de la empresa puede comprar facturas.' );
+        }
+        $producto = $sale->subscription_plan;
+        dd($sale);
+        $availableInvoices = $company->getAvailableInvoices( false, false );
+
+        $productosEtax = EtaxProducts::where('is_subscription', 0)->where('id',  16)->get(); //El 15 es el producto de cálculos de prorrata, creado por seeders.
+        $paymentMethods = PaymentMethod::where('user_id', auth()->user()->id)->get();
+        
+        return view('users.compra_contabilidades')->with('productosEtax', $productosEtax)
+                                                        ->with('company', $company)
+                                                        ->with('paymentMethods', $paymentMethods);
+
     }
 
 

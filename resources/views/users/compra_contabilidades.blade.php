@@ -1,0 +1,167 @@
+@extends('layouts/app')
+
+@section('title')
+    Comprar contabilidades
+@endsection
+
+@section('breadcrumb-buttons')
+@endsection 
+
+@section('content')
+
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="tabbable verticalForm">
+            <div class="row">
+                <div class="col-3">
+                    <ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                        <li class="active">
+                            <a class="nav-link active" aria-selected="true" href="/usuario/perfil">Editar información personal</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" aria-selected="false" href="/usuario/seguridad">Seguridad</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" aria-selected="false" href="/cambiar-plan">Cambiar plan</a>
+                        </li>
+                        @if( auth()->user()->isContador() )
+                        <li>
+                            <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
+                        </li>
+                        @endif
+                    </ul>
+                </div>
+                <div class="col-9">
+
+
+                        <div class="tab-content">
+                            <form method="POST" action="/payment/comprar-facturas" enctype="multipart/form-data">
+                                @csrf
+                                
+                                <div class="form-row" style="position: relative;">
+                                    <div class="form-group col-md-12" >
+                                        <h3>
+                                            Comprar Contabilidades Adicionales
+                                        </h3>
+                                    </div>
+                                    
+                                    <div class="form-group col-md-6">
+                                        <label for="product_id">Seleccione la cantidad de contabilidades que requiere</label>
+                                        <input type="number" class="form-control col-md-12" name="contabilidades" id="contabilidades" value="1"/>
+                                        <label for="payment_method">Seleccione su m&eacute;todo de pago</label>
+                                        <select class="form-control select-search" name="payment_method" id="payment_method" >
+                                            <option value='' selected>-- Seleccione un m&eacute;todo de pago --</option>
+                                            @foreach ( $paymentMethods as $paymentMethod )
+                                                <option value="{{ $paymentMethod->id }}" >{{ $paymentMethod->name }} {{ $paymentMethod->last_name }} - {{ $paymentMethod->masked_card }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group col-md-6">
+                                        <h4>En este momento cuentas con <span id="cantidad_disponibles_contabilidades"></span> contabilidades disponibles</h4>
+                                        <p>Estas comprando <span id="cantidad_contabilidades_requeridad">1 contabilidad</span></p>
+
+                                    </div>
+                                    
+                                    <div class="form-group col-md-12" style="white-space: nowrap;">
+                                        <h3>
+                                            Datos de receptor de la factura de eTax
+                                        </h3>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label for="tipo_persona">Tipo de persona *</label>
+                                        <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();">
+                                            <option value="F" >Física</option>
+                                            <option value="J" >Jurídica</option>
+                                            <option value="D" >DIMEX</option>
+                                            <option value="N" >NITE</option>
+                                            <option value="E" >Extranjero</option>
+                                            <option value="O" >Otro</option>
+                                        </select>
+                                    </div>
+        
+                                    <div class="form-group col-md-4">
+                                        <label for="id_number">Número de identificación *</label>
+                                        <input type="text" class="form-control checkEmpty" name="id_number" id="id_number" value="{{ $company->id_number }}" onchange="getJSONCedula(this.value);" required>
+                                    </div>
+        
+                                    <div class="form-group col-md-4">
+                                        <label for="first_name">Nombre *</label>
+                                        <input type="text" class="form-control checkEmpty" value="{{ $company->name }}" name="first_name" id="first_name" required>
+                                    </div>
+        
+                                    <div class="form-group col-md-4">
+                                        <label for="last_name">Apellido</label>
+                                        <input type="text" class="form-control" name="last_name" value="{{ $company->last_name }}" id="last_name" required>
+                                    </div>
+        
+                                    <div class="form-group col-md-4">
+                                        <label for="last_name2">Segundo apellido</label>
+                                        <input type="text" class="form-control" name="last_name2" value="{{ $company->last_name2 }}" id="last_name2" required>
+                                    </div>
+        
+                                    <div class="form-group col-md-4">
+                                        <label for="email">Correo electrónico *</label>
+                                        <input type="text" class="form-control checkEmpty" name="email" id="email" value="{{ $company->email }}" required>
+                                    </div>
+        
+                                    <div class="form-group col-md-4">
+                                        <label for="phone">Teléfono</label>
+                                        <input type="text" class="form-control" name="phone" id="phone" value="<?php echo ($company->phone) ? $company->phone : '' ?>" required>
+                                    </div>
+        
+                                    <div></div>
+        
+                                    <div class="form-group col-md-4">
+                                        <label for="country">País *</label>
+                                        <select class="form-control checkEmpty" name="country" id="country">
+                                            <option value="CR" selected>Costa Rica</option>
+                                        </select>
+                                    </div>
+        
+                                    <div class="form-group col-md-4">
+                                        <label for="state">Provincia</label>
+                                        <select class="form-control" name="state" id="state" onchange="fillCantones();" required>
+                                        </select>
+                                    </div>
+        
+                                    <div class="form-group col-md-4">
+                                        <label for="city">Canton</label>
+                                        <select class="form-control" name="city" id="city" onchange="fillDistritos();" required>
+                                        </select>
+                                    </div>
+        
+                                    <div class="form-group col-md-4">
+                                        <label for="district">Distrito</label>
+                                        <select class="form-control" name="district" id="district" onchange="fillZip();" required>
+                                        </select>
+                                    </div>
+        
+                                    <div class="form-group col-md-4">
+                                        <label for="neighborhood">Barrio</label>
+                                        <input class="form-control" name="neighborhood" id="neighborhood">
+                                        </select>
+                                    </div>
+        
+                                    <div class="form-group col-md-3">
+                                        <label for="zip">Zip</label>
+                                        <input type="text" class="form-control" name="zip" id="zip" readonly >
+                                    </div>
+                                    <div class="form-group col-md-9">
+                                        <label for="address">Dirección</label>
+                                        <input class="form-control" name="address" id="address">
+                                    </div>
+                            
+                                    <button id="btn-submit" type="submit" class="hidden btn btn-primary">Comprar</button>
+                                </div>
+                            </form>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>  
+</div>       
+
+@endsection
+

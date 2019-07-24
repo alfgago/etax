@@ -476,7 +476,7 @@ class CompanyController extends Controller {
         $producto = $sale->product;
         $availableInvoices = $company->getAvailableInvoices( false, false );
 
-        $productosEtax = EtaxProducts::where('is_subscription', 0)->where('id', '!=', 15)->get(); //El 15 es el producto de cálculos de prorrata, creado por seeders.
+        $productosEtax = EtaxProducts::where('is_subscription', 0)->whereNotIn('id', [15, 16])->get(); //El 15 es el producto de cálculos de prorrata, creado por seeders.
         $paymentMethods = PaymentMethod::where('user_id', auth()->user()->id)->get();
         $invoices = $availableInvoices->monthly_quota - $availableInvoices->current_month_sent;
         

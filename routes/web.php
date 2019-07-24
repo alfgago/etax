@@ -151,6 +151,7 @@ Route::prefix('usuario')->group(function() {
     Route::post('add-retiro', 'InfluencersController@retiro')->name('Influencers.retiro');
     Route::get('cancelar', 'UserController@cancelar')->name('User.cancelar');
     Route::patch('update-cancelar', 'UserController@updatecancelar')->name('User.updatecancelar');
+    Route::get('compra-contabilidades', 'UserController@CompraContabilidades')->name('Payment.CompraContabilidades');
 
 });
 
@@ -162,7 +163,6 @@ Route::prefix('payment')->group(function(){
     Route::post('payment-charge', 'PaymentController@paymentCharge')->name('Payment.payment_charge');
     Route::get('pending-charges', 'PaymentController@pendingCharges')->name('Payment.pending_charges');
     Route::post('comprar-facturas', 'PaymentController@comprarFacturas')->name('Payment.comprar_facturas');
-    Route::get('pruebas', 'PaymentController@CompanyDisponible')->name('Payment.CompanyDisponible');
     Route::post('seleccion-empresas', 'PaymentController@SeleccionEmpresas')->name('Payment.SeleccionEmpresas');
 });
 
