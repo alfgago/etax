@@ -44,7 +44,7 @@ class InvoiceController extends Controller
     public function index()
     {
         $company = currentCompanyModel();
-        if(empty($company->last_note_ref_number)){
+        if($company->last_note_ref_number === null) {
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
         }
         return view('Invoice/index');
