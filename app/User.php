@@ -155,12 +155,28 @@ class User extends Authenticatable {
         return $output;
     }
     
-    public function isContador() {
+    /*public function isContador() {
         try{
             $productId = getCurrentSubscription()->etax_product_id;
             if( $productId == 7 ) {
                 return true;
             }
+        }catch( \Throwable $e) { return false; }
+        
+        return false;
+    }*/
+    
+    public function isContador() {
+        try{
+            $plan = getCurrentSubscription()->plan;
+            $userID = auth()->user()->id;
+            $plan_tier = "Pro ($userID)";
+            $isContador = $plan_tier == $plan->plan_tier;
+            //dd("$plan_tier . . . $plan->plan_tier");
+            if($plan->id == 7){
+                $isContador = true;
+            }
+            return $isContador;
         }catch( \Throwable $e) { return false; }
         
         return false;
