@@ -4,9 +4,11 @@ namespace App\Console\Commands;
 
 use App\Invoice;
 use App\Jobs\ProcessInvoice;
+use App\Jobs\ProcessReception;
 use App\Utils\BridgeHaciendaApi;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\Process\Process;
 
 class ResendCreditNote extends Command
 {
@@ -44,22 +46,22 @@ class ResendCreditNote extends Command
         try {
             $this->info('Sending Credit Note to Hacienda....');
             $invoices = Invoice::where('hacienda_status', '01')->where('generation_method', 'etax')
-                ->where('document_type', '01')->get();
-            $this->info('Sending invoices ....'. count($invoices));
+                ->where('document_type', '03')->get();
+            $this->info('Sending Credit Note ....'. count($invoices));
             $this->info('Get Token Api Hacienda ....');
             $apiHacienda = new BridgeHaciendaApi();
             $tokenApi = $apiHacienda->login(false);
 
             foreach ($invoices as $invoice) {
                 $company = $invoice->company;
-                $this->info('Sending invoice ....'. $invoice->document_key);
+                $this->info('Sending Credit Note ....'. $invoice->document_key);
                 sleep(4);
-                ProcessInvoice::dispatch($invoice->id, $company->id, $tokenApi)
+                ProcessReception::dispatch($invoice->id, $company->id, $tokenApi)
                     ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
             }
         } catch ( \Exception $e) {
             Log::error('Error resend command '.$e);
-            $this->info('Error Resending invoices to Hacienda....'. $e);
+            $this->info('Error Resending Credit Note to Hacienda....'. $e);
         }
     }
 }
