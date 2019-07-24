@@ -90,7 +90,7 @@ class CalculatedTax extends Model
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
       
-      //if ( !Cache::has($cacheKey) ) {
+      if ( !Cache::has($cacheKey) ) {
           
           //Busca el calculo del mes en Base de Datos.
           $data = CalculatedTax::firstOrNew(
@@ -132,7 +132,7 @@ class CalculatedTax extends Model
             
           Cache::put($cacheKey, $data, now()->addDays(120));
           
-      //}
+      }
       
       $data = Cache::get($cacheKey);
       return $data;
