@@ -379,7 +379,7 @@ class CompanyController extends Controller {
             return redirect()->back()->withError('No se ha encontrado una compañía a su nombre.');
         }
         
-        if ( !$company->use_invoicing || !$request->file('cert') ) {
+        if ( !$request->file('cert') ) {
             return redirect()->back()->withError('Debe subir el certificado antes de guardar el formulario.');
         }
 
