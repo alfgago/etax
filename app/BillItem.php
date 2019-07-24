@@ -50,6 +50,8 @@ class BillItem extends Model
               }
             }
           }
+          $this->save();
+          dd($this->id);
         }
         
       }catch(\Throwable $e){
