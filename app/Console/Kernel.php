@@ -30,7 +30,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=1 --queue=receptions') ->timezone(config('app.timezone'))->everyTenMinutes();
         $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=1 --queue=invoices') ->timezone(config('app.timezone'))->everyThirtyMinutes();
         //Emails Queue Restart
-        $schedule->command('invoice:resend')->timezone(config('app.timezone'))->hourly();
+        $schedule->command('invoice:resend')->timezone(config('app.timezone'))->everyThirtyMinutes();
+        $schedule->command('creditnote:resend')->timezone(config('app.timezone'))->hourly();
         //Comandos de checkout
         $schedule->command('subscription:checkout')->timezone(config('app.timezone'))->dailyAt('01:30');
         $schedule->command('subscription:payment')->timezone(config('app.timezone'))->dailyAt('06:00'); //Una vez al día. Aveces se acumulan porque por alguna vez no correo y puede haber doble cargo. Hya un sleep de 3s entre cobro
