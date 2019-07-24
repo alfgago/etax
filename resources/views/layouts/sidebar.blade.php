@@ -40,6 +40,7 @@
                     <a href="/facturas-recibidas">Ver todas</a>
                     <a href="/facturas-recibidas/create">Registrar factura existente</a>
                     <a href="#" onclick="abrirPopup('importar-recibidas-popup');">Importar facturas</a>
+                    <a href="/facturas-recibidas/validaciones">Validar facturas</a>
                     <a href="/facturas-recibidas/aceptaciones">Aceptación de facturas recibidas</a>
                     <a href="/facturas-recibidas/autorizaciones">Autorizar facturas por email</a>
                 </div>
@@ -68,25 +69,6 @@
                 </div>
             </li>
             @endif
-            
-            <style>
-                li.hidden.nav-item.small-nav {
-                    display: none !important;
-                }
-                
-                li.soon.nav-item.small-nav a {
-                    opacity: 0.7;
-                    cursor: not-allowed;
-                }
-                
-                li.soon.nav-item.small-nav:before {
-                    background: #a3a1a7 !important;opacity: 1 !important;
-                }
-                
-                li.soon.nav-item.small-nav .subitems a {
-                    background: #787779 !important;opacity: 1 !important;
-                }
-            </style>
             
             @if( allowTo('books') )
             <li class="nav-item small-nav {{ request()->is('reportes/*') || request()->is('reportes') ? 'active' : '' }}" id="cierresmes">
@@ -166,3 +148,23 @@
       });*/
   </script>
   <!--=============== Left side End ================-->
+
+            
+            <style>
+                li.hidden.nav-item.small-nav {
+                    display: none !important;
+                }
+                
+                li.soon.nav-item.small-nav a {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                }
+                
+                li.soon.nav-item.small-nav:before {
+                    background: #a3a1a7 !important;opacity: 1 !important;
+                }
+                
+                li.soon.nav-item.small-nav .subitems a {
+                    background: #787779 !important;opacity: 1 !important;
+                }
+            </style>
