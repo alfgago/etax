@@ -15,14 +15,14 @@ class ResendCreditNote extends Command
      *
      * @var string
      */
-    protected $signature = 'invoice:resend';
+    protected $signature = 'creditnote:resend';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Resend invoices to Hacienda';
+    protected $description = 'Resend  Credit Note to Hacienda';
 
     /**
      * Create a new command instance.
