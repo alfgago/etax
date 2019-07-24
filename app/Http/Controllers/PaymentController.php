@@ -13,6 +13,7 @@ use App\Subscription;
 use App\PaymentMethod;
 use App\SubscriptionPlan;
 use App\AvailableInvoices;
+use App\Team;
 use Carbon\Carbon;
 use CybsSoapClient;
 use Illuminate\Http\Request;
@@ -123,7 +124,7 @@ class PaymentController extends Controller
         $companies_tengo = Company::where('user_id',$user_id)->where('status',1)->count();
         $sale = Sales::where('company_id',$company->id)->first();
         $plan = $sale->etax_product_id;
-        $porduct_etax = EtaxProducts::join('subscription_plans','subscription_plans.id','etax_products.subscription_plan_id')->where('etax_products.id',$plan)->first();
+        $porduct_etax = SubscriptionPlan::where('id',$plan)->first();
         $companies_puedo = $porduct_etax->num_companies;
         $companies_puedo += -1 ;
         if($companies_tengo >  $companies_puedo  ){
@@ -131,8 +132,8 @@ class PaymentController extends Controller
             foreach ($companies as $company) {
                 $companies_puedo += -1 ;
                 if($companies_puedo < 0){
-                    //Company::where('id', $company->id)
-                    //->update(['status' => 0],['updated_at',$start_date]);
+                    Company::where('id', $company->id)
+                    ->update(['status' => 0],['updated_at',$start_date]);
                     $companies = Company::where('user_id',$user_id)->get();
                 }
 
@@ -140,8 +141,25 @@ class PaymentController extends Controller
             $companies_puedo = $porduct_etax->num_companies;
             return view('payment.companySelect')->with('companies',$companies)->with('companies_puedo',$companies_puedo);
         }
+        return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
     }
  
+    public function SeleccionEmpresas(Request $request){
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $company = currentCompanyModel();
+        $user_id = $company->user_id;
+        $company_id = $company->id;
+        Company::where('user_id',$user_id)->whereNotIn('id', $request->empresas)->update(['status' => 0],['updated_at',$start_date]);
+        Company::where('user_id',$user_id)->whereIn('id', $request->empresas)->update(['status' => 1],['updated_at',$start_date]);
+        if (!in_array($company_id, $request->empresas)) {
+            $companyId = intval($request->empresas[0]);
+            $team = Team::where( 'company_id', $companyId )->first();
+            auth()->user()->switchTeam( $team );
+        }
+        return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+
+    }
+
     public function FacturasDisponibles(){
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $mes = $start_date->format("m");
@@ -150,7 +168,7 @@ class PaymentController extends Controller
         $company = currentCompanyModel();
         $sale = Sales::where('company_id',$company->id)->first();
         $plan = $sale->etax_product_id;
-        $porduct_etax = EtaxProducts::join('subscription_plans','subscription_plans.id','etax_products.subscription_plan_id')->where('etax_products.id',$plan)->first();
+        $porduct_etax = SubscriptionPlan::where('id',$plan)->first();
         $num_invoices = $porduct_etax->num_invoices;
         $AvailableInvoices = AvailableInvoices::where('company_id',$company->id)->where('month',$mes)->where('year',$year)->first();
         if($AvailableInvoices != null){
@@ -416,8 +434,7 @@ class PaymentController extends Controller
                 
                 if($factura){
                     $this->FacturasDisponibles();
-                    $this->CompanyDisponible();
-                    return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+                    return $this->CompanyDisponible();
                 }
             } else {
                 $mensaje = 'El pago ha sido denegado';
@@ -568,8 +585,8 @@ class PaymentController extends Controller
         
         
         $this->FacturasDisponibles();
-        $this->CompanyDisponible();
-        return redirect('/')->withMessage('Se aplicó el cupón exitosamente');
+        return $this->CompanyDisponible();
+        
            
     }
 

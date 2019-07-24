@@ -163,6 +163,7 @@ Route::prefix('payment')->group(function(){
     Route::get('pending-charges', 'PaymentController@pendingCharges')->name('Payment.pending_charges');
     Route::post('comprar-facturas', 'PaymentController@comprarFacturas')->name('Payment.comprar_facturas');
     Route::get('pruebas', 'PaymentController@CompanyDisponible')->name('Payment.CompanyDisponible');
+    Route::post('seleccion-empresas', 'PaymentController@SeleccionEmpresas')->name('Payment.SeleccionEmpresas');
 });
 
 
