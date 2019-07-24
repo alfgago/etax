@@ -452,8 +452,7 @@ class BillController extends Controller
      */
     public function indexValidaciones()
     {
-        return redirect('/facturas-recibidas/aceptaciones');
-        /*$current_company = currentCompany();
+        $current_company = currentCompany();
         $bills = Bill::where('company_id', $current_company)
                         ->where('is_void', false)
                         ->where('is_totales', false)
@@ -463,7 +462,7 @@ class BillController extends Controller
                         ->orderBy('reference_number', 'DESC')->paginate(10);
         return view('Bill/index-validaciones', [
           'bills' => $bills
-        ]);*/
+        ]);
     }
 
 
