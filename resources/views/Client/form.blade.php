@@ -20,7 +20,7 @@
     
     <div class="form-group col-md-4">
       <label for="id_number">Número de identificación *</label>
-      <input max="20" maxlength="20" class="form-control" name="id" id="id_number" value="{{ @$client->id_number }}" required onchange="getJSONCedula(this.value);" onblur="validateIdentificationLenght();">
+      <input max="20" maxlength="20" class="form-control" name="id_number" id="id_number" value="{{ @$client->id_number }}" required onchange="getJSONCedula(this.value);" onblur="validateIdentificationLenght();">
     </div>
 
     <div class="form-group col-md-4">
