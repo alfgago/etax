@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Invoice;
+use App\Jobs\ProcessCreditNote;
 use App\Jobs\ProcessInvoice;
 use App\Jobs\ProcessReception;
 use App\Utils\BridgeHaciendaApi;
@@ -56,7 +57,7 @@ class ResendCreditNote extends Command
                 $company = $invoice->company;
                 $this->info('Sending Credit Note ....'. $invoice->document_key);
                 sleep(4);
-                ProcessReception::dispatch($invoice->id, $company->id, $tokenApi)
+                ProcessCreditNote::dispatch($invoice->id, $company->id, $tokenApi)
                     ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
             }
         } catch ( \Exception $e) {
