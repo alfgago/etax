@@ -24,17 +24,20 @@
     
     <div class="form-group col-md-4">
       <label for="first_name">Nombre *</label>
-      <input type="text" class="form-control" name="first_name" id="first_name" value="{{ @$provider->first_name }}" required>
+      <input type="text" class="form-control" name="first_name" id="first_name" value="{{ @$provider->first_name }}" required onkeypress="return (event.charCode > 64 &&
+event.charCode < 91) || (event.charCode > 96 && event.charCode < 123)">
     </div>
     
     <div class="form-group col-md-4">
-      <label for="last_name">Apellido</label>
-      <input type="text" class="form-control" name="last_name" id="last_name" value="{{ @$provider->last_name }}" >
+      <label for="last_name">Apellido *</label>
+      <input type="text" class="form-control" name="last_name" id="last_name" value="{{ @$provider->last_name }}" required onkeypress="return (event.charCode > 64 &&
+event.charCode < 91) || (event.charCode > 96 && event.charCode < 123)">
     </div>
     
     <div class="form-group col-md-4">
-      <label for="last_name2">Segundo apellido</label>
-      <input type="text" class="form-control" name="last_name2" id="last_name2" value="{{ @$provider->last_name2 }}" >
+      <label for="last_name2">Segundo apellido *</label>
+      <input type="text" class="form-control" name="last_name2" id="last_name2" value="{{ @$provider->last_name2 }}" required onkeypress="return (event.charCode > 64 &&
+event.charCode < 91) || (event.charCode > 96 && event.charCode < 123)">
     </div>
     
     <div class="form-group col-md-4">

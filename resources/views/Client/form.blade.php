@@ -25,17 +25,20 @@
 
     <div class="form-group col-md-4">
       <label for="first_name">Nombre *</label>
-      <input type="text" class="form-control" name="first_name" id="first_name" value="{{ @$client->first_name }}" required>
+      <input type="text" class="form-control" name="first_name" id="first_name" value="{{ @$client->first_name }}" required onkeypress="return (event.charCode > 64 &&
+event.charCode < 91) || (event.charCode > 96 && event.charCode < 123)">
     </div>
     
     <div class="form-group col-md-4">
       <label for="last_name">Apellido</label>
-      <input type="text" class="form-control" name="last_name" id="last_name" value="{{ @$client->last_name }}" >
+      <input type="text" class="form-control" name="last_name" id="last_name" value="{{ @$client->last_name }}" onkeypress="return (event.charCode > 64 &&
+event.charCode < 91) || (event.charCode > 96 && event.charCode < 123)">
     </div>
     
     <div class="form-group col-md-4">
       <label for="last_name2">Segundo apellido</label>
-      <input type="text" class="form-control" name="last_name2" id="last_name2" value="{{ @$client->last_name2 }}" >
+      <input type="text" class="form-control" name="last_name2" id="last_name2" value="{{ @$client->last_name2 }}" onkeypress="return (event.charCode > 64 &&
+event.charCode < 91) || (event.charCode > 96 && event.charCode < 123)">
     </div>
     
     <div class="form-group col-md-4">
@@ -165,5 +168,9 @@
         }else{
             $('#email').removeClass('error');
         }
+    }
+    function validateNameInput() {
+        var element = $('#first_name').val();
+        $('#first_name').val(element.replace(/[^a-zA-Z0-9@]/g, ''));
     }
 </script>

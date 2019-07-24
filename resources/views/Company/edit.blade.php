@@ -91,12 +91,14 @@
 						    
 						    <div class="form-group col-md-4">
 						      <label for="last_name">Apellido</label>
-						      <input type="text" class="form-control" name="last_name" id="last_name" value="{{ @$company->last_name }}" >
+						      <input type="text" class="form-control" name="last_name" id="last_name" value="{{ @$company->last_name }}" onkeypress="return (event.charCode > 64 &&
+event.charCode < 91) || (event.charCode > 96 && event.charCode < 123)">
 						    </div>
 						    
 						    <div class="form-group col-md-4">
 						      <label for="last_name2">Segundo apellido</label>
-						      <input type="text" class="form-control" name="last_name2" id="last_name2" value="{{ @$company->last_name2 }}" >
+						      <input type="text" class="form-control" name="last_name2" id="last_name2" value="{{ @$company->last_name2 }}" onkeypress="return (event.charCode > 64 &&
+event.charCode < 91) || (event.charCode > 96 && event.charCode < 123)">
 						    </div>
 						    
 						    <div class="form-group col-md-4">
