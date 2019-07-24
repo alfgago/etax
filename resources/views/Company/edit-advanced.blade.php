@@ -120,23 +120,23 @@
 						    
 						    <div class="form-group col-md-6">
 						      <label for="last_document">Último documento emitido</label>
-						      <input type="text" class="form-control" name="last_document" id="last_document" value="{{ @$company->last_document }}" required>
+						      <input type="text" class="form-control" name="last_document" id="last_document" value="{{ $company->last_document === null ? '00100001010000000000' : @$company->last_document  }}" required>
 						      <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
 						    </div>
 							  <div class="form-group col-md-6">
 								  <label for="last_document_rec">Último documento emitido de aceptacion</label>
-								  <input type="text" class="form-control" name="last_document_rec" id="last_document_rec" value="{{ @$company->last_document_rec }}" required>
+								  <input type="text" class="form-control" name="last_document_rec" id="last_document_rec" value="{{ $company->last_document_rec === null ?  '00100001050000000000' : @$company->last_document_rec }}" required>
 								  <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
 							  </div>
 							  <div class="form-group col-md-6">
 								  <label for="last_document_note">Último documento emitio nota de credito</label>
-								  <input type="text" class="form-control" name="last_document_note" id="last_document_note" value="{{ @$company->last_document_note }}" required>
+								  <input type="text" class="form-control" name="last_document_note" id="last_document_note" value="{{ $company->last_document_note === null ? '00100001030000000000' : @$company->last_document_note }}" required>
 								  <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
 							  </div>
 
 							  <div class="form-group col-md-6">
 								  <label for="last_document_ticket">Último documento emitio tiquete electronico</label>
-								  <input type="text" class="form-control" name="last_document_ticket" id="last_document_ticket" value="{{ @$company->last_document_ticket }}" required>
+								  <input type="text" class="form-control" name="last_document_ticket" id="last_document_ticket" value="{{ $company->last_document_ticket === null ? '00100001040000000000' : @$company->last_document_ticket }}" required>
 								  <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
 							  </div>
 							  
