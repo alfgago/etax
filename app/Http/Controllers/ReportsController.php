@@ -171,7 +171,7 @@ class ReportsController extends Controller
       
       $company = currentCompanyModel();
       $prorrataOperativa = $company->getProrrataOperativa($ano);
-      
+
       $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
       $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
       $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0, $prorrataOperativa );

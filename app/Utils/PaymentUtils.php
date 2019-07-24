@@ -312,7 +312,7 @@ class PaymentUtils
             $data->due_date =
             $data->other_reference = '';
             $data->currency_rate = get_rates();
-            $data->description = 'Factura de Etax';
+            $data->description = 'Factura de Etax.';
             $data->subtotal = $invoiceData->subtotal;
             $data->currency = 'USD';
             $data->total = $invoiceData->amount;
