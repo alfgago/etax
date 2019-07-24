@@ -37,10 +37,10 @@ class InvoiceItem extends Model
       }
       //Asigna Prod Type;
       $cat = $this->product_type;
-      if( !$cat || $cat > 49 || ( $cat < 6 && $this->percentage != 1 )
-          || ( $cat > 6 && $cat <= 10 && $this->percentage != 2 )
-          || ( $cat < 10 && $cat <= 14 && $this->percentage != 4 ) 
-          || ( $cat < 14 && $cat <= 19  && $this->percentage != 13 ) ){
+      if( !$cat || $cat > 49 || ( $cat < 6 && $this->iva_percentage != 1 )
+          || ( $cat > 6 && $cat <= 10 && $this->iva_percentage != 2 )
+          || ( $cat > 10 && $cat <= 14 && $this->iva_percentage != 4 ) 
+          || ( $cat > 14 && $cat <= 19  && $this->iva_percentage != 13 ) ){
         $cat = ProductCategory::where('invoice_iva_code', $this->iva_type)->first();
         if( $cat ){
           $this->product_type = $cat->id;
@@ -51,10 +51,12 @@ class InvoiceItem extends Model
             }
           }
         }
+        $this->save();
       }
       
       if($cat == 'Plan') {
         $this->product_type = 17;
+        $this->save();
       }
     
     }

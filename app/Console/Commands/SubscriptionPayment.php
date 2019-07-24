@@ -152,7 +152,7 @@ class SubscriptionPayment extends Command
                             $item = new stdClass();
                             $item->total = $amount;
                             $item->code = $sale->etax_product_id;
-                            $item->name = $sale->product->name . " / $sale->recurrency meses";
+                            $item->name = "Renovación $subscriptionPlan->name / $sale->recurrency meses";
                             $item->descuento = 0;
                             $item->discount_reason = null;
                             $item->cantidad = 1;
