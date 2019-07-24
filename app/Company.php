@@ -189,7 +189,7 @@ class Company extends Model {
 
         try{
             
-            $count =  getCurrentSubscription()->product->plan->num_bills;
+            $count =  getCurrentSubscription()->plan->num_bills;
             
             if( !$count ) {
                 return -1;
@@ -219,7 +219,7 @@ class Company extends Model {
                                 
             // Si no encontró nada, tiene que crearla.
             if( ! $available_invoices ) {
-                $subscriptionPlan = getCurrentSubscription()->product->plan;
+                $subscriptionPlan = getCurrentSubscription()->plan;
 
                 $available_invoices = AvailableInvoices::create(
                     [
@@ -276,7 +276,7 @@ class Company extends Model {
                                 
             // Si no encontró nada, tiene que crearla.
             if( ! $available_invoices ) {
-                $subscriptionPlan = getCurrentSubscription()->product->plan;
+                $subscriptionPlan = getCurrentSubscription()->plan;
                 $available_invoices = AvailableInvoices::create(
                     [
                         'company_id' => $this->id,
