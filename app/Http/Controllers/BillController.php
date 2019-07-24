@@ -642,7 +642,7 @@ class BillController extends Controller
             return view('Bill/index-aceptaciones-hacienda')->withMessage('Usted no tiene un facturación con eTax activada, por lo que esta pantalla únicamente validará los códigos eTax para cálculo y no realizará aceptaciones con Hacienda.');
         }
 
-        if ($current_company->last_rec_ref_number == null) {
+        if ($current_company->last_rec_ref_number === null) {
             return redirect('/empresas/configuracion')->withError( "No ha ingresado ultimo consecutivo de recepcion");
         }
         
