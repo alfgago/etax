@@ -54,7 +54,7 @@ class ProcessCreditNote implements ShouldQueue
             $client = new Client();
             $invoice = Invoice::find($this->invoiceId);
             $company = Company::find($this->companyId);
-            if ( $company->atv_validation ) {
+            if ($company->atv_validation) {
                 if ($invoice->hacienda_status == '01' && $invoice->document_type == '03' && $invoiceUtils->validateZip($invoice)) {
                     if ($invoice->xml_schema == 43) {
                         $requestDetails = $invoiceUtils->setDetails43($invoice->items);
@@ -129,6 +129,7 @@ class ProcessCreditNote implements ShouldQueue
                         Log::info('Proceso de nota de credito finalizado con éxito.');
                     }
                 }
+                Log::info("No se envio Nota de credito falta informacion");
             }else {
                 Log::warning('El job no se procesó, porque la empresa no tiene un certificado válido: '.$this->invoiceId.'-->>');
             }
