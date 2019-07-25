@@ -216,6 +216,25 @@ class PaymentUtils
         $chargeIncluded = json_decode($appChargeBn->getBody()->getContents(), true);
         return $chargeIncluded;
     }
+
+    public function userGetChargeInfo($idCharge){
+        $bnCharge = new Client();
+        $user = auth()->user();
+        $chargeBn = $bnCharge->request('POST', "https://emcom.oneklap.com:2263/api/UserViewCharge?applicationName=string&userName=string&userPassword=string&chargeTokenId=string", [
+            'headers' => [
+                'Content-Type' => "application/json",
+            ],
+            'json' => [
+                'applicationName' => config('etax.klap_app_name'),
+                'userName' => $user->user_name,
+                "userPassword" => 'Etax-' . $user->id . 'Klap',
+                'chargeTokenId' => $idCharge,
+            ],
+            'verify' => false,
+        ]);
+        $charge = json_decode($chargeBn->getBody()->getContents(), true);
+        return $charge;
+    }
     
     public function paymentApplyCharge($request){
         $bnCharge = new Client();
@@ -246,13 +265,11 @@ class PaymentUtils
             'json' => [
                 'applicationName' => config('etax.klap_app_name'),
                 'userName' => $user->user_name,
-                'userPassword' => 'Etax-15Klap'
+                'userPassword' => 'Etax-' . $user->id . 'Klap'
             ],
             'verify' => false,
         ]);
-        //'userPassword' => 'Etax-' . $user->id . 'Klap'
         $charges = json_decode($userRequestCharges->getBody()->getContents(), true);
-        //dd($charges);
         return $charges;
     }
     
