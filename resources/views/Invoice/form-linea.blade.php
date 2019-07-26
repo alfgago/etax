@@ -40,23 +40,39 @@
         $class = 'form-group col-md-12';
     } ?>
 
-    <div class="form-group col-md-12">
-      <label for="tipo_producto">Categoría de declaración</label>
-      <select class="form-control select-search" id="tipo_producto" >
-        @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
-          <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
-        @endforeach
-      </select>
-    </div>
+    @if( @$tipoHacienda == 'SJB' )
+      <div class="form-group col-md-12">
+        <label for="tipo_producto">Categoría de declaración</label>
+        <select class="form-control select-search" id="tipo_producto" >
+            <option value="21" codigo="S140" posibles="S140" >Inversión del sujeto básico pasivo por servicios adquiridos desde el exterior</option>
+        </select>
+      </div>
+      
+      <div class="form-group col-md-11">
+        <label for="tipo_iva">Tipo de IVA</label>
+        <select class="form-control" id="tipo_iva" >
+            <option value="S140" attr-iva="S140" porcentaje="13" >Inversión del sujeto básico pasivo</option>
+        </select>
+      </div>
+    @else
+      <div class="form-group col-md-12">
+        <label for="tipo_producto">Categoría de declaración</label>
+        <select class="form-control select-search" id="tipo_producto" >
+          @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
+            <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
+          @endforeach
+        </select>
+      </div>
     
-    <div class="form-group col-md-11">
-      <label for="tipo_iva">Tipo de IVA</label>
-      <select class="form-control" id="tipo_iva" >
-        @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
-          <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
-        @endforeach
-      </select>
-    </div>
+      <div class="form-group col-md-11">
+        <label for="tipo_iva">Tipo de IVA</label>
+        <select class="form-control" id="tipo_iva" >
+          @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
+            <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
+          @endforeach
+        </select>
+      </div>
+    @endif
   
     <div class="form-group col-md-1">
       <label for="porc_iva">% IVA</label>
@@ -99,16 +115,16 @@
 
     <div class="form-group col-md-3">
       <label for="precio_unitario">Precio unitario</label>
-      @if( @$document_type != "08"  )
-      <input type="text" min="0" class="form-control" id="precio_unitario" placeholder="0" number >
+      @if( @$tipoHacienda == 'SJB' )
+      <input type="text" min="0" class="form-control" id="precio_unitario" readonly placeholder="0" number >
       @else
-      <input type="text" min="0" class="form-control" id="precio_unitario" readonly value="0" number >
+      <input type="text" min="0" class="form-control" id="precio_unitario" value="0" number >
       @endif
     </div>
 
     <div class="form-group col-md-3">
       <label for="item_iva">Monto IVA</label>
-      <input type="text" min="0" class="form-control {{ @$document_type == '08' ? 'is-fec' : 'not-fec' }}" id="item_iva_amount" placeholder="" >
+      <input type="text" min="0" class="form-control {{ @$tipoHacienda == 'SJB' ? 'is-fec' : 'not-fec' }}" id="item_iva_amount" placeholder="" >
     </div>
 
     <div class="form-group col-md-3">

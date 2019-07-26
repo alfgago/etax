@@ -673,6 +673,126 @@ class PaymentController extends Controller
         }
     }
 
+    public function pagarCargo($idCharge){
+        $paymentUtils = new PaymentUtils();
+        $date = Carbon::parse(now('America/Costa_Rica'));
+        $bnStatus = $paymentUtils->statusBNAPI();
+        if($bnStatus['apiStatus'] == 'Successful'){
+            $charge = $paymentUtils->userGetChargeInfo($idCharge);
+            $user = auth()->user();
+            $paymentMethod = PaymentMethod::where('user_id', $user->id)->where('default_card', true)->first();
+            $company = currentCompanyModel();
+            $amount = $charge['transactionAmount'];
+            $subtotal = $amount;
+            $iv = $subtotal * 0.13;
+            $amount = $subtotal + $iv;
+            if($paymentMethod){
+                $sale = Sales::updateOrCreate(
+                    [
+                        'sale_id' => $id,
+
+                    ],
+                    [
+                    'payment_status' => 1,
+                    'user_id' => $user->id,
+                    'company_id' => currentCompany(),
+                    'status' => 1,
+                    'recurrency' => 0,
+                    'is_subscription' => 0
+                    ]
+                );
+                $payment = Payment::updateOrCreate(
+                    [
+                        'sale_id' => $sale->id,
+                        'payment_status' => 1,
+                    ],
+                    [
+                        'payment_date' => $date,
+                        'payment_method_id' => $paymentMethod->id,
+                        'amount' => $amount,
+                        'charge_token' => $idCharge
+                    ]
+                );
+                $data = new stdClass();
+                $data->description = $charge['chargeDescription'];
+                $data->amount = $amount;
+                $data->user_name = $user->user_name;
+                $data->chargeTokenId = $idCharge;
+                $data->cardTokenId = $paymentMethod->token_bn;
+
+                $appliedCharge = $paymentUtils->paymentApplyCharge($data);
+
+                if ($appliedCharge['apiStatus'] == "Successful") {
+                    $payment->proof = $appliedCharge['retrievalRefNo'];
+                    $payment->payment_status = 2;
+                    $payment->save();
+
+                    $sale->next_payment_date = $date->addMonths($sale->recurrency);
+                    $sale->status = 1;
+                    $sale->save();
+
+                    $invoiceData = new stdClass();
+                    $invoiceData->client_code = $company->id_number;
+                    $invoiceData->client_id_number = $company->id_number;
+                    $invoiceData->client_id = $company->id_number;
+                    $invoiceData->tipo_persona = $company->tipo_persona;
+                    $invoiceData->first_name = $company->first_name;
+                    $invoiceData->last_name = $company->last_name;
+                    $invoiceData->last_name2 = $company->last_name2;
+                    $invoiceData->country = $company->country;
+                    $invoiceData->state = $company->state;
+                    $invoiceData->city = $company->city;
+                    $invoiceData->district = $company->district;
+                    $invoiceData->neighborhood = $company->neighborhood;
+                    $invoiceData->zip = $company->zip;
+                    $invoiceData->address = $company->address;
+                    $invoiceData->phone = $company->phone;
+                    $invoiceData->es_exento = false;
+                    $invoiceData->email = $company->email;
+                    $invoiceData->expiry = $company->expiry;
+                    $invoiceData->amount = $amount;
+                    $invoiceData->subtotal = $subtotal;
+                    $invoiceData->iva_amount = $iv;
+                    $invoiceData->discount_reason = null;
+
+                    $item = new stdClass();
+                    $item->total = $amount;
+                    $item->code = $sale->etax_product_id;
+                    $item->name = $sale->plan->name . " / $sale->recurrency meses";
+                    $item->descuento = 0;
+                    $item->discount_reason = null;
+                    $item->cantidad = 1;
+                    $item->iva_amount = $iv;
+                    $item->unit_price = $subtotal;
+                    $item->subtotal = $subtotal;
+                    $item->total = $amount;
+
+                    $invoiceData->items = [$item];
+                    $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
+                }else{
+                    \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
+                        [
+                            'name' => $company->name . ' ' . $company->last_name,
+                            'product' => $sale->plan->plan_type,
+                            'card' => $paymentMethod->masked_card
+                        ]
+                    ));
+                }
+            }else{
+                \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
+                    [
+                        'name' => $company->name . ' ' . $company->last_name,
+                        'product' => $charge['chargeDescription'],
+                        'card' => "No indica"
+                    ]
+                ));
+            }
+            return redirect()->back()->withMessage('Pago procesado');
+        }else{
+            return redirect()->back()->withErrors('No se pueden realizarse pagos en este momento');
+        }
+    }
+
     /**
      * Show the form for editing the specified resource.
      *
