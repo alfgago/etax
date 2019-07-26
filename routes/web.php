@@ -83,6 +83,7 @@ Route::prefix('empresas')->group(function() {
 // Rutas de facturación
 Route::prefix('facturas-emitidas')->group(function() {
     Route::get('emitir-factura/{tipoDocumento}', 'InvoiceController@emitFactura')->name('Invoice.emit_01');
+    Route::get('emitir-sujeto-pasivo', 'InvoiceController@emitSujetoPasivo')->name('Invoice.emitSujetoPasivo');
     Route::get('emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
     Route::post('enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
     Route::get('validaciones', 'InvoiceController@indexValidaciones')->name('Invoice.validaciones');

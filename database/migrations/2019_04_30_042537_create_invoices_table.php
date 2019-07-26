@@ -38,7 +38,7 @@ class CreateInvoicesTable extends Migration
             $table->double('currency_rate')->default(1);
 
             //Condiciones de la venta: 01 Contado, 02 Crédito, 03 Consignación, 04 Apartado, 05 Arrendamiento con opción de compra, 06 Arrendamiento en función financiera, 99 Otros
-            $table->enum('sale_condition', ['01', '02', '03', '04', '05', '06', '99'])->default('01');
+            $table->enum('sale_condition', ['01', '02', '03', '04', '05', '06', '07', '08', '99'])->default('01');
           
             //Plazo del crédito, es obligatorio cuando la venta del product o prestación del servicio sea a crédito
             $table->string('credit_time')->nullable();
