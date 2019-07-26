@@ -18,7 +18,11 @@ class PaymentMethodController extends Controller
     {
         $user = auth()->user();
         $cantidad = PaymentMethod::where('user_id', $user->id)->get()->count();
-        return view('payment_methods/index')->with('cantidad', $cantidad);
+        if($cantidad){
+            return view('payment_methods/index')->with('cantidad', $cantidad);
+        }else{
+            return redirect()->back()->withErrors('No existen metodos de pago para este usuario');
+        }
     }
 
     public function indexData(){
@@ -30,14 +34,6 @@ class PaymentMethodController extends Controller
                     'data' => $paymentMethod
                 ])->render();
             })
-/*            ->editColumn('masked_card', function(PaymentMethod $paymentMethod) {
-                if($paymentMethod->default_card == 0){
-                    $defaultText = ' / Por defecto';
-                }else{
-                    $defaultText = '';
-                }
-                return $paymentMethod->masked_card . $defaultText;
-            })*/
             ->editColumn('name', function(PaymentMethod $paymentMethod) {
                 return $paymentMethod->name . ' ' . $paymentMethod->last_name;
             })
