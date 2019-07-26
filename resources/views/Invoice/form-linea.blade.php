@@ -118,7 +118,7 @@
       @if( @$tipoHacienda == 'SJB' )
       <input type="text" min="0" class="form-control" id="precio_unitario" readonly placeholder="0" number >
       @else
-      <input type="text" min="0" class="form-control" id="precio_unitario"  value="0" number >
+      <input type="text" min="0" class="form-control" id="precio_unitario" value="0" number >
       @endif
     </div>
 
