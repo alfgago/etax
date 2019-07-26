@@ -543,6 +543,121 @@ class PaymentController extends Controller
             return redirect('/empresas/comprar-facturas-vista')->withErrors('Debe seleccionar un método de pago');
         }
     }
+
+    public function comprarContabilidades(Request $request){
+
+        
+        $paymentUtils = new PaymentUtils();
+        if(isset($request->payment_method)){
+
+                $date = Carbon::parse(now('America/Costa_Rica'));
+                $company = currentCompanyModel(); 
+
+                $sale = Sales::join('subscription_plans','subscription_plans.id','sales.etax_product_id')->where('company_id', $company->id)
+                                                                ->where('is_subscription', 1)->first();
+               
+                $cantidad = $sale->num_companies + $request->contabilidades; 
+                $total_extras = 0;
+                if($cantidad > 25){
+                   $total_extras = ($cantidad - 25) * 8;
+                   $cantidad = 25;
+                }
+                if($cantidad > 10){
+                   $total_extras += ($cantidad - 10) * 10;
+                   $cantidad = 10;
+                }
+                $monthly_price = $cantidad * 14.999;
+                $six_price = $cantidad * 13.740;
+                $annual_price = $cantidad * 12.491;
+                $monthly_price += $total_extras;
+                $six_price += $total_extras;
+                $annual_price += $total_extras;
+                $six_price = $six_price * 6;
+                $annual_price = $annual_price * 12;
+                $cantidad = $sale->num_companies + $request->contabilidades; 
+                SubscriptionPlan::where('id', $sale->etax_product_id)
+                    ->update(['num_companies' => $cantidad],['monthly_price' => $monthly_price],['six_price' => $six_price],['annual_price' => $annual_price]); 
+                $existentes = $sale->num_companies;
+                $total = 0;
+                $total_extras = 0;
+                  if($cantidad > 25){
+                      $total_extras = ($cantidad - $existentes ) * 8;
+                      $cantidad = 25;
+                  }
+                  if($cantidad > 10){
+                      $total_extras += ($cantidad - $existentes ) * 10;
+                      $cantidad = 10;
+                  }
+                  if($sale->recurrency == 1){
+                    $total_extras = $total_extras / 31 * $request->diff;
+                    $total = $total_extras;
+                  }
+                  if($sale->recurrency == 6){
+                    $total_extras = $total_extras / 133 * $request->diff;
+                    $total = $total_extras * 6;
+                  }
+                  if($sale->recurrency == 12){
+                    $total_extras = $total_extras / 366 * $request->diff;
+                    $total = $total_extras * 12;
+                  }
+                $subtotal = $total_extras;
+                $iv = $subtotal * 0.13;
+                $amount = $subtotal + $iv;
+                $user = auth()->user();
+                
+                $client = \App\Client::where('company_id', $company->id)->where('id_number', $request->id_number)->first();
+                
+                $invoiceData = new stdClass();
+                $invoiceData->client_code = $request->id_number;
+                $invoiceData->client_id_number = $request->id_number;
+                if($client){
+                    $invoiceData->client_id = $client->id;
+                }else{
+                    $invoiceData->client_id = '-1';
+                }
+                $invoiceData->tipo_persona = $request->tipo_persona;
+                $invoiceData->first_name = $request->first_name;
+                $invoiceData->last_name = $request->last_name;
+                $invoiceData->last_name2 = $request->last_name2;
+                $invoiceData->country = $request->country;
+                $invoiceData->state = $request->state;
+                $invoiceData->city = $request->city;
+                $invoiceData->district = $request->district;
+                $invoiceData->neighborhood = $request->neighborhood;
+                $invoiceData->zip = $request->zip;
+                $invoiceData->address = $request->address;
+                $invoiceData->phone = $request->phone;
+                $invoiceData->es_exento = false;
+                $invoiceData->email = $request->email;
+                $invoiceData->expiry = $request->expiry;
+                $invoiceData->amount = $amount;
+                $invoiceData->subtotal = $subtotal;
+                $invoiceData->iva_amount = $iv;
+                $invoiceData->discount_reason = null;
+
+                $item = new stdClass();
+                $item->total = $amount;
+                $item->code = 16;
+                $item->name = "Contabilidades extras";
+                $item->descuento = 0;
+                $item->discount_reason = null;
+                $item->cantidad = 1;
+                $item->iva_amount = $iv;
+                $item->unit_price = $subtotal;
+                $item->subtotal = $subtotal;
+                $item->total = $amount;
+
+                $invoiceData->items = [$item];
+                $procesoFactura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
+                
+                $company->additional_invoices = $additional_invoices;
+                $company->save();
+                
+                return redirect('/usuario/compra-contabilidades')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+        }else{
+            return redirect('/usuario/compra-contabilidades')->withErrors('Debe seleccionar un método de pago');
+        }
+    }
     
     public function skipPaymentCoupon( $request, $coupon ) {
         $user = auth()->user();

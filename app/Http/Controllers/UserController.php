@@ -377,20 +377,23 @@ class UserController extends Controller {
 
     public function CompraContabilidades(){
         $company = currentCompanyModel();
-        $sale = Sales::where('company_id', $company->id)->where('is_subscription', 1)->first();
+        $date_now = Carbon::parse( now('America/Costa_Rica') )->format('Y-m-d') ;
+        $sale = Sales::join('subscription_plans','subscription_plans.id','sales.etax_product_id')->where('company_id', $company->id)
+                                                        ->where('is_subscription', 1)->first();
         if( !$sale ){
             return back()->withError( 'Solamente el administrador de la empresa puede comprar facturas.' );
         }
-        $producto = $sale->subscription_plan;
-        dd($sale);
-        $availableInvoices = $company->getAvailableInvoices( false, false );
-
-        $productosEtax = EtaxProducts::where('is_subscription', 0)->where('id',  16)->get(); //El 15 es el producto de cálculos de prorrata, creado por seeders.
         $paymentMethods = PaymentMethod::where('user_id', auth()->user()->id)->get();
-        
-        return view('users.compra_contabilidades')->with('productosEtax', $productosEtax)
-                                                        ->with('company', $company)
-                                                        ->with('paymentMethods', $paymentMethods);
+        $fechavencimiento = date('Y-m-d', strtotime($sale->next_payment_date));
+        $fechavencimiento = Carbon::parse($fechavencimiento);
+        $diff = $fechavencimiento->diffInDays($date_now);
+        //dd($diff);
+        $fechavencimiento = date('d/m/Y', strtotime($sale->next_payment_date));
+        return view('users.compra_contabilidades')->with('company', $company)
+                                    ->with('sale', $sale)
+                                    ->with('fechavencimiento', $fechavencimiento)
+                                    ->with('diff', $diff)
+                                    ->with('paymentMethods', $paymentMethods);
 
     }
 

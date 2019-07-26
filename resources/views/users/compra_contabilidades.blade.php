@@ -36,9 +36,10 @@
 
 
                         <div class="tab-content">
-                            <form method="POST" action="/payment/comprar-facturas" enctype="multipart/form-data">
+                            <form method="POST" action="/payment/comprar-contabilidades" enctype="multipart/form-data">
                                 @csrf
                                 
+                                @method('post') 
                                 <div class="form-row" style="position: relative;">
                                     <div class="form-group col-md-12" >
                                         <h3>
@@ -48,9 +49,11 @@
                                     
                                     <div class="form-group col-md-6">
                                         <label for="product_id">Seleccione la cantidad de contabilidades que requiere</label>
-                                        <input type="number" class="form-control col-md-12" name="contabilidades" id="contabilidades" value="1"/>
+                                        <input type="number" class="form-control col-md-12" name="contabilidades" id="contabilidades" value="1"  onchange="calcularPrecioContabilidades()"/>
+                                        <input type="number" class="form-control d-none" name="recurrency" id="recurrency" value="{{@$sale->recurrency}}" />
+                                        <input type="number" class="form-control d-none" name="diff" id="diff" value="{{@$diff}}" />
                                         <label for="payment_method">Seleccione su m&eacute;todo de pago</label>
-                                        <select class="form-control select-search" name="payment_method" id="payment_method" >
+                                        <select class="form-control select-search" name="payment_method" id="payment_method">
                                             <option value='' selected>-- Seleccione un m&eacute;todo de pago --</option>
                                             @foreach ( $paymentMethods as $paymentMethod )
                                                 <option value="{{ $paymentMethod->id }}" >{{ $paymentMethod->name }} {{ $paymentMethod->last_name }} - {{ $paymentMethod->masked_card }}</option>
@@ -59,9 +62,9 @@
                                     </div>
                                     
                                     <div class="form-group col-md-6">
-                                        <h4>En este momento cuentas con <span id="cantidad_disponibles_contabilidades"></span> contabilidades disponibles</h4>
+                                        <h4>En este momento cuentas con <span id="cantidad_disponibles_contabilidades">{{@$sale->num_companies}}</span> contabilidades disponibles</h4>
                                         <p>Estas comprando <span id="cantidad_contabilidades_requeridad">1 contabilidad</span></p>
-
+                                        <p>Monto a pagar $<span id="precio_pago"></span></p>
                                     </div>
                                     
                                     <div class="form-group col-md-12" style="white-space: nowrap;">
@@ -123,6 +126,14 @@
                                     <div class="form-group col-md-4">
                                         <label for="state">Provincia</label>
                                         <select class="form-control" name="state" id="state" onchange="fillCantones();" required>
+                                            <option value="0" selected>Seleccione una opcion</option>
+                                            <option value="1" >San José</option>
+                                            <option value="2" >Alajuela</option>
+                                            <option value="3" >Cartago</option>
+                                            <option value="4" >Heredia</option>
+                                            <option value="5" >Guanacaste</option>
+                                            <option value="6" >Puntarenas</option>
+                                            <option value="7" >Limón</option>
                                         </select>
                                     </div>
         
@@ -153,7 +164,7 @@
                                         <input class="form-control" name="address" id="address">
                                     </div>
                             
-                                    <button id="btn-submit" type="submit" class="hidden btn btn-primary">Comprar</button>
+                                    <button id="btn-submit" type="submit" class="btn btn-primary">Comprar</button>
                                 </div>
                             </form>
                         </div>
@@ -165,3 +176,49 @@
 
 @endsection
 
+@section('footer-scripts')
+<script>
+    calcularPrecioContabilidades();
+    function calcularPrecioContabilidades() {
+          var cantidad = parseFloat($('#contabilidades').val());
+          console.log('contabilidades '+cantidad);
+          var existentes = parseFloat($('#cantidad_disponibles_contabilidades').html());
+          console.log('cantidad_disponibles_contabilidades '+existentes);
+          cantidad = cantidad + existentes;
+          existentes = existentes - 10;
+          console.log('total '+cantidad);
+          var recurrency = $('#recurrency').val();
+          var diff = $('#diff').val();
+          console.log('existentes extras '+existentes);
+          console.log('recurrencia'+recurrency);
+          console.log('diff'+diff);
+          var total = 0;
+          var total_extras = 0;
+          if(cantidad > 25){
+              total_extras = (cantidad - existentes) * 8;
+              cantidad = 25;
+          }
+          if(cantidad > 10){
+              total_extras += (cantidad - existentes) * 10;
+              cantidad = 10;
+          }
+          if(recurrency == 1){
+            total_extras = total_extras / 31 * diff;
+            total = total_extras;
+          }
+          if(recurrency == 6){
+            total_extras = total_extras / 133 * diff;
+            total = total_extras * 6;
+          }
+          if(recurrency == 12){
+            total_extras = total_extras / 366 * diff;
+            total = total_extras * 12;
+          }
+          var precioFinal = parseFloat(total).toFixed(2);
+          console.log(precioFinal);
+          $("#precio_pago").html(precioFinal);
+
+    }
+</script>
+
+@endsection
