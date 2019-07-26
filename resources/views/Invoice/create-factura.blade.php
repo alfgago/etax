@@ -62,6 +62,9 @@ $company = currentCompanyModel();
                           @endif
                         @endforeach
                       </select>
+                      @if($document_type == "04")
+                        <div class="description">El cliente no es obligatorio para los tiquetes electrónicos.</div>
+                      @endif
                     </div>
                     @else
                      <div class="form-group col-md-12">

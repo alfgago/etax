@@ -110,21 +110,21 @@
     
     <div class="form-group col-md-3">
       <label for="cantidad">Cantidad</label>
-      <input type="text" min="1" class="form-control" id="cantidad" value="1"  >
+      <input type="number" min="1" class="form-control" id="cantidad" value="1"  >
     </div>
 
     <div class="form-group col-md-3">
       <label for="precio_unitario">Precio unitario</label>
       @if( @$tipoHacienda == 'SJB' )
-      <input type="text" min="0" class="form-control" id="precio_unitario" readonly placeholder="0" number >
+      <input type="number" min="0" class="form-control" id="precio_unitario" readonly placeholder="0" number >
       @else
-      <input type="text" min="0" class="form-control" id="precio_unitario" value="0" number >
+      <input type="number" min="0" class="form-control" id="precio_unitario" value="0" number >
       @endif
     </div>
 
     <div class="form-group col-md-3">
       <label for="item_iva">Monto IVA</label>
-      <input type="text" min="0" class="form-control {{ @$tipoHacienda == 'SJB' ? 'is-fec' : 'not-fec' }}" id="item_iva_amount" placeholder="" >
+      <input type="number" min="0" class="form-control {{ @$tipoHacienda == 'SJB' ? 'is-fec' : 'not-fec' }}" id="item_iva_amount" placeholder="" >
     </div>
 
     <div class="form-group col-md-3">
