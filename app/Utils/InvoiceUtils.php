@@ -250,7 +250,7 @@ class InvoiceUtils
                     'precioUnitario' => $value['unit_price'] ?? 0,
                     'subtotal' => $value['subtotal'] ?? 0,
                     'montoTotal' =>  $montoSinIva,
-                    'montoTotalLinea' => $value['subtotal'] + $value['iva_amount'] ?? 0,
+                    'montoTotalLinea' => $value['subtotal'] + ($value['iva_amount'] - $value['exoneration_amount']) ?? 0,
                     'descuento' => $montoDescuento,
                     'impuesto_codigo' => '01',
                     'tipo_iva' => $value['iva_type'],
@@ -264,8 +264,9 @@ class InvoiceUtils
                     'exoneracion_porcentaje' => $value['exoneration_porcent'] ?? 0,
                     'exoneracion_monto' => $value['exoneration_amount'] ?? 0,
                     'exoneracion_company' => $value['exoneration_company_name'] ?? '',
-                    'impuesto_neto' => $value['impuesto_neto'] ?? 0,
+                    'impuestoneto' => $value['impuesto_neto'] ?? 0,
                     'tariff_heading' => $value['tariff_heading'] ?? '',
+                    'exoneracion_total_gravados' => $value['exoneration_total_gravado'] ?? 0,
                     'base_imponible' => 0,
                 );
             }
@@ -295,16 +296,18 @@ class InvoiceUtils
             $request = null;
             $totalServiciosGravados = 0;
             $totalServiciosExentos = 0;
+            $totalServiciosExonerados = 0;
             $totalMercaderiasGravadas = 0;
             $totalMercaderiasExentas = 0;
+            $totalMercaderiasExonerados = 0;
             $totalDescuentos = 0;
             $totalImpuestos = 0;
+            $totalImpuestosNeto = 0;
             $itemDetails = json_decode($details);
             //Spe, St, Al, Alc, Cm, I, Os
-            foreach ($itemDetails as $detail){
+            foreach ($itemDetails as $detail) {
                 $cod = \App\CodigoIvaRepercutido::find($detail->tipo_iva);
                 $isGravado = isset($cod) ? $cod->is_gravado : true;
-
                 if($detail->unidadMedida == 'Sp' || $detail->unidadMedida == 'Spe' || $detail->unidadMedida == 'St'
                     || $detail->unidadMedida == 'Al' || $detail->unidadMedida == 'Alc' || $detail->unidadMedida == 'Cm'
                     || $detail->unidadMedida == 'I' || $detail->unidadMedida == 'Os'){
@@ -315,25 +318,35 @@ class InvoiceUtils
                         $totalServiciosGravados += $detail->montoTotal;
                     }
 
+                    if ($detail->exoneracion_tipo_documento !== "" && $detail->exoneracion_porcentaje !== "") {
+                        $totalServiciosExonerados += $detail->exoneracion_total_gravados;
+                    }
+
                 } else {
                     if($detail->impuesto_monto == 0 && !$isGravado ){
                         $totalMercaderiasExentas += $detail->montoTotal;
                     }else{
                         $totalMercaderiasGravadas += $detail->montoTotal;
                     }
+                    if ($detail->exoneracion_tipo_documento !== "" && $detail->exoneracion_porcentaje !== "") {
+                        $totalMercaderiasExonerados += $detail->exoneracion_total_gravados;
+                    }
                 }
+
                 $totalDescuentos += $detail->descuento;
 
                 if ($detail->impuesto_monto !== 'false') {
                     $totalImpuestos += $detail->impuesto_monto;
+                    $totalImpuestosNeto += $detail->impuestoneto;
                 }
 
             }
-            $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas;
+            $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas - $totalServiciosExonerados;
             $totalExento = $totalServiciosExentos + $totalMercaderiasExentas;
-            $totalVenta = $totalGravado + $totalExento;
+            $totalExonerados = $totalServiciosExonerados + $totalMercaderiasExonerados;
+            $totalVenta = $totalGravado + $totalExento + $totalExonerados;
             $totalNeta = $totalVenta - $totalDescuentos;
-            $totalComprobante = $totalNeta + $totalImpuestos;
+            $totalComprobante = $totalNeta + ($totalImpuestos - $totalImpuestosNeto);
 
             $invoiceData = array(
                 'consecutivo' => $ref ?? '',
@@ -371,16 +384,19 @@ class InvoiceUtils
                 'atvcertPin' => $company->atv->pin ? trim($company->atv->pin) : '',
                 //'atvcertFile' => Storage::get($company->atv->key_url),
 
-                'servgravados' => $totalServiciosGravados,
+                'servgravados' => $totalServiciosGravados - $totalServiciosExonerados,
                 'servexentos' => $totalServiciosExentos,
+                'servexonerados' => $totalServiciosExonerados,
                 'mercgravados' => $totalMercaderiasGravadas,
                 'mercexentos' => $totalMercaderiasExentas,
+                'mercexonerados' => $totalMercaderiasExonerados - $totalMercaderiasExonerados,
                 'totgravado' => $totalGravado,
                 'totexento' => $totalExento,
+                'totexonerados' => $totalExonerados,
                 'totventa' => $totalVenta,
                 'totdescuentos' => $totalDescuentos,
                 'totventaneta' => $totalNeta,
-                'totimpuestos' => $totalImpuestos,
+                'totimpuestos' => $totalImpuestos - $totalImpuestosNeto,
                 'totcomprobante' => $totalComprobante,
                 'detalle' => $details
             );

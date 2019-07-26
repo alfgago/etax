@@ -339,7 +339,7 @@ class Invoice extends Model
                     $exonerationDate = null;
                 }
 
-                if ($exonerationDate && isset($data['typeDocument']) && isset($data['numeroDocumento'])) {
+                if ($exonerationDate && isset($data['typeDocument']) && isset($data['numeroDocumento']) && $data['porcentajeExoneracion'] > 0) {
                     $item->exoneration_document_type = $data['typeDocument'] ?? null;
                     $item->exoneration_document_number = $data['numeroDocumento'] ?? null;
                     $item->exoneration_company_name = $data['nombreInstitucion'] ?? null;
@@ -347,6 +347,7 @@ class Invoice extends Model
                     $item->exoneration_amount = $data['montoExoneracion'] ?? 0;
                     $item->exoneration_date = $exonerationDate;
                     $item->exoneration_total_amount = $data['montoExoneracion'] ?? 0;
+                    $item->exoneration_total_gravado = (($item->item_count * $item->unit_price) * $item->exoneration_porcent) / 100 ;
                     $item->impuesto_neto = $data['impuestoNeto'] ?? $data['iva_amount'] - $data['montoExoneracion'];
                     $item->save();
                 }
