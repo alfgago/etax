@@ -216,7 +216,7 @@ class Invoice extends Model
               $this->client_first_name = 'N/A';
             }
             
-            if( $this->document_type == '08' ) {
+            if( $this->document_type == '08' && !$request->client_id ) {
               $this->client_first_name = trim($this->company->name);
               $this->client_last_name = trim($this->company->last_name);
               $this->client_last_name2 = trim($this->company->last_name2);

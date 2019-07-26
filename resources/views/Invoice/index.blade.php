@@ -121,20 +121,37 @@ function confirmDelete( id ) {
 }
 
 
-function confirmAnular( id ) {
+
+function confirmAnular( id ) {  
   var formId = "#anular-form-"+id;
-  Swal.fire({
-    title: '¿Está seguro que desea anular la factura',
-    text: "Este proceso anulará la factura ante Hacienda y enviará una nueva nota de crédito al cliente.",
-    type: 'warning',
-    showCloseButton: true,
-    showCancelButton: true,
-    confirmButtonText: 'Sí, quiero anularla'
-  }).then((result) => {
-    if (result.value) {
-      $(formId).submit();
-    }
-  })
+  @if(currentCompanyModel()->atv_validation)
+    var title = '¿Está seguro que desea anular la factura';
+    var texto = "Este proceso anulará la factura ante Hacienda y enviará una nueva nota de crédito al cliente.";
+    Swal.fire({
+      title: title,
+      text: texto,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, quiero anularla'
+    }).then((result) => {
+      if (result.value) {
+        $(formId).submit();
+      }
+    })
+  @else
+    var title = 'No puede anular factura';
+    var texto = "Debe tener un certificado ATV válido para poder hacer anulaciones y generar nota de crédito.";
+    Swal.fire({
+      title: title,
+      text: texto,
+      type: 'warning',
+      showCloseButton: true,
+      confirmButtonText: 'Ok'
+    });
+  @endif
+
+  
   
 }
 
