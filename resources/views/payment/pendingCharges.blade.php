@@ -50,7 +50,7 @@
                                                     <td>{{$charge['created_at']}}</td>
                                                     <td>
                                                         <?php if($charge['payment_status'] == 2){ ?>
-                                                            <form id="payment-form" class="inline-form" method="POST" action="/payment/pagar-cargo/{{$charge['chargeTokenId']}}" >
+                                                            <form id="payment-form" class="inline-form" method="POST" action="/payment/pagar-cargo/{{$charge['id']}}" >
                                                             @csrf
                                                             @method('patch')
                                                                 <a type="button" class="text-success mr-2" title="Pagar " style="display: inline-block; background: none; border: 0;"onclick="confirmPayment();">

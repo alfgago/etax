@@ -674,6 +674,7 @@ class PaymentController extends Controller
             $payment = Payment::where('sale_id', $sale->id)->where('payment_status', 2)->first();
             array_push($charges, $payment);
         }
+        dd($charges);
         if($charges != '') {
             return view('/payment/pendingCharges')->with('charges', $charges);
         }else{
@@ -681,19 +682,14 @@ class PaymentController extends Controller
         }
     }
 
-    public function pagarCargo($idCharge){
+    public function pagarCargo($idpayment){
         $paymentUtils = new PaymentUtils();
         $date = Carbon::parse(now('America/Costa_Rica'));
+        $company = currentCompanyModel();
+        $user = auth()->user();
         $bnStatus = $paymentUtils->statusBNAPI();
-        if($bnStatus['apiStatus'] == 'Successful'){
-            $charge = $paymentUtils->userGetChargeInfo($idCharge);
-            $user = auth()->user();
+        if($bnStatus['apiStatus'] == 'Successful'){//charge_token
             $paymentMethod = PaymentMethod::where('user_id', $user->id)->where('default_card', 0)->first();
-            $company = currentCompanyModel();
-            $amount = $charge['transactionAmount'];
-            $subtotal = $amount;
-            $iv = $subtotal * 0.13;
-            $amount = $subtotal + $iv;
             if($paymentMethod){
                 $sale = Sales::updateOrCreate(
                     [
@@ -707,31 +703,45 @@ class PaymentController extends Controller
                 $payment = Payment::updateOrCreate(
                     [
                         'sale_id' => $sale->id,
-                        'payment_status' => 1,
+                        'payment_status' => 2,
                     ],
                     [
                         'payment_date' => $date,
                         'payment_method_id' => $paymentMethod->id,
-                        'amount' => $amount,
-                        'charge_token' => $idCharge
                     ]
                 );
+                $chargeTokenId = $payment->charge_token;
+                $amount = $payment->amount;
+                if(!$chargeTokenId){
+                    $new_payment = new stdClass();
+                    $new_payment->description = $payment->proof;
+                    $new_payment->user_name = $user->user_name;
+                    $new_payment->amount = $amount;
+                    $charge = $paymentUtils->paymentIncludeCharge($new_payment);
+                    $chargeTokenId = $charge['chargeTokenId'];
+                }
+                $subtotal = $amount;
+                $iv = $subtotal * 0.13;
+                $amount = $subtotal + $iv;
                 $data = new stdClass();
-                $data->description = $charge['chargeDescription'];
+                $data->description = 'Cargo directo de eTax';
                 $data->amount = $amount;
                 $data->user_name = $user->user_name;
-                $data->chargeTokenId = $idCharge;
+                $data->chargeTokenId = $chargeTokenId;
                 $data->cardTokenId = $paymentMethod->token_bn;
 
                 $appliedCharge = $paymentUtils->paymentApplyCharge($data);
 
                 if ($appliedCharge['apiStatus'] == "Successful") {
                     $payment->proof = $appliedCharge['retrievalRefNo'];
+                    $payment->charge_token = $charge['chargeTokenId'];
                     $payment->payment_status = 2;
                     $payment->save();
 
                     $sale->next_payment_date = $date->addMonths($sale->recurrency);
                     $sale->status = 1;
+                    $sale->is_subscription = 0;
+                    $sale->payment_status = 1;
                     $sale->save();
 
                     $invoiceData = new stdClass();
@@ -759,8 +769,8 @@ class PaymentController extends Controller
 
                     $item = new stdClass();
                     $item->total = $amount;
-                    $item->code = 'eTax';
-                    $item->name = $charge['chargeDescription'];
+                    $item->code = 'eTax01';
+                    $item->name = 'Cargo directo de eTax';
                     $item->descuento = 0;
                     $item->discount_reason = null;
                     $item->cantidad = 1;
