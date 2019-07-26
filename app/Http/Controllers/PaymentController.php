@@ -557,18 +557,30 @@ class PaymentController extends Controller
                                                                 ->where('is_subscription', 1)->first();
                
                 $cantidad = $sale->num_companies + $request->contabilidades; 
+                $precio_25 = 8;
+                $precio_10 = 10;
+                $precio_mes = 14.999;
+                $precio_seis = 13.740;
+                $precio_year = 12.491;
+                if($sale->price != 0){
+                    $precio_25 = $sale->price;
+                    $precio_10 = $sale->price;
+                    $precio_mes = $sale->price;
+                    $precio_seis = $sale->price;
+                    $precio_year = $sale->price;
+                }
                 $total_extras = 0;
                 if($cantidad > 25){
-                   $total_extras = ($cantidad - 25) * 8;
+                   $total_extras = ($cantidad - 25) * $precio_25;
                    $cantidad = 25;
                 }
                 if($cantidad > 10){
-                   $total_extras += ($cantidad - 10) * 10;
+                   $total_extras += ($cantidad - 10) * $precio_10;
                    $cantidad = 10;
                 }
-                $monthly_price = $cantidad * 14.999;
-                $six_price = $cantidad * 13.740;
-                $annual_price = $cantidad * 12.491;
+                $monthly_price = $cantidad * $precio_mes;
+                $six_price = $cantidad * $precio_seis;
+                $annual_price = $cantidad * $precio_year;
                 $monthly_price += $total_extras;
                 $six_price += $total_extras;
                 $annual_price += $total_extras;
@@ -581,11 +593,11 @@ class PaymentController extends Controller
                 $total = 0;
                 $total_extras = 0;
                   if($cantidad > 25){
-                      $total_extras = ($cantidad - $existentes ) * 8;
+                      $total_extras = ($cantidad - $existentes ) * $precio_25;
                       $cantidad = 25;
                   }
                   if($cantidad > 10){
-                      $total_extras += ($cantidad - $existentes ) * 10;
+                      $total_extras += ($cantidad - $existentes ) * $precio_10;
                       $cantidad = 10;
                   }
                   if($sale->recurrency == 1){

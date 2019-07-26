@@ -51,6 +51,7 @@
                                         <label for="product_id">Seleccione la cantidad de contabilidades que requiere</label>
                                         <input type="number" class="form-control col-md-12" name="contabilidades" id="contabilidades" value="1"  onchange="calcularPrecioContabilidades()"/>
                                         <input type="number" class="form-control d-none" name="recurrency" id="recurrency" value="{{@$sale->recurrency}}" />
+                                        <input type="number" class="form-control d-none" name="price_code" id="price_code" value="{{@$sale->price}}" />
                                         <input type="number" class="form-control d-none" name="diff" id="diff" value="{{@$diff}}" />
                                         <label for="payment_method">Seleccione su m&eacute;todo de pago</label>
                                         <select class="form-control select-search" name="payment_method" id="payment_method">
@@ -181,26 +182,34 @@
     calcularPrecioContabilidades();
     function calcularPrecioContabilidades() {
           var cantidad = parseFloat($('#contabilidades').val());
-          console.log('contabilidades '+cantidad);
+          var price_code = parseFloat($('#price_code').val());
           var existentes = parseFloat($('#cantidad_disponibles_contabilidades').html());
-          console.log('cantidad_disponibles_contabilidades '+existentes);
           cantidad = cantidad + existentes;
-          existentes = existentes - 10;
-          console.log('total '+cantidad);
+          existentes = existentes ;
           var recurrency = $('#recurrency').val();
           var diff = $('#diff').val();
-          console.log('existentes extras '+existentes);
-          console.log('recurrencia'+recurrency);
-          console.log('diff'+diff);
+          var procesadas = 0;
           var total = 0;
           var total_extras = 0;
+          var precio_25 = 8;
+          var precio_10 = 10;
+          if(price_code != 0){
+             precio_25 = price_code;
+             precio_10 = price_code;
+          }
           if(cantidad > 25){
-              total_extras = (cantidad - existentes) * 8;
-              cantidad = 25;
+              procesadas = (cantidad - existentes);
+              if(procesadas > 0){
+                  total_extras =  procesadas * precio_25;
+                  cantidad = 25;
+                }
           }
           if(cantidad > 10){
-              total_extras += (cantidad - existentes) * 10;
-              cantidad = 10;
+              procesadas = (cantidad - existentes);
+              if(procesadas > 0){
+                  total_extras =  procesadas * precio_10;
+                  cantidad = 10;
+                }
           }
           if(recurrency == 1){
             total_extras = total_extras / 31 * diff;
@@ -215,7 +224,6 @@
             total = total_extras * 12;
           }
           var precioFinal = parseFloat(total).toFixed(2);
-          console.log(precioFinal);
           $("#precio_pago").html(precioFinal);
 
     }
