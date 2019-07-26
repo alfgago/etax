@@ -664,9 +664,6 @@ class PaymentController extends Controller
 
     public function pendingCharges(){
         $user = auth()->user();
-        //$paymentUtils = new PaymentUtils();
-        //$bnStatus = $paymentUtils->statusBNAPI();
-        //$charges = $paymentUtils->userRequestCharges();
         $sales = Sales::where('user_id', $user->id)
                      ->where('status', 2)->get();
         $charges = array();
@@ -674,7 +671,6 @@ class PaymentController extends Controller
             $payment = Payment::where('sale_id', $sale->id)->where('payment_status', 2)->first();
             array_push($charges, $payment);
         }
-        dd($charges);
         if($charges != '') {
             return view('/payment/pendingCharges')->with('charges', $charges);
         }else{
