@@ -663,10 +663,18 @@ class PaymentController extends Controller
     }
 
     public function pendingCharges(){
-        $paymentUtils = new PaymentUtils();
-        $bnStatus = $paymentUtils->statusBNAPI();
-        if($bnStatus['apiStatus'] == 'Successful') {
-            $charges = $paymentUtils->userRequestCharges();
+        $user = auth()->user();
+        //$paymentUtils = new PaymentUtils();
+        //$bnStatus = $paymentUtils->statusBNAPI();
+        //$charges = $paymentUtils->userRequestCharges();
+        $sales = Sales::where('user_id', $user->id)
+                     ->where('status', 2)->get();
+        $charges = array();
+        foreach($sales as $sale){
+            $payment = Payment::where('sale_id', $sale->id)->where('payment_status', 2)->first();
+            array_push($charges, $payment);
+        }
+        if($charges != '') {
             return view('/payment/pendingCharges')->with('charges', $charges);
         }else{
             return redirect()->back()->withErrors('No se pueden ejecutar consultas en este momento');
@@ -680,7 +688,7 @@ class PaymentController extends Controller
         if($bnStatus['apiStatus'] == 'Successful'){
             $charge = $paymentUtils->userGetChargeInfo($idCharge);
             $user = auth()->user();
-            $paymentMethod = PaymentMethod::where('user_id', $user->id)->where('default_card', true)->first();
+            $paymentMethod = PaymentMethod::where('user_id', $user->id)->where('default_card', 0)->first();
             $company = currentCompanyModel();
             $amount = $charge['transactionAmount'];
             $subtotal = $amount;
@@ -689,11 +697,6 @@ class PaymentController extends Controller
             if($paymentMethod){
                 $sale = Sales::updateOrCreate(
                     [
-                        'sale_id' => $id,
-
-                    ],
-                    [
-                    'payment_status' => 1,
                     'user_id' => $user->id,
                     'company_id' => currentCompany(),
                     'status' => 1,
@@ -749,7 +752,6 @@ class PaymentController extends Controller
                     $invoiceData->phone = $company->phone;
                     $invoiceData->es_exento = false;
                     $invoiceData->email = $company->email;
-                    $invoiceData->expiry = $company->expiry;
                     $invoiceData->amount = $amount;
                     $invoiceData->subtotal = $subtotal;
                     $invoiceData->iva_amount = $iv;
@@ -757,8 +759,8 @@ class PaymentController extends Controller
 
                     $item = new stdClass();
                     $item->total = $amount;
-                    $item->code = $sale->etax_product_id;
-                    $item->name = $sale->plan->name . " / $sale->recurrency meses";
+                    $item->code = 'eTax';
+                    $item->name = $charge['chargeDescription'];
                     $item->descuento = 0;
                     $item->discount_reason = null;
                     $item->cantidad = 1;
@@ -769,6 +771,7 @@ class PaymentController extends Controller
 
                     $invoiceData->items = [$item];
                     $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
+                    return redirect()->back()->withMessage('Pago procesado');
                 }else{
                     \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
                         [
@@ -779,15 +782,8 @@ class PaymentController extends Controller
                     ));
                 }
             }else{
-                \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
-                    [
-                        'name' => $company->name . ' ' . $company->last_name,
-                        'product' => $charge['chargeDescription'],
-                        'card' => "No indica"
-                    ]
-                ));
+                return redirect()->back()->withErrors('Debe seleccionar un método de pago por defecto');
             }
-            return redirect()->back()->withMessage('Pago procesado');
         }else{
             return redirect()->back()->withErrors('No se pueden realizarse pagos en este momento');
         }
