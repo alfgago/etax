@@ -129,6 +129,7 @@ Route::get('/elegir-plan', 'SubscriptionPlanController@selectPlan')->name('Subsc
 Route::get('/periodo-pruebas', 'SubscriptionPlanController@startTrial')->name('Subscription.startTrial');
 Route::post('/confirmar-plan', 'SubscriptionPlanController@confirmPlanChange')->name('Subscription.confirmar_plan');
 Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}', 'SubscriptionPlanController@confirmCode')->name('Subscription.confirmar_code');
+Route::get('/codigo-contador/{codigo}', 'SubscriptionPlanController@confirmCodeAccount')->name('Subscription.confirmCodeAccount');
 Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');
 
 // Rutas de usuario
