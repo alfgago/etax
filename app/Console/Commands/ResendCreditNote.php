@@ -61,7 +61,7 @@ class ResendCreditNote extends Command
                     ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
             }
         } catch ( \Exception $e) {
-            Log::error('Error resend command '.$e);
+            Log::error('Error resend command credit note'.$e);
             $this->info('Error Resending Credit Note to Hacienda....'. $e);
         }
     }
