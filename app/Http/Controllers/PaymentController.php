@@ -884,11 +884,11 @@ class PaymentController extends Controller
         
         $bnStatus = $paymentUtils->statusBNAPI();
         if($bnStatus['apiStatus'] == 'Successful'){//charge_token
-            $paymentMethod = PaymentMethod::where('user_id', $sale->user_id)->where('default_card', true)->first();
+            $paymentMethod = PaymentMethod::where('user_id', $user->user_id)->where('default_card', true)->first();
             $company = $sale->company;
             
             if(!$paymentMethod){
-                $paymentMethod = PaymentMethod::where('user_id', $sale->user_id)->first();
+                $paymentMethod = PaymentMethod::where('user_id', $user->user_id)->first();
             }
                     
             if($paymentMethod){
