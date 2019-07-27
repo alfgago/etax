@@ -714,7 +714,7 @@ class PaymentController extends Controller
                 $amount = $payment->amount;
                 if(!$chargeTokenId){
                     $new_payment = new stdClass();
-                    $new_payment->description = $payment->proof;
+                    $new_payment->description = 'Cargo directo de eTax';
                     $new_payment->user_name = $user->user_name;
                     $new_payment->amount = $amount;
                     $charge = $paymentUtils->paymentIncludeCharge($new_payment);
