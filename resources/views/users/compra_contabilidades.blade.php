@@ -43,7 +43,7 @@
                                 <div class="form-row" style="position: relative;">
                                     <div class="form-group col-md-12" >
                                         <h3>
-                                            Comprar Contabilidades Adicionales
+                                            Comprar contabilidades adicionales
                                         </h3>
                                     </div>
                                     

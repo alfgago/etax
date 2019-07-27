@@ -41,9 +41,9 @@
                                         <thead>
                                         <tr>
                                             <th>Descripcion</th>
+                                            <th>Fecha</th>
                                             <th>Monto</th>
                                             <th>Estado</th>
-                                            <th>Fecha</th>
                                             <th>Pagar</th>
                                         </tr>
                                         </thead>
@@ -53,9 +53,9 @@
                                                 @if(@$charge->payment_status == 1)
                                                     <tr>
                                                         <td>{{ @$charge->sale->saleDescription() }}</td>
+                                                        <td>{{ \Carbon\Carbon::parse($charge->created_at)->format('d/m/Y') }}</td>
                                                         <td>${{$charge->amount}}</td>
                                                         <td>Pendiente</td>
-                                                        <td>{{ \Carbon\Carbon::parse($charge->created_at)->format('d/m/Y') }}</td>
                                                         <td>
                                                             
                                                             <form id="payment-form" class="inline-form" method="POST" action="/payment/pagar-cargo/{{$charge['id']}}" >

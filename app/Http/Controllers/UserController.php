@@ -173,9 +173,9 @@ class UserController extends Controller {
                 //$teams = \Mpociot\Teamwork\TeamworkTeam::get();
             }
             $actividades = Actividades::all()->toArray();
-
-            $available_companies_count = User::checkCountAvailableCompanies();
-            return view('users.companies', compact('data'))->with('teams', $teams);
+            $availableCompanies = User::checkCountAvailableCompanies();
+            
+            return view('users.companies', compact('data', 'teams', 'availableCompanies'));
 
         }catch( \Throwable $ex ){
             return view('users.companies');
