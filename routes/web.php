@@ -131,6 +131,9 @@ Route::get('/periodo-pruebas', 'SubscriptionPlanController@startTrial')->name('S
 Route::post('/confirmar-plan', 'SubscriptionPlanController@confirmPlanChange')->name('Subscription.confirmar_plan');
 Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}', 'SubscriptionPlanController@confirmCode')->name('Subscription.confirmar_code');
 Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');
+Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');
+Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}', 'SubscriptionPlanController@confirmCode')->name('Subscription.confirmar_code');
+
 
 // Rutas de usuario
 Route::prefix('usuario')->group(function() {
@@ -149,6 +152,8 @@ Route::prefix('usuario')->group(function() {
     Route::post('add-retiro', 'InfluencersController@retiro')->name('Influencers.retiro');
     Route::get('cancelar', 'UserController@cancelar')->name('User.cancelar');
     Route::patch('update-cancelar', 'UserController@updatecancelar')->name('User.updatecancelar');
+    Route::get('compra-contabilidades', 'UserController@CompraContabilidades')->name('Payment.CompraContabilidades');
+
 });
 
 //Rutas de Pagos de la aplicacion
@@ -159,6 +164,8 @@ Route::prefix('payment')->group(function(){
     Route::post('payment-charge', 'PaymentController@paymentCharge')->name('Payment.payment_charge');
     Route::get('pending-charges', 'PaymentController@pendingCharges')->name('Payment.pending_charges');
     Route::post('comprar-facturas', 'PaymentController@comprarFacturas')->name('Payment.comprar_facturas');
+    Route::post('comprar-contabilidades', 'PaymentController@comprarContabilidades')->name('Payment.comprarContabilidades');
+    Route::post('seleccion-empresas', 'PaymentController@SeleccionEmpresas')->name('Payment.SeleccionEmpresas');
     Route::patch('pagar-cargo/{id}', 'PaymentController@pagarCargo')->name('Payment.pagar-cargo');
 });
 

@@ -12,6 +12,7 @@ use Lab404\Impersonate\Models\Impersonate;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use App\Coupon;
+use App\SubscriptionPlan;
 
 class User extends Authenticatable {
 
@@ -157,10 +158,10 @@ class User extends Authenticatable {
     
     /*public function isContador() {
         try{
-            $productId = getCurrentSubscription()->etax_product_id;
-            if( $productId == 7 ) {
-                return true;
-            }
+            $company = currentCompanyModel();
+            $plan_tier = "Pro (".$company->user_id.")";
+            $contador = SubscriptionPlan::where('plan_tier',$plan_tier)->count();
+            return $contador;
         }catch( \Throwable $e) { return false; }
         
         return false;

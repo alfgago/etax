@@ -17,12 +17,17 @@
                 <label for="country">Empresa actual:</label>
                 <div class="form-group">
                     <select class="form-control" id="company_change" onchange="companyChange(true);">
+
                         @foreach( auth()->user()->teams as $row )
                             <?php  
                                 $c = $row->company;  
                                 $name = $c->name ? $c->name.' '.$c->last_name.' '.$c->last_name2 : '-- Nueva Empresa --';  
+                                if($c->status == 1){
                             ?>
-                            <option value="{{ $c->id }}" {{ $c->id == currentCompany() ? 'selected' : ''  }} > {{ $name }} </option>
+                                <option value="{{ $c->id }}" {{ $c->id == currentCompany() ? 'selected' : ''  }} > {{ $name }} </option>
+                            <?php
+                                }
+                            ?>
                         @endforeach
                     </select>
                 </div>
