@@ -34,30 +34,31 @@
                                     <tr>
                                         <th>Descripcion</th>
                                         <th>Monto</th>
-                                        <th>Moneda</th>
+                                        <th>Estado</th>
                                         <th>Fecha</th>
+                                        <th>Pagar</th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    @if ( $charges['chargesCount'] > 0 )
-                                        @foreach($charges['userCharges'] as $charge)
+                                    @if ( $charges > 0 )
+                                        @foreach($charges as $charge)
                                             @if($charge)
                                                 <tr>
-                                                    <td>{{$charge->chargeDescription}}</td>
-                                                    <td>{{$charge->transactionAmount}}</td>
-                                                    <td>{{$charge->transactionCurrency}}</td>
-                                                    <td>{{$charge->chargeDateTime}}</td>
-                                                    {{--<td>
-                                                        @if( auth()->user()->isOwnerOfTeam($team) )
-                                                            <form id="delete-form-{{ $company_detail->id }}" class="inline-form" method="POST" action="/empresas/{{ $company_detail->id }}" >
-                                                                @csrf
-                                                                @method('delete')
-                                                                <a type="button" class="text-danger mr-2" title="Eliminar empresa" style="display: inline-block; background: none; border: 0;" onclick="confirmDelete({{ $company_detail->id }});">
-                                                                    <i class="fa fa-ban" aria-hidden="true"></i>
+                                                    <td>{{$charge['proof']}}</td>
+                                                    <td>${{$charge['amount']}}</td>
+                                                    <td><?php echo ($charge['payment_status'] == 1) ? 'Pagado' : 'Pendiente' ?></td>
+                                                    <td>{{$charge['created_at']}}</td>
+                                                    <td>
+                                                        <?php if($charge['payment_status'] == 2){ ?>
+                                                            <form id="payment-form" class="inline-form" method="POST" action="/payment/pagar-cargo/{{$charge['id']}}" >
+                                                            @csrf
+                                                            @method('patch')
+                                                                <a type="button" class="text-success mr-2" title="Pagar " style="display: inline-block; background: none; border: 0;"onclick="confirmPayment();">
+                                                                    <i class="fa fa-credit-card" aria-hidden="true"></i>
                                                                 </a>
                                                             </form>
-                                                        @endif
-                                                    </td>--}}
+                                                        <?php } ?>
+                                                    </td>
                                                 </tr>
                                             @endif
                                         @endforeach
@@ -71,5 +72,22 @@
             </div>
         </div>
     </div>
+<script>
+    function confirmPayment() {
+        var formId = "#payment-form";
+        Swal.fire({
+            title: '¿Confirma que realizará el pago?',
+            text: "Se utilizará su método de pago por defecto.",
+            type: 'info',
+            showCloseButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Si, realizar pago'
+        }).then((result) => {
+            if (result.value) {
+                $(formId).submit();
+            }
+        })
 
+    }
+</script>
 @endsection

@@ -83,6 +83,7 @@ Route::prefix('empresas')->group(function() {
 // Rutas de facturación
 Route::prefix('facturas-emitidas')->group(function() {
     Route::get('emitir-factura/{tipoDocumento}', 'InvoiceController@emitFactura')->name('Invoice.emit_01');
+    Route::get('emitir-sujeto-pasivo', 'InvoiceController@emitSujetoPasivo')->name('Invoice.emitSujetoPasivo');
     Route::get('emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
     Route::post('enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
     Route::get('validaciones', 'InvoiceController@indexValidaciones')->name('Invoice.validaciones');
@@ -165,6 +166,7 @@ Route::prefix('payment')->group(function(){
     Route::post('comprar-facturas', 'PaymentController@comprarFacturas')->name('Payment.comprar_facturas');
     Route::post('comprar-contabilidades', 'PaymentController@comprarContabilidades')->name('Payment.comprarContabilidades');
     Route::post('seleccion-empresas', 'PaymentController@SeleccionEmpresas')->name('Payment.SeleccionEmpresas');
+    Route::patch('pagar-cargo/{id}', 'PaymentController@pagarCargo')->name('Payment.pagar-cargo');
 });
 
 
@@ -174,6 +176,7 @@ Route::prefix('payment-methods')->group(function(){
     Route::get('payment-method-token-update-view/{id}', 'PaymentMethodController@paymentMethodTokenUpdateView')->name('PaymentMethod.payment_method_token_update_view');
     Route::patch('payment-method-token-update', 'PaymentMethodController@tokenUpdate')->name('Payment.payment_token_update');
     Route::delete('payment-method-token-delete/{id}', 'PaymentMethodController@tokenDelete')->name('Payment.payment_token_delete');
+    Route::patch('payment-method-default-card-change/{id}', 'PaymentMethodController@updateDefault')->name('Payment.payment_method_default_card_change');
 });
 
 // Rutas de API data para ajax

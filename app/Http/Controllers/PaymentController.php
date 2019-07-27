@@ -863,13 +863,135 @@ class PaymentController extends Controller
     }
 
     public function pendingCharges(){
-        $paymentUtils = new PaymentUtils();
-        $bnStatus = $paymentUtils->statusBNAPI();
-        if($bnStatus['apiStatus'] == 'Successful') {
-            $charges = $paymentUtils->userRequestCharges();
+        $user = auth()->user();
+        $sales = Sales::where('user_id', $user->id)
+                     ->where('status', 2)->get();
+        $charges = array();
+        foreach($sales as $sale){
+            $payment = Payment::where('sale_id', $sale->id)->where('payment_status', 2)->first();
+            array_push($charges, $payment);
+        }
+        if($charges != '') {
             return view('/payment/pendingCharges')->with('charges', $charges);
         }else{
             return redirect()->back()->withErrors('No se pueden ejecutar consultas en este momento');
+        }
+    }
+
+    public function pagarCargo($idpayment){
+        $paymentUtils = new PaymentUtils();
+        $date = Carbon::parse(now('America/Costa_Rica'));
+        $company = currentCompanyModel();
+        $user = auth()->user();
+        $bnStatus = $paymentUtils->statusBNAPI();
+        if($bnStatus['apiStatus'] == 'Successful'){//charge_token
+            $paymentMethod = PaymentMethod::where('user_id', $user->id)->where('default_card', 0)->first();
+            if($paymentMethod){
+                $sale = Sales::updateOrCreate(
+                    [
+                    'user_id' => $user->id,
+                    'company_id' => currentCompany(),
+                    'status' => 1,
+                    'recurrency' => 0,
+                    'is_subscription' => 0
+                    ]
+                );
+                $payment = Payment::updateOrCreate(
+                    [
+                        'sale_id' => $sale->id,
+                        'payment_status' => 2,
+                    ],
+                    [
+                        'payment_date' => $date,
+                        'payment_method_id' => $paymentMethod->id,
+                    ]
+                );
+                $chargeTokenId = $payment->charge_token;
+                $amount = $payment->amount;
+                if(!$chargeTokenId){
+                    $new_payment = new stdClass();
+                    $new_payment->description = $payment->proof;
+                    $new_payment->user_name = $user->user_name;
+                    $new_payment->amount = $amount;
+                    $charge = $paymentUtils->paymentIncludeCharge($new_payment);
+                    $chargeTokenId = $charge['chargeTokenId'];
+                }
+                $subtotal = $amount;
+                $iv = $subtotal * 0.13;
+                $amount = $subtotal + $iv;
+                $data = new stdClass();
+                $data->description = 'Cargo directo de eTax';
+                $data->amount = $amount;
+                $data->user_name = $user->user_name;
+                $data->chargeTokenId = $chargeTokenId;
+                $data->cardTokenId = $paymentMethod->token_bn;
+
+                $appliedCharge = $paymentUtils->paymentApplyCharge($data);
+
+                if ($appliedCharge['apiStatus'] == "Successful") {
+                    $payment->proof = $appliedCharge['retrievalRefNo'];
+                    $payment->charge_token = $charge['chargeTokenId'];
+                    $payment->payment_status = 2;
+                    $payment->save();
+
+                    $sale->next_payment_date = $date->addMonths($sale->recurrency);
+                    $sale->status = 1;
+                    $sale->is_subscription = 0;
+                    $sale->payment_status = 1;
+                    $sale->save();
+
+                    $invoiceData = new stdClass();
+                    $invoiceData->client_code = $company->id_number;
+                    $invoiceData->client_id_number = $company->id_number;
+                    $invoiceData->client_id = $company->id_number;
+                    $invoiceData->tipo_persona = $company->tipo_persona;
+                    $invoiceData->first_name = $company->first_name;
+                    $invoiceData->last_name = $company->last_name;
+                    $invoiceData->last_name2 = $company->last_name2;
+                    $invoiceData->country = $company->country;
+                    $invoiceData->state = $company->state;
+                    $invoiceData->city = $company->city;
+                    $invoiceData->district = $company->district;
+                    $invoiceData->neighborhood = $company->neighborhood;
+                    $invoiceData->zip = $company->zip;
+                    $invoiceData->address = $company->address;
+                    $invoiceData->phone = $company->phone;
+                    $invoiceData->es_exento = false;
+                    $invoiceData->email = $company->email;
+                    $invoiceData->amount = $amount;
+                    $invoiceData->subtotal = $subtotal;
+                    $invoiceData->iva_amount = $iv;
+                    $invoiceData->discount_reason = null;
+
+                    $item = new stdClass();
+                    $item->total = $amount;
+                    $item->code = 'eTax01';
+                    $item->name = 'Cargo directo de eTax';
+                    $item->descuento = 0;
+                    $item->discount_reason = null;
+                    $item->cantidad = 1;
+                    $item->iva_amount = $iv;
+                    $item->unit_price = $subtotal;
+                    $item->subtotal = $subtotal;
+                    $item->total = $amount;
+
+                    $invoiceData->items = [$item];
+                    $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
+                    return redirect()->back()->withMessage('Pago procesado');
+                }else{
+                    \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
+                        [
+                            'name' => $company->name . ' ' . $company->last_name,
+                            'product' => $sale->plan->plan_type,
+                            'card' => $paymentMethod->masked_card
+                        ]
+                    ));
+                }
+            }else{
+                return redirect()->back()->withErrors('Debe seleccionar un método de pago por defecto');
+            }
+        }else{
+            return redirect()->back()->withErrors('No se pueden realizarse pagos en este momento');
         }
     }
 

@@ -156,12 +156,28 @@ class User extends Authenticatable {
         return $output;
     }
     
-    public function isContador() {
+    /*public function isContador() {
         try{
             $company = currentCompanyModel();
             $plan_tier = "Pro (".$company->user_id.")";
             $contador = SubscriptionPlan::where('plan_tier',$plan_tier)->count();
             return $contador;
+        }catch( \Throwable $e) { return false; }
+        
+        return false;
+    }*/
+    
+    public function isContador() {
+        try{
+            $plan = getCurrentSubscription()->plan;
+            $userID = auth()->user()->id;
+            $plan_tier = "Pro ($userID)";
+            $isContador = $plan_tier == $plan->plan_tier;
+            //dd("$plan_tier . . . $plan->plan_tier");
+            if($plan->id == 7){
+                $isContador = true;
+            }
+            return $isContador;
         }catch( \Throwable $e) { return false; }
         
         return false;

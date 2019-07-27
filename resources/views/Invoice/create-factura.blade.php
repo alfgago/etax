@@ -62,8 +62,25 @@ $company = currentCompanyModel();
                           @endif
                         @endforeach
                       </select>
+                      @if($document_type == "04")
+                        <div class="description">El cliente no es obligatorio para los tiquetes electrónicos.</div>
+                      @endif
                     </div>
                     @else
+                     <div class="form-group col-md-12">
+                        <h3>
+                          Proveedor
+                        </h3>
+                      </div>
+                      <div class="form-group col-md-12">
+                        <label for="actual">Proveedor</label>
+                          <select class="form-control select-search" name="provider_id" id="provider_id" placeholder="" required>
+                              <<option value='' selected>-- Seleccione un proveedor --</option>
+                              @foreach ( currentCompanyModel()->providers as $provider )
+                                <option value="{{ $provider->id }}" >{{ $provider->toString() }}</option>
+                              @endforeach
+                          </select>
+                      </div>
                       <div class="form-group col-md-12">
                         <h3>
                           Cliente
@@ -73,7 +90,6 @@ $company = currentCompanyModel();
                         <label for="actual">Empresa actual</label>
                         <input disabled readonly class="form-control" type="text" value="{{ $company->id_number . ' - ' . $company->name.' '.$company->last_name.' '.$company->last_name2 }}">
                       </div>
-                      
                     @endif
                     <div class="form-group col-md-12">
                       <label for="send_email">Enviar copia a:</label>
@@ -205,6 +221,8 @@ $company = currentCompanyModel();
                         <option value="04">Apartado</option>
                         <option value="05">Arrendamiento con opción de compra</option>
                         <option value="06">Arrendamiento en función financiera</option>
+                        <option value="07">Servicios prestados al Estado a crédito</option>
+                        <option value="08">Pago del servicios prestado al Estado</option>
                         <option value="99">Otros</option>
                       </select>
                     </div>
@@ -224,7 +242,7 @@ $company = currentCompanyModel();
                     </div>
                   </div>
                   
-                  <div class="form-group col-md-12" id="field-retencion" style="display:none;">
+                  <div class="form-group col-md-12" id="field-retencion" style="display:none; !important">
                     <label for="retention_percent">Porcentaje de retención</label>
                     <div class="input-group">
                       <select id="retention_percent" name="retention_percent" class="form-control" required>

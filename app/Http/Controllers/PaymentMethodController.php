@@ -18,7 +18,11 @@ class PaymentMethodController extends Controller
     {
         $user = auth()->user();
         $cantidad = PaymentMethod::where('user_id', $user->id)->get()->count();
-        return view('payment_methods/index')->with('cantidad', $cantidad);
+        if($cantidad){
+            return view('payment_methods/index')->with('cantidad', $cantidad);
+        }else{
+            return redirect()->back()->withErrors('No existen metodos de pago para este usuario');
+        }
     }
 
     public function indexData(){
@@ -29,14 +33,6 @@ class PaymentMethodController extends Controller
                 return view('payment_methods.actions', [
                     'data' => $paymentMethod
                 ])->render();
-            })
-            ->editColumn('masked_card', function(PaymentMethod $paymentMethod) {
-                if($paymentMethod->default_card == 1){
-                    $defaultText = ' / Por defecto';
-                }else{
-                    $defaultText = '';
-                }
-                return $paymentMethod->masked_card . $defaultText;
             })
             ->editColumn('name', function(PaymentMethod $paymentMethod) {
                 return $paymentMethod->name . ' ' . $paymentMethod->last_name;
@@ -223,11 +219,49 @@ class PaymentMethodController extends Controller
                 return redirect()->back()->withError('No se pudo eliminar el método de pago');
             }
         }else{
-            $mensaje = 'Transacción no disponible en este momento';
-            return redirect()->back()->withError($mensaje);
+            return redirect()->back()->withError('Transacción no disponible en este momento');
         }
     }
 
+    public function UpdateAllMethods(){
+        $user = auth()->user();
+        $paymentMethods = PaymentMethod::where('user_id', $user->id)->get();
+        foreach($paymentMethods as $paymentMethod){
+            $paymentMethod->default_card = 1;
+            $paymentMethod->save();
+        }
+    }
+
+    public function updateDefault($Id){
+        $paymentUtils = new PaymentUtils();
+        $user = auth()->user();
+        $paymentMethod = PaymentMethod::find($Id);
+        $bnStatus = $paymentUtils->statusBNAPI();
+        if($bnStatus['apiStatus'] == 'Successful'){
+            $update = $this->UpdateAllMethods();
+            $cardBn = new Client();
+            $cardUpdateDefault = $cardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserSetDefaultCard?applicationName=string&userName=string&cardTokenId=string", [
+                'headers' => [
+                    'Content-Type'  => "application/json",
+                ],
+                'json' => [
+                    'applicationName' => config('etax.klap_app_name'),
+                    'userName' => $user->user_name,
+                    'userPassword' => 'Etax-' . $user->id . 'Klap',
+                    'cardTokenId' => $paymentMethod->token_bn
+                ],
+                'verify' => false,
+            ]);
+            $card = json_decode($cardUpdateDefault->getBody()->getContents(), true);
+            if($card['apiStatus'] == "Successful"){
+                $paymentMethod->default_card = 0;
+                $paymentMethod->save();
+                return redirect()->back()->withMessage('Metodo de pago actualizado');
+            }else{
+                return redirect()->back()->withError('No se pudo actualizar el registro  ');
+            }
+        }
+    }
     /**
     * Store a newly created resource in storage.
     *
