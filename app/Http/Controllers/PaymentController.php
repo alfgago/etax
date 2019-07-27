@@ -23,7 +23,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use App\Utils\BridgeHaciendaApi;
 use App\Utils\PaymentUtils;
-
+use Illuminate\Database\Eloquent\Builder;
 
 //require __DIR__ . '/../../../vendor/autoload.php';
 
@@ -864,14 +864,12 @@ class PaymentController extends Controller
 
     public function pendingCharges(){
         $user = auth()->user();
-        $sales = Sales::where('user_id', $user->id)
-                     ->where('status', 2)->get();
-        $charges = array();
-        foreach($sales as $sale){
-            $payment = Payment::where('sale_id', $sale->id)->where('payment_status', 2)->first();
-            array_push($charges, $payment);
-        }
-        if($charges != '') {
+
+        $charges = Payment::whereHas('sale', function ($query) use($user) {
+            $query->where('user_id', $user->id);
+        })->get();
+        
+        if($charges) {
             return view('/payment/pendingCharges')->with('charges', $charges);
         }else{
             return redirect()->back()->withErrors('No se pueden ejecutar consultas en este momento');
@@ -883,61 +881,57 @@ class PaymentController extends Controller
         $date = Carbon::parse(now('America/Costa_Rica'));
         $company = currentCompanyModel();
         $user = auth()->user();
+        
         $bnStatus = $paymentUtils->statusBNAPI();
         if($bnStatus['apiStatus'] == 'Successful'){//charge_token
-            $paymentMethod = PaymentMethod::where('user_id', $user->id)->where('default_card', 0)->first();
+            $paymentMethod = PaymentMethod::where('user_id', $sale->user_id)->where('default_card', true)->first();
+            $company = $sale->company;
+            
+            if(!$paymentMethod){
+                $paymentMethod = PaymentMethod::where('user_id', $sale->user_id)->first();
+            }
+                    
             if($paymentMethod){
-                $sale = Sales::updateOrCreate(
-                    [
-                    'user_id' => $user->id,
-                    'company_id' => currentCompany(),
-                    'status' => 1,
-                    'recurrency' => 0,
-                    'is_subscription' => 0
-                    ]
-                );
                 $payment = Payment::updateOrCreate(
                     [
-                        'sale_id' => $sale->id,
-                        'payment_status' => 2,
+                        'id' => $idpayment,
                     ],
                     [
                         'payment_date' => $date,
                         'payment_method_id' => $paymentMethod->id,
                     ]
                 );
-                $chargeTokenId = $payment->charge_token;
+                $sale = Sales::find($payment->sale_id);
+                
                 $amount = $payment->amount;
-                if(!$chargeTokenId){
-                    $new_payment = new stdClass();
-                    $new_payment->description = $payment->proof;
-                    $new_payment->user_name = $user->user_name;
-                    $new_payment->amount = $amount;
-                    $charge = $paymentUtils->paymentIncludeCharge($new_payment);
-                    $chargeTokenId = $charge['chargeTokenId'];
-                }
-                $subtotal = $amount;
-                $iv = $subtotal * 0.13;
-                $amount = $subtotal + $iv;
+                $subtotal = $amount / 1.13;
+                $iv = $amount - $subtotal;
+                
                 $data = new stdClass();
-                $data->description = 'Cargo directo de eTax';
-                $data->amount = $amount;
+                $data->description = $sale->saleDescription();
                 $data->user_name = $user->user_name;
-                $data->chargeTokenId = $chargeTokenId;
+                $data->amount = $amount;
+                    
+                //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
+                if( ! isset($payment->charge_token) ) {
+                    $chargeIncluded = $paymentUtils->paymentIncludeCharge($data);
+                    $chargeTokenId = $chargeIncluded['chargeTokenId'];
+                    $payment->charge_token = $chargeTokenId;
+                    $payment->save();
+                }
+                
+                $data->chargeTokenId = $payment->charge_token;
                 $data->cardTokenId = $paymentMethod->token_bn;
-
+                
                 $appliedCharge = $paymentUtils->paymentApplyCharge($data);
 
                 if ($appliedCharge['apiStatus'] == "Successful") {
                     $payment->proof = $appliedCharge['retrievalRefNo'];
-                    $payment->charge_token = $charge['chargeTokenId'];
                     $payment->payment_status = 2;
                     $payment->save();
 
-                    $sale->next_payment_date = $date->addMonths($sale->recurrency);
+                    $sale->next_payment_date = Carbon::parse(now('America/Costa_Rica'))->addMonths($sale->recurrency);
                     $sale->status = 1;
-                    $sale->is_subscription = 0;
-                    $sale->payment_status = 1;
                     $sale->save();
 
                     $invoiceData = new stdClass();
@@ -965,8 +959,8 @@ class PaymentController extends Controller
 
                     $item = new stdClass();
                     $item->total = $amount;
-                    $item->code = 'eTax01';
-                    $item->name = 'Cargo directo de eTax';
+                    $item->code = $sale->id;
+                    $item->name = $sale->saleDescription();
                     $item->descuento = 0;
                     $item->discount_reason = null;
                     $item->cantidad = 1;
@@ -979,13 +973,7 @@ class PaymentController extends Controller
                     $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
                     return redirect()->back()->withMessage('Pago procesado');
                 }else{
-                    \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
-                        [
-                            'name' => $company->name . ' ' . $company->last_name,
-                            'product' => $sale->plan->plan_type,
-                            'card' => $paymentMethod->masked_card
-                        ]
-                    ));
+                    return redirect()->back()->withErrors('El pago no pudo ser procesado. Por favor intente más tarde.');
                 }
             }else{
                 return redirect()->back()->withErrors('Debe seleccionar un método de pago por defecto');
