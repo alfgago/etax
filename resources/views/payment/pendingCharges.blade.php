@@ -31,7 +31,7 @@
 					  	
     						    <div class="form-group col-md-12">
     						      <h3>
-    						        Datos de periodos anteriores
+    						        Tabla de cargos pendientes
     						      </h3>
     						    </div>
 						        
