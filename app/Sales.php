@@ -37,6 +37,15 @@ class Sales extends Model
             return $this->belongsTo(EtaxProducts::class, 'etax_product_id'); 
         }
     }
+    
+    public function saleDescription()
+    {
+        if($this->is_subscription){
+            return $this->plan->plan_type . " " . $this->plan->plan_tier;
+        }else{
+            return $this->product->name; 
+        }
+    }
 
     public function subscription_plan()
     {
