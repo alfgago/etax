@@ -50,22 +50,22 @@
                                         <tbody>
                                         @if ( $charges )
                                             @foreach($charges as $charge)
-                                                @if(@$charge->payment_status == 2)
+                                                @if(@$charge->payment_status == 1)
                                                     <tr>
                                                         <td>{{ @$charge->sale->saleDescription() }}</td>
-                                                        <td>${{$charge['amount']}}</td>
-                                                        <td><?php echo ($charge['payment_status'] == 1) ? 'Pagado' : 'Pendiente' ?></td>
-                                                        <td>{{$charge['created_at']}}</td>
+                                                        <td>${{$charge->amount}}</td>
+                                                        <td>Pendiente</td>
+                                                        <td>{{ \Carbon\Carbon::parse($charge->created_at)->format('d/m/Y') }}</td>
                                                         <td>
-                                                            <?php if($charge['payment_status'] == 2){ ?>
-                                                                <form id="payment-form" class="inline-form" method="POST" action="/payment/pagar-cargo/{{$charge['id']}}" >
-                                                                @csrf
-                                                                @method('patch')
-                                                                    <a type="button" class="text-success mr-2" title="Pagar " style="display: inline-block; background: none; border: 0;"onclick="confirmPayment();">
-                                                                        <i class="fa fa-credit-card" aria-hidden="true"></i>
-                                                                    </a>
-                                                                </form>
-                                                            <?php } ?>
+                                                            
+                                                            <form id="payment-form" class="inline-form" method="POST" action="/payment/pagar-cargo/{{$charge['id']}}" >
+                                                            @csrf
+                                                            @method('patch')
+                                                                <a type="button" class="text-success mr-2" title="Pagar " style="display: inline-block; background: none; border: 0;"onclick="confirmPayment();">
+                                                                    <i class="fa fa-credit-card" aria-hidden="true"></i>
+                                                                </a>
+                                                            </form>
+                                                            
                                                         </td>
                                                     </tr>
                                                 @endif
