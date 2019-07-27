@@ -50,7 +50,7 @@
                                         <tbody>
                                         @if ( $charges )
                                             @foreach($charges as $charge)
-                                                @if($charge)
+                                                @if(@$charge->payment_status == 2)
                                                     <tr>
                                                         <td>{{ @$charge->sale->saleDescription() }}</td>
                                                         <td>${{$charge['amount']}}</td>
