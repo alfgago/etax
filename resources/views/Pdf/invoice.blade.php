@@ -346,7 +346,7 @@
                 {{$item->discount ? number_format($item->discount, 0) : '0'}}
             </td>
             <td>
-                {{$item->discount_reason ?? ''}}
+                {{isset($item->discount_type) ? $item->discount_type == '01' ? '%' : 'monto': ''}}
             </td>
             <td>
                 {{$item->subtotal ? number_format($item->subtotal, 2) : ''}}
