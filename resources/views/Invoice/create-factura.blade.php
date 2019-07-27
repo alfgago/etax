@@ -106,8 +106,12 @@ $company = currentCompanyModel();
                     <div class="form-group col-md-4">
                       <label for="currency">Divisa</label>
                       <select class="form-control" name="currency" id="moneda" required>
-                        <option value="CRC"  data-rate="{{$rate}}" selected>CRC</option>
-                        <option value="USD"  data-rate="{{$rate}}">USD</option>
+                        <option value="{{$default_currency}}"  data-rate="{{$rate}}" selected>{{$default_currency}}</option>
+                        <?php if($default_currency == 'USD'){ ?>
+                        <option value="CRC" data-rate="{{$rate}}">CRC</option>
+                        <?php }else{ ?>
+                          <option value="USD" data-rate="{{$rate}}">USD</option>
+                        <?php } ?>
                       </select>
                     </div>
       

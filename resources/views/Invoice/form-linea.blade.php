@@ -59,7 +59,7 @@
         <label for="tipo_producto">Categoría de declaración</label>
         <select class="form-control select-search" id="tipo_producto" >
           @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
-            <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
+            <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" {{$default_vat_code == $tipo['invoice_iva_code'] ? 'selected' : ''}}>{{ $tipo['name'] }}</option>
           @endforeach
         </select>
       </div>

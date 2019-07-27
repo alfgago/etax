@@ -213,9 +213,15 @@ class InvoiceController extends Controller
         if($company->last_ticket_ref_number === null) {
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de tiquetes');
         }
-        return view("Invoice/create-factura", ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
-            'document_number' => $this->getDocReference($tipoDocumento),
-            'document_key' => $this->getDocumentKey($tipoDocumento), 'units' => $units, 'countries' => $countries])->with('arrayActividades', $arrayActividades);
+        return view("Invoice/create-factura",
+                    ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
+                    'document_number' => $this->getDocReference($tipoDocumento),
+                    'document_key' => $this->getDocumentKey($tipoDocumento),
+                    'units' => $units, 'countries' => $countries, 'default_currency' => $company->default_currency,
+                    'default_vat_code' => $company->default_vat_code
+                    ]
+                )
+            ->with('arrayActividades', $arrayActividades);
     }
     
     /**
