@@ -1,4 +1,4 @@
-@if($data->default_card != 0)
+@if( !$data->default_card )
     <form id="update-form-{{ $data->id }}" class="inline-form" method="POST" action="/payment-methods/payment-method-default-card-change/{{ $data->id }}">
         @csrf
         @method('patch')
