@@ -40,7 +40,7 @@
                                         <th>Tarjeta</th>
                                         <th>Nombre</th>
                                         <th>Vencimiento</th>
-                                        <th></th>
+                                        <th>Acciones</th>
                                     </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -73,7 +73,6 @@
             });
         });
 
-
         function confirmDelete( id ) {
             var formId = "#delete-form-"+id;
             Swal.fire({
@@ -83,6 +82,22 @@
                 showCloseButton: true,
                 showCancelButton: true,
                 confirmButtonText: 'Sí, quiero eliminarlo'
+            }).then((result) => {
+                if (result.value) {
+                    $(formId).submit();
+                }
+            })
+
+        }
+        function confirmUpdate( id ) {
+            var formId = "#update-form-"+id;
+            Swal.fire({
+                title: '¿Desea actualizar el metodo de pago?',
+                text: "Este metodo de pago sera utilizado por defecto",
+                type: 'info',
+                showCloseButton: true,
+                showCancelButton: true,
+                confirmButtonText: 'Si'
             }).then((result) => {
                 if (result.value) {
                     $(formId).submit();

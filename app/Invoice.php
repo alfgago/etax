@@ -333,21 +333,22 @@ class Invoice extends Model
                         'is_exempt' => $data['is_exempt'] ?? false,
                     ]
                 );
-
                 try {
                     $exonerationDate = isset( $data['exoneration_date'] )  ? Carbon::createFromFormat('d/m/Y', $data['exoneration_date']) : null;
                 }catch( \Exception $e ) {
                     $exonerationDate = null;
                 }
-                if ($exonerationDate && isset($data['exoneration_document_type']) && isset($data['exoneration_document_number'])) {
-                    $item->exoneration_document_type = $data['exoneration_document_type'] ?? null;
-                    $item->exoneration_document_number = $data['exoneration_document_number'] ?? null;
-                    $item->exoneration_company_name = $data['exoneration_company_name'] ?? null;
-                    $item->exoneration_porcent = $data['exoneration_porcent'] ?? 0;
-                    $item->exoneration_amount = $data['exoneration_amount'] ?? 0;
+
+                if ($exonerationDate && isset($data['typeDocument']) && isset($data['numeroDocumento']) && $data['porcentajeExoneracion'] > 0) {
+                    $item->exoneration_document_type = $data['typeDocument'] ?? null;
+                    $item->exoneration_document_number = $data['numeroDocumento'] ?? null;
+                    $item->exoneration_company_name = $data['nombreInstitucion'] ?? null;
+                    $item->exoneration_porcent = $data['porcentajeExoneracion'] ?? 0;
+                    $item->exoneration_amount = $data['montoExoneracion'] ?? 0;
                     $item->exoneration_date = $exonerationDate;
-                    $item->exoneration_total_amount = $data['exoneration_total_amount'] ?? 0;
-                    $item->impuesto_neto = isset($data['impuesto_neto']) ? $data['iva_amount'] - $data['montoExoneracion'] : $data['iva_amount'];
+                    $item->exoneration_total_amount = $data['montoExoneracion'] ?? 0;
+                    $item->exoneration_total_gravado = (($item->item_count * $item->unit_price) * $item->exoneration_porcent) / 100 ;
+                    $item->impuesto_neto = $data['impuestoNeto'] ?? $data['iva_amount'] - $data['montoExoneracion'];
                     $item->save();
                 }
 

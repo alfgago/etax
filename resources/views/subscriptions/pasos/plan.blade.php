@@ -31,13 +31,18 @@
 </div>
 <div class="form-group col-md-6">
   <label for="recurrency">Recurrencia de pagos </label>
-  <select class="form-control " name="recurrency" id="recurrency" onchange="togglePrice();">
+  <select class="form-control " name="recurrency" id="recurrency" onchange="togglePrice();" onchange="calcularPrecioContabilidades();">
   	<option value="1" selected>Mensual</option>
   	<option value="6">Semestral</option>
   	<option value="12">Anual</option>
   </select>
 </div>
 
+<div class="form-group col-md-6" id="copunContador">
+    <label for="recurrency">Cupon de Contador</label>
+    <input type="text" class="form-control" name="codigo_contador" id="codigo_contador">
+    <button class="btn btn-dark">Validar cupon</button>
+</div>
 <div class="form-group col-md-12 mt-4">
 	<span class="precio-container">
 		Precio de <span class="precio-text precio-inicial">9.99</span> <span class="recurrencia-text">/ mes</span> + IVA

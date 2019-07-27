@@ -27,42 +27,53 @@
                     </div>
                     <div class="col-9">
                         <div class="tab-content p-0">
-                            <div class="tab-pane fade show active" role="tabpanel">
-                                <h3 class="card-title">Pagos Pendientes</h3>
-                                <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
-                                    <thead>
-                                    <tr>
-                                        <th>Descripcion</th>
-                                        <th>Monto</th>
-                                        <th>Moneda</th>
-                                        <th>Fecha</th>
-                                        <th>Pagar</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    @if ( $charges['chargesCount'] > 0 )
-                                        @foreach($charges['userCharges'] as $charge)
-                                            @if($charge)
-                                                <tr>
-                                                    <td>{{$charge['chargeDescription']}}</td>
-                                                    <td>{{$charge['transactionAmount']}}</td>
-                                                    <td>{{$charge['transactionCurrency']}}</td>
-                                                    <td>{{$charge['chargeDateTime']}}</td>
-                                                    <td>
-                                                        <form id="payment-form" class="inline-form" method="POST" action="/payment/pagar-cargo/{{$charge['chargeTokenId']}}" >
-                                                            @csrf
-                                                            @method('patch')
-                                                            <a type="button" class="text-success mr-2" title="Pagar " style="display: inline-block; background: none; border: 0;"onclick="confirmPayment();">
-                                                                <i class="fa fa-credit-card" aria-hidden="true"></i>
-                                                            </a>
-                                                        </form>
-                                                    </td>
-                                                </tr>
-                                            @endif
-                                        @endforeach
-                                    @endif
-                                    </tbody>
-                                </table>
+                            <div class="form-row">
+					  	
+    						    <div class="form-group col-md-12">
+    						      <h3>
+    						        Datos de periodos anteriores
+    						      </h3>
+    						    </div>
+						        
+						        <div class="form-group col-md-12">
+						    
+                                    <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                                        <thead>
+                                        <tr>
+                                            <th>Descripcion</th>
+                                            <th>Monto</th>
+                                            <th>Estado</th>
+                                            <th>Fecha</th>
+                                            <th>Pagar</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @if ( $charges )
+                                            @foreach($charges as $charge)
+                                                @if($charge)
+                                                    <tr>
+                                                        <td>{{ @$charge->sale->saleDescription() }}</td>
+                                                        <td>${{$charge['amount']}}</td>
+                                                        <td><?php echo ($charge['payment_status'] == 1) ? 'Pagado' : 'Pendiente' ?></td>
+                                                        <td>{{$charge['created_at']}}</td>
+                                                        <td>
+                                                            <?php if($charge['payment_status'] == 2){ ?>
+                                                                <form id="payment-form" class="inline-form" method="POST" action="/payment/pagar-cargo/{{$charge['id']}}" >
+                                                                @csrf
+                                                                @method('patch')
+                                                                    <a type="button" class="text-success mr-2" title="Pagar " style="display: inline-block; background: none; border: 0;"onclick="confirmPayment();">
+                                                                        <i class="fa fa-credit-card" aria-hidden="true"></i>
+                                                                    </a>
+                                                                </form>
+                                                            <?php } ?>
+                                                        </td>
+                                                    </tr>
+                                                @endif
+                                            @endforeach
+                                        @endif
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -70,6 +81,7 @@
             </div>
         </div>
     </div>
+    
 <script>
     function confirmPayment() {
         var formId = "#payment-form";

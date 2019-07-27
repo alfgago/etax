@@ -11,6 +11,40 @@
         <b>Monto IVA: </b>{{ number_format( $data['bills']->iva_amount, 2 ) }} <br>
         <b>Total: </b>{{ number_format( $data['bills']->total, 2 ) }} 
       </div>
+      <div class="col-md-12">
+          <h3>Validación factura completa</h3>
+      </div>
+      <div class="col-md-4">
+          <label>Categoría</label>
+           <select class="form-control product_type_all"  placeholder="Seleccione una categoría de hacienda" required>
+              @foreach($data['categoria_productos'] as $categoria_productos)
+                 <option value="{{@$categoria_productos->id}}" codigo="{{ $categoria_productos->bill_iva_code }}" posibles="{{@$categoria_productos->open_codes}}" >{{@$categoria_productos->name}}</option>
+              @endforeach
+            </select>
+      </div>
+      <div class="col-md-4">
+          <label>Tipo IVA</label>
+            <div class="input-validate-iva">
+              <select class="form-control iva_type_all"  placeholder="Seleccione un código eTax" required >
+                        <option value="0">Seleccione una opcion</option>
+                @foreach($data['codigos_etax'] as $codigos_etax)
+                  <option value="{{@$codigos_etax->code}}" identificacion="{{@$codigos_etax->is_identificacion_plena}}" >{{@$codigos_etax->name}}</option>
+                @endforeach
+              </select>
+            </div>
+      </div>
+      <div class="col-md-4">
+          <label>Identificación plena</label>
+            <div class="input-validate-iva">
+                <select class="form-control porc_identificacion_plena_all"  >
+                        <option value="0">Seleccione un %</option>
+                        <option value="13" >13%</option>
+                        <option value="1" >1%</option>
+                        <option value="2" >2%</option>
+                        <option value="4" >4%</option>
+                </select>
+            </div>
+        </div>
     </div>
     <hr>
   </div>
@@ -103,6 +137,25 @@
 <script>
   
 $(document).ready(function(){
+
+    $(".product_type_all").change(function(){
+        var product_type  = $(this).val(); 
+        if(product_type != 0){
+        $(".product_type").val(product_type);
+      }
+    });
+    $(".iva_type_all").change(function(){
+        var iva_type  = $(this).val(); 
+        if(iva_type != 0){
+          $(".iva_type").val(iva_type);
+        }
+    });
+    $(".porc_identificacion_plena_all").change(function(){
+        var porc_identificacion_plena  = $(this).val(); 
+        if(porc_identificacion_plena != 0){
+          $(".porc_identificacion_plena").val(porc_identificacion_plena);
+        }
+    });
 
     $(".product_type").change(function(){
       var parent = $(this).parents('tr');
