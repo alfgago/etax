@@ -6,7 +6,7 @@
 
 @section('breadcrumb-buttons')
     @if($cantidad < 3)
-        <a type="submit" class="btn btn-primary" href="/payment-methods/payment-method-create-view">Ingresar nuevo..</a>
+        <a type="submit" class="btn btn-primary" href="/payment-methods/payment-method-create-view">Registrar nuevo método de pago</a>
     @endif
 @endsection
 
@@ -60,7 +60,7 @@
             $('#paymentMethod-table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('PaymentMethod.data') }}",
+                ajax: "/api/paymentsMethods",
                 columns: [
                     { data: 'masked_card', name: 'masked_card' },
                     { data: 'name', name: 'name' },
