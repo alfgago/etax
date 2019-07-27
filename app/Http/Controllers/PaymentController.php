@@ -876,7 +876,7 @@ class PaymentController extends Controller
         }
     }
 
-    public function pagarCargo($idpayment){
+    public function pagarCargo($paymentId){
         $paymentUtils = new PaymentUtils();
         $date = Carbon::parse(now('America/Costa_Rica'));
         $company = currentCompanyModel();
@@ -884,23 +884,18 @@ class PaymentController extends Controller
         
         $bnStatus = $paymentUtils->statusBNAPI();
         if($bnStatus['apiStatus'] == 'Successful'){//charge_token
-            $paymentMethod = PaymentMethod::where('user_id', $user->user_id)->where('default_card', true)->first();
-            $company = $sale->company;
+            $paymentMethod = PaymentMethod::where('user_id', $user->id)->where('default_card', true)->first();
             
             if(!$paymentMethod){
-                $paymentMethod = PaymentMethod::where('user_id', $user->user_id)->first();
+                $paymentMethod = PaymentMethod::where('user_id', $user->id)->first();
             }
                     
             if($paymentMethod){
-                $payment = Payment::updateOrCreate(
-                    [
-                        'id' => $idpayment,
-                    ],
-                    [
-                        'payment_date' => $date,
-                        'payment_method_id' => $paymentMethod->id,
-                    ]
-                );
+                $payment = Payment::find($paymentId);
+                $payment->payment_date = $date;
+                $payment->payment_method_id = $paymentMethod->id;
+                $payment->save();
+                
                 $sale = Sales::find($payment->sale_id);
                 
                 $amount = $payment->amount;
@@ -913,7 +908,7 @@ class PaymentController extends Controller
                 $data->amount = $amount;
                     
                 //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
-                if( ! isset($payment->charge_token) ) {
+                if( ! isset($payment->charge_token) || $payment->charge_token == 'N/A' || $payment->charge_token == '' ) {
                     $chargeIncluded = $paymentUtils->paymentIncludeCharge($data);
                     $chargeTokenId = $chargeIncluded['chargeTokenId'];
                     $payment->charge_token = $chargeTokenId;

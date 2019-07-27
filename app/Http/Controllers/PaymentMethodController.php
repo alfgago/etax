@@ -254,7 +254,7 @@ class PaymentMethodController extends Controller
             ]);
             $card = json_decode($cardUpdateDefault->getBody()->getContents(), true);
             if($card['apiStatus'] == "Successful"){
-                $paymentMethod->default_card = 0;
+                $paymentMethod->default_card = true;
                 $paymentMethod->save();
                 return redirect()->back()->withMessage('Metodo de pago actualizado');
             }else{
