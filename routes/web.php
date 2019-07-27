@@ -169,6 +169,7 @@ Route::prefix('payment-methods')->group(function(){
     Route::get('payment-method-token-update-view/{id}', 'PaymentMethodController@paymentMethodTokenUpdateView')->name('PaymentMethod.payment_method_token_update_view');
     Route::patch('payment-method-token-update', 'PaymentMethodController@tokenUpdate')->name('Payment.payment_token_update');
     Route::delete('payment-method-token-delete/{id}', 'PaymentMethodController@tokenDelete')->name('Payment.payment_token_delete');
+    Route::patch('payment-method-default-card-change/{id}', 'PaymentMethodController@updateDefault')->name('Payment.payment_method_default_card_change');
 });
 
 // Rutas de API data para ajax
