@@ -942,7 +942,7 @@ class PaymentController extends Controller
                     $invoiceData->client_id_number = $company->id_number;
                     $invoiceData->client_id = $company->id_number;
                     $invoiceData->tipo_persona = $company->tipo_persona;
-                    $invoiceData->first_name = $company->first_name;
+                    $invoiceData->first_name = $company->name;
                     $invoiceData->last_name = $company->last_name;
                     $invoiceData->last_name2 = $company->last_name2;
                     $invoiceData->country = $company->country;
