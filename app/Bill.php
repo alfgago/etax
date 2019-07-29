@@ -322,7 +322,13 @@ class Bill extends Model
         $bill->currency_rate = $tipoCambio;
         
         $bill->description = 'XML Importado';
-        $bill->document_type = $arr['TipoDoc'] ?? '01';
+
+        if(strlen($arr['Clave']) == 50){
+            $tipoDocumento = substr($arr['Clave'], 29, 2);
+        }else{
+            return back()->withError( "Hay un error en la clave del documento" );
+        }
+        $bill->document_type = $tipoDocumento ?? '01';
         $bill->total = $arr['ResumenFactura']['TotalComprobante'];
         
         $authorize = true;
