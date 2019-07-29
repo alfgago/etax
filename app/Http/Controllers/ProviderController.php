@@ -87,13 +87,13 @@ class ProviderController extends Controller
     {
         $request->validate([
           'tipo_persona' => 'required',
-          'id_number' => 'required',
-          'code' => 'required',
+          'id_number' =>  'required|unique:providers,id_number,NULL,id,company_id,' . currentCompany(),
+          'code' => 'required|unique:providers,code,NULL,id,company_id,' . currentCompany(),
           'first_name' => 'required',
           'email' => 'required',
           'country' => 'required'
         ]);
-      
+
         $provider = new Provider();
         $company = currentCompanyModel();    
         $provider->company_id = $company->id;
@@ -122,7 +122,7 @@ class ProviderController extends Controller
       
         $provider->save();
       
-        return redirect('/proveedores');
+        return redirect('/proveedores')->withMessage('Registro guardado');
     }
 
     /**

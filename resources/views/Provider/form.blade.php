@@ -2,7 +2,7 @@
 
     <div class="form-group col-md-4">
       <label for="code">Código *</label>
-      <input type="text" class="form-control" name="code" id="code" value="{{ @$provider->code }}" required>
+      <input type="text" class="form-control" name="code" id="code" value="{{ @$provider->code }}" required {{!@$provider->code ? '' : 'readonly'}}>
     </div>
     
     <div class="form-group col-md-4">
@@ -21,8 +21,7 @@
        <label for="id_number">Número de identificación *</label>
        <input max="20" maxlength="20" class="form-control" id="id_number" name="id_number" value="{{ @$provider->id_number }}" required onchange="getJSONCedula(this.value);" onblur="validateIdentificationLenght();">
     </div>
-    <input hidden  name="id_number">
-    
+
     <div class="form-group col-md-4">
       <label for="first_name">Nombre *</label>
       <input type="text" class="form-control" name="first_name" id="first_name" value="{{ @$provider->first_name }}" required>
