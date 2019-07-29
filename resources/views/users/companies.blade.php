@@ -8,6 +8,7 @@
     @if( auth()->user()->isContador() )
         @can('admin')
             <a type="submit" class="btn btn-primary {{$data['class']}}" href="{{$data['url']}}">Registrar otra empresa</a>
+            <a class="btn btn-primary" href="/usuario/compra-contabilidades">Comprar contabilidades</a>
         @endcan
     @endif
 @endsection
