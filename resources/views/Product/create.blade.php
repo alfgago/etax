@@ -33,7 +33,7 @@
           
           <div class="form-group col-md-6">
             <label for="product_category_id">Tipo de producto</label>
-            <select class="form-control select-search" name="product_category_id" id="tipo_producto" required>
+            <select class="form-control" name="product_category_id" id="tipo_producto" required>
               @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
                 <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
               @endforeach
@@ -43,6 +43,7 @@
           <div class="form-group col-md-6">
             <label for="default_iva_type">Tipo de IVA</label>
             <select class="form-control" name="default_iva_type" id="tipo_iva" required>
+                <option value="" selected >--Seleccione--</option>
               @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
                 <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}">{{ $tipo['name'] }}</option>
               @endforeach
@@ -52,6 +53,7 @@
           <div class="form-group col-md-6">
             <label for="measure_unit">Unidad de medición</label>
             <select class="form-control" name="measure_unit" id="unidad_medicion" value="" required>
+                <option value="" selected >--Seleccione--</option>
               @foreach ($units as $unit )
                 <option value="{{ $unit['code'] }}" >{{ $unit['name'] }}</option>
               @endforeach
@@ -61,7 +63,7 @@
           
           <div class="form-group col-md-6">
             <label for="unit_price">Precio unitario por defecto</label>
-            <input type="text" class="form-control" name="unit_price" id="precio_unitario" value="" required>
+            <input type="text" class="form-control" name="unit_price" id="precio_unitario" value="" placeholder="0" required>
           </div>
           
           <div class="form-group col-md-12">
