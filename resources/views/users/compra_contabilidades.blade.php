@@ -5,8 +5,12 @@
 @endsection
 
 @section('breadcrumb-buttons')
-@endsection 
-
+    @if( auth()->user()->isContador() )
+        @can('admin')
+            <a class="btn btn-primary" href="/usuario/empresas">Empresas</a>
+        @endcan
+    @endif
+@endsection
 @section('content')
 
 <div class="row">

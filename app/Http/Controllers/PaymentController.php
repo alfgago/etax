@@ -669,8 +669,6 @@ class PaymentController extends Controller
 
                 $invoiceData->items = [$item];
                 $procesoFactura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
-                
-                $company->additional_invoices = $additional_invoices;
                 $company->save();
                 
                 return redirect('/usuario/compra-contabilidades')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
