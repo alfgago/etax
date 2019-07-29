@@ -926,8 +926,6 @@ class PaymentController extends Controller
                 $data->chargeTokenId = $payment->charge_token;
                 $data->cardTokenId = $paymentMethod->token_bn;
                 
-                dd($data);
-                
                 $appliedCharge = $paymentUtils->paymentApplyCharge($data);
 
                 if ($appliedCharge['apiStatus'] == "Successful") {
