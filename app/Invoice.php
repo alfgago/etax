@@ -644,8 +644,6 @@ class Invoice extends Model
 
         if(strlen($arr['Clave']) == 50){
             $tipoDocumento = substr($arr['Clave'], 29, 2);
-        }else{
-            return back()->withError( "Hay un error en la clave del documento" );
         }
         $invoice->document_type = $tipoDocumento ?? '01';
         

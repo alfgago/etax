@@ -325,8 +325,6 @@ class Bill extends Model
 
         if(strlen($arr['Clave']) == 50){
             $tipoDocumento = substr($arr['Clave'], 29, 2);
-        }else{
-            return back()->withError( "Hay un error en la clave del documento" );
         }
         $bill->document_type = $tipoDocumento ?? '01';
         $bill->total = $arr['ResumenFactura']['TotalComprobante'];
