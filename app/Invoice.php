@@ -584,7 +584,7 @@ class Invoice extends Model
           //Si es email, busca por ID del proveedor para encontrar la compañia
           $company = Company::where('id_number', $identificacionProveedor)->first();
         }
-        
+
         if( ! $company ) {
           return false;
         }
@@ -641,8 +641,13 @@ class Invoice extends Model
         }
         $invoice->is_authorized = $authorize;
         $invoice->is_code_validated = false;
-        
-        $invoice->document_type = $arr['TipoDoc'] ?? '01';
+
+        if(strlen($arr['Clave']) == 50){
+            $tipoDocumento = substr($arr['Clave'], 29, 2);
+        }else{
+            return back()->withError( "Hay un error en la clave del documento" );
+        }
+        $invoice->document_type = $tipoDocumento ?? '01';
         
         //Start DATOS CLIENTE
               if ( array_key_exists('Receptor', $arr) ){
