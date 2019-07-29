@@ -117,34 +117,38 @@ class PaymentController extends Controller
         return $cliente;
     }
 
-    public function CompanyDisponible(){
-        $start_date = Carbon::parse(now('America/Costa_Rica'));
-        $company = currentCompanyModel();
-        $user_id = $company->user_id;
-        $companies_tengo = Company::where('user_id',$user_id)->where('status',1)->count();
-        $sale = Sales::where('company_id',$company->id)->first();
-        $plan = $sale->etax_product_id;
-        $porduct_etax = SubscriptionPlan::where('id',$plan)->first();
-        $companies_puedo = $porduct_etax->num_companies;
-        $companies_puedo += -1 ;
-        if($companies_tengo >  $companies_puedo  ){
-            $companies = Company::where('user_id',$user_id)->where('id','!=',$company->id)->where('status',1)->get();
-            foreach ($companies as $company) {
-                $companies_puedo += -1 ;
-                if($companies_puedo < 0){
-                    Company::where('id', $company->id)
-                    ->update(['status' => 0],['updated_at',$start_date]);
-                    $companies = Company::where('user_id',$user_id)->get();
+    public function $month(){
+        try{
+            $start_date = Carbon::parse(now('America/Costa_Rica'));
+            $company = currentCompanyModel();
+            $user_id = $company->user_id;
+            $companies_tengo = Company::where('user_id',$user_id)->where('status',1)->count();
+            $sale = Sales::where('company_id',$company->id)->first();
+            $plan = $sale->etax_product_id;
+            $product_etax = SubscriptionPlan::where('id',$plan)->first();
+            $companies_puedo = $product_etax->num_companies;
+            $companies_puedo += -1 ;
+            if($companies_tengo >  $companies_puedo  ){
+                $companies = Company::where('user_id',$user_id)->where('id','!=',$company->id)->where('status',1)->get();
+                foreach ($companies as $company) {
+                    $companies_puedo += -1 ;
+                    if($companies_puedo < 0){
+                        Company::where('id', $company->id)
+                        ->update(['status' => 0],['updated_at',$start_date]);
+                        $companies = Company::where('user_id',$user_id)->get();
+                    }
+    
                 }
-
+                $companies_puedo = $product_etax->num_companies;
+                return view('payment.companySelect')->with('companies',$companies)->with('companies_puedo',$companies_puedo);
             }
-            $companies_puedo = $porduct_etax->num_companies;
-            return view('payment.companySelect')->with('companies',$companies)->with('companies_puedo',$companies_puedo);
+        }catch(\Throwable $e){
+            Log::error($e->getMessage());
         }
         return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
     }
  
-    public function SeleccionEmpresas(Request $request){
+    public function seleccionEmpresas(Request $request){
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $company = currentCompanyModel();
         $user_id = $company->user_id;
@@ -160,29 +164,33 @@ class PaymentController extends Controller
 
     }
 
-    public function FacturasDisponibles(){
-        $start_date = Carbon::parse(now('America/Costa_Rica'));
-        $mes = $start_date->format("m");
-        $mes = intval($mes);
-        $year = $start_date->format("Y");
-        $company = currentCompanyModel();
-        $sale = Sales::where('company_id',$company->id)->first();
-        $plan = $sale->etax_product_id;
-        $porduct_etax = SubscriptionPlan::where('id',$plan)->first();
-        $num_invoices = $porduct_etax->num_invoices;
-        $AvailableInvoices = AvailableInvoices::where('company_id',$company->id)->where('month',$mes)->where('year',$year)->first();
-        if($AvailableInvoices != null){
-            if($num_invoices > $AvailableInvoices->monthly_quota){
-                AvailableInvoices::where('id', $AvailableInvoices->id)
-                    ->update(['monthly_quota' => $num_invoices],['updated_at',$start_date]);
+    public function facturasDisponibles(){
+        try{
+            $start_date = Carbon::parse(now('America/Costa_Rica'));
+            $month = $start_date->month;
+            $year = $start_date->year;
+            
+            $company = currentCompanyModel();
+            $sale = Sales::where('company_id',$company->id)->first();
+            $plan = $sale->etax_product_id;
+            $product_etax = SubscriptionPlan::where('id',$plan)->first();
+            $numInvoices = $product_etax->num_invoices;
+            $availableInvoices = AvailableInvoices::where('company_id',$company->id)->where('month',$month)->where('year',$year)->first();
+            if($availableInvoices != null){
+                if($numInvoices > $availableInvoices->monthly_quota){
+                    AvailableInvoices::where('id', $availableInvoices->id)
+                        ->update(['monthly_quota' => $numInvoices],['updated_at',$start_date]);
+                }
+            }else{
+                AvailableInvoices::insert([
+                    ['company_id' => $company->id, 'monthly_quota' => $numInvoices, 
+                    'month' => $month, 'year' => $year, 
+                    'current_month_sent' => 0, 'created_at' => $start_date, 'updated_at' => $start_date]
+                ]);
+    
             }
-        }else{
-            AvailableInvoices::insert([
-                ['company_id' => $company->id, 'monthly_quota' => $num_invoices, 
-                'month' => $mes, 'year' => $year, 
-                'current_month_sent' => 0, 'created_at' => $start_date, 'updated_at' => $start_date]
-            ]);
-
+        }catch(\Throwable $e){
+            Log::error($e->getMessage());
         }
     }
 
@@ -433,8 +441,8 @@ class PaymentController extends Controller
                 $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
                 
                 if($factura){
-                    $this->FacturasDisponibles();
-                    return $this->CompanyDisponible();
+                    $this->facturasDisponibles();
+                    return $this->$month();
                 }
             } else {
                 $mensaje = 'El pago ha sido denegado';
@@ -711,8 +719,8 @@ class PaymentController extends Controller
         );
         
         
-        $this->FacturasDisponibles();
-        return $this->CompanyDisponible();
+        $this->facturasDisponibles();
+        return $this->$month();
         
            
     }
@@ -917,6 +925,8 @@ class PaymentController extends Controller
                 
                 $data->chargeTokenId = $payment->charge_token;
                 $data->cardTokenId = $paymentMethod->token_bn;
+                
+                dd($data);
                 
                 $appliedCharge = $paymentUtils->paymentApplyCharge($data);
 

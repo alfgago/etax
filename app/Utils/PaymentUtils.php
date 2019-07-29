@@ -112,8 +112,8 @@ class PaymentUtils
             $data->user_name = $user->user_name;
             $data->amount = $amount;
 
-            $chargeCreated = $this->paymentIncludeCharge($data);
-            if($chargeCreated['apiStatus'] == "Successful"){
+            //$chargeCreated = $this->paymentIncludeCharge($data);
+            //if($chargeCreated['apiStatus'] == "Successful"){
                 $paymentMethod = PaymentMethod::where('id', $request->payment_method)->first();
                 $company = currentCompanyModel();
                 $date = Carbon::parse(now('America/Costa_Rica'));
@@ -164,9 +164,9 @@ class PaymentUtils
                     return false;
                 }
                 return true;
-            }else{
+            /*}else{
                 return false;
-            }
+            }*/
         }else{
             return false;
         }
