@@ -117,7 +117,7 @@ class PaymentController extends Controller
         return $cliente;
     }
 
-    public function $month(){
+    public function companyDisponible(){
         try{
             $start_date = Carbon::parse(now('America/Costa_Rica'));
             $company = currentCompanyModel();
