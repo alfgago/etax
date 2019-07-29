@@ -92,7 +92,7 @@ class EmailController extends Controller
                     Log::info( "Se registró la factura de venta $consecutivoComprobante para la empresa $identificacionEmisor");
                 }
             }else{
-                Log::info( "Factura $clave ya existe para la empresa $identificacionEmisor");
+                Log::warning( "Factura $clave ya existe para la empresa $identificacionEmisor");
             }
         }catch( \Throwable $ex ){
             Log::warning( "No se pudo guardar la factura de venta via Email. Mensaje:" . $ex->getMessage());
