@@ -43,7 +43,7 @@
           <div class="form-group col-md-6">
             <label for="default_iva_type">Tipo de IVA</label>
             <select class="form-control" name="default_iva_type" id="tipo_iva" required>
-                <option value="" selected >--Seleccione--</option>
+                <option value="" selected >--Seleccione-- </option>
               @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
                 <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}">{{ $tipo['name'] }}</option>
               @endforeach
