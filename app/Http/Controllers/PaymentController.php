@@ -711,7 +711,7 @@ class PaymentController extends Controller
         
         
         $this->facturasDisponibles();
-        return $this->$month();
+        return $this->companyDisponible();
         
            
     }

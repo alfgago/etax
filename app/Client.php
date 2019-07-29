@@ -34,15 +34,20 @@ class Client extends Model
       $allow = false;
     }
     
-    if( $tipoDoc != '09' ){
-      
+    if( $tipoDoc == '04' ){
+      if( empty($this->district) && $this->country == 'CR' ) {
+        $allow = false;
+      }
+      if( empty($this->zip) && $this->country == 'CR' ) {
+        $allow = false;
+      }
+    }elseif( $tipoDoc != '09' ){
         if( empty($this->district) ) {
           $allow = false;
         }
         if( empty($this->zip) ) {
           $allow = false;
         }
-      
     }else {
       if( $this->country == 'CR' ) {
         $allow = false;
