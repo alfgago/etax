@@ -122,25 +122,25 @@ class PaymentController extends Controller
             $start_date = Carbon::parse(now('America/Costa_Rica'));
             $company = currentCompanyModel();
             $user_id = $company->user_id;
-            $companies_tengo = Company::where('user_id',$user_id)->where('status',1)->count();
-            $sale = Sales::where('company_id',$company->id)->first();
-            $plan = $sale->etax_product_id;
-            $product_etax = SubscriptionPlan::where('id',$plan)->first();
-            $companies_puedo = $product_etax->num_companies;
-            $companies_puedo += -1 ;
-            if($companies_tengo >  $companies_puedo  ){
+            $activeCompanies = Company::where('user_id',$user_id)->where('status', 1)->count();
+            $sale = Sales::where('company_id', $company->id)->where('is_subscription', true)->first();
+            $plan = $sale->plan;
+            $availableCompanies = $plan->num_companies;
+            $availableCompanies += -1 ;
+            
+            if($activeCompanies >  $availableCompanies  ){
                 $companies = Company::where('user_id',$user_id)->where('id','!=',$company->id)->where('status',1)->get();
                 foreach ($companies as $company) {
-                    $companies_puedo += -1 ;
-                    if($companies_puedo < 0){
+                    $availableCompanies += -1 ;
+                    if($availableCompanies < 0){
                         Company::where('id', $company->id)
                         ->update(['status' => 0],['updated_at',$start_date]);
                         $companies = Company::where('user_id',$user_id)->get();
                     }
     
                 }
-                $companies_puedo = $product_etax->num_companies;
-                return view('payment.companySelect')->with('companies',$companies)->with('companies_puedo',$companies_puedo);
+                $availableCompanies = $product_etax->num_companies;
+                return view('payment.companySelect')->with('companies',$companies)->with('companies_puedo',$availableCompanies);
             }
         }catch(\Throwable $e){
             Log::error($e->getMessage());
@@ -171,24 +171,15 @@ class PaymentController extends Controller
             $year = $start_date->year;
             
             $company = currentCompanyModel();
-            $sale = Sales::where('company_id',$company->id)->first();
-            $plan = $sale->etax_product_id;
-            $product_etax = SubscriptionPlan::where('id',$plan)->first();
-            $numInvoices = $product_etax->num_invoices;
-            $availableInvoices = AvailableInvoices::where('company_id',$company->id)->where('month',$month)->where('year',$year)->first();
-            if($availableInvoices != null){
-                if($numInvoices > $availableInvoices->monthly_quota){
-                    AvailableInvoices::where('id', $availableInvoices->id)
-                        ->update(['monthly_quota' => $numInvoices],['updated_at',$start_date]);
-                }
-            }else{
-                AvailableInvoices::insert([
-                    ['company_id' => $company->id, 'monthly_quota' => $numInvoices, 
-                    'month' => $month, 'year' => $year, 
-                    'current_month_sent' => 0, 'created_at' => $start_date, 'updated_at' => $start_date]
-                ]);
-    
-            }
+            $sale = Sales::where('company_id',$company->id)->where('is_subscription', true)->first();
+
+            $plan = $sale->plan;
+            $numInvoices = $plan->num_invoices;
+            
+            $availableInvoices = $company->getAvailableInvoices( $year, $month );
+            $availableInvoices->monthly_quota = $numInvoices;
+            $availableInvoices->save();
+            
         }catch(\Throwable $e){
             Log::error($e->getMessage());
         }
@@ -442,7 +433,7 @@ class PaymentController extends Controller
                 
                 if($factura){
                     $this->facturasDisponibles();
-                    return $this->$month();
+                    return $this->companyDisponible();
                 }
             } else {
                 $mensaje = 'El pago ha sido denegado';
