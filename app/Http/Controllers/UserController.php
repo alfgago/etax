@@ -331,7 +331,7 @@ class UserController extends Controller {
         if( Auth::user()->canImpersonate() ) {
             $user = User::findOrFail($id);
             if( !$user ){
-                $user = User::where('email', $id)->first;
+                $user = User::where('email', $id)->first();
             }
             Auth::user()->impersonate($user);
         }
