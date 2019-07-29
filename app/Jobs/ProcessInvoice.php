@@ -85,7 +85,7 @@ class ProcessInvoice implements ShouldQueue
                         ]);
                         $response = json_decode($result->getBody()->getContents(), true);
                         $date = Carbon::now();
-                        Log::info('Response Api Hacienda '. json_encode($response));
+                        Log::info("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
                         if (isset($response['status']) && $response['status'] == 200) {
                             Log::info('API HACIENDA 200 :'. $invoice->document_number);
                             $invoice->hacienda_status = '03';

@@ -52,7 +52,7 @@ class BridgeHaciendaApi
             $company = $invoice->company;
             if ($requestData !== false) {
                 $client = new Client();
-                Log::info('Enviando parametros  API HACIENDA -->>' . $invoice->id);
+                Log::info("Enviando parametros  API HACIENDA -->> InvoiceID: $invoice->id, CompanyID: $invoice->company_id" );
                 $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice43/signxml', [
                     'headers' => [
                         'Auth-Key'  => config('etax.api_hacienda_key'),
