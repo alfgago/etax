@@ -736,7 +736,7 @@ class BillController extends Controller
                         $bill->save();
                         $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
                         $company->save();
-                        $company->last_document_rec = getDocReference($company->last_rec_ref_number);
+                        $company->last_document_rec = getDocReference('05',$company->last_rec_ref_number);
                         $company->save();
                         $apiHacienda->acceptInvoice($bill, $tokenApi);
                     }
