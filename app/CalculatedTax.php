@@ -411,7 +411,7 @@ class CalculatedTax extends Model
     *   Recorre todas las facturas recibidas y aumenta los montos correspondientes.
     **/
     public function setDatosSoportados ( $month, $year, $company, $query, $singleBill = false ) {
-      $countBills = $query->count();
+      $countBills = Bill::where('company_id', $company)->where('year', $year)->where('month', $month)->count();
   
       $billsTotal = 0;
       $billsSubtotal = 0;
