@@ -11,43 +11,10 @@
         <b>Monto IVA: </b>{{ number_format( $data['bills']->iva_amount, 2 ) }} <br>
         <b>Total: </b>{{ number_format( $data['bills']->total, 2 ) }} 
       </div>
-      <div class="col-md-12">
-          <h3>Validación factura completa</h3>
-      </div>
-      <div class="col-md-4">
-          <label>Categoría</label>
-           <select class="form-control product_type_all"  placeholder="Seleccione una categoría de hacienda" required>
-              @foreach($data['categoria_productos'] as $categoria_productos)
-                 <option value="{{@$categoria_productos->id}}" codigo="{{ $categoria_productos->bill_iva_code }}" posibles="{{@$categoria_productos->open_codes}}" >{{@$categoria_productos->name}}</option>
-              @endforeach
-            </select>
-      </div>
-      <div class="col-md-4">
-          <label>Tipo IVA</label>
-            <div class="input-validate-iva">
-              <select class="form-control iva_type_all"  placeholder="Seleccione un código eTax" required >
-                        <option value="0">Seleccione una opcion</option>
-                @foreach($data['codigos_etax'] as $codigos_etax)
-                  <option value="{{@$codigos_etax->code}}" identificacion="{{@$codigos_etax->is_identificacion_plena}}" >{{@$codigos_etax->name}}</option>
-                @endforeach
-              </select>
-            </div>
-      </div>
-      <div class="col-md-4">
-          <label>Identificación plena</label>
-            <div class="input-validate-iva">
-                <select class="form-control porc_identificacion_plena_all"  >
-                        <option value="0">Seleccione un %</option>
-                        <option value="13" >13%</option>
-                        <option value="1" >1%</option>
-                        <option value="2" >2%</option>
-                        <option value="4" >4%</option>
-                </select>
-            </div>
-        </div>
     </div>
     <hr>
   </div>
+  
   <div class="col-md-12">
     <form method="POST" action="/facturas-recibidas/guardar-validar">
       @csrf
@@ -84,6 +51,40 @@
             </tr>
           </thead>
           <tbody>
+             <tr>
+               <th colspan="7">Selección masiva: </th>
+               <td>
+                 <div class="input-validate-iva">
+                   <select class="form-control product_type_all"  placeholder="Seleccione una categoría de hacienda" >
+                      <option value="0">-- Seleccione --</option>
+                      @foreach($data['categoria_productos'] as $categoria_productos)
+                         <option value="{{@$categoria_productos->id}}" codigo="{{ $categoria_productos->bill_iva_code }}" posibles="{{@$categoria_productos->open_codes}}" >{{@$categoria_productos->name}}</option>
+                      @endforeach
+                    </select>
+                  </div>
+               </td>
+               <td>
+                  <div class="input-validate-iva">
+                    <select class="form-control iva_type_all"  placeholder="Seleccione un código eTax"  >
+                      <option value="0">-- Seleccione --</option>
+                      @foreach($data['codigos_etax'] as $codigos_etax)
+                        <option value="{{@$codigos_etax->code}}" identificacion="{{@$codigos_etax->is_identificacion_plena}}" >{{@$codigos_etax->name}}</option>
+                      @endforeach
+                    </select>
+                  </div>
+               </td>
+               <td>
+                 <div class="input-validate-iva">
+                    <select class="form-control porc_identificacion_plena_all"  >
+                      <option value="0">-- Seleccione --</option>
+                      <option value="13" >13%</option>
+                      <option value="1" >1%</option>
+                      <option value="2" >2%</option>
+                      <option value="4" >4%</option>
+                    </select>
+                  </div>
+               </td>
+             </tr>
              @foreach ( $data['bills']->items as $item )
              <tr class="item-tabla item-index-{{ $loop->index }}" index="{{ $loop->index }}" attr-num="{{ $loop->index }}" id="item-tabla-{{ $loop->index }}">
                 <td>
