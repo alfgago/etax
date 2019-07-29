@@ -41,7 +41,7 @@ class Client extends Model
       if( empty($this->zip) && $this->country == 'CR' ) {
         $allow = false;
       }
-    }if( $tipoDoc != '09' ){
+    }elseif( $tipoDoc != '09' ){
         if( empty($this->district) ) {
           $allow = false;
         }
