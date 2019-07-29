@@ -64,25 +64,25 @@ class InvoiceUtils
             return $file;
         }
 
-        if( isset($xml) ) {
+        if(isset($xml)) {
         	$path = $xml->xml;
-        	if ( Storage::exists($path)) {
+        	if (Storage::exists($path)) {
 	          $file = Storage::get($path);
 	        }
         }
         
         //Si no encontró el archivo, lo busca en 2 posibles rutas.
-        if( !isset($file) ){
+        if (!isset($file)) {
         	$cedulaEmpresa = $company->id_number;
         	$cedulaCliente = $invoice->client_id_number;
         	$consecutivoComprobante = $invoice->document_number;
         	
         	//Lo busca primero dentro de facturas_ventas
         	$path = "empresa-$cedulaEmpresa/facturas_ventas/$cedulaCliente-$consecutivoComprobante.xml";
-	        if ( Storage::exists($path)) {
+	        if (Storage::exists($path)) {
 	          $file = Storage::get($path);
 	        }
-	        if( !isset($file) ){
+	        if (!isset($file)) {
 	        	//Lo busca en el root de la empresa
         		$path = "empresa-$cedulaEmpresa/$cedulaCliente-$consecutivoComprobante.xml";
 		        if ( Storage::exists($path)) {
@@ -368,16 +368,16 @@ class InvoiceUtils
                 'tipo_documento' => $data['document_type'] ?? '',
                 'sucursal_nro' => '001',
                 'terminal_nro' => '00001',
-                'emisor_name' => $company->business_name ? trim($company->business_name) : '',
-                'emisor_email' => $company->email ? trim($company->email) : '',
-                'emisor_company' => $company->business_name ? trim($company->business_name) :  '',
-                'emisor_city' => $company->city ?? '',
-                'emisor_state' => $company->state ?? '',
-                'emisor_postal_code' => $company->zip ?? '',
-                'emisor_country' => $company->country ?? '',
-                'emisor_address' => $company->address ?? '',
-                'emisor_phone' => $company->phone ? trim($company->phone) : '',
-                'emisor_cedula' => $company->id_number ? preg_replace("/[^0-9]/", "", $company->id_number) : '',
+                'emisor_name' => 'ENRIQUE LANG',//$company->business_name ? trim($company->business_name) : '',
+                'emisor_email' => 'xavierperna@gmail.com',//$company->email ? trim($company->email) : '',
+                'emisor_company' => 'ENRIQUE LANG',//$company->business_name ? trim($company->business_name) :  '',
+                'emisor_city' => '103',//$company->city ?? '',
+                'emisor_state' => '1',//$company->state ?? '',
+                'emisor_postal_code' => '10301',//$company->zip ?? '',
+                'emisor_country' => 'CR',//$company->country ?? '',
+                'emisor_address' => 'villas',//$company->address ?? '',
+                'emisor_phone' => '72354062',//$company->phone ? trim($company->phone) : '',
+                'emisor_cedula' => '114220260',//$company->id_number ? preg_replace("/[^0-9]/", "", $company->id_number) : '',
                 'usuarioAtv' => $company->atv->user ? trim($company->atv->user) :  '',
                 'passwordAtv' => $company->atv->password ? trim($company->atv->password) : '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
