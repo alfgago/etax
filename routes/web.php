@@ -160,7 +160,13 @@ Route::prefix('payment')->group(function(){
     Route::post('comprar-facturas', 'PaymentController@comprarFacturas')->name('Payment.comprar_facturas');
 });
 
+//Rutas de cliente
+Route::prefix('clientes')->group(function(){
+    Route::get('clientes-edit/{id}', 'ClientController@edit')->name('client_edit');
+    Route::delete('destroy/{id}', 'ClientController@destroy')->name('clientes_destroy');
+});
 
+//Rutas de metodos de pago
 Route::prefix('payment-methods')->group(function(){
     Route::get('payment-method-create-view', 'PaymentMethodController@createView')->name('PaymentMethod.payment_method_create_view');
     Route::post('payment-method-create', 'PaymentMethodController@create')->name('PaymentMethod.payment_create');

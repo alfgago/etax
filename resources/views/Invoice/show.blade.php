@@ -22,7 +22,7 @@
                       </h3>
                     </div>  
                     
-                    <div class="form-group col-md-12 with-button">
+                    <div class="form-group col-md-12 with-button hidden">
                       <label for="cliente">Seleccione el cliente</label>
                       <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
                         <option value=''>-- Seleccione un cliente --</option>
@@ -31,6 +31,10 @@
                         @endforeach
                       </select>
                     </div>
+                      <div class="form-group col-md-12 with-button">
+                          <label for="cliente">Seleccione el cliente</label>
+                          <input class="form-control" type="text" readonly value="{{$invoice->clientName()}}">
+                      </div>
                   </div>
                 </div>
                     

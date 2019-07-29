@@ -46,16 +46,20 @@ class ClientController extends Controller
         
         return datatables()->eloquent( $query )
             ->orderColumn('reference_number', '-reference_number $1')
-            ->addColumn('actions', function($client) {
+            ->addColumn('actions', function($paymentMethod) {
+                return view('client.actions', [
+                    'data' => $paymentMethod
+                ])->render();
+            })
+            /*->addColumn('actions', function($client) {
                 return view('datatables.actions', [
                     'routeName' => 'clientes',
                     'deleteTitle' => 'Eliminar cliente',
-                    'hideDelete' => true,
                     'editTitle' => 'Editar cliente',
                     'deleteIcon' => 'fa fa-trash-o',
                     'id' => $client->id
                 ])->render();
-            })
+            })*/
             ->editColumn('es_exento', function(Client $client) {
                 return $client->es_exento ? 'Sí' : 'No';
             })
@@ -169,7 +173,7 @@ class ClientController extends Controller
     {
         $cliente = Client::findOrFail($id);
         $this->authorize('update', $cliente);
-      
+
         $cliente->tipo_persona = $request->tipo_persona;
         $cliente->id_number = preg_replace("/[^0-9]/", "", $request->id_number );
         $cliente->code = $request->code;
@@ -209,7 +213,7 @@ class ClientController extends Controller
     {
         $cliente = Client::find($id);
         $this->authorize('update', $cliente);
-        //$cliente->delete();
+        $cliente->delete();
         
         return redirect('/clientes');
     }

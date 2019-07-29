@@ -63,7 +63,7 @@ class InvoiceController extends Controller
                 ->where('is_authorized', true)
                 ->where('is_code_validated', true)
                 ->where('is_totales', false)
-                ->with('client');
+                ;
                 
         $filtro = $request->get('filtro');
         if( $filtro == 0 ) {
@@ -94,7 +94,7 @@ class InvoiceController extends Controller
                 ])->render();
             }) 
             ->editColumn('client', function(Invoice $invoice) {
-                return !empty($invoice->client_first_name) ? $invoice->client_first_name.' '.$invoice->client_last_name : $invoice->clientName();
+                return $invoice->clientName();
             })
             ->editColumn('hacienda_status', function(Invoice $invoice) {
                 if ($invoice->hacienda_status == '03') {

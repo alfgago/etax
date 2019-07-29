@@ -37,11 +37,13 @@ class Invoice extends Model
     }
     
     public function clientName() {
-      if( isset($this->client_id) ) {
+        return !empty($this->client_first_name) ? $this->client_first_name.' '.$this->client_last_name : 'N/A';
+
+      /*if( isset($this->client_id) ) {
         return $this->client->getFullName();
       }else{
         return 'N/A';
-      }
+      }*/
     }
     
     public function documentTypeName() {

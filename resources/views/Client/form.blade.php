@@ -3,12 +3,12 @@
     
     <div class="form-group col-md-4">
       <label for="code">Código *</label>
-      <input type="text" class="form-control" name="code" id="code" value="{{ @$client->code }}" required <?php echo (!@$client->code) ? '' : 'disabled'; ?>>
+      <input type="text" class="form-control" name="code" id="code" value="{{ @$client->code }}" required  {{ (!@$client->code) ? '' : 'readonly' }} >
     </div>
     
     <div class="form-group col-md-4">
       <label for="tipo_persona">Tipo de persona *</label>
-      <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();" onchange="cambiarDireccion();">
+      <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();" onchange="cambiarDireccion();" >
         <option value="F" {{ @$client->tipo_persona == 'F' ? 'selected' : '' }} >Física</option>
         <option value="J" {{ @$client->tipo_persona == 'J' ? 'selected' : '' }}>Jurídica</option>
         <option value="D" {{ @$client->tipo_persona == 'D' ? 'selected' : '' }}>DIMEX</option>
@@ -20,12 +20,12 @@
     
     <div class="form-group col-md-4">
       <label for="id_number">Número de identificación *</label>
-      <input type="text" class="form-control" name="id_number" id="id_number" value="{{ @$client->id_number }}" required onchange="getJSONCedula(this.value);" maxlength="20">
+      <input type="text" class="form-control" name="id_number" id="id_number" value="{{ @$client->id_number }}" required onchange="getJSONCedula(this.value);" maxlength="20" >
     </div>
 
     <div class="form-group col-md-4">
       <label for="first_name">Nombre *</label>
-      <input type="text" class="form-control" name="first_name" id="first_name" value="{{ @$client->first_name }}" required>
+      <input type="text" class="form-control" name="first_name" id="first_name" value="{{ @$client->first_name }}" required >
     </div>
     
     <div class="form-group col-md-4">
@@ -100,7 +100,7 @@
     <div class="form-group col-md-12">
       <label for="billing_emails">Correos electrónicos para facturación</label>
       <div class="form-group">
-        <div data-no-duplicate="true" data-pre-tags-separator="," data-no-duplicate-text="Correos duplicados" data-type-zone-class="type-zone" 
+        <div data-no-duplicate="true" type="email" data-pre-tags-separator="," data-no-duplicate-text="Correos duplicados" data-type-zone-class="type-zone"
           data-tag-box-class="tagging" id="billing_emails" data-tags-input-name="billing_emails">{{ @$client->billing_emails }}</div>
         <p class="text-muted"><small>Ingrese los correos separados por coma. Si lo deja en blanco, por defecto se enviarán las facturas al correo electrónico del cliente.</small> </p>
       </div>
