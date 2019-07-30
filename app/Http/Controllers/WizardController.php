@@ -13,6 +13,11 @@ use App\CalculatedTax;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @group Controller - Wizard
+ *
+ * Funciones de WizardController.
+ */
 class WizardController extends Controller
 {
   

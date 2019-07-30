@@ -17,6 +17,11 @@ use App\Exports\ReportsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\Controller;
 
+/**
+ * @group Controller - Reportes
+ *
+ * Funciones de ReportsController
+ */
 class ReportsController extends Controller
 {
   

@@ -57,8 +57,8 @@
                  <div class="input-validate-iva">
                    <select class="form-control product_type_all"  placeholder="Seleccione una categoría de hacienda" >
                       <option value="0">-- Seleccione --</option>
-                      @foreach($categoria_productos as $categoria_productos)
-                         <option value="{{@$categoria_productos->id}}" codigo="{{ @$categoria_productos->bill_iva_code }}" posibles="{{@$categoria_productos->open_codes}}" >{{@$categoria_productos->name}}</option>
+                      @foreach($categoria_productos as $cat)
+                         <option value="{{@$cat->id}}" codigo="{{ @$cat->bill_iva_code }}" posibles="{{@$cat->open_codes}}" >{{@$cat->name}}</option>
                       @endforeach
                     </select>
                   </div>
@@ -67,8 +67,8 @@
                   <div class="input-validate-iva">
                     <select class="form-control iva_type_all"  placeholder="Seleccione un código eTax"  >
                       <option value="0">-- Seleccione --</option>
-                      @foreach($codigos_etax as $codigos_etax)
-                        <option value="{{@$codigos_etax->code}}" identificacion="{{@$codigos_etax->is_identificacion_plena}}" >{{@$codigos_etax->name}}</option>
+                      @foreach($codigos_etax as $cod)
+                        <option value="{{@$cod->code}}" identificacion="{{@$cod->is_identificacion_plena}}" >{{@$cod->name}}</option>
                       @endforeach
                     </select>
                   </div>
@@ -100,8 +100,8 @@
                 <td>
                   <div class="input-validate-iva">
                     <select class="form-control product_type" name="items[{{ $loop->index }}][product_type]" placeholder="Seleccione una categoría de hacienda" required>
-                        @foreach($categoria_productos as $categoria_productos)
-                            <option value="{{@$categoria_productos->id}}" codigo="{{ $categoria_productos->bill_iva_code }}" posibles="{{@$categoria_productos->open_codes}}" {{ $item->product_type == @$categoria_productos->id ? 'selected' : '' }}>{{@$categoria_productos->name}}</option>
+                        @foreach($categoria_productos as $cat)
+                            <option value="{{@$cat->id}}" codigo="{{ @$cat->bill_iva_code }}" posibles="{{@$cat->open_codes}}" {{ $item->product_type == @$cat->id ? 'selected' : '' }}>{{@$cat->name}}</option>
                         @endforeach
                     </select>
                   </div>
@@ -109,8 +109,8 @@
                 <td>
                   <div class="input-validate-iva">
                     <select class="form-control iva_type" name="items[{{ $loop->index }}][iva_type]" placeholder="Seleccione un código eTax" required >
-                        @foreach($codigos_etax as $codigos_etax)
-                            <option value="{{@$codigos_etax->code}}" identificacion="{{@$codigos_etax->is_identificacion_plena}}" {{ $item->iva_type == @$codigos_etax->code ? 'selected' : '' }}>{{@$codigos_etax->name}}</option>
+                        @foreach($codigos_etax as $cod)
+                            <option value="{{@$cod->code}}" identificacion="{{@$cod->is_identificacion_plena}}" {{ $item->iva_type == @$cod->code ? 'selected' : '' }}>{{@$cod->name}}</option>
                         @endforeach
                     </select>
                   </div>
