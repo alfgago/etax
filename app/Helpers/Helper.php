@@ -164,7 +164,7 @@ if (!function_exists('currentCompanyModel')) {
         $user = auth()->user();
         
         $cacheKey = "cache-currentcompany-$user->id";
-        //if ( !Illuminate\Support\Facades\Cache::has($cacheKey) ) {
+        if ( !Illuminate\Support\Facades\Cache::has($cacheKey) ) {
                 
             if ( !$user->companies->count() ) {
                 auth()->user()->addCompany();
@@ -176,11 +176,10 @@ if (!function_exists('currentCompanyModel')) {
                 session( ['current_company' => $companyId] );
                 $company = App\Company::find($companyId);
             }
-            return $company;
-            //Illuminate\Support\Facades\Cache::put($cacheKey, $company, now()->addMinutes(1));
-        //}
+            Illuminate\Support\Facades\Cache::put($cacheKey, $company, now()->addMinutes(1));
+        }
         
-        //return Illuminate\Support\Facades\Cache::get($cacheKey);;
+        return Illuminate\Support\Facades\Cache::get($cacheKey);;
     }
 
 }

@@ -194,6 +194,8 @@ class InvoiceController extends Controller
                     Log::info('Atv Validated Company: '. $company->id_number);
                     $company->atv_validation = true;
                     $company->save();
+                    auth()->user()->attachTeam($team);
+                    Cache::forget("cache-currentcompany-$userId");
                 }
             }else {
                 return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
@@ -265,6 +267,8 @@ class InvoiceController extends Controller
                     Log::info('Atv Validated Company: '. $company->id_number);
                     $company->atv_validation = true;
                     $company->save();
+                    auth()->user()->attachTeam($team);
+                    Cache::forget("cache-currentcompany-$userId");
                 }
             }else {
                 return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
@@ -327,7 +331,7 @@ class InvoiceController extends Controller
         $invoice->setInvoiceData($request);
         
         $company->save();
-
+        
         clearInvoiceCache($invoice);
       
         return redirect('/facturas-emitidas');
