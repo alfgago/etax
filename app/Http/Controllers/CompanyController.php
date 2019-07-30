@@ -136,6 +136,7 @@ class CompanyController extends Controller {
         );
 
         auth()->user()->attachTeam($team);
+        Cache::forget("cache-currentcompany-$userId");
 
         return redirect()->route('User.companies')->withMessage('La compañía ha sido agregada con éxito');
     }
@@ -310,6 +311,9 @@ class CompanyController extends Controller {
         }
         
         $company->save();
+        
+        $userId = auth()->user()->id;
+        Cache::forget("cache-currentcompany-$userId");
 
         //Update Team name based on company
         /*$team->name = "(".$company->id.") " . $company->id_number;
@@ -364,6 +368,8 @@ class CompanyController extends Controller {
         $company->save();
         
         clearLastTaxesCache( $company->id, 2018);
+        $userId = auth()->user()->id;
+        Cache::forget("cache-currentcompany-$userId");
 
         return redirect()->route('Company.edit_config')->withMessage('La configuración de la empresa ha sido actualizada.');
     }
