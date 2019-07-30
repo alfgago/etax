@@ -492,9 +492,7 @@ class BillController extends Controller
         $bill = Bill::findOrFail($request->bill);
         
         $bill->activity_company_verification = $request->actividad_comercial;
-        $bill->codigo_iva_verification = $request->codigo_etax;
         $bill->is_code_validated = true;
-
         foreach( $request->items as $item ) {
             BillItem::where('id', $item['id'])
             ->update([
