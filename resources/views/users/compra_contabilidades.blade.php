@@ -5,8 +5,12 @@
 @endsection
 
 @section('breadcrumb-buttons')
-@endsection 
-
+    @if( auth()->user()->isContador() )
+        @can('admin')
+            <a class="btn btn-primary" href="/usuario/empresas">Empresas</a>
+        @endcan
+    @endif
+@endsection
 @section('content')
 
 <div class="row">
@@ -43,7 +47,7 @@
                                 <div class="form-row" style="position: relative;">
                                     <div class="form-group col-md-12" >
                                         <h3>
-                                            Comprar Contabilidades Adicionales
+                                            Comprar contabilidades adicionales
                                         </h3>
                                     </div>
                                     

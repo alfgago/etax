@@ -117,34 +117,38 @@ class PaymentController extends Controller
         return $cliente;
     }
 
-    public function CompanyDisponible(){
-        $start_date = Carbon::parse(now('America/Costa_Rica'));
-        $company = currentCompanyModel();
-        $user_id = $company->user_id;
-        $companies_tengo = Company::where('user_id',$user_id)->where('status',1)->count();
-        $sale = Sales::where('company_id',$company->id)->first();
-        $plan = $sale->etax_product_id;
-        $porduct_etax = SubscriptionPlan::where('id',$plan)->first();
-        $companies_puedo = $porduct_etax->num_companies;
-        $companies_puedo += -1 ;
-        if($companies_tengo >  $companies_puedo  ){
-            $companies = Company::where('user_id',$user_id)->where('id','!=',$company->id)->where('status',1)->get();
-            foreach ($companies as $company) {
-                $companies_puedo += -1 ;
-                if($companies_puedo < 0){
-                    Company::where('id', $company->id)
-                    ->update(['status' => 0],['updated_at',$start_date]);
-                    $companies = Company::where('user_id',$user_id)->get();
+    public function companyDisponible(){
+        try{
+            $start_date = Carbon::parse(now('America/Costa_Rica'));
+            $company = currentCompanyModel();
+            $user_id = $company->user_id;
+            $activeCompanies = Company::where('user_id',$user_id)->where('status', 1)->count();
+            $sale = Sales::where('company_id', $company->id)->where('is_subscription', true)->first();
+            $plan = $sale->plan;
+            $availableCompanies = $plan->num_companies;
+            $availableCompanies += -1 ;
+            
+            if($activeCompanies >  $availableCompanies  ){
+                $companies = Company::where('user_id',$user_id)->where('id','!=',$company->id)->where('status',1)->get();
+                foreach ($companies as $company) {
+                    $availableCompanies += -1 ;
+                    if($availableCompanies < 0){
+                        Company::where('id', $company->id)
+                        ->update(['status' => 0],['updated_at',$start_date]);
+                        $companies = Company::where('user_id',$user_id)->get();
+                    }
+    
                 }
-
+                $availableCompanies = $product_etax->num_companies;
+                return view('payment.companySelect')->with('companies',$companies)->with('companies_puedo',$availableCompanies);
             }
-            $companies_puedo = $porduct_etax->num_companies;
-            return view('payment.companySelect')->with('companies',$companies)->with('companies_puedo',$companies_puedo);
+        }catch(\Throwable $e){
+            Log::error($e->getMessage());
         }
         return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
     }
  
-    public function SeleccionEmpresas(Request $request){
+    public function seleccionEmpresas(Request $request){
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $company = currentCompanyModel();
         $user_id = $company->user_id;
@@ -160,29 +164,24 @@ class PaymentController extends Controller
 
     }
 
-    public function FacturasDisponibles(){
-        $start_date = Carbon::parse(now('America/Costa_Rica'));
-        $mes = $start_date->format("m");
-        $mes = intval($mes);
-        $year = $start_date->format("Y");
-        $company = currentCompanyModel();
-        $sale = Sales::where('company_id',$company->id)->first();
-        $plan = $sale->etax_product_id;
-        $porduct_etax = SubscriptionPlan::where('id',$plan)->first();
-        $num_invoices = $porduct_etax->num_invoices;
-        $AvailableInvoices = AvailableInvoices::where('company_id',$company->id)->where('month',$mes)->where('year',$year)->first();
-        if($AvailableInvoices != null){
-            if($num_invoices > $AvailableInvoices->monthly_quota){
-                AvailableInvoices::where('id', $AvailableInvoices->id)
-                    ->update(['monthly_quota' => $num_invoices],['updated_at',$start_date]);
-            }
-        }else{
-            AvailableInvoices::insert([
-                ['company_id' => $company->id, 'monthly_quota' => $num_invoices, 
-                'month' => $mes, 'year' => $year, 
-                'current_month_sent' => 0, 'created_at' => $start_date, 'updated_at' => $start_date]
-            ]);
+    public function facturasDisponibles(){
+        try{
+            $start_date = Carbon::parse(now('America/Costa_Rica'));
+            $month = $start_date->month;
+            $year = $start_date->year;
+            
+            $company = currentCompanyModel();
+            $sale = Sales::where('company_id',$company->id)->where('is_subscription', true)->first();
 
+            $plan = $sale->plan;
+            $numInvoices = $plan->num_invoices;
+            
+            $availableInvoices = $company->getAvailableInvoices( $year, $month );
+            $availableInvoices->monthly_quota = $numInvoices;
+            $availableInvoices->save();
+            
+        }catch(\Throwable $e){
+            Log::error($e->getMessage());
         }
     }
 
@@ -433,8 +432,8 @@ class PaymentController extends Controller
                 $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
                 
                 if($factura){
-                    $this->FacturasDisponibles();
-                    return $this->CompanyDisponible();
+                    $this->facturasDisponibles();
+                    return $this->companyDisponible();
                 }
             } else {
                 $mensaje = 'El pago ha sido denegado';
@@ -661,8 +660,6 @@ class PaymentController extends Controller
 
                 $invoiceData->items = [$item];
                 $procesoFactura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
-                
-                $company->additional_invoices = $additional_invoices;
                 $company->save();
                 
                 return redirect('/usuario/compra-contabilidades')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
@@ -711,8 +708,8 @@ class PaymentController extends Controller
         );
         
         
-        $this->FacturasDisponibles();
-        return $this->CompanyDisponible();
+        $this->facturasDisponibles();
+        return $this->companyDisponible();
         
            
     }
@@ -876,7 +873,7 @@ class PaymentController extends Controller
         }
     }
 
-    public function pagarCargo($idpayment){
+    public function pagarCargo($paymentId){
         $paymentUtils = new PaymentUtils();
         $date = Carbon::parse(now('America/Costa_Rica'));
         $company = currentCompanyModel();
@@ -891,15 +888,11 @@ class PaymentController extends Controller
             }
                     
             if($paymentMethod){
-                $payment = Payment::updateOrCreate(
-                    [
-                        'id' => $idpayment,
-                    ],
-                    [
-                        'payment_date' => $date,
-                        'payment_method_id' => $paymentMethod->id,
-                    ]
-                );
+                $payment = Payment::find($paymentId);
+                $payment->payment_date = $date;
+                $payment->payment_method_id = $paymentMethod->id;
+                $payment->save();
+                
                 $sale = Sales::find($payment->sale_id);
                 
                 $amount = $payment->amount;
@@ -912,7 +905,7 @@ class PaymentController extends Controller
                 $data->amount = $amount;
                     
                 //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
-                if( ! isset($payment->charge_token) ) {
+                if( ! isset($payment->charge_token) || $payment->charge_token == 'N/A' || $payment->charge_token == '' ) {
                     $chargeIncluded = $paymentUtils->paymentIncludeCharge($data);
                     $chargeTokenId = $chargeIncluded['chargeTokenId'];
                     $payment->charge_token = $chargeTokenId;
@@ -938,7 +931,7 @@ class PaymentController extends Controller
                     $invoiceData->client_id_number = $company->id_number;
                     $invoiceData->client_id = $company->id_number;
                     $invoiceData->tipo_persona = $company->tipo_persona;
-                    $invoiceData->first_name = $company->first_name;
+                    $invoiceData->first_name = $company->name;
                     $invoiceData->last_name = $company->last_name;
                     $invoiceData->last_name2 = $company->last_name2;
                     $invoiceData->country = $company->country;

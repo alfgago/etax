@@ -173,9 +173,9 @@ class UserController extends Controller {
                 //$teams = \Mpociot\Teamwork\TeamworkTeam::get();
             }
             $actividades = Actividades::all()->toArray();
-
-            $available_companies_count = User::checkCountAvailableCompanies();
-            return view('users.companies', compact('data'))->with('teams', $teams);
+            $availableCompanies = User::checkCountAvailableCompanies();
+            
+            return view('users.companies', compact('data', 'teams', 'availableCompanies'));
 
         }catch( \Throwable $ex ){
             return view('users.companies');
@@ -328,8 +328,11 @@ class UserController extends Controller {
     
     public function impersonate( $id ) {
         
-        if( Auth::user()->canImpersonate()  ) {
+        if( Auth::user()->canImpersonate() ) {
             $user = User::findOrFail($id);
+            if( !$user ){
+                $user = User::where('email', $id)->first();
+            }
             Auth::user()->impersonate($user);
         }
         return redirect( '/' );

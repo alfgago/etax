@@ -36,6 +36,7 @@
                                 <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
                                     <thead>
                                     <tr>
+                                        <th>Descripcion</th>
                                         <th>Fecha</th>
                                         <th>Monto</th>
                                         <th>Estado</th>
@@ -46,6 +47,7 @@
                                         @foreach($payments as $payment)
                                             @if($payment)
                                                 <tr>
+                                                    <td>{{ @$payment->sale->saleDescription() }}</td>
                                                     <td>{{$payment->payment_date}}</td>
                                                     <td>{{$payment->amount}}</td>
                                                     <td>{{$payment->getStatusString() }}</td>

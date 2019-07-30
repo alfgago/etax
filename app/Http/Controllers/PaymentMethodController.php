@@ -18,10 +18,11 @@ class PaymentMethodController extends Controller
     {
         $user = auth()->user();
         $cantidad = PaymentMethod::where('user_id', $user->id)->get()->count();
+        return view('payment_methods/index')->with('cantidad', $cantidad);
         if($cantidad){
             return view('payment_methods/index')->with('cantidad', $cantidad);
         }else{
-            return redirect()->back()->withErrors('No existen metodos de pago para este usuario');
+            return redirect()->back()->withErrors('No existen métodos de pago para este usuario');
         }
     }
 
@@ -110,7 +111,7 @@ class PaymentMethodController extends Controller
                         'due_date' => $request->cardMonth . ' ' . $request->cardYear,
                         'token_bn' => $card['cardTokenId']
                     ]);
-                    return redirect()->back()->withMessage('Metodo de pago creado');
+                    return redirect()->back()->withMessage('Método de pago creado');
                 } else {
                     return redirect()->back()->withErrors('No se aprobó esta tarjeta');
                 }
@@ -118,7 +119,7 @@ class PaymentMethodController extends Controller
                 return redirect()->back()->withErrors('Pagos en línea está fuera de servicio en este momento. No se pudo gestionar la transacción');
             }
         }else{
-            return redirect()->back()->withErrors('Solamente aceptamos Visa y Master-Card');
+            return redirect()->back()->withErrors('Solamente se permiten tarjetas Visa o MasterCard');
         }
     }
 
@@ -180,7 +181,7 @@ class PaymentMethodController extends Controller
                 $paymentMethod->updated_by = $user->id;
                 $paymentMethod->masked_card = $card['masked_card'];
                 $paymentMethod->save();
-                return redirect()->back()->withMessage('Metodo de pago actualizado');
+                return redirect()->back()->withMessage('Método de pago actualizado');
             }else{
                 return redirect()->back()->withError('No se pudo actualizar el metodo de pago');
             }
@@ -214,7 +215,7 @@ class PaymentMethodController extends Controller
                 $paymentMethod->updated_by = $user->id;
                 $paymentMethod->save();
                 $paymentMethod->delete();
-                return redirect()->back()->withMessage('Metodo de pago eliminado');
+                return redirect()->back()->withMessage('Método de pago eliminado');
             }else{
                 return redirect()->back()->withError('No se pudo eliminar el método de pago');
             }
@@ -223,22 +224,21 @@ class PaymentMethodController extends Controller
         }
     }
 
-    public function UpdateAllMethods(){
+    public function deactivateOtherMethods(){
         $user = auth()->user();
         $paymentMethods = PaymentMethod::where('user_id', $user->id)->get();
         foreach($paymentMethods as $paymentMethod){
-            $paymentMethod->default_card = 1;
+            $paymentMethod->default_card = false;
             $paymentMethod->save();
         }
     }
 
-    public function updateDefault($Id){
+    public function updateDefault($id){
         $paymentUtils = new PaymentUtils();
         $user = auth()->user();
-        $paymentMethod = PaymentMethod::find($Id);
+        $paymentMethod = PaymentMethod::find($id);
         $bnStatus = $paymentUtils->statusBNAPI();
         if($bnStatus['apiStatus'] == 'Successful'){
-            $update = $this->UpdateAllMethods();
             $cardBn = new Client();
             $cardUpdateDefault = $cardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserSetDefaultCard?applicationName=string&userName=string&cardTokenId=string", [
                 'headers' => [
@@ -254,9 +254,10 @@ class PaymentMethodController extends Controller
             ]);
             $card = json_decode($cardUpdateDefault->getBody()->getContents(), true);
             if($card['apiStatus'] == "Successful"){
+                $update = $this->deactivateOtherMethods();
                 $paymentMethod->default_card = true;
                 $paymentMethod->save();
-                return redirect()->back()->withMessage('Metodo de pago actualizado');
+                return redirect()->back()->withMessage('Método de pago actualizado');
             }else{
                 return redirect()->back()->withError('No se pudo actualizar el registro  ');
             }

@@ -107,7 +107,7 @@ class InvoiceController extends Controller
                     return '<div class="red"> <span class="tooltiptext">Rechazada</span></div>
                         <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
                             <i class="fa fa-refresh" aria-hidden="true"></i>
-                          </a>';
+                        </a>';
                 }
                 return '<div class="yellow"><span class="tooltiptext">Creada</span></div>
                     <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
@@ -396,6 +396,7 @@ class InvoiceController extends Controller
 
                 $company->save();
                 clearInvoiceCache($invoice);
+            
 
                 return redirect('/facturas-emitidas');
             } else {
