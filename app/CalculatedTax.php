@@ -56,8 +56,8 @@ class CalculatedTax extends Model
     /**
      * applyRatios
      * Aplica los ratios operativos y devuelve el valor con el cálculo realizado según el porcentaje indicado
-     * @bodyParam porc Campo de porcentaje (1, 2, 13, 4). En base a este campo, aplica los ratios respectivos
-     * @bodyParam value Campo de valor al cual se le aplican los ratios operativos.
+     * @bodyParam porc required Campo de porcentaje (1, 2, 13, 4). En base a este campo, aplica los ratios respectivos
+     * @bodyParam value required Campo de valor al cual se le aplican los ratios operativos.
      * @return \Illuminate\Http\Response
      */
     public function applyRatios( $porc, $value ) {
@@ -94,12 +94,13 @@ class CalculatedTax extends Model
     
     
     /**
+     * calcularFacturacionPorMesAno
      * Calcula y devuelve los datos del mes para dashboard y reportes
      *
-     * @param  int $month
-     * @param  int $year
-     * @param  int $lastBalance
-     * @param  int $prorrataOperativa
+     * @bodyParam month required
+     * @bodyParam year required
+     * @bodyParam lastBalance required
+     * @bodyParam prorrataOperativa required
      * @return App\CalculatedTax
      */
     public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa ) {
@@ -156,7 +157,17 @@ class CalculatedTax extends Model
       
     }
     
-    //Recibe fecha de inicio y fecha de fin en base a las cuales se desea calcular la prorrata.
+    //
+    /**
+     * calcularFacturacion
+     * Recibe fecha de inicio y fecha de fin en base a las cuales se desea calcular la prorrata.
+     *
+     * @bodyParam month required
+     * @bodyParam year required
+     * @bodyParam lastBalance required
+     * @bodyParam prorrataOperativa required
+     * @return App\CalculatedTax
+     */
     public function calcularFacturacion( $month, $year, $lastBalance, $prorrataOperativa ) {
 
       $currentCompany = currentCompanyModel();
@@ -190,7 +201,8 @@ class CalculatedTax extends Model
     }
   
     /**
-    *    Recorre todas las facturas emitidas y aumenta los montos correspondientes.
+    * setDatosEmitidos
+    * Recorre todas las facturas emitidas y aumenta los montos correspondientes.
     **/
     public function setDatosEmitidos ( $month, $year, $company ) {
       
@@ -274,6 +286,7 @@ class CalculatedTax extends Model
               
               $ivaType = $ivaType ? $ivaType : 'B103';
               
+              //Procesa los códigos que llevan IVA como costo dentro del subtotal de la factura.
               if( $ivaType == '200' || $ivaType == '201' || $ivaType == '240' || $ivaType == '250' || $ivaType == '260' || $ivaType == '245' || 
                   $ivaType == 'B200' || $ivaType == 'B201' || $ivaType == 'B240' || $ivaType == 'B250' || $ivaType == 'B260' || $ivaType == 'B245' ||
                   $ivaType == 'S200' || $ivaType == 'S201' || $ivaType == 'S240' || $ivaType == 'S250' || $ivaType == 'S260' || $ivaType == 'S245' ){
@@ -281,7 +294,7 @@ class CalculatedTax extends Model
                 $invoiceIva = 0;
                 $sumRepercutidoExentoSinCredito += $subtotal;
               }else if( $invoiceItems[$i]->is_identificacion_especifica ) {
-                $basesVentasConIdentificacion += $subtotal;
+                $basesVentasConIdentificacion += $subtotal; //Las bases con id. específica no se incluyen en el cálculo de iva con prorrata, son 100% acreditables.
               }
               
               //sum los del 1%
@@ -1030,7 +1043,6 @@ class CalculatedTax extends Model
               $typeVarAct4 = "$act->codigo-$varName4";
               $typeVarAct8 = "$act->codigo-$varName8";
               $typeVarAct3 = "$act->codigo-$varName3";
-              
               
         			try{$ivaData->$typeVarAct  += $ivaDataAnterior->$typeVarAct; }catch(\Throwable $e){}
         			try{$ivaData->$typeVarAct0 += $ivaDataAnterior->$typeVarAct0;}catch(\Throwable $e){}

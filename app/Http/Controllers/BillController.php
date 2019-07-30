@@ -126,44 +126,44 @@ class BillController extends Controller
      * Guardar factura existente
      * Store a newly created resource in storage.
      *
-     * @bodyParam document_key Clave de documento
-     * @bodyParam document_number Consecutivo de documento
-     * @bodyParam sale_condition Condición de venta de Hacienda
-     * @bodyParam payment_type Método de pago
-     * @bodyParam retention_percent Porcentaje de retención aplicado
-     * @bodyParam credit_time Plazo de crédito
-     * @bodyParam buy_order Órden de compra
-     * @bodyParam other_reference Referencias
-     * @bodyParam send_emails Correos electrónicos separados por coma
-     * @bodyParam commercial_activity Actividad comercial asignada
-     * @bodyParam description Descripción/Notas de la factura
-     * @bodyParam currency Moneda, ejemplo: USD o CRC
-     * @bodyParam currency_rate Tipo de cambio. Por defecto e 1
-     * @bodyParam subtotal Subtotal de la factura
-     * @bodyParam total Total de la factura
-     * @bodyParam iva_amount Monto correspondiente al IVA
-     * @bodyParam generated_date Fecha de generacion
-     * @bodyParam hora Hora de generación
-     * @bodyParam due_date Fecha de vencimiento
-     * @bodyParam items Array con item_number, code, name, product_type, measure_unit, item_count, unit_price, subtotal, total, discount_type, discount, iva_type, iva_percentage, iva_amount, tariff_heading, is_exempt
-     * @bodyParam client_id ID del cliente. Usar -1 si desea crear uno nuevo
-     * @bodyParam tipo_persona No obligatorio. Tipo de persona de proveedor nuevo
-     * @bodyParam id_number No obligatorio. Cédula de proveedor nuevo
-     * @bodyParam code No obligatorio. Código de proveedor nuevo
-     * @bodyParam email No obligatorio. Correo proveedor nuevo
-     * @bodyParam billing_emails No obligatorio. Lista de correos separados por coma de proveedor nuevo
-     * @bodyParam first_name No obligatorio. Primer nombre proveedor nuevo
-     * @bodyParam last_name No obligatorio. Apellido de proveedor nuevo
-     * @bodyParam last_name2 No obligatorio. Segundo apellido de proveedor nuevo
-     * @bodyParam country No obligatorio. País de proveedor nuevo
-     * @bodyParam state No obligatorio. Provincia de proveedor nuevo
-     * @bodyParam city No obligatorio. Cantón de proveedor nuevo
-     * @bodyParam district No obligatorio. Distrito de proveedor nuevo
-     * @bodyParam neighborhood No obligatorio. Barrio de proveedor nuevo
-     * @bodyParam zip No obligatorio. Código postal de proveedor nuevo
-     * @bodyParam address No obligatorio. Dirección de proveedor nuevo
-     * @bodyParam phone No obligatorio. Teléfono de proveedor nuevo
-     * @bodyParam es_exento No obligatorio. Indicar si es exento o no.
+     * @bodyParam document_key required Clave de documento
+     * @bodyParam document_number required Consecutivo de documento
+     * @bodyParam sale_condition required Condición de venta de Hacienda
+     * @bodyParam payment_type required Método de pago
+     * @bodyParam retention_percent required Porcentaje de retención aplicado
+     * @bodyParam credit_time required Plazo de crédito
+     * @bodyParam buy_order required Órden de compra
+     * @bodyParam other_reference required Referencias
+     * @bodyParam send_emails required Correos electrónicos separados por coma
+     * @bodyParam commercial_activity required Actividad comercial asignada
+     * @bodyParam description required Descripción/Notas de la factura
+     * @bodyParam currency required Moneda, ejemplo: USD o CRC
+     * @bodyParam currency_rate required Tipo de cambio. Por defecto e 1
+     * @bodyParam subtotal required Subtotal de la factura
+     * @bodyParam total required Total de la factura
+     * @bodyParam iva_amount required Monto correspondiente al IVA
+     * @bodyParam generated_date required Fecha de generacion
+     * @bodyParam hora required Hora de generación
+     * @bodyParam due_date required Fecha de vencimiento
+     * @bodyParam items required Array con item_number, code, name, product_type, measure_unit, item_count, unit_price, subtotal, total, discount_type, discount, iva_type, iva_percentage, iva_amount, tariff_heading, is_exempt
+     * @bodyParam client_id required ID del cliente. Usar -1 si desea crear uno nuevo
+     * @bodyParam tipo_persona required No obligatorio. Tipo de persona de proveedor nuevo
+     * @bodyParam id_number required No obligatorio. Cédula de proveedor nuevo
+     * @bodyParam code required No obligatorio. Código de proveedor nuevo
+     * @bodyParam email required No obligatorio. Correo proveedor nuevo
+     * @bodyParam billing_emails required No obligatorio. Lista de correos separados por coma de proveedor nuevo
+     * @bodyParam first_name required No obligatorio. Primer nombre proveedor nuevo
+     * @bodyParam last_name required No obligatorio. Apellido de proveedor nuevo
+     * @bodyParam last_name2 required No obligatorio. Segundo apellido de proveedor nuevo
+     * @bodyParam country required No obligatorio. País de proveedor nuevo
+     * @bodyParam state required No obligatorio. Provincia de proveedor nuevo
+     * @bodyParam city required No obligatorio. Cantón de proveedor nuevo
+     * @bodyParam district required No obligatorio. Distrito de proveedor nuevo
+     * @bodyParam neighborhood required No obligatorio. Barrio de proveedor nuevo
+     * @bodyParam zip required No obligatorio. Código postal de proveedor nuevo
+     * @bodyParam address required No obligatorio. Dirección de proveedor nuevo
+     * @bodyParam phone required No obligatorio. Teléfono de proveedor nuevo
+     * @bodyParam es_exento required No obligatorio. Indicar si es exento o no.
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)

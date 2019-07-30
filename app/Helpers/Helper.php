@@ -176,7 +176,7 @@ if (!function_exists('currentCompanyModel')) {
                 session( ['current_company' => $companyId] );
                 $company = App\Company::find($companyId);
             }
-            Illuminate\Support\Facades\Cache::put($cacheKey, $company, now()->addMinutes(1));
+            Illuminate\Support\Facades\Cache::put($cacheKey, $company, now()->addMinutes(15));
         }
         
         return Illuminate\Support\Facades\Cache::get($cacheKey);;
