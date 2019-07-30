@@ -7,10 +7,6 @@ if (!function_exists('clearInvoiceCache')) {
         $year = $invoice->year;
         clearTaxesCache($invoice->company_id, $month, $year);
         clearTaxesCache($invoice->company_id, 0, $year);
-        
-        $userId = auth()->user()->id;
-        Cache::forget("cache-currentcompany-$userId");
-        
     }
     
 }
@@ -22,9 +18,6 @@ if (!function_exists('clearBillCache')) {
         $year = $bill->year;
         clearTaxesCache($bill->company_id, $month, $year);
         clearTaxesCache($bill->company_id, 0, $year);
-        
-        $userId = auth()->user()->id;
-        Cache::forget("cache-currentcompany-$userId");
     }
     
 }
@@ -34,6 +27,8 @@ if (!function_exists('clearTaxesCache')) {
     function clearTaxesCache($current_company, $month, $year){
       	$cacheKey = "cache-taxes-$current_company-$month-$year";
       	Cache::forget($cacheKey);
+        $userId = auth()->user()->id;
+        Cache::forget("cache-currentcompany-$userId");
     }
     
 }

@@ -414,9 +414,9 @@ class CalculatedTax extends Model
             }
             
           }catch( \Exception $ex ){
-            Log::error('Error al leer factura para cálculo ' . $ex->getMessage());
+            Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }catch( \Throwable $ex ){
-            Log::error('Error al leer factura para cálculo ' . $ex->getMessage());
+            Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }
         }
         
@@ -629,9 +629,9 @@ class CalculatedTax extends Model
               
             }  
           }catch( \Exception $ex ){
-            Log::error('Error leer factura para cálculo' . $ex->getMessage());
+            Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }catch( \Throwable $ex ){
-            Log::error('Error leer factura para cálculo' . $ex->getMessage());
+            Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }
           
         }
