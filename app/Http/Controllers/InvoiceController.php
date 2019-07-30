@@ -397,7 +397,6 @@ class InvoiceController extends Controller
                 $company->save();
                 clearInvoiceCache($invoice);
             
-            dd($invoice);
 
                 return redirect('/facturas-emitidas');
             } else {
