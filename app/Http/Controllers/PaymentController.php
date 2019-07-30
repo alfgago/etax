@@ -27,6 +27,11 @@ use Illuminate\Database\Eloquent\Builder;
 
 //require __DIR__ . '/../../../vendor/autoload.php';
 
+/**
+ * @group Controller - Pagos
+ *
+ * Funciones de PaymentController. Todos los request de pagos deberían pasar por aquí, pero el pago en sí debería ser en Payment Utils.
+ */
 class PaymentController extends Controller
 {
     /**

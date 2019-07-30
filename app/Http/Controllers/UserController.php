@@ -20,6 +20,11 @@ use Auth;
 use \Firebase\JWT\JWT;
 use Carbon\Carbon;
 
+/**
+ * @group Controller - Usuarios
+ *
+ * Funciones de UserController.
+ */
 class UserController extends Controller {
 
     function __construct() {

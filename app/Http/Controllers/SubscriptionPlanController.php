@@ -13,6 +13,11 @@ use App\Exports\UsersExport;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @group Controller - Planes de suscripción
+ *
+ * Funciones de SubscriptionPlanController.
+ */
 class SubscriptionPlanController extends Controller
 {
     

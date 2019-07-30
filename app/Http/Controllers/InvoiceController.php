@@ -24,7 +24,11 @@ use Illuminate\Http\Request;
 use GuzzleHttp\Message\ResponseInterface;
 use PDF;
 
-
+/**
+ * @group Controller - Facturas de venta
+ *
+ * Funciones de InvoiceController
+ */
 class InvoiceController extends Controller
 {
 
@@ -194,8 +198,9 @@ class InvoiceController extends Controller
                     Log::info('Atv Validated Company: '. $company->id_number);
                     $company->atv_validation = true;
                     $company->save();
-                    auth()->user()->attachTeam($team);
-                    Cache::forget("cache-currentcompany-$userId");
+                    $user = auth()->user();
+                    $user->attachTeam($team);
+                    Cache::forget("cache-currentcompany-$user->id");
                 }
             }else {
                 return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
@@ -267,8 +272,10 @@ class InvoiceController extends Controller
                     Log::info('Atv Validated Company: '. $company->id_number);
                     $company->atv_validation = true;
                     $company->save();
-                    auth()->user()->attachTeam($team);
-                    Cache::forget("cache-currentcompany-$userId");
+                    
+                    $user = auth()->user();
+                    $user->attachTeam($team);
+                    Cache::forget("cache-currentcompany-$user->id");
                 }
             }else {
                 return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );

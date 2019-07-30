@@ -7,6 +7,11 @@ use App\Utils\PaymentUtils;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 
+/**
+ * @group Controller - Métodos de Pago
+ *
+ * Funciones de PaymentMethodController.
+ */
 class PaymentMethodController extends Controller
 {
     /**
