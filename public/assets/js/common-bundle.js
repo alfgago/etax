@@ -688,7 +688,11 @@ toastr.options = {
       if( $('#is-compra').length ){
         $('#tipo_producto').val(49).change();
       }else {
-        $('#tipo_producto').val(17).change();
+        if( $('#default_product_category').length ){
+          $('#tipo_producto').val( $('#default_product_category').val() ).change();
+        }else{
+          $('#tipo_producto').val( 17 ).change();
+        }
       }
       
     }else{

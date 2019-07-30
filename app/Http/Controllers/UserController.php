@@ -13,12 +13,18 @@ use App\PaymentMethod;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Cache;
 use DB;
 use Hash;
 use Auth;
 use \Firebase\JWT\JWT;
 use Carbon\Carbon;
 
+/**
+ * @group Controller - Usuarios
+ *
+ * Funciones de UserController.
+ */
 class UserController extends Controller {
 
     function __construct() {

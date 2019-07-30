@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css" />
     
     <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=4.06">
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=4.06"></script>
+    <script src="{{asset('assets/js/common-bundle.js')}}?v=4.07"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
   

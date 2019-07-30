@@ -10,6 +10,11 @@ use App\Imports\ClientImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
+/**
+ * @group Controller - Clientes
+ *
+ * Funciones de ClientController
+ */
 class ClientController extends Controller
 {
   

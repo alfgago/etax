@@ -25,12 +25,16 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
+/**
+ * @group Controller - Facturas de compra
+ *
+ * Funciones de BillController
+ */
 class BillController extends Controller
 {
   
     /**
      * Create a new controller instance.
-     *
      * @return void
      */
     public function __construct()
@@ -39,8 +43,8 @@ class BillController extends Controller
     }
   
     /**
-     * Display a listing of the resource.
-     *
+     * Index
+     * Index de facturas recibidas. Usa indexData para cargar las facturas con AJAX
      * @return \Illuminate\Http\Response
      */
     public function index()
@@ -49,8 +53,9 @@ class BillController extends Controller
     }
     
     /**
-     * Returns the required ajax data.
-     *
+     * Index Data
+     * Funcion AJAX para cargar data de las facturas.
+     * @bodyParam filtro Campo de filtro por tipo de documento. Por defecto es un 01. Si recibe 0 devuelve las eliminadas.
      * @return \Illuminate\Http\Response
      */
     public function indexData( Request $request ) {
@@ -102,7 +107,8 @@ class BillController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Crear factura existente
+     * Muestra la pantalla para crear facturas existentes
      *
      * @return \Illuminate\Http\Response
      */
@@ -117,9 +123,47 @@ class BillController extends Controller
     }
 
     /**
+     * Guardar factura existente
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @bodyParam document_key Clave de documento
+     * @bodyParam document_number Consecutivo de documento
+     * @bodyParam sale_condition Condición de venta de Hacienda
+     * @bodyParam payment_type Método de pago
+     * @bodyParam retention_percent Porcentaje de retención aplicado
+     * @bodyParam credit_time Plazo de crédito
+     * @bodyParam buy_order Órden de compra
+     * @bodyParam other_reference Referencias
+     * @bodyParam send_emails Correos electrónicos separados por coma
+     * @bodyParam commercial_activity Actividad comercial asignada
+     * @bodyParam description Descripción/Notas de la factura
+     * @bodyParam currency Moneda, ejemplo: USD o CRC
+     * @bodyParam currency_rate Tipo de cambio. Por defecto e 1
+     * @bodyParam subtotal Subtotal de la factura
+     * @bodyParam total Total de la factura
+     * @bodyParam iva_amount Monto correspondiente al IVA
+     * @bodyParam generated_date Fecha de generacion
+     * @bodyParam hora Hora de generación
+     * @bodyParam due_date Fecha de vencimiento
+     * @bodyParam items Array con item_number, code, name, product_type, measure_unit, item_count, unit_price, subtotal, total, discount_type, discount, iva_type, iva_percentage, iva_amount, tariff_heading, is_exempt
+     * @bodyParam client_id ID del cliente. Usar -1 si desea crear uno nuevo
+     * @bodyParam tipo_persona No obligatorio. Tipo de persona de proveedor nuevo
+     * @bodyParam id_number No obligatorio. Cédula de proveedor nuevo
+     * @bodyParam code No obligatorio. Código de proveedor nuevo
+     * @bodyParam email No obligatorio. Correo proveedor nuevo
+     * @bodyParam billing_emails No obligatorio. Lista de correos separados por coma de proveedor nuevo
+     * @bodyParam first_name No obligatorio. Primer nombre proveedor nuevo
+     * @bodyParam last_name No obligatorio. Apellido de proveedor nuevo
+     * @bodyParam last_name2 No obligatorio. Segundo apellido de proveedor nuevo
+     * @bodyParam country No obligatorio. País de proveedor nuevo
+     * @bodyParam state No obligatorio. Provincia de proveedor nuevo
+     * @bodyParam city No obligatorio. Cantón de proveedor nuevo
+     * @bodyParam district No obligatorio. Distrito de proveedor nuevo
+     * @bodyParam neighborhood No obligatorio. Barrio de proveedor nuevo
+     * @bodyParam zip No obligatorio. Código postal de proveedor nuevo
+     * @bodyParam address No obligatorio. Dirección de proveedor nuevo
+     * @bodyParam phone No obligatorio. Teléfono de proveedor nuevo
+     * @bodyParam es_exento No obligatorio. Indicar si es exento o no.
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -155,6 +199,7 @@ class BillController extends Controller
     }
 
     /**
+     * Mostrar factura existente
      * Display the specified resource.
      *
      * @param  \App\Bill  $bill
@@ -174,6 +219,7 @@ class BillController extends Controller
     }
 
     /**
+     * Editar factura
      * Show the form for editing the specified resource.
      *
      * @param  \App\Bill  $bill
@@ -197,6 +243,7 @@ class BillController extends Controller
     }
 
     /**
+     * Actualizar factura
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -232,7 +279,12 @@ class BillController extends Controller
         return redirect('/facturas-recibidas');
     }
     
-    
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Bill  $bill
+     * @return \Illuminate\Http\Response
+     */
     public function export() {
         return Excel::download(new BillExport(), 'documentos-recibidos.xlsx');
     }
@@ -472,19 +524,11 @@ class BillController extends Controller
         $company = Company::select('commercial_activities')->where('id', $current_company)->first();
         $activities_company = explode(", ", $company->commercial_activities);
         $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
-        $bills = Bill::where('id', $id)->first();
+        $bill = Bill::find($id);
         $codigos_etax = CodigoIvaSoportado::get();
         $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
-        $data = array(
-                "bills" => $bills,
-                "commercial_activities" => $commercial_activities,
-                "codigos_etax" => $codigos_etax,
-                "categoria_productos" => $categoria_productos,
-            );
-        //dd($data);
-        return view('Bill/validar', [
-          'data' => $data
-        ]);
+
+        return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos'));
     }
 
     public function guardar_validar(Request $request)
@@ -492,9 +536,7 @@ class BillController extends Controller
         $bill = Bill::findOrFail($request->bill);
         
         $bill->activity_company_verification = $request->actividad_comercial;
-        $bill->codigo_iva_verification = $request->codigo_etax;
         $bill->is_code_validated = true;
-
         foreach( $request->items as $item ) {
             BillItem::where('id', $item['id'])
             ->update([

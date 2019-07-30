@@ -8,6 +8,11 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use DB;
 
+/**
+ * @group Deprecados
+ *
+ * Funciones de RoleController
+ */
 class RoleController extends Controller {
 
     /**
