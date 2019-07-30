@@ -472,19 +472,11 @@ class BillController extends Controller
         $company = Company::select('commercial_activities')->where('id', $current_company)->first();
         $activities_company = explode(", ", $company->commercial_activities);
         $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
-        $bills = Bill::where('id', $id)->first();
+        $bill = Bill::find($id);
         $codigos_etax = CodigoIvaSoportado::get();
         $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
-        $data = array(
-                "bills" => $bills,
-                "commercial_activities" => $commercial_activities,
-                "codigos_etax" => $codigos_etax,
-                "categoria_productos" => $categoria_productos,
-            );
-        //dd($data);
-        return view('Bill/validar', [
-          'data' => $data
-        ]);
+
+        return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos'));
     }
 
     public function guardar_validar(Request $request)
