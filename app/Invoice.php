@@ -598,6 +598,11 @@ class Invoice extends Model
               ]
         );
         
+        if( $invoice->id ) {
+          Log::warning( "XML: No se pudo guardar la factura de venta. Ya existe para la empresa." );
+          return false;
+        }
+        
         $invoice->hacienda_status = "03";
         $invoice->payment_status = "01";
         $invoice->generation_method = $metodoGeneracion;
