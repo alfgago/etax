@@ -419,7 +419,7 @@ class PaymentController extends Controller
                 $item = new stdClass();
                 $item->total = $amount;
                 $item->code = $sale->etax_product_id;
-                $item->name = $sale->plan->name . " / $recurrency meses";
+                $item->name = $sale->plan->getName() . " / $recurrency meses";
                 $item->descuento = $montoDescontado;
                 $item->discount_reason = $razonDescuento;
                 $item->cantidad = 1;

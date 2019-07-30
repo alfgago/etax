@@ -281,8 +281,8 @@ class InvoiceUtils
         try {
             $company = $data->company;
             
-            if( !$company->id_number ) {
-                Log::info('Error enviando factura: No se encuentra company' );
+            if( !$company->id_number || !$company->business_name ) {
+                Log::error('Error enviando factura: No se encuentra company' );
                 return false;
             }
             
@@ -290,8 +290,8 @@ class InvoiceUtils
             $data->reference_number = $ref;
             $data->save();*/
             $ref = $data->reference_number;
-            Log::info("Set request parameters invoice id: $data->id consutivo: $ref Clave: $data->document_key");
-            $receptorPostalCode = $data['client_zip'];
+            Log::info("Set request parameters Company: $company->business_name, invoice id: $data->id, consutivo: $ref, Clave: $data->document_key");
+            $receptorPostalCode = $data['client_zip'] ?? '10101';
             $invoiceData = null;
             $request = null;
             $totalServiciosGravados = 0;
