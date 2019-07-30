@@ -299,8 +299,6 @@
                 total = total * 12;
                 recurrencia_texto = "año";
               }
-              console.log(valido);
-              
               var precioFinal = parseFloat(total).toFixed(2);
               $(".precio-text").text('$' + precioFinal);
               $(".recurrencia-text").text('/ '+ recurrencia_texto);

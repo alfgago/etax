@@ -419,7 +419,6 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::findOrFail($id);
         $this->authorize('update', $invoice);
-        
         $company = currentCompanyModel();
         $arrayActividades = $company->getActivities();
         $countries  = CodigosPaises::all()->toArray();

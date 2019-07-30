@@ -3,7 +3,9 @@
 @section('title') 
   Ver factura emitida
 @endsection
-
+@section('breadcrumb-buttons')
+  <button type="submit" onclick="$('#btn-submit-form').click();"  class="btn btn-primary">Guardar factura</button>
+@endsection 
 @section('content') 
 <div class="row form-container">
   <div class="col-md-12">
@@ -68,17 +70,17 @@
       
                  <div class="form-group col-md-4">
                   <label for="subtotal">Subtotal </label>
-                  <input type="text" class="form-control" disabled name="subtotal" id="subtotal" placeholder="" readonly="true" required>
+                  <input type="text" class="form-control" value="{{$invoice->subtotal}}" disabled name="subtotal"  required>
                 </div>
       
                 <div class="form-group col-md-4">
                   <label for="iva_amount">Monto IVA </label>
-                  <input type="text" class="form-control" disabled name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
+                  <input type="text" class="form-control" value="{{$invoice->iva_amount}}" disabled name="iva_amount" required>
                 </div>
       
                 <div class="form-group col-md-4">
                   <label for="total">Total</label>
-                  <input type="text" class="form-control total" disabled name="total" id="total" placeholder="" readonly="true" >
+                  <input type="text" class="form-control total" value="{{$invoice->total}}" disabled name="total"  >
                 </div>
       
               </div>
@@ -267,8 +269,8 @@
             </div>
           </div>
         
-          <div class="btn-holder ">
-            <button id="btn-submit" type="submit" class="btn btn-primary">Guardar factura</button>
+          <div class="btn-holder hidden">
+            <button id="btn-submit-form" type="submit" class="btn btn-primary">Guardar factura</button>
           </div>
 
         </form>
@@ -288,21 +290,7 @@ $(document).ready(function(){
   
   $('#tipo_iva').val('103');
   
-  var subtotal = 0;
-  var monto_iva = 0;
-  var total = 0;
-  $('.item-tabla').each(function(){
-    var s = parseFloat($(this).find('.subtotal').val());
-    var m = parseFloat($(this).find('.monto_iva').val());
-    var t = parseFloat($(this).find('.total').val());
-    subtotal += s;
-    monto_iva += m;	
-    total += t;	
-  });
 
-  $('#subtotal').val(subtotal);
-  $('#monto_iva').val(monto_iva);
-  $('#total').val(total);
   
   toggleRetencion();
 
