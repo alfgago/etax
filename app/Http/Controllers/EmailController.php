@@ -81,10 +81,10 @@ class EmailController extends Controller
             $bill = Bill::saveBillXML( $arr, 'Email' );
             if( $bill ) {
                 Bill::storeXML( $bill, $file );
-                Log::info( "Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor");
+                Log::info( "EMAIL: Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor");
             }
         }catch( \Throwable $ex ){
-            Log::warning( "No se pudo guardar la factura de compra via Email. Mensaje:" . $ex->getMessage());
+            Log::warning( "EMAIL: No se pudo guardar la factura de compra via Email. Mensaje: " . $ex->getMessage());
         }
        
         try {
@@ -93,13 +93,13 @@ class EmailController extends Controller
                 $invoice = Invoice::saveInvoiceXML( $arr, 'Email' );
                 if( $invoice ) {
                     Invoice::storeXML( $invoice, $file );
-                    Log::info( "Se registró la factura de venta $consecutivoComprobante para la empresa $identificacionEmisor");
+                    Log::info( "EMAIL: Se registró la factura de venta $consecutivoComprobante para la empresa $identificacionEmisor");
                 }
             }else{
-                Log::warning( "Factura $clave ya existe para la empresa $identificacionEmisor");
+                Log::warning( "EMAIL: Factura $clave ya existe para la empresa $identificacionEmisor");
             }
         }catch( \Throwable $ex ){
-            Log::warning( "No se pudo guardar la factura de venta via Email. Mensaje:" . $ex->getMessage());
+            Log::warning( "EMAIL: No se pudo guardar la factura de venta via Email. Mensaje: " . $ex->getMessage());
         }
         
         return true;
