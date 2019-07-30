@@ -17,7 +17,11 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
-
+/**
+ * @group Controller - Emails
+ *
+ * Funciones de EmailController. Se encarga de recibir los correos electrónicos y registrarlos ya sea en facturas enviadas o en recibidas.
+ */
 class EmailController extends Controller
 {
 	

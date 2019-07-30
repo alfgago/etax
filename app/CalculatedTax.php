@@ -384,9 +384,9 @@ class CalculatedTax extends Model
             }
             
           }catch( \Exception $ex ){
-            Log::error('Error leer factura para cálculo' . $ex->getMessage());
+            Log::error('Error al leer factura para cálculo ' . $ex->getMessage());
           }catch( \Throwable $ex ){
-            Log::error('Error leer factura para cálculo' . $ex->getMessage());
+            Log::error('Error al leer factura para cálculo ' . $ex->getMessage());
           }
         }
         
@@ -1014,15 +1014,15 @@ class CalculatedTax extends Model
               $typeVarAct8 = "$act->codigo-$varName8";
               $typeVarAct3 = "$act->codigo-$varName3";
               
-              try{
-        			  $ivaData->$typeVarAct  += $ivaDataAnterior->$typeVarAct ;
-        			  $ivaData->$typeVarAct0 += $ivaDataAnterior->$typeVarAct0 ;
-        			  $ivaData->$typeVarAct1 += $ivaDataAnterior->$typeVarAct1 ;
-        			  $ivaData->$typeVarAct2 += $ivaDataAnterior->$typeVarAct2 ;
-        			  $ivaData->$typeVarAct4 += $ivaDataAnterior->$typeVarAct4 ;
-        			  $ivaData->$typeVarAct8 += $ivaDataAnterior->$typeVarAct8 ;
-        			  $ivaData->$typeVarAct3 += $ivaDataAnterior->$typeVarAct3 ;
-              }catch(\Throwable $e){}
+              
+        			try{$ivaData->$typeVarAct  += $ivaDataAnterior->$typeVarAct; }catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct0 += $ivaDataAnterior->$typeVarAct0;}catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct1 += $ivaDataAnterior->$typeVarAct1;}catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct2 += $ivaDataAnterior->$typeVarAct2;}catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct4 += $ivaDataAnterior->$typeVarAct4;}catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct8 += $ivaDataAnterior->$typeVarAct8;}catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct3 += $ivaDataAnterior->$typeVarAct3;}catch(\Throwable $e){}
+              
             }
     			}
     			

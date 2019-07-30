@@ -15,6 +15,11 @@
           @csrf
           
           <input type="hidden" id="current-index" value="0">
+          <?php 
+            $company = currentCompanyModel();
+          ?>
+          <input type="hidden" class="form-control" id="default_product_category" value="{{$company->default_product_category}}">
+          <input type="hidden" class="form-control" id="default_vat_code" value="{{$company->default_vat_code}}">
 
           <div class="form-row">
             <div class="col-md">
@@ -53,14 +58,14 @@
                     <div class="form-group col-md-4">
                       <label for="currency">Divisa</label>
                       <select class="form-control" name="currency" id="moneda" required>
-                        <option value="CRC" selected>CRC</option>
-                        <option value="USD">USD</option>
+                        <option value="CRC" data-rate="1" {{$company->default_currency == 'CRC' ? 'selected' : ''}}>CRC</option>
+                        <option value="USD" data-rate="1" {{$company->default_currency == 'USD' ? 'selected' : ''}}>USD</option>
                       </select>
                     </div>
       
                     <div class="form-group col-md-8">
                       <label for="currency_rate">Tipo de cambio</label>
-                      <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="1.00" required>
+                      <input type="text" class="form-control" data-rates="1" name="currency_rate" id="tipo_cambio" value="1.00"required>
                     </div>
                   </div>
                 </div>
@@ -282,7 +287,7 @@
 
 <script>
 $(document).ready(function(){
-  $('#tipo_producto').val(17).change();
+  $('#tipo_producto').val( $('#default_product_category').val() ).change();
 });
 
 function toggleRetencion() {

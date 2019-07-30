@@ -8,6 +8,7 @@ use App\Company;
 use App\AtvCertificate;
 use App\UserCompanyPermission;
 use Mpociot\Teamwork\Exceptions\UserNotInTeamException;
+use Illuminate\Support\Facades\Cache;
 
 class TeamController extends Controller {
 
