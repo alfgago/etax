@@ -50,7 +50,7 @@
               <th data-priority="5">Subtotal</th>
               <th data-priority="5">Monto IVA</th>
               <th data-priority="4">Total</th>
-              <th data-priority="5">F. Generada</th>
+              <th data-priority="5">Fecha</th>
               <th data-priority="1">Estados</th>
               <th data-priority="1">Acciones</th>
             </tr>
