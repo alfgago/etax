@@ -198,8 +198,8 @@ class InvoiceController extends Controller
                     Log::info('Atv Validated Company: '. $company->id_number);
                     $company->atv_validation = true;
                     $company->save();
+                    
                     $user = auth()->user();
-                    $user->attachTeam($team);
                     Cache::forget("cache-currentcompany-$user->id");
                 }
             }else {
@@ -274,7 +274,6 @@ class InvoiceController extends Controller
                     $company->save();
                     
                     $user = auth()->user();
-                    $user->attachTeam($team);
                     Cache::forget("cache-currentcompany-$user->id");
                 }
             }else {
