@@ -6,6 +6,8 @@ use App\Actividades;
 use App\AvailableInvoices;
 use App\CodigosPaises;
 use App\UnidadMedicion;
+use App\ProductCategory;
+use App\CodigoIvaRepercutido;
 use App\Utils\BridgeHaciendaApi;
 use App\Utils\InvoiceUtils;
 use \Carbon\Carbon;
@@ -429,10 +431,22 @@ class InvoiceController extends Controller
         $arrayActividades = $company->getActivities();
         $countries  = CodigosPaises::all()->toArray();
 
+        $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
+        $codigos = CodigoIvaRepercutido::get();
         $units = UnidadMedicion::all()->toArray();
-        return view('Invoice/show', compact('invoice','units','arrayActividades','countries') );
+        return view('Invoice/show', compact('invoice','units','arrayActividades','countries','product_categories','codigos') );
     }
 
+    public function actualizar_categorias(Request $request){
+        Invoice::where('id',$request->invoice_id)
+            ->update(['commercial_activity'=>$request->commercial_activity]);
+        foreach ($request->items as $item) {
+            InvoiceItem::where('id',$item['id'])
+            ->update(['product_type'=>$item['category_product'],'iva_type'=>$item['tipo_iva']]);
+            
+        }
+        return redirect('/facturas-emitidas/'.$request->invoice_id)->withMessage('Factura actualizada');
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -451,6 +465,7 @@ class InvoiceController extends Controller
       
         $arrayActividades = $company->getActivities();
         $countries  = CodigosPaises::all()->toArray();
+
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
         if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){

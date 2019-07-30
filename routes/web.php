@@ -97,6 +97,7 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('reenviar-email/{id}', 'InvoiceController@resendInvoiceEmail')->name('Invoice.resendInvoiceEmail');
     Route::get('consult/{id}', 'InvoiceController@consultInvoice')->name('Invoice.consultInvoice');
     Route::get('query-invoice/{id}', 'InvoiceController@queryInvoice')->name('Invoice.queryInvoice');
+    Route::post('actualizar-categorias', 'InvoiceController@actualizar_categorias')->name('Invoice.actualizar_categorias');
 });
 
 // Rutas de facturacion recibida
