@@ -125,20 +125,36 @@ class PaymentController extends Controller
             $request->number = preg_replace('/\s+/', '',  $request->number);
 
             if($request->plan_sel == "c"){
+                $coupons = Coupon::where('code', $request->coupon)->count();
+                $precio_25 = 8;
+                $precio_10 = 10;
+                $precio_mes = 14.999;
+                $precio_6 = 13.740;
+                $precio_anual = 12.491;
+                $precio_contabilidad = 0;
+                if($coupons != 0){
+                    $coupon = Coupon::where('code', $request->coupon)->count();
+                    $precio_contabilidad = $coupon->amount;
+                    $precio_25 = $coupon->amount;
+                    $precio_10 = $coupon->amount;
+                    $precio_mes = $coupon->amount;
+                    $precio_6 = $coupon->amount;
+                    $precio_anual = $coupon->amount;
+                }
                 $plan_tier = "Pro ($user->id)";
                 $cantidad = $request->num_companies;
                 $total_extras = 0;
                 if($cantidad > 25){
-                   $total_extras = ($cantidad - 25) * 8;
+                   $total_extras = ($cantidad - 25) * $precio_25;
                    $cantidad = 25;
                 }
                 if($cantidad > 10){
-                   $total_extras += ($cantidad - 10) * 10;
+                   $total_extras += ($cantidad - 10) * $precio_10;
                    $cantidad = 10;
                 }
-                $monthly_price = $cantidad * 14.999;
-                $six_price = $cantidad * 13.740;
-                $annual_price = $cantidad * 12.491;
+                $monthly_price = $cantidad * $precio_mes;
+                $six_price = $cantidad * $precio_6;
+                $annual_price = $cantidad * $precio_anual;
                 $monthly_price += $total_extras;
                 $six_price += $total_extras;
                 $annual_price += $total_extras;
@@ -165,10 +181,12 @@ class PaymentController extends Controller
                         'advanced_reports' => 1,
                         'monthly_price' => round($monthly_price,2),
                         'six_price' => round($six_price,2),
-                        'annual_price' => round($annual_price,2)
+                        'annual_price' => round($annual_price,2),
+                        'price' =>round($precio_contabilidad,2)
                     ]
                 );
                 $request->product_id = $plan->id;
+           
             }
             $razonDescuento = null;
             //El descuento por defecto es cero.

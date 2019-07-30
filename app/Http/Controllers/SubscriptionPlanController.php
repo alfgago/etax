@@ -216,28 +216,45 @@ class SubscriptionPlanController extends Controller
     }
 
     public function confirmCode(Request $request){
-        $code = Coupon::where('code', $request->codigo)->where('type', 0)->first();
+        $code = Coupon::where('code', $request->codigo)->first();
         $retorno = array(
             "precio" => $request->precio,
-            "nota" => ''
+            "nota" => '',
         );
-        if( $request->codigo == $code->code ){
-            $descuento = ($request->precio * $code->discount_percentage);
-            $precio_final = $request->precio - $descuento;
-            $nota = $code->promotion_name;
-            if( $request->banco == 1 ) {
-                $descuento = ($precio_final * 0.1);
-                $precio_final = $precio_final - $descuento;
-                $nota = $code->promotion_name .' + 10% BN Nacional ';
+        if($code->type == 0){
+            if( $request->codigo == $code->code ){
+                $descuento = ($request->precio * $code->discount_percentage);
+                $precio_final = $request->precio - $descuento;
+                $nota = $code->promotion_name;
+                if( $request->banco == 1 ) {
+                    $descuento = ($precio_final * 0.1);
+                    $precio_final = $precio_final - $descuento;
+                    $nota = $code->promotion_name .' + 10% BN Nacional ';
+                }
+                if($precio_final < 0){
+                    $precio_final = 0;
+                }
+                $nota = '( DESCUENTO: '.$code->discount_percentage .'% '. $nota .')';
+                $retorno = array(
+                    "precio" => $precio_final,
+                    "nota" => $nota
+                );
             }
-            if($precio_final < 0){
-                $precio_final = 0;
+        }else{
+            if($request->plan == 'c'){
+                $precio_final = $request->companies  * $code->amount;
+                $nota = $code->promotion_name;
+                if( $request->banco == 1 ) {
+                    $descuento = ($precio_final * 0.1);
+                    $precio_final = $precio_final - $descuento;
+                    $nota = $code->promotion_name .' + 10% BN Nacional ';
+                }
+                $nota = '( DESCUENTO: '. $nota .')';
+                $retorno = array(
+                    "precio" => $precio_final,
+                    "nota" => $nota
+                );
             }
-            $nota = '( DESCUENTO: '.$code->discount_percentage .'% '. $nota .')';
-            $retorno = array(
-                "precio" => $precio_final,
-                "nota" => $nota
-            );
         }
         return $retorno;
     }
