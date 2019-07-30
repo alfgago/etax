@@ -13,6 +13,7 @@ use App\PaymentMethod;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Cache;
 use DB;
 use Hash;
 use Auth;

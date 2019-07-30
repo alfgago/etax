@@ -216,14 +216,14 @@ class InvoiceController extends Controller
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de tiquetes');
         }
         return view("Invoice/create-factura",
-                    ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
-                    'document_number' => $this->getDocReference($tipoDocumento),
-                    'document_key' => $this->getDocumentKey($tipoDocumento),
-                    'units' => $units, 'countries' => $countries, 'default_currency' => $company->default_currency,
-                    'default_vat_code' => $company->default_vat_code
-                    ]
-                )
-            ->with('arrayActividades', $arrayActividades);
+            [
+                'document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
+                'document_number' => $this->getDocReference($tipoDocumento),
+                'document_key' => $this->getDocumentKey($tipoDocumento),
+                'units' => $units, 'countries' => $countries, 'default_currency' => $company->default_currency,
+                'default_vat_code' => $company->default_vat_code
+            ]
+        )->with('arrayActividades', $arrayActividades);
     }
     
     /**
@@ -752,7 +752,6 @@ class InvoiceController extends Controller
 
     private function get_rates()
     {
-        
         try {
             $value = Cache::remember('usd_rate', '60000', function () {
                 $today = new Carbon();
@@ -1138,7 +1137,7 @@ class InvoiceController extends Controller
                 $company = currentCompanyModel();
                 $result = $apiHacienda->queryHacienda($invoice, $tokenApi, $company);
                 if ($result == false) {
-                    return redirect()->back()->withErrors('Comprobante no ha sido recibido por hacienda');
+                    return redirect()->back()->withErrors('El servidor de Hacienda es inaccesible en este momento, o el comprobante no ha sido recibido. Por favor intente de nuevo más tarde o contacte a soporte.');
                 }
                 $filename = 'MH-'.$invoice->document_key . '.xml';
                 if( ! $invoice->document_key ) {
