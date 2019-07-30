@@ -15,6 +15,11 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @group Model - Cálculo de impuestos
+ *
+ * Funciones de CalculatedTax.
+ */
 class CalculatedTax extends Model
 {
     use SoftDeletes;
@@ -35,6 +40,11 @@ class CalculatedTax extends Model
         return $this->hasOne(Book::class, 'calculated_tax_id');
     }
     
+    /**
+     * parsedIvaData
+     * Devuelve los datos de iva_data en formato de array
+     * @return \Illuminate\Http\Response
+     */
     public function parsedIvaData() {
       try{
         return json_decode($this->iva_data);
@@ -43,6 +53,13 @@ class CalculatedTax extends Model
       }
     }
     
+    /**
+     * applyRatios
+     * Aplica los ratios operativos y devuelve el valor con el cálculo realizado según el porcentaje indicado
+     * @bodyParam porc Campo de porcentaje (1, 2, 13, 4). En base a este campo, aplica los ratios respectivos
+     * @bodyParam value Campo de valor al cual se le aplican los ratios operativos.
+     * @return \Illuminate\Http\Response
+     */
     public function applyRatios( $porc, $value ) {
       
       $company = currentCompanyModel();

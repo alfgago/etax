@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 /**
- * @group Controller - Facturas Recibidas
+ * @group Controller - Facturas de compra
  *
  * Funciones de BillController
  */

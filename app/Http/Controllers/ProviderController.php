@@ -10,6 +10,11 @@ use App\Imports\ProviderImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
+/**
+ * @group Controller - Proveedores
+ *
+ * Funciones de ProviderController
+ */
 class ProviderController extends Controller
 {
   
