@@ -186,6 +186,10 @@
     calcularPrecioContabilidades();
     function calcularPrecioContabilidades() {
           var cantidad = parseFloat($('#contabilidades').val());
+          var texto = cantidad+" contabilidades";
+          if(cantidad == 1){
+            texto = cantidad+" contabilidad";
+          }
           var price_code = parseFloat($('#price_code').val());
           var existentes = parseFloat($('#cantidad_disponibles_contabilidades').html());
           cantidad = cantidad + existentes;
@@ -202,7 +206,10 @@
              precio_10 = price_code;
           }
           if(cantidad > 25){
-              procesadas = (cantidad - existentes);
+            procesadas = (cantidad - 25 );
+            if(existentes > 25){
+                procesadas = (cantidad - existentes );
+            }
               if(procesadas > 0){
                   total_extras =  procesadas * precio_25;
                   cantidad = 25;
@@ -211,7 +218,7 @@
           if(cantidad > 10){
               procesadas = (cantidad - existentes);
               if(procesadas > 0){
-                  total_extras =  procesadas * precio_10;
+                  total_extras +=  procesadas * precio_10;
                   cantidad = 10;
                 }
           }
@@ -229,6 +236,7 @@
           }
           var precioFinal = parseFloat(total).toFixed(2);
           $("#precio_pago").html(precioFinal);
+          $("#cantidad_contabilidades_requeridad").html(texto);
 
     }
 </script>
