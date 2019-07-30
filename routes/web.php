@@ -108,7 +108,7 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::get('validaciones', 'BillController@indexValidaciones')->name('Bill.validaciones');
     Route::patch('confirmar-validacion/{id}', 'BillController@confirmarValidacion')->name('Bill.confirmar_validacion');
     Route::get('autorizaciones', 'BillController@indexAuthorize')->name('Bill.validaciones');
-    Route::patch('confirmar-autorizacion/{id}', 'BillController@authorizeBill')->name('Bill.confirmar_validacion');
+    Route::patch('confirmar-autorizacion/{id}', 'BillController@authorizeBill')->name('Bill.authorizeBill');
     Route::get('aceptaciones-otros', 'BillController@indexAcceptsOther')->name('Bill.acceptOthers');
     Route::patch('confirmar-aceptacion-otros/{id}', 'BillController@correctAccepted')->name('Bill.correctAccepted');
     Route::patch('marcar-para-aceptacion/{id}', 'BillController@markAsNotAccepted')->name('Bill.markAsNotAccepted');
