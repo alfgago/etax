@@ -144,7 +144,7 @@ class PaymentController extends Controller
                     }
     
                 }
-                $availableCompanies = $product_etax->num_companies;
+                $availableCompanies = $plan->num_companies;
                 return view('payment.companySelect')->with('companies',$companies)->with('companies_puedo',$availableCompanies);
             }
         }catch(\Throwable $e){

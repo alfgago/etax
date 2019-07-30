@@ -2129,7 +2129,7 @@ $response = $client->get("/api/bills", [
             "Content-Type" => "application/json",
         ],
     'json' => [
-            "filtro" => "consequuntur",
+            "filtro" => "perferendis",
         ],
 ]);
 $body = $response->getBody();
@@ -2146,7 +2146,7 @@ let headers = {
 }
 
 let body = {
-    "filtro": "consequuntur"
+    "filtro": "perferendis"
 }
 
 fetch(url, {
@@ -2161,7 +2161,7 @@ fetch(url, {
 ```bash
 curl -X GET -G "/api/bills" \
     -H "Content-Type: application/json" \
-    -d '{"filtro":"consequuntur"}'
+    -d '{"filtro":"perferendis"}'
 
 ```
 
@@ -2444,44 +2444,44 @@ $response = $client->post("/facturas-recibidas", [
             "Content-Type" => "application/json",
         ],
     'json' => [
-            "document_key" => "ipsa",
-            "document_number" => "architecto",
-            "sale_condition" => "assumenda",
-            "payment_type" => "officiis",
-            "retention_percent" => "deleniti",
-            "credit_time" => "maxime",
-            "buy_order" => "veniam",
-            "other_reference" => "quae",
-            "send_emails" => "veniam",
-            "commercial_activity" => "magnam",
-            "description" => "assumenda",
-            "currency" => "distinctio",
-            "currency_rate" => "sint",
-            "subtotal" => "possimus",
-            "total" => "quidem",
-            "iva_amount" => "cumque",
-            "generated_date" => "ea",
-            "hora" => "in",
-            "due_date" => "ut",
-            "items" => "qui",
-            "client_id" => "perferendis",
-            "tipo_persona" => "aut",
+            "document_key" => "magnam",
+            "document_number" => "quae",
+            "sale_condition" => "ex",
+            "payment_type" => "et",
+            "retention_percent" => "sint",
+            "credit_time" => "odit",
+            "buy_order" => "est",
+            "other_reference" => "veritatis",
+            "send_emails" => "officiis",
+            "commercial_activity" => "sequi",
+            "description" => "optio",
+            "currency" => "provident",
+            "currency_rate" => "repudiandae",
+            "subtotal" => "reiciendis",
+            "total" => "qui",
+            "iva_amount" => "accusamus",
+            "generated_date" => "iure",
+            "hora" => "amet",
+            "due_date" => "sed",
+            "items" => "voluptas",
+            "client_id" => "suscipit",
+            "tipo_persona" => "quia",
             "id_number" => "aut",
-            "code" => "necessitatibus",
-            "email" => "sint",
-            "billing_emails" => "velit",
-            "first_name" => "aut",
-            "last_name" => "exercitationem",
-            "last_name2" => "laboriosam",
-            "country" => "illo",
-            "state" => "voluptatem",
-            "city" => "dolorem",
-            "district" => "sint",
-            "neighborhood" => "architecto",
-            "zip" => "dolores",
-            "address" => "sunt",
-            "phone" => "velit",
-            "es_exento" => "repellendus",
+            "code" => "sit",
+            "email" => "rerum",
+            "billing_emails" => "aliquid",
+            "first_name" => "officia",
+            "last_name" => "sint",
+            "last_name2" => "consequatur",
+            "country" => "veniam",
+            "state" => "molestiae",
+            "city" => "ab",
+            "district" => "voluptates",
+            "neighborhood" => "voluptatibus",
+            "zip" => "repudiandae",
+            "address" => "est",
+            "phone" => "magni",
+            "es_exento" => "qui",
         ],
 ]);
 $body = $response->getBody();
@@ -2498,44 +2498,44 @@ let headers = {
 }
 
 let body = {
-    "document_key": "ipsa",
-    "document_number": "architecto",
-    "sale_condition": "assumenda",
-    "payment_type": "officiis",
-    "retention_percent": "deleniti",
-    "credit_time": "maxime",
-    "buy_order": "veniam",
-    "other_reference": "quae",
-    "send_emails": "veniam",
-    "commercial_activity": "magnam",
-    "description": "assumenda",
-    "currency": "distinctio",
-    "currency_rate": "sint",
-    "subtotal": "possimus",
-    "total": "quidem",
-    "iva_amount": "cumque",
-    "generated_date": "ea",
-    "hora": "in",
-    "due_date": "ut",
-    "items": "qui",
-    "client_id": "perferendis",
-    "tipo_persona": "aut",
+    "document_key": "magnam",
+    "document_number": "quae",
+    "sale_condition": "ex",
+    "payment_type": "et",
+    "retention_percent": "sint",
+    "credit_time": "odit",
+    "buy_order": "est",
+    "other_reference": "veritatis",
+    "send_emails": "officiis",
+    "commercial_activity": "sequi",
+    "description": "optio",
+    "currency": "provident",
+    "currency_rate": "repudiandae",
+    "subtotal": "reiciendis",
+    "total": "qui",
+    "iva_amount": "accusamus",
+    "generated_date": "iure",
+    "hora": "amet",
+    "due_date": "sed",
+    "items": "voluptas",
+    "client_id": "suscipit",
+    "tipo_persona": "quia",
     "id_number": "aut",
-    "code": "necessitatibus",
-    "email": "sint",
-    "billing_emails": "velit",
-    "first_name": "aut",
-    "last_name": "exercitationem",
-    "last_name2": "laboriosam",
-    "country": "illo",
-    "state": "voluptatem",
-    "city": "dolorem",
-    "district": "sint",
-    "neighborhood": "architecto",
-    "zip": "dolores",
-    "address": "sunt",
-    "phone": "velit",
-    "es_exento": "repellendus"
+    "code": "sit",
+    "email": "rerum",
+    "billing_emails": "aliquid",
+    "first_name": "officia",
+    "last_name": "sint",
+    "last_name2": "consequatur",
+    "country": "veniam",
+    "state": "molestiae",
+    "city": "ab",
+    "district": "voluptates",
+    "neighborhood": "voluptatibus",
+    "zip": "repudiandae",
+    "address": "est",
+    "phone": "magni",
+    "es_exento": "qui"
 }
 
 fetch(url, {
@@ -2550,7 +2550,7 @@ fetch(url, {
 ```bash
 curl -X POST "/facturas-recibidas" \
     -H "Content-Type: application/json" \
-    -d '{"document_key":"ipsa","document_number":"architecto","sale_condition":"assumenda","payment_type":"officiis","retention_percent":"deleniti","credit_time":"maxime","buy_order":"veniam","other_reference":"quae","send_emails":"veniam","commercial_activity":"magnam","description":"assumenda","currency":"distinctio","currency_rate":"sint","subtotal":"possimus","total":"quidem","iva_amount":"cumque","generated_date":"ea","hora":"in","due_date":"ut","items":"qui","client_id":"perferendis","tipo_persona":"aut","id_number":"aut","code":"necessitatibus","email":"sint","billing_emails":"velit","first_name":"aut","last_name":"exercitationem","last_name2":"laboriosam","country":"illo","state":"voluptatem","city":"dolorem","district":"sint","neighborhood":"architecto","zip":"dolores","address":"sunt","phone":"velit","es_exento":"repellendus"}'
+    -d '{"document_key":"magnam","document_number":"quae","sale_condition":"ex","payment_type":"et","retention_percent":"sint","credit_time":"odit","buy_order":"est","other_reference":"veritatis","send_emails":"officiis","commercial_activity":"sequi","description":"optio","currency":"provident","currency_rate":"repudiandae","subtotal":"reiciendis","total":"qui","iva_amount":"accusamus","generated_date":"iure","hora":"amet","due_date":"sed","items":"voluptas","client_id":"suscipit","tipo_persona":"quia","id_number":"aut","code":"sit","email":"rerum","billing_emails":"aliquid","first_name":"officia","last_name":"sint","last_name2":"consequatur","country":"veniam","state":"molestiae","city":"ab","district":"voluptates","neighborhood":"voluptatibus","zip":"repudiandae","address":"est","phone":"magni","es_exento":"qui"}'
 
 ```
 
@@ -2563,44 +2563,44 @@ curl -X POST "/facturas-recibidas" \
 
 Parameter | Type | Status | Description
 --------- | ------- | ------- | ------- | -----------
-    document_key | Clave |  optional  | de documento
-    document_number | Consecutivo |  optional  | de documento
-    sale_condition | Condición |  optional  | de venta de Hacienda
-    payment_type | Método |  optional  | de pago
-    retention_percent | Porcentaje |  optional  | de retención aplicado
-    credit_time | Plazo |  optional  | de crédito
-    buy_order | Órden |  optional  | de compra
-    other_reference | Referencias |  optional  | 
-    send_emails | Correos |  optional  | electrónicos separados por coma
-    commercial_activity | Actividad |  optional  | comercial asignada
-    description | Descripción/Notas |  optional  | de la factura
-    currency | Moneda, |  optional  | ejemplo: USD o CRC
-    currency_rate | Tipo |  optional  | de cambio. Por defecto e 1
-    subtotal | Subtotal |  optional  | de la factura
-    total | Total |  optional  | de la factura
-    iva_amount | Monto |  optional  | correspondiente al IVA
-    generated_date | Fecha |  optional  | de generacion
-    hora | Hora |  optional  | de generación
-    due_date | Fecha |  optional  | de vencimiento
-    items | Array |  optional  | con item_number, code, name, product_type, measure_unit, item_count, unit_price, subtotal, total, discount_type, discount, iva_type, iva_percentage, iva_amount, tariff_heading, is_exempt
-    client_id | ID |  optional  | del cliente. Usar -1 si desea crear uno nuevo
-    tipo_persona | No |  optional  | obligatorio. Tipo de persona de proveedor nuevo
-    id_number | No |  optional  | obligatorio. Cédula de proveedor nuevo
-    code | No |  optional  | obligatorio. Código de proveedor nuevo
-    email | No |  optional  | obligatorio. Correo proveedor nuevo
-    billing_emails | No |  optional  | obligatorio. Lista de correos separados por coma de proveedor nuevo
-    first_name | No |  optional  | obligatorio. Primer nombre proveedor nuevo
-    last_name | No |  optional  | obligatorio. Apellido de proveedor nuevo
-    last_name2 | No |  optional  | obligatorio. Segundo apellido de proveedor nuevo
-    country | No |  optional  | obligatorio. País de proveedor nuevo
-    state | No |  optional  | obligatorio. Provincia de proveedor nuevo
-    city | No |  optional  | obligatorio. Cantón de proveedor nuevo
-    district | No |  optional  | obligatorio. Distrito de proveedor nuevo
-    neighborhood | No |  optional  | obligatorio. Barrio de proveedor nuevo
-    zip | No |  optional  | obligatorio. Código postal de proveedor nuevo
-    address | No |  optional  | obligatorio. Dirección de proveedor nuevo
-    phone | No |  optional  | obligatorio. Teléfono de proveedor nuevo
-    es_exento | No |  optional  | obligatorio. Indicar si es exento o no.
+    document_key | required |  optional  | Clave de documento
+    document_number | required |  optional  | Consecutivo de documento
+    sale_condition | required |  optional  | Condición de venta de Hacienda
+    payment_type | required |  optional  | Método de pago
+    retention_percent | required |  optional  | Porcentaje de retención aplicado
+    credit_time | required |  optional  | Plazo de crédito
+    buy_order | required |  optional  | Órden de compra
+    other_reference | required |  optional  | Referencias
+    send_emails | required |  optional  | Correos electrónicos separados por coma
+    commercial_activity | required |  optional  | Actividad comercial asignada
+    description | required |  optional  | Descripción/Notas de la factura
+    currency | required |  optional  | Moneda, ejemplo: USD o CRC
+    currency_rate | required |  optional  | Tipo de cambio. Por defecto e 1
+    subtotal | required |  optional  | Subtotal de la factura
+    total | required |  optional  | Total de la factura
+    iva_amount | required |  optional  | Monto correspondiente al IVA
+    generated_date | required |  optional  | Fecha de generacion
+    hora | required |  optional  | Hora de generación
+    due_date | required |  optional  | Fecha de vencimiento
+    items | required |  optional  | Array con item_number, code, name, product_type, measure_unit, item_count, unit_price, subtotal, total, discount_type, discount, iva_type, iva_percentage, iva_amount, tariff_heading, is_exempt
+    client_id | required |  optional  | ID del cliente. Usar -1 si desea crear uno nuevo
+    tipo_persona | required |  optional  | No obligatorio. Tipo de persona de proveedor nuevo
+    id_number | required |  optional  | No obligatorio. Cédula de proveedor nuevo
+    code | required |  optional  | No obligatorio. Código de proveedor nuevo
+    email | required |  optional  | No obligatorio. Correo proveedor nuevo
+    billing_emails | required |  optional  | No obligatorio. Lista de correos separados por coma de proveedor nuevo
+    first_name | required |  optional  | No obligatorio. Primer nombre proveedor nuevo
+    last_name | required |  optional  | No obligatorio. Apellido de proveedor nuevo
+    last_name2 | required |  optional  | No obligatorio. Segundo apellido de proveedor nuevo
+    country | required |  optional  | No obligatorio. País de proveedor nuevo
+    state | required |  optional  | No obligatorio. Provincia de proveedor nuevo
+    city | required |  optional  | No obligatorio. Cantón de proveedor nuevo
+    district | required |  optional  | No obligatorio. Distrito de proveedor nuevo
+    neighborhood | required |  optional  | No obligatorio. Barrio de proveedor nuevo
+    zip | required |  optional  | No obligatorio. Código postal de proveedor nuevo
+    address | required |  optional  | No obligatorio. Dirección de proveedor nuevo
+    phone | required |  optional  | No obligatorio. Teléfono de proveedor nuevo
+    es_exento | required |  optional  | No obligatorio. Indicar si es exento o no.
 
 <!-- END_c5aaf5a80d72fad5e4f6dabcdb80a217 -->
 
