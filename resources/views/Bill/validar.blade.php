@@ -58,7 +58,7 @@
                    <select class="form-control product_type_all"  placeholder="Seleccione una categoría de hacienda" >
                       <option value="0">-- Seleccione --</option>
                       @foreach($categoria_productos as $categoria_productos)
-                         <option value="{{@$categoria_productos->id}}" codigo="{{ $categoria_productos->bill_iva_code }}" posibles="{{@$categoria_productos->open_codes}}" >{{@$categoria_productos->name}}</option>
+                         <option value="{{@$categoria_productos->id}}" codigo="{{ @$categoria_productos->bill_iva_code }}" posibles="{{@$categoria_productos->open_codes}}" >{{@$categoria_productos->name}}</option>
                       @endforeach
                     </select>
                   </div>
