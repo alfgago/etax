@@ -43,8 +43,8 @@
                 <option selected value="2019">2019</option>
             </select>
             <select class="form-control" id="input-mes" name="input-mes">
-                <option class="opt-acumulado" value="0" selected>Acumulado</option>
-                <option value="1">Enero</option>
+                <option class="opt-acumulado" value="0" >Acumulado</option>
+                <option value="1" selected>Enero</option>
                 <option value="2">Febrero</option>
                 <option value="3">Marzo</option>
                 <option value="4">Abril</option>
