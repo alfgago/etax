@@ -18,8 +18,8 @@
       <div class="form-group col-md-3">
         <label for="reportes-select">Reporte</label>
         <select class="form-control" id="reportes-select" onchange="toggleFilters();">
-          <option>-- Seleccione un reporte --</option>
-          <option value="/reportes/cuentas-contables" type="post" selected ano="1" mes="1">Cuentas contables</option>
+          <option selected>-- Seleccione un reporte --</option>
+          <option value="/reportes/cuentas-contables" type="post" ano="1" mes="1">Cuentas contables</option>
           <option value="/reportes/detalle-debito" hideClass="#input-mes" type="post" ano="1" mes="1">Detalle de débito fiscal</option>
           <option value="/reportes/detalle-credito" hideClass="#input-mes" type="post" ano="1" mes="1">Detalle de crédito fiscal</option>
           <option value="/reportes/libro-compras" hideClass=".opt-acumulado" >Libro de compras</option>
