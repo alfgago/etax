@@ -52,14 +52,14 @@
 </div>
 
 <div class="form-group col-md-4">
-  <label for="logo">Logo Empresa *</label>
+  <label for="input_logo">Logo Empresa *</label>
   <div class="fallback">
     <input name="input_logo" id="input_logo" class="form-control " type="file" multiple="false" >
   </div>
 </div>
 
 <div class="form-group col-md-12">
-  <label for="tipo_persona">Actividad comercial principal *</label>
+  <label for="commercial_activities">Actividad comercial principal *</label>
   <select class="form-control checkEmpty select-search-wizard" name="commercial_activities" id="commercial_activities" required>
       <option value='' selected>-- No seleccionado --</option>
       @foreach ( $actividades as $actividad )
