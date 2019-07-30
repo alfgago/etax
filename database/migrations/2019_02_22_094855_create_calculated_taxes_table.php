@@ -91,7 +91,7 @@ class CreateCalculatedTaxesTable extends Migration
             $table->double('saldo_favor_anterior')->default(0);
 
             //Debitos
-            $table->text('iva_data');
+            $table->longText('iva_data');
             
             /*$table->double('b001')->default(0);
             $table->double('i001')->default(0);

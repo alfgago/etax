@@ -143,7 +143,7 @@ class InvoiceUtils
         try{
             $cc = [];
             //Primero revisa si el invoice tiene un client_id
-            if ( isset( $invoice->client_id ) ) {
+            if (isset($invoice->client_id)) {
                 $client_billing_emails = $invoice->client->billing_emails;
                 if ( isset($client_billing_emails) ){
                     //Si existen, empieza con eso.
@@ -153,11 +153,13 @@ class InvoiceUtils
                         
                         // Validate e-mail
                         if (filter_var($correo, FILTER_VALIDATE_EMAIL)) {
-                             array_push( $cc,  $correo );
+                             array_push($cc,  $correo);
                         }
                        
                     }
                 }
+            } else {
+                array_push( $cc,  $company->email);
             }
             
             //Si ademas de los billing emails se tiene send_emails, tambien los agrega.
@@ -169,7 +171,8 @@ class InvoiceUtils
                 array_push( $cc, $invoice->client_email );
             }
             
-            if ( !empty($cc) ) {
+            if (!empty($cc)) {
+
                 Mail::to($cc)->send(new \App\Mail\InvoiceNotification([	
                                         'xml' => $xmlPath,	
                                         'data_invoice' => $invoice, 
@@ -177,6 +180,7 @@ class InvoiceUtils
                                         'xmlMH' => $xmlMH
                                     ]));
             } else {
+
                 Mail::to($invoice->client_email)->send(new \App\Mail\InvoiceNotification([	
                                         'xml' => $xmlPath,	
                                         'data_invoice' => $invoice, 
@@ -185,8 +189,8 @@ class InvoiceUtils
                                     ]));
             }
             Log::info('Se enviaron correos de notififación de factura aprobada: ' .$invoice->id );
-        }catch( \Throwable $e ){
-            Log::error('Fallo el envío de correos de notififación de factura aprobada: ' .$invoice->id );
+        }catch( \Exception $e ){
+            Log::error('Fallo el envío de correos de notififación de factura aprobada: ' .$invoice->id." Error: $e" );
         }
     }
     
@@ -281,8 +285,8 @@ class InvoiceUtils
         try {
             $company = $data->company;
             
-            if( !$company->id_number ) {
-                Log::info('Error enviando factura: No se encuentra company' );
+            if( !$company->id_number || !$company->business_name ) {
+                Log::error('Error enviando factura: No se encuentra company' );
                 return false;
             }
             
@@ -290,8 +294,8 @@ class InvoiceUtils
             $data->reference_number = $ref;
             $data->save();*/
             $ref = $data->reference_number;
-            Log::info("Set request parameters invoice id: $data->id consutivo: $ref Clave: $data->document_key");
-            $receptorPostalCode = $data['client_zip'];
+            Log::info("Set request parameters Company: $company->business_name, invoice id: $data->id, consutivo: $ref, Clave: $data->document_key");
+            $receptorPostalCode = $data['client_zip'] ?? '10101';
             $invoiceData = null;
             $request = null;
             $totalServiciosGravados = 0;

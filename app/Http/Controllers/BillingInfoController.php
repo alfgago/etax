@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use App\BillingInfo;
 use Illuminate\Http\Request;
 
+/**
+ * @group Controller - Info de facturación automática
+ *
+ * Funciones de BillingInfoController
+ */
 class BillingInfoController extends Controller
 {
     /**

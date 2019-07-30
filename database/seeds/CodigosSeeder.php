@@ -204,7 +204,11 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'S240 - Autoconsumo de servicios sin derecho a crédito', 'codigo'=>'S240', 'porcentaje'=>'0', 'hidden2018'=>true, 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
           ['nombre'=>'S245 - Ventas locales de servicios con tarifa transitoria del 0% sin derecho a crédito', 'codigo'=>'S245', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false], //*vigente del 1-07-2019 al 30-06-2020
           ['nombre'=>'S250 - Ventas de servicios con IVA incluido en el precio', 'codigo'=>'S250', 'porcentaje'=>'0', 'hide'=>true, 'hidden2018'=>true, 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
-          ['nombre'=>'S260 - Ventas de servicios sin derecho a crédito por ventas al Estado', 'codigo'=>'S260', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false]
+          ['nombre'=>'S260 - Ventas de servicios sin derecho a crédito por ventas al Estado', 'codigo'=>'S260', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
+        
+          ['nombre'=>'S300 - Sevicios de periodos anteriores a la Ley del IVA', 'codigo'=>'S300', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
+          ['nombre'=>'B300 - Bienes de periodos anteriores a la Ley del IVA', 'codigo'=>'B300', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>false]
+          
         ];
         
         foreach( $lista as $codigo ) {

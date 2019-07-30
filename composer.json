@@ -24,6 +24,8 @@
         "league/flysystem-aws-s3-v3": "^1.0",
         "lindelea/laravel-aws-elb-support": "^1.4",
         "maatwebsite/excel": "^3.1",
+        "mpociot/laravel-apidoc-generator": "^3.10",
+        "nunomaduro/collision": "^3.0",
         "oliuz/teamwork": "^5.3",
         "orchestra/parser": "^3.8",
         "potelo/laravel-block-bots": "^0.1.5",
@@ -37,7 +39,6 @@
         "beyondcode/laravel-dump-server": "^1.0",
         "filp/whoops": "^2.0",
         "mockery/mockery": "^1.0",
-        "nunomaduro/collision": "^2.0",
         "phpunit/phpunit": "^7.0"
     },
     "autoload": {

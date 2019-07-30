@@ -10,6 +10,11 @@
                 
     <input type="hidden" class="form-control" id="lnum" value="">
     <input type="hidden" class="form-control" id="item_id" value="">
+    <?php 
+      $company = currentCompanyModel();
+    ?>
+    <input type="hidden" class="form-control" id="default_product_category" value="{{$company->default_product_category}}">
+    <input type="hidden" class="form-control" id="default_vat_code" value="{{$company->default_vat_code}}">
     
     <div class="form-group col-md-6 hidden">
       <label for="codigo">Código de producto</label>

@@ -7,8 +7,9 @@
 @section('content') 
 <div class="row form-container">
   <div class="col-md-12">
-      <form method="POST" action="" class="show-form"> 
-
+      <form method="POST" action="/facturas-emitidas/actualizar-categorias" class="show-form"> 
+          @csrf
+          @method('post') 
           <input type="hidden" id="current-index" value="{{ count($invoice->items) }}">
 
           <div class="form-row">
@@ -24,7 +25,7 @@
                     
                     <div class="form-group col-md-12 with-button">
                       <label for="cliente">Seleccione el cliente</label>
-                      <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
+                      <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required disabled>
                         <option value=''>-- Seleccione un cliente --</option>
                         @foreach ( currentCompanyModel()->clients as $cliente )
                           <option  {{ $invoice->client_id == $cliente->id ? 'selected' : '' }} value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
@@ -44,7 +45,7 @@
       
                     <div class="form-group col-md-4">
                       <label for="currency">Divisa</label>
-                      <select class="form-control" name="currency" id="moneda" required>
+                      <select class="form-control" name="currency" id="moneda" required disabled>
                         <option value="CRC" {{ $invoice->currency == 'CRC' ? 'selected' : '' }}>CRC</option>
                         <option value="USD" {{ $invoice->currency == 'USD' ? 'selected' : '' }}>USD</option>
                       </select>
@@ -52,7 +53,7 @@
   
                     <div class="form-group col-md-8">
                       <label for="currency_rate">Tipo de cambio</label>
-                      <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="{{ $invoice->currency_rate }}" required>
+                      <input type="text" disabled class="form-control" name="currency_rate" id="tipo_cambio" value="{{ $invoice->currency_rate }}" required>
                     </div>
                   </div>
                 </div>
@@ -67,17 +68,17 @@
       
                  <div class="form-group col-md-4">
                   <label for="subtotal">Subtotal </label>
-                  <input type="text" class="form-control" name="subtotal" id="subtotal" placeholder="" readonly="true" required>
+                  <input type="text" class="form-control" disabled name="subtotal" id="subtotal" placeholder="" readonly="true" required>
                 </div>
       
                 <div class="form-group col-md-4">
                   <label for="iva_amount">Monto IVA </label>
-                  <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
+                  <input type="text" class="form-control" disabled name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
                 </div>
       
                 <div class="form-group col-md-4">
                   <label for="total">Total</label>
-                  <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" >
+                  <input type="text" class="form-control total" disabled name="total" id="total" placeholder="" readonly="true" >
                 </div>
       
               </div>
@@ -94,18 +95,18 @@
                 
                   <div class="form-group col-md-6">
                     <label for="document_number">Número de documento</label>
-                    <input type="text" class="form-control" name="document_number" id="document_number" value="{{ $invoice->document_number }}" required>
+                    <input type="text" class="form-control" disabled name="document_number" id="document_number" value="{{ $invoice->document_number }}" required>
                   </div>
   
                   <div class="form-group col-md-6">
                     <label for="document_key">Clave de factura</label>
-                    <input type="text" class="form-control" name="document_key" id="document_key" value="{{ $invoice->document_key }}" >
+                    <input type="text" class="form-control" disabled name="document_key" id="document_key" value="{{ $invoice->document_key }}" >
                   </div>
 
                   <div class="form-group col-md-4">
                     <label for="generated_date">Fecha</label>
                     <div class='input-group date inputs-fecha'>
-                        <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ $invoice->generatedDate()->format('d/m/Y') }}">
+                        <input id="fecha_generada" disabled class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ $invoice->generatedDate()->format('d/m/Y') }}">
                         <span class="input-group-addon">
                           <i class="icon-regular i-Calendar-4"></i>
                         </span>
@@ -115,7 +116,7 @@
                   <div class="form-group col-md-4">
                     <label for="hora">Hora</label>
                     <div class='input-group date inputs-hora'>
-                        <input id="hora" class="form-control input-hora" name="hora" required value="{{ $invoice->generatedDate()->format('g:i A') }}">
+                        <input id="hora" disabled class="form-control input-hora" name="hora" required value="{{ $invoice->generatedDate()->format('g:i A') }}">
                         <span class="input-group-addon">
                           <i class="icon-regular i-Clock"></i>
                         </span>
@@ -125,7 +126,7 @@
                   <div class="form-group col-md-4">
                     <label for="due_date">Fecha de vencimiento</label>
                     <div class='input-group date inputs-fecha'>
-                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ $invoice->dueDate()->format('d/m/Y') }}">
+                      <input id="fecha_vencimiento" disabled class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ $invoice->dueDate()->format('d/m/Y') }}">
                       <span class="input-group-addon">
                         <i class="icon-regular i-Calendar-4"></i>
                       </span>
@@ -137,16 +138,16 @@
                       <div class="input-group">
                           <select id="commercial_activity" name="commercial_activity" class="form-control" required>
                               @foreach ( $arrayActividades as $actividad )
-                                  <option {{ $invoice->commercial_activity == $actividad->codigo ? 'selected' : '' }} value="{{ $actividad->codigo }}" >{{ $actividad->codigo }} - {{ $actividad->actividad }}</option>
+                                  <option {{ $invoice->commercial_activity == $actividad->codigo ? 'selected' : '' }} value="{{ $actividad->codigo }}" >{{ $actividad->codigo }} - {{ $actividad->actividad }} </option>
                               @endforeach
                           </select>
                       </div>
                   </div>
-
+                  <input type="text" value="{{$invoice->id}}" name="invoice_id" hidden>
                   <div class="form-group col-md-6">
                   <label for="sale_condition">Condición de venta</label>
                   <div class="input-group">
-                    <select id="condicion_venta" name="sale_condition" class="form-control" required>
+                    <select id="condicion_venta" disabled name="sale_condition" class="form-control" required>
                       <option {{ $invoice->sale_condition == '01' ? 'selected' : '' }} value="01">Contado</option>
                       <option {{ $invoice->sale_condition == '02' ? 'selected' : '' }} value="02">Crédito</option>
                       <option {{ $invoice->sale_condition == '03' ? 'selected' : '' }} value="03">Consignación</option>
@@ -161,7 +162,7 @@
                 <div class="form-group col-md-6">
                   <label for="payment_type">Método de pago</label>
                   <div class="input-group">
-                    <select id="medio_pago" name="payment_type" class="form-control" onchange="toggleRetencion();" required>
+                    <select id="medio_pago" disabled name="payment_type" class="form-control" onchange="toggleRetencion();" required>
                       <option {{ $invoice->payment_type == '01' ? 'selected' : '' }} value="01" selected>Efectivo</option>
                       <option {{ $invoice->payment_type == '02' ? 'selected' : '' }} value="02">Tarjeta</option>
                       <option {{ $invoice->payment_type == '03' ? 'selected' : '' }} value="03">Cheque</option>
@@ -175,7 +176,7 @@
                 <div class="form-group col-md-12" id="field-retencion" style="display:none;">
                   <label for="retention_percent">Porcentaje de retención</label>
                   <div class="input-group">
-                    <select id="retention_percent" name="retention_percent" class="form-control" required>
+                    <select id="retention_percent" disabled name="retention_percent" class="form-control" required>
                       <option value="6" {{ $invoice->retention_percent == 6 ? 'selected' : '' }}>6%</option>
                       <option value="3" {{ $invoice->retention_percent == 3 ? 'selected' : '' }}>3%</option>
                       <option value="0" {{ $invoice->retention_percent == 0 ? 'selected' : '' }}>Sin retención</option>
@@ -185,17 +186,17 @@
 
                   <div class="form-group col-md-6">
                     <label for="other_reference">Referencia</label>
-                    <input type="text" class="form-control" name="other_reference" id="referencia" value="{{ $invoice->other_reference }}" >
+                    <input type="text" disabled class="form-control" name="other_reference" id="referencia" value="{{ $invoice->other_reference }}" >
                   </div>
 
                   <div class="form-group col-md-6">
                     <label for="buy_order">Orden de compra</label>
-                    <input type="text" class="form-control" name="buy_order" id="orden_compra" value="{{ $invoice->buy_order }}" >
+                    <input type="text" disabled class="form-control" name="buy_order" id="orden_compra" value="{{ $invoice->buy_order }}" >
                   </div>
 
                   <div class="form-group col-md-12">
                     <label for="description">Notas</label>
-                    <input type="text" class="form-control" name="description" id="notas" placeholder="" value="{{ $invoice->description }}">
+                    <input type="text" disabled class="form-control" name="description" id="notas" placeholder="" value="{{ $invoice->description }}">
                   </div>
 
               </div>
@@ -220,6 +221,7 @@
                     <th>Cant.</th>
                     <th>Unidad</th>
                     <th>Precio unitario</th>
+                    <th>Categoria </th>
                     <th>Tipo IVA</th>
                     <th>Subtotal</th>
                     <th>IVA</th>
@@ -231,40 +233,29 @@
                    @foreach ( $invoice->items as $item )
                    <tr class="item-tabla item-index-{{ $loop->index }}" index="{{ $loop->index }}" attr-num="{{ $loop->index }}" id="item-tabla-{{ $loop->index }}">
                       <td><span class="numero-fila">{{ $loop->index+1 }}</span>
-                        <input type="hidden" class='numero' name="items[{{ $loop->index }}][item_number]" value="{{ $loop->index+1 }}">
                         <input type="hidden" class="item_id" name="items[{{ $loop->index }}][id]" value="{{ $item->id }}"> </td>
-                      <td>{{ $item->code }}
-                        <input type="hidden" class='codigo' name="items[{{ $loop->index }}][code]" value="{{ $item->code }}">
-                      </td>
-                      <td>{{ $item->name }}
-                        <input type="hidden" class='nombre' name="items[{{ $loop->index }}][name]" value="{{ $item->name }}">
-                        <input type="hidden" class='tipo_producto' name="items[{{ $loop->index }}][product_type]" value="{{ $item->product_type }}">
-                      </td>
-                      <td>{{ $item->item_count }}
-                        <input type="hidden" class='cantidad' name="items[{{ $loop->index }}][item_count]" value="{{ $item->item_count }}">
-                      </td>
-                      <td>{{ \App\UnidadMedicion::getUnidadMedicionName($item->measure_unit) }}
-                        <input type="hidden" class='unidad_medicion' name="items[{{ $loop->index }}][measure_unit]" value="{{ $item->measure_unit }}">
-                      </td>
-                      <td>{{ $item->unit_price }}
-                        <input type="hidden" class='precio_unitario' name="items[{{ $loop->index }}][unit_price]" value="{{ $item->unit_price }}">
-                      </td>
-                      <td>{{ \App\Variables::getTipoRepercutidoIVAName($item->iva_type) }}
-                        <input type="hidden" class='tipo_iva' name="items[{{ $loop->index }}][iva_type]" value="{{ $item->iva_type }}">
-                        <input type='hidden' class='porc_identificacion_plena' value='0'>
-                      </td>
-                      <td>{{ $item->subtotal }}
-                        <input class="subtotal" type="hidden" name="items[{{ $loop->index }}][subtotal]" value="{{ $item->subtotal }}">
-                      </td>
-                      <td>{{ $item->iva_amount }}
-                        <input class="porc_iva" type="hidden" name="items[{{ $loop->index }}][iva_percentage]" value="{{ $item->iva_percentage }}">
-                        <input class="monto_iva" type="hidden" name="items[{{ $loop->index }}][iva_amount]" value="{{ $item->iva_amount }}">
+                      <td>{{ $item->code }}</td>
+                      <td>{{ $item->name }}</td>
+                      <td>{{ $item->item_count }}</td>
+                      <td>{{ \App\UnidadMedicion::getUnidadMedicionName($item->measure_unit) }}</td>
+                      <td>{{ $item->unit_price }}</td>
+                      <td>
+                        <select class="form-control category_product" numero="{{ $loop->index+1 }}" name="items[{{ $loop->index }}][category_product]">
+                            @foreach( $product_categories as $product_category)
+                              <option {{ $item->product_type == $product_category->id ? 'selected' : '' }}  value="{{$product_category->id}}" options="{{$product_category->open_codes}}">{{$product_category->name}}</option>
+                            @endforeach
+                        </select>
                       </td>
                       <td>
-                        {{ $item->total }}
-                        <input class="total" type="hidden" name="items[{{ $loop->index }}][total]" value="{{ $item->total }}">
-                        <input class="is_identificacion_especifica" type="hidden" name="items[{{ $loop->index }}][is_identificacion_especifica]" value="{{ $item->is_identificacion_especifica }}">
+                        <select class="form-control tipo_iva tipo_iva_{{ $loop->index+1 }}" name="items[{{ $loop->index }}][tipo_iva]" >
+                            @foreach( $codigos as $codigo)
+                              <option {{ $item->iva_type == $codigo->id ? 'selected' : '' }} value="{{$codigo->id}}" identificacion="{{$codigo->is_identificacion_plena}}">{{$codigo->name}}</option>
+                            @endforeach
+                        </select>
                       </td>
+                      <td>{{ $item->subtotal }}</td>
+                      <td>{{ $item->iva_amount }}</td>
+                      <td>{{ $item->total }}</td>
                       <td class='acciones'>
                         <span title='Editar linea' class='btn-editar-item text-success mr-2' onclick="abrirPopup('linea-popup'); cargarFormItem({{ $loop->index }});"><i class='nav-icon i-Pen-2'></i> </span> 
                         <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ $loop->index }});' ><i class='nav-icon i-Close-Window'></i> </span> 
@@ -276,12 +267,8 @@
             </div>
           </div>
         
-          @include( 'Invoice.form-linea' )
-          @include( 'Invoice.form-nuevo-cliente' )
-
-          <div class="btn-holder hidden">
+          <div class="btn-holder ">
             <button id="btn-submit" type="submit" class="btn btn-primary">Guardar factura</button>
-            <button type="submit" class="btn btn-primary">Enviar factura electrónica</button>
           </div>
 
         </form>
@@ -318,7 +305,23 @@ $(document).ready(function(){
   $('#total').val(total);
   
   toggleRetencion();
+
+  $(".category_product").change(function(){
+      var numero = $(this).attr("numero");
+      var options = $(this).find(':selected').attr("options");
+      var arrPosibles = options.split(",");
+      var currTipo = $('.tipo_iva_'+numero).val();
+      var isAvailable = false;
+      var tipo;
+      $('.tipo_iva_'+numero+' option').hide();
+      for( tipo of arrPosibles ) {
+      console.log(tipo);
+        $('.tipo_iva_'+numero+' option[value='+tipo+']').show();
+        if(currTipo == tipo){ isAvailable = true; }
+      }
+  });
 });
+
 
 function toggleRetencion() {
   var metodo = $("#medio_pago").val();
@@ -340,14 +343,7 @@ function toggleRetencion() {
       display: none;
   }
   
-  form.show-form input, 
-  form.show-form select,
-  .select2-selection--single {
-      border: 0 !important;
-      background: #eee !important;
-      cursor: not-allowed;
-      pointer-events: none;
-  }
+
   
 </style>
 

@@ -23,8 +23,14 @@ use App\Mail\NewUser;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use stdClass;
 
+/**
+ * @group Controller - Empresa
+ *
+ * Funciones de CompanyController
+ */
 class CompanyController extends Controller {
     
     use SoftDeletes;
@@ -345,6 +351,7 @@ class CompanyController extends Controller {
         $company->first_prorrata_type = $request->first_prorrata_type;
         $company->use_invoicing = $request->use_invoicing;
         $company->card_retention  =  $request->card_retention;
+        $company->default_product_category = $request->default_category_producto_code;
         
         if( $company->first_prorrata_type == 1 ) {
             $company->operative_prorrata = $request->first_prorrata;
@@ -443,13 +450,12 @@ class CompanyController extends Controller {
         }
 
         try {
+            $user = auth()->user();
             $companyId = $request->companyId;
             $team = Team::where( 'company_id', $companyId )->first();
-	        auth()->user()->switchTeam( $team );
-        } catch( UserNotInTeamException $e )
-        {
-        	
-        }
+	        $user->switchTeam( $team );
+	        Cache::forget("cache-currentcompany-$user->id");
+        } catch( UserNotInTeamException $e ) { }
         
     }
     
