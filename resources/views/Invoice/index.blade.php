@@ -45,7 +45,7 @@
             <tr>
               <th data-priority="2">Comprobante</th>
               <th data-priority="3">Receptor</th>
-              <th>Tipo Doc.</th>
+              <th>Tipo de Documento</th>
               <th data-priority="5">Moneda</th>
               <th data-priority="5">Subtotal</th>
               <th data-priority="5">Monto IVA</th>
