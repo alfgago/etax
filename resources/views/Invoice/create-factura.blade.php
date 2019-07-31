@@ -310,7 +310,7 @@ $company = currentCompanyModel();
           </div>
           
         @include('Invoice.form-linea')
-        @if($document_type != "08" )
+        @if($document_type != "08")
           @include('Invoice.form-nuevo-cliente')
         @endif
         @include('Bill.form-nuevo-proveedor')
