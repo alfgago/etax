@@ -329,6 +329,7 @@ class Bill extends Model
         $bill->document_type = $tipoDocumento ?? '01';
         $bill->total = $arr['ResumenFactura']['TotalComprobante'];
         
+        
         $authorize = true;
         if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
             $authorize = false;
@@ -340,6 +341,11 @@ class Bill extends Model
         $bill->generation_method = $metodoGeneracion;
         $bill->is_authorized = $authorize;
         $bill->is_code_validated = false;
+        
+        if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML" ) {
+            $bill->accept_status = 0;
+            $bill->hacienda_status = "01";
+        }
         
         //Start DATOS PROVEEDOR
               $nombreProveedor = $arr['Emisor']['Nombre'];
@@ -377,11 +383,13 @@ class Bill extends Model
                 $otrasSenas = null;
               }
               
-              if ( isset($arr['Emisor']['Telefono']) ) {
-                $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'] ?? null;
-              }else{
-                $telefonoProveedor = null;
-              }
+              try{
+                if ( isset($arr['Emisor']['Telefono']) ) {
+                  $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'] ?? null;
+                }else{
+                  $telefonoProveedor = null;
+                }
+              }catch(\Throwable $e){}
               
               $providerCacheKey = "import-proveedors-$identificacionProveedor-".$company->id;
               if ( !Cache::has($providerCacheKey) ) {

@@ -88,7 +88,7 @@ class ProcessReception implements ShouldQueue
                         if (isset($response['status']) && $response['status'] == 200) {
                             Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
                             $date = Carbon::now();
-                            $bill->hacienda_status = 3;
+                            $bill->hacienda_status = '03';
                             $bill->save();
                             $path = 'empresa-' . $company->id_number .
                                 "/aceptaciones/$date->year/$date->month/$bill->document_key.xml";
