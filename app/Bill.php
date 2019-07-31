@@ -476,9 +476,9 @@ class Bill extends Model
             $montoExoneracion = 0;
             if( array_key_exists('Impuesto', $linea) ) {
               //$codigoEtax = $linea['Impuesto']['CodigoTarifa'];
-              $montoIva = $linea['Impuesto']['Monto'];
-              $porcentajeIva = $linea['Impuesto']['Tarifa'];
-              
+              $montoIva = trim($linea['Impuesto']['Monto'] );
+              $porcentajeIva = trim($linea['Impuesto']['Tarifa'] );
+
               if( array_key_exists('Exoneracion', $linea['Impuesto']) ) {
                 $tipoDocumentoExoneracion = $linea['Impuesto']['Exoneracion']['TipoDocumento'] ?? null;
                 $documentoExoneracion = $linea['Impuesto']['Exoneracion']['NumeroDocumento']  ?? null;
@@ -522,8 +522,12 @@ class Bill extends Model
               'porc_identificacion_plena' => 13,
             );
             
-            $item_modificado = $bill->addEditItem($item);
-            array_push( $lids, $item_modificado->id );
+            try{
+              $item_modificado = $bill->addEditItem($item);
+              array_push( $lids, $item_modificado->id );
+            }catch(\Throwable $e){
+              dd($item);
+            }
         }
         
         foreach ( $bill->items as $item ) {
