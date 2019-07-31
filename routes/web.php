@@ -114,7 +114,7 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::patch('confirmar-aceptacion-otros/{id}', 'BillController@correctAccepted')->name('Bill.correctAccepted');
     Route::patch('marcar-para-aceptacion/{id}', 'BillController@markAsNotAccepted')->name('Bill.markAsNotAccepted');
     Route::get('validar/{id}', 'BillController@validar')->name('Bill.validar');
-    Route::post('guardar-validar', 'BillController@guardar_validar')->name('Bill.guardar_validar');
+    Route::post('guardar-validar', 'BillController@GuardarValidar')->name('Bill.GuardarValidar');
     Route::get('edit-aceptacion', 'BillController@editAccept')->name('Bill.editAccept');
     Route::get('update-aceptacion', 'BillController@updateAccept')->name('Bill.updateAccept');
 });
