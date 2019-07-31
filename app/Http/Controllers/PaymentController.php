@@ -125,15 +125,15 @@ class PaymentController extends Controller
             $request->number = preg_replace('/\s+/', '',  $request->number);
 
             if($request->plan_sel == "c"){
-                $coupons = Coupon::where('code', $request->coupon)->count();
+                $coupons = Coupon::where('code', $request->coupon)->where('type',1)->count();
                 $precio_25 = 8;
                 $precio_10 = 10;
                 $precio_mes = 14.999;
                 $precio_6 = 13.740;
                 $precio_anual = 12.491;
                 $precio_contabilidad = 0;
-                if($coupons != 0){
-                    $coupon = Coupon::where('code', $request->coupon)->count();
+                if($coupons > 0){
+                    $coupon = Coupon::where('code', $request->coupon)->where('type',1)->first();
                     $precio_contabilidad = $coupon->amount;
                     $precio_25 = $coupon->amount;
                     $precio_10 = $coupon->amount;
@@ -149,7 +149,7 @@ class PaymentController extends Controller
                    $cantidad = 25;
                 }
                 if($cantidad > 10){
-                   $total_extras += ($cantidad - 10) * $precio_10;
+                   $total_extras = $total_extras + (($cantidad - 10) * $precio_10);
                    $cantidad = 10;
                 }
                 $monthly_price = $cantidad * $precio_mes;
