@@ -44,7 +44,7 @@ Route::post('/reportes/detalle-credito', 'ReportsController@reporteDetalleCredit
 Route::post('/reportes/libro-ventas', 'ReportsController@reporteLibroVentas');
 Route::post('/reportes/libro-compras', 'ReportsController@reporteLibroCompras');
 Route::get('/reportes/borrador-iva', 'ReportsController@reporteBorradorIVA');
-/**/
+/*Exportar XML DEPRECADOS*/
 Route::post('/reportes/export-cuentas-contables', 'ReportsController@exportCuentasContables');
 Route::post('/reportes/export-detalle-debito-fiscal', 'ReportsController@exportDetalleDebitoFiscal');
 Route::post('/reportes/export-detalle-credito-fiscal', 'ReportsController@exportDetalleCreditoFiscal');

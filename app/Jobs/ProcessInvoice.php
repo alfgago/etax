@@ -196,7 +196,7 @@ class ProcessInvoice implements ShouldQueue
 
     private function setDetails($data) {
         try {
-            $details = null;
+            $details = [];
             foreach ($data as $key => $value) {
                 $details[$key] = array(
                     'cantidad' => $value['item_count'] ?? '',

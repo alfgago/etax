@@ -93,6 +93,9 @@ class BillController extends Controller
                     'data' => $bill
                 ])->render();
             }) 
+            ->editColumn('moneda', function($bill) {
+                return $bill->currency == 'CRC' ? $bill->currency : "$bill->currency ($bill->currency_rate)";
+            })
             ->editColumn('hacienda_status', function( $bill) {
                 if ($bill->hacienda_status == '03') {
                     return '<div class="green">  <span class="tooltiptext">Aceptada</span></div>

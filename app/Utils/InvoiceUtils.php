@@ -234,6 +234,7 @@ class InvoiceUtils
     
     public function setDetails43($data) {
         try {
+            $details = [];
             foreach ($data as $key => $value) {
 
                 $cod = \App\CodigoIvaRepercutido::find($value->iva_type);

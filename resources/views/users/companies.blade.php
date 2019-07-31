@@ -47,7 +47,7 @@
                             
                             <div style="position: absolute; right: 0; top: 0; font-size: .8rem; text-align: right;">
                                 
-                                    <label style="width: 100%;"><b>Facturas disponibles actualmente:</b></label>
+                                    <label style="width: 100%;"><b>Empresas disponibles actualmente:</b></label>
                                     <div class="dato-facturas" style="display:inline-block;">
                                         <div class="barra-limites emitidas" >
                                             <div class="fill-bar" data-total="{{ $availableCompanies }}" data-fill="{{ $teams->count() }}"></div>
@@ -124,6 +124,14 @@ function confirmDelete( id ) {
   })
   
 }
+
+
+$('.fill-bar').each( function(){
+	var total = $(this).attr('data-total');
+	var fill = $(this).attr('data-fill');
+	var porc = (fill / total) * 100;
+	$(this).width( parseFloat(porc) + '%' );
+});
     
 </script>
 
