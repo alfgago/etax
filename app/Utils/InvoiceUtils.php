@@ -7,6 +7,7 @@ use App\Company;
 use App\Invoice;
 
 use App\AvailableInvoices;
+use App\Provider;
 use App\Variables;
 use App\XmlHacienda;
 use Carbon\Carbon;
@@ -283,6 +284,7 @@ class InvoiceUtils
 
     public function setInvoiceData43( Invoice $data, $details ) {
         try {
+            $provider = null;
             $company = $data->company;
             
             if( !$company->id_number || !$company->business_name ) {
@@ -351,6 +353,9 @@ class InvoiceUtils
             $totalVenta = $totalGravado + $totalExento + $totalExonerados;
             $totalNeta = $totalVenta - $totalDescuentos;
             $totalComprobante = $totalNeta + ($totalImpuestos - $totalImpuestosNeto);
+            if ($data['document_type'] == '08') {
+                $provider = Provider::find($data['provider_id']);
+            }
 
             $invoiceData = array(
                 'consecutivo' => $ref ?? '',
@@ -363,7 +368,6 @@ class InvoiceUtils
                 'receptor_ubicacion_otras_senas' => $data['client_address'] ? trim($data['client_address']) : '',
                 'receptor_otras_senas_extranjero' => $data['client_address'] ? trim($data['client_address']) : '',
                 'receptor_email' => $data['client_email'] ? trim($data['client_email']) :  '',
-
                 'receptor_phone' => !empty($data['client_phone']) ? preg_replace('/[^0-9]/', '', $data['client_phone']) : '00000000',
                 'receptor_cedula_numero' => $data['client_id_number'] ? preg_replace("/[^0-9]/", "", $data['client_id_number']) : '',
                 'receptor_postal_code' => $receptorPostalCode ?? '',
@@ -372,22 +376,22 @@ class InvoiceUtils
                 'tipo_documento' => $data['document_type'] ?? '',
                 'sucursal_nro' => '001',
                 'terminal_nro' => '00001',
-                'emisor_name' => 'ENRIQUE LANG',//$company->business_name ? trim($company->business_name) : '',
-                'emisor_email' => 'xavierperna@gmail.com',//$company->email ? trim($company->email) : '',
-                'emisor_company' => 'ENRIQUE LANG',//$company->business_name ? trim($company->business_name) :  '',
-                'emisor_city' => '103',//$company->city ?? '',
-                'emisor_state' => '1',//$company->state ?? '',
-                'emisor_postal_code' => '10301',//$company->zip ?? '',
-                'emisor_country' => 'CR',//$company->country ?? '',
-                'emisor_address' => 'villas',//$company->address ?? '',
-                'emisor_phone' => '72354062',//$company->phone ? trim($company->phone) : '',
-                'emisor_cedula' => '114220260',//$company->id_number ? preg_replace("/[^0-9]/", "", $company->id_number) : '',
+                'emisor_name' => $data['document_type'] !== '08' ? $company->business_name  ? trim($company->business_name) : '' : $provider->first_name ?? trim($provider->first_name),
+                'emisor_email' => $data['document_type'] !== '08' ? $company->email ? trim($company->email) : '' : $provider->email ?? trim($provider->email),
+                'emisor_company' => $data['document_type'] !== '08' &&  $company->business_name ? trim($company->business_name) : trim($provider->first_name),
+                'emisor_city' => $data['document_type'] !== '08' && $company->city ? trim($company->city) : trim($provider->city),
+                'emisor_state' => $data['document_type'] !== '08' && $company->state ?  trim($company->state) : trim($provider->state),
+                'emisor_postal_code' => $data['document_type'] !== '08' && $company->zip ? trim($company->zip) : trim($provider->zip),
+                'emisor_country' => $data['document_type'] !== '08' && $company->country ? trim($company->country) : trim($provider->country),
+                'emisor_address' => $data['document_type'] !== '08' ? $company->address ? trim($company->address) : '' : $provider->address ?? trim($provider->address),
+                'emisor_phone' => $data['document_type'] !== '08' ? $company->phone ? trim($company->phone) : '' : $provider->phone ?? trim($provider->phone),
+                'emisor_cedula' => $data['document_type'] !== '08' && $company->id_number ? preg_replace("/[^0-9]/", "", $company->id_number) :
+                    preg_replace("/[^0-9]/", "", $provider->id_number),
                 'usuarioAtv' => $company->atv->user ? trim($company->atv->user) :  '',
                 'passwordAtv' => $company->atv->password ? trim($company->atv->password) : '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
                 'atvcertPin' => $company->atv->pin ? trim($company->atv->pin) : '',
                 //'atvcertFile' => Storage::get($company->atv->key_url),
-
                 'servgravados' => $totalServiciosGravados - $totalServiciosExonerados,
                 'servexentos' => $totalServiciosExentos,
                 'servexonerados' => $totalServiciosExonerados,
@@ -413,6 +417,7 @@ class InvoiceUtils
                 $invoiceData['fecha_emision_factura'] = $data['reference_generated_date'];
                 $invoiceData['clave_factura'] = $data['reference_document_key'];
             }
+
             Log::info("Request Data from invoices id: $data->id  --> ".json_encode($invoiceData));
             $invoiceData['atvcertFile'] = Storage::get($company->atv->key_url);
 
@@ -431,8 +436,9 @@ class InvoiceUtils
                 }
             }
             return $request;
-        } catch (ClientException $error) {
-            Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
+        } catch (\Exception $error) {
+            dd($error);
+            Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage());
             return false;
         }
     }

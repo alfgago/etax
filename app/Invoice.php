@@ -2,9 +2,9 @@
 
 namespace App;
 
+use App\Company;
 use App\InvoiceItem;
 use \Carbon\Carbon;
-use App\Company;
 use App\Client;
 use App\XmlHacienda;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -24,7 +24,7 @@ class Invoice extends Model
     {
         return $this->belongsTo(Company::class);
     }
-  
+
     //Relacion con el cliente
     public function client()
     {
@@ -217,7 +217,7 @@ class Invoice extends Model
             }
             
             if ($this->document_type == '08' && isset($request->provider_id)) {
-//                $provider = Provider::find();
+
                 $this->client_first_name = trim($this->company->name);
                 $this->client_last_name = trim($this->company->last_name);
                 $this->client_last_name2 = trim($this->company->last_name2);
@@ -230,8 +230,49 @@ class Invoice extends Model
                 $this->client_zip = $this->company->zip;
                 $this->client_phone = preg_replace('/[^0-9]/', '', $this->company->phone);
                 $this->client_id_number = trim($this->company->id_number);
+
+                //Datos de proveedor
+                if ($request->provider_id == '-1') {
+                    $tipo_persona = $request->tipo_persona;
+                    $identificacion_provider = preg_replace("/[^0-9]/", "", $request->id_number );
+                    $codigo_provider = $request->code;
+
+                    $provider = Provider::firstOrCreate(
+                        [
+                            'id_number' => $identificacion_provider,
+                            'company_id' => $this->company_id,
+                        ],
+                        [
+                            'code' => $codigo_provider ,
+                            'company_id' => $this->company_id,
+                            'tipo_persona' => $tipo_persona,
+                            'id_number' => $identificacion_provider
+                        ]
+                    );
+                    $provider->first_name = $request->first_name;
+                    $provider->last_name = $request->last_name;
+                    $provider->last_name2 = $request->last_name2;
+                    $provider->fullname = $request->last_name2;
+                    $provider->country = $request->country;
+                    $provider->state = $request->state;
+                    $provider->city = $request->city;
+                    $provider->district = $request->district;
+                    $provider->neighborhood = $request->neighborhood;
+                    $provider->zip = $request->zip;
+                    $provider->address = $request->address;
+                    $provider->foreign_address = $request->foreign_address ?? null;
+                    $provider->phone = $request->phone;
+                    $provider->es_exento = $request->es_exento;
+                    $provider->email = $request->email;
+                    $provider->save();
+
+                    $this->provider_id = $provider->id;
+                } else {
+                    $this->provider_id = $request->provider_id;
+
+                }
             }
-            
+            $this->save();
             //Fechas
             $fecha = Carbon::createFromFormat('d/m/Y g:i A',
                 $request->generated_date . ' ' . $request->hora);
