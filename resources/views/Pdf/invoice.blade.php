@@ -232,7 +232,7 @@
             </td>
 
             <td style="width: 42%;margin-top: 0.75% !important;">
-                <b>Factura Electrónica N°: </b>{{$data_invoice->document_number}} <br>
+                <b>Documento N°: </b>{{$data_invoice->document_number}} <br>
                 <b>Clave Numérica: </b> {{$data_invoice->document_key}}<br>
                 <b>Tipo de Documento: </b> {{ $documentType }}<br>
                 <b>Fecha de Emisión: </b> {{ $data_invoice->generated_date }}<br>
