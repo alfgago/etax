@@ -846,8 +846,8 @@ class Invoice extends Model
             $montoExoneracion = 0;
             if( array_key_exists('Impuesto', $linea) ) {
               //$codigoEtax = $linea['Impuesto']['CodigoTarifa'];
-              $montoIva = $linea['Impuesto']['Monto'];
-              $porcentajeIva = $linea['Impuesto']['Tarifa'];
+              $montoIva = trim($linea['Impuesto']['Monto']);
+              $porcentajeIva = trim($linea['Impuesto']['Tarifa']);
               
               if( array_key_exists('Exoneracion', $linea['Impuesto']) ) {
                 $tipoDocumentoExoneracion = $linea['Impuesto']['Exoneracion']['TipoDocumento'] ?? null;
