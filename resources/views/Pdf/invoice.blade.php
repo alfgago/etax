@@ -184,7 +184,6 @@
                 <b>{{$company->business_name}}</b><br>
                 <b>Cedula:</b> {{$company->id_number}}<br>
                 <b>Tel:</b> {{$company->phone}}<br>
-                <b>Fax:</b> <br>
                 <b>Correo: {{$company->email}}</b> <br>
             </td>
             <td style="padding: 40px 0px 0px 30px; text-align: right;">
