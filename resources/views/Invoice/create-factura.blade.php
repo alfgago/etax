@@ -69,19 +69,21 @@ $company = currentCompanyModel();
                       @endif
                     </div>
                     @else
-                     <div class="form-group col-md-12">
+                      <div class="form-group col-md-12">
                         <h3>
                           Proveedor
                         </h3>
+                        <div onclick="abrirPopup('nuevo-proveedor-popup');" class="btn btn-agregar btn-agregar-cliente">Nuevo proveedor</div>
                       </div>
-                      <div class="form-group col-md-12">
-                        <label for="actual">Proveedor</label>
-                          <select class="form-control select-search" name="provider_id" id="provider_id" placeholder="" required>
-                              <<option value='' selected>-- Seleccione un proveedor --</option>
-                              @foreach ( currentCompanyModel()->providers as $provider )
-                                <option value="{{ $provider->id }}" >{{ $provider->toString() }}</option>
-                              @endforeach
-                          </select>
+
+                      <div class="form-group col-md-12 with-button">
+                        <label for="provider_id">Seleccione el proveedor</label>
+                        <select class="form-control select-search" name="provider_id" id="provider_id" placeholder="" required>
+                          <option value='' selected>-- Seleccione un proveedor --</option>
+                          @foreach ( $company->providers as $proveedor )
+                            <option value="{{ $proveedor->id }}" >{{ $proveedor->id_number }} - {{ $proveedor->first_name }}</option>
+                          @endforeach
+                        </select>
                       </div>
                       <div class="form-group col-md-12">
                         <h3>
@@ -307,8 +309,12 @@ $company = currentCompanyModel();
             </div>
           </div>
           
-          @include( 'Invoice.form-linea' )
-          @include( 'Invoice.form-nuevo-cliente' )
+        @include('Invoice.form-linea')
+        @if($document_type != "08")
+          @include('Invoice.form-nuevo-cliente')
+        @else
+          @include('Bill.form-nuevo-proveedor')
+        @endif
             <input type="text" hidden value="{{ $document_type }}" name="document_type" id="document_type">
           <div class="btn-holder hidden">
            

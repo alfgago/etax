@@ -101,7 +101,7 @@ class ProcessReception implements ShouldQueue
                                 $xml = new XmlHacienda();
                                 $xml->invoice_id = 0;
                                 $xml->bill_id = $bill->id;
-                                $xml->xml = $path;
+                                $xml->xml_reception = $path;
                                 $xml->save();
                                 $xmlExtract = ltrim($response['data']['response'], '\n');
                                 Mail::to($bill->provider_email)->cc($company->email)->send(new ReceptionNotification([
