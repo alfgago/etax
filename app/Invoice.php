@@ -2,9 +2,9 @@
 
 namespace App;
 
+use App\Company;
 use App\InvoiceItem;
 use \Carbon\Carbon;
-use App\Company;
 use App\Client;
 use App\XmlHacienda;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -24,7 +24,7 @@ class Invoice extends Model
     {
         return $this->belongsTo(Company::class);
     }
-  
+
     //Relacion con el cliente
     public function client()
     {
@@ -141,12 +141,12 @@ class Invoice extends Model
             $this->buy_order = $request->buy_order;
             $this->other_reference = trim($request->other_reference);
             $this->send_emails = isset($request->send_email) ? trim($request->send_email) : null;
-            if( $request->commercial_activity ){
+            if ($request->commercial_activity) {
                 $this->commercial_activity = $request->commercial_activity;
             }
 
             //Datos de cliente. El cliente nuevo viene con ID = -1
-            if( $request->client_id == '-1' ) {
+            if ($request->client_id == '-1') {
 
                 $tipo_persona = $request->tipo_persona;
                 $identificacion_cliente = preg_replace("/[^0-9]/", "", $request->id_number );
@@ -199,7 +199,7 @@ class Invoice extends Model
             $this->total = floatval( str_replace(",","", $request->total ));
             $this->iva_amount = floatval( str_replace(",","", $request->iva_amount ));
 
-            if( isset( $client ) ) {
+            if (isset($client)) {
               $this->client_first_name = $client->first_name;
               $this->client_last_name = $client->last_name;
               $this->client_last_name2 = $client->last_name2;
@@ -212,25 +212,67 @@ class Invoice extends Model
               $this->client_zip = $client->zip;
               $this->client_phone = preg_replace('/[^0-9]/', '', $client->phone);
               $this->client_id_number = $client->id_number;
-            }else{
+            } else {
               $this->client_first_name = 'N/A';
             }
             
-            if( $this->document_type == '08' ) {
-              $this->client_first_name = trim($this->company->name);
-              $this->client_last_name = trim($this->company->last_name);
-              $this->client_last_name2 = trim($this->company->last_name2);
-              $this->client_email = trim($this->company->email);
-              $this->client_address = trim($this->company->address);
-              $this->client_country = $this->company->country;
-              $this->client_state = $this->company->state;
-              $this->client_city = $this->company->city;
-              $this->client_district = $this->company->district;
-              $this->client_zip = $this->company->zip;
-              $this->client_phone = preg_replace('/[^0-9]/', '', $this->company->phone);
-              $this->client_id_number = trim($this->company->id_number);
+            if ($this->document_type == '08' && isset($request->provider_id)) {
+
+                $this->client_first_name = trim($this->company->name);
+                $this->client_last_name = trim($this->company->last_name);
+                $this->client_last_name2 = trim($this->company->last_name2);
+                $this->client_email = trim($this->company->email);
+                $this->client_address = trim($this->company->address);
+                $this->client_country = $this->company->country;
+                $this->client_state = $this->company->state;
+                $this->client_city = $this->company->city;
+                $this->client_district = $this->company->district;
+                $this->client_zip = $this->company->zip;
+                $this->client_phone = preg_replace('/[^0-9]/', '', $this->company->phone);
+                $this->client_id_number = trim($this->company->id_number);
+
+                //Datos de proveedor
+                if ($request->provider_id == '-1') {
+                    $tipo_persona = $request->tipo_persona;
+                    $identificacion_provider = preg_replace("/[^0-9]/", "", $request->id_number );
+                    $codigo_provider = $request->code;
+
+                    $provider = Provider::firstOrCreate(
+                        [
+                            'id_number' => $identificacion_provider,
+                            'company_id' => $this->company_id,
+                        ],
+                        [
+                            'code' => $codigo_provider ,
+                            'company_id' => $this->company_id,
+                            'tipo_persona' => $tipo_persona,
+                            'id_number' => $identificacion_provider
+                        ]
+                    );
+                    $provider->first_name = $request->first_name;
+                    $provider->last_name = $request->last_name;
+                    $provider->last_name2 = $request->last_name2;
+                    $provider->fullname = $request->last_name2;
+                    $provider->country = $request->country;
+                    $provider->state = $request->state;
+                    $provider->city = $request->city;
+                    $provider->district = $request->district;
+                    $provider->neighborhood = $request->neighborhood;
+                    $provider->zip = $request->zip;
+                    $provider->address = $request->address;
+                    $provider->foreign_address = $request->foreign_address ?? null;
+                    $provider->phone = $request->phone;
+                    $provider->es_exento = $request->es_exento;
+                    $provider->email = $request->email;
+                    $provider->save();
+
+                    $this->provider_id = $provider->id;
+                } else {
+                    $this->provider_id = $request->provider_id;
+
+                }
             }
-            
+            $this->save();
             //Fechas
             $fecha = Carbon::createFromFormat('d/m/Y g:i A',
                 $request->generated_date . ' ' . $request->hora);
@@ -240,14 +282,14 @@ class Invoice extends Model
             $this->year = $fecha->year;
             $this->month = $fecha->month;
             
-            if( !$this->id ){
+            if (!$this->id) {
               $this->company->addSentInvoice( $this->year, $this->month );
             }
             $this->save();
 
             $lids = array();
             $i = 1;
-            foreach($request->items as $item) {
+            foreach ($request->items as $item) {
                 $item['item_number'] = $i;
                 $item['item_id'] = $item['id'] ? $item['id'] : 0;
                 $item_modificado = $this->addEditItem($item);
@@ -255,8 +297,8 @@ class Invoice extends Model
                 $i++;
             }
 
-            foreach ( $this->items as $item ) {
-                if( !in_array( $item->id, $lids ) ) {
+            foreach ($this->items as $item) {
+                if (!in_array( $item->id, $lids )) {
                     $item->delete();
                 }
             }
@@ -307,30 +349,29 @@ class Invoice extends Model
     public function addEditItem(array $data)
     {
         try {
-            if(isset($data['item_number'])) {
-
+            if (isset($data['item_number'])) {
                 $item = InvoiceItem::updateOrCreate([
                     'item_number' => $data['item_number'],
                     'invoice_id' => $this->id,
                     'code'=> $data['code']
                 ], [
-                        'company_id' => $this->company_id,
-                        'year'  => $this->year,
-                        'month' => $this->month,
-                        'name'  => $data['name'] ? trim($data['name']) : null,
-                        'product_type' => $data['product_type'] ?? null,
-                        'measure_unit' => $data['measure_unit'] ?? 'Unid',
-                        'item_count'   => $data['item_count'] ? trim($data['item_count']) : 1,
-                        'unit_price'   => $data['unit_price'] ?? 0,
-                        'subtotal'     => $data['subtotal'] ?? 0,
-                        'total' => $data['total'] ?? 0,
-                        'discount_type' => $data['discount_type'] ?? null,
-                        'discount' => $data['discount'] ?? 0,
-                        'iva_type' => $data['iva_type'] ?? null,
-                        'iva_percentage' => $data['iva_percentage'] ?? 0,
-                        'iva_amount' => $data['iva_amount'] ?? 0,
-                        'tariff_heading' => $data['tariff_heading'] ?? null,
-                        'is_exempt' => $data['is_exempt'] ?? false,
+                    'company_id' => $this->company_id,
+                    'year'  => $this->year,
+                    'month' => $this->month,
+                    'name'  => $data['name'] ? trim($data['name']) : null,
+                    'product_type' => $data['product_type'] ?? null,
+                    'measure_unit' => $data['measure_unit'] ?? 'Unid',
+                    'item_count'   => $data['item_count'] ? trim($data['item_count']) : 1,
+                    'unit_price'   => $data['unit_price'] ?? 0,
+                    'subtotal'     => $data['subtotal'] ?? 0,
+                    'total' => $data['total'] ?? 0,
+                    'discount_type' => $data['discount_type'] ?? null,
+                    'discount' => $data['discount'] ?? 0,
+                    'iva_type' => $data['iva_type'] ?? null,
+                    'iva_percentage' => $data['iva_percentage'] ?? 0,
+                    'iva_amount' => $data['iva_amount'] ?? 0,
+                    'tariff_heading' => $data['tariff_heading'] ?? null,
+                    'is_exempt' => $data['is_exempt'] ?? false,
                     ]
                 );
                 try {

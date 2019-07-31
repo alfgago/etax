@@ -249,6 +249,7 @@ class SubscriptionPlanController extends Controller
 
     public function confirmCodeAccount($codigo){
         $coupons = Coupon::where('code',$codigo)->where('type',1)->count();
+        $retorno = 0;
         if($coupons != 0){
             $coupon = Coupon::where('code',$codigo)->where('type',1)->first();
             $retorno = $coupon->amount;

@@ -93,6 +93,24 @@ class BillController extends Controller
                     'data' => $bill
                 ])->render();
             }) 
+            ->editColumn('hacienda_status', function( $bill) {
+                if ($bill->hacienda_status == '03') {
+                    return '<div class="green">  <span class="tooltiptext">Aceptada</span></div>
+                        <a href="/facturas-recibidas/query-bill/'.$bill->id.'". title="Consultar factura en hacienda" class="text-dark mr-2 hidden"> 
+                            <i class="fa fa-refresh" aria-hidden="true"></i>
+                          </a>';
+                }
+                if ($bill->hacienda_status == '04') {
+                    return '<div class="red"> <span class="tooltiptext">Rechazada</span></div>
+                        <a href="/facturas-recibidas/query-bill/'.$bill->id.'". title="Consultar factura en hacienda" class="text-dark mr-2 hidden"> 
+                            <i class="fa fa-refresh" aria-hidden="true"></i>
+                        </a>';
+                }
+                return '<div class="yellow"><span class="tooltiptext">Esperando respuesta de Hacienda</span></div>
+                    <a href="/facturas-recibidas/query-bill/'.$bill->id.'". title="Consultar factura en hacienda" class="text-dark mr-2 hidden"> 
+                        <i class="fa fa-refresh" aria-hidden="true"></i>
+                      </a>';
+            })
             ->editColumn('provider', function(Bill $bill) {
                 return $bill->providerName();
             })
@@ -102,7 +120,7 @@ class BillController extends Controller
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');
             })
-            ->rawColumns(['actions'])
+            ->rawColumns(['actions', 'hacienda_status'])
             ->toJson();
     }
 
@@ -875,8 +893,41 @@ class BillController extends Controller
             }
         }
         
-        dd($bills);
         return true;
+    }
+    
+    public function queryBill($id) {
+        try {
+            /*
+            $bill = Bill::findOrFail($id);
+            $this->authorize('update', $bill);
+
+            $apiHacienda = new BridgeHaciendaApi();
+            $tokenApi = $apiHacienda->login(false);
+
+            if ($tokenApi !== false) {
+                $company = currentCompanyModel();
+                $result = $apiHacienda->queryHacienda($bill, $tokenApi, $company);
+                if ($result == false) {
+                    return redirect()->back()->withErrors('El servidor de Hacienda es inaccesible en este momento, o el comprobante no ha sido recibido. Por favor intente de nuevo más tarde o contacte a soporte.');
+                }
+                $filename = 'AHC-'.$bill->document_key . '.xml';
+                if( ! $bill->document_key ) {
+                    $filename = $bill->document_number . '-' . $bill->provider_id . '.xml';
+                }
+                $headers = [
+                    'Content-Type' => 'application/xml',
+                    'Content-Description' => 'File Transfer',
+                    'Content-Disposition' => "attachment; filename={$filename}",
+                    'filename'=> $filename
+                ];
+                return response($result, 200, $headers);
+            }
+            */
+        } catch (\Exception $e) {
+            Log::error("Error consultado factura -->" .$e);
+            return redirect()->back()->withErrors('Error al consultar comprobante en hacienda');
+        }
     }
     
 }
