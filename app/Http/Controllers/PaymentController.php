@@ -12,6 +12,8 @@ use App\Sales;
 use App\Subscription;
 use App\PaymentMethod;
 use App\SubscriptionPlan;
+use App\AvailableInvoices;
+use App\Team;
 use Carbon\Carbon;
 use CybsSoapClient;
 use Illuminate\Http\Request;
@@ -21,10 +23,15 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use App\Utils\BridgeHaciendaApi;
 use App\Utils\PaymentUtils;
-
+use Illuminate\Database\Eloquent\Builder;
 
 //require __DIR__ . '/../../../vendor/autoload.php';
 
+/**
+ * @group Controller - Pagos
+ *
+ * Funciones de PaymentController. Todos los request de pagos deberían pasar por aquí, pero el pago en sí debería ser en Payment Utils.
+ */
 class PaymentController extends Controller
 {
     /**
@@ -110,10 +117,77 @@ class PaymentController extends Controller
         $cliente->email = $request->email;
         $cliente->fullname = $cliente->toString();
         $cliente->billing_emails = $request->email;
-
         $cliente->save();
 
         return $cliente;
+    }
+
+    public function companyDisponible(){
+        try{
+            $start_date = Carbon::parse(now('America/Costa_Rica'));
+            $company = currentCompanyModel();
+            $user_id = $company->user_id;
+            $activeCompanies = Company::where('user_id',$user_id)->where('status', 1)->count();
+            $sale = Sales::where('company_id', $company->id)->where('is_subscription', true)->first();
+            $plan = $sale->plan;
+            $availableCompanies = $plan->num_companies;
+            $availableCompanies += -1 ;
+            
+            if($activeCompanies >  $availableCompanies  ){
+                $companies = Company::where('user_id',$user_id)->where('id','!=',$company->id)->where('status',1)->get();
+                foreach ($companies as $company) {
+                    $availableCompanies += -1 ;
+                    if($availableCompanies < 0){
+                        Company::where('id', $company->id)
+                        ->update(['status' => 0],['updated_at',$start_date]);
+                        $companies = Company::where('user_id',$user_id)->get();
+                    }
+    
+                }
+                $availableCompanies = $plan->num_companies;
+                return view('payment.companySelect')->with('companies',$companies)->with('companies_puedo',$availableCompanies);
+            }
+        }catch(\Throwable $e){
+            Log::error($e->getMessage());
+        }
+        return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+    }
+ 
+    public function seleccionEmpresas(Request $request){
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $company = currentCompanyModel();
+        $user_id = $company->user_id;
+        $company_id = $company->id;
+        Company::where('user_id',$user_id)->whereNotIn('id', $request->empresas)->update(['status' => 0],['updated_at',$start_date]);
+        Company::where('user_id',$user_id)->whereIn('id', $request->empresas)->update(['status' => 1],['updated_at',$start_date]);
+        if (!in_array($company_id, $request->empresas)) {
+            $companyId = intval($request->empresas[0]);
+            $team = Team::where( 'company_id', $companyId )->first();
+            auth()->user()->switchTeam( $team );
+        }
+        return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+
+    }
+
+    public function facturasDisponibles(){
+        try{
+            $start_date = Carbon::parse(now('America/Costa_Rica'));
+            $month = $start_date->month;
+            $year = $start_date->year;
+            
+            $company = currentCompanyModel();
+            $sale = Sales::where('company_id',$company->id)->where('is_subscription', true)->first();
+
+            $plan = $sale->plan;
+            $numInvoices = $plan->num_invoices;
+            
+            $availableInvoices = $company->getAvailableInvoices( $year, $month );
+            $availableInvoices->monthly_quota = $numInvoices;
+            $availableInvoices->save();
+            
+        }catch(\Throwable $e){
+            Log::error($e->getMessage());
+        }
     }
 
     public function confirmPayment(Request $request){
@@ -368,7 +442,7 @@ class PaymentController extends Controller
                 $item = new stdClass();
                 $item->total = $amount;
                 $item->code = $sale->etax_product_id;
-                $item->name = $sale->plan->name . " / $recurrency meses";
+                $item->name = $sale->plan->getName() . " / $recurrency meses";
                 $item->descuento = $montoDescontado;
                 $item->discount_reason = $razonDescuento;
                 $item->cantidad = 1;
@@ -381,7 +455,8 @@ class PaymentController extends Controller
                 $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
                 
                 if($factura){
-                    return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+                    $this->facturasDisponibles();
+                    return $this->companyDisponible();
                 }
             } else {
                 $mensaje = 'El pago ha sido denegado';
@@ -490,6 +565,131 @@ class PaymentController extends Controller
             return redirect('/empresas/comprar-facturas-vista')->withErrors('Debe seleccionar un método de pago');
         }
     }
+
+    public function comprarContabilidades(Request $request){
+
+        
+        $paymentUtils = new PaymentUtils();
+        if(isset($request->payment_method)){
+
+                $date = Carbon::parse(now('America/Costa_Rica'));
+                $company = currentCompanyModel(); 
+
+                $sale = Sales::join('subscription_plans','subscription_plans.id','sales.etax_product_id')->where('company_id', $company->id)
+                                                                ->where('is_subscription', 1)->first();
+               
+                $cantidad = $sale->num_companies + $request->contabilidades; 
+                $precio_25 = 8;
+                $precio_10 = 10;
+                $precio_mes = 14.999;
+                $precio_seis = 13.740;
+                $precio_year = 12.491;
+                if($sale->price != 0){
+                    $precio_25 = $sale->price;
+                    $precio_10 = $sale->price;
+                    $precio_mes = $sale->price;
+                    $precio_seis = $sale->price;
+                    $precio_year = $sale->price;
+                }
+                $total_extras = 0;
+                if($cantidad > 25){
+                   $total_extras = ($cantidad - 25) * $precio_25;
+                   $cantidad = 25;
+                }
+                if($cantidad > 10){
+                   $total_extras += ($cantidad - 10) * $precio_10;
+                   $cantidad = 10;
+                }
+                $monthly_price = $cantidad * $precio_mes;
+                $six_price = $cantidad * $precio_seis;
+                $annual_price = $cantidad * $precio_year;
+                $monthly_price += $total_extras;
+                $six_price += $total_extras;
+                $annual_price += $total_extras;
+                $six_price = $six_price * 6;
+                $annual_price = $annual_price * 12;
+                $cantidad = $sale->num_companies + $request->contabilidades; 
+                SubscriptionPlan::where('id', $sale->etax_product_id)
+                    ->update(['num_companies' => $cantidad],['monthly_price' => $monthly_price],['six_price' => $six_price],['annual_price' => $annual_price]); 
+                $existentes = $sale->num_companies;
+                $total = 0;
+                $total_extras = 0;
+                  if($cantidad > 25){
+                      $total_extras = ($cantidad - $existentes ) * $precio_25;
+                      $cantidad = 25;
+                  }
+                  if($cantidad > 10){
+                      $total_extras += ($cantidad - $existentes ) * $precio_10;
+                      $cantidad = 10;
+                  }
+                  if($sale->recurrency == 1){
+                    $total_extras = $total_extras / 31 * $request->diff;
+                    $total = $total_extras;
+                  }
+                  if($sale->recurrency == 6){
+                    $total_extras = $total_extras / 133 * $request->diff;
+                    $total = $total_extras * 6;
+                  }
+                  if($sale->recurrency == 12){
+                    $total_extras = $total_extras / 366 * $request->diff;
+                    $total = $total_extras * 12;
+                  }
+                $subtotal = $total_extras;
+                $iv = $subtotal * 0.13;
+                $amount = $subtotal + $iv;
+                $user = auth()->user();
+                
+                $client = \App\Client::where('company_id', $company->id)->where('id_number', $request->id_number)->first();
+                
+                $invoiceData = new stdClass();
+                $invoiceData->client_code = $request->id_number;
+                $invoiceData->client_id_number = $request->id_number;
+                if($client){
+                    $invoiceData->client_id = $client->id;
+                }else{
+                    $invoiceData->client_id = '-1';
+                }
+                $invoiceData->tipo_persona = $request->tipo_persona;
+                $invoiceData->first_name = $request->first_name;
+                $invoiceData->last_name = $request->last_name;
+                $invoiceData->last_name2 = $request->last_name2;
+                $invoiceData->country = $request->country;
+                $invoiceData->state = $request->state;
+                $invoiceData->city = $request->city;
+                $invoiceData->district = $request->district;
+                $invoiceData->neighborhood = $request->neighborhood;
+                $invoiceData->zip = $request->zip;
+                $invoiceData->address = $request->address;
+                $invoiceData->phone = $request->phone;
+                $invoiceData->es_exento = false;
+                $invoiceData->email = $request->email;
+                $invoiceData->expiry = $request->expiry;
+                $invoiceData->amount = $amount;
+                $invoiceData->subtotal = $subtotal;
+                $invoiceData->iva_amount = $iv;
+                $invoiceData->discount_reason = null;
+
+                $item = new stdClass();
+                $item->total = $amount;
+                $item->code = 16;
+                $item->name = "Contabilidades extras";
+                $item->descuento = 0;
+                $item->discount_reason = null;
+                $item->cantidad = 1;
+                $item->iva_amount = $iv;
+                $item->unit_price = $subtotal;
+                $item->subtotal = $subtotal;
+                $item->total = $amount;
+
+                $invoiceData->items = [$item];
+                $procesoFactura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
+                $company->save();
+                
+                return redirect('/usuario/compra-contabilidades')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+        }else{
+            return redirect('/usuario/compra-contabilidades')->withErrors('Debe seleccionar un método de pago');
+        }
+    }
     
     public function skipPaymentCoupon( $request, $coupon ) {
         $user = auth()->user();
@@ -499,7 +699,6 @@ class PaymentController extends Controller
             $nextPaymentDate = Carbon::parse(now('America/Costa_Rica'))->addYears(10);
             $proof = "Equipo de eTax";
         }
-        
         $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
         $sale->status = 1;
         $sale->next_payment_date = $nextPaymentDate;
@@ -531,7 +730,10 @@ class PaymentController extends Controller
             ]
         );
         
-        return redirect('/')->withMessage('Se aplicó el cupón exitosamente');
+        
+        $this->facturasDisponibles();
+        return $this->companyDisponible();
+        
            
     }
 
@@ -681,13 +883,118 @@ class PaymentController extends Controller
     }
 
     public function pendingCharges(){
-        $paymentUtils = new PaymentUtils();
-        $bnStatus = $paymentUtils->statusBNAPI();
-        if($bnStatus['apiStatus'] == 'Successful') {
-            $charges = $paymentUtils->userRequestCharges();
+        $user = auth()->user();
+
+        $charges = Payment::whereHas('sale', function ($query) use($user) {
+            $query->where('user_id', $user->id);
+        })->get();
+        
+        if($charges) {
             return view('/payment/pendingCharges')->with('charges', $charges);
         }else{
             return redirect()->back()->withErrors('No se pueden ejecutar consultas en este momento');
+        }
+    }
+
+    public function pagarCargo($paymentId){
+        $paymentUtils = new PaymentUtils();
+        $date = Carbon::parse(now('America/Costa_Rica'));
+        $company = currentCompanyModel();
+        $user = auth()->user();
+        
+        $bnStatus = $paymentUtils->statusBNAPI();
+        if($bnStatus['apiStatus'] == 'Successful'){//charge_token
+            $paymentMethod = PaymentMethod::where('user_id', $user->id)->where('default_card', true)->first();
+            
+            if(!$paymentMethod){
+                $paymentMethod = PaymentMethod::where('user_id', $user->id)->first();
+            }
+                    
+            if($paymentMethod){
+                $payment = Payment::find($paymentId);
+                $payment->payment_date = $date;
+                $payment->payment_method_id = $paymentMethod->id;
+                $payment->save();
+                
+                $sale = Sales::find($payment->sale_id);
+                
+                $amount = $payment->amount;
+                $subtotal = $amount / 1.13;
+                $iv = $amount - $subtotal;
+                
+                $data = new stdClass();
+                $data->description = $sale->saleDescription();
+                $data->user_name = $user->user_name;
+                $data->amount = $amount;
+                    
+                //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
+                if( ! isset($payment->charge_token) || $payment->charge_token == 'N/A' || $payment->charge_token == '' ) {
+                    $chargeIncluded = $paymentUtils->paymentIncludeCharge($data);
+                    $chargeTokenId = $chargeIncluded['chargeTokenId'];
+                    $payment->charge_token = $chargeTokenId;
+                    $payment->save();
+                }
+                
+                $data->chargeTokenId = $payment->charge_token;
+                $data->cardTokenId = $paymentMethod->token_bn;
+                
+                $appliedCharge = $paymentUtils->paymentApplyCharge($data);
+
+                if ($appliedCharge['apiStatus'] == "Successful") {
+                    $payment->proof = $appliedCharge['retrievalRefNo'];
+                    $payment->payment_status = 2;
+                    $payment->save();
+
+                    $sale->next_payment_date = Carbon::parse(now('America/Costa_Rica'))->addMonths($sale->recurrency);
+                    $sale->status = 1;
+                    $sale->save();
+
+                    $invoiceData = new stdClass();
+                    $invoiceData->client_code = $company->id_number;
+                    $invoiceData->client_id_number = $company->id_number;
+                    $invoiceData->client_id = $company->id_number;
+                    $invoiceData->tipo_persona = $company->tipo_persona;
+                    $invoiceData->first_name = $company->name;
+                    $invoiceData->last_name = $company->last_name;
+                    $invoiceData->last_name2 = $company->last_name2;
+                    $invoiceData->country = $company->country;
+                    $invoiceData->state = $company->state;
+                    $invoiceData->city = $company->city;
+                    $invoiceData->district = $company->district;
+                    $invoiceData->neighborhood = $company->neighborhood;
+                    $invoiceData->zip = $company->zip;
+                    $invoiceData->address = $company->address;
+                    $invoiceData->phone = $company->phone;
+                    $invoiceData->es_exento = false;
+                    $invoiceData->email = $company->email;
+                    $invoiceData->amount = $amount;
+                    $invoiceData->subtotal = $subtotal;
+                    $invoiceData->iva_amount = $iv;
+                    $invoiceData->discount_reason = null;
+
+                    $item = new stdClass();
+                    $item->total = $amount;
+                    $item->code = $sale->id;
+                    $item->name = $sale->saleDescription();
+                    $item->descuento = 0;
+                    $item->discount_reason = null;
+                    $item->cantidad = 1;
+                    $item->iva_amount = $iv;
+                    $item->unit_price = $subtotal;
+                    $item->subtotal = $subtotal;
+                    $item->total = $amount;
+
+                    $invoiceData->items = [$item];
+                    $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
+                    return redirect()->back()->withMessage('Pago procesado');
+                }else{
+                    return redirect()->back()->withErrors('El pago no pudo ser procesado. Por favor intente más tarde.');
+                }
+            }else{
+                return redirect()->back()->withErrors('Debe seleccionar un método de pago por defecto');
+            }
+        }else{
+            return redirect()->back()->withErrors('No se pueden realizarse pagos en este momento');
         }
     }
 

@@ -44,6 +44,7 @@
           <thead>
             <tr>
               <th data-priority="2">Comprobante</th>
+              <th data-priority="3">Actividad</th>
               <th data-priority="3">Receptor</th>
               <th>Tipo Doc.</th>
               <th data-priority="5">Moneda</th>
@@ -51,7 +52,7 @@
               <th data-priority="5">Monto IVA</th>
               <th data-priority="4">Total</th>
               <th data-priority="5">F. Generada</th>
-              <th data-priority="1">Estados</th>
+              <th data-priority="1">Estado</th>
               <th data-priority="1">Acciones</th>
             </tr>
           </thead>
@@ -83,9 +84,10 @@ $(function() {
     order: [[ 7, 'desc' ]],
     columns: [
       { data: 'document_number', name: 'document_number' },
+      { data: 'commercial_activity', name: 'commercial_activity' },
       { data: 'client', name: 'client.fullname' },
       { data: 'document_type', name: 'document_type' },
-      { data: 'currency', name: 'currency', orderable: false, searchable: false },
+      { data: 'moneda', name: 'currency', orderable: false, searchable: false },
       { data: 'subtotal', name: 'subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
       { data: 'iva_amount', name: 'iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
       { data: 'total', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
@@ -121,20 +123,37 @@ function confirmDelete( id ) {
 }
 
 
-function confirmAnular( id ) {
+
+function confirmAnular( id ) {  
   var formId = "#anular-form-"+id;
-  Swal.fire({
-    title: '¿Está seguro que desea anular la factura',
-    text: "Este proceso anulará la factura ante Hacienda y enviará una nueva nota de crédito al cliente.",
-    type: 'warning',
-    showCloseButton: true,
-    showCancelButton: true,
-    confirmButtonText: 'Sí, quiero anularla'
-  }).then((result) => {
-    if (result.value) {
-      $(formId).submit();
-    }
-  })
+  @if(currentCompanyModel()->atv_validation)
+    var title = '¿Está seguro que desea anular la factura';
+    var texto = "Este proceso anulará la factura ante Hacienda y enviará una nueva nota de crédito al cliente.";
+    Swal.fire({
+      title: title,
+      text: texto,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, quiero anularla'
+    }).then((result) => {
+      if (result.value) {
+        $(formId).submit();
+      }
+    })
+  @else
+    var title = 'No puede anular factura';
+    var texto = "Debe tener un certificado ATV válido para poder hacer anulaciones y generar nota de crédito.";
+    Swal.fire({
+      title: title,
+      text: texto,
+      type: 'warning',
+      showCloseButton: true,
+      confirmButtonText: 'Ok'
+    });
+  @endif
+
+  
   
 }
 

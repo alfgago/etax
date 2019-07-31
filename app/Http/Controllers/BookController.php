@@ -11,6 +11,11 @@ use App\Http\Controllers\CacheController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 
+/**
+ * @group Controller - Libro contable
+ *
+ * Funciones de BookController
+ */
 class BookController extends Controller
 {
   

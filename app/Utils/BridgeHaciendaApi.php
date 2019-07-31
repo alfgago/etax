@@ -51,7 +51,7 @@ class BridgeHaciendaApi
             $company = $invoice->company;
             if ($requestData !== false) {
                 $client = new Client();
-                Log::info('Enviando parametros  API HACIENDA -->>' . $invoice->id);
+                Log::info("Enviando parametros  API HACIENDA -->> InvoiceID: $invoice->id, CompanyID: $invoice->id, CompanyName: $invoice->business_name" );
                 $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice43/signxml', [
                     'headers' => [
                         'Auth-Key'  => config('etax.api_hacienda_key'),
@@ -85,7 +85,7 @@ class BridgeHaciendaApi
                         Log::info('XML Guardado -->>' . 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml");
 
                        
-                        $file = $invoiceUtils->sendInvoiceEmail( $invoice, $company, $path );
+                        $file = $invoiceUtils->sendInvoiceEmail($invoice, $company, $path);
                         //Send to queue invoice
                         ProcessInvoice::dispatch($invoice->id, $company->id, $token)
                             ->onConnection(config('etax.queue_connections'))->onQueue('invoices');

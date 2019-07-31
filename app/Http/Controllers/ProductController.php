@@ -9,6 +9,11 @@ use App\UnidadMedicion;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
+/**
+ * @group Controller - Productos
+ *
+ * Funciones de ProductController
+ */
 class ProductController extends Controller
 {
   

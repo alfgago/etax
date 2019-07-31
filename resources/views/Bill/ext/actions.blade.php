@@ -37,3 +37,4 @@
   </form>
 
 @endif
+<a link="/facturas-recibidas/validar/{{ $data->id }}" titulo="Verificación Compra"   class="text-success mr-2" onclick="validarPopup(this);" data-toggle="modal" data-target="#modal_estandar"><i class="fa fa-check" aria-hidden="true"></i></a>

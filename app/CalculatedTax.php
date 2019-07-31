@@ -15,6 +15,11 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @group Model - Cálculo de impuestos
+ *
+ * Funciones de CalculatedTax.
+ */
 class CalculatedTax extends Model
 {
     use SoftDeletes;
@@ -35,6 +40,11 @@ class CalculatedTax extends Model
         return $this->hasOne(Book::class, 'calculated_tax_id');
     }
     
+    /**
+     * parsedIvaData
+     * Devuelve los datos de iva_data en formato de array
+     * @return \Illuminate\Http\Response
+     */
     public function parsedIvaData() {
       try{
         return json_decode($this->iva_data);
@@ -43,6 +53,13 @@ class CalculatedTax extends Model
       }
     }
     
+    /**
+     * applyRatios
+     * Aplica los ratios operativos y devuelve el valor con el cálculo realizado según el porcentaje indicado
+     * @bodyParam porc required Campo de porcentaje (1, 2, 13, 4). En base a este campo, aplica los ratios respectivos
+     * @bodyParam value required Campo de valor al cual se le aplican los ratios operativos.
+     * @return \Illuminate\Http\Response
+     */
     public function applyRatios( $porc, $value ) {
       
       $company = currentCompanyModel();
@@ -77,12 +94,13 @@ class CalculatedTax extends Model
     
     
     /**
+     * calcularFacturacionPorMesAno
      * Calcula y devuelve los datos del mes para dashboard y reportes
      *
-     * @param  int $month
-     * @param  int $year
-     * @param  int $lastBalance
-     * @param  int $prorrataOperativa
+     * @bodyParam month required
+     * @bodyParam year required
+     * @bodyParam lastBalance required
+     * @bodyParam prorrataOperativa required
      * @return App\CalculatedTax
      */
     public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa ) {
@@ -139,7 +157,17 @@ class CalculatedTax extends Model
       
     }
     
-    //Recibe fecha de inicio y fecha de fin en base a las cuales se desea calcular la prorrata.
+    //
+    /**
+     * calcularFacturacion
+     * Recibe fecha de inicio y fecha de fin en base a las cuales se desea calcular la prorrata.
+     *
+     * @bodyParam month required
+     * @bodyParam year required
+     * @bodyParam lastBalance required
+     * @bodyParam prorrataOperativa required
+     * @return App\CalculatedTax
+     */
     public function calcularFacturacion( $month, $year, $lastBalance, $prorrataOperativa ) {
 
       $currentCompany = currentCompanyModel();
@@ -173,7 +201,8 @@ class CalculatedTax extends Model
     }
   
     /**
-    *    Recorre todas las facturas emitidas y aumenta los montos correspondientes.
+    * setDatosEmitidos
+    * Recorre todas las facturas emitidas y aumenta los montos correspondientes.
     **/
     public function setDatosEmitidos ( $month, $year, $company ) {
       
@@ -194,6 +223,7 @@ class CalculatedTax extends Model
       $basesVentasConIdentificacion = 0;
       $ivasVentasConIdentificacion = 0;
       $ivaRetenido = 0;
+      $sumIvaSinAplicar = 0;
       
       $filterTotales = false;
       if( $month == 0 && $year == 2018 && currentCompanyModel()->first_prorrata_type == 2 ) {
@@ -208,7 +238,7 @@ class CalculatedTax extends Model
                   ->where('year', $year)
                   ->where('month', $month)
                   ->chunk( 2500,  function($invoiceItems) use ($year, $month, &$company, &$ivaData, $filterTotales, $arrayActividades,
-       &$invoicesTotal, &$invoicesSubtotal, &$totalInvoiceIva, &$totalClientesContadoExp, &$totalClientesCreditoExp, &$totalClientesContadoLocal, &$totalClientesCreditoLocal,&$ivaRetenido,
+       &$invoicesTotal, &$invoicesSubtotal, &$totalInvoiceIva, &$totalClientesContadoExp, &$totalClientesCreditoExp, &$totalClientesContadoLocal, &$totalClientesCreditoLocal, &$ivaRetenido, &$sumIvaSinAplicar,
        &$sumRepercutido1, &$sumRepercutido2, &$sumRepercutido3, &$sumRepercutido4, &$sumRepercutidoExentoConCredito, &$sumRepercutidoExentoSinCredito, &$basesVentasConIdentificacion, &$ivasVentasConIdentificacion
       ) {
         
@@ -227,7 +257,6 @@ class CalculatedTax extends Model
               $invoiceItems[$i]->fixIvaType();
               
               $subtotal = $invoiceItems[$i]->subtotal * $currInvoice->currency_rate;
-              //$currentTotal = $invoiceItems[$i]->total * $currInvoice->currency_rate;
               $ivaType = $invoiceItems[$i]->iva_type;
               $prodType = $invoiceItems[$i]->product_type;
               $invoiceIva = $invoiceItems[$i]->iva_amount * $currInvoice->currency_rate;
@@ -256,6 +285,7 @@ class CalculatedTax extends Model
               
               $ivaType = $ivaType ? $ivaType : 'B103';
               
+              //Procesa los códigos que llevan IVA como costo dentro del subtotal de la factura.
               if( $ivaType == '200' || $ivaType == '201' || $ivaType == '240' || $ivaType == '250' || $ivaType == '260' || $ivaType == '245' || 
                   $ivaType == 'B200' || $ivaType == 'B201' || $ivaType == 'B240' || $ivaType == 'B250' || $ivaType == 'B260' || $ivaType == 'B245' ||
                   $ivaType == 'S200' || $ivaType == 'S201' || $ivaType == 'S240' || $ivaType == 'S250' || $ivaType == 'S260' || $ivaType == 'S245' ){
@@ -263,7 +293,7 @@ class CalculatedTax extends Model
                 $invoiceIva = 0;
                 $sumRepercutidoExentoSinCredito += $subtotal;
               }else if( $invoiceItems[$i]->is_identificacion_especifica ) {
-                $basesVentasConIdentificacion += $subtotal;
+                $basesVentasConIdentificacion += $subtotal; //Las bases con id. específica no se incluyen en el cálculo de iva con prorrata, son 100% acreditables.
               }
               
               //sum los del 1%
@@ -301,6 +331,11 @@ class CalculatedTax extends Model
                 $invoiceIva = 0;
                 $sumRepercutido3 += $subtotal;
                 $sumRepercutidoExentoConCredito += $subtotal;
+              }
+              //No cuenta los que no llevan IVA
+              if( $ivaType == 'S300' || $ivaType == 'B300' ){
+                $subtotal = $subtotal + $invoiceIva;
+                $sumIvaSinAplicar += $subtotal;
               }
               
               //Suma la transitoria de canasta básica
@@ -378,9 +413,9 @@ class CalculatedTax extends Model
             }
             
           }catch( \Exception $ex ){
-            Log::error('Error leer factura para cálculo' . $ex->getMessage());
+            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }catch( \Throwable $ex ){
-            Log::error('Error leer factura para cálculo' . $ex->getMessage());
+            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }
         }
         
@@ -401,6 +436,7 @@ class CalculatedTax extends Model
       $this->sum_repercutido4 = $sumRepercutido4;
       $this->sum_repercutido_exento_con_credito = $sumRepercutidoExentoConCredito;
       $this->sum_repercutido_exento_sin_credito = $sumRepercutidoExentoSinCredito;
+      $this->sum_iva_sin_aplicar = $sumIvaSinAplicar;
       $this->bases_ventas_con_identificacion = $basesVentasConIdentificacion;
       $this->iva_retenido = $ivaRetenido;
       
@@ -411,7 +447,7 @@ class CalculatedTax extends Model
     *   Recorre todas las facturas recibidas y aumenta los montos correspondientes.
     **/
     public function setDatosSoportados ( $month, $year, $company, $query, $singleBill = false ) {
-      $countBills = $query->count();
+      $countBills = Bill::where('company_id', $company)->where('year', $year)->where('month', $month)->count();
   
       $billsTotal = 0;
       $billsSubtotal = 0;
@@ -592,9 +628,9 @@ class CalculatedTax extends Model
               
             }  
           }catch( \Exception $ex ){
-            Log::error('Error leer factura para cálculo' . $ex->getMessage());
+            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }catch( \Throwable $ex ){
-            Log::error('Error leer factura para cálculo' . $ex->getMessage());
+            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }
           
         }
@@ -636,10 +672,11 @@ class CalculatedTax extends Model
     public function setCalculosIVA( $prorrataOperativa, $lastBalance ) {
       
       $company = currentCompanyModel();
+      $subtotalAplicado =  $this->invoices_subtotal - $this->sum_iva_sin_aplicar;
       
       //Determina numerador y denominador de la prorrata.
-      $numeradorProrrata = $this->invoices_subtotal - $this->sum_repercutido_exento_sin_credito;
-      $denumeradorProrrata = $this->invoices_subtotal;
+      $numeradorProrrata = $subtotalAplicado - $this->sum_repercutido_exento_sin_credito;
+      $denumeradorProrrata = $subtotalAplicado;
       
       //Otras variables relevantes
       $prorrata = 1;
@@ -677,12 +714,12 @@ class CalculatedTax extends Model
         $ratio4 = round($ratio4, 4);
         
         //Define los ratios por tipo para guardar
-        $fakeRatio1 = $this->sum_repercutido1 / $this->invoices_subtotal;
-        $fakeRatio2 = $this->sum_repercutido2 / $this->invoices_subtotal;
-        $fakeRatio3 = ($this->sum_repercutido3-$this->sum_repercutido_exento_con_credito) / $this->invoices_subtotal;
-        $fakeRatio4 = $this->sum_repercutido4 / $this->invoices_subtotal;
-        $fakeRatioExentoSinCredito = $this->sum_repercutido_exento_sin_credito / $this->invoices_subtotal;
-        $fakeRatioExentoConCredito = $this->sum_repercutido_exento_con_credito / $this->invoices_subtotal;
+        $fakeRatio1 = $this->sum_repercutido1 / $subtotalAplicado;
+        $fakeRatio2 = $this->sum_repercutido2 / $subtotalAplicado;
+        $fakeRatio3 = ($this->sum_repercutido3-$this->sum_repercutido_exento_con_credito) / $subtotalAplicado;
+        $fakeRatio4 = $this->sum_repercutido4 / $subtotalAplicado;
+        $fakeRatioExentoSinCredito = $this->sum_repercutido_exento_sin_credito / $subtotalAplicado;
+        $fakeRatioExentoConCredito = $this->sum_repercutido_exento_con_credito / $subtotalAplicado;
         
         //Calcula prorrata
         $prorrata = $numeradorProrrata / $denumeradorProrrata;
@@ -908,6 +945,7 @@ class CalculatedTax extends Model
 			$this->sum_repercutido_exento_con_credito = 0;
 			$this->sum_repercutido_exento_sin_credito = 0;
 			$this->bases_ventas_con_identificacion = 0;
+			$this->sum_iva_sin_aplicar = 0;
 
 			$this->count_bills = 0;
 			$this->bills_total = 0;
@@ -945,6 +983,7 @@ class CalculatedTax extends Model
     			$this->sum_repercutido4 += $calculosAnteriores[$i]->sum_repercutido4;
     			$this->sum_repercutido_exento_con_credito += $calculosAnteriores[$i]->sum_repercutido_exento_con_credito;
     			$this->sum_repercutido_exento_sin_credito += $calculosAnteriores[$i]->sum_repercutido_exento_sin_credito;
+    			$this->sum_iva_sin_aplicar += $calculosAnteriores[$i]->sum_iva_sin_aplicar;
     			$this->bases_ventas_con_identificacion += $calculosAnteriores[$i]->bases_ventas_con_identificacion;
     
     			$this->count_bills += $calculosAnteriores[$i]->count_bills;
@@ -1004,15 +1043,14 @@ class CalculatedTax extends Model
               $typeVarAct8 = "$act->codigo-$varName8";
               $typeVarAct3 = "$act->codigo-$varName3";
               
-              try{
-        			  $ivaData->$typeVarAct  += $ivaDataAnterior->$typeVarAct ;
-        			  $ivaData->$typeVarAct0 += $ivaDataAnterior->$typeVarAct0 ;
-        			  $ivaData->$typeVarAct1 += $ivaDataAnterior->$typeVarAct1 ;
-        			  $ivaData->$typeVarAct2 += $ivaDataAnterior->$typeVarAct2 ;
-        			  $ivaData->$typeVarAct4 += $ivaDataAnterior->$typeVarAct4 ;
-        			  $ivaData->$typeVarAct8 += $ivaDataAnterior->$typeVarAct8 ;
-        			  $ivaData->$typeVarAct3 += $ivaDataAnterior->$typeVarAct3 ;
-              }catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct  += $ivaDataAnterior->$typeVarAct; }catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct0 += $ivaDataAnterior->$typeVarAct0;}catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct1 += $ivaDataAnterior->$typeVarAct1;}catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct2 += $ivaDataAnterior->$typeVarAct2;}catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct4 += $ivaDataAnterior->$typeVarAct4;}catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct8 += $ivaDataAnterior->$typeVarAct8;}catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct3 += $ivaDataAnterior->$typeVarAct3;}catch(\Throwable $e){}
+              
             }
     			}
     			
@@ -1042,6 +1080,7 @@ class CalculatedTax extends Model
 			$this->sum_repercutido4 = 0;
 			$this->sum_repercutido_exento_con_credito = 0;
 			$this->sum_repercutido_exento_sin_credito = 0;
+			$this->sum_iva_sin_aplicar = 0;
 			$this->bases_ventas_con_identificacion = 0;
 
 			$this->count_bills = 0;

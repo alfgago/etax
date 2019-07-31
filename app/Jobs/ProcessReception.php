@@ -88,7 +88,7 @@ class ProcessReception implements ShouldQueue
                         if (isset($response['status']) && $response['status'] == 200) {
                             Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
                             $date = Carbon::now();
-                            $bill->hacienda_status = 3;
+                            $bill->hacienda_status = '03';
                             $bill->save();
                             $path = 'empresa-' . $company->id_number .
                                 "/aceptaciones/$date->year/$date->month/$bill->document_key.xml";
@@ -101,7 +101,7 @@ class ProcessReception implements ShouldQueue
                                 $xml = new XmlHacienda();
                                 $xml->invoice_id = 0;
                                 $xml->bill_id = $bill->id;
-                                $xml->xml = $path;
+                                $xml->xml_reception = $path;
                                 $xml->save();
                                 $xmlExtract = ltrim($response['data']['response'], '\n');
                                 Mail::to($bill->provider_email)->cc($company->email)->send(new ReceptionNotification([
@@ -237,7 +237,7 @@ class ProcessReception implements ShouldQueue
 
     private function setDetails($data) {
         try {
-            $details = null;
+            $details = [];
             foreach ($data as $key => $value) {
                 $details[$key] = array(
                     'cantidad' => $value['item_count'] ?? '',

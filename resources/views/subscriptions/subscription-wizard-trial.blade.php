@@ -252,7 +252,7 @@
         var total = 0;
         var total_extras = 0;
         var recurrencia_texto = "";
-        
+
           if(cantidad > 25){
               total_extras = (cantidad - 25) * precio_25;
               cantidad = 25;
@@ -282,8 +282,6 @@
           var precioFinal = parseFloat(total).toFixed(2);
           $(".precio-text").text('$' + precioFinal);
           $(".recurrencia-text").text('/ '+ recurrencia_texto);
-        
-
     }
 
 

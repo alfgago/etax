@@ -55,7 +55,7 @@ class ProcessInvoice implements ShouldQueue
             $invoice = Invoice::find($this->invoiceId);
             $company = Company::find($this->companyId);
             if ( $company->atv_validation ) {
-                if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '08' || '09'))) {
+                if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09'))) {
                     if ($invoice->xml_schema == 43) {
                         $requestDetails = $invoiceUtils->setDetails43($invoice->items);
                         $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
@@ -85,7 +85,7 @@ class ProcessInvoice implements ShouldQueue
                         ]);
                         $response = json_decode($result->getBody()->getContents(), true);
                         $date = Carbon::now();
-                        Log::info('Response Api Hacienda '. json_encode($response));
+                        Log::info("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
                         if (isset($response['status']) && $response['status'] == 200) {
                             Log::info('API HACIENDA 200 :'. $invoice->document_number);
                             $invoice->hacienda_status = '03';
@@ -196,7 +196,7 @@ class ProcessInvoice implements ShouldQueue
 
     private function setDetails($data) {
         try {
-            $details = null;
+            $details = [];
             foreach ($data as $key => $value) {
                 $details[$key] = array(
                     'cantidad' => $value['item_count'] ?? '',

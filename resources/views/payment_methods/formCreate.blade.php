@@ -1,23 +1,16 @@
 <style>
-    .vl {
-        margin-left: 5%;
-        border-left: 2px solid black;
-        height: 400px;
-        margin-right: 1%;
-    }
-    .newCard{
-        margin-left: 2%;
-        margin-top: 15%;
+    .jp-card-container {
+        margin-left: 0 !important;
     }
 </style>
-<div class="col-md-12 offset-1">
+<div class="col-md-12">
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-6 pr-3 borde-derecho">
             <div class="form-row">
                 <div class="form-group col-md-12" style="white-space: nowrap;">
                     <label for="number">N&#250;mero de tarjeta</label>
                     <input type="text" inputmode="numeric" class="form-control checkEmpty" name="number" id="number" placeholder="N&#250;mero de tarjeta:" required onblur="valid_credit_card(this.value);">
-                    <label id="alertCardValid" class="alertCardValid"></label>
+
                 </div>
                 <div class="form-group col-md-6" style="white-space: nowrap;">
                     <label for="expiry">Expira</label>
@@ -39,12 +32,12 @@
                 <input type="text" hidden id="cardMonth" name="cardMonth">
                 <input type="text" hidden id="cardYear" name="cardYear">
                 <div class="btn-holder">
-                    <h6>Nota: Los datos sensibles de su tarjeta no se guardar&aacute;n en nuestra base de datos, ser&aacute;n utilizados solamente <br> para procesar sus pagos</h6>
+                    <div class="description">Nota: Los datos sensibles de su tarjeta no se guardar&aacute;n en nuestra base de datos, ser&aacute;n utilizados solamente para procesar sus pagos</div>
+                    <p id="alertCardValid" class="alertCardValid"></p>                    
                 </div>
             </div>
         </div>
-        <div class="vl"></div>
-        <div class="col-md-5">
+        <div class="col-md-6 pl-3">
             <div class='card-wrapper newCard'></div>
         </div>
     </div>

@@ -37,6 +37,7 @@
               <th data-priority="5">Monto IVA</th>
               <th data-priority="4">Total</th>
               <th data-priority="6">F. Generada</th>
+              <th data-priority="6">Estado</th>
               <th data-priority="1">Acciones</th>
             </tr>
           </thead>
@@ -69,11 +70,12 @@ $(function() {
       { data: 'document_number', name: 'document_number' },
       { data: 'provider', name: 'provider.fullname' },
       { data: 'document_type', name: 'document_type' },
-      { data: 'currency', name: 'currency', orderable: false, searchable: false },
+      { data: 'moneda', name: 'currency', orderable: false, searchable: false },
       { data: 'subtotal', name: 'subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
       { data: 'iva_amount', name: 'iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
       { data: 'total', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
       { data: 'generated_date', name: 'generated_date' },
+      { data: 'hacienda_status', name: 'hacienda_status' },
       { data: 'actions', name: 'actions', orderable: false, searchable: false },
     ],
     language: {
@@ -156,6 +158,22 @@ function confirmRecover( id ) {
       $(formId).submit();
     }
   })
+  
+}
+
+function validarPopup(obj) {
+  
+    var link = $(obj).attr("link");
+    var titulo = $(obj).attr("titulo");
+    $("#titulo_modal_estandar").html(titulo);
+    $.ajax({
+       type:'GET',
+       url:link,
+       success:function(data){
+          $("#body_modal_estandar").html(data);
+       }
+  
+    });
   
 }
   

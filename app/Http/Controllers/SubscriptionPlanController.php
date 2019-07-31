@@ -13,6 +13,11 @@ use App\Exports\UsersExport;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @group Controller - Planes de suscripción
+ *
+ * Funciones de SubscriptionPlanController.
+ */
 class SubscriptionPlanController extends Controller
 {
     
@@ -27,8 +32,8 @@ class SubscriptionPlanController extends Controller
     } 
         
     public function changePlan() {
-        
         $plans = SubscriptionPlan::get();
+        //$plans = EtaxProducts::where('is_subscription', true)->with('plan')->get();
         return view( 'subscriptions/change-plan', compact('plans') );
         
     }
@@ -261,6 +266,7 @@ class SubscriptionPlanController extends Controller
 
     public function confirmCodeAccount($codigo){
         $coupons = Coupon::where('code',$codigo)->where('type',1)->count();
+        $retorno = 0;
         if($coupons != 0){
             $coupon = Coupon::where('code',$codigo)->where('type',1)->first();
             $retorno = $coupon->amount;

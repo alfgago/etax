@@ -25,12 +25,16 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
+/**
+ * @group Controller - Facturas de compra
+ *
+ * Funciones de BillController
+ */
 class BillController extends Controller
 {
   
     /**
      * Create a new controller instance.
-     *
      * @return void
      */
     public function __construct()
@@ -39,8 +43,8 @@ class BillController extends Controller
     }
   
     /**
-     * Display a listing of the resource.
-     *
+     * Index
+     * Index de facturas recibidas. Usa indexData para cargar las facturas con AJAX
      * @return \Illuminate\Http\Response
      */
     public function index()
@@ -49,8 +53,9 @@ class BillController extends Controller
     }
     
     /**
-     * Returns the required ajax data.
-     *
+     * Index Data
+     * Funcion AJAX para cargar data de las facturas.
+     * @bodyParam filtro Campo de filtro por tipo de documento. Por defecto es un 01. Si recibe 0 devuelve las eliminadas.
      * @return \Illuminate\Http\Response
      */
     public function indexData( Request $request ) {
@@ -88,6 +93,27 @@ class BillController extends Controller
                     'data' => $bill
                 ])->render();
             }) 
+            ->editColumn('moneda', function($bill) {
+                return $bill->currency == 'CRC' ? $bill->currency : "$bill->currency ($bill->currency_rate)";
+            })
+            ->editColumn('hacienda_status', function( $bill) {
+                if ($bill->hacienda_status == '03') {
+                    return '<div class="green">  <span class="tooltiptext">Aceptada</span></div>
+                        <a href="/facturas-recibidas/query-bill/'.$bill->id.'". title="Consultar factura en hacienda" class="text-dark mr-2 hidden"> 
+                            <i class="fa fa-refresh" aria-hidden="true"></i>
+                          </a>';
+                }
+                if ($bill->hacienda_status == '04') {
+                    return '<div class="red"> <span class="tooltiptext">Rechazada</span></div>
+                        <a href="/facturas-recibidas/query-bill/'.$bill->id.'". title="Consultar factura en hacienda" class="text-dark mr-2 hidden"> 
+                            <i class="fa fa-refresh" aria-hidden="true"></i>
+                        </a>';
+                }
+                return '<div class="yellow"><span class="tooltiptext">Esperando respuesta de Hacienda</span></div>
+                    <a href="/facturas-recibidas/query-bill/'.$bill->id.'". title="Consultar factura en hacienda" class="text-dark mr-2 hidden"> 
+                        <i class="fa fa-refresh" aria-hidden="true"></i>
+                      </a>';
+            })
             ->editColumn('provider', function(Bill $bill) {
                 return $bill->providerName();
             })
@@ -97,12 +123,13 @@ class BillController extends Controller
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');
             })
-            ->rawColumns(['actions'])
+            ->rawColumns(['actions', 'hacienda_status'])
             ->toJson();
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Crear factura existente
+     * Muestra la pantalla para crear facturas existentes
      *
      * @return \Illuminate\Http\Response
      */
@@ -117,9 +144,47 @@ class BillController extends Controller
     }
 
     /**
+     * Guardar factura existente
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @bodyParam document_key required Clave de documento
+     * @bodyParam document_number required Consecutivo de documento
+     * @bodyParam sale_condition required Condición de venta de Hacienda
+     * @bodyParam payment_type required Método de pago
+     * @bodyParam retention_percent required Porcentaje de retención aplicado
+     * @bodyParam credit_time required Plazo de crédito
+     * @bodyParam buy_order required Órden de compra
+     * @bodyParam other_reference required Referencias
+     * @bodyParam send_emails required Correos electrónicos separados por coma
+     * @bodyParam commercial_activity required Actividad comercial asignada
+     * @bodyParam description required Descripción/Notas de la factura
+     * @bodyParam currency required Moneda, ejemplo: USD o CRC
+     * @bodyParam currency_rate required Tipo de cambio. Por defecto e 1
+     * @bodyParam subtotal required Subtotal de la factura
+     * @bodyParam total required Total de la factura
+     * @bodyParam iva_amount required Monto correspondiente al IVA
+     * @bodyParam generated_date required Fecha de generacion
+     * @bodyParam hora required Hora de generación
+     * @bodyParam due_date required Fecha de vencimiento
+     * @bodyParam items required Array con item_number, code, name, product_type, measure_unit, item_count, unit_price, subtotal, total, discount_type, discount, iva_type, iva_percentage, iva_amount, tariff_heading, is_exempt
+     * @bodyParam client_id required ID del cliente. Usar -1 si desea crear uno nuevo
+     * @bodyParam tipo_persona required No obligatorio. Tipo de persona de proveedor nuevo
+     * @bodyParam id_number required No obligatorio. Cédula de proveedor nuevo
+     * @bodyParam code required No obligatorio. Código de proveedor nuevo
+     * @bodyParam email required No obligatorio. Correo proveedor nuevo
+     * @bodyParam billing_emails required No obligatorio. Lista de correos separados por coma de proveedor nuevo
+     * @bodyParam first_name required No obligatorio. Primer nombre proveedor nuevo
+     * @bodyParam last_name required No obligatorio. Apellido de proveedor nuevo
+     * @bodyParam last_name2 required No obligatorio. Segundo apellido de proveedor nuevo
+     * @bodyParam country required No obligatorio. País de proveedor nuevo
+     * @bodyParam state required No obligatorio. Provincia de proveedor nuevo
+     * @bodyParam city required No obligatorio. Cantón de proveedor nuevo
+     * @bodyParam district required No obligatorio. Distrito de proveedor nuevo
+     * @bodyParam neighborhood required No obligatorio. Barrio de proveedor nuevo
+     * @bodyParam zip required No obligatorio. Código postal de proveedor nuevo
+     * @bodyParam address required No obligatorio. Dirección de proveedor nuevo
+     * @bodyParam phone required No obligatorio. Teléfono de proveedor nuevo
+     * @bodyParam es_exento required No obligatorio. Indicar si es exento o no.
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -155,6 +220,7 @@ class BillController extends Controller
     }
 
     /**
+     * Mostrar factura existente
      * Display the specified resource.
      *
      * @param  \App\Bill  $bill
@@ -174,6 +240,7 @@ class BillController extends Controller
     }
 
     /**
+     * Editar factura
      * Show the form for editing the specified resource.
      *
      * @param  \App\Bill  $bill
@@ -197,6 +264,7 @@ class BillController extends Controller
     }
 
     /**
+     * Actualizar factura
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -232,7 +300,12 @@ class BillController extends Controller
         return redirect('/facturas-recibidas');
     }
     
-    
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Bill  $bill
+     * @return \Illuminate\Http\Response
+     */
     public function export() {
         return Excel::download(new BillExport(), 'documentos-recibidos.xlsx');
     }
@@ -472,29 +545,19 @@ class BillController extends Controller
         $company = Company::select('commercial_activities')->where('id', $current_company)->first();
         $activities_company = explode(", ", $company->commercial_activities);
         $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
-        $bills = Bill::where('id', $id)->first();
+        $bill = Bill::find($id);
         $codigos_etax = CodigoIvaSoportado::get();
         $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
-        $data = array(
-                "bills" => $bills,
-                "commercial_activities" => $commercial_activities,
-                "codigos_etax" => $codigos_etax,
-                "categoria_productos" => $categoria_productos,
-            );
-        //dd($data);
-        return view('Bill/validar', [
-          'data' => $data
-        ]);
+
+        return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos'));
     }
 
-    public function guardar_validar(Request $request)
+    public function GuardarValidar(Request $request)
     {
         $bill = Bill::findOrFail($request->bill);
         
         $bill->activity_company_verification = $request->actividad_comercial;
-        $bill->codigo_iva_verification = $request->codigo_etax;
         $bill->is_code_validated = true;
-
         foreach( $request->items as $item ) {
             BillItem::where('id', $item['id'])
             ->update([
@@ -508,7 +571,7 @@ class BillController extends Controller
         
         clearBillCache($bill);
 
-        return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
+        return back()->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
 
     }
     
@@ -668,7 +731,7 @@ class BillController extends Controller
                 ])->render();
             }) 
             ->editColumn('total', function(Bill $bill) {
-                $total = $bill->total;
+                $total = number_format($bill->total,2);
                 return "$bill->currency $total";
             })
             ->editColumn('accept_total_factura', function(Bill $bill) {
@@ -736,7 +799,7 @@ class BillController extends Controller
                         $bill->save();
                         $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
                         $company->save();
-                        $company->last_document_rec = getDocReference($company->last_rec_ref_number);
+                        $company->last_document_rec = getDocReference('05',$company->last_rec_ref_number);
                         $company->save();
                         $apiHacienda->acceptInvoice($bill, $tokenApi);
                     }
@@ -833,8 +896,41 @@ class BillController extends Controller
             }
         }
         
-        dd($bills);
         return true;
+    }
+    
+    public function queryBill($id) {
+        try {
+            /*
+            $bill = Bill::findOrFail($id);
+            $this->authorize('update', $bill);
+
+            $apiHacienda = new BridgeHaciendaApi();
+            $tokenApi = $apiHacienda->login(false);
+
+            if ($tokenApi !== false) {
+                $company = currentCompanyModel();
+                $result = $apiHacienda->queryHacienda($bill, $tokenApi, $company);
+                if ($result == false) {
+                    return redirect()->back()->withErrors('El servidor de Hacienda es inaccesible en este momento, o el comprobante no ha sido recibido. Por favor intente de nuevo más tarde o contacte a soporte.');
+                }
+                $filename = 'AHC-'.$bill->document_key . '.xml';
+                if( ! $bill->document_key ) {
+                    $filename = $bill->document_number . '-' . $bill->provider_id . '.xml';
+                }
+                $headers = [
+                    'Content-Type' => 'application/xml',
+                    'Content-Description' => 'File Transfer',
+                    'Content-Disposition' => "attachment; filename={$filename}",
+                    'filename'=> $filename
+                ];
+                return response($result, 200, $headers);
+            }
+            */
+        } catch (\Exception $e) {
+            Log::error("Error consultado factura -->" .$e);
+            return redirect()->back()->withErrors('Error al consultar comprobante en hacienda');
+        }
     }
     
 }

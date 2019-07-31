@@ -162,19 +162,24 @@ if (!function_exists('currentCompanyModel')) {
     function currentCompanyModel() {
 
         $user = auth()->user();
-        if ( !$user->companies->count() ) {
-            auth()->user()->addCompany();
+        
+        $cacheKey = "cache-currentcompany-$user->id";
+        if ( !Illuminate\Support\Facades\Cache::has($cacheKey) ) {
+                
+            if ( !$user->companies->count() ) {
+                auth()->user()->addCompany();
+            }
+            
+            $company = $user->currentTeam->company;
+            if ( !$company ) {
+                $companyId = auth()->user()->companies->first()->id;
+                session( ['current_company' => $companyId] );
+                $company = App\Company::find($companyId);
+            }
+            Illuminate\Support\Facades\Cache::put($cacheKey, $company, now()->addMinutes(15));
         }
         
-        $company = $user->currentTeam->company;
-        
-        if ( !$company ) {
-            $companyId = auth()->user()->companies->first()->id;
-            session( ['current_company' => $companyId] );
-            $company = App\Company::find($companyId);
-        }
-
-        return $company;
+        return Illuminate\Support\Facades\Cache::get($cacheKey);;
     }
 
 }

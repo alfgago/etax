@@ -12,6 +12,7 @@ use Lab404\Impersonate\Models\Impersonate;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use App\Coupon;
+use App\SubscriptionPlan;
 
 class User extends Authenticatable {
 
@@ -74,6 +75,8 @@ class User extends Authenticatable {
         if( 
             $this->user_name == "alfgago" || 
             $this->user_name == "alfredo@5e.cr" || 
+            $this->user_name == "enrique@5e.cr" || 
+            $this->user_name == "juan@5e.cr" || 
             $this->user_name == "aligguillen@gmail.com" 
         ) {
             $allow = true;
@@ -113,18 +116,13 @@ class User extends Authenticatable {
 
         $subscription = getCurrentSubscription();
         
-        $availableCompanies = 25;
-        
-        /*if ( $subscription->num_companies == 0 ) {
-            return -1;
-        } else {
-            $countRegistered = \App\Company::where('user_id', $user_id)->where('subscription_id', $subscription->id)->count();
-            $availableCompanies += $subscription->num_companies - $countRegistered;
-        }*/
+        $availableCompanies = 1;
+        if ( $subscription->plan->num_companies ) {
+            return $subscription->plan->num_companies;
+        }
 
         return $availableCompanies;
-        
-        
+
     }
     
     public function createKlapUser() {
@@ -157,10 +155,10 @@ class User extends Authenticatable {
     
     /*public function isContador() {
         try{
-            $productId = getCurrentSubscription()->etax_product_id;
-            if( $productId == 7 ) {
-                return true;
-            }
+            $company = currentCompanyModel();
+            $plan_tier = "Pro (".$company->user_id.")";
+            $contador = SubscriptionPlan::where('plan_tier',$plan_tier)->count();
+            return $contador;
         }catch( \Throwable $e) { return false; }
         
         return false;

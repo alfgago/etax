@@ -23,8 +23,14 @@ use App\Mail\NewUser;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use stdClass;
 
+/**
+ * @group Controller - Empresa
+ *
+ * Funciones de CompanyController
+ */
 class CompanyController extends Controller {
     
     use SoftDeletes;
@@ -130,6 +136,7 @@ class CompanyController extends Controller {
         );
 
         auth()->user()->attachTeam($team);
+        Cache::forget("cache-currentcompany-$userId");
 
         return redirect()->route('User.companies')->withMessage('La compañía ha sido agregada con éxito');
     }
@@ -227,7 +234,7 @@ class CompanyController extends Controller {
 
         /* Only owner of company can edit that company */
         if ( !auth()->user()->isOwnerOfTeam($team) ) {
-            abort(401);
+            redirect()->back()->withError('Usted no tiene permisos para editar el equipo.');
         }
         
         return view('Company.edit-team', compact('company', 'users', 'team'))->withTeam($team);
@@ -304,6 +311,9 @@ class CompanyController extends Controller {
         }
         
         $company->save();
+        
+        $userId = auth()->user()->id;
+        Cache::forget("cache-currentcompany-$userId");
 
         //Update Team name based on company
         /*$team->name = "(".$company->id.") " . $company->id_number;
@@ -345,6 +355,7 @@ class CompanyController extends Controller {
         $company->first_prorrata_type = $request->first_prorrata_type;
         $company->use_invoicing = $request->use_invoicing;
         $company->card_retention  =  $request->card_retention;
+        $company->default_product_category = $request->default_category_producto_code;
         
         if( $company->first_prorrata_type == 1 ) {
             $company->operative_prorrata = $request->first_prorrata;
@@ -357,6 +368,8 @@ class CompanyController extends Controller {
         $company->save();
         
         clearLastTaxesCache( $company->id, 2018);
+        $userId = auth()->user()->id;
+        Cache::forget("cache-currentcompany-$userId");
 
         return redirect()->route('Company.edit_config')->withMessage('La configuración de la empresa ha sido actualizada.');
     }
@@ -443,13 +456,12 @@ class CompanyController extends Controller {
         }
 
         try {
+            $user = auth()->user();
             $companyId = $request->companyId;
             $team = Team::where( 'company_id', $companyId )->first();
-	        auth()->user()->switchTeam( $team );
-        } catch( UserNotInTeamException $e )
-        {
-        	
-        }
+	        $user->switchTeam( $team );
+	        Cache::forget("cache-currentcompany-$user->id");
+        } catch( UserNotInTeamException $e ) { }
         
     }
     
@@ -476,7 +488,7 @@ class CompanyController extends Controller {
         $producto = $sale->product;
         $availableInvoices = $company->getAvailableInvoices( false, false );
 
-        $productosEtax = EtaxProducts::where('is_subscription', 0)->where('id', '!=', 15)->get(); //El 15 es el producto de cálculos de prorrata, creado por seeders.
+        $productosEtax = EtaxProducts::where('is_subscription', 0)->whereNotIn('id', [15, 16])->get(); //El 15 es el producto de cálculos de prorrata, creado por seeders.
         $paymentMethods = PaymentMethod::where('user_id', auth()->user()->id)->get();
         $invoices = $availableInvoices->monthly_quota - $availableInvoices->current_month_sent;
         

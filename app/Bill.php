@@ -322,8 +322,13 @@ class Bill extends Model
         $bill->currency_rate = $tipoCambio;
         
         $bill->description = 'XML Importado';
-        $bill->document_type = $arr['TipoDoc'] ?? '01';
+
+        if(strlen($arr['Clave']) == 50){
+            $tipoDocumento = substr($arr['Clave'], 29, 2);
+        }
+        $bill->document_type = $tipoDocumento ?? '01';
         $bill->total = $arr['ResumenFactura']['TotalComprobante'];
+        
         
         $authorize = true;
         if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
@@ -336,6 +341,11 @@ class Bill extends Model
         $bill->generation_method = $metodoGeneracion;
         $bill->is_authorized = $authorize;
         $bill->is_code_validated = false;
+        
+        if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML" ) {
+            $bill->accept_status = 0;
+            $bill->hacienda_status = "01";
+        }
         
         //Start DATOS PROVEEDOR
               $nombreProveedor = $arr['Emisor']['Nombre'];
@@ -373,11 +383,13 @@ class Bill extends Model
                 $otrasSenas = null;
               }
               
-              if ( isset($arr['Emisor']['Telefono']) ) {
-                $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'] ?? null;
-              }else{
-                $telefonoProveedor = null;
-              }
+              try{
+                if ( isset($arr['Emisor']['Telefono']) ) {
+                  $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'] ?? null;
+                }else{
+                  $telefonoProveedor = null;
+                }
+              }catch(\Throwable $e){}
               
               $providerCacheKey = "import-proveedors-$identificacionProveedor-".$company->id;
               if ( !Cache::has($providerCacheKey) ) {

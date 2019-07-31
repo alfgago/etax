@@ -112,8 +112,8 @@ class PaymentUtils
             $data->user_name = $user->user_name;
             $data->amount = $amount;
 
-            $chargeCreated = $this->paymentIncludeCharge($data);
-            if($chargeCreated['apiStatus'] == "Successful"){
+            //$chargeCreated = $this->paymentIncludeCharge($data);
+            //if($chargeCreated['apiStatus'] == "Successful"){
                 $paymentMethod = PaymentMethod::where('id', $request->payment_method)->first();
                 $company = currentCompanyModel();
                 $date = Carbon::parse(now('America/Costa_Rica'));
@@ -151,8 +151,8 @@ class PaymentUtils
                 $charge->user_name = $user->user_name;
                 $charge->chargeTokenId = $chargeTokenId;
 
-                $apliedCharge = $this->paymentApplyCharge($charge);
-                if($apliedCharge['apiStatus'] == "Successful"){
+                $appliedCharge = $this->paymentApplyCharge($charge);
+                if($appliedCharge['apiStatus'] == "Successful"){
                     $payment->proof = $appliedCharge['retrievalRefNo'];
                     $payment->payment_status = 2;
                     $payment->save();
@@ -164,9 +164,9 @@ class PaymentUtils
                     return false;
                 }
                 return true;
-            }else{
+            /*}else{
                 return false;
-            }
+            }*/
         }else{
             return false;
         }
@@ -216,6 +216,25 @@ class PaymentUtils
         $chargeIncluded = json_decode($appChargeBn->getBody()->getContents(), true);
         return $chargeIncluded;
     }
+
+    public function userGetChargeInfo($idCharge){
+        $bnCharge = new Client();
+        $user = auth()->user();
+        $chargeBn = $bnCharge->request('POST', "https://emcom.oneklap.com:2263/api/UserViewCharge?applicationName=string&userName=string&userPassword=string&chargeTokenId=string", [
+            'headers' => [
+                'Content-Type' => "application/json",
+            ],
+            'json' => [
+                'applicationName' => config('etax.klap_app_name'),
+                'userName' => $user->user_name,
+                "userPassword" => 'Etax-' . $user->id . 'Klap',
+                'chargeTokenId' => $idCharge,
+            ],
+            'verify' => false,
+        ]);
+        $charge = json_decode($chargeBn->getBody()->getContents(), true);
+        return $charge;
+    }
     
     public function paymentApplyCharge($request){
         $bnCharge = new Client();
@@ -239,7 +258,7 @@ class PaymentUtils
     public function userRequestCharges(){
         $user = auth()->user();
         $requestCharges = new Client();
-        $userRequestCharges = $requestCharges->request('POST', "http://www.fttserver.com:4217/api/UserRequestCharges?applicationName=string&userName=string&applicationPassword=string", [
+        $userRequestCharges = $requestCharges->request('POST', "https://emcom.oneklap.com:2263/api/UserRequestCharges?applicationName=string&userName=string&applicationPassword=string", [
             'headers' => [
                 'Content-Type'  => "application/json",
             ],
