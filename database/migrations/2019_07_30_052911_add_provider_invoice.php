@@ -25,7 +25,7 @@ class AddProviderInvoice extends Migration
      */
     public function down()
     {
-        Schema::table('companies', function (Blueprint $table) {
+        Schema::table('invoices', function (Blueprint $table) {
             $table->dropColumn('provider_id');
         });
     }
