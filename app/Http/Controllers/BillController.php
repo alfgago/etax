@@ -549,7 +549,7 @@ class BillController extends Controller
         return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos'));
     }
 
-    public function guardar_validar(Request $request)
+    public function GuardarValidar(Request $request)
     {
         $bill = Bill::findOrFail($request->bill);
         
@@ -568,7 +568,7 @@ class BillController extends Controller
         
         clearBillCache($bill);
 
-        return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
+        return back()->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
 
     }
     
