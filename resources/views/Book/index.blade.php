@@ -33,14 +33,14 @@
               @foreach ( $books as $data )
                 <tr>
                   <td>{{ \App\Variables::getMonthName($data->month) }} {{ $data->year }} {{ $data->is_rectification ? '(Rectificación)' : '' }} </td>
-                  <td>₡{{ number_format( $data->invoices_subtotal, 0 ) }}</td>
-                  <td>₡{{ number_format( $data->bills_subtotal, 0 ) }}</td>
-                  <td>₡{{ number_format( $data->total_invoice_iva, 0 ) }}</td>
-                  <td>₡{{ number_format( $data->total_bill_iva, 0 ) }}</td>
-                  <td>₡{{ number_format( $data->iva_deducible_operativo, 0 ) }}</td>
-                  <td>₡{{ $data->balance_operativo > 0 ? number_format( $data->balance_operativo, 0 ) : 0 }} </td>
-                  <td>₡{{ $data->balance_operativo < 0 ? number_format( abs($data->balance_operativo), 0 ) : 0 }} </td>
-                  <td>₡{{ number_format( $data->retention_by_card, 0 ) }}</td>
+                  <td class="text-right">₡{{ number_format( $data->invoices_subtotal, 0 ) }}</td>
+                  <td class="text-right">₡{{ number_format( $data->bills_subtotal, 0 ) }}</td>
+                  <td class="text-right">₡{{ number_format( $data->total_invoice_iva, 0 ) }}</td>
+                  <td class="text-right">₡{{ number_format( $data->total_bill_iva, 0 ) }}</td>
+                  <td class="text-right">₡{{ number_format( $data->iva_deducible_operativo, 0 ) }}</td>
+                  <td class="text-right">₡{{ $data->balance_operativo > 0 ? number_format( $data->balance_operativo, 0 ) : 0 }} </td>
+                  <td class="text-right">₡{{ $data->balance_operativo < 0 ? number_format( abs($data->balance_operativo), 0 ) : 0 }} </td>
+                  <td class="text-right">₡{{ number_format( $data->retention_by_card, 0 ) }}</td>
                   <td>{{ $data->is_closed ? 'Cerrado' : 'Abierto' }}</td>
                   <td> 
                       <a href="/cierres/retenciones-tarjeta/{{ $data->id }}" title="Retenciones {{ $data->month }}-{{ $data->year }}" class="btn btn-danger m-0" style=" font-size: 0.9em;">
