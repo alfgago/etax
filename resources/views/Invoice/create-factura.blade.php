@@ -312,8 +312,9 @@ $company = currentCompanyModel();
         @include('Invoice.form-linea')
         @if($document_type != "08")
           @include('Invoice.form-nuevo-cliente')
+        @else
+          @include('Bill.form-nuevo-proveedor')
         @endif
-        @include('Bill.form-nuevo-proveedor')
             <input type="text" hidden value="{{ $document_type }}" name="document_type" id="document_type">
           <div class="btn-holder hidden">
            
