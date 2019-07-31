@@ -12,6 +12,7 @@ use App\Team;
 use App\CalculatedTax;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * @group Controller - Wizard

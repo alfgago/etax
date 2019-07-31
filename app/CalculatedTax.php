@@ -257,7 +257,6 @@ class CalculatedTax extends Model
               $invoiceItems[$i]->fixIvaType();
               
               $subtotal = $invoiceItems[$i]->subtotal * $currInvoice->currency_rate;
-              //$currentTotal = $invoiceItems[$i]->total * $currInvoice->currency_rate;
               $ivaType = $invoiceItems[$i]->iva_type;
               $prodType = $invoiceItems[$i]->product_type;
               $invoiceIva = $invoiceItems[$i]->iva_amount * $currInvoice->currency_rate;
@@ -414,9 +413,9 @@ class CalculatedTax extends Model
             }
             
           }catch( \Exception $ex ){
-            Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
+            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }catch( \Throwable $ex ){
-            Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
+            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }
         }
         
@@ -629,9 +628,9 @@ class CalculatedTax extends Model
               
             }  
           }catch( \Exception $ex ){
-            Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
+            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }catch( \Throwable $ex ){
-            Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
+            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }
           
         }

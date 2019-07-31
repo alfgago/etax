@@ -234,7 +234,7 @@ class CompanyController extends Controller {
 
         /* Only owner of company can edit that company */
         if ( !auth()->user()->isOwnerOfTeam($team) ) {
-            abort(401);
+            redirect()->back()->withError('Usted no tiene permisos para editar el equipo.');
         }
         
         return view('Company.edit-team', compact('company', 'users', 'team'))->withTeam($team);
