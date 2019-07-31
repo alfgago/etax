@@ -41,23 +41,32 @@ class EmailController extends Controller
         try {  
             $file = $request->file('attachment1');
             EmailController::processAttachment( $file );
-        }catch( \Throwable $ex ){
-            
-        }
+        }catch( \Throwable $ex ){}
         
         try {
             $file2 = $request->file('attachment2');
             EmailController::processAttachment( $file2 );
-        }catch( \Throwable $ex ){
-            
-        }
+        }catch( \Throwable $ex ){}
         
         try {
             $file3 = $request->file('attachment3');
             EmailController::processAttachment( $file3 );
-        }catch( \Throwable $ex ){
-            
-        }
+        }catch( \Throwable $ex ){}
+        
+        try {
+            $file4 = $request->file('attachment4');
+            EmailController::processAttachment( $file4 );
+        }catch( \Throwable $ex ){}
+        
+        try {
+            $file5 = $request->file('attachment5');
+            EmailController::processAttachment( $file5 );
+        }catch( \Throwable $ex ){}
+        
+        try {
+            $file6 = $request->file('attachment6');
+            EmailController::processAttachment( $file6 );
+        }catch( \Throwable $ex ){}
         
         return response()->json([
             'success' => 'Exito'
