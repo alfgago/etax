@@ -33,7 +33,9 @@ class CalculatedTax extends Model
     {
         return $this->belongsTo(Company::class);
     }
-    
+
+  
+
     //Relacion con el asiento contable
     public function book()
     {

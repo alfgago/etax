@@ -7,6 +7,7 @@ use App\Company;
 use App\CalculatedTax;
 use App\Book;
 use App\Invoice;
+use App\Bill;
 use App\Http\Controllers\CacheController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
@@ -94,6 +95,27 @@ class BookController extends Controller
         return redirect('/cierres')->withMessage('Cierres de mes satisfactorio');
     }
     
+    public function validar($cierre){
+        $books = Book::join('calculated_taxes','calculated_taxes.id','books.calculated_tax_id')
+            ->where('books.id',$cierre)->first();
+        $invoices = Invoice::join('invoice_items','invoice_items.invoice_id','invoices.id')
+            ->where(['invoices.company_id'=> $books->company_id,'invoices.month'=> $books->month,'invoices.year'=> $books->year,'invoices.is_authorized'=>true])
+            ->orwhereNull('invoice_items.product_type')
+            ->orwhereNull('invoice_items.iva_type')
+            ->count();
+        $bills = Bill::join('bill_items','bill_items.bill_id','bills.id')
+            ->where(['bills.company_id'=> $books->company_id,'bills.month'=> $books->month,'bills.year'=> $books->year,'bills.accept_status'=>true])
+            ->orwhereNull('bill_items.product_type')
+            ->orwhereNull('bill_items.iva_type')
+            ->count();
+        $bloqueo = $invoices + $bills;
+        dd($bills);
+        if($bloqueo > 0){
+            dd("no bloquear");
+        }else{
+            dd("bloquear");
+        }
+    }
     /**
      * Update the specified resource in storage.
      *

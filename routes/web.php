@@ -60,6 +60,7 @@ Route::post('/reportes/export-declaracion-iva', 'ReportsController@exportDeclara
 Route::prefix('cierres')->group(function() {
     Route::get('/', 'BookController@index');
     Route::patch('cerrar-mes/{id}', 'BookController@close');
+    Route::get('validar-cierre/{id}', 'BookController@validar');
     Route::patch('abrir-rectificacion/{id}', 'BookController@openForRectification');
     Route::get('/retenciones-tarjeta/{id}', 'BookController@retenciones_tarjeta')->name('Book.retenciones_tarjeta');
     Route::post('/actualizar-retencion-tarjeta', 'BookController@actualizar_retencion_tarjeta')->name('Book.actualizar_retencion_tarjeta');
