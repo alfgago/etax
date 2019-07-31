@@ -44,6 +44,7 @@
           <thead>
             <tr>
               <th data-priority="2">Comprobante</th>
+              <th data-priority="3">Actividad</th>
               <th data-priority="3">Receptor</th>
               <th>Tipo Doc.</th>
               <th data-priority="5">Moneda</th>
@@ -83,9 +84,10 @@ $(function() {
     order: [[ 7, 'desc' ]],
     columns: [
       { data: 'document_number', name: 'document_number' },
+      { data: 'commercial_activity', name: 'commercial_activity' },
       { data: 'client', name: 'client.fullname' },
       { data: 'document_type', name: 'document_type' },
-      { data: 'currency', name: 'currency', orderable: false, searchable: false },
+      { data: 'moneda', name: 'currency', orderable: false, searchable: false },
       { data: 'subtotal', name: 'subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
       { data: 'iva_amount', name: 'iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
       { data: 'total', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },

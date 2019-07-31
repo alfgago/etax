@@ -70,7 +70,7 @@ $(function() {
       { data: 'document_number', name: 'document_number' },
       { data: 'provider', name: 'provider.fullname' },
       { data: 'document_type', name: 'document_type' },
-      { data: 'currency', name: 'currency', orderable: false, searchable: false },
+      { data: 'moneda', name: 'currency', orderable: false, searchable: false },
       { data: 'subtotal', name: 'subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
       { data: 'iva_amount', name: 'iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
       { data: 'total', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },

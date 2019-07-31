@@ -125,3 +125,7 @@ table.table-bordered.dataTable thead tr th {
 table.table-bordered.dataTable tr {
     transition: .25s ease all;
 }
+
+table#bill-table, table#invoice-table {
+    font-size: 0.75rem;
+}
