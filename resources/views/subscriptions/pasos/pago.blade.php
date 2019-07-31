@@ -80,7 +80,9 @@
         var codigo = $('#coupon').val();
         var precio =  parseFloat( $('.precio-inicial').text().slice(1) );
         var banco =  $('#bncupon').val();
-        var url = '/confirmar-codigo/'+codigo+'/'+precio+'/'+banco;
+        var plan =  $('#plan-sel').val();
+        var companies =  $('#num_companies').val();
+        var url = '/confirmar-codigo/'+codigo+'/'+precio+'/'+banco+'/'+plan+'/'+companies;
         $.ajax({
            type:'GET',
            url:url,

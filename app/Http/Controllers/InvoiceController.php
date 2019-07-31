@@ -102,6 +102,9 @@ class InvoiceController extends Controller
             ->editColumn('client', function(Invoice $invoice) {
                 return !empty($invoice->client_first_name) ? $invoice->client_first_name.' '.$invoice->client_last_name : $invoice->clientName();
             })
+            ->editColumn('moneda', function(Invoice $invoice) {
+                return $invoice->currency == 'CRC' ? $invoice->currency : "$invoice->currency ($invoice->currency_rate)";
+            })
             ->editColumn('hacienda_status', function(Invoice $invoice) {
                 if ($invoice->hacienda_status == '03') {
                     return '<div class="green">  <span class="tooltiptext">Aceptada</span></div>
@@ -436,7 +439,6 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::findOrFail($id);
         $this->authorize('update', $invoice);
-        
         $company = currentCompanyModel();
         $arrayActividades = $company->getActivities();
         $countries  = CodigosPaises::all()->toArray();

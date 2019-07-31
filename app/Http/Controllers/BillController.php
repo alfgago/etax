@@ -93,6 +93,9 @@ class BillController extends Controller
                     'data' => $bill
                 ])->render();
             }) 
+            ->editColumn('moneda', function($bill) {
+                return $bill->currency == 'CRC' ? $bill->currency : "$bill->currency ($bill->currency_rate)";
+            })
             ->editColumn('hacienda_status', function( $bill) {
                 if ($bill->hacienda_status == '03') {
                     return '<div class="green">  <span class="tooltiptext">Aceptada</span></div>
@@ -549,7 +552,7 @@ class BillController extends Controller
         return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos'));
     }
 
-    public function guardar_validar(Request $request)
+    public function GuardarValidar(Request $request)
     {
         $bill = Bill::findOrFail($request->bill);
         
@@ -568,7 +571,7 @@ class BillController extends Controller
         
         clearBillCache($bill);
 
-        return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
+        return back()->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
 
     }
     
