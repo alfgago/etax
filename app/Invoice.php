@@ -696,14 +696,31 @@ class Invoice extends Model
         
         //Start DATOS CLIENTE
               if ( array_key_exists('Receptor', $arr) ){
-                $correoCliente = $arr['Receptor']['CorreoElectronico'];
+                if( isset( $arr['Receptor']['CorreoElectronico'] ) ){
+                    $correoCliente = $arr['Receptor']['CorreoElectronico'];
+                }else{
+                    $correoCliente = null;
+                }
                 if ( isset($arr['Receptor']['Telefono']) ) {
                   $telefonoCliente = $arr['Receptor']['Telefono']['NumTelefono'] ?? null;
                 }else {
                   $telefonoCliente = null;
                 }
-                $tipoPersona = $arr['Receptor']['Identificacion']['Tipo'];
-                $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
+                if( isset($arr['Receptor']['Identificacion']['Tipo']) ){
+                    $tipoPersona = $arr['Receptor']['Identificacion']['Tipo'];
+                }else{
+                    $tipoPersona = null;
+                }
+
+                if($invoice->xml_schema == 42){
+                    if ( isset($arr['Receptor']['Identificacion']['Numero']) ) {
+                        $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'] ?? null;
+                    }else {
+                        $identificacionCliente = null;
+                    }
+                }else{
+                    $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
+                }
                 $nombreCliente = $arr['Receptor']['Nombre'];
               
                 if ( isset($arr['Receptor']['Ubicacion']) ) {
@@ -742,7 +759,7 @@ class Invoice extends Model
                             'company_id' => $company->id,
                         ],
                         [
-                            'code' => $identificacionCliente,
+                            'code' => $identificacionCliente ?? null,
                             'company_id' => $company->id,
                             'tipo_persona' => $tipoPersona,
                             'id_number' => $identificacionCliente,
