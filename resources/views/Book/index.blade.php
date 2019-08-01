@@ -47,13 +47,9 @@
                           Retenciones
                         </a>
                     @if( !$data->is_closed  )
-                      <form class="inline-form" method="POST" action="/cierres/cerrar-mes/{{ $data->id }}" >
-                        @csrf
-                        @method('patch')
-                        <button type="submit" title="Cerrar {{ $data->month }}-{{ $data->year }}" class="btn btn-primary btn-agregar m-0" style="background: #15408E; font-size: 0.9em;">
+                        <button onclick="validarPopup(this)" link="/cierres/validar-cierre/{{ $data->id }}" type="submit" title="Cerrar {{ $data->month }}-{{ $data->year }}" class="btn btn-primary btn-agregar m-0" style="background: #15408E; font-size: 0.9em;"  data-toggle="modal" data-target="#modal_estandar">
                           Cerrar mes
                         </button>
-                      </form>
                     @elseif( !$data->is_final  )
                       - Tiene rectificación -
                     @else
@@ -62,7 +58,7 @@
                           @csrf
                           @method('patch')
                           <input type="hidden" name="id">
-                          <button type="submit" title="Abrir {{ $data->month }}-{{ $data->year }}" class="btn btn-primary btn-agregar m-0" style="background: #15408E; font-size: 0.9em;">
+                          <button type="submit" title="Abrir {{ $data->month }}-{{ $data->year }}" class="btn btn-primary btn-agregar m-0" style="background: #15408E; font-size: 0.9em;" >
                             Abrir para rectificación
                           </button>
                         </form>
@@ -83,4 +79,24 @@
   </div>  
 </div>
 
+@endsection
+@section('footer-scripts')
+
+<script>
+function validarPopup(obj) {
+  
+    var link = $(obj).attr("link");
+    var titulo = $(obj).attr("title");
+    $("#titulo_modal_estandar").html(titulo);
+    $.ajax({
+       type:'GET',
+       url:link,
+       success:function(data){
+          $("#body_modal_estandar").html(data);
+       }
+  
+    });
+  
+}
+</script>
 @endsection
