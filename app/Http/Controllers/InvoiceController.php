@@ -118,7 +118,7 @@ class InvoiceController extends Controller
                             <i class="fa fa-refresh" aria-hidden="true"></i>
                         </a>';
                 }
-                return '<div class="yellow"><span class="tooltiptext">Esperando respuesta de Hacienda</span></div>
+                return '<div class="yellow"><span class="tooltiptext">Procesando...</span></div>
                     <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
                         <i class="fa fa-refresh" aria-hidden="true"></i>
                       </a>';
@@ -942,6 +942,24 @@ class InvoiceController extends Controller
             ->toJson();
     }
     
+    public function hideInvoice ( Request $request, $id )
+    {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        
+        if ( $request->hide_from_taxes ) {
+            $invoice->hide_from_taxes = true;
+            $invoice->save();
+            clearInvoiceCache($invoice);
+            return redirect('/facturas-emitidas')->withMessage( 'La factura '. $invoice->document_number . ' se ha ocultado para cálculo de IVA.');
+        }else{
+            $invoice->hide_from_taxes = false;
+            $invoice->save();
+            clearInvoiceCache($invoice);
+            return redirect('/facturas-emitidas')->withMessage( 'La factura '. $invoice->document_number . ' se ha incluido nuevamente para cálculo de IVA.');
+        }
+    }
+    
     public function authorizeInvoice ( Request $request, $id )
     {
         $invoice = Invoice::findOrFail($id);
@@ -950,13 +968,13 @@ class InvoiceController extends Controller
         if ( $request->autorizar ) {
             $invoice->is_authorized = true;
             $invoice->save();
-            return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido autorizada');
+            return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . ' ha sido autorizada');
         }else {
             $invoice->is_authorized = false;
             $invoice->is_void = true;
             InvoiceItem::where('invoice_id', $invoice->id)->delete();
             $invoice->delete();
-            return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido rechazada');
+            return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . ' ha sido rechazada');
         }
     }
     

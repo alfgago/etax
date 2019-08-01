@@ -109,7 +109,7 @@ class BillController extends Controller
                             <i class="fa fa-refresh" aria-hidden="true"></i>
                         </a>';
                 }
-                return '<div class="yellow"><span class="tooltiptext">Esperando respuesta de Hacienda</span></div>
+                return '<div class="yellow"><span class="tooltiptext">Procesando...</span></div>
                     <a href="/facturas-recibidas/query-bill/'.$bill->id.'". title="Consultar factura en hacienda" class="text-dark mr-2 hidden"> 
                         <i class="fa fa-refresh" aria-hidden="true"></i>
                       </a>';
@@ -575,6 +575,24 @@ class BillController extends Controller
 
     }
     
+    public function hideBill ( Request $request, $id )
+    {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+        
+        if ( $request->hide_from_taxes ) {
+            $bill->hide_from_taxes = true;
+            $bill->save();
+            clearBillCache($bill);
+            return redirect('/facturas-recibidas')->withMessage( 'La factura '. $bill->document_number . ' se ha ocultado para cálculo de IVA.');
+        }else{
+            $bill->hide_from_taxes = false;
+            $bill->save();
+            clearBillCache($bill);
+            return redirect('/facturas-recibidas')->withMessage( 'La factura '. $bill->document_number . ' se ha incluido nuevamente para cálculo de IVA.');
+        }
+    }
+    
     public function confirmarValidacion( Request $request, $id )
     {
         $bill = Bill::findOrFail($id);
@@ -803,8 +821,12 @@ class BillController extends Controller
                         $company->save();
                         $apiHacienda->acceptInvoice($bill, $tokenApi);
                     }
+                    $mensaje = 'Aceptación enviada.';
+                    if($request->respuesta == 2){
+                        $mensaje = 'Rechazo de factura enviado';
+                    }
                     clearBillCache($bill);
-                    return redirect('/facturas-recibidas/aceptaciones')->withMessage('Aceptación enviada.');
+                    return redirect('/facturas-recibidas/aceptaciones')->withMessage( $mensaje );
     
                 } else {
                     return back()->withError( 'Ha ocurrido un error al enviar factura.' );
