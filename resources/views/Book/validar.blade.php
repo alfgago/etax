@@ -14,9 +14,10 @@
 		</div>
 
 	@else
+		<h3>Este mes tienen pendiente de validacion las ventas</h3>
 
-		<table>
-			<thead>
+		<table class="table table-striped table-bordered">
+  			<thead class="thead-dark">
 				<tr>
 					<th>Comprobante</th>
 					<th>Receptor</th>
@@ -38,9 +39,10 @@
 			</tbody>
 		</table>
 
+		<h3>Este mes tienen pendiente de validacion las compras</h3>
 
-		<table>
-			<thead>
+		<table class="table table-striped table-bordered">
+  			<thead class="thead-dark">
 				<tr>
 					<th>Comprobante</th>
 					<th>Emisor</th>
