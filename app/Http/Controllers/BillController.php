@@ -803,8 +803,12 @@ class BillController extends Controller
                         $company->save();
                         $apiHacienda->acceptInvoice($bill, $tokenApi);
                     }
+                    $mensaje = 'Aceptación enviada.';
+                    if($request->respuesta == 2){
+                        $mensaje = 'Rechazo de factura enviado';
+                    }
                     clearBillCache($bill);
-                    return redirect('/facturas-recibidas/aceptaciones')->withMessage('Aceptación enviada.');
+                    return redirect('/facturas-recibidas/aceptaciones')->withMessage( $mensaje );
     
                 } else {
                     return back()->withError( 'Ha ocurrido un error al enviar factura.' );
