@@ -98,6 +98,7 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('consult/{id}', 'InvoiceController@consultInvoice')->name('Invoice.consultInvoice');
     Route::get('query-invoice/{id}', 'InvoiceController@queryInvoice')->name('Invoice.queryInvoice');
     Route::post('actualizar-categorias', 'InvoiceController@actualizar_categorias')->name('Invoice.actualizar_categorias');
+    Route::patch('switch-ocultar/{id}', 'InvoiceController@hideInvoice')->name('Bill.hideInvoice');
 });
 
 // Rutas de facturacion recibida
@@ -116,6 +117,7 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::post('guardar-validar', 'BillController@GuardarValidar')->name('Bill.GuardarValidar');
     Route::get('edit-aceptacion', 'BillController@editAccept')->name('Bill.editAccept');
     Route::get('update-aceptacion', 'BillController@updateAccept')->name('Bill.updateAccept');
+    Route::patch('switch-ocultar/{id}', 'BillController@hideBill')->name('Bill.hideBill');
 });
 
 // Rutas de Wizard

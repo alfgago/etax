@@ -109,7 +109,7 @@ class BillController extends Controller
                             <i class="fa fa-refresh" aria-hidden="true"></i>
                         </a>';
                 }
-                return '<div class="yellow"><span class="tooltiptext">Esperando respuesta de Hacienda</span></div>
+                return '<div class="yellow"><span class="tooltiptext">Procesando...</span></div>
                     <a href="/facturas-recibidas/query-bill/'.$bill->id.'". title="Consultar factura en hacienda" class="text-dark mr-2 hidden"> 
                         <i class="fa fa-refresh" aria-hidden="true"></i>
                       </a>';
@@ -573,6 +573,24 @@ class BillController extends Controller
 
         return back()->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
 
+    }
+    
+    public function hideBill ( Request $request, $id )
+    {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+        
+        if ( $request->hide_from_taxes ) {
+            $bill->hide_from_taxes = true;
+            $bill->save();
+            clearBillCache($bill);
+            return redirect('/facturas-recibidas')->withMessage( 'La factura '. $bill->document_number . ' se ha ocultado para cálculo de IVA.');
+        }else{
+            $bill->hide_from_taxes = false;
+            $bill->save();
+            clearBillCache($bill);
+            return redirect('/facturas-recibidas')->withMessage( 'La factura '. $bill->document_number . ' se ha incluido nuevamente para cálculo de IVA.');
+        }
     }
     
     public function confirmarValidacion( Request $request, $id )
