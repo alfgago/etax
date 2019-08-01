@@ -749,7 +749,7 @@ class Invoice extends Model
                   $distritoCliente = '10101';
                   $zipCliente = '10101';
                   $otrasSenas = null;
-                  $nombreCliente = 'Cliente Generico';
+                  $nombreCliente = 'Cliente Genérico';
                     $identificacionCliente = null;
                 }
                 
