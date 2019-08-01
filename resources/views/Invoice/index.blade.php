@@ -95,6 +95,11 @@ $(function() {
       { data: 'hacienda_status', name: 'hacienda_status' },
       { data: 'actions', name: 'actions', orderable: false, searchable: false },
     ],
+    createdRow: function (row, data, index) {
+      if(data.hide_from_taxes){
+        $(row).addClass("tax-hidden");
+      }
+    },
     language: {
       url: "/lang/datatables-es_ES.json",
     },
@@ -121,8 +126,6 @@ function confirmDelete( id ) {
   })
   
 }
-
-
 
 function confirmAnular( id ) {  
   var formId = "#anular-form-"+id;
@@ -152,8 +155,6 @@ function confirmAnular( id ) {
       confirmButtonText: 'Ok'
     });
   @endif
-
-  
   
 }
 
@@ -175,7 +176,32 @@ function confirmRecover( id ) {
   })
   
 }
+
+function confirmHideFromTaxes( id ) {
+  
+  var formId = "#hidefromtaxes-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea ocultar la factura de los cálculos de IVA?',
+    text: "La factura no será tomada en cuenta para sus cálculos de IVA.",
+    type: 'success',
+    customContainerClass: 'container-success',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero ocultarla del cálculo',
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
   
 </script>
+
+<style>
+  tr.tax-hidden td {
+    text-decoration: line-through !important;
+  }
+</style>
 
 @endsection

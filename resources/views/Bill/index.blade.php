@@ -78,6 +78,11 @@ $(function() {
       { data: 'hacienda_status', name: 'hacienda_status' },
       { data: 'actions', name: 'actions', orderable: false, searchable: false },
     ],
+    createdRow: function (row, data, index) {
+      if(data.hide_from_taxes){
+        $(row).addClass("tax-hidden");
+      }
+    },
     language: {
       url: "/lang/datatables-es_ES.json",
     },
@@ -106,7 +111,7 @@ function confirmDelete( id ) {
 }
 
 
-function condfirmEnvioAceptacion( id ) {
+function confirmEnvioAceptacion( id ) {
   var formId = "#envioaceptacion-form-"+id;
   Swal.fire({
     title: '¿Está seguro que desea enviar la factura a aceptación?',
@@ -134,6 +139,25 @@ function confirmAnular( id ) {
     showCloseButton: true,
     showCancelButton: true,
     confirmButtonText: 'Sí, quiero anularla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
+
+function confirmHideFromTaxes( id ) {
+  
+  var formId = "#hidefromtaxes-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea ocultar la factura de los cálculos de IVA?',
+    text: "La factura no será tomada en cuenta para sus cálculos de IVA.",
+    type: 'success',
+    customContainerClass: 'container-success',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero ocultarla del cálculo',
   }).then((result) => {
     if (result.value) {
       $(formId).submit();
@@ -178,5 +202,11 @@ function validarPopup(obj) {
 }
   
 </script>
+
+<style>
+  tr.tax-hidden td {
+    text-decoration: line-through !important;
+  }
+</style>
 
 @endsection
