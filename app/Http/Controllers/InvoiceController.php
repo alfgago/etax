@@ -49,7 +49,32 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        $company = currentCompanyModel();
+        $company = currentCompanyModel(false);
+
+        if ($company->atv_validation == false) {
+            $apiHacienda = new BridgeHaciendaApi();
+            $token = $apiHacienda->login(false);
+            $validateAtv = $apiHacienda->validateAtv($token, $company);
+            if( $validateAtv ) {
+                if ($validateAtv['status'] == 400) {
+                    Log::info('Atv Not Validated Company: '. $company->id_number);
+                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                    }
+                    return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
+
+                } else {
+                    Log::info('Atv Validated Company: '. $company->id_number);
+                    $company->atv_validation = true;
+                    $company->save();
+
+                    $user = auth()->user();
+                    Cache::forget("cache-currentcompany-$user->id");
+                }
+            }else {
+                return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
+            }
+        }
         if($company->last_note_ref_number === null) {
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
         }
@@ -170,7 +195,7 @@ class InvoiceController extends Controller
      */
     public function emitFactura($tipoDocumento)
     {
-        $company = currentCompanyModel();
+        $company = currentCompanyModel(false);
 
         //Revisa límite de facturas emitidas en el mes actual
         $start_date = Carbon::parse(now('America/Costa_Rica'));

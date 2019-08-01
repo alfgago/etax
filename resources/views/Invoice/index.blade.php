@@ -129,7 +129,8 @@ function confirmDelete( id ) {
 
 function confirmAnular( id ) {  
   var formId = "#anular-form-"+id;
-  @if(currentCompanyModel()->atv_validation)
+
+  @if(currentCompanyModel(false)->atv_validation)
     var title = '¿Está seguro que desea anular la factura';
     var texto = "Este proceso anulará la factura ante Hacienda y enviará una nueva nota de crédito al cliente.";
     Swal.fire({
