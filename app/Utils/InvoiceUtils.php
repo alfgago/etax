@@ -438,7 +438,6 @@ class InvoiceUtils
             }
             return $request;
         } catch (\Exception $error) {
-            dd($error);
             Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage());
             return false;
         }
