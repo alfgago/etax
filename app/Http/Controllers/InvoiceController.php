@@ -143,6 +143,7 @@ class InvoiceController extends Controller
                             <i class="fa fa-refresh" aria-hidden="true"></i>
                         </a>';
                 }
+
                 return '<div class="yellow"><span class="tooltiptext">Procesando...</span></div>
                     <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
                         <i class="fa fa-refresh" aria-hidden="true"></i>
@@ -250,6 +251,7 @@ class InvoiceController extends Controller
         if($company->last_ticket_ref_number === null) {
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de tiquetes');
         }
+
         return view("Invoice/create-factura",
             [
                 'document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
@@ -469,7 +471,7 @@ class InvoiceController extends Controller
         $countries  = CodigosPaises::all()->toArray();
 
         $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
-        $codigos = CodigoIvaRepercutido::get();
+        $codigos = CodigoIvaRepercutido::where('hidden', false)->get();
         $units = UnidadMedicion::all()->toArray();
         return view('Invoice/show', compact('invoice','units','arrayActividades','countries','product_categories','codigos') );
     }
@@ -789,8 +791,12 @@ class InvoiceController extends Controller
 
     private function get_rates()
     {
+
+        $cacheKey = "usd_rate";
+        $lastRateKey = "last_usd_rate";
         try {
-            $value = Cache::remember('usd_rate', '60000', function () {
+            if ( !Cache::has($cacheKey) ) {
+
                 $today = new Carbon();
                 $client = new \GuzzleHttp\Client();
                 $response = $client->get(config('etax.exchange_url'),
@@ -802,24 +808,31 @@ class InvoiceController extends Controller
                         'SubNiveles' => 'N',
                         'CorreoElectronico' => config('etax.emailbccr'),
                         'Token' => config('etax.tokenbccr')
-                        ]
+                    ]
                     ]
                 );
                 $body = $response->getBody()->getContents();
                 $xml = new \SimpleXMLElement($body);
                 $xml->registerXPathNamespace('d', 'urn:schemas-microsoft-com:xml-diffgram-v1');
                 $tables = $xml->xpath('//INGC011_CAT_INDICADORECONOMIC[@d:id="INGC011_CAT_INDICADORECONOMIC1"]');
-                return json_decode($tables[0]->NUM_VALOR);
-            });
+                $valor =  json_decode($tables[0]->NUM_VALOR);
 
+                Cache::put($cacheKey, $valor, now()->addHours(2));
+                Cache::put($lastRateKey, $valor, now()->addDays(5));
+            }
+
+            $value = Cache::get($cacheKey);
             return $value;
 
         } catch( \Exception $e) {
             Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: ');
+            $value = Cache::get($lastRateKey);
+            return $value;
         } catch (RequestException $e) {
             Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: '.
                 $e->getResponse()->getReasonPhrase());
-            return null;
+            $value = Cache::get($lastRateKey);
+            return $value;
         }
 
     }

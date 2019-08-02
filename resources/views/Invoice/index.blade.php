@@ -81,7 +81,7 @@ $(function() {
       },
       type: 'GET'
     },
-    order: [[ 7, 'desc' ]],
+    order: [[ 8, 'desc' ]],
     columns: [
       { data: 'document_number', name: 'document_number' },
       { data: 'commercial_activity', name: 'commercial_activity' },

@@ -161,6 +161,7 @@ if (!function_exists('currentCompanyModel')) {
 
     function currentCompanyModel($cache = true) {
         $user = auth()->user();
+
         if ($cache == false) {
             if (!$user->companies->count()) {
                 auth()->user()->addCompany();
@@ -174,6 +175,7 @@ if (!function_exists('currentCompanyModel')) {
             }
             return $company;
         }
+
         $cacheKey = "cache-currentcompany-$user->id";
         if ( !Illuminate\Support\Facades\Cache::has($cacheKey) ) {
                 

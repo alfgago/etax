@@ -7,6 +7,7 @@ use App\Company;
 use App\CalculatedTax;
 use App\Book;
 use App\Invoice;
+use App\Bill;
 use App\Http\Controllers\CacheController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
@@ -94,6 +95,56 @@ class BookController extends Controller
         return redirect('/cierres')->withMessage('Cierres de mes satisfactorio');
     }
     
+    public function validar($cierre){
+        $books = Book::join('calculated_taxes','calculated_taxes.id','books.calculated_tax_id')
+            ->where('books.id',$cierre)->first();
+        $invoices = Invoice::whereHas('items', function ($query){
+            $query->where('iva_type', null)->orwhere('product_type', null);
+        })->where([
+            'company_id'=> $books->company_id,
+            'month'=> $books->month,
+            'year'=> $books->year,
+            'is_authorized' => true
+        ])->count();
+        $bills = Bill::whereHas('items', function ($query){
+            $query->where('iva_type', null)->orwhere('product_type', null);
+        })->where([
+            'company_id'=> $books->company_id,
+            'month'=> $books->month,
+            'year'=> $books->year,
+            'accept_status' => true
+        ])->orwhere('commercial_activity', null)->count();
+
+        $bloqueo = $bills + $invoices; 
+        $invoices = Invoice::whereHas('items', function ($query){
+        $query->where('iva_type', null)->orwhere('product_type', null);
+            })->where([
+                'company_id'=> $books->company_id,
+                'month'=> $books->month,
+                'year'=> $books->year,
+                'is_authorized' => true
+            ])->get();
+            $bills = Bill::whereHas('items', function ($query){
+                $query->where('iva_type', null)->orwhere('product_type', null);
+            })->where([
+                'company_id'=> $books->company_id,
+                'month'=> $books->month,
+                'year'=> $books->year,
+                'accept_status' => true
+            ])->orwhere('commercial_activity', null)->get();
+        if($bloqueo > 0){
+           
+            $retorno = array(
+                "cierre" => $cierre,
+                "bloqueo" => $bloqueo,
+                "invoices" => $invoices,
+                "bills" => $bills,
+            ); 
+            return view('book/validar')->with('retorno',$retorno );
+        }else{
+            return $bloqueo;
+        }
+    }
     /**
      * Update the specified resource in storage.
      *

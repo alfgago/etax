@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\ApiResponse;
 use App\Company;
 use App\Invoice;
 use App\Mail\CreditNoteNotificacion;
@@ -55,7 +56,7 @@ class ProcessCreditNote implements ShouldQueue
             $invoice = Invoice::find($this->invoiceId);
             $company = Company::find($this->companyId);
             if ($company->atv_validation) {
-                if ($invoice->hacienda_status == '01' && $invoice->document_type == '03' && $invoiceUtils->validateZip($invoice)) {
+                if ($invoice->hacienda_status == '01' && $invoice->document_type == '03' && $invoice->reference_doc_type == '04' ? true : $invoiceUtils->validateZip($invoice)) {
                     if ($invoice->xml_schema == 43) {
                         $requestDetails = $invoiceUtils->setDetails43($invoice->items);
                         $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
@@ -84,6 +85,10 @@ class ProcessCreditNote implements ShouldQueue
                             'connect_timeout' => 20
                         ]);
                         $response = json_decode($result->getBody()->getContents(), true);
+                        ApiResponse::create(['invoice_id' => $invoice->id, 'document_key' => $invoice->document_key,
+                            'doc_type' => $invoice->document_type,
+                            'json_response' => json_encode($response)
+                        ]);
                         Log::info('Response Credit Note Api Hacienda '. json_encode($response));
                         if (isset($response['status']) && $response['status'] == 200) {
                             Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
@@ -101,14 +106,20 @@ class ProcessCreditNote implements ShouldQueue
                                 $xml->bill_id = 0;
                                 $xml->xml = $path;
                                 $xml->save();
-
-                                if ( !empty($invoice->send_emails) ) {
-                                    Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new CreditNoteNotificacion([
-                                        'xml' => $path,
-                                        'data_invoice' => $invoice, 'data_company' => $company
-                                    ]));
+                                if (isset($invoice->client_id)) {
+                                    if (!empty($invoice->send_emails)) {
+                                        Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new CreditNoteNotificacion([
+                                            'xml' => $path,
+                                            'data_invoice' => $invoice, 'data_company' => $company
+                                        ]));
+                                    } else {
+                                        Mail::to($invoice->client_email)->send(new CreditNoteNotificacion([
+                                            'xml' => $path,
+                                            'data_invoice' => $invoice, 'data_company' => $company
+                                        ]));
+                                    }
                                 } else {
-                                    Mail::to($invoice->client_email)->send(new CreditNoteNotificacion([
+                                    Mail::to($company->email)->send(new CreditNoteNotificacion([
                                         'xml' => $path,
                                         'data_invoice' => $invoice, 'data_company' => $company
                                     ]));
