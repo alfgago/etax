@@ -289,13 +289,16 @@ $(document).ready(function(){
       var codigoIVA = $(this).find(':selected').val();
       var parent = $(this).parents('tr');
       parent.find('.tipo_producto option').hide();
+      var tipoProducto = 0;
       parent.find(".tipo_producto option").each(function(){
         var posibles = $(this).attr('posibles').split(",");
       	if(posibles.includes(codigoIVA)){
           	$(this).show();
+          	if( !tipoProducto ){
+              tipoProducto = $(this).val();
+            }
           }
       });
-      var tipoProducto = parent.find('.tipo_producto option[codigo='+codigoIVA+']').first().val()
       parent.find('.tipo_producto').val( tipoProducto ).change();
   });
   

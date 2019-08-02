@@ -184,7 +184,7 @@ $(document).ready(function(){
       }
     });
     
-    $(".product_type").change();
+    //$(".iva_type").change();
 
 });
       
