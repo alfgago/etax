@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\ApiResponse;
 use App\Company;
 use App\Invoice;
 use App\Mail\CreditNoteNotificacion;
@@ -84,6 +85,10 @@ class ProcessCreditNote implements ShouldQueue
                             'connect_timeout' => 20
                         ]);
                         $response = json_decode($result->getBody()->getContents(), true);
+                        ApiResponse::create(['invoice_id' => $invoice->id, 'document_key' => $invoice->document_key,
+                            'doc_type' => $invoice->document_type,
+                            'json_response' => json_encode($response)
+                        ]);
                         Log::info('Response Credit Note Api Hacienda '. json_encode($response));
                         if (isset($response['status']) && $response['status'] == 200) {
                             Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());

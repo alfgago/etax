@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\ApiResponse;
 use App\Bill;
 use App\Company;
 use App\Invoice;
@@ -86,6 +87,10 @@ class ProcessReception implements ShouldQueue
                         ]);
                         $response = json_decode($result->getBody()->getContents(), true);
                         Log::info('Response Reception Api Hacienda '. json_encode($response));
+                        ApiResponse::create(['bill_id' => $bill->id, 'document_key' => $bill->document_key,
+                            'doc_type' => $bill->document_type,
+                            'json_response' => json_encode($response)
+                        ]);
                         if (isset($response['status']) && $response['status'] == 200) {
                             Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
                             $date = Carbon::now();
