@@ -48,25 +48,28 @@
         <div class="card-title" id="manuales">Manuales eTax</div>
         <ul>
     			<li>	
-    			  <a download href="/assets/files/guias/Manual-ConfiguracionEmpresa.pdf">Descargar manual de configuración de empresa</a>
+    			  <a download href="/assets/files/guias/Manual_completo_eTax.pdf">Descargar Manual completo de eTax</a>
     			</li>
     			<li>	
-    				<a download href="/assets/files/guias/Manual-IntroducirVentas.pdf">Descargar manual de introducción de ventas</a>
+    				<a download href="/assets/files/guias/Manual_de_codigos_de_eTax.pdf">Descargar Manual de códigos de eTax</a>
     			</li>
     			<li>	
-    				<a download href="/assets/files/guias/Manual-GenerarFactura.pdf">Descargar manual de facturación electrónica</a>
+    				<a download href="/assets/files/guias/Manual_de_Configuracion.pdf">Descargar Manual de configuración</a>
     			</li>
     			<li>	
-    				<a download href="/assets/files/guias/Manual-IntroducirCompras.pdf">Descargar manual de introducción de compras</a>
+    				<a download href="/assets/files/guias/Manual_Derechos_de_Acreditacion_operativos.pdf">Descargar Manual de derechos de acreditación operativos</a>
     			</li>
     			<li>	
-    				<a download href="/assets/files/guias/Manual-Escritorio.pdf">Descargar manual de escritorio</a>
+    				<a download href="/assets/files/guias/Manual_Facturacion_Electronica.pdf">Descargar Manual de facturación electrónica</a>
     			</li>
     			<li>	
-    				<a download href="/assets/files/guias/Manual-CodigosVentasEtax.pdf">Descargar manual de códigos eTax de ventas.</a>
+    				<a download href="/assets/files/guias/Manual_Facturas_Recibidas.pdf">Descargar Manual de facturas recibidas</a>
     			</li>
     			<li>	
-    				<a download href="/assets/files/guias/Manual-CodigosComprasEtax.pdf">Descargar manual de códigos eTax de compras.</a>
+    				<a download href="/assets/files/guias/Manual_Navegar_en_el_escritorio.pdf">Descargar Manual navegar en el escritorio</a>
+    			</li>
+    			<li>
+    				<a download href="/assets/files/guias/Manual_Registro_Facturas_Emitidas.pdf">Descargar Manual registro facturas emitidas</a>
     			</li>
                 <li onclick="actualizarTutorial();">
                     <a style="cursor: pointer">Tutorial r&aacute;pido</a>
