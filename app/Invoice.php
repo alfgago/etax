@@ -936,10 +936,11 @@ class Invoice extends Model
     public function setNoteData($invoiceReference) {
         try {
             $this->document_key = getDocumentKey('03', $this->reference_number, $invoiceReference->company->id_number);
-            $this->document_number = getDocReference('03', $this->reference_number);;
+            $this->document_number = getDocReference('03', $this->reference_number);
             $this->sale_condition = $invoiceReference->sale_condition;
             $this->payment_type = $invoiceReference->payment_type;
             $this->retention_percent = $invoiceReference->retention_percent;
+            $this->commercial_activity = $invoiceReference->commercial_activity;
             $this->credit_time = $invoiceReference->credit_time;
             $this->buy_order = $invoiceReference->buy_order;
             $this->other_reference = $invoiceReference->reference_number;
