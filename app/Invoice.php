@@ -749,17 +749,19 @@ class Invoice extends Model
                   $distritoCliente = '10101';
                   $zipCliente = '10101';
                   $otrasSenas = null;
+                  $nombreCliente = 'Cliente Genérico';
+                    $identificacionCliente = null;
                 }
                 
                 $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
                 if ( !Cache::has($clientCacheKey) ) {
                     $clienteCache =  Client::updateOrCreate(
                         [
-                            'id_number' => $identificacionCliente,
+                            'id_number' => $identificacionCliente ?? null,
                             'company_id' => $company->id,
                         ],
                         [
-                            'code' => $identificacionCliente ?? null,
+                            'code' => $identificacionCliente,
                             'company_id' => $company->id,
                             'tipo_persona' => $tipoPersona,
                             'id_number' => $identificacionCliente,
