@@ -96,51 +96,35 @@ class BookController extends Controller
     }
     
     public function validar($cierre){
-        $books = Book::join('calculated_taxes','calculated_taxes.id','books.calculated_tax_id')
+        $book = Book::join('calculated_taxes','calculated_taxes.id','books.calculated_tax_id')
             ->where('books.id',$cierre)->first();
-        $invoices = Invoice::whereHas('items', function ($query){
-            $query->where('iva_type', null)->orwhere('product_type', null);
-        })->where([
-            'company_id'=> $books->company_id,
-            'month'=> $books->month,
-            'year'=> $books->year,
-            'is_authorized' => true
-        ])->count();
-        $bills = Bill::whereHas('items', function ($query){
-            $query->where('iva_type', null)->orwhere('product_type', null);
-        })->where([
-            'company_id'=> $books->company_id,
-            'month'=> $books->month,
-            'year'=> $books->year,
-            'accept_status' => true
-        ])->orwhere('commercial_activity', null)->count();
 
-        $bloqueo = $bills + $invoices; 
         $invoices = Invoice::whereHas('items', function ($query){
-        $query->where('iva_type', null)->orwhere('product_type', null);
-            })->where([
-                'company_id'=> $books->company_id,
-                'month'=> $books->month,
-                'year'=> $books->year,
-                'is_authorized' => true
-            ])->get();
-            $bills = Bill::whereHas('items', function ($query){
                 $query->where('iva_type', null)->orwhere('product_type', null);
             })->where([
-                'company_id'=> $books->company_id,
-                'month'=> $books->month,
-                'year'=> $books->year,
+                'company_id'=> $book->company_id,
+                'month'=> $book->month,
+                'year'=> $book->year,
+                'is_authorized' => true
+            ])->orWhere('commercial_activity', null)->get();
+        $bills = Bill::whereHas('items', function ($query){
+                $query->where('iva_type', null)->orwhere('product_type', null);
+            })->where([
+                'company_id'=> $book->company_id,
+                'month'=> $book->month,
+                'year'=> $book->year,
                 'accept_status' => true
-            ])->orwhere('commercial_activity', null)->get();
+            ])->orWhere('commercial_activity', null)->get();
+
+        $bloqueo = count($bills) + count($invoices);
         if($bloqueo > 0){
-           
             $retorno = array(
                 "cierre" => $cierre,
                 "bloqueo" => $bloqueo,
                 "invoices" => $invoices,
                 "bills" => $bills,
             ); 
-            return view('book/validar')->with('retorno',$retorno );
+            return view('Book/validar')->with('retorno',$retorno );
         }else{
             return $bloqueo;
         }

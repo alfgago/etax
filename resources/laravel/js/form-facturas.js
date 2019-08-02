@@ -97,14 +97,16 @@
     if( ! $('#cliente_exento:checked').length ){
       var codigoIVA = $('#tipo_iva :selected').val();
       $('#tipo_producto option').hide();
+      var tipoProducto = 0;
       $("#tipo_producto option").each(function(){
           var posibles = $(this).attr('posibles').split(",");
       	if(posibles.includes(codigoIVA)){
-      		console.log(posibles);
           	$(this).show();
+          	if( !tipoProducto ){
+              tipoProducto = $(this).val();
+            }
           }
       });
-      var tipoProducto = $('#tipo_producto option[codigo='+codigoIVA+']').first().val()
       $('#tipo_producto').val( tipoProducto ).change();
     }else{
       $('#tipo_iva').val( 'B260' );
