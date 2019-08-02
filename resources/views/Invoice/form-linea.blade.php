@@ -42,33 +42,33 @@
 
     @if( @$tipoHacienda == 'SJB' )
       <div class="form-group col-md-12">
+        <label for="tipo_iva">Tipo de IVA</label>
+        <select class="form-control" id="tipo_iva" >
+            <option value="S140" attr-iva="S140" porcentaje="13" >S140 -  Inversión del sujeto básico pasivo</option>
+        </select>
+      </div>
+      
+      <div class="form-group col-md-11">
         <label for="tipo_producto">Categoría de declaración</label>
         <select class="form-control select-search" id="tipo_producto" >
             <option value="21" codigo="S140" posibles="S140" >Inversión del sujeto básico pasivo por servicios adquiridos desde el exterior</option>
         </select>
       </div>
-      
-      <div class="form-group col-md-11">
-        <label for="tipo_iva">Tipo de IVA</label>
-        <select class="form-control" id="tipo_iva" >
-            <option value="S140" attr-iva="S140" porcentaje="13" >Inversión del sujeto básico pasivo</option>
-        </select>
-      </div>
     @else
       <div class="form-group col-md-12">
-        <label for="tipo_producto">Categoría de declaración</label>
-        <select class="form-control select-search" id="tipo_producto" >
-          @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
-            <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
+        <label for="tipo_iva">Tipo de IVA</label>
+        <select class="form-control select-search" id="tipo_iva" >
+          @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+            <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
           @endforeach
         </select>
       </div>
-    
+      
       <div class="form-group col-md-11">
-        <label for="tipo_iva">Tipo de IVA</label>
-        <select class="form-control" id="tipo_iva" >
-          @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
-            <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
+        <label for="tipo_producto">Categoría de declaración</label>
+        <select class="form-control" id="tipo_producto" >
+          @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
+            <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
           @endforeach
         </select>
       </div>
