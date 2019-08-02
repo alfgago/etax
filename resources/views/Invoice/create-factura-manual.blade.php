@@ -287,12 +287,14 @@
 
 <script>
 $(document).ready(function(){
+
   //$('#tipo_producto').val( $('#default_product_category').val() ).change();
   if( $('#default_vat_code').length ){
     $('#tipo_iva').val( $('#default_vat_code').val() ).change();
   }else{
     $('#tipo_iva').val( 'B103' ).change();
   }
+
 });
 
 function toggleRetencion() {

@@ -17,10 +17,15 @@ class Book extends Model
     {
         return $ivaData->belongsTo(Company::class);
     }
+
     
     public function calculos()
     {
         return $ivaData->belongsTo(CalculatedTax::class, 'calculated_tax_id');
+    }
+    public function calculo_tax()
+    {
+        return $this->belongsTo(CalculatedTax::class, 'calculated_tax_id');
     }
     
     public static function calcularAsientos( $calculos ){

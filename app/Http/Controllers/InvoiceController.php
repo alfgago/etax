@@ -143,6 +143,7 @@ class InvoiceController extends Controller
                             <i class="fa fa-refresh" aria-hidden="true"></i>
                         </a>';
                 }
+
                 return '<div class="yellow"><span class="tooltiptext">Procesando...</span></div>
                     <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
                         <i class="fa fa-refresh" aria-hidden="true"></i>
@@ -790,6 +791,7 @@ class InvoiceController extends Controller
 
     private function get_rates()
     {
+
         $cacheKey = "usd_rate";
         $lastRateKey = "last_usd_rate";
         try {
