@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\ApiResponse;
 use App\Company;
 use App\Invoice;
 use App\Utils\BridgeHaciendaApi;
@@ -86,6 +87,10 @@ class ProcessInvoice implements ShouldQueue
                         $response = json_decode($result->getBody()->getContents(), true);
                         $date = Carbon::now();
                         Log::info("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
+                        ApiResponse::create(['invoice_id' => $invoice->id, 'document_key' => $invoice->document_key,
+                            'doc_type' => $invoice->document_type,
+                            'json_response' => json_encode($response)
+                        ]);
                         if (isset($response['status']) && $response['status'] == 200) {
                             Log::info('API HACIENDA 200 :'. $invoice->document_number);
                             $invoice->hacienda_status = '03';
