@@ -444,7 +444,7 @@ class InvoiceController extends Controller
         $countries  = CodigosPaises::all()->toArray();
 
         $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
-        $codigos = CodigoIvaRepercutido::get();
+        $codigos = CodigoIvaRepercutido::where('hidden', false)->get();
         $units = UnidadMedicion::all()->toArray();
         return view('Invoice/show', compact('invoice','units','arrayActividades','countries','product_categories','codigos') );
     }

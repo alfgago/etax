@@ -70,17 +70,17 @@
       
                  <div class="form-group col-md-4">
                   <label for="subtotal">Subtotal </label>
-                  <input type="text" class="form-control" value="{{$invoice->subtotal}}" disabled name="subtotal"  required>
+                  <input type="text" class="form-control" value="{{number_format($invoice->subtotal, 2)}}" disabled name="subtotal"  required>
                 </div>
       
                 <div class="form-group col-md-4">
                   <label for="iva_amount">Monto IVA </label>
-                  <input type="text" class="form-control" value="{{$invoice->iva_amount}}" disabled name="iva_amount" required>
+                  <input type="text" class="form-control" value="{{number_format($invoice->iva_amount, 2)}}" disabled name="iva_amount" required>
                 </div>
       
                 <div class="form-group col-md-4">
                   <label for="total">Total</label>
-                  <input type="text" class="form-control total" value="{{$invoice->total}}" disabled name="total"  >
+                  <input type="text" class="form-control total" value="{{number_format($invoice->total, 2)}}" disabled name="total"  >
                 </div>
       
               </div>
@@ -223,8 +223,7 @@
                     <th>Cant.</th>
                     <th>Unidad</th>
                     <th>Precio unitario</th>
-                    <th>Categoria </th>
-                    <th>Tipo IVA</th>
+                    <th>Código / Categoría</th>
                     <th>Subtotal</th>
                     <th>IVA</th>
                     <th>Total</th>
@@ -242,22 +241,20 @@
                       <td>{{ \App\UnidadMedicion::getUnidadMedicionName($item->measure_unit) }}</td>
                       <td>{{ $item->unit_price }}</td>
                       <td>
-                        <select class="form-control category_product" numero="{{ $loop->index+1 }}" name="items[{{ $loop->index }}][category_product]">
-                            @foreach( $product_categories as $product_category)
-                              <option {{ $item->product_type == $product_category->id ? 'selected' : '' }}  value="{{$product_category->id}}" options="{{$product_category->open_codes}}">{{$product_category->name}}</option>
+                        <select class="form-control tipo_iva tipo_iva_{{ $loop->index+1 }} select-search" name="items[{{ $loop->index }}][tipo_iva]" >
+                            @foreach( $codigos as $tipo)
+                              <option {{ $item->iva_type == $tipo->id ? 'selected' : '' }} value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }} " identificacion="{{$tipo->is_identificacion_plena}}">{{ $tipo['name'] }}</option>
+                            @endforeach
+                        </select>
+                        <select class="mt-2 form-control tipo_producto" numero="{{ $loop->index+1 }}" name="items[{{ $loop->index }}][category_product]">
+                            @foreach( $product_categories as $tipo)
+                              <option {{ $item->product_type == $tipo->id ? 'selected' : '' }} value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
                             @endforeach
                         </select>
                       </td>
-                      <td>
-                        <select class="form-control tipo_iva tipo_iva_{{ $loop->index+1 }}" name="items[{{ $loop->index }}][tipo_iva]" >
-                            @foreach( $codigos as $codigo)
-                              <option {{ $item->iva_type == $codigo->id ? 'selected' : '' }} value="{{$codigo->id}}" identificacion="{{$codigo->is_identificacion_plena}}">{{$codigo->name}}</option>
-                            @endforeach
-                        </select>
-                      </td>
-                      <td>{{ $item->subtotal }}</td>
-                      <td>{{ $item->iva_amount }}</td>
-                      <td>{{ $item->total }}</td>
+                      <td>{{ number_format($item->subtotal, 2) }}</td>
+                      <td>{{ number_format($item->iva_amount, 2) }}</td>
+                      <td>{{ number_format($item->total, 2) }}</td>
                       <td class='acciones'>
                         <span title='Editar linea' class='btn-editar-item text-success mr-2' onclick="abrirPopup('linea-popup'); cargarFormItem({{ $loop->index }});"><i class='nav-icon i-Pen-2'></i> </span> 
                         <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ $loop->index }});' ><i class='nav-icon i-Close-Window'></i> </span> 
@@ -288,26 +285,23 @@
 <script>
 $(document).ready(function(){
   
-  $('#tipo_iva').val('103');
-  
-
+  $(".tipo_iva").change(function(){
+      var codigoIVA = $(this).find(':selected').val();
+      var parent = $(this).parents('tr');
+      parent.find('.tipo_producto option').hide();
+      parent.find(".tipo_producto option").each(function(){
+        var posibles = $(this).attr('posibles').split(",");
+      	if(posibles.includes(codigoIVA)){
+          	$(this).show();
+          }
+      });
+      var tipoProducto = parent.find('.tipo_producto option[codigo='+codigoIVA+']').first().val()
+      parent.find('.tipo_producto').val( tipoProducto ).change();
+  });
   
   toggleRetencion();
-
-  $(".category_product").change(function(){
-      var numero = $(this).attr("numero");
-      var options = $(this).find(':selected').attr("options");
-      var arrPosibles = options.split(",");
-      var currTipo = $('.tipo_iva_'+numero).val();
-      var isAvailable = false;
-      var tipo;
-      $('.tipo_iva_'+numero+' option').hide();
-      for( tipo of arrPosibles ) {
-      console.log(tipo);
-        $('.tipo_iva_'+numero+' option[value='+tipo+']').show();
-        if(currTipo == tipo){ isAvailable = true; }
-      }
-  });
+  $('.tipo_iva').change();
+  
 });
 
 
