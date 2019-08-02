@@ -142,13 +142,7 @@ class BookController extends Controller
             ); 
             return view('book/validar')->with('retorno',$retorno );
         }else{
-            $retorno = array(
-                "cierre" => $cierre,
-                "bloqueo" => $bloqueo,
-                "invoices" => $invoices,
-                "bills" => $bills,
-            );
-            return view('book/validar')->with('retorno',$retorno );
+            return $bloqueo;
         }
     }
     /**

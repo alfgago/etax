@@ -43,13 +43,21 @@
                   <td>₡{{ number_format( $data->retention_by_card, 0 ) }}</td>
                   <td>{{ $data->is_closed ? 'Cerrado' : 'Abierto' }}</td>
                   <td> 
-                      <a href="/cierres/retenciones-tarjeta/{{ $data->id }}" title="Retenciones {{ $data->month }}-{{ $data->year }}" class="btn btn-danger m-0" style=" font-size: 0.9em;">
+                      <a href="/cierres/retenciones-tarjeta/{{ $data->id }}"  title="Retenciones {{ $data->month }}-{{ $data->year }}" class="btn btn-danger m-0" style=" font-size: 0.9em;">
                           Retenciones
                         </a>
                     @if( !$data->is_closed  )
-                        <button onclick="validarPopup(this)" link="/cierres/validar-cierre/{{ $data->id }}" type="submit" title="Cerrar {{ $data->month }}-{{ $data->year }}" class="btn btn-primary btn-agregar m-0" style="background: #15408E; font-size: 0.9em;"  data-toggle="modal" data-target="#modal_estandar">
+                        <button onclick="validarPopup(this)" nid="{{ $data->id }}" link="/cierres/validar-cierre/{{ $data->id }}" type="submit" title="Cerrar {{ $data->month }}-{{ $data->year }}" class="btn btn-primary btn-agregar m-0" style="background: #15408E; font-size: 0.9em;"  >
                           Cerrar mes
                         </button>
+                          
+                        <form class="inline-form" method="POST" action="/cierres/cerrar-mes/{{ $data->id }}" >
+                          @csrf
+                          @method('patch')
+                          <button type="submit" title="Cerrar" hidden class="btn btn-primary btn-agregar m-0 btn_submit_{{ $data->id }}" style="background: #15408E; font-size: 0.9em;">
+                              Cerrar mes
+                          </button>
+                      </form>
                     @elseif( !$data->is_final  )
                       - Tiene rectificación -
                     @else
@@ -78,7 +86,7 @@
         
   </div>  
 </div>
-
+<button type="submit" title="Cerrar" hidden class="levantar_modal" data-toggle="modal" data-target="#modal_estandar"></button>
 @endsection
 @section('footer-scripts')
 
@@ -87,15 +95,41 @@ function validarPopup(obj) {
   
     var link = $(obj).attr("link");
     var titulo = $(obj).attr("title");
+    var id = $(obj).attr("nid");
+    console.log(id);
     $("#titulo_modal_estandar").html(titulo);
     $.ajax({
        type:'GET',
        url:link,
        success:function(data){
-          $("#body_modal_estandar").html(data);
-       }
+          if(data == 0){
+            cerrar(id);
+          }else{
+            $("#body_modal_estandar").html(data);
+            $(".levantar_modal").click();
+          }
+        }
   
     });
+  
+}
+
+function cerrar( id ) {
+  $(".modal-dialog .close").click();
+  var formId = ".btn_submit_"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea realizar el cierre',
+    text: "Si cierras este mes no podras ingresar mas datos correspondientes al mes cerrado",
+    type: 'warning',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero cerrarlo'
+  }).then((result) => {
+    if (result.value) {
+      alert(formId);
+      $(formId).click();
+    }
+  })
   
 }
 </script>

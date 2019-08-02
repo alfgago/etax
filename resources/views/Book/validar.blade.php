@@ -1,19 +1,5 @@
 
-	@if($retorno['bloqueo'] == 0)
-		<div class="row">
-			<div class="col-md-12">
-				<h3>Esta seguro que desea cerrar las cuentas del mes</h3>
-				<form class="inline-form" method="POST" action="/cierres/cerrar-mes/{{ $retorno['cierre'] }}" >
-                    @csrf
-                    @method('patch')
-                    <button type="submit" title="Cerrar" class="btn btn-primary btn-agregar m-0" style="background: #15408E; font-size: 0.9em;">
-                        Cerrar mes
-                    </button>
-                </form>
-            </div>
-		</div>
-
-	@else
+	
 		<h3>Este mes tienen pendiente de validacion las ventas</h3>
 
 		<table class="table table-striped table-bordered">
@@ -63,4 +49,3 @@
 				@endforeach
 			</tbody>
 		</table>
-	@endif
