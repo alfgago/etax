@@ -267,7 +267,7 @@
 
 <script>
 $(document).ready(function(){
-  $('#tipo_producto').val(17).change();
+  $('#tipo_producto').val('B003').change();
 });
 </script>
 

@@ -17603,6 +17603,11 @@ table.table-bordered.dataTable tr {
   transition: .25s ease all;
 }
 
+table#bill-table,
+table#invoice-table {
+  font-size: 0.75rem;
+}
+
 .form-group {
   position: relative;
   margin-bottom: 0.75rem;
@@ -18629,6 +18634,24 @@ input.type-zone {
   -webkit-box-align: end;
       -ms-flex-align: end;
           align-items: flex-end;
+}
+
+ul#select2-tipo_iva-results {
+  font-size: .8rem;
+}
+
+.select2-search--dropdown input {
+  font-size: .8rem;
+}
+
+span.select2-dropdown.select2-dropdown--below {
+  -webkit-box-shadow: 0 0 0 0.2rem rgba(76, 0, 109, 0.25);
+  box-shadow: 0 5px 15px rgba(76, 0, 109, 0.25);
+}
+
+span.select2.select2-container.select2-container--default.select2-container--below.select2-container--open {
+  -webkit-box-shadow: 0 0 0 0.2rem rgba(76, 0, 109, 0.25);
+  box-shadow: 0 0 25px rgba(76, 0, 109, 0.25);
 }
 
 .alert {

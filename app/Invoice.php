@@ -696,14 +696,31 @@ class Invoice extends Model
         
         //Start DATOS CLIENTE
               if ( array_key_exists('Receptor', $arr) ){
-                $correoCliente = $arr['Receptor']['CorreoElectronico'];
+                if( isset( $arr['Receptor']['CorreoElectronico'] ) ){
+                    $correoCliente = $arr['Receptor']['CorreoElectronico'];
+                }else{
+                    $correoCliente = null;
+                }
                 if ( isset($arr['Receptor']['Telefono']) ) {
                   $telefonoCliente = $arr['Receptor']['Telefono']['NumTelefono'] ?? null;
                 }else {
                   $telefonoCliente = null;
                 }
-                $tipoPersona = $arr['Receptor']['Identificacion']['Tipo'];
-                $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
+                if( isset($arr['Receptor']['Identificacion']['Tipo']) ){
+                    $tipoPersona = $arr['Receptor']['Identificacion']['Tipo'];
+                }else{
+                    $tipoPersona = null;
+                }
+
+                if($invoice->xml_schema == 42){
+                    if ( isset($arr['Receptor']['Identificacion']['Numero']) ) {
+                        $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'] ?? null;
+                    }else {
+                        $identificacionCliente = null;
+                    }
+                }else{
+                    $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
+                }
                 $nombreCliente = $arr['Receptor']['Nombre'];
               
                 if ( isset($arr['Receptor']['Ubicacion']) ) {
@@ -742,7 +759,7 @@ class Invoice extends Model
                             'company_id' => $company->id,
                         ],
                         [
-                            'code' => $identificacionCliente,
+                            'code' => $identificacionCliente ?? null,
                             'company_id' => $company->id,
                             'tipo_persona' => $tipoPersona,
                             'id_number' => $identificacionCliente,
@@ -829,8 +846,8 @@ class Invoice extends Model
             $montoExoneracion = 0;
             if( array_key_exists('Impuesto', $linea) ) {
               //$codigoEtax = $linea['Impuesto']['CodigoTarifa'];
-              $montoIva = $linea['Impuesto']['Monto'];
-              $porcentajeIva = $linea['Impuesto']['Tarifa'];
+              $montoIva = trim($linea['Impuesto']['Monto']);
+              $porcentajeIva = trim($linea['Impuesto']['Tarifa']);
               
               if( array_key_exists('Exoneracion', $linea['Impuesto']) ) {
                 $tipoDocumentoExoneracion = $linea['Impuesto']['Exoneracion']['TipoDocumento'] ?? null;
@@ -919,10 +936,11 @@ class Invoice extends Model
     public function setNoteData($invoiceReference) {
         try {
             $this->document_key = getDocumentKey('03', $this->reference_number, $invoiceReference->company->id_number);
-            $this->document_number = getDocReference('03', $this->reference_number);;
+            $this->document_number = getDocReference('03', $this->reference_number);
             $this->sale_condition = $invoiceReference->sale_condition;
             $this->payment_type = $invoiceReference->payment_type;
             $this->retention_percent = $invoiceReference->retention_percent;
+            $this->commercial_activity = $invoiceReference->commercial_activity;
             $this->credit_time = $invoiceReference->credit_time;
             $this->buy_order = $invoiceReference->buy_order;
             $this->other_reference = $invoiceReference->reference_number;

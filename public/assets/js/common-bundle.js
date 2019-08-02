@@ -497,17 +497,17 @@ toastr.options = {
 
   window.presetTipoIVA = function(){
     if( ! $('#cliente_exento:checked').length ){
-      
-      var posibles = $('#tipo_producto :selected').attr('posibles');
-      var arrPosibles = posibles.split(",");
-      var tipo;
-      $('#tipo_iva option').hide();
-      for( tipo of arrPosibles ) {
-      	$('#tipo_iva option[value='+tipo+']').show();
-      }
-      
-      var tipoIVA = $('#tipo_producto :selected').attr('codigo');
-      $('#tipo_iva').val( tipoIVA ).change();
+      var codigoIVA = $('#tipo_iva :selected').val();
+      $('#tipo_producto option').hide();
+      $("#tipo_producto option").each(function(){
+          var posibles = $(this).attr('posibles').split(",");
+      	if(posibles.includes(codigoIVA)){
+      		console.log(posibles);
+          	$(this).show();
+          }
+      });
+      var tipoProducto = $('#tipo_producto option[codigo='+codigoIVA+']').first().val()
+      $('#tipo_producto').val( tipoProducto ).change();
     }else{
       $('#tipo_iva').val( 'B260' );
     }
@@ -686,12 +686,12 @@ toastr.options = {
       $('#p1').change();*/
       
       if( $('#is-compra').length ){
-        $('#tipo_producto').val(49).change();
+        $('#tipo_producto').val('B003').change();
       }else {
         if( $('#default_product_category').length ){
-          $('#tipo_producto').val( $('#default_product_category').val() ).change();
+          $('#tipo_iva').val( $('#default_vat_code').val() ).change();
         }else{
-          $('#tipo_producto').val( 17 ).change();
+          $('#tipo_iva').val( 'B103' ).change();
         }
       }
       
@@ -714,9 +714,9 @@ toastr.options = {
       $('.item-factura-form input[type=checkbox]').prop('checked', false);
       
       if( $('#is-compra').length ){
-        $('#tipo_producto').val(49).change();
+        $('#tipo_iva').val('B003').change();
       }else {
-        $('#tipo_producto').val(17).change();
+        $('#tipo_iva').val('B103').change();
       }
       $('#unidad_medicion').val('Unid');
       $('#cantidad').val(1);
@@ -914,13 +914,14 @@ $( document ).ready(function() {
     });
   
     $('#tipo_iva').on('change', function(){
+      presetTipoIVA();
       presetPorcentaje();
       calcularSubtotalItem();
       togglePorcentajeIdentificacionPlena();
       if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
     });
   
-    $('#tipo_producto').on('change', function(){
+    /*$('#tipo_producto').on('change', function(){
       
       presetTipoIVA();
       presetPorcentaje();
@@ -928,7 +929,7 @@ $( document ).ready(function() {
       togglePorcentajeIdentificacionPlena();
       if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
       
-    });
+    });*/
     
     $('#item_iva_amount').on('change', function(){
       calcularConIvaManual();

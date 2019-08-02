@@ -99,18 +99,18 @@
                 <td>{{ number_format($item->total,2) }} </td>
                 <td>
                   <div class="input-validate-iva">
-                    <select class="form-control product_type" name="items[{{ $loop->index }}][product_type]" placeholder="Seleccione una categoría de hacienda" required>
-                        @foreach($categoria_productos as $cat)
-                            <option value="{{@$cat->id}}" codigo="{{ @$cat->bill_iva_code }}" posibles="{{@$cat->open_codes}}" {{ $item->product_type == @$cat->id ? 'selected' : '' }}>{{@$cat->name}}</option>
+                    <select class="form-control iva_type" name="items[{{ $loop->index }}][iva_type]" placeholder="Seleccione un código eTax" required >
+                        @foreach($codigos_etax as $cod)
+                            <option value="{{@$cod->code}}" identificacion="{{@$cod->is_identificacion_plena}}" {{ $item->iva_type == @$cod->code ? 'selected' : '' }}>{{@$cod->name}}</option>
                         @endforeach
                     </select>
                   </div>
                 </td>
                 <td>
                   <div class="input-validate-iva">
-                    <select class="form-control iva_type" name="items[{{ $loop->index }}][iva_type]" placeholder="Seleccione un código eTax" required >
-                        @foreach($codigos_etax as $cod)
-                            <option value="{{@$cod->code}}" identificacion="{{@$cod->is_identificacion_plena}}" {{ $item->iva_type == @$cod->code ? 'selected' : '' }}>{{@$cod->name}}</option>
+                    <select class="form-control product_type" name="items[{{ $loop->index }}][product_type]" placeholder="Seleccione una categoría de hacienda" required>
+                        @foreach($categoria_productos as $cat)
+                            <option value="{{@$cat->id}}" codigo="{{ @$cat->bill_iva_code }}" posibles="{{@$cat->open_codes}}" {{ $item->product_type == @$cat->id ? 'selected' : '' }}>{{@$cat->name}}</option>
                         @endforeach
                     </select>
                   </div>
@@ -158,36 +158,29 @@ $(document).ready(function(){
         }
     });
 
-    $(".product_type").change(function(){
-      var parent = $(this).parents('tr');
-      var posibles = $(this).find(':selected').attr('posibles');
-      var arrPosibles = posibles.split(",");
-      var currTipo = parent.find('.iva_type').val();
-      var isAvailable = false;
-      var tipo;
-      parent.find('.iva_type option').hide();
-      for( tipo of arrPosibles ) {
-        parent.find('.iva_type option[value='+tipo+']').show();
-        if(currTipo == tipo){ isAvailable = true; }
-      }
-      if(!isAvailable){
-        var tipoIVA = $(this).find(':selected').attr('codigo');
-        parent.find('.iva_type').val( tipoIVA ).change();
-      }
-    });
-
     $(".iva_type").change(function(){
+      var codigoIVA = $(this).find(':selected').val();
       var parent = $(this).parents('tr');
-      var identificacion = $(this).find('.iva_type :selected').attr('identificacion');
+      parent.find('.product_type option').hide();
+      var tipoProducto = 0;
+      parent.find(".product_type option").each(function(){
+        var posibles = $(this).attr('posibles').split(",");
+      	if(posibles.includes(codigoIVA)){
+          $(this).show();
+          if( !tipoProducto ){
+            tipoProducto = $(this).val();
+          }
+        }
+      });
+      parent.find('.product_type').val( tipoProducto ).change();
+          
+      var identificacion = $(this).find(':selected').attr('identificacion');
       if(identificacion == 1){
-          $(this).find(".porc_identificacion_plena").val('1');
-          $(this).find(".porc_identificacion_plena").removeClass("hidden");
-          $(this).find(".porc_identificacion_plena").attr("required");
-          $(this).find(".porc_identificacion_plena").val('1');
+          parent.find(".porc_identificacion_plena").removeClass("hidden");
+          parent.find(".porc_identificacion_plena").attr("required");
       }else{
-          $(this).find(".porc_identificacion_plena").addClass("hidden");
-          $(this).find(".porc_identificacion_plena").val("0");
-          $(this).find(".porc_identificacion_plena").removeAttr("required");
+          parent.find(".porc_identificacion_plena").addClass("hidden");
+          parent.find(".porc_identificacion_plena").removeAttr("required");
       }
     });
     

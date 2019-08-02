@@ -268,7 +268,7 @@
 
 <script>
 $(document).ready(function(){
-  $('#tipo_producto').val(21).change();
+  $('#tipo_iva').val('B260').change();
 
   $('#moneda').change(function() {
     if ($(this).val() == 'USD') {

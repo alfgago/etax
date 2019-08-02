@@ -44,7 +44,7 @@ Route::post('/reportes/detalle-credito', 'ReportsController@reporteDetalleCredit
 Route::post('/reportes/libro-ventas', 'ReportsController@reporteLibroVentas');
 Route::post('/reportes/libro-compras', 'ReportsController@reporteLibroCompras');
 Route::get('/reportes/borrador-iva', 'ReportsController@reporteBorradorIVA');
-/**/
+/*Exportar XML DEPRECADOS*/
 Route::post('/reportes/export-cuentas-contables', 'ReportsController@exportCuentasContables');
 Route::post('/reportes/export-detalle-debito-fiscal', 'ReportsController@exportDetalleDebitoFiscal');
 Route::post('/reportes/export-detalle-credito-fiscal', 'ReportsController@exportDetalleCreditoFiscal');
@@ -99,6 +99,7 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('consult/{id}', 'InvoiceController@consultInvoice')->name('Invoice.consultInvoice');
     Route::get('query-invoice/{id}', 'InvoiceController@queryInvoice')->name('Invoice.queryInvoice');
     Route::post('actualizar-categorias', 'InvoiceController@actualizar_categorias')->name('Invoice.actualizar_categorias');
+    Route::patch('switch-ocultar/{id}', 'InvoiceController@hideInvoice')->name('Bill.hideInvoice');
 });
 
 // Rutas de facturacion recibida
@@ -117,6 +118,7 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::post('guardar-validar', 'BillController@GuardarValidar')->name('Bill.GuardarValidar');
     Route::get('edit-aceptacion', 'BillController@editAccept')->name('Bill.editAccept');
     Route::get('update-aceptacion', 'BillController@updateAccept')->name('Bill.updateAccept');
+    Route::patch('switch-ocultar/{id}', 'BillController@hideBill')->name('Bill.hideBill');
 });
 
 // Rutas de Wizard
@@ -131,7 +133,7 @@ Route::get('/cambiar-plan', 'SubscriptionPlanController@changePlan')->name('Subs
 Route::get('/elegir-plan', 'SubscriptionPlanController@selectPlan')->name('Subscription.select_plan');
 Route::get('/periodo-pruebas', 'SubscriptionPlanController@startTrial')->name('Subscription.startTrial');
 Route::post('/confirmar-plan', 'SubscriptionPlanController@confirmPlanChange')->name('Subscription.confirmar_plan');
-Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}', 'SubscriptionPlanController@confirmCode')->name('Subscription.confirmar_code');
+Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}/{plan}/{companies}', 'SubscriptionPlanController@confirmCode')->name('Subscription.confirmar_code');
 Route::get('/codigo-contador/{codigo}', 'SubscriptionPlanController@confirmCodeAccount')->name('Subscription.confirmCodeAccount');
 Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');
 Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');

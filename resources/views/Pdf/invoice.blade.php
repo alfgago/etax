@@ -184,7 +184,6 @@
                 <b>{{$company->business_name}}</b><br>
                 <b>Cedula:</b> {{$company->id_number}}<br>
                 <b>Tel:</b> {{$company->phone}}<br>
-                <b>Fax:</b> <br>
                 <b>Correo: {{$company->email}}</b> <br>
             </td>
             <td style="padding: 40px 0px 0px 30px; text-align: right;">
@@ -232,7 +231,7 @@
             </td>
 
             <td style="width: 42%;margin-top: 0.75% !important;">
-                <b>Factura Electrónica N°: </b>{{$data_invoice->document_number}} <br>
+                <b>Documento N°: </b>{{$data_invoice->document_number}} <br>
                 <b>Clave Numérica: </b> {{$data_invoice->document_key}}<br>
                 <b>Tipo de Documento: </b> {{ $documentType }}<br>
                 <b>Fecha de Emisión: </b> {{ $data_invoice->generated_date }}<br>

@@ -249,8 +249,9 @@ class CalculatedTax extends Model
         for ($i = 0; $i < $countInvoiceItems; $i++) {
           try {
             $currInvoice = $invoiceItems[$i]->invoice;
+            
             if( !$currInvoice->is_void && $currInvoice->is_authorized && $currInvoice->is_code_validated 
-            && $currInvoice->is_totales == $filterTotales ) {
+            && $currInvoice->is_totales == $filterTotales && $currInvoice->hide_from_taxes == false ) {
             
               if( $currInvoice->currency == 'CRC' ) {
                 $currInvoice->currency_rate = 1;
@@ -259,7 +260,6 @@ class CalculatedTax extends Model
               $invoiceItems[$i]->fixIvaType();
               
               $subtotal = $invoiceItems[$i]->subtotal * $currInvoice->currency_rate;
-              //$currentTotal = $invoiceItems[$i]->total * $currInvoice->currency_rate;
               $ivaType = $invoiceItems[$i]->iva_type;
               $prodType = $invoiceItems[$i]->product_type;
               $invoiceIva = $invoiceItems[$i]->iva_amount * $currInvoice->currency_rate;
@@ -416,9 +416,9 @@ class CalculatedTax extends Model
             }
             
           }catch( \Exception $ex ){
-            Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
+            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }catch( \Throwable $ex ){
-            Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
+            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }
         }
         
@@ -474,29 +474,30 @@ class CalculatedTax extends Model
           
           try{
             
-            if( !$billItems[$i]->bill->is_void && $billItems[$i]->bill->is_authorized && $billItems[$i]->bill->is_code_validated &&
-                ( $singleBill || $billItems[$i]->bill->accept_status == 1 ) ) {
+            $currBill = $billItems[$i]->bill;
+            if( !$currBill->is_void && $currBill->is_authorized && $currBill->is_code_validated &&
+                ( $singleBill || $currBill->accept_status == 1 ) && $currBill->hide_from_taxes == false ) {
             
-              if( $billItems[$i]->bill->currency == 'CRC' ) {
-                $billItems[$i]->bill->currency_rate = 1;
+              if( $currBill->currency == 'CRC' ) {
+                $currBill->currency_rate = 1;
               }
               //Arrela el IVATYPE la primera vez en caso de ser codigos anteriores.
               //$billItems[$i]->fixIvaType();
               
-              $subtotal = $billItems[$i]->subtotal * $billItems[$i]->bill->currency_rate;
+              $subtotal = $billItems[$i]->subtotal * $currBill->currency_rate;
               $ivaType = $billItems[$i]->iva_type;
               $prodType = $billItems[$i]->product_type;
-              $billIva = $billItems[$i]->iva_amount * $billItems[$i]->bill->currency_rate;
+              $billIva = $billItems[$i]->iva_amount * $currBill->currency_rate;
               $currentTotal = $subtotal + $billIva;
               
               $prodPorc = $billItems[$i]->ivaType ? $billItems[$i]->ivaType->percentage : '13';
               $prodType = $prodType ? $prodType : '49';
               
-              $currActivity = $billItems[$i]->bill->activity_company_verification;
+              $currActivity = $currBill->activity_company_verification;
               if( !isset($currActivity) ){
                 $currActivity = $arrayActividades[0]->codigo;
-                $billItems[$i]->bill->commercial_activity = $currActivity;
-                $billItems[$i]->bill->save();
+                $currBill->commercial_activity = $currActivity;
+                $currBill->save();
               }
               
               //Redondea todo a 2 decimales
@@ -606,7 +607,7 @@ class CalculatedTax extends Model
               $ivaData->$iVar += $billIva;
               
               //Cuenta contable de proveedor
-              $tipoVenta = $billItems[$i]->bill->sale_condition;
+              $tipoVenta = $currBill->sale_condition;
               if( $tipoVenta == '01' ) {
                 $totalProveedoresContado += $currentTotal;
               }else{
@@ -631,9 +632,9 @@ class CalculatedTax extends Model
               
             }  
           }catch( \Exception $ex ){
-            Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
+            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }catch( \Throwable $ex ){
-            Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
+            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }
           
         }

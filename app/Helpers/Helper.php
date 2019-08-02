@@ -159,10 +159,23 @@ if (!function_exists('currentCompany')) {
 
 if (!function_exists('currentCompanyModel')) {
 
-    function currentCompanyModel() {
-
+    function currentCompanyModel($cache = true) {
         $user = auth()->user();
-        
+
+        if ($cache == false) {
+            if (!$user->companies->count()) {
+                auth()->user()->addCompany();
+            }
+
+            $company = $user->currentTeam->company;
+            if (!$company) {
+                $companyId = auth()->user()->companies->first()->id;
+                session(['current_company' => $companyId]);
+                $company = App\Company::find($companyId);
+            }
+            return $company;
+        }
+
         $cacheKey = "cache-currentcompany-$user->id";
         if ( !Illuminate\Support\Facades\Cache::has($cacheKey) ) {
                 

@@ -44,6 +44,7 @@
           <thead>
             <tr>
               <th data-priority="2">Comprobante</th>
+              <th data-priority="3">Actividad</th>
               <th data-priority="3">Receptor</th>
               <th>Tipo Doc.</th>
               <th data-priority="5">Moneda</th>
@@ -80,19 +81,25 @@ $(function() {
       },
       type: 'GET'
     },
-    order: [[ 7, 'desc' ]],
+    order: [[ 8, 'desc' ]],
     columns: [
       { data: 'document_number', name: 'document_number' },
+      { data: 'commercial_activity', name: 'commercial_activity' },
       { data: 'client', name: 'client.fullname' },
       { data: 'document_type', name: 'document_type' },
-      { data: 'currency', name: 'currency', orderable: false, searchable: false },
-      { data: 'subtotal', name: 'subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
-      { data: 'iva_amount', name: 'iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
-      { data: 'total', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ) },
+      { data: 'moneda', name: 'currency', orderable: false, searchable: false },
+      { data: 'subtotal', name: 'subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
+      { data: 'iva_amount', name: 'iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
+      { data: 'total', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
       { data: 'generated_date', name: 'generated_date' },
       { data: 'hacienda_status', name: 'hacienda_status' },
       { data: 'actions', name: 'actions', orderable: false, searchable: false },
     ],
+    createdRow: function (row, data, index) {
+      if(data.hide_from_taxes){
+        $(row).addClass("tax-hidden");
+      }
+    },
     language: {
       url: "/lang/datatables-es_ES.json",
     },
@@ -120,11 +127,10 @@ function confirmDelete( id ) {
   
 }
 
-
-
 function confirmAnular( id ) {  
   var formId = "#anular-form-"+id;
-  @if(currentCompanyModel()->atv_validation)
+
+  @if(currentCompanyModel(false)->atv_validation)
     var title = '¿Está seguro que desea anular la factura';
     var texto = "Este proceso anulará la factura ante Hacienda y enviará una nueva nota de crédito al cliente.";
     Swal.fire({
@@ -150,8 +156,6 @@ function confirmAnular( id ) {
       confirmButtonText: 'Ok'
     });
   @endif
-
-  
   
 }
 
@@ -173,7 +177,32 @@ function confirmRecover( id ) {
   })
   
 }
+
+function confirmHideFromTaxes( id ) {
+  
+  var formId = "#hidefromtaxes-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea ocultar la factura de los cálculos de IVA?',
+    text: "La factura no será tomada en cuenta para sus cálculos de IVA.",
+    type: 'success',
+    customContainerClass: 'container-success',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero ocultarla del cálculo',
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
   
 </script>
+
+<style>
+  tr.tax-hidden td {
+    text-decoration: line-through !important;
+  }
+</style>
 
 @endsection

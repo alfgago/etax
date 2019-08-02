@@ -69,6 +69,7 @@ class ProcessReception implements ShouldQueue
                     $tokenApi = $apiHacienda->login(false);
                     if ($requestData !== false) {
                         $endpoint = $bill->xml_schema == 42 ? 'invoice' : 'invoice43';
+                        sleep(15);
                         Log::info('Enviando Request Reception  API HACIENDA -->>' . $this->billId);
                         $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/aceptacionxml', [
                             'headers' => [
@@ -237,7 +238,7 @@ class ProcessReception implements ShouldQueue
 
     private function setDetails($data) {
         try {
-            $details = null;
+            $details = [];
             foreach ($data as $key => $value) {
                 $details[$key] = array(
                     'cantidad' => $value['item_count'] ?? '',
