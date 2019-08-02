@@ -161,7 +161,7 @@ class TeamController extends Controller {
 
         /* Only owner of company can delete their company */
         if (!auth()->user()->isOwnerOfTeam($team)) {
-            abort(403);
+            return redirect()->back()->withError('Solamente el usuario creador de la empresa puede eliminarla.');
         }
 
         /* Delete company,certificate and permissions related to that company */
