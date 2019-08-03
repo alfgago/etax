@@ -39,10 +39,14 @@ class Bill extends Model
     }
     
     public function providerName() {
-      if( isset($this->provider_id) ) {
-        return $this->provider->getFullName();
-      }else{
-        return 'N/A';
+      if( isset($this->provider_first_name)) {
+        return "$this->provider_first_name $this->provider_last_name $this->provider_last_name2";
+      }else {
+        if( isset($this->provider_id) ) {
+          return $this->provider->getFullName();
+        }else{
+          return 'N/A';
+        }
       }
     }
     

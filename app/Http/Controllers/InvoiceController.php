@@ -51,7 +51,7 @@ class InvoiceController extends Controller
     {
         $company = currentCompanyModel(false);
 
-        if ($company->atv_validation == false) {
+        if ( !$company->atv_validation && $company->use_invoicing ) {
             $apiHacienda = new BridgeHaciendaApi();
             $token = $apiHacienda->login(false);
             $validateAtv = $apiHacienda->validateAtv($token, $company);
@@ -801,7 +801,7 @@ class InvoiceController extends Controller
                 $client = new \GuzzleHttp\Client();
                 $response = $client->get(config('etax.exchange_url'),
                     ['query' => [
-                        'Indicador' => '317',
+                        'Indicador' => '318',
                         'FechaInicio' => $today::now()->format('d/m/Y'),
                         'FechaFinal' => $today::now()->format('d/m/Y'),
                         'Nombre' => config('etax.namebccr'),

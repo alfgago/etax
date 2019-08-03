@@ -98,23 +98,26 @@ class BookController extends Controller
     public function validar($cierre){
         $book = Book::join('calculated_taxes','calculated_taxes.id','books.calculated_tax_id')
             ->where('books.id',$cierre)->first();
-
-        $invoices = Invoice::whereHas('items', function ($query){
+            
+        $invoices = Invoice::where(function ($query) use($book) {
+            $query->where(['company_id'=> $book->company_id,'month'=> $book->month,'year'=> $book->year,'is_authorized' => true])
+                ->where('commercial_activity', null);
+        })->orWhere(function($query) use($book) {
+            $query->where(['company_id'=> $book->company_id,'month'=> $book->month,'year'=> $book->year,'is_authorized' => true])
+                ->whereHas('items', function ($query){
                 $query->where('iva_type', null)->orwhere('product_type', null);
-            })->where([
-                'company_id'=> $book->company_id,
-                'month'=> $book->month,
-                'year'=> $book->year,
-                'is_authorized' => true
-            ])->orWhere('commercial_activity', null)->get();
-        $bills = Bill::whereHas('items', function ($query){
+            });
+        })->get();
+        
+        $bills = Bill::where(function ($query) use($book) {
+            $query->where(['company_id'=> $book->company_id,'month'=> $book->month,'year'=> $book->year,'accept_status' => true])
+                ->where('activity_company_verification', null);
+        })->orWhere(function($query) use($book) {
+            $query->where(['company_id'=> $book->company_id,'month'=> $book->month,'year'=> $book->year,'accept_status' => true])
+                ->whereHas('items', function ($query){
                 $query->where('iva_type', null)->orwhere('product_type', null);
-            })->where([
-                'company_id'=> $book->company_id,
-                'month'=> $book->month,
-                'year'=> $book->year,
-                'accept_status' => true
-            ])->orWhere('commercial_activity', null)->get();
+            });
+        })->get();
 
         $bloqueo = count($bills) + count($invoices);
         if($bloqueo > 0){
