@@ -2,6 +2,12 @@
     <div class="logo">
         <a title="Volver al escritorio" href="/"><img src="{{asset('assets/images/logo-final-150.png')}}" class="logo-img"></a>
     </div>
+    @if( getCurrentSubscription()->status == 4 )
+    <div class="comprar-ahora">
+        <p class="description">Periodo de pruebas activo</p>
+        <a class="btn btn-primary btn-buynow" href="/elegir-plan" title="Comprar ahora">Comprar ahora</a>
+    </div>
+    @endif
     <div class="menu-toggle">
         <div></div>
         <div></div>
