@@ -45,7 +45,7 @@
     
     <div class="form-group col-md-4">
       <label for="phone">Teléfono</label>
-      <input type="number" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" maxlength="20" onblur="validatephoneFormat();">
+      <input type="text" numeric class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" maxlength="20" max="20" onblur="validatephoneFormat();">
     </div>
     
     <div class="form-group col-md-4"></div>
@@ -151,6 +151,7 @@
                 $('#extranjero').attr("hidden", true);
             }
         }
+        $('#phone').val('');
     }
     cambiarDireccion();
     $("#id_number").keyup(function() {
