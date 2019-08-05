@@ -157,7 +157,7 @@
       </label>
     </div>
     
-    <div class="form-group col-md-12 inline-form inline-checkbox {{ @$document_type == '08' || @$document_type == '09' ? 'hidden' : '' }}">
+    <div class="form-group col-md-12 inline-form inline-checkbox hidden {{ @$document_type == '08' || @$document_type == '09' ? 'hidden' : '' }}">
         <label for="checkExoneracion">
             <span>Incluir exoneraci&oacute;n</span>
             <input type="checkbox" class="form-control" id="checkExoneracion" onchange="mostrarCamposExoneracion();">
@@ -203,7 +203,7 @@
 
             <div class="form-group col-md-2">
                 <label for="porcentajeExoneracion">% *</label>
-                <input type="number" class="form-control" max="100" min="0" maxlength="3" id="porcentajeExoneracion" placeholder="0%" onkeyup="calcularMontoExoneracion();">
+                <input type="number" class="form-control" max="100" min="0" maxlength="3" id="porcentajeExoneracion" placeholder="100%" value="100" onkeyup="calcularMontoExoneracion();">
             </div>
             <div class="form-group col-md-3">
                 <label for="montoExoneracion">Monto Exonerado *</label>
