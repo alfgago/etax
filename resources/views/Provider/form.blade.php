@@ -39,7 +39,7 @@
     
     <div class="form-group col-md-4">
       <label for="email">Correo electrónico *</label>
-      <input type="text" class="form-control" name="email" id="email" value="{{ @$provider->email }}" required>
+      <input type="email" class="form-control" name="email" id="email" value="{{ @$provider->email }}" required onblur="ValidateEmail(this.value)">
     </div>
     
     <div class="form-group col-md-4">
@@ -199,5 +199,12 @@
                   $('#extranjero').attr("hidden", true);
               }
           }
-		  
+          function ValidateEmail(mail){
+              if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)){
+                  return (true)
+              }
+              alert("Debe ingresar una dirección de email válida");
+              $("#email").val('');
+              return (false)
+          }
 		</script>
