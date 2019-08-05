@@ -64,7 +64,7 @@
           
           <div class="form-group col-md-6">
             <label for="unit_price">Precio unitario por defecto</label>
-            <input type="text" class="form-control" name="unit_price" id="precio_unitario" value="" required>
+            <input type="number" numeric class="form-control" name="unit_price" id="precio_unitario" value="" required placeholder="0" onblur="validateUnitPrice();">
           </div>
           
           <div class="form-group col-md-12">
@@ -91,6 +91,13 @@
       $('#tipo_iva').val( $('#default_vat_code').val() ).change();
     }else{
       $('#tipo_iva').val( 'B103' ).change();
+    }
+    function validateUnitPrice() {
+        var price = $('#precio_unitario').val();
+        if(price <= 0){
+            alert('El precio debe ser mayor a cero');
+            $('#precio_unitario').val(0);
+        }
     }
   </script>
 @endsection
