@@ -269,10 +269,10 @@ class CalculatedTax extends Model
               $prodType = $prodType ? $prodType : '17';
               $currActivity = $currInvoice->commercial_activity;
               
-              if( !isset($currActivity) ){
+              if( !isset($currActivity) || !in_array($currActivity, $arrayActividades) ){
                 $currActivity = $arrayActividades[0]->codigo;
                 $currInvoice->commercial_activity = $currActivity;
-                $currInvoice->save();
+                //$currInvoice->save();
               }
               
               //Redondea todo a 2 decimales
@@ -331,6 +331,13 @@ class CalculatedTax extends Model
                   $ivaType == 'B150' || $ivaType == 'B160' ||  $ivaType == 'B170' || $ivaType == 'B199' || $ivaType == 'B155' ||
                   $ivaType == 'S150' || $ivaType == 'S160' ||  $ivaType == 'S170' || $ivaType == 'S199' || $ivaType == 'S155' ){
                 $subtotal = $subtotal + $invoiceIva;
+                $invoiceIva = 0;
+                $sumRepercutido3 += $subtotal;
+                $sumRepercutidoExentoConCredito += $subtotal;
+              }
+              if( $ivaType == 'S181' || $ivaType == 'S182' ||  $ivaType == 'S183' || $ivaType == 'S184' ||
+                  $ivaType == 'B181' || $ivaType == 'B182' ||  $ivaType == 'B183' || $ivaType == 'B184' ){
+                $subtotal = $subtotal;
                 $invoiceIva = 0;
                 $sumRepercutido3 += $subtotal;
                 $sumRepercutidoExentoConCredito += $subtotal;
@@ -415,8 +422,6 @@ class CalculatedTax extends Model
 
             }
             
-          }catch( \Exception $ex ){
-            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }catch( \Throwable $ex ){
             //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }
@@ -494,10 +499,10 @@ class CalculatedTax extends Model
               $prodType = $prodType ? $prodType : '49';
               
               $currActivity = $currBill->activity_company_verification;
-              if( !isset($currActivity) ){
+              if( !isset($currActivity) || !in_array($currActivity, $arrayActividades) ){
                 $currActivity = $arrayActividades[0]->codigo;
                 $currBill->commercial_activity = $currActivity;
-                $currBill->save();
+                //$currBill->save();
               }
               
               //Redondea todo a 2 decimales
@@ -631,8 +636,7 @@ class CalculatedTax extends Model
               $ivaData->$typeVarPorcActividad += $subtotal;
               
             }  
-          }catch( \Exception $ex ){
-            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
+            
           }catch( \Throwable $ex ){
             //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }

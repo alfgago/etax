@@ -169,9 +169,11 @@
 						    <div class="form-group col-md-6">
 						      <label for="card_retention">% Retención Tarjetas</label>
 						      <select class="form-control" id="card_retention" name="card_retention" >
-				                    <option value="0" {{ @$company->card_retention == 0 ? 'selected' : '' }}>0%</option>
-				                    <option value="3" {{ @$company->card_retention == 3 ? 'selected' : '' }}>3%</option>
 				                    <option value="6" {{ @$company->card_retention == 6 ? 'selected' : '' }}>6%</option>
+				                    <option value="0" {{ @$company->card_retention == 0 ? 'selected' : '' }}>0%</option>
+				                    <option value="1" {{ @$company->card_retention == 1 ? 'selected' : '' }}>1%</option>
+				                    <option value="2" {{ @$company->card_retention == 2 ? 'selected' : '' }}>2%</option>
+				                    <option value="3" {{ @$company->card_retention == 3 ? 'selected' : '' }}>3%</option>
 						      </select>
 						    </div>
 						    

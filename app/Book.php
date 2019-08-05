@@ -132,7 +132,14 @@ class Book extends Model
                            $ivaData->bS104 + $ivaData->bS124 + + $ivaData->bS114;
       $this->cc_ventas_exp = $ivaData->bB150 + $ivaData->bS150;
       $this->cc_ventas_estado = $ivaData->bB160 + $ivaData->bS160;
-      $this->cc_ventas_exentas = $ivaData->bB170 + $ivaData->bS170;
+      try{ //Hace un tryCatch porque hay cierres donde aun no existian los codigos 180s;
+      $this->cc_ventas_exentas = $ivaData->bB170 + $ivaData->bS170 + 
+                                 $ivaData->bB181 + $ivaData->bS181 +
+                                 $ivaData->bB182 + $ivaData->bS182 +
+                                 $ivaData->bB183 + $ivaData->bS183 +
+                                 $ivaData->bB184 + $ivaData->bS184;
+      }catch(\Exception $e){ $this->cc_ventas_exentas = $ivaData->bB170 + $ivaData->bS170; }
+                        
       $this->cc_ventas_canasta = $ivaData->bB165 + $ivaData->bS165;
       $this->cc_ventas_aduana = $ivaData->bB155 + $ivaData->iB155 +
                                 $ivaData->bS155 + $ivaData->iS155;
@@ -144,8 +151,14 @@ class Book extends Model
                                 $ivaData->iS103 + $ivaData->iS123 + $ivaData->iS130;
       $this->cc_ventas_4_iva = $ivaData->iB104 + $ivaData->iB124 + + $ivaData->iB114 +
                                $ivaData->iS104 + $ivaData->iS124 + + $ivaData->iS114;
+      try{ //Hace un tryCatch porque hay cierres donde aun no existia el codigo 300
       $this->cc_ventas_sin_derecho = $ivaData->bB200 + $ivaData->bB201 + $ivaData->bB240 + $ivaData->bB245 + $ivaData->bB250 + $ivaData->bB260 + $ivaData->iB200 + $ivaData->iB201 + $ivaData->iB240 + $ivaData->iB245 + $ivaData->iB250 + $ivaData->iB260 +
-                                     $ivaData->bS200 + $ivaData->bS201 + $ivaData->bS240 + $ivaData->bS245 + $ivaData->bS250 + $ivaData->bS260 + $ivaData->iS200 + $ivaData->iS201 + $ivaData->iS240 + $ivaData->iS245 + $ivaData->iS250 + $ivaData->iS260;
+                                     $ivaData->bS200 + $ivaData->bS201 + $ivaData->bS240 + $ivaData->bS245 + $ivaData->bS250 + $ivaData->bS260 + $ivaData->iS200 + $ivaData->iS201 + $ivaData->iS240 + $ivaData->iS245 + $ivaData->iS250 + $ivaData->iS260 +
+                                     $ivaData->bS300 + $ivaData->iS300;
+      }catch(\Exception $e){ $this->cc_ventas_sin_derecho = $ivaData->bB200 + $ivaData->bB201 + $ivaData->bB240 + $ivaData->bB245 + $ivaData->bB250 + $ivaData->bB260 + $ivaData->iB200 + $ivaData->iB201 + $ivaData->iB240 + $ivaData->iB245 + $ivaData->iB250 + $ivaData->iB260 +
+        $ivaData->bS200 + $ivaData->bS201 + $ivaData->bS240 + $ivaData->bS245 + $ivaData->bS250 + $ivaData->bS260 + $ivaData->iS200 + $ivaData->iS201 + $ivaData->iS240 + $ivaData->iS245 + $ivaData->iS250 + $ivaData->iS260; 
+      }
+      
       $this->cc_ventas_sum = $this->cc_ventas_1 + $this->cc_ventas_2 + $this->cc_ventas_13 + $this->cc_ventas_4 + 
                                  $this->cc_ventas_1_iva + $this->cc_ventas_2_iva + $this->cc_ventas_13_iva + $this->cc_ventas_4_iva + 
                                  $this->cc_ventas_exp + $this->cc_ventas_estado + $this->cc_ventas_sin_derecho + $this->cc_ventas_exentas +
