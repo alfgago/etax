@@ -51,7 +51,7 @@
     
     <div class="form-group col-md-4" id="divCountry">
       <label for="country">País *</label>
-      <select class="form-control" name="country" id="country" value="{{ @$provider->country }}" required >
+      <select class="form-control" name="country" id="country" value="{{ @$provider->country }}" required onchange="cambiarTipoPersona();">
           @foreach ( \App\CodigosPaises::all() as $pais )
               <option value="{{ $pais['country_code'] }}">{{ $pais['country_code'] }} - {{ $pais['country_name'] }}</option>
           @endforeach
@@ -178,7 +178,7 @@
           function cambiarDireccion(){
               var tipoPersona = $('#tipo_persona').val();
               if(tipoPersona === 'E'){
-                  $('#divCountry').hide('slow');
+                  //$('#divCountry').hide('slow');
                   $('#divState').hide('slow');
                   $('#divCity').hide('slow');
                   $('#divDistrict').hide('slow');
@@ -187,8 +187,9 @@
                   $('#divAddress').hide('slow');
 
                   $('#extranjero').removeAttr('hidden');
+                  $('#country').val('US');
               }else{
-                  $('#divCountry').show('slow');
+                  //$('#divCountry').show('slow');
                   $('#divState').show('slow');
                   $('#divCity').show('slow');
                   $('#divDistrict').show('slow');
@@ -197,6 +198,34 @@
                   $('#divAddress').show('slow');
 
                   $('#extranjero').attr("hidden", true);
+                  $('#country').val('CR');
+              }
+          }
+
+          function cambiarTipoPersona(){
+              var country = $('#country').val();
+              if(country !== 'CR'){
+                  //$('#divCountry').hide('slow');
+                  $('#divState').hide('slow');
+                  $('#divCity').hide('slow');
+                  $('#divDistrict').hide('slow');
+                  $('#divNeighborhood').hide('slow');
+                  $('#divZip').hide('slow');
+                  $('#divAddress').hide('slow');
+
+                  $('#extranjero').removeAttr('hidden');
+                  $('#tipo_persona').val('E');
+              }else{
+                  //$('#divCountry').show('slow');
+                  $('#divState').show('slow');
+                  $('#divCity').show('slow');
+                  $('#divDistrict').show('slow');
+                  $('#divNeighborhood').show('slow');
+                  $('#divZip').show('slow');
+                  $('#divAddress').show('slow');
+
+                  $('#extranjero').attr("hidden", true);
+                  $('#tipo_persona').val('F');
               }
           }
 		  
