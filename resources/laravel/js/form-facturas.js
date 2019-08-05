@@ -107,6 +107,9 @@
             }
           }
       });
+    
+      toggleCamposExoneracion();
+      
       $('#tipo_producto').val( tipoProducto ).change();
     }else{
       $('#tipo_iva').val( 'B260' );
@@ -145,6 +148,7 @@
     var codigo = $('#codigo').val();
     var nombre = $('#nombre').val();
     var tipo_producto = $('#tipo_producto').val();
+    var tipo_producto_text = $('#tipo_producto :selected').text();
     var cantidad = $('#cantidad').val();
     cantidad = parseFloat(cantidad);
     var unidad_medicion = $('#unidad_medicion').val();
@@ -249,7 +253,7 @@
         htmlCols += "<td>"+cantidad+" </td>";
         htmlCols += "<td>"+unidad_medicion+" </td>";
         htmlCols += "<td>"+ fixComas(precio_unitario) +" </td>";
-        htmlCols += "<td>"+tipo_iva_text+"  </td>";
+        htmlCols += "<td>"+tipo_iva_text+" <br> -"+tipo_producto_text+"</td>";
         htmlCols += "<td>"+ fixComas(subtotal) +" </td>";
         htmlCols += "<td>"+ fixComas(monto_iva) +" </td>";
         htmlCols += "<td>"+ fixComas(total) +"   </td>";
@@ -354,13 +358,14 @@
     $('#montoExoneracion').val( item.find('.montoExoneracion ').val() );
     $('#impuestoNeto').val( item.find('.impuestoNeto ').val() );
     $('#montoTotalLinea').val( item.find('.montoTotalLinea ').val() );
-
     
     if( parseInt(item.find('.is_identificacion_especifica').val()) ) {
       $('#is_identificacion_especifica').prop( 'checked', true );
     }else {
       $('#is_identificacion_especifica').prop( 'checked', false );
     }
+    
+    toggleCamposExoneracion();
     
     togglePorcentajeIdentificacionPlena();
     calcularConIvaManual();
@@ -472,10 +477,17 @@
         }
     }
     
-    window.mostrarCamposExoneracion = function() {
-        var checkExoneracion = $('#checkExoneracion').prop('checked');
-        console.log(checkExoneracion);
-        if(checkExoneracion === true){
+    window.toggleCamposExoneracion = function() {
+        /*var checkExoneracion = $('#checkExoneracion').prop('checked');
+        console.log(checkExoneracion);*/
+        
+        var hasExoneracion = false;
+        var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184"];
+        if( codigosConExoneracion.includes( $('#tipo_iva').val() ) ){
+          hasExoneracion = true;
+        }
+        
+        if(hasExoneracion){
             $(".exoneracion-cont").show();
             $('#etiqTotal').text('');
             $('#etiqTotal').text('Total sin exonerar');
@@ -592,10 +604,6 @@ $( document ).ready(function() {
     
     if( $("#tipo_producto").length && $("#tipo_iva").length ) {
       $('#tipo_iva').on('change', function(){
-        if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
-      });
-    
-      $('#tipo_producto').on('change', function(){
         presetTipoIVA();
         if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
       });

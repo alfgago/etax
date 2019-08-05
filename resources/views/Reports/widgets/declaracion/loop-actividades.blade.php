@@ -4,6 +4,16 @@
 			<tr class="macro-title">
 		    <th colspan="6">TOTAL DE VENTAS, SUJETAS, EXENTAS Y NO SUJETAS</th>
 		  </tr>
+		  <tr class="macro-title withmarcar inner {{ $actividad['V1']['totales'] || $actividad['V2']['totales'] || $actividad['V13']['totales'] || $actividad['V4']['totales'] || $actividad['BI']['totales'] ? 'desplegar-true' : 'desplegar-false' }}">
+			  <th class="marcar-td" colspan="1">
+					<span class="marcar">
+						¿Aplica?
+						<span class="si">Sí</span>
+						<span class="no">No</span>
+					</span>
+			  </th>
+		    <th colspan="5">Ventas sujetas (Base imponible)</th>
+		  </tr>
 		  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
 				'title' 	 => $actividad['V1']['title'], 
 				'desplegar' => $actividad['V1']['totales'] ? 'desplegar-true' : 'desplegar-false', 
@@ -59,8 +69,18 @@
 				'col4' => 'true',
 				'col8' => 'true-blocked',
 			])
+		  <tr class="macro-title withmarcar inner {{ $actividad['VEX']['totales'] || $actividad['VAS']['totales'] ? 'desplegar-true' : 'desplegar-false' }}">
+			  <th class="marcar-td" colspan="1">
+					<span class="marcar">
+						¿Aplica?
+						<span class="si">Sí</span>
+						<span class="no">No</span>
+					</span>
+			  </th>
+		    <th colspan="5">Ventas exentas (Art.8)</th>
+		  </tr>
 		  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
-				'title' 	 => $actividad['VEX']['title'], 
+				'title' 	 => null, 
 				'desplegar' => $actividad['VEX']['totales'] ? 'desplegar-true' : 'desplegar-false', 
 				'cats' => $actividad['VEX']['cats'],
 				'cols' 	 => false, 
@@ -81,8 +101,18 @@
 				'col4' => 'true',
 				'col8' => 'true',
 			])
+		  <tr class="macro-title withmarcar inner desplegar-true">
+			  <th class="marcar-td" colspan="1">
+					<span class="marcar">
+						¿Aplica?
+						<span class="si">Sí</span>
+						<span class="no">No</span>
+					</span>
+			  </th>
+		    <th colspan="5">Ventas no sujetas (Art.9)</th>
+		  </tr>
 		  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
-				'title' 	 => $actividad['VNS']['title'], 
+				'title' 	 => null, 
 				'desplegar' => $actividad['VNS']['totales'] ? 'desplegar-true' : 'desplegar-false', 
 				'cats' => $actividad['VNS']['cats'],
 				'cols' 	 => false, 

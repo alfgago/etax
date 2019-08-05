@@ -126,19 +126,19 @@
 						    </div>
 						    
 						    <div class="form-group col-md-4">
-						      <label for="state">Provincia</label>
+						      <label for="state">Provincia *</label>
 						      <select class="form-control" name="state" id="state" value="{{ @$company->state }}" onchange="fillCantones();">
 						      </select>
 						    </div>
 						    
 						    <div class="form-group col-md-4">
-						      <label for="city">Canton</label>
+						      <label for="city">Cantón *</label>
 						      <select class="form-control" name="city" id="city" value="{{ @$company->city }}" onchange="fillDistritos();">
 						      </select>
 						    </div>
 						    
 						    <div class="form-group col-md-4">
-						      <label for="district">Distrito</label>
+						      <label for="district">Distrito *</label>
 						      <select class="form-control" name="district" id="district" value="{{ @$company->district }}" onchange="fillZip();" >
 						      </select>
 						    </div>

@@ -60,6 +60,7 @@ class SubscriptionPayment extends Command
                 foreach($unpaidSubscriptions as $sale){
                     sleep(1);
                     $subscriptionPlan = $sale->plan;
+                    $planName = $subscriptionPlan->getName();
                     Log::info("Procesando cobro $sale->company_id");
                     $subtotal = $subscriptionPlan->monthly_price;
                     switch ($sale->recurrency){
@@ -100,7 +101,7 @@ class SubscriptionPayment extends Command
                         );
 
                         $data = new stdClass();
-                        $data->description = "Renovación plan etax $subscriptionPlan->name";
+                        $data->description = "Renovación plan etax $planName";
                         $data->amount = $amount;
                         $data->user_name = $sale->user->user_name;
                         
@@ -152,7 +153,7 @@ class SubscriptionPayment extends Command
                             $item = new stdClass();
                             $item->total = $amount;
                             $item->code = $sale->etax_product_id;
-                            $item->name = "Renovación $subscriptionPlan->name / $sale->recurrency meses";
+                            $item->name = "Renovación $planName / $sale->recurrency meses";
                             $item->descuento = 0;
                             $item->discount_reason = null;
                             $item->cantidad = 1;
