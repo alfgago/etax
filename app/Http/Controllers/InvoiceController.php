@@ -370,7 +370,7 @@ class InvoiceController extends Controller
         
         clearInvoiceCache($invoice);
       
-        return redirect('/facturas-emitidas');
+        return redirect('/facturas-emitidas')->withMessage('Factura registrada con éxito');
     }
     
     /**
@@ -446,7 +446,7 @@ class InvoiceController extends Controller
                 clearInvoiceCache($invoice);
             
 
-                return redirect('/facturas-emitidas');
+                return redirect('/facturas-emitidas')->withMessage('Factura registrada con éxito');
             } else {
                 return back()->withError( 'Ha ocurrido un error al enviar factura.' );
             }
@@ -535,7 +535,7 @@ class InvoiceController extends Controller
         
         clearInvoiceCache($invoice);
           
-        return redirect('/facturas-emitidas');
+        return redirect('/facturas-emitidas')->withMessage('Factura editada con éxito');
     }
     
     public function export() {
