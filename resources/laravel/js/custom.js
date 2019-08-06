@@ -197,6 +197,23 @@ window.companyChange = function($redirect = false) {
 
 }
 
+window.validatePhoneFormat = function () {
+    var tipoPersona = $('#tipo_persona').val();
+    var phone = $('#phone').val();
+    if(tipoPersona != 'E'){
+        if(phone.length == 8){
+            var init = phone.substr(0,1);
+            if(init != '5' && init != '6' && init != '7' && init != '8'){
+                alert('Debe incluir un número de celular válido');
+                $('#phone').val('');
+            }
+        }else{
+            alert('Debe incluir un número de teléfono válido');
+            $('#phone').val('');
+        }
+    }
+}
+
 $(document).ready(function() {
 
   $('.select-search').select2({

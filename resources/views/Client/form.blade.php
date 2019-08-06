@@ -45,7 +45,7 @@
     
     <div class="form-group col-md-4">
       <label for="phone">Teléfono</label>
-      <input type="text" numeric class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" maxlength="20" max="20" onblur="validatephoneFormat();">
+      <input type="text" numeric class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" maxlength="20" max="20" onblur="validatePhoneFormat();">
     </div>
     
     <div class="form-group col-md-4"></div>
@@ -165,22 +165,6 @@
             $('#email').addClass('error');
         }else{
             $('#email').removeClass('error');
-        }
-    }
-    function validatephoneFormat() {
-        var tipoPersona = $('#tipo_persona').val();
-        var phone = $('#phone').val();
-        if(tipoPersona != 'E'){
-            if(phone.length == 8){
-                var init = phone.substr(0,1);
-                if(init != '5' && init != '6' && init != '7' && init != '8'){
-                    alert('Debe incluir un número de celular válido');
-                    $('#phone').val('');
-                }
-            }else{
-                alert('Debe incluir un número de teléfono válido');
-                $('#phone').val('');
-            }
         }
     }
 </script>
