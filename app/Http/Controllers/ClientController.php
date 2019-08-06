@@ -123,9 +123,17 @@ class ClientController extends Controller
         $cliente->foreign_address = $request->foreign_address ?? $cliente->address;
         $cliente->phone = $request->phone;
         $cliente->es_exento = $request->es_exento;
-        $cliente->billing_emails = $request->billing_emails;
-        if (is_array ($cliente->billing_emails)) {
-            $cliente->billing_emails = implode(", ",$cliente->billing_emails);
+        //$cliente->billing_emails = $request->billing_emails;
+        if (is_array ($request->billing_emails)) {
+            $arrayEmails = array();
+            foreach($request->billing_emails as $email){
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    array_push($arrayEmails, $email);
+                }else{
+                    return redirect()->back()->withErrors('Los emails para facturación deben ser válidos');
+                }
+            }
+            $cliente->billing_emails = implode(", ", $arrayEmails);
         }
         
         $cliente->email = $request->email;
