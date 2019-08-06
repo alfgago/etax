@@ -63,7 +63,7 @@
           
           <div class="form-group col-md-12">
             <label for="description">Descripción</label>
-            <textarea class="form-control" name="description" id="descripcion"  >{{ $product->description }}</textarea>
+            <textarea class="form-control" name="description" id="descripcion" maxlength="160" max="160" style="resize:none;">{{ $product->description }}</textarea>
           </div>
           
         </div>
