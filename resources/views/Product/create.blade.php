@@ -69,7 +69,7 @@
           
           <div class="form-group col-md-12">
             <label for="description">Descripción</label>
-            <textarea class="form-control" name="description" id="descripcion" value="" ></textarea>
+            <textarea class="form-control" name="description" id="descripcion" value="" maxlength="160" max="160" style="resize:none;"></textarea>
           </div>
 
         </div>

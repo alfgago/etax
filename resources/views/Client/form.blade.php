@@ -51,10 +51,10 @@
     <div class="form-group col-md-4"></div>
     <div class="form-group col-md-4">
       <label for="country">País *</label>
-      <select class="form-control" name="country" id="country" value="{{ @$client->country }}" required>
+      <select class="form-control" name="country" id="country" value="{{ @$client->country }}" required onchange="cambiarTipoPersona();">
           <option value="CR">CR - Costa Rica</option>
           @foreach ( \App\CodigosPaises::all() as $pais )
-              <option value="{{ $pais['country_code'] }}" {{ $pais['country_code'] == @$client->country ? 'selected' : ''}}>{{ $pais['country_code'] }} - {{ $pais['country_name'] }}</option>
+              <option value="{{ $pais['country_code'] }}" {{ $pais['country_code'] === @$client->country ? 'selected' : ''}}>{{ $pais['country_code'] }} - {{ $pais['country_name'] }}</option>
           @endforeach
       </select>
     </div>
@@ -114,7 +114,7 @@
         <option value="emisor" {{ @$client->emisor_receptor == '3' ? 'selected' : '' }}>Emisor</option>
       </select>
     </div>
-    
+    <input hidden value="{{ @$client->id }}" id="id_client">
     <div class="form-group col-md-4">
         <label for="es_exento">Exento de IVA</label>
         <select class="form-control" name="es_exento" id="es_exento" >
@@ -130,6 +130,7 @@
 <script>
     function cambiarDireccion() {
         var tipoPersona = $('#tipo_persona').val();
+        var idClient = $('#id_client').val();
         if(tipoPersona != undefined){
             if (tipoPersona === 'E') {
                 $('#divState').hide('slow');
@@ -140,6 +141,9 @@
                 $('#divAddress').hide('slow');
 
                 $('#extranjero').removeAttr('hidden');
+                if(idClient == ''){
+                    $('#country').val('US');
+                }
             } else {
                 $('#divState').show('slow');
                 $('#divCity').show('slow');
@@ -149,6 +153,7 @@
                 $('#divAddress').show('slow');
 
                 $('#extranjero').attr("hidden", true);
+                $('#country').val('CR');
             }
         }
     }
@@ -164,6 +169,33 @@
             $('#email').addClass('error');
         }else{
             $('#email').removeClass('error');
+        }
+    }
+
+    function cambiarTipoPersona(){
+        var country = $('#country').val();
+        if(country !== 'CR'){
+            //$('#divCountry').hide('slow');
+            $('#divState').hide('slow');
+            $('#divCity').hide('slow');
+            $('#divDistrict').hide('slow');
+            $('#divNeighborhood').hide('slow');
+            $('#divZip').hide('slow');
+            $('#divAddress').hide('slow');
+
+            $('#extranjero').removeAttr('hidden');
+            $('#tipo_persona').val('E');
+        }else{
+            //$('#divCountry').show('slow');
+            $('#divState').show('slow');
+            $('#divCity').show('slow');
+            $('#divDistrict').show('slow');
+            $('#divNeighborhood').show('slow');
+            $('#divZip').show('slow');
+            $('#divAddress').show('slow');
+
+            $('#extranjero').attr("hidden", true);
+            $('#tipo_persona').val('F');
         }
     }
 </script>
