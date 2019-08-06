@@ -110,13 +110,16 @@
 						    </div>
 						    
 						    <div class="form-group col-md-12">
-                    <label for="tipo_persona">Actividades comerciales *</label>
-                    <select class="form-control checkEmpty select2-tags" name="commercial_activities[]" id="commercial_activities" multiple required>
-                        @foreach ( $actividades as $actividad )
-                            <option value="{{ $actividad['codigo'] }}" {{ (strpos($company->commercial_activities, $actividad['codigo']) !== false) ? 'selected' : '' }}>{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                                <label for="tipo_persona">Actividades comerciales *</label>
+                                <select class="form-control checkEmpty select2-tags" name="commercial_activities[]" id="commercial_activities" multiple required>
+                                    <?php
+                                        $listaActividades = explode(",", $company->commercial_activities);
+                                    ?>
+                                    @foreach ( $actividades as $actividad )
+                                        <option value="{{ $actividad['codigo'] }}" {{ (in_array($actividad['codigo'], $listaActividades) !== false) ? 'selected' : '' }}>{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 						    
 						    <div class="form-group col-md-4">
 						      <label for="country">País *</label>
