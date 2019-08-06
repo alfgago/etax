@@ -8,6 +8,7 @@ use App\CodigosPaises;
 use App\UnidadMedicion;
 use App\ProductCategory;
 use App\CodigoIvaRepercutido;
+use App\CalculatedTax;
 use App\Utils\BridgeHaciendaApi;
 use App\Utils\InvoiceUtils;
 use \Carbon\Carbon;
@@ -354,23 +355,27 @@ class InvoiceController extends Controller
             'items' => 'required',
         ]);
         
-        $invoice = new Invoice();
-        $company = currentCompanyModel();
-        $invoice->company_id = $company->id;
+        if(CalculatedTax::validarMes($request->generated_date)){
+            $invoice = new Invoice();
+            $company = currentCompanyModel();
+            $invoice->company_id = $company->id;
 
-        //Datos generales y para Hacienda
-        $invoice->document_type = "01";
-        $invoice->hacienda_status = "03";
-        $invoice->payment_status = "01";
-        $invoice->payment_receipt = "";
-        $invoice->generation_method = "M";
-        $invoice->setInvoiceData($request);
-        
-        $company->save();
-        
-        clearInvoiceCache($invoice);
-      
-        return redirect('/facturas-emitidas');
+            //Datos generales y para Hacienda
+            $invoice->document_type = "01";
+            $invoice->hacienda_status = "03";
+            $invoice->payment_status = "01";
+            $invoice->payment_receipt = "";
+            $invoice->generation_method = "M";
+            $invoice->setInvoiceData($request);
+            
+            $company->save();
+            
+            clearInvoiceCache($invoice);
+          
+            return redirect('/facturas-emitidas');
+        }else{
+            return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
+        }
     }
     
     /**
@@ -388,67 +393,70 @@ class InvoiceController extends Controller
                 'subtotal' => 'required',
                 'items' => 'required',
             ]);
+            if(CalculatedTax::validarMes($request->generated_date)){
+                $apiHacienda = new BridgeHaciendaApi();
+                $tokenApi = $apiHacienda->login(false);
 
-            $apiHacienda = new BridgeHaciendaApi();
-            $tokenApi = $apiHacienda->login(false);
+                if ($tokenApi !== false) {
+                    $invoice = new Invoice();
+                    $company = currentCompanyModel();
+                    $invoice->company_id = $company->id;
 
-            if ($tokenApi !== false) {
-                $invoice = new Invoice();
-                $company = currentCompanyModel();
-                $invoice->company_id = $company->id;
+                    //Datos generales y para Hacienda
+                    $invoice->document_type = $request->document_type;
+                    $invoice->hacienda_status = '01';
+                    $invoice->payment_status = "01";
+                    $invoice->payment_receipt = "";
+                    $invoice->generation_method = "etax";
+                    $invoice->xml_schema = 43;
+                    if ($request->document_type == '01') {
+                        $invoice->reference_number = $company->last_invoice_ref_number + 1;
+                    }
+                    if ($request->document_type == '08') {
+                        $invoice->reference_number = $company->last_invoice_pur_ref_number + 1;
+                    }
+                    if ($request->document_type == '09') {
+                        $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
+                    }
+                    if ($request->document_type == '04') {
+                        $invoice->reference_number = $company->last_ticket_ref_number + 1;
+                    }
 
-                //Datos generales y para Hacienda
-                $invoice->document_type = $request->document_type;
-                $invoice->hacienda_status = '01';
-                $invoice->payment_status = "01";
-                $invoice->payment_receipt = "";
-                $invoice->generation_method = "etax";
-                $invoice->xml_schema = 43;
-                if ($request->document_type == '01') {
-                    $invoice->reference_number = $company->last_invoice_ref_number + 1;
-                }
-                if ($request->document_type == '08') {
-                    $invoice->reference_number = $company->last_invoice_pur_ref_number + 1;
-                }
-                if ($request->document_type == '09') {
-                    $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
-                }
-                if ($request->document_type == '04') {
-                    $invoice->reference_number = $company->last_ticket_ref_number + 1;
-                }
+                    $invoiceData = $invoice->setInvoiceData($request);
+                    
+                    $invoice->document_key = $this->getDocumentKey($request->document_type);
+                    $invoice->document_number = $this->getDocReference($request->document_type);
+                    $invoice->save();
+                    
+                    if (!empty($invoiceData)) {
+                        $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
+                    }
+                    if ($request->document_type == '01') {
+                        $company->last_invoice_ref_number = $invoice->reference_number;
+                        $company->last_document = $invoice->document_number;
 
-                $invoiceData = $invoice->setInvoiceData($request);
+                    } elseif ($request->document_type == '08') {
+                        $company->last_invoice_pur_ref_number = $invoice->reference_number;
+                        $company->last_document_invoice_pur = $invoice->document_number;
+
+                    } elseif ($request->document_type == '09') {
+                        $company->last_invoice_exp_ref_number = $invoice->reference_number;
+                        $company->last_document_invoice_exp = $invoice->document_number;
+                    } elseif ($request->document_type == '04') {
+                        $company->last_ticket_ref_number = $invoice->reference_number;
+                        $company->last_document_ticket = $invoice->document_number;
+                    }
+
+                    $company->save();
+                    clearInvoiceCache($invoice);
                 
-                $invoice->document_key = $this->getDocumentKey($request->document_type);
-                $invoice->document_number = $this->getDocReference($request->document_type);
-                $invoice->save();
-                
-                if (!empty($invoiceData)) {
-                    $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
+
+                    return redirect('/facturas-emitidas');
+                } else {
+                    return back()->withError( 'Ha ocurrido un error al enviar factura.' );
                 }
-                if ($request->document_type == '01') {
-                    $company->last_invoice_ref_number = $invoice->reference_number;
-                    $company->last_document = $invoice->document_number;
-
-                } elseif ($request->document_type == '08') {
-                    $company->last_invoice_pur_ref_number = $invoice->reference_number;
-                    $company->last_document_invoice_pur = $invoice->document_number;
-
-                } elseif ($request->document_type == '09') {
-                    $company->last_invoice_exp_ref_number = $invoice->reference_number;
-                    $company->last_document_invoice_exp = $invoice->document_number;
-                } elseif ($request->document_type == '04') {
-                    $company->last_ticket_ref_number = $invoice->reference_number;
-                    $company->last_document_ticket = $invoice->document_number;
-                }
-
-                $company->save();
-                clearInvoiceCache($invoice);
-            
-
-                return redirect('/facturas-emitidas');
-            } else {
-                return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+            }else{
+                return back()->withError('Mes seleccionado ya fue cerrado');
             }
         } catch( \Exception $ex ) {
             Log::error("ERROR Envio de factura a hacienda -> ".$ex->getMessage());
@@ -477,12 +485,17 @@ class InvoiceController extends Controller
     }
 
     public function actualizar_categorias(Request $request){
-        Invoice::where('id',$request->invoice_id)
-            ->update(['commercial_activity'=>$request->commercial_activity]);
-        foreach ($request->items as $item) {
-            InvoiceItem::where('id',$item['id'])
-            ->update(['product_type'=>$item['category_product'],'iva_type'=>$item['tipo_iva']]);
-            
+        $invoice = Invoice::where('id',$request->invoice_id)->first();
+        if(CalculatedTax::validarMes($invoice->generated_date)){
+            Invoice::where('id',$request->invoice_id)
+                ->update(['commercial_activity'=>$request->commercial_activity]);
+            foreach ($request->items as $item) {
+                InvoiceItem::where('id',$item['id'])
+                ->update(['product_type'=>$item['category_product'],'iva_type'=>$item['tipo_iva']]);
+                
+            }
+        }else{
+            return back()->withError('Mes seleccionado ya fue cerrado');
         }
         return redirect('/facturas-emitidas/'.$request->invoice_id)->withMessage('Factura actualizada');
     }
@@ -497,19 +510,22 @@ class InvoiceController extends Controller
     {
         
         $company = currentCompanyModel();
-        
-        $invoice = Invoice::findOrFail($id);
-        $units = UnidadMedicion::all()->toArray();
-        $this->authorize('update', $invoice);
-      
-        $arrayActividades = $company->getActivities();
-        $countries  = CodigosPaises::all()->toArray();
+        if(CalculatedTax::validarMes($request->generated_date)){  
+            $invoice = Invoice::findOrFail($id);
+            $units = UnidadMedicion::all()->toArray();
+            $this->authorize('update', $invoice);
+          
+            $arrayActividades = $company->getActivities();
+            $countries  = CodigosPaises::all()->toArray();
 
-      
-        //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
-        if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
-          return redirect('/facturas-emitidas');
-        }  
+          
+            //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
+            if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
+              return redirect('/facturas-emitidas');
+            }  
+        }else{
+            return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
+        }
       
         return view('Invoice/edit', compact('invoice', 'units', 'arrayActividades', 'countries') );
     }
@@ -524,17 +540,18 @@ class InvoiceController extends Controller
     public function update(Request $request, $id)
     {
         $invoice = Invoice::findOrFail($id);
-        $this->authorize('update', $invoice);
-      
-        //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
-        if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
-          return redirect('/facturas-emitidas');
-        }
-      
-        $invoice->setInvoiceData($request);
-        
-        clearInvoiceCache($invoice);
+        if(CalculatedTax::validarMes($invoice->generated_date)){ 
+            $this->authorize('update', $invoice);
           
+            //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
+            if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
+              return redirect('/facturas-emitidas');
+            }
+          
+            $invoice->setInvoiceData($request);
+            
+            clearInvoiceCache($invoice);
+        }
         return redirect('/facturas-emitidas');
     }
     
@@ -596,115 +613,117 @@ class InvoiceController extends Controller
                         foreach ($facturas as $row){
                             $i++;
                             
-                            $arrayRow = array();
-                            /*if($available_invoices_by_plan > 0){
-                                $available_invoices_by_plan = $available_invoices_by_plan - 1;
-                            }else{
-                                $company->additional_invoices = $company->additional_invoices - 1;
-                            }*/
+                            if(CalculatedTax::validarMes($row['fechaemision'])){ 
+                                $arrayRow = array();
+                                /*if($available_invoices_by_plan > 0){
+                                    $available_invoices_by_plan = $available_invoices_by_plan - 1;
+                                }else{
+                                    $company->additional_invoices = $company->additional_invoices - 1;
+                                }*/
 
-                            $metodoGeneracion = "XLSX";
+                                $metodoGeneracion = "XLSX";
 
-                            //Datos de proveedor
-                            $nombreCliente = $row['nombrecliente'];
-                            $codigoCliente = array_key_exists('codigocliente', $row) ? $row['codigocliente'] : '';
-                            $tipoPersona = $row['tipoidentificacion'];
-                            $identificacionCliente = $row['identificacionreceptor'];
-                            $correoCliente = $row['correoreceptor'];
-                            $telefonoCliente = null;
+                                //Datos de proveedor
+                                $nombreCliente = $row['nombrecliente'];
+                                $codigoCliente = array_key_exists('codigocliente', $row) ? $row['codigocliente'] : '';
+                                $tipoPersona = $row['tipoidentificacion'];
+                                $identificacionCliente = $row['identificacionreceptor'];
+                                $correoCliente = $row['correoreceptor'];
+                                $telefonoCliente = null;
 
-                            //Datos de factura
-                            $consecutivoComprobante = $row['consecutivocomprobante'];
-                            $claveFactura = array_key_exists('clavefactura', $row) ? $row['clavefactura'] : '';
-                            $condicionVenta = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
-                            $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
-                            $numeroLinea = array_key_exists('numerolinea', $row) ? $row['numerolinea'] : 1;
-                            $fechaEmision = $row['fechaemision'];
+                                //Datos de factura
+                                $consecutivoComprobante = $row['consecutivocomprobante'];
+                                $claveFactura = array_key_exists('clavefactura', $row) ? $row['clavefactura'] : '';
+                                $condicionVenta = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
+                                $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
+                                $numeroLinea = array_key_exists('numerolinea', $row) ? $row['numerolinea'] : 1;
+                                $fechaEmision = $row['fechaemision'];
 
-                            $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
-                            $idMoneda = $row['moneda'];
-                            $tipoCambio = $row['tipocambio'];
-                            $totalDocumento = $row['totaldocumento'];
-                            $tipoDocumento = $row['tipodocumento'];
-                            $descripcion = array_key_exists('descripcion', $row)  ? $row['descripcion'] : '';
+                                $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
+                                $idMoneda = $row['moneda'];
+                                $tipoCambio = $row['tipocambio'];
+                                $totalDocumento = $row['totaldocumento'];
+                                $tipoDocumento = $row['tipodocumento'];
+                                $descripcion = array_key_exists('descripcion', $row)  ? $row['descripcion'] : '';
 
-                            //Datos de linea
-                            $codigoProducto = $row['codigoproducto'];
-                            $detalleProducto = $row['detalleproducto'];
-                            $unidadMedicion = $row['unidadmedicion'];
-                            $cantidad = array_key_exists('cantidad', $row) ? $row['cantidad'] : 1;
-                            $precioUnitario = $row['preciounitario'];
-                            $subtotalLinea = (float)$row['subtotallinea'];
-                            $totalLinea = $row['totallinea'];
-                            $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
-                            $codigoEtax = $row['codigoivaetax'];
-                            $montoIva = (float)$row['montoiva'];
-                            
-                            $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
-                            $codigoActividad = $row['codigoactividad'] ?? $mainAct;
-                            $xmlSchema = $row['xmlschema'] ?? 42;
-                            
-                            //Exoneraciones
-                            $totalNeto = 0;
-                            $tipoDocumentoExoneracion = $row['tipodocumentoexoneracion'] ?? null;
-                            $documentoExoneracion = $row['documentoexoneracion'] ?? null;
-                            $companiaExoneracion = $row['companiaexoneracion'] ?? null;
-                            $porcentajeExoneracion = $row['porcentajeexoneracion'] ?? 0;
-                            $montoExoneracion = $row['montoexoneracion'] ?? 0;
-                            $impuestoNeto = $row['impuestoneto'] ?? 0;
-                            $totalMontoLinea = $row['totalmontolinea'] ?? 0;
-                            
-                            //
-                            $arrayInsert = array(
-                                'metodoGeneracion' => $metodoGeneracion,
-                                'idEmisor' => 0,
-                                'nombreCliente' => $nombreCliente,
-                                'descripcion' => $descripcion,
-                                'codigoCliente' => $codigoCliente,
-                                'tipoPersona' => $tipoPersona,
-                                'identificacionCliente' => $identificacionCliente,
-                                'correoCliente' => $correoCliente,
-                                'telefonoCliente' => $telefonoCliente,
-                                'claveFactura' => $claveFactura,
-                                'consecutivoComprobante' => $consecutivoComprobante,
-                                'condicionVenta' => $condicionVenta,
-                                'metodoPago' => $metodoPago,
-                                'numeroLinea' => $numeroLinea,
-                                'fechaEmision' => $fechaEmision,
-                                'fechaVencimiento' => $fechaVencimiento,
-                                'idMoneda' => $idMoneda,
-                                'tipoCambio' => $tipoCambio,
-                                'totalDocumento' => $totalDocumento,
-                                'totalNeto' => $totalNeto,
-                                'cantidad' => $cantidad,
-                                'precioUnitario' => $precioUnitario,
-                                'totalLinea' => $totalLinea,
-                                'montoIva' => $montoIva,
-                                'codigoEtax' => $codigoEtax,
-                                'montoDescuento' => $montoDescuento,
-                                'subtotalLinea' => $subtotalLinea,
-                                'tipoDocumento' => $tipoDocumento,
-                                'codigoProducto' => $codigoProducto,
-                                'detalleProducto' => $detalleProducto,
-                                'unidadMedicion' => $unidadMedicion,
-                                'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
-                                'documentoExoneracion' => $documentoExoneracion,
-                                'companiaExoneracion' => $companiaExoneracion,
-                                'porcentajeExoneracion' => $porcentajeExoneracion,
-                                'montoExoneracion' => $montoExoneracion,
-                                'impuestoNeto' => $impuestoNeto,
-                                'totalMontoLinea' => $totalMontoLinea,
-                                'xmlSchema' => $xmlSchema,
-                                'codigoActividad' => $codigoActividad,
-                                'isAuthorized' => true,
-                                'codeValidated' => true
-                            );
-                            
-                            if( $consecutivoComprobante ) {
-                                $insert = Invoice::importInvoiceRow( $arrayInsert );
-    
-                                if( $insert ) {
-                                    array_push( $inserts, $insert );
+                                //Datos de linea
+                                $codigoProducto = $row['codigoproducto'];
+                                $detalleProducto = $row['detalleproducto'];
+                                $unidadMedicion = $row['unidadmedicion'];
+                                $cantidad = array_key_exists('cantidad', $row) ? $row['cantidad'] : 1;
+                                $precioUnitario = $row['preciounitario'];
+                                $subtotalLinea = (float)$row['subtotallinea'];
+                                $totalLinea = $row['totallinea'];
+                                $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
+                                $codigoEtax = $row['codigoivaetax'];
+                                $montoIva = (float)$row['montoiva'];
+                                
+                                $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
+                                $codigoActividad = $row['codigoactividad'] ?? $mainAct;
+                                $xmlSchema = $row['xmlschema'] ?? 42;
+                                
+                                //Exoneraciones
+                                $totalNeto = 0;
+                                $tipoDocumentoExoneracion = $row['tipodocumentoexoneracion'] ?? null;
+                                $documentoExoneracion = $row['documentoexoneracion'] ?? null;
+                                $companiaExoneracion = $row['companiaexoneracion'] ?? null;
+                                $porcentajeExoneracion = $row['porcentajeexoneracion'] ?? 0;
+                                $montoExoneracion = $row['montoexoneracion'] ?? 0;
+                                $impuestoNeto = $row['impuestoneto'] ?? 0;
+                                $totalMontoLinea = $row['totalmontolinea'] ?? 0;
+                                
+                                //
+                                $arrayInsert = array(
+                                    'metodoGeneracion' => $metodoGeneracion,
+                                    'idEmisor' => 0,
+                                    'nombreCliente' => $nombreCliente,
+                                    'descripcion' => $descripcion,
+                                    'codigoCliente' => $codigoCliente,
+                                    'tipoPersona' => $tipoPersona,
+                                    'identificacionCliente' => $identificacionCliente,
+                                    'correoCliente' => $correoCliente,
+                                    'telefonoCliente' => $telefonoCliente,
+                                    'claveFactura' => $claveFactura,
+                                    'consecutivoComprobante' => $consecutivoComprobante,
+                                    'condicionVenta' => $condicionVenta,
+                                    'metodoPago' => $metodoPago,
+                                    'numeroLinea' => $numeroLinea,
+                                    'fechaEmision' => $fechaEmision,
+                                    'fechaVencimiento' => $fechaVencimiento,
+                                    'idMoneda' => $idMoneda,
+                                    'tipoCambio' => $tipoCambio,
+                                    'totalDocumento' => $totalDocumento,
+                                    'totalNeto' => $totalNeto,
+                                    'cantidad' => $cantidad,
+                                    'precioUnitario' => $precioUnitario,
+                                    'totalLinea' => $totalLinea,
+                                    'montoIva' => $montoIva,
+                                    'codigoEtax' => $codigoEtax,
+                                    'montoDescuento' => $montoDescuento,
+                                    'subtotalLinea' => $subtotalLinea,
+                                    'tipoDocumento' => $tipoDocumento,
+                                    'codigoProducto' => $codigoProducto,
+                                    'detalleProducto' => $detalleProducto,
+                                    'unidadMedicion' => $unidadMedicion,
+                                    'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
+                                    'documentoExoneracion' => $documentoExoneracion,
+                                    'companiaExoneracion' => $companiaExoneracion,
+                                    'porcentajeExoneracion' => $porcentajeExoneracion,
+                                    'montoExoneracion' => $montoExoneracion,
+                                    'impuestoNeto' => $impuestoNeto,
+                                    'totalMontoLinea' => $totalMontoLinea,
+                                    'xmlSchema' => $xmlSchema,
+                                    'codigoActividad' => $codigoActividad,
+                                    'isAuthorized' => true,
+                                    'codeValidated' => true
+                                );
+                                
+                                if( $consecutivoComprobante ) {
+                                    $insert = Invoice::importInvoiceRow( $arrayInsert );
+        
+                                    if( $insert ) {
+                                        array_push( $inserts, $insert );
+                                    }
                                 }
                             }
 
@@ -750,36 +769,41 @@ class InvoiceController extends Controller
     {
         try {
             Log::info('Anulacion de facturar -->'.$id);
-            $apiHacienda = new BridgeHaciendaApi();
-            $tokenApi = $apiHacienda->login();
-            if ($tokenApi !== false) {
-                $invoice = Invoice::findOrFail($id);
-                $note = new Invoice();
-                $company = currentCompanyModel();
+            $invoice = Invoice::findOrFail($id);
+            if(CalculatedTax::validarMes($invoice->generated_date)){ 
+                $apiHacienda = new BridgeHaciendaApi();
+                $tokenApi = $apiHacienda->login();
+                if ($tokenApi !== false) {
+                    $invoice = Invoice::findOrFail($id);
+                    $note = new Invoice();
+                    $company = currentCompanyModel();
 
-                //Datos generales y para Hacienda
-                $note->company_id = $company->id;
-                $note->document_type = "03";
-                $note->hacienda_status = '01';
-                $note->payment_status = "01";
-                $note->payment_receipt = "";
-                $note->generation_method = "etax";
-                $note->reference_number = $company->last_note_ref_number + 1;
-                $note->save();
-                $noteData = $note->setNoteData($invoice);
-                if (!empty($noteData)) {
-                    $apiHacienda->createCreditNote($noteData, $tokenApi);
+                    //Datos generales y para Hacienda
+                    $note->company_id = $company->id;
+                    $note->document_type = "03";
+                    $note->hacienda_status = '01';
+                    $note->payment_status = "01";
+                    $note->payment_receipt = "";
+                    $note->generation_method = "etax";
+                    $note->reference_number = $company->last_note_ref_number + 1;
+                    $note->save();
+                    $noteData = $note->setNoteData($invoice);
+                    if (!empty($noteData)) {
+                        $apiHacienda->createCreditNote($noteData, $tokenApi);
+                    }
+                    $company->last_note_ref_number = $noteData->reference_number;
+                    $company->last_document_note = $noteData->document_number;
+                    $company->save();
+
+                    clearInvoiceCache($invoice);
+
+                    return redirect('/facturas-emitidas')->withMessage('Nota de crédito creada.');
+
+                } else {
+                    return back()->withError( 'Ha ocurrido un error al enviar factura.' );
                 }
-                $company->last_note_ref_number = $noteData->reference_number;
-                $company->last_document_note = $noteData->document_number;
-                $company->save();
-
-                clearInvoiceCache($invoice);
-
-                return redirect('/facturas-emitidas')->withMessage('Nota de crédito creada.');
-
-            } else {
-                return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+            }else{
+                return back()->withError('Mes seleccionado ya fue cerrado');
             }
 
         } catch ( \Exception $e) {
@@ -856,19 +880,24 @@ class InvoiceController extends Controller
                     $json = json_encode( $xml ); // convert the XML string to JSON
                     $arr = json_decode( $json, TRUE );
                     
-                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
-                    $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-                    $consecutivoComprobante = $arr['NumeroConsecutivo'];
-                    
-                    //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
-                        //Registra el XML. Si todo sale bien, lo guarda en S3.
-                        $invoice = Invoice::saveInvoiceXML( $arr, 'XML' );
-                        if( $invoice ) {
-                            Invoice::storeXML( $invoice, $file );
+                    if(CalculatedTax::validarMes($arr['FechaEmision'])){
+                        $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
+                        $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+                        $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                        
+                        //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                        if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
+                            //Registra el XML. Si todo sale bien, lo guarda en S3.
+                            $invoice = Invoice::saveInvoiceXML( $arr, 'XML' );
+                            if( $invoice ) {
+                                Invoice::storeXML( $invoice, $file );
+                            }
+                        }else{
+                            return redirect('/facturas-emitidas/validaciones')->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
                         }
+
                     }else{
-                        return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
+                        return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
                     }
                 }
             }
@@ -910,23 +939,28 @@ class InvoiceController extends Controller
     public function confirmarValidacion( Request $request, $id )
     {
         $invoice = Invoice::findOrFail($id);
-        $this->authorize('update', $invoice);
-        
-        $tipoIva = $request->tipo_iva;
-        foreach( $invoice->items as $item ) {
-            $item->iva_type = $request->tipo_iva;
-            $item->save();
+
+        if(CalculatedTax::validarMes($invoice->generated_date)){ 
+            $this->authorize('update', $invoice);
+            
+            $tipoIva = $request->tipo_iva;
+            foreach( $invoice->items as $item ) {
+                $item->iva_type = $request->tipo_iva;
+                $item->save();
+            }
+            
+            $invoice->is_code_validated = true;
+            $invoice->save();
+            
+            if( $invoice->year == 2018 ) {
+                clearLastTaxesCache($invoice->company->id, 2018);
+            }
+            clearInvoiceCache($invoice);
+            
+            return redirect('/facturas-emitidas/validaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido validada');
+        }else{
+            return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
         }
-        
-        $invoice->is_code_validated = true;
-        $invoice->save();
-        
-        if( $invoice->year == 2018 ) {
-            clearLastTaxesCache($invoice->company->id, 2018);
-        }
-        clearInvoiceCache($invoice);
-        
-        return redirect('/facturas-emitidas/validaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido validada');
     }
     
     
@@ -1001,18 +1035,22 @@ class InvoiceController extends Controller
     public function authorizeInvoice ( Request $request, $id )
     {
         $invoice = Invoice::findOrFail($id);
-        $this->authorize('update', $invoice);
-        
-        if ( $request->autorizar ) {
-            $invoice->is_authorized = true;
-            $invoice->save();
-            return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . ' ha sido autorizada');
-        }else {
-            $invoice->is_authorized = false;
-            $invoice->is_void = true;
-            InvoiceItem::where('invoice_id', $invoice->id)->delete();
-            $invoice->delete();
-            return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . ' ha sido rechazada');
+        if(CalculatedTax::validarMes($invoice->generated_date)){ 
+            $this->authorize('update', $invoice);
+            
+            if ( $request->autorizar ) {
+                $invoice->is_authorized = true;
+                $invoice->save();
+                return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . ' ha sido autorizada');
+            }else {
+                $invoice->is_authorized = false;
+                $invoice->is_void = true;
+                InvoiceItem::where('invoice_id', $invoice->id)->delete();
+                $invoice->delete();
+                return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . ' ha sido rechazada');
+            }
+        }else{
+            return redirect('/facturas-emitidas/autorizaciones')->withError('Mes seleccionado ya fue cerrado');
         }
     }
     
@@ -1025,12 +1063,17 @@ class InvoiceController extends Controller
     public function destroy($id)
     {
         $invoice = Invoice::findOrFail($id);
-        $this->authorize('update', $invoice);
-        InvoiceItem::where('invoice_id', $invoice->id)->delete();
-        $invoice->delete();
-        clearInvoiceCache($invoice);
-        
-        return redirect('/facturas-emitidas')->withMessage('La factura ha sido eliminada satisfactoriamente.');
+
+        if(CalculatedTax::validarMes($invoice->generated_date)){ 
+            $this->authorize('update', $invoice);
+            InvoiceItem::where('invoice_id', $invoice->id)->delete();
+            $invoice->delete();
+            clearInvoiceCache($invoice);
+            
+            return redirect('/facturas-emitidas')->withMessage('La factura ha sido eliminada satisfactoriamente.');
+        }else{
+            return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
+        }
     } 
     
     /**
@@ -1042,14 +1085,18 @@ class InvoiceController extends Controller
     public function restore($id)
     {
         $invoice = Invoice::onlyTrashed()->where('id', $id)->first();
-        if( $invoice->company_id != currentCompany() ){
-            return 404;
+        if(CalculatedTax::validarMes($invoice->generated_date)){ 
+            if( $invoice->company_id != currentCompany() ){
+                return 404;
+            }
+            $invoice->restore();
+            InvoiceItem::onlyTrashed()->where('invoice_id', $invoice->id)->restore();
+            clearInvoiceCache($invoice);
+            
+            return redirect('/facturas-emitidas')->withMessage('La factura ha sido restaurada satisfactoriamente.');
+        }else{
+            return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
         }
-        $invoice->restore();
-        InvoiceItem::onlyTrashed()->where('invoice_id', $invoice->id)->restore();
-        clearInvoiceCache($invoice);
-        
-        return redirect('/facturas-emitidas')->withMessage('La factura ha sido restaurada satisfactoriamente.');
     }  
     
     public function downloadPdf($id) {

@@ -55,6 +55,28 @@ class CalculatedTax extends Model
       }
     }
     
+ /**
+     * validarMes
+     * Valida si para el mes en el que se quiere asignar el dato tiene una cierre abierto 
+     * @bodyParam date required Fecha en la que se va a guardar el dato ejemplo 19/09/1994
+     * @return true / false
+     */
+    public static function validarMes($date){
+      $company = currentCompanyModel();
+      $generated_date =  Carbon::parse($date);
+      
+      $abierto = CalculatedTax::where([['company_id',$company->id],['month',$generated_date->month],
+            ['year',$generated_date->year],['is_final',1],['is_closed',0]])->count();
+      dd($abierto);
+      if($abierto == 0){
+        return false;
+      }else{
+        return true;
+      }
+    }
+
+
+
     /**
      * applyRatios
      * Aplica los ratios operativos y devuelve el valor con el cálculo realizado según el porcentaje indicado

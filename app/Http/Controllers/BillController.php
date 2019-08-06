@@ -190,33 +190,35 @@ class BillController extends Controller
     public function store(Request $request)
     {
       
+        $company = currentCompanyModel();
         $request->validate([
             'subtotal' => 'required',
             'items' => 'required',
         ]);
-      
-        $bill = new Bill();
-        $company = currentCompanyModel();
-        $bill->company_id = $company->id;
-
-        //Datos generales y para Hacienda
-        $bill->document_type = "01";
-        $bill->hacienda_status = "03";
-        $bill->status = "02";
-        $bill->payment_status = "01";
-        $bill->payment_receipt = "";
-        $bill->generation_method = "M";
-        $bill->reference_number = $company->last_bill_ref_number + 1;
-        $bill->accept_status = 1;
-        
-        $bill->setBillData($request);
-        
-        $company->last_bill_ref_number = $bill->reference_number;
-        $company->save();
-        
-        clearBillCache($bill);
-      
-        return redirect('/facturas-recibidas');
+        if(CalculatedTax::validarMes($request->generated_date)){
+            $bill = new Bill();
+            $bill->company_id = $company->id;
+            //Datos generales y para Hacienda
+            $bill->document_type = "01";
+            $bill->hacienda_status = "03";
+            $bill->status = "02";
+            $bill->payment_status = "01";
+            $bill->payment_receipt = "";
+            $bill->generation_method = "M";
+            $bill->reference_number = $company->last_bill_ref_number + 1;
+            $bill->accept_status = 1;
+            
+            $bill->setBillData($request);
+            
+            $company->last_bill_ref_number = $bill->reference_number;
+            $company->save();
+            
+            clearBillCache($bill);
+            return redirect('/facturas-recibidas');
+            
+        }else{
+            return redirect('/facturas-recibidas')->withError('Mes seleccionado ya fue cerrado');
+        }
     }
 
     /**
@@ -251,15 +253,18 @@ class BillController extends Controller
         $company = currentCompanyModel();
         
         $bill = Bill::findOrFail($id);
-        $units = UnidadMedicion::all()->toArray();
-        $this->authorize('update', $bill);
-      
-        //Valida que la factura recibida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
-        if( $bill->generation_method != 'M' && $bill->generation_method != 'XLSX' ){
-          return redirect('/facturas-recibidas');
-        } 
-        $arrayActividades = $company->getActivities();
-      
+        if(CalculatedTax::validarMes($bill->generated_date)){
+            $units = UnidadMedicion::all()->toArray();
+            $this->authorize('update', $bill);
+          
+            //Valida que la factura recibida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
+            if( $bill->generation_method != 'M' && $bill->generation_method != 'XLSX' ){
+              return redirect('/facturas-recibidas');
+            } 
+            $arrayActividades = $company->getActivities();
+        }else{
+            return view('Bill/edit', compact('bill', 'units', 'arrayActividades') )->withError('Mes seleccionado ya fue cerrado');
+        }
         return view('Bill/edit', compact('bill', 'units', 'arrayActividades') );
     }
 
@@ -275,17 +280,21 @@ class BillController extends Controller
     {
         
         $bill = Bill::findOrFail($id);
-        $this->authorize('update', $bill);
-      
-        //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
-        if( $bill->generation_method != 'M' && $bill->generation_method != 'XLSX' ){
-          return redirect('/facturas-emitidas');
+        if(CalculatedTax::validarMes($bill->generated_date)){
+            $this->authorize('update', $bill);
+          
+            //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
+            if( $bill->generation_method != 'M' && $bill->generation_method != 'XLSX' ){
+              return redirect('/facturas-emitidas');
+            }
+          
+            $bill->setBillData($request);
+            
+            clearBillCache($bill);
+        
+        }else{
+            return view('Bill/edit', compact('bill', 'units', 'arrayActividades') )->withError('Mes seleccionado ya fue cerrado');
         }
-      
-        $bill->setBillData($request);
-        
-        clearBillCache($bill);
-        
         return redirect('/facturas-recibidas');
     }
 
@@ -336,108 +345,110 @@ class BillController extends Controller
                         $inserts = array();
                         foreach ($facturas as $row){
                             $i++;
-                            
-                            $metodoGeneracion = "XLSX";
-                            
-                            //Datos de proveedor
-                            $nombreProveedor = $row['nombreproveedor'];
-                            $codigoProveedor = $row['codigoproveedor'] ? $row['codigoproveedor'] : '';
-                            $tipoPersona = $row['tipoidentificacion'];
-                            $identificacionProveedor = $row['identificacionproveedor'];
-                            $correoProveedor = $row['correoproveedor'];
-                            $telefonoProveedor = null;
-                                        
-                            //Datos de factura
-                            $consecutivoComprobante = $row['consecutivocomprobante'];
-                            $claveFactura = array_key_exists('clavefactura', $row) ? $row['clavefactura'] : '';
-                            $condicionVenta = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
-                            $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
-                            $numeroLinea = array_key_exists('numerolinea', $row) ? $row['numerolinea'] : 1;
-                            $fechaEmision = $row['fechaemision'];
-                            $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
-                            $idMoneda = $row['moneda'];
-                            $tipoCambio = $row['tipocambio'];
-                            $totalDocumento = $row['totaldocumento'];
-                            $tipoDocumento = $row['tipodocumento'];
-                            $descripcion = array_key_exists('descripcion', $row)  ? $row['descripcion'] : '';
-                            
-                            //Datos de linea
-                            $codigoProducto = $row['codigoproducto'];
-                            $detalleProducto = $row['detalleproducto'];
-                            $unidadMedicion = $row['unidadmedicion'];
-                            $cantidad = array_key_exists('cantidad', $row) ? $row['cantidad'] : 1;
-                            $precioUnitario = $row['preciounitario'];
-                            $subtotalLinea = (float)$row['subtotallinea'];
-                            $totalLinea = $row['totallinea'];
-                            $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
-                            $codigoEtax = $row['codigoivaetax'];
-                            $montoIva = (float)$row['montoiva'];
-                            
-                            $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
-                            $codigoActividad = $row['codigoactividad'] ?? $mainAct;
-                            $xmlSchema = $row['xmlschema'] ?? 42;
-                            
-                            //Datos de exoneracion
-                            $totalNeto = 0;
-                            $tipoDocumentoExoneracion = $row['tipodocumentoexoneracion'] ?? null;
-                            $documentoExoneracion = $row['documentoexoneracion'] ?? null;
-                            $companiaExoneracion = $row['companiaexoneracion'] ?? null;
-                            $porcentajeExoneracion = $row['porcentajeexoneracion'] ?? 0;
-                            $montoExoneracion = $row['montoexoneracion'] ?? 0;
-                            $impuestoNeto = $row['impuestoneto'] ?? 0;
-                            $totalMontoLinea = $row['totalmontolinea'] ?? 0;
+                                $metodoGeneracion = "XLSX";
+                                
+                                if(CalculatedTax::validarMes($row['fechaemision'])){
+                                    //Datos de proveedor
+                                    $nombreProveedor = $row['nombreproveedor'];
+                                    $codigoProveedor = $row['codigoproveedor'] ? $row['codigoproveedor'] : '';
+                                    $tipoPersona = $row['tipoidentificacion'];
+                                    $identificacionProveedor = $row['identificacionproveedor'];
+                                    $correoProveedor = $row['correoproveedor'];
+                                    $telefonoProveedor = null;
+                                                
+                                    //Datos de factura
+                                    $consecutivoComprobante = $row['consecutivocomprobante'];
+                                    $claveFactura = array_key_exists('clavefactura', $row) ? $row['clavefactura'] : '';
+                                    $condicionVenta = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
+                                    $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
+                                    $numeroLinea = array_key_exists('numerolinea', $row) ? $row['numerolinea'] : 1;
+                                    $fechaEmision = $row['fechaemision'];
+                                    $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
+                                    $idMoneda = $row['moneda'];
+                                    $tipoCambio = $row['tipocambio'];
+                                    $totalDocumento = $row['totaldocumento'];
+                                    $tipoDocumento = $row['tipodocumento'];
+                                    $descripcion = array_key_exists('descripcion', $row)  ? $row['descripcion'] : '';
+                                    
+                                    //Datos de linea
+                                    $codigoProducto = $row['codigoproducto'];
+                                    $detalleProducto = $row['detalleproducto'];
+                                    $unidadMedicion = $row['unidadmedicion'];
+                                    $cantidad = array_key_exists('cantidad', $row) ? $row['cantidad'] : 1;
+                                    $precioUnitario = $row['preciounitario'];
+                                    $subtotalLinea = (float)$row['subtotallinea'];
+                                    $totalLinea = $row['totallinea'];
+                                    $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
+                                    $codigoEtax = $row['codigoivaetax'];
+                                    $montoIva = (float)$row['montoiva'];
+                                    
+                                    $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
+                                    $codigoActividad = $row['codigoactividad'] ?? $mainAct;
+                                    $xmlSchema = $row['xmlschema'] ?? 42;
+                                    
+                                    //Datos de exoneracion
+                                    $totalNeto = 0;
+                                    $tipoDocumentoExoneracion = $row['tipodocumentoexoneracion'] ?? null;
+                                    $documentoExoneracion = $row['documentoexoneracion'] ?? null;
+                                    $companiaExoneracion = $row['companiaexoneracion'] ?? null;
+                                    $porcentajeExoneracion = $row['porcentajeexoneracion'] ?? 0;
+                                    $montoExoneracion = $row['montoexoneracion'] ?? 0;
+                                    $impuestoNeto = $row['impuestoneto'] ?? 0;
+                                    $totalMontoLinea = $row['totalmontolinea'] ?? 0;
 
-                            $codigoEtax = str_pad($codigoEtax, 3, '0', STR_PAD_LEFT);
+                                    $codigoEtax = str_pad($codigoEtax, 3, '0', STR_PAD_LEFT);
 
-                            $arrayImportBill = array(
-                                'metodoGeneracion' => $metodoGeneracion,
-                                'idReceptor' => 0,
-                                'nombreProveedor' => $nombreProveedor,
-                                'codigoProveedor' => $codigoProveedor,
-                                'tipoPersona' => $tipoPersona,
-                                'identificacionProveedor' => $identificacionProveedor,
-                                'correoProveedor' => $correoProveedor,
-                                'telefonoProveedor' => $telefonoProveedor,
-                                'claveFactura' => $claveFactura,
-                                'consecutivoComprobante' => $consecutivoComprobante,
-                                'condicionVenta' => $condicionVenta,
-                                'metodoPago' => $metodoPago,
-                                'numeroLinea' => $numeroLinea,
-                                'fechaEmision' => $fechaEmision,
-                                'fechaVencimiento' => $fechaVencimiento,
-                                'idMoneda' => $idMoneda,
-                                'tipoCambio' => $tipoCambio,
-                                'totalDocumento' => $totalDocumento,
-                                'totalNeto' => $totalNeto,
-                                'tipoDocumento' => $tipoDocumento,
-                                'codigoProducto' => $codigoProducto,
-                                'detalleProducto' => $detalleProducto,
-                                'unidadMedicion' => $unidadMedicion,
-                                'cantidad' => $cantidad,
-                                'precioUnitario' => $precioUnitario,
-                                'subtotalLinea' => $subtotalLinea,
-                                'totalLinea' => $totalLinea,
-                                'montoDescuento' => $montoDescuento,
-                                'codigoEtax' => $codigoEtax,
-                                'montoIva' => $montoIva,
-                                'descripcion' => $descripcion,
-                                'isAuthorized' => true,
-                                'codeValidated' => true,
-                                'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
-                                'documentoExoneracion' => $documentoExoneracion,
-                                'companiaExoneracion' => $companiaExoneracion,
-                                'porcentajeExoneracion' => $porcentajeExoneracion,
-                                'montoExoneracion' => $montoExoneracion,
-                                'impuestoNeto' => $impuestoNeto,
-                                'totalMontoLinea' => $totalMontoLinea,
-                                'xmlSchema' => $xmlSchema,
-                                'codigoActividad' => $codigoActividad
-                            );
-                            
-                            $insert = Bill::importBillRow( $arrayImportBill );
-                            
-                            if( $insert ) {
-                                array_push( $inserts, $insert );
+                                    $arrayImportBill = array(
+                                        'metodoGeneracion' => $metodoGeneracion,
+                                        'idReceptor' => 0,
+                                        'nombreProveedor' => $nombreProveedor,
+                                        'codigoProveedor' => $codigoProveedor,
+                                        'tipoPersona' => $tipoPersona,
+                                        'identificacionProveedor' => $identificacionProveedor,
+                                        'correoProveedor' => $correoProveedor,
+                                        'telefonoProveedor' => $telefonoProveedor,
+                                        'claveFactura' => $claveFactura,
+                                        'consecutivoComprobante' => $consecutivoComprobante,
+                                        'condicionVenta' => $condicionVenta,
+                                        'metodoPago' => $metodoPago,
+                                        'numeroLinea' => $numeroLinea,
+                                        'fechaEmision' => $fechaEmision,
+                                        'fechaVencimiento' => $fechaVencimiento,
+                                        'idMoneda' => $idMoneda,
+                                        'tipoCambio' => $tipoCambio,
+                                        'totalDocumento' => $totalDocumento,
+                                        'totalNeto' => $totalNeto,
+                                        'tipoDocumento' => $tipoDocumento,
+                                        'codigoProducto' => $codigoProducto,
+                                        'detalleProducto' => $detalleProducto,
+                                        'unidadMedicion' => $unidadMedicion,
+                                        'cantidad' => $cantidad,
+                                        'precioUnitario' => $precioUnitario,
+                                        'subtotalLinea' => $subtotalLinea,
+                                        'totalLinea' => $totalLinea,
+                                        'montoDescuento' => $montoDescuento,
+                                        'codigoEtax' => $codigoEtax,
+                                        'montoIva' => $montoIva,
+                                        'descripcion' => $descripcion,
+                                        'isAuthorized' => true,
+                                        'codeValidated' => true,
+                                        'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
+                                        'documentoExoneracion' => $documentoExoneracion,
+                                        'companiaExoneracion' => $companiaExoneracion,
+                                        'porcentajeExoneracion' => $porcentajeExoneracion,
+                                        'montoExoneracion' => $montoExoneracion,
+                                        'impuestoNeto' => $impuestoNeto,
+                                        'totalMontoLinea' => $totalMontoLinea,
+                                        'xmlSchema' => $xmlSchema,
+                                        'codigoActividad' => $codigoActividad
+                                    );
+                                     
+                                    $insert = Bill::importBillRow( $arrayImportBill );
+                                    
+                                    if( $insert ) {
+                                        array_push( $inserts, $insert );
+                                    }
+                                
                             }
                         }
                         
@@ -484,21 +495,25 @@ class BillController extends Controller
                     $xml = simplexml_load_string( file_get_contents($file) );
                     $json = json_encode( $xml ); // convert the XML string to JSON
                     $arr = json_decode( $json, TRUE );
-                    
-                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
-                    $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-                    $consecutivoComprobante = $arr['NumeroConsecutivo'];
-                    $clave = $arr['Clave'];
-                    
-                    //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
-                        //Registra el XML. Si todo sale bien, lo guarda en S3
-                        $bill = Bill::saveBillXML( $arr, 'XML' );
-                        if( $bill ) {
-                            Bill::storeXML( $bill, $file );
+
+                    if(CalculatedTax::validarMes($arr['FechaEmision'])){
+                        $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
+                        $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+                        $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                        $clave = $arr['Clave'];
+                        
+                        //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                        if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
+                            //Registra el XML. Si todo sale bien, lo guarda en S3
+                            $bill = Bill::saveBillXML( $arr, 'XML' );
+                            if( $bill ) {
+                                Bill::storeXML( $bill, $file );
+                            }
+                        }else{
+                            return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
                         }
                     }else{
-                        return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
+                        return back()->withError('Mes seleccionado ya fue cerrado');
                     }
                 }
             }
@@ -542,36 +557,44 @@ class BillController extends Controller
 
     public function validar($id){
         $current_company = currentCompany();
-        $company = Company::select('commercial_activities')->where('id', $current_company)->first();
-        $activities_company = explode(", ", $company->commercial_activities);
-        $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
         $bill = Bill::find($id);
-        $codigos_etax = CodigoIvaSoportado::get();
-        $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
+        if(CalculatedTax::validarMes($bill->generated_date)){
+            $company = Company::select('commercial_activities')->where('id', $current_company)->first();
+            $activities_company = explode(", ", $company->commercial_activities);
+            $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
+            $codigos_etax = CodigoIvaSoportado::get();
+            $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
 
-        return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos'));
+            return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos'));
+        }else{
+            return back()->withError('Mes seleccionado ya fue cerrado');
+        }
     }
 
     public function GuardarValidar(Request $request)
     {
         $bill = Bill::findOrFail($request->bill);
         
-        $bill->activity_company_verification = $request->actividad_comercial;
-        $bill->is_code_validated = true;
-        foreach( $request->items as $item ) {
-            BillItem::where('id', $item['id'])
-            ->update([
-              'iva_type' =>  $item['iva_type'],
-              'product_type' =>  $item['product_type'],
-              'porc_identificacion_plena' =>  $item['porc_identificacion_plena']
-            ]);
-        }
-        
-        $bill->save();
-        
-        clearBillCache($bill);
+        if(CalculatedTax::validarMes($bill->generated_date)){
+            $bill->activity_company_verification = $request->actividad_comercial;
+            $bill->is_code_validated = true;
+            foreach( $request->items as $item ) {
+                BillItem::where('id', $item['id'])
+                ->update([
+                  'iva_type' =>  $item['iva_type'],
+                  'product_type' =>  $item['product_type'],
+                  'porc_identificacion_plena' =>  $item['porc_identificacion_plena']
+                ]);
+            }
+            
+            $bill->save();
+            
+            clearBillCache($bill);
 
-        return back()->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
+            return back()->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
+        }else{
+            return back()->withError('Mes seleccionado ya fue cerrado');
+        }
 
     }
     
@@ -596,23 +619,27 @@ class BillController extends Controller
     public function confirmarValidacion( Request $request, $id )
     {
         $bill = Bill::findOrFail($id);
-        $this->authorize('update', $bill);
-        
-        $tipoIva = $request->tipo_iva;
-        foreach( $bill->items as $item ) {
-            $item->iva_type = $request->tipo_iva;
-            $item->save();
+        if(CalculatedTax::validarMes($bill->generated_date)){
+            $this->authorize('update', $bill);
+            
+            $tipoIva = $request->tipo_iva;
+            foreach( $bill->items as $item ) {
+                $item->iva_type = $request->tipo_iva;
+                $item->save();
+            }
+            
+            $bill->is_code_validated = true;
+            $bill->save();
+            
+            if( $bill->year == 2018 ) {
+                clearLastTaxesCache($bill->company->id, 2018);
+            }
+            clearBillCache($bill);
+            
+            return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido validada');
+        }else{
+            return redirect('/facturas-recibidas/aceptaciones')->withError('Mes seleccionado ya fue cerrado');
         }
-        
-        $bill->is_code_validated = true;
-        $bill->save();
-        
-        if( $bill->year == 2018 ) {
-            clearLastTaxesCache($bill->company->id, 2018);
-        }
-        clearBillCache($bill);
-        
-        return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido validada');
     }
     
     /**
@@ -660,18 +687,24 @@ class BillController extends Controller
     public function authorizeBill ( Request $request, $id )
     {
         $bill = Bill::findOrFail($id);
-        $this->authorize('update', $bill);
+        if(CalculatedTax::validarMes($bill->generated_date)){
         
-        if ( $request->autorizar ) {
-            $bill->is_authorized = true;
-            $bill->save();
-            return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido autorizada. Recuerde validar el código');
-        }else {
-            $bill->is_authorized = false;
-            $bill->is_void = true;
-            BillItem::where('bill_id', $bill->id)->delete();
-            $bill->delete();
-            return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido rechazada');
+            $this->authorize('update', $bill);
+            
+            if ( $request->autorizar ) {
+                $bill->is_authorized = true;
+                $bill->save();
+                return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido autorizada. Recuerde validar el código');
+            }else {
+                $bill->is_authorized = false;
+                $bill->is_void = true;
+                BillItem::where('bill_id', $bill->id)->delete();
+                $bill->delete();
+                return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido rechazada');
+            }
+
+        }else{
+            return redirect('/facturas-recibidas/autorizaciones')->withError('Mes seleccionado ya fue cerrado');
         }
     }
     
@@ -791,12 +824,18 @@ class BillController extends Controller
     public function markAsNotAccepted ( $id )
     {
         $bill = Bill::findOrFail($id);
-        $this->authorize('update', $bill);
+        if(CalculatedTax::validarMes($bill->generated_date)){
         
-        $bill->accept_status = 0;
-        $bill->is_code_validated = false;
-        $bill->save();
-        return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido incluida para aceptación');
+            $this->authorize('update', $bill);
+            
+            $bill->accept_status = 0;
+            $bill->is_code_validated = false;
+            $bill->save();
+            return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido incluida para aceptación');
+        }else{
+            return redirect('/facturas-recibidas/aceptaciones')->withError('Mes seleccionado ya fue cerrado');
+        }
+
     }
     
     
@@ -848,18 +887,23 @@ class BillController extends Controller
     public function correctAccepted ( Request $request, $id )
     {
         $bill = Bill::findOrFail($id);
-        $this->authorize('update', $bill);
-        
-        $bill->accept_iva_condition = $request->accept_iva_condition ? $request->accept_iva_condition : '02';
-        $bill->accept_iva_acreditable = $request->accept_iva_acreditable;
-        $bill->accept_iva_gasto = $request->accept_iva_gasto;
-        $bill->accept_status = 1;
-        $bill->hacienda_status = "01";
-        $bill->accept_id_number = currentCompany();
+        if(CalculatedTax::validarMes($bill->generated_date)){
+            $this->authorize('update', $bill);
+            
+            $bill->accept_iva_condition = $request->accept_iva_condition ? $request->accept_iva_condition : '02';
+            $bill->accept_iva_acreditable = $request->accept_iva_acreditable;
+            $bill->accept_iva_gasto = $request->accept_iva_gasto;
+            $bill->accept_status = 1;
+            $bill->hacienda_status = "01";
+            $bill->accept_id_number = currentCompany();
 
-        $bill->save();
-        clearBillCache($bill);
-        return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido aceptada');
+            $bill->save();
+            clearBillCache($bill);
+            return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido aceptada');
+        }else{
+            return redirect('/facturas-recibidas/aceptaciones')->withError('Mes seleccionado ya fue cerrado');
+        }
+
     }
 
     /**
