@@ -64,7 +64,7 @@
 						    
 						    <div class="form-group col-md-4">
 						      <label for="tipo_persona">Tipo de persona *</label>
-						      <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();" onchange="validateIdentificationLenght();">
+						      <select class="form-control" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();" onchange="validateIdentificationLength();">
 						        <option value="F" {{ @$company->type == 'F' ? 'selected' : '' }} >Física</option>
 						        <option value="J" {{ @$company->type == 'J' ? 'selected' : '' }}>Jurídica</option>
 						        <option value="D" {{ @$company->type == 'D' ? 'selected' : '' }}>DIMEX</option>
@@ -76,7 +76,7 @@
 						    
 						    <div class="form-group col-md-4">
 						      <label for="id_number">Número de identificación *</label>
-						      <input max="20" maxlength="20" id="id_number" name="id_number" class="form-control" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);" onblur="validateIdentificationLenght();">
+						      <input max="20" maxlength="20" id="id_number" name="id_number" class="form-control" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);" onblur="validateIdentificationLength();">
 						    </div>
 
 						    <div class="form-group col-md-4">
@@ -199,45 +199,5 @@
 		    @endif
 	    @endif
 	  });
-      function validateIdentificationLenght(){
-          var tCed = $('#tipo_persona').val();
-          var identificacion = $('#id_number').val();
-          switch (tCed){
-              case 'F':
-                  if(identificacion.length != 9){
-                      alert('Utilice 9 dígitos numerales para este tipo de documento');
-                      $('#id_number').val('');
-                  }
-                  break;
-              case 'J':
-                  if(identificacion.length != 10){
-                      alert('Utilice 10 dígitos numerales para este tipo de documento');
-                      $('#id_number').val('');
-                  }
-                  break;
-              case 'D':
-                  if(identificacion.length != 11 && identificacion.length != 12) {
-                      alert('Utilice 11 ó 12 dígitos numerales para este tipo de documento');
-                      $('#id_number').val('');
-                  }
-                  break;
-              case 'N':
-                  if(identificacion.length != 10){
-                      alert('Utilice 10 dígitos numerales para este tipo de documento');
-                      $('#id_number').val('');
-                  }
-                  break;
-              case 'E':
-                  if(identificacion.length > 20){
-                      alert('Utilice un máximo de 20 dígitos numerales para este tipo de documento');
-                      $('#id_number').val('');
-                  }
-                  break;
-              default:
-                  alert('Debe seleccionar un tipo de persona');
-                  $('#id_number').val('');
-              break;
-          }
-      }
     </script>
 @endsection

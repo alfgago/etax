@@ -19,7 +19,7 @@
     
     <div class="form-group col-md-4">
        <label for="id_number">Número de identificación *</label>
-       <input max="20" maxlength="20" class="form-control" id="id_number" name="id_number" value="{{ @$provider->id_number }}" required onchange="getJSONCedula(this.value);" onblur="validateIdentificationLenght();">
+       <input max="20" maxlength="20" class="form-control" id="id_number" name="id_number" value="{{ @$provider->id_number }}" required onchange="getJSONCedula(this.value);" onblur="validateIdentificationLength();">
     </div>
 
     <div class="form-group col-md-4">
@@ -197,46 +197,6 @@
                   $('#divAddress').show('slow');
 
                   $('#extranjero').attr("hidden", true);
-              }
-          }
-          function validateIdentificationLenght(){
-              var tCed = $('#tipo_persona').val();
-              var identificacion = $('#id_number').val();
-              switch (tCed){
-                  case 'F':
-                      if(identificacion.length != 9){
-                          alert('Utilice 9 dígitos numerales para este tipo de documento');
-                          $('#id_number').val('');
-                      }
-                      break;
-                  case 'J':
-                      if(identificacion.length != 10){
-                          alert('Utilice 10 dígitos numerales para este tipo de documento');
-                          $('#id_number').val('');
-                      }
-                      break;
-                  case 'D':
-                      if(identificacion.length != 11 && identificacion.length != 12) {
-                          alert('Utilice 11 ó 12 dígitos numerales para este tipo de documento');
-                          $('#id_number').val('');
-                      }
-                      break;
-                  case 'N':
-                      if(identificacion.length != 10){
-                          alert('Utilice 10 dígitos numerales para este tipo de documento');
-                          $('#id_number').val('');
-                      }
-                      break;
-                  case 'E':
-                      if(identificacion.length > 20){
-                          alert('Utilice un máximo de 20 dígitos numerales para este tipo de documento');
-                          $('#id_number').val('');
-                      }
-                      break;
-                  default:
-                      alert('Debe seleccionar un tipo de persona');
-                      $('#id_number').val('');
-                      break;
               }
           }
 		</script>
