@@ -87,7 +87,7 @@
       <label for="zip">Zip</label>
       <input type="text" class="form-control" name="zip" id="zip" value="{{ @$provider->zip }}" readonly >
     </div>
-    
+    <input hidden value="{{ @$provider->id }}" id="id_provider">
     <div class="form-group col-md-12" id="divAddress">
       <label for="address">Dirección</label>
       <textarea class="form-control" name="address" id="address" >{{ @$provider->address }}</textarea>
@@ -177,8 +177,8 @@
 		  });
           function cambiarDireccion(){
               var tipoPersona = $('#tipo_persona').val();
+              var idProvider = $('#id_provider').val();
               if(tipoPersona === 'E'){
-                  //$('#divCountry').hide('slow');
                   $('#divState').hide('slow');
                   $('#divCity').hide('slow');
                   $('#divDistrict').hide('slow');
@@ -187,9 +187,10 @@
                   $('#divAddress').hide('slow');
 
                   $('#extranjero').removeAttr('hidden');
-                  $('#country').val('US');
+                  if(idProvider === ''){
+                      $('#country').val('US');
+                  }
               }else{
-                  //$('#divCountry').show('slow');
                   $('#divState').show('slow');
                   $('#divCity').show('slow');
                   $('#divDistrict').show('slow');
@@ -201,11 +202,10 @@
                   $('#country').val('CR');
               }
           }
-
+          cambiarDireccion();
           function cambiarTipoPersona(){
               var country = $('#country').val();
               if(country !== 'CR'){
-                  //$('#divCountry').hide('slow');
                   $('#divState').hide('slow');
                   $('#divCity').hide('slow');
                   $('#divDistrict').hide('slow');
@@ -216,7 +216,6 @@
                   $('#extranjero').removeAttr('hidden');
                   $('#tipo_persona').val('E');
               }else{
-                  //$('#divCountry').show('slow');
                   $('#divState').show('slow');
                   $('#divCity').show('slow');
                   $('#divDistrict').show('slow');
