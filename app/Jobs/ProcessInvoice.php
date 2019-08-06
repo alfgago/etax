@@ -55,8 +55,9 @@ class ProcessInvoice implements ShouldQueue
             $client = new Client();
             $invoice = Invoice::find($this->invoiceId);
             $company = Company::find($this->companyId);
-            if ( $company->atv_validation ) {
-                if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09'))) {
+            if ($company->atv_validation) {
+                if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09'))
+                    && $invoice->resend_attempts < 6) {
                     if ($invoice->xml_schema == 43) {
                         $requestDetails = $invoiceUtils->setDetails43($invoice->items);
                         $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
@@ -64,7 +65,8 @@ class ProcessInvoice implements ShouldQueue
                         $requestDetails = $this->setDetails($invoice->items);
                         $requestData = $this->setInvoiceData($invoice, $requestDetails);
                     }
-                    
+                    $invoice->in_queue = false;
+                    $invoice->save();
                     $apiHacienda = new BridgeHaciendaApi();
                     $tokenApi = $apiHacienda->login(false);
                     if ($requestData !== false) {

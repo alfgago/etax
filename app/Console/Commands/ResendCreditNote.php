@@ -47,6 +47,7 @@ class ResendCreditNote extends Command
         try {
             $this->info('Sending Credit Note to Hacienda....');
             $invoices = Invoice::where('hacienda_status', '01')->where('generation_method', 'etax')
+                ->where('resend_attempts', '<', 6)->where('in_queue', false)
                 ->where('document_type', '03')->get();
             $this->info('Sending Credit Note ....'. count($invoices));
             $this->info('Get Token Api Hacienda ....');
@@ -55,6 +56,9 @@ class ResendCreditNote extends Command
 
             foreach ($invoices as $invoice) {
                 $company = $invoice->company;
+                $invoice->resend_attempts = $invoice->resend_attempts + 1;
+                $invoice->in_queue = true;
+                $invoice->save();
                 $this->info('Sending Credit Note ....'. $invoice->document_key);
                 sleep(4);
                 ProcessCreditNote::dispatch($invoice->id, $company->id, $tokenApi)
