@@ -200,6 +200,7 @@
 
                   $('#extranjero').attr("hidden", true);
                   $('#country').val('CR');
+                  setTimeout(fillProvincias, 1000);
               }
           }
           cambiarDireccion();
@@ -225,6 +226,7 @@
 
                   $('#extranjero').attr("hidden", true);
                   $('#tipo_persona').val('F');
+                  setTimeout(fillProvincias, 1000);
               }
           }
 		  
