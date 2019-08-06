@@ -59,6 +59,21 @@ $(function() {
     },
   });
 });
-  
+function confirmDelete( id ) {
+    var formId = "#delete-form-"+id;
+    Swal.fire({
+        title: '¿Está seguro que desea eliminar el cliente?',
+        text: "",
+        type: 'warning',
+        showCloseButton: true,
+        showCancelButton: true,
+        confirmButtonText: 'Sí, deseo eliminarlo'
+    }).then((result) => {
+        if (result.value) {
+            $(formId).submit();
+        }
+    })
+
+}
 </script>
 @endsection
