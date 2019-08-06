@@ -64,6 +64,8 @@ class ProcessCreditNote implements ShouldQueue
                         $requestDetails = $this->setDetails($invoice->items);
                         $requestData = $this->setInvoiceData($invoice, $requestDetails);
                     }
+                    $invoice->in_queue = false;
+                    $invoice->save();
                     Log::info('Request data'. json_encode($requestData));
                     $apiHacienda = new BridgeHaciendaApi();
                     $tokenApi = $apiHacienda->login(false);
