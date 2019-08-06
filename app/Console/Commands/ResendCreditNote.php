@@ -56,6 +56,9 @@ class ResendCreditNote extends Command
 
             foreach ($invoices as $invoice) {
                 $company = $invoice->company;
+                $invoice->resend_attempts = $invoice->resend_attempts + 1;
+                $invoice->in_queue = true;
+                $invoice->save();
                 $this->info('Sending Credit Note ....'. $invoice->document_key);
                 sleep(4);
                 ProcessCreditNote::dispatch($invoice->id, $company->id, $tokenApi)
