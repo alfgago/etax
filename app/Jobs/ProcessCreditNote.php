@@ -56,7 +56,8 @@ class ProcessCreditNote implements ShouldQueue
             $invoice = Invoice::find($this->invoiceId);
             $company = Company::find($this->companyId);
             if ($company->atv_validation) {
-                if ($invoice->hacienda_status == '01' && $invoice->document_type == '03' && $invoice->reference_doc_type == '04' ? true : $invoiceUtils->validateZip($invoice)) {
+                if ($invoice->hacienda_status == '01' && $invoice->document_type == '03' && $invoice->reference_doc_type == '04' ? true : $invoiceUtils->validateZip($invoice)
+                    && $invoice->resend_attempts < 6) {
                     if ($invoice->xml_schema == 43) {
                         $requestDetails = $invoiceUtils->setDetails43($invoice->items);
                         $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
