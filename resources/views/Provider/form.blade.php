@@ -39,7 +39,7 @@
     
     <div class="form-group col-md-4">
       <label for="email">Correo electrónico *</label>
-      <input type="text" class="form-control" name="email" id="email" value="{{ @$provider->email }}" required>
+      <input type="email" class="form-control" name="email" id="email" value="{{ @$provider->email }}" required onblur="validateEmail(this.value);">
     </div>
     
     <div class="form-group col-md-4">
@@ -97,58 +97,7 @@
         <textarea class="form-control" name="foreign_address" id="foreign_address" >{{ @$client->foreign_address }}</textarea>
     </div>
 		<script>
-		
-		  function toggleApellidos() {
-		    var tipoPersona = $('#tipo_persona').val();
-		    if( tipoPersona == 2 ){
-		      $('#last_name, #last_name2').val('');
-		      $('#last_name, #last_name2').attr('readonly', 'true');
-		    }else{
-		      $('#last_name, #last_name2').removeAttr('readonly');
-		    }
-		  }
-		  
-		  function fillProvincias() {
-		    if( $('#country').val() == 'CR' ) {
-		      var sel = $('#state');
-		      sel.html("");
-		      sel.append( "<option val='0' selected>-- Seleccione una provincia --</option>" );
-		      $.each(provincias, function(i, val) {
-		        sel.append( "<option value='"+i+"'>"+ provincias[i]["Nombre"] +"</option>" );
-		      });
-		    }
-		  }
-		  
-		  function fillCantones() {
-		    var provincia = $('#state').val();
-		    var sel = $('#city');
-		    sel.html("");
-		    sel.append( "<option val='0' selected>-- Seleccione un cantón --</option>" );
-		    $.each(cantones, function(i, val) {
-		      if( provincia == cantones[i]["Provincia"] ){
-		         sel.append( "<option value='"+i+"'>"+ cantones[i]["Nombre"] +"</option>" );
-		      }
-		    });
-		  }
-		  
-		  function fillDistritos() {
-		    var canton = $('#city').val();
-		    var sel = $('#district');
-		    sel.html("");
-		    sel.append( "<option val='0' selected>-- Seleccione un distrito --</option>" );
-		    $.each(distritos, function(i, val) {
-		      if( canton == distritos[i]["Canton"] ){
-		         sel.append( "<option value='"+i+"'>"+ distritos[i]["Nombre"] +"</option>" );
-		      }
-		    });
-		  }
-		  
-		  function fillZip() {
-		    var distrito = $('#district').val();
-		    var sel = $('#zip').val(distrito);
-		  }
-		  
-		  $(document).ready(function(){
+		    $(document).ready(function(){
 		    
 		  	fillProvincias();
 		    $("#billing_emails").tagging({
@@ -229,5 +178,4 @@
                   setTimeout(fillProvincias, 1000);
               }
           }
-		  
 		</script>
