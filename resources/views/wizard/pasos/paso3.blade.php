@@ -62,7 +62,7 @@
 
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-prev" onclick="toggleStep('step2');">Paso anterior</button>
-  <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step4');">Siguiente paso</button>
+  <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step5');">Siguiente paso</button>
 </div>
 
 <script>
