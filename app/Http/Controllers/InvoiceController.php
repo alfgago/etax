@@ -513,11 +513,11 @@ class InvoiceController extends Controller
     {
         
         $company = currentCompanyModel(); 
+        $invoice = Invoice::findOrFail($id);
         $FechaEmision = explode(" ", $invoice->generated_date);
         $FechaEmision = explode("-", $FechaEmision[0]);
         $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
         if(CalculatedTax::validarMes($FechaEmision)){ 
-            $invoice = Invoice::findOrFail($id);
             $units = UnidadMedicion::all()->toArray();
             $this->authorize('update', $invoice);
           
