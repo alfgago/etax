@@ -51,7 +51,7 @@ class ClientController extends Controller
         return datatables()->eloquent( $query )
             ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($client) {
-                return view('client.actions', [
+                return view('Client.actions', [
                     'data' => $client
                 ])->render();
             })

@@ -84,7 +84,7 @@
 	<tr class="macro-title">
     <th colspan="7">Créditos fiscales aplicables por transacciones y operaciones sujetas por tarifas <input readonly value="{{ number_format( $totalesSume, 0 ) }}"/></th>
   </tr>
-	<tr class="header-tarifas">
+	<tr class="header-tarifas header-tarifas-7">
 		<th>Detalle</th>
     <th>Afectas al 13%</th>
     <th>Afectas al 8%</th>
@@ -332,7 +332,7 @@
 	<tr class="macro-title">
     <th colspan="7">Créditos por compras locales de bienes y servicios e importaciones utilizados indistintamente en operaciones sujetas, no sujetas o exentas <input readonly value="{{ number_format( ($totalesSum), 0 ) }}"/></th>
   </tr>
-	<tr class="header-tarifas">
+	<tr class="header-tarifas header-tarifas-7">
 		<th>Detalle</th>
     <th>Afectas al 13%</th>
     <th>Afectas al 8%</th>
@@ -559,3 +559,9 @@
 	
 	</tbody>
 </table>
+
+<style>
+	tr.header-tarifas-7 th {
+	    width: calc(100% / 7);
+	}
+</style>
