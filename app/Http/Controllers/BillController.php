@@ -476,7 +476,7 @@ class BillController extends Controller
           'xmls' => 'required'
         ]);
           
-        //try {
+        try {
             $time_start = getMicrotime();
             $company = currentCompanyModel();
             if( request()->hasfile('xmls') ) {
@@ -498,20 +498,20 @@ class BillController extends Controller
                             Bill::storeXML( $bill, $file );
                         }
                     }else{
-                        return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
+                        return back()->withError( "El documento $consecutivoComprobante no le pertenece a su compañía actual." );
                     }
                 }
             }
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
-        /*}catch( \Exception $ex ){
+        }catch( \Exception $ex ){
             Log::error('Error importando XML ' . $ex->getMessage());
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
         }catch( \Throwable $ex ){
             Log::error('Error importando XML ' . $ex->getMessage());
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
-        }*/
+        }
 
         return redirect('/facturas-recibidas/aceptaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
 

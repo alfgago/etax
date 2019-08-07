@@ -299,7 +299,7 @@ class Bill extends Model
         $bill->xml_schema = $bill->commercial_activity ? 43 : 42;
         $bill->sale_condition = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
         $bill->credit_time = null;
-        $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
+        $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '01';
         if ( is_array($medioPago) ) {
           $medioPago = $medioPago[0];
         }
