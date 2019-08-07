@@ -26,7 +26,7 @@
           
           <div class="form-group col-md-6">
             <label for="code">Código</label>
-            <input type="text" class="form-control" name="code" id="codigo" value="" required>
+            <input type="text" class="form-control" name="code" id="codigo" value="" max="13" maxlength="13" required>
           </div>
           
           <div class="form-group col-md-6">
