@@ -45,7 +45,7 @@
     
     <div class="form-group col-md-4">
       <label for="phone">Teléfono</label>
-      <input type="number" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" maxlength="20">
+      <input type="text" numeric class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" maxlength="20" max="20" onblur="validatePhoneFormat();">
     </div>
     
     <div class="form-group col-md-4"></div>
@@ -163,6 +163,7 @@
                 setTimeout(fillProvincias, 1000);
             }
         }
+        $('#phone').val('');
     }
     cambiarDireccion();
 
