@@ -329,7 +329,7 @@ class BillController extends Controller
         $company = currentCompanyModel();
         
         if( $collection[0]->count() < 2501 ){
-            try {
+            //try {
                 foreach ($collection[0]->chunk(200) as $facturas) {
                     \DB::transaction(function () use ($facturas, &$company, &$i) {
                         
@@ -445,7 +445,7 @@ class BillController extends Controller
                     });
                     
                 }
-            }catch( \ErrorException $ex ){
+            /*}catch( \ErrorException $ex ){
                 Log::error('Error importando Excel' . $ex->getMessage());
                 return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila. '.$i);
             }catch( \InvalidArgumentException $ex ){
@@ -453,11 +453,11 @@ class BillController extends Controller
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
             }catch( \Exception $ex ){
                 Log::error('Error importando Excel' . $ex->getMessage());
-                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.'.$i);
+                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Linea: '.$i);
             }catch( \Throwable $ex ){
                 Log::error('Error importando Excel' . $ex->getMessage());
-                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.'.$i);
-            }
+                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Linea: '.$i);
+            }*/
         
             $company->save();
             
@@ -476,7 +476,7 @@ class BillController extends Controller
           'xmls' => 'required'
         ]);
           
-        try {
+        //try {
             $time_start = getMicrotime();
             $company = currentCompanyModel();
             if( request()->hasfile('xmls') ) {
@@ -505,13 +505,13 @@ class BillController extends Controller
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
-        }catch( \Exception $ex ){
+        /*}catch( \Exception $ex ){
             Log::error('Error importando XML ' . $ex->getMessage());
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
         }catch( \Throwable $ex ){
             Log::error('Error importando XML ' . $ex->getMessage());
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
-        }
+        }*/
 
         return redirect('/facturas-recibidas/aceptaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
 
