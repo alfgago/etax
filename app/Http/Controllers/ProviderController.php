@@ -123,7 +123,7 @@ class ProviderController extends Controller
       
         $provider->save();
       
-        return redirect('/proveedores');
+        return redirect('/proveedores')->withMessage('Proveedor creado');
     }
 
     /**
@@ -191,7 +191,7 @@ class ProviderController extends Controller
       
         $provider->save();
       
-        return redirect('/proveedores');
+        return redirect('/proveedores')->withMessage('Proveedor editado');
     }
 
     /**
