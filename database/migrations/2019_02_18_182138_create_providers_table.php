@@ -41,7 +41,9 @@ class CreateProvidersTable extends Migration
             $table->timestamps();
         });
         
-        $this->demoData();
+        if ( !app()->environment('production') ) {
+            $this->demoData();
+        }
     }
     
     public function demoData() {
