@@ -130,7 +130,7 @@ class ClientController extends Controller
                 if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     array_push($arrayEmails, $email);
                 }else{
-                    return redirect()->back()->withErrors('Los emails para facturación deben ser válidos');
+                    return redirect()->back()->withErrors('Los correos para facturación deben ser válidos');
                 }
             }
             $cliente->billing_emails = implode(", ", $arrayEmails);
