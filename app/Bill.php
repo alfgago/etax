@@ -480,18 +480,32 @@ class Bill extends Model
             $montoExoneracion = 0;
             if( array_key_exists('Impuesto', $linea) ) {
               //$codigoEtax = $linea['Impuesto']['CodigoTarifa'];
-              $montoIva = trim($linea['Impuesto']['Monto'] );
-              $porcentajeIva = trim($linea['Impuesto']['Tarifa'] );
-
-              if( array_key_exists('Exoneracion', $linea['Impuesto']) ) {
-                $tipoDocumentoExoneracion = $linea['Impuesto']['Exoneracion']['TipoDocumento'] ?? null;
-                $documentoExoneracion = $linea['Impuesto']['Exoneracion']['NumeroDocumento']  ?? null;
-                $companiaExoneracion = $linea['Impuesto']['Exoneracion']['NombreInstitucion'] ?? null;
-                $fechaExoneracion = $linea['Impuesto']['Exoneracion']['FechaEmision'] ?? null;
-                $porcentajeExoneracion = $linea['Impuesto']['Exoneracion']['PorcentajeExoneracion'] ?? 0;
-                $montoExoneracion = $linea['Impuesto']['Exoneracion']['MontoExoneracion'] ?? 0;
+              try{
+                $montoIva = trim($linea['Impuesto']['Monto'] );
+                $porcentajeIva = trim($linea['Impuesto']['Tarifa'] );
+  
+                if( array_key_exists('Exoneracion', $linea['Impuesto']) ) {
+                  $tipoDocumentoExoneracion = $linea['Impuesto']['Exoneracion']['TipoDocumento'] ?? null;
+                  $documentoExoneracion = $linea['Impuesto']['Exoneracion']['NumeroDocumento']  ?? null;
+                  $companiaExoneracion = $linea['Impuesto']['Exoneracion']['NombreInstitucion'] ?? null;
+                  $fechaExoneracion = $linea['Impuesto']['Exoneracion']['FechaEmision'] ?? null;
+                  $porcentajeExoneracion = $linea['Impuesto']['Exoneracion']['PorcentajeExoneracion'] ?? 0;
+                  $montoExoneracion = $linea['Impuesto']['Exoneracion']['MontoExoneracion'] ?? 0;
+                }
+              }catch(\Exception $e){
+                if( is_array($linea['Impuesto'])){
+                  $montoIva = 0;
+                  $porcentajeIva = 0;
+                  foreach ($linea['Impuesto'] as $imp){
+                    if( trim($imp['Tarifa']) == 5 ){
+                      $subtotalLinea = $subtotalLinea + (float)trim($imp['Monto'] );
+                    }else{
+                      $montoIva += (float)trim($imp['Monto'] );
+                      $porcentajeIva += (float)trim($imp['Tarifa'] );
+                    }
+                  }
+                }
               }
-              
             }
             
             $bill->subtotal = $bill->subtotal + $subtotalLinea;
@@ -737,8 +751,8 @@ class Bill extends Model
               'year' => $year,
               'month' => $month,
               'item_number' => $data['numeroLinea'],
-              'code' => $data['codigoProducto'],
-              'name' => $data['detalleProducto'],
+              'code' => $data['codigoProducto'] ?? 'N/A',
+              'name' => $data['detalleProducto'] ?? 'No indica',
               'product_type' => 1,
               'measure_unit' => $data['unidadMedicion'],
               'item_count' => $data['cantidad'],
