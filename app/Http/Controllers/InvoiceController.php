@@ -393,7 +393,6 @@ class InvoiceController extends Controller
                 'subtotal' => 'required',
                 'items' => 'required',
             ]);
-            dd($request->generated_date);
             if(CalculatedTax::validarMes($request->generated_date)){
                 $apiHacienda = new BridgeHaciendaApi();
                 $tokenApi = $apiHacienda->login(false);
