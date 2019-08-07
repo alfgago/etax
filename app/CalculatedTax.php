@@ -63,15 +63,18 @@ class CalculatedTax extends Model
      */
     public static function validarMes($date){
       $company = currentCompanyModel();
-      $generated_date =  Carbon::parse($date);
-      
-      $abierto = CalculatedTax::where([['company_id',$company->id],['month',$generated_date->month],
-            ['year',$generated_date->year],['is_final',1],['is_closed',0]])->count();
-      dd($abierto);
+      $generated_date = explode("/", $date);
+      $abierto = CalculatedTax::where([['company_id',$company->id],['month',$generated_date[1]],
+            ['year',$generated_date[2]],['is_final',1],['is_closed',0]])->count();
       if($abierto == 0){
         return false;
       }else{
-        return true;
+        if($abierto > 0){
+
+            return true;
+        }else{
+          return false;
+        }
       }
     }
 

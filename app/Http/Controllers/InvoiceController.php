@@ -393,6 +393,7 @@ class InvoiceController extends Controller
                 'subtotal' => 'required',
                 'items' => 'required',
             ]);
+            dd($request->generated_date);
             if(CalculatedTax::validarMes($request->generated_date)){
                 $apiHacienda = new BridgeHaciendaApi();
                 $tokenApi = $apiHacienda->login(false);
@@ -485,8 +486,11 @@ class InvoiceController extends Controller
     }
 
     public function actualizar_categorias(Request $request){
-        $invoice = Invoice::where('id',$request->invoice_id)->first();
-        if(CalculatedTax::validarMes($invoice->generated_date)){
+        $invoice = Invoice::where('id',$request->invoice_id)->first(); 
+        $FechaEmision = explode(" ", $invoice->generated_date);
+        $FechaEmision = explode("-", $FechaEmision[0]);
+        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+        if(CalculatedTax::validarMes($FechaEmision)){ 
             Invoice::where('id',$request->invoice_id)
                 ->update(['commercial_activity'=>$request->commercial_activity]);
             foreach ($request->items as $item) {
@@ -509,8 +513,11 @@ class InvoiceController extends Controller
     public function edit($id)
     {
         
-        $company = currentCompanyModel();
-        if(CalculatedTax::validarMes($request->generated_date)){  
+        $company = currentCompanyModel(); 
+        $FechaEmision = explode(" ", $invoice->generated_date);
+        $FechaEmision = explode("-", $FechaEmision[0]);
+        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+        if(CalculatedTax::validarMes($FechaEmision)){ 
             $invoice = Invoice::findOrFail($id);
             $units = UnidadMedicion::all()->toArray();
             $this->authorize('update', $invoice);
@@ -539,8 +546,11 @@ class InvoiceController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $invoice = Invoice::findOrFail($id);
-        if(CalculatedTax::validarMes($invoice->generated_date)){ 
+        $invoice = Invoice::findOrFail($id); 
+        $FechaEmision = explode(" ", $invoice->generated_date);
+        $FechaEmision = explode("-", $FechaEmision[0]);
+        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+        if(CalculatedTax::validarMes($FechaEmision)){ 
             $this->authorize('update', $invoice);
           
             //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
@@ -612,7 +622,6 @@ class InvoiceController extends Controller
                         $inserts = array();
                         foreach ($facturas as $row){
                             $i++;
-                            
                             if(CalculatedTax::validarMes($row['fechaemision'])){ 
                                 $arrayRow = array();
                                 /*if($available_invoices_by_plan > 0){
@@ -769,8 +778,11 @@ class InvoiceController extends Controller
     {
         try {
             Log::info('Anulacion de facturar -->'.$id);
-            $invoice = Invoice::findOrFail($id);
-            if(CalculatedTax::validarMes($invoice->generated_date)){ 
+            $invoice = Invoice::findOrFail($id); 
+            $FechaEmision = explode(" ", $invoice->generated_date);
+            $FechaEmision = explode("-", $FechaEmision[0]);
+            $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+            if(CalculatedTax::validarMes($FechaEmision)){ 
                 $apiHacienda = new BridgeHaciendaApi();
                 $tokenApi = $apiHacienda->login();
                 if ($tokenApi !== false) {
@@ -880,7 +892,10 @@ class InvoiceController extends Controller
                     $json = json_encode( $xml ); // convert the XML string to JSON
                     $arr = json_decode( $json, TRUE );
                     
-                    if(CalculatedTax::validarMes($arr['FechaEmision'])){
+                    $FechaEmision = explode("T", $arr['FechaEmision']);
+                    $FechaEmision = explode("-", $FechaEmision[0]);
+                    $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+                    if(CalculatedTax::validarMes($FechaEmision)){
                         $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
                         $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
                         $consecutivoComprobante = $arr['NumeroConsecutivo'];
@@ -940,7 +955,10 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::findOrFail($id);
 
-        if(CalculatedTax::validarMes($invoice->generated_date)){ 
+        $FechaEmision = explode(" ", $invoice->generated_date);
+        $FechaEmision = explode("-", $FechaEmision[0]);
+        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+        if(CalculatedTax::validarMes($FechaEmision)){ 
             $this->authorize('update', $invoice);
             
             $tipoIva = $request->tipo_iva;
@@ -1034,8 +1052,11 @@ class InvoiceController extends Controller
     
     public function authorizeInvoice ( Request $request, $id )
     {
-        $invoice = Invoice::findOrFail($id);
-        if(CalculatedTax::validarMes($invoice->generated_date)){ 
+        $invoice = Invoice::findOrFail($id); 
+        $FechaEmision = explode(" ", $invoice->generated_date);
+        $FechaEmision = explode("-", $FechaEmision[0]);
+        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+        if(CalculatedTax::validarMes($FechaEmision)){ 
             $this->authorize('update', $invoice);
             
             if ( $request->autorizar ) {

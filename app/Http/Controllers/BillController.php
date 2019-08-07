@@ -178,7 +178,7 @@ class BillController extends Controller
      * @bodyParam last_name2 required No obligatorio. Segundo apellido de proveedor nuevo
      * @bodyParam country required No obligatorio. País de proveedor nuevo
      * @bodyParam state required No obligatorio. Provincia de proveedor nuevo
-     * @bodyParam city required No obligatorio. Cantón de proveedor nuevo
+     * @bodyParam city required No obligatorio. Cantón de provee dor nuevo
      * @bodyParam district required No obligatorio. Distrito de proveedor nuevo
      * @bodyParam neighborhood required No obligatorio. Barrio de proveedor nuevo
      * @bodyParam zip required No obligatorio. Código postal de proveedor nuevo
@@ -253,7 +253,10 @@ class BillController extends Controller
         $company = currentCompanyModel();
         
         $bill = Bill::findOrFail($id);
-        if(CalculatedTax::validarMes($bill->generated_date)){
+        $FechaEmision = explode(" ", $bill->generated_date);
+        $FechaEmision = explode("-", $FechaEmision[0]);
+        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+        if(CalculatedTax::validarMes($FechaEmision)){
             $units = UnidadMedicion::all()->toArray();
             $this->authorize('update', $bill);
           
@@ -280,7 +283,10 @@ class BillController extends Controller
     {
         
         $bill = Bill::findOrFail($id);
-        if(CalculatedTax::validarMes($bill->generated_date)){
+        $FechaEmision = explode(" ", $bill->generated_date);
+        $FechaEmision = explode("-", $FechaEmision[0]);
+        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+        if(CalculatedTax::validarMes($FechaEmision)){
             $this->authorize('update', $bill);
           
             //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
@@ -346,7 +352,6 @@ class BillController extends Controller
                         foreach ($facturas as $row){
                             $i++;
                                 $metodoGeneracion = "XLSX";
-                                
                                 if(CalculatedTax::validarMes($row['fechaemision'])){
                                     //Datos de proveedor
                                     $nombreProveedor = $row['nombreproveedor'];
@@ -496,7 +501,11 @@ class BillController extends Controller
                     $json = json_encode( $xml ); // convert the XML string to JSON
                     $arr = json_decode( $json, TRUE );
 
-                    if(CalculatedTax::validarMes($arr['FechaEmision'])){
+                    $FechaEmision = explode("T", $arr['FechaEmision']);
+                    $FechaEmision = explode("-", $FechaEmision[0]);
+                    $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+
+                    if(CalculatedTax::validarMes($FechaEmision)){
                         $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
                         $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
                         $consecutivoComprobante = $arr['NumeroConsecutivo'];
@@ -558,7 +567,6 @@ class BillController extends Controller
     public function validar($id){
         $current_company = currentCompany();
         $bill = Bill::find($id);
-        if(CalculatedTax::validarMes($bill->generated_date)){
             $company = Company::select('commercial_activities')->where('id', $current_company)->first();
             $activities_company = explode(", ", $company->commercial_activities);
             $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
@@ -566,16 +574,17 @@ class BillController extends Controller
             $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
 
             return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos'));
-        }else{
-            return back()->withError('Mes seleccionado ya fue cerrado');
-        }
+        
     }
 
     public function GuardarValidar(Request $request)
     {
         $bill = Bill::findOrFail($request->bill);
         
-        if(CalculatedTax::validarMes($bill->generated_date)){
+        $FechaEmision = explode(" ", $bill->generated_date);
+        $FechaEmision = explode("-", $FechaEmision[0]);
+        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+        if(CalculatedTax::validarMes($FechaEmision)){
             $bill->activity_company_verification = $request->actividad_comercial;
             $bill->is_code_validated = true;
             foreach( $request->items as $item ) {
@@ -619,7 +628,10 @@ class BillController extends Controller
     public function confirmarValidacion( Request $request, $id )
     {
         $bill = Bill::findOrFail($id);
-        if(CalculatedTax::validarMes($bill->generated_date)){
+        $FechaEmision = explode(" ", $bill->generated_date);
+        $FechaEmision = explode("-", $FechaEmision[0]);
+        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+        if(CalculatedTax::validarMes($FechaEmision)){
             $this->authorize('update', $bill);
             
             $tipoIva = $request->tipo_iva;
@@ -687,7 +699,10 @@ class BillController extends Controller
     public function authorizeBill ( Request $request, $id )
     {
         $bill = Bill::findOrFail($id);
-        if(CalculatedTax::validarMes($bill->generated_date)){
+        $FechaEmision = explode(" ", $bill->generated_date);
+        $FechaEmision = explode("-", $FechaEmision[0]);
+        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+        if(CalculatedTax::validarMes($FechaEmision)){
         
             $this->authorize('update', $bill);
             
@@ -824,7 +839,10 @@ class BillController extends Controller
     public function markAsNotAccepted ( $id )
     {
         $bill = Bill::findOrFail($id);
-        if(CalculatedTax::validarMes($bill->generated_date)){
+        $FechaEmision = explode(" ", $bill->generated_date);
+        $FechaEmision = explode("-", $FechaEmision[0]);
+        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+        if(CalculatedTax::validarMes($FechaEmision)){
         
             $this->authorize('update', $bill);
             
@@ -887,7 +905,10 @@ class BillController extends Controller
     public function correctAccepted ( Request $request, $id )
     {
         $bill = Bill::findOrFail($id);
-        if(CalculatedTax::validarMes($bill->generated_date)){
+        $FechaEmision = explode(" ", $bill->generated_date);
+        $FechaEmision = explode("-", $FechaEmision[0]);
+        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+        if(CalculatedTax::validarMes($FechaEmision)){
             $this->authorize('update', $bill);
             
             $bill->accept_iva_condition = $request->accept_iva_condition ? $request->accept_iva_condition : '02';
