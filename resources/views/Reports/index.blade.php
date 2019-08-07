@@ -176,7 +176,7 @@
   
   .iframe-container {
     position: relative;
-    width: 67.67rem;
+    width: 75rem;
     max-width: 100%;
     overflow: hidden;
     height: auto;

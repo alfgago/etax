@@ -1,3 +1,4 @@
+<div class="actions-flex">
 @if( !$data->trashed()  )
 
   @if( !@$data->hide_from_taxes )
@@ -71,3 +72,4 @@
   </form>
 
 @endif
+</div>
