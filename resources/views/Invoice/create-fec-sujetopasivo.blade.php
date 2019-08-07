@@ -53,8 +53,8 @@
                     <div class="form-group col-md-4">
                       <label for="currency">Divisa</label>
                       <select class="form-control" name="currency" id="moneda" required>
-                        <option value="CRC"  data-rate="{{$rate}}" selected>CRC</option>
-                        <option value="USD"  data-rate="{{$rate}}">USD</option>
+                        <option value="CRC"  data-rate="{{$rate}}" {{$company->default_currency == 'CRC' ? 'selected' : ''}}>CRC</option>
+                        <option value="USD"  data-rate="{{$rate}}" {{$company->default_currency == 'USD' ? 'selected' : ''}}>USD</option>
                       </select>
                     </div>
       
