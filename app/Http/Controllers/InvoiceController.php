@@ -545,7 +545,8 @@ class InvoiceController extends Controller
      */
     public function update(Request $request, $id)
     {
-            $invoice = Invoice::findOrFail($id); 
+        $invoice = Invoice::findOrFail($id); 
+        if(CalculatedTax::validarMes($request->generated_date)){
             $this->authorize('update', $invoice);
           
             //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
