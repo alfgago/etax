@@ -51,13 +51,8 @@ class ClientController extends Controller
         return datatables()->eloquent( $query )
             ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($client) {
-                return view('datatables.actions', [
-                    'routeName' => 'clientes',
-                    'deleteTitle' => 'Eliminar cliente',
-                    'hideDelete' => true,
-                    'editTitle' => 'Editar cliente',
-                    'deleteIcon' => 'fa fa-trash-o',
-                    'id' => $client->id
+                return view('client.actions', [
+                    'data' => $client
                 ])->render();
             })
             ->editColumn('es_exento', function(Client $client) {
@@ -231,9 +226,9 @@ class ClientController extends Controller
     {
         $cliente = Client::find($id);
         $this->authorize('update', $cliente);
-        //$cliente->delete();
+        $cliente->delete();
         
-        return redirect('/clientes');
+        return redirect('/clientes')->withMessage('Cliente eliminado');
     }
     
     public function export() {
