@@ -213,7 +213,7 @@ class ClientController extends Controller
       
         $cliente->save();
       
-        return redirect('/clientes');
+        return redirect('/clientes')->withMessage('Cliente actualizado');
     }
 
     /**
