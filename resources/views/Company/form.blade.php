@@ -81,7 +81,7 @@
 </div>
 
 <div class="form-group col-md-4">
-    <label for="invoice_email">email de factura</label>
+    <label for="invoice_email">Correo de facturación</label>
     <input type="text" class="form-control" name="invoice_email" id="invoice_email" value="{{ old('invoice_email') }}">
 </div>
 
