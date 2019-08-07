@@ -265,10 +265,11 @@ class BillController extends Controller
               return redirect('/facturas-recibidas');
             } 
             $arrayActividades = $company->getActivities();
-        }else{
-            return view('Bill/edit', compact('bill', 'units', 'arrayActividades') )->withError('Mes seleccionado ya fue cerrado');
-        }
+
         return view('Bill/edit', compact('bill', 'units', 'arrayActividades') );
+        }else{
+            return redirect('/facturas-recibidas')->withError('Mes seleccionado ya fue cerrado');
+        }
     }
 
     /**
@@ -283,10 +284,7 @@ class BillController extends Controller
     {
         
         $bill = Bill::findOrFail($id);
-        $FechaEmision = explode(" ", $bill->generated_date);
-        $FechaEmision = explode("-", $FechaEmision[0]);
-        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
-        if(CalculatedTax::validarMes($FechaEmision)){
+        if(CalculatedTax::validarMes($request->generated_date)){
             $this->authorize('update', $bill);
           
             //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
@@ -299,7 +297,7 @@ class BillController extends Controller
             clearBillCache($bill);
         
         }else{
-            return view('Bill/edit', compact('bill', 'units', 'arrayActividades') )->withError('Mes seleccionado ya fue cerrado');
+            return redirect('/facturas-recibidas')->withError('Mes seleccionado ya fue cerrado');
         }
         return redirect('/facturas-recibidas');
     }

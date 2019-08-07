@@ -65,16 +65,22 @@ class CalculatedTax extends Model
       try{
         $company = currentCompanyModel();
         $generated_date = explode("/", $date);
-        $abierto = CalculatedTax::where([['company_id',$company->id],['month',$generated_date[1]],
-              ['year',$generated_date[2]],['is_final',1],['is_closed',0]])->count();
-        if($abierto == 0){
-          return false;
+        $existe = CalculatedTax::where([['company_id',$company->id],['month',$generated_date[1]],
+              ['year',$generated_date[2]]])->count();
+        if($existe == 0){
+          return true;
         }else{
-          if($abierto > 0){
-
-              return true;
-          }else{
+          $abierto = CalculatedTax::where([['company_id',$company->id],['month',$generated_date[1]],
+                ['year',$generated_date[2]],['is_final',1],['is_closed',0]])->count();
+          if($abierto == 0){
             return false;
+          }else{
+            if($abierto > 0){
+
+                return true;
+            }else{
+              return false;
+            }
           }
         }
       } catch( \Exception $ex ) {

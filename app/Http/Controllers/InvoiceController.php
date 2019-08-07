@@ -545,11 +545,7 @@ class InvoiceController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $invoice = Invoice::findOrFail($id); 
-        $FechaEmision = explode(" ", $invoice->generated_date);
-        $FechaEmision = explode("-", $FechaEmision[0]);
-        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
-        if(CalculatedTax::validarMes($FechaEmision)){ 
+            $invoice = Invoice::findOrFail($id); 
             $this->authorize('update', $invoice);
           
             //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
