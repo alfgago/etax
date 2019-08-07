@@ -96,7 +96,6 @@ function validarPopup(obj) {
     var link = $(obj).attr("link");
     var titulo = $(obj).attr("title");
     var id = $(obj).attr("nid");
-    console.log(id);
     $("#titulo_modal_estandar").html(titulo);
     $.ajax({
        type:'GET',
@@ -126,7 +125,6 @@ function cerrar( id ) {
     confirmButtonText: 'Sí, quiero cerrarlo'
   }).then((result) => {
     if (result.value) {
-      alert(formId);
       $(formId).click();
     }
   })
