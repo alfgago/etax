@@ -79,12 +79,12 @@
       </div>
     </div>
     
-    <div class="col-lg-12 mb-4 hidden">
+    <div class="col-lg-12 mb-4">
       <div class="sidebar-dashboard">
         <div class="card-title">Notificaciones</div>
-    
         <div class="notificaciones-container">
-          
+            <p>El 08 de Agosto es el último día para validar sus facturas de gastos ante el Ministerio de Hacienda y que puedan incluirse en su cálculo de IVA</p>
+
         </div>
         
       </div>

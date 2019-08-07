@@ -498,7 +498,7 @@ class BillController extends Controller
                             Bill::storeXML( $bill, $file );
                         }
                     }else{
-                        return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
+                        return back()->withError( "El documento $consecutivoComprobante no le pertenece a su compañía actual." );
                     }
                 }
             }
@@ -753,10 +753,10 @@ class BillController extends Controller
                 return "$bill->currency $total";
             })
             ->editColumn('accept_total_factura', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_total_factura;
+                return $bill->total * $bill->currency_rate;
             })
             ->editColumn('accept_iva_total', function(Bill $bill) {
-                return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_iva_total;
+                return $bill->iva_amount;
             })
             ->editColumn('accept_iva_acreditable', function(Bill $bill) {
                 return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_iva_acreditable;

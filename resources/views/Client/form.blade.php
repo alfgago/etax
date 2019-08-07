@@ -45,7 +45,7 @@
     
     <div class="form-group col-md-4">
       <label for="phone">Teléfono</label>
-      <input type="number" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" maxlength="20">
+      <input type="text" numeric class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" maxlength="20" max="20" onblur="validatePhoneFormat();">
     </div>
     
     <div class="form-group col-md-4"></div>
@@ -84,7 +84,7 @@
     </div>
 
     <div class="form-group col-md-4" id="divZip">
-      <label for="zip">Zip</label>
+      <label for="zip">Código Postal</label>
       <input type="text" class="form-control" name="zip" id="zip" value="{{ @$client->zip }}" readonly >
     </div>
 
@@ -134,8 +134,11 @@
         if(tipoPersona != undefined){
             if (tipoPersona === 'E') {
                 $('#divState').hide('slow');
+                $('#state').attr('required', false);
                 $('#divCity').hide('slow');
+                $('#city').attr('required', false);
                 $('#divDistrict').hide('slow');
+                $('#district').attr('required', false);
                 $('#divNeighborhood').hide('slow');
                 $('#divZip').hide('slow');
                 $('#divAddress').hide('slow');
@@ -146,18 +149,24 @@
                 }
             } else {
                 $('#divState').show('slow');
+                $('#state').attr('required', true);
                 $('#divCity').show('slow');
+                $('#city').attr('required', true);
                 $('#divDistrict').show('slow');
+                $('#district').attr('required', true);
                 $('#divNeighborhood').show('slow');
                 $('#divZip').show('slow');
                 $('#divAddress').show('slow');
 
                 $('#extranjero').attr("hidden", true);
                 $('#country').val('CR');
+                setTimeout(fillProvincias, 1000);
             }
         }
+        $('#phone').val('');
     }
     cambiarDireccion();
+
     $("#id_number").keyup(function() {
         $("#id_number").val(this.value.match(/[0-9]*/));
     });
@@ -175,7 +184,6 @@
     function cambiarTipoPersona(){
         var country = $('#country').val();
         if(country !== 'CR'){
-            //$('#divCountry').hide('slow');
             $('#divState').hide('slow');
             $('#divCity').hide('slow');
             $('#divDistrict').hide('slow');
@@ -186,7 +194,6 @@
             $('#extranjero').removeAttr('hidden');
             $('#tipo_persona').val('E');
         }else{
-            //$('#divCountry').show('slow');
             $('#divState').show('slow');
             $('#divCity').show('slow');
             $('#divDistrict').show('slow');
@@ -196,6 +203,7 @@
 
             $('#extranjero').attr("hidden", true);
             $('#tipo_persona').val('F');
+            setTimeout(fillProvincias, 1000);
         }
     }
 </script>

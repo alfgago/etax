@@ -110,7 +110,7 @@ class CalculatedTax extends Model
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
       
-      if ( !Cache::has($cacheKey) ) {
+      //if ( !Cache::has($cacheKey) ) {
           
           //Busca el calculo del mes en Base de Datos.
           $data = CalculatedTax::firstOrNew(
@@ -128,7 +128,7 @@ class CalculatedTax extends Model
               
               $data->resetVars();
               $data->calcularFacturacion( $month, $year, $lastBalance, $prorrataOperativa );
-              
+
               if( $data->count_invoices || $data->count_bills || $data->id ) {
                 $data->save();
                 $book = Book::calcularAsientos( $data );
@@ -152,7 +152,7 @@ class CalculatedTax extends Model
             
           Cache::put($cacheKey, $data, now()->addDays(120));
           
-      }
+      //}
       
       $data = Cache::get($cacheKey);
       return $data;
@@ -505,7 +505,7 @@ class CalculatedTax extends Model
                 $currBill->currency_rate = 1;
               }
               //Arrela el IVATYPE la primera vez en caso de ser codigos anteriores.
-              //$billItems[$i]->fixIvaType();
+              $billItems[$i]->fixIvaType();
               
               $subtotal = $billItems[$i]->subtotal * $currBill->currency_rate;
               $ivaType = $billItems[$i]->iva_type;
@@ -652,6 +652,7 @@ class CalculatedTax extends Model
               $ivaData->$typeVarPorc += $subtotal;
               $ivaData->$typeVarActividad += $subtotal;
               $ivaData->$typeVarPorcActividad += $subtotal;
+              
               
             }  
             
