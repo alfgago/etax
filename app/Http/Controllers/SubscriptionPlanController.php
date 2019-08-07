@@ -13,6 +13,11 @@ use App\Exports\UsersExport;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @group Controller - Planes de suscripción
+ *
+ * Funciones de SubscriptionPlanController.
+ */
 class SubscriptionPlanController extends Controller
 {
     
@@ -27,8 +32,8 @@ class SubscriptionPlanController extends Controller
     } 
         
     public function changePlan() {
-        
         $plans = SubscriptionPlan::get();
+        //$plans = EtaxProducts::where('is_subscription', true)->with('plan')->get();
         return view( 'subscriptions/change-plan', compact('plans') );
         
     }
@@ -52,19 +57,50 @@ class SubscriptionPlanController extends Controller
         $user = auth()->user();
         if($request->plan_sel == "c"){
             $plan_tier = "Pro ($user->id)";
+            $valido = 0;
+            $precio_25 = 8;
+            $precio_10 = 10;
+            $precio_mes = 14.999;
+            $precio_seis = 13.740;
+            $precio_anual = 12.491;
+            $total = 0;
+            $total_extras = 0;
+            $precio = 0;
+            $coupons = Coupon::where('code',$request->codigo_contador)->where('type',1)->count();
+            if($coupons != 0){
+                $coupon = Coupon::where('code',$request->codigo_contador)->where('type',1)->first();
+                $retorno = $coupon->amount;
+                $precio_25 = $retorno;
+                $precio_10 = $retorno;
+                $precio_mes = $retorno;
+                $precio_seis = $retorno;
+                $precio_anual = $retorno;
+                $precio = $retorno;
+            }
+            $planes = SubscriptionPlan::where('plan_tier',$plan_tier)->count();
+            if($planes != 0){
+                $plan = SubscriptionPlan::where('plan_tier',$plan_tier)->first();
+                $retorno = $plan->price;
+                $precio_25 = $retorno;
+                $precio_10 = $retorno;
+                $precio_mes = $retorno;
+                $precio_seis = $retorno;
+                $precio_anual = $retorno;
+                $precio = $retorno;
+            }
             $cantidad = $request->num_companies;
             $total_extras = 0;
             if($cantidad > 25){
-               $total_extras = ($cantidad - 25) * 8;
+               $total_extras = ($cantidad - 25) * $precio_25;
                $cantidad = 25;
             }
             if($cantidad > 10){
-               $total_extras += ($cantidad - 10) * 10;
+               $total_extras += ($cantidad - 10) * $precio_10;
                $cantidad = 10;
             }
-            $monthly_price = $cantidad * 14.999;
-            $six_price = $cantidad * 13.740;
-            $annual_price = $cantidad * 12.491;
+            $monthly_price = $cantidad * $precio_mes;
+            $six_price = $cantidad * $precio_seis;
+            $annual_price = $cantidad * $precio_anual;
             $monthly_price += $total_extras;
             $six_price += $total_extras;
             $annual_price += $total_extras;
@@ -89,7 +125,8 @@ class SubscriptionPlanController extends Controller
                 'monthly_price' => round($monthly_price,2),
                 'six_price' => round($six_price,2),
                 'annual_price' => round($annual_price,2),
-                'created_at' => $start_date]
+                'created_at' => $start_date,
+                'price'=>$precio]
             );
             $request->product_id = $plan->id;
         }
@@ -104,19 +141,51 @@ class SubscriptionPlanController extends Controller
         $user = auth()->user();
         if($request->plan_sel == "c"){
             $plan_tier = "Pro ($user->id)";
+
+            $valido = 0;
+            $precio_25 = 8;
+            $precio_10 = 10;
+            $precio_mes = 14.999;
+            $precio_seis = 13.740;
+            $precio_anual = 12.491;
+            $total = 0;
+            $total_extras = 0;
+            $precio = 0;
+            $coupons = Coupon::where('code',$request->codigo_contador)->where('type',1)->count();
+            if($coupons != 0){
+                $coupon = Coupon::where('code',$request->codigo_contador)->where('type',1)->first();
+                $retorno = $coupon->amount;
+                $precio_25 = $retorno;
+                $precio_10 = $retorno;
+                $precio_mes = $retorno;
+                $precio_seis = $retorno;
+                $precio_anual = $retorno;
+                $precio = $retorno;
+            }
+            $planes = SubscriptionPlan::where('plan_tier',$plan_tier)->count();
+            if($planes != 0){
+                $plan = SubscriptionPlan::where('plan_tier',$plan_tier)->first();
+                $retorno = $plan->price;
+                $precio_25 = $retorno;
+                $precio_10 = $retorno;
+                $precio_mes = $retorno;
+                $precio_seis = $retorno;
+                $precio_anual = $retorno;
+                $precio = $retorno;
+            }
             $cantidad = $request->num_companies;
             $total_extras = 0;
             if($cantidad > 25){
-               $total_extras = ($cantidad - 25) * 8;
+               $total_extras = ($cantidad - 25) * $precio_25;
                $cantidad = 25;
             }
             if($cantidad > 10){
-               $total_extras += ($cantidad - 10) * 10;
+               $total_extras += ($cantidad - 10) * $precio_10;
                $cantidad = 10;
             }
-            $monthly_price = $cantidad * 14.999;
-            $six_price = $cantidad * 13.740;
-            $annual_price = $cantidad * 12.491;
+            $monthly_price = $cantidad * $precio_mes;
+            $six_price = $cantidad * $precio_seis;
+            $annual_price = $cantidad * $precio_anual;
             $monthly_price += $total_extras;
             $six_price += $total_extras;
             $annual_price += $total_extras;
@@ -141,7 +210,8 @@ class SubscriptionPlanController extends Controller
                 'monthly_price' => round($monthly_price,2),
                 'six_price' => round($six_price,2),
                 'annual_price' => round($annual_price,2),
-                'created_at' => $start_date]
+                'created_at' => $start_date,
+                'price'=>$precio]
             );
             $request->product_id = $plan->id;
         }
@@ -151,35 +221,57 @@ class SubscriptionPlanController extends Controller
     }
 
     public function confirmCode(Request $request){
-
-
         $code = Coupon::where('code', $request->codigo)->first();
         $retorno = array(
             "precio" => $request->precio,
-            "nota" => ''
+            "nota" => '',
         );
-        if( $request->codigo == $code->code ){
-            $descuento = ($request->precio * $code->discount_percentage);
-            $precio_final = $request->precio - $descuento;
-            $nota = $code->promotion_name;
-            if( $request->banco == 1 ) {
-                $descuento = ($precio_final * 0.1);
-                $precio_final = $precio_final - $descuento;
-                $nota = $code->promotion_name .' + 10% BN Nacional ';
+        if($code->type == 0){
+            if( $request->codigo == $code->code ){
+                $descuento = ($request->precio * $code->discount_percentage);
+                $precio_final = $request->precio - $descuento;
+                $nota = $code->promotion_name;
+                if( $request->banco == 1 ) {
+                    $descuento = ($precio_final * 0.1);
+                    $precio_final = $precio_final - $descuento;
+                    $nota = $code->promotion_name .' + 10% BN Nacional ';
+                }
+                if($precio_final < 0){
+                    $precio_final = 0;
+                }
+                $nota = '( DESCUENTO: '.$code->discount_percentage .'% '. $nota .')';
+                $retorno = array(
+                    "precio" => $precio_final,
+                    "nota" => $nota
+                );
             }
-            if($precio_final < 0){
-                $precio_final = 0;
+        }else{
+            if($request->plan == 'c'){
+                $precio_final = $request->companies  * $code->amount;
+                $nota = $code->promotion_name;
+                if( $request->banco == 1 ) {
+                    $descuento = ($precio_final * 0.1);
+                    $precio_final = $precio_final - $descuento;
+                    $nota = $code->promotion_name .' + 10% BN Nacional ';
+                }
+                $nota = '( DESCUENTO: '. $nota .')';
+                $retorno = array(
+                    "precio" => $precio_final,
+                    "nota" => $nota
+                );
             }
-            $nota = '( DESCUENTO: '.$code->discount_percentage .'% '. $nota .')';
-            $retorno = array(
-                "precio" => $precio_final,
-                "nota" => $nota
-            );
         }
-            
         return $retorno;
+    }
 
-
+    public function confirmCodeAccount($codigo){
+        $coupons = Coupon::where('code',$codigo)->where('type',1)->count();
+        $retorno = 0;
+        if($coupons != 0){
+            $coupon = Coupon::where('code',$codigo)->where('type',1)->first();
+            $retorno = $coupon->amount;
+        }
+        return $retorno;
     }
     /**
      * Remove the specified resource from storage.

@@ -61,6 +61,7 @@
               	<option value="12">Anual</option>
               </select>
             </div>
+
             <div class="form-group col-md-12 mt-4">
             	<span class="precio-container">
             		Precio de <span class="precio-text precio-inicial">9.99</span> <span class="recurrencia-text">/ mes</span> + IVA
@@ -241,42 +242,49 @@
     }
     function calcularPrecioContabilidades() {
         var cantidad = parseFloat($('#num_companies').val());
-
+        var valido = 0;
+        var precio_25 = 8;
+        var precio_10 = 10;
+        var precio_mes = 14.999;
+        var precio_seis = 13.740;
+        var precio_anual = 12.491;
         var recurrency = $('#recurrency').val();
         var total = 0;
         var total_extras = 0;
-        if(cantidad > 25){
-            total_extras = (cantidad - 25) * 8;
-            cantidad = 25;
-        }
-        if(cantidad > 10){
-            total_extras += (cantidad - 10) * 10;
-            cantidad = 10;
-        }
         var recurrencia_texto = "";
-        if(recurrency == 1){
-            total = cantidad * 14.999;
-            total = total + total_extras;
-            recurrencia_texto = "mes";
-        }
-        if(recurrency == 6){
-          total = cantidad * 13.740;
-          total = total + total_extras;
-          total = total * 6;
-          recurrencia_texto = "semestre";
-        }
-        if(recurrency == 12){
-          total = cantidad * 12.491;
-          total = total + total_extras;
-          total = total * 12;
-          recurrencia_texto = "año";
-        }
-        var precioFinal = parseFloat(total).toFixed(2);
-        $(".precio-text").text('$' + precioFinal);
-        $(".recurrencia-text").text('/ '+ recurrencia_texto);
 
+          if(cantidad > 25){
+              total_extras = (cantidad - 25) * precio_25;
+              cantidad = 25;
+          }
+          if(cantidad > 10){
+              total_extras += (cantidad - 10) * precio_10;
+              cantidad = 10;
+          }
+          if(recurrency == 1){
+              total = cantidad * precio_mes;
+              total = total + total_extras;
+              recurrencia_texto = "mes";
+          }
+          if(recurrency == 6){
+            total = cantidad * precio_seis;
+            total = total + total_extras;
+            total = total * 6;
+            recurrencia_texto = "semestre";
+          }
+          if(recurrency == 12){
+            total = cantidad * precio_anual;
+            total = total + total_extras;
+            total = total * 12;
+            recurrencia_texto = "año";
+          }
+          
+          var precioFinal = parseFloat(total).toFixed(2);
+          $(".precio-text").text('$' + precioFinal);
+          $(".recurrencia-text").text('/ '+ recurrencia_texto);
     }
-    
+
+
     $( document ).ready(function() {
         togglePlan();
     });

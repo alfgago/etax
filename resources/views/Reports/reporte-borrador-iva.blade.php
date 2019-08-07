@@ -247,11 +247,26 @@
 			    right: .4rem;
 			}
 			
-          table tr
-					table tr td,
-					table tr th {
-						page-break-inside: avoid;
-					}
+      table tr
+			table tr td,
+			table tr th {
+				page-break-inside: avoid;
+			}
+					
+					
+			.borrador-presentacion .macro-title th.marcar-td {
+			    text-align: center !important;
+			    padding-right: 1rem !important;
+			    background: #333!important;
+			}
+			
+			.borrador-presentacion .macro-title th.marcar-td span {
+			    color: #fff;
+			}
+			
+			tr.macro-title.inner th {
+			    background: #444!important;
+			}
       
       @media print {
       		body {

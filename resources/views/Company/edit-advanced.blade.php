@@ -144,7 +144,7 @@
 								  <label for="default_category_producto_code">Categoría de declaración por defecto</label>
 								  <select class="form-control" id="default_category_producto_code" name="default_category_producto_code">
 								    @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $category )
-								      <option value="{{ $category['id'] }}" posibles="{{ $category['open_codes'] }}" {{ @$company->default_category_producto_code == $category['id']  ? 'selected' : '' }}>{{ $category['name'] }}</option>
+								      <option value="{{ $category['id'] }}" posibles="{{ $category['open_codes'] }}" {{ @$company->default_product_category == $category['id']  ? 'selected' : '' }}>{{ $category['name'] }}</option>
 								    @endforeach
 								  </select>
 								</div>  
@@ -153,7 +153,7 @@
 								  <label for="default_vat_code">Tipo de IVA por defecto</label>
 								  <select class="form-control" id="default_vat_code" name="default_vat_code">
 								    @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
-								      <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }} {{ @$tipo['hideMasiva'] ? 'hidden' : '' }}" {{ @$company->default_vat_code == $tipo['codigo']  ? 'selected' : '' }}>{{ $tipo['name'] }}</option>
+								      <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }} {{ @$tipo['hideMasiva'] ? 'hidden' : '' }}" {{ @$company->default_vat_code == $tipo['code']  ? 'selected' : '' }}>{{ $tipo['name'] }}</option>
 								    @endforeach
 								  </select>
 								</div> 
@@ -161,17 +161,19 @@
 						    <div class="form-group col-md-6">
 						      <label for="default_currency">Tipo de moneda por defecto</label>
 						      <select class="form-control" name="default_currency" id="default_currency" required>
-                    <option value="crc" {{ @$company->default_currency == 'crc' ? 'selected' : '' }}>CRC</option>
-                    <option value="usd" {{ @$company->default_currency == 'usd' ? 'selected' : '' }}>USD</option>
-                  </select>
+                                <option value="CRC" {{ @$company->default_currency == 'CRC' ? 'selected' : '' }}>CRC</option>
+                                <option value="USD" {{ @$company->default_currency == 'USD' ? 'selected' : '' }}>USD</option>
+                              </select>
 						    </div>
 						    
 						    <div class="form-group col-md-6">
 						      <label for="card_retention">% Retención Tarjetas</label>
 						      <select class="form-control" id="card_retention" name="card_retention" >
-				                    <option value="0" {{ @$company->card_retention == 0 ? 'selected' : '' }}>0%</option>
-				                    <option value="3" {{ @$company->card_retention == 3 ? 'selected' : '' }}>3%</option>
 				                    <option value="6" {{ @$company->card_retention == 6 ? 'selected' : '' }}>6%</option>
+				                    <option value="0" {{ @$company->card_retention == 0 ? 'selected' : '' }}>0%</option>
+				                    <option value="1" {{ @$company->card_retention == 1 ? 'selected' : '' }}>1%</option>
+				                    <option value="2" {{ @$company->card_retention == 2 ? 'selected' : '' }}>2%</option>
+				                    <option value="3" {{ @$company->card_retention == 3 ? 'selected' : '' }}>3%</option>
 						      </select>
 						    </div>
 						    

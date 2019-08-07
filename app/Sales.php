@@ -37,6 +37,15 @@ class Sales extends Model
             return $this->belongsTo(EtaxProducts::class, 'etax_product_id'); 
         }
     }
+    
+    public function saleDescription()
+    {
+        if($this->is_subscription){
+            return $this->plan->plan_type . " " . $this->plan->plan_tier;
+        }else{
+            return $this->product->name; 
+        }
+    }
 
     public function subscription_plan()
     {
@@ -52,8 +61,8 @@ class Sales extends Model
         $company = currentCompanyModel();
         $user = auth()->user();
         
-        $start_date = Carbon::parse( now('America/Costa_Rica') );
-        $next_payment_date = Carbon::parse( now('America/Costa_Rica') )->addMonths(1);
+        $startDate = Carbon::parse( now('America/Costa_Rica') );
+        $nextPaymentDate = Carbon::parse( now('America/Costa_Rica') )->addMonths(1);
         
         $sale = Sales::updateOrCreate (
             [ 
@@ -64,8 +73,8 @@ class Sales extends Model
                 'company_id' => $company->id,
                 'status'  => 3,
                 'recurrency' => $recurrency,
-                'start_date' => $start_date, 
-                'next_payment_date' => $next_payment_date, 
+                'start_date' => $startDate, 
+                'next_payment_date' => $nextPaymentDate, 
                 'etax_product_id' => $productId
             ]
         );
@@ -74,11 +83,11 @@ class Sales extends Model
     }
     
     public static function startTrial ( $productId, $recurrency ) {
-        $trial_end_date = Carbon::parse( now('America/Costa_Rica') )->addDays(2);
+        $trialEndDate = Carbon::parse( now('America/Costa_Rica') )->addDays(2);
         
         $sale = Sales::createUpdateSubscriptionSale ( $productId, $recurrency );
         $sale->status = 4;
-        $sale->trial_end_date = $trial_end_date;
+        $sale->trial_end_date = $trialEndDate;
         $sale->save();
         
         return $sale;

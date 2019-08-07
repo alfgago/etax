@@ -6,7 +6,7 @@
 
 @section('breadcrumb-buttons')
     @if($cantidad < 3)
-        <a type="submit" class="btn btn-primary" href="/payment-methods/payment-method-create-view">Ingresar nuevo..</a>
+        <a type="submit" class="btn btn-primary" href="/payment-methods/payment-method-create-view">Registrar nuevo método de pago</a>
     @endif
 @endsection
 
@@ -40,7 +40,7 @@
                                         <th>Tarjeta</th>
                                         <th>Nombre</th>
                                         <th>Vencimiento</th>
-                                        <th></th>
+                                        <th>Acciones</th>
                                     </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -60,7 +60,7 @@
             $('#paymentMethod-table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('PaymentMethod.data') }}",
+                ajax: "/api/paymentsMethods",
                 columns: [
                     { data: 'masked_card', name: 'masked_card' },
                     { data: 'name', name: 'name' },
@@ -73,7 +73,6 @@
             });
         });
 
-
         function confirmDelete( id ) {
             var formId = "#delete-form-"+id;
             Swal.fire({
@@ -83,6 +82,22 @@
                 showCloseButton: true,
                 showCancelButton: true,
                 confirmButtonText: 'Sí, quiero eliminarlo'
+            }).then((result) => {
+                if (result.value) {
+                    $(formId).submit();
+                }
+            })
+
+        }
+        function confirmUpdate( id ) {
+            var formId = "#update-form-"+id;
+            Swal.fire({
+                title: '¿Desea actualizar el metodo de pago?',
+                text: "Este metodo de pago sera utilizado por defecto",
+                type: 'info',
+                showCloseButton: true,
+                showCancelButton: true,
+                confirmButtonText: 'Si'
             }).then((result) => {
                 if (result.value) {
                     $(formId).submit();

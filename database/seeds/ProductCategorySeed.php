@@ -18,11 +18,11 @@ class ProductCategorySeed extends Seeder
           ['grupo'=>'V1','nombre'=>'Bienes de capital al 1%', 'invoice_iva_code'=>'B171', 'open_codes'=>'B171'],
           ['grupo'=>'V1','nombre'=>'Servicios al 1%', 'invoice_iva_code'=>'S101', 'open_codes'=>'S101,S161'],
           ['grupo'=>'V1','nombre'=>'Uso o consumo personal de mercancias y servicios al 1%', 'invoice_iva_code'=>'B121', 'open_codes'=>'B121,S121'],
-          ['grupo'=>'V1','nombre'=>'Transferenccias sin contraprestación a terceros 1%', 'invoice_iva_code'=>'B125', 'open_codes'=>'S125,B125'],
+          ['grupo'=>'V1','nombre'=>'Transferencias sin contraprestación a terceros 1%', 'invoice_iva_code'=>'B125', 'open_codes'=>'S125,B125'],
           //Ventas al 2%
           ['grupo'=>'V2','nombre'=>'Medicamentos, materias primas, insumos, maquinaria, equipo y reactivos para su producción', 'invoice_iva_code'=>'B102', 'open_codes'=>'B102,S102,B162,S162,B122,S122,B126,S126,B172'],
           ['grupo'=>'V2','nombre'=>'Primas de seguros personales', 'invoice_iva_code'=>'S102', 'open_codes'=>'S102'],
-          ['grupo'=>'V2','nombre'=>'Bienes y servicios que hagan las instituciones estatles de educación superior y otras autorizadas', 'invoice_iva_code'=>'S102', 'open_codes'=>'B102,S102,B162,S162,B122,S122,B126,S126,B172'],
+          ['grupo'=>'V2','nombre'=>'Bienes y servicios que hagan las instituciones estatales de educación superior y otras autorizadas', 'invoice_iva_code'=>'S102', 'open_codes'=>'B102,S102,B162,S162,B122,S122,B126,S126,B172'],
           ['grupo'=>'V2','nombre'=>'Otros servicios de educación privada no acreditados por el MEP y/o CONESUP', 'invoice_iva_code'=>'S102', 'open_codes'=>'B102,S102,B162,S162,B122,S122,B126,S126,B172'],
           //Ventas al 4%
           ['grupo'=>'V4','nombre'=>'Boletos o pasajes aéreos nacionales', 'invoice_iva_code'=>'S104', 'open_codes'=>'S104,B104,S128,S124'],
@@ -35,7 +35,7 @@ class ProductCategorySeed extends Seeder
           ['grupo'=>'V13','nombre'=>'Bienes de capital al 13%', 'invoice_iva_code'=>'B173', 'open_codes'=>'B173'],
           ['grupo'=>'V13','nombre'=>'Servicios al 13%', 'invoice_iva_code'=>'S103', 'open_codes'=>'S103,S130,S163'],
           ['grupo'=>'V13','nombre'=>'Uso o consumo personal de mercancias y servicios al 13%', 'invoice_iva_code'=>'B123', 'open_codes'=>'B123,S123'],
-          ['grupo'=>'V13','nombre'=>'Transferenccias sin contraprestación a terceros 13%', 'invoice_iva_code'=>'B127', 'open_codes'=>'S127,B127'],
+          ['grupo'=>'V13','nombre'=>'Transferencias sin contraprestación a terceros 13%', 'invoice_iva_code'=>'B127', 'open_codes'=>'S127,B127'],
           //Rubros incluidos como gasto en base imponible
           ['grupo'=>'BI','nombre'=>'Incrementos en la base imponible por recaudación a nivel de mayorista', 'invoice_iva_code'=>'S250', 'open_codes'=>'S250,B250'],
           ['grupo'=>'BI','nombre'=>'Servicios adquiridos desde el exterior', 'invoice_iva_code'=>'S140', 'open_codes'=>'S140'],
@@ -58,17 +58,17 @@ class ProductCategorySeed extends Seeder
           ['grupo'=>'VEX','nombre'=>'Comisiones por el servicio de subasta ganadera y transacción de animales', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
           ['grupo'=>'VEX','nombre'=>'Venta, comercialización y matanza de animales vivos', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
           //Ventas autorizadas sin impuesto
-          ['grupo'=>'VAS','nombre'=>'Ventas sin impuesto a clientes autorizados por la Dirección General de Hacienda', 'invoice_iva_code'=>'B170', 'open_codes'=>'B170,S170'],
-          ['grupo'=>'VAS','nombre'=>'Ventas sin impuesto a clientes autorizados por la Dirección General de Tributación', 'invoice_iva_code'=>'B170', 'open_codes'=>'B170,S170'],
-          ['grupo'=>'VAS','nombre'=>'Ventas sin impuesto a clientes exonerados por ley especial', 'invoice_iva_code'=>'B170', 'open_codes'=>'B170,S170'],
-          ['grupo'=>'VAS','nombre'=>'Ventas de bienes y servicios relacionados a la canasta básica tributarioa exentos el 1er año de la ley', 'invoice_iva_code'=>'B165', 'open_codes'=>'B165,S165'],
+          ['grupo'=>'VAS','nombre'=>'Ventas sin impuesto a clientes autorizados por la Dirección General de Hacienda', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184'],
+          ['grupo'=>'VAS','nombre'=>'Ventas sin impuesto a clientes autorizados por la Dirección General de Tributación', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184'],
+          ['grupo'=>'VAS','nombre'=>'Ventas sin impuesto a clientes exonerados por ley especial', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184'],
+          ['grupo'=>'VAS','nombre'=>'Ventas de bienes y servicios relacionados a la canasta básica tributaria exentos el 1er año de la ley', 'invoice_iva_code'=>'B165', 'open_codes'=>'B165,S165'],
           ['grupo'=>'VAS','nombre'=>'Servicios de ingeniería, arquitectura, topografía y construcción de obra civil con planos visados antes del 1 de octubre del 2019', 'invoice_iva_code'=>'S245', 'open_codes'=>'S245'],
           ['grupo'=>'VAS','nombre'=>'Servicios turísticos inscritos ante el Instituto Costarricense de Turismo', 'invoice_iva_code'=>'S245', 'open_codes'=>'S245'],
           ['grupo'=>'VAS','nombre'=>'Servicios de recolección, clasificación y almacenamiento de bienes reciclables y reutilizables, inscritos ante la Administración Tributaria y el Ministerio de Salud', 'invoice_iva_code'=>'S245', 'open_codes'=>'S245'],
           //Ventas no sujetas
-          ['grupo'=>'VNS','nombre'=>'Bienes y servicios a la Caja Costarricense de Seguro Social', 'invoice_iva_code'=>'B170', 'open_codes'=>'B170,S170'],
-          ['grupo'=>'VNS','nombre'=>'Bienes y servicios a las corporaciones municipales', 'invoice_iva_code'=>'B170', 'open_codes'=>'B170,S170'],
-          ['grupo'=>'VNS','nombre'=>'Otras ventas no sujetas', 'invoice_iva_code'=>'B170', 'open_codes'=>'B170,S170']
+          ['grupo'=>'VNS','nombre'=>'Bienes y servicios a la Caja Costarricense de Seguro Social', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184'],
+          ['grupo'=>'VNS','nombre'=>'Bienes y servicios a las corporaciones municipales', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184'],
+          ['grupo'=>'VNS','nombre'=>'Otras ventas no sujetas', 'invoice_iva_code'=>'B173', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184,S300,B300']
         ];
         
         $listaCompras = [
@@ -87,24 +87,28 @@ class ProductCategorySeed extends Seeder
       
         foreach( $listaVentas as $categoria ) {
           try{
-            App\ProductCategory::create([
-                'group' => $categoria['grupo'],
-                'name' => $categoria['nombre'],
-                'bill_iva_code' => $categoria['bill_iva_code'] ?? null,
-                'invoice_iva_code' => $categoria['invoice_iva_code'] ?? null,
-                'open_codes' => $categoria['open_codes'],
+            App\ProductCategory::updateOrCreate(
+            [ 'name' => $categoria['nombre'], 'group' => $categoria['grupo'] ],
+            [
+              'group' => $categoria['grupo'],
+              'name' => $categoria['nombre'],
+              'bill_iva_code' => $categoria['bill_iva_code'] ?? null,
+              'invoice_iva_code' => $categoria['invoice_iva_code'] ?? null,
+              'open_codes' => $categoria['open_codes'],
             ]);
           }catch(\Throwable $e){}
         }
         
         foreach( $listaCompras as $categoria ) {
           try{
-            App\ProductCategory::create([
-                'group' => $categoria['grupo'],
-                'name' => $categoria['nombre'],
-                'bill_iva_code' => $categoria['bill_iva_code'] ?? null,
-                'invoice_iva_code' => $categoria['invoice_iva_code'] ?? null,
-                'open_codes' => $categoria['open_codes'],
+            App\ProductCategory::updateOrCreate(
+            [ 'name' => $categoria['nombre'], 'group' => $categoria['grupo'] ],
+            [
+              'group' => $categoria['grupo'],
+              'name' => $categoria['nombre'],
+              'bill_iva_code' => $categoria['bill_iva_code'] ?? null,
+              'invoice_iva_code' => $categoria['invoice_iva_code'] ?? null,
+              'open_codes' => $categoria['open_codes'],
             ]);
           }catch(\Throwable $e){}
         }

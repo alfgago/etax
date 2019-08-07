@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use App\Sales;
 use Illuminate\Http\Request;
 
+/**
+ * @group Controller - Emails
+ *
+ * Funciones de SalesController. No se utiliza. El sale se crea siempre desde otros lugares, no hay consulta de todas las ventas.
+ */
 class SalesController extends Controller
 {
     /**

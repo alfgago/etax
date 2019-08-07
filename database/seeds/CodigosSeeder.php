@@ -112,7 +112,9 @@ class CodigosSeeder extends Seeder
         
         foreach( $lista as $codigo ) {
           try{
-          App\CodigoIvaSoportado::create([
+          App\CodigoIvaSoportado::updateOrCreate(
+            [ 'id' => $codigo['codigo'] ],
+            [
               'id' => $codigo['codigo'],
               'code' => $codigo['codigo'],
               'name' => $codigo['nombre'],
@@ -160,12 +162,16 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'B163 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 13%', 'codigo'=>'B163', 'porcentaje'=>'0', 'codigo_tarifa' => '08', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true, 'hide'=>true, 'hidden2018'=>true],
           ['nombre'=>'B164 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 4%', 'codigo'=>'B164', 'porcentaje'=>'0', 'codigo_tarifa' => '04', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true, 'hide'=>true, 'hidden2018'=>true],
           ['nombre'=>'B165 - Ventas de bienes de canasta básica con tarifa transitoria de 0% con acreditación plena', 'codigo'=>'B165', 'porcentaje'=>'0', 'codigo_tarifa' => '05', 'is_bienes'=>true, 'is_gravado'=>true],
-          ['nombre'=>'B170 - Ventas de bienes a no sujetos y exentos con derecho a crédito', 'codigo'=>'B170', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'B170 - Ventas de bienes a no sujetos y exentos con derecho a crédito', 'codigo'=>'B170', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true, 'hide'=>true, 'hidden2018'=>true],
           ['nombre'=>'B171 - Ventas locales de bienes de capital al 1%', 'codigo'=>'B171', 'porcentaje'=>'1', 'codigo_tarifa' => '02', 'is_bienes'=>true, 'is_gravado'=>true, 'is_servicio'=>true],
           ['nombre'=>'B172 - Ventas locales de bienes de capital al 2%', 'codigo'=>'B172', 'porcentaje'=>'2', 'codigo_tarifa' => '03', 'is_bienes'=>true, 'is_gravado'=>true, 'is_servicio'=>true],
           ['nombre'=>'B173 - Ventas locales de bienes de capital al 13%', 'codigo'=>'B173', 'porcentaje'=>'13', 'codigo_tarifa' => '08', 'is_bienes'=>true, 'is_gravado'=>true, 'is_servicio'=>true],
           ['nombre'=>'B174 - Ventas locales de bienes de capital al 4%', 'codigo'=>'B174', 'porcentaje'=>'4', 'codigo_tarifa' => '04', 'is_bienes'=>true, 'is_gravado'=>true, 'is_servicio'=>true],
-          
+          ['nombre'=>'B181 - Ventas de bienes a no sujetos y exentos con derecho a crédito al 1%', 'codigo'=>'B181', 'porcentaje'=>'1', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'B182 - Ventas de bienes a no sujetos y exentos con derecho a crédito al 2%', 'codigo'=>'B182', 'porcentaje'=>'2', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'B183 - Ventas de bienes a no sujetos y exentos con derecho a crédito al 13%', 'codigo'=>'B183', 'porcentaje'=>'13', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'B184 - Ventas de bienes a no sujetos y exentos con derecho a crédito al 4%', 'codigo'=>'B184', 'porcentaje'=>'4', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true],
+
           ['nombre'=>'B200 - Ventas de bienes sin derecho a crédito por exenciones objetivas', 'codigo'=>'B200', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>false],
           ['nombre'=>'B201 - Ventas de bienes sin derecho a crédito por exenciones objetivas con límite no sobrepasado', 'codigo'=>'B201', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>false],
           ['nombre'=>'B240 - Autoconsumo de bienes sin derecho a crédito', 'codigo'=>'B240', 'porcentaje'=>'0', 'hidden2018'=>true, 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>false],
@@ -197,19 +203,29 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'S163 - Ventas de servicios al Estado e Instituciones con derecho a crédito al 13%', 'codigo'=>'S163', 'porcentaje'=>'0', 'codigo_tarifa' => '08', 'is_servicio'=>true, 'is_gravado'=>true, 'is_estado'=>true, 'hide'=>true, 'hidden2018'=>true],
           ['nombre'=>'S164 - Ventas de servicios al Estado e Instituciones con derecho a crédito al 4%', 'codigo'=>'S164', 'porcentaje'=>'0', 'codigo_tarifa' => '04', 'is_servicio'=>true, 'is_gravado'=>true, 'is_estado'=>true, 'hide'=>true, 'hidden2018'=>true],
           ['nombre'=>'S165 - Ventas de servicios de canasta básica con tarifa transitoria de 0% con acreditación plena', 'codigo'=>'S165', 'porcentaje'=>'0', 'codigo_tarifa' => '05', 'is_servicio'=>true, 'is_gravado'=>true],
-          ['nombre'=>'S170 - Ventas de servicios a no sujetos y exentos con derecho a crédito', 'codigo'=>'S170', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>true],
+          ['nombre'=>'S170 - Ventas de servicios a no sujetos y exentos con derecho a crédito', 'codigo'=>'S170', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>true, 'hide'=>true, 'hidden2018'=>true],
+          ['nombre'=>'S181 - Ventas de servicios a no sujetos y exentos con derecho a crédito al 1%', 'codigo'=>'S181', 'porcentaje'=>'1', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>true],
+          ['nombre'=>'S182 - Ventas de servicios a no sujetos y exentos con derecho a crédito al 2%', 'codigo'=>'S182', 'porcentaje'=>'2', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>true],
+          ['nombre'=>'S183 - Ventas de servicios a no sujetos y exentos con derecho a crédito al 13%', 'codigo'=>'S183', 'porcentaje'=>'13', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>true],
+          ['nombre'=>'S184 - Ventas de servicios a no sujetos y exentos con derecho a crédito al 4%', 'codigo'=>'S184', 'porcentaje'=>'4', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>true],
           
           ['nombre'=>'S200 - Ventas de servicios sin derecho a crédito por exenciones objetivas', 'codigo'=>'S200', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
           ['nombre'=>'S201 - Ventas de servicios sin derecho a crédito por exenciones objetivas con límite no sobrepasado', 'codigo'=>'S201', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
           ['nombre'=>'S240 - Autoconsumo de servicios sin derecho a crédito', 'codigo'=>'S240', 'porcentaje'=>'0', 'hidden2018'=>true, 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
           ['nombre'=>'S245 - Ventas locales de servicios con tarifa transitoria del 0% sin derecho a crédito', 'codigo'=>'S245', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false], //*vigente del 1-07-2019 al 30-06-2020
           ['nombre'=>'S250 - Ventas de servicios con IVA incluido en el precio', 'codigo'=>'S250', 'porcentaje'=>'0', 'hide'=>true, 'hidden2018'=>true, 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
-          ['nombre'=>'S260 - Ventas de servicios sin derecho a crédito por ventas al Estado', 'codigo'=>'S260', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false]
+          ['nombre'=>'S260 - Ventas de servicios sin derecho a crédito por ventas al Estado', 'codigo'=>'S260', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
+        
+          ['nombre'=>'S300 - Sevicios de periodos anteriores a la Ley del IVA', 'codigo'=>'S300', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
+          ['nombre'=>'B300 - Bienes de periodos anteriores a la Ley del IVA', 'codigo'=>'B300', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>false]
+          
         ];
         
         foreach( $lista as $codigo ) {
           try{
-          App\CodigoIvaRepercutido::create([
+          App\CodigoIvaRepercutido::updateOrCreate(
+            [ 'id' => $codigo['codigo'] ],
+            [
               'id' => $codigo['codigo'],
               'code' => $codigo['codigo'],
               'name' => $codigo['nombre'],

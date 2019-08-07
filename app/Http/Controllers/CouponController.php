@@ -5,9 +5,15 @@ namespace App\Http\Controllers;
 use App\Coupon;
 use Illuminate\Http\Request;
 
+/**
+ * @group Controller - Cupones
+ *
+ * Funciones de CouponController. Actualmente no se está usando
+ */
 class CouponController extends Controller
 {
     /**
+     * 
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response

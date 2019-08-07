@@ -7,7 +7,6 @@ if (!function_exists('clearInvoiceCache')) {
         $year = $invoice->year;
         clearTaxesCache($invoice->company_id, $month, $year);
         clearTaxesCache($invoice->company_id, 0, $year);
-        
     }
     
 }
@@ -28,6 +27,8 @@ if (!function_exists('clearTaxesCache')) {
     function clearTaxesCache($current_company, $month, $year){
       	$cacheKey = "cache-taxes-$current_company-$month-$year";
       	Cache::forget($cacheKey);
+        $userId = auth()->user()->id;
+        Cache::forget("cache-currentcompany-$userId");
     }
     
 }
@@ -69,18 +70,18 @@ if (!function_exists('clearLastTaxesCache')) {
 
 if (!function_exists('clearPermissionsCache')) {  
 
-function clearPermissionsCache($companyId, $userId) {
-    
-    $cacheKey = "cache-allow-$companyId-$userId";
-    Cache::forget("$cacheKey-admin");
-    Cache::forget("$cacheKey-invoicing");
-    Cache::forget("$cacheKey-billing");
-    Cache::forget("$cacheKey-validation");
-    Cache::forget("$cacheKey-books");
-    Cache::forget("$cacheKey-reports");
-    Cache::forget("$cacheKey-catalogue");
-    
-}
+    function clearPermissionsCache($companyId, $userId) {
+        
+        $cacheKey = "cache-allow-$companyId-$userId";
+        Cache::forget("$cacheKey-admin");
+        Cache::forget("$cacheKey-invoicing");
+        Cache::forget("$cacheKey-billing");
+        Cache::forget("$cacheKey-validation");
+        Cache::forget("$cacheKey-books");
+        Cache::forget("$cacheKey-reports");
+        Cache::forget("$cacheKey-catalogue");
+        
+    }
 
 }
 

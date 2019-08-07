@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCalculatedTaxesTable extends Migration
+class CreateCalculatedTaxesTable2 extends Migration
 {
     /**
      * Run the migrations.
@@ -91,7 +91,7 @@ class CreateCalculatedTaxesTable extends Migration
             $table->double('saldo_favor_anterior')->default(0);
 
             //Debitos
-            $table->text('iva_data');
+            $table->longText('iva_data');
             
             /*$table->double('b001')->default(0);
             $table->double('i001')->default(0);

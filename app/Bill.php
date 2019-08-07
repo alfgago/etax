@@ -39,10 +39,14 @@ class Bill extends Model
     }
     
     public function providerName() {
-      if( isset($this->provider_id) ) {
-        return $this->provider->getFullName();
-      }else{
-        return 'N/A';
+      if( isset($this->provider_first_name)) {
+        return "$this->provider_first_name $this->provider_last_name $this->provider_last_name2";
+      }else {
+        if( isset($this->provider_id) ) {
+          return $this->provider->getFullName();
+        }else{
+          return 'N/A';
+        }
       }
     }
     
@@ -322,8 +326,13 @@ class Bill extends Model
         $bill->currency_rate = $tipoCambio;
         
         $bill->description = 'XML Importado';
-        $bill->document_type = $arr['TipoDoc'] ?? '01';
+
+        if(strlen($arr['Clave']) == 50){
+            $tipoDocumento = substr($arr['Clave'], 29, 2);
+        }
+        $bill->document_type = $tipoDocumento ?? '01';
         $bill->total = $arr['ResumenFactura']['TotalComprobante'];
+        
         
         $authorize = true;
         if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
@@ -336,6 +345,11 @@ class Bill extends Model
         $bill->generation_method = $metodoGeneracion;
         $bill->is_authorized = $authorize;
         $bill->is_code_validated = false;
+        
+        if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML" ) {
+            $bill->accept_status = 0;
+            $bill->hacienda_status = "01";
+        }
         
         //Start DATOS PROVEEDOR
               $nombreProveedor = $arr['Emisor']['Nombre'];
@@ -373,11 +387,13 @@ class Bill extends Model
                 $otrasSenas = null;
               }
               
-              if ( isset($arr['Emisor']['Telefono']) ) {
-                $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'] ?? null;
-              }else{
-                $telefonoProveedor = null;
-              }
+              try{
+                if ( isset($arr['Emisor']['Telefono']) ) {
+                  $telefonoProveedor = $arr['Emisor']['Telefono']['NumTelefono'] ?? null;
+                }else{
+                  $telefonoProveedor = null;
+                }
+              }catch(\Throwable $e){}
               
               $providerCacheKey = "import-proveedors-$identificacionProveedor-".$company->id;
               if ( !Cache::has($providerCacheKey) ) {
@@ -464,18 +480,32 @@ class Bill extends Model
             $montoExoneracion = 0;
             if( array_key_exists('Impuesto', $linea) ) {
               //$codigoEtax = $linea['Impuesto']['CodigoTarifa'];
-              $montoIva = $linea['Impuesto']['Monto'];
-              $porcentajeIva = $linea['Impuesto']['Tarifa'];
-              
-              if( array_key_exists('Exoneracion', $linea['Impuesto']) ) {
-                $tipoDocumentoExoneracion = $linea['Impuesto']['Exoneracion']['TipoDocumento'] ?? null;
-                $documentoExoneracion = $linea['Impuesto']['Exoneracion']['NumeroDocumento']  ?? null;
-                $companiaExoneracion = $linea['Impuesto']['Exoneracion']['NombreInstitucion'] ?? null;
-                $fechaExoneracion = $linea['Impuesto']['Exoneracion']['FechaEmision'] ?? null;
-                $porcentajeExoneracion = $linea['Impuesto']['Exoneracion']['PorcentajeExoneracion'] ?? 0;
-                $montoExoneracion = $linea['Impuesto']['Exoneracion']['MontoExoneracion'] ?? 0;
+              try{
+                $montoIva = trim($linea['Impuesto']['Monto'] );
+                $porcentajeIva = trim($linea['Impuesto']['Tarifa'] );
+  
+                if( array_key_exists('Exoneracion', $linea['Impuesto']) ) {
+                  $tipoDocumentoExoneracion = $linea['Impuesto']['Exoneracion']['TipoDocumento'] ?? null;
+                  $documentoExoneracion = $linea['Impuesto']['Exoneracion']['NumeroDocumento']  ?? null;
+                  $companiaExoneracion = $linea['Impuesto']['Exoneracion']['NombreInstitucion'] ?? null;
+                  $fechaExoneracion = $linea['Impuesto']['Exoneracion']['FechaEmision'] ?? null;
+                  $porcentajeExoneracion = $linea['Impuesto']['Exoneracion']['PorcentajeExoneracion'] ?? 0;
+                  $montoExoneracion = $linea['Impuesto']['Exoneracion']['MontoExoneracion'] ?? 0;
+                }
+              }catch(\Exception $e){
+                if( is_array($linea['Impuesto'])){
+                  $montoIva = 0;
+                  $porcentajeIva = 0;
+                  foreach ($linea['Impuesto'] as $imp){
+                    if( trim($imp['Tarifa']) == 5 ){
+                      $subtotalLinea = $subtotalLinea + (float)trim($imp['Monto'] );
+                    }else{
+                      $montoIva += (float)trim($imp['Monto'] );
+                      $porcentajeIva += (float)trim($imp['Tarifa'] );
+                    }
+                  }
+                }
               }
-              
             }
             
             $bill->subtotal = $bill->subtotal + $subtotalLinea;
@@ -510,8 +540,12 @@ class Bill extends Model
               'porc_identificacion_plena' => 13,
             );
             
-            $item_modificado = $bill->addEditItem($item);
-            array_push( $lids, $item_modificado->id );
+            try{
+              $item_modificado = $bill->addEditItem($item);
+              array_push( $lids, $item_modificado->id );
+            }catch(\Throwable $e){
+              dd($item);
+            }
         }
         
         foreach ( $bill->items as $item ) {
@@ -717,8 +751,8 @@ class Bill extends Model
               'year' => $year,
               'month' => $month,
               'item_number' => $data['numeroLinea'],
-              'code' => $data['codigoProducto'],
-              'name' => $data['detalleProducto'],
+              'code' => $data['codigoProducto'] ?? 'N/A',
+              'name' => $data['detalleProducto'] ?? 'No indica',
               'product_type' => 1,
               'measure_unit' => $data['unidadMedicion'],
               'item_count' => $data['cantidad'],

@@ -214,6 +214,15 @@ window.validatePhoneFormat = function () {
     }
 }
 
+window.validateEmail = function(mail){
+    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)){
+        return (true)
+    }
+    alert("Debe ingresar una dirección de email válida");
+    $("#email").val('');
+    return (false)
+}
+
 $(document).ready(function() {
 
   $('.select-search').select2({

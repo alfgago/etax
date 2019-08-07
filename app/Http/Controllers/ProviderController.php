@@ -10,6 +10,11 @@ use App\Imports\ProviderImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
+/**
+ * @group Controller - Proveedores
+ *
+ * Funciones de ProviderController
+ */
 class ProviderController extends Controller
 {
   
@@ -118,7 +123,7 @@ class ProviderController extends Controller
       
         $provider->save();
       
-        return redirect('/proveedores');
+        return redirect('/proveedores')->withMessage('Proveedor creado');
     }
 
     /**
@@ -186,7 +191,7 @@ class ProviderController extends Controller
       
         $provider->save();
       
-        return redirect('/proveedores');
+        return redirect('/proveedores')->withMessage('Proveedor editado');
     }
 
     /**

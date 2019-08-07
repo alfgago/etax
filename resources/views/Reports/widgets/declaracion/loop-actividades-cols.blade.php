@@ -1,5 +1,5 @@
 
-
+@if($title)
 <tr class="sub-title {{ $desplegar }}">
   <th class="marcar-td" colspan="1">
 		<span class="marcar">
@@ -10,6 +10,7 @@
   </th>
 	<th colspan="6">{{ $title }}</th>
 </tr>
+@endif
 @if( $desplegar == "desplegar-true" )
   <tr class="header-tarifas desplegar-true">
   		@if($cols)

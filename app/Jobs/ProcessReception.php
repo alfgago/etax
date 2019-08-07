@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\ApiResponse;
 use App\Bill;
 use App\Company;
 use App\Invoice;
@@ -69,6 +70,7 @@ class ProcessReception implements ShouldQueue
                     $tokenApi = $apiHacienda->login(false);
                     if ($requestData !== false) {
                         $endpoint = $bill->xml_schema == 42 ? 'invoice' : 'invoice43';
+                        sleep(15);
                         Log::info('Enviando Request Reception  API HACIENDA -->>' . $this->billId);
                         $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/aceptacionxml', [
                             'headers' => [
@@ -85,10 +87,14 @@ class ProcessReception implements ShouldQueue
                         ]);
                         $response = json_decode($result->getBody()->getContents(), true);
                         Log::info('Response Reception Api Hacienda '. json_encode($response));
+                        ApiResponse::create(['bill_id' => $bill->id, 'document_key' => $bill->document_key,
+                            'doc_type' => $bill->document_type,
+                            'json_response' => json_encode($response)
+                        ]);
                         if (isset($response['status']) && $response['status'] == 200) {
                             Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
                             $date = Carbon::now();
-                            $bill->hacienda_status = 3;
+                            $bill->hacienda_status = '03';
                             $bill->save();
                             $path = 'empresa-' . $company->id_number .
                                 "/aceptaciones/$date->year/$date->month/$bill->document_key.xml";
@@ -101,7 +107,7 @@ class ProcessReception implements ShouldQueue
                                 $xml = new XmlHacienda();
                                 $xml->invoice_id = 0;
                                 $xml->bill_id = $bill->id;
-                                $xml->xml = $path;
+                                $xml->xml_reception = $path;
                                 $xml->save();
                                 $xmlExtract = ltrim($response['data']['response'], '\n');
                                 Mail::to($bill->provider_email)->cc($company->email)->send(new ReceptionNotification([
@@ -237,7 +243,7 @@ class ProcessReception implements ShouldQueue
 
     private function setDetails($data) {
         try {
-            $details = null;
+            $details = [];
             foreach ($data as $key => $value) {
                 $details[$key] = array(
                     'cantidad' => $value['item_count'] ?? '',

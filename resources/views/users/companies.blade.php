@@ -8,6 +8,7 @@
     @if( auth()->user()->isContador() )
         @can('admin')
             <a type="submit" class="btn btn-primary {{$data['class']}}" href="{{$data['url']}}">Registrar otra empresa</a>
+            <a class="btn btn-primary" href="/usuario/compra-contabilidades">Comprar contabilidades</a>
         @endcan
     @endif
 @endsection
@@ -40,13 +41,26 @@
                 <div class="col-9">
                     <div class="tab-content p-0">       
 
-                        <div class="tab-pane fade show active" role="tabpanel">
+                        <div class="tab-pane fade show active" style="position: relative;" role="tabpanel">
 
                             <h3 class="card-title">Contabilidades</h3>
+                            
+                            <div style="position: absolute; right: 0; top: 0; font-size: .8rem; text-align: right;">
+                                
+                                    <label style="width: 100%;"><b>Empresas disponibles actualmente:</b></label>
+                                    <div class="dato-facturas" style="display:inline-block;">
+                                        <div class="barra-limites emitidas" >
+                                            <div class="fill-bar" data-total="{{ $availableCompanies }}" data-fill="{{ $teams->count() }}"></div>
+                                            <div class="barra-text">{{ $teams->count() }} de {{ $availableCompanies }}</div>
+                                        </div>
+                                    </div>
+                                
+                            </div>
 
-                            <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                            <table id="dataTable" class="table table-striped table-bordered  mt-3" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
+                                        <th>#</th>
                                         <th>Identificación</th>
                                         <th>Nombre</th>
                                         <th>Correo</th>   
@@ -59,6 +73,7 @@
                                     @php $company_detail = get_company_details($team->company_id);  @endphp
                                     @if($company_detail)
                                     <tr>
+                                        <td>{{ $loop->index+1 }}</td>
                                         <td>{{$company_detail->id_number}}</td>
                                         <td>{{$company_detail->name}}</td>
                                         <td>{{$company_detail->email}}</td>
@@ -109,6 +124,14 @@ function confirmDelete( id ) {
   })
   
 }
+
+
+$('.fill-bar').each( function(){
+	var total = $(this).attr('data-total');
+	var fill = $(this).attr('data-fill');
+	var porc = (fill / total) * 100;
+	$(this).width( parseFloat(porc) + '%' );
+});
     
 </script>
 

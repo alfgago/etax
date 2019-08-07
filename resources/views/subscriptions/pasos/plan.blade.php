@@ -31,7 +31,7 @@
 </div>
 <div class="form-group col-md-6">
   <label for="recurrency">Recurrencia de pagos </label>
-  <select class="form-control " name="recurrency" id="recurrency" onchange="togglePrice();">
+  <select class="form-control " name="recurrency" id="recurrency" onchange="togglePrice();" onchange="calcularPrecioContabilidades();">
   	<option value="1" selected>Mensual</option>
   	<option value="6">Semestral</option>
   	<option value="12">Anual</option>
@@ -73,3 +73,4 @@
       </div>
     @endif
 @endif
+

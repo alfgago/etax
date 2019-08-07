@@ -10,6 +10,11 @@
                 
     <input type="hidden" class="form-control" id="lnum" value="">
     <input type="hidden" class="form-control" id="item_id" value="">
+    <?php 
+      $company = currentCompanyModel();
+    ?>
+    <input type="hidden" class="form-control" id="default_product_category" value="{{$company->default_product_category}}">
+    <input type="hidden" class="form-control" id="default_vat_code" value="{{$company->default_vat_code}}">
     
     <div class="form-group col-md-6 hidden">
       <label for="codigo">Código de producto</label>
@@ -20,21 +25,21 @@
       <label for="nombre">Nombre / Descripción</label>
       <input type="text" class="form-control" id="nombre" value="2018" >
     </div>
-
-    <div class="form-group col-md-12">
-      <label for="tipo_producto">Categoría de producto</label>
-      <select class="form-control select-search" id="tipo_producto" name="tipo_producto">
-        @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
-          <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
-        @endforeach
-      </select>
-    </div>
     
     <div class="form-group col-md-12">
       <label for="tipo_iva">Tipo de IVA</label>
-      <select class="form-control" id="tipo_iva" >
+      <select class="form-control select-search" id="tipo_iva" >
         @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
           <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }} {{ @$tipo['hideMasiva'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
+        @endforeach
+      </select>
+    </div>
+
+    <div class="form-group col-md-12">
+      <label for="tipo_producto">Categoría de producto</label>
+      <select class="form-control" id="tipo_producto" name="tipo_producto">
+        @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
+          <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
         @endforeach
       </select>
     </div>

@@ -197,6 +197,10 @@
 }
 
 @media (max-width: 580px) {
+    .comprar-ahora {
+        display: none;
+    }
+        
     .main-header {
         height: $topbar-height-mobile;
         padding: 0 .5rem;
@@ -303,4 +307,33 @@
         }
     }
 
+}
+
+
+.comprar-ahora .btn-primary {
+    background: #f0c960;
+    color: #1f2642 !important;
+    border: 0;
+    -webkit-box-shadow: 0.2rem 0.2rem #261c65 !important;
+    box-shadow: 0.2rem 0.2rem #261c65  !important;
+    font-size: 0.9rem;
+    margin: 0;
+    font-weight: bold;
+    width: 100%;
+}
+
+.comprar-ahora .btn-primary:hover {
+    -webkit-box-shadow: 2px 2px #261c65 !important;
+    box-shadow: 2px 2px #261c65 !important;
+}
+
+.comprar-ahora .description {
+    font-size: 0.7rem;
+    margin: 0;
+}
+
+.comprar-ahora {
+    margin-left: 6rem;
+    display: inline-block;
+    text-align: center;
 }

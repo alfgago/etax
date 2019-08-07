@@ -8,6 +8,7 @@
     <div onclick="abrirPopup('importar-aceptacion-popup');" class="btn btn-primary hidden">Importar facturas para aceptación</div>
     <a href="/facturas-recibidas/aceptaciones-otros" class="btn btn-primary">Aceptación manual de facturas</a>
     <a href="/facturas-recibidas/autorizaciones" class="btn btn-primary">Autorizar facturas por email</a>
+    <a href="/facturas-recibidas/validaciones" class="btn btn-primary">Validar facturas</a>
 @endsection 
 
 @section('content') 
@@ -21,7 +22,7 @@
         <h2 class="mt-4 mb-4" style="color: red;">Asegúrese de tener la prorrata y proporcionalidad correctas antes de aceptar su primera factura en 4.3</h2>
         @else
         <h2 class="mt-4 mb-4" style="color: red;">
-          Usted no tiene un facturación con eTax habilitada, por lo que esta pantalla únicamente incluirá o no las facturas en eTax para cálculo, y <b><u>no</u></b> realizará aceptaciones con Hacienda.
+          Usted no tiene facturación con eTax habilitada, por lo que esta pantalla únicamente incluirá o no las facturas en eTax para cálculo, y <b><u>no</u></b> realizará aceptaciones con Hacienda.
         </h2>
         @endif
         <table id="bill-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
@@ -59,11 +60,11 @@ $(function() {
     columns: [
       { data: 'document_number', name: 'document_number' },
       { data: 'provider', name: 'provider.id' },
-      { data: 'total', name: 'total' },
-      { data: 'accept_total_factura', name: 'accept_total_factura', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
-      { data: 'accept_iva_total', name: 'accept_iva_total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
-      { data: 'accept_iva_acreditable', name: 'accept_iva_acreditable', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
-      { data: 'accept_iva_gasto', name: 'accept_iva_gasto', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
+      { data: 'total', name: 'total', class: "text-right" },
+      { data: 'accept_total_factura', class: "text-right", name: 'accept_total_factura', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
+      { data: 'accept_iva_total', class: "text-right", name: 'accept_iva_total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
+      { data: 'accept_iva_acreditable', class: "text-right", name: 'accept_iva_acreditable', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
+      { data: 'accept_iva_gasto', class: "text-right", name: 'accept_iva_gasto', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
       { data: 'generated_date', name: 'generated_date' },
       { data: 'actions', name: 'actions', orderable: false, searchable: false },
     ],

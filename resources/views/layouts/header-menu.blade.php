@@ -2,6 +2,12 @@
     <div class="logo">
         <a title="Volver al escritorio" href="/"><img src="{{asset('assets/images/logo-final-150.png')}}" class="logo-img"></a>
     </div>
+    @if( getCurrentSubscription()->status == 4 )
+    <div class="comprar-ahora">
+        <p class="description">Periodo de pruebas activo</p>
+        <a class="btn btn-primary btn-buynow" href="/elegir-plan" title="Comprar ahora">Comprar ahora</a>
+    </div>
+    @endif
     <div class="menu-toggle">
         <div></div>
         <div></div>
@@ -17,12 +23,17 @@
                 <label for="country">Empresa actual:</label>
                 <div class="form-group">
                     <select class="form-control" id="company_change" onchange="companyChange(true);">
+
                         @foreach( auth()->user()->teams as $row )
                             <?php  
                                 $c = $row->company;  
                                 $name = $c->name ? $c->name.' '.$c->last_name.' '.$c->last_name2 : '-- Nueva Empresa --';  
+                                if($c->status == 1){
                             ?>
-                            <option value="{{ $c->id }}" {{ $c->id == currentCompany() ? 'selected' : ''  }} > {{ $name }} </option>
+                                <option value="{{ $c->id }}" {{ $c->id == currentCompany() ? 'selected' : ''  }} > {{ $name }} </option>
+                            <?php
+                                }
+                            ?>
                         @endforeach
                     </select>
                 </div>
@@ -40,7 +51,7 @@
                     </div>
                     <a class="dropdown-item" href="/usuario/perfil">Perfil</a>                     
                     <a class="dropdown-item" href="/empresas/editar">Configuración de empresa</a>   
-                    <a class="dropdown-item hidden" href="/payments-methods">Gesti&oacute;n de pagos</a>
+                    <a class="dropdown-item" href="/payments-methods">Gesti&oacute;n de pagos</a>
                     <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('frm-logout').submit();">
                         Cerrar sesión
                     </a>

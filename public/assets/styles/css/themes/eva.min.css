@@ -16249,6 +16249,11 @@ table.table-bordered.dataTable tr {
   transition: 0.25s ease all;
 }
 
+table#bill-table,
+table#invoice-table {
+  font-size: 0.75rem;
+}
+
 .form-group {
   position: relative;
   margin-bottom: 0.75rem;
@@ -17261,6 +17266,22 @@ input.type-zone {
   height: 1.85rem;
   display: flex;
   align-items: flex-end;
+}
+
+ul#select2-tipo_iva-results {
+  font-size: 0.8rem;
+}
+
+.select2-search--dropdown input {
+  font-size: 0.8rem;
+}
+
+span.select2-dropdown.select2-dropdown--below {
+  box-shadow: 0 5px 15px rgba(76, 0, 109, 0.25);
+}
+
+span.select2.select2-container.select2-container--default.select2-container--below.select2-container--open {
+  box-shadow: 0 0 25px rgba(76, 0, 109, 0.25);
 }
 
 .alert {
@@ -18291,6 +18312,10 @@ div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-ar
 }
 
 @media (max-width: 580px) {
+  .comprar-ahora {
+    display: none;
+  }
+
   .main-header {
     height: 70px;
     padding: 0 0.5rem;
@@ -18396,6 +18421,32 @@ div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-ar
   .main-header .menu-toggle {
     margin: 0;
   }
+}
+
+.comprar-ahora .btn-primary {
+  background: #f0c960;
+  color: #1f2642 !important;
+  border: 0;
+  box-shadow: 0.2rem 0.2rem #261c65 !important;
+  font-size: 0.9rem;
+  margin: 0;
+  font-weight: bold;
+  width: 100%;
+}
+
+.comprar-ahora .btn-primary:hover {
+  box-shadow: 2px 2px #261c65 !important;
+}
+
+.comprar-ahora .description {
+  font-size: 0.7rem;
+  margin: 0;
+}
+
+.comprar-ahora {
+  margin-left: 6rem;
+  display: inline-block;
+  text-align: center;
 }
 
 .app-footer {

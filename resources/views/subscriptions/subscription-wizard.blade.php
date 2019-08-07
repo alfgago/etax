@@ -110,11 +110,13 @@
     $("#product_id ."+planId).show();
     $("#product_id").val( $("#product_id ."+planId).first().val() );
     togglePrice();
-      if(planId == 'c'){
+    if(planId == 'c'){
           $('#cantidadContabilidades').show();
+          $('#copunContador').show();
           $('.hide-contador').hide();
       }else{
           $('#cantidadContabilidades').hide();
+          $('#copunContador').hide();
           $('.hide-contador').show();
       }
   }

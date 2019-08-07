@@ -6,6 +6,8 @@ use App\Actividades;
 use App\AvailableInvoices;
 use App\CodigosPaises;
 use App\UnidadMedicion;
+use App\ProductCategory;
+use App\CodigoIvaRepercutido;
 use App\Utils\BridgeHaciendaApi;
 use App\Utils\InvoiceUtils;
 use \Carbon\Carbon;
@@ -22,7 +24,11 @@ use Illuminate\Http\Request;
 use GuzzleHttp\Message\ResponseInterface;
 use PDF;
 
-
+/**
+ * @group Controller - Facturas de venta
+ *
+ * Funciones de InvoiceController
+ */
 class InvoiceController extends Controller
 {
 
@@ -43,7 +49,32 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        $company = currentCompanyModel();
+        $company = currentCompanyModel(false);
+
+        if ( !$company->atv_validation && $company->use_invoicing ) {
+            $apiHacienda = new BridgeHaciendaApi();
+            $token = $apiHacienda->login(false);
+            $validateAtv = $apiHacienda->validateAtv($token, $company);
+            if( $validateAtv ) {
+                if ($validateAtv['status'] == 400) {
+                    Log::info('Atv Not Validated Company: '. $company->id_number);
+                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                    }
+                    return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
+
+                } else {
+                    Log::info('Atv Validated Company: '. $company->id_number);
+                    $company->atv_validation = true;
+                    $company->save();
+
+                    $user = auth()->user();
+                    Cache::forget("cache-currentcompany-$user->id");
+                }
+            }else {
+                return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
+            }
+        }
         if($company->last_note_ref_number === null) {
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
         }
@@ -96,6 +127,9 @@ class InvoiceController extends Controller
             ->editColumn('client', function(Invoice $invoice) {
                 return !empty($invoice->client_first_name) ? $invoice->client_first_name.' '.$invoice->client_last_name : $invoice->clientName();
             })
+            ->editColumn('moneda', function(Invoice $invoice) {
+                return $invoice->currency == 'CRC' ? $invoice->currency : "$invoice->currency ($invoice->currency_rate)";
+            })
             ->editColumn('hacienda_status', function(Invoice $invoice) {
                 if ($invoice->hacienda_status == '03') {
                     return '<div class="green">  <span class="tooltiptext">Aceptada</span></div>
@@ -107,9 +141,10 @@ class InvoiceController extends Controller
                     return '<div class="red"> <span class="tooltiptext">Rechazada</span></div>
                         <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
                             <i class="fa fa-refresh" aria-hidden="true"></i>
-                          </a>';
+                        </a>';
                 }
-                return '<div class="yellow"><span class="tooltiptext">Creada</span></div>
+
+                return '<div class="yellow"><span class="tooltiptext">Procesando...</span></div>
                     <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
                         <i class="fa fa-refresh" aria-hidden="true"></i>
                       </a>';
@@ -161,7 +196,7 @@ class InvoiceController extends Controller
      */
     public function emitFactura($tipoDocumento)
     {
-        $company = currentCompanyModel();
+        $company = currentCompanyModel(false);
 
         //Revisa límite de facturas emitidas en el mes actual
         $start_date = Carbon::parse(now('America/Costa_Rica'));
@@ -192,15 +227,14 @@ class InvoiceController extends Controller
                     Log::info('Atv Validated Company: '. $company->id_number);
                     $company->atv_validation = true;
                     $company->save();
+                    
+                    $user = auth()->user();
+                    Cache::forget("cache-currentcompany-$user->id");
                 }
             }else {
                 return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
             }
         }
-
-        /*if( ! isset($company->logo_url) ){
-            return redirect('/empresas/editar')->withError('Para poder emitir facturas, debe subir un logo y certificado ATV');
-        }*/
         
         $units = UnidadMedicion::all()->toArray();
         $countries  = CodigosPaises::all()->toArray();
@@ -217,7 +251,82 @@ class InvoiceController extends Controller
         if($company->last_ticket_ref_number === null) {
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de tiquetes');
         }
-        return view("Invoice/create-factura", ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
+
+        return view("Invoice/create-factura",
+            [
+                'document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
+                'document_number' => $this->getDocReference($tipoDocumento),
+                'document_key' => $this->getDocumentKey($tipoDocumento),
+                'units' => $units, 'countries' => $countries, 'default_currency' => $company->default_currency,
+                'default_vat_code' => $company->default_vat_code
+            ]
+        )->with('arrayActividades', $arrayActividades);
+    }
+    
+    /**
+     * Muestra el formulario para emitir tiquetes electrónicos
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function emitSujetoPasivo()
+    {
+        $company = currentCompanyModel();
+        $tipoDocumento = '08';
+
+        //Revisa límite de facturas emitidas en el mes actual
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $month = $start_date->month;
+        $year = $start_date->year;
+        $available_invoices = $company->getAvailableInvoices( $year, $month );
+        
+        $available_plan_invoices = $available_invoices->monthly_quota - $available_invoices->current_month_sent;
+        if($available_plan_invoices < 1 && $company->additional_invoices < 1){
+            return redirect()->back()->withError('Usted ha sobrepasado el límite de facturas mensuales de su plan actual.');
+        }
+        //Termina de revisar limite de facturas.
+
+        if ($company->atv_validation == false) {
+            $apiHacienda = new BridgeHaciendaApi();
+            $token = $apiHacienda->login(false);
+            $validateAtv = $apiHacienda->validateAtv($token, $company);
+            
+            if( $validateAtv ) {
+                if ($validateAtv['status'] == 400) {
+                    Log::info('Atv Not Validated Company: '. $company->id_number);
+                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                    }
+                    return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
+
+                } else {
+                    Log::info('Atv Validated Company: '. $company->id_number);
+                    $company->atv_validation = true;
+                    $company->save();
+                    
+                    $user = auth()->user();
+                    Cache::forget("cache-currentcompany-$user->id");
+                }
+            }else {
+                return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
+            }
+        }
+        
+        $units = UnidadMedicion::all()->toArray();
+        $countries  = CodigosPaises::all()->toArray();
+
+        $arrayActividades = $company->getActivities();
+        
+        if(count($arrayActividades) == 0){
+            return redirect('/empresas/editar')->withError('No ha definido una actividad comercial para esta empresa');
+        }
+
+        if($company->last_note_ref_number === null) {
+            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
+        }
+        if($company->last_ticket_ref_number === null) {
+            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de tiquetes');
+        }
+        return view("Invoice/create-fec-sujetopasivo", ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
             'document_number' => $this->getDocReference($tipoDocumento),
             'document_key' => $this->getDocumentKey($tipoDocumento), 'units' => $units, 'countries' => $countries])->with('arrayActividades', $arrayActividades);
     }
@@ -258,10 +367,10 @@ class InvoiceController extends Controller
         $invoice->setInvoiceData($request);
         
         $company->save();
-
+        
         clearInvoiceCache($invoice);
       
-        return redirect('/facturas-emitidas');
+        return redirect('/facturas-emitidas')->withMessage('Factura registrada con éxito');
     }
     
     /**
@@ -335,8 +444,9 @@ class InvoiceController extends Controller
 
                 $company->save();
                 clearInvoiceCache($invoice);
+            
 
-                return redirect('/facturas-emitidas');
+                return redirect('/facturas-emitidas')->withMessage('Factura registrada con éxito');
             } else {
                 return back()->withError( 'Ha ocurrido un error al enviar factura.' );
             }
@@ -356,15 +466,26 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::findOrFail($id);
         $this->authorize('update', $invoice);
-        
         $company = currentCompanyModel();
         $arrayActividades = $company->getActivities();
         $countries  = CodigosPaises::all()->toArray();
 
+        $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
+        $codigos = CodigoIvaRepercutido::where('hidden', false)->get();
         $units = UnidadMedicion::all()->toArray();
-        return view('Invoice/show', compact('invoice','units','arrayActividades','countries') );
+        return view('Invoice/show', compact('invoice','units','arrayActividades','countries','product_categories','codigos') );
     }
 
+    public function actualizar_categorias(Request $request){
+        Invoice::where('id',$request->invoice_id)
+            ->update(['commercial_activity'=>$request->commercial_activity]);
+        foreach ($request->items as $item) {
+            InvoiceItem::where('id',$item['id'])
+            ->update(['product_type'=>$item['category_product'],'iva_type'=>$item['tipo_iva']]);
+            
+        }
+        return redirect('/facturas-emitidas/'.$request->invoice_id)->withMessage('Factura actualizada');
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -383,6 +504,7 @@ class InvoiceController extends Controller
       
         $arrayActividades = $company->getActivities();
         $countries  = CodigosPaises::all()->toArray();
+
       
         //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
         if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
@@ -413,7 +535,7 @@ class InvoiceController extends Controller
         
         clearInvoiceCache($invoice);
           
-        return redirect('/facturas-emitidas');
+        return redirect('/facturas-emitidas')->withMessage('Factura editada con éxito');
     }
     
     public function export() {
@@ -669,38 +791,48 @@ class InvoiceController extends Controller
 
     private function get_rates()
     {
-        
+
+        $cacheKey = "usd_rate";
+        $lastRateKey = "last_usd_rate";
         try {
-            $value = Cache::remember('usd_rate', '60000', function () {
+            if ( !Cache::has($cacheKey) ) {
+
                 $today = new Carbon();
                 $client = new \GuzzleHttp\Client();
                 $response = $client->get(config('etax.exchange_url'),
                     ['query' => [
-                        'Indicador' => '317',
+                        'Indicador' => '318',
                         'FechaInicio' => $today::now()->format('d/m/Y'),
                         'FechaFinal' => $today::now()->format('d/m/Y'),
                         'Nombre' => config('etax.namebccr'),
                         'SubNiveles' => 'N',
                         'CorreoElectronico' => config('etax.emailbccr'),
                         'Token' => config('etax.tokenbccr')
-                        ]
+                    ]
                     ]
                 );
                 $body = $response->getBody()->getContents();
                 $xml = new \SimpleXMLElement($body);
                 $xml->registerXPathNamespace('d', 'urn:schemas-microsoft-com:xml-diffgram-v1');
                 $tables = $xml->xpath('//INGC011_CAT_INDICADORECONOMIC[@d:id="INGC011_CAT_INDICADORECONOMIC1"]');
-                return json_decode($tables[0]->NUM_VALOR);
-            });
+                $valor =  json_decode($tables[0]->NUM_VALOR);
 
+                Cache::put($cacheKey, $valor, now()->addHours(2));
+                Cache::put($lastRateKey, $valor, now()->addDays(5));
+            }
+
+            $value = Cache::get($cacheKey);
             return $value;
 
         } catch( \Exception $e) {
             Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: ');
+            $value = Cache::get($lastRateKey);
+            return $value;
         } catch (RequestException $e) {
             Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: '.
                 $e->getResponse()->getReasonPhrase());
-            return null;
+            $value = Cache::get($lastRateKey);
+            return $value;
         }
 
     }
@@ -848,6 +980,24 @@ class InvoiceController extends Controller
             ->toJson();
     }
     
+    public function hideInvoice ( Request $request, $id )
+    {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        
+        if ( $request->hide_from_taxes ) {
+            $invoice->hide_from_taxes = true;
+            $invoice->save();
+            clearInvoiceCache($invoice);
+            return redirect('/facturas-emitidas')->withMessage( 'La factura '. $invoice->document_number . ' se ha ocultado para cálculo de IVA.');
+        }else{
+            $invoice->hide_from_taxes = false;
+            $invoice->save();
+            clearInvoiceCache($invoice);
+            return redirect('/facturas-emitidas')->withMessage( 'La factura '. $invoice->document_number . ' se ha incluido nuevamente para cálculo de IVA.');
+        }
+    }
+    
     public function authorizeInvoice ( Request $request, $id )
     {
         $invoice = Invoice::findOrFail($id);
@@ -856,13 +1006,13 @@ class InvoiceController extends Controller
         if ( $request->autorizar ) {
             $invoice->is_authorized = true;
             $invoice->save();
-            return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido autorizada');
+            return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . ' ha sido autorizada');
         }else {
             $invoice->is_authorized = false;
             $invoice->is_void = true;
             InvoiceItem::where('invoice_id', $invoice->id)->delete();
             $invoice->delete();
-            return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido rechazada');
+            return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . ' ha sido rechazada');
         }
     }
     
@@ -1055,7 +1205,7 @@ class InvoiceController extends Controller
                 $company = currentCompanyModel();
                 $result = $apiHacienda->queryHacienda($invoice, $tokenApi, $company);
                 if ($result == false) {
-                    return redirect()->back()->withErrors('Comprobante no ha sido recibido por hacienda');
+                    return redirect()->back()->withErrors('El servidor de Hacienda es inaccesible en este momento, o el comprobante no ha sido recibido. Por favor intente de nuevo más tarde o contacte a soporte.');
                 }
                 $filename = 'MH-'.$invoice->document_key . '.xml';
                 if( ! $invoice->document_key ) {

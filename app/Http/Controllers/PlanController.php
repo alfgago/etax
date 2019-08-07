@@ -7,6 +7,12 @@ use App\Http\Controllers\Controller;
 use App\Plan;
 use DB;
 
+
+/**
+ * @group Deprecados
+ *
+ * Funciones de PlanController. Ahora se usa el SubscriptionPlanController
+ */
 class PlanController extends Controller {
 
     function __construct() {

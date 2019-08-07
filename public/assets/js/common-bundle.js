@@ -361,6 +361,16 @@ window.validatePhoneFormat = function () {
     }
 }
 
+
+window.validateEmail = function(mail){
+    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)){
+        return (true)
+    }
+    alert("Debe ingresar una dirección de email válida");
+    $("#email").val('');
+    return (false)
+}
+
 $(document).ready(function() {
 
   $('.select-search').select2({
@@ -515,17 +525,22 @@ toastr.options = {
 
   window.presetTipoIVA = function(){
     if( ! $('#cliente_exento:checked').length ){
+      var codigoIVA = $('#tipo_iva :selected').val();
+      $('#tipo_producto option').hide();
+      var tipoProducto = 0;
+      $("#tipo_producto option").each(function(){
+          var posibles = $(this).attr('posibles').split(",");
+      	if(posibles.includes(codigoIVA)){
+          	$(this).show();
+          	if( !tipoProducto ){
+              tipoProducto = $(this).val();
+            }
+          }
+      });
+    
+      toggleCamposExoneracion();
       
-      var posibles = $('#tipo_producto :selected').attr('posibles');
-      var arrPosibles = posibles.split(",");
-      var tipo;
-      $('#tipo_iva option').hide();
-      for( tipo of arrPosibles ) {
-      	$('#tipo_iva option[value='+tipo+']').show();
-      }
-      
-      var tipoIVA = $('#tipo_producto :selected').attr('codigo');
-      $('#tipo_iva').val( tipoIVA ).change();
+      $('#tipo_producto').val( tipoProducto ).change();
     }else{
       $('#tipo_iva').val( 'B260' );
     }
@@ -563,6 +578,7 @@ toastr.options = {
     var codigo = $('#codigo').val();
     var nombre = $('#nombre').val();
     var tipo_producto = $('#tipo_producto').val();
+    var tipo_producto_text = $('#tipo_producto :selected').text();
     var cantidad = $('#cantidad').val();
     cantidad = parseFloat(cantidad);
     var unidad_medicion = $('#unidad_medicion').val();
@@ -667,7 +683,7 @@ toastr.options = {
         htmlCols += "<td>"+cantidad+" </td>";
         htmlCols += "<td>"+unidad_medicion+" </td>";
         htmlCols += "<td>"+ fixComas(precio_unitario) +" </td>";
-        htmlCols += "<td>"+tipo_iva_text+"  </td>";
+        htmlCols += "<td>"+tipo_iva_text+" <br> -"+tipo_producto_text+"</td>";
         htmlCols += "<td>"+ fixComas(subtotal) +" </td>";
         htmlCols += "<td>"+ fixComas(monto_iva) +" </td>";
         htmlCols += "<td>"+ fixComas(total) +"   </td>";
@@ -704,9 +720,13 @@ toastr.options = {
       $('#p1').change();*/
       
       if( $('#is-compra').length ){
-        $('#tipo_producto').val(49).change();
+        $('#tipo_producto').val('B003').change();
       }else {
-        $('#tipo_producto').val(17).change();
+        if( $('#default_product_category').length ){
+          $('#tipo_iva').val( $('#default_vat_code').val() ).change();
+        }else{
+          $('#tipo_iva').val( 'B103' ).change();
+        }
       }
       
     }else{
@@ -728,9 +748,9 @@ toastr.options = {
       $('.item-factura-form input[type=checkbox]').prop('checked', false);
       
       if( $('#is-compra').length ){
-        $('#tipo_producto').val(49).change();
+        $('#tipo_iva').val('B003').change();
       }else {
-        $('#tipo_producto').val(17).change();
+        $('#tipo_iva').val('B103').change();
       }
       $('#unidad_medicion').val('Unid');
       $('#cantidad').val(1);
@@ -768,13 +788,14 @@ toastr.options = {
     $('#montoExoneracion').val( item.find('.montoExoneracion ').val() );
     $('#impuestoNeto').val( item.find('.impuestoNeto ').val() );
     $('#montoTotalLinea').val( item.find('.montoTotalLinea ').val() );
-
     
     if( parseInt(item.find('.is_identificacion_especifica').val()) ) {
       $('#is_identificacion_especifica').prop( 'checked', true );
     }else {
       $('#is_identificacion_especifica').prop( 'checked', false );
     }
+    
+    toggleCamposExoneracion();
     
     togglePorcentajeIdentificacionPlena();
     calcularConIvaManual();
@@ -886,10 +907,17 @@ toastr.options = {
         }
     }
     
-    window.mostrarCamposExoneracion = function() {
-        var checkExoneracion = $('#checkExoneracion').prop('checked');
-        console.log(checkExoneracion);
-        if(checkExoneracion === true){
+    window.toggleCamposExoneracion = function() {
+        /*var checkExoneracion = $('#checkExoneracion').prop('checked');
+        console.log(checkExoneracion);*/
+        
+        var hasExoneracion = false;
+        var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184"];
+        if( codigosConExoneracion.includes( $('#tipo_iva').val() ) ){
+          hasExoneracion = true;
+        }
+        
+        if(hasExoneracion){
             $(".exoneracion-cont").show();
             $('#etiqTotal').text('');
             $('#etiqTotal').text('Total sin exonerar');
@@ -928,13 +956,14 @@ $( document ).ready(function() {
     });
   
     $('#tipo_iva').on('change', function(){
+      presetTipoIVA();
       presetPorcentaje();
       calcularSubtotalItem();
       togglePorcentajeIdentificacionPlena();
       if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
     });
   
-    $('#tipo_producto').on('change', function(){
+    /*$('#tipo_producto').on('change', function(){
       
       presetTipoIVA();
       presetPorcentaje();
@@ -942,7 +971,7 @@ $( document ).ready(function() {
       togglePorcentajeIdentificacionPlena();
       if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
       
-    });
+    });*/
     
     $('#item_iva_amount').on('change', function(){
       calcularConIvaManual();
@@ -1005,10 +1034,6 @@ $( document ).ready(function() {
     
     if( $("#tipo_producto").length && $("#tipo_iva").length ) {
       $('#tipo_iva').on('change', function(){
-        if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
-      });
-    
-      $('#tipo_producto').on('change', function(){
         presetTipoIVA();
         if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
       });

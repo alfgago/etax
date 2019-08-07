@@ -38,6 +38,8 @@ $company = currentCompanyModel();
           @csrf
           
           <input type="hidden" id="current-index" value="0">
+          <input type="hidden" class="form-control" id="default_product_category" value="{{$company->default_product_category}}">
+          <input type="hidden" class="form-control" id="default_vat_code" value="{{$company->default_vat_code}}">
 
           <div class="form-row">
             <div class="col-md">
@@ -62,8 +64,27 @@ $company = currentCompanyModel();
                           @endif
                         @endforeach
                       </select>
+                      @if($document_type == "04")
+                        <div class="description">El cliente no es obligatorio para los tiquetes electrónicos.</div>
+                      @endif
                     </div>
                     @else
+                      <div class="form-group col-md-12">
+                        <h3>
+                          Proveedor
+                        </h3>
+                        <div onclick="abrirPopup('nuevo-proveedor-popup');" class="btn btn-agregar btn-agregar-cliente">Nuevo proveedor</div>
+                      </div>
+
+                      <div class="form-group col-md-12 with-button">
+                        <label for="provider_id">Seleccione el proveedor</label>
+                        <select class="form-control select-search" name="provider_id" id="provider_id" placeholder="" required>
+                          <option value='' selected>-- Seleccione un proveedor --</option>
+                          @foreach ( $company->providers as $proveedor )
+                            <option value="{{ $proveedor->id }}" >{{ $proveedor->id_number }} - {{ $proveedor->first_name }}</option>
+                          @endforeach
+                        </select>
+                      </div>
                       <div class="form-group col-md-12">
                         <h3>
                           Cliente
@@ -73,7 +94,6 @@ $company = currentCompanyModel();
                         <label for="actual">Empresa actual</label>
                         <input disabled readonly class="form-control" type="text" value="{{ $company->id_number . ' - ' . $company->name.' '.$company->last_name.' '.$company->last_name2 }}">
                       </div>
-                      
                     @endif
                     <div class="form-group col-md-12">
                       <label for="send_email">Enviar copia a:</label>
@@ -93,14 +113,14 @@ $company = currentCompanyModel();
                     <div class="form-group col-md-4">
                       <label for="currency">Divisa</label>
                       <select class="form-control" name="currency" id="moneda" required>
-                        <option value="CRC"  data-rate="{{$rate}}" selected>CRC</option>
-                        <option value="USD"  data-rate="{{$rate}}">USD</option>
+                        <option value="CRC" data-rate="1" {{$company->default_currency == 'CRC' ? 'selected' : ''}}>CRC</option>
+                        <option value="USD" data-rate="{{$rate}}" {{$company->default_currency == 'USD' ? 'selected' : ''}}>USD</option>
                       </select>
                     </div>
       
                     <div class="form-group col-md-8">
                       <label for="currency_rate">Tipo de cambio</label>
-                      <input type="text" class="form-control" data-rates="{{$rate}}" name="currency_rate" id="tipo_cambio" value="1.00"required>
+                      <input type="text" class="form-control" data-rates="{{$rate}}" name="currency_rate" id="tipo_cambio" value="{{$company->default_currency == 'USD' ? $rate : '1.00'}}"required>
                     </div>
                   </div>
                 </div>
@@ -205,6 +225,8 @@ $company = currentCompanyModel();
                         <option value="04">Apartado</option>
                         <option value="05">Arrendamiento con opción de compra</option>
                         <option value="06">Arrendamiento en función financiera</option>
+                        <option value="07">Servicios prestados al Estado a crédito</option>
+                        <option value="08">Pago del servicios prestado al Estado</option>
                         <option value="99">Otros</option>
                       </select>
                     </div>
@@ -224,7 +246,7 @@ $company = currentCompanyModel();
                     </div>
                   </div>
                   
-                  <div class="form-group col-md-12" id="field-retencion" style="display:none;">
+                  <div class="form-group col-md-12" id="field-retencion" style="display:none; !important">
                     <label for="retention_percent">Porcentaje de retención</label>
                     <div class="input-group">
                       <select id="retention_percent" name="retention_percent" class="form-control" required>
@@ -287,8 +309,12 @@ $company = currentCompanyModel();
             </div>
           </div>
           
-          @include( 'Invoice.form-linea' )
-          @include( 'Invoice.form-nuevo-cliente' )
+        @include('Invoice.form-linea')
+        @if($document_type != "08")
+          @include('Invoice.form-nuevo-cliente')
+        @else
+          @include('Bill.form-nuevo-proveedor')
+        @endif
             <input type="text" hidden value="{{ $document_type }}" name="document_type" id="document_type">
           <div class="btn-holder hidden">
            
@@ -308,7 +334,11 @@ $company = currentCompanyModel();
 
 <script>
 $(document).ready(function(){
-  $('#tipo_producto').val(17).change();
+  if( $('#default_vat_code').length ){
+    $('#tipo_iva').val( $('#default_vat_code').val() ).change();
+  }else{
+    $('#tipo_iva').val( 'B103' ).change();
+  }
 
   $('#moneda').change(function() {
     if ($(this).val() == 'USD') {
