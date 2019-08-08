@@ -641,7 +641,7 @@ class InvoiceController extends Controller
                             $montoIva = (float)$row['montoiva'];
                             
                             $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
-                            $codigoActividad = $row['codigoactividad'] ?? $mainAct;
+                            $codigoActividad = $row['actividadcomercial'] ?? $mainAct;
                             $xmlSchema = $row['xmlschema'] ?? 42;
                             
                             //Exoneraciones
@@ -727,7 +727,7 @@ class InvoiceController extends Controller
                 Log::error('Error importando Excel ' . $ex->getMessage());
                 return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. IC 537'.$i);
             }
-            
+
             $company->save();
             //$available_invoices->save();
             
