@@ -94,7 +94,7 @@ class ReportsController extends Controller
       $data = InvoiceItem::where('month', $mes)
                       ->where('year', $ano)
                       ->where('company_id', $companyID)
-                      ->with('invoice', 'invoice.client')
+                      ->with('invoice','ivaType', 'productCategory', 'invoice.client')
                         ->orderBy('created_at', 'ASC')
                         ->orderBy('item_number', 'ASC')
                         ->get();
@@ -114,7 +114,7 @@ class ReportsController extends Controller
       $data = BillItem::where('month', $mes)
                       ->where('year', $ano)
                       ->where('company_id', $companyID)
-                      ->with('bill', 'bill.provider')
+                      ->with('bill', 'bill.provider','ivaType', 'productCategory')
                         ->orderBy('created_at', 'ASC')
                         ->orderBy('item_number', 'ASC')
                         ->get();

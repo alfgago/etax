@@ -723,7 +723,10 @@ class Invoice extends Model
                         $identificacionCliente = null;
                     }
                 }else{
-                    $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
+                  try { 
+                      $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
+                  }catch(\Exception $e){ $identificacionCliente = null; };
+                    
                 }
                 $nombreCliente = $arr['Receptor']['Nombre'];
               
@@ -757,47 +760,55 @@ class Invoice extends Model
                     $identificacionCliente = null;
                 }
                 
-                $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
-                if ( !Cache::has($clientCacheKey) ) {
-                    $clienteCache =  Client::updateOrCreate(
-                        [
-                            'id_number' => $identificacionCliente ?? null,
-                            'company_id' => $company->id,
-                        ],
-                        [
-                            'code' => $identificacionCliente,
-                            'company_id' => $company->id,
-                            'tipo_persona' => $tipoPersona,
-                            'id_number' => $identificacionCliente,
-                            'first_name' => $nombreCliente,
-                            'email' => $correoCliente,
-                            'phone' => $telefonoCliente,
-                            'fullname' => "$identificacionCliente - " . $nombreCliente,
-                            'country' => 'CR',
-                            'state' => $provinciaCliente,
-                            'city' => $cantonCliente,
-                            'district' => $distritoCliente,
-                            'zip' => $zipCliente,
-                            'address' => $otrasSenas,
-                            'foreign_address' => $otrasSenas,
-                        ]
-                    );
-                    Cache::put($clientCacheKey, $clienteCache, 30);
+                if( $identificacionCliente ){
+                  $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
+                  if ( !Cache::has($clientCacheKey) ) {
+                      $clienteCache =  Client::updateOrCreate(
+                          [
+                              'id_number' => $identificacionCliente ?? null,
+                              'company_id' => $company->id,
+                          ],
+                          [
+                              'code' => $identificacionCliente ?? null,
+                              'company_id' => $company->id,
+                              'tipo_persona' => $tipoPersona,
+                              'id_number' => $identificacionCliente,
+                              'first_name' => $nombreCliente,
+                              'email' => $correoCliente,
+                              'phone' => $telefonoCliente,
+                              'fullname' => "$identificacionCliente - " . $nombreCliente,
+                              'country' => 'CR',
+                              'state' => $provinciaCliente,
+                              'city' => $cantonCliente,
+                              'district' => $distritoCliente,
+                              'zip' => $zipCliente,
+                              'address' => $otrasSenas,
+                              'foreign_address' => $otrasSenas,
+                          ]
+                      );
+                      Cache::put($clientCacheKey, $clienteCache, 30);
+                  }
+                  $cliente = Cache::get($clientCacheKey);
+                  
+                  $invoice->client_id = $cliente->id;
+                  $invoice->client_id_number = $identificacionCliente;
+                  $invoice->client_first_name = $nombreCliente;
+                  $invoice->client_email = $correoCliente;
+                  $invoice->client_address = $otrasSenas;
+                  $invoice->client_country = 'CR';
+                  $invoice->client_state = $provinciaCliente;
+                  $invoice->client_city = $cantonCliente;
+                  $invoice->client_district = $distritoCliente;
+                  $invoice->client_zip = $zipCliente;
+                  $invoice->client_phone = $telefonoCliente;
+                  $invoice->foreign_address = $otrasSenas;
+                }else{
+                  $invoice->client_email = 'N/A';
+                  $invoice->client_phone = 'N/A';
+                  $invoice->client_id_number = 0;
+                  $invoice->client_first_name = 'N/A';
+                  $invoice->document_type = '04';
                 }
-                $cliente = Cache::get($clientCacheKey);
-                
-                $invoice->client_id = $cliente->id;
-                $invoice->client_id_number = $identificacionCliente;
-                $invoice->client_first_name = $nombreCliente;
-                $invoice->client_email = $correoCliente;
-                $invoice->client_address = $otrasSenas;
-                $invoice->client_country = 'CR';
-                $invoice->client_state = $provinciaCliente;
-                $invoice->client_city = $cantonCliente;
-                $invoice->client_district = $distritoCliente;
-                $invoice->client_zip = $zipCliente;
-                $invoice->client_phone = $telefonoCliente;
-                $invoice->foreign_address = $otrasSenas;
                 
               }else{
                 $invoice->client_email = 'N/A';
@@ -917,12 +928,12 @@ class Invoice extends Model
         $cedulaCliente = $invoice->client->id_number;
         $consecutivoComprobante = $invoice->document_number;
         
-        if ( Storage::exists("empresa-$cedulaEmpresa/facturas_ventas/$cedulaCliente-$consecutivoComprobante.xml")) {
-            Storage::delete("empresa-$cedulaEmpresa/facturas_ventas/$cedulaCliente-$consecutivoComprobante.xml");
+        if ( Storage::exists("empresa-$cedulaEmpresa/facturas_ventas/$invoice->year/$invoice->month/$consecutivoComprobante.xml")) {
+            Storage::delete("empresa-$cedulaEmpresa/facturas_ventas/$invoice->year/$invoice->month/$consecutivoComprobante.xml");
         }
         
         $path = \Storage::putFileAs(
-            "empresa-$cedulaEmpresa/facturas_ventas", $file, "$cedulaCliente-$consecutivoComprobante.xml"
+            "empresa-$cedulaEmpresa/facturas_ventas", $file, "$invoice->year/$invoice->month/$consecutivoComprobante.xml"
         );
         
         try{

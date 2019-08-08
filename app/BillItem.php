@@ -22,6 +22,10 @@ class BillItem extends Model
       return $this->belongsTo(CodigoIvaSoportado::class, 'iva_type');
     }    
     
+    public function productCategory() {
+      return $this->belongsTo(ProductCategory::class, 'product_type');
+    }
+    
     public function fixIvaType() {
       try{
         
@@ -34,7 +38,6 @@ class BillItem extends Model
             }else{
               $this->iva_type = "B$this->iva_type";
             }
-            $this->save();
         }
       
         //Asigna Prod Type;

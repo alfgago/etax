@@ -77,6 +77,9 @@ class User extends Authenticatable {
             $this->user_name == "alfredo@5e.cr" || 
             $this->user_name == "enrique@5e.cr" || 
             $this->user_name == "juan@5e.cr" || 
+            $this->user_name == "quiquelang@gmail.com" || 
+            $this->user_name == "xavier@5e.cr" || 
+            $this->user_name == "xavierperna@gmail.com" || 
             $this->user_name == "aligguillen@gmail.com" 
         ) {
             $allow = true;

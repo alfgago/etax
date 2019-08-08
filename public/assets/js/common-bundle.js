@@ -212,14 +212,12 @@ window.getJSONCedula = function( cedula ) {
 }
 
 window.fillProvincias = function() {
-  if ($('#country').val() == 'CR') {
     var sel = $('#state');
     sel.html("");
     sel.append("<option value='0' selected>-- Seleccione una provincia --</option>");
     $.each(provincias, function(i, val) {
       sel.append("<option value='" + i + "'>" + provincias[i]["Nombre"] + "</option>");
     });
-  }
 }
 
 window.fillCantones = function() {
@@ -345,22 +343,17 @@ window.companyChange = function($redirect = false) {
 }
 
 window.validatePhoneFormat = function () {
-    var tipoPersona = $('#tipo_persona').val();
     var phone = $('#phone').val();
-    if(tipoPersona != 'E'){
-        if(phone.length == 8){
-            var init = phone.substr(0,1);
-            if(init != '5' && init != '6' && init != '7' && init != '8'){
-                alert('Debe incluir un número de celular válido');
-                $('#phone').val('');
-            }
-        }else{
-            alert('Debe incluir un número de teléfono válido');
-            $('#phone').val('');
-        }
+    var numbers = /^[0-9]+$/;
+    if(phone.length > 20 || !phone.value.match(numbers)){
+        Swal.fire({
+            type: 'error',
+            title: 'Información',
+            text: 'El número no debe poseer más de 20 dígitos'
+        })
+        $('#phone').val('');
     }
 }
-
 
 window.validateEmail = function(mail){
     if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)){

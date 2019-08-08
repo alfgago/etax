@@ -30,9 +30,7 @@
 			  		<li>Identificacion</li>
 			  		<li>Correo</li>
 			  		<li>Pais</li>
-			  		<li>Provincia</li>
-			  		<li>Canton</li>
-			  		<li>Distrito</li>
+			  		<li>Codigo Postal</li>
 			  		<li>Barrio</li>
 			  		<li>Direccion</li>
 			  		<li>AreaTel</li>

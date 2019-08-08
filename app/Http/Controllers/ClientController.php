@@ -51,7 +51,7 @@ class ClientController extends Controller
         return datatables()->eloquent( $query )
             ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($client) {
-                return view('client.actions', [
+                return view('Client.actions', [
                     'data' => $client
                 ])->render();
             })
@@ -213,7 +213,7 @@ class ClientController extends Controller
       
         $cliente->save();
       
-        return redirect('/clientes');
+        return redirect('/clientes')->withMessage('Cliente actualizado');
     }
 
     /**
@@ -248,9 +248,12 @@ class ClientController extends Controller
         $company_id = currentCompany();  
         foreach ($clientes[0] as $row){
             
-            $zip = 0;
+            $zip = $row['codigopostal'];
+            $row['provincia'] = substr($zip, 0, 1);
+            $row['canton'] = substr($zip, 0, 3);
+            $row['distrito'] = $zip;
             
-            if( $row['canton'] ) {
+            /*if( $row['canton'] ) {
                 if( strlen( (int)$row['canton'] ) <= 2 ) {
                     $row['canton'] = (int)$row['provincia'] . str_pad((int)$row['canton'], 2, '0', STR_PAD_LEFT);
                 }
@@ -263,7 +266,7 @@ class ClientController extends Controller
                     $row['distrito'] = (int)$row['canton'] . str_pad((int)$row['distrito'], 2, '0', STR_PAD_LEFT);
                     $zip = $row['distrito'];
                 }
-            }
+            }*/
             
             $correosCopia = $row['correoscopia'];
             $correosCopia = str_replace(";", ",", $correosCopia);

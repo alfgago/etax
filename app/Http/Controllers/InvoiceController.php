@@ -623,6 +623,7 @@ class InvoiceController extends Controller
                         $inserts = array();
                         foreach ($facturas as $row){
                             $i++;
+
                             if(CalculatedTax::validarMes($row['fechaemision'])){ 
                                 $arrayRow = array();
                                 /*if($available_invoices_by_plan > 0){
@@ -734,6 +735,7 @@ class InvoiceController extends Controller
                                     if( $insert ) {
                                         array_push( $inserts, $insert );
                                     }
+
                                 }
                             }
 
@@ -756,7 +758,7 @@ class InvoiceController extends Controller
                 Log::error('Error importando Excel ' . $ex->getMessage());
                 return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. IC 537'.$i);
             }
-            
+
             $company->save();
             //$available_invoices->save();
             
@@ -893,6 +895,7 @@ class InvoiceController extends Controller
                     $json = json_encode( $xml ); // convert the XML string to JSON
                     $arr = json_decode( $json, TRUE );
                     
+
                     $FechaEmision = explode("T", $arr['FechaEmision']);
                     $FechaEmision = explode("-", $FechaEmision[0]);
                     $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
@@ -902,16 +905,20 @@ class InvoiceController extends Controller
                         $consecutivoComprobante = $arr['NumeroConsecutivo'];
                         
                         //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                        try { 
+                            $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0 ;
+                        }catch(\Exception $e){ $identificacionReceptor = 0; };
+                        $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+                        $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                    
+                        //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                         if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                             //Registra el XML. Si todo sale bien, lo guarda en S3.
                             $invoice = Invoice::saveInvoiceXML( $arr, 'XML' );
                             if( $invoice ) {
                                 Invoice::storeXML( $invoice, $file );
                             }
-                        }else{
-                            return redirect('/facturas-emitidas/validaciones')->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
                         }
-
                     }else{
                         return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
                     }
@@ -1220,6 +1227,7 @@ class InvoiceController extends Controller
     public function fixImports() {
         $invoiceUtils = new InvoiceUtils();
         $invoices = Invoice::where('generation_method', 'Email')->orWhere('generation_method', 'XML')->get();
+        dd($invoices);
         
         foreach($invoices as $invoice) {
             if( !$invoice->client_zip ){
@@ -1233,7 +1241,6 @@ class InvoiceController extends Controller
             }
         }
         
-        dd($invoices);
         return true;
     }
 

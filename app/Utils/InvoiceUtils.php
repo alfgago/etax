@@ -370,7 +370,8 @@ class InvoiceUtils
                 'receptor_otras_senas_extranjero' => $data['client_address'] ? trim($data['client_address']) : '',
                 'receptor_email' => $data['client_email'] ? trim($data['client_email']) :  '',
                 'receptor_phone' => !empty($data['client_phone']) ? preg_replace('/[^0-9]/', '', $data['client_phone']) : '00000000',
-                'receptor_cedula_numero' => $data['client_id_number'] ? preg_replace("/[^0-9]/", "", $data['client_id_number']) : '',
+                'receptor_cedula_numero' => $data['client_id_number'] ? str_pad(preg_replace("/[^0-9]/", "",
+                    $data['client_id_number']), 9, '0', STR_PAD_LEFT) : '',
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',
                 'tipocambio' => $data['currency_rate'] ?? '',
@@ -386,8 +387,8 @@ class InvoiceUtils
                 'emisor_country' => $data['document_type'] !== '08' && $company->country ? trim($company->country) : trim($provider->country),
                 'emisor_address' => $data['document_type'] !== '08' ? $company->address ? trim($company->address) : '' : $provider->address ?? trim($provider->address),
                 'emisor_phone' => $data['document_type'] !== '08' ? $company->phone ? trim($company->phone) : '' : $provider->phone ?? trim($provider->phone),
-                'emisor_cedula' => $data['document_type'] !== '08' && $company->id_number ? preg_replace("/[^0-9]/", "", $company->id_number) :
-                    preg_replace("/[^0-9]/", "", $provider->id_number),
+                'emisor_cedula' => $data['document_type'] !== '08' && $company->id_number ? str_pad(preg_replace("/[^0-9]/", "", $company->id_number), 9, '0', STR_PAD_LEFT) :
+                    str_pad(preg_replace("/[^0-9]/", "", $provider->id_number), 9, '0', STR_PAD_LEFT),
                 'usuarioAtv' => $company->atv->user ? trim($company->atv->user) :  '',
                 'passwordAtv' => $company->atv->password ? trim($company->atv->password) : '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,

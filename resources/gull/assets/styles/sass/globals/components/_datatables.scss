@@ -127,5 +127,22 @@ table.table-bordered.dataTable tr {
 }
 
 table#bill-table, table#invoice-table {
-    font-size: 0.75rem;
+    font-size: 0.725rem;
+}
+
+.actions-flex {
+    display: flex;
+    flex-wrap: wrap;
+    width: 115px;
+    margin: -0.5rem;
+}
+
+.actions-flex > a, .actions-flex > form {
+    margin: .5rem;
+    flex-wrap: wrap;
+}
+
+table#bill-table td,
+table#invoice-table td {
+    vertical-align: middle !important;
 }
