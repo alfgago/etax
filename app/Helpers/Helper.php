@@ -146,7 +146,7 @@ if (!function_exists('userCompanies')) {
 if (!function_exists('currentCompany')) {
 
     function currentCompany() {
-        
+        try {
         $user = auth()->user();
         if ( !$user->companies->count() ) {
             return auth()->user()->addCompany();
@@ -157,6 +157,7 @@ if (!function_exists('currentCompany')) {
         }catch( \Throwable $e ){
             return $user->teams[0]->company->id;
         }
+        }catch(\Throwable $e){}
     }
 
 }
