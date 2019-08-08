@@ -184,8 +184,9 @@ $(document).ready(function(){
       }
     });
     
-    //$(".iva_type").change();
-
+    <?php if( !$bill->is_code_validated ){ ?>
+      $(".iva_type").change();
+    <?php } ?>
 });
       
 </script>

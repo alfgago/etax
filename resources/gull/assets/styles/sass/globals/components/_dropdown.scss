@@ -118,3 +118,17 @@
     right: 0;
     top: 0;
 }
+
+.companyParent .select2-container span {
+    font-size: 12px;
+    min-width: 280px;
+}
+
+span.select2-container.select2-container--default.select2-container--open {
+    font-size: 13px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    left: auto;
+    right: 6px;
+}

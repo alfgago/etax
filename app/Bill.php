@@ -295,11 +295,18 @@ class Bill extends Model
               ]
         );
         
+        if( $bill->id ) {
+          Log::warning( "XML: No se pudo guardar la factura de compra. Ya existe para la empresa." );
+          return false;
+        }
+        
         $bill->commercial_activity = $arr['CodigoActividad'] ?? 0;
         $bill->xml_schema = $bill->commercial_activity ? 43 : 42;
         $bill->sale_condition = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
         $bill->credit_time = null;
+
         $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '01';
+
         if ( is_array($medioPago) ) {
           $medioPago = $medioPago[0];
         }
@@ -452,6 +459,7 @@ class Bill extends Model
         $lids = array();
         $items = array();
         $numeroLinea = 0;
+
         foreach( $lineas as $linea ) {
             $numeroLinea++;
             try {
@@ -496,6 +504,7 @@ class Bill extends Model
                 if( is_array($linea['Impuesto'])){
                   $montoIva = 0;
                   $porcentajeIva = 0;
+
                   foreach ($linea['Impuesto'] as $imp){
                     if( trim($imp['Tarifa']) == 5 ){
                       $subtotalLinea = $subtotalLinea + (float)trim($imp['Monto'] );
@@ -544,7 +553,7 @@ class Bill extends Model
               $item_modificado = $bill->addEditItem($item);
               array_push( $lids, $item_modificado->id );
             }catch(\Throwable $e){
-              dd($item);
+
             }
         }
         
