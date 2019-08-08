@@ -334,11 +334,15 @@ $company = currentCompanyModel();
 
 <script>
 $(document).ready(function(){
-  if( $('#default_vat_code').length ){
-    $('#tipo_iva').val( $('#default_vat_code').val() ).change();
-  }else{
-    $('#tipo_iva').val( 'B103' ).change();
-  }
+  <?php if( @$document_type != "08"){ ?>
+    if( $('#default_vat_code').length ){
+      $('#tipo_iva').val( $('#default_vat_code').val() ).change();
+    }else{
+      $('#tipo_iva').val( 'B103' ).change();
+    }
+  <?php }else{ ?>
+    $('#tipo_iva').val( 'S140' ).change();
+  <?php } ?>
 
   $('#moneda').change(function() {
     if ($(this).val() == 'USD') {

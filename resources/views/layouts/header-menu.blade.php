@@ -22,7 +22,7 @@
             <div class="companyParent">
                 <label for="country">Empresa actual:</label>
                 <div class="form-group">
-                    <select class="form-control" id="company_change" onchange="companyChange(true);">
+                    <select class="form-control select-search" id="company_change" onchange="companyChange(true);">
 
                         @foreach( auth()->user()->teams as $row )
                             <?php  
