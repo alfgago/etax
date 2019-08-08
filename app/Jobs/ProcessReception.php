@@ -131,15 +131,15 @@ class ProcessReception implements ShouldQueue
                         } else {
                             //$bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
                             //$bill->save();
-                            Log::error('ERROR Enviando parametros  API HACIENDA Reception: '.$this->billId);
+                            Log::error('ERROR Enviando parametros  API HACIENDA Reception Empresa '.$company->business_name.' Bill: '.$this->billId);
                         }
-                        Log::info('Proceso de Reception finalizado con éxito.');
+                        Log::info('Proceso de Reception finalizado con éxito. Empresa '.$company->business_name.' Bill: '.$this->billId);
                     }
                 } else {
-                    Log::info('Proceso de Reception Factura ya habia sido enviada.');
+                    Log::info('Proceso de Reception Factura ya habia sido enviada. Empresa '.$company->business_name.' Bill: '.$this->billId);
                 }
             }else {
-                Log::warning('El job Receptions no se procesó, porque la empresa no tiene un certificado válido: Cedula '.$company->id_number.' Id Bill'.$this->billId.'-->>');
+                Log::warning('El job receptions no se procesó, porque la empresa no tiene un certificado válido: Empresa '.$company->business_name.' Bill: '.$this->billId.'-->>');
             }
         } catch ( \Exception $e) {
             Log::error('ERROR Enviando parametros  API HACIENDA Reception: '.$this->billId.'-->>'.$e);
