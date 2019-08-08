@@ -223,11 +223,11 @@
         <tr class="details">
             <td style="width: 40%;margin-top: 0.75% !important;">
                 <b>Receptor: </b> {{$data_invoice->client_first_name.' '.$data_invoice->client_last_name}} <br>
-                <b>Cedula: </b> {{$data_invoice->client_id_number}}<br>
+                <b>Cédula: </b> {{$data_invoice->client_id_number}}<br>
                 <b>Tel: </b> {{$data_invoice->client_phone}}<br>
                 <b>Correo: </b> {{$data_invoice->client_email}}<br>
-                <b>Codigo Interno :</b> {{$data_invoice->id}}<br>
-                <b>Direccion: </b> {{$data_invoice->client_address}}<br>
+                <b>Código Interno :</b> {{$data_invoice->id}}<br>
+                <b>Dirección: </b> {{$data_invoice->client_address}}<br>
             </td>
 
             <td style="width: 42%;margin-top: 0.75% !important;">
