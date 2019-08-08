@@ -152,7 +152,11 @@ if (!function_exists('currentCompany')) {
             return auth()->user()->addCompany();
         }
         
-        return $user->currentTeam->company->id;
+        try{
+            return $user->currentTeam->company->id;
+        }catch( \Throwable $e ){
+            return $user->teams[0]->company->id;
+        }
     }
 
 }
