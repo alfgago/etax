@@ -45,7 +45,7 @@
     
     <div class="form-group col-md-4">
       <label for="phone">Teléfono</label>
-      <input type="text" numeric class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" maxlength="20" max="20" onblur="validatePhoneFormat();">
+      <input type="number" pattern="/[0-9]|\./$" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" maxlength="20" max="20" onblur="validatePhoneFormat();">
     </div>
     
     <div class="form-group col-md-4"></div>
@@ -160,7 +160,7 @@
 
                 $('#extranjero').attr("hidden", true);
                 $('#country').val('CR');
-                setTimeout(fillProvincias, 1000);
+                //setTimeout(fillProvincias, 1000);
             }
         }
         $('#phone').val('');
@@ -203,7 +203,7 @@
 
             $('#extranjero').attr("hidden", true);
             $('#tipo_persona').val('F');
-            setTimeout(fillProvincias, 1000);
+            //setTimeout(fillProvincias, 1000);
         }
     }
 </script>

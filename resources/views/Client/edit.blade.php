@@ -44,12 +44,12 @@
 		    
 		  	fillProvincias();
 		  	
-  	    $("#billing_emails").tagging({
-  	      "forbidden-chars":[",",'"',"'","?"],
-  	      "forbidden-chars-text": "Caracter inválido: ",
-  	      "edit-on-delete": false,
-  	      "tag-char": "@"
-  	    });
+            $("#billing_emails").tagging({
+              "forbidden-chars":[",",'"',"'","?"],
+              "forbidden-chars-text": "Caracter inválido: ",
+              "edit-on-delete": false,
+              "tag-char": "@"
+            });
 		    
 		    toggleApellidos();
 		    
