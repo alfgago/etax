@@ -372,10 +372,12 @@ class InvoiceController extends Controller
             
             clearInvoiceCache($invoice);
           
-            return redirect('/facturas-emitidas');
+            return redirect('/facturas-emitidas')->withMessage('Factura registrada con éxito');
         }else{
             return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
         }
+       
+      
     }
     
     /**
@@ -451,7 +453,7 @@ class InvoiceController extends Controller
                     clearInvoiceCache($invoice);
                 
 
-                    return redirect('/facturas-emitidas');
+                    return redirect('/facturas-emitidas')->withMessage('Factura registrada con éxito');
                 } else {
                     return back()->withError( 'Ha ocurrido un error al enviar factura.' );
                 }
@@ -548,7 +550,7 @@ class InvoiceController extends Controller
         $invoice = Invoice::findOrFail($id); 
         if(CalculatedTax::validarMes($request->generated_date)){
             $this->authorize('update', $invoice);
-          
+
             //Valida que la factura emitida sea generada manualmente. De ser generada por XML o con el sistema, no permite edición.
             if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
               return redirect('/facturas-emitidas');
@@ -557,8 +559,11 @@ class InvoiceController extends Controller
             $invoice->setInvoiceData($request);
             
             clearInvoiceCache($invoice);
+            return redirect('/facturas-emitidas')->withMessage('Factura editada con éxito');
+        } else{
+            return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
         }
-        return redirect('/facturas-emitidas');
+
     }
     
     public function export() {

@@ -175,6 +175,10 @@ Route::prefix('payment')->group(function(){
 });
 
 
+Route::prefix('clients')->group(function(){
+    Route::get('clients-update-view/{id}', 'ClientController@edit')->name('clients_update_view');
+    Route::delete('clients-delete/{id}', 'ClientController@destroy')->name('clients_delete');
+});
 Route::prefix('payment-methods')->group(function(){
     Route::get('payment-method-create-view', 'PaymentMethodController@createView')->name('PaymentMethod.payment_method_create_view');
     Route::post('payment-method-create', 'PaymentMethodController@create')->name('PaymentMethod.payment_create');

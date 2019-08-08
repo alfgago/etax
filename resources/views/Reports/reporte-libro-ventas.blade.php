@@ -34,7 +34,7 @@
 		                <td>{{ $item->invoice->document_number }}</td>
 		                <td>{{ $item->item_number }}</td>
 		                <td>{{ $item->name }}</td>
-		                <td>{{ $item->invoice->currency }}</td>
+		                <td>{{ $item->invoice->currency }} {{ $item->invoice->currency == 'USD' ? "(".$item->invoice->currency_rate.")" : '' }}</td>
 		                <td>{{ number_format( $item->subtotal, 2) }}</td>
 		                <td>{{ $item->iva_percentage }}%</td>
 		                <td>{{ number_format( $item->iva_amount, 2) }}</td>

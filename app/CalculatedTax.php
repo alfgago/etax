@@ -269,7 +269,8 @@ class CalculatedTax extends Model
       }
       
       $ivaData = json_decode( $this->iva_data ) ?? new \stdClass();
-      $arrayActividades = currentCompanyModel()->getActivities();
+      $arrayActividades = explode( ',', currentCompanyModel()->commercial_activities );
+      
       InvoiceItem::with('invoice')
                   ->with('ivaType')
                   ->where('company_id', $company)
@@ -306,7 +307,7 @@ class CalculatedTax extends Model
               $currActivity = $currInvoice->commercial_activity;
               
               if( !isset($currActivity) || !in_array($currActivity, $arrayActividades) ){
-                $currActivity = $arrayActividades[0]->codigo;
+                $currActivity = $arrayActividades[0];
                 $currInvoice->commercial_activity = $currActivity;
                 //$currInvoice->save();
               }
@@ -371,11 +372,28 @@ class CalculatedTax extends Model
                 $sumRepercutido3 += $subtotal;
                 $sumRepercutidoExentoConCredito += $subtotal;
               }
-              if( $ivaType == 'S181' || $ivaType == 'S182' ||  $ivaType == 'S183' || $ivaType == 'S184' ||
-                  $ivaType == 'B181' || $ivaType == 'B182' ||  $ivaType == 'B183' || $ivaType == 'B184' ){
+              if( $ivaType == 'S181' || $ivaType == 'B181' ){
+                $subtotal = $subtotal;
+                $invoiceIva = 0;
+                $sumRepercutido1 += $subtotal;
+                $sumRepercutidoExentoConCredito += $subtotal;
+              }
+              if( $ivaType == 'S182' || $ivaType == 'B182' ){
+                $subtotal = $subtotal;
+                $invoiceIva = 0;
+                $sumRepercutido2 += $subtotal;
+                $sumRepercutidoExentoConCredito += $subtotal;
+              }
+              if( $ivaType == 'S183' || $ivaType == 'B183' ){
                 $subtotal = $subtotal;
                 $invoiceIva = 0;
                 $sumRepercutido3 += $subtotal;
+                $sumRepercutidoExentoConCredito += $subtotal;
+              }
+              if( $ivaType == 'S184' || $ivaType == 'B184' ){
+                $subtotal = $subtotal;
+                $invoiceIva = 0;
+                $sumRepercutido4 += $subtotal;
                 $sumRepercutidoExentoConCredito += $subtotal;
               }
               //No cuenta los que no llevan IVA
@@ -503,7 +521,7 @@ class CalculatedTax extends Model
       $totalProveedoresContado = 0;
       $totalProveedoresCredito = 0;
       $ivaData = json_decode( $this->iva_data ) ?? new \stdClass();
-      $arrayActividades = currentCompanyModel()->getActivities();
+      $arrayActividades = explode( ',', currentCompanyModel()->commercial_activities );
 
       $query->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$ivaData, &$singleBill, $arrayActividades,
        &$billsTotal, &$billsSubtotal, &$totalBillIva, &$basesIdentificacionPlena, &$basesNoDeducibles, &$ivaAcreditableIdentificacionPlena, 
@@ -536,7 +554,7 @@ class CalculatedTax extends Model
               
               $currActivity = $currBill->activity_company_verification;
               if( !isset($currActivity) || !in_array($currActivity, $arrayActividades) ){
-                $currActivity = $arrayActividades[0]->codigo;
+                $currActivity = $arrayActividades[0];
                 $currBill->commercial_activity = $currActivity;
                 //$currBill->save();
               }
