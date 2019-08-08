@@ -499,10 +499,10 @@ class InvoiceController extends Controller
                 ->update(['product_type'=>$item['category_product'],'iva_type'=>$item['tipo_iva']]);
                 
             }
+            return redirect('/facturas-emitidas/')->withMessage('Factura actualizada');
         }else{
             return back()->withError('Mes seleccionado ya fue cerrado');
         }
-        return redirect('/facturas-emitidas/'.$request->invoice_id)->withMessage('Factura actualizada');
     }
 
     /**
