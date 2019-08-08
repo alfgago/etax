@@ -295,7 +295,6 @@ class ReportsController extends Controller
           }
           array_push( $actividadDataArray, $actividadData );
         }
-        dd($actividadDataArray);
         
         return view('/Reports/reporte-borrador-iva', compact('data', 'mes', 'ano', 'nombreMes', 'actividadDataArray', 'acumulado') );
       
