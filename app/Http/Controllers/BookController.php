@@ -98,7 +98,6 @@ class BookController extends Controller
     public function validar($cierre){
         $book = Book::join('calculated_taxes','calculated_taxes.id','books.calculated_tax_id')
             ->where('books.id',$cierre)->first();
-            
         $invoices = Invoice::where(function ($query) use($book) {
             $query->where(['company_id'=> $book->company_id,'month'=> $book->month,'year'=> $book->year,'is_authorized' => true])
                 ->where('commercial_activity', null);
@@ -120,6 +119,11 @@ class BookController extends Controller
         })->get();
 
         $bloqueo = count($bills) + count($invoices);
+        if($book->year == 2019){
+            if($book->month < 6){
+                $bloqueo = 0;
+            }
+        }
         if($bloqueo > 0){
             $retorno = array(
                 "cierre" => $cierre,
