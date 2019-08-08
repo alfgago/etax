@@ -54,11 +54,15 @@ class ResendReception extends Command
             foreach ($bills as $bill) {
                 $provider = $bill->provider;
                 $company = $bill->company;
-                $ref = $company->last_rec_ref_number;
-                $this->info('Sending Reception ....'. $bill->document_key);
-                sleep(4);
-                ProcessReception::dispatch($bill->id, $provider->id, $tokenApi, $ref)
-                    ->onConnection(config('etax.queue_connections'))->onQueue('receptions');
+                if( $company ){
+                    $ref = $company->last_rec_ref_number;
+                    Log::info('Sending Reception .... Empresa: $company->id_number, Doc:'. $bill->document_key);
+                    sleep(4);
+                    ProcessReception::dispatch($bill->id, $provider->id, $tokenApi, $ref)
+                        ->onConnection(config('etax.queue_connections'))->onQueue('receptions');
+                }else{
+                    Log::error("Error en resend: compra $bill->id no tiene empresa");
+                }
             }
         } catch ( \Exception $e) {
             Log::error('Error resend command receptions'.$e);
