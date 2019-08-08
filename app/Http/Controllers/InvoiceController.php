@@ -847,7 +847,7 @@ class InvoiceController extends Controller
             return back()->withError( 'Por favor mantenga el límite de 10 archivos por intento.');
         }
           
-        //try {
+        try {
             $time_start = getMicrotime();
             $company = currentCompanyModel();
             if( request()->hasfile('xmls') ) {
@@ -878,13 +878,13 @@ class InvoiceController extends Controller
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
 
-        /*}catch( \Exception $ex ){
+        }catch( \Exception $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML de factura válida.');
         }catch( \Throwable $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML de factura válida.');
-        }*/
+        }
         
         return redirect('/facturas-emitidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
     }
@@ -1153,6 +1153,7 @@ class InvoiceController extends Controller
     public function fixImports() {
         $invoiceUtils = new InvoiceUtils();
         $invoices = Invoice::where('generation_method', 'Email')->orWhere('generation_method', 'XML')->get();
+        dd($invoices);
         
         foreach($invoices as $invoice) {
             if( !$invoice->client_zip ){
@@ -1166,7 +1167,6 @@ class InvoiceController extends Controller
             }
         }
         
-        dd($invoices);
         return true;
     }
 
