@@ -498,7 +498,7 @@ class BillController extends Controller
                             Bill::storeXML( $bill, $file );
                         }
                     }else{
-                        return back()->withError( "La factura $consecutivoComprobante subida no le pertenece a su compañía actual." );
+                        return back()->withError( "El documento $consecutivoComprobante no le pertenece a su compañía actual." );
                     }
                 }
             }
