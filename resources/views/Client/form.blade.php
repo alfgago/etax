@@ -45,7 +45,7 @@
     
     <div class="form-group col-md-4">
       <label for="phone">Teléfono</label>
-      <input type="number" pattern="/[0-9]|\./$" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" maxlength="20" max="20" onblur="validatePhoneFormat();">
+      <input type="number" pattern="/[0-9]|\./$" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" maxlength="20"  onblur="validatePhoneFormat();">
     </div>
     
     <div class="form-group col-md-4"></div>
