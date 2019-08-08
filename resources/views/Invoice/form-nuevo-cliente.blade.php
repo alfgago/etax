@@ -24,14 +24,14 @@
         <option value="J" >Jurídica</option>
         <option value="D" >DIMEX</option>
         <option value="N" >NITE</option>
-      @elseif(@$document_type == '04')
+      @elseif(@$document_type == '04' || @$document_type == '')
         <option value="F" >Física</option>
         <option value="J" >Jurídica</option>
         <option value="D" >DIMEX</option>
         <option value="N" >NITE</option>
         <option value="E" >Extranjero</option>
         <option value="O" >Otro</option>
-        @else
+        @elseif(@$document_type == '09')
         <option value="E" >Extranjero</option>
         <option value="O" >Otro</option>
       @endif
