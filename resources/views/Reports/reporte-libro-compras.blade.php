@@ -14,6 +14,8 @@
 	                <th>Consecutivo</th>
 	                <th># Línea</th>
 	                <th>Producto</th>
+	                <th>Tipo IVA</th>
+	                <th>Cat. Declaración</th>
 	                <th>Moneda</th>
 	                <th>Subtotal</th>
 	                <th>Tarifa IVA</th>
@@ -31,6 +33,8 @@
 		                <td>{{ $item->bill->document_number }}</td>
 		                <td>{{ $item->item_number }}</td>
 		                <td>{{ $item->name }}</td>
+		                <td>{{ @$item->ivaType->code }}</td>
+		                <td>{{ @$item->productCategory->name }}</td>
 		                <td>{{ $item->bill->currency }} {{ $item->bill->currency == 'USD' ? "(".$item->bill->currency_rate.")" : '' }}</td>
 		                <td>{{ number_format( $item->subtotal, 2) }}</td>
 		                <td>{{ $item->iva_percentage }}%</td>

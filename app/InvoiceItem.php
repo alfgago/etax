@@ -22,6 +22,10 @@ class InvoiceItem extends Model
     public function ivaType() {
       return $this->belongsTo(CodigoIvaRepercutido::class, 'iva_type');
     }
+    
+    public function productCategory() {
+      return $this->belongsTo(ProductCategory::class, 'product_type');
+    }
 
     public function fixIvaType() {
       $initial = $this->iva_type[0];
