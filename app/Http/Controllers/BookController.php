@@ -120,7 +120,7 @@ class BookController extends Controller
 
         $bloqueo = count($bills) + count($invoices);
         if($book->year == 2019){
-            if($book->month < 6){
+            if($book->month < 7){
                 $bloqueo = 0;
             }
         }
