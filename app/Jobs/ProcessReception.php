@@ -118,19 +118,19 @@ class ProcessReception implements ShouldQueue
                             Log::info('Reception enviada y XML guardado.');
                         } else if (isset($response['status']) && $response['status'] == 400 &&
                             strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
-                            $bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
-                            $bill->save();
+                            //$bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
+                            //$bill->save();
                             Log::info('Failed Job');
 
 
                         } else if (isset($response['status']) && $response['status'] == 400 &&
                             strpos($response['message'], 'archivo XML ya existe en nuestras bases de datos') <> false) {
-                            $bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
-                            $bill->save();
+                            //$bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
+                            //$bill->save();
                             Log::info('Failed Job');
                         } else {
-                            $bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
-                            $bill->save();
+                            //$bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
+                            //$bill->save();
                             Log::error('ERROR Enviando parametros  API HACIENDA Reception: '.$this->billId);
                         }
                         Log::info('Proceso de Reception finalizado con éxito.');

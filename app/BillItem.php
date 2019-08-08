@@ -22,6 +22,10 @@ class BillItem extends Model
       return $this->belongsTo(CodigoIvaSoportado::class, 'iva_type');
     }    
     
+    public function productCategory() {
+      return $this->belongsTo(ProductCategory::class, 'product_type');
+    }
+    
     public function fixIvaType() {
       try{
         
