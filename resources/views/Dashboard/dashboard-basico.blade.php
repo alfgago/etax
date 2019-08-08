@@ -83,7 +83,7 @@
       <div class="sidebar-dashboard">
         <div class="card-title">Notificaciones</div>
         <div class="notificaciones-container">
-            <p>El 08 de Agosto es el último día para validar sus facturas de gastos ante el Ministerio de Hacienda y que puedan incluirse en su cálculo de IVA</p>
+            <p>El 13 de Agosto es el último día para validar sus facturas de gastos ante el Ministerio de Hacienda y que puedan incluirse en su cálculo de IVA</p>
 
         </div>
         

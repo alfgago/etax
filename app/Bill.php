@@ -699,19 +699,19 @@ class Bill extends Model
               $bill->is_void = false;
               
               //Datos de factura
-              $bill->currency = $data['idMoneda'];
+              $bill->currency = $data['moneda'];
               if( $bill->currency == 1 ) { $bill->currency = "CRC"; }
               if( $bill->currency == 2 ) { $bill->currency = "USD"; }
-                  
+
               $bill->currency_rate = $data['tipoCambio'];
               //$bill->description = $row['description'] ? $row['description'] : '';
-            
+
               $company->last_bill_ref_number = $bill->reference_number;
               
               $bill->subtotal = 0;
               $bill->iva_amount = 0;
               $bill->total = $data['totalDocumento'];
-              
+
               $bill->save();
               $company->save();
               

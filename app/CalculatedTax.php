@@ -55,6 +55,42 @@ class CalculatedTax extends Model
       }
     }
     
+ /**
+     * validarMes
+     * Valida si para el mes en el que se quiere asignar el dato tiene una cierre abierto 
+     * @bodyParam date required Fecha en la que se va a guardar el dato ejemplo 19/09/1994
+     * @return true / false
+     */
+    public static function validarMes($date){
+      try{
+        $company = currentCompanyModel();
+        $generated_date = explode("/", $date);
+        $existe = CalculatedTax::where([['company_id',$company->id],['month',$generated_date[1]],
+              ['year',$generated_date[2]]])->count();
+        if($existe == 0){
+          return true;
+        }else{
+          $abierto = CalculatedTax::where([['company_id',$company->id],['month',$generated_date[1]],
+                ['year',$generated_date[2]],['is_final',1],['is_closed',0]])->count();
+          if($abierto == 0){
+            return false;
+          }else{
+            if($abierto > 0){
+
+                return true;
+            }else{
+              return false;
+            }
+          }
+        }
+      } catch( \Exception $ex ) {
+        Log::error("ERROR validando si el mes esta cerrado -> ".$ex->getMessage());
+        return false;
+      }
+    }
+
+
+
     /**
      * applyRatios
      * Aplica los ratios operativos y devuelve el valor con el cálculo realizado según el porcentaje indicado
