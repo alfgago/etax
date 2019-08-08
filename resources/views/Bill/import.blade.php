@@ -50,6 +50,7 @@
 			  		<li>TotalLinea</li>
 			  		<li>TotalDocumento</li>
 			  		<li>CodigoIVAEtax</li>
+			  		<li>ActividadComercial</li>
 			  	</ul>
 			  	* El orden puede variar, pero debe mantener nombres de columnas. Debe utilizar una fila por cada linea de factura.
 			  	* Máximo de 2500 lineas por archivo.
