@@ -59,7 +59,7 @@
     </div>
     <div class="form-group">
       <label for="total_retenido">SALDO REAL RETENIDO</label>
-      <input type="number" class="form-control" id="total_retenido" @if($data['cerrado'] === 1) disabled @endif name="total_retenido" value="{{ $data['total_retencion'] }}">
+      <input type="number" class="form-control" steps="0.01" id="total_retenido" @if($data['cerrado'] === 1) disabled @endif name="total_retenido" value="{{ round($data['total_retenido'],0) }}">
     </div>
     @if($data['cerrado'] === 0) 
         <input type="number" class="form-control" id="cierre" name="cierre" hidden value="{{@$data['cierre']}}">

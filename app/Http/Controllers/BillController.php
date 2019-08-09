@@ -341,7 +341,7 @@ class BillController extends Controller
         
         $company = currentCompanyModel();
         
-        if( $collection[0]->count() < 2501 ){
+        if( $collection[0]->count() < 5001 ){
             try {
                 foreach ($collection[0]->chunk(200) as $facturas) {
                     \DB::transaction(function () use ($facturas, &$company, &$i) {
@@ -481,7 +481,7 @@ class BillController extends Controller
             
             return redirect('/facturas-recibidas')->withMessage('Facturas importados exitosamente en '.$time.'s');
         }else{
-            return redirect('/facturas-recibidas')->withError('Usted tiene un límite de 2500 facturas por archivo.');
+            return redirect('/facturas-recibidas')->withError('Usted tiene un límite de 5000 facturas por archivo.');
         }
         
     }

@@ -126,7 +126,7 @@
 	    <th colspan="5"> Monto </th>
 	  </tr>
 	    <th>Retenciones pagos a cuenta del impuesto</th>
-	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->retention_by_card, 0) }}" > </td>
+	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->retention_by_card ? $data->retention_by_card : $data->iva_retenido, 0) }}" > </td>
 	  </tr>
 	  <tr>
 	    <th>Saldo a favor de periodos anteriores</th>
