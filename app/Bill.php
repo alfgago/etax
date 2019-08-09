@@ -571,15 +571,15 @@ class Bill extends Model
     public static function storeXML($bill, $file) {
         
         $cedulaEmpresa = $bill->company->id_number;
-        $cedulaProveedor = $bill->provider->id_number;
+        //$cedulaProveedor = $bill->provider->id_number;
         $consecutivoComprobante = $bill->document_number;
         
-        if ( Storage::exists("empresa-$cedulaEmpresa/facturas_compras/$cedulaProveedor-$consecutivoComprobante.xml")) {
-            Storage::delete("empresa-$cedulaEmpresa/facturas_compras/$cedulaProveedor-$consecutivoComprobante.xml");
+        if ( Storage::exists("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/$consecutivoComprobante.xml")) {
+            Storage::delete("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/$consecutivoComprobante.xml");
         }
         
         $path = \Storage::putFileAs(
-            "empresa-$cedulaEmpresa/facturas_compras", $file, "$cedulaProveedor-$consecutivoComprobante.xml"
+            "empresa-$cedulaEmpresa/facturas_compras", $file, "$bill->year/$bill->month/$consecutivoComprobante.xml"
         );
         
         try{

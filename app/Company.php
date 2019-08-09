@@ -216,7 +216,7 @@ class Company extends Model {
                                 ->where('month', $month)
                                 ->where('year', $year)
                                 ->first();
-                                
+                       
             // Si no encontró nada, tiene que crearla.
             if( ! $available_invoices ) {
                 $subscriptionPlan = getCurrentSubscription()->plan;

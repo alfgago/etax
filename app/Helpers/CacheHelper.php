@@ -38,6 +38,8 @@ if (!function_exists('clearCierreCache')) {
     function clearCierreCache($current_company, $month, $year){
       $cacheKey = "cache-estadoCierre-$current_company-$month-$year";
       Cache::forget($cacheKey);
+      $cacheKey2 = "cache-taxes-$current_company-$month-$year";
+      Cache::forget($cacheKey2);
     }
     
 }

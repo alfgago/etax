@@ -187,13 +187,12 @@ class BookController extends Controller
     public function retenciones_tarjeta($id){
         $company = currentCompanyModel();
         $retencion_porcentaje = $company->card_retention;
-        $cierres = CalculatedTax::where('company_id', $company->id)
-            ->where('id',$id)->first();
+        $cierres = CalculatedTax::where('company_id', $company->id)->where('id',$id)->first();
         $month = $cierres->month;
         $year = $cierres->year;
         $cerrado = $cierres->is_closed;
         $total_retenido = $cierres->retention_by_card;
-        $invoices = Invoice::select('generated_date', 'document_number', 'client_first_name', 'client_last_name', 'client_last_name2','total','total as retencion')
+        $invoices = Invoice::select('generated_date', 'document_number', 'client_first_name', 'client_last_name', 'client_last_name2','total','total as retencion', 'currency_rate')
             ->where('company_id',$company->id)
             ->whereYear('generated_date',$year)
             ->whereMonth('generated_date',$month)
@@ -202,11 +201,16 @@ class BookController extends Controller
         $total_facturado = 0;
         $total_retencion = 0;
         foreach($invoices as $invoice){
-            $total = $invoice->total;
+            $total = $invoice->total = $invoice->total * $invoice->currency_rate;
             $invoice->retencion = $total * $retencion_porcentaje / 100;
             $total_facturado += $total;
             $total_retencion += $total * $retencion_porcentaje / 100;
         }
+        
+        if($total_retenido == 0) {
+            $total_retenido = $total_retencion;
+        }
+        
         $data = array(
             'cierre' => $id,
             'mes' => $month,
@@ -223,11 +227,13 @@ class BookController extends Controller
 
     public function actualizar_retencion_tarjeta(Request $request){
         $company = currentCompanyModel();
-        CalculatedTax::where('company_id', $company->id)
-            ->where('id',$request->cierre)
-            ->where('is_closed',0)
-            ->update(['retention_by_card' => $request->total_retenido]);
-        //dd($request);
+        $calc = CalculatedTax::find($request->cierre);
+        if($calc->company_id == $company->id) {
+            $calc->retention_by_card = (float)$request->total_retenido;
+            $calc->save();
+            clearCierreCache($company->id, $calc->month, $calc->year);
+        }
+        
         return redirect('/cierres')->withMessage('Retención por tarjeta actualizada exitosamente.');
     }
 
