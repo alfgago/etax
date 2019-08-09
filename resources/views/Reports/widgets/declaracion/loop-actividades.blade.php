@@ -101,7 +101,7 @@
 				'col4' => 'true',
 				'col8' => 'true',
 			])
-		  <tr class="macro-title withmarcar inner desplegar-true">
+		  <tr class="macro-title withmarcar inner {{ $actividad['VNS']['totales'] ? 'desplegar-true' : 'desplegar-false' }}">
 			  <th class="marcar-td" colspan="1">
 					<span class="marcar">
 						¿Aplica?
