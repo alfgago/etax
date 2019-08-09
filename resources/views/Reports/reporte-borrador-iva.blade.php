@@ -185,7 +185,8 @@
 			    top: 1px;
 			}
 			
-			tr.sub-title.desplegar-false {
+			tr.sub-title.desplegar-false, 
+			tr.macro-title.desplegar-false {
 			    display: table-row;
 			}
 			
