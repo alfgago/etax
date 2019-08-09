@@ -198,74 +198,34 @@ class InvoiceController extends Controller
     public function emitFactura($tipoDocumento)
     {
         $company = currentCompanyModel(false);
-
-        //Revisa límite de facturas emitidas en el mes actual
-        $start_date = Carbon::parse(now('America/Costa_Rica'));
-        $month = $start_date->month;
-        $year = $start_date->year;
-        $available_invoices = $company->getAvailableInvoices( $year, $month );
         
-        $available_plan_invoices = $available_invoices->monthly_quota - $available_invoices->current_month_sent;
-        if($available_plan_invoices < 1 && $company->additional_invoices < 1){
-            return redirect()->back()->withError('Usted ha sobrepasado el límite de facturas mensuales de su plan actual.');
+        $errors = $company->validateEmit();
+        if( $errors ){
+            return redirect($errors['url'])->withError($errors['mensaje']);
         }
-        //Termina de revisar limite de facturas.
 
-        if ($company->atv_validation == false) {
-            $apiHacienda = new BridgeHaciendaApi();
-            $token = $apiHacienda->login(false);
-            $validateAtv = $apiHacienda->validateAtv($token, $company);
-            
-            if( $validateAtv ) {
-                if ($validateAtv['status'] == 400) {
-                    Log::info('Atv Not Validated Company: '. $company->id_number);
-                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
-                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
-                    }
-                    return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
-
-                } else {
-                    Log::info('Atv Validated Company: '. $company->id_number);
-                    $company->atv_validation = true;
-                    $company->save();
-                    
-                    $user = auth()->user();
-                    Cache::forget("cache-currentcompany-$user->id");
-                }
-            }else {
-                return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
-            }
-        }
-        
         $units = UnidadMedicion::all()->toArray();
         $countries  = CodigosPaises::all()->toArray();
-
         $arrayActividades = $company->getActivities();
         
         if(count($arrayActividades) == 0){
             return redirect('/empresas/editar')->withError('No ha definido una actividad comercial para esta empresa');
         }
-
-        if($company->last_note_ref_number === null) {
-            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
-        }
-        if($company->last_ticket_ref_number === null) {
-            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de tiquetes');
-        }
-
+        
         return view("Invoice/create-factura",
             [
                 'document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
                 'document_number' => $this->getDocReference($tipoDocumento),
                 'document_key' => $this->getDocumentKey($tipoDocumento),
-                'units' => $units, 'countries' => $countries, 'default_currency' => $company->default_currency,
+                'units' => $units, 'countries' => $countries,
+                'default_currency' => $company->default_currency,
                 'default_vat_code' => $company->default_vat_code
-            ]
-        )->with('arrayActividades', $arrayActividades);
+            ])
+            ->with('arrayActividades', $arrayActividades);
     }
     
     /**
-     * Muestra el formulario para emitir tiquetes electrónicos
+     * Muestra el formulario para emitir sujeto pasivos
      *
      * @return \Illuminate\Http\Response
      */
@@ -273,63 +233,31 @@ class InvoiceController extends Controller
     {
         $company = currentCompanyModel();
         $tipoDocumento = '08';
-
-        //Revisa límite de facturas emitidas en el mes actual
-        $start_date = Carbon::parse(now('America/Costa_Rica'));
-        $month = $start_date->month;
-        $year = $start_date->year;
-        $available_invoices = $company->getAvailableInvoices( $year, $month );
         
-        $available_plan_invoices = $available_invoices->monthly_quota - $available_invoices->current_month_sent;
-        if($available_plan_invoices < 1 && $company->additional_invoices < 1){
-            return redirect()->back()->withError('Usted ha sobrepasado el límite de facturas mensuales de su plan actual.');
+        //validates if the company has invoices left, atv, consecutivos
+        $errors = $company->validateEmit();
+        if(count($errors) > 0){
+            return redirect($errors['url'])->withError($errors['mensaje']);
         }
-        //Termina de revisar limite de facturas.
 
-        if ($company->atv_validation == false) {
-            $apiHacienda = new BridgeHaciendaApi();
-            $token = $apiHacienda->login(false);
-            $validateAtv = $apiHacienda->validateAtv($token, $company);
-            
-            if( $validateAtv ) {
-                if ($validateAtv['status'] == 400) {
-                    Log::info('Atv Not Validated Company: '. $company->id_number);
-                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
-                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
-                    }
-                    return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
-
-                } else {
-                    Log::info('Atv Validated Company: '. $company->id_number);
-                    $company->atv_validation = true;
-                    $company->save();
-                    
-                    $user = auth()->user();
-                    Cache::forget("cache-currentcompany-$user->id");
-                }
-            }else {
-                return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
-            }
-        }
-        
+        //gather info from the DBs to the view
         $units = UnidadMedicion::all()->toArray();
         $countries  = CodigosPaises::all()->toArray();
-
         $arrayActividades = $company->getActivities();
         
         if(count($arrayActividades) == 0){
             return redirect('/empresas/editar')->withError('No ha definido una actividad comercial para esta empresa');
         }
-
-        if($company->last_note_ref_number === null) {
-            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
-        }
-        if($company->last_ticket_ref_number === null) {
-            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de tiquetes');
-        }
-        return view("Invoice/create-fec-sujetopasivo", ['document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
+        
+        return view("Invoice/create-fec-sujetopasivo", [
+            'document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
             'document_number' => $this->getDocReference($tipoDocumento),
-            'document_key' => $this->getDocumentKey($tipoDocumento), 'units' => $units, 'countries' => $countries])->with('arrayActividades', $arrayActividades);
+            'document_key' => $this->getDocumentKey($tipoDocumento),
+            'units' => $units, 'countries' => $countries,
+            'default_currency' => $company->default_currency,
+            'default_vat_code' => $company->default_vat_code
+            ])
+            ->with('arrayActividades', $arrayActividades);
     }
     
     /**
