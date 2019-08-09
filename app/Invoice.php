@@ -925,7 +925,7 @@ class Invoice extends Model
     
     public static function storeXML($invoice, $file) {
         $cedulaEmpresa = $invoice->company->id_number;
-        $cedulaCliente = $invoice->client->id_number;
+        //$cedulaCliente = $invoice->client->id_number;
         $consecutivoComprobante = $invoice->document_number;
         
         if ( Storage::exists("empresa-$cedulaEmpresa/facturas_ventas/$invoice->year/$invoice->month/$consecutivoComprobante.xml")) {
@@ -944,6 +944,19 @@ class Invoice extends Model
           $xmlHacienda->save();
         }catch( \Throwable $e ){
           Log::error( 'Error al registrar en tabla XMLHacienda: ' . $e->getMessage() );
+        }
+        
+        try{
+          $available_invoices = AvailableInvoices::where('company_id', $invoice->company_id)
+                              ->where('year', $invoice->year)
+                              ->where('month', $invoice->month)
+                              ->first();
+          if( isset($available_invoices) ) {
+            $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
+            $available_invoices->save();
+          }
+        }catch( \Throwable $e ){
+          Log::error( 'Error al sumar en AvailableInvoices ' . $e->getMessage() );
         }
         
         return $path;
