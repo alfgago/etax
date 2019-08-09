@@ -699,124 +699,125 @@ class Invoice extends Model
         $invoice->document_type = $tipoDocumento ?? '01';
         
         //Start DATOS CLIENTE
-              if ( array_key_exists('Receptor', $arr) ){
-                if( isset( $arr['Receptor']['CorreoElectronico'] ) ){
-                    $correoCliente = $arr['Receptor']['CorreoElectronico'];
-                }else{
-                    $correoCliente = null;
-                }
-                if ( isset($arr['Receptor']['Telefono']) ) {
-                  $telefonoCliente = $arr['Receptor']['Telefono']['NumTelefono'] ?? null;
-                }else {
-                  $telefonoCliente = null;
-                }
-                if( isset($arr['Receptor']['Identificacion']['Tipo']) ){
-                    $tipoPersona = $arr['Receptor']['Identificacion']['Tipo'];
-                }else{
-                    $tipoPersona = null;
-                }
+        if ( array_key_exists('Receptor', $arr) ){
+            if( isset( $arr['Receptor']['CorreoElectronico'] ) ){
+                $correoCliente = $arr['Receptor']['CorreoElectronico'];
+            }else{
+                $correoCliente = null;
+            }
+            if ( isset($arr['Receptor']['Telefono']) ) {
+              $telefonoCliente = $arr['Receptor']['Telefono']['NumTelefono'] ?? null;
+            }else {
+              $telefonoCliente = null;
+            }
+            if( isset($arr['Receptor']['Identificacion']['Tipo']) ){
+                $tipoPersona = $arr['Receptor']['Identificacion']['Tipo'];
+            }else{
+                $tipoPersona = null;
+            }
 
-                if($invoice->xml_schema == 42){
-                    if ( isset($arr['Receptor']['Identificacion']['Numero']) ) {
-                        $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'] ?? null;
-                    }else {
-                        $identificacionCliente = null;
-                    }
-                }else{
-                  try { 
-                      $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
-                  }catch(\Exception $e){ $identificacionCliente = null; };
-                    
-                }
-                $nombreCliente = $arr['Receptor']['Nombre'];
-              
-                if ( isset($arr['Receptor']['Ubicacion']) ) {
-                  $provinciaCliente = $arr['Receptor']['Ubicacion']['Provincia'];
-                  $cantonCliente = $arr['Receptor']['Ubicacion']['Canton'];
-                  $distritoCliente = $arr['Receptor']['Ubicacion']['Distrito'];
-                  $otrasSenas = $arr['Receptor']['Ubicacion']['OtrasSenas'] ?? null;
-                  
-                  $zipCliente = 0;
-                  if( $cantonCliente ) {
-                      if( strlen( (int)$cantonCliente ) <= 2 ) {
-                          $cantonCliente = (int)$provinciaCliente . str_pad((int)$cantonCliente, 2, '0', STR_PAD_LEFT);
-                      }
-                  }
-                  if( $distritoCliente ) {
-                      if( strlen( $distritoCliente ) > 4 ) {
-                          $zipCliente = $distritoCliente;
-                      }else{
-                          $distritoCliente = (int)$cantonCliente . str_pad((int)$distritoCliente, 2, '0', STR_PAD_LEFT);
-                          $zipCliente = $distritoCliente;
-                      }
-                  }
-                }else{
-                  $provinciaCliente = '1';
-                  $cantonCliente = '101';
-                  $distritoCliente = '10101';
-                  $zipCliente = '10101';
-                  $otrasSenas = null;
-                  $nombreCliente = 'Cliente Genérico';
+            if($invoice->xml_schema == 42){
+                if ( isset($arr['Receptor']['Identificacion']['Numero']) ) {
+                    $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'] ?? null;
+                }else {
                     $identificacionCliente = null;
                 }
-                
-                if( $identificacionCliente ){
-                  $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
-                  if ( !Cache::has($clientCacheKey) ) {
-                      $clienteCache =  Client::updateOrCreate(
-                          [
-                              'id_number' => $identificacionCliente ?? null,
-                              'company_id' => $company->id,
-                          ],
-                          [
-                              'code' => $identificacionCliente ?? null,
-                              'company_id' => $company->id,
-                              'tipo_persona' => $tipoPersona,
-                              'id_number' => $identificacionCliente,
-                              'first_name' => $nombreCliente,
-                              'email' => $correoCliente,
-                              'phone' => $telefonoCliente,
-                              'fullname' => "$identificacionCliente - " . $nombreCliente,
-                              'country' => 'CR',
-                              'state' => $provinciaCliente,
-                              'city' => $cantonCliente,
-                              'district' => $distritoCliente,
-                              'zip' => $zipCliente,
-                              'address' => $otrasSenas,
-                              'foreign_address' => $otrasSenas,
-                          ]
-                      );
-                      Cache::put($clientCacheKey, $clienteCache, 30);
+            }else{
+              try {
+                  $identificacionCliente = $arr['Receptor']['Identificacion']['Numero'];
+              }catch(\Exception $e){ $identificacionCliente = null; }
+            }
+            try {
+                $nombreCliente = $arr['Receptor']['Nombre'];
+            }catch(\Exception $e){
+                $nombreCliente = 'Cliente Genérico';
+            }
+
+
+            if ( isset($arr['Receptor']['Ubicacion']) ) {
+              $provinciaCliente = $arr['Receptor']['Ubicacion']['Provincia'];
+              $cantonCliente = $arr['Receptor']['Ubicacion']['Canton'];
+              $distritoCliente = $arr['Receptor']['Ubicacion']['Distrito'];
+              $otrasSenas = $arr['Receptor']['Ubicacion']['OtrasSenas'] ?? null;
+
+              $zipCliente = 0;
+              if( $cantonCliente ) {
+                  if( strlen( (int)$cantonCliente ) <= 2 ) {
+                      $cantonCliente = (int)$provinciaCliente . str_pad((int)$cantonCliente, 2, '0', STR_PAD_LEFT);
                   }
-                  $cliente = Cache::get($clientCacheKey);
-                  
-                  $invoice->client_id = $cliente->id;
-                  $invoice->client_id_number = $identificacionCliente;
-                  $invoice->client_first_name = $nombreCliente;
-                  $invoice->client_email = $correoCliente;
-                  $invoice->client_address = $otrasSenas;
-                  $invoice->client_country = 'CR';
-                  $invoice->client_state = $provinciaCliente;
-                  $invoice->client_city = $cantonCliente;
-                  $invoice->client_district = $distritoCliente;
-                  $invoice->client_zip = $zipCliente;
-                  $invoice->client_phone = $telefonoCliente;
-                  $invoice->foreign_address = $otrasSenas;
-                }else{
-                  $invoice->client_email = 'N/A';
-                  $invoice->client_phone = 'N/A';
-                  $invoice->client_id_number = 0;
-                  $invoice->client_first_name = 'N/A';
-                  $invoice->document_type = '04';
-                }
-                
-              }else{
-                $invoice->client_email = 'N/A';
-                $invoice->client_phone = 'N/A';
-                $invoice->client_id_number = 0;
-                $invoice->client_first_name = 'N/A';
-                $invoice->document_type = '04';
               }
+              if( $distritoCliente ) {
+                  if( strlen( $distritoCliente ) > 4 ) {
+                      $zipCliente = $distritoCliente;
+                  }else{
+                      $distritoCliente = (int)$cantonCliente . str_pad((int)$distritoCliente, 2, '0', STR_PAD_LEFT);
+                      $zipCliente = $distritoCliente;
+                  }
+              }
+            }else{
+              $provinciaCliente = '1';
+              $cantonCliente = '101';
+              $distritoCliente = '10101';
+              $zipCliente = '10101';
+              $otrasSenas = null;
+            }
+
+        if( $identificacionCliente ){
+          $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
+          if ( !Cache::has($clientCacheKey) ) {
+              $clienteCache =  Client::updateOrCreate(
+                  [
+                      'id_number' => $identificacionCliente ?? null,
+                      'company_id' => $company->id,
+                  ],
+                  [
+                      'code' => $identificacionCliente,
+                      'company_id' => $company->id,
+                      'tipo_persona' => $tipoPersona ?? null,
+                      'id_number' => $identificacionCliente,
+                      'first_name' => $nombreCliente ?? null,
+                      'email' => $correoCliente ?? null,
+                      'phone' => $telefonoCliente ?? null,
+                      'fullname' => "$identificacionCliente - " . $nombreCliente ?? null,
+                      'country' => 'CR',
+                      'state' => $provinciaCliente ?? null,
+                      'city' => $cantonCliente ?? null,
+                      'district' => $distritoCliente ?? null,
+                      'zip' => $zipCliente ?? null,
+                      'address' => $otrasSenas ?? null,
+                      'foreign_address' => $otrasSenas ?? null,
+                  ]
+              );
+              Cache::put($clientCacheKey, $clienteCache, 30);
+          }
+          $cliente = Cache::get($clientCacheKey);
+
+          $invoice->client_id = $cliente->id;
+          $invoice->client_id_number = $identificacionCliente;
+          $invoice->client_first_name = $nombreCliente;
+          $invoice->client_email = $correoCliente;
+          $invoice->client_address = $otrasSenas;
+          $invoice->client_country = 'CR';
+          $invoice->client_state = $provinciaCliente;
+          $invoice->client_city = $cantonCliente;
+          $invoice->client_district = $distritoCliente;
+          $invoice->client_zip = $zipCliente;
+          $invoice->client_phone = $telefonoCliente;
+          $invoice->foreign_address = $otrasSenas;
+        }else{
+          $invoice->client_email = $arr['Receptor']['CorreoElectronico'] ??'N/A';
+          $invoice->client_phone = $arr['Receptor']['Telefono']['NumTelefono'] ?? 'N/A';
+          $invoice->client_id_number = $arr['Receptor']['Identificacion']['Numero'] ?? 0;
+          $invoice->client_first_name = $arr['Receptor']['Nombre'] ?? 'N/A';
+        }
+
+        }else{
+        $invoice->client_email = 'N/A';
+        $invoice->client_phone = 'N/A';
+        $invoice->client_id_number = 0;
+        $invoice->client_first_name = 'N/A';
+        $invoice->document_type = '04';
+        }
               
         //End DATOS CLIENTE
         
