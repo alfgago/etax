@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Utils\BridgeHaciendaApi;
 use App\Subscription;
 use App\SubscriptionPlan;
 use App\CalculatedTax;
@@ -329,6 +330,63 @@ class Company extends Model {
         } else {
             return false;
         }
+    }
+    
+    /*
+    *Checks various validations to make sure that company is able to emit new invoices.
+    *
+    *
+    */
+    public function validateEmit(){
+        
+        //Revisa límite de facturas emitidas en el mes actual
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $month = $start_date->month;
+        $year = $start_date->year;
+        
+        $available_invoices = $this->getAvailableInvoices( $year, $month );
+        
+        $available_plan_invoices = $available_invoices->monthly_quota - $available_invoices->current_month_sent;
+        if($available_plan_invoices < 1 && $this->additional_invoices < 1){
+            return $errors = ['url' => '/', 'mensaje' => 'Usted ha sobrepasado el límite de facturas mensuales de su plan actual.'];
+        }
+        //Termina de revisar limite de facturas.
+
+        if ($this->atv_validation == false) {
+            $apiHacienda = new BridgeHaciendaApi();
+            $token = $apiHacienda->login(false);
+            $validateAtv = $apiHacienda->validateAtv($token, $this);
+            
+            if( $validateAtv ) {
+                if ($validateAtv['status'] == 400) {
+                    Log::info('Atv Not Validated Company: '. $this->id_number);
+                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                    }
+                    return $errors = ['url' => '/empresas/certificado', 'mensaje' => "Error al validar el certificado: " . $validateAtv['message']];
+                    
+                } else {
+                    Log::info('Atv Validated Company: '. $this->id_number);
+                    $this->atv_validation = true;
+                    $this->save();
+                    
+                    $user = auth()->user();
+                    Cache::forget("cache-currentcompany-$user->id");
+                }
+            }else {
+                return $errors = ['url' => '/empresas/certificado', 'mensaje' => 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto. '];
+            }
+        }
+               
+        if($this->last_note_ref_number === null) {
+            return $errors = ['url' => '/empresas/configuracion', 'mensaje' => 'No ha ingresado ultimo consecutivo de nota credito'];
+        }
+        if($this->last_ticket_ref_number === null) {
+            return $errors = ['url' => '/empresas/configuracion', 'mensaje' => 'No ha ingresado ultimo consecutivo de tiquetes'];
+        }
+        
+        return $errors = false;
+        
     }
 
 }
