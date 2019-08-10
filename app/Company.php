@@ -10,6 +10,7 @@ use App\SubscriptionPlan;
 use App\CalculatedTax;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class Company extends Model {
 
@@ -119,6 +120,15 @@ class Company extends Model {
       if($anoAnterior == 2018) {
         if( $this->first_prorrata_type == 1 ){
           $prorrataOperativa = $this->first_prorrata ? $this->first_prorrata / 100 : 1;
+              
+          if( $prorrataOperativa == 1 ) {
+              $prorrataOperativa = 0.9999;
+              $this->first_prorrata = 99.99;
+              $this->operative_prorrata = 99.99;
+              $this->save();
+              $userId = auth()->user()->id;
+              Cache::forget("cache-currentcompany-$userId");
+          }
         }else {
           $anterior = CalculatedTax::getProrrataPeriodoAnterior( $anoAnterior );
           $prorrataOperativa = $anterior->prorrata;

@@ -242,7 +242,7 @@ class PaymentController extends Controller
                         'plan_type' => 'Contador',
                         'num_companies' => $request->num_companies,
                         'num_users' => 10,
-                        'num_invoices' => 10000,
+                        'num_invoices' => 2000,
                         'ticket_sla' => 1,
                         'call_center_vip' => 1,
                         'setup_help' => 1,
