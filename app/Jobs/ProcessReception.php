@@ -141,6 +141,11 @@ class ProcessReception implements ShouldQueue
                 }
             }else {
                 Log::warning('El job receptions no se procesó, porque la empresa no tiene un certificado válido: Empresa '.$company->business_name.' Bill: '.$this->billId.'-->>');
+                if( !$company->use_invoicing ){
+                    $bill->accept_status = 1;
+                    $bill->hacienda_status = '03';
+                    $bill->save();
+                }
             }
         } catch ( \Exception $e) {
             Log::error('ERROR Enviando parametros  API HACIENDA Reception: '.$this->billId.'-->>'.$e);
