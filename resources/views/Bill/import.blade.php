@@ -65,6 +65,7 @@
 					<div class="fallback">
 				      <input name="archivo" type="file" multiple="false" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
 				  </div>
+				  <small class="descripcion">Hasta 5000 líneas por archivo.</small>
 				</div>
 			</div>
 			

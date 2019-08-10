@@ -733,7 +733,6 @@ class CalculatedTax extends Model
     }
     
     public function setCalculosIVA( $prorrataOperativa, $lastBalance ) {
-      
       $company = currentCompanyModel();
       $subtotalAplicado =  $this->invoices_subtotal - $this->sum_iva_sin_aplicar;
       
@@ -761,9 +760,9 @@ class CalculatedTax extends Model
       $subtotalParaCFDP = 0;
       $cfdp = 0;
       
+      
       //Primero revisa si la sumatoria de pro
       if( $numeradorProrrata > 0 ){
-        
         //Define los ratios por tipo para calculo de prorrata
         $ratio1 = $this->sum_repercutido1 / $numeradorProrrata;
         $ratio2 = $this->sum_repercutido2 / $numeradorProrrata;
@@ -805,6 +804,8 @@ class CalculatedTax extends Model
       
       $prorrata = round($prorrata, 4);
       $prorrataOperativa = round($prorrataOperativa, 4);
+      $prorrata = ($prorrata == 1) ? 0.9999 : $prorrata; // El máximo posible es 0.9999
+      $prorrataOperativa = ($prorrataOperativa == 1) ? 0.9999 : $prorrataOperativa; // El máximo posible es 0.9999
       
       //Calcula el total deducible y no deducible en base a los ratios y los montos de facturas recibidas.
       $subtotalParaCFDP = $this->bills_subtotal - $this->bases_identificacion_plena - $this->bases_no_deducibles;
@@ -880,6 +881,7 @@ class CalculatedTax extends Model
     }
     
     public function setCalculosPorFactura( $prorrataOperativa, $lastBalance ) {
+      $prorrataOperativa = ($prorrataOperativa == 1) ? 0.9999 : $prorrataOperativa;
       
       $company = currentCompanyModel();
       
@@ -972,6 +974,7 @@ class CalculatedTax extends Model
                 $data->book = $book;
               }
           }
+          $data->prorrata = ($data->prorrata == 1) ? 0.9999 : $data->prorrata;
           $currentCompany->operative_prorrata = number_format( $data->prorrata*100, 2);
           $currentCompany->first_prorrata   = number_format( $data->prorrata*100, 2);
           $currentCompany->operative_ratio1 = number_format( $data->ratio1*100, 2);
