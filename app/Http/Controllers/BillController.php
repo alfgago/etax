@@ -319,8 +319,8 @@ class BillController extends Controller
      * @param  \App\Bill  $bill
      * @return \Illuminate\Http\Response
      */
-    public function export() {
-        return Excel::download(new BillExport(), 'documentos-recibidos.xlsx');
+    public function export( $year, $month ) {
+        return Excel::download(new BillExport($year, $month), 'documentos-recibidos.xlsx');
     }
 
     public function importExcel() {

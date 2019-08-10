@@ -20,8 +20,8 @@ Auth::routes();
 // Rutas de exportación
 Route::get('clientes/exportar', 'ClientController@export');
 Route::get('proveedores/exportar', 'ProviderController@export');
-Route::get('facturas-emitidas/exportar', 'InvoiceController@export');
-Route::get('facturas-recibidas/exportar', 'BillController@export');
+Route::get('facturas-emitidas/exportar/{year}/{month}', 'InvoiceController@export');
+Route::get('facturas-recibidas/exportar/{year}/{month}', 'BillController@export');
 
 // Rutas de importación
 Route::post('clientes/importar', 'ClientController@import');

@@ -494,8 +494,8 @@ class InvoiceController extends Controller
 
     }
     
-    public function export() {
-        return Excel::download(new InvoiceExport(), 'documentos-emitidos.xlsx');
+    public function export( $year, $month ) {
+        return Excel::download(new InvoiceExport($year, $month), 'documentos-emitidos.xlsx');
     }
     
     public function importExcel() {
