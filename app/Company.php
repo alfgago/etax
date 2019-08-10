@@ -10,6 +10,7 @@ use App\SubscriptionPlan;
 use App\CalculatedTax;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class Company extends Model {
 
