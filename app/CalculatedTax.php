@@ -65,26 +65,34 @@ class CalculatedTax extends Model
       try{
         $company = currentCompanyModel();
         $generated_date = explode("/", $date);
-        $existe = CalculatedTax::where([['company_id',$company->id],['month',$generated_date[1]],
-              ['year',$generated_date[2]]])->count();
+
+        $existe = CalculatedTax::where([
+          ['company_id',$company->id],
+          ['month',$generated_date[1]],
+          ['year',$generated_date[2]]
+        ])->count();
+              
         if($existe == 0){
           return true;
         }else{
-          $abierto = CalculatedTax::where([['company_id',$company->id],['month',$generated_date[1]],
-                ['year',$generated_date[2]],['is_final',1],['is_closed',0]])->count();
+          $abierto = CalculatedTax::where([
+            ['company_id',$company->id],
+            ['month',$generated_date[1]],
+            ['year',$generated_date[2]],
+            ['is_final',1],
+            ['is_closed',0]
+          ])->count();
           if($abierto == 0){
             return false;
           }else{
             if($abierto > 0){
-
-                return true;
+              return true;
             }else{
               return false;
             }
           }
         }
       } catch( \Exception $ex ) {
-        Log::error("ERROR validando si el mes esta cerrado -> ".$ex->getMessage());
         return false;
       }
     }

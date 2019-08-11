@@ -692,8 +692,10 @@ class Bill extends Model
                 $bill->accept_status = 0;
                 $bill->hacienda_status = "01";
               }else{
-                $bill->accept_status = 1;
-                $bill->hacienda_status = "03";
+                if( $data['acceptStatus'] ){
+                  $bill->accept_status = 1;
+                  $bill->hacienda_status = "03";
+                }
               }
 
               $bill->is_void = false;
@@ -762,7 +764,7 @@ class Bill extends Model
               'item_number' => $data['numeroLinea'],
               'code' => $data['codigoProducto'] ?? 'N/A',
               'name' => $data['detalleProducto'] ?? 'No indica',
-              'product_type' => 1,
+              'product_type' => $data['categoriaHacienda'] ?? 0,
               'measure_unit' => $data['unidadMedicion'],
               'item_count' => $data['cantidad'],
               'unit_price' => $data['precioUnitario'],

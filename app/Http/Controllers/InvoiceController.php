@@ -521,150 +521,124 @@ class InvoiceController extends Controller
         if( $collection[0]->count() < 5001 ){
             try {
                 
-                /**Revisa limite de facturas**/
-                /*$available = 0;
-                $unicos = [];
-                foreach ($collection[0]->chunk(200) as $facturas) {
-                    foreach ($facturas as $row) {
-                        $consecutivoComprobante = $row['consecutivocomprobante'];
-                        array_push( $unicos, $consecutivoComprobante );
-                    }
-                }
-                $unicos =  array_unique($unicos);
-                $totalFacturasExcel = sizeof($unicos);
-
-                $available_invoices = AvailableInvoices::where('company_id',$company->id)->first();
-                $available_invoices_by_plan = $available_invoices->monthly_quota - $available_invoices->current_month_sent;
-
-                if($totalFacturasExcel > $available_invoices_by_plan){
-                    $available = $available_invoices_by_plan + $company->additional_invoices;
-                }
-                if($totalFacturasExcel > $available){
-                    return back()->withError('No puede pasarse de su cuota de facturas mensual');
-                }*/
-                /**END Revisa limite de facturas**/
-                
                 foreach ($collection[0]->chunk(200) as $facturas) {
 
-                    \DB::transaction(function () use ($facturas, &$company, &$i /*, $available_invoices, $available_invoices_by_plan*/) {
+                    \DB::transaction(function () use ($facturas, &$company, &$i) {
 
                         $inserts = array();
                         foreach ($facturas as $row){
                             $i++;
+                            
+                            $arrayRow = array();
 
-                            if(CalculatedTax::validarMes($row['fechaemision'])){ 
-                                $arrayRow = array();
-                                /*if($available_invoices_by_plan > 0){
-                                    $available_invoices_by_plan = $available_invoices_by_plan - 1;
-                                }else{
-                                    $company->additional_invoices = $company->additional_invoices - 1;
-                                }*/
+                            $metodoGeneracion = "XLSX";
 
-                                $metodoGeneracion = "XLSX";
+                            //Datos de proveedor
+                            $nombreCliente = $row['nombrecliente'];
+                            $codigoCliente = array_key_exists('codigocliente', $row) ? $row['codigocliente'] : '';
+                            $tipoPersona = $row['tipoidentificacion'];
+                            $identificacionCliente = $row['identificacionreceptor'];
+                            $correoCliente = $row['correoreceptor'];
+                            $telefonoCliente = null;
 
-                                //Datos de proveedor
-                                $nombreCliente = $row['nombrecliente'];
-                                $codigoCliente = array_key_exists('codigocliente', $row) ? $row['codigocliente'] : '';
-                                $tipoPersona = $row['tipoidentificacion'];
-                                $identificacionCliente = $row['identificacionreceptor'];
-                                $correoCliente = $row['correoreceptor'];
-                                $telefonoCliente = null;
+                            //Datos de factura
+                            $consecutivoComprobante = $row['consecutivocomprobante'];
+                            $claveFactura = array_key_exists('clavefactura', $row) ? $row['clavefactura'] : '';
+                            $condicionVenta = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
+                            $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
+                            $numeroLinea = array_key_exists('numerolinea', $row) ? $row['numerolinea'] : 1;
+                            $fechaEmision = $row['fechaemision'];
 
-                                //Datos de factura
-                                $consecutivoComprobante = $row['consecutivocomprobante'];
-                                $claveFactura = array_key_exists('clavefactura', $row) ? $row['clavefactura'] : '';
-                                $condicionVenta = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
-                                $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
-                                $numeroLinea = array_key_exists('numerolinea', $row) ? $row['numerolinea'] : 1;
-                                $fechaEmision = $row['fechaemision'];
+                            $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
+                            $idMoneda = $row['moneda'];
+                            $tipoCambio = $row['tipocambio'];
+                            $totalDocumento = $row['totaldocumento'];
+                            $tipoDocumento = $row['tipodocumento'];
+                            $descripcion = array_key_exists('descripcion', $row)  ? $row['descripcion'] : '';
 
-                                $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
-                                $idMoneda = $row['moneda'];
-                                $tipoCambio = $row['tipocambio'];
-                                $totalDocumento = $row['totaldocumento'];
-                                $tipoDocumento = $row['tipodocumento'];
-                                $descripcion = array_key_exists('descripcion', $row)  ? $row['descripcion'] : '';
-
-                                //Datos de linea
-                                $codigoProducto = $row['codigoproducto'];
-                                $detalleProducto = $row['detalleproducto'];
-                                $unidadMedicion = $row['unidadmedicion'];
-                                $cantidad = array_key_exists('cantidad', $row) ? $row['cantidad'] : 1;
-                                $precioUnitario = $row['preciounitario'];
-                                $subtotalLinea = (float)$row['subtotallinea'];
-                                $totalLinea = $row['totallinea'];
-                                $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
-                                $codigoEtax = $row['codigoivaetax'];
-                                $montoIva = (float)$row['montoiva'];
-                                
-                                $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
-                                $codigoActividad = $row['codigoactividad'] ?? $mainAct;
-                                $xmlSchema = $row['xmlschema'] ?? 42;
-                                
-                                //Exoneraciones
-                                $totalNeto = 0;
-                                $tipoDocumentoExoneracion = $row['tipodocumentoexoneracion'] ?? null;
-                                $documentoExoneracion = $row['documentoexoneracion'] ?? null;
-                                $companiaExoneracion = $row['companiaexoneracion'] ?? null;
-                                $porcentajeExoneracion = $row['porcentajeexoneracion'] ?? 0;
-                                $montoExoneracion = $row['montoexoneracion'] ?? 0;
-                                $impuestoNeto = $row['impuestoneto'] ?? 0;
-                                $totalMontoLinea = $row['totalmontolinea'] ?? 0;
-                                
-                                //
-                                $arrayInsert = array(
-                                    'metodoGeneracion' => $metodoGeneracion,
-                                    'idEmisor' => 0,
-                                    'nombreCliente' => $nombreCliente,
-                                    'descripcion' => $descripcion,
-                                    'codigoCliente' => $codigoCliente,
-                                    'tipoPersona' => $tipoPersona,
-                                    'identificacionCliente' => $identificacionCliente,
-                                    'correoCliente' => $correoCliente,
-                                    'telefonoCliente' => $telefonoCliente,
-                                    'claveFactura' => $claveFactura,
-                                    'consecutivoComprobante' => $consecutivoComprobante,
-                                    'condicionVenta' => $condicionVenta,
-                                    'metodoPago' => $metodoPago,
-                                    'numeroLinea' => $numeroLinea,
-                                    'fechaEmision' => $fechaEmision,
-                                    'fechaVencimiento' => $fechaVencimiento,
-                                    'idMoneda' => $idMoneda,
-                                    'tipoCambio' => $tipoCambio,
-                                    'totalDocumento' => $totalDocumento,
-                                    'totalNeto' => $totalNeto,
-                                    'cantidad' => $cantidad,
-                                    'precioUnitario' => $precioUnitario,
-                                    'totalLinea' => $totalLinea,
-                                    'montoIva' => $montoIva,
-                                    'codigoEtax' => $codigoEtax,
-                                    'montoDescuento' => $montoDescuento,
-                                    'subtotalLinea' => $subtotalLinea,
-                                    'tipoDocumento' => $tipoDocumento,
-                                    'codigoProducto' => $codigoProducto,
-                                    'detalleProducto' => $detalleProducto,
-                                    'unidadMedicion' => $unidadMedicion,
-                                    'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
-                                    'documentoExoneracion' => $documentoExoneracion,
-                                    'companiaExoneracion' => $companiaExoneracion,
-                                    'porcentajeExoneracion' => $porcentajeExoneracion,
-                                    'montoExoneracion' => $montoExoneracion,
-                                    'impuestoNeto' => $impuestoNeto,
-                                    'totalMontoLinea' => $totalMontoLinea,
-                                    'xmlSchema' => $xmlSchema,
-                                    'codigoActividad' => $codigoActividad,
-                                    'isAuthorized' => true,
-                                    'codeValidated' => true
-                                );
-                                
-                                if( $consecutivoComprobante ) {
-                                    $insert = Invoice::importInvoiceRow( $arrayInsert );
-        
-                                    if( $insert ) {
-                                        array_push( $inserts, $insert );
-                                    }
-
+                            //Datos de linea
+                            $codigoProducto = $row['codigoproducto'];
+                            $detalleProducto = $row['detalleproducto'];
+                            $unidadMedicion = $row['unidadmedicion'];
+                            $cantidad = array_key_exists('cantidad', $row) ? $row['cantidad'] : 1;
+                            $precioUnitario = $row['preciounitario'];
+                            $subtotalLinea = (float)$row['subtotallinea'];
+                            $totalLinea = $row['totallinea'];
+                            $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
+                            $codigoEtax = $row['codigoivaetax'];
+                            $categoriaHacienda = array_key_exists('categoriaHacienda', $row) ? $row['categoriaHacienda'] : null;
+                            $montoIva = (float)$row['montoiva'];
+                            $acceptStatus = array_key_exists('aceptada', $row) ? $row['aceptada'] : 1;
+                            
+                            $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
+                            $codigoActividad = $row['codigoactividad'] ?? $mainAct;
+                            $xmlSchema = $row['xmlschema'] ?? 42;
+                            
+                            //Exoneraciones
+                            $totalNeto = 0;
+                            $tipoDocumentoExoneracion = $row['tipodocumentoexoneracion'] ?? null;
+                            $documentoExoneracion = $row['documentoexoneracion'] ?? null;
+                            $companiaExoneracion = $row['companiaexoneracion'] ?? null;
+                            $porcentajeExoneracion = $row['porcentajeexoneracion'] ?? 0;
+                            $montoExoneracion = $row['montoexoneracion'] ?? 0;
+                            $impuestoNeto = $row['impuestoneto'] ?? 0;
+                            $totalMontoLinea = $row['totalmontolinea'] ?? 0;
+                            
+                            
+                            $arrayInsert = array(
+                                'metodoGeneracion' => $metodoGeneracion,
+                                'idEmisor' => 0,
+                                'nombreCliente' => $nombreCliente,
+                                'descripcion' => $descripcion,
+                                'codigoCliente' => $codigoCliente,
+                                'tipoPersona' => $tipoPersona,
+                                'identificacionCliente' => $identificacionCliente,
+                                'correoCliente' => $correoCliente,
+                                'telefonoCliente' => $telefonoCliente,
+                                'claveFactura' => $claveFactura,
+                                'consecutivoComprobante' => $consecutivoComprobante,
+                                'condicionVenta' => $condicionVenta,
+                                'metodoPago' => $metodoPago,
+                                'numeroLinea' => $numeroLinea,
+                                'fechaEmision' => $fechaEmision,
+                                'fechaVencimiento' => $fechaVencimiento,
+                                'idMoneda' => $idMoneda,
+                                'tipoCambio' => $tipoCambio,
+                                'totalDocumento' => $totalDocumento,
+                                'totalNeto' => $totalNeto,
+                                'cantidad' => $cantidad,
+                                'precioUnitario' => $precioUnitario,
+                                'totalLinea' => $totalLinea,
+                                'montoIva' => $montoIva,
+                                'codigoEtax' => $codigoEtax,
+                                'montoDescuento' => $montoDescuento,
+                                'subtotalLinea' => $subtotalLinea,
+                                'tipoDocumento' => $tipoDocumento,
+                                'codigoProducto' => $codigoProducto,
+                                'detalleProducto' => $detalleProducto,
+                                'unidadMedicion' => $unidadMedicion,
+                                'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
+                                'documentoExoneracion' => $documentoExoneracion,
+                                'companiaExoneracion' => $companiaExoneracion,
+                                'porcentajeExoneracion' => $porcentajeExoneracion,
+                                'montoExoneracion' => $montoExoneracion,
+                                'impuestoNeto' => $impuestoNeto,
+                                'totalMontoLinea' => $totalMontoLinea,
+                                'xmlSchema' => $xmlSchema,
+                                'codigoActividad' => $codigoActividad,
+                                'categoriaHacienda' => $categoriaHacienda,
+                                'acceptStatus' => $acceptStatus,
+                                'isAuthorized' => true,
+                                'codeValidated' => true
+                            );
+                            
+                            if( $consecutivoComprobante ) {
+                                $insert = Invoice::importInvoiceRow( $arrayInsert );
+    
+                                if( $insert ) {
+                                    array_push( $inserts, $insert );
                                 }
+
                             }
 
                         }
@@ -679,16 +653,12 @@ class InvoiceController extends Controller
             }catch( \InvalidArgumentException $ex ){
                 Log::error('Error importando Excel ' . $ex->getMessage());
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
-            }catch( \Exception $ex ){
-                Log::error('Error importando Excel ' . $ex->getMessage());
-                return back()->withError( 'Ha ocurrido un error al subir su archivo. Error en la fila. '.$i);
             }catch( \Throwable $ex ){
-                Log::error('Error importando Excel ' . $ex->getMessage());
-                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. IC 537'.$i);
+                Log::error('Error importando Excel ' . $ex);
+                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Linea '.$i);
             }
 
             $company->save();
-            //$available_invoices->save();
             
             $time_end = getMicrotime();
             $time = $time_end - $time_start;

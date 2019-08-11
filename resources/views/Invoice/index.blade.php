@@ -7,18 +7,6 @@
 @section('breadcrumb-buttons')
     <a class="btn btn-primary" href="/facturas-emitidas/emitir-factura/01">Emitir factura nueva</a>
     <a class="btn btn-primary" href="/facturas-emitidas/create">Ingresar factura existente</a>
-    <!--
-    <div class="btn-group" role="group">
-        <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Ingresar factura existente
-        </button>
-        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-            <a class="dropdown-item" href="/facturas-emitidas/emitir-factura/01">Factura electrónica</a>
-            <a class="dropdown-item" href="/facturas-emitidas/emitir-factura/08">Factura electrónica de exportación</a>
-            <a class="dropdown-item" href="/facturas-emitidas/emitir-factura/09">Factura electrónica de compra</a>
-        </div> 
-    </div>
-    -->
     <div onclick="abrirPopup('importar-emitidas-popup');" class="btn btn-primary">Importar facturas emitidas</div>
 @endsection 
 
@@ -39,19 +27,19 @@
             </select>
           </div>
       </div>
-        
+
       <table id="invoice-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
               <th data-priority="2">Comprobante</th>
-              <th data-priority="3">Actividad</th>
               <th data-priority="3">Receptor</th>
-              <th>Tipo Doc.</th>
+              <th data-priority="3">Actividad</th>
+              <th data-priority="4">Tipo Doc.</th>
               <th data-priority="5">Moneda</th>
               <th data-priority="5">Subtotal</th>
               <th data-priority="5">Monto IVA</th>
               <th data-priority="4">Total</th>
-              <th data-priority="5">F. Generada</th>
+              <th data-priority="4">F. Generada</th>
               <th data-priority="1">Estado</th>
               <th data-priority="1">Acciones</th>
             </tr>
@@ -84,8 +72,8 @@ $(function() {
     order: [[ 8, 'desc' ]],
     columns: [
       { data: 'document_number', name: 'document_number' },
-      { data: 'commercial_activity', name: 'commercial_activity' },
       { data: 'client', name: 'client.fullname' },
+      { data: 'commercial_activity', name: 'commercial_activity' },
       { data: 'document_type', name: 'document_type' },
       { data: 'moneda', name: 'currency', orderable: false, searchable: false },
       { data: 'subtotal', name: 'subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
@@ -102,7 +90,7 @@ $(function() {
     },
     language: {
       url: "/lang/datatables-es_ES.json",
-    },
+    }
   });
 });
 

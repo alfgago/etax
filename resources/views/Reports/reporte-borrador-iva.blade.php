@@ -155,6 +155,7 @@
 			span.marcar {
 			    position: relative;
 			    font-size: .9rem;
+    			white-space: nowrap;
 			}
 			
 			span.marcar span {
@@ -315,10 +316,28 @@
         <div class='print-content'  style="">
         	<div class="container-fluid" >
 						<div class="row">
-							<h1 class="card-title">Declaración de IVA {{ $nombreMes }} {{ $ano }} </h1>
+							<h1 class="card-title">Borrador de declaración de IVA {{ $nombreMes }} {{ $ano }} </h1>
 						  <div class="col-sm-12 pl-0 pr-0">
 						  	
-						  	<h2 class="card-subtitle">Consolidado de compras y ventas</h2>
+						  	<h2 class="card-subtitle">D-104 - Declaración Jurada del Impuesto al Valor Agregado</h2>
+						  	
+						  	<table class="text-12 text-muted m-0 p-2 ivas-table bigtext borrador-presentacion" style="width:100%;">
+									<tbody>
+									    <th>Periodo</th>
+									    <td colspan="5"> <input style="width:100%;" type="text" readonly value='{{ "$mes/$ano" }}' > </td>
+									  </tr>
+									  <tr>
+									    <th>Cédula</th>
+									    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ currentCompanyModel()->id_number }}" > </td>
+									  </tr>
+									  <tr>
+									    <th>Nombre o razó social</th>
+									    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ currentCompanyModel()->business_name }}" > </td>
+									  </tr>
+									</tbody>
+								</table>
+						  	
+						  	<h2 class="card-subtitle">Consolidado</h2>
 						  	@foreach( $actividadDataArray as $actividad )
 						  		<div class="declaracion-content">
 						  			<h3 class="card-subtitle m-0">Actividad comercial: {{ $actividad['codigo'] }} - {{ $actividad['titulo'] }}</h3>

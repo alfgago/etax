@@ -1,12 +1,15 @@
-<table class="text-12 text-muted m-0 p-2 ivas-table bigtext borrador-presentacion" style="width:100%;">
+<?php
+	$ivaData = json_decode($data->iva_data);
+	$isLastMonth = $mes == 12;
+	$toggleEstimacionAnual = !$isLastMonth ? 'hidden' : '';
+?>
+
+<table class="text-12 text-muted m-0 p-2 ivas-table bigtext borrador-presentacion " style="width:100%;">
 <tbody>
-	<?php
-		$ivaData = json_decode($data->iva_data);
-	?>
 		<tr class="macro-title">
 	    <th colspan="6">Estimación y liquidación anual de la proporcionalidad</th>
 	  </tr>
-		<tr class="sub-title desplegar-false">
+		<tr class="sub-title {{ $isLastMonth ? 'desplegar-true' : 'desplegar-false' }}">
 	    <th class="marcar-td" colspan="1">
     		<span class="marcar">
     			¿Aplica?
@@ -16,46 +19,42 @@
 	    </th>
     	<th colspan="5">¿Es esta la última declaración del IVA que presenta por desinscripción como Contribuyente ante la Administración Tributaria?</th>
 	  </tr>
-	  <tr class="header-tarifas">
-	    <th>Detalle</th>
-	    <th colspan="5"> Monto </th>
-	  </tr>
-	  <tr>
+	  <tr class="{{ $toggleEstimacionAnual }}">
 	    <th>Monto anual de ventas con derecho a crédito fiscal aplicados</th>
 	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->numerador_prorrata, 0) }}" > </td>
 	  </tr>
-	  <tr>
+	  <tr class="{{ $toggleEstimacionAnual }}">
 	    <th>Monto anual de ventas con derecho y sin derecho a crédito fiscal</th>
 	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->invoices_subtotal, 0) }}" > </td>
 	  </tr>
-	  <tr>
+	  <tr class="{{ $toggleEstimacionAnual }}">
 	    <th>Porcentaje a aplicar como liquidación final</th>
 	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->prorrata*100, 0) }}%" > </td>
 	  </tr>
-		<tr class="sub-title desplegar-false">
+		<tr class="sub-title {{ $toggleEstimacionAnual }}">
 	    <th colspan="6">Liquidación final de la regla de la proporcionalidad</th>
 	  </tr>
-	  <tr class="header-tarifas">
+	  <tr class="header-tarifas {{ $toggleEstimacionAnual }}">
 	    <th>Detalle</th>
 	    <th colspan="5"> Monto </th>
 	  </tr>
-	  <tr>
+	  <tr class="{{ $toggleEstimacionAnual }}">
 	    <th>Crédito fiscal anual sobre el que se aplica el porcentaje de proporcionalidad</th>
 	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->total_bill_iva, 0) }}" > </td>
 	  </tr>
-	  <tr>
+	  <tr class="{{ $toggleEstimacionAnual }}">
 	    <th>Crédito fiscal generado por aplicación final del porcentaje de proporcionalidad</th>
 	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->iva_deducible_estimado, 0) }}" > </td>
 	  </tr>
-	  <tr>
+	  <tr class="{{ $toggleEstimacionAnual }}">
 	    <th>Crédito aplicado de enero a la fecha de la liquidación final según regla de proporcionalidad</th>
 	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->iva_por_cobrar, 0) }}" > </td>
 	  </tr>
-	  <tr>
+	  <tr class="{{ $toggleEstimacionAnual }}">
 	    <th>Saldo a favor en aplicación del porcentaje de la liquidación final</th>
 	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->iva_por_cobrar, 0) }}" > </td>
 	  </tr>
-	  <tr>
+	  <tr class="{{ $toggleEstimacionAnual }}">
 	    <th>Saldo deudor en aplicación del porcentaje de la liquidación final</th>
 	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $acumulado->iva_por_pagar, 0) }}" > </td>
 	  </tr>
@@ -69,10 +68,6 @@
 	<tbody>	  
 		<tr class="macro-title">
 	    <th colspan="6"></th>
-	  </tr>
-	  <tr class="header-tarifas">
-	    <th>Detalle</th>
-	    <th colspan="5"> Monto </th>
 	  </tr>
 	 	<tr>
 	    <th>Impuesto generado por operaciones gravadas</th>
@@ -121,10 +116,7 @@
 		<tr class="macro-title">
 	    <th colspan="6"></th>
 	  </tr>
-	  <tr class="header-tarifas">
-	    <th>Detalle</th>
-	    <th colspan="5"> Monto </th>
-	  </tr>
+	  <tr>
 	    <th>Retenciones pagos a cuenta del impuesto</th>
 	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->retention_by_card ? $data->retention_by_card : $data->iva_retenido, 0) }}" > </td>
 	  </tr>

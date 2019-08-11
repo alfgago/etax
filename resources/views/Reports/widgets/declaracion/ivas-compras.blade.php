@@ -94,7 +94,7 @@
     <th>Total</th>
   </tr>
 	<tr class="true-blocked">
-	  <th>Crédito de por compra de bienes</th>
+	  <th>Crédito por compra de bienes</th>
 	  <td>
 	  	<input readonly value="{{ number_format( $iva_compras_B3e+$iva_importaciones_B3e, 0 ) }}"/>
 	  </td>
@@ -224,7 +224,7 @@
 	
 	
 	<tr class="true-blocked">
-	  <th>Crédito de por compra de servicios</th>
+	  <th>Crédito por adquisición de servicios</th>
 	  <td>
 	  	<input readonly value="{{ number_format( $iva_compras_S3e+$iva_importaciones_S3e, 0 ) }}"/>
 	  </td>
@@ -309,6 +309,27 @@
 	  </td>
 	</tr>
 	
+	<tr class="true-blocked">
+	  <th>Crédito por devoluciones sobre ventas y en consignación</th>
+	  <td>
+	  	<input readonly value="0"/>
+	  </td>
+	  <td>
+	  	<input readonly value="0"/>
+	  </td>
+	  <td>
+	  	<input readonly value="0"/>
+	  </td>
+	  <td>
+	  	<input readonly value="0"/>
+	  </td>
+	  <td>
+	  	<input readonly value="0" />
+	  </td>
+	  <td>
+	  	<input readonly value="0" />
+	  </td>
+	</tr>
 	
 	<tr class="sub-title desplegar-true">
     <th class="marcar-td" colspan="2">
@@ -326,8 +347,6 @@
 	  	<input readonly value="{{ number_format( $data->prorrata_operativa*100, 2 ) }}%"/>
 	  </td>
 	</tr>
-	
-	
 	
 	<tr class="macro-title">
     <th colspan="7">Créditos por compras locales de bienes y servicios e importaciones utilizados indistintamente en operaciones sujetas, no sujetas o exentas <input readonly value="{{ number_format( ($totalesSum), 0 ) }}"/></th>

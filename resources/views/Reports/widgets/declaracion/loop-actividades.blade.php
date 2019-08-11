@@ -37,17 +37,6 @@
 				'col8' => 'false',
 			])
 		  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
-				'title' 	 => $actividad['V13']['title'], 
-				'desplegar' => $actividad['V13']['totales'] ? 'desplegar-true' : 'desplegar-false', 
-				'cats' => $actividad['V13']['cats'],
-				'cols' 	 => true, 
-				'col1' => 'false',
-				'col2' => 'false',
-				'col3' => 'true',
-				'col4' => 'false',
-				'col8' => 'false',
-			])
-		  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
 				'title' 	 => $actividad['V4']['title'], 
 				'desplegar' => $actividad['V4']['totales'] ? 'desplegar-true' : 'desplegar-false', 
 				'cats' => $actividad['V4']['cats'],
@@ -56,6 +45,17 @@
 				'col2' => 'false',
 				'col3' => 'false',
 				'col4' => 'true',
+				'col8' => 'false',
+			])
+		  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
+				'title' 	 => $actividad['V13']['title'], 
+				'desplegar' => $actividad['V13']['totales'] ? 'desplegar-true' : 'desplegar-false', 
+				'cats' => $actividad['V13']['cats'],
+				'cols' 	 => true, 
+				'col1' => 'false',
+				'col2' => 'false',
+				'col3' => 'true',
+				'col4' => 'false',
 				'col8' => 'false',
 			])
 		  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 

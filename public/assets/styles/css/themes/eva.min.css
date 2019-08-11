@@ -15535,7 +15535,6 @@ h6,
   position: relative;
   min-height: calc(100vh - 5.25rem);
   background: #fff;
-  padding-left: 6rem;
 }
 
 .main-content-wrap.sidenav-open {
@@ -20301,6 +20300,14 @@ div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-ar
   .list-horizontal .list-item .item-title {
     max-width: 10rem;
   }
+}
+
+table#invoice-table tr th:nth-of-type(2),
+table#invoice-table tr td:nth-of-type(2),
+table#bill-table tr th:nth-of-type(2),
+table#bill-table tr td:nth-of-type(2) {
+  width: 200px !important;
+  white-space: normal;
 }
 
 .user-profile .header-cover {
