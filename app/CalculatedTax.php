@@ -531,7 +531,7 @@ class CalculatedTax extends Model
 
         for ($i = 0; $i < $countBillItems; $i++) {
           
-          try{
+          //try{
             
             $currBill = $billItems[$i]->bill;
             if( !$currBill->is_void && $currBill->is_authorized && $currBill->is_code_validated &&
@@ -698,9 +698,9 @@ class CalculatedTax extends Model
               
             }  
             
-          }catch( \Throwable $ex ){
+          //}catch( \Throwable $ex ){
             //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
-          }
+          //}
           
         }
         
