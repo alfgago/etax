@@ -531,7 +531,7 @@ class CalculatedTax extends Model
 
         for ($i = 0; $i < $countBillItems; $i++) {
           
-          //try{
+          try{
             
             $currBill = $billItems[$i]->bill;
             if( !$currBill->is_void && $currBill->is_authorized && $currBill->is_code_validated &&
@@ -561,7 +561,7 @@ class CalculatedTax extends Model
               
               //Redondea todo a 2 decimales
               $subtotal = round($subtotal, 2);
-              $invoiceIva = round($invoiceIva, 2);
+              $billIva = round($billIva, 2);
               $currentTotal = round($currentTotal, 2);
               
               if( $currBill->document_type == '03' ) {
@@ -698,9 +698,9 @@ class CalculatedTax extends Model
               
             }  
             
-          //}catch( \Throwable $ex ){
+          }catch( \Throwable $ex ){
             //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
-          //}
+          }
           
         }
         
