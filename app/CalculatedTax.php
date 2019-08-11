@@ -564,9 +564,9 @@ class CalculatedTax extends Model
               $invoiceIva = round($invoiceIva, 2);
               $currentTotal = round($currentTotal, 2);
               
-              if( $currInvoice->document_type == '03' ) {
+              if( $currBill->document_type == '03' ) {
                 $subtotal = $subtotal * -1;
-                $invoiceIva = $invoiceIva * -1;
+                $billIva = $billIva * -1;
                 $currentTotal = $currentTotal * -1;
               }
                 
