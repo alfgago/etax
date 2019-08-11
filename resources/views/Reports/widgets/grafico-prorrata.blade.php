@@ -20,8 +20,9 @@
 
 <?php
 
-  $signo = ( $acumulado->prorrata - $acumulado->prorrata_operativa ) < 0 ? ' - ' : ' + ';
+  $posNeg = ( $acumulado->prorrata - $acumulado->prorrata_operativa ) < 0 ? -1 : 1;
   $texto = ( $acumulado->prorrata - $acumulado->prorrata_operativa ) < 0 ? 'por pagar' : 'por cobrar';
+  $signo = ( $acumulado->prorrata - $acumulado->prorrata_operativa ) < 0 ? '-' : '';
   
   $numerador = abs($acumulado->balance_operativo - $acumulado->balance_estimado) ;
   $denumerador = abs($acumulado->balance_operativo);
@@ -114,7 +115,7 @@
         if( diff > 40 ){
           rango = 100;
         }
-        var res = {{ $porcentaje*100 }};
+        var res = {{ $porcentaje*100 }} * {{$posNeg}};
         var ratio = 50 / rango;
         var res = ( parseFloat(res) * ratio ) + 50;
         
@@ -168,7 +169,7 @@
                 width: 100,
                 height: 40,
                 offsetCenter: [0, 30],
-                formatter:'{{ number_format( $porcentaje*100, 2 ) }}%',
+                formatter:'{{ $signo . number_format( $porcentaje*100, 2 ) }}%',
                 textStyle: {  
                     color: '#000',
                     fontSize : 18,

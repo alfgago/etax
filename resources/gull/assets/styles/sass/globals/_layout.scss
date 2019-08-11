@@ -12,7 +12,6 @@
     position: relative;
     min-height: calc(100vh - #{$topbar-height});
     background: $white;
-    padding-left: 6rem;
     &.sidenav-open {
         width: calc(100% - #{$sidebar-left-width});
     }

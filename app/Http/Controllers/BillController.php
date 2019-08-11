@@ -357,8 +357,17 @@ class BillController extends Controller
                                 $nombreProveedor = $row['nombreproveedor'];
                                 $codigoProveedor = $row['codigoproveedor'] ? $row['codigoproveedor'] : '';
                                 $tipoPersona = $row['tipoidentificacion'];
-                                $identificacionProveedor = $row['identificacionproveedor'];
-                                $correoProveedor = $row['correoproveedor'];
+                                if(array_key_exists('identificacionproveedor', $row)){
+                                    $identificacionProveedor = $row['identificacionproveedor'];
+                                }else{
+                                    $identificacionProveedor = $row['identificacionreceptor'];
+                                }
+                                if(array_key_exists('identificacionproveedor', $row)){
+                                    $correoProveedor = $row['correoproveedor'];
+                                }else{
+                                    $correoProveedor = $row['correoreceptor'];
+                                }
+                                
                                 $telefonoProveedor = null;
 
                                 //Datos de factura
@@ -385,7 +394,9 @@ class BillController extends Controller
                                 $totalLinea = $row['totallinea'];
                                 $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
                                 $codigoEtax = $row['codigoivaetax'];
+                                $categoriaHacienda = array_key_exists('categoriaHacienda', $row) ? $row['categoriaHacienda'] : null;
                                 $montoIva = (float)$row['montoiva'];
+                                $acceptStatus = array_key_exists('aceptada', $row) ? $row['aceptada'] : 1;
 
                                 $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
                                 $codigoActividad = $row['actividadcomercial'] ?? $mainAct;
@@ -445,7 +456,9 @@ class BillController extends Controller
                                     'impuestoNeto' => $impuestoNeto,
                                     'totalMontoLinea' => $totalMontoLinea,
                                     'xmlSchema' => $xmlSchema,
-                                    'codigoActividad' => $codigoActividad
+                                    'codigoActividad' => $codigoActividad,
+                                    'categoriaHacienda' => $categoriaHacienda,
+                                    'acceptStatus' => $acceptStatus
                                 );
 
                                 $insert = Bill::importBillRow($arrayImportBill);
