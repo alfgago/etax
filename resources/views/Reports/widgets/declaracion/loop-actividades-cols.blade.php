@@ -15,11 +15,11 @@
   <tr class="header-tarifas desplegar-true">
   		@if($cols)
 	    <th>Detalle</th>
-	    <th>Afectas al 13%</th>
-	    <th>Afectas al 8%</th>
-	    <th>Afectas al 4%</th>
-	    <th>Afectas al 2%</th>
-	    <th>Afectas al 1%</th>
+	    <th class="{{ $col3 }}">Afectas al 13%</th>
+	    <th class="{{ $col8 }}">Afectas al 8%</th>
+	    <th class="{{ $col4 }}">Afectas al 4%</th>
+	    <th class="{{ $col2 }}">Afectas al 2%</th>
+	    <th class="{{ $col1 }}">Afectas al 1%</th>
 	    @else
 		  	<th colspan="4">Detalle</th>
 		    <th colspan="2">Monto</th>

@@ -80,3 +80,11 @@
         }
     }
 }
+
+table#invoice-table tr th:nth-of-type(2), 
+table#invoice-table tr td:nth-of-type(2),
+table#bill-table tr th:nth-of-type(2), 
+table#bill-table tr td:nth-of-type(2) {
+    width: 200px !important;
+    white-space: normal;
+}

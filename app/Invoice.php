@@ -520,6 +520,9 @@ class Invoice extends Model
         $dt =\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaEmision']);
         $invoice->generated_date = Carbon::instance($dt);
       }
+      if( !CalculatedTax::validarMes( $invoice->generated_date->format('d/m/Y') )){ 
+        return false; 
+      }
       
       try{
         $invoice->due_date = Carbon::createFromFormat('d/m/Y', $data['fechaVencimiento']);

@@ -230,7 +230,7 @@ class TeamMemberController extends Controller {
           return redirect(route('teams.members.show', $invite->team));
          */
 
-        return redirect()->back()->withMessage('Se ha re-enviado invitación a ' . $invite->email . ' satisfactoriamente.');
+        return redirect()->back()->withMessage('Se ha reenviado invitación a ' . $invite->email . ' satisfactoriamente.');
     }
 
 

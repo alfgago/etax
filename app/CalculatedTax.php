@@ -65,26 +65,34 @@ class CalculatedTax extends Model
       try{
         $company = currentCompanyModel();
         $generated_date = explode("/", $date);
-        $existe = CalculatedTax::where([['company_id',$company->id],['month',$generated_date[1]],
-              ['year',$generated_date[2]]])->count();
+
+        $existe = CalculatedTax::where([
+          ['company_id',$company->id],
+          ['month',$generated_date[1]],
+          ['year',$generated_date[2]]
+        ])->count();
+              
         if($existe == 0){
           return true;
         }else{
-          $abierto = CalculatedTax::where([['company_id',$company->id],['month',$generated_date[1]],
-                ['year',$generated_date[2]],['is_final',1],['is_closed',0]])->count();
+          $abierto = CalculatedTax::where([
+            ['company_id',$company->id],
+            ['month',$generated_date[1]],
+            ['year',$generated_date[2]],
+            ['is_final',1],
+            ['is_closed',0]
+          ])->count();
           if($abierto == 0){
             return false;
           }else{
             if($abierto > 0){
-
-                return true;
+              return true;
             }else{
               return false;
             }
           }
         }
       } catch( \Exception $ex ) {
-        Log::error("ERROR validando si el mes esta cerrado -> ".$ex->getMessage());
         return false;
       }
     }
@@ -560,9 +568,15 @@ class CalculatedTax extends Model
               }
               
               //Redondea todo a 2 decimales
-              $subtotal = $subtotal;
-              $billIva = $billIva;
-              $currentTotal = $currentTotal;
+              $subtotal = round($subtotal, 2);
+              $billIva = round($billIva, 2);
+              $currentTotal = round($currentTotal, 2);
+              
+              if( $currBill->document_type == '03' ) {
+                $subtotal = $subtotal * -1;
+                $billIva = $billIva * -1;
+                $currentTotal = $currentTotal * -1;
+              }
                 
               $ivaType = $ivaType ? $ivaType : '003';
               $ivaType = str_pad($ivaType, 3, '0', STR_PAD_LEFT);
