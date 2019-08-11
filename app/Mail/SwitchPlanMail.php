@@ -27,7 +27,7 @@ class SwitchPlanMail extends Mailable {
      * @return $this
      */
     public function build() {
-        return $this->subject('Subscription Plan Upgraded ' . ucfirst($this->content['old_plan_details']->plan_type) . '-' . $this->content['old_plan_details']->plan_name . '(' . $this->content['old_plan_details']->unique_no . ')')->markdown('emails.switchplanemail')->with('content', $this->content);
+        return $this->subject('Cambio de plan eTax ' . ucfirst($this->content['old_plan_details']->plan_type) . '-' . $this->content['old_plan_details']->plan_name . '(' . $this->content['old_plan_details']->unique_no . ')')->markdown('emails.switchplanemail')->with('content', $this->content);
     }
 
 }

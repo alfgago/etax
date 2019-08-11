@@ -27,7 +27,7 @@ class InviteMail extends Mailable {
      * @return $this
      */
     public function build() {
-        return $this->subject('Invitation to join company ' . $this->content['team']->name)->markdown('emails.invitemail')->with('content', $this->content);
+        return $this->subject('Invitación a equipo de empresa: ' . $this->content['team']->name)->markdown('emails.invitemail')->with('content', $this->content);
     }
 
 }

@@ -560,9 +560,15 @@ class CalculatedTax extends Model
               }
               
               //Redondea todo a 2 decimales
-              $subtotal = $subtotal;
-              $billIva = $billIva;
-              $currentTotal = $currentTotal;
+              $subtotal = round($subtotal, 2);
+              $invoiceIva = round($invoiceIva, 2);
+              $currentTotal = round($currentTotal, 2);
+              
+              if( $currInvoice->document_type == '03' ) {
+                $subtotal = $subtotal * -1;
+                $invoiceIva = $invoiceIva * -1;
+                $currentTotal = $currentTotal * -1;
+              }
                 
               $ivaType = $ivaType ? $ivaType : '003';
               $ivaType = str_pad($ivaType, 3, '0', STR_PAD_LEFT);
