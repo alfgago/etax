@@ -561,7 +561,7 @@ class CalculatedTax extends Model
               
               //Redondea todo a 2 decimales
               $subtotal = round($subtotal, 2);
-              $invoiceIva = round($invoiceIva, 2);
+              $billIva = round($billIva, 2);
               $currentTotal = round($currentTotal, 2);
               
               if( $currBill->document_type == '03' ) {
