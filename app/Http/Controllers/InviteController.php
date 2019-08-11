@@ -26,7 +26,7 @@ class InviteController extends Controller {
 
         // check inviation is on pending state or not
         if (!$invite) {
-            return redirect()->route('User.companies')->withErrors(['email' => 'Invitation has already been accepted.']);
+            return redirect()->route('User.companies')->withErrors(['email' => 'La invitación ha sido aceptada.']);
         }
 
         session(['invite_token' => $token]);
