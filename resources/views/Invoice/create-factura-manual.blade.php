@@ -227,7 +227,7 @@
 
                   <div class="form-group col-md-12">
                     <label for="description">Notas</label>
-                    <textarea class="form-control" name="description"  maxlength="200" id="notas" placeholder=""></textarea>
+                    <textarea class="form-control" name="description"  maxlength="200" id="notas" placeholder="" rows="2" style="resize: none;"></textarea>
                   </div>
 
               </div>

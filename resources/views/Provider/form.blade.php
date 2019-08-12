@@ -90,11 +90,11 @@
     <input hidden value="{{ @$provider->id }}" id="id_provider">
     <div class="form-group col-md-12" id="divAddress">
       <label for="address">Dirección</label>
-      <textarea class="form-control" name="address" id="address" >{{ @$provider->address }}</textarea>
+      <textarea class="form-control" name="address" id="address" maxlength="250" rows="2" style="resize: none;">{{ @$provider->address }}</textarea>
     </div>
     <div class="form-group col-md-12" id="extranjero" hidden>
         <label for="address">Otras Señas Extranjero</label>
-        <textarea class="form-control" name="foreign_address" id="foreign_address" >{{ @$client->foreign_address }}</textarea>
+        <textarea class="form-control" name="foreign_address" id="foreign_address" maxlength="300" rows="2" style="resize: none;">{{ @$client->foreign_address }}</textarea>
     </div>
 		<script>
 		    $(document).ready(function(){
