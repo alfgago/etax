@@ -416,10 +416,8 @@ class InvoiceController extends Controller
 
     public function actualizar_categorias(Request $request){
         $invoice = Invoice::where('id',$request->invoice_id)->first(); 
-        $FechaEmision = explode(" ", $invoice->generated_date);
-        $FechaEmision = explode("-", $FechaEmision[0]);
-        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
-        if(CalculatedTax::validarMes($FechaEmision)){ 
+
+        if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
             Invoice::where('id',$request->invoice_id)
                 ->update(['commercial_activity'=>$request->commercial_activity]);
             foreach ($request->items as $item) {
@@ -444,10 +442,8 @@ class InvoiceController extends Controller
         
         $company = currentCompanyModel(); 
         $invoice = Invoice::findOrFail($id);
-        $FechaEmision = explode(" ", $invoice->generated_date);
-        $FechaEmision = explode("-", $FechaEmision[0]);
-        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
-        if(CalculatedTax::validarMes($FechaEmision)){ 
+
+        if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
             $units = UnidadMedicion::all()->toArray();
             $this->authorize('update', $invoice);
           
@@ -535,7 +531,7 @@ class InvoiceController extends Controller
 
                             //Datos de proveedor
                             $nombreCliente = $row['nombrecliente'];
-                            $codigoCliente = array_key_exists('codigocliente', $row) ? $row['codigocliente'] : '';
+                            $codigoCliente = isset($row['codigocliente']) ? $row['codigocliente'] : '';
                             $tipoPersona = $row['tipoidentificacion'];
                             $identificacionCliente = $row['identificacionreceptor'];
                             $correoCliente = $row['correoreceptor'];
@@ -543,32 +539,32 @@ class InvoiceController extends Controller
 
                             //Datos de factura
                             $consecutivoComprobante = $row['consecutivocomprobante'];
-                            $claveFactura = array_key_exists('clavefactura', $row) ? $row['clavefactura'] : '';
+                            $claveFactura = isset($row['clavefactura']) ? $row['clavefactura'] : '';
                             $condicionVenta = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
                             $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
-                            $numeroLinea = array_key_exists('numerolinea', $row) ? $row['numerolinea'] : 1;
+                            $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
                             $fechaEmision = $row['fechaemision'];
 
-                            $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
+                            $fechaVencimiento = isset($row['fechavencimiento']) ? $row['fechavencimiento'] : $fechaEmision;
                             $idMoneda = $row['moneda'];
                             $tipoCambio = $row['tipocambio'];
                             $totalDocumento = $row['totaldocumento'];
                             $tipoDocumento = $row['tipodocumento'];
-                            $descripcion = array_key_exists('descripcion', $row)  ? $row['descripcion'] : '';
+                            $descripcion = isset($row['descripcion'])  ? $row['descripcion'] : '';
 
                             //Datos de linea
                             $codigoProducto = $row['codigoproducto'];
                             $detalleProducto = $row['detalleproducto'];
                             $unidadMedicion = $row['unidadmedicion'];
-                            $cantidad = array_key_exists('cantidad', $row) ? $row['cantidad'] : 1;
+                            $cantidad = isset($row['cantidad']) ? $row['cantidad'] : 1;
                             $precioUnitario = $row['preciounitario'];
                             $subtotalLinea = (float)$row['subtotallinea'];
                             $totalLinea = $row['totallinea'];
-                            $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
+                            $montoDescuento = isset($row['montodescuento']) ? $row['montodescuento'] : 0;
                             $codigoEtax = $row['codigoivaetax'];
-                            $categoriaHacienda = array_key_exists('categoriaHacienda', $row) ? $row['categoriaHacienda'] : null;
+                            $categoriaHacienda = isset($row['categoriaHacienda']) ? $row['categoriaHacienda'] : null;
                             $montoIva = (float)$row['montoiva'];
-                            $acceptStatus = array_key_exists('aceptada', $row) ? $row['aceptada'] : 1;
+                            $acceptStatus = isset($row['aceptada']) ? $row['aceptada'] : 1;
                             
                             $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
                             $codigoActividad = $row['codigoactividad'] ?? $mainAct;
@@ -680,10 +676,8 @@ class InvoiceController extends Controller
         try {
             Log::info('Anulacion de facturar -->'.$id);
             $invoice = Invoice::findOrFail($id); 
-            $FechaEmision = explode(" ", $invoice->generated_date);
-            $FechaEmision = explode("-", $FechaEmision[0]);
-            $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
-            if(CalculatedTax::validarMes($FechaEmision)){ 
+
+            if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
                 $apiHacienda = new BridgeHaciendaApi();
                 $tokenApi = $apiHacienda->login();
                 if ($tokenApi !== false) {
@@ -861,10 +855,7 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::findOrFail($id);
 
-        $FechaEmision = explode(" ", $invoice->generated_date);
-        $FechaEmision = explode("-", $FechaEmision[0]);
-        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
-        if(CalculatedTax::validarMes($FechaEmision)){ 
+        if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
             $this->authorize('update', $invoice);
             
             $tipoIva = $request->tipo_iva;
@@ -959,10 +950,8 @@ class InvoiceController extends Controller
     public function authorizeInvoice ( Request $request, $id )
     {
         $invoice = Invoice::findOrFail($id); 
-        $FechaEmision = explode(" ", $invoice->generated_date);
-        $FechaEmision = explode("-", $FechaEmision[0]);
-        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
-        if(CalculatedTax::validarMes($FechaEmision)){ 
+
+        if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
             $this->authorize('update', $invoice);
             
             if ( $request->autorizar ) {
@@ -991,7 +980,7 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::findOrFail($id);
 
-        if(CalculatedTax::validarMes($invoice->generated_date)){ 
+        if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
             $this->authorize('update', $invoice);
             InvoiceItem::where('invoice_id', $invoice->id)->delete();
             $invoice->delete();
@@ -1012,7 +1001,7 @@ class InvoiceController extends Controller
     public function restore($id)
     {
         $invoice = Invoice::onlyTrashed()->where('id', $id)->first();
-        if(CalculatedTax::validarMes($invoice->generated_date)){ 
+        if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
             if( $invoice->company_id != currentCompany() ){
                 return 404;
             }
