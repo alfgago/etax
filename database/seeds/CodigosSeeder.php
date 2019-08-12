@@ -60,11 +60,7 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'B062 - Compras locales con IVA al 2% de bienes de acreditación plena con identificación específica', 'codigo'=>'B062', 'porcentaje'=>'2', 'is_bienes'=>true, 'is_identificacion_plena'=>true],
           ['nombre'=>'B063 - Compras locales con IVA al 13% de bienes de acreditación plena con identificación específica', 'codigo'=>'B063', 'porcentaje'=>'13', 'is_bienes'=>true, 'is_identificacion_plena'=>true],
           ['nombre'=>'B064 - Compras locales con IVA al 4% de bienes de acreditación plena con identificación específica', 'codigo'=>'B064', 'porcentaje'=>'4', 'is_bienes'=>true, 'is_identificacion_plena'=>true],
-          
-          ['nombre'=>'B065 - Devoluciones a proveedores con IVA al 1% de compras con derecho a acreditación', 'codigo'=>'B065', 'porcentaje'=>'1', 'is_bienes'=>true, 'is_identificacion_plena'=>true],
-          ['nombre'=>'B066 - Devoluciones a proveedores con IVA al 2% de compras con derecho a acreditación', 'codigo'=>'B066', 'porcentaje'=>'2', 'is_bienes'=>true, 'is_identificacion_plena'=>true],
-          ['nombre'=>'B067 - Devoluciones a proveedores con IVA al 13% de compras con derecho a acreditación', 'codigo'=>'B067', 'porcentaje'=>'13', 'is_bienes'=>true, 'is_identificacion_plena'=>true],
-          
+
           ['nombre'=>'B070 - Compras locales de  bienes de capital exentos.', 'codigo'=>'B070', 'porcentaje'=>'0', 'is_servicio'=>true, 'is_importacion'=>true],
           ['nombre'=>'B071 - Compras locales con IVA al 1% de bienes de capital de acreditación plena con identificación específica.', 'codigo'=>'B071', 'porcentaje'=>'1', 'is_servicio'=>true, 'is_identificacion_plena'=>true],
           ['nombre'=>'B072 - Compras locales con IVA al 2% de bienes de capital de acreditación plena con identificación específica.', 'codigo'=>'B072', 'porcentaje'=>'2', 'is_servicio'=>true, 'is_identificacion_plena'=>true],
@@ -221,7 +217,11 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'S260 - Ventas de servicios sin derecho a crédito por ventas al Estado', 'codigo'=>'S260', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
         
           ['nombre'=>'S300 - Sevicios de periodos anteriores a la Ley del IVA', 'codigo'=>'S300', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
-          ['nombre'=>'B300 - Bienes de periodos anteriores a la Ley del IVA', 'codigo'=>'B300', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>false]
+          ['nombre'=>'B300 - Bienes de periodos anteriores a la Ley del IVA', 'codigo'=>'B300', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>false],
+
+          ['nombre'=>'B065 - Devoluciones a proveedores con IVA al 1% de compras con derecho a acreditación', 'codigo'=>'B065', 'porcentaje'=>'1', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B066 - Devoluciones a proveedores con IVA al 2% de compras con derecho a acreditación', 'codigo'=>'B066', 'porcentaje'=>'2', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B067 - Devoluciones a proveedores con IVA al 13% de compras con derecho a acreditación', 'codigo'=>'B067', 'porcentaje'=>'13', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true]
           
         ];
         
