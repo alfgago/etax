@@ -87,7 +87,7 @@
 
 <div class="form-group col-md-12">
     <label for="address">Dirección</label>
-    <textarea class="form-control" name="address" id="address" >{{ old('address') }}</textarea>
+    <textarea class="form-control" name="address" id="address" maxlength="250" rows="2" style="resize: none;">{{ old('address') }}</textarea>
 </div>
 
 

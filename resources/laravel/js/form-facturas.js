@@ -25,11 +25,11 @@
       }
       var discount_type = $('#discount_type').val();
       if( discount_type == "01" && discount > 0 ) {
-        subtotal = subtotal - ( subtotal * (discount / 100) );
+          subtotal = subtotal - ( subtotal * (discount / 100) );
       }else if( discount_type == "02" && discount > 0 ) {
-        subtotal = parseFloat(subtotal - discount).toFixed(2);
+          subtotal = subtotal - discount;
       }
-      
+
       $('#item_subtotal').val( subtotal.toFixed(2) );
       if( $('#porc_iva').val().length ){
         monto_iva = parseFloat(subtotal * porc_iva / 100);
