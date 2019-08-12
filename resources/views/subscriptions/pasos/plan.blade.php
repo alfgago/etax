@@ -46,7 +46,7 @@
 
 <div class="btn-holder">
   <a class="btn btn-primary btn-prev" target="_blank" href="https://etaxcr.com/planes">Ver detalle de planes</a>
-  <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step2');" onclick="trackClickEvent( 'PagosPaso2' );">Siguiente paso</button>
+  <button type="button" class="btn btn-primary btn-next" onclick="fowardFields();toggleStep('step2');" onclick="trackClickEvent( 'PagosPaso2' );">Siguiente paso</button>
 </div>
 <style>
     .biginputs .form-group select, .biginputs .form-group input {
