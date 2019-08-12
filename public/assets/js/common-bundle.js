@@ -377,6 +377,11 @@ window.fowardFields = function() {
     $('#neighborhood').addClass('checkEmpty');
     $('#address').addClass('checkEmpty');
     $('#es_exento').addClass('checkEmpty');
+    $('#number').addClass('checkEmpty');
+    $('#expiry').addClass('checkEmpty');
+    $('#cvc').addClass('checkEmpty');
+    $('#first_name_card').addClass('checkEmpty');
+    $('#last_name_card').addClass('checkEmpty');
 }
 window.backFields = function () {
     $('#tipo_persona').removeClass('checkEmpty');
@@ -392,6 +397,11 @@ window.backFields = function () {
     $('#neighborhood').removeClass('checkEmpty');
     $('#address').removeClass('checkEmpty');
     $('#es_exento').removeClass('checkEmpty');
+    $('#number').removeClass('checkEmpty');
+    $('#expiry').removeClass('checkEmpty');
+    $('#cvc').removeClass('checkEmpty');
+    $('#first_name_card').removeClass('checkEmpty');
+    $('#last_name_card').removeClass('checkEmpty');
 }
 $(document).ready(function() {
 
