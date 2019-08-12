@@ -149,12 +149,12 @@ class CalculatedTax extends Model
      * @bodyParam prorrataOperativa required
      * @return App\CalculatedTax
      */
-    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa ) {
+    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa, $forceRecalc = false ) {
       
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
       
-      if ( !Cache::has($cacheKey) ) {
+      if ( !Cache::has($cacheKey) || $forceRecalc ) {
           
           //Busca el calculo del mes en Base de Datos.
           $data = CalculatedTax::firstOrNew(
@@ -168,8 +168,7 @@ class CalculatedTax extends Model
             
           if ( $month > 0 ) {
             
-            if( !$data->is_closed ) {
-              
+            if( !$data->is_closed || $forceRecalc ) {
               $data->resetVars();
               $data->calcularFacturacion( $month, $year, $lastBalance, $prorrataOperativa );
 
