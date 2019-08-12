@@ -342,7 +342,7 @@ class BillController extends Controller
         $company = currentCompanyModel();
         
         if( $collection[0]->count() < 5001 ){
-            //try {
+            try {
                 foreach ($collection[0]->chunk(200) as $facturas) {
                     \DB::transaction(function () use ($facturas, &$company, &$i) {
                         
@@ -473,7 +473,7 @@ class BillController extends Controller
                     });
                     
                 }
-            /*}catch( \ErrorException $ex ){
+            }catch( \ErrorException $ex ){
                 Log::error('Error importando Excel' . $ex->getMessage());
                 return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila. '.$i);
             }catch( \InvalidArgumentException $ex ){
@@ -485,7 +485,7 @@ class BillController extends Controller
             }catch( \Throwable $ex ){
                 Log::error('Error importando Excel' . $ex->getMessage());
                 return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Linea: '.$i);
-            }*/
+            }
         
             $company->save();
             
