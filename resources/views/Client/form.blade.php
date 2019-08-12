@@ -90,12 +90,12 @@
 
     <div class="form-group col-md-12" id="divAddress">
       <label for="address">Dirección</label>
-      <textarea class="form-control" name="address" id="address" >{{ @$client->address }}</textarea>
+      <textarea class="form-control" name="address" id="address" maxlength="250" rows="2" style="resize: none;">{{ @$client->address }}</textarea>
     </div>
 
     <div class="form-group col-md-12" id="extranjero" hidden>
         <label for="address">Otras Señas Extranjero</label>
-        <textarea class="form-control" name="foreign_address" id="foreign_address" maxlength="160">{{ @$client->foreign_address }}</textarea>
+        <textarea class="form-control" name="foreign_address" id="foreign_address" maxlength="300" rows="2" style="resize: none;">{{ @$client->foreign_address }}</textarea>
     </div>
     <div class="form-group col-md-12">
       <label for="billing_emails">Correos electrónicos para facturación</label>

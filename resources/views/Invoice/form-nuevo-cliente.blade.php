@@ -116,12 +116,12 @@
 
       <div class="form-group col-md-12" id="divAddress">
         <label for="address">Dirección</label>
-        <textarea class="form-control" name="address" id="address" maxlength="250"></textarea>
+        <textarea class="form-control" name="address" id="address" maxlength="250" rows="2" style="resize: none;"></textarea>
       </div>
     @else
       <div class="form-group col-md-12">
           <label for="address">Otras señas extranjero</label>
-          <textarea class="form-control" name="foreign_address" id="foreign_address" maxlength="300">{{ @$client->foreign_address }}</textarea>
+          <textarea class="form-control" name="foreign_address" id="foreign_address" maxlength="300" rows="2" style="resize: none;">{{ @$client->foreign_address }}</textarea>
       </div>
     @endif
 
