@@ -153,11 +153,10 @@ class ReportsController extends Controller
         $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
         
         currentCompanyModel()->setFirstAvailableInvoices( $ano, $mes, $dataMes->count_invoices );
-        
-      }catch( \Exception $ex ){
-          Log::error('Error al cargar dashboard' . $ex->getMessage());
+
       }catch( \Throwable $ex ){
-          Log::error('Error al cargar dashboard' . $ex->getMessage());
+        $this->forceRecalc($ano);
+        Log::error('Error al cargar dashboard' . $ex->getMessage());
       }
       
       if( !$request->vista || $request->vista == 'basica' ){
@@ -229,42 +228,42 @@ class ReportsController extends Controller
     public function reporteBorradorIVA( Request $request ) {
         $ano = $request->ano ? $request->ano : 2019;
         $mes = $request->mes ? $request->mes : 7;
-
-        $company = currentCompanyModel();
-        $prorrataOperativa = $company->getProrrataOperativa($ano);
-  
-        $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
-  			$ivaData = json_decode($data->iva_data);
-        $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
         $nombreMes = Variables::getMonthName($mes);
-        $arrayActividades = $company->getActivities();
         
-        if( !$data->book ) {
-          return view('/Reports/no-data', compact('nombreMes') );
-        }
-        
-        $actividadDataArray = array();
-        foreach( $arrayActividades as $act ){
-          $actividadData = array();
-          $actividadData['codigo'] = $act->codigo;
-          $actividadData['titulo'] = $act->actividad;
-          $actividadData['V1'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 1%", "cats"=>[]];
-          $actividadData['V2'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 2%", "cats"=>[]];
-          $actividadData['V4'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 4%", "cats"=>[]];
-          $actividadData['V13'] = ["title" => "BIENES Y SERVICIOS AFECTOS AL 13%", "cats"=>[]];
-          $actividadData['BI'] =  ["title" => "TOTAL OTROS DETALLES A INCLUIR EN LA BASE IMPONIBLE", "cats"=>[]];
-          $actividadData['VEX'] = ["title" => "VENTAS EXENTAS", "cats"=>[]];
-          $actividadData['VAS'] = ["title" => "VENTAS AUTORIZADAS SIN IMPUESTO (órdenes especiales y otros transitorios)", "cats"=>[]];
-          $actividadData['VNS'] = ["title" => "VENTAS A NO SUJETOS", "cats"=>[]];
-          $actividadData['CL'] =  ["title" => "Compras de bienes y servicios locales", "cats"=>[]];
-          $actividadData['CI'] =  ["title" => "Importación de bienes y adquisición de servicios del exterior", "cats"=>[]];
-          $actividadData['CE'] =  ["title" => "Bienes y servicios exentos", "cats"=>[]];
-          $actividadData['CNR'] =  ["title" => "Bienes y servicios no relacionados directamente con la actividad", "cats"=>[]];
-          $actividadData['CNS'] =  ["title" => "Bienes y servicios no sujetos", "cats"=>[]];
-          $actividadData['CLI'] =  ["title" => " Bienes y servicios del artículo 19 de la LIVA", "cats"=>[]];
-          $actividadData['COE'] =  ["title" => "Compras autorizadas sin impuesto (órdenes especiales)", "cats"=>[]];
+        try{
+          $company = currentCompanyModel();
+          $prorrataOperativa = $company->getProrrataOperativa($ano);
+    
+          $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
+    			$ivaData = json_decode($data->iva_data);
+          $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
+          $arrayActividades = $company->getActivities();
           
-          try{
+          if( !$data->book ) {
+            return view('/Reports/no-data', compact('nombreMes') );
+          }
+          
+          $actividadDataArray = array();
+          foreach( $arrayActividades as $act ){
+            $actividadData = array();
+            $actividadData['codigo'] = $act->codigo;
+            $actividadData['titulo'] = $act->actividad;
+            $actividadData['V1'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 1%", "cats"=>[]];
+            $actividadData['V2'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 2%", "cats"=>[]];
+            $actividadData['V4'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 4%", "cats"=>[]];
+            $actividadData['V13'] = ["title" => "BIENES Y SERVICIOS AFECTOS AL 13%", "cats"=>[]];
+            $actividadData['BI'] =  ["title" => "TOTAL OTROS DETALLES A INCLUIR EN LA BASE IMPONIBLE", "cats"=>[]];
+            $actividadData['VEX'] = ["title" => "VENTAS EXENTAS", "cats"=>[]];
+            $actividadData['VAS'] = ["title" => "VENTAS AUTORIZADAS SIN IMPUESTO (órdenes especiales y otros transitorios)", "cats"=>[]];
+            $actividadData['VNS'] = ["title" => "VENTAS A NO SUJETOS", "cats"=>[]];
+            $actividadData['CL'] =  ["title" => "Compras de bienes y servicios locales", "cats"=>[]];
+            $actividadData['CI'] =  ["title" => "Importación de bienes y adquisición de servicios del exterior", "cats"=>[]];
+            $actividadData['CE'] =  ["title" => "Bienes y servicios exentos", "cats"=>[]];
+            $actividadData['CNR'] =  ["title" => "Bienes y servicios no relacionados directamente con la actividad", "cats"=>[]];
+            $actividadData['CNS'] =  ["title" => "Bienes y servicios no sujetos", "cats"=>[]];
+            $actividadData['CLI'] =  ["title" => " Bienes y servicios del artículo 19 de la LIVA", "cats"=>[]];
+            $actividadData['COE'] =  ["title" => "Compras autorizadas sin impuesto (órdenes especiales)", "cats"=>[]];
+            
             foreach( \App\ProductCategory::all() as $cat ) {
               $tipoID = $cat->id;
               $varName  = "$act->codigo-type$tipoID";
@@ -298,10 +297,11 @@ class ReportsController extends Controller
         			array_push($actividadData["$cat->group"]["cats"], $info);
             }
             array_push( $actividadDataArray, $actividadData );
-          }catch(\Throwable $e){
-            $this->forceRecalc($ano);
-            return view('/Reports/no-data', compact('nombreMes') );
           }
+        
+        }catch(\Throwable $e){
+          $this->forceRecalc($ano);
+          return view('/Reports/no-data', compact('nombreMes') );
         }
         
         return view('/Reports/reporte-borrador-iva', compact('data', 'mes', 'ano', 'nombreMes', 'actividadDataArray', 'acumulado') );
