@@ -363,7 +363,36 @@ window.validateEmail = function(mail){
     $("#email").val('');
     return (false)
 }
-
+window.fowardFields = function() {
+    $('#tipo_persona').addClass('checkEmpty');
+    $('#id_number').addClass('checkEmpty');
+    $('#first_name').addClass('checkEmpty');
+    $('#email').addClass('checkEmpty');
+    $('#phone').addClass('checkEmpty');
+    $('#country').addClass('checkEmpty');
+    $('#state').addClass('checkEmpty');
+    $('#city').addClass('checkEmpty');
+    $('#district').addClass('checkEmpty');
+    $('#zip').addClass('checkEmpty');
+    $('#neighborhood').addClass('checkEmpty');
+    $('#address').addClass('checkEmpty');
+    $('#es_exento').addClass('checkEmpty');
+}
+window.backFields = function () {
+    $('#tipo_persona').removeClass('checkEmpty');
+    $('#id_number').removeClass('checkEmpty');
+    $('#first_name').removeClass('checkEmpty');
+    $('#email').removeClass('checkEmpty');
+    $('#phone').removeClass('checkEmpty');
+    $('#country').removeClass('checkEmpty');
+    $('#state').removeClass('checkEmpty');
+    $('#city').removeClass('checkEmpty');
+    $('#district').removeClass('checkEmpty');
+    $('#zip').removeClass('checkEmpty');
+    $('#neighborhood').removeClass('checkEmpty');
+    $('#address').removeClass('checkEmpty');
+    $('#es_exento').removeClass('checkEmpty');
+}
 $(document).ready(function() {
 
   $('.select-search').select2({
