@@ -229,7 +229,7 @@ class ReportsController extends Controller
     public function reporteBorradorIVA( Request $request ) {
         $ano = $request->ano ? $request->ano : 2019;
         $mes = $request->mes ? $request->mes : 7;
-        
+
         $company = currentCompanyModel();
         $prorrataOperativa = $company->getProrrataOperativa($ano);
   
@@ -256,44 +256,52 @@ class ReportsController extends Controller
           $actividadData['VEX'] = ["title" => "VENTAS EXENTAS", "cats"=>[]];
           $actividadData['VAS'] = ["title" => "VENTAS AUTORIZADAS SIN IMPUESTO (órdenes especiales y otros transitorios)", "cats"=>[]];
           $actividadData['VNS'] = ["title" => "VENTAS A NO SUJETOS", "cats"=>[]];
-          $actividadData['CL'] =  ["title" => "Compras de bienes y servicios locales utilizados en operaciones sujetas y no exentas", "cats"=>[]];
-          $actividadData['CI'] =  ["title" => "Importaciones de bienes y adquisición de servicios del exterior utilizadas en operaciones sujetas y no exentas", "cats"=>[]];
-          $actividadData['CE'] =  ["title" => "Compras sin derecho a crédito fiscal", "cats"=>[]];
-          $actividadData['CN'] =  ["title" => "Compras de bienes con IVA no acreditable por gastos no deducibles", "cats"=>[]];
-
-          foreach( \App\ProductCategory::all() as $cat ) {
-            $tipoID = $cat->id;
-            $varName  = "$act->codigo-type$tipoID";
-      			$varName0 = "$act->codigo-type$tipoID-0";
-      			$varName1 = "$act->codigo-type$tipoID-1";
-      			$varName2 = "$act->codigo-type$tipoID-2";
-      			$varName3 = "$act->codigo-type$tipoID-13";
-      			$varName4 = "$act->codigo-type$tipoID-4";
-      			
-      			$m0 = $ivaData->$varName0 ?? 0;
-      			$m1 = $ivaData->$varName1 ?? 0;
-      			$m2 = $ivaData->$varName2 ?? 0;
-      			$m3 = $ivaData->$varName3 ?? 0;
-      			$m4 = $ivaData->$varName4 ?? 0;
-      			
-      			$info = [
-      			  "name"   => $cat->name,
-      			  "monto0" => $m0,
-      			  "monto1" => $m1,
-      			  "monto2" => $m2,
-      			  "monto3" => $m3,
-      			  "monto4" => $m4,
-      			];
-      			
-      			if( ! isset($actividadData[$cat->group]["totales"]) ){
-      			  $actividadData[$cat->group]["totales"] = 0;
-      			}
-      			$actividadData[$cat->group]["totales"] = $actividadData[$cat->group]["totales"] + ($m0+$m1+$m2+$m3+$m4);
-  
-      			//Agrega la información al grupo respectivo.
-      			array_push($actividadData["$cat->group"]["cats"], $info);
+          $actividadData['CL'] =  ["title" => "Compras de bienes y servicios locales", "cats"=>[]];
+          $actividadData['CI'] =  ["title" => "Importación de bienes y adquisición de servicios del exterior", "cats"=>[]];
+          $actividadData['CE'] =  ["title" => "Bienes y servicios exentos", "cats"=>[]];
+          $actividadData['CNR'] =  ["title" => "Bienes y servicios no relacionados directamente con la actividad", "cats"=>[]];
+          $actividadData['CNS'] =  ["title" => "Bienes y servicios no sujetos", "cats"=>[]];
+          $actividadData['CLI'] =  ["title" => " Bienes y servicios del artículo 19 de la LIVA", "cats"=>[]];
+          $actividadData['COE'] =  ["title" => "Compras autorizadas sin impuesto (órdenes especiales)", "cats"=>[]];
+          
+          try{
+            foreach( \App\ProductCategory::all() as $cat ) {
+              $tipoID = $cat->id;
+              $varName  = "$act->codigo-type$tipoID";
+        			$varName0 = "$act->codigo-type$tipoID-0";
+        			$varName1 = "$act->codigo-type$tipoID-1";
+        			$varName2 = "$act->codigo-type$tipoID-2";
+        			$varName3 = "$act->codigo-type$tipoID-13";
+        			$varName4 = "$act->codigo-type$tipoID-4";
+        			
+        			$m0 = $ivaData->$varName0 ?? 0;
+        			$m1 = $ivaData->$varName1 ?? 0;
+        			$m2 = $ivaData->$varName2 ?? 0;
+        			$m3 = $ivaData->$varName3 ?? 0;
+        			$m4 = $ivaData->$varName4 ?? 0;
+        			
+        			$info = [
+        			  "name"   => $cat->declaracion_name,
+        			  "monto0" => $m0,
+        			  "monto1" => $m1,
+        			  "monto2" => $m2,
+        			  "monto3" => $m3,
+        			  "monto4" => $m4,
+        			];
+        			
+        			if( ! isset($actividadData[$cat->group]["totales"]) ){
+        			  $actividadData[$cat->group]["totales"] = 0;
+        			}
+        			$actividadData[$cat->group]["totales"] = $actividadData[$cat->group]["totales"] + ($m0+$m1+$m2+$m3+$m4);
+    
+        			//Agrega la información al grupo respectivo.
+        			array_push($actividadData["$cat->group"]["cats"], $info);
+            }
+            array_push( $actividadDataArray, $actividadData );
+          }catch(\Throwable $e){
+            $this->forceRecalc($ano);
+            return view('/Reports/no-data', compact('nombreMes') );
           }
-          array_push( $actividadDataArray, $actividadData );
         }
         
         return view('/Reports/reporte-borrador-iva', compact('data', 'mes', 'ano', 'nombreMes', 'actividadDataArray', 'acumulado') );
@@ -381,6 +389,25 @@ class ReportsController extends Controller
     private function microtime_float(){
         list($usec, $sec) = explode(" ", microtime());
         return ((float) $usec + (float)$sec);
+    }
+    
+    
+    public function forceRecalc($ano){
+      $company = currentCompanyModel();
+      $prorrataOperativa = $company->getProrrataOperativa($ano);
+      $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa, true );
+      $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa, true );
+      $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0, $prorrataOperativa, true );
+      $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0, $prorrataOperativa, true );
+      $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0, $prorrataOperativa, true );
+      $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0, $prorrataOperativa, true );
+      $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0, $prorrataOperativa, true );
+      $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0, $prorrataOperativa, true );
+      $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0, $prorrataOperativa, true );
+      $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0, $prorrataOperativa, true );
+      $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0, $prorrataOperativa, true );
+      $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, $prorrataOperativa, true );
+      $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa, true );
     }
 
 }

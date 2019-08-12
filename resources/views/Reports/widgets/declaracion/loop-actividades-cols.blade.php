@@ -8,7 +8,7 @@
 			<span class="no">No</span>
 		</span>
   </th>
-	<th colspan="6">{{ $title }}</th>
+	<th style="position:relative;" colspan="6">{{ $title }} <input class="sumtot" readonly="" value="{{ number_format($totales, 2) }}"></th>
 </tr>
 @endif
 @if( $desplegar == "desplegar-true" )
