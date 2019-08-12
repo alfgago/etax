@@ -56,7 +56,7 @@ class ResendReception extends Command
                 $company = $bill->company;
                 if( isset($company->atv_validation) && $company ){
                     $ref = $company->last_rec_ref_number;
-                    Log::info('Sending Reception .... Empresa: $company->id_number, Doc:'. $bill->document_key);
+                    Log::info("Sending Reception ID:$bill->id, Empresa: $company->business_name, Doc: $bill->document_key" );
                     sleep(4);
                     ProcessReception::dispatch($bill->id, $provider->id, $tokenApi, $ref)
                         ->onConnection(config('etax.queue_connections'))->onQueue('receptions');

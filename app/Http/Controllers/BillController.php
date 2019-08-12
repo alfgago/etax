@@ -721,12 +721,14 @@ class BillController extends Controller
             if ( $request->autorizar ) {
                 $bill->is_authorized = true;
                 $bill->save();
+            clearBillCache($bill);
                 return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido autorizada. Recuerde validar el código');
             }else {
                 $bill->is_authorized = false;
                 $bill->is_void = true;
                 BillItem::where('bill_id', $bill->id)->delete();
                 $bill->delete();
+                clearBillCache($bill);
                 return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido rechazada');
             }
 
@@ -861,6 +863,7 @@ class BillController extends Controller
             $bill->accept_status = 0;
             $bill->is_code_validated = false;
             $bill->save();
+            clearBillCache($bill);
             return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido incluida para aceptación');
         }else{
             return redirect('/facturas-recibidas/aceptaciones')->withError('Mes seleccionado ya fue cerrado');

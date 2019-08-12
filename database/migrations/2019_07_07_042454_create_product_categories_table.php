@@ -18,6 +18,7 @@ class CreateProductCategoriesTable extends Migration
             $table->bigIncrements('id');
           
             $table->string('name')->nullable();
+            $table->string('declaracion_name')->nullable();
             $table->string('group')->nullable();
             $table->string('invoice_iva_code')->nullable();
             $table->string('bill_iva_code')->nullable();
