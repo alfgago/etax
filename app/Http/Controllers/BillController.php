@@ -357,12 +357,12 @@ class BillController extends Controller
                                 $nombreProveedor = $row['nombreproveedor'];
                                 $codigoProveedor = $row['codigoproveedor'] ? $row['codigoproveedor'] : '';
                                 $tipoPersona = $row['tipoidentificacion'];
-                                if(array_key_exists('identificacionproveedor', $row)){
+                                if( isset($row['identificacionproveedor']) ){
                                     $identificacionProveedor = $row['identificacionproveedor'];
                                 }else{
                                     $identificacionProveedor = $row['identificacionreceptor'];
                                 }
-                                if(array_key_exists('identificacionproveedor', $row)){
+                                if( isset($row['correoproveedor']) ){
                                     $correoProveedor = $row['correoproveedor'];
                                 }else{
                                     $correoProveedor = $row['correoreceptor'];
@@ -372,31 +372,31 @@ class BillController extends Controller
 
                                 //Datos de factura
                                 $consecutivoComprobante = $row['consecutivocomprobante'];
-                                $claveFactura = array_key_exists('clavefactura', $row) ? $row['clavefactura'] : '';
+                                $claveFactura = isset($row['clavefactura']) ? $row['clavefactura'] : '';
                                 $condicionVenta = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
                                 $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
-                                $numeroLinea = array_key_exists('numerolinea', $row) ? $row['numerolinea'] : 1;
+                                $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
                                 $fechaEmision = $row['fechaemision'];
-                                $fechaVencimiento = array_key_exists('fechavencimiento', $row) ? $row['fechavencimiento'] : $fechaEmision;
+                                $fechaVencimiento = isset($row['fechavencimiento']) ? $row['fechavencimiento'] : $fechaEmision;
                                 $moneda = $row['moneda'];
                                 $tipoCambio = $row['tipocambio'];
                                 $totalDocumento = $row['totaldocumento'];
                                 $tipoDocumento = $row['tipodocumento'];
-                                $descripcion = array_key_exists('descripcion', $row) ? $row['descripcion'] : '';
+                                $descripcion = isset($row['descripcion']) ? $row['descripcion'] : '';
 
                                 //Datos de linea
                                 $codigoProducto = $row['codigoproducto'];
                                 $detalleProducto = $row['detalleproducto'];
                                 $unidadMedicion = $row['unidadmedicion'];
-                                $cantidad = array_key_exists('cantidad', $row) ? $row['cantidad'] : 1;
+                                $cantidad = isset($row['cantidad']) ? $row['cantidad'] : 1;
                                 $precioUnitario = $row['preciounitario'];
                                 $subtotalLinea = (float)$row['subtotallinea'];
                                 $totalLinea = $row['totallinea'];
-                                $montoDescuento = array_key_exists('montodescuento', $row) ? $row['montodescuento'] : 0;
+                                $montoDescuento = isset($row['montodescuento']) ? $row['montodescuento'] : 0;
                                 $codigoEtax = $row['codigoivaetax'];
-                                $categoriaHacienda = array_key_exists('categoriaHacienda', $row) ? $row['categoriaHacienda'] : null;
+                                $categoriaHacienda = isset($row['categoriaHacienda']) ? $row['categoriaHacienda'] : null;
                                 $montoIva = (float)$row['montoiva'];
-                                $acceptStatus = array_key_exists('aceptada', $row) ? $row['aceptada'] : 1;
+                                $acceptStatus = isset($row['aceptada']) ? $row['aceptada'] : 1;
 
                                 $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
                                 $codigoActividad = $row['actividadcomercial'] ?? $mainAct;

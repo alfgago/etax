@@ -68,7 +68,9 @@ class ProductCategorySeed extends Seeder
           //Ventas no sujetas
           ['grupo'=>'VNS','nombre'=>'Bienes y servicios a la Caja Costarricense de Seguro Social', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184'],
           ['grupo'=>'VNS','nombre'=>'Bienes y servicios a las corporaciones municipales', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184'],
-          ['grupo'=>'VNS','nombre'=>'Otras ventas no sujetas', 'invoice_iva_code'=>'B173', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184,S300,B300']
+          ['grupo'=>'VNS','nombre'=>'Otras ventas no sujetas', 'invoice_iva_code'=>'B173', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184,S300,B300'],
+          //Usado para notas de débito.
+          ['grupo'=>'DP','nombre'=>'Devoluciones a proveedores', 'invoice_iva_code'=>'B065', 'open_codes'=>'B065,B066,B067']
         ];
         
         $listaCompras = [
@@ -87,7 +89,7 @@ class ProductCategorySeed extends Seeder
           ['grupo'=>'CLI','nombre'=>'Bienes y servicios del artículo 19 de la LIVA', 'bill_iva_code'=>'B080', 'open_codes'=>'B080,S080'],
           ['grupo'=>'COE','nombre'=>'Autorizadas por la Dirección General de Hacienda', 'bill_iva_code'=>'B080', 'open_codes'=>'B080,S080'],
           ['grupo'=>'COE','nombre'=>'Autorizadas por la Dirección General de Tributación', 'bill_iva_code'=>'B080', 'open_codes'=>'B080,S080'],
-          ['grupo'=>'COE','nombre'=>'Autorizadas por Ley especial', 'bill_iva_code'=>'B080', 'open_codes'=>'B080,S080'],
+          ['grupo'=>'COE','nombre'=>'Autorizadas por Ley especial', 'bill_iva_code'=>'B080', 'open_codes'=>'B080,S080']
         ];
       
         foreach( $listaVentas as $categoria ) {
