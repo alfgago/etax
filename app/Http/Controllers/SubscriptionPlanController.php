@@ -227,8 +227,8 @@ class SubscriptionPlanController extends Controller
             "nota" => '',
         );
         if($code->type == 0){
-            if( $request->codigo == $code->code ){
-                $descuento = ($request->precio * $code->discount_percentage);
+            //if( $request->codigo == $code->code ){
+                $descuento = ($request->precio * $code->discount_percentage/100);
                 $precio_final = $request->precio - $descuento;
                 $nota = $code->promotion_name;
                 if( $request->banco == 1 ) {
@@ -244,7 +244,7 @@ class SubscriptionPlanController extends Controller
                     "precio" => $precio_final,
                     "nota" => $nota
                 );
-            }
+            //}
         }else{
             if($request->plan == 'c'){
                 $precio_final = $request->companies  * $code->amount;

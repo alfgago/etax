@@ -10,11 +10,22 @@
 @endsection
 
 @section('content')
-
+<?php $ratios = currentCompanyModel()->operative_ratio1 + currentCompanyModel()->operative_ratio2 + currentCompanyModel()->operative_ratio3 + currentCompanyModel()->operative_ratio4;?>
+    
 <div class="row">
   <div class="col-md-12">
     <div class="row">
-      
+      @if(!$ratios)
+      <div class="col-md-8">
+        <div class="alert alert-warning"> 
+          <strong>Configuración de empresa incompleta.</strong><br><br>
+          Para obtener datos precisos en su declaración y otros reportes, debe ingresar su proporción de ventas del año 2018 para cada una de las posibles tarifas (1%, 2%, 13% y 4%). 
+          Puede hacerlo ingresando a la sección de <a href="/empresas/configuracion">configuración avanzada</a>.
+  		  </div>
+		  </div>
+		  <div class="col-md-12"></div>
+		  @endif
+		  
       <div class="form-group col-md-3">
         <label for="reportes-select">Reporte</label>
         <select class="form-control" id="reportes-select" onchange="toggleFilters();">
@@ -152,6 +163,18 @@
   
   $( document ).ready(function() {
     clearEmptyRows();
+    
+    @if(!$ratios)
+      var title = 'Configuración de empresa incompleta.';
+      var texto = "Para obtener datos precisos en su declaración y otros reportes, debe ingresar su proporción de ventas del año 2018 para cada una de las posibles tarifas (1%, 2%, 13% y 4%). Puede hacerlo ingresando a la sección de configuración avanzada.";
+      Swal.fire({
+        title: title,
+        text: texto,
+        type: 'warning',
+        showCloseButton: true,
+        confirmButtonText: 'Ok'
+      });
+    @endif
   });
   
   function resizeIframe() {
