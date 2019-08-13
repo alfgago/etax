@@ -244,11 +244,11 @@
         </td>
     </table>
     <div class="footer">
-                Autorizada mediante resolución N° DGT-R-48-2016 del 7 de octubre de 2016. <br>
-                <div style="font-size: 11px;">
-                Clave: {{ $data_invoice->document_key }} <br>
-                Versión del Documento Electrónico: 4.3
-                </div>
+        Autorizada mediante resolución N° DGT-R-48-2016 del 7 de octubre de 2016. <br>
+        <div style="font-size: 11px;">
+        Clave: {{ $data_invoice->document_key }} <br>
+        Versión del Documento Electrónico: 4.3
+        </div>
     </div>
     </div>
 </body>
