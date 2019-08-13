@@ -235,10 +235,10 @@ class InvoiceController extends Controller
         $tipoDocumento = '08';
         
         //validates if the company has invoices left, atv, consecutivos
-        $errors = $company->validateEmit();
+        /*$errors = $company->validateEmit();
         if(count($errors) > 0){
             return redirect($errors['url'])->withError($errors['mensaje']);
-        }
+        }*/
 
         //gather info from the DBs to the view
         $units = UnidadMedicion::all()->toArray();
