@@ -189,7 +189,7 @@ class BillController extends Controller
      */
     public function store(Request $request)
     {
-      dd($request);
+      
         $company = currentCompanyModel();
         $request->validate([
             'subtotal' => 'required',
