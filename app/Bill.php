@@ -323,12 +323,13 @@ class Bill extends Model
         $bill->year = $year;
         
         if( array_key_exists( 'CodigoTipoMoneda', $arr['ResumenFactura'] ) ) {
-          $idMoneda = $arr['ResumenFactura']['CodigoTipoMoneda']['CodigoMoneda'] ?? '';
+          $idMoneda = $arr['ResumenFactura']['CodigoTipoMoneda']['CodigoMoneda'] ?? 'CRC';
           $tipoCambio = $arr['ResumenFactura']['CodigoTipoMoneda']['TipoCambio'] ?? 1;
         }else {
-          $idMoneda = $arr['ResumenFactura']['CodigoMoneda'] ?? '';
+          $idMoneda = $arr['ResumenFactura']['CodigoMoneda'] ?? 'CRC';
           $tipoCambio = array_key_exists('TipoCambio', $arr['ResumenFactura']) ? $arr['ResumenFactura']['TipoCambio'] : '1';
         }
+        if($idMoneda == 'CRC'){ $tipoCambio = 1; }
         $bill->currency = $idMoneda;
         $bill->currency_rate = $tipoCambio;
         
@@ -463,7 +464,7 @@ class Bill extends Model
         foreach( $lineas as $linea ) {
             $numeroLinea++;
             try {
-              $codigoProducto = array_key_exists('Codigo', $linea) ? $linea['Codigo']['Codigo'] ?? '' : '';
+              $codigoProducto = array_key_exists('Codigo', $linea) ? ($linea['Codigo']['Codigo'] ?? '') : '';
             } catch( \Throwable $e ) {
               $codigoProducto = "No indica";
             }
@@ -492,13 +493,16 @@ class Bill extends Model
                 $montoIva = trim($linea['Impuesto']['Monto'] );
                 $porcentajeIva = trim($linea['Impuesto']['Tarifa'] );
   
-                if( array_key_exists('Exoneracion', $linea['Impuesto']) ) {
+                if( isset( $linea['Impuesto']['Exoneracion'] ) ) {
                   $tipoDocumentoExoneracion = $linea['Impuesto']['Exoneracion']['TipoDocumento'] ?? null;
                   $documentoExoneracion = $linea['Impuesto']['Exoneracion']['NumeroDocumento']  ?? null;
                   $companiaExoneracion = $linea['Impuesto']['Exoneracion']['NombreInstitucion'] ?? null;
                   $fechaExoneracion = $linea['Impuesto']['Exoneracion']['FechaEmision'] ?? null;
                   $porcentajeExoneracion = $linea['Impuesto']['Exoneracion']['PorcentajeExoneracion'] ?? 0;
                   $montoExoneracion = $linea['Impuesto']['Exoneracion']['MontoExoneracion'] ?? 0;
+                  if( $montoExoneracion ){
+                    $montoIva = $montoIva - $montoExoneracion;
+                  }
                 }
               }catch(\Exception $e){
                 if( is_array($linea['Impuesto'])){
@@ -506,11 +510,11 @@ class Bill extends Model
                   $porcentajeIva = 0;
 
                   foreach ($linea['Impuesto'] as $imp){
-                    if( trim($imp['Tarifa']) == 5 ){
-                      $subtotalLinea = $subtotalLinea + (float)trim($imp['Monto'] );
-                    }else{
+                    if( trim($imp['Codigo']) == '01' || trim($imp['Codigo']) == 1 ){
                       $montoIva += (float)trim($imp['Monto'] );
                       $porcentajeIva += (float)trim($imp['Tarifa'] );
+                    }else{
+                      $subtotalLinea = $subtotalLinea + (float)trim($imp['Monto'] );
                     }
                   }
                 }
@@ -700,12 +704,16 @@ class Bill extends Model
 
               $bill->is_void = false;
               
+              $bill->currency_rate = $data['tipoCambio'] ?? 1;
+              
               //Datos de factura
-              $bill->currency = $data['moneda'];
+              $bill->currency = $data['moneda'] ?? 'CRC';
               if( $bill->currency == 1 ) { $bill->currency = "CRC"; }
               if( $bill->currency == 2 ) { $bill->currency = "USD"; }
+              if($bill->currency == 'CRC'){
+                $bill->currency_rate = 1;
+              }
 
-              $bill->currency_rate = $data['tipoCambio'];
               //$bill->description = $row['description'] ? $row['description'] : '';
 
               $company->last_bill_ref_number = $bill->reference_number;
@@ -753,8 +761,14 @@ class Bill extends Model
       $insert = false;
       
       if( !$item->exists ) {
-          $bill->subtotal = $bill->subtotal + $data['subtotalLinea'];
-          $bill->iva_amount = $bill->iva_amount + $data['montoIva'];
+          $subtotalLinea = $data['subtotalLinea'] ?? 0;
+          $montoIvaLinea = $data['montoIva'] ?? 0;
+          $totalLinea = $data['totalLinea'] ?? 0;
+          $precioUnitarioLinea = $data['precioUnitario'] ?? 0;
+          $montoDescuentoLinea = $data['montoDescuento'] ?? 0;
+          $cantidadLinea = $data['cantidad'] ?? 0;
+          $bill->subtotal = $bill->subtotal + $subtotalLinea;
+          $bill->iva_amount = $bill->iva_amount + $montoIvaLinea;
           
           $insert = [
               'bill_id' => $bill->id,
@@ -766,14 +780,14 @@ class Bill extends Model
               'name' => $data['detalleProducto'] ?? 'No indica',
               'product_type' => $data['categoriaHacienda'] ?? 0,
               'measure_unit' => $data['unidadMedicion'],
-              'item_count' => $data['cantidad'],
-              'unit_price' => $data['precioUnitario'],
-              'subtotal' => $data['subtotalLinea'],
-              'total' => $data['totalLinea'],
+              'item_count' => $cantidadLinea,
+              'unit_price' => $precioUnitarioLinea,
+              'subtotal' => $subtotalLinea,
+              'total' => $totalLinea,
               'discount_type' => '01',
-              'discount' => $data['montoDescuento'],
+              'discount' => $montoDescuentoLinea,
               'iva_type' => $data['codigoEtax'],
-              'iva_amount' => $data['montoIva'],
+              'iva_amount' => $montoIvaLinea,
               'exoneration_document_type' => $data['tipoDocumentoExoneracion'],
               'exoneration_document_number' => $data['documentoExoneracion'],
               'exoneration_company_name' => $data['companiaExoneracion'],

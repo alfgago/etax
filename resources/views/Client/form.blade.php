@@ -163,7 +163,6 @@
                 //setTimeout(fillProvincias, 1000);
             }
         }
-        $('#phone').val('');
     }
     cambiarDireccion();
 

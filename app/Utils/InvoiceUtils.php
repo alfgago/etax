@@ -23,8 +23,12 @@ class InvoiceUtils
 
     public function streamPdf( $invoice, $company )
     {
+        $pdfRoute = 'Pdf/invoice';
+        if($company->id_number == '3101015179'){
+            $pdfRoute = 'Pdf/custom/trifami';
+        }
         
-        $pdf = PDF::loadView('Pdf/invoice', [
+        $pdf = PDF::loadView($pdfRoute, [
             'data_invoice' => $invoice,
             'company' => $company
         ]);
@@ -35,7 +39,12 @@ class InvoiceUtils
 	
 	public function downloadPdf( $invoice, $company )
     {
-        $pdf = PDF::loadView('Pdf/invoice', [
+        $pdfRoute = 'Pdf/invoice';
+        if($company->id_number == '3101015179'){
+            $pdfRoute = 'Pdf/custom/trifami';
+        }
+        
+        $pdf = PDF::loadView($pdfRoute, [
             'data_invoice' => $invoice,
             'company' => $company
         ]);
@@ -222,6 +231,12 @@ class InvoiceUtils
 	        if( !isset($file) ){
 	        	//Lo busca en el root de la empresa
         		$path = "empresa-$cedulaEmpresa/$cedulaCliente-$consecutivoComprobante.xml";
+		        if ( Storage::exists($path)) {
+		          $file = Storage::get($path);
+		        }
+	        }
+	        if( !isset($file) ){
+        		$path = "empresa-$cedulaEmpresa/facturas_ventas/$invoice->year/$invoice->month/$consecutivoComprobante.xml";
 		        if ( Storage::exists($path)) {
 		          $file = Storage::get($path);
 		        }
