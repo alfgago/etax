@@ -705,7 +705,6 @@ class Bill extends Model
               $bill->is_void = false;
               
               $bill->currency_rate = $data['tipoCambio'] ?? 1;
-              
               //Datos de factura
               $bill->currency = $data['moneda'] ?? 'CRC';
               if( $bill->currency == 1 ) { $bill->currency = "CRC"; }
@@ -729,6 +728,20 @@ class Bill extends Model
           Cache::put($billCacheKey, $bill, 30);
       }
       $bill = Cache::get($billCacheKey);
+      
+      if( data['metodoGeneracion'] != "XLSX" ){
+        $bill->is_code_validated = $data['codeValidated'];
+        $bill->is_authorized = $data['isAuthorized'];
+        $bill->currency_rate = $data['tipoCambio'] ?? 1;
+        //Datos de factura
+        $bill->currency = $data['moneda'] ?? 'CRC';
+        if( $bill->currency == 1 ) { $bill->currency = "CRC"; }
+        if( $bill->currency == 2 ) { $bill->currency = "USD"; }
+        if($bill->currency == 'CRC'){
+          $bill->currency_rate = 1;
+        }
+        $bill->commercial_activity =  $data['codigoActividad'] ?? '0';
+      }
       
       try{
         $bill->generated_date = Carbon::createFromFormat('d/m/Y', $data['fechaEmision']);
