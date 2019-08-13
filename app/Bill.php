@@ -730,6 +730,11 @@ class Bill extends Model
       }
       $bill = Cache::get($billCacheKey);
       
+      if( data['metodoGeneracion'] != "XLSX" ){
+        $bill->is_code_validated = $data['codeValidated'];
+        $bill->is_authorized = $data['isAuthorized'];
+      }
+      
       try{
         $bill->generated_date = Carbon::createFromFormat('d/m/Y', $data['fechaEmision']);
       }catch( \Exception $ex ){
