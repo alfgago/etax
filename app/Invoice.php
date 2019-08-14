@@ -507,12 +507,24 @@ class Invoice extends Model
               $invoice->currency_rate = $data['tipoCambio'];
               $invoice->subtotal = 0;
               $invoice->iva_amount = 0;
-              $invoice->total = $data['totalDocumento'];
+              $invoice->total = $data['totalDocumento'] ?? 0;
               $invoice->save();
           }   
           Cache::put($invoiceCacheKey, $invoice, 30);
       }
       $invoice = Cache::get($invoiceCacheKey);
+      
+        $invoice->is_authorized = $data['isAuthorized'];
+        $invoice->is_code_validated = $data['codeValidated'];
+        $invoice->currency_rate = $data['tipoCambio'] ?? 1;
+        //Datos de factura
+        $invoice->currency = $data['moneda'] ?? 'CRC';
+        if( $invoice->currency == 1 ) { $invoice->currency = "CRC"; }
+        if( $invoice->currency == 2 ) { $invoice->currency = "USD"; }
+        if($invoice->currency == 'CRC'){
+          $invoice->currency_rate = 1;
+        }
+        $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
       
       try{
         $invoice->generated_date = Carbon::createFromFormat('d/m/Y', $data['fechaEmision']);
@@ -548,8 +560,14 @@ class Invoice extends Model
       $insert = false;
       
       if( !$item->exists ) {
-          $invoice->subtotal = $invoice->subtotal + $data['subtotalLinea'];
-          $invoice->iva_amount = $invoice->iva_amount + $data['montoIva'];
+          $subtotalLinea = $data['subtotalLinea'] ?? 0;
+          $montoIvaLinea = $data['montoIva'] ?? 0;
+          $totalLinea = $data['totalLinea'] ?? 0;
+          $precioUnitarioLinea = $data['precioUnitario'] ?? 0;
+          $montoDescuentoLinea = $data['montoDescuento'] ?? 0;
+          $cantidadLinea = $data['cantidad'] ?? 0;
+          $invoice->subtotal = $invoice->subtotal + $subtotalLinea;
+          $invoice->iva_amount = $invoice->iva_amount + $montoIvaLinea;
           
           $discount_reason = "";
           
@@ -561,16 +579,16 @@ class Invoice extends Model
               'item_number' => $data['numeroLinea'],
               'code' => $data['codigoProducto'],
               'name' => $data['detalleProducto'],
-              'product_type' => 1,
+              'product_type' => $data['categoriaHacienda'] ?? 0,
               'measure_unit' => $data['unidadMedicion'],
-              'item_count' => $data['cantidad'],
-              'unit_price' => $data['precioUnitario'],
-              'subtotal' => $data['subtotalLinea'],
-              'total' => $data['totalLinea'],
+              'item_count' => $cantidadLinea,
+              'unit_price' => $precioUnitarioLinea,
+              'subtotal' => $subtotalLinea,
+              'total' => $totalLinea,
               'discount_type' => '01',
-              'discount' => $data['montoDescuento'],
+              'discount' => $montoDescuentoLinea,
               'iva_type' => $data['codigoEtax'],
-              'iva_amount' => $data['montoIva'],
+              'iva_amount' => $montoIvaLinea,
               'exoneration_document_type' => $data['tipoDocumentoExoneracion'],
               'exoneration_document_number' => $data['documentoExoneracion'],
               'exoneration_company_name' => $data['companiaExoneracion'],
