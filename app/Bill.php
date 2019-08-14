@@ -741,6 +741,10 @@ class Bill extends Model
           $bill->currency_rate = 1;
         }
         $bill->commercial_activity =  $data['codigoActividad'] ?? '0';
+        if( $data['acceptStatus'] ){
+          $bill->accept_status = 1;
+          $bill->hacienda_status = "03";
+        }
       //}
       
       try{
