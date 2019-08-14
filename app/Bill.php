@@ -719,7 +719,7 @@ class Bill extends Model
               
               $bill->subtotal = 0;
               $bill->iva_amount = 0;
-              $bill->total = $data['totalDocumento'];
+              $bill->total = $data['totalDocumento'] ?? 0;
 
               $bill->save();
               $company->save();
@@ -729,7 +729,7 @@ class Bill extends Model
       }
       $bill = Cache::get($billCacheKey);
       
-      if( data['metodoGeneracion'] != "XLSX" ){
+      //if( data['metodoGeneracion'] != "XLSX" ){
         $bill->is_code_validated = $data['codeValidated'];
         $bill->is_authorized = $data['isAuthorized'];
         $bill->currency_rate = $data['tipoCambio'] ?? 1;
@@ -741,7 +741,7 @@ class Bill extends Model
           $bill->currency_rate = 1;
         }
         $bill->commercial_activity =  $data['codigoActividad'] ?? '0';
-      }
+      //}
       
       try{
         $bill->generated_date = Carbon::createFromFormat('d/m/Y', $data['fechaEmision']);
@@ -772,8 +772,8 @@ class Bill extends Model
       );
       
       $insert = false;
-      
-      if( !$item->exists ) {
+
+      if( !$item->id ) {
           $subtotalLinea = $data['subtotalLinea'] ?? 0;
           $montoIvaLinea = $data['montoIva'] ?? 0;
           $totalLinea = $data['totalLinea'] ?? 0;

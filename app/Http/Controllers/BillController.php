@@ -479,11 +479,8 @@ class BillController extends Controller
             }catch( \InvalidArgumentException $ex ){
                 Log::error('Error importando Excel' . $ex->getMessage());
                 return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
-            }catch( \Exception $ex ){
-                Log::error('Error importando Excel' . $ex->getMessage());
-                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Linea: '.$i);
             }catch( \Throwable $ex ){
-                Log::error('Error importando Excel' . $ex->getMessage());
+                Log::error('Error importando Excel' . $ex);
                 return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Linea: '.$i);
             }
         
