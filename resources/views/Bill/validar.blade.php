@@ -108,7 +108,7 @@
                 </td>
                 <td>
                   <div class="input-validate-iva">
-                    <select class="form-control product_type" name="items[{{ $loop->index }}][product_type]" placeholder="Seleccione una categoría de hacienda" required>
+                    <select curr="{{ $item->product_type }}" class="form-control product_type" name="items[{{ $loop->index }}][product_type]" placeholder="Seleccione una categoría de hacienda" required>
                         @foreach($categoria_productos as $cat)
                             <option value="{{@$cat->id}}" codigo="{{ @$cat->bill_iva_code }}" posibles="{{@$cat->open_codes}}" {{ $item->product_type == @$cat->id ? 'selected' : '' }}>{{@$cat->name}}</option>
                         @endforeach
@@ -186,6 +186,11 @@ $(document).ready(function(){
     
     <?php if( !$bill->is_code_validated ){ ?>
       $(".iva_type").change();
+    <?php }else{ ?>
+      $('.iva_type').change();
+      $(".product_type").each(function(){
+        $(this).val($(this).attr('curr')).change();
+      });
     <?php } ?>
 });
       

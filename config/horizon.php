@@ -140,9 +140,9 @@ return [
 
     'environments' => [
         'production' => [
-            'supervisor-invoices' => [
+            'horizon-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['default', 'invoices'],
+                'queue' => ['default', 'invoices', 'receptions', 'importExcel'],
                 'balance' => 'auto',
                 'processes' => 10,
                 'tries' => 3,
@@ -152,7 +152,7 @@ return [
         'local' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['default', 'invoices'],
+                'queue' => ['default', 'invoices', 'receptions', 'importExcel'],
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,

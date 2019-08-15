@@ -161,7 +161,10 @@ class Company extends Model {
                               ->value('saldo_favor');
         //Si el saldo es mayor que nulo, lo pone en 0.                     
         $lastBalance = $lastBalance ? $lastBalance : 0;
-        
+      
+        if( $month == 7 ) {
+            return $this->saldo_favor_2018;
+        }
       }else{
         $lastBalance = 0;
       }
