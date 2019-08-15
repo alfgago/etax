@@ -54,94 +54,96 @@ class ProcessReception implements ShouldQueue
     public function handle()
     {
         try {
-            Log::info('send job reception id: '.$this->billId);
-            $client = new Client();
-            $bill = Bill::find($this->billId);
-            $company = Company::find($bill->company_id);
-            if ( $company->atv_validation ) {
-                if ($bill->hacienda_status == '01' && $bill->document_type == '01') {
-                    if($bill->xml_schema == 42) {
-                        $requestData = $this->setReceptionData($bill, $this->ref);
-                    } else {
-                        $requestData = $this->setReceptionData43($bill, $this->ref);
-                    }
-                    Log::info('Request data'. json_encode($requestData));
-                    $apiHacienda = new BridgeHaciendaApi();
-                    $tokenApi = $apiHacienda->login(false);
-                    if ($requestData !== false) {
-                        $endpoint = $bill->xml_schema == 42 ? 'invoice' : 'invoice43';
-                        sleep(15);
-                        Log::info('Enviando Request Reception  API HACIENDA -->>' . $this->billId);
-                        $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/aceptacionxml', [
-                            'headers' => [
-                                'Auth-Key' => config('etax.api_hacienda_key'),
-                                'Client-Service' => config('etax.api_hacienda_client'),
-                                'Authorization' => $tokenApi,
-                                'User-ID' => config('etax.api_hacienda_user_id'),
-                                'Connection' => 'Close'
-                            ],
-                            'multipart' => $requestData,
-                            'verify' => false,
-                            'http_errors' => false,
-                            'connect_timeout' => 20
-                        ]);
-                        $response = json_decode($result->getBody()->getContents(), true);
-                        Log::info('Response Reception Api Hacienda '. json_encode($response));
-                        ApiResponse::create(['bill_id' => $bill->id, 'document_key' => $bill->document_key,
-                            'doc_type' => $bill->document_type,
-                            'json_response' => json_encode($response)
-                        ]);
-                        if (isset($response['status']) && $response['status'] == 200) {
-                            Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
-                            $date = Carbon::now();
-                            $bill->hacienda_status = '03';
-                            $bill->save();
-                            $xml = XmlHacienda::where('bill_id',$bill->id)->whereNotNull('xml')->first();
-                            $path = 'empresa-' . $company->id_number .
-                                "/aceptaciones/$date->year/$date->month/$bill->document_key.xml";
-                            $pathFE = $xml->xml;
-                            $save = Storage::put(
-                                $path,
-                                ltrim($response['data']['xmlFirmado'], '\n'));
-                            if ($save) {
-                                $xml->xml_reception = $path;
-                                $xml->save();
-                                $xmlExtract = ltrim($response['data']['response'], '\n');
-                                Mail::to($bill->provider_email)->cc($company->email)->send(new ReceptionNotification([
-                                    'xml' => $path, 'xmlFE' => $pathFE,  'data_invoice' => $bill,
-                                    'data_company' => $company, 'response' => $xmlExtract
-                                ]));
-                            }
-                            Log::info('Reception enviada y XML guardado.');
-                        } else if (isset($response['status']) && $response['status'] == 400 &&
-                            strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
-                            //$bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
-                            //$bill->save();
-                            Log::info('Failed Job');
-                        } else if (isset($response['status']) && $response['status'] == 400 &&
-                            strpos($response['message'], 'archivo XML ya existe en nuestras bases de datos') <> false) {
-                            //$bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
-                            //$bill->save();
-                            Log::info('Failed Job');
+            if ( app()->environment('production') ) {
+                Log::info('send job reception id: '.$this->billId);
+                $client = new Client();
+                $bill = Bill::find($this->billId);
+                $company = Company::find($bill->company_id);
+                if ( $company->atv_validation ) {
+                    if ($bill->hacienda_status == '01' && $bill->document_type == '01') {
+                        if($bill->xml_schema == 42) {
+                            $requestData = $this->setReceptionData($bill, $this->ref);
                         } else {
-                            //$bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
-                            //$bill->save();
-                            Log::error('ERROR Enviando parametros API HACIENDA Reception Empresa '.$company->business_name.' Bill: '.$this->billId);
+                            $requestData = $this->setReceptionData43($bill, $this->ref);
                         }
-                        Log::info('Proceso de Reception finalizado con éxito. Empresa '.$company->business_name.' Bill: '.$this->billId);
+                        Log::info('Request data'. json_encode($requestData));
+                        $apiHacienda = new BridgeHaciendaApi();
+                        $tokenApi = $apiHacienda->login(false);
+                        if ($requestData !== false) {
+                            $endpoint = $bill->xml_schema == 42 ? 'invoice' : 'invoice43';
+                            sleep(15);
+                            Log::info('Enviando Request Reception  API HACIENDA -->>' . $this->billId);
+                            $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/aceptacionxml', [
+                                'headers' => [
+                                    'Auth-Key' => config('etax.api_hacienda_key'),
+                                    'Client-Service' => config('etax.api_hacienda_client'),
+                                    'Authorization' => $tokenApi,
+                                    'User-ID' => config('etax.api_hacienda_user_id'),
+                                    'Connection' => 'Close'
+                                ],
+                                'multipart' => $requestData,
+                                'verify' => false,
+                                'http_errors' => false,
+                                'connect_timeout' => 20
+                            ]);
+                            $response = json_decode($result->getBody()->getContents(), true);
+                            Log::info('Response Reception Api Hacienda '. json_encode($response));
+                            ApiResponse::create(['bill_id' => $bill->id, 'document_key' => $bill->document_key,
+                                'doc_type' => $bill->document_type,
+                                'json_response' => json_encode($response)
+                            ]);
+                            if (isset($response['status']) && $response['status'] == 200) {
+                                Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
+                                $date = Carbon::now();
+                                $bill->hacienda_status = '03';
+                                $bill->save();
+                                $xml = XmlHacienda::where('bill_id',$bill->id)->whereNotNull('xml')->first();
+                                $path = 'empresa-' . $company->id_number .
+                                    "/aceptaciones/$date->year/$date->month/$bill->document_key.xml";
+                                $pathFE = $xml->xml;
+                                $save = Storage::put(
+                                    $path,
+                                    ltrim($response['data']['xmlFirmado'], '\n'));
+                                if ($save) {
+                                    $xml->xml_reception = $path;
+                                    $xml->save();
+                                    $xmlExtract = ltrim($response['data']['response'], '\n');
+                                    Mail::to($bill->provider_email)->cc($company->email)->send(new ReceptionNotification([
+                                        'xml' => $path, 'xmlFE' => $pathFE,  'data_invoice' => $bill,
+                                        'data_company' => $company, 'response' => $xmlExtract
+                                    ]));
+                                }
+                                Log::info('Reception enviada y XML guardado.');
+                            } else if (isset($response['status']) && $response['status'] == 400 &&
+                                strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
+                                //$bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
+                                //$bill->save();
+                                Log::info('Failed Job');
+                            } else if (isset($response['status']) && $response['status'] == 400 &&
+                                strpos($response['message'], 'archivo XML ya existe en nuestras bases de datos') <> false) {
+                                //$bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
+                                //$bill->save();
+                                Log::info('Failed Job');
+                            } else {
+                                //$bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
+                                //$bill->save();
+                                Log::error('ERROR Enviando parametros API HACIENDA Reception Empresa '.$company->business_name.' Bill: '.$this->billId);
+                            }
+                            Log::info('Proceso de Reception finalizado con éxito. Empresa '.$company->business_name.' Bill: '.$this->billId);
+                        }
+                    } else {
+                        $bill->accept_status = 1;
+                        $bill->hacienda_status = '03';
+                        $bill->save();
+                        Log::info('Proceso de Reception Factura ya habia sido enviada. Empresa '.$company->business_name.' Bill: '.$this->billId);
                     }
-                } else {
-                    $bill->accept_status = 1;
-                    $bill->hacienda_status = '03';
-                    $bill->save();
-                    Log::info('Proceso de Reception Factura ya habia sido enviada. Empresa '.$company->business_name.' Bill: '.$this->billId);
-                }
-            }else {
-                Log::warning('El job receptions no se procesó, porque la empresa no tiene un certificado válido: Empresa '.$company->business_name.' Bill: '.$this->billId.'-->>');
-                if( !$company->use_invoicing ){
-                    $bill->accept_status = 1;
-                    $bill->hacienda_status = '03';
-                    $bill->save();
+                }else {
+                    Log::warning('El job receptions no se procesó, porque la empresa no tiene un certificado válido: Empresa '.$company->business_name.' Bill: '.$this->billId.'-->>');
+                    if( !$company->use_invoicing ){
+                        $bill->accept_status = 1;
+                        $bill->hacienda_status = '03';
+                        $bill->save();
+                    }
                 }
             }
         } catch ( \Exception $e) {

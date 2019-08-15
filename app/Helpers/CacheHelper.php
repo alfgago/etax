@@ -27,8 +27,10 @@ if (!function_exists('clearTaxesCache')) {
     function clearTaxesCache($current_company, $month, $year){
       	$cacheKey = "cache-taxes-$current_company-$month-$year";
       	Cache::forget($cacheKey);
-        $userId = auth()->user()->id;
-        Cache::forget("cache-currentcompany-$userId");
+      	try{
+            $userId = auth()->user()->id;
+            Cache::forget("cache-currentcompany-$userId");
+      	}catch(\Throwable $e){}
     }
     
 }

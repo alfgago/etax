@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use App\Jobs\ProcessBillsImport;
 
 /**
  * @group Controller - Facturas de compra
@@ -253,10 +254,7 @@ class BillController extends Controller
         $company = currentCompanyModel();
         
         $bill = Bill::findOrFail($id);
-        $FechaEmision = explode(" ", $bill->generated_date);
-        $FechaEmision = explode("-", $FechaEmision[0]);
-        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
-        if(CalculatedTax::validarMes($FechaEmision)){
+        if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
             $units = UnidadMedicion::all()->toArray();
             $this->authorize('update', $bill);
           
@@ -328,8 +326,6 @@ class BillController extends Controller
         request()->validate([
           'archivo' => 'required',
         ]);
-      
-        $time_start = getMicrotime();
 
         try {
             $collection = Excel::toCollection( new BillImport(), request()->file('archivo') );
@@ -340,160 +336,10 @@ class BillController extends Controller
         }
         
         $company = currentCompanyModel();
-        
-        if( $collection[0]->count() < 5001 ){
-            try {
-                foreach ($collection[0]->chunk(200) as $facturas) {
-                    \DB::transaction(function () use ($facturas, &$company, &$i) {
-                        
-                        $inserts = array();
-                        foreach ($facturas as $row){
-                            if($row['consecutivocomprobante']) {
-                                $i++;
-
-                                $metodoGeneracion = "XLSX";
-
-                                //Datos de proveedor
-                                $nombreProveedor = $row['nombreproveedor'];
-                                $codigoProveedor = $row['codigoproveedor'] ? $row['codigoproveedor'] : '';
-                                $tipoPersona = $row['tipoidentificacion'];
-                                if( isset($row['identificacionproveedor']) ){
-                                    $identificacionProveedor = $row['identificacionproveedor'];
-                                }else{
-                                    $identificacionProveedor = $row['identificacionreceptor'];
-                                }
-                                if( isset($row['correoproveedor']) ){
-                                    $correoProveedor = $row['correoproveedor'];
-                                }else{
-                                    $correoProveedor = $row['correoreceptor'];
-                                }
-                                
-                                $telefonoProveedor = null;
-
-                                //Datos de factura
-                                $consecutivoComprobante = $row['consecutivocomprobante'];
-                                $claveFactura = isset($row['clavefactura']) ? $row['clavefactura'] : '';
-                                $condicionVenta = str_pad($row['condicionventa'], 2, '0', STR_PAD_LEFT);
-                                $metodoPago = str_pad($row['metodopago'], 2, '0', STR_PAD_LEFT);
-                                $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
-                                $fechaEmision = $row['fechaemision'];
-                                $fechaVencimiento = isset($row['fechavencimiento']) ? $row['fechavencimiento'] : $fechaEmision;
-                                $moneda = $row['moneda'];
-                                $tipoCambio = $row['tipocambio'];
-                                $totalDocumento = $row['totaldocumento'];
-                                $tipoDocumento = $row['tipodocumento'];
-                                $descripcion = isset($row['descripcion']) ? $row['descripcion'] : '';
-
-                                //Datos de linea
-                                $codigoProducto = $row['codigoproducto'];
-                                $detalleProducto = $row['detalleproducto'];
-                                $unidadMedicion = $row['unidadmedicion'];
-                                $cantidad = isset($row['cantidad']) ? $row['cantidad'] : 1;
-                                $precioUnitario = $row['preciounitario'];
-                                $subtotalLinea = (float)$row['subtotallinea'];
-                                $totalLinea = $row['totallinea'];
-                                $montoDescuento = isset($row['montodescuento']) ? $row['montodescuento'] : 0;
-                                $codigoEtax = $row['codigoivaetax'];
-                                $categoriaHacienda = isset($row['categoriaHacienda']) ? $row['categoriaHacienda'] : null;
-                                $montoIva = (float)$row['montoiva'];
-                                $acceptStatus = isset($row['aceptada']) ? $row['aceptada'] : 1;
-
-                                $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
-                                $codigoActividad = $row['actividadcomercial'] ?? $mainAct;
-                                $xmlSchema = $row['xmlschema'] ?? 42;
-
-                                //Datos de exoneracion
-                                $totalNeto = 0;
-                                $tipoDocumentoExoneracion = $row['tipodocumentoexoneracion'] ?? null;
-                                $documentoExoneracion = $row['documentoexoneracion'] ?? null;
-                                $companiaExoneracion = $row['companiaexoneracion'] ?? null;
-                                $porcentajeExoneracion = $row['porcentajeexoneracion'] ?? 0;
-                                $montoExoneracion = $row['montoexoneracion'] ?? 0;
-                                $impuestoNeto = $row['impuestoneto'] ?? 0;
-                                $totalMontoLinea = $row['totalmontolinea'] ?? 0;
-
-                                $codigoEtax = str_pad($codigoEtax, 3, '0', STR_PAD_LEFT);
-
-                                $arrayImportBill = array(
-                                    'metodoGeneracion' => $metodoGeneracion,
-                                    'idReceptor' => 0,
-                                    'nombreProveedor' => $nombreProveedor,
-                                    'codigoProveedor' => $codigoProveedor,
-                                    'tipoPersona' => $tipoPersona,
-                                    'identificacionProveedor' => $identificacionProveedor,
-                                    'correoProveedor' => $correoProveedor,
-                                    'telefonoProveedor' => $telefonoProveedor,
-                                    'claveFactura' => $claveFactura,
-                                    'consecutivoComprobante' => $consecutivoComprobante,
-                                    'condicionVenta' => $condicionVenta,
-                                    'metodoPago' => $metodoPago,
-                                    'numeroLinea' => $numeroLinea,
-                                    'fechaEmision' => $fechaEmision,
-                                    'fechaVencimiento' => $fechaVencimiento,
-                                    'moneda' => $moneda,
-                                    'tipoCambio' => $tipoCambio,
-                                    'totalDocumento' => $totalDocumento,
-                                    'totalNeto' => $totalNeto,
-                                    'tipoDocumento' => $tipoDocumento,
-                                    'codigoProducto' => $codigoProducto,
-                                    'detalleProducto' => $detalleProducto,
-                                    'unidadMedicion' => $unidadMedicion,
-                                    'cantidad' => $cantidad,
-                                    'precioUnitario' => $precioUnitario,
-                                    'subtotalLinea' => $subtotalLinea,
-                                    'totalLinea' => $totalLinea,
-                                    'montoDescuento' => $montoDescuento,
-                                    'codigoEtax' => $codigoEtax,
-                                    'montoIva' => $montoIva,
-                                    'descripcion' => $descripcion,
-                                    'isAuthorized' => true,
-                                    'codeValidated' => true,
-                                    'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
-                                    'documentoExoneracion' => $documentoExoneracion,
-                                    'companiaExoneracion' => $companiaExoneracion,
-                                    'porcentajeExoneracion' => $porcentajeExoneracion,
-                                    'montoExoneracion' => $montoExoneracion,
-                                    'impuestoNeto' => $impuestoNeto,
-                                    'totalMontoLinea' => $totalMontoLinea,
-                                    'xmlSchema' => $xmlSchema,
-                                    'codigoActividad' => $codigoActividad,
-                                    'categoriaHacienda' => $categoriaHacienda,
-                                    'acceptStatus' => $acceptStatus
-                                );
-
-                                $insert = Bill::importBillRow($arrayImportBill);
-
-                                if ($insert) {
-                                    array_push($inserts, $insert);
-                                }
-                            }
-                        }
-                        
-                        BillItem::insert($inserts);
-                    });
-                    
-                }
-            }catch( \ErrorException $ex ){
-                Log::error('Error importando Excel' . $ex->getMessage());
-                return back()->withError('Por favor verifique que su documento de excel contenga todas las columnas indicadas. Error en la fila. '.$i);
-            }catch( \InvalidArgumentException $ex ){
-                Log::error('Error importando Excel' . $ex->getMessage());
-                return back()->withError( 'Ha ocurrido un error al subir su archivo. Por favor verifique que los campos de fecha estén correctos. Formato: "dd/mm/yyyy : 01/01/2018"');
-            }catch( \Throwable $ex ){
-                Log::error('Error importando Excel' . $ex);
-                return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Linea: '.$i);
-            }
-        
-            $company->save();
+        ProcessBillsImport::dispatch($collection[0]->toArray(), $company)->onQueue('importExcel');
             
-            $time_end = getMicrotime();
-            $time = $time_end - $time_start;
-            
-            return redirect('/facturas-recibidas')->withMessage('Facturas importados exitosamente en '.$time.'s');
-        }else{
-            return redirect('/facturas-recibidas')->withError('Usted tiene un límite de 5000 facturas por archivo.');
-        }
-        
+        return redirect('/facturas-recibidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
+
     }
     
     public function importXML() {
@@ -588,12 +434,8 @@ class BillController extends Controller
 
     public function GuardarValidar(Request $request)
     {
-        $bill = Bill::findOrFail($request->bill);
-        
-        $FechaEmision = explode(" ", $bill->generated_date);
-        $FechaEmision = explode("-", $FechaEmision[0]);
-        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
-        if(CalculatedTax::validarMes($FechaEmision)){
+        $bill = Bill::findOrFail($id);
+        if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
             $bill->activity_company_verification = $request->actividad_comercial;
             $bill->is_code_validated = true;
             foreach( $request->items as $item ) {
@@ -637,10 +479,7 @@ class BillController extends Controller
     public function confirmarValidacion( Request $request, $id )
     {
         $bill = Bill::findOrFail($id);
-        $FechaEmision = explode(" ", $bill->generated_date);
-        $FechaEmision = explode("-", $FechaEmision[0]);
-        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
-        if(CalculatedTax::validarMes($FechaEmision)){
+        if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
             $this->authorize('update', $bill);
             
             $tipoIva = $request->tipo_iva;
@@ -708,10 +547,7 @@ class BillController extends Controller
     public function authorizeBill ( Request $request, $id )
     {
         $bill = Bill::findOrFail($id);
-        $FechaEmision = explode(" ", $bill->generated_date);
-        $FechaEmision = explode("-", $FechaEmision[0]);
-        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
-        if(CalculatedTax::validarMes($FechaEmision)){
+        if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
         
             $this->authorize('update', $bill);
             
@@ -850,10 +686,7 @@ class BillController extends Controller
     public function markAsNotAccepted ( $id )
     {
         $bill = Bill::findOrFail($id);
-        $FechaEmision = explode(" ", $bill->generated_date);
-        $FechaEmision = explode("-", $FechaEmision[0]);
-        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
-        if(CalculatedTax::validarMes($FechaEmision)){
+        if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
         
             $this->authorize('update', $bill);
             
@@ -917,10 +750,7 @@ class BillController extends Controller
     public function correctAccepted ( Request $request, $id )
     {
         $bill = Bill::findOrFail($id);
-        $FechaEmision = explode(" ", $bill->generated_date);
-        $FechaEmision = explode("-", $FechaEmision[0]);
-        $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
-        if(CalculatedTax::validarMes($FechaEmision)){
+        if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
             $this->authorize('update', $bill);
             
             $bill->accept_iva_condition = $request->accept_iva_condition ? $request->accept_iva_condition : '02';

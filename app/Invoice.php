@@ -408,18 +408,19 @@ class Invoice extends Model
 
     }
     
-    public static function importInvoiceRow ( $data ) {
-      
-      //Revisa si el método es por correo electrónico. De ser así, usa busca la compañia por cedula.
-      if( $data['metodoGeneracion'] != "Email" ){
-        $company = currentCompanyModel();
-      }else{
-        //Si es email, busca por ID del receptor para encontrar la compañia
-        $company = Company::where('id_number', $data['idEmisor'])->first();
-      }
-      
-      if( ! $company ) {
-        return false;
+    public static function importInvoiceRow ( $data, $company = false ) {
+      if(!$company){
+        //Revisa si el método es por correo electrónico. De ser así, usa busca la compañia por cedula.
+        if( $data['metodoGeneracion'] != "Email" ){
+          $company = currentCompanyModel();
+        }else{
+          //Si es email, busca por ID del receptor para encontrar la compañia
+          $company = Company::where('id_number', $data['idEmisor'])->first();
+        }
+        
+        if( ! $company ) {
+          return false;
+        }
       }
       
       $idCliente = 0;
@@ -500,7 +501,7 @@ class Invoice extends Model
               $invoice->client_phone = $data['telefonoCliente'] ?? null;
               
               //Datos de factura
-              $invoice->currency = $data['idMoneda'];
+              $invoice->currency = $data['moneda'] ?? 'CRC';
               if( $invoice->currency == 1 ) { $invoice->currency = "CRC"; }
               if( $invoice->currency == 2 ) { $invoice->currency = "USD"; }
 
@@ -509,22 +510,32 @@ class Invoice extends Model
               $invoice->iva_amount = 0;
               $invoice->total = $data['totalDocumento'] ?? 0;
               $invoice->save();
+              
+              $available_invoices = AvailableInvoices::where('company_id', $company->id)
+                                    ->where('year', $invoice->year)
+                                    ->where('month', $invoice->month)
+                                    ->first();
+              if( isset($available_invoices) ) {
+                $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
+                $available_invoices->save();
+              }
+              
           }   
           Cache::put($invoiceCacheKey, $invoice, 30);
       }
       $invoice = Cache::get($invoiceCacheKey);
       
-        $invoice->is_authorized = $data['isAuthorized'];
-        $invoice->is_code_validated = $data['codeValidated'];
-        $invoice->currency_rate = $data['tipoCambio'] ?? 1;
-        //Datos de factura
-        $invoice->currency = $data['moneda'] ?? 'CRC';
-        if( $invoice->currency == 1 ) { $invoice->currency = "CRC"; }
-        if( $invoice->currency == 2 ) { $invoice->currency = "USD"; }
-        if($invoice->currency == 'CRC'){
-          $invoice->currency_rate = 1;
-        }
-        $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
+      $invoice->is_authorized = $data['isAuthorized'];
+      $invoice->is_code_validated = $data['codeValidated'];
+      $invoice->currency_rate = $data['tipoCambio'] ?? 1;
+      //Datos de factura
+      $invoice->currency = $data['moneda'] ?? 'CRC';
+      if( $invoice->currency == 1 ) { $invoice->currency = "CRC"; }
+      if( $invoice->currency == 2 ) { $invoice->currency = "USD"; }
+      if($invoice->currency == 'CRC'){
+        $invoice->currency_rate = 1;
+      }
+      $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
       
       try{
         $invoice->generated_date = Carbon::createFromFormat('d/m/Y', $data['fechaEmision']);
@@ -550,54 +561,47 @@ class Invoice extends Model
       $invoice->month = $month;
     
       /**LINEA DE FACTURA**/
+      $subtotalLinea = $data['subtotalLinea'] ?? 0;
+      $montoIvaLinea = $data['montoIva'] ?? 0;
+      $totalLinea = $data['totalLinea'] ?? 0;
+      $precioUnitarioLinea = $data['precioUnitario'] ?? 0;
+      $montoDescuentoLinea = $data['montoDescuento'] ?? 0;
+      $cantidadLinea = $data['cantidad'] ?? 0;
+      $invoice->subtotal = $invoice->subtotal + $subtotalLinea;
+      $invoice->iva_amount = $invoice->iva_amount + $montoIvaLinea;
+      
+      $discount_reason = "";
+      
       $item = InvoiceItem::firstOrNew(
-          [
-              'invoice_id' => $invoice->id,
-              'item_number' => $data['numeroLinea'],
-          ]
-      );
-      
-      $insert = false;
-      
-      if( !$item->exists ) {
-          $subtotalLinea = $data['subtotalLinea'] ?? 0;
-          $montoIvaLinea = $data['montoIva'] ?? 0;
-          $totalLinea = $data['totalLinea'] ?? 0;
-          $precioUnitarioLinea = $data['precioUnitario'] ?? 0;
-          $montoDescuentoLinea = $data['montoDescuento'] ?? 0;
-          $cantidadLinea = $data['cantidad'] ?? 0;
-          $invoice->subtotal = $invoice->subtotal + $subtotalLinea;
-          $invoice->iva_amount = $invoice->iva_amount + $montoIvaLinea;
-          
-          $discount_reason = "";
-          
-          $insert = [
-              'invoice_id' => $invoice->id,
-              'company_id' => $company->id,
-              'year' => $year,
-              'month' => $month,
-              'item_number' => $data['numeroLinea'],
-              'code' => $data['codigoProducto'],
-              'name' => $data['detalleProducto'],
-              'product_type' => $data['categoriaHacienda'] ?? 0,
-              'measure_unit' => $data['unidadMedicion'],
-              'item_count' => $cantidadLinea,
-              'unit_price' => $precioUnitarioLinea,
-              'subtotal' => $subtotalLinea,
-              'total' => $totalLinea,
-              'discount_type' => '01',
-              'discount' => $montoDescuentoLinea,
-              'iva_type' => $data['codigoEtax'],
-              'iva_amount' => $montoIvaLinea,
-              'exoneration_document_type' => $data['tipoDocumentoExoneracion'],
-              'exoneration_document_number' => $data['documentoExoneracion'],
-              'exoneration_company_name' => $data['companiaExoneracion'],
-              'exoneration_porcent' => $data['porcentajeExoneracion'],
-              'exoneration_amount' => $data['montoExoneracion'],
-              'impuesto_neto' => $data['impuestoNeto'],
-              'exoneration_total_amount' => $data['totalMontoLinea']
-          ];
-      }
+      [
+          'bill_id' => $bill->id,
+          'item_number' => $data['numeroLinea'],
+      ],[
+          'invoice_id' => $invoice->id,
+          'company_id' => $company->id,
+          'year' => $year,
+          'month' => $month,
+          'item_number' => $data['numeroLinea'],
+          'code' => $data['codigoProducto'],
+          'name' => $data['detalleProducto'],
+          'product_type' => $data['categoriaHacienda'] ?? 0,
+          'measure_unit' => $data['unidadMedicion'],
+          'item_count' => $cantidadLinea,
+          'unit_price' => $precioUnitarioLinea,
+          'subtotal' => $subtotalLinea,
+          'total' => $totalLinea,
+          'discount_type' => '01',
+          'discount' => $montoDescuentoLinea,
+          'iva_type' => $data['codigoEtax'],
+          'iva_amount' => $montoIvaLinea,
+          'exoneration_document_type' => $data['tipoDocumentoExoneracion'],
+          'exoneration_document_number' => $data['documentoExoneracion'],
+          'exoneration_company_name' => $data['companiaExoneracion'],
+          'exoneration_porcent' => $data['porcentajeExoneracion'],
+          'exoneration_amount' => $data['montoExoneracion'],
+          'impuesto_neto' => $data['impuestoNeto'],
+          'exoneration_total_amount' => $data['totalMontoLinea']
+      ]);
       if( $invoice->year == 2018 ) {
          clearLastTaxesCache($company->id, 2018);
       }
@@ -608,17 +612,8 @@ class Invoice extends Model
         $invoice->subtotal = $data['totalNeto'];
       }
       $invoice->save();
-
-      $available_invoices = AvailableInvoices::where('company_id', $company->id)
-                            ->where('year', $invoice->year)
-                            ->where('month', $invoice->month)
-                            ->first();
-      if( isset($available_invoices) ) {
-        $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
-        $available_invoices->save();
-      }
       
-      return $insert;
+      return $invoice;
       
     }
 

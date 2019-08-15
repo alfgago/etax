@@ -356,6 +356,7 @@ class CompanyController extends Controller {
         $company->use_invoicing = $request->use_invoicing;
         $company->card_retention  =  $request->card_retention;
         $company->default_product_category = $request->default_category_producto_code;
+        $company->saldo_favor_2018 = $request->saldo_favor_2018;
         
         if( $company->first_prorrata_type == 1 ) {
             $company->operative_prorrata = $request->first_prorrata;

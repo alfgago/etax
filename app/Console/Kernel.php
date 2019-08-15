@@ -25,8 +25,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         //Invoice Queue
-        $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=1 --queue=receptions') ->timezone(config('app.timezone'))->everyTenMinutes();
-        $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=1 --queue=invoices') ->timezone(config('app.timezone'))->everyThirtyMinutes();
+        $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=1 --queue=invoices')->timezone(config('app.timezone'))->everyThirtyMinutes()->runInBackground();
+        $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=1 --queue=receptions')->timezone(config('app.timezone'))->everyTenMinutes()->runInBackground();
         //Emails Queue Restart
         $schedule->command('invoice:resend')->timezone(config('app.timezone'))->everyThirtyMinutes()->runInBackground();
         $schedule->command('creditnote:resend')->timezone(config('app.timezone'))->hourly()->runInBackground();
