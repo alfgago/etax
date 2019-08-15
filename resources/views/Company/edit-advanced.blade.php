@@ -62,7 +62,7 @@
 						    
 						    <div class="form-group col-md-6 hidden toggle-types type-1">
 						      <label for="first_prorrata">Digite su prorrata operativa</label>
-						      <input type="number" class="form-control" name="first_prorrata" id="first_prorrata" step="0.01" min="0" max="99.99" value="{{ @$company->first_prorrata ? $company->first_prorrata : 99.99 }}" required>
+						      <input type="number" class="form-control" name="first_prorrata" id="first_prorrata" step="0.01" min="0" max="99.99" value="{{ @$company->first_prorrata ? $company->first_prorrata : 0 }}" required>
 						    </div>
 						    
 						    <div class="form-group col-md-6 hidden toggle-types type-1 proporciones">
