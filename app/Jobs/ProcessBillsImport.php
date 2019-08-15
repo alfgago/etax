@@ -51,12 +51,13 @@ class ProcessBillsImport implements ShouldQueue
     {
         try {
             Log::info($this->company->id_number . " importanto Excel compras con ".count($this->collection)." lineas");
+            $company = $this->company;
+            $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
             foreach (array_chunk ( $this->collection, 100 ) as $facturas) {
                 Log::info("Procesando batch de 100...");
                 sleep(1);
                 //foreach ($arr500 as $facturas) {
                     //\DB::transaction(function () use ($facturas, &$i) {
-                        $company = $this->company;
                         $inserts = array();
                         foreach ($facturas as $row){
                             $i++;
@@ -108,10 +109,8 @@ class ProcessBillsImport implements ShouldQueue
                                 $categoriaHacienda = isset($row['categoriaHacienda']) ? $row['categoriaHacienda'] : null;
                                 $montoIva = (float)$row['montoiva'];
                                 $acceptStatus = isset($row['aceptada']) ? $row['aceptada'] : 1;
-        
-                                $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
                                 $codigoActividad = $row['actividadcomercial'] ?? $mainAct;
-                                $xmlSchema = $row['xmlschema'] ?? 42;
+                                $xmlSchema = $row['xmlschema'] ?? 43;
         
                                 //Datos de exoneracion
                                 $totalNeto = 0;
