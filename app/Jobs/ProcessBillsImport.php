@@ -53,6 +53,7 @@ class ProcessBillsImport implements ShouldQueue
             Log::info($this->company->id_number . " importanto Excel compras con ".count($this->collection)." lineas");
             $company = $this->company;
             $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
+            $i = 0;
             foreach (array_chunk ( $this->collection, 100 ) as $facturas) {
                 Log::info("Procesando batch de 100...");
                 sleep(1);
