@@ -38,8 +38,11 @@
           <option value="/reportes/resumen-ejecutivo" hideClass=".opt-acumulado" type="iframe" >Resumen ejecutivo</option>
           <option type="post">Reporte de proveedores (Muy pronto)</option>
           <option type="post">Reporte de clientes (Muy pronto)</option>
-          <option style="" value="/reportes/borrador-iva" hideClass=".opt-acumulado" type="iframe">Borrador de declaración de IVA</option>
-
+          @if( getCurrentSubscription()->status == 4 )
+            <option style="" value="" hideClass=".opt-acumulado" type="iframe">Declaración de IVA (No disponible en periodo gratis)</option>
+          @else
+            <option style="" value="/reportes/borrador-iva" hideClass=".opt-acumulado" type="iframe">Borrador de declaración de IVA</option>
+          @endif
         </select>
       </div>
       
@@ -78,6 +81,26 @@
       <div id="reporte-container" class="col-md-12 mb-4 reporte" style="padding: 3rem 15px;">
         
       </div>
+		  
+		  @if( getCurrentSubscription()->status == 4 )
+		  <div class=" ml-4 mb-4 pb-4" style="background: #eee; padding: 1rem 2rem; width: auto; display: inline-block; box-shadow: 0 0 15px rgba(0,0,0,0.3);">
+        
+          <h2>¡Tu declaración te espera!</h2>
+          ¿Ya usaste eTax para ingresar tus facturas, viste todos los reportes, y ya querés hacer tu declaración?<br> Ingresá aquí y comprá tu plan ahora. 
+          <div>
+          <a  style="background: #f0c960;
+            color: #1f2642 !important;
+            border: 0;
+            -webkit-box-shadow: 0.2rem 0.2rem #261c65 !important;
+            box-shadow: 0.2rem 0.2rem #261c65 !important;
+            font-size: 0.9rem;
+            margin: 0; display: inline-block;
+            font-weight: bold; margin-top: .5rem;
+            width: auto;" class="btn btn-primary btn-buynow" href="/elegir-plan" title="Comprar ahora">Comprar ahora</a>.
+  		    </div>
+		  </div>
+		  <div class="col-md-12"></div>
+		  @endif
       
       <div class="col-md-12" hidden id="export-btn-container" style="margin-top:-2em;">
         <a id="btnExport" download='reporteEtax' href='javascript:exportarTablas()' class="btn btn-primary form-btn">Descargar</a>
