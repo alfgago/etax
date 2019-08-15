@@ -54,7 +54,7 @@ class ProcessBillsImport implements ShouldQueue
             $company = $this->company;
             $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
             $i = 0;
-            foreach (array_chunk ( $this->collection, 100 ) as $facturas) {
+            foreach (array_chunk ( $this->collection, 250 ) as $facturas) {
                 Log::info("Procesando batch de 100...");
                 sleep(1);
                 //foreach ($arr500 as $facturas) {
