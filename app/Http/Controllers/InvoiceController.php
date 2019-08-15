@@ -512,8 +512,12 @@ class InvoiceController extends Controller
         }
 
         $company = currentCompanyModel();
-        ProcessInvoicesImport::dispatch($collection[0]->toArray(), $company)->onQueue('importExcel');
         
+        if( count($collection[0]->toArray()) < 1800 ){
+            ProcessInvoicesImport::dispatchNow($collection[0]->toArray(), $company);
+        }else{
+            ProcessInvoicesImport::dispatch($collection[0]->toArray(), $company);
+        }
         return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
     }
 

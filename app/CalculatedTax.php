@@ -61,9 +61,11 @@ class CalculatedTax extends Model
      * @bodyParam date required Fecha en la que se va a guardar el dato ejemplo 19/09/1994
      * @return true / false
      */
-    public static function validarMes($date){
+    public static function validarMes($date, $company = false){
       try{
-        $company = currentCompanyModel();
+        if(!$company){
+          $company = currentCompanyModel();
+        }
         $generated_date = explode("/", $date);
 
         $existe = CalculatedTax::where([
@@ -71,8 +73,7 @@ class CalculatedTax extends Model
           ['month',$generated_date[1]],
           ['year',$generated_date[2]]
         ])->count();
-              
-        if($existe == 0){
+        if( !$existe ){
           return true;
         }else{
           $abierto = CalculatedTax::where([
@@ -93,6 +94,7 @@ class CalculatedTax extends Model
           }
         }
       } catch( \Exception $ex ) {
+        Log::warning($ex);
         return false;
       }
     }
