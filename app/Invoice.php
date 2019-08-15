@@ -742,7 +742,11 @@ class Invoice extends Model
               $cantonCliente = $arr['Receptor']['Ubicacion']['Canton'];
               $distritoCliente = $arr['Receptor']['Ubicacion']['Distrito'];
               try{
-                $otrasSenas = $arr['Receptor']['Ubicacion']['OtrasSenas'] ?? null;
+                if(is_array($arr['Receptor']['Ubicacion']['OtrasSenas'])){
+                    $otrasSenas = null;
+                }else{
+                    $otrasSenas = $arr['Receptor']['Ubicacion']['OtrasSenas'] ?? null;
+                }
               }catch(\Exception $e){ $otrasSenas = null; }
               $zipCliente = 0;
               if( $cantonCliente ) {
