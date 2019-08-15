@@ -458,7 +458,8 @@ class Invoice extends Model
         $tipoDocumento = '04'; //Si no trae cliente, es un tiquete.
       }
       $idCliente = preg_replace("/[^0-9]/", "", $idCliente );
-      $invoiceCacheKey = "import-factura-" . $data['nombreCliente'] . $company->id . "-" . $data['consecutivoComprobante'];
+      
+      $invoiceCacheKey = "import-factura-" . $data['claveFactura'] . $company->id . "-" . $data['consecutivoComprobante'];
       //Usa Cache por si viene la misma factura en varios lugares del Excel, las siguientes veces no reinicia el subtotal de la factura.
       if ( !Cache::has($invoiceCacheKey) ) { 
       
@@ -518,7 +519,7 @@ class Invoice extends Model
             $dt =\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaEmision']);
             $invoice->generated_date = Carbon::instance($dt);
           }
-          if( !CalculatedTax::validarMes( $invoice->generated_date->format('d/m/Y') )){ 
+          if( !CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/Y'), $company )){ 
             return false; 
           }
           try{
@@ -527,6 +528,7 @@ class Invoice extends Model
             $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaVencimiento']);
             $invoice->due_date = Carbon::instance($dt);
           }
+          
           $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
           $year = $invoice->generated_date->year;
           $month = $invoice->generated_date->month;
@@ -553,6 +555,8 @@ class Invoice extends Model
           Cache::put($invoiceCacheKey, $invoice, 30);
       }
       $invoice = Cache::get($invoiceCacheKey);
+      $year = $invoice->generatedDate()->year;
+      $month = $invoice->generatedDate()->month;
     
       /**LINEA DE FACTURA**/
       $subtotalLinea = $data['subtotalLinea'] ?? 0;
@@ -568,7 +572,7 @@ class Invoice extends Model
       
       $item = InvoiceItem::updateOrCreate(
       [
-          'bill_id' => $bill->id,
+          'invoice_id' => $invoice->id,
           'item_number' => $data['numeroLinea'],
       ],[
           'invoice_id' => $invoice->id,

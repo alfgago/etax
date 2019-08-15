@@ -749,6 +749,8 @@ class Bill extends Model
           Cache::put($billCacheKey, $bill, 30);
       }
       $bill = Cache::get($billCacheKey);
+      $year = $bill->generatedDate()->year;
+      $month = $bill->generatedDate()->month;
     
       /**LINEA DE FACTURA**/
       $subtotalLinea = $data['subtotalLinea'] ?? 0;
