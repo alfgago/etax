@@ -582,7 +582,7 @@ class Invoice extends Model
           'item_number' => $data['numeroLinea'],
           'code' => $data['codigoProducto'],
           'name' => $data['detalleProducto'],
-          'product_type' => $data['categoriaHacienda'] ?? 0,
+          'product_type' => $data['categoriaHacienda'] ?? null,
           'measure_unit' => $data['unidadMedicion'],
           'item_count' => $cantidadLinea,
           'unit_price' => $precioUnitarioLinea,

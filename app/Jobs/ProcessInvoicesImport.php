@@ -55,7 +55,7 @@ class ProcessInvoicesImport implements ShouldQueue
             $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
             $i = 0;
             foreach (array_chunk ( $this->collection, 250 ) as $facturas) {
-                Log::info("Procesando batch de 100...");
+                Log::info("Procesando batch de 250...");
                 sleep(1);
                 //foreach ($arr500 as $facturas) {
                     //\DB::transaction(function () use ($facturas, &$i) {
@@ -99,7 +99,7 @@ class ProcessInvoicesImport implements ShouldQueue
                                 $totalLinea = $row['totallinea'];
                                 $montoDescuento = isset($row['montodescuento']) ? $row['montodescuento'] : 0;
                                 $codigoEtax = $row['codigoivaetax'];
-                                $categoriaHacienda = isset($row['categoriaHacienda']) ? $row['categoriaHacienda'] : null;
+                                $categoriaHacienda = isset($row['categoriahacienda']) ? $row['categoriahacienda'] : null;
                                 $montoIva = (float)$row['montoiva'];
                                 $acceptStatus = isset($row['aceptada']) ? $row['aceptada'] : 1;
                                 
