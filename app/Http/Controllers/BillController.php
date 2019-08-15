@@ -336,7 +336,11 @@ class BillController extends Controller
         }
         
         $company = currentCompanyModel();
-        ProcessBillsImport::dispatch($collection[0]->toArray(), $company)->onQueue('importExcel');
+        if( count($collection[0]->toArray()) < 1800 ){
+            ProcessBillsImport::dispatchNow($collection[0]->toArray(), $company);
+        }else{
+            ProcessBillsImport::dispatch($collection[0]->toArray(), $company);
+        }
             
         return redirect('/facturas-recibidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
 
