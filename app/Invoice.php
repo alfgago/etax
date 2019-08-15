@@ -540,7 +540,7 @@ class Invoice extends Model
           $invoice->iva_amount = 0;
           $invoice->total = $data['totalDocumento'] ?? 0;
           
-          if($invoice->id){
+          if( !$invoice->id ){
             $available_invoices = AvailableInvoices::where('company_id', $company->id)
                                   ->where('year', $invoice->year)
                                   ->where('month', $invoice->month)
@@ -549,9 +549,9 @@ class Invoice extends Model
               $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
               $available_invoices->save();
             }  
+            $invoice->save();
           }
           
-          $invoice->save();
           Cache::put($invoiceCacheKey, $invoice, 30);
       }
       $invoice = Cache::get($invoiceCacheKey);

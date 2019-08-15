@@ -743,7 +743,9 @@ class Bill extends Model
           $bill->iva_amount = 0;
           $bill->total = $data['totalDocumento'] ?? 0;
 
-          $bill->save();
+          if(!$bill->id){
+            $bill->save();
+          }
           $company->save();
              
           Cache::put($billCacheKey, $bill, 30);
@@ -774,7 +776,7 @@ class Bill extends Model
           'item_number' => $data['numeroLinea'],
           'code' => $data['codigoProducto'] ?? 'N/A',
           'name' => $data['detalleProducto'] ?? 'No indica',
-          'product_type' => $data['categoriaHacienda'] ?? 0,
+          'product_type' => $data['categoriaHacienda'] ?? null,
           'measure_unit' => $data['unidadMedicion'],
           'item_count' => $cantidadLinea,
           'unit_price' => $precioUnitarioLinea,
