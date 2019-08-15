@@ -803,6 +803,9 @@ class CalculatedTax extends Model
         $prorrata = $numeradorProrrata / $denumeradorProrrata;
       } else {
         $prorrata = 1;
+        if( $this->sum_repercutido_exento_sin_credito > 0) {
+          $prorrata = 0;
+        }
         $ratio1 = 0;
         $ratio2 = 0;
         $ratio3 = 0;
@@ -822,7 +825,7 @@ class CalculatedTax extends Model
       $prorrataOperativa = round($prorrataOperativa, 4);
       $prorrata = ($prorrata == 1) ? 0.9999 : $prorrata; // El máximo posible es 0.9999
       $prorrataOperativa = ($prorrataOperativa == 1) ? 0.9999 : $prorrataOperativa; // El máximo posible es 0.9999
-      
+
       //Calcula el total deducible y no deducible en base a los ratios y los montos de facturas recibidas.
       $subtotalParaCFDP = $this->bills_subtotal - $this->bases_identificacion_plena - $this->bases_no_deducibles;
       
