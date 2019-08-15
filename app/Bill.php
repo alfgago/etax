@@ -650,122 +650,105 @@ class Bill extends Model
                   'document_key' => $data['claveFactura'],
               ]
           );
+              
+          $bill->company_id = $company->id;
+          $bill->provider_id = $proveedor->id;    
+  
+          //Datos generales y para Hacienda
+          if( $data['tipoDocumento'] == '01' || $data['tipoDocumento'] == '02' || $data['tipoDocumento'] == '03' || $data['tipoDocumento'] == '04'
+              || $data['tipoDocumento'] == '05' || $data['tipoDocumento'] == '06' || $data['tipoDocumento'] == '07' || $data['tipoDocumento'] == '08' || $data['tipoDocumento'] == '99' ) {
+              $bill->document_type = $data['tipoDocumento'];
+          } else {
+             $bill->document_type = '01'; 
+          }
           
-          if( !$bill->exists ) {
-              
-              $bill->company_id = $company->id;
-              $bill->provider_id = $proveedor->id;    
-      
-              //Datos generales y para Hacienda
-              if( $data['tipoDocumento'] == '01' || $data['tipoDocumento'] == '02' || $data['tipoDocumento'] == '03' || $data['tipoDocumento'] == '04'
-                  || $data['tipoDocumento'] == '05' || $data['tipoDocumento'] == '06' || $data['tipoDocumento'] == '07' || $data['tipoDocumento'] == '08' || $data['tipoDocumento'] == '99' ) {
-                  $bill->document_type = $data['tipoDocumento'];
-              } else {
-                 $bill->document_type = '01'; 
-              }
-              
-              $bill->reference_number = $company->last_bill_ref_number + 1;
-              $bill->document_number =  $data['consecutivoComprobante'];
-              $bill->document_key =  $data['claveFactura'];
-              $bill->xml_schema =  $data['xmlSchema'] ?? 43;
-              $bill->commercial_activity =  $data['codigoActividad'] ?? '0';
-              
-              //Datos generales
-              $bill->sale_condition = $data['condicionVenta'];
-              $bill->payment_type = $data['metodoPago'];
-              $bill->credit_time = 0;
-              $bill->description = $data['descripcion'];
+          $bill->reference_number = $company->last_bill_ref_number + 1;
+          $bill->document_number =  $data['consecutivoComprobante'];
+          $bill->document_key =  $data['claveFactura'];
+          $bill->xml_schema =  $data['xmlSchema'] ?? 43;
+          $bill->commercial_activity =  $data['codigoActividad'] ?? '0';
+          
+          //Datos generales
+          $bill->sale_condition = $data['condicionVenta'];
+          $bill->payment_type = $data['metodoPago'];
+          $bill->credit_time = 0;
+          $bill->description = $data['descripcion'];
 
-              $bill->generation_method = $data['metodoGeneracion'];
-              $bill->is_authorized = $data['isAuthorized'];
-              $bill->is_code_validated = $data['codeValidated'];
+          $bill->generation_method = $data['metodoGeneracion'];
+          $bill->is_authorized = $data['isAuthorized'];
+          $bill->is_code_validated = $data['codeValidated'];
 
-              $bill->provider_id_number = preg_replace("/[^0-9]/", "", $data['identificacionProveedor']);
-              $bill->provider_first_name = $data['nombreProveedor'] ?? null;
-              $bill->provider_last_name = '';
-              $bill->provider_last_name2 = '';
-              $bill->provider_email = $data['correoProveedor'] ?? null;
-              $bill->provider_address = $data['otrasSenas'] ?? null;
-              $bill->provider_country = '';
-              $bill->provider_city = $data['provinciaProveedor'] ?? null;
-              $bill->provider_state = $data['cantonProveedor'] ?? null;
-              $bill->provider_district = $data['distritoProveedor'] ?? null;
-              $bill->provider_phone = $data['telefonoProveedor'] ?? null;
-              $bill->provider_zip = $data['zipProveedor'] ?? null;
-              
-              if($data['metodoGeneracion'] == 'Email' || $data['metodoGeneracion'] == 'XML') {
-                $bill->accept_status = 0;
-                $bill->hacienda_status = "01";
-              }else{
-                if( $data['acceptStatus'] ){
-                  $bill->accept_status = 1;
-                  $bill->hacienda_status = "03";
-                }
-              }
+          $bill->provider_id_number = preg_replace("/[^0-9]/", "", $data['identificacionProveedor']);
+          $bill->provider_first_name = $data['nombreProveedor'] ?? null;
+          $bill->provider_last_name = '';
+          $bill->provider_last_name2 = '';
+          $bill->provider_email = $data['correoProveedor'] ?? null;
+          $bill->provider_address = $data['otrasSenas'] ?? null;
+          $bill->provider_country = '';
+          $bill->provider_city = $data['provinciaProveedor'] ?? null;
+          $bill->provider_state = $data['cantonProveedor'] ?? null;
+          $bill->provider_district = $data['distritoProveedor'] ?? null;
+          $bill->provider_phone = $data['telefonoProveedor'] ?? null;
+          $bill->provider_zip = $data['zipProveedor'] ?? null;
+          
+          if($data['metodoGeneracion'] == 'Email' || $data['metodoGeneracion'] == 'XML') {
+            $bill->accept_status = 0;
+            $bill->hacienda_status = "01";
+          }else{
+            if( $data['acceptStatus'] ){
+              $bill->accept_status = 1;
+              $bill->hacienda_status = "03";
+            }
+          }
 
-              $bill->is_void = false;
-              
-              $bill->currency_rate = $data['tipoCambio'] ?? 1;
-              //Datos de factura
-              $bill->currency = $data['moneda'] ?? 'CRC';
-              if( $bill->currency == 1 ) { $bill->currency = "CRC"; }
-              if( $bill->currency == 2 ) { $bill->currency = "USD"; }
-              if($bill->currency == 'CRC'){
-                $bill->currency_rate = 1;
-              }
+          $bill->is_void = false;
+          
+          $bill->is_code_validated = $data['codeValidated'];
+          $bill->is_authorized = $data['isAuthorized'];
+          $bill->currency_rate = $data['tipoCambio'] ?? 1;
+          //Datos de factura
+          $bill->currency = $data['moneda'] ?? 'CRC';
+          if( $bill->currency == 1 ) { $bill->currency = "CRC"; }
+          if( $bill->currency == 2 ) { $bill->currency = "USD"; }
+          if($bill->currency == 'CRC'){
+            $bill->currency_rate = 1;
+          }
+          $bill->commercial_activity =  $data['codigoActividad'] ?? '0';
+          if( $data['acceptStatus'] ){
+            $bill->accept_status = 1;
+            $bill->hacienda_status = "03";
+          }
 
-              //$bill->description = $row['description'] ? $row['description'] : '';
+          //$bill->description = $row['description'] ? $row['description'] : '';
+          try{
+            $bill->generated_date = Carbon::createFromFormat('d/m/Y', $data['fechaEmision']);
+          }catch( \Exception $ex ){
+            $dt =\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaEmision']);
+            $bill->generated_date = Carbon::instance($dt);
+          }
+          try{
+            $bill->due_date = Carbon::createFromFormat('d/m/Y', $data['fechaVencimiento']);
+          }catch( \Exception $ex ){
+            $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaVencimiento']);
+            $bill->due_date = Carbon::instance($dt);
+          }
+          $year = $bill->generated_date->year;
+          $month = $bill->generated_date->month;
+          $bill->year = $year;
+          $bill->month = $month;
 
-              $company->last_bill_ref_number = $bill->reference_number;
-              
-              $bill->subtotal = 0;
-              $bill->iva_amount = 0;
-              $bill->total = $data['totalDocumento'] ?? 0;
+          $company->last_bill_ref_number = $bill->reference_number;
+          
+          $bill->subtotal = 0;
+          $bill->iva_amount = 0;
+          $bill->total = $data['totalDocumento'] ?? 0;
 
-              $bill->save();
-              $company->save();
-          }   
+          $bill->save();
+          $company->save();
+             
           Cache::put($billCacheKey, $bill, 30);
       }
       $bill = Cache::get($billCacheKey);
-      
-      //if( data['metodoGeneracion'] != "XLSX" ){
-        $bill->is_code_validated = $data['codeValidated'];
-        $bill->is_authorized = $data['isAuthorized'];
-        $bill->currency_rate = $data['tipoCambio'] ?? 1;
-        //Datos de factura
-        $bill->currency = $data['moneda'] ?? 'CRC';
-        if( $bill->currency == 1 ) { $bill->currency = "CRC"; }
-        if( $bill->currency == 2 ) { $bill->currency = "USD"; }
-        if($bill->currency == 'CRC'){
-          $bill->currency_rate = 1;
-        }
-        $bill->commercial_activity =  $data['codigoActividad'] ?? '0';
-        if( $data['acceptStatus'] ){
-          $bill->accept_status = 1;
-          $bill->hacienda_status = "03";
-        }
-      //}
-      
-      try{
-        $bill->generated_date = Carbon::createFromFormat('d/m/Y', $data['fechaEmision']);
-      }catch( \Exception $ex ){
-        $dt =\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaEmision']);
-        $bill->generated_date = Carbon::instance($dt);
-      }
-      
-      try{
-        $bill->due_date = Carbon::createFromFormat('d/m/Y', $data['fechaVencimiento']);
-      }catch( \Exception $ex ){
-        $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaVencimiento']);
-        $bill->due_date = Carbon::instance($dt);
-      }
-      
-      $year = $bill->generated_date->year;
-      $month = $bill->generated_date->month;
-      
-      $bill->year = $year;
-      $bill->month = $month;
     
       /**LINEA DE FACTURA**/
       $subtotalLinea = $data['subtotalLinea'] ?? 0;
@@ -777,7 +760,7 @@ class Bill extends Model
       $bill->subtotal = $bill->subtotal + $subtotalLinea;
       $bill->iva_amount = $bill->iva_amount + $montoIvaLinea;
       
-      $item = BillItem::firstOrNew(
+      $item = BillItem::updateOrCreate(
       [
           'bill_id' => $bill->id,
           'item_number' => $data['numeroLinea'],

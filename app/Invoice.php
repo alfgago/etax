@@ -408,6 +408,9 @@ class Invoice extends Model
 
     }
     
+    /*
+    * importInvoiceRow Es la función que se usa para importar por Excel.
+    */
     public static function importInvoiceRow ( $data, $company = false ) {
       if(!$company){
         //Revisa si el método es por correo electrónico. De ser así, usa busca la compañia por cedula.
@@ -456,109 +459,100 @@ class Invoice extends Model
       }
       $idCliente = preg_replace("/[^0-9]/", "", $idCliente );
       $invoiceCacheKey = "import-factura-" . $data['nombreCliente'] . $company->id . "-" . $data['consecutivoComprobante'];
-      if ( !Cache::has($invoiceCacheKey) ) {
+      //Usa Cache por si viene la misma factura en varios lugares del Excel, las siguientes veces no reinicia el subtotal de la factura.
+      if ( !Cache::has($invoiceCacheKey) ) { 
       
           $invoice = Invoice::firstOrNew(
               [
                   'company_id' => $company->id,
-                  'client_id' => $idCliente,
                   'document_number' => $data['consecutivoComprobante'],
                   'document_key' => $data['claveFactura'],
               ]
           );
           
-          if( !$invoice->exists ) {
-              $invoice->company_id = $company->id;
-              $invoice->client_id = $idCliente;    
-      
-              //Datos generales y para Hacienda
-              if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' 
-                  || $tipoDocumento == '05' || $tipoDocumento == '06' || $tipoDocumento == '07' || $tipoDocumento == '08' || $tipoDocumento == '99' ) {
-                  $invoice->document_type = $tipoDocumento;    
-              } else {
-                 $invoice->document_type = '01'; 
-              }
+          $invoice->company_id = $company->id;
+          $invoice->client_id = $idCliente;    
+  
+          //Datos generales y para Hacienda
+          if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' 
+              || $tipoDocumento == '05' || $tipoDocumento == '06' || $tipoDocumento == '07' || $tipoDocumento == '08' || $tipoDocumento == '99' ) {
+              $invoice->document_type = $tipoDocumento;    
+          } else {
+             $invoice->document_type = '01'; 
+          }
 
-              $invoice->document_number =  $data['consecutivoComprobante'];
-              $invoice->xml_schema =  $data['xmlSchema'] ?? 43;
-              $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
-              
-              //Datos generales
-              $invoice->sale_condition = $data['condicionVenta'];
-              $invoice->payment_type = $data['metodoPago'];
-              $invoice->credit_time = 0;
-              $invoice->description = $data['descripcion'];
-              
-              
-              $invoice->generation_method = $data['metodoGeneracion'];
-              $invoice->is_authorized = $data['isAuthorized'];
-              $invoice->is_code_validated = $data['codeValidated'];
-              $invoice->hacienda_status = "03";
-              
-              $invoice->client_id_number = preg_replace("/[^0-9]/", "", $data['identificacionCliente']);
-              $invoice->client_first_name = $data['nombreCliente'] ?? null;
-              $invoice->client_email = $data['correoCliente'] ?? null;
-              $invoice->client_phone = $data['telefonoCliente'] ?? null;
-              
-              //Datos de factura
-              $invoice->currency = $data['moneda'] ?? 'CRC';
-              if( $invoice->currency == 1 ) { $invoice->currency = "CRC"; }
-              if( $invoice->currency == 2 ) { $invoice->currency = "USD"; }
+          $invoice->document_number =  $data['consecutivoComprobante'];
+          $invoice->xml_schema =  $data['xmlSchema'] ?? 43;
+          $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
+          
+          //Datos generales
+          $invoice->sale_condition = $data['condicionVenta'];
+          $invoice->payment_type = $data['metodoPago'];
+          $invoice->credit_time = 0;
+          $invoice->description = $data['descripcion'];
+          
+          
+          $invoice->generation_method = $data['metodoGeneracion'];
+          $invoice->is_authorized = $data['isAuthorized'];
+          $invoice->is_code_validated = $data['codeValidated'];
+          $invoice->hacienda_status = "03";
+          
+          $invoice->client_id_number = preg_replace("/[^0-9]/", "", $data['identificacionCliente']);
+          $invoice->client_first_name = $data['nombreCliente'] ?? null;
+          $invoice->client_email = $data['correoCliente'] ?? null;
+          $invoice->client_phone = $data['telefonoCliente'] ?? null;
+          
+          //Datos de factura
+          $invoice->currency_rate = $data['tipoCambio'] ?? 1;
+          //Datos de factura
+          $invoice->currency = $data['moneda'] ?? 'CRC';
+          if( $invoice->currency == 1 ) { $invoice->currency = "CRC"; }
+          if( $invoice->currency == 2 ) { $invoice->currency = "USD"; }
+          if($invoice->currency == 'CRC'){
+            $invoice->currency_rate = 1;
+          }
+          
+          try{
+            $invoice->generated_date = Carbon::createFromFormat('d/m/Y', $data['fechaEmision']);
+          }catch( \Exception $ex ){
+            $dt =\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaEmision']);
+            $invoice->generated_date = Carbon::instance($dt);
+          }
+          if( !CalculatedTax::validarMes( $invoice->generated_date->format('d/m/Y') )){ 
+            return false; 
+          }
+          try{
+            $invoice->due_date = Carbon::createFromFormat('d/m/Y', $data['fechaVencimiento']);
+          }catch( \Exception $ex ){
+            $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaVencimiento']);
+            $invoice->due_date = Carbon::instance($dt);
+          }
+          $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
+          $year = $invoice->generated_date->year;
+          $month = $invoice->generated_date->month;
+          $invoice->year = $year;
+          $invoice->month = $month;
 
-              $invoice->currency_rate = $data['tipoCambio'];
-              $invoice->subtotal = 0;
-              $invoice->iva_amount = 0;
-              $invoice->total = $data['totalDocumento'] ?? 0;
-              $invoice->save();
-              
-              $available_invoices = AvailableInvoices::where('company_id', $company->id)
-                                    ->where('year', $invoice->year)
-                                    ->where('month', $invoice->month)
-                                    ->first();
-              if( isset($available_invoices) ) {
-                $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
-                $available_invoices->save();
-              }
-              
-          }   
+          $invoice->currency_rate = $data['tipoCambio'];
+          $invoice->subtotal = 0;
+          $invoice->iva_amount = 0;
+          $invoice->total = $data['totalDocumento'] ?? 0;
+          
+          if($invoice->id){
+            $available_invoices = AvailableInvoices::where('company_id', $company->id)
+                                  ->where('year', $invoice->year)
+                                  ->where('month', $invoice->month)
+                                  ->first();
+            if( isset($available_invoices) ) {
+              $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
+              $available_invoices->save();
+            }  
+          }
+          
+          $invoice->save();
           Cache::put($invoiceCacheKey, $invoice, 30);
       }
       $invoice = Cache::get($invoiceCacheKey);
-      
-      $invoice->is_authorized = $data['isAuthorized'];
-      $invoice->is_code_validated = $data['codeValidated'];
-      $invoice->currency_rate = $data['tipoCambio'] ?? 1;
-      //Datos de factura
-      $invoice->currency = $data['moneda'] ?? 'CRC';
-      if( $invoice->currency == 1 ) { $invoice->currency = "CRC"; }
-      if( $invoice->currency == 2 ) { $invoice->currency = "USD"; }
-      if($invoice->currency == 'CRC'){
-        $invoice->currency_rate = 1;
-      }
-      $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
-      
-      try{
-        $invoice->generated_date = Carbon::createFromFormat('d/m/Y', $data['fechaEmision']);
-      }catch( \Exception $ex ){
-        $dt =\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaEmision']);
-        $invoice->generated_date = Carbon::instance($dt);
-      }
-      if( !CalculatedTax::validarMes( $invoice->generated_date->format('d/m/Y') )){ 
-        return false; 
-      }
-      
-      try{
-        $invoice->due_date = Carbon::createFromFormat('d/m/Y', $data['fechaVencimiento']);
-      }catch( \Exception $ex ){
-        $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaVencimiento']);
-        $invoice->due_date = Carbon::instance($dt);
-      }
-      
-      $year = $invoice->generated_date->year;
-      $month = $invoice->generated_date->month;
-      
-      $invoice->year = $year;
-      $invoice->month = $month;
     
       /**LINEA DE FACTURA**/
       $subtotalLinea = $data['subtotalLinea'] ?? 0;
@@ -572,7 +566,7 @@ class Invoice extends Model
       
       $discount_reason = "";
       
-      $item = InvoiceItem::firstOrNew(
+      $item = InvoiceItem::updateOrCreate(
       [
           'bill_id' => $bill->id,
           'item_number' => $data['numeroLinea'],
