@@ -639,7 +639,7 @@ class Bill extends Model
       }
       $proveedor = Cache::get($providerCacheKey);
       
-      $billCacheKey = "import-factura-$identificacionProveedor-" . $company->id . "-" . $data['consecutivoComprobante'];
+      $billCacheKey = "import-factura-" . $data['claveFactura'] . $company->id . "-" . $data['consecutivoComprobante'];
       if ( !Cache::has($billCacheKey) ) {
       
           $bill = Bill::firstOrNew(
