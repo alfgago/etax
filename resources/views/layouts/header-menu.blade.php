@@ -4,7 +4,7 @@
     </div>
     @if( getCurrentSubscription()->status == 4 )
     <div class="comprar-ahora">
-        <p class="description">Periodo de pruebas activo</p>
+        <p class="description">Periodo de uso gratuito</p>
         <a class="btn btn-primary btn-buynow" href="/elegir-plan" title="Comprar ahora">Comprar ahora</a>
     </div>
     @endif
