@@ -600,18 +600,19 @@ class Bill extends Model
         
     }
     
-    public static function importBillRow ( $data ) {
-      
-      //Revisa si el método es por correo electrónico. De ser así, usa busca la compañia por cedula.
-      if( $data['metodoGeneracion'] != "Email" ){
-        $company = currentCompanyModel();
-      }else{
-        //Si es email, busca por ID del receptor para encontrar la compañia
-        $company = Company::where('id_number', $data['idReceptor'])->first();
-      }
-      
-      if( ! $company ) {
-        return false;
+    public static function importBillRow ( $data, $company = false ) {
+      if(!$company){
+        //Revisa si el método es por correo electrónico. De ser así, usa busca la compañia por cedula.
+        if( $data['metodoGeneracion'] != "Email" ){
+          $company = currentCompanyModel();
+        }else{
+          //Si es email, busca por ID del receptor para encontrar la compañia
+          $company = Company::where('id_number', $data['idReceptor'])->first();
+        }
+        
+        if( ! $company ) {
+          return false;
+        }
       }
       
       $identificacionProveedor = preg_replace("/[^0-9]/", "", $data['identificacionProveedor']);
@@ -723,7 +724,6 @@ class Bill extends Model
 
               $bill->save();
               $company->save();
-              
           }   
           Cache::put($billCacheKey, $bill, 30);
       }
@@ -768,51 +768,48 @@ class Bill extends Model
       $bill->month = $month;
     
       /**LINEA DE FACTURA**/
-      $item = BillItem::firstOrNew(
-          [
-              'bill_id' => $bill->id,
-              'item_number' => $data['numeroLinea'],
-          ]
-      );
+      $subtotalLinea = $data['subtotalLinea'] ?? 0;
+      $montoIvaLinea = $data['montoIva'] ?? 0;
+      $totalLinea = $data['totalLinea'] ?? 0;
+      $precioUnitarioLinea = $data['precioUnitario'] ?? 0;
+      $montoDescuentoLinea = $data['montoDescuento'] ?? 0;
+      $cantidadLinea = $data['cantidad'] ?? 0;
+      $bill->subtotal = $bill->subtotal + $subtotalLinea;
+      $bill->iva_amount = $bill->iva_amount + $montoIvaLinea;
       
-      $insert = false;
-
-      if( !$item->id ) {
-          $subtotalLinea = $data['subtotalLinea'] ?? 0;
-          $montoIvaLinea = $data['montoIva'] ?? 0;
-          $totalLinea = $data['totalLinea'] ?? 0;
-          $precioUnitarioLinea = $data['precioUnitario'] ?? 0;
-          $montoDescuentoLinea = $data['montoDescuento'] ?? 0;
-          $cantidadLinea = $data['cantidad'] ?? 0;
-          $bill->subtotal = $bill->subtotal + $subtotalLinea;
-          $bill->iva_amount = $bill->iva_amount + $montoIvaLinea;
-          
-          $insert = [
-              'bill_id' => $bill->id,
-              'company_id' => $company->id,
-              'year' => $year,
-              'month' => $month,
-              'item_number' => $data['numeroLinea'],
-              'code' => $data['codigoProducto'] ?? 'N/A',
-              'name' => $data['detalleProducto'] ?? 'No indica',
-              'product_type' => $data['categoriaHacienda'] ?? 0,
-              'measure_unit' => $data['unidadMedicion'],
-              'item_count' => $cantidadLinea,
-              'unit_price' => $precioUnitarioLinea,
-              'subtotal' => $subtotalLinea,
-              'total' => $totalLinea,
-              'discount_type' => '01',
-              'discount' => $montoDescuentoLinea,
-              'iva_type' => $data['codigoEtax'],
-              'iva_amount' => $montoIvaLinea,
-              'exoneration_document_type' => $data['tipoDocumentoExoneracion'],
-              'exoneration_document_number' => $data['documentoExoneracion'],
-              'exoneration_company_name' => $data['companiaExoneracion'],
-              'exoneration_porcent' => $data['porcentajeExoneracion'],
-              'exoneration_amount' => $data['montoExoneracion'],
-              'impuesto_neto' => $data['impuestoNeto'],
-              'exoneration_total_amount' => $data['totalMontoLinea']
-          ];
+      $item = BillItem::firstOrNew(
+      [
+          'bill_id' => $bill->id,
+          'item_number' => $data['numeroLinea'],
+      ],[
+          'bill_id' => $bill->id,
+          'company_id' => $company->id,
+          'year' => $year,
+          'month' => $month,
+          'item_number' => $data['numeroLinea'],
+          'code' => $data['codigoProducto'] ?? 'N/A',
+          'name' => $data['detalleProducto'] ?? 'No indica',
+          'product_type' => $data['categoriaHacienda'] ?? 0,
+          'measure_unit' => $data['unidadMedicion'],
+          'item_count' => $cantidadLinea,
+          'unit_price' => $precioUnitarioLinea,
+          'subtotal' => $subtotalLinea,
+          'total' => $totalLinea,
+          'discount_type' => '01',
+          'discount' => $montoDescuentoLinea,
+          'iva_type' => $data['codigoEtax'],
+          'iva_amount' => $montoIvaLinea,
+          'exoneration_document_type' => $data['tipoDocumentoExoneracion'],
+          'exoneration_document_number' => $data['documentoExoneracion'],
+          'exoneration_company_name' => $data['companiaExoneracion'],
+          'exoneration_porcent' => $data['porcentajeExoneracion'],
+          'exoneration_amount' => $data['montoExoneracion'],
+          'impuesto_neto' => $data['impuestoNeto'],
+          'exoneration_total_amount' => $data['totalMontoLinea']
+      ]);
+      
+      if( $bill->year == 2018 ) {
+         clearLastTaxesCache($company->id, 2018);
       }
       
       clearBillCache($bill);
@@ -822,7 +819,7 @@ class Bill extends Model
       }
       
       $bill->save();
-      return $insert;
+      return $bill;
       
     }
     

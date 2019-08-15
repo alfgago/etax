@@ -53,7 +53,7 @@
 			  		<li>ActividadComercial</li>
 			  	</ul>
 			  	* El orden puede variar, pero debe mantener nombres de columnas. Debe utilizar una fila por cada linea de factura.
-			  	* Máximo de 5000 lineas por archivo.
+			  	* Máximo de 2500 lineas por archivo.
 			  	<br>
 			  	<a href="{{asset('assets/files/PlantillaLineasFacturaRecibida.xlsx')}}" class="btn btn-link" title="Descargar plantilla" download><i class="fa fa-file-excel-o" aria-hidden="true"></i> Descargar plantilla</a>
 			  </div>
@@ -65,7 +65,7 @@
 					<div class="fallback">
 				      <input name="archivo" type="file" multiple="false" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
 				  </div>
-				  <small class="descripcion">Hasta 5000 líneas por archivo.</small>
+				  <small class="descripcion">Hasta 2500 líneas por archivo.</small>
 				</div>
 			</div>
 			

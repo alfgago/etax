@@ -246,7 +246,8 @@
                               <option {{ $item->iva_type == $tipo->id ? 'selected' : '' }} value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }} " identificacion="{{$tipo->is_identificacion_plena}}">{{ $tipo['name'] }}</option>
                             @endforeach
                         </select>
-                        <select class="mt-2 form-control tipo_producto" numero="{{ $loop->index+1 }}" name="items[{{ $loop->index }}][category_product]">
+                        <select class="mt-2 form-control tipo_producto" curr="{{$item->product_type}}" numero="{{ $loop->index+1 }}" name="items[{{ $loop->index }}][category_product]">
+                            
                             @foreach( $product_categories as $tipo)
                               <option {{ $item->product_type == $tipo->id ? 'selected' : '' }} value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
                             @endforeach
@@ -303,8 +304,11 @@ $(document).ready(function(){
   });
   
   toggleRetencion();
-  $('.tipo_iva').change();
   
+  $('.tipo_iva').change();
+  $(".tipo_producto").each(function(){
+    $(this).val($(this).attr('curr')).change();
+  });
 });
 
 

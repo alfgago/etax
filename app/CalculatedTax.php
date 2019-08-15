@@ -608,6 +608,7 @@ class CalculatedTax extends Model
                   $ivaType == 'S040' || $ivaType == 'S050' || $ivaType == 'S060' || $ivaType == 'S070' )
               {
                 $basesNoDeducibles += $subtotal;
+                $ivaNoAcreditableIdentificacionPlena += $billIva;
               }
               
               /***SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
