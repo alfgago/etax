@@ -438,7 +438,7 @@ class BillController extends Controller
 
     public function GuardarValidar(Request $request)
     {
-        $bill = Bill::findOrFail($request->id);
+        $bill = Bill::findOrFail($request->bill);
         if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
             $bill->activity_company_verification = $request->actividad_comercial;
             $bill->is_code_validated = true;
