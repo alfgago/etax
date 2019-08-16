@@ -33,8 +33,8 @@
           <option value="/reportes/cuentas-contables" type="post" selected ano="1" mes="1">Cuentas contables</option>
           <option value="/reportes/detalle-debito" hideClass="#input-mes" type="post" ano="1" mes="1">Detalle de débito fiscal</option>
           <option value="/reportes/detalle-credito" hideClass="#input-mes" type="post" ano="1" mes="1">Detalle de crédito fiscal</option>
-          <option value="/reportes/libro-compras" hideClass=".opt-acumulado" >Libro de compras</option>
-          <option value="/reportes/libro-ventas" hideClass=".opt-acumulado" >Libro de ventas</option>
+          <option value="/exportar-libro-compras" type="download" hideClass=".opt-acumulado" >Libro de compras</option>
+          <option value="/exportar-libro-ventas" type="download" hideClass=".opt-acumulado" >Libro de ventas</option>
           <option value="/reportes/resumen-ejecutivo" hideClass=".opt-acumulado" type="iframe" >Resumen ejecutivo</option>
           <option type="post">Reporte de proveedores (Muy pronto)</option>
           <option type="post">Reporte de clientes (Muy pronto)</option>
@@ -153,7 +153,10 @@
       var mes = $("#input-mes").val();
       var ano = $("#input-ano").val();
       		  
-      if(formType != "iframe"){
+      if( formType == "download"){
+        reporteView = reporteView + "/"+ano+"/"+mes;
+        window.open(reporteView, '_blank');
+      }else if(formType != "iframe"){
         jQuery.ajax({
           url: reporteView,
           type: 'post',

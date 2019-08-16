@@ -667,6 +667,7 @@ class Bill extends Model
           $bill->document_key =  $data['claveFactura'];
           $bill->xml_schema =  $data['xmlSchema'] ?? 43;
           $bill->commercial_activity =  $data['codigoActividad'] ?? '0';
+          $bill->activity_company_verification =  $data['codigoActividad'] ?? '0';
           
           //Datos generales
           $bill->sale_condition = $data['condicionVenta'];
