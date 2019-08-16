@@ -40,7 +40,7 @@ class InvoiceItem extends Model
           $this->save();
       }
       //Asigna Prod Type;
-      $cat = $this->product_type;
+      /*$cat = $this->product_type;
       if( !$cat || $cat > 49 || ( $cat < 6 && $this->iva_percentage != 1 )
           || ( $cat > 6 && $cat <= 10 && $this->iva_percentage != 2 )
           || ( $cat > 10 && $cat <= 14 && $this->iva_percentage != 4 ) 
@@ -61,7 +61,7 @@ class InvoiceItem extends Model
       if($cat == 'Plan') {
         $this->product_type = 17;
         $this->save();
-      }
+      }*/
     
     }
     
