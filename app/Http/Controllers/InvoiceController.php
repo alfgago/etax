@@ -515,7 +515,7 @@ class InvoiceController extends Controller
             ProcessInvoicesImport::dispatchNow($array, $company);
             return redirect('/facturas-emitidas')->withMessage('Facturas importados satisfactoriamente.');
         }else{
-            ProcessInvoicesImport::dispatch($array, $company);
+            ProcessInvoicesImport::dispatchNow($array, $company);
             return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
         }
         
