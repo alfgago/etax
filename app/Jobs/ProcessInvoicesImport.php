@@ -48,6 +48,7 @@ class ProcessInvoicesImport implements ShouldQueue
     public function handle()
     {
         Log::info("Agregando facturas a queue");
+        sleep(5);
         foreach($this->invoiceList as $fac){
             ProcessSingleInvoiceImport::dispatch($fac)->onQueue('imports');
         }

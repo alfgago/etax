@@ -629,7 +629,11 @@ class InvoiceController extends Controller
                 $i = $i + 250;
                 Log::info("$i procesadas...");
             };
-            ProcessInvoicesImport::dispatch($invoiceList)->onQueue('imports');
+            
+            foreach (array_chunk ( $invoiceList, 250 ) as $facturas) {
+                Log::info("Mandando 250 a queue...");
+                ProcessInvoicesImport::dispatch($facturas);
+            }
             
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
