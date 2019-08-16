@@ -40,7 +40,7 @@ class BillItem extends Model
         }
       
         //Asigna Prod Type;
-        $cat = $this->product_type;
+        /*$cat = $this->product_type;
         if( !$cat || $cat < 49 ){
           $cat = ProductCategory::where('bill_iva_code', $this->iva_type)->first();
           if( $cat ){
@@ -53,7 +53,7 @@ class BillItem extends Model
             }
           }
           $this->save();
-        }
+        }*/
       }catch(\Throwable $e){
         Log::warning('No pudo asignar un codigo de producto a legacy bill. ' . $e->getMessage());
       }
