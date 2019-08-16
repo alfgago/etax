@@ -523,6 +523,7 @@ class InvoiceController extends Controller
                 $metodoGeneracion = "XLSX";
 
                 if( isset($row['consecutivocomprobante']) ){
+                    $i++;
                     //Datos de proveedor
                     $nombreCliente = $row['nombrecliente'];
                     $codigoCliente = isset($row['codigocliente']) ? $row['codigocliente'] : '';
