@@ -52,7 +52,7 @@ class ProcessInvoicesImport implements ShouldQueue
         foreach($this->invoiceList as $fac){
             ProcessSingleInvoiceImport::dispatch($fac)->onQueue('imports');
         }
-        Log::info(count($invoiceList)." facturas importadas por excel");
+        Log::info(count($this->invoiceList)." facturas importadas por excel");
     }
 
 }
