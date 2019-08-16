@@ -27,8 +27,7 @@ class ProcessInvoicesImport implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    private $collection = null;
-    private $company = null;
+    private $invoiceList = null;
 
 
     /**
@@ -36,10 +35,9 @@ class ProcessInvoicesImport implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($collection, $company)
+    public function __construct($invoiceList)
     {
-        $this->collection = $collection;
-        $this->company = $company;
+        $this->invoiceList = $invoiceList;
     }
 
     /**
@@ -49,7 +47,11 @@ class ProcessInvoicesImport implements ShouldQueue
      */
     public function handle()
     {
-        
+        Log::info("Agregando facturas a queue");
+        foreach($this->invoiceList as $fac){
+            ProcessSingleInvoiceImport::dispatch($fac)->onQueue('imports');
+        }
+        Log::info(count($invoiceList)." facturas importadas por excel");
     }
 
 }
