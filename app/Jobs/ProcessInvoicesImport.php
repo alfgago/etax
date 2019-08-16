@@ -59,7 +59,6 @@ class ProcessInvoicesImport implements ShouldQueue
                 Log::info("Procesando batch de 250...");
                 $inserts = array();
                 foreach ($facturas as $row){
-                    $i++;
 
                     $metodoGeneracion = "XLSX";
 
