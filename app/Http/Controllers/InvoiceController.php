@@ -510,12 +510,12 @@ class InvoiceController extends Controller
         }
 
         $company = currentCompanyModel();
-        
-        if( count($collection[0]->chunk(10000)->toArray()) < 1800 ){
-            ProcessInvoicesImport::dispatchNow($collection[0]->toArray(), $company);
+        $array = $collection[0]->chunk(10000)->toArray()[0];
+        if( count($array) < 1800 ){
+            ProcessInvoicesImport::dispatchNow($array, $company);
             return redirect('/facturas-emitidas')->withMessage('Facturas importados satisfactoriamente.');
         }else{
-            ProcessInvoicesImport::dispatch($collection[0]->chunk(10000)->toArray(), $company);
+            ProcessInvoicesImport::dispatch($array, $company);
             return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
         }
         
