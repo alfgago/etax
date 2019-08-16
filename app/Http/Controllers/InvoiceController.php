@@ -15,6 +15,7 @@ use \Carbon\Carbon;
 use App\Invoice;
 use App\InvoiceItem;
 use App\Exports\InvoiceExport;
+use App\Exports\LibroVentasExport;
 use App\Imports\InvoiceImport;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Log;
@@ -495,6 +496,10 @@ class InvoiceController extends Controller
         return Excel::download(new InvoiceExport($year, $month), 'documentos-emitidos.xlsx');
     }
     
+    public function exportLibroVentas( $year, $month ) {
+        return Excel::download(new LibroVentasExport($year, $month), 'libro-ventas.xlsx');
+    }
+    
     public function importExcel() {
         
         request()->validate([
@@ -523,6 +528,7 @@ class InvoiceController extends Controller
                 $metodoGeneracion = "XLSX";
 
                 if( isset($row['consecutivocomprobante']) ){
+                    $i++;
                     //Datos de proveedor
                     $nombreCliente = $row['nombrecliente'];
                     $codigoCliente = isset($row['codigocliente']) ? $row['codigocliente'] : '';

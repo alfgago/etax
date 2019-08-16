@@ -22,6 +22,8 @@ Route::get('clientes/exportar', 'ClientController@export');
 Route::get('proveedores/exportar', 'ProviderController@export');
 Route::get('facturas-emitidas/exportar/{year}/{month}', 'InvoiceController@export');
 Route::get('facturas-recibidas/exportar/{year}/{month}', 'BillController@export');
+Route::get('exportar-libro-compras/{year}/{month}', 'BillController@exportLibroCompras');
+Route::get('exportar-libro-ventas/{year}/{month}', 'InvoiceController@exportLibroVentas');
 
 // Rutas de importación
 Route::post('clientes/importar', 'ClientController@import');

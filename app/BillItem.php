@@ -28,7 +28,6 @@ class BillItem extends Model
     
     public function fixIvaType() {
       try{
-        
         $initial = $this->iva_type[0];
         if( $initial != 'S' && $initial != 'B' && 
             $this->iva_type != '098' && $this->iva_type != '099' ){
@@ -55,7 +54,6 @@ class BillItem extends Model
           }
           $this->save();
         }
-        
       }catch(\Throwable $e){
         Log::warning('No pudo asignar un codigo de producto a legacy bill. ' . $e->getMessage());
       }

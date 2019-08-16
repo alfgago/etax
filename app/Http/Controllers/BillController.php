@@ -17,6 +17,7 @@ use App\CodigoIvaSoportado;
 use App\ProductCategory;
 use App\Http\Controllers\CacheController;
 use App\Exports\BillExport;
+use App\Exports\LibroComprasExport;
 use App\Imports\BillImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Orchestra\Parser\Xml\Facade as XmlParser;
@@ -319,6 +320,10 @@ class BillController extends Controller
      */
     public function export( $year, $month ) {
         return Excel::download(new BillExport($year, $month), 'documentos-recibidos.xlsx');
+    }
+    
+    public function exportLibroCompras( $year, $month ) {
+        return Excel::download(new LibroComprasExport($year, $month), 'libro-compras.xlsx');
     }
 
     public function importExcel() {
