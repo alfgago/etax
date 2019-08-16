@@ -97,7 +97,6 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
                 'Producto',
                 'Tipo IVA',
                 'Cat. Declaración',
-                'Cat. Declaración',
                 'Moneda',
                 'Tipo Cambio',
                 'Subtotal',
