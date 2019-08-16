@@ -510,14 +510,15 @@ class InvoiceController extends Controller
         }
 
         $company = currentCompanyModel();
-        
+
         try {
-            Log::info($this->company->id_number . " importanto Excel ventas con ".count($this->collection)." lineas");
-            $company = $this->company;
+            $collection = $collection->toArray()[0];
+            Log::info($company->id_number . " importanto Excel ventas con ".count($collection)." lineas");
             $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
             $i = 0;
             $invoiceList = array();
-            foreach (array_chunk ( $this->collection, 250 ) as $facturas) {
+
+            foreach (array_chunk ( $collection, 250 ) as $facturas) {
                 Log::info("Procesando batch de 250...");
                 $inserts = array();
                 foreach ($facturas as $row){
@@ -628,19 +629,14 @@ class InvoiceController extends Controller
                 $i = $i + 250;
                 Log::info("$i procesadas...");
             };
-
-            Log::info("Agregando facturas a queue");
-            foreach($invoiceList as $fac){
-                ProcessSingleInvoiceImport::dispatch($fac)->onQueue('imports');
-            }
-            Log::info(count($this->collection)." lineas de factura importadas por excel");
+            ProcessInvoicesImport::dispatch($invoiceList)->onQueue('imports');
             
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
             return redirect('/facturas-emitidas')->withError('Error importando. Archivo excede el tamaño mínimo.');
         }
 
-        $this->company->save();
+        $company->save();
         
         return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
         
