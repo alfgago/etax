@@ -166,13 +166,14 @@ class ProcessInvoicesImport implements ShouldQueue
                 }
             };
 
+            Log::info("Agregando facturas a queue");
             foreach($invoiceList as $fac){
                 ProcessSingleInvoiceImport::dispatch($fac)->onQueue('imports');
             }
             Log::info(count($this->collection)." lineas de factura importadas por excel");
             
         }catch( \Throwable $ex ){
-            Log::error("Error importando Excel. Empresa: ".$this->company->id_number.", Archivo:" . $ex);
+            Log::error("Error importando excel archivo:" . $ex);
         }
 
         $this->company->save();
