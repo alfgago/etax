@@ -25,8 +25,6 @@ use App\Utils\BridgeHaciendaApi;
 use App\Utils\PaymentUtils;
 use Illuminate\Database\Eloquent\Builder;
 
-//require __DIR__ . '/../../../vendor/autoload.php';
-
 /**
  * @group Controller - Pagos
  *
@@ -271,6 +269,7 @@ class PaymentController extends Controller
                 $razonDescuento = "Cupón BN";
             }
            
+            $cuponId = null;
             //Si tiene un cupon adicional, este aplica sobre el de la tarjeta del BN.
             if ( isset($request->coupon) ) {
                 $cuponConsultado = Coupon::where('code', $request->coupon)->first();
@@ -283,6 +282,7 @@ class PaymentController extends Controller
                     if( $request->bncupon ) {
                         $razonDescuento = "Cupón BN + $cuponConsultado->code";
                     }
+                    $cuponId = $cuponConsultado->id;
                 }
             }
             
@@ -385,7 +385,8 @@ class PaymentController extends Controller
                 [
                     'payment_method_id' => $paymentMethod->id,
                     'payment_date' => Carbon::parse(now('America/Costa_Rica')),
-                    'amount' => $amount
+                    'amount' => $amount,
+                    'coupon_id' => $cuponId
                 ]
             );
             

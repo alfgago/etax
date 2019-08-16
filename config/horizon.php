@@ -125,7 +125,7 @@ return [
     |
     */
 
-    'memory_limit' => 64,
+    'memory_limit' => 128,
 
     /*
     |--------------------------------------------------------------------------
@@ -142,7 +142,7 @@ return [
         'production' => [
             'horizon-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['default', 'invoices', 'receptions', 'importExcel'],
+                'queue' => ['default', 'invoices', 'receptions', 'imports'],
                 'balance' => 'auto',
                 'processes' => 10,
                 'tries' => 3,
@@ -152,8 +152,8 @@ return [
         'local' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['default', 'invoices', 'receptions', 'importExcel'],
-                'balance' => 'simple',
+                'queue' => ['default', 'invoices', 'receptions', 'imports'],
+                'balance' => 'auto',
                 'processes' => 3,
                 'tries' => 3,
             ],
