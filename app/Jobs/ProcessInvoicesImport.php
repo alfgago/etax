@@ -164,6 +164,8 @@ class ProcessInvoicesImport implements ShouldQueue
                         $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
                     }
                 }
+                $i = $i + 250;
+                Log::info("$i procesadas...");
             };
 
             Log::info("Agregando facturas a queue");
