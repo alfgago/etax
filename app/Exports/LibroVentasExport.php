@@ -67,6 +67,7 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
     public function map($map): array
     {
         return [
+            $map->invoice->documentTypeName(),
             $map->invoice->generatedDate()->format('d/m/Y'),
             $map->invoice->clientName(),
             $map->invoice->commercial_activity ?? 'No indica',
@@ -89,6 +90,7 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
      {
         return [
             [
+                'Tipo Doc.',
                 'Fecha',
                 'Cliente',
                 'Actividad',
