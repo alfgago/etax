@@ -501,8 +501,6 @@ class InvoiceController extends Controller
           'archivo' => 'required',
         ]);
       
-        $time_start = getMicrotime();
-        
         try {
             $collection = Excel::toCollection( new InvoiceImport(), request()->file('archivo') );
         }catch( \Exception $ex ){
@@ -515,10 +513,12 @@ class InvoiceController extends Controller
         
         if( count($collection[0]->toArray()) < 1800 ){
             ProcessInvoicesImport::dispatchNow($collection[0]->toArray(), $company);
+            return redirect('/facturas-emitidas')->withMessage('Facturas importados satisfactoriamente.');
         }else{
             ProcessInvoicesImport::dispatch($collection[0]->toArray(), $company);
+            return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
         }
-        return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
+        
     }
 
     private function microtime_float()
