@@ -1,10 +1,12 @@
 <table class="text-12 text-muted m-0 p-2 ivas-table bigtext borrador-presentacion" style="width:100%;">
 	<tbody>
-		
+			<?php 
+				$totVentasSujetas = $actividad['V1']['totales'] + $actividad['V2']['totales'] + $actividad['V13']['totales'] + $actividad['V4']['totales'] + $actividad['BI']['totales'];
+			?>
 			<tr class="macro-title">
 		    <th colspan="6">TOTAL DE VENTAS, SUJETAS, EXENTAS Y NO SUJETAS</th>
 		  </tr>
-		  <tr class="macro-title withmarcar inner {{ $actividad['V1']['totales'] || $actividad['V2']['totales'] || $actividad['V13']['totales'] || $actividad['V4']['totales'] || $actividad['BI']['totales'] ? 'desplegar-true' : 'desplegar-false' }}">
+		  <tr class="macro-title withmarcar inner {{ $totVentasSujetas ? 'desplegar-true' : 'desplegar-false' }}">
 			  <th class="marcar-td" colspan="1">
 					<span class="marcar">
 						¿Aplica?
@@ -12,7 +14,7 @@
 						<span class="no">No</span>
 					</span>
 			  </th>
-		    <th colspan="5">Ventas sujetas (Base imponible)</th>
+		    <th class="posrel" colspan="5">Ventas sujetas (Base imponible) <input class="sumtot" readonly="" value="{{ number_format($totVentasSujetas, 2) }}"></th>
 		  </tr>
 		  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
 				'title' 	 => $actividad['V1']['title'], 
@@ -74,7 +76,10 @@
 				'col4' => 'true',
 				'col8' => 'true-blocked',
 			])
-		  <tr class="macro-title withmarcar inner {{ $actividad['VEX']['totales'] || $actividad['VAS']['totales'] ? 'desplegar-true' : 'desplegar-false' }}">
+			<?php 
+				$totVentasExentas = $actividad['VEX']['totales'] + $actividad['VAS']['totales'];
+			?>
+		  <tr class="macro-title withmarcar inner {{ $totVentasExentas ? 'desplegar-true' : 'desplegar-false' }}">
 			  <th class="marcar-td" colspan="1">
 					<span class="marcar">
 						¿Aplica?
@@ -82,20 +87,22 @@
 						<span class="no">No</span>
 					</span>
 			  </th>
-		    <th colspan="5">Ventas exentas (Art.8)</th>
+		    <th class="posrel" colspan="5">Ventas exentas (Art.8) <input class="sumtot" readonly="" value="{{ number_format($totVentasExentas, 2) }}"></th>
 		  </tr>
-		  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
-				'title' 	 => null, 
-				'totales' 	 => $actividad['VEX']['totales'],
-				'desplegar' => $actividad['VAS']['totales'] || $actividad['VEX']['totales'] ? 'desplegar-true' : 'desplegar-true', 
-				'cats' => $actividad['VEX']['cats'],
-				'cols' 	 => false, 
-				'col1' => 'true',
-				'col2' => 'true',
-				'col3' => 'true',
-				'col4' => 'true',
-				'col8' => 'true',
-			])
+		  @if($actividad['VEX']['totales'])
+			  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
+					'title' 	 => null, 
+					'totales' 	 => $actividad['VEX']['totales'],
+					'desplegar' => $actividad['VAS']['totales'] || $actividad['VEX']['totales'] ? 'desplegar-true' : 'desplegar-true', 
+					'cats' => $actividad['VEX']['cats'],
+					'cols' 	 => false, 
+					'col1' => 'true',
+					'col2' => 'true',
+					'col3' => 'true',
+					'col4' => 'true',
+					'col8' => 'true',
+				])
+			@endif
 		  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
 				'title' 	 => $actividad['VAS']['title'], 
 				'totales' 	 => $actividad['VAS']['totales'],
@@ -116,8 +123,9 @@
 						<span class="no">No</span>
 					</span>
 			  </th>
-		    <th colspan="5">Ventas no sujetas (Art.9)</th>
+		    <th class="posrel" colspan="5">Ventas no sujetas (Art.9) <input class="sumtot" readonly="" value="{{ number_format($actividad['VNS']['totales'], 2) }}"></th>
 		  </tr>
+		  @if($actividad['VNS']['totales'])
 		  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
 				'title' 	 => null, 
 				'totales' 	 => $actividad['VNS']['totales'],
@@ -130,6 +138,7 @@
 				'col4' => 'true',
 				'col8' => 'true',
 			])
+			@endif
 	</tbody>
 </table>
 <table class="text-12 text-muted m-0 p-2 ivas-table bigtext borrador-presentacion" style="width:100%;">
@@ -138,9 +147,9 @@
 		    <th colspan="6">TOTAL DE COMPRAS</th>
 		  </tr>
 		  <?php 
-		  	$totComprasAcred = $actividad['CL']['totales'] || $actividad['CI']['totales'];
-		  	$totComprasNAcred = $actividad['CE']['totales'] || $actividad['CNR']['totales'] || $actividad['CNS']['totales'] || 
-		  											$actividad['CLI']['totales'] || $actividad['COE']['totales'];
+		  	$totComprasAcred = $actividad['CL']['totales'] + $actividad['CI']['totales'];
+		  	$totComprasNAcred = $actividad['CE']['totales'] + $actividad['CNR']['totales'] + $actividad['CNS']['totales'] || 
+		  											$actividad['CLI']['totales'] + $actividad['COE']['totales'];
 		  ?>
 		  <tr class="macro-title withmarcar inner {{ $totComprasAcred ? 'desplegar-true' : 'desplegar-false' }}">
 			  <th class="marcar-td" colspan="1">
@@ -150,7 +159,7 @@
 						<span class="no">No</span>
 					</span>
 			  </th>
-		    <th colspan="5">Compras con IVA soportado acreditable</th>
+		    <th class="posrel" colspan="5">Compras con IVA soportado acreditable <input class="sumtot" readonly="" value="{{ number_format($totComprasAcred, 2) }}"></th>
 		  </tr>
 		  @if($totComprasAcred)
 			  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
@@ -186,7 +195,7 @@
 						<span class="no">No</span>
 					</span>
 			  </th>
-		    <th colspan="5">Compras sin IVA soportado y/o con IVA soportado no acreditable</th>
+		    <th class="posrel" colspan="5">Compras sin IVA soportado y/o con IVA soportado no acreditable <input class="sumtot" readonly="" value="{{ number_format($totComprasNAcred, 2) }}"></th>
 		  </tr>
 			@if($totComprasNAcred)
 			  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 

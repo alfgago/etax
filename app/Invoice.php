@@ -411,7 +411,7 @@ class Invoice extends Model
     /*
     * importInvoiceRow Es la función que se usa para importar por Excel.
     */
-    public static function importInvoiceRow ( $data, $company = false ) {
+    public static function importInvoiceRow ( $data, $invoiceList, $company = false ) {
       if(!$company){
         //Revisa si el método es por correo electrónico. De ser así, usa busca la compañia por cedula.
         if( $data['metodoGeneracion'] != "Email" ){
@@ -459,20 +459,17 @@ class Invoice extends Model
       }
       $idCliente = preg_replace("/[^0-9]/", "", $idCliente );
       
-      $invoiceCacheKey = "import-factura-" . $data['claveFactura'] . $company->id . "-" . $data['consecutivoComprobante'];
+      $arrayKey = "import-factura-" . $data['claveFactura'];
       //Usa Cache por si viene la misma factura en varios lugares del Excel, las siguientes veces no reinicia el subtotal de la factura.
-      if ( !Cache::has($invoiceCacheKey) ) { 
+      if ( !isset($invoiceList[$arrayKey]) ) { 
       
-          $invoice = Invoice::firstOrNew(
-              [
-                  'company_id' => $company->id,
-                  'document_number' => $data['consecutivoComprobante'],
-                  'document_key' => $data['claveFactura'],
-              ]
-          );
-          
+          $invoice = new Invoice();
           $invoice->company_id = $company->id;
-          $invoice->client_id = $idCliente;    
+          $invoice->client_id = $idCliente;
+          $invoice->document_key =  $data['claveFactura'];
+          $invoice->document_number =  $data['consecutivoComprobante'];
+          $invoice->xml_schema =  $data['xmlSchema'] ?? 43;
+          $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
   
           //Datos generales y para Hacienda
           if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' 
@@ -481,17 +478,12 @@ class Invoice extends Model
           } else {
              $invoice->document_type = '01'; 
           }
-
-          $invoice->document_number =  $data['consecutivoComprobante'];
-          $invoice->xml_schema =  $data['xmlSchema'] ?? 43;
-          $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
           
           //Datos generales
           $invoice->sale_condition = $data['condicionVenta'];
           $invoice->payment_type = $data['metodoPago'];
           $invoice->credit_time = 0;
           $invoice->description = $data['descripcion'];
-          
           
           $invoice->generation_method = $data['metodoGeneracion'];
           $invoice->is_authorized = $data['isAuthorized'];
@@ -519,9 +511,6 @@ class Invoice extends Model
             $dt =\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaEmision']);
             $invoice->generated_date = Carbon::instance($dt);
           }
-          if( !CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/Y'), $company )){ 
-            return false; 
-          }
           try{
             $invoice->due_date = Carbon::createFromFormat('d/m/Y', $data['fechaVencimiento']);
           }catch( \Exception $ex ){
@@ -540,21 +529,15 @@ class Invoice extends Model
           $invoice->iva_amount = 0;
           $invoice->total = $data['totalDocumento'] ?? 0;
           
-          if( !$invoice->id ){
-            $available_invoices = AvailableInvoices::where('company_id', $company->id)
-                                  ->where('year', $invoice->year)
-                                  ->where('month', $invoice->month)
-                                  ->first();
-            if( isset($available_invoices) ) {
-              $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
-              $available_invoices->save();
-            }  
-            $invoice->save();
-          }
-          
-          Cache::put($invoiceCacheKey, $invoice, 30);
+          $invoiceList[$arrayKey]['lineas'] = array();
+          $invoiceList[$arrayKey]['factura'] = $invoice;
       }
-      $invoice = Cache::get($invoiceCacheKey);
+      
+      /*if( !CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/Y'), $company )){ 
+        return false; 
+      }*/
+      
+      $invoice = $invoiceList[$arrayKey]['factura'];
       $year = $invoice->generatedDate()->year;
       $month = $invoice->generatedDate()->month;
     
@@ -565,17 +548,10 @@ class Invoice extends Model
       $precioUnitarioLinea = $data['precioUnitario'] ?? 0;
       $montoDescuentoLinea = $data['montoDescuento'] ?? 0;
       $cantidadLinea = $data['cantidad'] ?? 0;
-      $invoice->subtotal = $invoice->subtotal + $subtotalLinea;
-      $invoice->iva_amount = $invoice->iva_amount + $montoIvaLinea;
       
       $discount_reason = "";
       
-      $item = InvoiceItem::updateOrCreate(
-      [
-          'invoice_id' => $invoice->id,
-          'item_number' => $data['numeroLinea'],
-      ],[
-          'invoice_id' => $invoice->id,
+      $item = [
           'company_id' => $company->id,
           'year' => $year,
           'month' => $month,
@@ -599,20 +575,14 @@ class Invoice extends Model
           'exoneration_amount' => $data['montoExoneracion'],
           'impuesto_neto' => $data['impuestoNeto'],
           'exoneration_total_amount' => $data['totalMontoLinea']
-      ]);
-      if( $invoice->year == 2018 ) {
-         clearLastTaxesCache($company->id, 2018);
-      }
-      
-      clearInvoiceCache($invoice);
+      ];
+      array_push($invoiceList[$arrayKey]['lineas'], $item);
       
       if( $data['totalNeto'] != 0 ) {
         $invoice->subtotal = $data['totalNeto'];
       }
-      $invoice->save();
       
-      return $invoice;
-      
+      return $invoiceList;
     }
 
 
