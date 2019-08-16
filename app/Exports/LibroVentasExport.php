@@ -49,7 +49,7 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
     {
         $current_company = currentCompany();
         $invoiceItems = InvoiceItem::query()
-        ->with(['invoice', 'invoice.client'])
+        ->with(['invoice', 'invoice.client', 'productCategory', 'ivaType'])
         ->where('year', $this->year)
         ->where('month', $this->month)
         ->whereHas('invoice', function ($query) use ($current_company){
@@ -73,7 +73,7 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
             $map->invoice->document_number,
             $map->item_number,
             $map->name,
-            $map->ivaType->code,
+            $map->ivaType ? $map->ivaType->name : 'No indica',
             $map->productCategory->name,
             $map->invoice->currency,
             $map->invoice->currency_rate ?? '',
