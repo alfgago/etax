@@ -352,28 +352,28 @@ class CalculatedTax extends Model
               //sum los del 1%
               if( $ivaType == '101' || $ivaType == '121' || $ivaType == '141' ||
                   $ivaType == 'B101' || $ivaType == 'B121' || $ivaType == 'B141' ||
-                  $ivaType == 'S101' || $ivaType == 'S121' || $ivaType == 'S141' ){
+                  $ivaType == 'S101' || $ivaType == 'S121' || $ivaType == 'S141' || $ivaType == 'B171' ){
                 $sumRepercutido1 += $subtotal;
               }
               
               //sum los del 2%
               if( $ivaType == '102' || $ivaType == '122' || $ivaType == '142' ||
                   $ivaType == 'B102' || $ivaType == 'B122' || $ivaType == 'B142' ||
-                  $ivaType == 'S102' || $ivaType == 'S122' || $ivaType == 'S142' ){
+                  $ivaType == 'S102' || $ivaType == 'S122' || $ivaType == 'S142' || $ivaType == 'B172' ){
                 $sumRepercutido2 += $subtotal;
               }
               
               //sum los del 13%
               if( $ivaType == '103' || $ivaType == '123' || $ivaType == '143' || $ivaType == '130' || $ivaType == '140' ||
                   $ivaType == 'B103' || $ivaType == 'B123' || $ivaType == 'B143' || $ivaType == 'B130' || $ivaType == 'B140' ||
-                  $ivaType == 'S103' || $ivaType == 'S123' || $ivaType == 'S143' || $ivaType == 'S130' || $ivaType == 'S140' ){
+                  $ivaType == 'S103' || $ivaType == 'S123' || $ivaType == 'S143' || $ivaType == 'S130' || $ivaType == 'S140' || $ivaType == 'B173' ){
                 $sumRepercutido3 += $subtotal;
               }
               
               //sum los del 4%
               if( $ivaType == '104' || $ivaType == '124' || $ivaType == '144' || $ivaType == '114' ||
                   $ivaType == 'B104' || $ivaType == 'B124' || $ivaType == 'B144' || $ivaType == 'B114' ||
-                  $ivaType == 'S104' || $ivaType == 'S124' || $ivaType == 'S144' || $ivaType == 'S114' ){
+                  $ivaType == 'S104' || $ivaType == 'S124' || $ivaType == 'S144' || $ivaType == 'S114' || $ivaType == 'B174' ){
                 $sumRepercutido4 += $subtotal;
               }
               //sum los del exentos. Estos se suman como si fueran 13 para efectos del cálculo.

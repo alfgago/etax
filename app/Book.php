@@ -123,13 +123,17 @@ class Book extends Model
       
       //Haber 2 
       $this->cc_ventas_1 = $ivaData->bB101 + $ivaData->bB121 +
-                           $ivaData->bS101 + $ivaData->bS121;
+                           $ivaData->bS101 + $ivaData->bS121 + 
+                           $ivaData->bB171;
       $this->cc_ventas_2 = $ivaData->bB102 + $ivaData->bB122 +
-                           $ivaData->bS102 + $ivaData->bS122;
+                           $ivaData->bS102 + $ivaData->bS122 + 
+                           $ivaData->bB172;
       $this->cc_ventas_13 = $ivaData->bB103 + $ivaData->bB123 + $ivaData->bB130 + $ivaData->bS140 +
-                            $ivaData->bS103 + $ivaData->bS123 + $ivaData->bS130;
+                            $ivaData->bS103 + $ivaData->bS123 + $ivaData->bS130 + 
+                           $ivaData->bB173;
       $this->cc_ventas_4 = $ivaData->bB104 + $ivaData->bB124 + + $ivaData->bB114 +
-                           $ivaData->bS104 + $ivaData->bS124 + + $ivaData->bS114;
+                           $ivaData->bS104 + $ivaData->bS124 + + $ivaData->bS114 + 
+                           $ivaData->bB174;
       $this->cc_ventas_exp = $ivaData->bB150 + $ivaData->bS150;
       $this->cc_ventas_estado = $ivaData->bB160 + $ivaData->bS160;
       try{ //Hace un tryCatch porque hay cierres donde aun no existian los codigos 180s;
@@ -144,13 +148,17 @@ class Book extends Model
       $this->cc_ventas_aduana = $ivaData->bB155 + $ivaData->iB155 +
                                 $ivaData->bS155 + $ivaData->iS155;
       $this->cc_ventas_1_iva = $ivaData->iB101 + $ivaData->iB121 +
-                               $ivaData->iS101 + $ivaData->iS121;
+                               $ivaData->iS101 + $ivaData->iS121 + 
+                               $ivaData->iB171;
       $this->cc_ventas_2_iva = $ivaData->iB102 + $ivaData->iB122 +
-                               $ivaData->iS102 + $ivaData->iS122;
+                               $ivaData->iS102 + $ivaData->iS122 + 
+                               $ivaData->iB172;
       $this->cc_ventas_13_iva = $ivaData->iB103 + $ivaData->iB123 + $ivaData->iB130 + $ivaData->iS140 +
-                                $ivaData->iS103 + $ivaData->iS123 + $ivaData->iS130;
+                                $ivaData->iS103 + $ivaData->iS123 + $ivaData->iS130 + 
+                                $ivaData->iB173;
       $this->cc_ventas_4_iva = $ivaData->iB104 + $ivaData->iB124 + + $ivaData->iB114 +
-                               $ivaData->iS104 + $ivaData->iS124 + + $ivaData->iS114;
+                               $ivaData->iS104 + $ivaData->iS124 + + $ivaData->iS114 + 
+                                $ivaData->iB174;
       try{ //Hace un tryCatch porque hay cierres donde aun no existia el codigo 300
       $this->cc_ventas_sin_derecho = $ivaData->bB200 + $ivaData->bB201 + $ivaData->bB240 + $ivaData->bB245 + $ivaData->bB250 + $ivaData->bB260 + $ivaData->iB200 + $ivaData->iB201 + $ivaData->iB240 + $ivaData->iB245 + $ivaData->iB250 + $ivaData->iB260 +
                                      $ivaData->bS200 + $ivaData->bS201 + $ivaData->bS240 + $ivaData->bS245 + $ivaData->bS250 + $ivaData->bS260 + $ivaData->iS200 + $ivaData->iS201 + $ivaData->iS240 + $ivaData->iS245 + $ivaData->iS250 + $ivaData->iS260 +
@@ -209,13 +217,17 @@ class Book extends Model
       
       //Debe 3 
         $this->cc_iva_emitido_1 = $ivaData->iB101 + $ivaData->iB121 +
-                                  $ivaData->iS101 + $ivaData->iS121;
+                                  $ivaData->iS101 + $ivaData->iS121 + 
+                                  $ivaData->iB171;
         $this->cc_iva_emitido_2 = $ivaData->iB102 + $ivaData->iB122 +
-                                  $ivaData->iS102 + $ivaData->iS122;
+                                  $ivaData->iS102 + $ivaData->iS122 + 
+                                  $ivaData->iB172;
         $this->cc_iva_emitido_3 = $ivaData->iB103 + $ivaData->iB123 + $ivaData->iB130 + $ivaData->iS140 +
-                                  $ivaData->iS103 + $ivaData->iS123 + $ivaData->iS130;
+                                  $ivaData->iS103 + $ivaData->iS123 + $ivaData->iS130 + 
+                                  $ivaData->iB173;
         $this->cc_iva_emitido_4 = $ivaData->iB104 + $ivaData->iB124 +
-                                  $ivaData->iS104 + $ivaData->iS124;  
+                                  $ivaData->iS104 + $ivaData->iS124 + 
+                                  $ivaData->iB174;  
         
         $bases_bs1 = $ivaData->bB001 + $ivaData->bB021 +
                      $ivaData->bS001 + $ivaData->bS021;

@@ -37,33 +37,37 @@ class Invoice extends Model
     }
     
     public function clientName() {
-      if( isset($this->client_first_name)) {
-        return "$this->client_first_name $this->client_last_name $this->client_last_name2";
-      }else {
-        if( isset($this->client_id) ) {
-          return $this->client->getFullName();
-        }else{
-          return 'N/A';
+      try{
+        if( isset($this->client_first_name)) {
+          return "$this->client_first_name $this->client_last_name $this->client_last_name2";
+        }else {
+          if( isset($this->client_id) ) {
+            return $this->client->getFullName();
+          }else{
+            return 'N/A';
+          }
         }
-      }
+      }catch(\Throwable $e){ return 'N/A'; }
     }
     
     public function documentTypeName() {
       $tipo = 'Factura electrónica';
-      if( $this->document_type == '03' ) {
-        $tipo = "Nota de crédito";
-      }else if( $this->document_type == '04' ) {
-        $tipo = "Tiquete";
-      }else if( $this->document_type == '08' ) {
-        $tipo = "Factura de compra";
-      }else if( $this->document_type == '09' ) {
-        $tipo = "Factura de exportación";
-      }else if( $this->document_type == '02' ) {
-        $tipo = "Nota de débito";
-      }else if( $this->document_type == '1' ) {
-         $this->document_type = '01';
-         $this->save();
-      }
+      try{
+        if( $this->document_type == '03' ) {
+          $tipo = "Nota de crédito";
+        }else if( $this->document_type == '04' ) {
+          $tipo = "Tiquete";
+        }else if( $this->document_type == '08' ) {
+          $tipo = "Factura de compra";
+        }else if( $this->document_type == '09' ) {
+          $tipo = "Factura de exportación";
+        }else if( $this->document_type == '02' ) {
+          $tipo = "Nota de débito";
+        }else if( $this->document_type == '1' ) {
+           $this->document_type = '01';
+           $this->save();
+        }
+      }catch(\Throwable $e){ return 'N/A'; }
       
       return $tipo;
     }

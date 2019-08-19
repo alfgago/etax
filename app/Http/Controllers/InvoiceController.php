@@ -420,13 +420,14 @@ class InvoiceController extends Controller
         $invoice = Invoice::where('id',$request->invoice_id)->first(); 
 
         if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
-            Invoice::where('id',$request->invoice_id)
-                ->update(['commercial_activity'=>$request->commercial_activity]);
-            foreach ($request->items as $item) {
-                InvoiceItem::where('id',$item['id'])
-                ->update(['product_type'=>$item['category_product'],'iva_type'=>$item['tipo_iva']]);
-                
-            }
+            try{
+                Invoice::where('id',$request->invoice_id)
+                    ->update(['commercial_activity'=>$request->commercial_activity]);
+                foreach ($request->items as $item) {
+                    InvoiceItem::where('id',$item['id'])
+                    ->update(['product_type'=>$item['category_product'],'iva_type'=>$item['tipo_iva']]);
+                }
+            }catch(\Throwable $e){}
             return redirect('/facturas-emitidas/')->withMessage('Factura validada satisfactoriamente');
         }else{
             return back()->withError('Mes seleccionado ya fue cerrado');

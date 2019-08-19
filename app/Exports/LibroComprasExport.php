@@ -49,7 +49,7 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
     {
         $current_company = currentCompany();
         $billItems = BillItem::query()
-        ->with(['bill', 'bill.provider'])
+        ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
         ->where('year', $this->year)
         ->where('month', $this->month)
         ->whereHas('bill', function ($query) use ($current_company){
@@ -67,21 +67,21 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
     public function map($map): array
     {
         return [
+            $map->bill->documentTypeName(),
             $map->bill->generatedDate()->format('d/m/Y'),
             $map->bill->providerName(),
             $map->bill->activity_company_verification ?? ($map->bill->commercial_activity ?? 'No indica'),
             $map->bill->document_number,
             $map->item_number,
             $map->name,
-            $map->ivaType->code,
-            $map->productCategory->name,
+            $map->ivaType ? $map->ivaType->name : 'No indica',
+            $map->productCategory->id . " - " . $map->productCategory->name,
             $map->bill->currency,
             $map->bill->currency_rate ?? '',
             round( $map->subtotal, 2),
             $map->iva_percentage . '%',
             round( $map->iva_amount, 2),
             round( $map->total * ( $map->bill->document_type != '03' ? 1 : -1 ) , 2),
-            
         ];
     }						
 
@@ -89,6 +89,7 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
      {
         return [
             [
+                'Tipo Doc.',
                 'Fecha',
                 'Proveedor',
                 'Actividad',

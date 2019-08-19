@@ -148,7 +148,7 @@
 		  </tr>
 		  <?php 
 		  	$totComprasAcred = $actividad['CL']['totales'] + $actividad['CI']['totales'];
-		  	$totComprasNAcred = $actividad['CE']['totales'] + $actividad['CNR']['totales'] + $actividad['CNS']['totales'] || 
+		  	$totComprasNAcred = $actividad['CE']['totales'] + $actividad['CNR']['totales'] + $actividad['CNS']['totales'] +
 		  											$actividad['CLI']['totales'] + $actividad['COE']['totales'];
 		  ?>
 		  <tr class="macro-title withmarcar inner {{ $totComprasAcred ? 'desplegar-true' : 'desplegar-false' }}">
