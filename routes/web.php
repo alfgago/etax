@@ -88,7 +88,8 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('emitir-factura/{tipoDocumento}', 'InvoiceController@emitFactura')->name('Invoice.emit_01');
     Route::get('emitir-sujeto-pasivo', 'InvoiceController@emitSujetoPasivo')->name('Invoice.emitSujetoPasivo');
     Route::get('emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
-    Route::post('enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
+    Route::get('emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
+    Route::get('nota-debito/{id}', 'InvoiceController@notaDebito')->name('Invoice.notadebito');
     Route::get('validaciones', 'InvoiceController@indexValidaciones')->name('Invoice.validaciones');
     Route::patch('confirmar-validacion/{id}', 'InvoiceController@confirmarValidacion')->name('Invoice.confirmar_validacion');
     Route::get('autorizaciones', 'InvoiceController@indexAuthorize')->name('Invoice.validaciones');

@@ -416,6 +416,26 @@ class InvoiceController extends Controller
         return view('Invoice/show', compact('invoice','units','arrayActividades','countries','product_categories','codigos') );
     }
 
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Invoice  $invoice
+     * @return \Illuminate\Http\Response
+     */
+    public function notaDebito($id)
+    {
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        $company = currentCompanyModel();
+        $arrayActividades = $company->getActivities();
+        $countries  = CodigosPaises::all()->toArray();
+
+        $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
+        $codigos = CodigoIvaRepercutido::where('hidden', false)->get();
+        $units = UnidadMedicion::all()->toArray();
+        return view('Invoice/nota-debito', compact('invoice','units','arrayActividades','countries','product_categories','codigos') );
+    }
+
     public function actualizar_categorias(Request $request){
         $invoice = Invoice::where('id',$request->invoice_id)->first(); 
 
