@@ -4,9 +4,14 @@
   @if( !@$data->hide_from_taxes )
   
     @if( @$oficialHacienda )
-      <a href="/facturas-emitidas/{{ $data->id }}" title="Ver detalle de factura" class="text-info mr-2"> 
-        <i class="fa fa-pencil" aria-hidden="true"></i>
-      </a>
+        <a href="/facturas-emitidas/{{ $data->id }}" title="Ver detalle de factura" class="text-info mr-2">
+            <i class="fa fa-pencil" aria-hidden="true"></i>
+        </a>
+        @if( $data->document_type == ('01' || '08' || '09' || '04') &&  $data->reference_document_key == null)
+        <a href="/facturas-emitidas/nota-debito/{{ $data->id }}" title="Crear nota de debito" class="text-warning mr-2">
+            <i class="fa fa-pencil" aria-hidden="true"></i>
+        </a>
+        @endif
       @if( $data->document_type == ('01' || '08' || '09' || '04') &&  $data->reference_document_key == null)
       <form id="anular-form-{{ $data->id }}" class="inline-form" method="POST" action="/facturas-emitidas/anular/{{  $data->id }}" >
         @csrf

@@ -957,10 +957,11 @@ class Invoice extends Model
         
     }
 
-    public function setNoteData($invoiceReference) {
+    public function setNoteData($invoiceReference, $requestItems = null, $noteType = null) {
         try {
-            $this->document_key = getDocumentKey('03', $this->reference_number, $invoiceReference->company->id_number);
-            $this->document_number = getDocReference('03', $this->reference_number);
+            $noteType = $noteType ?? '03';
+            $this->document_key = getDocumentKey($noteType, $this->reference_number, $invoiceReference->company->id_number);
+            $this->document_number = getDocReference($noteType, $this->reference_number);
             $this->sale_condition = $invoiceReference->sale_condition;
             $this->payment_type = $invoiceReference->payment_type;
             $this->retention_percent = $invoiceReference->retention_percent;
@@ -1009,7 +1010,7 @@ class Invoice extends Model
             $this->save();
 
             $lids = array();
-            $dataItems = $invoiceReference->items->toArray();
+            $dataItems = $requestItems ?? $invoiceReference->items->toArray();
             foreach($dataItems as $item) {
                 $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
                 $item['item_id'] = $item['id'] ? $item['id'] : 0;

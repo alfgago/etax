@@ -426,7 +426,7 @@ class InvoiceUtils
                 'detalle' => $details
             );
 
-            if ($data['document_type'] == '03') {
+            if ($data['document_type'] == ('03' || '02')) {
                 $invoiceData['totalivadevuelto'] = 0;
                 $invoiceData['referencia_doc_type'] = $data['reference_doc_type'];
                 $invoiceData['referencia_codigo'] = '01';

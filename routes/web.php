@@ -88,13 +88,15 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('emitir-factura/{tipoDocumento}', 'InvoiceController@emitFactura')->name('Invoice.emit_01');
     Route::get('emitir-sujeto-pasivo', 'InvoiceController@emitSujetoPasivo')->name('Invoice.emitSujetoPasivo');
     Route::get('emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
-    Route::post('enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
+    Route::get('emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
+    Route::get('nota-debito/{id}', 'InvoiceController@notaDebito')->name('Invoice.notadebito');
     Route::get('validaciones', 'InvoiceController@indexValidaciones')->name('Invoice.validaciones');
     Route::patch('confirmar-validacion/{id}', 'InvoiceController@confirmarValidacion')->name('Invoice.confirmar_validacion');
     Route::get('autorizaciones', 'InvoiceController@indexAuthorize')->name('Invoice.validaciones');
     Route::patch('confirmar-autorizacion/{id}', 'InvoiceController@authorizeInvoice')->name('Invoice.confirmar_validacion');
     Route::post('send', 'InvoiceController@sendHacienda')->name('Invoice.sendHacienda');
     Route::patch('/anular/{id}', 'InvoiceController@anularInvoice')->name('Invoice.anular');
+    Route::post('/nota-debito/send/{id}', 'InvoiceController@sendNotaDebito')->name('Invoice.sendNotaDebit');
     Route::get('download-pdf/{id}', 'InvoiceController@downloadPdf')->name('Invoice.downloadPdf');
     Route::get('download-xml/{id}', 'InvoiceController@downloadXml')->name('Invoice.downloadXml');
     Route::get('reenviar-email/{id}', 'InvoiceController@resendInvoiceEmail')->name('Invoice.resendInvoiceEmail');
