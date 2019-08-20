@@ -416,6 +416,105 @@ class InvoiceController extends Controller
         return view('Invoice/show', compact('invoice','units','arrayActividades','countries','product_categories','codigos') );
     }
 
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Invoice  $invoice
+     * @return \Illuminate\Http\Response
+     */
+    public function notaDebito($id)
+    {
+        $company = currentCompanyModel(false);
+
+        if ( !$company->atv_validation && $company->use_invoicing ) {
+            $apiHacienda = new BridgeHaciendaApi();
+            $token = $apiHacienda->login(false);
+            $validateAtv = $apiHacienda->validateAtv($token, $company);
+            if( $validateAtv ) {
+                if ($validateAtv['status'] == 400) {
+                    Log::info('Atv Not Validated Company: '. $company->id_number);
+                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                    }
+                    return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
+
+                } else {
+                    Log::info('Atv Validated Company: '. $company->id_number);
+                    $company->atv_validation = true;
+                    $company->save();
+
+                    $user = auth()->user();
+                    Cache::forget("cache-currentcompany-$user->id");
+                }
+            }else {
+                return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
+            }
+        }
+        if($company->last_debit_note_ref_number === null) {
+            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota de debito');
+        }
+
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        $company = currentCompanyModel();
+        $arrayActividades = $company->getActivities();
+        $countries  = CodigosPaises::all()->toArray();
+
+        $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
+        $codigos = CodigoIvaRepercutido::where('hidden', false)->get();
+        $units = UnidadMedicion::all()->toArray();
+        return view('Invoice/nota-debito', compact('invoice','units','arrayActividades','countries','product_categories','codigos') );
+    }
+
+    public function sendNotaDebito($id, Request $request)
+    {
+        try {
+            Log::info('Enviando nota de debito de facturar -->'.$id);
+            $invoice = Invoice::findOrFail($id);
+
+            if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){
+                $apiHacienda = new BridgeHaciendaApi();
+                $tokenApi = $apiHacienda->login();
+                if ($tokenApi !== false) {
+                    $invoice = Invoice::findOrFail($id);
+                    $note = new Invoice();
+                    $company = currentCompanyModel();
+
+                    //Datos generales y para Hacienda
+                    $note->company_id = $company->id;
+                    $note->document_type = "02";
+                    $note->hacienda_status = '01';
+                    $note->payment_status = "01";
+                    $note->payment_receipt = "";
+                    $note->generation_method = "etax";
+                    $note->reference_number = $company->last_debit_note_ref_number + 1;
+                    $note->save();
+                    $noteData = $note->setNoteData($invoice, $request->items, $note->document_type);
+                    if (!empty($noteData)) {
+                        $apiHacienda->createCreditNote($noteData, $tokenApi);
+                    }
+                    $company->last_debit_note_ref_number = $noteData->reference_number;
+                    $company->last_document_debit_note = $noteData->document_number;
+                    $company->save();
+
+                    clearInvoiceCache($invoice);
+
+                    return redirect('/facturas-emitidas')->withMessage('Nota de debito creada.');
+
+                } else {
+                    return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+                }
+            }else{
+                return back()->withError('Mes seleccionado ya fue cerrado');
+            }
+
+        } catch ( \Exception $e) {
+            Log::error('Error al anular facturar -->'.$e);
+            return redirect('/facturas-emitidas')->withErrors('Error al anular factura');
+        }
+
+    }
+
     public function actualizar_categorias(Request $request){
         $invoice = Invoice::where('id',$request->invoice_id)->first(); 
 

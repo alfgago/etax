@@ -57,7 +57,7 @@ class ProcessCreditNote implements ShouldQueue
                 $invoice = Invoice::find($this->invoiceId);
                 $company = Company::find($this->companyId);
                 if ($company->atv_validation) {
-                    if ($invoice->hacienda_status == '01' && $invoice->document_type == '03' && $invoice->reference_doc_type == '04' ? true : $invoiceUtils->validateZip($invoice)
+                    if ($invoice->hacienda_status == '01' && $invoice->document_type == ('03' || '02') && $invoice->reference_doc_type == '04' ? true : $invoiceUtils->validateZip($invoice)
                         && $invoice->resend_attempts < 6) {
                         if ($invoice->xml_schema == 43) {
                             $requestDetails = $invoiceUtils->setDetails43($invoice->items);
@@ -73,9 +73,10 @@ class ProcessCreditNote implements ShouldQueue
                         $tokenApi = $apiHacienda->login(false);
                         if ($requestData !== false) {
                             $endpoint = $invoice->xml_schema == 42 ? 'invoice' : 'invoice43';
+                            $path = $invoice->document_type == '02' ? 'debit' : 'credit';
                             sleep(15);
                             Log::info('Enviando Request Nota Credito  API HACIENDA -->>' . $this->invoiceId);
-                            $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/credit', [
+                            $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/'.$path, [
                                 'headers' => [
                                     'Auth-Key' => config('etax.api_hacienda_key'),
                                     'Client-Service' => config('etax.api_hacienda_client'),

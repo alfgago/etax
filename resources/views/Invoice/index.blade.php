@@ -21,6 +21,7 @@
                 <option value="1">Facturas electrónicas</option>
                 <option value="4">Tiquete electrónico</option>
                 <option value="3">Notas de crédito</option>
+                <option value="2">Notas de debito</option>
                 <option value="8">Factura de compra</option>
                 <option value="9">Factura de exportación</option>
                 <option value="0">Documentos eliminados</option>
