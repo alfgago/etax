@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\PaymentMethod;
+use App\Team;
 use App\Utils\PaymentUtils;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Mpociot\Teamwork\TeamworkTeam;
 
 /**
  * @group Controller - Métodos de Pago
@@ -22,6 +24,11 @@ class PaymentMethodController extends Controller
     public function index()
     {
         $user = auth()->user();
+        //$company = currentCompanyModel();
+        $owner = currentCompanyModel()->owner;
+        if(auth()->user()->id != $owner){
+            return redirect()->back()->withErrors('Su usuario no tiene acceso a esta vista' );
+        }
         $cantidad = PaymentMethod::where('user_id', $user->id)->get()->count();
         return view('payment_methods/index')->with('cantidad', $cantidad);
         if($cantidad){
