@@ -212,7 +212,7 @@ class ProcessReception implements ShouldQueue
                 'consecutivo' => getDocReference('05', $ref),
                 'tipo_documento' => '05',
                 'total_impuesto' => $data['accept_iva_total'],
-                'cod_actividad' => $data['commercial_activity'],
+                'cod_actividad' => str_pad($data['commercial_activity'], 6, '0', STR_PAD_LEFT),
                 'cond_impuesto' => empty($data['accept_iva_condition']) ? '02' : $data['accept_iva_condition'],
                 'total_imp_acredit' => $data['accept_iva_acreditable'],
                 'total_gastos' => $data['accept_iva_gasto'],
