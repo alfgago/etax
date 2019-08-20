@@ -3,13 +3,11 @@
 @section('title')
     Ver factura emitida
 @endsection
-@section('breadcrumb-buttons')
-    <button type="submit" onclick="$('#btn-submit-form').click();"  class="btn btn-primary">Guardar factura</button>
-@endsection
+
 @section('content')
     <div class="row form-container">
         <div class="col-md-12">
-            <form method="POST" action="/facturas-emitidas/actualizar-categorias" class="show-form">
+            <form method="POST" action="/facturas-emitidas/nota-debito/send/{{ $invoice->id }}" class="show-form">
                 @csrf
                 @method('post')
                 <input type="hidden" id="current-index" value="{{ count($invoice->items) }}">
@@ -280,15 +278,17 @@
 
                 @include( 'Invoice.form-linea' )
                 <div class="btn-holder hidden">
-                    <button id="btn-submit-form" type="submit" class="btn btn-primary">Guardar factura</button>
-                </div>
 
+                    <button id="btn-submit" type="submit" class="btn btn-primary">Enviar factura electrónica</button>
+                </div>
             </form>
         </div>
     </div>
 @endsection
 
-
+@section('breadcrumb-buttons')
+    <button id='btn-submit-fe' onclick="$('#btn-submit').click();" class="btn btn-primary">Enviar nota de debito</button>
+@endsection
 @section('footer-scripts')
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
