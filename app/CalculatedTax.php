@@ -176,6 +176,7 @@ class CalculatedTax extends Model
             
             if( !$data->is_closed || $forceRecalc ) {
               $data->resetVars();
+
               $data->calcularFacturacion( $month, $year, $lastBalance, $prorrataOperativa );
 
               if( $data->count_invoices || $data->count_bills || $data->id ) {
@@ -202,7 +203,7 @@ class CalculatedTax extends Model
           Cache::put($cacheKey, $data, now()->addDays(120));
           
       }
-      
+
       $data = Cache::get($cacheKey);
       return $data;
       
@@ -229,15 +230,16 @@ class CalculatedTax extends Model
       
       if( $year >= 2018 ) {
         $this->setDatosEmitidos( $month, $year, $currentCompany->id );
-        //dd($this);
+
         $query = BillItem::with('bill')->with('ivaType')
                     ->where('company_id', $currentCompany->id)
                     ->where('year', $year)
                     ->where('month', $month);
         $this->setDatosSoportados( $month, $year, $currentCompany->id, $query );
       }
-      $this->setCalculosIVA( $prorrataOperativa, $lastBalance );
       
+      $this->setCalculosIVA( $prorrataOperativa, $lastBalance );
+
       return $this;
     }
     
