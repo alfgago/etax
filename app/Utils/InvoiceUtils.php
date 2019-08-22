@@ -289,6 +289,7 @@ class InvoiceUtils
                     'tariff_heading' => $value['tariff_heading'] ?? '',
                     'exoneracion_total_gravados' => $value['exoneration_total_gravado'] ?? 0,
                     'base_imponible' => 0,
+                    'product_type' => $value['product_type'] ?? '',
                 );
             }
             return json_encode($details, true);
@@ -325,6 +326,7 @@ class InvoiceUtils
             $totalDescuentos = 0;
             $totalImpuestos = 0;
             $totalImpuestosNeto = 0;
+            $totalIvaDevuelto = 0;
             $itemDetails = json_decode($details);
             //Spe, St, Al, Alc, Cm, I, Os
             foreach ($itemDetails as $detail) {
@@ -361,6 +363,9 @@ class InvoiceUtils
                     $totalImpuestos += $detail->impuesto_monto;
                     $totalImpuestosNeto += $detail->impuestoneto;
                 }
+                if ($data['payment_type'] == '02' && $detail->product_type == 12) {
+                    $totalIvaDevuelto += $detail->impuesto_monto;
+                }
 
             }
             $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas - $totalServiciosExonerados;
@@ -376,6 +381,8 @@ class InvoiceUtils
             $invoiceData = array(
                 'consecutivo' => $ref ?? '',
                 'fecha_emision' => $data['generated_date'] ?? '',
+                'metodo_pago' => $data['payment_type'] ?? '01',
+                'condicion_venta' => $data['sale_condition'] ?? '01',
                 'codigo_actividad' => str_pad($data['commercial_activity'], 6, '0', STR_PAD_LEFT),
                 'receptor_nombre' => trim($data['client_first_name'].' '.$data['client_last_name']),
                 'receptor_ubicacion_provincia' => substr($receptorPostalCode,0,1),
@@ -422,12 +429,12 @@ class InvoiceUtils
                 'totdescuentos' => $totalDescuentos,
                 'totventaneta' => $totalNeta,
                 'totimpuestos' => $totalImpuestos - $totalImpuestosNeto,
-                'totcomprobante' => $totalComprobante,
+                'totalivadevuelto' => $totalIvaDevuelto,
+                'totcomprobante' => $totalComprobante - $totalIvaDevuelto,
                 'detalle' => $details
             );
 
             if ($data['document_type'] == ('03' || '02')) {
-                $invoiceData['totalivadevuelto'] = 0;
                 $invoiceData['referencia_doc_type'] = $data['reference_doc_type'];
                 $invoiceData['referencia_codigo'] = '01';
                 $invoiceData['referencia_razon'] = 'Anular Factura';
