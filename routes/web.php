@@ -30,6 +30,7 @@ Route::post('clientes/importar', 'ClientController@import');
 Route::post('proveedores/importar', 'ProviderController@import');
 Route::post('productos/importar', 'ProductController@import');
 Route::post('facturas-emitidas/importarExcel', 'InvoiceController@importExcel');
+Route::post('facturas-emitidas/importarExcelSM', 'InvoiceController@importExcelSM');
 Route::post('facturas-emitidas/importarXML', 'InvoiceController@importXML');
 Route::post('facturas-recibidas/importarExcel', 'BillController@importExcel');
 Route::post('facturas-recibidas/importarXML', 'BillController@importXML');
@@ -96,6 +97,7 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::post('send', 'InvoiceController@sendHacienda')->name('Invoice.sendHacienda');
     Route::patch('/anular/{id}', 'InvoiceController@anularInvoice')->name('Invoice.anular');
     Route::get('download-pdf/{id}', 'InvoiceController@downloadPdf')->name('Invoice.downloadPdf');
+    Route::get('stream-pdf/{id}', 'InvoiceController@streamPdf')->name('Invoice.downloadPdf');
     Route::get('download-xml/{id}', 'InvoiceController@downloadXml')->name('Invoice.downloadXml');
     Route::get('reenviar-email/{id}', 'InvoiceController@resendInvoiceEmail')->name('Invoice.resendInvoiceEmail');
     Route::get('consult/{id}', 'InvoiceController@consultInvoice')->name('Invoice.consultInvoice');

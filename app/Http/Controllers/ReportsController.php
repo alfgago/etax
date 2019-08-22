@@ -234,7 +234,7 @@ class ReportsController extends Controller
           $company = currentCompanyModel();
           $prorrataOperativa = $company->getProrrataOperativa($ano);
 
-          $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa, true );
+          $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
 
     			$ivaData = json_decode($data->iva_data);
           $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
