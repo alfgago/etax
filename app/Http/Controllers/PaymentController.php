@@ -84,7 +84,6 @@ class PaymentController extends Controller
         $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
             '1'.$invoice->getHashFromRef($company->last_invoice_ref_number + 1);
             
-            
         return $key;
     }
 
@@ -694,7 +693,7 @@ class PaymentController extends Controller
     
     public function skipPaymentCoupon( $request, $coupon ) {
         $user = auth()->user();
-        $nextPaymentDate = Carbon::parse(now('America/Costa_Rica'))->addYears(1);
+        $nextPaymentDate = Carbon::parse(now('America/Costa_Rica'))->addMonths($request->recurrency);
         $proof = "Pago por transferencia";
         if( $coupon->code == '$$$ETAX100DESCUENTO!' ){
             $nextPaymentDate = Carbon::parse(now('America/Costa_Rica'))->addYears(10);
@@ -727,15 +726,14 @@ class PaymentController extends Controller
                 'payment_status' => 2,
                 'amount' => 0,
                 'charge_token' => 'N/A',
-                'proof' => $proof
+                'proof' => "Transferencia"
             ]
         );
         
         
         $this->facturasDisponibles();
         return $this->companyDisponible();
-        
-           
+ 
     }
 
     public function dailySubscriptionsPayment(){

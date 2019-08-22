@@ -71,7 +71,7 @@
 			
 			<button type="submit" class="btn btn-primary">Importar facturas</button>
 		</form>	
-			
+		
 	<form method="POST" action="/facturas-emitidas/importarXML" enctype="multipart/form-data" class="toggle-xml">
 			
 			@csrf
