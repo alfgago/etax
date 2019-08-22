@@ -193,29 +193,28 @@
 						  </div>
 						  
 						</form>
-						
-
+		
+							@if(currentCompanyModel()->id==1106 || currentCompanyModel()->id==437)
 						    <div class="form-group col-md-12">
 						      <h3>
 						        Importación de Excel para facturación SM Seguros
 						      </h3>
 						    </div>
-		
-							@if(currentCompanyModel()->id==1106 || currentCompanyModel()->id==437)
-							<form method="POST" action="/facturas-emitidas/importarExcelSM" enctype="multipart/form-data" class="toggle-xlsx mt-3">
-														
-							  @csrf
-								<div class="form-group col-md-12">
-							    <label for="archivo">Excel SM Seguros para envio masivo</label>  
-									<div class="">
-										<div class="fallback">
-									      <input name="archivo" type="file" multiple="false" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-									  </div>
-									  <small class="descripcion">Hasta 5000 líneas por archivo.</small>
+						    
+								<form method="POST" action="/facturas-emitidas/importarExcelSM" enctype="multipart/form-data" class="toggle-xlsx mt-3">
+															
+								  @csrf
+									<div class="form-group col-md-12">
+								    <label for="archivo">Excel SM Seguros para envio masivo</label>  
+										<div class="">
+											<div class="fallback">
+										      <input name="archivo" type="file" multiple="false" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+										  </div>
+										  <small class="descripcion">Hasta 5000 líneas por archivo.</small>
+										</div>
+										<button type="submit" class="btn btn-primary">Importar facturas</button>
 									</div>
-									<button type="submit" class="btn btn-primary">Importar facturas</button>
-								</div>
-							</form>
+								</form>
 							@endif	
 
           </div>
