@@ -501,6 +501,7 @@ class Invoice extends Model
           $invoice->client_id = $idCliente;
           $invoice->document_key =  $data['claveFactura'];
           $invoice->document_number =  $data['consecutivoComprobante'];
+          $invoice->reference_number =  $data['refNumber'] ?? 0;
           $invoice->xml_schema =  $data['xmlSchema'] ?? 43;
           $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
   

@@ -1295,7 +1295,7 @@ class InvoiceController extends Controller
 
         $company = currentCompanyModel();
 
-        //try {
+        try {
             $collection = $collection->toArray()[0];
             Log::info($company->id_number . " importanto Excel ventas con ".count($collection)." lineas");
             $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
@@ -1320,6 +1320,7 @@ class InvoiceController extends Controller
                     $consecutivoComprobante = $this->getDocReference('01', $company);
                     $claveFactura = $this->getDocumentKey('01', $company);
                     $company->last_invoice_ref_number = $company->last_invoice_ref_number+1;
+                    $refNumber = $company->last_invoice_ref_number;
                     $condicionVenta = '02';
                     $metodoPago = str_pad((int)$row['medio_pago'], 2, '0', STR_PAD_LEFT);
                     $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
@@ -1376,6 +1377,7 @@ class InvoiceController extends Controller
                         'zip' => trim($zip),
                         'claveFactura' => trim($claveFactura),
                         'consecutivoComprobante' => trim($consecutivoComprobante),
+                        'numeroReferencia' => $refNumber,
                         'condicionVenta' => trim($condicionVenta),
                         'metodoPago' => trim($metodoPago),
                         'numeroLinea' => trim($numeroLinea),
@@ -1425,10 +1427,10 @@ class InvoiceController extends Controller
                 ProcessSendExcelInvoices::dispatch($facturas);
             }
             
-        /*}catch( \Throwable $ex ){
+        }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
             return redirect('/facturas-emitidas')->withError('Error importando.');
-        }*/
+        }
 
         $company->save();
         
