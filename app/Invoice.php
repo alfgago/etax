@@ -454,10 +454,10 @@ class Invoice extends Model
             $clienteCache->email = $correoCliente;
             $clienteCache->address = isset($data['direccion']) ?? null;
             if( isset($data['zip']) ){
-              $clienteCache->state = $correoCliente;
-              $clienteCache->city = $correoCliente;
-              $clienteCache->district = $correoCliente;
-              $clienteCache->zip = $correoCliente;
+              $clienteCache->state = $data['zip'][0];
+              $clienteCache->city = $data['zip'][0] . $data['zip'][1];
+              $clienteCache->district = $data['zip'];
+              $clienteCache->zip = $data['zip'];
             }
             $clienteCache->save();
             Cache::put($clientCacheKey, $clienteCache, 30);
@@ -473,8 +473,30 @@ class Invoice extends Model
       $arrayKey = "import-factura-" . $data['claveFactura'];
       //Usa Cache por si viene la misma factura en varios lugares del Excel, las siguientes veces no reinicia el subtotal de la factura.
       if ( !isset($invoiceList[$arrayKey]) ) { 
-      
+        
           $invoice = new Invoice();
+          try{
+            $invoice->generated_date = Carbon::createFromFormat('d/m/Y', $data['fechaEmision']);
+          }catch( \Exception $ex ){
+            $dt =\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaEmision']);
+            $invoice->generated_date = Carbon::instance($dt);
+          }
+          try{
+            $invoice->due_date = Carbon::createFromFormat('d/m/Y', $data['fechaVencimiento']);
+          }catch( \Exception $ex ){
+            $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaVencimiento']);
+            $invoice->due_date = Carbon::instance($dt);
+          }
+          $year = $invoice->generated_date->year;
+          $month = $invoice->generated_date->month;
+          
+          if( $data['metodoGeneracion'] == 'etax-bulk' ){
+            if( Invoice::where("client_id_number", $identificacionCliente)->where('year', $year)->where('month', $month)->count() ){
+              Log::warning('Factura repetida en envio masivo');
+              return false;
+            }
+          }
+      
           $invoice->company_id = $company->id;
           $invoice->client_id = $idCliente;
           $invoice->document_key =  $data['claveFactura'];
@@ -516,22 +538,7 @@ class Invoice extends Model
             $invoice->currency_rate = 1;
           }
           
-          try{
-            $invoice->generated_date = Carbon::createFromFormat('d/m/Y', $data['fechaEmision']);
-          }catch( \Exception $ex ){
-            $dt =\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaEmision']);
-            $invoice->generated_date = Carbon::instance($dt);
-          }
-          try{
-            $invoice->due_date = Carbon::createFromFormat('d/m/Y', $data['fechaVencimiento']);
-          }catch( \Exception $ex ){
-            $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data['fechaVencimiento']);
-            $invoice->due_date = Carbon::instance($dt);
-          }
-          
           $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
-          $year = $invoice->generated_date->year;
-          $month = $invoice->generated_date->month;
           $invoice->year = $year;
           $invoice->month = $month;
 

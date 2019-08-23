@@ -1205,7 +1205,7 @@ class InvoiceController extends Controller
 
             foreach ($collection as $row){
 
-                $metodoGeneracion = "XLSX";
+                $metodoGeneracion = "etax-bulk";
 
                 if( isset($row['doc_identificacion']) ){
                     $i++;
@@ -1318,6 +1318,9 @@ class InvoiceController extends Controller
             
             Log::info("$i procesadas...");
             $company->save();
+            $user = auth()->user();
+            Cache::forget("cache-currentcompany-$user->id");
+            
             foreach (array_chunk ( $invoiceList, 250 ) as $facturas) {
                 Log::info("Mandando 250 a queue...");
                 ProcessSendExcelInvoices::dispatch($facturas);
@@ -1325,7 +1328,7 @@ class InvoiceController extends Controller
             
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
-            return redirect('/facturas-emitidas')->withError('Error importando. Archivo excede el tamaño mínimo.');
+            return redirect('/facturas-emitidas')->withError('Error importando.');
         }
 
         $company->save();
