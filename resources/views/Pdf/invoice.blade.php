@@ -209,10 +209,10 @@
                 $documentType = 'Tiquete electrónico';
                 break;
             case '08':
-                $documentType = 'Factura de exportación';
+                $documentType = 'Factura de compra';
             break;
             case '09':
-                $documentType = 'Factura de compra';
+                $documentType = 'Factura de exportación';
             break;
         }
     ?>
