@@ -23,19 +23,12 @@ class PaymentMethodController extends Controller
      */
     public function index()
     {
-        $user = auth()->user();
-        //$company = currentCompanyModel();
-        $owner = currentCompanyModel()->owner;
-        if(auth()->user()->id != $owner){
+        $team = Team::where('company_id', currentCompany())->first();
+        if(auth()->user()->id != $team->owner_id){
             return redirect()->back()->withErrors('Su usuario no tiene acceso a esta vista' );
         }
-        $cantidad = PaymentMethod::where('user_id', $user->id)->get()->count();
+        $cantidad = PaymentMethod::where('user_id', auth()->user()->id)->get()->count();
         return view('payment_methods/index')->with('cantidad', $cantidad);
-        if($cantidad){
-            return view('payment_methods/index')->with('cantidad', $cantidad);
-        }else{
-            return redirect()->back()->withErrors('No existen métodos de pago para este usuario');
-        }
     }
 
     public function indexData(){
