@@ -67,9 +67,9 @@ class ProcessExcelSM implements ShouldQueue
                     $i++;
                     //Datos de proveedor
                     $nombreCliente = $row['nombre_tomador'];
-                    $codigoCliente = isset($row['doc_identificacion']) ? $row['doc_identificacion'] : '';
+                    $identificacionCliente = ltrim($row['doc_identificacion'], '0') ?? null;
+                    $codigoCliente = $identificacionCliente;
                     $tipoPersona = $row['tipo_id'][0];
-                    $identificacionCliente = $row['doc_identificacion'] ?? null;
                     $correoCliente = $row['correo'] ?? null;
                     $telefonoCliente = $row['telefono_celular'];
 
