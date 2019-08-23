@@ -188,5 +188,50 @@ class ProcessExcelSM implements ShouldQueue
             Log::error("Error importando excel archivo:" . $ex);
         }
     }
+    
+    
+    private function getDocReference($docType, $company = false) {
+        if(!$company){
+            $company = currentCompanyModel();
+        }
+        if ($docType == '01') {
+            $lastSale = $company->last_invoice_ref_number + 1;
+        }
+        if ($docType == '08') {
+            $lastSale = $company->last_invoice_pur_ref_number + 1;
+        }
+        if ($docType == '09') {
+            $lastSale = $company->last_invoice_exp_ref_number + 1;
+        }
+        if ($docType == '04') {
+            $lastSale = $company->last_ticket_ref_number + 1;
+        }
+        $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
+
+        return $consecutive;
+    }
+
+    private function getDocumentKey($docType, $company = false) {
+        if(!$company){
+            $company = currentCompanyModel();
+        }
+        $invoice = new Invoice();
+        if ($docType == '01') {
+            $ref = $company->last_invoice_ref_number + 1;
+        }
+        if ($docType == '08') {
+            $ref = $company->last_invoice_pur_ref_number + 1;
+        }
+        if ($docType == '09') {
+            $ref = $company->last_invoice_exp_ref_number + 1;
+        }
+        if ($docType == '04') {
+            $ref = $company->last_ticket_ref_number + 1;
+        }
+        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType, $company).
+            '1'.$invoice->getHashFromRef($ref);
+
+        return $key;
+    }
 
 }
