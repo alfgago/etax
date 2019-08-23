@@ -60,6 +60,7 @@ class ProcessSendExcelSingleInvoice implements ShouldQueue
                   'document_key' => $fac->document_key,
               ], $fac->toArray()
             );
+            
             $invoice->hacienda_status = '01';
             $invoice->generation_method = "etax-bulk";
             
