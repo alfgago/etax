@@ -177,8 +177,8 @@ class ProcessExcelSM implements ShouldQueue
             
             Log::info("$i procesadas...");
             $company->save();
-            $user = $company->user_id;
-            Cache::forget("cache-currentcompany-$user->id");
+            $userId = $company->user_id;
+            Cache::forget("cache-currentcompany-$userId");
             
             foreach (array_chunk ( $invoiceList, 250 ) as $facturas) {
                 Log::info("Mandando 250 a queue...");
