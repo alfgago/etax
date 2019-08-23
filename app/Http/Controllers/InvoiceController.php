@@ -27,6 +27,7 @@ use Illuminate\Http\Request;
 use GuzzleHttp\Message\ResponseInterface;
 use PDF;
 use App\Jobs\ProcessInvoicesImport;
+use App\Jobs\ProcessSendExcelInvoices;
 
 /**
  * @group Controller - Facturas de venta
@@ -1158,26 +1159,31 @@ class InvoiceController extends Controller
         return back()->withMessage( 'Se han reenviado los correos exitosamente.');
     }
     
-    private function getDocReference($docType) {
+    private function getDocReference($docType, $company = false) {
+        if(!$company){
+            $company = currentCompanyModel();
+        }
         if ($docType == '01') {
-            $lastSale = currentCompanyModel()->last_invoice_ref_number + 1;
+            $lastSale = $company->last_invoice_ref_number + 1;
         }
         if ($docType == '08') {
-            $lastSale = currentCompanyModel()->last_invoice_pur_ref_number + 1;
+            $lastSale = $company->last_invoice_pur_ref_number + 1;
         }
         if ($docType == '09') {
-            $lastSale = currentCompanyModel()->last_invoice_exp_ref_number + 1;
+            $lastSale = $company->last_invoice_exp_ref_number + 1;
         }
         if ($docType == '04') {
-            $lastSale = currentCompanyModel()->last_ticket_ref_number + 1;
+            $lastSale = $company->last_ticket_ref_number + 1;
         }
         $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
 
         return $consecutive;
     }
 
-    private function getDocumentKey($docType) {
-        $company = currentCompanyModel();
+    private function getDocumentKey($docType, $company = false) {
+        if(!$company){
+            $company = currentCompanyModel();
+        }
         $invoice = new Invoice();
         if ($docType == '01') {
             $ref = $company->last_invoice_ref_number + 1;
@@ -1191,7 +1197,7 @@ class InvoiceController extends Controller
         if ($docType == '04') {
             $ref = $company->last_ticket_ref_number + 1;
         }
-        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
+        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType, $company).
             '1'.$invoice->getHashFromRef($ref);
 
         return $key;
@@ -1284,7 +1290,6 @@ class InvoiceController extends Controller
         try {
             $collection = Excel::toCollection( new InvoiceImportSM(), request()->file('archivo') );
         }catch( \Throwable $ex ){
-            dd($ex);
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.' );
         }
 
@@ -1312,23 +1317,23 @@ class InvoiceController extends Controller
                     $telefonoCliente = $row['telefono_celular'];
 
                     //Datos de factura
-                    $consecutivoComprobante = $this->getDocumentKey('01');
-                    $claveFactura = $this->getDocReference('01');
+                    $consecutivoComprobante = $this->getDocReference('01', $company);
+                    $claveFactura = $this->getDocumentKey('01', $company);
+                    $company->last_invoice_ref_number = $consecutivoComprobante;
                     $condicionVenta = '02';
                     $metodoPago = str_pad((int)$row['medio_pago'], 2, '0', STR_PAD_LEFT);
                     $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
                     $fechaEmision = '15/07/2019';
 
                     $fechaVencimiento = isset($row['fechavencimiento']) ? $row['fechavencimiento'] : $fechaEmision;
-                    $idMoneda = $row['moneda'] ?? 'CRC';
+                    $idMoneda = 'CRC';
                     $tipoCambio = $row['tipocambio'] ?? 1;
                     $totalDocumento = $row['total'];
                     $tipoDocumento = '01';
-                    $descripcion = isset($row['descripcion'])  ? $row['descripcion'] : '';
+                    $descripcion = isset($row['descripcion']) ? $row['descripcion'] : ($row['descricpion'] ?? '');
 
                     //Datos de linea
-                    $codigoProducto = $row['num_objeto'] ?? 'N/A
-                    ';
+                    $codigoProducto = $row['num_objeto'] ?? 'N/A';
                     $detalleProducto =isset($row['descripcion'])  ? $row['descripcion'] : $codigoProducto;
                     $unidadMedicion = 'Os';
                     $cantidad = isset($row['cantidad']) ? $row['cantidad'] : 1;
@@ -1341,8 +1346,8 @@ class InvoiceController extends Controller
                     $montoIva = (float)$row['impuesto'];
                     $acceptStatus = isset($row['aceptada']) ? $row['aceptada'] : 1;
                     
-                    $codigoActividad = $row['actividadcomercial'] ?? $mainAct;
-                    $xmlSchema = $row['xmlschema'] ?? 43;
+                    $codigoActividad = $row['actividad_comercial'] ?? $mainAct;
+                    $xmlSchema = 43;
                     
                     //Exoneraciones
                     $totalNeto = 0;
@@ -1354,61 +1359,67 @@ class InvoiceController extends Controller
                     $impuestoNeto = $row['impuestoneto'] ?? 0;
                     $totalMontoLinea = $row['totalmontolinea'] ?? 0;
                     
+                    $direccion = $row['des_direccion'] ?? null;
+                    $zip = $row['codigo_postal'] ?? '10101';
+                    
                     $arrayInsert = array(
-                        'metodoGeneracion' => $metodoGeneracion,
+                        'metodoGeneracion' => trim($metodoGeneracion),
                         'idEmisor' => 0,
-                        'nombreCliente' => $nombreCliente,
-                        'descripcion' => $descripcion,
-                        'codigoCliente' => $codigoCliente,
-                        'tipoPersona' => $tipoPersona,
-                        'identificacionCliente' => $identificacionCliente,
-                        'correoCliente' => $correoCliente,
-                        'telefonoCliente' => $telefonoCliente,
-                        'claveFactura' => $claveFactura,
-                        'consecutivoComprobante' => $consecutivoComprobante,
-                        'condicionVenta' => $condicionVenta,
-                        'metodoPago' => $metodoPago,
-                        'numeroLinea' => $numeroLinea,
-                        'fechaEmision' => $fechaEmision,
-                        'fechaVencimiento' => $fechaVencimiento,
-                        'moneda' => $idMoneda,
-                        'tipoCambio' => $tipoCambio,
-                        'totalDocumento' => $totalDocumento,
-                        'totalNeto' => $totalNeto,
-                        'cantidad' => $cantidad,
-                        'precioUnitario' => $precioUnitario,
-                        'totalLinea' => $totalLinea,
-                        'montoIva' => $montoIva,
-                        'codigoEtax' => $codigoEtax,
-                        'montoDescuento' => $montoDescuento,
-                        'subtotalLinea' => $subtotalLinea,
-                        'tipoDocumento' => $tipoDocumento,
-                        'codigoProducto' => $codigoProducto,
-                        'detalleProducto' => $detalleProducto,
-                        'unidadMedicion' => $unidadMedicion,
-                        'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
-                        'documentoExoneracion' => $documentoExoneracion,
-                        'companiaExoneracion' => $companiaExoneracion,
-                        'porcentajeExoneracion' => $porcentajeExoneracion,
-                        'montoExoneracion' => $montoExoneracion,
-                        'impuestoNeto' => $impuestoNeto,
-                        'totalMontoLinea' => $totalMontoLinea,
-                        'xmlSchema' => $xmlSchema,
-                        'codigoActividad' => $codigoActividad,
-                        'categoriaHacienda' => $categoriaHacienda,
-                        'acceptStatus' => $acceptStatus,
+                        'nombreCliente' => trim($nombreCliente),
+                        'descripcion' => trim($descripcion),
+                        'codigoCliente' => trim($codigoCliente),
+                        'tipoPersona' => trim($tipoPersona),
+                        'identificacionCliente' => trim($identificacionCliente),
+                        'correoCliente' => trim($correoCliente),
+                        'telefonoCliente' => trim($telefonoCliente),
+                        'direccion' => trim($direccion),
+                        'zip' => trim($zip),
+                        'claveFactura' => trim($claveFactura),
+                        'consecutivoComprobante' => trim($consecutivoComprobante),
+                        'condicionVenta' => trim($condicionVenta),
+                        'metodoPago' => trim($metodoPago),
+                        'numeroLinea' => trim($numeroLinea),
+                        'fechaEmision' => trim($fechaEmision),
+                        'fechaVencimiento' => trim($fechaVencimiento),
+                        'moneda' => trim($idMoneda),
+                        'tipoCambio' => trim($tipoCambio),
+                        'totalDocumento' => trim($totalDocumento),
+                        'totalNeto' => trim($totalNeto),
+                        'cantidad' => trim($cantidad),
+                        'precioUnitario' => trim($precioUnitario),
+                        'totalLinea' => trim($totalLinea),
+                        'montoIva' => trim($montoIva),
+                        'codigoEtax' => trim($codigoEtax),
+                        'montoDescuento' => trim($montoDescuento),
+                        'subtotalLinea' => trim($subtotalLinea),
+                        'tipoDocumento' => trim($tipoDocumento),
+                        'codigoProducto' => trim($codigoProducto),
+                        'detalleProducto' => trim($detalleProducto),
+                        'unidadMedicion' => trim($unidadMedicion),
+                        'tipoDocumentoExoneracion' => trim($tipoDocumentoExoneracion),
+                        'documentoExoneracion' => trim($documentoExoneracion),
+                        'companiaExoneracion' => trim($companiaExoneracion),
+                        'porcentajeExoneracion' => trim($porcentajeExoneracion),
+                        'montoExoneracion' => trim($montoExoneracion),
+                        'impuestoNeto' => trim($impuestoNeto),
+                        'totalMontoLinea' => trim($totalMontoLinea),
+                        'xmlSchema' => trim($xmlSchema),
+                        'codigoActividad' => trim($codigoActividad),
+                        'categoriaHacienda' => trim($categoriaHacienda),
+                        'acceptStatus' => trim($acceptStatus),
                         'isAuthorized' => true,
                         'codeValidated' => true
                     );
-                    dd($arrayInsert);
+                    
                     $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
                 }
             }
             
             Log::info("$i procesadas...");
+            $company->save();
             foreach (array_chunk ( $invoiceList, 250 ) as $facturas) {
                 Log::info("Mandando 250 a queue...");
-                ProcessInvoicesImport::dispatch($facturas);
+                ProcessSendExcelInvoices::dispatch($facturas);
             }
             
         }catch( \Throwable $ex ){

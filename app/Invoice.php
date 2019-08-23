@@ -452,6 +452,13 @@ class Invoice extends Model
             );
             $correoCliente = $data['correoCliente'] ? $data['correoCliente'] : $clienteCache->email;
             $clienteCache->email = $correoCliente;
+            $clienteCache->address = isset($data['direccion']) ?? null;
+            if( isset($data['zip']) ){
+              $clienteCache->state = $correoCliente;
+              $clienteCache->city = $correoCliente;
+              $clienteCache->district = $correoCliente;
+              $clienteCache->zip = $correoCliente;
+            }
             $clienteCache->save();
             Cache::put($clientCacheKey, $clienteCache, 30);
         }
