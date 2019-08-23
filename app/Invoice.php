@@ -530,7 +530,6 @@ class Invoice extends Model
           $invoice->client_phone = $data['telefonoCliente'] ?? null;
           $invoice->client_address = isset($data['direccion']) ?? null;
           if( isset($data['zip']) ){
-            $invoice->client_address = 'CR';
             $invoice->client_country = 'CR';
             $invoice->client_state = $data['zip'][0];
             $invoice->client_city = $data['zip'][1] . $data['zip'][2];
