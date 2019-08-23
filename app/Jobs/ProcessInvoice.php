@@ -49,7 +49,7 @@ class ProcessInvoice implements ShouldQueue
      */
     public function handle()
     {
-        return true;
+
         try {
             if ( app()->environment('production') ) {
                 $invoiceUtils = new InvoiceUtils();
