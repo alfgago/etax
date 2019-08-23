@@ -188,7 +188,7 @@
 						  
 						</form>
 		
-							@if(currentCompanyModel()->id==1106 || currentCompanyModel()->id==437)
+							@if(currentCompanyModel()->id==1110 || currentCompanyModel()->id==437)
 						    <div class="form-group col-md-12">
 						      <h3>
 						        Importación de Excel para facturación SM Seguros
