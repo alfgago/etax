@@ -210,7 +210,7 @@
 											<div class="fallback">
 										      <input name="archivo" type="file" multiple="false" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
 										  </div>
-										  <small class="descripcion">Hasta 5000 líneas por archivo.</small>
+										  <small class="descripcion">Hasta 2500 líneas por archivo.</small>
 										</div>
 										<button type="submit" class="btn btn-primary">Importar facturas</button>
 									</div>
