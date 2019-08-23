@@ -493,7 +493,7 @@ class Invoice extends Model
           if( $data['metodoGeneracion'] == 'etax-bulk' ){
             if( Invoice::where("client_id_number", $identificacionCliente)->where('year', $year)->where('month', $month)->count() ){
               Log::warning('Factura repetida en envio masivo');
-              return false;
+              return $invoiceList;
             }
           }
       
