@@ -22,6 +22,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 class ProcessExcelSM implements ShouldQueue
 {
@@ -176,7 +177,7 @@ class ProcessExcelSM implements ShouldQueue
             
             Log::info("$i procesadas...");
             $company->save();
-            $user = $company->user;
+            $user = $company->user_id;
             Cache::forget("cache-currentcompany-$user->id");
             
             foreach (array_chunk ( $invoiceList, 250 ) as $facturas) {
