@@ -1295,7 +1295,7 @@ class InvoiceController extends Controller
 
         $company = currentCompanyModel();
 
-        try {
+        //try {
             $collection = $collection->toArray()[0];
             Log::info($company->id_number . " importanto Excel ventas con ".count($collection)." lineas");
             $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
@@ -1427,10 +1427,10 @@ class InvoiceController extends Controller
                 ProcessSendExcelInvoices::dispatch($facturas);
             }
             
-        }catch( \Throwable $ex ){
+        /*}catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
             return redirect('/facturas-emitidas')->withError('Error importando.');
-        }
+        }*/
 
         $company->save();
         
