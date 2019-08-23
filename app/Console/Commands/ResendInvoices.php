@@ -57,7 +57,7 @@ class ResendInvoices extends Command
                 $invoice->in_queue = true;
                 $invoice->save();
                 $this->info('Sending invoice ....'. $invoice->document_key);
-                sleep(4);
+                sleep(2);
                 ProcessInvoice::dispatch($invoice->id, $company->id, $tokenApi)
                     ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
             }
