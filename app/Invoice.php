@@ -452,7 +452,7 @@ class Invoice extends Model
             );
             $correoCliente = $data['correoCliente'] ? $data['correoCliente'] : $clienteCache->email;
             $clienteCache->email = $correoCliente;
-            $clienteCache->address = isset($data['direccion']) ?? null;
+            $clienteCache->address = $data['direccion'] ?? null;
             if( isset($data['zip']) ){
               $clienteCache->state = $data['zip'][0];
               $clienteCache->city = $data['zip'][1] . $data['zip'][2];
@@ -501,7 +501,7 @@ class Invoice extends Model
           $invoice->client_id = $idCliente;
           $invoice->document_key =  $data['claveFactura'];
           $invoice->document_number =  $data['consecutivoComprobante'];
-          $invoice->reference_number =  $data['refNumber'] ?? 0;
+          $invoice->reference_number =  $data['numeroReferencia'] ?? 0;
           $invoice->xml_schema =  $data['xmlSchema'] ?? 43;
           $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
   
@@ -528,7 +528,7 @@ class Invoice extends Model
           $invoice->client_first_name = $data['nombreCliente'] ?? null;
           $invoice->client_email = $data['correoCliente'] ?? null;
           $invoice->client_phone = $data['telefonoCliente'] ?? null;
-          $invoice->client_address = isset($data['direccion']) ?? null;
+          $invoice->client_address = $data['direccion'] ?? null;
           if( isset($data['zip']) ){
             $invoice->client_country = 'CR';
             $invoice->client_state = $data['zip'][0];
