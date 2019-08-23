@@ -147,6 +147,7 @@ class ProcessExcelSM implements ShouldQueue
                         'precioUnitario' => trim($precioUnitario),
                         'totalLinea' => trim($totalLinea),
                         'montoIva' => trim($montoIva),
+                        'porcentajeIva' => 2,
                         'codigoEtax' => trim($codigoEtax),
                         'montoDescuento' => trim($montoDescuento),
                         'subtotalLinea' => trim($subtotalLinea),

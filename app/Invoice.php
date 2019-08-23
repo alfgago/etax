@@ -516,7 +516,7 @@ class Invoice extends Model
           //Datos generales
           $invoice->sale_condition = $data['condicionVenta'];
           $invoice->payment_type = $data['metodoPago'];
-          $invoice->credit_time = 0;
+          $invoice->credit_time = $data['condicionVenta']== '02' ? 30 : 0;
           $invoice->description = $data['descripcion'];
           
           $invoice->generation_method = $data['metodoGeneracion'];
@@ -567,6 +567,7 @@ class Invoice extends Model
       $precioUnitarioLinea = $data['precioUnitario'] ?? 0;
       $montoDescuentoLinea = $data['montoDescuento'] ?? 0;
       $cantidadLinea = $data['cantidad'] ?? 0;
+      $porcentajeIva = $data['porcentajeIva'] ?? 13;
       
       $discount_reason = "";
       
@@ -585,6 +586,7 @@ class Invoice extends Model
           'total' => $totalLinea,
           'discount_type' => '01',
           'discount' => $montoDescuentoLinea,
+          'iva_percentage' => $porcentajeIva,
           'iva_type' => $data['codigoEtax'],
           'iva_amount' => $montoIvaLinea,
           'exoneration_document_type' => $data['tipoDocumentoExoneracion'],
