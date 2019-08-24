@@ -383,6 +383,7 @@ class InvoiceUtils
                 'fecha_emision' => $data['generated_date'] ?? '',
                 'metodo_pago' => $data['payment_type'] ?? '01',
                 'condicion_venta' => $data['sale_condition'] ?? '01',
+                'plazo_credito' => $data['credit_time'] ?? '',
                 'codigo_actividad' => str_pad($data['commercial_activity'], 6, '0', STR_PAD_LEFT),
                 'receptor_nombre' => trim($data['client_first_name'].' '.$data['client_last_name']),
                 'receptor_ubicacion_provincia' => substr($receptorPostalCode,0,1),
