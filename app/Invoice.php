@@ -490,13 +490,6 @@ class Invoice extends Model
           }
           $year = $invoice->generated_date->year;
           $month = $invoice->generated_date->month;
-          
-          if( $data['metodoGeneracion'] == 'etax-bulk' ){
-            if( Invoice::where("client_id_number", $identificacionCliente)->where('year', $year)->where('month', $month)->count() ){
-              Log::warning('Factura repetida en envio masivo');
-              return $invoiceList;
-            }
-          }
       
           $invoice->company_id = $company->id;
           $invoice->client_id = $idCliente;
