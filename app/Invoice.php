@@ -519,7 +519,7 @@ class Invoice extends Model
           $invoice->payment_type = $data['metodoPago'];
           $invoice->credit_time = isset( $invoice->due_date ) ? $invoice->due_date->format('d/m/Y') : null;
           $invoice->description = $data['descripcion'];
-          
+
           $invoice->generation_method = $data['metodoGeneracion'];
           $invoice->is_authorized = $data['isAuthorized'];
           $invoice->is_code_validated = $data['codeValidated'];
