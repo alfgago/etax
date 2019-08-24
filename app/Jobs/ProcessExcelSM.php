@@ -29,17 +29,17 @@ class ProcessExcelSM implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private $collection = null;
-    private $company = null;
+    private $companyId = null;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($collection, $company)
+    public function __construct($collection, $companyId)
     {
         $this->collection = $collection;
-        $this->company = $company;
+        $this->companyId = $companyId;
     }
 
     /**
@@ -50,9 +50,10 @@ class ProcessExcelSM implements ShouldQueue
     public function handle()
     {
                 
+        sleep(5);
         try {
             $collection = $this->collection;
-            $company = $this->company;
+            $company = Company::find($this->companyId);
             Log::info("Mandando ".count($collection)." a queue...");
             $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
             $i = 0;
@@ -172,10 +173,10 @@ class ProcessExcelSM implements ShouldQueue
                     );
                     
                     $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
-                    ProcessSendExcelInvoices::dispatch($facturas);
                 }
             }
             
+            ProcessSendExcelInvoices::dispatch($facturas);
             Log::info("$i procesadas...");
             $company->save();
             $userId = $company->user_id;
