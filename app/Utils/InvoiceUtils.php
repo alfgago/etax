@@ -480,7 +480,7 @@ class InvoiceUtils
         } else {
             $discount= $value;
         }
-        return $discount;
+        return round($discount,2);
     }
     
 }
