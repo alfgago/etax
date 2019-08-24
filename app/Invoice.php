@@ -289,6 +289,7 @@ class Invoice extends Model
             $this->due_date = $fechaV;
             $this->year = $fecha->year;
             $this->month = $fecha->month;
+            $this->credit_time = $fechaV->format('d/m/Y');
             
             if (!$this->id) {
               $this->company->addSentInvoice( $this->year, $this->month );
@@ -516,7 +517,7 @@ class Invoice extends Model
           //Datos generales
           $invoice->sale_condition = $data['condicionVenta'];
           $invoice->payment_type = $data['metodoPago'];
-          $invoice->credit_time = $data['condicionVenta']== '02' ? 30 : 0;
+          $invoice->credit_time = isset( $invoice->due_date ) ? $invoice->due_date->format('d/m/Y') : null;
           $invoice->description = $data['descripcion'];
           
           $invoice->generation_method = $data['metodoGeneracion'];
@@ -667,9 +668,9 @@ class Invoice extends Model
         
         $invoice->commercial_activity = $arr['CodigoActividad'] ?? 0;
         $invoice->xml_schema = $invoice->commercial_activity ? 43 : 42;
-        $invoice->sale_condition = array_key_exists('CondicionVenta', $arr) ? $arr['CondicionVenta'] : '';
-        //$invoice->credit_time = array_key_exists('PlazoCredito', $arr) ? $arr['PlazoCredito'] : '';
-        $invoice->credit_time = null;
+        $invoice->sale_condition = isset($arr['CondicionVenta']) ? $arr['CondicionVenta'] : '01';
+        $invoice->credit_time = isset($arr['PlazoCredito']) ? $arr['PlazoCredito'] : null;
+        //$invoice->credit_time = null;
         $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
         if ( is_array($medioPago) ) {
           $medioPago = $medioPago[0];
