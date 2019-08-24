@@ -82,7 +82,8 @@ class ProcessExcelSM implements ShouldQueue
                     $metodoPago = str_pad((int)$row['medio_pago'], 2, '0', STR_PAD_LEFT);
                     $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
                     $fechaEmision = Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y');
-                    $fechaVencimiento = isset($row['fecha_pago']) ? $row['fecha_pago'] : $fechaEmision;
+                    $fechaVencimiento = isset($row['fecha_pago']) ? $row['fecha_pago']."" : $fechaEmision; 
+                    $fechaVencimiento = "30/".$fechaVencimiento[4].$fechaVencimiento[5]."/".$fechaVencimiento[0].$fechaVencimiento[1].$fechaVencimiento[2].$fechaVencimiento[3];
                     
                     $idMoneda = 'CRC';
                     $tipoCambio = $row['tipocambio'] ?? 1;
