@@ -53,8 +53,7 @@ class ProcessExcelSM implements ShouldQueue
         try {
             $collection = $this->collection;
             $company = $this->company;
-            
-            Log::info($company->id_number . " importanto Excel ventas con ".count($collection)." lineas");
+            Log::info("Mandando ".count($collection)." a queue...");
             $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
             $i = 0;
             $invoiceList = array();
@@ -173,6 +172,7 @@ class ProcessExcelSM implements ShouldQueue
                     );
                     
                     $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
+                    ProcessSendExcelInvoices::dispatch($facturas);
                 }
             }
             
@@ -180,11 +180,6 @@ class ProcessExcelSM implements ShouldQueue
             $company->save();
             $userId = $company->user_id;
             Cache::forget("cache-currentcompany-$userId");
-            
-            foreach (array_chunk ( $invoiceList, 250 ) as $facturas) {
-                Log::info("Mandando 250 a queue...");
-                ProcessSendExcelInvoices::dispatch($facturas);
-            }
             
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);

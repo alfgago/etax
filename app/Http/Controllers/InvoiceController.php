@@ -1192,8 +1192,11 @@ class InvoiceController extends Controller
             $collection = Excel::toCollection( new InvoiceImportSM(), request()->file('archivo') );
             $company = currentCompanyModel();
             $collection = $collection->toArray()[0];
-            
-            ProcessExcelSM::dispatch($collection, $company);
+
+            Log::info($company->id_number . " importanto Excel ventas con ".count($collection)." lineas");
+            foreach (array_chunk ( $collection, 200 ) as $facturas) {
+                ProcessExcelSM::dispatch($facturas, $company);
+            }
             
         }catch( \Throwable $ex ){
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.' );
