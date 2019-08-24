@@ -72,9 +72,9 @@ class ProcessExcelSM implements ShouldQueue
                     $tipoPersona = $row['tipo_id'][0];
                     $correoCliente = $row['correo'] ?? null;
                     $telefonoCliente = $row['telefono_celular'];
-                    $fechaEmision = Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y');
+                    $today = Carbon::parse( now('America/Costa_Rica') );
                     
-                    if( ! Invoice::where("client_id_number", $identificacionCliente)->where('year', $fechaEmision->year)->where('month', $fechaEmision->month)->count() ){
+                    if( ! Invoice::where("client_id_number", $identificacionCliente)->where('year', $today->year)->where('month', $today->month)->count() ){
     
                         //Datos de factura
                         $consecutivoComprobante = $this->getDocReference('01', $company);
@@ -86,6 +86,7 @@ class ProcessExcelSM implements ShouldQueue
                         $condicionVenta = '02';
                         $metodoPago = str_pad((int)$row['medio_pago'], 2, '0', STR_PAD_LEFT);
                         $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
+                        $fechaEmision = $today->format('d/m/Y');
                         $fechaVencimiento = isset($row['fecha_pago']) ? $row['fecha_pago']."" : $fechaEmision; 
                         $fechaVencimiento = "30/".$fechaVencimiento[4].$fechaVencimiento[5]."/".$fechaVencimiento[0].$fechaVencimiento[1].$fechaVencimiento[2].$fechaVencimiento[3];
                         
