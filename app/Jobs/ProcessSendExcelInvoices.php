@@ -49,7 +49,6 @@ class ProcessSendExcelInvoices implements ShouldQueue
     {
                 
         Log::info("Agregando facturas a queue");
-        sleep(3);
         foreach($this->invoiceList as $fac){
             ProcessSendExcelSingleInvoice::dispatch($fac)->onQueue('imports');
         }
