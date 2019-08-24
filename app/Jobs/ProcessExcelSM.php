@@ -186,8 +186,8 @@ class ProcessExcelSM implements ShouldQueue
                 }
             }
             
-            ProcessSendExcelInvoices::dispatch($invoiceList);
             Log::info("$i procesadas...");
+            ProcessSendExcelInvoices::dispatch($invoiceList);
             $company->save();
             $userId = $company->user_id;
             Cache::forget("cache-currentcompany-$userId");
