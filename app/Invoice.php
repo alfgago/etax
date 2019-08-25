@@ -456,10 +456,10 @@ class Invoice extends Model
             $clienteCache->address = $data['direccion'] ?? null;
             if( isset($data['zip']) ){
               try{
-              $clienteCache->zip = $data['zip'];
-              $clienteCache->state = $data['zip'][0];
-              $clienteCache->city = $data['zip'][1] . $data['zip'][2];
-              $clienteCache->district = $data['zip'];
+                $clienteCache->zip = $data['zip'];
+                $clienteCache->state = $data['zip'][0];
+                $clienteCache->city = $data['zip'][1] . $data['zip'][2];
+                $clienteCache->district = $data['zip'];
               }catch( \Throwable $e ){ Log::error("Ni zip de  $identificacionCliente");}
             }
             $clienteCache->save();
@@ -526,11 +526,13 @@ class Invoice extends Model
           $invoice->client_phone = $data['telefonoCliente'] ?? null;
           $invoice->client_address = $data['direccion'] ?? null;
           if( isset($data['zip']) ){
-            $invoice->client_country = 'CR';
-            $invoice->client_state = $data['zip'][0];
-            $invoice->client_city = $data['zip'][1] . $data['zip'][2];
-            $invoice->client_district = $data['zip'];
-            $invoice->client_zip = $data['zip'];
+            try{
+              $invoice->client_zip = $data['zip'];
+              $invoice->client_country = 'CR';
+              $invoice->client_state = $data['zip'][0];
+              $invoice->client_city = $data['zip'][1] . $data['zip'][2];
+              $invoice->client_district = $data['zip'];
+            }catch( \Throwable $e ){ }
           }
           
           //Datos de factura
