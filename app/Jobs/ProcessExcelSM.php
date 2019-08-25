@@ -49,7 +49,6 @@ class ProcessExcelSM implements ShouldQueue
      */
     public function handle()
     {
-        sleep(10);
         try {
             $collection = $this->collection;
             $company = Company::find($this->companyId);
