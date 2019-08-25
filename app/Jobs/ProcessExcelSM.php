@@ -179,7 +179,7 @@ class ProcessExcelSM implements ShouldQueue
                           
                       
                     }else {
-                        Log::warning('Factura repetida en envio masivo '.$identificacionCliente);
+                        //Log::warning('Factura repetida en envio masivo '.$identificacionCliente);
                     }
                 }
             }

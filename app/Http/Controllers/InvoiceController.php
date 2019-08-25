@@ -1293,11 +1293,14 @@ class InvoiceController extends Controller
             $collection = Excel::toCollection( new InvoiceImportSM(), request()->file('archivo') );
             $company = currentCompanyModel();
             $collection = $collection->toArray()[0];
-
+            
+            $i=0;
             Log::info($company->id_number . " importanto Excel ventas con ".count($collection)." lineas");
             foreach (array_chunk ( $collection, 100 ) as $facturas) {
+                $i = $i + 100;
                 sleep(1);
-                ProcessExcelSM::dispatch($facturas, $company->id)->onQueue('bulk');;
+                ProcessExcelSM::dispatch($facturas, $company->id)->onQueue('bulk');
+                Log::info("Envios a queue $i de ".count($collection));
             }
             Log::info("Envios a queue finalizados $company->id_number");
             
