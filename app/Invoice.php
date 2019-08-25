@@ -527,12 +527,12 @@ class Invoice extends Model
           $invoice->client_address = $data['direccion'] ?? null;
           if( isset($data['zip']) ){
             try{
+              $invoice->client_zip = $data['zip'];
               $invoice->client_country = 'CR';
               $invoice->client_state = $data['zip'][0];
               $invoice->client_city = $data['zip'][1] . $data['zip'][2];
               $invoice->client_district = $data['zip'];
-              $invoice->client_zip = $data['zip'];
-            }catch( \Throwable $e ){ Log::error("Ni zip de  $identificacionCliente");}
+            }catch( \Throwable $e ){ }
           }
           
           //Datos de factura
