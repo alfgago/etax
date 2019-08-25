@@ -85,7 +85,7 @@ class ProcessBillsImport implements ShouldQueue
         
                                 //Datos de factura
                                 $consecutivoComprobante = $row['consecutivocomprobante'];
-                                $claveFactura = isset($row['clavefactura']) ? $row['clavefactura'] : '';
+                                $claveFactura = isset($row['clavefactura']) ? $row['clavefactura'] : $consecutivoComprobante;
                                 $condicionVenta = str_pad((int)$row['condicionventa'], 2, '0', STR_PAD_LEFT);
                                 $metodoPago = str_pad((int)$row['metodopago'], 2, '0', STR_PAD_LEFT);
                                 $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
