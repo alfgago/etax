@@ -455,10 +455,12 @@ class Invoice extends Model
             $clienteCache->email = $correoCliente;
             $clienteCache->address = $data['direccion'] ?? null;
             if( isset($data['zip']) ){
+              try{
+              $clienteCache->zip = $data['zip'];
               $clienteCache->state = $data['zip'][0];
               $clienteCache->city = $data['zip'][1] . $data['zip'][2];
               $clienteCache->district = $data['zip'];
-              $clienteCache->zip = $data['zip'];
+              }catch( \Throwable $e ){ Log::error("Ni zip de  $identificacionCliente");}
             }
             $clienteCache->save();
             Cache::put($clientCacheKey, $clienteCache, 30);
