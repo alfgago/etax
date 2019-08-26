@@ -53,11 +53,11 @@ class ProcessInvoice implements ShouldQueue
         try {
             if ( app()->environment('production') ) {
                 $invoiceUtils = new InvoiceUtils();
-                Log::info('send job invoice id: '.$this->invoiceId);
                 $client = new Client();
                 $invoice = Invoice::find($this->invoiceId);
                 $company = Company::find($this->companyId);
                 if($company->id != 1110) { //No procese el bulk de SM Seguros aqui
+                    Log::info('send job invoice id: '.$this->invoiceId);
                     if ($company->atv_validation ) {
                         if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09'))
                             && $invoice->resend_attempts < 6) {
