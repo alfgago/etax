@@ -1190,23 +1190,23 @@ class InvoiceController extends Controller
           'archivo' => 'required',
         ]);
       
-        try {
+        //try {
             $collection = Excel::toCollection( new InvoiceImportSM(), request()->file('archivo') );
             $company = currentCompanyModel();
             $collection = $collection->toArray()[0];
             
             $i=0;
-            Log::notice($company->id_number . " importanto Excel ventas con ".count($collection)." lineas");
+            Log::debug($company->id_number . " importanto Excel ventas con ".count($collection)." lineas");
             foreach (array_chunk ( $collection, 75 ) as $facturas) {
                 $i = $i + 75;
-                Log::notice("Enviando a queue $i de ".count($collection));
+                Log::debug("Enviando a queue $i de ".count($collection));
                 ProcessExcelSM::dispatch($facturas, $company->id)->delay(now()->addSeconds(15));;
             }
-            Log::notice("Envios a queue finalizados $company->id_number");
+            Log::debug("Envios a queue finalizados $company->id_number");
             
-        }catch( \Throwable $ex ){
+        /*}catch( \Throwable $ex ){
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.' );
-        }
+        }*/
         
         return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
         
