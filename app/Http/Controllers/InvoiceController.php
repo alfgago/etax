@@ -1199,8 +1199,7 @@ class InvoiceController extends Controller
             Log::info($company->id_number . " importanto Excel ventas con ".count($collection)." lineas");
             foreach (array_chunk ( $collection, 75 ) as $facturas) {
                 $i = $i + 75;
-                sleep(1);
-                ProcessExcelSM::dispatch($facturas, $company->id);
+                ProcessExcelSM::dispatch($facturas, $company->id)->delay(now()->addSeconds(15));;
                 Log::info("Enviando a queue $i de ".count($collection));
             }
             Log::info("Envios a queue finalizados $company->id_number");
