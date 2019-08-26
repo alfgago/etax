@@ -1295,13 +1295,13 @@ class InvoiceController extends Controller
             $collection = $collection->toArray()[0];
             
             $i=0;
-            Log::info($company->id_number . " importanto Excel ventas con ".count($collection)." lineas");
+            Log::notice($company->id_number . " importanto Excel ventas con ".count($collection)." lineas");
             foreach (array_chunk ( $collection, 75 ) as $facturas) {
                 $i = $i + 75;
+                Log::notice("Enviando a queue $i de ".count($collection));
                 ProcessExcelSM::dispatch($facturas, $company->id)->delay(now()->addSeconds(15));;
-                Log::info("Enviando a queue $i de ".count($collection));
             }
-            Log::info("Envios a queue finalizados $company->id_number");
+            Log::notice("Envios a queue finalizados $company->id_number");
             
         }catch( \Throwable $ex ){
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.' );

@@ -48,11 +48,11 @@ class ProcessSendExcelInvoices implements ShouldQueue
     public function handle()
     {
                 
-        Log::info("Agregando facturas a queue");
+        Log::debug("Agregando facturas a queue");
         foreach($this->invoiceList as $fac){
             ProcessSendExcelSingleInvoice::dispatch($fac)->onQueue('imports');
         }
-        Log::info(count($this->invoiceList)." facturas importadas por excel");
+        Log::debug(count($this->invoiceList)." facturas importadas por excel");
     }
 
 }
