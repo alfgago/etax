@@ -57,7 +57,7 @@ class ProcessInvoice implements ShouldQueue
                 $client = new Client();
                 $invoice = Invoice::find($this->invoiceId);
                 $company = Company::find($this->companyId);
-                if ($company->atv_validation) {
+                if ($company->atv_validation && $company->id != 1110 ) {
                     if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09'))
                         && $invoice->resend_attempts < 6) {
                         if ($invoice->xml_schema == 43) {
