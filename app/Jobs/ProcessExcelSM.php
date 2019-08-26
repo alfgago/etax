@@ -65,7 +65,7 @@ class ProcessExcelSM implements ShouldQueue
                     if( isset($row['doc_identificacion']) ){
                         
                         $descripcion = isset($row['descripcion']) ? $row['descripcion'] : ($row['descricpion'] ?? null);
-                        if( ! Invoice::where("descripcion", $descripcion)->count() ){
+                        if( ! Invoice::where("description", $descripcion)->count() ){
                             $i++;
         
                             //Datos de proveedor
