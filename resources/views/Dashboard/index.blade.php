@@ -44,7 +44,7 @@
 
 @if( allowTo('reports') )     
 
-  <div class="toggle-vista filters">
+  <div class="toggle-vista filters hidden">
     <label id="vistabasica">Vista de dashboard</label>
     <div class="">
       <select id="input-vista" name="input-vista" onchange="loadReportes();">

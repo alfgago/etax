@@ -56,7 +56,7 @@ class ProcessInvoice implements ShouldQueue
                 $client = new Client();
                 $invoice = Invoice::find($this->invoiceId);
                 $company = Company::find($this->companyId);
-                if($company->id != 1110) { //No procese el bulk de SM Seguros aqui
+                //if($company->id != 1110) { //No procese el bulk de SM Seguros aqui
                     Log::info('send job invoice id: '.$this->invoiceId);
                     if ($company->atv_validation ) {
                         if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09'))
@@ -74,7 +74,7 @@ class ProcessInvoice implements ShouldQueue
                             $tokenApi = $apiHacienda->login(false);
                             if ($requestData !== false) {
                                 $endpoint = $invoice->xml_schema == 42 ? 'invoice' : 'invoice43';
-                                sleep(15);
+                                sleep(3);
                                 Log::info('Enviando Request  API HACIENDA -->>' . $this->invoiceId);
                                 $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/create', [
                                     'headers' => [
@@ -117,9 +117,9 @@ class ProcessInvoice implements ShouldQueue
                                         $xml->xml = $path;
                                         $xml->xml_message = $pathMH;
                                         $xml->save();
-        
-                                        $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH);
-        
+                                        
+                                        $sendPdf = $invoice->generation_method == "etax-bulk";
+                                        $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, $sendPdf);
                                     }
                                     Log::info('Factura enviada y XML guardado.');
                                 } else if (isset($response['status']) && $response['status'] == 400 &&
@@ -139,7 +139,7 @@ class ProcessInvoice implements ShouldQueue
                     }else {
                         Log::warning('El job Invoices no se procesó, porque la empresa no tiene un certificado válido.'.$company->id_number);
                     }
-                }
+                //}
             }
         } catch ( \Exception $e) {
             Log::error('ERROR Enviando parametros  API HACIENDA Invoice: '.$this->invoiceId.'-->>'.$e);

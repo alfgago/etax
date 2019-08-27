@@ -19,12 +19,12 @@
     </div>
     
     
-    <div class="col-lg-6 mb-4" id="reporteMes">
-      @include('Reports.widgets.resumen-basico', ['titulo' => "Resumen de $nombreMes $ano", 'data' => $dataMes])
+    <div class="col-lg-6 mb-4">
+      @include('Reports.widgets.resumen-periodo', ['titulo' => "$nombreMes $ano", 'data' => $dataMes])
     </div>
     
-    <div class="col-lg-6 mb-4" id="facturas">
-      @include('Reports.widgets.resumen-facturacion', ['titulo' => "Facturación $nombreMes $ano", 'data' => $dataMes])
+    <div class="col-lg-6 mb-4">
+      @include('Reports.widgets.resumen-periodo', ['titulo' => "Acumulado $ano", 'data' => $acumulado])
     </div>
     
     <div class="col-lg-6 mb-4" id="proporcion">
@@ -32,7 +32,7 @@
     </div>
     
     <div class="col-lg-6 mb-4" id="prorrata">
-      @include('Reports.widgets.grafico-prorrata-basico', ['titulo' => 'Prorrata operativa vs estimada', 'data' => $acumulado])
+      @include('Reports.widgets.grafico-prorrata', ['titulo' => 'Prorrata operativa vs prorrata estimada', 'data' => $acumulado])
     </div>
 
   </div>
@@ -41,6 +41,39 @@
 
 <div class=" col-md-4 mb-4">
   <div class="row">
+    
+    <div class="col-lg-12 mb-4">
+      <div class="sidebar-dashboard">
+        <div class="card-title" id="empresa">Empresa</div>
+    
+        <div class="info-empresa">
+          <?php $empresa = currentCompanyModel(); $hide_tutorial = $user = auth()->user()->hide_tutorial;?>
+          <div class="dato-empresa">
+            {{ $empresa->name.' '.$empresa->last_name.' '.$empresa->last_name2 }}
+          </div>
+          <div class="dato-empresa">
+            {{ $empresa->id_number }} {{ $empresa->business_name ? " - ".$empresa->business_name : ''}}
+          </div>
+          <div class="dato-empresa">
+            <b>Plan actual:</b> {{ getCurrentSubscription()->plan->getName() }}
+          </div>
+          <div class="dato-empresa">
+            <b>Empresas disponibles:</b> {{ getCurrentSubscription()->plan->num_companies }}
+          </div>
+          <div class="dato-empresa">
+            <b>Facturación electrónica:</b> Habilitada
+          </div>
+          <div class="dato-empresa mt-3">  
+            <a class="btn btn-secondary btn-sm" href="/empresas/configuracion">Configurar datos</a>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <div class="col-lg-12 mb-4" id="facturas">
+      @include('Reports.widgets.resumen-facturacion', ['titulo' => "Facturación $nombreMes $ano", 'data' => $dataMes])
+    </div>
     
     
     <div class="col-lg-12 mb-4 manuales-etax">
@@ -90,41 +123,22 @@
       </div>
     </div>
     
-    <div class="col-lg-12 mb-4">
-      <div class="sidebar-dashboard">
-        <div class="card-title" id="empresa">Empresa</div>
-    
-        <div class="info-empresa">
-          <?php $empresa = currentCompanyModel(); $hide_tutorial = $user = auth()->user()->hide_tutorial;?>
-          <div class="dato-empresa">
-            {{ $empresa->name.' '.$empresa->last_name.' '.$empresa->last_name2 }}
-          </div>
-          <div class="dato-empresa">
-            {{ $empresa->id_number }} {{ $empresa->business_name ? " - ".$empresa->business_name : ''}}
-          </div>
-          <div class="dato-empresa">
-            <b>Plan actual:</b> {{ getCurrentSubscription()->plan->getName() }}
-          </div>
-          <div class="dato-empresa">
-            <b>Empresas disponibles:</b> {{ getCurrentSubscription()->plan->num_companies }}
-          </div>
-          <div class="dato-empresa">
-            <b>Facturación electrónica:</b> Habilitada
-          </div>
-          <div class="dato-empresa mt-3">  
-            <a class="btn btn-secondary btn-sm" href="/empresas/configuracion">Configurar datos</a>
-          </div>
-        </div>
-        
-      </div>
-    </div>
   
   </div> 
+  
  <input type="text" hidden value="{{$hide_tutorial}}" id="hide_tutorial">
 </div>
+  
+  
+    
+    <div class="col-lg-12 mb-4 pb-4">
+      @include('Reports.widgets.grafico-mensual', ['titulo' => "Resumen de IVA $ano"])
+    </div>
+    
+    
 <script>
     function tutorialBurbujas(){
-        var tour = {
+        /*var tour = {
             id: "tour",
             i18n: {
                 nextBtn: "Siguiente",
@@ -239,7 +253,7 @@
                 });
             }
         }
-        hopscotch.startTour(tour);
+        hopscotch.startTour(tour);*/
     }
     function actualizarTutorial() {
         console.log('here');

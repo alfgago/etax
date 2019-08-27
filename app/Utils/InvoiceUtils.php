@@ -104,7 +104,7 @@ class InvoiceUtils
         return $file;
     }
     
-    public function sendInvoiceEmail( $invoice, $company, $xmlPath ) {
+    public function sendInvoiceEmail( $invoice, $company, $xmlPath) {
         
         try{
             $cc = [];
@@ -136,8 +136,11 @@ class InvoiceUtils
             }
             
             if ( !empty($cc) ) {
-                Mail::to($cc)->send(new \App\Mail\Invoice(['xml' => $xmlPath,
-                    'data_invoice' => $invoice, 'data_company' =>$company]));
+                Mail::to($cc)->send(new \App\Mail\Invoice([
+                    'xml' => $xmlPath,
+                    'data_invoice' => $invoice, 
+                    'data_company' =>$company
+                ]));
             } else {
                 Mail::to(!empty($invoice->client_email) ? trim($invoice->client_email) : trim($company->email))->send(new \App\Mail\Invoice(['xml' => $xmlPath,
                     'data_invoice' => $invoice, 'data_company' =>$company]));
@@ -148,7 +151,7 @@ class InvoiceUtils
         }
     }
     
-     public function sendInvoiceNotificationEmail($invoice, $company, $xmlPath, $xmlMH) {
+     public function sendInvoiceNotificationEmail($invoice, $company, $xmlPath, $xmlMH, $sendPdf = false ) {
         
         try{
             $cc = [];
@@ -187,7 +190,8 @@ class InvoiceUtils
                                         'xml' => $xmlPath,	
                                         'data_invoice' => $invoice, 
                                         'data_company' => $company,
-                                        'xmlMH' => $xmlMH
+                                        'xmlMH' => $xmlMH,
+                                        'sendPdf' => $sendPdf
                                     ]));
             } else {
 
@@ -195,7 +199,8 @@ class InvoiceUtils
                                         'xml' => $xmlPath,	
                                         'data_invoice' => $invoice, 
                                         'data_company' => $company,
-                                        'xmlMH' => $xmlMH
+                                        'xmlMH' => $xmlMH,
+                                        'sendPdf' => $sendPdf
                                     ]));
             }
             Log::info('Se enviaron correos de notififación de factura aprobada: ' .$invoice->id );
