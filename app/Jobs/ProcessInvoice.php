@@ -51,7 +51,7 @@ class ProcessInvoice implements ShouldQueue
     {
 
         try {
-            if ( app()->environment('production') ) {
+            //if ( app()->environment('production') ) {
                 $invoiceUtils = new InvoiceUtils();
                 $client = new Client();
                 $invoice = Invoice::find($this->invoiceId);
@@ -59,8 +59,7 @@ class ProcessInvoice implements ShouldQueue
                 //if($company->id != 1110) { //No procese el bulk de SM Seguros aqui
                     Log::info('send job invoice id: '.$this->invoiceId);
                     if ($company->atv_validation ) {
-                        if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09'))
-                            && $invoice->resend_attempts < 6) {
+                        //if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09')) && $invoice->resend_attempts < 6) {
                             if ($invoice->xml_schema == 43) {
                                 $requestDetails = $invoiceUtils->setDetails43($invoice->items);
                                 $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
@@ -135,12 +134,12 @@ class ProcessInvoice implements ShouldQueue
                                 }
                                 Log::info('Proceso de facturación finalizado con éxito.');
                             }
-                        }
+                        //}
                     }else {
                         Log::warning('El job Invoices no se procesó, porque la empresa no tiene un certificado válido.'.$company->id_number);
                     }
                 //}
-            }
+            //}
         } catch ( \Exception $e) {
             Log::error('ERROR Enviando parametros  API HACIENDA Invoice: '.$this->invoiceId.'-->>'.$e);
         }
