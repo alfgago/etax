@@ -640,7 +640,7 @@ class InvoiceController extends Controller
     
                         //Datos de factura
                         $consecutivoComprobante = $row['consecutivocomprobante'];
-                        $claveFactura = isset($row['clavefactura']) ? $row['clavefactura'] : '';
+                        $claveFactura = isset($row['clavefactura']) ? $row['clavefactura'] : $consecutivoComprobante;
                         $condicionVenta = str_pad((int)$row['condicionventa'], 2, '0', STR_PAD_LEFT);
                         $metodoPago = str_pad((int)$row['metodopago'], 2, '0', STR_PAD_LEFT);
                         $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
@@ -1289,20 +1289,23 @@ class InvoiceController extends Controller
           'archivo' => 'required',
         ]);
       
-        try {
+        //try {
             $collection = Excel::toCollection( new InvoiceImportSM(), request()->file('archivo') );
             $company = currentCompanyModel();
             $collection = $collection->toArray()[0];
-
-            Log::info($company->id_number . " importanto Excel ventas con ".count($collection)." lineas");
-            foreach (array_chunk ( $collection, 100 ) as $facturas) {
-                ProcessExcelSM::dispatch($facturas, $company->id);
-            }
-            Log::info("Envios a queue finalizados $company->id_number");
             
-        }catch( \Throwable $ex ){
+            $i=0;
+            Log::debug($company->id_number . " importanto Excel ventas con ".count($collection)." lineas");
+            foreach (array_chunk ( $collection, 75 ) as $facturas) {
+                $i = $i + 75;
+                Log::debug("Enviando a queue $i de ".count($collection));
+                ProcessExcelSM::dispatch($facturas, $company->id)->delay(now()->addSeconds(15));;
+            }
+            Log::debug("Envios a queue finalizados $company->id_number");
+            
+        /*}catch( \Throwable $ex ){
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.' );
-        }
+        }*/
         
         return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
         

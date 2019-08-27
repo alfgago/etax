@@ -653,7 +653,7 @@ class CalculatedTax extends Model
                   $menor = $porc_plena > 13 ? 13 : $porc_plena;
                 }
                 $menor_porc = $menor/100;
-                if( $menor != $porc_plena) { 
+                if( $menor != 13) { 
                   $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
                   $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
                 }else{
