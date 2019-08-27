@@ -30,6 +30,7 @@ class InvoiceNotification extends Mailable
      */
     public function build()
     {
+        $invoiceUtils = new InvoiceUtils();
         $string = substr($this->content['xml'], -169);
         
         $fromName = $this->content['data_company']->business_name;
@@ -48,6 +49,7 @@ class InvoiceNotification extends Mailable
                 );
             }
         }catch(\Throwable $e){}
+        
         return $message;
     }
 }
