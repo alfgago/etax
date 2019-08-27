@@ -66,6 +66,7 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
      
     public function map($map): array
     {
+        $factor = $map->bill->document_type != '03' ? 1 : -1;
         return [
             $map->bill->documentTypeName(),
             $map->bill->generatedDate()->format('d/m/Y'),
@@ -78,10 +79,10 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
             $map->productCategory->id . " - " . $map->productCategory->name,
             $map->bill->currency,
             $map->bill->currency_rate ?? '',
-            round( $map->subtotal, 2),
+            round( $map->subtotal * $factor, 2),
             $map->iva_percentage . '%',
-            round( $map->iva_amount, 2),
-            round( $map->total * ( $map->bill->document_type != '03' ? 1 : -1 ) , 2),
+            round( $map->iva_amount * $factor, 2),
+            round( $map->total * $factor , 2),
         ];
     }						
 

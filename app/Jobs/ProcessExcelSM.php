@@ -85,7 +85,8 @@ class ProcessExcelSM implements ShouldQueue
                             $company->last_document = $consecutivoComprobante;
                             $refNumber = $company->last_invoice_ref_number;
                             $condicionVenta = '02';
-                            $metodoPago = str_pad((int)$row['medio_pago'], 2, '0', STR_PAD_LEFT);
+                            //$metodoPago = str_pad((int)$row['medio_pago'], 2, '0', STR_PAD_LEFT);
+                            $metodoPago = '99';
                             $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
                             $fechaEmision = $today->format('d/m/Y');
                             $fechaVencimiento = isset($row['fecha_pago']) ? $row['fecha_pago']."" : $fechaEmision; 

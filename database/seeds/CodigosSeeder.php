@@ -106,8 +106,8 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'B093 - Compras de bienes con IVA no acreditable desde origen', 'codigo'=>'B093', 'porcentaje'=>'13', 'is_bienes'=>true, 'is_gravado'=>true],
           ['nombre'=>'B094 - Compras de bienes con IVA no acreditable desde origen', 'codigo'=>'B094', 'porcentaje'=>'4', 'is_bienes'=>true, 'is_gravado'=>true],
           
-          ['nombre'=>'098 - Inversion del sujeto pasivo base', 'codigo'=>'098', 'porcentaje'=>'0', 'is_gravado'=>false],
-          ['nombre'=>'099 - Inversion del sujeto pasivo base no acreditable', 'codigo'=>'099', 'porcentaje'=>'0', 'is_gravado'=>false]
+          ['nombre'=>'098 - Inversion del sujeto pasivo base', 'codigo'=>'098', 'porcentaje'=>'0', 'is_gravado'=>false, 'hide'=>true, 'hidden2018'=>true],
+          ['nombre'=>'099 - Inversion del sujeto pasivo base no acreditable', 'codigo'=>'099', 'porcentaje'=>'0', 'is_gravado'=>false, 'hide'=>true, 'hidden2018'=>true]
         ];
         
         foreach( $lista as $codigo ) {
@@ -157,10 +157,10 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'B150 - Ventas por exportación de bienes con derecho a crédito', 'codigo'=>'B150', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true],
           ['nombre'=>'B155 - Ventas de bienes con derecho a crédito por ventas con IVA recaudado desde aduanas.', 'codigo'=>'B155', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true],
           ['nombre'=>'B160 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 0%', 'codigo'=>'B160', 'porcentaje'=>'0', 'codigo_tarifa' => '05', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true, 'hide'=>true, 'hidden2018'=>true],
-          ['nombre'=>'B161 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 1%', 'codigo'=>'B161', 'porcentaje'=>'0', 'codigo_tarifa' => '02', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true, 'hide'=>true, 'hidden2018'=>true],
-          ['nombre'=>'B162 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 2%', 'codigo'=>'B162', 'porcentaje'=>'0', 'codigo_tarifa' => '03', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true, 'hide'=>true, 'hidden2018'=>true],
-          ['nombre'=>'B163 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 13%', 'codigo'=>'B163', 'porcentaje'=>'0', 'codigo_tarifa' => '08', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true, 'hide'=>true, 'hidden2018'=>true],
-          ['nombre'=>'B164 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 4%', 'codigo'=>'B164', 'porcentaje'=>'0', 'codigo_tarifa' => '04', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true, 'hide'=>true, 'hidden2018'=>true],
+          ['nombre'=>'B161 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 1%', 'codigo'=>'B161', 'porcentaje'=>'0', 'codigo_tarifa' => '02', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true],
+          ['nombre'=>'B162 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 2%', 'codigo'=>'B162', 'porcentaje'=>'0', 'codigo_tarifa' => '03', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true],
+          ['nombre'=>'B163 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 13%', 'codigo'=>'B163', 'porcentaje'=>'0', 'codigo_tarifa' => '08', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true],
+          ['nombre'=>'B164 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 4%', 'codigo'=>'B164', 'porcentaje'=>'0', 'codigo_tarifa' => '04', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true],
           ['nombre'=>'B165 - Ventas de bienes de canasta básica con tarifa transitoria de 0% con acreditación plena', 'codigo'=>'B165', 'porcentaje'=>'0', 'codigo_tarifa' => '05', 'is_bienes'=>true, 'is_gravado'=>true],
           ['nombre'=>'B170 - Ventas de bienes a no sujetos y exentos con derecho a crédito', 'codigo'=>'B170', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true, 'hide'=>false, 'hidden2018'=>false],
           ['nombre'=>'B171 - Ventas locales de bienes de capital al 1%', 'codigo'=>'B171', 'porcentaje'=>'1', 'codigo_tarifa' => '02', 'is_bienes'=>true, 'is_gravado'=>true, 'is_servicio'=>true],
@@ -198,10 +198,10 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'S150 - Ventas por exportación de servicios con derecho a crédito', 'codigo'=>'S150', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>true],
           ['nombre'=>'S155 - Ventas de servicios con derecho a crédito por ventas con IVA recaudado desde aduanas.', 'codigo'=>'S155', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>true],
           ['nombre'=>'S160 - Ventas de servicios al Estado e Instituciones con derecho a crédito al 0%', 'codigo'=>'S160', 'porcentaje'=>'0', 'codigo_tarifa' => '05', 'is_servicio'=>true, 'is_gravado'=>true, 'is_estado'=>true, 'hide'=>true, 'hidden2018'=>true],
-          ['nombre'=>'S161 - Ventas de servicios al Estado e Instituciones con derecho a crédito al 1%', 'codigo'=>'S161', 'porcentaje'=>'0', 'codigo_tarifa' => '02', 'is_servicio'=>true, 'is_gravado'=>true, 'is_estado'=>true, 'hide'=>true, 'hidden2018'=>true],
-          ['nombre'=>'S162 - Ventas de servicios al Estado e Instituciones con derecho a crédito al 2%', 'codigo'=>'S162', 'porcentaje'=>'0', 'codigo_tarifa' => '03', 'is_servicio'=>true, 'is_gravado'=>true, 'is_estado'=>true, 'hide'=>true, 'hidden2018'=>true],
-          ['nombre'=>'S163 - Ventas de servicios al Estado e Instituciones con derecho a crédito al 13%', 'codigo'=>'S163', 'porcentaje'=>'0', 'codigo_tarifa' => '08', 'is_servicio'=>true, 'is_gravado'=>true, 'is_estado'=>true, 'hide'=>true, 'hidden2018'=>true],
-          ['nombre'=>'S164 - Ventas de servicios al Estado e Instituciones con derecho a crédito al 4%', 'codigo'=>'S164', 'porcentaje'=>'0', 'codigo_tarifa' => '04', 'is_servicio'=>true, 'is_gravado'=>true, 'is_estado'=>true, 'hide'=>true, 'hidden2018'=>true],
+          ['nombre'=>'S161 - Ventas de servicios al Estado e Instituciones con derecho a crédito al 1%', 'codigo'=>'S161', 'porcentaje'=>'0', 'codigo_tarifa' => '02', 'is_servicio'=>true, 'is_gravado'=>true, 'is_estado'=>true],
+          ['nombre'=>'S162 - Ventas de servicios al Estado e Instituciones con derecho a crédito al 2%', 'codigo'=>'S162', 'porcentaje'=>'0', 'codigo_tarifa' => '03', 'is_servicio'=>true, 'is_gravado'=>true, 'is_estado'=>true],
+          ['nombre'=>'S163 - Ventas de servicios al Estado e Instituciones con derecho a crédito al 13%', 'codigo'=>'S163', 'porcentaje'=>'0', 'codigo_tarifa' => '08', 'is_servicio'=>true, 'is_gravado'=>true, 'is_estado'=>true],
+          ['nombre'=>'S164 - Ventas de servicios al Estado e Instituciones con derecho a crédito al 4%', 'codigo'=>'S164', 'porcentaje'=>'0', 'codigo_tarifa' => '04', 'is_servicio'=>true, 'is_gravado'=>true, 'is_estado'=>true],
           ['nombre'=>'S165 - Ventas de servicios de canasta básica con tarifa transitoria de 0% con acreditación plena', 'codigo'=>'S165', 'porcentaje'=>'0', 'codigo_tarifa' => '05', 'is_servicio'=>true, 'is_gravado'=>true],
           ['nombre'=>'S170 - Ventas de servicios a no sujetos y exentos con derecho a crédito', 'codigo'=>'S170', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>true, 'hide'=>false, 'hidden2018'=>false],
           ['nombre'=>'S181 - Ventas de servicios a no sujetos y exentos con derecho a crédito al 1%', 'codigo'=>'S181', 'porcentaje'=>'1', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>true],
@@ -221,7 +221,9 @@ class CodigosSeeder extends Seeder
 
           ['nombre'=>'B065 - Devoluciones a proveedores con IVA al 1% de compras con derecho a acreditación', 'codigo'=>'B065', 'porcentaje'=>'1', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
           ['nombre'=>'B066 - Devoluciones a proveedores con IVA al 2% de compras con derecho a acreditación', 'codigo'=>'B066', 'porcentaje'=>'2', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
-          ['nombre'=>'B067 - Devoluciones a proveedores con IVA al 13% de compras con derecho a acreditación', 'codigo'=>'B067', 'porcentaje'=>'13', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true]
+          ['nombre'=>'B067 - Devoluciones a proveedores con IVA al 13% de compras con derecho a acreditación', 'codigo'=>'B067', 'porcentaje'=>'13', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
+          
+          ['nombre'=>'999 - Otros cargos que no corresponden a ventas.', 'codigo'=>'999', 'porcentaje'=>'13', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true, 'hide'=>false, 'hidden2018'=>false]
           
         ];
         

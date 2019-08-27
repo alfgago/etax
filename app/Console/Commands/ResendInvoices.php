@@ -45,7 +45,6 @@ class ResendInvoices extends Command
             $this->info('Sending invoices to Hacienda....');
             $invoices = Invoice::where('hacienda_status', '01')->where('generation_method','like', '%etax%')
                 ->where('resend_attempts', '<', 6)->where('in_queue', false)
-                ->where('id', '!=', 1110)
                 ->whereIn('document_type', ['01', '04', '08', '09'])->get();
             $this->info('Sending invoices ....'. count($invoices));
             $this->info('Get Token Api Hacienda ....');

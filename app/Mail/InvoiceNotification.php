@@ -6,6 +6,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use PDF;
+use App\Utils\InvoiceUtils;
 
 class InvoiceNotification extends Mailable
 {
@@ -28,6 +30,7 @@ class InvoiceNotification extends Mailable
      */
     public function build()
     {
+        $invoiceUtils = new InvoiceUtils();
         $string = substr($this->content['xml'], -169);
         
         $fromName = $this->content['data_company']->business_name;
@@ -39,6 +42,14 @@ class InvoiceNotification extends Mailable
             )->from('info@etaxcr.com', $fromName);;
         $message->attachFromStorage($this->content['xmlMH']);
         $message->attachFromStorage($this->content['xml']);
+        try{
+            if( $this->content['sendPdf'] ){
+                $message->attachFromStorage(
+                    $invoiceUtils->streamPdf( $this->content['data_invoice'], $this->content['data_company'] )
+                );
+            }
+        }catch(\Throwable $e){}
+        
         return $message;
     }
 }

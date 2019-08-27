@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use GuzzleHttp\Message\ResponseInterface;
 use PDF;
+use App\Jobs\ProcessInvoice;
 use App\Jobs\ProcessInvoicesImport;
 use App\Jobs\ProcessExcelSM;
 
@@ -1281,6 +1282,7 @@ class InvoiceController extends Controller
             Log::error("Error consultado factura -->" .$e);
             return redirect()->back()->withErrors('Error al consultar comprobante en hacienda');
         }
+        
     }
     
     
