@@ -66,7 +66,7 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
      
     public function map($map): array
     {
-        $factor = $map->bill->document_type != '03' ? 1 : -1;
+        $factor = $map->invoice->document_type != '03' ? 1 : -1;
         return [
             $map->invoice->documentTypeName(),
             $map->invoice->generatedDate()->format('d/m/Y'),

@@ -594,6 +594,42 @@ class InvoiceController extends Controller
         }
 
     }
+  
+    public function validar($id){
+        $company = currentCompanyModel();
+        $invoice = Invoice::find($id);
+            $companyActivities = explode(", ", $company->commercial_activities);
+            $commercialActivities = Actividades::whereIn('codigo', $companyActivities)->get();
+            $codigosEtax = CodigoIvaRepercutido::get();
+            $categoriaProductos = ProductCategory::whereNotNull('invoice_iva_code')->get();
+            return view('Invoice/validar', compact('invoice', 'commercialActivities', 'codigosEtax', 'categoriaProductos'));
+        
+    }
+
+    public function guardarValidar(Request $request)
+    {
+        $invoice = Invoice::findOrFail($request->invoice);
+        if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
+            $invoice->commercial_activity = $request->actividad_comercial;
+            $invoice->is_code_validated = true;
+            foreach( $request->items as $item ) {
+                InvoiceItem::where('id', $item['id'])
+                ->update([
+                  'iva_type' =>  $item['iva_type'],
+                  'product_type' =>  $item['product_type']
+                ]);
+            }
+            
+            $invoice->save();
+            
+            clearInvoiceCache($invoice);
+
+            return back()->withMessage( 'La factura '. $invoice->document_number . ' ha sido validada');
+        }else{
+            return back()->withError('Mes seleccionado ya fue cerrado');
+        }
+
+    }
     
     public function export( $year, $month ) {
         return Excel::download(new InvoiceExport($year, $month), 'documentos-emitidos.xlsx');
@@ -626,11 +662,15 @@ class InvoiceController extends Controller
             
             if(count($collection) < 2501){
                 foreach ($collection as $row){
-    
                     $metodoGeneracion = "XLSX";
-    
+                  
                     if( isset($row['consecutivocomprobante']) ){
                         $i++;
+                      
+                        $cedulaEmpresa = isset($row['cedulaempresa']) ? $row['cedulaempresa'] : null;
+                        if( $company->id_number != $cedulaEmpresa ){ 
+                          return back()->withError( "Error en validación: Asegúrese de agregar la columna CedulaEmpresa a su archivo de excel, con la cédula de su empresa en cada línea. La línea $i le pertenece a la empresa actual. ($company->id_number)" );
+                        }
                         //Datos de proveedor
                         $nombreCliente = $row['nombrecliente'];
                         $codigoCliente = isset($row['codigocliente']) ? $row['codigocliente'] : '';

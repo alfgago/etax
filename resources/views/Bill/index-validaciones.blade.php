@@ -36,7 +36,7 @@
                   <td class="text-right">{{ number_format( $data->iva_amount, 2 ) }}</td>
                   <td class="text-right">{{ number_format( $data->total, 2 ) }}</td>
                   <td>
-                    <a link="/facturas-recibidas/validar/{{ $data->id }}" titulo="Verificación Compra" class="btn btn-primary m-0 verificar_compra" style="color:#fff; font-size: 0.85em;" onclick="" data-toggle="modal" data-target="#modal_estandar">Validar</a>
+                    <a link="/facturas-recibidas/validar/{{ $data->id }}" titulo="Verificación de compra" class="btn btn-primary m-0 verificar_compra" style="color:#fff; font-size: 0.85em;" onclick="" data-toggle="modal" data-target="#modal_estandar">Validar</a>
                   </td>
                 </tr>
               @endforeach

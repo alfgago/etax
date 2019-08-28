@@ -5,6 +5,7 @@ namespace App;
 use App\Bill;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 
 class BillItem extends Model
 {
@@ -38,24 +39,39 @@ class BillItem extends Model
               $this->iva_type = "B$this->iva_type";
             }
         }
-      
-        //Asigna Prod Type;
-        /*$cat = $this->product_type;
-        if( !$cat || $cat < 49 ){
-          $cat = ProductCategory::where('bill_iva_code', $this->iva_type)->first();
-          if( $cat ){
-            $this->product_type = $cat->id;
-          }else{
-            foreach( ProductCategory::get() as $c ) {
-              if (strpos($c->open_codes, $this->iva_type) !== false) {
-                $this->product_type = $c->id;
-              }
+
+      }catch(\Throwable $e){
+        Log::error('No pudo asignar un codigo de producto a legacy bill. ' . $e->getMessage());
+      }
+    }
+  
+    
+    public function fixCategoria() {
+      try{
+        $this->fixIvaType();
+        
+        $cat = $this->product_type;
+        $alt = $this->product_type;
+        $categorias = Cache::rememberForever ('cachekey-categorias-repercutidas', function () {
+            return ProductCategory::whereNotNull('bill_iva_code')->get();
+        });
+        
+        $categoriaCorrecta = false;
+        foreach( $categorias as $c ) {
+          if (strpos($c->open_codes, $this->iva_type) !== false) {
+            $alt = $c->id;
+            if( $cat == $c->id){
+              $categoriaCorrecta = true;
             }
           }
+        }
+        if( !$categoriaCorrecta ){
+          $this->product_type = $alt;
           $this->save();
-        }*/
+        }
+
       }catch(\Throwable $e){
-        Log::warning('No pudo asignar un codigo de producto a legacy bill. ' . $e->getMessage());
+        Log::error('No pudo asignar un codigo de producto a legacy bill. ' . $e->getMessage());
       }
     }
  

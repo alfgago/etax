@@ -58,17 +58,17 @@ class ProductCategorySeed extends Seeder
           ['grupo'=>'VEX','nombre'=>'Comisiones por el servicio de subasta ganadera y transacción de animales', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
           ['grupo'=>'VEX','nombre'=>'Venta, comercialización y matanza de animales vivos', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
           //Ventas autorizadas sin impuesto
-          ['grupo'=>'VAS','nombre'=>'Ventas sin impuesto a clientes autorizados por la Dirección General de Hacienda', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184'],
-          ['grupo'=>'VAS','nombre'=>'Ventas sin impuesto a clientes autorizados por la Dirección General de Tributación', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184'],
-          ['grupo'=>'VAS','nombre'=>'Ventas sin impuesto a clientes exonerados por ley especial', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184'],
+          ['grupo'=>'VAS','nombre'=>'Ventas sin impuesto a clientes autorizados por la Dirección General de Hacienda', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184,B170,S170'],
+          ['grupo'=>'VAS','nombre'=>'Ventas sin impuesto a clientes autorizados por la Dirección General de Tributación', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184,B170,S170'],
+          ['grupo'=>'VAS','nombre'=>'Ventas sin impuesto a clientes exonerados por ley especial', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184,B170,S170'],
           ['grupo'=>'VAS','nombre'=>'Ventas de bienes y servicios relacionados a la canasta básica tributaria exentos el 1er año de la ley', 'invoice_iva_code'=>'B165', 'open_codes'=>'B165,S165'],
           ['grupo'=>'VAS','nombre'=>'Servicios de ingeniería, arquitectura, topografía y construcción de obra civil con planos visados antes del 1 de octubre del 2019', 'invoice_iva_code'=>'S245', 'open_codes'=>'S245'],
           ['grupo'=>'VAS','nombre'=>'Servicios turísticos inscritos ante el Instituto Costarricense de Turismo', 'invoice_iva_code'=>'S245', 'open_codes'=>'S245'],
           ['grupo'=>'VAS','nombre'=>'Servicios de recolección, clasificación y almacenamiento de bienes reciclables y reutilizables, inscritos ante la Administración Tributaria y el Ministerio de Salud', 'invoice_iva_code'=>'S245', 'open_codes'=>'S245'],
           //Ventas no sujetas
-          ['grupo'=>'VNS','nombre'=>'Bienes y servicios a la Caja Costarricense de Seguro Social', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184'],
-          ['grupo'=>'VNS','nombre'=>'Bienes y servicios a las corporaciones municipales', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184'],
-          ['grupo'=>'VNS','nombre'=>'Otras ventas no sujetas', 'invoice_iva_code'=>'B173', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184,S300,B300'],
+          ['grupo'=>'VNS','nombre'=>'Bienes y servicios a la Caja Costarricense de Seguro Social', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184,B170,S170'],
+          ['grupo'=>'VNS','nombre'=>'Bienes y servicios a las corporaciones municipales', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184,B170,S170'],
+          ['grupo'=>'VNS','nombre'=>'Otras ventas no sujetas', 'invoice_iva_code'=>'B173', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184,S300,B300,B170,S170'],
           //Usado para notas de débito.
           ['grupo'=>'DP','nombre'=>'Devoluciones a proveedores', 'invoice_iva_code'=>'B065', 'open_codes'=>'B065,B066,B067']
         ];
