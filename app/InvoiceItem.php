@@ -74,7 +74,6 @@ class InvoiceItem extends Model
         }
 
       }catch(\Throwable $e){
-        dd($e);
         Log::error('No pudo asignar un codigo de producto a legacy bill. ' . $e->getMessage());
       }
     }
