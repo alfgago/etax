@@ -105,7 +105,9 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('consult/{id}', 'InvoiceController@consultInvoice')->name('Invoice.consultInvoice');
     Route::get('query-invoice/{id}', 'InvoiceController@queryInvoice')->name('Invoice.queryInvoice');
     Route::post('actualizar-categorias', 'InvoiceController@actualizar_categorias')->name('Invoice.actualizar_categorias');
-    Route::patch('switch-ocultar/{id}', 'InvoiceController@hideInvoice')->name('Bill.hideInvoice');
+    Route::patch('switch-ocultar/{id}', 'InvoiceController@hideInvoice')->name('Invoice.hideInvoice');
+    Route::get('validar/{id}', 'InvoiceController@validar')->name('Invoice.validar');
+    Route::post('guardar-validar', 'InvoiceController@guardarValidar')->name('Invoice.GuardarValidar');
 });
 
 // Rutas de facturacion recibida
@@ -121,7 +123,7 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::patch('confirmar-aceptacion-otros/{id}', 'BillController@correctAccepted')->name('Bill.correctAccepted');
     Route::patch('marcar-para-aceptacion/{id}', 'BillController@markAsNotAccepted')->name('Bill.markAsNotAccepted');
     Route::get('validar/{id}', 'BillController@validar')->name('Bill.validar');
-    Route::post('guardar-validar', 'BillController@GuardarValidar')->name('Bill.GuardarValidar');
+    Route::post('guardar-validar', 'BillController@guardarValidar')->name('Bill.GuardarValidar');
     Route::get('edit-aceptacion', 'BillController@editAccept')->name('Bill.editAccept');
     Route::get('update-aceptacion', 'BillController@updateAccept')->name('Bill.updateAccept');
     Route::patch('switch-ocultar/{id}', 'BillController@hideBill')->name('Bill.hideBill');

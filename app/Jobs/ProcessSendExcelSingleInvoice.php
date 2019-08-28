@@ -83,11 +83,12 @@ class ProcessSendExcelSingleInvoice implements ShouldQueue
                 $linea['invoice_id'] = $invoice->id;
                 $invoice->subtotal = $invoice->subtotal + $linea['subtotal'];
                 $invoice->iva_amount = $invoice->iva_amount + $linea['iva_amount'];
-                InvoiceItem::updateOrCreate(
+                $item = InvoiceItem::updateOrCreate(
                 [
                     'invoice_id' => $linea['invoice_id'],
                     'item_number' => $linea['item_number'],
                 ], $linea);
+                $item->fixCategoria();
             }
       
             $invoice->save();

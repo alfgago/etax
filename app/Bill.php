@@ -800,12 +800,12 @@ class Bill extends Model
          clearLastTaxesCache($company->id, 2018);
       }
       
+      $item->fixCategoria();
       clearBillCache($bill);
       
       if( $data['totalNeto'] != 0 ) {
         $bill->subtotal = $data['totalNeto'];
       }
-      
       $bill->save();
       return $bill;
       
