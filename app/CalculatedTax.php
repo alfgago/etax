@@ -605,8 +605,10 @@ class CalculatedTax extends Model
                 $basesIdentificacionPlena += $subtotal;
               }
               
-              if( $ivaType == 'B080' || $ivaType == 'B090' || $ivaType == 'B097' || $ivaType == '098' || $ivaType == '099' ||
-                  $ivaType == 'S080' || $ivaType == 'S090' || $ivaType == 'S097' || $ivaType == '098' || $ivaType == '099' )
+              if( $ivaType == 'B091' || $ivaType == 'B092' || $ivaType == 'B093' || $ivaType == 'B094' ||
+                  $ivaType == 'S091' || $ivaType == 'S092' || $ivaType == 'S093' || $ivaType == 'S094' ||
+                  $ivaType == 'B080' || $ivaType == 'B090' || $ivaType == 'B097' || $ivaType == '098' || $ivaType == '099' ||
+                  $ivaType == 'S080' || $ivaType == 'S090' || $ivaType == 'S097' )
               {
                 $basesNoDeducibles += $subtotal;
                 $ivaNoAcreditableIdentificacionPlena += $billIva;
