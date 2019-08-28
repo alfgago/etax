@@ -6,6 +6,7 @@ use App\Invoice;
 use App\CodigoIvaRepercutido;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 
 class InvoiceItem extends Model
 {
@@ -73,6 +74,7 @@ class InvoiceItem extends Model
         }
 
       }catch(\Throwable $e){
+        dd($e);
         Log::error('No pudo asignar un codigo de producto a legacy bill. ' . $e->getMessage());
       }
     }
