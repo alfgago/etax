@@ -111,7 +111,8 @@ class ProcessExcelSM implements ShouldQueue
                             $montoIva = (float)$row['impuesto'];
                             $acceptStatus = isset($row['aceptada']) ? $row['aceptada'] : 1;
                             
-                            $codigoActividad = $row['actividad_comercial'] ?? $mainAct;
+                            //$codigoActividad = $row['actividad_comercial'] ?? $mainAct;
+                            $codigoActividad = 660101; //No viene en el Excel del todo.
                             $xmlSchema = 43;
                             
                             //Exoneraciones
