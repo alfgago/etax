@@ -69,11 +69,11 @@ class ProcessInvoice implements ShouldQueue
                             }
                             $invoice->in_queue = false;
                             $invoice->save();
+                            sleep(10);
                             $apiHacienda = new BridgeHaciendaApi();
                             $tokenApi = $apiHacienda->login(false);
                             if ($requestData !== false) {
                                 $endpoint = $invoice->xml_schema == 42 ? 'invoice' : 'invoice43';
-                                sleep(3);
                                 Log::info('Enviando Request  API HACIENDA -->>' . $this->invoiceId);
                                 $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/create', [
                                     'headers' => [

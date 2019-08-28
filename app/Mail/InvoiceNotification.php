@@ -8,6 +8,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use PDF;
 use App\Utils\InvoiceUtils;
+use Illuminate\Support\Facades\Log;
 
 class InvoiceNotification extends Mailable
 {
@@ -44,11 +45,13 @@ class InvoiceNotification extends Mailable
         $message->attachFromStorage($this->content['xml']);
         try{
             if( $this->content['sendPdf'] ){
-                $message->attachFromStorage(
-                    $invoiceUtils->streamPdf( $this->content['data_invoice'], $this->content['data_company'] )
+                $message->attachData( 
+                 $invoiceUtils->streamPdf( $this->content['data_invoice'], $this->content['data_company'] ), 
+                 $this->content['data_invoice']->document_key.'.pdf',
+                 [ 'mime' => 'application/pdf' ]
                 );
             }
-        }catch(\Throwable $e){}
+        }catch(\Throwable $e){ Log::error($e->getMessage()); }
         
         return $message;
     }

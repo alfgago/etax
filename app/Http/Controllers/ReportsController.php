@@ -295,7 +295,9 @@ class ReportsController extends Controller
         			$actividadData[$cat->group]["totales"] = $actividadData[$cat->group]["totales"] + ($m0+$m1+$m2+$m3+$m4);
     
         			//Agrega la información al grupo respectivo.
-        			array_push($actividadData["$cat->group"]["cats"], $info);
+        			try{ 
+        			  array_push($actividadData["$cat->group"]["cats"], $info); 
+        			}catch(\Throwable $e){}
             }
             array_push( $actividadDataArray, $actividadData );
           }
