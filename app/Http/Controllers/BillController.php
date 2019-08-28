@@ -334,6 +334,7 @@ class BillController extends Controller
 
         try {
             $collection = Excel::toCollection( new BillImport(), request()->file('archivo') );
+            $collectionArray = $collection[0]->toArray();
         }catch( \Exception $ex ){
             return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.' );
         }catch( \Throwable $ex ){
@@ -341,10 +342,15 @@ class BillController extends Controller
         }
         
         $company = currentCompanyModel();
-        if( count($collection[0]->toArray()) < 1800 ){
-            ProcessBillsImport::dispatchNow($collection[0]->toArray(), $company);
+        $cedulaEmpresa = isset($collectionArray[0]['cedulaempresa']) ? $collectionArray[0]['cedulaempresa'] : null;
+        if( $company->id_number != $cedulaEmpresa ){ 
+          return back()->withError( "Error en validación: Asegúrese de agregar la columna CedulaEmpresa a su archivo de excel, con la cédula de su empresa en todas las lineas. La línea 1 no le pertenece a la empresa actual. ($company->id_number)" );
+        }
+      
+        if( count($collectionArray) < 1800 ){
+            ProcessBillsImport::dispatchNow($collectionArray, $company);
         }else{
-            ProcessBillsImport::dispatch($collection[0]->toArray(), $company);
+            ProcessBillsImport::dispatch($collectionArray, $company);
         }
             
         return redirect('/facturas-recibidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
@@ -441,7 +447,7 @@ class BillController extends Controller
         
     }
 
-    public function GuardarValidar(Request $request)
+    public function guardarValidar(Request $request)
     {
         $bill = Bill::findOrFail($request->bill);
         if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 

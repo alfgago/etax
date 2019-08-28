@@ -28,41 +28,53 @@ class InvoiceItem extends Model
     }
 
     public function fixIvaType() {
-      $initial = $this->iva_type[0];
-      if( $initial != 'S' && $initial != 'B' && 
-          $this->iva_type != '098' && $this->iva_type != '099' ){
-          $um = $this->measure_unit;
-          if($um == 'Sp' || $um == 'Spe' || $um == 'St' || $um == 'Al' || $um == 'Alc' || $um == 'Cm' || $um == 'I' || $um == 'Os'){
-            $this->iva_type = "S$this->iva_type";
-          }else{
-            $this->iva_type = "B$this->iva_type";
-          }
-          $this->save();
+      try{
+      
+        $initial = $this->iva_type[0];
+        if( $initial != 'S' && $initial != 'B' && 
+            $this->iva_type != '098' && $this->iva_type != '099' ){
+            $um = $this->measure_unit;
+            if($um == 'Sp' || $um == 'Spe' || $um == 'St' || $um == 'Al' || $um == 'Alc' || $um == 'Cm' || $um == 'I' || $um == 'Os'){
+              $this->iva_type = "S$this->iva_type";
+            }else{
+              $this->iva_type = "B$this->iva_type";
+            }
+            $this->save();
+        }
+
+      }catch(\Throwable $e){
+        Log::error('No pudo asignar un codigo de producto a legacy bill. ' . $e->getMessage());
       }
-      //Asigna Prod Type;
-      /*$cat = $this->product_type;
-      if( !$cat || $cat > 49 || ( $cat < 6 && $this->iva_percentage != 1 )
-          || ( $cat > 6 && $cat <= 10 && $this->iva_percentage != 2 )
-          || ( $cat > 10 && $cat <= 14 && $this->iva_percentage != 4 ) 
-          || ( $cat > 14 && $cat <= 19  && $this->iva_percentage != 13 ) ){
-        $cat = ProductCategory::where('invoice_iva_code', $this->iva_type)->first();
-        if( $cat ){
-          $this->product_type = $cat->id;
-        }else{
-          foreach( ProductCategory::get() as $c ) {
-            if (strpos($c->open_codes, $this->iva_type) !== false) {
-              $this->product_type = $c->id;
+    }
+  
+    public function fixCategoria() {
+      try{
+      
+        $this->fixIvaType();
+
+        $cat = $this->product_type;
+        $alt = $this->product_type;
+        $categorias = Cache::rememberForever ('cachekey-categorias-repercutidas', function () {
+            return ProductCategory::whereNotNull('invoice_iva_code')->get();
+        });
+
+        $categoriaCorrecta = false;
+        foreach( $categorias as $c ) {
+          if (strpos($c->open_codes, $this->iva_type) !== false) {
+            $alt = $c->id;
+            if( $cat == $c->id){
+              $categoriaCorrecta = true;
             }
           }
         }
-        $this->save();
+        if( !$categoriaCorrecta ){
+          $this->product_type = $alt;
+          $this->save();
+        }
+
+      }catch(\Throwable $e){
+        Log::error('No pudo asignar un codigo de producto a legacy bill. ' . $e->getMessage());
       }
-      
-      if($cat == 'Plan') {
-        $this->product_type = 17;
-        $this->save();
-      }*/
-    
     }
     
 }
