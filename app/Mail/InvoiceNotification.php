@@ -44,7 +44,7 @@ class InvoiceNotification extends Mailable
         $message->attachFromStorage($this->content['xml']);
         try{
             if( $this->content['sendPdf'] ){
-                $message->attachFromStorage(
+                $message->attachData(
                     $invoiceUtils->streamPdf( $this->content['data_invoice'], $this->content['data_company'] )
                 );
             }
