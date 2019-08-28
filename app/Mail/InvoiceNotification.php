@@ -8,6 +8,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use PDF;
 use App\Utils\InvoiceUtils;
+use Illuminate\Support\Facades\Log;
 
 class InvoiceNotification extends Mailable
 {
@@ -50,7 +51,7 @@ class InvoiceNotification extends Mailable
                  [ 'mime' => 'application/pdf' ]
                 );
             }
-        }catch(\Throwable $e){}
+        }catch(\Throwable $e){ Log::error($e->getMessage()); }
         
         return $message;
     }
