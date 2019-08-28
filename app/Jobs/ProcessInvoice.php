@@ -59,7 +59,6 @@ class ProcessInvoice implements ShouldQueue
                 //if($company->id != 1110) { //No procese el bulk de SM Seguros aqui
                     Log::info('send job invoice id: '.$this->invoiceId);
                     if ($company->atv_validation ) {
-                        sleep(10);
                         if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09')) && $invoice->resend_attempts < 6) {
                             if ($invoice->xml_schema == 43) {
                                 $requestDetails = $invoiceUtils->setDetails43($invoice->items);
@@ -70,6 +69,7 @@ class ProcessInvoice implements ShouldQueue
                             }
                             $invoice->in_queue = false;
                             $invoice->save();
+                            sleep(10);
                             $apiHacienda = new BridgeHaciendaApi();
                             $tokenApi = $apiHacienda->login(false);
                             if ($requestData !== false) {
