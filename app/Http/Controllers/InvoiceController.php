@@ -551,6 +551,10 @@ class InvoiceController extends Controller
                 return back()->withError('Mes seleccionado ya fue cerrado');
 
             }
+        }catch ( \Exception $e) {
+            Log::error('Error al anular facturar -->'.$e);
+            return redirect('/facturas-emitidas')->withErrors('Error al emitir factura');
+        }
     }
 
     /**

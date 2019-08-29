@@ -393,7 +393,7 @@ $company = currentCompanyModel();
 @section('breadcrumb-buttons')
   <button id='btn-submit-fe' onclick="$('#btn-submit').click();" class="btn btn-primary">Enviar factura electrónica</button>
 
-  <button titulo="Programar envio" class="btn btn-primary m-0 programar_venta" data-toggle="modal" data-target="#modal_programar">Programar envio</a>
+  <button titulo="Programar envio" class="btn btn-primary m-0 programar_venta" data-toggle="modal" data-target="#modal_programar">Programar envio</button>
 {{--@else--}}
 {{--  <p class="description mt-4">FEC temporalmente deshabilitada. Muy pronto en funcionamiento al finalizar el día. Nos disculpamos por la inconveniencia.</p>--}}
 {{-- @endif--}}
