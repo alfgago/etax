@@ -298,6 +298,7 @@ class Invoice extends Model
 
             $lids = array();
             $i = 1;
+            $totalIvaDevuelto = 0;
             foreach ($request->items as $item) {
                 $item['item_number'] = $i;
                 $item['item_id'] = $item['id'] ? $item['id'] : 0;
@@ -311,6 +312,15 @@ class Invoice extends Model
                     $item->delete();
                 }
             }
+
+            foreach ($this->items as $item) {
+                if ($this->payment_type == '02' && $item->product_type == 12) {
+                    $totalIvaDevuelto += $item->iva_amount;
+                }
+            }
+            $this->total_iva_devuelto = $totalIvaDevuelto;
+            $this->save();
+
             return $this;
 
         } catch (\Exception $e) {
@@ -1047,6 +1057,14 @@ class Invoice extends Model
                     $item->delete();
                 }
             }
+            $totalIvaDevuelto = 0;
+            foreach ($this->items as $item) {
+                if ($this->payment_type == '02' && $item->product_type == 12) {
+                    $totalIvaDevuelto += $item->iva_amount;
+                }
+            }
+            $this->total_iva_devuelto = $totalIvaDevuelto;
+            $this->save();
             return $this;
 
         } catch (\Exception $e) {
