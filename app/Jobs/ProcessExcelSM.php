@@ -49,7 +49,7 @@ class ProcessExcelSM implements ShouldQueue
      */
     public function handle()
     {
-        try {
+        /*try {
             $collection = $this->collection;
             $company = Company::find($this->companyId);
             Log::notice("Mandando ".count($collection)." a queue... Last Invoice: $company->last_invoice_ref_number");
@@ -65,7 +65,9 @@ class ProcessExcelSM implements ShouldQueue
                     if( isset($row['doc_identificacion']) ){
                         
                         $descripcion = isset($row['descripcion']) ? $row['descripcion'] : ($row['descricpion'] ?? null);
-                        if( ! Invoice::where("description", $descripcion)->count() ){
+                        $totalDocumento = $row['total'];
+                        if( ! Invoice::where("description", $descripcion)
+                              ->where('total', $totalDocumento)->count() ){
                             $i++;
         
                             //Datos de proveedor
@@ -94,7 +96,6 @@ class ProcessExcelSM implements ShouldQueue
                             
                             $idMoneda = 'CRC';
                             $tipoCambio = $row['tipocambio'] ?? 1;
-                            $totalDocumento = $row['total'];
                             $tipoDocumento = '01';
         
                             //Datos de linea
@@ -180,7 +181,6 @@ class ProcessExcelSM implements ShouldQueue
                             );
                             
                             $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
-                              
                           
                         }else {
                             //Log::warning('Factura repetida en envio masivo '.$identificacionCliente);
@@ -199,7 +199,7 @@ class ProcessExcelSM implements ShouldQueue
             
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
-        }
+        }*/
     }
     
     

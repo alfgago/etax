@@ -77,10 +77,16 @@
                   <label for="iva_amount">Monto IVA </label>
                   <input type="text" class="form-control" value="{{number_format($invoice->iva_amount, 2)}}" disabled name="iva_amount" required>
                 </div>
+                @if($invoice->total_iva_devuelto > 0)
+                <div class="form-group col-md-4">
+                  <label for="total">IVA Devuelto</label>
+                  <input type="text" class="form-control total" value="{{number_format($invoice->total_iva_devuelto, 2)}}" disabled name="total"  >
+                </div>
+                @endif
       
                 <div class="form-group col-md-4">
                   <label for="total">Total</label>
-                  <input type="text" class="form-control total" value="{{number_format($invoice->total, 2)}}" disabled name="total"  >
+                  <input type="text" class="form-control total" value="{{number_format($invoice->total - $invoice->total_iva_devuelto, 2)}}" disabled name="total"  >
                 </div>
       
               </div>

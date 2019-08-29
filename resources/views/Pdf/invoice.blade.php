@@ -279,6 +279,7 @@
         $totalMercaderiasExentas = 0;
         $totalDescuentos = 0;
         $totalImpuestos = 0;
+        $totalIvaDevuelto = 0;
         
         foreach ($data_invoice->items as $item){
             $productType = $item->ivaType;
@@ -312,6 +313,10 @@
                 } else {
                     $discount= $item['discount'];
                 }
+            }
+
+            if ($data_invoice->payment_type == '02' && $item->product_type == 12) {
+                $totalIvaDevuelto += $item->iva_amount;
             }
             
             $totalDescuentos += $discount;
@@ -416,8 +421,12 @@
                         <td><span>{{ number_format($totalImpuestos, 2)}}</span></td>
                     </tr>
                     <tr>
+                        <td><b>Total IVA Devuelto</b></td>
+                        <td><span>{{ number_format($totalIvaDevuelto, 2)}}</span></td>
+                    </tr>
+                    <tr>
                         <td><b>Total comprobante</b></td>
-                        <td><span>{{ number_format( ($totalComprobante) , 2)}}</span></td>
+                        <td><span>{{ number_format( ($totalComprobante - $totalIvaDevuelto) , 2)}}</span></td>
                     </tr>
                 </table>
                 
