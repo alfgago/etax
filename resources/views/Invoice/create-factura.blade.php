@@ -338,7 +338,7 @@ $company = currentCompanyModel();
   </div>  
 </div>
 
-<div class="modal fade" id="modal_programar" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+<div class="modal fade" id="modal_programar_facturas" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-center modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -392,11 +392,8 @@ $company = currentCompanyModel();
 
 @section('breadcrumb-buttons')
   <button id='btn-submit-fe' onclick="$('#btn-submit').click();" class="btn btn-primary">Enviar factura electrónica</button>
-
-  <button titulo="Programar envio" class="btn btn-primary m-0 programar_venta" data-toggle="modal" data-target="#modal_programar">Programar envio</button>
-{{--@else--}}
-{{--  <p class="description mt-4">FEC temporalmente deshabilitada. Muy pronto en funcionamiento al finalizar el día. Nos disculpamos por la inconveniencia.</p>--}}
-{{-- @endif--}}
+  <button titulo="Programar envio" class="btn btn-primary m-0 programar_venta" data-toggle="modal" data-target="#modal_programar_facturas">Programar envio</button>
+@endsection
 
 @section('footer-scripts')
 
@@ -608,3 +605,8 @@ function toggleRetencion() {
 </script>
 
 @endsection
+<style type="text/css">
+  #modal_programar_facturas{
+    z-index: 9999;
+  }
+</style>

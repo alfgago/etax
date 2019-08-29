@@ -235,7 +235,8 @@ class InvoiceController extends Controller
                 'document_key' => $this->getDocumentKey($tipoDocumento),
                 'units' => $units, 'countries' => $countries,
                 'default_currency' => $company->default_currency,
-                'default_vat_code' => $company->default_vat_code
+                'default_vat_code' => $company->default_vat_code,
+                'date_Today' => $date_Today
             ])
             ->with('arrayActividades', $arrayActividades);
     }
