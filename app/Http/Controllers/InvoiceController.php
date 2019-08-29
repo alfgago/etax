@@ -28,7 +28,7 @@ use GuzzleHttp\Message\ResponseInterface;
 use PDF;
 use App\Jobs\ProcessInvoice;
 use App\Jobs\ProcessInvoicesImport;
-use App\Jobs\ProcessExcelSM;
+use App\Jobs\ProcessSendExcelInvoices;
 
 /**
  * @group Controller - Facturas de venta
@@ -1488,7 +1488,9 @@ class InvoiceController extends Controller
             }
             
             Log::debug('Creando job de registro de facturas.');
-            ProcessSendExcelInvoices::dispatch($invoiceList)->onQueue('bulk');;
+            foreach (array_chunk ( $collection, 250 ) as $facturas) {
+                ProcessSendExcelInvoices::dispatch($invoiceList)->onQueue('bulk');
+            }
             $company->save();
             $userId = $company->user_id;
             Cache::forget("cache-currentcompany-$userId");
