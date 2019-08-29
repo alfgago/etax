@@ -50,6 +50,7 @@
 			  		<li>TotalLinea</li>
 			  		<li>TotalDocumento</li>
 			  		<li>CodigoIVAEtax</li>
+			  		<li>ActividadComercial</li>
 			  	</ul>
 			  	* El orden puede variar, mantener nombres de columnas. Debe utilizar una fila por cada linea de factura.
 			  	* Máximo de 2500 lineas por archivo.
@@ -70,7 +71,7 @@
 			
 			<button type="submit" class="btn btn-primary">Importar facturas</button>
 		</form>	
-			
+		
 	<form method="POST" action="/facturas-emitidas/importarXML" enctype="multipart/form-data" class="toggle-xml">
 			
 			@csrf

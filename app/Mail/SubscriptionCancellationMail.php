@@ -27,7 +27,7 @@ class SubscriptionCancellationMail extends Mailable {
      * @return $this
      */
     public function build() {
-        return $this->subject('Link to cancel your subscription plan ' . $this->content['plan_name'])->markdown('emails.cancelplanemail')->with('content', $this->content);
+        return $this->subject('Cancelación de eTax ' . $this->content['plan_name'])->markdown('emails.cancelplanemail')->with('content', $this->content);
     }
 
 }

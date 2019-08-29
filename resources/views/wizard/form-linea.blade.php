@@ -10,6 +10,11 @@
                 
     <input type="hidden" class="form-control" id="lnum" value="">
     <input type="hidden" class="form-control" id="item_id" value="">
+    <?php 
+      $company = currentCompanyModel();
+    ?>
+    <input type="hidden" class="form-control" id="default_product_category" value="{{$company->default_product_category}}">
+    <input type="hidden" class="form-control" id="default_vat_code" value="{{$company->default_vat_code}}">
     
     <div class="form-group col-md-6 hidden">
       <label for="codigo">Código de producto</label>
@@ -20,21 +25,21 @@
       <label for="nombre">Nombre / Descripción</label>
       <input type="text" class="form-control" id="nombre" value="2018" >
     </div>
-
-    <div class="form-group col-md-12">
-      <label for="tipo_producto">Tipo de producto</label>
-      <select class="form-control select-search" id="tipo_producto" >
-        @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
-          <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
-        @endforeach
-      </select>
-    </div>
     
     <div class="form-group col-md-12">
       <label for="tipo_iva">Tipo de IVA</label>
-      <select class="form-control" id="tipo_iva" >
+      <select class="form-control select-search" id="tipo_iva" >
         @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
           <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }} {{ @$tipo['hideMasiva'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
+        @endforeach
+      </select>
+    </div>
+
+    <div class="form-group col-md-12">
+      <label for="tipo_producto">Categoría de producto</label>
+      <select class="form-control" id="tipo_producto" name="tipo_producto">
+        @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
+          <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
         @endforeach
       </select>
     </div>
@@ -73,13 +78,13 @@
     </div>
     
     <div class="form-group col-md-3 hidden">
-      <label for="precio_unitario">Cantidad</label>
+      <label for="cantidad">Cantidad</label>
       <input type="text" class="form-control" id="cantidad" value="1" >
     </div>
 
     <div class="form-group col-md-12">
       <label for="precio_unitario">Total en colones</label>
-      <input type="text" class="form-control" id="precio_unitario" value="" >
+        <input class="form-control" id="precio_unitario" type="text" maxlength="20">
     </div>
 
     <div class="form-group col-md-4 hidden">
@@ -119,7 +124,7 @@
 
     <div class="form-group col-md-12">
       <div class="botones-agregar">
-        <div onclick="agregarEditarItem();" class="btn btn-dark m-1 ml-0">Confirmar linea</div>
+        <div onclick="agregarEditarItem()" class="btn btn-dark m-1 ml-0">Confirmar linea</div>
         <div onclick="cerrarPopup('linea-popup');cancelarEdicion();" class="btn btn-danger m-1">Cancelar</div>
       </div>
       <div class="botones-editar">
@@ -127,6 +132,28 @@
         <div onclick="cerrarPopup('linea-popup');cancelarEdicion();" class="btn btn-danger m-1">Cancelar</div>
       </div>
     </div>
-
   </div>
 </div>
+<script>
+    /*$(document).ready(function(){
+        $('#precio_unitario').on('keyup',function(){
+            $(this).manageCommas();
+        });
+        $('#precio_unitario').on('focus',function(){
+            $(this).santizeCommas();
+        });
+    });
+    String.prototype.addComma = function() {
+        return this.replace(/(.)(?=(.{3})+$)/g,"$1,").replace(',.', '.');
+    }
+    $.fn.manageCommas = function () {
+        return this.each(function () {
+            $(this).val($(this).val().replace(/(,|)/g,'').addComma());
+        });
+    }
+
+    $.fn.santizeCommas = function() {
+        return $(this).val($(this).val().replace(/(,| )/g,''));
+    }*/
+</script>
+

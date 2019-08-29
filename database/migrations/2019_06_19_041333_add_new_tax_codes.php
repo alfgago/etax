@@ -63,7 +63,7 @@ class AddNewTaxCodes extends Migration
         });
         
         Schema::table('sales', function (Blueprint $table) {
-            //$table->boolean('is_subscription')->default(true);
+            $table->boolean('is_subscription')->default(true);
         });
     }
 
@@ -108,7 +108,7 @@ class AddNewTaxCodes extends Migration
         });
         
         Schema::table('calculated_taxes', function ($table) {
-            $table->dropColumn('b015');
+            /*$table->dropColumn('b015');
             $table->dropColumn('i015');
             $table->dropColumn('b016');
             $table->dropColumn('i016');
@@ -122,11 +122,11 @@ class AddNewTaxCodes extends Migration
             $table->dropColumn('b165');
             $table->dropColumn('i165');
             $table->dropColumn('b170');
-            $table->dropColumn('i170');
+            $table->dropColumn('i170');*/
         });
         
         Schema::table('sales', function ($table) {
-            $table->dropColumn('isSubscription');
+            //$table->dropColumn('isSubscription');
         });
     }
 }

@@ -92,13 +92,13 @@
     </div>
     
     <div class="form-group col-md-4">
-      <label for="zip">Zip</label>
+      <label for="zip">Código Postal</label>
       <input type="text" class="form-control" name="zip" id="zip" readonly >
     </div>
     
     <div class="form-group col-md-12">
       <label for="address">Dirección</label>
-      <textarea class="form-control" name="address" id="address" ></textarea>
+      <textarea class="form-control" name="address" id="address" maxlength="250" rows="2" style="resize: none;"></textarea>
     </div>
     
     <div class="form-group col-md-4">

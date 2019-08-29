@@ -212,14 +212,12 @@ window.getJSONCedula = function( cedula ) {
 }
 
 window.fillProvincias = function() {
-  if ($('#country').val() == 'CR') {
     var sel = $('#state');
     sel.html("");
     sel.append("<option value='0' selected>-- Seleccione una provincia --</option>");
     $.each(provincias, function(i, val) {
       sel.append("<option value='" + i + "'>" + provincias[i]["Nombre"] + "</option>");
     });
-  }
 }
 
 window.fillCantones = function() {
@@ -344,6 +342,67 @@ window.companyChange = function($redirect = false) {
 
 }
 
+window.validatePhoneFormat = function () {
+    var phone = $('#phone').val();
+    var numbers = /^[0-9]+$/;
+    if(phone.length > 20 || !phone.value.match(numbers)){
+        Swal.fire({
+            type: 'error',
+            title: 'Información',
+            text: 'El número no debe poseer más de 20 dígitos'
+        })
+        $('#phone').val('');
+    }
+}
+
+window.validateEmail = function(mail){
+    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)){
+        return (true)
+    }
+    alert("Debe ingresar una dirección de email válida");
+    $("#email").val('');
+    return (false)
+}
+window.fowardFields = function() {
+    $('#tipo_persona').addClass('checkEmpty');
+    $('#id_number').addClass('checkEmpty');
+    $('#first_name').addClass('checkEmpty');
+    $('#email').addClass('checkEmpty');
+    $('#phone').addClass('checkEmpty');
+    $('#country').addClass('checkEmpty');
+    $('#state').addClass('checkEmpty');
+    $('#city').addClass('checkEmpty');
+    $('#district').addClass('checkEmpty');
+    $('#zip').addClass('checkEmpty');
+    $('#neighborhood').addClass('checkEmpty');
+    $('#address').addClass('checkEmpty');
+    $('#es_exento').addClass('checkEmpty');
+    $('#number').addClass('checkEmpty');
+    $('#expiry').addClass('checkEmpty');
+    $('#cvc').addClass('checkEmpty');
+    $('#first_name_card').addClass('checkEmpty');
+    $('#last_name_card').addClass('checkEmpty');
+}
+window.backFields = function () {
+    $('#tipo_persona').removeClass('checkEmpty');
+    $('#id_number').removeClass('checkEmpty');
+    $('#first_name').removeClass('checkEmpty');
+    $('#email').removeClass('checkEmpty');
+    $('#phone').removeClass('checkEmpty');
+    $('#country').removeClass('checkEmpty');
+    $('#state').removeClass('checkEmpty');
+    $('#city').removeClass('checkEmpty');
+    $('#district').removeClass('checkEmpty');
+    $('#zip').removeClass('checkEmpty');
+    $('#neighborhood').removeClass('checkEmpty');
+    $('#address').removeClass('checkEmpty');
+    $('#es_exento').removeClass('checkEmpty');
+    $('#number').removeClass('checkEmpty');
+    $('#expiry').removeClass('checkEmpty');
+    $('#cvc').removeClass('checkEmpty');
+    $('#first_name_card').removeClass('checkEmpty');
+    $('#last_name_card').removeClass('checkEmpty');
+}
 $(document).ready(function() {
 
   $('.select-search').select2({
@@ -400,12 +459,18 @@ toastr.options = {
   "showMethod": "fadeIn",
   "hideMethod": "fadeOut"
 }
+
   window.calcularSubtotalItem = function(){
 
     var precio_unitario = parseFloat( $('#precio_unitario').val() );
-    var cantidad = parseInt( $('#cantidad').val() );
+      precio_unitario = parseFloat(precio_unitario);
+    var cantidad = parseFloat( $('#cantidad').val() );
+      cantidad = parseFloat(cantidad);
+
     var porc_iva = parseFloat( $('#porc_iva').val() );
+      porc_iva = parseFloat(porc_iva);
     var monto_iva = parseFloat( $('#item_iva_amount').val() );
+      monto_iva = parseFloat(monto_iva);
     
     if( !monto_iva ) {
       monto_iva = 0;
@@ -414,24 +479,26 @@ toastr.options = {
     if( precio_unitario && cantidad ){
       var subtotal = cantidad * precio_unitario;
       
-      var discount = parseFloat( $('#discount').val() );
+      var discount = $('#discount').val();
+        discount = parseFloat(discount);
       if( !discount ) {
+        discount = 0;
         $('#discount').val(0);
       }
       var discount_type = $('#discount_type').val();
       if( discount_type == "01" && discount > 0 ) {
-        subtotal = subtotal - ( subtotal * (discount / 100) );
-      }else {
-        subtotal = subtotal - discount;
+          subtotal = subtotal - ( subtotal * (discount / 100) );
+      }else if( discount_type == "02" && discount > 0 ) {
+          subtotal = subtotal - discount;
       }
-      
+
       $('#item_subtotal').val( subtotal.toFixed(2) );
       if( $('#porc_iva').val().length ){
-        monto_iva = subtotal * porc_iva / 100;
+        monto_iva = parseFloat(subtotal * porc_iva / 100);
         $('#item_iva_amount').val( monto_iva.toFixed(2) );
         $('#item_total').val( (subtotal + monto_iva).toFixed(2) );
       }else{
-        $('#item_total').val( subtotal.toFixed(2) );
+        $('#item_total').val( subtotal );
       }
     }else{
       $('#item_subtotal').val( 0 );
@@ -444,7 +511,7 @@ toastr.options = {
   window.calcularConIvaManual = function(){
     
     var precio_unitario = parseFloat( $('#precio_unitario').val() );
-    var cantidad = parseInt( $('#cantidad').val() );
+    var cantidad = parseFloat( $('#cantidad').val() );
     var monto_iva = parseFloat( $('#item_iva_amount').val() );
     
     if( !monto_iva ) {
@@ -455,11 +522,12 @@ toastr.options = {
     if( precio_unitario && cantidad ){
       var subtotal = cantidad * precio_unitario;
       
-      var discount = parseFloat( $('#discount').val() );
+      var discount = $('#discount').val();
+        discount = parseFloat(discount);
       var discount_type = $('#discount_type').val();
       if( discount_type == "01" && discount > 0 ) {
         subtotal = subtotal - ( subtotal * (discount / 100) );
-      }else {
+      }else if( discount_type == "02" && discount > 0 ){
         subtotal = subtotal - discount;
       }
       
@@ -489,17 +557,22 @@ toastr.options = {
 
   window.presetTipoIVA = function(){
     if( ! $('#cliente_exento:checked').length ){
+      var codigoIVA = $('#tipo_iva :selected').val();
+      $('#tipo_producto option').hide();
+      var tipoProducto = 0;
+      $("#tipo_producto option").each(function(){
+          var posibles = $(this).attr('posibles').split(",");
+      	if(posibles.includes(codigoIVA)){
+          	$(this).show();
+          	if( !tipoProducto ){
+              tipoProducto = $(this).val();
+            }
+          }
+      });
+    
+      toggleCamposExoneracion();
       
-      var posibles = $('#tipo_producto :selected').attr('posibles');
-      var arrPosibles = posibles.split(",");
-      var tipo;
-      $('#tipo_iva option').hide();
-      for( tipo of arrPosibles ) {
-      	$('#tipo_iva option[value='+tipo+']').show();
-      }
-      
-      var tipoIVA = $('#tipo_producto :selected').attr('codigo');
-      $('#tipo_iva').val( tipoIVA ).change();
+      $('#tipo_producto').val( tipoProducto ).change();
     }else{
       $('#tipo_iva').val( 'B260' );
     }
@@ -537,19 +610,26 @@ toastr.options = {
     var codigo = $('#codigo').val();
     var nombre = $('#nombre').val();
     var tipo_producto = $('#tipo_producto').val();
+    var tipo_producto_text = $('#tipo_producto :selected').text();
     var cantidad = $('#cantidad').val();
+    cantidad = parseFloat(cantidad);
     var unidad_medicion = $('#unidad_medicion').val();
     var precio_unitario = $('#precio_unitario').val();
+    precio_unitario = parseFloat(precio_unitario);
     var porc_identificacion_plena = $('#porc_identificacion_plena').val();
     var is_identificacion_especifica = $('#is_identificacion_especifica:checked').length;
     var descuento = $('#discount').val();
+    descuento = parseFloat(descuento);
     var tipo_descuento = $('#discount_type').val();
     var tipo_iva = $('#tipo_iva').val();
     var tipo_iva_text = $('#tipo_iva :selected').text();
     var porc_iva = $('#porc_iva').val();
     var monto_iva = $('#item_iva_amount').val();
+    monto_iva = parseFloat(monto_iva);
     var subtotal = $('#item_subtotal').val();
+    subtotal = parseFloat(subtotal);
     var total = $('#item_total').val();
+    total = parseFloat(total);
     var typeDocument = $('#typeDocument').val();
     var numeroDocumento = $('#numeroDocumento').val();
     var nombreInstitucion = $('#nombreInstitucion').val();
@@ -564,7 +644,11 @@ toastr.options = {
       monto_iva = 0;
       $('#item_iva_amount').val(0);
     }
-    
+    if( !descuento ) {
+      descuento = 0;
+      $('#discount').val(0);
+    }
+
     if( !precio_unitario ) {
       precio_unitario = 0;
       $('#precio_unitario').val(0);
@@ -579,9 +663,9 @@ toastr.options = {
       codigo = $('#codigo').val( "L" + numero  );
       nombre = $('#nombre').val( "TIPO-" + tipo_iva  );
     }
-    
+
     //Se asegura de que los campos hayan sido llenados
-    if( subtotal && codigo && nombre && precio_unitario && cantidad && tipo_iva){
+    if( subtotal && codigo && nombre && precio_unitario && cantidad && tipo_iva && total > 0){
       
       //Crear el ID de la fila.
       var itemExistente = false;
@@ -631,7 +715,7 @@ toastr.options = {
         htmlCols += "<td>"+cantidad+" </td>";
         htmlCols += "<td>"+unidad_medicion+" </td>";
         htmlCols += "<td>"+ fixComas(precio_unitario) +" </td>";
-        htmlCols += "<td>"+tipo_iva_text+"  </td>";
+        htmlCols += "<td>"+tipo_iva_text+" <br> -"+tipo_producto_text+"</td>";
         htmlCols += "<td>"+ fixComas(subtotal) +" </td>";
         htmlCols += "<td>"+ fixComas(monto_iva) +" </td>";
         htmlCols += "<td>"+ fixComas(total) +"   </td>";
@@ -653,28 +737,39 @@ toastr.options = {
       recalcularNumerosItem();
       
       //Calcula total de factura
-      calcularTotalFactura();                                                                                                            
+      calcularTotalFactura();
       
       //Aumenta el indice de filas para evitar cualquier conflicto si hubo eliminados. El index nunca debe cambiar ni repetirse, los números pueden cambiar.
       $('#current-index').val(index);
       
       //Si estaba editando, quita la clase
       $('.item-factura-form').removeClass('editando');
-      
+
       cerrarPopup('linea-popup');
-      
+
       //Fuerza un reset en la ayuda al marcar preguntas.
       /*$('#p1').prop('checked', false);
       $('#p1').change();*/
       
       if( $('#is-compra').length ){
-        $('#tipo_producto').val(49).change();
+        $('#tipo_producto').val('B003').change();
       }else {
-        $('#tipo_producto').val(17).change();
+        if( $('#default_product_category').length ){
+          $('#tipo_iva').val( $('#default_vat_code').val() ).change();
+        }else{
+          $('#tipo_iva').val( 'B103' ).change();
+        }
       }
       
     }else{
-      alert('Debe completar los datos de la linea antes de guardarla');
+      /*alert('Debe completar los datos de la linea antes de guardarla');
+      return false;*/
+        Swal.fire({
+            type: 'error',
+            title: 'Error',
+            text: 'Por favor, asegúrese que todos los datos sean válidos antes de continuar.'
+        })
+        return false;
     }
     
   }
@@ -685,9 +780,9 @@ toastr.options = {
       $('.item-factura-form input[type=checkbox]').prop('checked', false);
       
       if( $('#is-compra').length ){
-        $('#tipo_producto').val(49).change();
+        $('#tipo_iva').val('B003').change();
       }else {
-        $('#tipo_producto').val(17).change();
+        $('#tipo_iva').val('B103').change();
       }
       $('#unidad_medicion').val('Unid');
       $('#cantidad').val(1);
@@ -706,13 +801,13 @@ toastr.options = {
     $('#item_id').val( item.find('.item_id ').val() );
     $('#codigo').val( item.find('.codigo ').val() );
     $('#nombre').val( item.find('.nombre ').val() );
-    $('#tipo_producto').val( item.find('.tipo_producto ').val() );
+    $('#tipo_producto').val( item.find('.tipo_producto ').val() ).change();
     $('#discount').val( item.find('.discount ').val() );
     $('#discount_type').val( item.find('.discount_type ').val() );
     $('#cantidad').val( item.find('.cantidad ').val() );
     $('#unidad_medicion').val( item.find('.unidad_medicion ').val() );
     $('#precio_unitario').val( item.find('.precio_unitario ').val() );
-    $('#tipo_iva').val( item.find('.tipo_iva ').val() );
+    $('#tipo_iva').val( item.find('.tipo_iva ').val() ).change();
     $('#item_subtotal').val( item.find('.subtotal ').val() );
     $('#porc_iva').val( item.find('.porc_iva ').val() );
     $('#item_iva_amount').val( item.find('.monto_iva ').val() );
@@ -725,13 +820,14 @@ toastr.options = {
     $('#montoExoneracion').val( item.find('.montoExoneracion ').val() );
     $('#impuestoNeto').val( item.find('.impuestoNeto ').val() );
     $('#montoTotalLinea').val( item.find('.montoTotalLinea ').val() );
-
     
     if( parseInt(item.find('.is_identificacion_especifica').val()) ) {
       $('#is_identificacion_especifica').prop( 'checked', true );
     }else {
       $('#is_identificacion_especifica').prop( 'checked', false );
     }
+    
+    toggleCamposExoneracion();
     
     togglePorcentajeIdentificacionPlena();
     calcularConIvaManual();
@@ -843,10 +939,17 @@ toastr.options = {
         }
     }
     
-    window.mostrarCamposExoneracion = function() {
-        var checkExoneracion = $('#checkExoneracion').prop('checked');
-        console.log(checkExoneracion);
-        if(checkExoneracion === true){
+    window.toggleCamposExoneracion = function() {
+        /*var checkExoneracion = $('#checkExoneracion').prop('checked');
+        console.log(checkExoneracion);*/
+        
+        var hasExoneracion = false;
+        var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184"];
+        if( codigosConExoneracion.includes( $('#tipo_iva').val() ) ){
+          hasExoneracion = true;
+        }
+        
+        if(hasExoneracion){
             $(".exoneracion-cont").show();
             $('#etiqTotal').text('');
             $('#etiqTotal').text('Total sin exonerar');
@@ -885,13 +988,14 @@ $( document ).ready(function() {
     });
   
     $('#tipo_iva').on('change', function(){
+      presetTipoIVA();
       presetPorcentaje();
       calcularSubtotalItem();
       togglePorcentajeIdentificacionPlena();
       if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
     });
   
-    $('#tipo_producto').on('change', function(){
+    /*$('#tipo_producto').on('change', function(){
       
       presetTipoIVA();
       presetPorcentaje();
@@ -899,7 +1003,7 @@ $( document ).ready(function() {
       togglePorcentajeIdentificacionPlena();
       if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
       
-    });
+    });*/
     
     $('#item_iva_amount').on('change', function(){
       calcularConIvaManual();
@@ -962,10 +1066,6 @@ $( document ).ready(function() {
     
     if( $("#tipo_producto").length && $("#tipo_iva").length ) {
       $('#tipo_iva').on('change', function(){
-        if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
-      });
-    
-      $('#tipo_producto').on('change', function(){
         presetTipoIVA();
         if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
       });

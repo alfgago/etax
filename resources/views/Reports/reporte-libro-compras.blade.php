@@ -10,9 +10,12 @@
 	              <tr>
 	                <th>Fecha</th>
 	                <th>Proveedor</th>
+	                <th>Actividad <small style="font-size: .8em !important;font-weight: 600;">(aceptación)</small></th>
 	                <th>Consecutivo</th>
 	                <th># Línea</th>
 	                <th>Producto</th>
+	                <th>Tipo IVA</th>
+	                <th>Cat. Declaración</th>
 	                <th>Moneda</th>
 	                <th>Subtotal</th>
 	                <th>Tarifa IVA</th>
@@ -22,14 +25,17 @@
 	            </thead>
 	            <tbody>
 	            	@foreach($data as $item)
-		            	@if( !$item->bill->is_void && $item->bill->is_authorized && $item->bill->is_code_validated )
+		            	@if( !$item->bill->is_void && $item->bill->is_authorized && $item->bill->is_code_validated && $item->bill->accept_status == 1 )
 		              <tr>
 		                <td>{{ $item->bill->generatedDate()->format('d/m/Y') }}</td>
 		                <td>{{ $item->bill->provider->getFullName() }}</td>
+		                <td>{{ @$item->bill->activity_company_verification ?? 'No indica' }}</td>
 		                <td>{{ $item->bill->document_number }}</td>
 		                <td>{{ $item->item_number }}</td>
 		                <td>{{ $item->name }}</td>
-		                <td>{{ $item->bill->currency }}</td>
+		                <td>{{ @$item->ivaType->code }}</td>
+		                <td>{{ @$item->productCategory->name }}</td>
+		                <td>{{ $item->bill->currency }} {{ $item->bill->currency == 'USD' ? "(".$item->bill->currency_rate.")" : '' }}</td>
 		                <td>{{ number_format( $item->subtotal, 2) }}</td>
 		                <td>{{ $item->iva_percentage }}%</td>
 		                <td>{{ number_format( $item->iva_amount, 2) }}</td>

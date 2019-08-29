@@ -102,43 +102,58 @@ class PaymentUtils
         return $cards;
     }
 
-    public function comprarProductos($request){
+    public function comprarProductos($request, $producto, $amount){
         $bnStatus = $this->statusBNAPI();
         if($bnStatus['apiStatus'] == 'Successful'){
             $date = Carbon::parse(now('America/Costa_Rica'));
             $user = auth()->user();
             $data = new stdClass();
-            $data->description = 'Compra de ' . $request->product_name . ' eTax';
+            $data->description = 'Compra de ' . $producto->name . ' eTax';
             $data->user_name = $user->user_name;
-            $data->amount = $request->product_price;
+            $data->amount = $amount;
 
-            $chargeCreated = $this->paymentIncludeCharge($data);
-            if($chargeCreated['apiStatus'] == "Successful"){
+            //$chargeCreated = $this->paymentIncludeCharge($data);
+            //if($chargeCreated['apiStatus'] == "Successful"){
                 $paymentMethod = PaymentMethod::where('id', $request->payment_method)->first();
-                $current_company = currentCompany();
+                $company = currentCompanyModel();
                 $date = Carbon::parse(now('America/Costa_Rica'));
-                $sale = Sale::create([
-                    "user_id" => $user->user_id,
-                    "company_id" => $current_company,
-                    "etax_product_id" => $request->product_id,
-                    "status" => 1,
-                    "recurrency" => 0
+                $sale = Sales::updateOrCreate([
+                    "user_id" => $user->id,
+                    "company_id" => $company->id,
+                    "etax_product_id" => $producto->id,
+                    "status" => 2,
+                    "recurrency" => false
                 ]);
-                $payment = Payment::create([
-                    'sale_id' => $sale->id,
-                    'payment_date' => $date,
-                    'payment_status' => 1,
-                    'amount' => $request->product_price
-                ]);
+                
+                $payment = Payment::updateOrCreate(
+                    [
+                        'sale_id' => $sale->id,
+                        'payment_status' => 1,
+                    ],
+                    [
+                        'payment_method_id' => $paymentMethod->id,
+                        'payment_date' => $date,
+                        'amount' => $producto->price
+                    ]
+                );
 
+                //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
+                if( ! isset($payment->charge_token) ) {
+                    $chargeIncluded = $this->paymentIncludeCharge($data);
+                    $chargeTokenId = $chargeIncluded['chargeTokenId'];
+                    $payment->charge_token = $chargeTokenId;
+                    $payment->save();
+                }
+                
                 $chargeTokenId = $chargeCreated['chargeTokenId'];
                 $charge = new stdClass();
                 $charge->cardTokenId = $paymentMethod->token_bn;
                 $charge->user_name = $user->user_name;
                 $charge->chargeTokenId = $chargeTokenId;
 
-                $apliedCharge = $this->paymentApplyCharge($charge);
-                if($apliedCharge['apiStatus'] == "Successful"){
+                $appliedCharge = $this->paymentApplyCharge($charge);
+                if($appliedCharge['apiStatus'] == "Successful"){
+                    $payment->proof = $appliedCharge['retrievalRefNo'];
                     $payment->payment_status = 2;
                     $payment->save();
                     $sale->status = 1;
@@ -148,141 +163,35 @@ class PaymentUtils
                 }else{
                     return false;
                 }
-            }else{
+                return true;
+            /*}else{
                 return false;
-            }
+            }*/
         }else{
             return false;
         }
     }
 
-    public function facturarProductosEtax($invoiceData){
-        $apiHacienda = new BridgeHaciendaApi();
-        $tokenApi = $apiHacienda->login();
-        if ($tokenApi !== false) {
-            $invoice = new Invoice();
-            $company = Company::find(1);
-            $invoice->company_id = 1;
-            $document_key = $this->getDocumentKey('01');
-            $document_number = $this->getDocReference('01');
-
-            //Datos generales y para Hacienda
-            $invoice->document_type = "01";
-            $invoice->hacienda_status = "01";
-            $invoice->payment_status = "01";
-            $invoice->payment_receipt = "";
-            $invoice->generation_method = "etax";
-            $invoice->reference_number = $company->last_invoice_ref_number + 1;
-
-            $data = new stdClass();
-            $data->document_key = $document_key;
-            $data->document_number = $document_number;
-            $data->sale_condition = '01';
-            $data->payment_type = "02";
-            $data->retention_percent = "6";
-            $data->credit_time = "0";
-
-            $data->tipo_persona = $invoiceData->tipo_persona;
-            $data->identificacion_cliente = $invoiceData->client_id_number;
-            $data->codigo_cliente = $invoiceData->client_code;
-            $data->code = $invoiceData->client_code;
-            $data->id_number = $invoiceData->client_id_number;
-
-            $data->client_code = $invoiceData->client_id_number;
-            $data->client_id_number = $invoiceData->client_id_number;
-            $data->client_id = '-1';
-            $data->tipo_persona = $invoiceData->tipo_persona;
-            $data->first_name = $invoiceData->first_name;
-            $data->last_name = $invoiceData->last_name;
-            $data->last_name2 = $invoiceData->last_name2;
-            $data->country = $invoiceData->country;
-            $data->state = $invoiceData->state;
-            $data->city = $invoiceData->city;
-            $data->district = $invoiceData->district;
-            $data->neighborhood = $invoiceData->neighborhood;
-            $data->zip = $invoiceData->zip;
-            $data->address = $invoiceData->address;
-            $data->phone = $invoiceData->phone;
-            $data->es_exento = $invoiceData->es_exento;
-            $data->email = $invoiceData->email;
-            $data->buy_order = '';
-            $data->due_date =
-            $data->other_reference = '';
-            $data->currency_rate = get_rates();
-            $data->description = 'Factura de Etax';
-            $data->subtotal = $invoiceData->items[0]->cantidad * $invoiceData->amount;
-            $data->currency = 'USD';
-            $data->total = $invoiceData->items[0]->cantidad * $invoiceData->amount;
-            $data->iva_amount = 0;
-            $data->generated_date = Carbon::now()->format('d/m/Y');
-            $data->hora = Carbon::now()->format('g:i A');
-            $data->due_date = Carbon::now()->addDays(7)->format('d/m/Y');
-
-            $item = array();
-
-            $item['item_number'] = 1;
-            $item['id'] = 0;
-            $item['code'] = $invoiceData->items[0]->code;
-            $item['name'] = $invoiceData->items[0]->name;
-            $item['product_type'] = 'Plan';
-            $item['measure_unit'] = 'Sp';
-            $item['item_count'] = $invoiceData->items[0]->cantidad;
-            $item['unit_price'] = $invoiceData->amount;
-            $item['subtotal'] = $invoiceData->items[0]->cantidad * $invoiceData->amount;
-
-            if($invoiceData->items[0]->descuento > 0){
-                $discount_reason = 'Cupón de descuento';
-                $discount = $invoiceData->items[0]->descuento;
-            }else{
-                $discount_reason = null;
-                $discount = 0;
-            }
-            $item['discount_percentage'] = $invoiceData->items[0]->descuento;
-            $item['discount_reason'] = $discount_reason;
-            $item['discount'] = $discount;
-
-            $item['iva_type'] = '103';
-            $item['iva_percentage'] = 0;
-            $item['iva_amount'] = 0;
-
-            $item['total'] = $invoiceData->subtotal + 0;//$data->items->iva_amount;
-            $item['is_identificacion_especifica'] = 0;
-            $item['is_exempt'] = 0;
-
-            $data->items = [ $item ];
-
-            try{
-                $invoiceDataSent = $invoice->setInvoiceData($data);
-                Log::info('Suscriptor: '. $data->client_id_number . ", Nombre: " . $data->first_name . " " . $data->last_name . " " . $data->last_name2 . ", Plan:" . $invoiceData->items[0]->name );
-                if ( !empty($invoiceDataSent) ) {
-                    $invoice = $apiHacienda->createInvoice($invoiceDataSent, $tokenApi);
-                }
-            }catch(\Throwable $e){}
-
-            $company->last_invoice_ref_number = $invoice->reference_number;
-            $company->last_document = $invoice->document_number;
-            $company->save();
-            clearInvoiceCache($invoice);
-
-            return true;
-        } else {
-            return false;
+    private function getDocReference($docType, $companyId = null) {
+        if( $companyId ){
+            $company = Company::find($companyId);
+        }else{
+            $company = currentCompanyModel();
         }
-    }
-
-    private function getDocReference($docType) {
-        $company = currentCompany();
-        $lastSale = Company::find($company)->last_invoice_ref_number + 1;
+        $lastSale = $company->last_invoice_ref_number + 1;
         $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
 
         return $consecutive;
     }
 
-    private function getDocumentKey($docType) {
-        $companyId = currentCompany();
-        $company = Company::find($companyId);
+    private function getDocumentKey($docType, $companyId = null) {
+        if( $companyId ){
+            $company = Company::find($companyId);
+        }else{
+            $company = currentCompanyModel();
+        }
         $invoice = new Invoice();
-        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
+        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType, 1).
             '1'.$invoice->getHashFromRef($company->last_invoice_ref_number + 1);
 
         return $key;
@@ -307,6 +216,25 @@ class PaymentUtils
         $chargeIncluded = json_decode($appChargeBn->getBody()->getContents(), true);
         return $chargeIncluded;
     }
+
+    public function userGetChargeInfo($idCharge){
+        $bnCharge = new Client();
+        $user = auth()->user();
+        $chargeBn = $bnCharge->request('POST', "https://emcom.oneklap.com:2263/api/UserViewCharge?applicationName=string&userName=string&userPassword=string&chargeTokenId=string", [
+            'headers' => [
+                'Content-Type' => "application/json",
+            ],
+            'json' => [
+                'applicationName' => config('etax.klap_app_name'),
+                'userName' => $user->user_name,
+                "userPassword" => 'Etax-' . $user->id . 'Klap',
+                'chargeTokenId' => $idCharge,
+            ],
+            'verify' => false,
+        ]);
+        $charge = json_decode($chargeBn->getBody()->getContents(), true);
+        return $charge;
+    }
     
     public function paymentApplyCharge($request){
         $bnCharge = new Client();
@@ -330,7 +258,7 @@ class PaymentUtils
     public function userRequestCharges(){
         $user = auth()->user();
         $requestCharges = new Client();
-        $userRequestCharges = $requestCharges->request('POST', "http://www.fttserver.com:4217/api/UserRequestCharges?applicationName=string&userName=string&applicationPassword=string", [
+        $userRequestCharges = $requestCharges->request('POST', "https://emcom.oneklap.com:2263/api/UserRequestCharges?applicationName=string&userName=string&applicationPassword=string", [
             'headers' => [
                 'Content-Type'  => "application/json",
             ],
@@ -343,6 +271,122 @@ class PaymentUtils
         ]);
         $charges = json_decode($userRequestCharges->getBody()->getContents(), true);
         return $charges;
+    }
+    
+    public function crearFacturaClienteEtax($invoiceData){
+        $apiHacienda = new BridgeHaciendaApi();
+        $tokenApi = $apiHacienda->login(false);
+        if ($tokenApi !== false) {
+            $invoice = new Invoice();
+            $company = Company::find(1);
+            $invoice->company_id = 1;
+            $document_key = $this->getDocumentKey('01', 1);
+            $document_number = $this->getDocReference('01', 1);
+
+            //Datos generales y para Hacienda
+            $invoice->document_type = "01";
+            $invoice->hacienda_status = "01";
+            $invoice->payment_status = "01";
+            $invoice->payment_receipt = "";
+            $invoice->generation_method = "etaxAuto";
+            $invoice->reference_number = $company->last_invoice_ref_number + 1;
+            $invoice->xml_schema = 43;
+
+            $data = new stdClass();
+            $data->document_key = $document_key;
+            $data->document_number = $document_number;
+            $data->sale_condition = '01';
+            $data->payment_type = "02";
+            $data->retention_percent = "6";
+            $data->credit_time = "0";
+
+            $data->tipo_persona = "02";
+            $data->identificacion_cliente = $invoiceData->client_id_number;
+            $data->codigo_cliente = $invoiceData->client_code;
+            $data->code = $invoiceData->client_code;
+            $data->id_number = $invoiceData->client_id_number;
+            
+            $data->commercial_activity = 722003;
+
+            $data->client_code = $invoiceData->client_id_number;
+            $data->client_id_number = $invoiceData->client_id_number;
+            $data->client_id = '-1';
+            $data->tipo_persona = $invoiceData->tipo_persona;
+            $data->first_name = $invoiceData->first_name;
+            $data->last_name = $invoiceData->last_name;
+            $data->last_name2 = $invoiceData->last_name2;
+            $data->country = $invoiceData->country;
+            $data->state = $invoiceData->state;
+            $data->city = $invoiceData->city;
+            $data->district = $invoiceData->district;
+            $data->neighborhood = $invoiceData->neighborhood;
+            $data->zip = $invoiceData->zip;
+            $data->address = $invoiceData->address;
+            $data->phone = $invoiceData->phone;
+            $data->es_exento = $invoiceData->es_exento;
+            $data->email = $invoiceData->email;
+            $data->send_email = "info@etaxcr.com";
+            $data->billing_emails = null;
+            $data->buy_order = '';
+            $data->due_date =
+            $data->other_reference = '';
+            $data->currency_rate = get_rates();
+            $data->description = 'Factura de Etax.';
+            $data->subtotal = $invoiceData->subtotal;
+            $data->currency = 'USD';
+            $data->total = $invoiceData->amount;
+            $data->iva_amount = $invoiceData->iva_amount;
+            $data->generated_date = Carbon::parse(now('America/Costa_Rica'))->format('d/m/Y');
+            $data->hora = Carbon::parse(now('America/Costa_Rica'))->format('g:i A');
+            $data->due_date = Carbon::parse(now('America/Costa_Rica'))->addDays(7)->format('d/m/Y');
+
+            $item = array();
+
+            $item['item_number'] = 1;
+            $item['id'] = 0;
+            $item['code'] = $invoiceData->items[0]->code;
+            $item['name'] = $invoiceData->items[0]->name;
+            $item['product_type'] = '17';
+            $item['measure_unit'] = 'Sp';
+            $item['item_count'] = $invoiceData->items[0]->cantidad;
+            $item['unit_price'] = $invoiceData->items[0]->unit_price;
+            $item['subtotal'] = $invoiceData->items[0]->subtotal;
+
+            $item['discount_percentage'] = $invoiceData->items[0]->descuento;
+            $item['discount_reason'] = $invoiceData->items[0]->discount_reason;
+            $item['discount'] = $invoiceData->items[0]->descuento;
+
+            $item['iva_type'] = 'S103';
+            $item['iva_percentage'] = 13;
+            $item['iva_amount'] = $invoiceData->items[0]->iva_amount;
+
+            $item['total'] = $invoiceData->items[0]->total;
+            $item['is_identificacion_especifica'] = 0;
+            $item['is_exempt'] = 0;
+
+            $data->items = [ $item ];
+            
+            try{
+                $invoiceDataSent = $invoice->setInvoiceData($data);
+                
+                Log::info('Suscriptor: '. $data->client_id_number . ", Nombre: " . $data->first_name . " " . $data->last_name . " " . $data->last_name2 . ", Plan:" . $invoiceData->items[0]->name );
+                if ( !empty($invoiceDataSent) ) {
+                    $invoice = $apiHacienda->createInvoice($invoiceDataSent, $tokenApi);
+                }
+                $company->last_invoice_ref_number = $invoice->reference_number;
+                $company->last_document = $invoice->document_number;
+                $company->save();
+                clearInvoiceCache($invoice);
+                
+            }catch(\Throwable $e){
+                Log::error('Error al crear factura de compra eTax. ' . $e->getMessage() );
+            }
+
+            Log::info( 'Factura de suscripción exitosa.' );
+            return true;
+        } else {
+            return false;
+        }
     }
 	
 }

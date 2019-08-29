@@ -18,10 +18,10 @@
     </a>
   </form>
 
+  <a link="/facturas-recibidas/validar/{{ $bill->id }}" titulo="Verificación Compra" class="btn btn-dark btn-agregar" style="color:#fff; border-color: #333; background: #333; font-size: 0.85em; " onclick="validarPopup(this);" data-toggle="modal" data-target="#modal_estandar">Revalidar</a>
+
 @else
 
-  <a href="/facturas-recibidas/validaciones" title="Validar código" class="btn btn-primary btn-agregar m-0" style="background: #15408E; font-size: 0.85em;" >
-    Requiere validación de código
-  </a>
+  <a link="/facturas-recibidas/validar/{{ $bill->id }}" titulo="Verificación Compra" class="btn btn-dark btn-agregar m-0 " style="color:#fff; border-color: #333; background: #333; font-size: 0.85em;" onclick="validarPopup(this);" data-toggle="modal" data-target="#modal_estandar">Requiere validación</a>
 
 @endif

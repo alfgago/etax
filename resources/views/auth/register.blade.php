@@ -5,7 +5,8 @@
 
   <form method="POST" action="{{ route('register') }}">
     @csrf
-
+    @honeypot
+    
     <div class="form-row">
 
       <div class="form-group col-md-12 text-center">

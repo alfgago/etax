@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\ApiResponse;
 use App\Company;
 use App\Invoice;
 use App\Mail\CreditNoteNotificacion;
@@ -49,83 +50,106 @@ class ProcessCreditNote implements ShouldQueue
     public function handle()
     {
         try {
-            Log::info('send job credit note id: '.$this->invoiceId);
-            $invoiceUtils = new InvoiceUtils();
-            $client = new Client();
-            $invoice = Invoice::find($this->invoiceId);
-            $company = Company::find($this->companyId);
-            if ( $company->atv_validation ) {
-                if ($invoice->hacienda_status == '01' && $invoice->document_type == '03' && $invoiceUtils->validateZip($invoice)) {
-                    if ($invoice->xml_schema == 43) {
-                        $requestDetails = $invoiceUtils->setDetails43($invoice->items);
-                        $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
-                    } else {
-                        $requestDetails = $this->setDetails($invoice->items);
-                        $requestData = $this->setInvoiceData($invoice, $requestDetails);
-                    }
-                    Log::info('Request data'. json_encode($requestData));
-                    $apiHacienda = new BridgeHaciendaApi();
-                    $tokenApi = $apiHacienda->login(false);
-                    if ($requestData !== false) {
-                        $endpoint = $invoice->xml_schema == 42 ? 'invoice' : 'invoice43';
-                        Log::info('Enviando Request Nota Credito  API HACIENDA -->>' . $this->invoiceId);
-                        $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/credit', [
-                            'headers' => [
-                                'Auth-Key' => config('etax.api_hacienda_key'),
-                                'Client-Service' => config('etax.api_hacienda_client'),
-                                'Authorization' => $tokenApi,
-                                'User-ID' => config('etax.api_hacienda_user_id'),
-                                'Connection' => 'Close'
-                            ],
-                            'multipart' => $requestData,
-                            'verify' => false,
-                            'http_errors' => false,
-                            'connect_timeout' => 20
-                        ]);
-                        $response = json_decode($result->getBody()->getContents(), true);
-                        Log::info('Response Credit Note Api Hacienda '. json_encode($response));
-                        if (isset($response['status']) && $response['status'] == 200) {
-                            Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
-                            $date = Carbon::now();
-                            $invoice->hacienda_status = '03';
-                            $invoice->save();
-                            $path = 'empresa-' . $company->id_number .
-                                "/notas_credito_ventas/$date->year/$date->month/$invoice->document_key.xml";
-                            $save = Storage::put(
-                                $path,
-                                ltrim($response['data']['xmlFirmado'], '\n'));
-                            if ($save) {
-                                $xml = new XmlHacienda();
-                                $xml->invoice_id = $invoice->id;
-                                $xml->bill_id = 0;
-                                $xml->xml = $path;
-                                $xml->save();
-
-                                if ( !empty($invoice->send_emails) ) {
-                                    Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new CreditNoteNotificacion([
-                                        'xml' => $path,
-                                        'data_invoice' => $invoice, 'data_company' => $company
-                                    ]));
-                                } else {
-                                    Mail::to($invoice->client_email)->send(new CreditNoteNotificacion([
-                                        'xml' => $path,
-                                        'data_invoice' => $invoice, 'data_company' => $company
-                                    ]));
-                                }
-                            }
-                            Log::info('Factura enviada y XML guardado.');
-                        } else if (isset($response['status']) && $response['status'] == 400 &&
-                            strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
-                            Log::info('Consecutive repeated -->' . $invoice->document_number);
-                            $invoice->hacienda_status = '04';
-                            $invoice->save();
-
+            if ( app()->environment('production') ) {
+                Log::info('send job credit note id: '.$this->invoiceId);
+                $invoiceUtils = new InvoiceUtils();
+                $client = new Client();
+                $invoice = Invoice::find($this->invoiceId);
+                $company = Company::find($this->companyId);
+                if ($company->atv_validation) {
+                    if ($invoice->hacienda_status == '01' && $invoice->document_type == ('03' || '02') && $invoice->reference_doc_type == '04' ? true : $invoiceUtils->validateZip($invoice)
+                        && $invoice->resend_attempts < 6) {
+                        if ($invoice->xml_schema == 43) {
+                            $requestDetails = $invoiceUtils->setDetails43($invoice->items);
+                            $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
+                        } else {
+                            $requestDetails = $this->setDetails($invoice->items);
+                            $requestData = $this->setInvoiceData($invoice, $requestDetails);
                         }
-                        Log::info('Proceso de nota de credito finalizado con éxito.');
+                        $invoice->in_queue = false;
+                        $invoice->save();
+                        Log::info('Request data'. json_encode($requestData));
+                        $apiHacienda = new BridgeHaciendaApi();
+                        $tokenApi = $apiHacienda->login(false);
+                        if ($requestData !== false) {
+                            $endpoint = $invoice->xml_schema == 42 ? 'invoice' : 'invoice43';
+                            $path = $invoice->document_type == '02' ? 'debit' : 'credit';
+                            sleep(15);
+                            Log::info('Enviando Request Nota Credito  API HACIENDA -->>' . $this->invoiceId);
+                            $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/'.$path, [
+                                'headers' => [
+                                    'Auth-Key' => config('etax.api_hacienda_key'),
+                                    'Client-Service' => config('etax.api_hacienda_client'),
+                                    'Authorization' => $tokenApi,
+                                    'User-ID' => config('etax.api_hacienda_user_id'),
+                                    'Connection' => 'Close'
+                                ],
+                                'multipart' => $requestData,
+                                'verify' => false,
+                                'http_errors' => false,
+                                'connect_timeout' => 20
+                            ]);
+                            $response = json_decode($result->getBody()->getContents(), true);
+                            ApiResponse::create(['invoice_id' => $invoice->id, 'document_key' => $invoice->document_key,
+                                'doc_type' => $invoice->document_type,
+                                'json_response' => json_encode($response)
+                            ]);
+                            Log::info('Response Credit Note Api Hacienda '. json_encode($response));
+                            if (isset($response['status']) && $response['status'] == 200) {
+                                Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
+                                $date = Carbon::now();
+                                $invoice->hacienda_status = '03';
+                                $invoice->save();
+                                $path = 'empresa-' . $company->id_number .
+                                    "/notas_credito_ventas/$date->year/$date->month/$invoice->document_key.xml";
+                                $save = Storage::put(
+                                    $path,
+                                    ltrim($response['data']['xmlFirmado'], '\n'));
+                                if ($save) {
+                                    $xml = new XmlHacienda();
+                                    $xml->invoice_id = $invoice->id;
+                                    $xml->bill_id = 0;
+                                    $xml->xml = $path;
+                                    $xml->save();
+                                    if (isset($invoice->client_id)) {
+                                        if (!empty($invoice->send_emails)) {
+                                            Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new CreditNoteNotificacion([
+                                                'xml' => $path,
+                                                'data_invoice' => $invoice, 'data_company' => $company
+                                            ]));
+                                        } else {
+                                            Mail::to($invoice->client_email)->send(new CreditNoteNotificacion([
+                                                'xml' => $path,
+                                                'data_invoice' => $invoice, 'data_company' => $company
+                                            ]));
+                                        }
+                                    } else {
+                                        Mail::to($company->email)->send(new CreditNoteNotificacion([
+                                            'xml' => $path,
+                                            'data_invoice' => $invoice, 'data_company' => $company
+                                        ]));
+                                    }
+                                }
+                                Log::info('Factura enviada y XML guardado.');
+                            } else if (isset($response['status']) && $response['status'] == 400 &&
+                                strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
+                                Log::info('Consecutive repeated -->' . $invoice->document_number);
+                                $invoice->hacienda_status = '04';
+                                $invoice->save();
+    
+                            } else if (isset($response['status']) && $response['status'] == 400 &&
+                                strpos($response['message'], 'archivo XML ya existe en nuestras bases de datos') <> false) {
+                                Log::info('Consecutive repeated -->' . $invoice->document_number);
+                                $invoice->hacienda_status = '04';
+                                $invoice->save();
+                            }
+                            Log::info('Proceso de nota de credito finalizado con éxito.');
+                        }
                     }
+                    Log::info("No se envio Nota de credito falta informacion");
+                }else {
+                    Log::warning('El job no se procesó, porque la empresa no tiene un certificado válido: '.$this->invoiceId.'-->>');
                 }
-            }else {
-                Log::warning('El job no se procesó, porque la empresa no tiene un certificado válido: '.$this->invoiceId.'-->>');
             }
         } catch ( \Exception $e) {
             Log::error('ERROR Enviando parametros  API HACIENDA Nota de credito: '.$this->invoiceId.'-->>'.$e);
@@ -141,37 +165,37 @@ class ProcessCreditNote implements ShouldQueue
             $invoiceData = [
                 'consecutivo' => $data['reference_number'] ?? '',
                 'fecha_emision' => $data['generated_date'] ?? '',
-                'receptor_nombre' => $data['client_first_name'].' '.$data['client_last_name'],
+                'receptor_nombre' => trim($data['client_first_name'].' '.$data['client_last_name']),
                 'receptor_ubicacion_provincia' => substr($receptorPostalCode,0,1),
                 'receptor_ubicacion_canton' => substr($receptorPostalCode,1,2),
                 'receptor_ubicacion_distrito' => substr($receptorPostalCode,3),
-                'receptor_ubicacion_otras_senas' => $data['client_address'] ?? '',
-                'receptor_email' => $data['client_email'] ?? '',
-                'receptor_cedula_numero' => $data['client_id_number'] ?? '',
+                'receptor_ubicacion_otras_senas' => $data['client_address'] ? trim($data['client_address']) : '',
+                'receptor_email' => $data['client_email'] ? trim($data['client_email']) : '',
+                'receptor_cedula_numero' => $data['client_id_number'] ? trim($data['client_id_number']): '',
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',
                 'tipocambio' => $data['currency_rate'] ?? '',
                 'tipo_documento' => $data['document_type'] ?? '',
                 'sucursal_nro' => '001',
                 'terminal_nro' => '00001',
-                'emisor_name' => $company->business_name ?? '',
-                'emisor_email' => $company->email ?? '',
-                'emisor_company' => $company->business_name ?? '',
+                'emisor_name' => $company->business_name ? trim($company->business_name) : '',
+                'emisor_email' => $company->email ? trim($company->email) : '',
+                'emisor_company' => $company->business_name ? trim($company->business_name) : '',
                 'emisor_city' => $company->city ?? '',
                 'emisor_state' => $company->state ?? '',
                 'emisor_postal_code' => $company->zip ?? '',
                 'emisor_country' => $company->country ?? '',
-                'emisor_address' => $company->address ?? '',
-                'emisor_phone' => $company->phone ?? '',
-                'emisor_cedula' => $company->id_number ?? '',
-                'usuarioAtv' => $company->atv->user ?? '',
-                'passwordAtv' => $company->atv->password ?? '',
+                'emisor_address' => $company->address ? trim($company->address) : '',
+                'emisor_phone' => $company->phone ? trim($company->phone) : '',
+                'emisor_cedula' => $company->id_number ? trim($company->id_number) : '',
+                'usuarioAtv' => $company->atv->user ? trim($company->atv->user) : '',
+                'passwordAtv' => $company->atv->password ? trim($company->atv->password) : '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
                 'referencia_codigo' => '01',
                 'referencia_razon' => 'Anulacion de factura',
                 'fecha_emision_factura' => $data['reference_generated_date'],
                 'clave_factura' => $data['reference_document_key'],
-                'atvcertPin' => $company->atv->pin ?? '',
+                'atvcertPin' => $company->atv->pin ? trim($company->atv->pin) : '',
                 'atvcertFile' => Storage::get($company->atv->key_url),
                 'detalle' => $details
             ];
@@ -198,7 +222,7 @@ class ProcessCreditNote implements ShouldQueue
 
     private function setDetails($data) {
         try {
-            $details = null;
+            $details = [];
             foreach ($data as $key => $value) {
                 $details[$key] = array(
                     'cantidad' => $value['item_count'] ?? '',

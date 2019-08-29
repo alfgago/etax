@@ -15,15 +15,15 @@
   <div class="wizard-popup" id="wizard-popup">
   	
    	<div class="titulo-bienvenida">
-    	<h2>Configuración inicial</h2>
-    	<p>Para iniciar con eTax, complete sus datos a continuación.</p>
+    	<h2>Configuración inicial de empresa</h2>
+    	<p>Para iniciar, complete sus datos a continuación.</p>
     </div>
     	
 	<div class="wizard-steps">
 			<div id="step1" class="step-btn step1 is-active" onclick="toggleStep(id);"><span>Información básica</span></div>
 			<div id="step2" class="step-btn step2" onclick="toggleStep(id);"><span>Ubicación</span></div>
 			<div id="step3" class="step-btn step3" onclick="toggleStep(id);"><span>Facturación electrónica</span></div>
-			<div id="step4" class="step-btn step4" onclick="toggleStep(id);"><span>Certificado ATV</span></div>
+			<!--div id="step4" class="step-btn step4" onclick="toggleStep(id);"><span>Certificado ATV</span></div-->
 			<div id="step5" class="step-btn step5" onclick="toggleStep(id);"><span>Prorrata</span></div>
 	</div>
     
@@ -98,15 +98,17 @@
 	}
 
     function checkEmptyFields(id) {
-        var allow = true;
-        $('.'+id+' .checkEmpty').each( function() {
+      var allow = true;
+      $('.'+id+' .checkEmpty').each( function() {
         	
     		if( $(this).val() && $(this).val() != "" ) {
     		    $(this).removeClass('isEmptyRequired');
+    		    $(this).parent().find('label').attr('style', '');
     		}
     		else {
     		    $(this).addClass('isEmptyRequired');
     		    allow = false;
+    		    $(this).parent().find('label').attr('style', 'color:red;');
     		}
     		
     		if(allow) {

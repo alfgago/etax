@@ -28,9 +28,10 @@ class CreditNoteNotificacion extends Mailable
      */
     public function build()
     {
-        $message = $this->subject('Confirmación Nota de Crédito #' . $this->content['data_invoice']->document_number.
+        $type = $this->content['data_invoice']->document_type == '03' ? 'Crédito': 'Debito';
+        $message = $this->subject('Confirmación Nota de '. $type .' #' . $this->content['data_invoice']->document_number.
             ' De: '.$this->content['data_company']->business_name)->markdown('emails.invoice.creditnote')
-            ->with(['data_invoice' => $this->content['data_invoice']]);
+            ->with(['data_invoice' => $this->content['data_invoice'], 'type' => $type]);
 
         $message->attachFromStorage($this->content['xml']);
         return $message;

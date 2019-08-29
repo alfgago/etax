@@ -13,28 +13,28 @@
     
     <div class="form-group col-md-6">
       <label for="codigo">Código</label>
-      <input type="text" class="form-control" id="codigo" value="" >
+      <input type="text" class="form-control" id="codigo" value="" maxlength="20">
     </div>
 
     <div class="form-group col-md-6">
       <label for="nombre">Nombre / Descripción</label>
-      <input type="text" class="form-control" id="nombre" value="" >
+      <input type="text" class="form-control" id="nombre" value="" maxlength="200">
     </div>
     
     <div class="form-group col-md-12">
-      <label for="tipo_producto">Tipo de producto</label>
-      <select class="form-control select-search" id="tipo_producto" >
-        @foreach ( \App\ProductCategory::whereNotNull('bill_iva_code')->get() as $tipo )
-          <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['bill_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
+      <label for="tipo_iva">Tipo de IVA</label>
+      <select class="form-control select-search" id="tipo_iva" >
+        @foreach ( \App\CodigoIvaSoportado::all() as $tipo )
+          <option value="{{ $tipo['code'] }}" is_identificacion_plena="{{ $tipo['is_identificacion_plena'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
         @endforeach
       </select>
     </div>
     
     <div class="form-group col-md-11">
-      <label for="tipo_iva">Tipo de IVA</label>
-      <select class="form-control" id="tipo_iva" >
-        @foreach ( \App\CodigoIvaSoportado::all() as $tipo )
-          <option value="{{ $tipo['code'] }}" is_identificacion_plena="{{ $tipo['is_identificacion_plena'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
+      <label for="tipo_producto">Categoría de declaración</label>
+      <select class="form-control" id="tipo_producto" >
+        @foreach ( \App\ProductCategory::whereNotNull('bill_iva_code')->get() as $tipo )
+          <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['bill_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
         @endforeach
       </select>
     </div>
@@ -131,3 +131,39 @@
 
   </div>
 </div>
+<script>
+    /*$(function () {
+        $("#cantidad").keydown(function () {
+            // Save old value.
+            if (!$(this).val() || parseInt($(this).val()) >= 0)
+                $(this).data("old", $(this).val());
+        });
+        $("#cantidad").keyup(function () {
+            // Check correct, else revert back to old value.
+            if (!$(this).val() ||  parseInt($(this).val()) >= 0)
+                ;
+            else
+                $(this).val($(this).data("old"));
+        });
+        $("#precio_unitario").keydown(function () {
+            // Save old value.
+            if (!$(this).val() || parseInt($(this).val()) >= 0)
+                $(this).data("old1", $(this).val());
+        });
+        $("#precio_unitario").keyup(function () {
+            // Check correct, else revert back to old value.
+            if (!$(this).val() ||  parseInt($(this).val()) >= 0)
+                ;
+            else
+                $(this).val($(this).data("old1"));
+        });
+        $('#item_iva_amount').change(function () {
+            if (!$(this).val() || parseInt($(this).val()) >= 0)
+                $(this).data("old2", $(this).val());
+            else if (!$(this).val() ||  parseInt($(this).val()) >= 0)
+                ;
+            else
+                $(this).val($(this).data("old2"));
+        })
+    });*/
+</script>

@@ -50,7 +50,7 @@
 </div>
 <input type="text" hidden id="bncupon" name="bncupon" value="0">
 <div class="btn-holder">
-  <button type="button" class="btn btn-primary btn-prev" onclick="toggleStep('step2');">Paso anterior</button>
+  <button type="button" class="btn btn-primary btn-prev" onclick="backFields();toggleStep('step2');">Paso anterior</button>
   <button onclick="trackClickEvent( 'ConfirmarPago' );" type="submit" id="btn-submit-tc" class="btn btn-primary btn-next has-spinner" >Confirmar</button>
 </div>
 
@@ -77,20 +77,20 @@
 
 <script>
     function checkCupon() {
-        if( $('#coupon').val() == '!!S0C10S3T4X!!' ){
-            $('.precio-final').text( '$' + (parseFloat( $('.precio-inicial').text().slice(1) ) * 0.5) );
-            $('.etiqueta-descuento').text('( Socios eTax 50% )');
-        }
-        if( $('#coupon').val() == 'edgarmurillo' || $('#coupon').val() == 'EDGARMURILLO'  ){
-            var descuento = parseFloat( $('.precio-inicial').text().slice(1) ) * 0.05;
-            $('.precio-final').text( '$' + (parseFloat( $('.precio-inicial').text().slice(1) ) - descuento) );
-            $('.etiqueta-descuento').text('( DESCUENTO: 5% Código Edgar Murillo )');
-            
-            if( $('#coupon').val() == 1 ) {
-                var descuento = parseFloat( $('.precio-inicial').text().slice(1) ) * 0.15;
-                $('.precio-final').text( '$' + (parseFloat( $('.precio-inicial').text().slice(1) ) - descuento) );
-                $('.etiqueta-descuento').text('( DESCUENTO: 5% Código Edgar Murillo + 10% BN Nacional)');
-            }
-        }
+        var codigo = $('#coupon').val();
+        var precio =  parseFloat( $('.precio-inicial').text().slice(1) );
+        var banco =  $('#bncupon').val();
+        var plan =  $('#plan-sel').val();
+        var companies =  $('#num_companies').val();
+        var url = '/confirmar-codigo/'+codigo+'/'+precio+'/'+banco+'/'+plan+'/'+companies;
+        $.ajax({
+           type:'GET',
+           url:url,
+           data:{},
+           success:function(data){
+                $('.precio-final').text( '$' + data.precio );
+                $('.etiqueta-descuento').text(data.nota);
+           }
+        });
     }
 </script>

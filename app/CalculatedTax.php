@@ -15,6 +15,11 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @group Model - Cálculo de impuestos
+ *
+ * Funciones de CalculatedTax.
+ */
 class CalculatedTax extends Model
 {
     use SoftDeletes;
@@ -28,29 +33,134 @@ class CalculatedTax extends Model
     {
         return $this->belongsTo(Company::class);
     }
-    
+
+  
+
     //Relacion con el asiento contable
     public function book()
     {
         return $this->hasOne(Book::class, 'calculated_tax_id');
     }
     
+    /**
+     * parsedIvaData
+     * Devuelve los datos de iva_data en formato de array
+     * @return \Illuminate\Http\Response
+     */
+    public function parsedIvaData() {
+      try{
+        return json_decode($this->iva_data);
+      }catch(\Throwable $e){
+        return false;
+      }
+    }
+    
+ /**
+     * validarMes
+     * Valida si para el mes en el que se quiere asignar el dato tiene una cierre abierto 
+     * @bodyParam date required Fecha en la que se va a guardar el dato ejemplo 19/09/1994
+     * @return true / false
+     */
+    public static function validarMes($date, $company = false){
+      try{
+        if(!$company){
+          $company = currentCompanyModel();
+        }
+        $generated_date = explode("/", $date);
+        
+        $month = $generated_date[1];
+        $year = $generated_date[2];
+
+        $existe = CalculatedTax::where([
+          ['company_id',$company->id],
+          ['month', $month],
+          ['year', $year]
+        ])->count();
+        
+        if( !$existe ){
+          return true;
+        }else{
+          $abierto = CalculatedTax::where([
+            ['company_id',$company->id],
+            ['month', $month],
+            ['year', $year],
+            ['is_final',1],
+            ['is_closed',0]
+          ])->count();
+          if($abierto == 0){
+            return false;
+          }else{
+            if($abierto > 0){
+              return true;
+            }else{
+              return false;
+            }
+          }
+        }
+      } catch( \Exception $ex ) {
+        Log::warning($ex);
+        return false;
+      }
+    }
+
+
+
+    /**
+     * applyRatios
+     * Aplica los ratios operativos y devuelve el valor con el cálculo realizado según el porcentaje indicado
+     * @bodyParam porc required Campo de porcentaje (1, 2, 13, 4). En base a este campo, aplica los ratios respectivos
+     * @bodyParam value required Campo de valor al cual se le aplican los ratios operativos.
+     * @return \Illuminate\Http\Response
+     */
+    public function applyRatios( $porc, $value ) {
+      
+      $company = currentCompanyModel();
+     
+      $ratio1_operativo = $company->operative_ratio1 / 100;
+      $ratio2_operativo = $company->operative_ratio2 / 100;
+      $ratio3_operativo = $company->operative_ratio3 / 100;
+      $ratio4_operativo = $company->operative_ratio4 / 100;
+      
+      //Redondea ratios a 4 decimales (Al multiplicar por 100, queda en 2)
+      $ratio1_operativo = round($ratio1_operativo, 4);
+      $ratio2_operativo = round($ratio2_operativo, 4);
+      $ratio3_operativo = round($ratio3_operativo, 4);
+      $ratio4_operativo = round($ratio4_operativo, 4);
+      
+      $applied = 0;
+      if( $porc == 1 ){
+        $applied =  $value*$ratio1_operativo*0.01 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.13 + $value*$ratio4_operativo*0.04 ;
+      }
+      if( $porc == 2 ){
+        $applied =  $value*$ratio1_operativo*0.02 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.02 + $value*$ratio4_operativo*0.02 ;
+      }
+      if( $porc == 13 ){
+        $applied =  $value*$ratio1_operativo*0.13 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.13 + $value*$ratio4_operativo*0.04 ; 
+      }
+      if( $porc == 4 ){
+        $applied =  $value*$ratio1_operativo*0.04 + $value*$ratio2_operativo*0.02 + $value*$ratio3_operativo*0.04 + $value*$ratio4_operativo*0.04 ; 
+      }
+      
+      return $applied;
+    }
+    
     
     /**
+     * calcularFacturacionPorMesAno
      * Calcula y devuelve los datos del mes para dashboard y reportes
      *
-     * @param  int $month
-     * @param  int $year
-     * @param  int $lastBalance
-     * @param  int $prorrataOperativa
+     * @bodyParam month required
+     * @bodyParam year required
+     * @bodyParam lastBalance required
+     * @bodyParam prorrataOperativa required
      * @return App\CalculatedTax
      */
-    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa ) {
+    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa, $forceRecalc = false ) {
       
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
       
-      //if ( !Cache::has($cacheKey) ) {
+      if ( !Cache::has($cacheKey) || $forceRecalc ) {
           
           //Busca el calculo del mes en Base de Datos.
           $data = CalculatedTax::firstOrNew(
@@ -64,11 +174,11 @@ class CalculatedTax extends Model
             
           if ( $month > 0 ) {
             
-            if( !$data->is_closed ) {
-              
+            if( !$data->is_closed || $forceRecalc ) {
               $data->resetVars();
+
               $data->calcularFacturacion( $month, $year, $lastBalance, $prorrataOperativa );
-              
+
               if( $data->count_invoices || $data->count_bills || $data->id ) {
                 $data->save();
                 $book = Book::calcularAsientos( $data );
@@ -92,24 +202,36 @@ class CalculatedTax extends Model
             
           Cache::put($cacheKey, $data, now()->addDays(120));
           
-      //}
-      
+      }
+
       $data = Cache::get($cacheKey);
       return $data;
       
     }
     
-    //Recibe fecha de inicio y fecha de fin en base a las cuales se desea calcular la prorrata.
+    //
+    /**
+     * calcularFacturacion
+     * Recibe fecha de inicio y fecha de fin en base a las cuales se desea calcular la prorrata.
+     *
+     * @bodyParam month required
+     * @bodyParam year required
+     * @bodyParam lastBalance required
+     * @bodyParam prorrataOperativa required
+     * @return App\CalculatedTax
+     */
     public function calcularFacturacion( $month, $year, $lastBalance, $prorrataOperativa ) {
+
       $currentCompany = currentCompanyModel();
       //Si recibe el balance anterior en 0, intenta buscarlo.
       if( !$lastBalance ) {
         $lastBalance = $currentCompany->getLastBalance($month, $year);
       }
       
-      if( $year >= 2018 && !( $year == 2019 && $month < 7 ) ) {
+      if( $year >= 2018 ) {
         $this->setDatosEmitidos( $month, $year, $currentCompany->id );
-        $query = BillItem::with('bill')
+
+        $query = BillItem::with('bill')->with('ivaType')
                     ->where('company_id', $currentCompany->id)
                     ->where('year', $year)
                     ->where('month', $month);
@@ -117,7 +239,7 @@ class CalculatedTax extends Model
       }
       
       $this->setCalculosIVA( $prorrataOperativa, $lastBalance );
-      
+
       return $this;
     }
     
@@ -132,7 +254,8 @@ class CalculatedTax extends Model
     }
   
     /**
-    *    Recorre todas las facturas emitidas y aumenta los montos correspondientes.
+    * setDatosEmitidos
+    * Recorre todas las facturas emitidas y aumenta los montos correspondientes.
     **/
     public function setDatosEmitidos ( $month, $year, $company ) {
       
@@ -153,48 +276,63 @@ class CalculatedTax extends Model
       $basesVentasConIdentificacion = 0;
       $ivasVentasConIdentificacion = 0;
       $ivaRetenido = 0;
+      $sumIvaSinAplicar = 0;
+      
+      $filterTotales = false;
+      if( $month == 0 && $year == 2018 && currentCompanyModel()->first_prorrata_type == 2 ) {
+        $filterTotales = true;
+      }
       
       $ivaData = json_decode( $this->iva_data ) ?? new \stdClass();
+      $arrayActividades = explode( ',', currentCompanyModel()->commercial_activities );
       
       InvoiceItem::with('invoice')
+                  ->with('ivaType')
                   ->where('company_id', $company)
                   ->where('year', $year)
                   ->where('month', $month)
-                  ->chunk( 2500,  function($invoiceItems) use ($year, $month, &$company, &$ivaData,
-       &$invoicesTotal, &$invoicesSubtotal, &$totalInvoiceIva, &$totalClientesContadoExp, &$totalClientesCreditoExp, &$totalClientesContadoLocal, &$totalClientesCreditoLocal,&$ivaRetenido,
+                  ->chunk( 2500,  function($invoiceItems) use ($year, $month, &$company, &$ivaData, $filterTotales, $arrayActividades,
+       &$invoicesTotal, &$invoicesSubtotal, &$totalInvoiceIva, &$totalClientesContadoExp, &$totalClientesCreditoExp, &$totalClientesContadoLocal, &$totalClientesCreditoLocal, &$ivaRetenido, &$sumIvaSinAplicar,
        &$sumRepercutido1, &$sumRepercutido2, &$sumRepercutido3, &$sumRepercutido4, &$sumRepercutidoExentoConCredito, &$sumRepercutidoExentoSinCredito, &$basesVentasConIdentificacion, &$ivasVentasConIdentificacion
       ) {
         
         $countInvoiceItems = $invoiceItems->count();
-        
         //Recorre las lineas de factura
         for ($i = 0; $i < $countInvoiceItems; $i++) {
           try {
-            if( !$invoiceItems[$i]->invoice->is_void && $invoiceItems[$i]->invoice->is_authorized && $invoiceItems[$i]->invoice->is_code_validated ) {
+            $currInvoice = $invoiceItems[$i]->invoice;
             
-              if( $invoiceItems[$i]->invoice->currency == 'CRC' ) {
-                $invoiceItems[$i]->invoice->currency_rate = 1;
+            if( !$currInvoice->is_void && $currInvoice->is_authorized && $currInvoice->is_code_validated 
+            && $currInvoice->is_totales == $filterTotales && $currInvoice->hide_from_taxes == false ) {
+            
+              if( $currInvoice->currency == 'CRC' ) {
+                $currInvoice->currency_rate = 1;
               }
               
               $invoiceItems[$i]->fixIvaType();
               
-              $subtotal = $invoiceItems[$i]->subtotal * $invoiceItems[$i]->invoice->currency_rate;
-              //$currentTotal = $invoiceItems[$i]->total * $invoiceItems[$i]->invoice->currency_rate;
+              $subtotal = $invoiceItems[$i]->subtotal * $currInvoice->currency_rate;
               $ivaType = $invoiceItems[$i]->iva_type;
-              $prodType = $invoiceItems[$i]->product_id;
-              $invoiceIva = $invoiceItems[$i]->iva_amount * $invoiceItems[$i]->invoice->currency_rate;
+              $prodType = $invoiceItems[$i]->product_type;
+              $invoiceIva = $invoiceItems[$i]->iva_amount * $currInvoice->currency_rate;
               $currentTotal = $subtotal + $invoiceIva;
               
+              $prodPorc = $invoiceItems[$i]->ivaType ? $invoiceItems[$i]->ivaType->percentage : '13';
               $prodType = $prodType ? $prodType : '17';
+              $currActivity = $currInvoice->commercial_activity;
               
-              
+              if( !isset($currActivity) || !in_array($currActivity, $arrayActividades) ){
+                $currActivity = $arrayActividades[0];
+                $currInvoice->commercial_activity = $currActivity;
+                //$currInvoice->save();
+              }
               
               //Redondea todo a 2 decimales
               $subtotal = round($subtotal, 2);
               $invoiceIva = round($invoiceIva, 2);
               $currentTotal = round($currentTotal, 2);
               
-              if( $invoiceItems[$i]->invoice->document_type == '03' ) {
+              if( $currInvoice->document_type == '03' ) {
                 $subtotal = $subtotal * -1;
                 $invoiceIva = $invoiceIva * -1;
                 $currentTotal = $currentTotal * -1;
@@ -202,6 +340,7 @@ class CalculatedTax extends Model
               
               $ivaType = $ivaType ? $ivaType : 'B103';
               
+              //Procesa los códigos que llevan IVA como costo dentro del subtotal de la factura.
               if( $ivaType == '200' || $ivaType == '201' || $ivaType == '240' || $ivaType == '250' || $ivaType == '260' || $ivaType == '245' || 
                   $ivaType == 'B200' || $ivaType == 'B201' || $ivaType == 'B240' || $ivaType == 'B250' || $ivaType == 'B260' || $ivaType == 'B245' ||
                   $ivaType == 'S200' || $ivaType == 'S201' || $ivaType == 'S240' || $ivaType == 'S250' || $ivaType == 'S260' || $ivaType == 'S245' ){
@@ -209,34 +348,34 @@ class CalculatedTax extends Model
                 $invoiceIva = 0;
                 $sumRepercutidoExentoSinCredito += $subtotal;
               }else if( $invoiceItems[$i]->is_identificacion_especifica ) {
-                $basesVentasConIdentificacion += $subtotal;
+                $basesVentasConIdentificacion += $subtotal; //Las bases con id. específica no se incluyen en el cálculo de iva con prorrata, son 100% acreditables.
               }
               
               //sum los del 1%
               if( $ivaType == '101' || $ivaType == '121' || $ivaType == '141' ||
                   $ivaType == 'B101' || $ivaType == 'B121' || $ivaType == 'B141' ||
-                  $ivaType == 'S101' || $ivaType == 'S121' || $ivaType == 'S141' ){
+                  $ivaType == 'S101' || $ivaType == 'S121' || $ivaType == 'S141' || $ivaType == 'B171' ){
                 $sumRepercutido1 += $subtotal;
               }
               
               //sum los del 2%
               if( $ivaType == '102' || $ivaType == '122' || $ivaType == '142' ||
                   $ivaType == 'B102' || $ivaType == 'B122' || $ivaType == 'B142' ||
-                  $ivaType == 'S102' || $ivaType == 'S122' || $ivaType == 'S142' ){
+                  $ivaType == 'S102' || $ivaType == 'S122' || $ivaType == 'S142' || $ivaType == 'B172' ){
                 $sumRepercutido2 += $subtotal;
               }
               
               //sum los del 13%
               if( $ivaType == '103' || $ivaType == '123' || $ivaType == '143' || $ivaType == '130' || $ivaType == '140' ||
                   $ivaType == 'B103' || $ivaType == 'B123' || $ivaType == 'B143' || $ivaType == 'B130' || $ivaType == 'B140' ||
-                  $ivaType == 'S103' || $ivaType == 'S123' || $ivaType == 'S143' || $ivaType == 'S130' || $ivaType == 'S140' ){
+                  $ivaType == 'S103' || $ivaType == 'S123' || $ivaType == 'S143' || $ivaType == 'S130' || $ivaType == 'S140' || $ivaType == 'B173' ){
                 $sumRepercutido3 += $subtotal;
               }
               
               //sum los del 4%
               if( $ivaType == '104' || $ivaType == '124' || $ivaType == '144' || $ivaType == '114' ||
                   $ivaType == 'B104' || $ivaType == 'B124' || $ivaType == 'B144' || $ivaType == 'B114' ||
-                  $ivaType == 'S104' || $ivaType == 'S124' || $ivaType == 'S144' || $ivaType == 'S114' ){
+                  $ivaType == 'S104' || $ivaType == 'S124' || $ivaType == 'S144' || $ivaType == 'S114' || $ivaType == 'B174' ){
                 $sumRepercutido4 += $subtotal;
               }
               //sum los del exentos. Estos se suman como si fueran 13 para efectos del cálculo.
@@ -248,6 +387,35 @@ class CalculatedTax extends Model
                 $sumRepercutido3 += $subtotal;
                 $sumRepercutidoExentoConCredito += $subtotal;
               }
+              if( $ivaType == 'S181' || $ivaType == 'B181' ){
+                $subtotal = $subtotal;
+                $invoiceIva = 0;
+                $sumRepercutido1 += $subtotal;
+                $sumRepercutidoExentoConCredito += $subtotal;
+              }
+              if( $ivaType == 'S182' || $ivaType == 'B182' ){
+                $subtotal = $subtotal;
+                $invoiceIva = 0;
+                $sumRepercutido2 += $subtotal;
+                $sumRepercutidoExentoConCredito += $subtotal;
+              }
+              if( $ivaType == 'S183' || $ivaType == 'B183' ){
+                $subtotal = $subtotal;
+                $invoiceIva = 0;
+                $sumRepercutido3 += $subtotal;
+                $sumRepercutidoExentoConCredito += $subtotal;
+              }
+              if( $ivaType == 'S184' || $ivaType == 'B184' ){
+                $subtotal = $subtotal;
+                $invoiceIva = 0;
+                $sumRepercutido4 += $subtotal;
+                $sumRepercutidoExentoConCredito += $subtotal;
+              }
+              //No cuenta los que no llevan IVA
+              if( $ivaType == 'S300' || $ivaType == 'B300' ){
+                $subtotal = $subtotal + $invoiceIva;
+                $sumIvaSinAplicar += $subtotal;
+              }
               
               //Suma la transitoria de canasta básica
               if( $ivaType == '165' || $ivaType == 'B165' || $ivaType == 'S165' ){
@@ -258,16 +426,16 @@ class CalculatedTax extends Model
               }
               
               //Ingresa retenciones al calculo
-              $tipoPago = $invoiceItems[$i]->invoice->payment_type;
+              $tipoPago = $currInvoice->payment_type;
               $retenidoLinea = 0;
-              $porcRetencion = $invoiceItems[$i]->invoice->retention_percent;
+              $porcRetencion = $currInvoice->retention_percent;
               if( $tipoPago == '02' ) {
                 $retenidoLinea = $currentTotal * ($porcRetencion / 100);
                 $ivaRetenido += $retenidoLinea;
               }
               
               //Ingresa retenciones al calculo
-              $tipo_venta = $invoiceItems[$i]->invoice->sale_condition;
+              $tipo_venta = $currInvoice->sale_condition;
               if( $ivaType == '150' || $ivaType == 'B150' || $ivaType == 'S150' ){
                 if( $tipo_venta == '01' ) {
                   $totalClientesContadoExp += $currentTotal-$retenidoLinea;
@@ -299,17 +467,32 @@ class CalculatedTax extends Model
               $ivaData->$bVar += $subtotal;
               $ivaData->$iVar += $invoiceIva;
               
-              $typeVar = "type$prodType";
+              $typeVar = "type$prodType"; //Ej. type17
+              $typeVarPorc = "type$prodType-$prodPorc"; //Ej. type17-4
+              $typeVarActividad = $currActivity."-".$typeVar; //Ej. 706903-type17
+              $typeVarPorcActividad = $currActivity."-".$typeVarPorc; //Ej. 706903-type17-4
+              
               if(!isset($ivaData->$typeVar)) {
                 $ivaData->$typeVar = 0;
               }
+              if(!isset($ivaData->$typeVarPorc)) {
+                $ivaData->$typeVarPorc = 0;
+              }
+              if(!isset($ivaData->$typeVarActividad)) {
+                $ivaData->$typeVarActividad = 0;
+              }
+              if(!isset($ivaData->$typeVarPorcActividad)) {
+                $ivaData->$typeVarPorcActividad = 0;
+              }
               $ivaData->$typeVar += $subtotal;
+              $ivaData->$typeVarPorc += $subtotal;
+              $ivaData->$typeVarActividad += $subtotal;
+              $ivaData->$typeVarPorcActividad += $subtotal;
+
             }
             
-          }catch( \Exception $ex ){
-            Log::error('Error leer factura para cálculo' . $ex->getMessage());
           }catch( \Throwable $ex ){
-            Log::error('Error leer factura para cálculo' . $ex->getMessage());
+            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }
         }
         
@@ -330,6 +513,7 @@ class CalculatedTax extends Model
       $this->sum_repercutido4 = $sumRepercutido4;
       $this->sum_repercutido_exento_con_credito = $sumRepercutidoExentoConCredito;
       $this->sum_repercutido_exento_sin_credito = $sumRepercutidoExentoSinCredito;
+      $this->sum_iva_sin_aplicar = $sumIvaSinAplicar;
       $this->bases_ventas_con_identificacion = $basesVentasConIdentificacion;
       $this->iva_retenido = $ivaRetenido;
       
@@ -339,8 +523,8 @@ class CalculatedTax extends Model
     /**
     *   Recorre todas las facturas recibidas y aumenta los montos correspondientes.
     **/
-    public function setDatosSoportados ( $month, $year, $company, $query ) {
-      $countBills = $query->count();
+    public function setDatosSoportados ( $month, $year, $company, $query, $singleBill = false ) {
+      $countBills = Bill::where('company_id', $company)->where('year', $year)->where('month', $month)->count();
   
       $billsTotal = 0;
       $billsSubtotal = 0;
@@ -352,8 +536,9 @@ class CalculatedTax extends Model
       $totalProveedoresContado = 0;
       $totalProveedoresCredito = 0;
       $ivaData = json_decode( $this->iva_data ) ?? new \stdClass();
-      
-      $query->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$ivaData,
+      $arrayActividades = explode( ',', currentCompanyModel()->commercial_activities );
+
+      $query->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$ivaData, &$singleBill, $arrayActividades,
        &$billsTotal, &$billsSubtotal, &$totalBillIva, &$basesIdentificacionPlena, &$basesNoDeducibles, &$ivaAcreditableIdentificacionPlena, 
        &$ivaNoAcreditableIdentificacionPlena, &$totalProveedoresContado, &$totalProveedoresCredito
       ) {
@@ -361,30 +546,45 @@ class CalculatedTax extends Model
 
         for ($i = 0; $i < $countBillItems; $i++) {
           
-          try {
-          
-            if( !$billItems[$i]->bill->is_void && $billItems[$i]->bill->is_authorized && $billItems[$i]->bill->is_code_validated ) {
+          try{
             
-              if( $billItems[$i]->bill->currency == 'CRC' ) {
-                $billItems[$i]->bill->currency_rate = 1;
+            $currBill = $billItems[$i]->bill;
+            if( !$currBill->is_void && $currBill->is_authorized && $currBill->is_code_validated &&
+                ( $singleBill || $currBill->accept_status == 1 ) && $currBill->hide_from_taxes == false ) {
+            
+              if( $currBill->currency == 'CRC' ) {
+                $currBill->currency_rate = 1;
               }
-            
               //Arrela el IVATYPE la primera vez en caso de ser codigos anteriores.
               $billItems[$i]->fixIvaType();
               
-              $subtotal = $billItems[$i]->subtotal * $billItems[$i]->bill->currency_rate;
+              $subtotal = $billItems[$i]->subtotal * $currBill->currency_rate;
               $ivaType = $billItems[$i]->iva_type;
-              $prodType = $billItems[$i]->product_id;
-              $billIva = $billItems[$i]->iva_amount * $billItems[$i]->bill->currency_rate;
+              $prodType = $billItems[$i]->product_type;
+              $billIva = $billItems[$i]->iva_amount * $currBill->currency_rate;
               $currentTotal = $subtotal + $billIva;
               
+              $prodPorc = $billItems[$i]->ivaType ? $billItems[$i]->ivaType->percentage : '13';
               $prodType = $prodType ? $prodType : '49';
+              
+              $currActivity = $currBill->activity_company_verification;
+              if( !isset($currActivity) || !in_array($currActivity, $arrayActividades) ){
+                $currActivity = $arrayActividades[0];
+                $currBill->commercial_activity = $currActivity;
+                //$currBill->save();
+              }
               
               //Redondea todo a 2 decimales
               $subtotal = round($subtotal, 2);
               $billIva = round($billIva, 2);
               $currentTotal = round($currentTotal, 2);
               
+              if( $currBill->document_type == '03' ) {
+                $subtotal = $subtotal * -1;
+                $billIva = $billIva * -1;
+                $currentTotal = $currentTotal * -1;
+              }
+                
               $ivaType = $ivaType ? $ivaType : '003';
               $ivaType = str_pad($ivaType, 3, '0', STR_PAD_LEFT);
               
@@ -405,8 +605,10 @@ class CalculatedTax extends Model
                 $basesIdentificacionPlena += $subtotal;
               }
               
-              if( $ivaType == 'B080' || $ivaType == 'B090' || $ivaType == 'B097' || $ivaType == '098' || $ivaType == '099' ||
-                  $ivaType == 'S080' || $ivaType == 'S090' || $ivaType == 'S097' || $ivaType == '098' || $ivaType == '099' )
+              if( $ivaType == 'B091' || $ivaType == 'B092' || $ivaType == 'B093' || $ivaType == 'B094' ||
+                  $ivaType == 'S091' || $ivaType == 'S092' || $ivaType == 'S093' || $ivaType == 'S094' ||
+                  $ivaType == 'B080' || $ivaType == 'B090' || $ivaType == 'B097' || $ivaType == '098' || $ivaType == '099' ||
+                  $ivaType == 'S080' || $ivaType == 'S090' || $ivaType == 'S097' )
               {
                 $basesNoDeducibles += $subtotal;
                 $ivaNoAcreditableIdentificacionPlena += $billIva;
@@ -416,6 +618,7 @@ class CalculatedTax extends Model
                   $ivaType == 'S040' || $ivaType == 'S050' || $ivaType == 'S060' || $ivaType == 'S070' )
               {
                 $basesNoDeducibles += $subtotal;
+                $ivaNoAcreditableIdentificacionPlena += $billIva;
               }
               
               /***SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
@@ -452,9 +655,13 @@ class CalculatedTax extends Model
                   $menor = $porc_plena > 13 ? 13 : $porc_plena;
                 }
                 $menor_porc = $menor/100;
-                
-                $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
-                $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
+                if( $menor != 13) { 
+                  $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
+                  $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
+                }else{
+                  $ivaAcreditableIdentificacionPlena += $billIva;
+                  $ivaNoAcreditableIdentificacionPlena += 0;
+                }
               }
               if( $ivaType == 'B044' || $ivaType == 'B054' || $ivaType == 'B064' || $ivaType == 'B074' ||
                   $ivaType == 'S044' || $ivaType == 'S054' || $ivaType == 'S064' || $ivaType == 'S074' )
@@ -482,30 +689,41 @@ class CalculatedTax extends Model
               $ivaData->$bVar += $subtotal;
               $ivaData->$iVar += $billIva;
               
-              $typeVar = "type$prodType";
-              if(!isset($ivaData->$typeVar)) {
-                $ivaData->$typeVar = 0;
-              }
-              $ivaData->$typeVar += $subtotal;
-              
               //Cuenta contable de proveedor
-              $tipoVenta = $billItems[$i]->bill->sale_condition;
+              $tipoVenta = $currBill->sale_condition;
               if( $tipoVenta == '01' ) {
                 $totalProveedoresContado += $currentTotal;
               }else{
                 $totalProveedoresCredito += $currentTotal;
               }
               
+              $typeVar = "type$prodType";
+              $typeVarPorc = "type$prodType-$prodPorc";
+              $typeVarActividad = $currActivity."-".$typeVar;
+              $typeVarPorcActividad = $currActivity."-".$typeVarPorc;
+              
+              if(!isset($ivaData->$typeVar)) {
+                $ivaData->$typeVar = 0;
+                $ivaData->$typeVarPorc = 0;
+                $ivaData->$typeVarActividad = 0;
+                $ivaData->$typeVarPorcActividad = 0;
+              }
+              $ivaData->$typeVar += $subtotal;
+              $ivaData->$typeVarPorc += $subtotal;
+              $ivaData->$typeVarActividad += $subtotal;
+              $ivaData->$typeVarPorcActividad += $subtotal;
+              
+              
             }  
             
-          }catch( \Exception $ex ){
-            Log::error('Error leer factura para cálculo' . $ex->getMessage());
           }catch( \Throwable $ex ){
-            Log::error('Error leer factura para cálculo' . $ex->getMessage());
+            //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
           }
+          
         }
         
       });
+              
       
       $this->iva_data = json_encode( $ivaData );
       $this->count_bills = $countBills;
@@ -539,12 +757,12 @@ class CalculatedTax extends Model
     }
     
     public function setCalculosIVA( $prorrataOperativa, $lastBalance ) {
-      
       $company = currentCompanyModel();
+      $subtotalAplicado =  $this->invoices_subtotal - $this->sum_iva_sin_aplicar;
       
       //Determina numerador y denominador de la prorrata.
-      $numeradorProrrata = $this->invoices_subtotal - $this->sum_repercutido_exento_sin_credito;
-      $denumeradorProrrata = $this->invoices_subtotal;
+      $numeradorProrrata = $subtotalAplicado - $this->sum_repercutido_exento_sin_credito;
+      $denumeradorProrrata = $subtotalAplicado;
       
       //Otras variables relevantes
       $prorrata = 1;
@@ -566,9 +784,9 @@ class CalculatedTax extends Model
       $subtotalParaCFDP = 0;
       $cfdp = 0;
       
+      
       //Primero revisa si la sumatoria de pro
       if( $numeradorProrrata > 0 ){
-        
         //Define los ratios por tipo para calculo de prorrata
         $ratio1 = $this->sum_repercutido1 / $numeradorProrrata;
         $ratio2 = $this->sum_repercutido2 / $numeradorProrrata;
@@ -582,17 +800,20 @@ class CalculatedTax extends Model
         $ratio4 = round($ratio4, 4);
         
         //Define los ratios por tipo para guardar
-        $fakeRatio1 = $this->sum_repercutido1 / $this->invoices_subtotal;
-        $fakeRatio2 = $this->sum_repercutido2 / $this->invoices_subtotal;
-        $fakeRatio3 = ($this->sum_repercutido3-$this->sum_repercutido_exento_con_credito) / $this->invoices_subtotal;
-        $fakeRatio4 = $this->sum_repercutido4 / $this->invoices_subtotal;
-        $fakeRatioExentoSinCredito = $this->sum_repercutido_exento_sin_credito / $this->invoices_subtotal;
-        $fakeRatioExentoConCredito = $this->sum_repercutido_exento_con_credito / $this->invoices_subtotal;
+        $fakeRatio1 = $this->sum_repercutido1 / $subtotalAplicado;
+        $fakeRatio2 = $this->sum_repercutido2 / $subtotalAplicado;
+        $fakeRatio3 = ($this->sum_repercutido3-$this->sum_repercutido_exento_con_credito) / $subtotalAplicado;
+        $fakeRatio4 = $this->sum_repercutido4 / $subtotalAplicado;
+        $fakeRatioExentoSinCredito = $this->sum_repercutido_exento_sin_credito / $subtotalAplicado;
+        $fakeRatioExentoConCredito = $this->sum_repercutido_exento_con_credito / $subtotalAplicado;
         
         //Calcula prorrata
         $prorrata = $numeradorProrrata / $denumeradorProrrata;
       } else {
         $prorrata = 1;
+        if( $this->sum_repercutido_exento_sin_credito > 0) {
+          $prorrata = 0;
+        }
         $ratio1 = 0;
         $ratio2 = 0;
         $ratio3 = 0;
@@ -608,14 +829,19 @@ class CalculatedTax extends Model
         
       }
       
+      $prorrata = round($prorrata, 4);
+      $prorrataOperativa = round($prorrataOperativa, 4);
+      $prorrata = ($prorrata == 1) ? 0.9999 : $prorrata; // El máximo posible es 0.9999
+      $prorrataOperativa = ($prorrataOperativa == 1) ? 0.9999 : $prorrataOperativa; // El máximo posible es 0.9999
+
       //Calcula el total deducible y no deducible en base a los ratios y los montos de facturas recibidas.
       $subtotalParaCFDP = $this->bills_subtotal - $this->bases_identificacion_plena - $this->bases_no_deducibles;
       
       //Usa los subtotales de cada tarifa para hacer el calculo. Los subtotales no incluyen nada 100% acreditable.
       $cfdpEstimado1 = $this->bills_subtotal1*$ratio1*0.01 + $this->bills_subtotal1*$ratio2*0.02 + $this->bills_subtotal1*$ratio3*0.13 + $this->bills_subtotal1*$ratio4*0.04 ; 
-      $cfdpEstimado2 = $this->bills_subtotal2*$ratio1*0.01 + $this->bills_subtotal2*$ratio2*0.02 + $this->bills_subtotal2*$ratio3*0.02 + $this->bills_subtotal2*$ratio4*0.02 ; 
-      $cfdpEstimado3 = $this->bills_subtotal3*$ratio1*0.01 + $this->bills_subtotal3*$ratio2*0.02 + $this->bills_subtotal3*$ratio3*0.13 + $this->bills_subtotal3*$ratio4*0.04 ; 
-      $cfdpEstimado4 = $this->bills_subtotal4*$ratio1*0.01 + $this->bills_subtotal4*$ratio2*0.02 + $this->bills_subtotal4*$ratio3*0.04 + $this->bills_subtotal4*$ratio4*0.04 ; 
+      $cfdpEstimado2 = $this->bills_subtotal2*$ratio1*0.02 + $this->bills_subtotal2*$ratio2*0.02 + $this->bills_subtotal2*$ratio3*0.02 + $this->bills_subtotal2*$ratio4*0.02 ; 
+      $cfdpEstimado3 = $this->bills_subtotal3*$ratio1*0.13 + $this->bills_subtotal3*$ratio2*0.02 + $this->bills_subtotal3*$ratio3*0.13 + $this->bills_subtotal3*$ratio4*0.04 ; 
+      $cfdpEstimado4 = $this->bills_subtotal4*$ratio1*0.04 + $this->bills_subtotal4*$ratio2*0.02 + $this->bills_subtotal4*$ratio3*0.04 + $this->bills_subtotal4*$ratio4*0.04 ; 
       $cfdpEstimado  = $cfdpEstimado1 + $cfdpEstimado2 + $cfdpEstimado3 + $cfdpEstimado4;
       
       //Calcula el balance estimado.
@@ -644,10 +870,6 @@ class CalculatedTax extends Model
       $ivaDeducibleOperativo = ($cfdp  * $prorrataOperativa) + $this->iva_acreditable_identificacion_plena;
       $balanceOperativo = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleOperativo;
       $ivaNoDeducible = $this->total_bill_iva - $ivaDeducibleOperativo;
-
-      if( $this->month == 7) {
-       //dd( "1: $cfdp1, 2: $cfdp2, 3: $cfdp3, 4: $cfdp4, PLENA: $this->iva_acreditable_identificacion_plena, deducible: $ivaDeducibleOperativo" );
-      }
  
       $saldoFavor = $balanceOperativo - $this->iva_retenido;
       $saldoFavor = $saldoFavor < 0 ? abs( $saldoFavor ) : 0;
@@ -686,6 +908,7 @@ class CalculatedTax extends Model
     }
     
     public function setCalculosPorFactura( $prorrataOperativa, $lastBalance ) {
+      $prorrataOperativa = ($prorrataOperativa == 1) ? 0.9999 : $prorrataOperativa;
       
       $company = currentCompanyModel();
       
@@ -738,7 +961,7 @@ class CalculatedTax extends Model
                 'is_final' => true,
             ]
         );
-        
+
         if($anoAnterior == 2018 && $currentCompany->first_prorrata_type == 2 ){
           
           if( !$data->is_closed ) {
@@ -757,8 +980,6 @@ class CalculatedTax extends Model
             
         }else {
           if( !$data->is_closed ) {
-            
-              
               $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $anoAnterior, 0, 100 );
               $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $anoAnterior, 0, 100 );
               $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $anoAnterior, 0, 100 );
@@ -771,20 +992,25 @@ class CalculatedTax extends Model
               $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $anoAnterior, 0, 100 );
               $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $anoAnterior, 0, 100 );
               $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $anoAnterior, 0, 100 );
-            
               $data->resetVars();
               $data->calcularFacturacionAcumulado( $anoAnterior, 1 );
-              
               if( $data->count_invoices || $data->count_bills ) {
                 $data->save();
                 $book = Book::calcularAsientos( $data );
                 $book->save();
                 $data->book = $book;
               }
-            
           }
+          $data->prorrata = ($data->prorrata == 1) ? 0.9999 : $data->prorrata;
+          $currentCompany->operative_prorrata = number_format( $data->prorrata*100, 2);
+          $currentCompany->first_prorrata   = number_format( $data->prorrata*100, 2);
+          $currentCompany->operative_ratio1 = number_format( $data->ratio1*100, 2);
+          $currentCompany->operative_ratio2 = number_format( $data->ratio2*100, 2);
+          $currentCompany->operative_ratio3 = number_format( $data->ratio3*100, 2);
+          $currentCompany->operative_ratio4 = number_format( $data->ratio4*100, 2);
+          $currentCompany->save();
         }
-        Cache::put($cacheKey, $data, now()->addDays(120));
+        Cache::put($cacheKey, $data, now()->addDays(365));
       }
       
       return Cache::get($cacheKey);
@@ -812,6 +1038,7 @@ class CalculatedTax extends Model
 			$this->sum_repercutido_exento_con_credito = 0;
 			$this->sum_repercutido_exento_sin_credito = 0;
 			$this->bases_ventas_con_identificacion = 0;
+			$this->sum_iva_sin_aplicar = 0;
 
 			$this->count_bills = 0;
 			$this->bills_total = 0;
@@ -829,7 +1056,12 @@ class CalculatedTax extends Model
 			$this->total_proveedores_credito = 0;
 			$this->iva_retenido = 0;
       
+    	$ivaData = json_decode($this->iva_data);
+    	$arrayActividades = currentCompanyModel()->getActivities();
+
       for ($i = 0; $i < $countAnteriores; $i++) {
+        
+        if( !( $calculosAnteriores[$i]->year == 2019 && $calculosAnteriores[$i]->month < 7 ) ){
           $this->count_invoices += $calculosAnteriores[$i]->count_invoices;
     			$this->invoices_total += $calculosAnteriores[$i]->invoices_total;
     			$this->invoices_subtotal += $calculosAnteriores[$i]->invoices_subtotal;
@@ -844,6 +1076,7 @@ class CalculatedTax extends Model
     			$this->sum_repercutido4 += $calculosAnteriores[$i]->sum_repercutido4;
     			$this->sum_repercutido_exento_con_credito += $calculosAnteriores[$i]->sum_repercutido_exento_con_credito;
     			$this->sum_repercutido_exento_sin_credito += $calculosAnteriores[$i]->sum_repercutido_exento_sin_credito;
+    			$this->sum_iva_sin_aplicar += $calculosAnteriores[$i]->sum_iva_sin_aplicar;
     			$this->bases_ventas_con_identificacion += $calculosAnteriores[$i]->bases_ventas_con_identificacion;
     
     			$this->count_bills += $calculosAnteriores[$i]->count_bills;
@@ -861,8 +1094,6 @@ class CalculatedTax extends Model
     			$this->total_proveedores_contado += $calculosAnteriores[$i]->total_proveedores_contado;
     			$this->total_proveedores_credito += $calculosAnteriores[$i]->total_proveedores_credito;
     			$this->iva_retenido += $calculosAnteriores[$i]->iva_retenido;
-    			
-    			$ivaData = json_decode($this->iva_data);
     			$ivaDataAnterior = json_decode($calculosAnteriores[$i]->iva_data);
 			
     			foreach( CodigoIvaRepercutido::all() as $codigo ) {
@@ -881,176 +1112,43 @@ class CalculatedTax extends Model
     			
     			foreach( ProductCategory::all() as $codigo ) {
     			  $varName = "type$codigo->id";
+    			  $varName0 = "type$codigo->id-0";
+    			  $varName1 = "type$codigo->id-1";
+    			  $varName2 = "type$codigo->id-2";
+    			  $varName4 = "type$codigo->id-4";
+    			  $varName8 = "type$codigo->id-8";
+    			  $varName3 = "type$codigo->id-13";
+    			  
     			  $ivaData->$varName += $ivaDataAnterior->$varName;
+    			  $ivaData->$varName0 += $ivaDataAnterior->$varName0;
+    			  $ivaData->$varName1 += $ivaDataAnterior->$varName1;
+    			  $ivaData->$varName2 += $ivaDataAnterior->$varName2;
+    			  $ivaData->$varName4 += $ivaDataAnterior->$varName4;
+    			  $ivaData->$varName8 += $ivaDataAnterior->$varName8;
+    			  $ivaData->$varName3 += $ivaDataAnterior->$varName3;
+    			  
+            foreach( $arrayActividades as $act){
+              $typeVarAct  = "$act->codigo-$varName";
+              $typeVarAct0 = "$act->codigo-$varName0";
+              $typeVarAct1 = "$act->codigo-$varName1";
+              $typeVarAct2 = "$act->codigo-$varName2";
+              $typeVarAct4 = "$act->codigo-$varName4";
+              $typeVarAct8 = "$act->codigo-$varName8";
+              $typeVarAct3 = "$act->codigo-$varName3";
+              
+        			try{$ivaData->$typeVarAct  += $ivaDataAnterior->$typeVarAct; }catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct0 += $ivaDataAnterior->$typeVarAct0;}catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct1 += $ivaDataAnterior->$typeVarAct1;}catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct2 += $ivaDataAnterior->$typeVarAct2;}catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct4 += $ivaDataAnterior->$typeVarAct4;}catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct8 += $ivaDataAnterior->$typeVarAct8;}catch(\Throwable $e){}
+        			try{$ivaData->$typeVarAct3 += $ivaDataAnterior->$typeVarAct3;}catch(\Throwable $e){}
+              
+            }
     			}
     			
     			$this->iva_data = json_encode($ivaData);
-    			
-    			/*$this->b001 += $calculosAnteriores[$i]->b001;
-          $this->i001 += $calculosAnteriores[$i]->i001;
-          $this->b002 += $calculosAnteriores[$i]->b002;
-          $this->i002 += $calculosAnteriores[$i]->i002;
-          $this->b003 += $calculosAnteriores[$i]->b003;
-          $this->i003 += $calculosAnteriores[$i]->i003;
-          $this->b004 += $calculosAnteriores[$i]->b004;
-          $this->i004 += $calculosAnteriores[$i]->i004;
-          
-          $this->b011 += $calculosAnteriores[$i]->b011;
-          $this->i011 += $calculosAnteriores[$i]->i011;
-          $this->b012 += $calculosAnteriores[$i]->b012;
-          $this->i012 += $calculosAnteriores[$i]->i012;
-          $this->b013 += $calculosAnteriores[$i]->b013;
-          $this->i013 += $calculosAnteriores[$i]->i013;
-          $this->b014 += $calculosAnteriores[$i]->b014;
-          $this->i014 += $calculosAnteriores[$i]->i014;
-          
-          $this->b021 += $calculosAnteriores[$i]->b021;
-          $this->i021 += $calculosAnteriores[$i]->i021;
-          $this->b022 += $calculosAnteriores[$i]->b022;
-          $this->i022 += $calculosAnteriores[$i]->i022;
-          $this->b023 += $calculosAnteriores[$i]->b023;
-          $this->i023 += $calculosAnteriores[$i]->i023;
-          $this->b024 += $calculosAnteriores[$i]->b024;
-          $this->i024 += $calculosAnteriores[$i]->i024;
-          
-          $this->b031 += $calculosAnteriores[$i]->b031;
-          $this->i031 += $calculosAnteriores[$i]->i031;
-          $this->b032 += $calculosAnteriores[$i]->b032;
-          $this->i032 += $calculosAnteriores[$i]->i032;
-          $this->b033 += $calculosAnteriores[$i]->b033;
-          $this->i033 += $calculosAnteriores[$i]->i033;
-          $this->b034 += $calculosAnteriores[$i]->b034;
-          $this->i034 += $calculosAnteriores[$i]->i034;
-
-          $this->b015 += $calculosAnteriores[$i]->b015;
-          $this->i015 += $calculosAnteriores[$i]->i015;
-          $this->b016 += $calculosAnteriores[$i]->b016;
-          $this->i016 += $calculosAnteriores[$i]->i016;
-          
-          $this->b035 += $calculosAnteriores[$i]->b035;
-          $this->i035 += $calculosAnteriores[$i]->i035;
-          $this->b036 += $calculosAnteriores[$i]->b036;
-          $this->i036 += $calculosAnteriores[$i]->i036;
-          
-          $this->b040 += $calculosAnteriores[$i]->b040;
-          $this->i040 += $calculosAnteriores[$i]->i040;
-          $this->b041 += $calculosAnteriores[$i]->b041;
-          $this->i041 += $calculosAnteriores[$i]->i041;
-          $this->b042 += $calculosAnteriores[$i]->b042;
-          $this->i042 += $calculosAnteriores[$i]->i042;
-          $this->b043 += $calculosAnteriores[$i]->b043;
-          $this->i043 += $calculosAnteriores[$i]->i043;
-          $this->b044 += $calculosAnteriores[$i]->b044;
-          $this->i044 += $calculosAnteriores[$i]->i044;
-          
-          $this->b050 += $calculosAnteriores[$i]->b050;
-          $this->i050 += $calculosAnteriores[$i]->b050;
-          $this->b051 += $calculosAnteriores[$i]->b051;
-          $this->i051 += $calculosAnteriores[$i]->i051;
-          $this->b052 += $calculosAnteriores[$i]->b052;
-          $this->i052 += $calculosAnteriores[$i]->i052;
-          $this->b053 += $calculosAnteriores[$i]->b053;
-          $this->i053 += $calculosAnteriores[$i]->i053;
-          $this->b054 += $calculosAnteriores[$i]->b054;
-          $this->i054 += $calculosAnteriores[$i]->i054;
-          
-          $this->b060 += $calculosAnteriores[$i]->b060;
-          $this->i060 += $calculosAnteriores[$i]->i060;
-          $this->b061 += $calculosAnteriores[$i]->b061;
-          $this->i061 += $calculosAnteriores[$i]->i061;
-          $this->b062 += $calculosAnteriores[$i]->b062;
-          $this->i062 += $calculosAnteriores[$i]->i062;
-          $this->b063 += $calculosAnteriores[$i]->b063;
-          $this->i063 += $calculosAnteriores[$i]->i063;
-          $this->b064 += $calculosAnteriores[$i]->b064;
-          $this->i064 += $calculosAnteriores[$i]->i064;
-          
-          $this->b070 += $calculosAnteriores[$i]->b070;
-          $this->i070 += $calculosAnteriores[$i]->i070;
-          $this->b071 += $calculosAnteriores[$i]->b071;
-          $this->i071 += $calculosAnteriores[$i]->i071;
-          $this->b072 += $calculosAnteriores[$i]->b072;
-          $this->i072 += $calculosAnteriores[$i]->i072;
-          $this->b073 += $calculosAnteriores[$i]->b073;
-          $this->i073 += $calculosAnteriores[$i]->i073;
-          $this->b074 += $calculosAnteriores[$i]->b074;
-          $this->i074 += $calculosAnteriores[$i]->i074;
-          
-          $this->b080 += $calculosAnteriores[$i]->b080;
-          $this->i080 += $calculosAnteriores[$i]->i080;
-          $this->b090 += $calculosAnteriores[$i]->b090;
-          $this->i090 += $calculosAnteriores[$i]->i090;
-          $this->b097 += $calculosAnteriores[$i]->b097;
-          $this->i097 += $calculosAnteriores[$i]->i097;
-          $this->b098 += $calculosAnteriores[$i]->b098;
-          $this->i098 += $calculosAnteriores[$i]->i098;
-          $this->b099 += $calculosAnteriores[$i]->b099;
-          $this->i099 += $calculosAnteriores[$i]->i099;
-        
-          $this->b101 += $calculosAnteriores[$i]->b101;
-          $this->i101 += $calculosAnteriores[$i]->i101;
-          $this->b102 += $calculosAnteriores[$i]->b102;
-          $this->i102 += $calculosAnteriores[$i]->i102;
-          $this->b103 += $calculosAnteriores[$i]->b103;
-          $this->i103 += $calculosAnteriores[$i]->i103;
-          $this->b104 += $calculosAnteriores[$i]->b104;
-          $this->i104 += $calculosAnteriores[$i]->i104;
-          
-          $this->b121 += $calculosAnteriores[$i]->b121;
-          $this->i121 += $calculosAnteriores[$i]->i121;
-          $this->b122 += $calculosAnteriores[$i]->b122;
-          $this->i122 += $calculosAnteriores[$i]->i122;
-          $this->b123 += $calculosAnteriores[$i]->b123;
-          $this->i123 += $calculosAnteriores[$i]->i123;
-          $this->b124 += $calculosAnteriores[$i]->b124;
-          $this->i124 += $calculosAnteriores[$i]->i124;
-          
-          $this->b130 += $calculosAnteriores[$i]->b130;
-          $this->i130 += $calculosAnteriores[$i]->i130;
-          $this->b140 += $calculosAnteriores[$i]->b140;
-          $this->i140 += $calculosAnteriores[$i]->i140;
-          
-          $this->b141 += $calculosAnteriores[$i]->b141;
-          $this->i141 += $calculosAnteriores[$i]->i141;
-          $this->b142 += $calculosAnteriores[$i]->b142;
-          $this->i142 += $calculosAnteriores[$i]->i142;
-          $this->b143 += $calculosAnteriores[$i]->b143;
-          $this->i143 += $calculosAnteriores[$i]->i143;
-          $this->b144 += $calculosAnteriores[$i]->b144;
-          $this->i144 += $calculosAnteriores[$i]->i144;
-          
-          $this->b150 += $calculosAnteriores[$i]->b150;
-          $this->i150 += $calculosAnteriores[$i]->i150;
-          
-          $this->b155 += $calculosAnteriores[$i]->b155;
-          $this->i155 += $calculosAnteriores[$i]->i155;
-          
-          $this->b160 += $calculosAnteriores[$i]->b160;
-          $this->i160 += $calculosAnteriores[$i]->i160;
-          
-          $this->b165 += $calculosAnteriores[$i]->b165;
-          $this->i165 += $calculosAnteriores[$i]->i165;
-          
-          $this->b170 += $calculosAnteriores[$i]->b170;
-          $this->i170 += $calculosAnteriores[$i]->i170;
-          
-          $this->b200 += $calculosAnteriores[$i]->b200;
-          $this->i200 += $calculosAnteriores[$i]->i200;
-          
-          $this->b201 += $calculosAnteriores[$i]->b201;
-          $this->i201 += $calculosAnteriores[$i]->i201;
-          
-          $this->b240 += $calculosAnteriores[$i]->b240;
-          $this->i240 += $calculosAnteriores[$i]->i240;
-          
-          $this->b250 += $calculosAnteriores[$i]->b250;
-          $this->i250 += $calculosAnteriores[$i]->i250;
-          
-          $this->b245 += $calculosAnteriores[$i]->b245;
-          $this->i245 += $calculosAnteriores[$i]->i245;
-          
-          $this->b260 += $calculosAnteriores[$i]->b260;
-          $this->i260 += $calculosAnteriores[$i]->i260;   */
+        }		
       }
       
     }
@@ -1075,6 +1173,7 @@ class CalculatedTax extends Model
 			$this->sum_repercutido4 = 0;
 			$this->sum_repercutido_exento_con_credito = 0;
 			$this->sum_repercutido_exento_sin_credito = 0;
+			$this->sum_iva_sin_aplicar = 0;
 			$this->bases_ventas_con_identificacion = 0;
 
 			$this->count_bills = 0;
@@ -1109,180 +1208,45 @@ class CalculatedTax extends Model
 			  $ivaData->$iVar = 0;
 			}
 			
+      $arrayActividades = currentCompanyModel()->getActivities();
 			foreach( ProductCategory::all() as $codigo ) {
-			  $varName = "type$codigo->id";
+			  $varName  = "type$codigo->id";
+			  $varName0 = "type$codigo->id-0";
+			  $varName1 = "type$codigo->id-1";
+			  $varName2 = "type$codigo->id-2";
+			  $varName4 = "type$codigo->id-4";
+			  $varName8 = "type$codigo->id-8";
+			  $varName3 = "type$codigo->id-13";
+			  
 			  $ivaData->$varName = 0;
+			  $ivaData->$varName0 = 0;
+			  $ivaData->$varName1 = 0;
+			  $ivaData->$varName2 = 0;
+			  $ivaData->$varName4 = 0;
+			  $ivaData->$varName8 = 0;
+			  $ivaData->$varName3 = 0;
+			  
+        foreach( $arrayActividades as $act){
+          $typeVarAct  = "$act->codigo-$varName";
+          $typeVarAct0 = "$act->codigo-$varName0";
+          $typeVarAct1 = "$act->codigo-$varName1";
+          $typeVarAct2 = "$act->codigo-$varName2";
+          $typeVarAct4 = "$act->codigo-$varName4";
+          $typeVarAct8 = "$act->codigo-$varName8";
+          $typeVarAct3 = "$act->codigo-$varName3";
+          
+          $ivaData->$typeVarAct = 0;
+  			  $ivaData->$typeVarAct0 = 0;
+  			  $ivaData->$typeVarAct1 = 0;
+  			  $ivaData->$typeVarAct2 = 0;
+  			  $ivaData->$typeVarAct4 = 0;
+  			  $ivaData->$typeVarAct8 = 0;
+  			  $ivaData->$typeVarAct3 = 0;
+        }
+			  
 			}
 			
 			$this->iva_data = json_encode($ivaData);
-
-      //Debitos
-      /*      $this->b001 = 0;
-            $this->i001 = 0;
-            $this->b002 = 0;
-            $this->i002 = 0;
-            $this->b003 = 0;
-            $this->i003 = 0;
-            $this->b004 = 0;
-            $this->i004 = 0;
-            
-            $this->b011 = 0;
-            $this->i011 = 0;
-            $this->b012 = 0;
-            $this->i012 = 0;
-            $this->b013 = 0;
-            $this->i013 = 0;
-            $this->b014 = 0;
-            $this->i014 = 0;
-            
-            $this->b021 = 0;
-            $this->i021 = 0;
-            $this->b022 = 0;
-            $this->i022 = 0;
-            $this->b023 = 0;
-            $this->i023 = 0;
-            $this->b024 = 0;
-            $this->i024 = 0;
-            
-            $this->b031 = 0;
-            $this->i031 = 0;
-            $this->b032 = 0;
-            $this->i032 = 0;
-            $this->b033 = 0;
-            $this->i033 = 0;
-            $this->b034 = 0;
-            $this->i034 = 0;
-            
-            $this->b015 = 0;
-            $this->i015 = 0;
-            $this->b016 = 0;
-            $this->i016 = 0;
-            
-            $this->b035 = 0;
-            $this->i035 = 0;
-            $this->b036 = 0;
-            $this->i036 = 0;
-            
-            $this->b040 = 0;
-            $this->i040 = 0;
-            $this->b041 = 0;
-            $this->i041 = 0;
-            $this->b042 = 0;
-            $this->i042 = 0;
-            $this->b043 = 0;
-            $this->i043 = 0;
-            $this->b044 = 0;
-            $this->i044 = 0;
-            
-            $this->b050 = 0;
-            $this->i050 = 0;
-            $this->b051 = 0;
-            $this->i051 = 0;
-            $this->b052 = 0;
-            $this->i052 = 0;
-            $this->b053 = 0;
-            $this->i053 = 0;
-            $this->b054 = 0;
-            $this->i054 = 0;
-            
-            $this->b060 = 0;
-            $this->i060 = 0;
-            $this->b061 = 0;
-            $this->i061 = 0;
-            $this->b062 = 0;
-            $this->i062 = 0;
-            $this->b063 = 0;
-            $this->i063 = 0;
-            $this->b064 = 0;
-            $this->i064 = 0;
-            
-            $this->b070 = 0;
-            $this->i070 = 0;
-            $this->b071 = 0;
-            $this->i071 = 0;
-            $this->b072 = 0;
-            $this->i072 = 0;
-            $this->b073 = 0;
-            $this->i073 = 0;
-            $this->b074 = 0;
-            $this->i074 = 0;
-            
-            $this->b080 = 0;
-            $this->i080 = 0;
-            $this->b090 = 0;
-            $this->i090 = 0;
-            $this->b097 = 0;
-            $this->i097 = 0;
-            $this->b098 = 0;
-            $this->i098 = 0;
-            $this->b099 = 0;
-            $this->i099 = 0;
-          
-            //Creditos
-            $this->b101 = 0;
-            $this->i101 = 0;
-            $this->b102 = 0;
-            $this->i102 = 0;
-            $this->b103 = 0;
-            $this->i103 = 0;
-            $this->b104 = 0;
-            $this->i104 = 0;
-            
-            $this->b121 = 0;
-            $this->i121 = 0;
-            $this->b122 = 0;
-            $this->i122 = 0;
-            $this->b123 = 0;
-            $this->i123 = 0;
-            $this->b124 = 0;
-            $this->i124 = 0;
-            
-            $this->b130 = 0;
-            $this->i130 = 0;
-            $this->b140 = 0;
-            $this->i140 = 0;
-            
-            $this->b141 = 0;
-            $this->i141 = 0;
-            $this->b142 = 0;
-            $this->i142 = 0;
-            $this->b143 = 0;
-            $this->i143 = 0;
-            $this->b144 = 0;
-            $this->i144 = 0;
-            
-            $this->b150 = 0;
-            $this->i150 = 0;
-            
-            $this->b155 = 0;
-            $this->i155 = 0;
-            
-            $this->b160 = 0;
-            $this->i160 = 0;
-            
-            $this->b165 = 0;
-            $this->i165 = 0;
-            
-            $this->b170 = 0;
-            $this->i170 = 0;
-            
-            $this->b200 = 0;
-            $this->i200 = 0;
-            
-            $this->b201 = 0;
-            $this->i201 = 0;
-            
-            $this->b240 = 0;
-            $this->i240 = 0;
-            
-            $this->b245 = 0;
-            $this->i245 = 0;
-            
-            $this->b250 = 0;
-            $this->i250 = 0;
-            
-            $this->b260 = 0;
-            $this->i260 = 0;*/
     }
     
     private function microtime_float(){

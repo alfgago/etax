@@ -22,17 +22,6 @@
                     <a href="/facturas-emitidas">Ver todas</a>
                     <a href="/facturas-emitidas/emitir-factura/01">Emitir factura electrónica</a>
                     <a href="/facturas-emitidas/create" >Registrar factura existente</a>
-
-                    <!--<ul id="factExistente">
-                        <a class="nav-item-hold"  style="margin-left:-3em;">Registrar factura existente</a>
-                        <li class="nav-item">
-                            <div class="subitemsFactExistente subitems" style="margin-top:-4em;">
-                                <a href="/facturas-emitidas/emitir-factura/01" id="factExistente01" hidden>Emitir factura electrónica</a>
-                                <a href="/facturas-emitidas/emitir-factura/08" id="factExistente02" hidden>Emitir factura electrónica de exportación</a>
-                                <a href="/facturas-emitidas/emitir-factura/09" id="factExistente03" hidden>Emitir factura electrónica de compra</a>
-                            </div>
-                        </li>
-                    </ul>-->
                     <a href="#" onclick="abrirPopup('importar-emitidas-popup');">Importar facturas</a>
                     <a href="/facturas-emitidas/validaciones">Validar facturas</a>
                     <a href="/facturas-emitidas/autorizaciones">Autorizar facturas por email</a>
@@ -49,15 +38,16 @@
                 
                 <div class="subitems">
                     <a href="/facturas-recibidas">Ver todas</a>
-                    <a href="/facturas-recibidas/create">Registrar factura recibida</a>
+                    <a href="/facturas-recibidas/create">Registrar factura existente</a>
                     <a href="#" onclick="abrirPopup('importar-recibidas-popup');">Importar facturas</a>
                     <a href="/facturas-recibidas/validaciones">Validar facturas</a>
+                    <a href="/facturas-recibidas/aceptaciones">Aceptación de facturas recibidas</a>
                     <a href="/facturas-recibidas/autorizaciones">Autorizar facturas por email</a>
                 </div>
             </li>
             @endif
             
-            @if( allowTo('invoicing') )
+            @if( allowTo('invoicing') || allowTo('billing') )
             <li class="nav-item small-nav {{ request()->is('facturas-recibidas/*') || request()->is('facturas-recibidas') ? 'active' : '' }}" id="facturacion">
                 <a class="nav-item-hold" href="/facturas-emitidas">
                     <img src="{{asset('assets/images/iconos/facturacion.png')}}" class="sidemenu-icon">
@@ -65,35 +55,21 @@
                 </a>
                 
                 <div class="subitems">
+                    @if( allowTo('invoicing') )
                     <a href="/facturas-emitidas">Ver documentos emitidos</a>
                     <a href="/facturas-emitidas/emitir-factura/01">Emitir factura electrónica</a>
+                    <a href="/facturas-emitidas/emitir-factura/04">Emitir tiquete electrónico</a>
                     <a href="/facturas-emitidas/emitir-factura/09">Emitir factura electrónica de exportación</a>
                     <a href="/facturas-emitidas/emitir-factura/08">Emitir factura electrónica de compra</a>
-                    <a href="/facturas-emitidas/emitir-factura/04">Emitir tiquete electrónico</a>
-                    <a href="/facturas-emitidas/emitir-factura/02">Emitir nota de débito</a>
+                    <a href="/facturas-emitidas/emitir-sujeto-pasivo">Emitir factura de inversión sujeto pasivo</a>
+                    <a style="display:none; !important" href="/facturas-emitidas/emitir-factura/02">Emitir nota de débito</a>
+                    @endif
+                    @if( allowTo('invoicing') )
                     <a href="/facturas-recibidas/aceptaciones">Aceptación de facturas recibidas</a>
+                    @endif
                 </div>
             </li>
             @endif
-            
-            <style>
-                li.hidden.nav-item.small-nav {
-                    display: none !important;
-                }
-                
-                li.soon.nav-item.small-nav a {
-                    opacity: 0.7;
-                    cursor: not-allowed;
-                }
-                
-                li.soon.nav-item.small-nav:before {
-                    background: #a3a1a7 !important;opacity: 1 !important;
-                }
-                
-                li.soon.nav-item.small-nav .subitems a {
-                    background: #787779 !important;opacity: 1 !important;
-                }
-            </style>
             
             @if( allowTo('books') )
             <li class="nav-item small-nav {{ request()->is('reportes/*') || request()->is('reportes') ? 'active' : '' }}" id="cierresmes">
@@ -161,7 +137,7 @@
       </div>
   </div>
   <script>
-      $( "#factExistente" ).mouseover(function() {
+      /*$( "#factExistente" ).mouseover(function() {
           $( "#factExistente01" ).attr('hidden', false);
           $( "#factExistente02" ).attr('hidden', false);
           $( "#factExistente03" ).attr('hidden', false);
@@ -170,6 +146,26 @@
           $( "#factExistente01" ).attr('hidden', true);
           $( "#factExistente02" ).attr('hidden', true);
           $( "#factExistente03" ).attr('hidden', true);
-      });
+      });*/
   </script>
   <!--=============== Left side End ================-->
+
+            
+            <style>
+                li.hidden.nav-item.small-nav {
+                    display: none !important;
+                }
+                
+                li.soon.nav-item.small-nav a {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                }
+                
+                li.soon.nav-item.small-nav:before {
+                    background: #a3a1a7 !important;opacity: 1 !important;
+                }
+                
+                li.soon.nav-item.small-nav .subitems a {
+                    background: #787779 !important;opacity: 1 !important;
+                }
+            </style>

@@ -43,8 +43,9 @@ class ResendInvoices extends Command
     {
         try {
             $this->info('Sending invoices to Hacienda....');
-            $invoices = Invoice::where('hacienda_status', '01')->where('generation_method', 'etax')
-                ->where('document_type', '01')->get();
+            $invoices = Invoice::where('hacienda_status', '01')->where('generation_method','like', '%etax%')
+                ->where('resend_attempts', '<', 6)->where('in_queue', false)
+                ->whereIn('document_type', ['01', '04', '08', '09'])->get();
             $this->info('Sending invoices ....'. count($invoices));
             $this->info('Get Token Api Hacienda ....');
             $apiHacienda = new BridgeHaciendaApi();
@@ -52,7 +53,11 @@ class ResendInvoices extends Command
 
             foreach ($invoices as $invoice) {
                 $company = $invoice->company;
+                $invoice->resend_attempts = $invoice->resend_attempts + 1;
+                $invoice->in_queue = true;
+                $invoice->save();
                 $this->info('Sending invoice ....'. $invoice->document_key);
+                sleep(2);
                 ProcessInvoice::dispatch($invoice->id, $company->id, $tokenApi)
                     ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
             }

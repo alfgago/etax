@@ -15,6 +15,11 @@
           @csrf
           
           <input type="hidden" id="current-index" value="0">
+          <?php 
+            $company = currentCompanyModel();
+          ?>
+          <input type="hidden" class="form-control" id="default_product_category" value="{{$company->default_product_category}}">
+          <input type="hidden" class="form-control" id="default_vat_code" value="{{$company->default_vat_code}}">
 
           <div class="form-row">
             <div class="col-md">
@@ -53,14 +58,14 @@
                     <div class="form-group col-md-4">
                       <label for="currency">Divisa</label>
                       <select class="form-control" name="currency" id="moneda" required>
-                        <option value="CRC" selected>CRC</option>
-                        <option value="USD">USD</option>
+                        <option value="CRC" data-rate="1" {{$company->default_currency == 'CRC' ? 'selected' : ''}}>CRC</option>
+                        <option value="USD" data-rate="1" {{$company->default_currency == 'USD' ? 'selected' : ''}}>USD</option>
                       </select>
                     </div>
       
                     <div class="form-group col-md-8">
                       <label for="currency_rate">Tipo de cambio</label>
-                      <input type="text" class="form-control" name="currency_rate" id="tipo_cambio" value="1.00" required>
+                      <input type="text" class="form-control" data-rates="1" name="currency_rate" id="tipo_cambio" value="1.00"required>
                     </div>
                   </div>
                 </div>
@@ -149,7 +154,7 @@
                   <div class="form-group col-md-4">
                     <label for="due_date">Fecha de vencimiento</label>
                     <div class='input-group date inputs-fecha'>
-                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
+                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}" maxlength="10">
                       <span class="input-group-addon">
                         <i class="icon-regular i-Calendar-4"></i>
                       </span>
@@ -222,7 +227,7 @@
 
                   <div class="form-group col-md-12">
                     <label for="description">Notas</label>
-                    <textarea class="form-control" name="description"  maxlength="200" id="notas" placeholder=""></textarea>
+                    <textarea class="form-control" name="description"  maxlength="200" id="notas" placeholder="" rows="2" style="resize: none;"></textarea>
                   </div>
 
               </div>
@@ -282,7 +287,14 @@
 
 <script>
 $(document).ready(function(){
-  $('#tipo_iva').val('103');
+
+  //$('#tipo_producto').val( $('#default_product_category').val() ).change();
+  if( $('#default_vat_code').length ){
+    $('#tipo_iva').val( $('#default_vat_code').val() ).change();
+  }else{
+    $('#tipo_iva').val( 'B103' ).change();
+  }
+
 });
 
 function toggleRetencion() {

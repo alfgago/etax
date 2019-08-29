@@ -62,7 +62,7 @@
 						    
 						    <div class="form-group col-md-6 hidden toggle-types type-1">
 						      <label for="first_prorrata">Digite su prorrata operativa</label>
-						      <input type="number" class="form-control" name="first_prorrata" id="first_prorrata" step="0.01" min="1" max="100" value="{{ @$company->first_prorrata ? $company->first_prorrata : 100 }}" required>
+						      <input type="number" class="form-control" name="first_prorrata" id="first_prorrata" step="0.01" min="0" max="99.99" value="{{ @$company->first_prorrata ? $company->first_prorrata : 0 }}" required>
 						    </div>
 						    
 						    <div class="form-group col-md-6 hidden toggle-types type-1 proporciones">
@@ -101,7 +101,7 @@
 						    
 						    <div class="form-group col-md-6">
 						      <label for="saldo_favor_2018">Ingrese su saldo a favor acumulado de periodos anteriores</label>
-						      <input type="number" class="form-control" name="saldo_favor_2018" id="saldo_favor_2018" step="0.01" value="{{ @$company->saldo_favor_2018 ? $company->saldo_favor_2018 : 0 }}">
+						      <input type="numeric" class="form-control" name="saldo_favor_2018" id="saldo_favor_2018" step="0.01" value="{{ @$company->saldo_favor_2018 ? $company->saldo_favor_2018 : 0 }}">
 						    </div>
 						    
 						    <div class="form-group col-md-12">
@@ -120,35 +120,67 @@
 						    
 						    <div class="form-group col-md-6">
 						      <label for="last_document">Último documento emitido</label>
-						      <input type="text" class="form-control" name="last_document" id="last_document" value="{{ @$company->last_document }}" required>
+						      <input type="text" class="form-control" name="last_document" id="last_document" value="{{ $company->last_document === null ? '00100001010000000000' : @$company->last_document  }}" required>
 						      <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
 						    </div>
 							  <div class="form-group col-md-6">
 								  <label for="last_document_rec">Último documento emitido de aceptacion</label>
-								  <input type="text" class="form-control" name="last_document_rec" id="last_document_rec" value="{{ @$company->last_document_rec }}" required>
+								  <input type="text" class="form-control" name="last_document_rec" id="last_document_rec" value="{{ $company->last_document_rec === null ?  '00100001050000000000' : @$company->last_document_rec }}" required>
 								  <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
 							  </div>
 							  <div class="form-group col-md-6">
 								  <label for="last_document_note">Último documento emitio nota de credito</label>
-								  <input type="text" class="form-control" name="last_document_note" id="last_document_note" value="{{ @$company->last_document_note }}" required>
+								  <input type="text" class="form-control" name="last_document_note" id="last_document_note" value="{{ $company->last_document_note === null ? '00100001030000000000' : @$company->last_document_note }}" required>
 								  <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
 							  </div>
-						    
-						    <div class="form-group col-md-12">
-						      <label for="default_vat_code">Tipo de IVA por defecto</label>
-						      <select class="form-control" id="default_vat_code" name="default_vat_code" >
-						        @foreach ( \App\Variables::tiposIVARepercutidos() as $tipo )
-						          <option value="{{ $tipo['codigo'] }}" porcentaje="{{ $tipo['porcentaje'] }}" {{ @$company->default_vat_code == $tipo['codigo']  ? 'selected' : '' }}>{{ $tipo['nombre'] }}</option>
-						        @endforeach
-						      </select>
-						    </div>
+
+							  <div class="form-group col-md-6">
+								  <label for="last_document_ticket">Último documento emitio tiquete electronico</label>
+								  <input type="text" class="form-control" name="last_document_ticket" id="last_document_ticket" value="{{ $company->last_document_ticket === null ? '00100001040000000000' : @$company->last_document_ticket }}" required>
+								  <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
+							  </div>
+
+							  <div class="form-group col-md-6">
+								  <label for="last_document_ticket">Último documento emitio nota de debito</label>
+								  <input type="text" class="form-control" name="last_document_debit_note" id="last_document_debit_note" value="{{ $company->last_document_debit_note === null ? '00100001020000000000' : @$company->last_document_debit_note }}" required>
+								  <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
+							  </div>
+							  
+								<div class="form-group col-md-12">
+								  <label for="default_category_producto_code">Categoría de declaración por defecto</label>
+								  <select class="form-control" id="default_category_producto_code" name="default_category_producto_code">
+								    @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $category )
+								      <option value="{{ $category['id'] }}" posibles="{{ $category['open_codes'] }}" {{ @$company->default_product_category == $category['id']  ? 'selected' : '' }}>{{ $category['name'] }}</option>
+								    @endforeach
+								  </select>
+								</div>  
+								
+								<div class="form-group col-md-12">
+								  <label for="default_vat_code">Tipo de IVA por defecto</label>
+								  <select class="form-control" id="default_vat_code" name="default_vat_code">
+								    @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
+								      <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }} {{ @$tipo['hideMasiva'] ? 'hidden' : '' }}" {{ @$company->default_vat_code == $tipo['code']  ? 'selected' : '' }}>{{ $tipo['name'] }}</option>
+								    @endforeach
+								  </select>
+								</div> 
 						    
 						    <div class="form-group col-md-6">
 						      <label for="default_currency">Tipo de moneda por defecto</label>
 						      <select class="form-control" name="default_currency" id="default_currency" required>
-                    <option value="crc" {{ @$company->default_currency == 'crc' ? 'selected' : '' }}>CRC</option>
-                    <option value="usd" {{ @$company->default_currency == 'usd' ? 'selected' : '' }}>USD</option>
-                  </select>
+                                <option value="CRC" {{ @$company->default_currency == 'CRC' ? 'selected' : '' }}>CRC</option>
+                                <option value="USD" {{ @$company->default_currency == 'USD' ? 'selected' : '' }}>USD</option>
+                              </select>
+						    </div>
+						    
+						    <div class="form-group col-md-6">
+						      <label for="card_retention">% Retención Tarjetas</label>
+						      <select class="form-control" id="card_retention" name="card_retention" >
+				                    <option value="6" {{ @$company->card_retention == 6 ? 'selected' : '' }}>6%</option>
+				                    <option value="0" {{ @$company->card_retention == 0 ? 'selected' : '' }}>0%</option>
+				                    <option value="1" {{ @$company->card_retention == 1 ? 'selected' : '' }}>1%</option>
+				                    <option value="2" {{ @$company->card_retention == 2 ? 'selected' : '' }}>2%</option>
+				                    <option value="3" {{ @$company->card_retention == 3 ? 'selected' : '' }}>3%</option>
+						      </select>
 						    </div>
 						    
 						     <div class="form-group col-md-12">
@@ -161,6 +193,29 @@
 						  </div>
 						  
 						</form>
+		
+							@if(currentCompanyModel()->id==1110 || currentCompanyModel()->id==437)
+						    <div class="form-group col-md-12">
+						      <h3>
+						        Importación de Excel para facturación SM Seguros
+						      </h3>
+						    </div>
+						    
+								<form method="POST" action="/facturas-emitidas/importarExcelSM" enctype="multipart/form-data" class="toggle-xlsx mt-3">
+															
+								  @csrf
+									<div class="form-group col-md-12">
+								    <label for="archivo">Excel SM Seguros para envio masivo</label>  
+										<div class="">
+											<div class="fallback">
+										      <input name="archivo" type="file" multiple="false" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+										  </div>
+										  <small class="descripcion">Hasta 2500 líneas por archivo.</small>
+										</div>
+										<button type="submit" class="btn btn-primary">Importar facturas</button>
+									</div>
+								</form>
+							@endif	
 
           </div>
         </div>
@@ -172,6 +227,33 @@
 @endsection
 
 @section('footer-scripts')
+    <script>
+        /*$(document).ready(function(){
+            $('#saldo_favor_2018').on('keyup',function(){
+                $(this).manageCommas();
+            });
+            //then sanatize on leave
+            // if sanitizing needed on form submission time,
+            //then comment beloc function here and call in in form submit function.
+            $('#saldo_favor_2018').on('focus',function(){
+                $(this).santizeCommas();
+            });
+        });
+
+        String.prototype.addComma = function() {
+            return this.replace(/(.)(?=(.{3})+$)/g,"$1,").replace(',.', '.');
+        }
+        //Jquery global extension method
+        $.fn.manageCommas = function () {
+            return this.each(function () {
+                $(this).val($(this).val().replace(/(,|)/g,'').addComma());
+            });
+        }
+
+        $.fn.santizeCommas = function() {
+            return $(this).val($(this).val().replace(/(,| )/g,''));
+        }*/
+    </script>
 
 	<script>
 		
@@ -185,6 +267,16 @@
 		  
 		  toggleTipoProrrata();
 		  
+	    $("#default_category_producto_code").change(function(){
+	      var posibles = $('#default_category_producto_code :selected').attr('posibles');
+	      var arrPosibles = posibles.split(",");
+	      var tipo;
+	      $('#default_vat_code option').hide();
+	      for( tipo of arrPosibles ) {
+	        $('#default_vat_code option[value='+tipo+']').show();
+	      }
+	    });
+
 		});
 				
 	</script>

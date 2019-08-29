@@ -10,11 +10,22 @@
 @endsection
 
 @section('content')
-
+<?php $ratios = currentCompanyModel()->operative_ratio1 + currentCompanyModel()->operative_ratio2 + currentCompanyModel()->operative_ratio3 + currentCompanyModel()->operative_ratio4;?>
+    
 <div class="row">
   <div class="col-md-12">
     <div class="row">
-      
+      @if(!$ratios)
+      <div class="col-md-8">
+        <div class="alert alert-warning"> 
+          <strong>Configuración de empresa incompleta.</strong><br><br>
+          Para obtener datos precisos en su declaración y otros reportes, debe ingresar su proporción de ventas del año 2018 para cada una de las posibles tarifas (1%, 2%, 13% y 4%). 
+          Puede hacerlo ingresando a la sección de <a href="/empresas/configuracion">configuración avanzada</a>.
+  		  </div>
+		  </div>
+		  <div class="col-md-12"></div>
+		  @endif
+		  
       <div class="form-group col-md-3">
         <label for="reportes-select">Reporte</label>
         <select class="form-control" id="reportes-select" onchange="toggleFilters();">
@@ -22,13 +33,16 @@
           <option value="/reportes/cuentas-contables" type="post" selected ano="1" mes="1">Cuentas contables</option>
           <option value="/reportes/detalle-debito" hideClass="#input-mes" type="post" ano="1" mes="1">Detalle de débito fiscal</option>
           <option value="/reportes/detalle-credito" hideClass="#input-mes" type="post" ano="1" mes="1">Detalle de crédito fiscal</option>
-          <option value="/reportes/libro-compras" hideClass=".opt-acumulado" >Libro de compras</option>
-          <option value="/reportes/libro-ventas" hideClass=".opt-acumulado" >Libro de ventas</option>
+          <option value="/exportar-libro-compras" type="download" hideClass=".opt-acumulado" >Libro de compras</option>
+          <option value="/exportar-libro-ventas" type="download" hideClass=".opt-acumulado" >Libro de ventas</option>
           <option value="/reportes/resumen-ejecutivo" hideClass=".opt-acumulado" type="iframe" >Resumen ejecutivo</option>
           <option type="post">Reporte de proveedores (Muy pronto)</option>
           <option type="post">Reporte de clientes (Muy pronto)</option>
-          <option type="post">Declaración de IVA (Muy pronto)</option>
-          <option style="display:none;" value="/reportes/borrador-iva" hideClass=".opt-acumulado" type="iframe">Borrador de declaración de IVA (Muy pronto)</option>
+          @if( getCurrentSubscription()->status == 4 )
+            <option style="" value="" hideClass=".opt-acumulado" type="iframe">Declaración de IVA (No disponible en periodo gratis)</option>
+          @else
+            <option style="" value="/reportes/borrador-iva" hideClass=".opt-acumulado" type="iframe">Borrador de declaración de IVA</option>
+          @endif
         </select>
       </div>
       
@@ -43,7 +57,7 @@
                 <option selected value="2019">2019</option>
             </select>
             <select class="form-control" id="input-mes" name="input-mes">
-                <option class="opt-acumulado" value="0" selected>Acumulado</option>
+                <option class="opt-acumulado" value="0" selected>Acumulado Jul. 2019 - Dic. 2019</option>
                 <option value="1">Enero</option>
                 <option value="2">Febrero</option>
                 <option value="3">Marzo</option>
@@ -60,33 +74,45 @@
           </div>
         </div>
       </div>
-      
-      <div class="form-group col-md-12">
-          <button onclick="verReporte();" class="btn btn-primary form-btn">Ver reporte</button>
+      <div class="col-md-12">
+        <button onclick="verReporte();" class="btn btn-primary form-btn">Ver reporte</button>
       </div>
-      
+
       <div id="reporte-container" class="col-md-12 mb-4 reporte" style="padding: 3rem 15px;">
         
       </div>
-
-      <div class="col-lg-12 col-md-12 hidden reporte" style="padding: 3rem 15px;" id="reporte-detalle-debito">
+		  
+		  @if( getCurrentSubscription()->status == 4 )
+		  <div class=" ml-4 mb-4 pb-4" style="background: #eee; padding: 1rem 2rem; width: auto; display: inline-block; box-shadow: 0 0 15px rgba(0,0,0,0.3);">
         
-      </div>
-    
-      <div class="col-lg-12 col-md-12 hidden reporte" style="padding: 3rem 15px;" id="reporte-detalle-credito">
-        
-      </div>
+          <h2>¡Tu declaración te espera!</h2>
+          ¿Ya usaste eTax para ingresar tus facturas, viste todos los reportes, y ya querés hacer tu declaración?<br> Ingresá aquí y comprá tu plan ahora. 
+          <div>
+          <a  style="background: #f0c960;
+            color: #1f2642 !important;
+            border: 0;
+            -webkit-box-shadow: 0.2rem 0.2rem #261c65 !important;
+            box-shadow: 0.2rem 0.2rem #261c65 !important;
+            font-size: 0.9rem;
+            margin: 0; display: inline-block;
+            font-weight: bold; margin-top: .5rem;
+            width: auto;" class="btn btn-primary btn-buynow" href="/elegir-plan" title="Comprar ahora">Comprar ahora</a>.
+  		    </div>
+		  </div>
+		  <div class="col-md-12"></div>
+		  @endif
       
-      <div class="col-lg-12 col-md-12  reporte" style="padding: 3rem 15px; margin-left: -15px;" id="reporte-resumen-ejecutivo">
-        
-      </div>
+      <div class="col-md-12" hidden id="export-btn-container" style="margin-top:-2em;">
+        <a id="btnExport" download='reporteEtax' href='javascript:exportarTablas()' class="btn btn-primary form-btn">Descargar</a>
+      </div>  
       
     </div>
   </div>
 </div>
 
-@endsection @section('footer-scripts')
+@endsection 
 
+@section('footer-scripts')
 
 <script>
   
@@ -98,6 +124,26 @@
     $("#input-mes").val(1);
     
   }
+
+ function exportarTablas(){
+      var uri = 'data:application/vnd.ms-excel;base64,',
+          template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><meta http-equiv="content-type" content="application/vnd.ms-excel;charset=UTF-8;base64"><head></head><body><table>{table}</table></body></html>',
+          base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) },
+          format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+
+      var table = 'reporte-container';
+      var name = 'nombre_hoja_calculo';
+
+      if (!table.nodeType) table = document.getElementById(table);
+      var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML };
+      
+      var link = document.createElement("a");
+          link.download = "reporte-etax.xls";
+          link.href = uri + base64(format(template, ctx));
+          link.click();
+      
+      //window.location.href = uri + base64(format(template, ctx));
+  }
   
   function verReporte() {
     var reporteView = $("#reportes-select").val();
@@ -107,7 +153,10 @@
       var mes = $("#input-mes").val();
       var ano = $("#input-ano").val();
       		  
-      if(formType != "iframe"){
+      if( formType == "download"){
+        reporteView = reporteView + "/"+ano+"/"+mes;
+        window.open(reporteView, '_blank');
+      }else if(formType != "iframe"){
         jQuery.ajax({
           url: reporteView,
           type: 'post',
@@ -120,13 +169,17 @@
           success : function( response ) {
             $('#reporte-container').html(response);
             clearEmptyRows();
+              setTimeout(function(){
+                $("table").attr('id', 'reporte-container');
+                $('#export-btn-container').attr('hidden', false);
+              }, 1000);
           },
           async: true
         });  
         
       }else{
         reporteView = reporteView + "?ano="+ano+"&mes="+mes;
-        $('#reporte-container').html( "<div class='iframe-container'> <iframe src='"+reporteView+"'></iframe> </div>" );
+        $('#reporte-container').html( "<div class='iframe-container'> <iframe id='report-iframe' onload='resizeIframe(this);' src='"+reporteView+"'></iframe> </div>" );
       }
       
     }else{
@@ -136,7 +189,24 @@
   
   $( document ).ready(function() {
     clearEmptyRows();
+    
+    @if(!$ratios)
+      var title = 'Configuración de empresa incompleta.';
+      var texto = "Para obtener datos precisos en su declaración y otros reportes, debe ingresar su proporción de ventas del año 2018 para cada una de las posibles tarifas (1%, 2%, 13% y 4%). Puede hacerlo ingresando a la sección de configuración avanzada.";
+      Swal.fire({
+        title: title,
+        text: texto,
+        type: 'warning',
+        showCloseButton: true,
+        confirmButtonText: 'Ok'
+      });
+    @endif
   });
+  
+  function resizeIframe() {
+    var iframe = document.getElementById('report-iframe');
+    iframe.style.height = iframe.contentWindow.document.body.offsetHeight + 'px';
+  }
   
   function clearEmptyRows() {
     $(".ivas-table tbody tr").each( function(){
@@ -155,11 +225,21 @@
   
   .iframe-container {
     position: relative;
-    width: 67.67rem;
+    width: 75rem;
     max-width: 100%;
-    padding-bottom: 4300px;
     overflow: hidden;
-}
+    height: auto;
+    padding-bottom: 3rem;
+  }
+  
+  .iframe-container iframe {
+      position: relative;
+      top: 0;
+      left: 0;
+      width: 100%;
+      border: 0;
+  }
+  
 </style>
 
 @endsection

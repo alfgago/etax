@@ -9,10 +9,13 @@
 	            <thead>
 	              <tr>
 	                <th>Fecha</th>
-	                <th>Proveedor</th>
+	                <th>Cliente</th>
+	                <th>Actividad</th>
 	                <th>Consecutivo</th>
 	                <th># Línea</th>
 	                <th>Producto</th>
+	                <th>Tipo IVA</th>
+	                <th>Cat. Declaración</th>
 	                <th>Moneda</th>
 	                <th>Subtotal</th>
 	                <th>Tarifa IVA</th>
@@ -22,17 +25,20 @@
 	            </thead>
 	            <tbody>
 	            	@foreach($data as $item)
-		            	@if( !$item->invoice->is_void && $item->invoice->is_authorized && $item->invoice->is_code_validated )
+		            	@if( !$item->invoice->is_void && $item->invoice->is_authorized && $item->invoice->is_code_validated && $item->invoice->hide_from_taxes == false)
 		              <tr>
 		              	<?php 
 		              		$factor = $item->invoice->document_type != '03' ? 1 : -1;
 		              	?>
 		                <td>{{ $item->invoice->generatedDate()->format('d/m/Y') }}</td>
 		                <td>{{ @$item->invoice->client ? $item->invoice->client->getFullName() : 'N/A' }}</td>
+		                <td>{{ @$item->invoice->commercial_activity ?? 'No indica' }}</td>
 		                <td>{{ $item->invoice->document_number }}</td>
 		                <td>{{ $item->item_number }}</td>
 		                <td>{{ $item->name }}</td>
-		                <td>{{ $item->invoice->currency }}</td>
+		                <td>{{ @$item->ivaType->code }}</td>
+		                <td>{{ @$item->productCategory->name }}</td>
+		                <td>{{ $item->invoice->currency }} {{ $item->invoice->currency == 'USD' ? "(".$item->invoice->currency_rate.")" : '' }}</td>
 		                <td>{{ number_format( $item->subtotal, 2) }}</td>
 		                <td>{{ $item->iva_percentage }}%</td>
 		                <td>{{ number_format( $item->iva_amount, 2) }}</td>

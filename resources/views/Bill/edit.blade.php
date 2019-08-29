@@ -63,6 +63,68 @@
                   </div>
                 </div>
               </div>  
+              
+              
+              <div class="form-row">  
+              
+                <div class="form-group col-md-12">
+                  <h3>
+                    Datos de aceptación
+                  </h3>
+                </div>
+                
+                <div class="form-group col-md-3">
+                  <label for="currency">XML de factura</label>
+                  <select class="form-control" name="xml_schema" id="xml_schema" required>
+                    <option value="43" {{ $bill->xml_schema == 43 ? 'selected' : '' }}>4.3</option>
+                    <option value="42" {{ $bill->xml_schema == 42 ? 'selected' : '' }}>4.2</option>
+                  </select>
+                </div>
+                  
+                <div class="form-group col-md-9">
+                    <label for="activity_company_verification">Actividad Comercial</label>
+                    <div class="input-group">
+                      <select id="activity_company_verification" name="activity_company_verification" class="form-control" required>
+                          @foreach ( $arrayActividades as $actividad )
+                              <option {{ $bill->activity_company_verification == $actividad->codigo ? 'selected' : '' }} value="{{ $actividad->codigo }}" >{{ $actividad->codigo }} - {{ $actividad->actividad }}</option>
+                          @endforeach
+                      </select>
+                    </div>
+                </div>
+                  
+                <div class="form-group col-md-12 inline-form inline-checkbox">
+                  <label for="accept_status">
+                    <span>¿Aceptada desde otro proveedor?</span>
+                    <input type="checkbox" class="form-control" id="accept_status" name="accept_status" {{ $bill->accept_status == 1 ? 'checked' : '' }}>
+                  </label>
+                </div>
+                              
+                <div class="form-group col-md-4">
+                    <label for="accept_iva_condition">Condición de acceptación</label>
+                    <select class="form-control" name="accept_iva_condition" id="accept_iva_condition">
+                      <option value="01" {{ $bill->accept_iva_condition == "01" ? 'selected' : '' }}>Genera crédito IVA</option>
+                      <option value="02" {{ $bill->accept_iva_condition == "02" ? 'selected' : '' }}>Genera crédito parcial del IVA</option>
+                      <option value="03" {{ $bill->accept_iva_condition == "03" ? 'selected' : '' }}>Bienes de capital</option>
+                      <option value="04" {{ $bill->accept_iva_condition == "04" ? 'selected' : '' }}>Gasto corriente (no genera IVA)</option>
+                      <option value="05" {{ $bill->accept_iva_condition == "05" ? 'selected' : '' }}>Proporcionalidad</option>
+                    </select>
+                </div>
+                              
+                <div class="form-group col-md-4">
+                    <label for="accept_iva_acreditable">IVA acreditable</label>
+                    <div class="input-group">
+                      <input type="number" id="accept_iva_acreditable" name="accept_iva_acreditable" class="form-control" value="{{ $bill->accept_iva_acreditable }}" />
+                    </div>
+                </div>
+                              
+                <div class="form-group col-md-4">
+                    <label for="accept_iva_gasto">IVA al gasto</label>
+                    <div class="input-group">
+                      <input type="number" id="accept_iva_gasto" name="accept_iva_gasto" class="form-control" value="{{ $bill->accept_iva_gasto }}" />
+                    </div>
+                </div>
+    
+              </div>
 
               <div class="form-row">    
                 <div class="form-group col-md-12">
@@ -224,7 +286,7 @@
                       <td>{{ $item->item_count }}</td>
                       <td>{{ \App\Variables::getUnidadMedicionName($item->measure_unit) }}</td>
                       <td>{{ $item->unit_price }} </td>
-                      <td>{{ \App\Variables::getTipoSoportadoIVAName($item->iva_type) }} </td>
+                      <td>{{ \App\Variables::getTipoSoportadoIVAName($item->iva_type) }} <br> - {{ @\App\ProductCategory::find($item->product_type)->name }} </td>
                       <td>{{ $item->subtotal }}</td>
                       <td>{{ $item->iva_amount }}</td>
                       <td>{{ $item->total }} </td>

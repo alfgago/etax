@@ -24,7 +24,7 @@
                     <li>
                         <a class="nav-link active" aria-selected="true" href="/empresas/equipo">Equipo de trabajo</a>
                     </li>
-                    <li>
+                    <li class="">
                         <a class="nav-link" aria-selected="false" href="/empresas/comprar-facturas-vista">Comprar facturas</a>
                     </li>
                 </ul>
@@ -81,7 +81,7 @@
                                         <div class="row">
 
                                             <div class="col-sm-12">
-                                                <table class="table table-striped">
+                                                <table id="dataTable" class="table table-striped table-bordered" >
                                                     <thead>
                                                         <tr>
                                                             <th>Correo electrónico</th>
@@ -94,9 +94,16 @@
                                                         <td>{{$invite->email}}</td>
                                                         <td>{{($invite->role == 'admin') ? 'Invited as admin':'Invited as read-only user'}}</td>
                                                         <td>
-                                                            <a href="{{route('teams.members.resend_invite', $invite)}}" class="btn btn-sm btn-default">
-                                                                <i class="fa fa-envelope-o"></i> Reenviar invitación
+                                                            <a title="Reenviar invitación" href="{{route('teams.members.resend_invite', $invite)}}" class="btn btn-sm btn-default">
+                                                                <i class="fa fa-envelope-o"></i> 
                                                             </a>
+                                                            <form id="delete-form-{{ $invite->id }}" class="inline-form" method="POST" action="/invite/delete/{{ $invite->id }}" >
+                                                              @csrf
+                                                              @method('delete')
+                                                              <a type="button" class="text-danger mr-2" title="Eliminar invitación" onclick="confirmDelete({{ $invite->id }});">
+                                                                <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                                              </a>
+                                                            </form>
                                                         </td>
                                                     </tr>
                                                     @endforeach
@@ -156,6 +163,28 @@
 @endsection 
 
 @section('footer-scripts')
+
+<script>
+    
+function confirmDelete( id ) {
+  var formId = "#delete-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea eliminar la invitación',
+    text: "Esto invalidará los correos de invitación enviados actualmente. Podrá enviarlos de nuevo sin problema.",
+    type: 'warning',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero eliminarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
+    
+    
+</script>
 
 @endsection
 

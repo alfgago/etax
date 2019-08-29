@@ -146,35 +146,58 @@ if (!function_exists('userCompanies')) {
 if (!function_exists('currentCompany')) {
 
     function currentCompany() {
-        
+        try {
         $user = auth()->user();
         if ( !$user->companies->count() ) {
             return auth()->user()->addCompany();
         }
         
-        return $user->currentTeam->company->id;
+        try{ 
+            return $user->currentTeam->company->id;
+        }catch( \Throwable $e ){
+            return $user->teams[0]->company->id;
+        }
+        }catch(\Throwable $e){}
     }
 
 }
 
 if (!function_exists('currentCompanyModel')) {
 
-    function currentCompanyModel() {
-
+    function currentCompanyModel($cache = true) {
         $user = auth()->user();
-        if ( !$user->companies->count() ) {
-            auth()->user()->addCompany();
-        }
-        
-        $company = $user->currentTeam->company;
-        
-        if ( !$company ) {
-            $companyId = auth()->user()->companies->first()->id;
-            session( ['current_company' => $companyId] );
-            $company = App\Company::find($companyId);
+
+        if ($cache == false) {
+            if (!$user->companies->count()) {
+                auth()->user()->addCompany();
+            }
+
+            $company = $user->currentTeam->company;
+            if (!$company) {
+                $companyId = auth()->user()->companies->first()->id;
+                session(['current_company' => $companyId]);
+                $company = App\Company::find($companyId);
+            }
+            return $company;
         }
 
-        return $company;
+        $cacheKey = "cache-currentcompany-$user->id";
+        if ( !Illuminate\Support\Facades\Cache::has($cacheKey) ) {
+                
+            if ( !$user->companies->count() ) {
+                auth()->user()->addCompany();
+            }
+            
+            $company = $user->currentTeam->company;
+            if ( !$company ) {
+                $companyId = auth()->user()->companies->first()->id;
+                session( ['current_company' => $companyId] );
+                $company = App\Company::find($companyId);
+            }
+            Illuminate\Support\Facades\Cache::put($cacheKey, $company, now()->addMinutes(15));
+        }
+        
+        return Illuminate\Support\Facades\Cache::get($cacheKey);;
     }
 
 }
@@ -188,15 +211,21 @@ if (!function_exists('allowTo')) {
         $companyId = currentCompany();
         $user = auth()->user();
         
-        $cacheKey = "cache-allow-$companyId-$user->id";
+        $cacheKey = "cache-allow-$companyId-$user->id-$permiso";
         if ( !Illuminate\Support\Facades\Cache::has($cacheKey) ) {
-        
-            $team = App\Team::where('company_id', $companyId)->first();
-            if( $user->isOwnerOfTeam($team) ) {
-                return true;
-            }
             
             $userId = $user->id;
+        
+            $team = App\Team::where('company_id', $companyId)->first();
+            $hasPermisoAdmin = App\UserCompanyPermission::where(  [    
+                'company_id' => $companyId,
+                'user_id' => $userId,
+                'permission_id' => 1 
+            ])->count();
+            if( $hasPermisoAdmin || $user->isOwnerOfTeam($team) ) {
+                Illuminate\Support\Facades\Cache::put($cacheKey, 1, now()->addDays(120));
+                return 1;
+            }
             
             $permisoId = 1;
             if( $permiso == 'admin') {
@@ -215,22 +244,15 @@ if (!function_exists('allowTo')) {
                 $permisoId = 7;
             }
             
-            $hasPermisoAdmin = App\UserCompanyPermission::where(  [    
-                'company_id' => $companyId,
-                'user_id' => $userId,
-                'permission_id' => 1 
-            ])->count();
-            
             $hasPermiso = App\UserCompanyPermission::where(  [    
                 'company_id' => $companyId,
                 'user_id' => $userId,
                 'permission_id' => $permisoId 
             ])->count();
             
-            $allowed = $hasPermiso + $hasPermisoAdmin;
+            $allowed = $hasPermiso ;
             
             Illuminate\Support\Facades\Cache::put($cacheKey, $allowed, now()->addDays(120));
-            
         }
         
         return Illuminate\Support\Facades\Cache::get($cacheKey);;
@@ -328,6 +350,12 @@ if (!function_exists('getCurrentSubscription')) {
         
         $company = currentCompanyModel();
         $sale = $company->subscription;
+        
+        if( ! isset($sale) ) {
+            $sale = \App\Sales::where('company_id', $company->id)
+                ->where('is_subscription', true)
+                ->first();
+        }
         
         if( ! isset($sale) ) {
             $owner_id = $company->user_id;

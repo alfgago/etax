@@ -5,6 +5,7 @@
 @endsection
 
 @section('breadcrumb-buttons')
+    <a  class="btn btn-primary" href="/facturas-recibidas/aceptaciones">Aceptación de facturas</a>
     <div onclick="abrirPopup('importar-recibidas-popup');" class="btn btn-primary">Importar facturas recibidas</div>
 @endsection 
 
@@ -31,16 +32,15 @@
                   <td>{{ $data->document_number }}</td>
                   <td>{{ @$data->provider->fullname }}</td>
                   <td>{{ $data->currency }}</td>
-                  <td>{{ number_format( $data->subtotal, 2 ) }}</td>
-                  <td>{{ number_format( $data->iva_amount, 2 ) }}</td>
-                  <td>{{ number_format( $data->total, 2 ) }}</td>
+                  <td class="text-right">{{ number_format( $data->subtotal, 2 ) }}</td>
+                  <td class="text-right">{{ number_format( $data->iva_amount, 2 ) }}</td>
+                  <td class="text-right">{{ number_format( $data->total, 2 ) }}</td>
                   <td>
-                    <button link="/facturas-recibidas/validar/{{ $data->id }}" titulo="Verificación Compra" class="btn btn-primary m-0 verificar_compra" data-toggle="modal" data-target="#modal_estandar">Validar</a>
+                    <a link="/facturas-recibidas/validar/{{ $data->id }}" titulo="Verificación de compra" class="btn btn-primary m-0 verificar_compra" style="color:#fff; font-size: 0.85em;" onclick="" data-toggle="modal" data-target="#modal_estandar">Validar</a>
                   </td>
                 </tr>
               @endforeach
             @endif
-
           </tbody>
         </table>
         {{ $bills->links() }}
@@ -52,7 +52,6 @@
 @section('footer-scripts')
 
 <style>
-
 	form.inline-form.validaciones,
 	form.inline-form.validaciones .input-validate-iva, 
 	form.inline-form.validaciones .input-validate-iva select {

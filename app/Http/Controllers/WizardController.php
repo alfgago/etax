@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actividades;
+use App\SubscriptionPlan;
 use Illuminate\Http\Request;
 use App\Company;
 use App\Invoice;
@@ -11,7 +12,13 @@ use App\Team;
 use App\CalculatedTax;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
+/**
+ * @group Controller - Wizard
+ *
+ * Funciones de WizardController.
+ */
 class WizardController extends Controller
 {
   
@@ -111,7 +118,7 @@ class WizardController extends Controller
         clearLastTaxesCache($company->id, 2019);
         
         $calc = CalculatedTax::getProrrataPeriodoAnterior(2018);
-        
+
         $company->operative_prorrata = number_format( $calc->prorrata*100, 2);
         $company->first_prorrata   = number_format( $calc->prorrata*100, 2);
         $company->operative_ratio1 = number_format( $calc->ratio1*100, 2);
@@ -119,7 +126,9 @@ class WizardController extends Controller
         $company->operative_ratio3 = number_format( $calc->ratio3*100, 2);
         $company->operative_ratio4 = number_format( $calc->ratio4*100, 2);
         $company->save();
-      
+        $user = auth()->user();
+	    Cache::forget("cache-currentcompany-$user->id");
+
         return redirect('/empresas/configuracion')->withMessage( 'Su prorrata operativa 2018 es de: '. number_format( $calc->prorrata*100, 2) . '%' );
     }
     
@@ -181,6 +190,8 @@ class WizardController extends Controller
             $company->first_prorrata = $request->first_prorrata;
             $company->first_prorrata_type = $request->first_prorrata_type;
             $company->use_invoicing = $request->use_invoicing;
+            $company->card_retention = $request->card_retention;
+            $company->default_product_category = $request->default_category_producto_code;
             
             if( $company->first_prorrata_type == 1 ) {
                 $company->operative_prorrata = $request->first_prorrata;
@@ -321,6 +332,9 @@ class WizardController extends Controller
                     'year' => 2018
                 ]
             );
+            /*$subscription_plan = SubscriptionPlan::create([
+                'num_companies'=> $request->num_companies
+            ]);*/
 
             $team = new Team();
     		$team->name = "(".$company->id.") " . $company->id_number;

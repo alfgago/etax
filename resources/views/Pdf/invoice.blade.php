@@ -184,7 +184,6 @@
                 <b>{{$company->business_name}}</b><br>
                 <b>Cedula:</b> {{$company->id_number}}<br>
                 <b>Tel:</b> {{$company->phone}}<br>
-                <b>Fax:</b> <br>
                 <b>Correo: {{$company->email}}</b> <br>
             </td>
             <td style="padding: 40px 0px 0px 30px; text-align: right;">
@@ -201,16 +200,19 @@
                 $documentType = 'Factura electrónica';
             break;
             case '02':
-                $documentType = 'Nota de crédito electrónica';
-            break;
-            case '03':
                 $documentType = 'Nota de débito electrónica';
             break;
+            case '03':
+                $documentType = 'Nota de crédito electrónica';
+            break;
+            case '04':
+                $documentType = 'Tiquete electrónico';
+                break;
             case '08':
-                $documentType = 'Factura de exportación';
+                $documentType = 'Factura de compra';
             break;
             case '09':
-                $documentType = 'Factura de compra';
+                $documentType = 'Factura de exportación';
             break;
         }
     ?>
@@ -221,15 +223,15 @@
         <tr class="details">
             <td style="width: 40%;margin-top: 0.75% !important;">
                 <b>Receptor: </b> {{$data_invoice->client_first_name.' '.$data_invoice->client_last_name}} <br>
-                <b>Cedula: </b> {{$data_invoice->client_id_number}}<br>
+                <b>Cédula: </b> {{$data_invoice->client_id_number}}<br>
                 <b>Tel: </b> {{$data_invoice->client_phone}}<br>
                 <b>Correo: </b> {{$data_invoice->client_email}}<br>
-                <b>Codigo Interno :</b> {{$data_invoice->id}}<br>
-                <b>Direccion: </b> {{$data_invoice->client_address}}<br>
+                <b>Código Interno :</b> {{$data_invoice->id}}<br>
+                <b>Dirección: </b> {{$data_invoice->client_address}}<br>
             </td>
 
             <td style="width: 42%;margin-top: 0.75% !important;">
-                <b>Factura Electrónica N°: </b>{{$data_invoice->document_number}} <br>
+                <b>Documento N°: </b>{{$data_invoice->document_number}} <br>
                 <b>Clave Numérica: </b> {{$data_invoice->document_key}}<br>
                 <b>Tipo de Documento: </b> {{ $documentType }}<br>
                 <b>Fecha de Emisión: </b> {{ $data_invoice->generated_date }}<br>
@@ -277,6 +279,7 @@
         $totalMercaderiasExentas = 0;
         $totalDescuentos = 0;
         $totalImpuestos = 0;
+        $totalIvaDevuelto = 0;
         
         foreach ($data_invoice->items as $item){
             $productType = $item->ivaType;
@@ -284,19 +287,20 @@
                 $item->fixIvaType();
                 $productType = $item->ivaType;
             }
+            $isGravado = isset($productType) ? $productType->is_gravado : true;
             $netaLinea = $item->item_count * $item->unit_price;
             
             if($item->measure_unit == 'Sp' || $item->measure_unit == 'Spe' || $item->measure_unit == 'St'
                 || $item->measure_unit == 'Al' || $item->measure_unit == 'Alc' || $item->measure_unit == 'Cm'
                 || $item->measure_unit == 'I' || $item->measure_unit == 'Os'){
-                if($item->iva_amount == 0 && !$productType->is_gravado ){
+                if($item->iva_amount == 0 && !$isGravado ){
                     $totalServiciosExentos += $netaLinea;
                 }else{
                     $totalServiciosGravados += $netaLinea;
                 }
 
             } else {
-                if($item->iva_amount == 0 && !$productType->is_gravado ){
+                if($item->iva_amount == 0 && !$isGravado ){
                     $totalMercaderiasExentas += $netaLinea;
                 }else{
                     $totalMercaderiasGravadas += $netaLinea;
@@ -309,6 +313,10 @@
                 } else {
                     $discount= $item['discount'];
                 }
+            }
+
+            if ($data_invoice->payment_type == '02' && $item->product_type == 12) {
+                $totalIvaDevuelto += $item->iva_amount;
             }
             
             $totalDescuentos += $discount;
@@ -342,7 +350,7 @@
                 {{$item->discount ? number_format($item->discount, 0) : '0'}}
             </td>
             <td>
-                {{$item->discount_reason ?? ''}}
+                {{isset($item->discount_type) ? $item->discount_type == '01' ? '%' : 'monto': ''}}
             </td>
             <td>
                 {{$item->subtotal ? number_format($item->subtotal, 2) : ''}}
@@ -409,12 +417,16 @@
                         <td><span>{{ number_format( ($totalNeta), 2)}}</span></td>
                     </tr>
                     <tr>
-                        <td><b>Total impuestos</b></td>
+                        <td><b>Total IVA</b></td>
                         <td><span>{{ number_format($totalImpuestos, 2)}}</span></td>
                     </tr>
                     <tr>
+                        <td><b>Total IVA Devuelto</b></td>
+                        <td><span>{{ number_format($totalIvaDevuelto, 2)}}</span></td>
+                    </tr>
+                    <tr>
                         <td><b>Total comprobante</b></td>
-                        <td><span>{{ number_format( ($totalComprobante) , 2)}}</span></td>
+                        <td><span>{{ number_format( ($totalComprobante - $totalIvaDevuelto) , 2)}}</span></td>
                     </tr>
                 </table>
                 

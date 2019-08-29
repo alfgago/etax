@@ -29,29 +29,13 @@
               @foreach ( $invoices as $data )
                 <tr>
                   <td>{{ $data->document_number }}</td>
-                  <td>{{ @$data->client->fullname }}</td>
+                  <td>{{ @$data->clientName() }}</td>
                   <td>{{ $data->currency }}</td>
                   <td>{{ number_format( $data->subtotal, 2 ) }}</td>
                   <td>{{ number_format( $data->iva_amount, 2 ) }}</td>
                   <td>{{ number_format( $data->total, 2 ) }}</td>
                   <td>
-                    <form class="inline-form validaciones" method="POST" action="/facturas-emitidas/confirmar-validacion/{{ $data->id }}">
-                      @csrf
-                      @method('patch')
-                      
-                      <div class="input-validate-iva">
-										      <select class="form-control" id="tipo_iva" name="tipo_iva">
-										        @foreach ( \App\Variables::tiposIVARepercutidos() as $tipo )
-										          <option value="{{ $tipo['codigo'] }}" {{ $tipo['codigo'] == '103' ? 'selected' : '' }}
-										          	porcentaje="{{ $tipo['porcentaje'] }}" class="{{ @$tipo['hide'] ? 'hidden' : '' }}" >{{ $tipo['nombre'] }}</option>
-										        @endforeach
-										      </select>
-										  </div>
-										                      
-                      <button type="submit" class="text-success mr-2" title="Confirmar código" style="display: inline-block; background: none;">
-                      	<i class="fa fa-check mr-2" aria-hidden="true"></i> Confirmar código
-                      </button>
-                    </form>
+                    <a link="/facturas-emitidas/validar/{{ $data->id }}" titulo="Verificación de venta" class="btn btn-primary m-0 verificar_compra" style="color:#fff; font-size: 0.85em;" onclick="" data-toggle="modal" data-target="#modal_estandar">Validar</a>
                   </td>
                 </tr>
               @endforeach
@@ -81,5 +65,27 @@
 	}
 
 </style>
+
+<script>
+  $(function(){
+      $(".verificar_compra").click(function(){
+        var link = $(this).attr("link");
+        var titulo = $(this).attr("titulo");
+        $("#titulo_modal_estandar").html(titulo);
+        $.ajax({
+           type:'GET',
+           url:link,
+           success:function(data){
+              
+                $("#body_modal_estandar").html(data);
+
+           }
+
+        });
+      });
+
+  });
+
+</script>
 
 @endsection

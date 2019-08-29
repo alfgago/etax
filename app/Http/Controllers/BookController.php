@@ -7,10 +7,16 @@ use App\Company;
 use App\CalculatedTax;
 use App\Book;
 use App\Invoice;
+use App\Bill;
 use App\Http\Controllers\CacheController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 
+/**
+ * @group Controller - Libro contable
+ *
+ * Funciones de BookController
+ */
 class BookController extends Controller
 {
   
@@ -89,6 +95,47 @@ class BookController extends Controller
         return redirect('/cierres')->withMessage('Cierres de mes satisfactorio');
     }
     
+    public function validar($cierre){
+        $book = Book::join('calculated_taxes','calculated_taxes.id','books.calculated_tax_id')
+            ->where('books.id',$cierre)->first();
+        $invoices = Invoice::where(function ($query) use($book) {
+            $query->where(['company_id'=> $book->company_id,'month'=> $book->month,'year'=> $book->year,'is_authorized' => true])
+                ->where('commercial_activity', null);
+        })->orWhere(function($query) use($book) {
+            $query->where(['company_id'=> $book->company_id,'month'=> $book->month,'year'=> $book->year,'is_authorized' => true])
+                ->whereHas('items', function ($query){
+                $query->where('iva_type', null)->orwhere('product_type', null);
+            });
+        })->get();
+        
+        $bills = Bill::where(function ($query) use($book) {
+            $query->where(['company_id'=> $book->company_id,'month'=> $book->month,'year'=> $book->year,'accept_status' => true])
+                ->where('activity_company_verification', null);
+        })->orWhere(function($query) use($book) {
+            $query->where(['company_id'=> $book->company_id,'month'=> $book->month,'year'=> $book->year,'accept_status' => true])
+                ->whereHas('items', function ($query){
+                $query->where('iva_type', null)->orwhere('product_type', null);
+            });
+        })->get();
+
+        $bloqueo = count($bills) + count($invoices);
+        if($book->year <= 2019){
+            if($book->month < 7){
+                $bloqueo = 0;
+            }
+        }
+        if($bloqueo > 0){
+            $retorno = array(
+                "cierre" => $cierre,
+                "bloqueo" => $bloqueo,
+                "invoices" => $invoices,
+                "bills" => $bills,
+            ); 
+            return view('Book/validar')->with('retorno',$retorno );
+        }else{
+            return $bloqueo;
+        }
+    }
     /**
      * Update the specified resource in storage.
      *
@@ -139,13 +186,13 @@ class BookController extends Controller
 
     public function retenciones_tarjeta($id){
         $company = currentCompanyModel();
-        $cierres = CalculatedTax::where('company_id', $company->id)
-            ->where('id',$id)->first();
+        $retencion_porcentaje = $company->card_retention;
+        $cierres = CalculatedTax::where('company_id', $company->id)->where('id',$id)->first();
         $month = $cierres->month;
         $year = $cierres->year;
         $cerrado = $cierres->is_closed;
         $total_retenido = $cierres->retention_by_card;
-        $invoices = Invoice::select('generated_date', 'document_number', 'client_first_name', 'client_last_name', 'client_last_name2','total','total as retencion')
+        $invoices = Invoice::select('generated_date', 'document_number', 'client_first_name', 'client_last_name', 'client_last_name2','total','total as retencion', 'currency_rate')
             ->where('company_id',$company->id)
             ->whereYear('generated_date',$year)
             ->whereMonth('generated_date',$month)
@@ -154,11 +201,16 @@ class BookController extends Controller
         $total_facturado = 0;
         $total_retencion = 0;
         foreach($invoices as $invoice){
-            $total = $invoice->total;
-            $invoice->retencion = $total * 0.06;
+            $total = $invoice->total = $invoice->total * $invoice->currency_rate;
+            $invoice->retencion = $total * $retencion_porcentaje / 100;
             $total_facturado += $total;
-            $total_retencion += $total * 0.06;
+            $total_retencion += $total * $retencion_porcentaje / 100;
         }
+        
+        if($total_retenido == 0) {
+            $total_retenido = $total_retencion;
+        }
+        
         $data = array(
             'cierre' => $id,
             'mes' => $month,
@@ -166,7 +218,8 @@ class BookController extends Controller
             'cerrado'  => $cerrado,
             'total_facturado' => $total_facturado,
             'total_retencion' => $total_retencion,
-            'total_retenido' => $total_retenido
+            'total_retenido' => $total_retenido,
+            'retencion_porcentaje' => $retencion_porcentaje
         );
         //dd($data);
         return view('Book.retenciones_tarjeta')->with('invoices', $invoices)->with('data', $data);
@@ -174,11 +227,13 @@ class BookController extends Controller
 
     public function actualizar_retencion_tarjeta(Request $request){
         $company = currentCompanyModel();
-        CalculatedTax::where('company_id', $company->id)
-            ->where('id',$request->cierre)
-            ->where('is_closed',0)
-            ->update(['retention_by_card' => $request->total_retenido]);
-        //dd($request);
+        $calc = CalculatedTax::find($request->cierre);
+        if($calc->company_id == $company->id) {
+            $calc->retention_by_card = (float)$request->total_retenido;
+            $calc->save();
+            clearCierreCache($company->id, $calc->month, $calc->year);
+        }
+        
         return redirect('/cierres')->withMessage('Retención por tarjeta actualizada exitosamente.');
     }
 

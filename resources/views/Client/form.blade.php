@@ -20,7 +20,7 @@
     
     <div class="form-group col-md-4">
       <label for="id_number">Número de identificación *</label>
-      <input type="number" class="form-control" name="id_number" id="id_number" value="{{ @$client->id_number }}" required onchange="getJSONCedula(this.value);">
+      <input type="text" class="form-control" name="id_number" id="id_number" value="{{ @$client->id_number }}" required onchange="getJSONCedula(this.value);" maxlength="20">
     </div>
 
     <div class="form-group col-md-4">
@@ -40,39 +40,39 @@
     
     <div class="form-group col-md-4">
       <label for="email">Correo electrónico *</label>
-      <input type="text" class="form-control" name="email" id="email" value="{{ @$client->email }}" required>
+      <input type="text" class="form-control" name="email" id="email" value="{{ @$client->email }}" required onblur="validateEmail();" maxlength="160">
     </div>
     
     <div class="form-group col-md-4">
       <label for="phone">Teléfono</label>
-      <input type="text" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" >
+      <input type="number" pattern="/[0-9]|\./$" class="form-control" name="phone" id="phone" value="{{ @$client->phone }}" maxlength="20"  onblur="validatePhoneFormat();">
     </div>
     
     <div class="form-group col-md-4"></div>
     <div class="form-group col-md-4">
       <label for="country">País *</label>
-      <select class="form-control" name="country" id="country" value="{{ @$client->country }}" required>
+      <select class="form-control" name="country" id="country" value="{{ @$client->country }}" required onchange="cambiarTipoPersona();">
           <option value="CR">CR - Costa Rica</option>
           @foreach ( \App\CodigosPaises::all() as $pais )
-              <option value="{{ $pais['country_code'] }}" {{ $pais['country_code'] == @$client->country ? 'selected' : ''}}>{{ $pais['country_code'] }} - {{ $pais['country_name'] }}</option>
+              <option value="{{ $pais['country_code'] }}" {{ $pais['country_code'] === @$client->country ? 'selected' : ''}}>{{ $pais['country_code'] }} - {{ $pais['country_name'] }}</option>
           @endforeach
       </select>
     </div>
 
     <div class="form-group col-md-4" id="divState">
-      <label for="state">Provincia</label>
+      <label for="state">Provincia *</label>
       <select class="form-control" name="state" id="state" value="{{ @$client->state }}" onchange="fillCantones();">
       </select>
     </div>
 
     <div class="form-group col-md-4" id="divCity">
-      <label for="city">Canton</label>
+      <label for="city">Canton *</label>
       <select class="form-control" name="city" id="city" value="{{ @$client->city }}" onchange="fillDistritos();">
       </select>
     </div>
 
     <div class="form-group col-md-4" id="divDistrict">
-      <label for="district">Distrito</label>
+      <label for="district">Distrito *</label>
       <select class="form-control" name="district" id="district" value="{{ @$client->district }}" onchange="fillZip();" >
       </select>
     </div>
@@ -84,18 +84,18 @@
     </div>
 
     <div class="form-group col-md-4" id="divZip">
-      <label for="zip">Zip</label>
+      <label for="zip">Código Postal</label>
       <input type="text" class="form-control" name="zip" id="zip" value="{{ @$client->zip }}" readonly >
     </div>
 
     <div class="form-group col-md-12" id="divAddress">
       <label for="address">Dirección</label>
-      <textarea class="form-control" name="address" id="address" >{{ @$client->address }}</textarea>
+      <textarea class="form-control" name="address" id="address" maxlength="250" rows="2" style="resize: none;">{{ @$client->address }}</textarea>
     </div>
 
     <div class="form-group col-md-12" id="extranjero" hidden>
         <label for="address">Otras Señas Extranjero</label>
-        <textarea class="form-control" name="foreign_address" id="foreign_address" >{{ @$client->foreign_address }}</textarea>
+        <textarea class="form-control" name="foreign_address" id="foreign_address" maxlength="300" rows="2" style="resize: none;">{{ @$client->foreign_address }}</textarea>
     </div>
     <div class="form-group col-md-12">
       <label for="billing_emails">Correos electrónicos para facturación</label>
@@ -114,7 +114,7 @@
         <option value="emisor" {{ @$client->emisor_receptor == '3' ? 'selected' : '' }}>Emisor</option>
       </select>
     </div>
-    
+    <input hidden value="{{ @$client->id }}" id="id_client">
     <div class="form-group col-md-4">
         <label for="es_exento">Exento de IVA</label>
         <select class="form-control" name="es_exento" id="es_exento" >
@@ -122,30 +122,87 @@
           <option value="1" {{ @$client->es_exento ? 'selected' : '' }}>Sí</option>
         </select>
     </div>
+<style>
+    .error {
+        border:1px solid red;
+    }
+</style>
 <script>
     function cambiarDireccion() {
         var tipoPersona = $('#tipo_persona').val();
+        var idClient = $('#id_client').val();
         if(tipoPersona != undefined){
             if (tipoPersona === 'E') {
                 $('#divState').hide('slow');
+                $('#state').attr('required', false);
                 $('#divCity').hide('slow');
+                $('#city').attr('required', false);
                 $('#divDistrict').hide('slow');
+                $('#district').attr('required', false);
                 $('#divNeighborhood').hide('slow');
                 $('#divZip').hide('slow');
                 $('#divAddress').hide('slow');
 
                 $('#extranjero').removeAttr('hidden');
+                if(idClient == ''){
+                    $('#country').val('US');
+                }
             } else {
                 $('#divState').show('slow');
+                $('#state').attr('required', true);
                 $('#divCity').show('slow');
+                $('#city').attr('required', true);
                 $('#divDistrict').show('slow');
+                $('#district').attr('required', true);
                 $('#divNeighborhood').show('slow');
                 $('#divZip').show('slow');
                 $('#divAddress').show('slow');
 
                 $('#extranjero').attr("hidden", true);
+                $('#country').val('CR');
+                //setTimeout(fillProvincias, 1000);
             }
         }
     }
     cambiarDireccion();
+
+    $("#id_number").keyup(function() {
+        $("#id_number").val(this.value.match(/[0-9]*/));
+    });
+    function validateEmail() {
+        var email = $('#email').val();
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if(re.test(String(email).toLowerCase()) != true){
+            alert('La direccion de correo electronico no coincide con ningun formato de correo');
+            $('#email').addClass('error');
+        }else{
+            $('#email').removeClass('error');
+        }
+    }
+
+    function cambiarTipoPersona(){
+        var country = $('#country').val();
+        if(country !== 'CR'){
+            $('#divState').hide('slow');
+            $('#divCity').hide('slow');
+            $('#divDistrict').hide('slow');
+            $('#divNeighborhood').hide('slow');
+            $('#divZip').hide('slow');
+            $('#divAddress').hide('slow');
+
+            $('#extranjero').removeAttr('hidden');
+            $('#tipo_persona').val('E');
+        }else{
+            $('#divState').show('slow');
+            $('#divCity').show('slow');
+            $('#divDistrict').show('slow');
+            $('#divNeighborhood').show('slow');
+            $('#divZip').show('slow');
+            $('#divAddress').show('slow');
+
+            $('#extranjero').attr("hidden", true);
+            $('#tipo_persona').val('F');
+            //setTimeout(fillProvincias, 1000);
+        }
+    }
 </script>

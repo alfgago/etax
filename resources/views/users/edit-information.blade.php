@@ -31,6 +31,7 @@
                             <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
                         </li>
                         @endif
+                        
                     </ul>
                 </div>
                 <div class="col-9">
@@ -113,7 +114,7 @@
         						    </div>
         						    
         						    <div class="form-group col-md-4">
-        						      <label for="zip">Zip</label>
+        						      <label for="zip">Código Postal</label>
         						      <input type="text" class="form-control" name="zip" id="zip" value="{{ @$user->zip }}" readonly >
         						    </div>
         						    

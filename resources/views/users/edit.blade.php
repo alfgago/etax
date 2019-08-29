@@ -113,13 +113,13 @@
         						    </div>
         						    
         						    <div class="form-group col-md-4">
-        						      <label for="zip">Zip</label>
+        						      <label for="zip">Código Postal</label>
         						      <input type="text" class="form-control" name="zip" id="zip" value="{{ @$user->zip }}" readonly >
         						    </div>
         						    
         						    <div class="form-group col-md-12">
         						      <label for="address">Dirección</label>
-        						      <textarea class="form-control" name="address" id="address" >{{ @$user->address }}</textarea>
+        						      <textarea class="form-control" name="address" id="address" maxlength="250" rows="2" style="resize: none;">{{ @$user->address }}</textarea>
         						    </div>
                                     
                                     <button id="btn-submit" type="submit" class="hidden btn btn-primary">Guardar información</button>

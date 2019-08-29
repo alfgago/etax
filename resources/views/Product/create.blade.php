@@ -18,12 +18,15 @@
               Información de producto
             </h3>
           </div>
-          
+
+          <?php $company = currentCompanyModel(); ?>          
           <input type="hidden" class="form-control" name="is_catalogue" id="is_catalogue" value="true" required>
+          <input type="hidden" class="form-control" id="default_product_category" value="{{$company->default_product_category}}">
+          <input type="hidden" class="form-control" id="default_vat_code" value="{{$company->default_vat_code}}">
           
           <div class="form-group col-md-6">
             <label for="code">Código</label>
-            <input type="text" class="form-control" name="code" id="codigo" value="" required>
+            <input type="text" class="form-control" name="code" id="codigo" value="" max="13" maxlength="13" required>
           </div>
           
           <div class="form-group col-md-6">
@@ -32,19 +35,19 @@
           </div>
           
           <div class="form-group col-md-6">
-            <label for="product_category_id">Tipo de producto</label>
-            <select class="form-control select-search" name="product_category_id" id="tipo_producto" required>
-              @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
-                <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
+            <label for="default_iva_type">Tipo de IVA</label>
+            <select class="form-control select-search" name="default_iva_type" id="tipo_iva" >
+              @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+                <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
               @endforeach
             </select>
           </div>
           
           <div class="form-group col-md-6">
-            <label for="default_iva_type">Tipo de IVA</label>
-            <select class="form-control" name="default_iva_type" id="tipo_iva" required>
-              @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
-                <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}">{{ $tipo['name'] }}</option>
+            <label for="product_category_id">Categoría de declaración</label>
+            <select class="form-control" name="product_category_id" id="tipo_producto" >
+              @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
+                <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
               @endforeach
             </select>
           </div>
@@ -61,12 +64,12 @@
           
           <div class="form-group col-md-6">
             <label for="unit_price">Precio unitario por defecto</label>
-            <input type="text" class="form-control" name="unit_price" id="precio_unitario" value="" required>
+            <input type="number" numeric class="form-control" name="unit_price" id="precio_unitario" value="" required placeholder="0" onblur="validateUnitPrice();">
           </div>
           
           <div class="form-group col-md-12">
             <label for="description">Descripción</label>
-            <textarea class="form-control" name="description" id="descripcion" value="" ></textarea>
+            <textarea class="form-control" name="description" id="descripcion" value="" maxlength="160" style="resize:none;"></textarea>
           </div>
 
         </div>
@@ -84,6 +87,17 @@
 
 @section('footer-scripts')
   <script>
-    $('#tipo_producto').val(17).change();
+    if( $('#default_vat_code').length ){
+      $('#tipo_iva').val( $('#default_vat_code').val() ).change();
+    }else{
+      $('#tipo_iva').val( 'B103' ).change();
+    }
+    function validateUnitPrice() {
+        var price = $('#precio_unitario').val();
+        if(price <= 0){
+            alert('El precio debe ser mayor a cero');
+            $('#precio_unitario').val(0);
+        }
+    }
   </script>
 @endsection

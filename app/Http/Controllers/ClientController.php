@@ -10,6 +10,11 @@ use App\Imports\ClientImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
+/**
+ * @group Controller - Clientes
+ *
+ * Funciones de ClientController
+ */
 class ClientController extends Controller
 {
   
@@ -46,13 +51,8 @@ class ClientController extends Controller
         return datatables()->eloquent( $query )
             ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($client) {
-                return view('datatables.actions', [
-                    'routeName' => 'clientes',
-                    'deleteTitle' => 'Eliminar cliente',
-                    'hideDelete' => true,
-                    'editTitle' => 'Editar cliente',
-                    'deleteIcon' => 'fa fa-trash-o',
-                    'id' => $client->id
+                return view('Client.actions', [
+                    'data' => $client
                 ])->render();
             })
             ->editColumn('es_exento', function(Client $client) {
@@ -118,9 +118,17 @@ class ClientController extends Controller
         $cliente->foreign_address = $request->foreign_address ?? $cliente->address;
         $cliente->phone = $request->phone;
         $cliente->es_exento = $request->es_exento;
-        $cliente->billing_emails = $request->billing_emails;
-        if (is_array ($cliente->billing_emails)) {
-            $cliente->billing_emails = implode(", ",$cliente->billing_emails);
+        //$cliente->billing_emails = $request->billing_emails;
+        if (is_array ($request->billing_emails)) {
+            $arrayEmails = array();
+            foreach($request->billing_emails as $email){
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    array_push($arrayEmails, $email);
+                }else{
+                    return redirect()->back()->withErrors('Los correos para facturación deben ser válidos');
+                }
+            }
+            $cliente->billing_emails = implode(", ", $arrayEmails);
         }
         
         $cliente->email = $request->email;
@@ -128,7 +136,7 @@ class ClientController extends Controller
       
         $cliente->save();
       
-        return redirect('/clientes');
+        return redirect('/clientes')->withMessage('Cliente creado');
     }
 
     /**
@@ -205,7 +213,7 @@ class ClientController extends Controller
       
         $cliente->save();
       
-        return redirect('/clientes');
+        return redirect('/clientes')->withMessage('Cliente actualizado');
     }
 
     /**
@@ -218,9 +226,9 @@ class ClientController extends Controller
     {
         $cliente = Client::find($id);
         $this->authorize('update', $cliente);
-        //$cliente->delete();
+        $cliente->delete();
         
-        return redirect('/clientes');
+        return redirect('/clientes')->withMessage('Cliente eliminado');
     }
     
     public function export() {
@@ -240,9 +248,12 @@ class ClientController extends Controller
         $company_id = currentCompany();  
         foreach ($clientes[0] as $row){
             
-            $zip = 0;
+            $zip = $row['codigopostal'];
+            $row['provincia'] = substr($zip, 0, 1);
+            $row['canton'] = substr($zip, 0, 3);
+            $row['distrito'] = $zip;
             
-            if( $row['canton'] ) {
+            /*if( $row['canton'] ) {
                 if( strlen( (int)$row['canton'] ) <= 2 ) {
                     $row['canton'] = (int)$row['provincia'] . str_pad((int)$row['canton'], 2, '0', STR_PAD_LEFT);
                 }
@@ -255,7 +266,7 @@ class ClientController extends Controller
                     $row['distrito'] = (int)$row['canton'] . str_pad((int)$row['distrito'], 2, '0', STR_PAD_LEFT);
                     $zip = $row['distrito'];
                 }
-            }
+            }*/
             
             $correosCopia = $row['correoscopia'];
             $correosCopia = str_replace(";", ",", $correosCopia);

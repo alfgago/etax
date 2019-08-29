@@ -8,15 +8,23 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
 use App\Sales;
+use App\EtaxProducts;
+use App\PaymentMethod;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Cache;
 use DB;
 use Hash;
 use Auth;
 use \Firebase\JWT\JWT;
 use Carbon\Carbon;
 
+/**
+ * @group Controller - Usuarios
+ *
+ * Funciones de UserController.
+ */
 class UserController extends Controller {
 
     function __construct() {
@@ -171,9 +179,9 @@ class UserController extends Controller {
                 //$teams = \Mpociot\Teamwork\TeamworkTeam::get();
             }
             $actividades = Actividades::all()->toArray();
-
-            $available_companies_count = User::checkCountAvailableCompanies();
-            return view('users.companies', compact('data'))->with('teams', $teams);
+            $availableCompanies = User::checkCountAvailableCompanies();
+            
+            return view('users.companies', compact('data', 'teams', 'availableCompanies'));
 
         }catch( \Throwable $ex ){
             return view('users.companies');
@@ -326,9 +334,13 @@ class UserController extends Controller {
     
     public function impersonate( $id ) {
         
-        $user = User::findOrFail($id);
-        
-        Auth::user()->impersonate($user);
+        if( Auth::user()->canImpersonate() ) {
+            $user = User::findOrFail($id);
+            if( !$user ){
+                $user = User::where('email', $id)->first();
+            }
+            Auth::user()->impersonate($user);
+        }
         return redirect( '/' );
         
     }
@@ -370,6 +382,28 @@ class UserController extends Controller {
         Mail::to($company->email)->send(new \App\Mail\NotifyCancellation(auth()->user()->companies->first()));
         Auth::logout();
         return redirect("login")->withError('Su subscripción se ha cancelado');
+    }
+
+    public function CompraContabilidades(){
+        $company = currentCompanyModel();
+        $date_now = Carbon::parse( now('America/Costa_Rica') )->format('Y-m-d') ;
+        $sale = Sales::join('subscription_plans','subscription_plans.id','sales.etax_product_id')->where('company_id', $company->id)
+                                                        ->where('is_subscription', 1)->first();
+        if( !$sale ){
+            return back()->withError( 'Solamente el administrador de la empresa puede comprar facturas.' );
+        }
+        $paymentMethods = PaymentMethod::where('user_id', auth()->user()->id)->get();
+        $fechavencimiento = date('Y-m-d', strtotime($sale->next_payment_date));
+        $fechavencimiento = Carbon::parse($fechavencimiento);
+        $diff = $fechavencimiento->diffInDays($date_now);
+        //dd($diff);
+        $fechavencimiento = date('d/m/Y', strtotime($sale->next_payment_date));
+        return view('users.compra_contabilidades')->with('company', $company)
+                                    ->with('sale', $sale)
+                                    ->with('fechavencimiento', $fechavencimiento)
+                                    ->with('diff', $diff)
+                                    ->with('paymentMethods', $paymentMethods);
+
     }
 
 

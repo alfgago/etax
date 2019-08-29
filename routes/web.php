@@ -20,14 +20,17 @@ Auth::routes();
 // Rutas de exportación
 Route::get('clientes/exportar', 'ClientController@export');
 Route::get('proveedores/exportar', 'ProviderController@export');
-Route::get('facturas-emitidas/exportar', 'InvoiceController@export');
-Route::get('facturas-recibidas/exportar', 'BillController@export');
+Route::get('facturas-emitidas/exportar/{year}/{month}', 'InvoiceController@export');
+Route::get('facturas-recibidas/exportar/{year}/{month}', 'BillController@export');
+Route::get('exportar-libro-compras/{year}/{month}', 'BillController@exportLibroCompras');
+Route::get('exportar-libro-ventas/{year}/{month}', 'InvoiceController@exportLibroVentas');
 
 // Rutas de importación
 Route::post('clientes/importar', 'ClientController@import');
 Route::post('proveedores/importar', 'ProviderController@import');
 Route::post('productos/importar', 'ProductController@import');
 Route::post('facturas-emitidas/importarExcel', 'InvoiceController@importExcel');
+Route::post('facturas-emitidas/importarExcelSM', 'InvoiceController@importExcelSM');
 Route::post('facturas-emitidas/importarXML', 'InvoiceController@importXML');
 Route::post('facturas-recibidas/importarExcel', 'BillController@importExcel');
 Route::post('facturas-recibidas/importarXML', 'BillController@importXML');
@@ -44,11 +47,23 @@ Route::post('/reportes/detalle-credito', 'ReportsController@reporteDetalleCredit
 Route::post('/reportes/libro-ventas', 'ReportsController@reporteLibroVentas');
 Route::post('/reportes/libro-compras', 'ReportsController@reporteLibroCompras');
 Route::get('/reportes/borrador-iva', 'ReportsController@reporteBorradorIVA');
+/*Exportar XML DEPRECADOS*/
+Route::post('/reportes/export-cuentas-contables', 'ReportsController@exportCuentasContables');
+Route::post('/reportes/export-detalle-debito-fiscal', 'ReportsController@exportDetalleDebitoFiscal');
+Route::post('/reportes/export-detalle-credito-fiscal', 'ReportsController@exportDetalleCreditoFiscal');
+Route::post('/reportes/export-libro-compras', 'ReportsController@exportLibroCompras');
+Route::post('/reportes/export-libro-ventas', 'ReportsController@exportLibroVentas');
+Route::post('/reportes/export-resumen-ejecutivo', 'ReportsController@exportResumenEjecutivo');
+Route::post('/reportes/export-reporte-proveedores', 'ReportsController@exportReporteProveedores');
+Route::post('/reportes/export-reporte-clientes', 'ReportsController@exportReporteClientes');
+Route::post('/reportes/export-declaracion-iva', 'ReportsController@exportDeclaracionIVA');
+/**/
 
 //Cierres de mes
 Route::prefix('cierres')->group(function() {
     Route::get('/', 'BookController@index');
     Route::patch('cerrar-mes/{id}', 'BookController@close');
+    Route::get('validar-cierre/{id}', 'BookController@validar');
     Route::patch('abrir-rectificacion/{id}', 'BookController@openForRectification');
     Route::get('/retenciones-tarjeta/{id}', 'BookController@retenciones_tarjeta')->name('Book.retenciones_tarjeta');
     Route::post('/actualizar-retencion-tarjeta', 'BookController@actualizar_retencion_tarjeta')->name('Book.actualizar_retencion_tarjeta');
@@ -66,27 +81,34 @@ Route::prefix('empresas')->group(function() {
     Route::get('company-profile/{id}', 'CompanyController@company_profile')->name('Company.company_profile');
     Route::get('set-prorrata-2018-facturas', 'CompanyController@setProrrata2018PorFacturas')->name('Company.set_prorrata_2018_facturas');
     Route::get('comprar-facturas-vista', 'CompanyController@comprarFacturasVista')->name('Company.comprar_facturas_vista');
-    Route::patch('comprar-facturas', 'CompanyController@comprarFacturas')->name('Company.comprar_facturas');
     Route::patch('seleccionar-cliente', 'CompanyController@seleccionarCliente')->name('Company.seleccionar_cliente');
 });
 
 // Rutas de facturación
 Route::prefix('facturas-emitidas')->group(function() {
     Route::get('emitir-factura/{tipoDocumento}', 'InvoiceController@emitFactura')->name('Invoice.emit_01');
+    Route::get('emitir-sujeto-pasivo', 'InvoiceController@emitSujetoPasivo')->name('Invoice.emitSujetoPasivo');
     Route::get('emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
-    Route::post('enviar-hacienda', 'InvoiceController@sendHacienda')->name('Invoice.send');
+    Route::get('emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
+    Route::get('nota-debito/{id}', 'InvoiceController@notaDebito')->name('Invoice.notadebito');
     Route::get('validaciones', 'InvoiceController@indexValidaciones')->name('Invoice.validaciones');
     Route::patch('confirmar-validacion/{id}', 'InvoiceController@confirmarValidacion')->name('Invoice.confirmar_validacion');
     Route::get('autorizaciones', 'InvoiceController@indexAuthorize')->name('Invoice.validaciones');
     Route::patch('confirmar-autorizacion/{id}', 'InvoiceController@authorizeInvoice')->name('Invoice.confirmar_validacion');
     Route::post('send', 'InvoiceController@GuardarInvoice')->name('Invoice.GuardarInvoice');
     Route::patch('/anular/{id}', 'InvoiceController@anularInvoice')->name('Invoice.anular');
+    Route::post('/nota-debito/send/{id}', 'InvoiceController@sendNotaDebito')->name('Invoice.sendNotaDebit');
     Route::get('download-pdf/{id}', 'InvoiceController@downloadPdf')->name('Invoice.downloadPdf');
+    Route::get('stream-pdf/{id}', 'InvoiceController@streamPdf')->name('Invoice.downloadPdf');
     Route::get('download-xml/{id}', 'InvoiceController@downloadXml')->name('Invoice.downloadXml');
     Route::get('reenviar-email/{id}', 'InvoiceController@resendInvoiceEmail')->name('Invoice.resendInvoiceEmail');
     Route::get('enviar-programadas/', 'InvoiceController@EnviarProgramadas')->name('Invoice.EnviarProgramadas');
     Route::get('consult/{id}', 'InvoiceController@consultInvoice')->name('Invoice.consultInvoice');
-
+    Route::get('query-invoice/{id}', 'InvoiceController@queryInvoice')->name('Invoice.queryInvoice');
+    Route::post('actualizar-categorias', 'InvoiceController@actualizar_categorias')->name('Invoice.actualizar_categorias');
+    Route::patch('switch-ocultar/{id}', 'InvoiceController@hideInvoice')->name('Invoice.hideInvoice');
+    Route::get('validar/{id}', 'InvoiceController@validar')->name('Invoice.validar');
+    Route::post('guardar-validar', 'InvoiceController@guardarValidar')->name('Invoice.GuardarValidar');
 });
 
 // Rutas de facturacion recibida
@@ -97,12 +119,15 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::get('validaciones', 'BillController@indexValidaciones')->name('Bill.validaciones');
     Route::patch('confirmar-validacion/{id}', 'BillController@confirmarValidacion')->name('Bill.confirmar_validacion');
     Route::get('autorizaciones', 'BillController@indexAuthorize')->name('Bill.validaciones');
-    Route::patch('confirmar-autorizacion/{id}', 'BillController@authorizeBill')->name('Bill.confirmar_validacion');
+    Route::patch('confirmar-autorizacion/{id}', 'BillController@authorizeBill')->name('Bill.authorizeBill');
     Route::get('aceptaciones-otros', 'BillController@indexAcceptsOther')->name('Bill.acceptOthers');
     Route::patch('confirmar-aceptacion-otros/{id}', 'BillController@correctAccepted')->name('Bill.correctAccepted');
     Route::patch('marcar-para-aceptacion/{id}', 'BillController@markAsNotAccepted')->name('Bill.markAsNotAccepted');
     Route::get('validar/{id}', 'BillController@validar')->name('Bill.validar');
-    Route::post('guardar-validar', 'BillController@guardar_validar')->name('Bill.guardar_validar');
+    Route::post('guardar-validar', 'BillController@guardarValidar')->name('Bill.GuardarValidar');
+    Route::get('edit-aceptacion', 'BillController@editAccept')->name('Bill.editAccept');
+    Route::get('update-aceptacion', 'BillController@updateAccept')->name('Bill.updateAccept');
+    Route::patch('switch-ocultar/{id}', 'BillController@hideBill')->name('Bill.hideBill');
 });
 
 // Rutas de Wizard
@@ -115,7 +140,14 @@ Route::post('/store-wizard', 'WizardController@createWizard')->name('Wizard.stor
 //Rutas para suscripciones
 Route::get('/cambiar-plan', 'SubscriptionPlanController@changePlan')->name('Subscription.cambiar_plan');
 Route::get('/elegir-plan', 'SubscriptionPlanController@selectPlan')->name('Subscription.select_plan');
+Route::get('/periodo-pruebas', 'SubscriptionPlanController@startTrial')->name('Subscription.startTrial');
 Route::post('/confirmar-plan', 'SubscriptionPlanController@confirmPlanChange')->name('Subscription.confirmar_plan');
+Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}/{plan}/{companies}', 'SubscriptionPlanController@confirmCode')->name('Subscription.confirmar_code');
+Route::get('/codigo-contador/{codigo}', 'SubscriptionPlanController@confirmCodeAccount')->name('Subscription.confirmCodeAccount');
+Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');
+Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');
+Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}', 'SubscriptionPlanController@confirmCode')->name('Subscription.confirmar_code');
+
 
 // Rutas de usuario
 Route::prefix('usuario')->group(function() {
@@ -130,8 +162,12 @@ Route::prefix('usuario')->group(function() {
     Route::get('zendesk-jwt', 'UserController@zendeskJwt')->name('User.zendesk_jwt');
     Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
     Route::post('update-user-tutorial', 'UserController@updateUserTutorial')->name('User.update_user_tutorial');
+    Route::get('wallet', 'InfluencersController@wallet')->name('Influencers.wallet');
+    Route::post('add-retiro', 'InfluencersController@retiro')->name('Influencers.retiro');
     Route::get('cancelar', 'UserController@cancelar')->name('User.cancelar');
     Route::patch('update-cancelar', 'UserController@updatecancelar')->name('User.updatecancelar');
+    Route::get('compra-contabilidades', 'UserController@CompraContabilidades')->name('Payment.CompraContabilidades');
+
 });
 
 //Rutas de Pagos de la aplicacion
@@ -141,15 +177,24 @@ Route::prefix('payment')->group(function(){
     Route::post('payment-token-transaction', 'PaymentController@paymentTokenTransaction')->name('Payment.payment_token_transaction');
     Route::post('payment-charge', 'PaymentController@paymentCharge')->name('Payment.payment_charge');
     Route::get('pending-charges', 'PaymentController@pendingCharges')->name('Payment.pending_charges');
+    Route::post('comprar-facturas', 'PaymentController@comprarFacturas')->name('Payment.comprar_facturas');
+    Route::post('comprar-contabilidades', 'PaymentController@comprarContabilidades')->name('Payment.comprarContabilidades');
+    Route::post('seleccion-empresas', 'PaymentController@seleccionEmpresas')->name('Payment.seleccionEmpresas');
+    Route::patch('pagar-cargo/{id}', 'PaymentController@pagarCargo')->name('Payment.pagar-cargo');
 });
 
 
+Route::prefix('clients')->group(function(){
+    Route::get('clients-update-view/{id}', 'ClientController@edit')->name('clients_update_view');
+    Route::delete('clients-delete/{id}', 'ClientController@destroy')->name('clients_delete');
+});
 Route::prefix('payment-methods')->group(function(){
     Route::get('payment-method-create-view', 'PaymentMethodController@createView')->name('PaymentMethod.payment_method_create_view');
     Route::post('payment-method-create', 'PaymentMethodController@create')->name('PaymentMethod.payment_create');
     Route::get('payment-method-token-update-view/{id}', 'PaymentMethodController@paymentMethodTokenUpdateView')->name('PaymentMethod.payment_method_token_update_view');
     Route::patch('payment-method-token-update', 'PaymentMethodController@tokenUpdate')->name('Payment.payment_token_update');
     Route::delete('payment-method-token-delete/{id}', 'PaymentMethodController@tokenDelete')->name('Payment.payment_token_delete');
+    Route::patch('payment-method-default-card-change/{id}', 'PaymentMethodController@updateDefault')->name('Payment.payment_method_default_card_change');
 });
 
 // Rutas de API data para ajax
@@ -216,6 +261,7 @@ Route::group(['prefix' => 'companies', 'namespace' => 'Teamwork', 'middleware' =
 
 //OM Routing
 Route::get('invite/register/{token}', 'InviteController@index')->name('invites.accept_invite');
+Route::delete('invite/delete/{id}', 'InviteController@removeInvitation')->name('teams.members.removeInvitation');
 Route::post('change-company', 'CompanyController@changeCompany');
 Route::get('company-deactivate/{token}', 'CompanyController@confirmCompanyDeactivation')->name('company-deactivate');
 Route::patch('/plans/cancel-plan/{planNo}', 'PlanController@cancelPlan')->name('Plan.cancel_plan');

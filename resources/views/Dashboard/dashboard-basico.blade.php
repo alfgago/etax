@@ -19,12 +19,12 @@
     </div>
     
     
-    <div class="col-lg-6 mb-4" id="reporteMes">
-      @include('Reports.widgets.resumen-basico', ['titulo' => "Resumen de $nombreMes $ano", 'data' => $dataMes])
+    <div class="col-lg-6 mb-4">
+      @include('Reports.widgets.resumen-periodo', ['titulo' => "$nombreMes $ano", 'data' => $dataMes])
     </div>
     
-    <div class="col-lg-6 mb-4" id="facturas">
-      @include('Reports.widgets.resumen-facturacion', ['titulo' => "Facturación $nombreMes $ano", 'data' => $dataMes])
+    <div class="col-lg-6 mb-4">
+      @include('Reports.widgets.resumen-periodo', ['titulo' => "Acumulado Jul. 2019 - Dic. 2019", 'data' => $acumulado])
     </div>
     
     <div class="col-lg-6 mb-4" id="proporcion">
@@ -32,7 +32,7 @@
     </div>
     
     <div class="col-lg-6 mb-4" id="prorrata">
-      @include('Reports.widgets.grafico-prorrata-basico', ['titulo' => 'Prorrata operativa vs estimada', 'data' => $acumulado])
+      @include('Reports.widgets.grafico-prorrata', ['titulo' => 'Prorrata operativa vs prorrata estimada', 'data' => $acumulado])
     </div>
 
   </div>
@@ -41,52 +41,6 @@
 
 <div class=" col-md-4 mb-4">
   <div class="row">
-    
-    
-    <div class="col-lg-12 mb-4 manuales-etax">
-      <div class="sidebar-dashboard">
-        <div class="card-title" id="manuales">Manuales eTax</div>
-        <ul>
-    			<li>	
-    			  <a download href="/assets/files/guias/Manual-ConfiguracionEmpresa.pdf">Descargar manual de configuración de empresa</a>
-    			</li>
-    			<li>	
-    				<a download href="/assets/files/guias/Manual-IntroducirVentas.pdf">Descargar manual de introducción de ventas</a>
-    			</li>
-    			<li>	
-    				<a download href="/assets/files/guias/Manual-GenerarFactura.pdf">Descargar manual de facturación electrónica</a>
-    			</li>
-    			<li>	
-    				<a download href="/assets/files/guias/Manual-IntroducirCompras.pdf">Descargar manual de introducción de compras</a>
-    			</li>
-    			<li>	
-    				<a download href="/assets/files/guias/Manual-Escritorio.pdf">Descargar manual de escritorio</a>
-    			</li>
-    			<li>	
-    				<a download href="/assets/files/guias/Manual-CodigosVentasEtax.pdf">Descargar manual de códigos eTax de ventas.</a>
-    			</li>
-    			<li>	
-    				<a download href="/assets/files/guias/Manual-CodigosComprasEtax.pdf">Descargar manual de códigos eTax de compras.</a>
-    			</li>
-                <li onclick="actualizarTutorial();">
-                    <a style="cursor: pointer">Tutorial r&aacute;pido</a>
-                </li>
-    		</ul>
-        
-      </div>
-    </div>
-    
-    <div class="col-lg-12 mb-4">
-      <div class="sidebar-dashboard">
-        <div class="card-title">Notificaciones</div>
-    
-        <div class="notificaciones-container">
-          <div class="notificacion"><span class="fecha">01/06/2019</span> La emisión de tiquetes y notas de débito se encuentra temporalmente deshabilitada.</div>
-          <div class="notificacion"><span class="fecha">01/06/2019</span> Facturación con IVA habilitada en eTax.</div>
-        </div>
-        
-      </div>
-    </div>
     
     <div class="col-lg-12 mb-4">
       <div class="sidebar-dashboard">
@@ -101,7 +55,10 @@
             {{ $empresa->id_number }} {{ $empresa->business_name ? " - ".$empresa->business_name : ''}}
           </div>
           <div class="dato-empresa">
-            <b>Plan actual:</b> {{ getCurrentSubscription()->product->plan->getName() }}
+            <b>Plan actual:</b> {{ getCurrentSubscription()->plan->getName() }}
+          </div>
+          <div class="dato-empresa">
+            <b>Empresas disponibles:</b> {{ getCurrentSubscription()->plan->num_companies }}
           </div>
           <div class="dato-empresa">
             <b>Facturación electrónica:</b> Habilitada
@@ -113,13 +70,75 @@
         
       </div>
     </div>
+    
+    <div class="col-lg-12 mb-4" id="facturas">
+      @include('Reports.widgets.resumen-facturacion', ['titulo' => "Facturación $nombreMes $ano", 'data' => $dataMes])
+    </div>
+    
+    
+    <div class="col-lg-12 mb-4 manuales-etax">
+      <div class="sidebar-dashboard">
+        <div class="card-title" id="manuales">Manuales eTax</div>
+        <ul>
+    			<li>	
+    			  <a download href="/assets/files/guias/Manual_completo_eTax.pdf">Descargar Manual completo de eTax</a>
+    			</li>
+    			<li>	
+    				<a download href="/assets/files/guias/Manual_de_codigos_de_eTax.pdf">Descargar Manual de códigos de eTax</a>
+    			</li>
+    			<li>	
+    				<a download href="/assets/files/guias/Manual_de_Configuracion.pdf">Descargar Manual de configuración</a>
+    			</li>
+    			<li>	
+    				<a download href="/assets/files/guias/Manual_Derechos_de_Acreditacion_operativos.pdf">Descargar Manual de derechos de acreditación operativos</a>
+    			</li>
+    			<li>	
+    				<a download href="/assets/files/guias/Manual_Facturacion_Electronica.pdf">Descargar Manual de facturación electrónica</a>
+    			</li>
+    			<li>	
+    				<a download href="/assets/files/guias/Manual_Facturas_Recibidas.pdf">Descargar Manual de facturas recibidas</a>
+    			</li>
+    			<li>	
+    				<a download href="/assets/files/guias/Manual_Navegar_en_el_escritorio.pdf">Descargar Manual navegar en el escritorio</a>
+    			</li>
+    			<li>
+    				<a download href="/assets/files/guias/Manual_Registro_Facturas_Emitidas.pdf">Descargar Manual registro facturas emitidas</a>
+    			</li>
+                <li onclick="actualizarTutorial();">
+                    <a style="cursor: pointer">Tutorial r&aacute;pido</a>
+                </li>
+    		</ul>
+        
+      </div>
+    </div>
+    
+    <div class="col-lg-12 mb-4">
+      <div class="sidebar-dashboard">
+        <div class="card-title">Notificaciones</div>
+        <div class="notificaciones-container">
+            <p>El 13 de Agosto es el último día para validar sus facturas de gastos ante el Ministerio de Hacienda y que puedan incluirse en su cálculo de IVA</p>
+
+        </div>
+        
+      </div>
+    </div>
+    
   
   </div> 
+  
  <input type="text" hidden value="{{$hide_tutorial}}" id="hide_tutorial">
 </div>
+  
+  
+    
+    <div class="col-lg-12 mb-4 pb-4">
+      @include('Reports.widgets.grafico-mensual', ['titulo' => "Resumen de IVA $ano"])
+    </div>
+    
+    
 <script>
     function tutorialBurbujas(){
-        var tour = {
+        /*var tour = {
             id: "tour",
             i18n: {
                 nextBtn: "Siguiente",
@@ -234,7 +253,7 @@
                 });
             }
         }
-        hopscotch.startTour(tour);
+        hopscotch.startTour(tour);*/
     }
     function actualizarTutorial() {
         console.log('here');

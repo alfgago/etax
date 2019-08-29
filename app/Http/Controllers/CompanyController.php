@@ -23,8 +23,14 @@ use App\Mail\NewUser;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use stdClass;
 
+/**
+ * @group Controller - Empresa
+ *
+ * Funciones de CompanyController
+ */
 class CompanyController extends Controller {
     
     use SoftDeletes;
@@ -130,6 +136,7 @@ class CompanyController extends Controller {
         );
 
         auth()->user()->attachTeam($team);
+        Cache::forget("cache-currentcompany-$userId");
 
         return redirect()->route('User.companies')->withMessage('La compañía ha sido agregada con éxito');
     }
@@ -227,7 +234,7 @@ class CompanyController extends Controller {
 
         /* Only owner of company can edit that company */
         if ( !auth()->user()->isOwnerOfTeam($team) ) {
-            abort(401);
+            redirect()->back()->withError('Usted no tiene permisos para editar el equipo.');
         }
         
         return view('Company.edit-team', compact('company', 'users', 'team'))->withTeam($team);
@@ -304,6 +311,9 @@ class CompanyController extends Controller {
         }
         
         $company->save();
+        
+        $userId = auth()->user()->id;
+        Cache::forget("cache-currentcompany-$userId");
 
         //Update Team name based on company
         /*$team->name = "(".$company->id.") " . $company->id_number;
@@ -339,9 +349,16 @@ class CompanyController extends Controller {
         $company->last_rec_ref_number = $request->last_document_rec ? getInvoiceReference($request->last_document_rec) : 0;
         $company->last_document_note = $request->last_document_note;
         $company->last_note_ref_number = $request->last_document_note ? getInvoiceReference($request->last_document_note) : 0;
+        $company->last_document_ticket = $request->last_document_ticket;
+        $company->last_ticket_ref_number = $request->last_document_ticket ? getInvoiceReference($request->last_document_ticket) : 0;
+        $company->last_document_debit_note = $request->last_document_debit_note;
+        $company->last_debit_note_ref_number = $request->last_document_debit_note ? getInvoiceReference($request->last_document_debit_note) : 0;
         $company->first_prorrata = $request->first_prorrata;
         $company->first_prorrata_type = $request->first_prorrata_type;
         $company->use_invoicing = $request->use_invoicing;
+        $company->card_retention  =  $request->card_retention;
+        $company->default_product_category = $request->default_category_producto_code;
+        $company->saldo_favor_2018 = $request->saldo_favor_2018;
         
         if( $company->first_prorrata_type == 1 ) {
             $company->operative_prorrata = $request->first_prorrata;
@@ -354,6 +371,8 @@ class CompanyController extends Controller {
         $company->save();
         
         clearLastTaxesCache( $company->id, 2018);
+        $userId = auth()->user()->id;
+        Cache::forget("cache-currentcompany-$userId");
 
         return redirect()->route('Company.edit_config')->withMessage('La configuración de la empresa ha sido actualizada.');
     }
@@ -376,7 +395,7 @@ class CompanyController extends Controller {
             return redirect()->back()->withError('No se ha encontrado una compañía a su nombre.');
         }
         
-        if ( !$company->use_invoicing || !$request->file('cert') ) {
+        if ( !$request->file('cert') ) {
             return redirect()->back()->withError('Debe subir el certificado antes de guardar el formulario.');
         }
 
@@ -440,13 +459,12 @@ class CompanyController extends Controller {
         }
 
         try {
+            $user = auth()->user();
             $companyId = $request->companyId;
             $team = Team::where( 'company_id', $companyId )->first();
-	        auth()->user()->switchTeam( $team );
-        } catch( UserNotInTeamException $e )
-        {
-        	
-        }
+	        $user->switchTeam( $team );
+	        Cache::forget("cache-currentcompany-$user->id");
+        } catch( UserNotInTeamException $e ) { }
         
     }
     
@@ -463,20 +481,25 @@ class CompanyController extends Controller {
     }
 
     public function comprarFacturasVista(){
-        return back()->withError( 'Compra de facturas adicionales deshabilitada hasta el 1 de Julio.' );
+        //return back()->withError( 'Compra de facturas adicionales deshabilitada hasta el 1 de Julio.' );
         
-        $company = currentCompany();
-        $sale = Sales::where('company_id', $company)->first();
-        $producto = EtaxProducts::where('id', $sale->etax_product_id)->first();
-        $availableInvoices = AvailableInvoices::where('company_id', $company)->first();
-        $productosEtax = EtaxProducts::where('is_subscription', 0)->where('id', '!=', 15)->get(); //El 15 es el producto de cálculos de prorrata, creado por seeders.
-        $paymentmethods = PaymentMethod::where('user_id', auth()->user()->id)->get();
+        $company = currentCompanyModel();
+        $sale = Sales::where('company_id', $company->id)->where('is_subscription', 1)->first();
+        if( !$sale ){
+            return back()->withError( 'Solamente el administrador de la empresa puede comprar facturas.' );
+        }
+        $producto = $sale->product;
+        $availableInvoices = $company->getAvailableInvoices( false, false );
+
+        $productosEtax = EtaxProducts::where('is_subscription', 0)->whereNotIn('id', [15, 16])->get(); //El 15 es el producto de cálculos de prorrata, creado por seeders.
+        $paymentMethods = PaymentMethod::where('user_id', auth()->user()->id)->get();
         $invoices = $availableInvoices->monthly_quota - $availableInvoices->current_month_sent;
         
-        return view('/Company/comprarFacturasView')->with('productosEtax', $productosEtax)
+        return view('/Company/comprar-facturas-view')->with('productosEtax', $productosEtax)
                                                         ->with('availableInvoices', $availableInvoices)
                                                         ->with('invoices', $invoices)
-                                                        ->with('paymentmethods', $paymentmethods);
+                                                        ->with('company', $company)
+                                                        ->with('paymentMethods', $paymentMethods);
     }
 
     public function seleccionarCliente(Request $request){
@@ -490,79 +513,6 @@ class CompanyController extends Controller {
                 ->with('payment_method', $payment_method);
         }else{
             return redirect()->back()->withErrors('Debe seleccionar un metodo de pago');
-        }
-    }
-
-    public function comprarFacturas(Request $request){
-        $date = Carbon::parse(now('America/Costa_Rica'));
-        $current_company = currentCompany();
-        $company = get_company_details($current_company);
-        $available_company_invoices = ($company->additional_invoices == null) ? $available_company_invoices = 0 : $available_company_invoices = $company->additional_invoices;
-        $product_id = $request->product_id;
-        switch ($product_id){
-            case 9:
-                $additional_invoices = $available_company_invoices + 5;
-            break;
-            case 10:
-                $additional_invoices = $available_company_invoices + 25;
-            break;
-            case 11:
-                $additional_invoices = $available_company_invoices + 50;
-            break;
-            case 12:
-                $additional_invoices = $available_company_invoices + 250;
-            break;
-            case 13:
-                $additional_invoices = $available_company_invoices + 2000;
-            break;
-            case 14:
-                $additional_invoices = $available_company_invoices + 5000;
-            break;
-        }
-        $paymentUtils = new PaymentUtils();
-        if(isset($payment_method)){
-            $pagoProducto = $paymentUtils->comprarProductos($request);
-            if($pagoProducto){
-                $user = auth()->user();
-                $invoiceData = new stdClass();
-                $invoiceData->client_code = $request->id_number;
-                $invoiceData->client_id_number = $request->id_number;
-                $invoiceData->client_id = $request->user_id;
-                $invoiceData->tipo_persona = $request->tipo_persona;
-                $invoiceData->first_name = $request->first_name;
-                $invoiceData->last_name = $request->last_name;
-                $invoiceData->last_name2 = $request->last_name2;
-                $invoiceData->country = $request->country;
-                $invoiceData->state = $request->state;
-                $invoiceData->city = $request->city;
-                $invoiceData->district = $request->district;
-                $invoiceData->neighborhood = $request->neighborhood;
-                $invoiceData->zip = $request->zip;
-                $invoiceData->address = $request->address;
-                $invoiceData->phone = $request->phone;
-                $invoiceData->es_exento = $request->es_exento;
-                $invoiceData->email = $request->email;
-                $invoiceData->expiry = $date->toDateTimeString();
-                $invoiceData->amount = $request->product_price;
-                $invoiceData->subtotal = $request->product_price;
-
-                $item = new stdClass();
-                $item->total = $request->product_price;
-                $item->code = $request->product_id;
-                $item->name = $request->product_name;
-                $item->descuento = 0;
-                $item->cantidad = 1;
-
-                $invoiceData->items = [$item];
-                $procesoFactura = $paymentUtils->facturarProductosEtax($invoiceData);
-                $company->additional_invoices = $additional_invoices;
-                $company->save();
-                return redirect()->back()->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
-            }else{
-                return redirect()->back()->withErrors('No pudo procesarse el pago');
-            }
-        }else{
-            return redirect()->back()->withErrors('Debe incluir un método de pago');
         }
     }
 

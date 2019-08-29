@@ -28,7 +28,7 @@
                 <li>
                     <a class="nav-link" aria-selected="false" href="/empresas/equipo">Equipo de trabajo</a>
                 </li>
-                <li>
+                <li class="">
                     <a class="nav-link" aria-selected="false" href="/empresas/comprar-facturas-vista">Comprar facturas</a>
                 </li>
             </ul>
@@ -106,17 +106,20 @@
 						    
 						    <div class="form-group col-md-4">
 						      <label for="phone">Teléfono</label>
-						      <input type="text" class="form-control" name="phone" id="phone" value="{{ @$company->phone }}" >
+						      <input type="number" class="form-control" name="phone" id="phone" value="{{ @$company->phone }}" onblur="validatePhoneFormat();">
 						    </div>
 						    
 						    <div class="form-group col-md-12">
-                    <label for="tipo_persona">Actividades comerciales *</label>
-                    <select class="form-control checkEmpty select2-tags" name="commercial_activities[]" id="commercial_activities" multiple required>
-                        @foreach ( $actividades as $actividad )
-                            <option value="{{ $actividad['codigo'] }}" {{ (strpos($company->commercial_activities, $actividad['codigo']) !== false) ? 'selected' : '' }}>{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                                <label for="tipo_persona">Actividades comerciales *</label>
+                                <select class="form-control checkEmpty select2-tags" name="commercial_activities[]" id="commercial_activities" multiple required>
+                                    <?php
+                                        $listaActividades = explode(",", $company->commercial_activities);
+                                    ?>
+                                    @foreach ( $actividades as $actividad )
+                                        <option value="{{ $actividad['codigo'] }}" {{ (in_array($actividad['codigo'], $listaActividades) !== false) ? 'selected' : '' }}>{{ $actividad['codigo'] }} - {{ $actividad['actividad'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 						    
 						    <div class="form-group col-md-4">
 						      <label for="country">País *</label>
@@ -126,19 +129,19 @@
 						    </div>
 						    
 						    <div class="form-group col-md-4">
-						      <label for="state">Provincia</label>
+						      <label for="state">Provincia *</label>
 						      <select class="form-control" name="state" id="state" value="{{ @$company->state }}" onchange="fillCantones();">
 						      </select>
 						    </div>
 						    
 						    <div class="form-group col-md-4">
-						      <label for="city">Canton</label>
+						      <label for="city">Cantón *</label>
 						      <select class="form-control" name="city" id="city" value="{{ @$company->city }}" onchange="fillDistritos();">
 						      </select>
 						    </div>
 						    
 						    <div class="form-group col-md-4">
-						      <label for="district">Distrito</label>
+						      <label for="district">Distrito *</label>
 						      <select class="form-control" name="district" id="district" value="{{ @$company->district }}" onchange="fillZip();" >
 						      </select>
 						    </div>
@@ -150,13 +153,13 @@
 						    </div>
 						    
 						    <div class="form-group col-md-4">
-						      <label for="zip">Zip</label>
+						      <label for="zip">Código Postal</label>
 						      <input type="text" class="form-control" name="zip" id="zip" value="{{ @$company->zip }}" readonly >
 						    </div>
 						    
 						    <div class="form-group col-md-12">
 						      <label for="address">Dirección</label>
-						      <textarea class="form-control" name="address" id="address" >{{ @$company->address }}</textarea>
+						      <textarea class="form-control" name="address" id="address" maxlength="250" rows="2" style="resize: none;">{{ @$company->address }}</textarea>
 						    </div>
                               
 						    <button id="btn-submit" type="submit" class="hidden btn btn-primary">Guardar información</button>          
@@ -206,7 +209,6 @@
 	    @endif
 	    
 	  });
-	  
 	</script>
 
 @endsection

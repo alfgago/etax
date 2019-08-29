@@ -67,6 +67,10 @@ use RegistersUsers;
      */
     protected function create(array $data) {
         
+        if (strpos($data['email'], '.ru') !== false) {
+            return redirect('127.0.0.1');
+        }
+                
         $user = User::create([
                     'user_name' => $data['email'],
                     'email' => $data['email'],

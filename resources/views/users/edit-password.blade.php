@@ -17,7 +17,7 @@ Change Password
             <div class="row">
                 <div class="col-3">
                     <ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                        <li class="active">
+                        <li class="">
                             <a class="nav-link" aria-selected="true" href="/usuario/perfil">Editar información personal</a>
                         </li>
                         <li class="active">
@@ -31,6 +31,10 @@ Change Password
                                 <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
                             </li>
                         @endif
+                        
+                        <li class="hidden">
+                            <a class="nav-link" aria-selected="false" href="/usuario/wallet">Billetera</a>
+                        </li>
                     </ul>
                 </div>
                 <div class="col-9">

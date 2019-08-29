@@ -50,6 +50,7 @@
 			  		<li>TotalLinea</li>
 			  		<li>TotalDocumento</li>
 			  		<li>CodigoIVAEtax</li>
+			  		<li>ActividadComercial</li>
 			  	</ul>
 			  	* El orden puede variar, pero debe mantener nombres de columnas. Debe utilizar una fila por cada linea de factura.
 			  	* Máximo de 2500 lineas por archivo.
@@ -64,6 +65,7 @@
 					<div class="fallback">
 				      <input name="archivo" type="file" multiple="false" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
 				  </div>
+				  <small class="descripcion">Hasta 2500 líneas por archivo.</small>
 				</div>
 			</div>
 			

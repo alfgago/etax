@@ -74,6 +74,66 @@
               <div class="form-row">    
                 <div class="form-group col-md-12">
                   <h3>
+                    Datos de aceptación
+                  </h3>
+                </div>
+                
+                <div class="form-group col-md-3">
+                  <label for="xml_schema">XML de factura</label>
+                  <select class="form-control" name="xml_schema" id="xml_schema" required>
+                    <option value="43" selected>4.3</option>
+                    <option value="42">4.2</option>
+                  </select>
+                </div>
+                  
+                <div class="form-group col-md-9">
+                    <label for="activity_company_verification">Actividad Comercial</label>
+                    <div class="input-group">
+                      <select id="activity_company_verification" name="activity_company_verification" class="form-control" required>
+                          @foreach ( $arrayActividades as $actividad )
+                              <option value="{{ $actividad->codigo }}" >{{ $actividad->codigo }} - {{ $actividad->actividad }}</option>
+                          @endforeach
+                      </select>
+                    </div>
+                </div>
+                  
+                <div class="form-group col-md-12 inline-form inline-checkbox">
+                  <label for="accept_status">
+                    <span>¿Aceptada desde otro proveedor?</span>
+                    <input type="checkbox" class="form-control" id="accept_status" name="accept_status" onchange="toggleInfoAceptacion();" checked>
+                  </label>
+                </div>
+                              
+                <div class="form-group col-md-4">
+                    <label for="accept_iva_condition">Condición de acceptación</label>
+                    <select class="form-control" name="accept_iva_condition" id="accept_iva_condition">
+                      <option value="01" selected>Genera crédito IVA</option>
+                      <option value="02">Genera crédito parcial del IVA</option>
+                      <option value="03">Bienes de capital</option>
+                      <option value="04">Gasto corriente (no genera IVA)</option>
+                      <option value="05">Proporcionalidad</option>
+                    </select>
+                </div>
+                              
+                <div class="form-group col-md-4">
+                    <label for="accept_iva_acreditable">IVA acreditable</label>
+                    <div class="input-group">
+                      <input type="number" id="accept_iva_acreditable" name="accept_iva_acreditable" class="form-control" value="0" />
+                    </div>
+                </div>
+                              
+                <div class="form-group col-md-4">
+                    <label for="accept_iva_gasto">IVA al gasto</label>
+                    <div class="input-group">
+                      <input type="number" id="accept_iva_gasto" name="accept_iva_gasto" class="form-control" value="0" />
+                    </div>
+                </div>
+    
+              </div>
+              
+              <div class="form-row">    
+                <div class="form-group col-md-12">
+                  <h3>
                     Detalle
                   </h3>
                 </div>
@@ -247,9 +307,46 @@
 @section('footer-scripts')
 
 <script>
-
 $(document).ready(function(){
-  $('#tipo_iva').val('003');
+  $('#tipo_iva').val('B003').change();
+});
+$(function () {
+    $("#accept_iva_acreditable").keydown(function () {
+        // Save old value.
+        if (!$(this).val() || parseInt($(this).val()) >= 0)
+            $(this).data("old", $(this).val());
+    });
+    $("#accept_iva_acreditable").keyup(function () {
+        // Check correct, else revert back to old value.
+        if (!$(this).val() || parseInt($(this).val()) >= 0)
+            ;
+        else
+            $(this).val($(this).data("old"));
+    });
+    $("#accept_iva_gasto").keydown(function () {
+        // Save old value.
+        if (!$(this).val() || parseInt($(this).val()) >= 0)
+            $(this).data("old", $(this).val());
+    });
+    $("#accept_iva_gasto").keyup(function () {
+        // Check correct, else revert back to old value.
+        if (!$(this).val() || parseInt($(this).val()) >= 0)
+            ;
+        else
+            $(this).val($(this).data("old"));
+    });
+    $("#tipo_cambio").keydown(function () {
+        // Save old value.
+        if (!$(this).val() || parseInt($(this).val()) >= 0)
+            $(this).data("old", $(this).val());
+    });
+    $("#tipo_cambio").keyup(function () {
+        // Check correct, else revert back to old value.
+        if (!$(this).val() || parseInt($(this).val()) >= 0)
+            ;
+        else
+            $(this).val($(this).data("old"));
+    });
 });
 
 </script>

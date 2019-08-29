@@ -38,6 +38,8 @@ $company = currentCompanyModel();
           @csrf
           
           <input type="hidden" id="current-index" value="0">
+          <input type="hidden" class="form-control" id="default_product_category" value="{{$company->default_product_category}}">
+          <input type="hidden" class="form-control" id="default_vat_code" value="{{$company->default_vat_code}}">
 
           <div class="form-row">
             <div class="col-md">
@@ -54,7 +56,7 @@ $company = currentCompanyModel();
                     
                     <div class="form-group col-md-12 with-button">
                       <label for="cliente">Seleccione el cliente</label>
-                      <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
+                      <select class="form-control select-search" name="client_id" id="client_id" placeholder="" @if(@$document_type !== '04') required @endif>
                         <option value='' selected>-- Seleccione un cliente --</option>
                         @foreach ( currentCompanyModel()->clients as $cliente )
                           @if( @$cliente->canInvoice($document_type) )
@@ -62,8 +64,27 @@ $company = currentCompanyModel();
                           @endif
                         @endforeach
                       </select>
+                      @if($document_type == "04")
+                        <div class="description">El cliente no es obligatorio para los tiquetes electrónicos.</div>
+                      @endif
                     </div>
                     @else
+                      <div class="form-group col-md-12">
+                        <h3>
+                          Proveedor
+                        </h3>
+                        <div onclick="abrirPopup('nuevo-proveedor-popup');" class="btn btn-agregar btn-agregar-cliente">Nuevo proveedor</div>
+                      </div>
+
+                      <div class="form-group col-md-12 with-button">
+                        <label for="provider_id">Seleccione el proveedor</label>
+                        <select class="form-control select-search" name="provider_id" id="provider_id" placeholder="" required>
+                          <option value='' selected>-- Seleccione un proveedor --</option>
+                          @foreach ( $company->providers as $proveedor )
+                            <option value="{{ $proveedor->id }}" >{{ $proveedor->id_number }} - {{ $proveedor->first_name }}</option>
+                          @endforeach
+                        </select>
+                      </div>
                       <div class="form-group col-md-12">
                         <h3>
                           Cliente
@@ -73,7 +94,6 @@ $company = currentCompanyModel();
                         <label for="actual">Empresa actual</label>
                         <input disabled readonly class="form-control" type="text" value="{{ $company->id_number . ' - ' . $company->name.' '.$company->last_name.' '.$company->last_name2 }}">
                       </div>
-                      
                     @endif
                   </div>
                 </div>
@@ -89,14 +109,14 @@ $company = currentCompanyModel();
                     <div class="form-group col-md-4">
                       <label for="currency">Divisa</label>
                       <select class="form-control" name="currency" id="moneda" required>
-                        <option value="CRC"  data-rate="{{$rate}}" selected>CRC</option>
-                        <option value="USD"  data-rate="{{$rate}}">USD</option>
+                        <option value="CRC" data-rate="1" {{$company->default_currency == 'CRC' ? 'selected' : ''}}>CRC</option>
+                        <option value="USD" data-rate="{{$rate}}" {{$company->default_currency == 'USD' ? 'selected' : ''}}>USD</option>
                       </select>
                     </div>
       
                     <div class="form-group col-md-8">
                       <label for="currency_rate">Tipo de cambio</label>
-                      <input type="text" class="form-control" data-rates="{{$rate}}" name="currency_rate" id="tipo_cambio" value="1.00"required>
+                      <input type="text" class="form-control" data-rates="{{$rate}}" name="currency_rate" id="tipo_cambio" value="{{$company->default_currency == 'USD' ? $rate : '1.00'}}"required>
                     </div>
                   </div>
                 </div>
@@ -190,7 +210,7 @@ $company = currentCompanyModel();
                   <div class="form-group col-md-6">
                     <label for="due_date">Fecha de vencimiento</label>
                     <div class='input-group date inputs-fecha'>
-                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->addDays(3)->format('d/m/Y') }}">
+                      <input id="fecha_vencimiento" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->addDays(3)->format('d/m/Y') }}" maxlength="10">
                       <span class="input-group-addon">
                         <i class="icon-regular i-Calendar-4"></i>
                       </span>
@@ -218,6 +238,8 @@ $company = currentCompanyModel();
                         <option value="04">Apartado</option>
                         <option value="05">Arrendamiento con opción de compra</option>
                         <option value="06">Arrendamiento en función financiera</option>
+                        <option value="07">Servicios prestados al Estado a crédito</option>
+                        <option value="08">Pago del servicios prestado al Estado</option>
                         <option value="99">Otros</option>
                       </select>
                     </div>
@@ -237,7 +259,7 @@ $company = currentCompanyModel();
                     </div>
                   </div>
                   
-                  <div class="form-group col-md-12" id="field-retencion" style="display:none;">
+                  <div class="form-group col-md-12" id="field-retencion" style="display:none; !important">
                     <label for="retention_percent">Porcentaje de retención</label>
                     <div class="input-group">
                       <select id="retention_percent" name="retention_percent" class="form-control" required>
@@ -260,7 +282,7 @@ $company = currentCompanyModel();
 
                   <div class="form-group col-md-12">
                     <label for="description">Notas</label>
-                    <textarea class="form-control" name="notas" id="notas"  maxlength="200" placeholder=""> {{ @currentCompanyModel()->default_invoice_notes }}  </textarea>
+                    <textarea class="form-control" name="notas" id="notas"  maxlength="200" placeholder="" rows="2" style="resize: none;"> {{ @currentCompanyModel()->default_invoice_notes }}  </textarea>
                   </div>
 
               </div>
@@ -300,8 +322,12 @@ $company = currentCompanyModel();
             </div>
           </div>
           
-          @include( 'Invoice.form-linea' )
-          @include( 'Invoice.form-nuevo-cliente' )
+        @include('Invoice.form-linea')
+        @if($document_type != "08")
+          @include('Invoice.form-nuevo-cliente')
+        @else
+          @include('Bill.form-nuevo-proveedor')
+        @endif
             <input type="text" hidden value="{{ $document_type }}" name="document_type" id="document_type">
           <div class="btn-holder hidden">
            
@@ -365,19 +391,26 @@ $company = currentCompanyModel();
 @endsection
 
 @section('breadcrumb-buttons')
-{{--@if( $document_type != "09"  )--}}
   <button id='btn-submit-fe' onclick="$('#btn-submit').click();" class="btn btn-primary">Enviar factura electrónica</button>
+
   <button titulo="Programar envio" class="btn btn-primary m-0 programar_venta" data-toggle="modal" data-target="#modal_programar">Programar envio</a>
 {{--@else--}}
 {{--  <p class="description mt-4">FEC temporalmente deshabilitada. Muy pronto en funcionamiento al finalizar el día. Nos disculpamos por la inconveniencia.</p>--}}
 {{-- @endif--}}
-@endsection
 
 @section('footer-scripts')
 
 <script>
 $(document).ready(function(){
-  $('#tipo_producto').val(17).change();
+  <?php if( @$document_type != "08"){ ?>
+    if( $('#default_vat_code').length ){
+      $('#tipo_iva').val( $('#default_vat_code').val() ).change();
+    }else{
+      $('#tipo_iva').val( 'B103' ).change();
+    }
+  <?php }else{ ?>
+    $('#tipo_iva').val( 'S140' ).change();
+  <?php } ?>
 
   $('#moneda').change(function() {
     if ($(this).val() == 'USD') {

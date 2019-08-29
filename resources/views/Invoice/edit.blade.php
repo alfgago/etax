@@ -227,7 +227,7 @@
                     <th>Cant.</th>
                     <th>Unidad</th>
                     <th>Precio unitario</th>
-                    <th>Tipo IVA</th>
+                    <th>Tipo/Categoría IVA</th>
                     <th>Subtotal</th>
                     <th>IVA</th>
                     <th>Total</th>
@@ -243,7 +243,7 @@
                       <td>{{ $item->item_count }}</td>
                       <td>{{ \App\Variables::getUnidadMedicionName($item->measure_unit) }}</td>
                       <td>{{ $item->unit_price }} </td>
-                      <td>{{ \App\Variables::getTipoRepercutidoIVAName($item->iva_type) }} </td>
+                      <td>{{ \App\Variables::getTipoRepercutidoIVAName($item->iva_type) }} <br> - {{ @\App\ProductCategory::find($item->product_type)->name }} </td>
                       <td>{{ $item->subtotal }}</td>
                       <td>{{ $item->iva_amount }}</td>
                       <td>{{ $item->total }}</td>
@@ -302,7 +302,7 @@
 <script>
 $(document).ready(function(){
   
-  $('#tipo_iva').val('103');
+  $('#tipo_producto').val(17).change();
   
   var subtotal = 0;
   var monto_iva = 0;

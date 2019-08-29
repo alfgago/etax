@@ -10,6 +10,11 @@ use App\Imports\ProviderImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
+/**
+ * @group Controller - Proveedores
+ *
+ * Funciones de ProviderController
+ */
 class ProviderController extends Controller
 {
   
@@ -118,7 +123,7 @@ class ProviderController extends Controller
       
         $provider->save();
       
-        return redirect('/proveedores');
+        return redirect('/proveedores')->withMessage('Proveedor creado');
     }
 
     /**
@@ -186,7 +191,7 @@ class ProviderController extends Controller
       
         $provider->save();
       
-        return redirect('/proveedores');
+        return redirect('/proveedores')->withMessage('Proveedor editado');
     }
 
     /**
@@ -220,8 +225,12 @@ class ProviderController extends Controller
         $proveedors = Excel::toCollection( new ProviderImport(), request()->file('archivo') );
         $company_id = currentCompany(); 
         foreach ($proveedors[0] as $row){
-            
-            $zip = 0;
+            $zip = $row['codigopostal'];
+            $row['provincia'] = substr($zip, 0, 1);
+            $row['canton'] = substr($zip, 0, 3);
+            $row['distrito'] = $zip;
+
+            /*$zip = 0;
             
             if( $row['canton'] ) {
                 if( strlen( (int)$row['canton'] ) <= 2 ) {
@@ -236,7 +245,7 @@ class ProviderController extends Controller
                     $row['distrito'] = (int)$row['canton'] . str_pad((int)$row['distrito'], 2, '0', STR_PAD_LEFT);
                     $zip = $row['distrito'];
                 }
-            }
+            }*/
             
             Provider::updateOrCreate(
                 [

@@ -24,33 +24,20 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
         //Invoice Queue
-        $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=1 --queue=invoices')
-            ->timezone(config('app.timezone'))->everyThirtyMinutes();
-        $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=1 --queue=receptions')
-            ->timezone(config('app.timezone'))->everyTenMinutes();
+        $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=1 --queue=invoices')->timezone(config('app.timezone'))->everyThirtyMinutes()->runInBackground();
+        $schedule->command('queue:work '.config('etax.queue_connections') .' --tries=3 --delay=3 --sleep=1 --queue=receptions')->timezone(config('app.timezone'))->everyTenMinutes()->runInBackground();
         //Emails Queue Restart
+        $schedule->command('invoice:resend')->timezone(config('app.timezone'))->everyThirtyMinutes()->runInBackground();
+        $schedule->command('creditnote:resend')->timezone(config('app.timezone'))->hourly()->runInBackground();
+        $schedule->command('reception:resend')->timezone(config('app.timezone'))->everyFifteenMinutes()->runInBackground();
+        //Comandos de checkout
+        $schedule->command('subscription:checkout')->timezone(config('app.timezone'))->dailyAt('01:30')->runInBackground();
+        $schedule->command('subscription:payment')->timezone(config('app.timezone'))->twiceDaily(2, 5)->runInBackground(); //Una vez al día. Aveces se acumulan porque por alguna vez no correo y puede haber doble cargo. Hya un sleep de 3s entre cobro
+        //$schedule->command('subscription:payment')->timezone(config('app.timezone'))->dailyAt('09:00');
+        //Comandos generales
+        $schedule->command('telescope:prune')->daily()->runInBackground();
         $schedule->command('queue:restart')->timezone(config('app.timezone'))->daily();
-        $schedule->command('invoice:resend')->timezone(config('app.timezone'))->hourly();
-        $schedule->command('telescope:prune')->daily();
-
-        $schedule->command('subscription:checkout')->timezone(config('app.timezone'))->dailyAt('01:30');
-        $schedule->command('subscription:payment')->timezone(config('app.timezone'))->dailyAt('07:00');
-        $schedule->command('subscription:payment')->timezone(config('app.timezone'))->dailyAt('10:00');
-        /*$schedule->call(function () {
-            $suscriptionsUpdate = PaymentController::updateAllSubscriptions();
-        })->dailyAt('14:17');
-        
-        $schedule->call(function () {
-            $makePayment = PaymentController::dailySubscriptionsPayment();
-        })->dailyAt('14:18');
-        
-        $schedule->call(function () {
-            $makePayment = PaymentController::dailySubscriptionsPayment();
-        })->dailyAt('5:00');*/
-        
     }
 
     /**
