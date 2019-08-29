@@ -473,7 +473,7 @@ class Invoice extends Model
       }
       $idCliente = preg_replace("/[^0-9]/", "", $idCliente );
       
-      $arrayKey = "import-factura-" . $data['claveFactura'];
+      $arrayKey = "import-factura-" . $data['claveFactura'] . "-$identificacionCliente";
       //Usa Cache por si viene la misma factura en varios lugares del Excel, las siguientes veces no reinicia el subtotal de la factura.
       if ( !isset($invoiceList[$arrayKey]) ) { 
         
