@@ -45,7 +45,8 @@ class ResendReception extends Command
     {
         try {
             $this->info('Sending Reception to Hacienda....');
-            $bills = Bill::where('hacienda_status', '01')->where('accept_status', '1')->get();
+            $bills = Bill::where('hacienda_status', '01')->where('accept_status', '1')
+                ->where('resend_attempts', '<', 6)->where('in_queue', false)->get();
             $this->info('Sending Reception ....'. count($bills));
             $this->info('Get Token Api Hacienda ....');
             $apiHacienda = new BridgeHaciendaApi();
@@ -54,17 +55,20 @@ class ResendReception extends Command
             foreach ($bills as $bill) {
                 $provider = $bill->provider;
                 $company = $bill->company;
-                if( isset($company->atv_validation) && $company ){
+                if (isset($company->atv_validation) && $company) {
+                    $bill->resend_attempts = $bill->resend_attempts + 1;
+                    $bill->in_queue = true;
+                    $bill->save();
                     $ref = $company->last_rec_ref_number;
                     Log::info("Sending Reception ID:$bill->id, Empresa: $company->business_name, Doc: $bill->document_key" );
                     sleep(4);
                     ProcessReception::dispatch($bill->id, $provider->id, $tokenApi, $ref)
                         ->onConnection(config('etax.queue_connections'))->onQueue('receptions');
-                }else{
+                } else {
                     Log::error("Error en resend: compra $bill->id no tiene empresa");
                 }
             }
-        } catch ( \Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error resend command receptions'.$e);
             $this->info('Error Resending Receptions to Hacienda....'. $e);
         }
