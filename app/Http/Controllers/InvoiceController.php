@@ -389,15 +389,172 @@ class InvoiceController extends Controller
         $pre_invoices = ScheduledInvoices::join('pre_invoices','pre_invoices.id','scheduled_invoices.pre_invoice_id')
                 ->where('send_date',$date_Today)->get();
         foreach ($pre_invoices as $invoice ) {
-            $request = json_decode($invoice->body);
-            //dd($request);
-            $request->generated_date = $generated_date;
-            $retorno = $this->sendHacienda($request);
-           // dd($request);
+           
+            $retorno = $this->aaaa($invoice);
+           
         }
         dd($pre_invoices);                                                 
     }
 
+
+    public function aaaa($invoice){
+
+        $request_data = json_decode($invoice->body,true);
+        $request = new Request($request_data);
+
+        dd($request); 
+        $data = ["clave"=> $request->document_key,
+                  "codigoActividad"=> $request->commercial_activity,
+                  "numeroConsecutivo"=> $request->document_number,
+                  "fechaEmision"=> $request->generated_date,
+                  "fechaVencimiento"=> $request->due_date,
+                  "emisor"=> [
+                    "codigo"=> "15223",
+                    "nombre"=> "ANDRES",
+                    "primerApellido"=> "MENDEZ",
+                    "segundoApellido"=> "PANIAGUA",
+                    "identificacion"=>  [
+                      "tipo"=> "F",
+                      "numero"=> "186201160288"
+                    ],
+                    "nombreComercial"=> "ANDRES MENDEZ PANIAGUA",
+                    "ubicacion"=> [
+                      "pais"=> "CR",
+                      "provincia"=> "01",
+                      "canton"=> "06",
+                      "distrito"=> "01",
+                      "barrio"=> "ASDASD",
+                      "codigoPostal"=> "10101",
+                      "otrasSenas"=> "ASDASDASD",
+                      "direccionExtranjero"=> ""
+                    ],
+                    "telefono"=> [
+                      "codigoPais"=> "506",
+                      "numTelefono"=> "45612345"
+                      
+                    ],
+                    "correoElectronico"=> "juan@5e.cr",
+                    "exento"=> "0"
+                    
+                  ],
+                  "receptor"=> [
+                    "codigo"=> $request->code,
+                    "nombre"=> $request->first_name,
+                    "primerApellido"=> $request->last_name,
+                    "segundoApellido"=> $request->last_name2,
+                    "identificacion"=> [
+                      "tipo"=> $request->tipo_persona,
+                      "numero"=> $request->id_number
+                      
+                    ],
+                    "ubicacion"=> [
+                      "provincia"=> $request->state,
+                      "canton"=> "",
+                      "distrito"=> "",
+                      "otrasSenas"=> $request->address
+                      
+                    ],
+                    "telefono"=> [
+                      "codigoPais"=> $request->codigoPais,
+                      "numTelefono"=> $request->phone
+                    ],
+                    "correoElectronico"=> $request->email
+                    
+                  ],
+                  "condicionVenta"=> $request->sale_condition,
+                  "medioPago"=> $request->payment_type,
+                  "tiempoCredito"=>$request->state,
+                  "ordenCompra"=>$request->buy_order,
+                   "referencia"=>$request->other_reference,
+                   "moneda"=>$request->currency,
+                   "tipoCambio"=> $request->currency_rate,
+                   "descripcion"=> $request->state,
+                   "aceptada"=> 1,
+                   "tipoXml"=> 43,
+                  "detalleServicio"=> [
+                    "lineaDetalle"=> [
+                        "numeroLinea"=>1,
+                      "codigoComercial"=> [
+                        "tipo"=> "50",
+                        "codigo"=> "dasda"
+                        
+                      ],
+                      "cantidad"=> "1",
+                      "unidadMedida"=> "Unid",
+                      "detalle"=> "asdasasdd",
+                      "precioUnitario"=> "150000",
+                      "montoTotal"=> "150000",
+                      "subTotal"=> "150000",
+                      "tipoDescuento"=> "",
+                      "descuento"=>"",
+                      "impuesto"=> [
+                        "codigo"=> "",
+                        "codigoTarifa"=> "B003",
+                        "tarifa"=> "13",
+                        "monto"=> "19500",
+                        "exento"=> 0,
+                        "exoneracion"=> [
+                          "tipoDocumento"=> "",
+                          "numeroDocumento"=> "",
+                          "nombreInstitucion"=> "",
+                          "fechaEmision"=> "",
+                          "porcentajeExoneracion"=> "",
+                          "montoExoneracion"=> ""
+                        ]
+                      ],
+                      "impuestoNeto"=> "",
+                      "montoTotalLinea"=> ""
+                    ],
+                    "lineaDetalles"=> [
+                        "numeroLinea"=>2,
+                      "codigoComercial"=> [
+                        "tipo"=> "50",
+                        "codigo"=> "dasda"
+                        
+                      ],
+                      "cantidad"=> "1",
+                      "unidadMedida"=> "Unid",
+                      "detalle"=> "asdasd",
+                      "precioUnitario"=> "150000",
+                      "montoTotal"=> "150000",
+                      "subTotal"=> "150000",
+                      "impuesto"=> [
+                        "codigo"=> "",
+                        "codigoTarifa"=> "B003",
+                        "tarifa"=> "13",
+                        "monto"=> "19500",
+                        "exoneracion"=> [
+                          "tipoDocumento"=> "",
+                          "numeroDocumento"=> "",
+                          "nombreInstitucion"=> "",
+                          "fechaEmision"=> "",
+                          "porcentajeExoneracion"=> "",
+                          "montoExoneracion"=> ""
+                        ]
+                      ],
+                      "impuestoNeto"=> "",
+                      "montoTotalLinea"=> ""
+                    ]
+                    
+                  ],
+                  "resumenFactura"=> [
+                    "totalServGravados"=> 300000,
+                    "totalServExentos"=> 0,
+                    "totalMercanciaGravadas"=> 0,
+                    "totalMercanciaExentas"=> 0,
+                    "totalGravado"=> 300000,
+                    "totalExento"=> 0,
+                    "totalVenta"=> 0,
+                    "totalDescuentos"=> 0,
+                    "totalVentaNeta"=> 300000,
+                    "totalImpuesto"=> 39000,
+                    "totalComprobante"=> 339000
+                    
+                  ]
+                  
+                ];
+        dd($data);
+    }
 
     public function GuardarInvoice(Request $request){
         $company = currentCompanyModel();
@@ -439,11 +596,7 @@ class InvoiceController extends Controller
         }
         if($request->fecha_envio == $date_Today){
             try {
-                Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
-                $request->validate([
-                    'subtotal' => 'required',
-                    'items' => 'required',
-                ]);
+                
                 $retorno = $this->sendHacienda($request);
                 
                 if($retorno == true){
@@ -474,16 +627,14 @@ class InvoiceController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function sendHacienda($request)
+    public function sendHacienda(Request $request)
     {
-        //revision de branch para segmentacion de funcionalidades por tipo de documento
-
         try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
-            $request->validate([
-                'subtotal' => 'required',
-                'items' => 'required',
-            ]);
+                $request->validate([
+                    'subtotal' => 'required',
+                    'items' => 'required',
+                ]);
             if(CalculatedTax::validarMes($request->generated_date)){
                 $apiHacienda = new BridgeHaciendaApi();
                 $tokenApi = $apiHacienda->login(false);
