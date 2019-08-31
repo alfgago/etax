@@ -54,7 +54,7 @@
             <option value="21" codigo="S140" posibles="S140" >Inversión del sujeto básico pasivo por servicios adquiridos desde el exterior</option>
         </select>
       </div>
-{{--    @elseif( @$document_type == '000' )--}}
+{{--    @elseif( @$document_type == '08' )--}}
 {{--      <div class="form-group col-md-12">--}}
 {{--        <label for="tipo_iva">Tipo de IVA</label>--}}
 {{--        <select class="form-control" id="tipo_iva" >--}}
