@@ -54,28 +54,28 @@
             <option value="21" codigo="S140" posibles="S140" >Inversión del sujeto básico pasivo por servicios adquiridos desde el exterior</option>
         </select>
       </div>
-    @elseif( @$document_type == '08' )
-      <div class="form-group col-md-12">
-        <label for="tipo_iva">Tipo de IVA</label>
-        <select class="form-control" id="tipo_iva" >
-            <option value="B040" attr-iva="B040" porcentaje="0" >B040 -  Importaciones de bienes exentos</option>
-            <option value="S040" attr-iva="S040" porcentaje="0" >S040 -  Importaciones de bienes exentos</option>
-            <option value="B050" attr-iva="B050" porcentaje="0" >B050 -  Importaciones de bienes de capital exentos</option>
-            <option value="B060" attr-iva="B060" porcentaje="0" >B060 -  Compras locales de bienes exentos</option>
-            <option value="S060" attr-iva="S060" porcentaje="0" >S060 -  Compras locales de servicios exentos</option>
-            <option value="B070" attr-iva="B070" porcentaje="0" >B070 -  Compras locales de  bienes de capital exentos.</option>
-            <option value="S140" attr-iva="S140" porcentaje="0" >S140 -  Inversión del sujeto básico pasivo</option>
-        </select>
-      </div>
-      
-      <div class="form-group col-md-11">
-        <label for="tipo_producto">Categoría de declaración</label>
-        <select class="form-control select-search" id="tipo_producto" >
-            @foreach ( \App\ProductCategory::all() as $tipo )
-              <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
-            @endforeach
-        </select>
-      </div>
+{{--    @elseif( @$document_type == '000' )--}}
+{{--      <div class="form-group col-md-12">--}}
+{{--        <label for="tipo_iva">Tipo de IVA</label>--}}
+{{--        <select class="form-control" id="tipo_iva" >--}}
+{{--            <option value="B040" attr-iva="0" porcentaje="0" >B040 -  Importaciones de bienes exentos</option>--}}
+{{--            <option value="S040" attr-iva="0" porcentaje="0" >S040 -  Importaciones de bienes exentos</option>--}}
+{{--            <option value="B050" attr-iva="0" porcentaje="0" >B050 -  Importaciones de bienes de capital exentos</option>--}}
+{{--            <option value="B060" attr-iva="0" porcentaje="0" >B060 -  Compras locales de bienes exentos</option>--}}
+{{--            <option value="S060" attr-iva="0" porcentaje="0" >S060 -  Compras locales de servicios exentos</option>--}}
+{{--            <option value="B070" attr-iva="0" porcentaje="0" >B070 -  Compras locales de  bienes de capital exentos.</option>--}}
+{{--            <option value="S140" attr-iva="0" porcentaje="0" >S140 -  Inversión del sujeto básico pasivo</option>--}}
+{{--        </select>--}}
+{{--      </div>--}}
+{{--      --}}
+{{--      <div class="form-group col-md-11">--}}
+{{--        <label for="tipo_producto">Categoría de declaración</label>--}}
+{{--        <select class="form-control select-search" id="tipo_producto" >--}}
+{{--            @foreach ( \App\ProductCategory::all() as $tipo )--}}
+{{--              <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>--}}
+{{--            @endforeach--}}
+{{--        </select>--}}
+{{--      </div>--}}
     @else
       <div class="form-group col-md-12">
         <label for="tipo_iva">Tipo de IVA</label>
