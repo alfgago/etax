@@ -145,8 +145,9 @@ class ProcessCreditNote implements ShouldQueue
                             }
                             Log::info('Proceso de nota de credito finalizado con éxito.');
                         }
+                    }else{
+                        Log::info("No se envio Nota de credito falta informacion");
                     }
-                    Log::info("No se envio Nota de credito falta informacion");
                 }else {
                     Log::warning('El job no se procesó, porque la empresa no tiene un certificado válido: '.$this->invoiceId.'-->>');
                 }
