@@ -1551,8 +1551,8 @@ class InvoiceController extends Controller
             }
             
             Log::debug('Creando job de registro de facturas.');
-            foreach (array_chunk ( $collection, 250 ) as $facturas) {
-                ProcessSendExcelInvoices::dispatch($invoiceList)->onQueue('bulk');
+            foreach (array_chunk ( $invoiceList, 250 ) as $facturas) {
+                ProcessSendExcelInvoices::dispatch($facturas)->onQueue('bulk');
             }
             $company->save();
             $userId = $company->user_id;
