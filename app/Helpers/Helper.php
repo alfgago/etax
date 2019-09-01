@@ -640,7 +640,7 @@ if (!function_exists('get_rates')) {
                 $client = new \GuzzleHttp\Client();
                 $response = $client->get(config('etax.exchange_url'),
                     ['query' => [
-                        'Indicador' => '317',
+                        'Indicador' => '318',
                         'FechaInicio' => $today::now()->format('d/m/Y'),
                         'FechaFinal' => $today::now()->format('d/m/Y'),
                         'Nombre' => config('etax.namebccr'),

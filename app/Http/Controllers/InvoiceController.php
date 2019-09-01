@@ -454,6 +454,16 @@ class InvoiceController extends Controller
         $company = currentCompanyModel();
         $arrayActividades = $company->getActivities();
         $countries  = CodigosPaises::all()->toArray();
+        $totalIvaDevuelto = 0;
+        if ($invoice->total_iva_devuelto == 0) {
+            foreach ($invoice->items as $item) {
+                if ($invoice->payment_type == '02' && $item->product_type == 12) {
+                    $totalIvaDevuelto += $item->iva_amount;
+                }
+            }
+            $invoice->total_iva_devuelto = $totalIvaDevuelto;
+        }
+        $invoice->save();
 
         $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
         $codigos = CodigoIvaRepercutido::where('hidden', false)->get();
@@ -1190,6 +1200,17 @@ class InvoiceController extends Controller
     public function downloadPdf($id) {
         $invoice = Invoice::findOrFail($id);
         $this->authorize('update', $invoice);
+        $totalIvaDevuelto = 0;
+
+        if ($invoice->total_iva_devuelto == 0) {
+            foreach ($invoice->items as $item) {
+                if ($invoice->payment_type == '02' && $item->product_type == 12) {
+                    $totalIvaDevuelto += $item->iva_amount;
+                }
+            }
+            $invoice->total_iva_devuelto = $totalIvaDevuelto;
+        }
+        $invoice->save();
         
         $invoiceUtils = new InvoiceUtils();
         $file = $invoiceUtils->downloadPdf( $invoice, currentCompanyModel() );

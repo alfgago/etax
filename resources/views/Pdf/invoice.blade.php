@@ -179,7 +179,18 @@
                     <img src="{{\Illuminate\Support\Facades\Storage::temporaryUrl($company->logo_url,  now()->addMinutes(1))}}" style="width:100%; max-width:150px; max-height: 150px">
                 @endif
             </td>
-
+            @if($data_invoice->document_type == '08' && $provider !== null)
+            <td>
+                <b>{{$provider->first_name }} {{ $provider->last_name }}}</b><br>
+                <b>Cedula:</b> {{$provider->id_number}}<br>
+                <b>Tel:</b> {{$provider->phone}}<br>
+                <b>Correo: {{$provider->email}}</b> <br>
+            </td>
+            <td style="padding: 40px 0px 0px 30px; text-align: right;">
+                <b>Direccion:</b>
+                {{$provider->address. " ".$provider->zip}}<br>
+            </td>
+            @else
             <td>
                 <b>{{$company->business_name}}</b><br>
                 <b>Cedula:</b> {{$company->id_number}}<br>
@@ -190,6 +201,7 @@
                 <b>Direccion:</b>
                 {{$company->address. " ".$company->zip}}<br>
             </td>
+            @endif
         </tr>
         </td>
         </tr>
@@ -279,6 +291,7 @@
         $totalMercaderiasExentas = 0;
         $totalDescuentos = 0;
         $totalImpuestos = 0;
+        $totalIvaDevuelto = 0;
         
         foreach ($data_invoice->items as $item){
             $productType = $item->ivaType;
@@ -312,6 +325,10 @@
                 } else {
                     $discount= $item['discount'];
                 }
+            }
+
+            if ($data_invoice->payment_type == '02' && $item->product_type == 12) {
+                $totalIvaDevuelto += $item->iva_amount;
             }
             
             $totalDescuentos += $discount;
@@ -416,8 +433,12 @@
                         <td><span>{{ number_format($totalImpuestos, 2)}}</span></td>
                     </tr>
                     <tr>
+                        <td><b>Total IVA Devuelto</b></td>
+                        <td><span>{{ number_format($totalIvaDevuelto, 2)}}</span></td>
+                    </tr>
+                    <tr>
                         <td><b>Total comprobante</b></td>
-                        <td><span>{{ number_format( ($totalComprobante) , 2)}}</span></td>
+                        <td><span>{{ number_format( ($totalComprobante - $totalIvaDevuelto) , 2)}}</span></td>
                     </tr>
                 </table>
                 

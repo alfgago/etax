@@ -566,6 +566,13 @@ class Bill extends Model
             $item->delete();
           }
         }
+        $totalIvaDevuelto = 0;
+        foreach ($bill->items as $item) {
+            if ($bill->payment_type == '02' && $item->product_type == 12) {
+                $totalIvaDevuelto += $item->iva_amount;
+            }
+        }
+        $bill->total_iva_devuelto = $totalIvaDevuelto;
         $bill->save();
         
         return $bill;

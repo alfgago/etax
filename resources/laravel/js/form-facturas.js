@@ -59,7 +59,7 @@
     
     if( precio_unitario && cantidad ){
       var subtotal = cantidad * precio_unitario;
-      
+
       var discount = $('#discount').val();
         discount = parseFloat(discount);
       var discount_type = $('#discount_type').val();
@@ -401,10 +401,16 @@
     var subtotal = 0;
     var monto_iva = 0;
     var total = 0;
+    var iva_devuelto = 0;
     $('.item-tabla').each(function(){
       var s = parseFloat($(this).find('.subtotal').val());
       var m = parseFloat($(this).find('.monto_iva').val());
       var t = parseFloat($(this).find('.total').val());
+      var tp = parseFloat($(this).find('.tipo_producto').val());
+
+      if ($('#medio_pago').val() === '02' && tp === 12) {
+          iva_devuelto += m;
+      }
       subtotal += s;
       monto_iva += m;	
       total += t;	
@@ -412,8 +418,8 @@
     
     $('#subtotal').val(subtotal);
     $('#monto_iva').val(monto_iva);
-    $('#total').val(total);
-    
+    $('#total').val(total - iva_devuelto);
+    $('#total_iva_devuelto').val(iva_devuelto);
   }
   
   window.fixComas = function( numero ) {
