@@ -40,37 +40,18 @@
         $class = 'form-group col-md-12';
     } ?>
 
-    @if( @$tipoHacienda == 'SJB' )
+    @if( @$document_type == '08' )
       <div class="form-group col-md-12">
         <label for="tipo_iva">Tipo de IVA</label>
-        <select class="form-control" id="tipo_iva" >
-            <option value="S140" attr-iva="S140" porcentaje="13" >S140 -  Inversión del sujeto básico pasivo</option>
+        <select class="form-control select-search" id="tipo_iva" >
+          @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
+            <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
+          @endforeach
         </select>
       </div>
-      
       <div class="form-group col-md-11">
         <label for="tipo_producto">Categoría de declaración</label>
-        <select class="form-control select-search" id="tipo_producto" >
-            <option value="21" codigo="S140" posibles="S140" >Inversión del sujeto básico pasivo por servicios adquiridos desde el exterior</option>
-        </select>
-      </div>
-    @elseif( @$document_type == '08' )
-      <div class="form-group col-md-12">
-        <label for="tipo_iva">Tipo de IVA</label>
-        <select class="form-control" id="tipo_iva" >
-            <option value="B040" attr-iva="B040" porcentaje="0" >B040 -  Importaciones de bienes exentos</option>
-            <option value="S040" attr-iva="S040" porcentaje="0" >S040 -  Importaciones de bienes exentos</option>
-            <option value="B050" attr-iva="B050" porcentaje="0" >B050 -  Importaciones de bienes de capital exentos</option>
-            <option value="B060" attr-iva="B060" porcentaje="0" >B060 -  Compras locales de bienes exentos</option>
-            <option value="S060" attr-iva="S060" porcentaje="0" >S060 -  Compras locales de servicios exentos</option>
-            <option value="B070" attr-iva="B070" porcentaje="0" >B070 -  Compras locales de  bienes de capital exentos.</option>
-            <option value="S140" attr-iva="S140" porcentaje="0" >S140 -  Inversión del sujeto básico pasivo</option>
-        </select>
-      </div>
-      
-      <div class="form-group col-md-11">
-        <label for="tipo_producto">Categoría de declaración</label>
-        <select class="form-control select-search" id="tipo_producto" >
+        <select class="form-control" id="tipo_producto" >
             @foreach ( \App\ProductCategory::all() as $tipo )
               <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
             @endforeach
@@ -137,16 +118,12 @@
 
     <div class="form-group col-md-3">
       <label for="precio_unitario">Precio unitario</label>
-      @if( @$tipoHacienda == 'SJB' )
-      <input type="number" min="0" class="form-control" id="precio_unitario" readonly placeholder="0" number >
-      @else
       <input type="number" min="0" class="form-control" id="precio_unitario" value="0" number >
-      @endif
     </div>
 
     <div class="form-group col-md-3">
       <label for="item_iva">Monto IVA</label>
-      <input type="number" min="0" class="form-control {{ @$tipoHacienda == 'SJB' ? 'is-fec' : 'not-fec' }}" id="item_iva_amount" placeholder="" >
+      <input type="number" min="0" class="form-control" id="item_iva_amount" placeholder="" >
     </div>
 
     <div class="form-group col-md-3">

@@ -301,6 +301,10 @@ class Invoice extends Model
             foreach ($request->items as $item) {
                 $item['item_number'] = $i;
                 $item['item_id'] = $item['id'] ? $item['id'] : 0;
+                if( $this->document_type == '08' ){
+                  $item['iva_type'] = 'S140';
+                  $item['product_type'] = '21';
+                }
                 $item_modificado = $this->addEditItem($item);
                 array_push( $lids, $item_modificado->id );
                 $i++;

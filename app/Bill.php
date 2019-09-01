@@ -254,7 +254,7 @@ class Bill extends Model
           }catch( \Exception $e ) {
             $exonerationDate = null;
           }
-          if( $exonerationDate && $data['exoneration_document_type'] && $data['exoneration_document_number'] ) {
+          if( $exonerationDate && isset($data['exoneration_document_type']) && isset($data['exoneration_document_number']) ) {
             $item->exoneration_document_type = $data['exoneration_document_type'] ?? null;
             $item->exoneration_document_number = $data['exoneration_document_number'] ?? null;
             $item->exoneration_company_name = $data['exoneration_company_name'] ?? null;
