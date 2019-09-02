@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Invoice;
 use App\Jobs\ProcessInvoice;
+use App\Jobs\ProcessInvoiceSM;
 use App\Utils\BridgeHaciendaApi;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
