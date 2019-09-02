@@ -101,7 +101,7 @@
 						    
 						    <div class="form-group col-md-6">
 						      <label for="saldo_favor_2018">Ingrese su saldo a favor acumulado de periodos anteriores</label>
-						      <input type="numeric" class="form-control" name="saldo_favor_2018" id="saldo_favor_2018" step="0.01" value="{{ @$company->saldo_favor_2018 ? $company->saldo_favor_2018 : 0 }}">
+						      <input type="numeric" class="form-control" name="saldo_favor_2018" id="saldo_favor_2018" step="0.01" value="{{ @$company->saldo_favor_2018 ? round($company->saldo_favor_2018, 2) : 0 }}">
 						    </div>
 						    
 						    <div class="form-group col-md-12">

@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
-class ProcessInvoice implements ShouldQueue
+class ProcessInvoiceSM implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -69,7 +69,7 @@ class ProcessInvoice implements ShouldQueue
                             }
                             $invoice->in_queue = false;
                             $invoice->save();
-                            sleep(10);
+                            sleep(7);
                             $apiHacienda = new BridgeHaciendaApi();
                             $tokenApi = $apiHacienda->login(false);
                             if ($requestData !== false) {
@@ -129,7 +129,7 @@ class ProcessInvoice implements ShouldQueue
                                 } else if (isset($response['status']) && $response['status'] == 400 &&
                                     strpos($response['message'], 'XML ya existe en nuestras bases de datos') <> false) {
                                     Log::info('Consecutive repeated -->' . $invoice->document_number);
-                                    $invoice->hacienda_status = '04';
+                                    $invoice->hacienda_status = '30';
                                     $invoice->save();
                                 }else if (isset($response['status']) && $response['status'] == 400 &&
                                     strpos($response['message'], 'archivo XML ya existe en nuestras bases de datos') <> false) {
