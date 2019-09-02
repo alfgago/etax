@@ -84,7 +84,7 @@
                                       $c = $row->company;  
                                       $name = isset($c->name) ? $c->name.' '.$c->last_name.' '.$c->last_name2 : '-- Nueva Empresa --';  
                                   ?>
-                                  <option value="{{ $c->id }}" {{ $c->id == currentCompany() ? 'selected' : ''  }} > {{ $name }} </option>
+                                  <option value="{{ isset($c->id) ? $c->id : 0 }}" {{ isset($c->id) == currentCompany() ? 'selected' : ''  }} > {{ $name }} </option>
                               @endforeach
                           </select>
                       </div>
