@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
-class ProcessInvoice implements ShouldQueue
+class ProcessInvoiceSM implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -56,7 +56,7 @@ class ProcessInvoice implements ShouldQueue
                 $client = new Client();
                 $invoice = Invoice::find($this->invoiceId);
                 $company = Company::find($this->companyId);
-                if($company->id != 1110) { //No procese el bulk de SM Seguros aqui
+                //if($company->id != 1110) { //No procese el bulk de SM Seguros aqui
                     Log::info('send job invoice id: '.$this->invoiceId);
                     if ($company->atv_validation ) {
                         if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09')) && $invoice->resend_attempts < 6) {
@@ -138,7 +138,7 @@ class ProcessInvoice implements ShouldQueue
                     }else {
                         Log::warning('El job Invoices no se procesó, porque la empresa no tiene un certificado válido.'.$company->id_number);
                     }
-                }
+                //}
             }
         } catch ( \Exception $e) {
             Log::error('ERROR Enviando parametros  API HACIENDA Invoice: '.$this->invoiceId.'-->>'.$e);
