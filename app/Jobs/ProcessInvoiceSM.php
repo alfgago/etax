@@ -69,7 +69,7 @@ class ProcessInvoiceSM implements ShouldQueue
                             }
                             $invoice->in_queue = false;
                             $invoice->save();
-                            sleep(1);
+                            sleep(3);
                             $apiHacienda = new BridgeHaciendaApi();
                             $tokenApi = $apiHacienda->login(false);
                             if ($requestData !== false) {
@@ -127,6 +127,11 @@ class ProcessInvoiceSM implements ShouldQueue
                                     $invoice->hacienda_status = '04';
                                     $invoice->save();
                                 } else if (isset($response['status']) && $response['status'] == 400 &&
+                                    strpos($response['message'], 'XML ya existe en nuestras bases de datos') <> false) {
+                                    Log::info('Consecutive repeated -->' . $invoice->document_number);
+                                    $invoice->hacienda_status = '30';
+                                    $invoice->save();
+                                }else if (isset($response['status']) && $response['status'] == 400 &&
                                     strpos($response['message'], 'archivo XML ya existe en nuestras bases de datos') <> false) {
                                     Log::info('Consecutive repeated -->' . $invoice->document_number);
                                     $invoice->hacienda_status = '04';
