@@ -139,7 +139,7 @@ class InvoiceController extends Controller
                 return $invoice->currency == 'CRC' ? $invoice->currency : "$invoice->currency ($invoice->currency_rate)";
             })
             ->editColumn('hacienda_status', function(Invoice $invoice) {
-                if ($invoice->hacienda_status == '03') {
+                if ($invoice->hacienda_status == '03' || $invoice->hacienda_status == '30') {
                     return '<div class="green">  <span class="tooltiptext">Aceptada</span></div>
                         <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
                             <i class="fa fa-refresh" aria-hidden="true"></i>
