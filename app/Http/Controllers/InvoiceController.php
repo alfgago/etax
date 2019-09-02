@@ -1434,8 +1434,8 @@ class InvoiceController extends Controller
                             $codigoCliente = $identificacionCliente;
                             $tipoPersona = $row['tipo_id'][0];
                             $correoCliente = $row['correo'] ?? null;
-                            $telefonoCliente = $row['telefono_celular'];
-                            $today = Carbon::parse( now('America/Costa_Rica') );
+                            $telefonoCliente = $row['telefono_celular'] ? $row['telefono_celular'] : ( $row['telefono_habitacion'] ?? null );
+                            $today = Carbon::parse( now('America/Costa_Rica') )->subDays(2);;
                         
                             //Datos de factura
                             $consecutivoComprobante = $this->getDocReference('01', $company);
@@ -1445,8 +1445,8 @@ class InvoiceController extends Controller
                             $refNumber = $company->last_invoice_ref_number;
                             
                             $condicionVenta = '02';
-                            //$metodoPago = str_pad((int)$row['medio_pago'], 2, '0', STR_PAD_LEFT);
-                            $metodoPago = '99';
+                            $metodoPago = str_pad((int)$row['medio_pago'], 2, '0', STR_PAD_LEFT);
+                            //$metodoPago = '99';
                             $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
                             $fechaEmision = $today->format('d/m/Y');
                             $fechaVencimiento = isset($row['fecha_pago']) ? $row['fecha_pago']."" : $fechaEmision; 
