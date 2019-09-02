@@ -82,11 +82,9 @@
                               @foreach( auth()->user()->teams as $row )
                                   <?php  
                                       $c = $row->company;  
-                                      if( $c ) { 
                                       $name = isset($c->name) ? $c->name.' '.$c->last_name.' '.$c->last_name2 : '-- Nueva Empresa --';  
                                   ?>
-                                  <option value="{{ $c->id }}" {{ $c->id == currentCompany() ? 'selected' : ''  }} > {{ $name }} </option>
-                                  <?php } ?>
+                                  <option value="{{ isset($c->id) ? $c->id : 0 }}" {{ isset($c->id) == currentCompany() ? 'selected' : ''  }} > {{ $name }} </option>
                               @endforeach
                           </select>
                       </div>
