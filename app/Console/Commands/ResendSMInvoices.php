@@ -59,8 +59,7 @@ class ResendSMInvoices extends Command
                 $invoice->save();
                 $this->info('Sending invoice ....'. $invoice->document_key);
                 //sleep(1);
-                ProcessInvoice::dispatch($invoice->id, $company->id, $tokenApi)
-                    ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
+                ProcessInvoiceSM::dispatch($invoice->id, $company->id, $tokenApi)->onQueue('invoices');
             }
         } catch ( \Exception $e) {
             Log::error('Error resend command '.$e);
