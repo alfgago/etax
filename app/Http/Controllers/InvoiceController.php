@@ -29,6 +29,7 @@ use PDF;
 use App\Jobs\ProcessInvoice;
 use App\Jobs\ProcessInvoicesImport;
 use App\Jobs\ProcessSendExcelInvoices;
+use Illuminate\Support\Facades\Input;
 
 /**
  * @group Controller - Facturas de venta
@@ -911,16 +912,15 @@ class InvoiceController extends Controller
 
 
 
-    public function importXML() {
+    public function importXML(Request $request) {
         try {
             $time_start = getMicrotime();
             $company = currentCompanyModel();
-                $file = Input::file('file');
-                    $xml = simplexml_load_string( file_get_contents($file) );
-                    $json = json_encode( $xml ); // convert the XML string to JSON
-                    $arr = json_decode( $json, TRUE );
-                    
+            $file = Input::file('file');
 
+                    $xml = simplexml_load_string( file_get_contents($file) );
+                    $json = json_encode( $xml ); // convert the XML string to json  
+                    $arr = json_decode( $json, TRUE );
                     $FechaEmision = explode("T", $arr['FechaEmision']);
                     $FechaEmision = explode("-", $FechaEmision[0]);
                     $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
@@ -945,20 +945,21 @@ class InvoiceController extends Controller
                             }
                         }
                     }else{
-                        return Response()->json('error', 400);
+                        return Response()->json('error mes seleccionado ya fue cerrado', 400);
                         //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
                     } 
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
+                        
 
         }catch( \Exception $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
-            return Response()->json('error', 400);
+            return Response()->json('Error importando con archivo inválido', 400);
             //return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML de factura válida.');
         }catch( \Throwable $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
-            return Response()->json('error', 400);
+            return Response()->json('Error importando con archivo inválido', 400);
             //return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML de factura válida.');
         }
         return Response()->json('success', 200);

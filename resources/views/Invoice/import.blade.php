@@ -91,7 +91,6 @@
 				</div>
 			</div>
 			
-			<button type="submit" class="btn btn-primary">Importar facturas</button>
 			
 		</form>
   </div>
