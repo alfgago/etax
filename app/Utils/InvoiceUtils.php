@@ -24,9 +24,9 @@ class InvoiceUtils
     public function streamPdf( $invoice, $company )
     {
         $pdfRoute = 'Pdf/invoice';
-        if($company->id_number == '3101015179'){
+        /*if($company->id_number == '3101015179'){
             $pdfRoute = 'Pdf/custom/trifami';
-        }
+        }*/
         
         $pdf = PDF::loadView($pdfRoute, [
             'data_invoice' => $invoice,
