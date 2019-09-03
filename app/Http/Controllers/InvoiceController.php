@@ -303,6 +303,18 @@ class InvoiceController extends Controller
             $invoice->generation_method = "M";
             $invoice->setInvoiceData($request);
             
+            
+            try{
+                if ($request->document_type == '08' ) {
+                    $this->storeBillFEC($request);
+                    if( $request->tipo_compra == 'local' ){
+                        $invoice->is_void = true;
+                        $invoice->save();
+                    }
+                }
+            }catch(\Throwable $e){}
+                    
+            
             $company->save();
             
             clearInvoiceCache($invoice);
