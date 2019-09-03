@@ -908,21 +908,14 @@ class InvoiceController extends Controller
 
     }
 
+
+
+
     public function importXML() {
-        request()->validate([
-          'xmls' => 'required'
-        ]);
-        
-        $count = count(request()->file('xmls'));
-        if( $count > 10 ) {
-            return back()->withError( 'Por favor mantenga el límite de 10 archivos por intento.');
-        }
-          
         try {
             $time_start = getMicrotime();
             $company = currentCompanyModel();
-            if( request()->hasfile('xmls') ) {
-                foreach(request()->file('xmls') as $file) {
+                $file = Input::file('file');
                     $xml = simplexml_load_string( file_get_contents($file) );
                     $json = json_encode( $xml ); // convert the XML string to JSON
                     $arr = json_decode( $json, TRUE );
@@ -952,23 +945,24 @@ class InvoiceController extends Controller
                             }
                         }
                     }else{
-                        return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
-                    }
-                }
-            }
+                        return Response()->json('error', 400);
+                        //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
+                    } 
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
 
         }catch( \Exception $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML de factura válida.');
+            return Response()->json('error', 400);
+            //return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML de factura válida.');
         }catch( \Throwable $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML de factura válida.');
+            return Response()->json('error', 400);
+            //return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML de factura válida.');
         }
-        
-        return redirect('/facturas-emitidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
+        return Response()->json('success', 200);
+        //return redirect('/facturas-emitidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
     }
     
     /**

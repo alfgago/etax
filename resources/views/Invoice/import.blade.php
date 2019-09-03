@@ -71,34 +71,23 @@
 			
 			<button type="submit" class="btn btn-primary">Importar facturas</button>
 		</form>	
-		
-	<form method="POST" action="/facturas-emitidas/importarXML" enctype="multipart/form-data" class="toggle-xml">
-			
-			@csrf
-			
-			<div class="form-group col-md-12 toggle-xml">
-		    <div class="descripcion">
+		<div class="form-group col-md-12 toggle-xml">
+		    	<div class="descripcion">
 		    	Arrastre los archivos XML de Hacienda que haya generado desde sistemas de facturación externos. <br>
 		    	
 		    	* Utilice el formato 4.2 si su factura fue emitida antes del 1 de Julio del 2019.
 		    	</div>
 		  </div>
-		  
+	<form method="POST" action="/facturas-emitidas/importarXML" class="dropzone toggle-xml"
+      id="xml-dropzone" enctype="multipart/form-data" >
+			
+			@csrf
 		  <div class="form-group col-md-12">
-		    <label for="formato_xml">Formato de XML</label>
-		    <select class="form-control" name="formato_xml" id="formato_xml">
-		      <option value="4.2">4.2</option>
-		      <option value="4.3">4.3</option>
-		    </select>
-			</div>
-		  
-		  <div class="form-group col-md-12">
-		    <label for="xmls[]">Archivos</label>  
+		    <label for="file">Archivos</label>  
 				<div class="">
 					<div class="fallback">
-				      <input name="xmls[]" type="file" multiple="true" accept=".xml">
+				      <input name="file" type="file" >
 				  </div>
-				  <small class="descripcion">Puede subir hasta 10 archivos XML por intento.</small>
 				</div>
 			</div>
 			
@@ -107,3 +96,30 @@
 		</form>
   </div>
 </div>
+
+<script type="text/javascript">
+        Dropzone.autoDiscover = false;
+        $(document).ready(function(){
+
+            var baseUrl = "{{ url('/') }}";
+            var token = "{{ Session::token() }}";
+
+            $("#xml-dropzone").dropzone({
+                paramName: 'file',
+                url: baseUrl+"/facturas-emitidas/importarXML",
+                params: {
+                    _token: token
+                },
+                method : "post",
+                dictDefaultMessage: "Drop or click to upload images",
+                clickable: true,
+                removedfile: function(file) {
+                    // @TODO : Make your own implementation to delete a file
+                },
+                queuecomplete: function() {
+                    // @TODO : Ajax call to load your uploaded files right away if required
+                }
+            });
+        });
+</script>
+
