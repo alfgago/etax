@@ -53,7 +53,29 @@ class Company extends Model {
     public function actividades(){
         return $this->hasOne(Actividades::class);
     }
-    
+
+    //Relacion con Codigos Repercutidos
+    public function repercutidos()
+    {   
+        return $this->belongsToMany('App\CodigoIvaRepercutido');
+    }
+
+    public function repercutidosRelation()
+    {   
+        return $this->hasMany(CodigoIvaRepercutidoCompany::class);
+    }
+
+    //retorna los codigosRepercutidos Preselectos
+    public function codigosRepercutidos(){
+        $repercutidos = $this->repercutidos;
+        if(count($repercutidos) < 1){
+            return CodigoIvaRepercutido::all();
+        }else{
+            return $repercutidos;
+        }
+    }
+
+ 
     //Revisa si el certificado existe
     public function certificateExists() {
         if( $this->atv ){
@@ -343,6 +365,38 @@ class Company extends Model {
         } else {
             return false;
         }
+    }
+
+    public function preselectVatCodes($preselected_vat_codes){
+
+        $repercutidos = $this->repercutidosRelation;
+        if($preselected_vat_codes[0] == 1){
+            foreach($repercutidos as $repercutido){
+                $repercutido->delete();    
+            }
+            return true;
+        }else{
+            foreach($repercutidos as $repercutido){
+                $repercutido->erase = true;
+                foreach($preselected_vat_codes as $key => $preselected){
+                    if($repercutido->codigo_iva_repercutido_id === $preselected){
+                        $repercutido->erase = false;
+                        unset($preselected_vat_codes[$key]);
+                    }
+                }
+                if($repercutido->erase){
+                    $repercutido->delete();
+                }
+            }
+            foreach($preselected_vat_codes as $preselected){
+                $repercutidosCompany = new CodigoIvaRepercutidoCompany();
+                $repercutidosCompany->codigo_iva_repercutido_id = $preselected;
+                $repercutidosCompany->company_id = $this->id;
+                $repercutidosCompany->save();      
+            }
+        return true;
+        }  
+        return false;
     }
     
     /*

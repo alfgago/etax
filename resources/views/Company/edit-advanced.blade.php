@@ -163,6 +163,22 @@
 								    @endforeach
 								  </select>
 								</div> 
+
+								<div class="form-group col-md-12">
+	                                <label for="tipo_persona">Preseleción de codigos IVA</label>
+	                                <select class="form-control checkEmpty select2-tags" name="preselected_vat_code[]" id="preselected_vat_code" multiple required>
+	              						<option value="1" {{@$company->repercutidos[0]->id ? '' : 'selected'}}>Utilizar todos los codigos</option>
+	              						<?php
+	              						$preselectos = array();
+	              						foreach($company->repercutidos as $repercutido){
+	              							$preselectos[] = $repercutido->id;
+	              						}
+                                    	?>
+	                                    @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
+	                                        <option id="preselected-option-{{$tipo['id']}}" value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }} {{ @$tipo['hideMasiva'] ? 'hidden' : '' }} "  {{ (in_array($tipo['id'], $preselectos) !== false) ? 'selected' : '' }}  >{{ $tipo['name'] }}</option>
+	                                    @endforeach
+	                                </select>
+	                            </div>
 						    
 						    <div class="form-group col-md-6">
 						      <label for="default_currency">Tipo de moneda por defecto</label>
@@ -228,6 +244,7 @@
 
 @section('footer-scripts')
     <script>
+
         /*$(document).ready(function(){
             $('#saldo_favor_2018').on('keyup',function(){
                 $(this).manageCommas();
@@ -256,7 +273,14 @@
     </script>
 
 	<script>
-		
+
+		//seleccinar los codigos seleccionados.
+
+
+
+
+
+
 		function toggleTipoProrrata() {
 		  var metodo = $("#first_prorrata_type").val();
 		  $( ".toggle-types" ).hide();
@@ -278,9 +302,8 @@
 	    });
 
 		});
-				
+		
 	</script>
-	
 	<style>
 		.form-button {
 		    display: block;
