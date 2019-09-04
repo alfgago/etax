@@ -31,6 +31,46 @@
 
     @yield('header-scripts')
 
+    <style>
+      
+      .dz-error-mark g {
+    fill: red;
+}
+
+.dz-success-mark g {
+    fill: green;
+}
+
+.dropzone .dz-preview .dz-success-mark, .dropzone .dz-preview .dz-error-mark {
+    position: absolute;
+    top: auto;
+    bottom: 0px;
+    height: 20px;
+    width: 20px;
+    margin: 0;
+    right: 0px;
+    left: auto;
+    z-index: 9999;
+}
+
+.dropzone .dz-preview .dz-success-mark svg, .dropzone .dz-preview .dz-error-mark svg {
+    height: 20px;
+    width: 20px;
+}
+
+.dropzone .dz-preview .dz-error-message {
+    font-size: 9px;
+    overflow: hidden;
+    width: auto;
+    top: 0;
+    margin: 0;
+    left: 0;
+    height: 100%;
+    word-break: break-word;
+}
+      
+    </style>
+
 </head>
 
 <body>
