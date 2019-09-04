@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Jobs\ProcessBillsImport;
+use Illuminate\Support\Facades\Input;
 
 /**
  * @group Controller - Facturas de compra
@@ -357,16 +358,11 @@ class BillController extends Controller
 
     }
     
-    public function importXML() {
-        request()->validate([
-          'xmls' => 'required'
-        ]);
-          
+    public function importXML(Request $request) {
         try {
             $time_start = getMicrotime();
             $company = currentCompanyModel();
-            if( request()->hasfile('xmls') ) {
-                foreach(request()->file('xmls') as $file) {
+            $file = Input::file('file');
                     $xml = simplexml_load_string( file_get_contents($file) );
                     $json = json_encode( $xml ); // convert the XML string to JSON
                     $arr = json_decode( $json, TRUE );
@@ -389,25 +385,29 @@ class BillController extends Controller
                                 Bill::storeXML( $bill, $file );
                             }
                         }else{
-                            return back()->withError( "El documento $consecutivoComprobante no le pertenece a su compañía actual" );
+                            //return back()->withError( "El documento $consecutivoComprobante no le pertenece a su compañía actual" );
+                            return Response()->json('El documento $consecutivoComprobante no le pertenece a su compañía actual', 400);
                         }
                     }else{
-                        return back()->withError('Mes seleccionado ya fue cerrado');
+                        return Response()->json('error mes seleccionado ya fue cerrado', 400);
+                        //return back()->withError('Mes seleccionado ya fue cerrado');
                     }
-                }
-            }
+             
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
         }catch( \Exception $ex ){
             Log::error('Error importando XML ' . $ex->getMessage());
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
+            //return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
+            return Response()->json('Se ha detectado un error en el tipo de archivo subido.', 400);
         }catch( \Throwable $ex ){
             Log::error('Error importando XML ' . $ex->getMessage());
-            return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
+            //return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
+            return Response()->json('Se ha detectado un error en el tipo de archivo subido.', 400);
         }
 
-        return redirect('/facturas-recibidas/aceptaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
+        return Response()->json('Facturas importados exitosamente en '.$time.'s', 200);
+        //return redirect('/facturas-recibidas/aceptaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
 
     }
     
