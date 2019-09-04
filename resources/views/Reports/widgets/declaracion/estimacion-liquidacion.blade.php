@@ -79,7 +79,7 @@
 	  </tr>
 	 	<tr>
 	    <th>Devolución del IVA por servicios de salud privada pagados con tarjeta de crédito y/o débito</th>
-	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( 0, 0) }}" > </td>
+	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->iva_devuelto, 0) }}" > </td>
 	  </tr>
 	 	<tr>
 	    <th>Saldo a favor del periodo</th>
@@ -97,13 +97,24 @@
 	    <th>Saldo deudor en aplicación del porcentaje de la liquidación final</th>
 	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->iva_por_pagar, 0) }}" > </td>
 	  </tr>
+	  <?php 
+	  
+	  	 $diff = $data->iva_por_pagar - $data->iva_devuelto;
+	  	 $impuestoFinal = $diff;
+	  	 $saldoFavor = $data->saldo_favor;
+	  	 if($diff < 0){
+	  	 		$impuestoFinal = 0;
+	  	 		$saldoFavor = $saldoFavor + abs($diff);
+	  	 }
+	  	 
+	  ?>
 	 	<tr>
 	    <th>Saldo a favor final</th>
-	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->saldo_favor, 0) }}" > </td>
+	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $saldoFavor, 0) }}" > </td>
 	  </tr>
 	 	<tr>
 	    <th>Impuesto final</th>
-	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $data->iva_por_pagar, 0) }}" > </td>
+	    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ number_format( $impuestoFinal, 0) }}" > </td>
 	  </tr>
 	  
 	</tbody>
