@@ -879,7 +879,7 @@ class CalculatedTax extends Model
       $ivaRetenido = isset($this->retention_by_card) ? $this->retention_by_card : $this->iva_retenido;
       $saldoFavor = $balanceOperativo - $ivaRetenido;
       $saldoFavor = $saldoFavor < 0 ? abs( $saldoFavor ) : 0;
-      $this->iva_retenido = $this->retention_by_card;
+      $this->iva_retenido = $ivaRetenido;
 
       $this->numerador_prorrata = $numeradorProrrata;
       $this->denumerador_prorrata = $denumeradorProrrata;

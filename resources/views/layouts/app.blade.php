@@ -23,8 +23,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css" />
 
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=5.19">
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=5.19"></script>
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=5.20">
+    <script src="{{asset('assets/js/common-bundle.js')}}?v=5.20"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
     <link href="https://unpkg.com/dropzone/dist/dropzone.css" rel="stylesheet"/>
@@ -33,41 +33,7 @@
 
     <style>
       
-      .dz-error-mark g {
-    fill: red;
-}
-
-.dz-success-mark g {
-    fill: green;
-}
-
-.dropzone .dz-preview .dz-success-mark, .dropzone .dz-preview .dz-error-mark {
-    position: absolute;
-    top: auto;
-    bottom: 0px;
-    height: 20px;
-    width: 20px;
-    margin: 0;
-    right: 0px;
-    left: auto;
-    z-index: 9999;
-}
-
-.dropzone .dz-preview .dz-success-mark svg, .dropzone .dz-preview .dz-error-mark svg {
-    height: 20px;
-    width: 20px;
-}
-
-.dropzone .dz-preview .dz-error-message {
-    font-size: 9px;
-    overflow: hidden;
-    width: auto;
-    top: 0;
-    margin: 0;
-    left: 0;
-    height: 100%;
-    word-break: break-word;
-}
+ 
       
     </style>
 

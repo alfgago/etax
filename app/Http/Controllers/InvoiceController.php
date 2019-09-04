@@ -1265,9 +1265,13 @@ class InvoiceController extends Controller
         
         $company = currentCompanyModel();
         
-        $invoiceUtils = new InvoiceUtils();
-        $path = $invoiceUtils->getXmlPath( $invoice, $company );
-        $invoiceUtils->sendInvoiceEmail( $invoice, $company, $path );
+        try{
+            $invoiceUtils = new InvoiceUtils();
+            $path = $invoiceUtils->getXmlPath( $invoice, $company );
+            $invoiceUtils->sendInvoiceEmail( $invoice, $company, $path );
+        }catch( \Exception $e ){
+            return back()->withError( 'El correo electrónico no pudo ser reenviado.');
+        }
         
         return back()->withMessage( 'Se han reenviado los correos exitosamente.');
     }
