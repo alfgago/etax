@@ -28,9 +28,9 @@ class BillExport implements WithHeadings, WithMapping, FromQuery, WithEvents
                 $event->sheet->getDelegate()->getStyle($cellRangeExplainer)->getFont()->setSize(8);
                 $event->sheet->getDelegate()->getStyle($cellRangeExplainer)->getAlignment()->setWrapText(true);
                 $event->sheet->getDelegate()->getColumnDimension('A')->setWidth('20');
-                $event->sheet->getDelegate()->getColumnDimension('B')->setAutoSize(true);
+                $event->sheet->getDelegate()->getColumnDimension('B')->setWidth('20');
                 $event->sheet->getDelegate()->getColumnDimension('C')->setAutoSize(true);
-                $event->sheet->getDelegate()->getColumnDimension('D')->setWidth('20');
+                $event->sheet->getDelegate()->getColumnDimension('D')->setAutoSize(true);
                 $event->sheet->getDelegate()->getColumnDimension('E')->setWidth('20');
                 $event->sheet->getDelegate()->getColumnDimension('F')->setWidth('20');
                 $event->sheet->getDelegate()->getColumnDimension('G')->setWidth('20');
@@ -55,6 +55,7 @@ class BillExport implements WithHeadings, WithMapping, FromQuery, WithEvents
                 $event->sheet->getDelegate()->getColumnDimension('Z')->setWidth('20');
                 $event->sheet->getDelegate()->getColumnDimension('AA')->setWidth('20');
                 $event->sheet->getDelegate()->getColumnDimension('AB')->setWidth('20');
+                $event->sheet->getDelegate()->getColumnDimension('AC')->setWidth('20');
                 $cellRangeHeaders = 'A3:AB3'; // All headers
                 $event->sheet->getDelegate()->getStyle($cellRangeHeaders)->getFont()->setSize(12);
                 $event->sheet->getDelegate()->getStyle($cellRangeHeaders)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
@@ -83,7 +84,9 @@ class BillExport implements WithHeadings, WithMapping, FromQuery, WithEvents
     
     public function map($map): array
     {
+        $current_company = currentCompanyModel();
         return [
+            $current_company->id_number,
             $map->bill->document_type,
             $map->bill->document_key,
             $map->bill->document_number,
@@ -120,6 +123,7 @@ class BillExport implements WithHeadings, WithMapping, FromQuery, WithEvents
         return [
             [ "Archivo exportado desde etaxcr.com" ],
             [ 
+                'Ingrese la cédula de su empresa o persona física en todas las líneas.',
                 'Elija el código equivalente al tipo de documento emitido.', 
                 'Indique la clave de su comprobante (50 digitos)', 
                 'Indique el número de consecutivo de su comprobante.', 
@@ -150,6 +154,7 @@ class BillExport implements WithHeadings, WithMapping, FromQuery, WithEvents
                 'Indique 1 si la factura ya está aceptada, o 0 si desea aceptar desde eTax.',    
             ],
             [
+                'CedulaEmpresa',
                 'TipoDocumento',
                 'ClaveFactura',
                 'ConsecutivoComprobante',
