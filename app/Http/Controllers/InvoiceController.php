@@ -997,9 +997,11 @@ class InvoiceController extends Controller
                             if( $invoice ) {
                                 Invoice::storeXML( $invoice, $file );
                             }
+                        }else{
+                            return Response()->json("El documento $consecutivoComprobante no le pertenece a su empresa actual", 400);
                         }
                     }else{
-                        return Response()->json('error mes seleccionado ya fue cerrado', 400);
+                        return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
                         //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
                     } 
             $company->save();
@@ -1010,14 +1012,11 @@ class InvoiceController extends Controller
         }catch( \Exception $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
             return Response()->json('Error importando con archivo inválido', 400);
-            //return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML de factura válida.');
         }catch( \Throwable $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
             return Response()->json('Error importando con archivo inválido', 400);
-            //return back()->withError( 'Se ha detectado un error en el tipo de archivo subido. Asegúrese de estar enviando un XML de factura válida.');
         }
         return Response()->json('success', 200);
-        //return redirect('/facturas-emitidas/validaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
     }
     
     /**

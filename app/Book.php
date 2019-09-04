@@ -197,7 +197,8 @@ class Book extends Model
       //Haber 3
         $iva_no_acreditables = $ivaData->iB080 + $ivaData->iB090 + $ivaData->iB097 + $ivaData->i098 + $ivaData->i099 +
                                $ivaData->iS080 + $ivaData->iS090 + $ivaData->iS097 +
-                               $ivaData->bB091 + $ivaData->bB092 + $ivaData->bB093 + $ivaData->bB094 + $ivaData->iB091 + $ivaData->iB092 + $ivaData->iB093 + $ivaData->iB094;
+                               $ivaData->bB091 + $ivaData->bB092 + $ivaData->bB093 + $ivaData->bB094 + 
+                               $ivaData->iB091 + $ivaData->iB092 + $ivaData->iB093 + $ivaData->iB094;
       
         $this->cc_ppp_1 = $ivaData->iB011 + $ivaData->iB031 + $ivaData->iB051 + $ivaData->iB071;
         $this->cc_ppp_2 = $ivaData->iB012 + $ivaData->iB032 + $ivaData->iB052 + $ivaData->iB072;
