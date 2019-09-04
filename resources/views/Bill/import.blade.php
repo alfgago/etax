@@ -72,30 +72,26 @@
 			<button type="submit" class="btn btn-primary">Importar facturas</button>
 	</form>
 	
-	<form method="POST" action="/facturas-recibidas/importarXML" class="dropzone toggle-xml"
-      id="xml-dropzone" enctype="multipart/form-data" >
-				
-			@csrf	
-				
-			<div class="form-group col-md-12">
-		    <div class="descripcion">
-		    	Arrastre los archivos XML de Hacienda que haya generado desde sistemas de facturación externos. <br>
-		    	
-		    	* Utilice el formato 4.2 si su factura fue emitida antes del 1 de Julio del 2019.
+			<div class="form-group col-md-12 toggl-xml">
+		      <div class="descripcion">
+			    	Arrastre los archivos XML de Hacienda que haya generado desde sistemas de facturación externos. <br>
+			    	
+			    	* Utilice el formato 4.2 si su factura fue emitida antes del 1 de Julio del 2019.
 		    	</div>
-		  </div>
 		  
-		 
-		  <div class="form-group col-md-12">
-		    <label for="file">Archivos</label>  
-				<div class="">
-					<div class="fallback">
-				      <input name="file" type="file" multiple="true" accept=".xml">
-				  </div>
-				</div>
-			</div>
-			
-		</form>
+					<form method="POST" action="/facturas-recibidas/importarXML" class="dropzone toggle-xml" id="xml-dropzone" enctype="multipart/form-data" >
+						@csrf		 
+					  <div class="form-group col-md-12">
+					  	<label for="file"></label>  
+							<div class="">
+								<div class="fallback">
+							      <input name="file" type="file" multiple="true" accept=".xml">
+							  </div>
+							</div>
+						</div>
+						
+					</form>
+		  </div>
   </div>
 </div>
 <script type="text/javascript">
@@ -112,7 +108,7 @@
                     _token: token
                 },
                 method : "post",
-                dictDefaultMessage: "Drop or click to upload images",
+                dictDefaultMessage: "Arrastre sus archivos XML aquí o presione para seleccionarlos.",
                 clickable: true,
                 removedfile: function(file) {
                     // @TODO : Make your own implementation to delete a file
