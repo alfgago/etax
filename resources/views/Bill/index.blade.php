@@ -65,7 +65,7 @@ $(function() {
       },
       type: 'GET'
     },
-    order: [[ 8, 'desc' ]],
+    order: [[ 7, 'desc' ]],
     columns: [
       { data: 'document_number', name: 'document_number' },
       { data: 'provider', name: 'provider.fullname' },

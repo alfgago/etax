@@ -14,6 +14,8 @@ use App\Utils\InvoiceUtils;
 use \Carbon\Carbon;
 use App\Invoice;
 use App\InvoiceItem;
+use App\Bill;
+use App\BillItem;
 use App\Exports\InvoiceExport;
 use App\Exports\LibroVentasExport;
 use App\Imports\InvoiceImport;
@@ -138,7 +140,7 @@ class InvoiceController extends Controller
                 return $invoice->currency == 'CRC' ? $invoice->currency : "$invoice->currency ($invoice->currency_rate)";
             })
             ->editColumn('hacienda_status', function(Invoice $invoice) {
-                if ($invoice->hacienda_status == '03') {
+                if ($invoice->hacienda_status == '03' || $invoice->hacienda_status == '30') {
                     return '<div class="green">  <span class="tooltiptext">Aceptada</span></div>
                         <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
                             <i class="fa fa-refresh" aria-hidden="true"></i>
@@ -357,16 +359,27 @@ class InvoiceController extends Controller
                     if ($request->document_type == '04') {
                         $invoice->reference_number = $company->last_ticket_ref_number + 1;
                     }
-
+                    
                     $invoiceData = $invoice->setInvoiceData($request);
                     
                     $invoice->document_key = $this->getDocumentKey($request->document_type);
                     $invoice->document_number = $this->getDocReference($request->document_type);
+                    $request->document_key = $invoice->document_key;
+                    $request->document_number = $invoice->document_number;
+                    
+                    if ($request->document_type == '08' ) {
+                        $this->storeBillFEC($request);
+                        if( $request->tipo_compra == 'local' ){
+                            $invoice->is_void = true;
+                        }
+                    }
+                    
                     $invoice->save();
                     
                     if (!empty($invoiceData)) {
                         $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
                     }
+                    
                     if ($request->document_type == '01') {
                         $company->last_invoice_ref_number = $invoice->reference_number;
                         $company->last_document = $invoice->document_number;
@@ -385,7 +398,6 @@ class InvoiceController extends Controller
 
                     $company->save();
                     clearInvoiceCache($invoice);
-                
 
                     return redirect('/facturas-emitidas')->withMessage('Factura registrada con éxito');
                 } else {
@@ -398,6 +410,36 @@ class InvoiceController extends Controller
             Log::error("ERROR Envio de factura a hacienda -> ".$ex->getMessage());
             return back()->withError( 'Ha ocurrido un error al enviar factura.' );
         }
+    }
+    
+    private function storeBillFEC($request) {
+        $company = currentCompanyModel();
+
+        $bill = new Bill();
+        $bill->company_id = $company->id;
+        //Datos generales y para Hacienda
+        $bill->document_type = "01";
+        $bill->hacienda_status = "03";
+        $bill->status = "02";
+        $bill->payment_status = "01";
+        $bill->payment_receipt = "";
+        $bill->generation_method = "M";
+        $bill->reference_number = $company->last_bill_ref_number + 1;
+
+        $bill->setBillData($request);
+        
+        $bill->is_code_validated = 1;
+        $bill->accept_status = 1;
+        $bill->accept_iva_condition = '01';
+        $bill->accept_iva_acreditable = $bill->iva_amount;
+        $bill->accept_iva_gasto = 0;
+        $bill->description = "FEC" . ($request->description ?? '');
+        $bill->save();
+        $company->last_bill_ref_number = $bill->reference_number;
+        $company->save();
+
+        clearBillCache($bill);
+
     }
 
     /**
@@ -1387,8 +1429,8 @@ class InvoiceController extends Controller
                             $codigoCliente = $identificacionCliente;
                             $tipoPersona = $row['tipo_id'][0];
                             $correoCliente = $row['correo'] ?? null;
-                            $telefonoCliente = $row['telefono_celular'];
-                            $today = Carbon::parse( now('America/Costa_Rica') );
+                            $telefonoCliente = $row['telefono_celular'] ? $row['telefono_celular'] : ( $row['telefono_habitacion'] ?? null );
+                            $today = Carbon::parse( now('America/Costa_Rica') )->subDays(2);;
                         
                             //Datos de factura
                             $consecutivoComprobante = $this->getDocReference('01', $company);
@@ -1398,8 +1440,8 @@ class InvoiceController extends Controller
                             $refNumber = $company->last_invoice_ref_number;
                             
                             $condicionVenta = '02';
-                            //$metodoPago = str_pad((int)$row['medio_pago'], 2, '0', STR_PAD_LEFT);
-                            $metodoPago = '99';
+                            $metodoPago = str_pad((int)$row['medio_pago'], 2, '0', STR_PAD_LEFT);
+                            //$metodoPago = '99';
                             $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
                             $fechaEmision = $today->format('d/m/Y');
                             $fechaVencimiento = isset($row['fecha_pago']) ? $row['fecha_pago']."" : $fechaEmision; 
@@ -1504,8 +1546,8 @@ class InvoiceController extends Controller
             }
             
             Log::debug('Creando job de registro de facturas.');
-            foreach (array_chunk ( $collection, 250 ) as $facturas) {
-                ProcessSendExcelInvoices::dispatch($invoiceList)->onQueue('bulk');
+            foreach (array_chunk ( $invoiceList, 250 ) as $facturas) {
+                ProcessSendExcelInvoices::dispatch($facturas)->onQueue('bulk');
             }
             $company->save();
             $userId = $company->user_id;

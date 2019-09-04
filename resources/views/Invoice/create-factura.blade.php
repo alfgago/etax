@@ -133,6 +133,16 @@ $company = currentCompanyModel();
                   </h3>
                 </div>
                 
+                @if( @$document_type == '08' )
+                  <div class="form-group col-md-12">
+                    <label for="tipo_compra">Tipo de compra</label>
+                    <select class="form-control" id="tipo_compra" name="tipo_compra">
+                        <option value="local">Compra local</option>
+                        <option value="import">Importación de servicios</option>
+                    </select>
+                  </div>
+                @endif
+                
                  <div class="form-group col-md-4">
                   <label for="subtotal">Subtotal </label>
                   <input type="text" class="form-control" name="subtotal" id="subtotal" placeholder="" readonly="true" required>
@@ -142,6 +152,11 @@ $company = currentCompanyModel();
                   <label for="iva_amount">Monto IVA </label>
                   <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
                 </div>
+
+                  <div class="form-group col-md-4">
+                    <label for="total">IVA Devuelto</label>
+                    <input type="text" class="form-control total" name="total_iva_devuelto" id="total_iva_devuelto" placeholder="" readonly="true" required>
+                  </div>
     
                 <div class="form-group col-md-4">
                   <label for="total">Total</label>
@@ -163,7 +178,7 @@ $company = currentCompanyModel();
                     Datos generales
                   </h3>
                 </div>
-
+                  
                   <div class="form-group col-md-6">
                     <label for="document_number">Número de documento</label>
                     <input type="text" class="form-control" name="document_number" id="document_number" value="{{$document_number}}" required readonly="readonly">
@@ -315,6 +330,7 @@ $company = currentCompanyModel();
         @else
           @include('Bill.form-nuevo-proveedor')
         @endif
+        
             <input type="text" hidden value="{{ $document_type }}" name="document_type" id="document_type">
           <div class="btn-holder hidden">
            
@@ -334,15 +350,15 @@ $company = currentCompanyModel();
 
 <script>
 $(document).ready(function(){
-  <?php if( @$document_type != "08"){ ?>
+  @if( @$document_type != '08' )
     if( $('#default_vat_code').length ){
       $('#tipo_iva').val( $('#default_vat_code').val() ).change();
     }else{
       $('#tipo_iva').val( 'B103' ).change();
     }
-  <?php }else{ ?>
-    $('#tipo_iva').val( 'S140' ).change();
-  <?php } ?>
+  @else
+    $('#tipo_iva').val( 'B003' ).change();
+  @endif
 
   $('#moneda').change(function() {
     if ($(this).val() == 'USD') {

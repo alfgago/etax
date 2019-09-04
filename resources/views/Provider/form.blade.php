@@ -52,10 +52,10 @@
     <div class="form-group col-md-4" id="divCountry">
       <label for="country">País *</label>
       <select class="form-control" name="country" id="country" value="{{ @$provider->country }}" required onchange="cambiarTipoPersona();">
-          @foreach ( \App\CodigosPaises::all() as $pais )
-              <option value="{{ $pais['country_code'] }}">{{ $pais['country_code'] }} - {{ $pais['country_name'] }}</option>
+          <option value="CR" selected>Costa Rica</option>
+          @foreach ( \App\CodigosPaises::orderBy('country_code', 'ASC')->get() as $pais )
+              <option value="{{ $pais['country_code'] }}" {{ @$provider->country == $pais->country_code ? 'selected' : ''}}>{{ $pais['country_code'] }} - {{ $pais['country_name'] }}</option>
           @endforeach
-        <option value="CR" selected>Costa Rica</option>
       </select>
     </div>
     
@@ -124,58 +124,61 @@
 		    @endif
 		    
 		  });
-          function cambiarDireccion(){
-              var tipoPersona = $('#tipo_persona').val();
-              var idProvider = $('#id_provider').val();
-              if(tipoPersona === 'E'){
-                  $('#divState').hide('slow');
-                  $('#divCity').hide('slow');
-                  $('#divDistrict').hide('slow');
-                  $('#divNeighborhood').hide('slow');
-                  $('#divZip').hide('slow');
-                  $('#divAddress').hide('slow');
+		  
+      function cambiarDireccion(){
+          var tipoPersona = $('#tipo_persona').val();
+          var idProvider = $('#id_provider').val();
+          if(tipoPersona === 'E'){
+              $('#divState').hide();
+              $('#divCity').hide();
+              $('#divDistrict').hide();
+              $('#divNeighborhood').hide();
+              $('#divZip').hide();
+              $('#divAddress').hide();
 
-                  $('#extranjero').removeAttr('hidden');
-                  if(idProvider === ''){
-                      $('#country').val('US');
-                  }
-              }else{
-                  $('#divState').show('slow');
-                  $('#divCity').show('slow');
-                  $('#divDistrict').show('slow');
-                  $('#divNeighborhood').show('slow');
-                  $('#divZip').show('slow');
-                  $('#divAddress').show('slow');
-
-                  $('#extranjero').attr("hidden", true);
-                  $('#country').val('CR');
-                  setTimeout(fillProvincias, 1000);
+              $('#extranjero').removeAttr('hidden');
+              if(idProvider === ''){
+                  $('#country').val('US');
               }
-          }
-          cambiarDireccion();
-          function cambiarTipoPersona(){
-              var country = $('#country').val();
-              if(country !== 'CR'){
-                  $('#divState').hide('slow');
-                  $('#divCity').hide('slow');
-                  $('#divDistrict').hide('slow');
-                  $('#divNeighborhood').hide('slow');
-                  $('#divZip').hide('slow');
-                  $('#divAddress').hide('slow');
+          }else{
+              $('#divState').show();
+              $('#divCity').show();
+              $('#divDistrict').show();
+              $('#divNeighborhood').show();
+              $('#divZip').show();
+              $('#divAddress').show();
 
-                  $('#extranjero').removeAttr('hidden');
-                  $('#tipo_persona').val('E');
-              }else{
-                  $('#divState').show('slow');
-                  $('#divCity').show('slow');
-                  $('#divDistrict').show('slow');
-                  $('#divNeighborhood').show('slow');
-                  $('#divZip').show('slow');
-                  $('#divAddress').show('slow');
-
-                  $('#extranjero').attr("hidden", true);
-                  $('#tipo_persona').val('F');
-                  setTimeout(fillProvincias, 1000);
-              }
+              $('#extranjero').attr("hidden", true);
+              $('#country').val('CR');
+              setTimeout(fillProvincias, 1000);
           }
+      }
+      
+      cambiarDireccion();
+      
+      function cambiarTipoPersona(){
+          var country = $('#country').val();
+          if(country !== 'CR'){
+              $('#divState').hide();
+              $('#divCity').hide();
+              $('#divDistrict').hide();
+              $('#divNeighborhood').hide();
+              $('#divZip').hide();
+              $('#divAddress').hide();
+
+              $('#extranjero').removeAttr('hidden');
+              $('#tipo_persona').val('E');
+          }else{
+              $('#divState').show();
+              $('#divCity').show();
+              $('#divDistrict').show();
+              $('#divNeighborhood').show();
+              $('#divZip').show();
+              $('#divAddress').show();
+
+              $('#extranjero').attr("hidden", true);
+              $('#tipo_persona').val('F');
+              setTimeout(fillProvincias, 1000);
+          }
+      }
 		</script>

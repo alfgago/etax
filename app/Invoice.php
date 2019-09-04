@@ -302,6 +302,10 @@ class Invoice extends Model
             foreach ($request->items as $item) {
                 $item['item_number'] = $i;
                 $item['item_id'] = $item['id'] ? $item['id'] : 0;
+                if( $this->document_type == '08' ){
+                  $item['iva_type'] = 'S140';
+                  $item['product_type'] = '21';
+                }
                 $item_modificado = $this->addEditItem($item);
                 array_push( $lids, $item_modificado->id );
                 $i++;
@@ -470,7 +474,7 @@ class Invoice extends Model
                 $clienteCache->state = $data['zip'][0];
                 $clienteCache->city = $data['zip'][1] . $data['zip'][2];
                 $clienteCache->district = $data['zip'];
-              }catch( \Throwable $e ){ Log::error("Ni zip de  $identificacionCliente");}
+              }catch( \Throwable $e ){ Log::error("No zip de cliente: $identificacionCliente"); }
             }
             $clienteCache->save();
             Cache::put($clientCacheKey, $clienteCache, 30);
