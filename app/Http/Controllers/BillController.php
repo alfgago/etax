@@ -385,12 +385,10 @@ class BillController extends Controller
                                 Bill::storeXML( $bill, $file );
                             }
                         }else{
-                            //return back()->withError( "El documento $consecutivoComprobante no le pertenece a su compañía actual" );
-                            return Response()->json('El documento $consecutivoComprobante no le pertenece a su compañía actual', 400);
+                            return Response()->json("El documento $consecutivoComprobante no le pertenece a su empresa actual", 400);
                         }
                     }else{
-                        return Response()->json('error mes seleccionado ya fue cerrado', 400);
-                        //return back()->withError('Mes seleccionado ya fue cerrado');
+                        return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
                     }
              
             $company->save();
@@ -398,16 +396,13 @@ class BillController extends Controller
             $time = $time_end - $time_start;
         }catch( \Exception $ex ){
             Log::error('Error importando XML ' . $ex->getMessage());
-            //return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
             return Response()->json('Se ha detectado un error en el tipo de archivo subido.', 400);
         }catch( \Throwable $ex ){
             Log::error('Error importando XML ' . $ex->getMessage());
-            //return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
             return Response()->json('Se ha detectado un error en el tipo de archivo subido.', 400);
         }
 
         return Response()->json('Facturas importados exitosamente en '.$time.'s', 200);
-        //return redirect('/facturas-recibidas/aceptaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
 
     }
     
