@@ -383,9 +383,26 @@ class InvoiceUtils
             $totalVenta = $totalGravado + $totalExento + $totalExonerados;
             $totalNeta = $totalVenta - $totalDescuentos;
             $totalComprobante = $totalNeta + ($totalImpuestos - $totalImpuestosNeto);
+            
+            $isCompanyEmisor = true;
             if ($data['document_type'] == '08') {
+                $isCompanyEmisor = false;
                 $provider = Provider::find($data['provider_id']);
+                if($provider->tipo_persona == 'J' || $provider->tipo_persona == '4'  || $provider->tipo_persona == '04'){
+                    $isCompanyEmisor = true;
+                }
             }
+            
+            $emisorName = $isCompanyEmisor ? $company->business_name  ? trim($company->business_name) : '' : $provider->first_name ?? trim($provider->first_name);
+            $emisorEmail = $isCompanyEmisor ? $company->email ? trim($company->email) : '' : $provider->email ?? trim($provider->email);
+            $emisorCompany = $isCompanyEmisor && $company->business_name ? trim($company->business_name) : trim($provider->first_name);
+            $emisorCity = $isCompanyEmisor && $company->city ? trim($company->city) : trim($provider->city);
+            $emisorState = $isCompanyEmisor && $company->state ?  trim($company->state) : trim($provider->state);
+            $emisorPostalCode = $isCompanyEmisor && $company->zip ? trim($company->zip) : trim($provider->zip);
+            $emisorCountry = $isCompanyEmisor && $company->country ? trim($company->country) : trim($provider->country);
+            $emisorAddress = $isCompanyEmisor ? $company->address ? trim($company->address) : '' : $provider->address ?? trim($provider->address);
+            $emisorPhone = $isCompanyEmisor ? $company->phone ? trim($company->phone) : '' : $provider->phone ?? trim($provider->phone);
+            $emisorCedula = $isCompanyEmisor && $company->id_number ? str_pad(preg_replace("/[^0-9]/", "", $company->id_number), 9, '0', STR_PAD_LEFT) :str_pad(preg_replace("/[^0-9]/", "", $provider->id_number), 9, '0', STR_PAD_LEFT);
 
             $invoiceData = array(
                 'consecutivo' => $ref ?? '',
@@ -410,17 +427,16 @@ class InvoiceUtils
                 'tipo_documento' => $data['document_type'] ?? '',
                 'sucursal_nro' => '001',
                 'terminal_nro' => '00001',
-                'emisor_name' => $data['document_type'] !== '08' ? $company->business_name  ? trim($company->business_name) : '' : $provider->first_name ?? trim($provider->first_name),
-                'emisor_email' => $data['document_type'] !== '08' ? $company->email ? trim($company->email) : '' : $provider->email ?? trim($provider->email),
-                'emisor_company' => $data['document_type'] !== '08' &&  $company->business_name ? trim($company->business_name) : trim($provider->first_name),
-                'emisor_city' => $data['document_type'] !== '08' && $company->city ? trim($company->city) : trim($provider->city),
-                'emisor_state' => $data['document_type'] !== '08' && $company->state ?  trim($company->state) : trim($provider->state),
-                'emisor_postal_code' => $data['document_type'] !== '08' && $company->zip ? trim($company->zip) : trim($provider->zip),
-                'emisor_country' => $data['document_type'] !== '08' && $company->country ? trim($company->country) : trim($provider->country),
-                'emisor_address' => $data['document_type'] !== '08' ? $company->address ? trim($company->address) : '' : $provider->address ?? trim($provider->address),
-                'emisor_phone' => $data['document_type'] !== '08' ? $company->phone ? trim($company->phone) : '' : $provider->phone ?? trim($provider->phone),
-                'emisor_cedula' => $data['document_type'] !== '08' && $company->id_number ? str_pad(preg_replace("/[^0-9]/", "", $company->id_number), 9, '0', STR_PAD_LEFT) :
-                    str_pad(preg_replace("/[^0-9]/", "", $provider->id_number), 9, '0', STR_PAD_LEFT),
+                'emisor_name' => $emisorName,
+                'emisor_email' => $emisorEmail,
+                'emisor_company' => $emisorCompany,
+                'emisor_city' => $emisorCity,
+                'emisor_state' => $emisorState,
+                'emisor_postal_code' => $emisorPostalCode,
+                'emisor_country' => $emisorCountry,
+                'emisor_address' => $emisorAddress,
+                'emisor_phone' => $emisorPhone,
+                'emisor_cedula' => $emisorCedula,
                 'usuarioAtv' => $company->atv->user ? trim($company->atv->user) :  '',
                 'passwordAtv' => $company->atv->password ? trim($company->atv->password) : '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,

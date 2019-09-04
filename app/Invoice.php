@@ -960,7 +960,7 @@ class Invoice extends Model
         $consecutivoComprobante = $invoice->document_number;
         
         if ( Storage::exists("empresa-$cedulaEmpresa/facturas_ventas/$invoice->year/$invoice->month/$consecutivoComprobante.xml")) {
-            Storage::delete("empresa-$cedulaEmpresa/facturas_ventas/$invoice->year/$invoice->month/$consecutivoComprobante.xml");
+             Storage::delete("empresa-$cedulaEmpresa/facturas_ventas/$invoice->year/$invoice->month/$consecutivoComprobante.xml");
         }
         
         $path = \Storage::putFileAs(
