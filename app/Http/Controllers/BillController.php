@@ -440,7 +440,7 @@ class BillController extends Controller
             $company = Company::select('commercial_activities')->where('id', $current_company)->first();
             $activities_company = explode(", ", $company->commercial_activities);
             $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
-            $codigos_etax = CodigoIvaSoportado::get();
+            $codigos_etax = CodigoIvaSoportado::where('hidden', false)->get();
             $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
 
             return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos'));

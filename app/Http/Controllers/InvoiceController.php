@@ -664,7 +664,7 @@ class InvoiceController extends Controller
         $invoice = Invoice::find($id);
             $companyActivities = explode(", ", $company->commercial_activities);
             $commercialActivities = Actividades::whereIn('codigo', $companyActivities)->get();
-            $codigosEtax = CodigoIvaRepercutido::get();
+            $codigosEtax = CodigoIvaRepercutido::where('hidden', false)->get();
             $categoriaProductos = ProductCategory::whereNotNull('invoice_iva_code')->get();
             return view('Invoice/validar', compact('invoice', 'commercialActivities', 'codigosEtax', 'categoriaProductos'));
         
