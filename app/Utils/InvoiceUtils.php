@@ -41,9 +41,9 @@ class InvoiceUtils
     {
         $pdfRoute = 'Pdf/invoice';
         $provider = null;
-        if($company->id_number == '3101015179'){
+        /*if($company->id_number == '3101015179'){
             $pdfRoute = 'Pdf/custom/trifami';
-        }
+        }*/
         if ($invoice->document_type == '08') {
             $provider = Provider::find($invoice->provider_id);
         }

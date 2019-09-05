@@ -383,7 +383,8 @@ class CalculatedTax extends Model
               if( $ivaType == '150' || $ivaType == '160' ||  $ivaType == '170' || $ivaType == '199' || $ivaType == '155' ||
                   $ivaType == 'B150' || $ivaType == 'B160' ||  $ivaType == 'B170' || $ivaType == 'B199' || $ivaType == 'B155' ||
                   $ivaType == 'S150' || $ivaType == 'S160' ||  $ivaType == 'S170' || $ivaType == 'S199' || $ivaType == 'S155' ){
-                $subtotal = $subtotal + $invoiceIva;
+                //$subtotal = $subtotal + $invoiceIva;
+                $subtotal = $subtotal;
                 $invoiceIva = 0;
                 $sumRepercutido3 += $subtotal;
                 $sumRepercutidoExentoConCredito += $subtotal;
@@ -414,7 +415,8 @@ class CalculatedTax extends Model
               }
               //No cuenta los que no llevan IVA
               if( $ivaType == 'S300' || $ivaType == 'B300' ){
-                $subtotal = $subtotal + $invoiceIva;
+                $subtotal = $subtotal;
+                $invoiceIva = 0;
                 $sumIvaSinAplicar += $subtotal;
               }
               
@@ -593,10 +595,6 @@ class CalculatedTax extends Model
               $ivaType = $ivaType ? $ivaType : '003';
               $ivaType = str_pad($ivaType, 3, '0', STR_PAD_LEFT);
               
-              $billsTotal += $currentTotal;
-              $billsSubtotal += $subtotal;
-              $totalBillIva += $billIva;
-              
               if( $ivaType == 'B041' || $ivaType == 'B042' || $ivaType == 'B043' || $ivaType == 'B044' ||
                   $ivaType == 'B051' || $ivaType == 'B052' || $ivaType == 'B053' || $ivaType == 'B054' || 
                   $ivaType == 'B061' || $ivaType == 'B062' || $ivaType == 'B063' || $ivaType == 'B064' || 
@@ -681,6 +679,10 @@ class CalculatedTax extends Model
                 $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
               }
               /***END SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
+              
+              $billsTotal += $currentTotal;
+              $billsSubtotal += $subtotal;
+              $totalBillIva += $billIva;
               
               $bVar = "b".$ivaType;
               $iVar = "i".$ivaType;
