@@ -364,7 +364,7 @@ class PaymentController extends Controller
                     'masked_card' => $card['maskedCard'],
                     'due_date' => $cardMonth . '/' .$cardYear,
                     'token_bn' => $card['cardTokenId'],
-                    'default_card' => 0
+                    'default_card' => 1
                 ]);
             } else {
                 $paymentMethod = PaymentMethod::where('user_id', $user->id)
