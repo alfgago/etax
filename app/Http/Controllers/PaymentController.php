@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\CybersourcePaymentProcessor;
 use App\EtaxProducts;
 use App\Coupon;
 use App\Invoice;
 use App\Mail\SubscriptionPaymentFailure;
 use App\Payment;
+use App\PaymentProcessor;
 use App\Sales;
 use App\Subscription;
 use App\PaymentMethod;
@@ -188,12 +190,30 @@ class PaymentController extends Controller
     }
 
     public function confirmPayment(Request $request){
-
+        dd($request);
         try{
             $user = auth()->user();
-            $paymentUtils = new PaymentUtils();
-
+            $paymentGateway = new CybersourcePaymentProcessor();
             $request->number = preg_replace('/\s+/', '',  $request->number);
+            $cybersourceCardInfo = new stdClass();
+
+            /*$cybersourceCardInfo->deviceFingerPrintID
+            $cybersourceCardInfo->firstName
+            $cybersourceCardInfo->lastName
+            $cybersourceCardInfo->street1
+            $cybersourceCardInfo->city
+            $cybersourceCardInfo->state
+            $cybersourceCardInfo->postalCode
+            $cybersourceCardInfo->country
+            $cybersourceCardInfo->email
+            $cybersourceCardInfo->IP
+            $cybersourceCardInfo->cardNumber
+            $cybersourceCardInfo->cardMonth
+            $cybersourceCardInfo->cardYear
+            $cybersourceCardInfo->cardType
+            $cybersourceCardInfo->frequency
+            $cybersourceCardInfo->amount
+            $cybersourceCardInfo->numberOfPayments*/
 
             if($request->plan_sel == "c"){
                 $coupons = Coupon::where('code', $request->coupon)->where('type',1)->count();
@@ -257,7 +277,6 @@ class PaymentController extends Controller
                     ]
                 );
                 $request->product_id = $plan->id;
-
             }
             $razonDescuento = null;
             //El descuento por defecto es cero.
@@ -267,7 +286,7 @@ class PaymentController extends Controller
                 $descuento = 0.1;
                 $razonDescuento = "Cupón BN";
             }
-
+            $cybersourceCardInfo->referenceCode = $request->product_id;
             $cuponId = null;
             //Si tiene un cupon adicional, este aplica sobre el de la tarjeta del BN.
             if ( isset($request->coupon) ) {
@@ -335,24 +354,21 @@ class PaymentController extends Controller
             }
 
             foreach ($cards as $c) {
-                $check = $paymentUtils->checkCC($c, true);
-                //if ($check !== false) {
-                    $typeCard = $check;
-                //}
+                $check = $paymentGateway->checkCC($c, true);
+                $typeCard = $check;
             }
             $last_4digits = substr($request->number, -4);
-            $nameCard = $typeCard ? $typeCard : 'Visa';
             $cardDescripcion = "Tarjeta $last_4digits de usuario: " . auth()->user()->user_name;
-
-            //Revisa si el API del BN esta arriba.
-            $bnStatus = $paymentUtils->statusBNAPI();
+            $payment_gateway =
+            //Eliminado para cybersourse.
+            /*$bnStatus = $paymentUtils->statusBNAPI();
             if($bnStatus['apiStatus'] != 'Successful'){
                 $mensaje = 'Hubo un error procesando el pago. Por favor contacte a nuestro centro de servicios o vuelva a intentar en unos minutos.';
                 return redirect('wizard')->withError($mensaje)->withInput();
-            }
+            }*/
 
             //Agrega la tarjeta al API del BN.
-            $card = $paymentUtils->userCardInclusion($request->number, $cardDescripcion, $cardMonth, $cardYear, $request->cvc);
+            $card = $paymentGateway->createCardToken($request->number, $cardDescripcion, $cardMonth, $cardYear, $request->cvc);
             if($card['apiStatus'] == 'Successful'){
                 $last_4digits = substr($request->number, -4);
                 //Se logró agregar la tarjeta, entonces hago un nuevo payment method.
@@ -415,7 +431,7 @@ class PaymentController extends Controller
                 $sale->next_payment_date = $nextPaymentDate;
                 $sale->save();
 
-                $invoiceData = new stdClass();
+                /*$invoiceData = new stdClass();
                 $invoiceData->client_code = $request->id_number;
                 $invoiceData->client_id_number = $request->id_number;
                 $invoiceData->client_id = '-1';
@@ -450,8 +466,9 @@ class PaymentController extends Controller
                 $item->unit_price = $costo;
                 $item->subtotal = $subtotal;
                 $item->total = $amount;
+                $invoiceData->items = [$item];*/
 
-                $invoiceData->items = [$item];
+                $invoiceData = $payment_gateway->setInvoiceInfo();
                 $factura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
 
                 if($factura){
@@ -471,7 +488,6 @@ class PaymentController extends Controller
     }
 
     public function comprarFacturas(Request $request){
-        dd($request);
         $company = currentCompanyModel();
         $available_company_invoices = !$company->additional_invoices ? $available_company_invoices = 0 : $company->additional_invoices;
         $product_id = $request->product_id;
@@ -501,10 +517,13 @@ class PaymentController extends Controller
         $subtotal = $product->price;
         $iv = $subtotal * 0.13;
         $amount = $subtotal + $iv;
-
-        $paymentUtils = new PaymentUtils();
+        $payment_info = explode('- ', $request->payment_method);
+        $payment_id = $payment_info[0];
+        $paymentUtil = new PaymentProcessor();
+        $payment_gateway = $paymentUtil->selectPaymentGateway($payment_info[1]);
+        dd($payment_gateway);
         if(isset($request->payment_method)){
-            $pagoProducto = $paymentUtils->comprarProductos($request, $product, $amount);
+            $pagoProducto = $payment_gateway->comprarProductos($request, $product, $amount);
             if($pagoProducto){
                 $user = auth()->user();
 
@@ -551,7 +570,7 @@ class PaymentController extends Controller
                 $item->total = $amount;
 
                 $invoiceData->items = [$item];
-                $procesoFactura = $paymentUtils->crearFacturaClienteEtax($invoiceData);
+                $procesoFactura = $payment_gateway->crearFacturaClienteEtax($invoiceData);
 
                 $company->additional_invoices = $additional_invoices;
                 $company->save();

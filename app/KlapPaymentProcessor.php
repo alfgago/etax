@@ -34,6 +34,28 @@ class KlapPaymentProcessor extends PaymentProcessor
         return $bnStatus;
     }
     /**
+     *checkCC
+     *
+     *
+    */
+    public function checkCC($cc, $extra_check = false){
+        $cards = array(
+            "visa" => "(4\d{12}(?:\d{3})?)",
+            "amex" => "(3[47]\d{13})",
+            "jcb" => "(35[2-8][89]\d\d\d{10})",
+            "maestro" => "((?:5020|5038|6304|6579|6761)\d{12}(?:\d\d)?)",
+            "solo" => "((?:6334|6767)\d{12}(?:\d\d)?\d?)",
+            "mastercard" => "(5[1-5]\d{14})",
+            "switch" => "(?:(?:(?:4903|4905|4911|4936|6333|6759)\d{12})|(?:(?:564182|633110)\d{10})(\d\d)?\d?)",
+        );
+        $names = array("Visa", "American Express", "JCB", "Maestro", "Solo", "Mastercard", "Switch");
+        $matches = array();
+        $pattern = "#^(?:".implode("|", $cards).")$#";
+        $result = preg_match($pattern, str_replace(" ", "", $cc), $matches);
+
+        return ($result>0) ? $names[ sizeof($matches)-2 ] : false;
+    }
+    /**
      * Payment token creation
      * Params cardNumber, cardDescripcion, expiry, cvc, user_id, user_name
      *
@@ -182,6 +204,77 @@ class KlapPaymentProcessor extends PaymentProcessor
         $charge = json_decode($chargeBn->getBody()->getContents(), true);
 
         return $charge['apiStatus'] === "Successful";
+    }
+    /**
+     *comprarProductos
+     *
+     *
+     */
+    public function comprarProductos($request, $producto, $amount){
+        $bnStatus = $this->statusBNAPI();
+        if($bnStatus['apiStatus'] == 'Successful'){
+            $date = Carbon::parse(now('America/Costa_Rica'));
+            $user = auth()->user();
+            $data = new stdClass();
+            $data->description = 'Compra de ' . $producto->name . ' eTax';
+            $data->user_name = $user->user_name;
+            $data->amount = $amount;
+            $chargeCreated = $this->paymentIncludeCharge($data);
+
+            if($chargeCreated['apiStatus'] == "Successful"){
+                $paymentMethod = PaymentMethod::where('id', $request->payment_method)->first();
+                $company = currentCompanyModel();
+                $date = Carbon::parse(now('America/Costa_Rica'));
+                $sale = Sales::updateOrCreate([
+                    "user_id" => $user->id,
+                    "company_id" => $company->id,
+                    "etax_product_id" => $producto->id,
+                    "status" => 2,
+                    "recurrency" => false
+                ]);
+                $payment = Payment::updateOrCreate(
+                    [
+                        'sale_id' => $sale->id,
+                        'payment_status' => 1,
+                    ],
+                    [
+                        'payment_method_id' => $paymentMethod->id,
+                        'payment_date' => $date,
+                        'amount' => $producto->price
+                    ]
+                );
+                //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
+                if( ! isset($payment->charge_token) ) {
+                    $chargeIncluded = $this->paymentIncludeCharge($data);
+                    $chargeTokenId = $chargeIncluded['chargeTokenId'];
+                    $payment->charge_token = $chargeTokenId;
+                    $payment->save();
+                }
+                $chargeTokenId = $chargeCreated['chargeTokenId'];
+                $charge = new stdClass();
+                $charge->cardTokenId = $paymentMethod->token_bn;
+                $charge->user_name = $user->user_name;
+                $charge->chargeTokenId = $chargeTokenId;
+
+                $appliedCharge = $this->paymentApplyCharge($charge);
+                if($appliedCharge['apiStatus'] == "Successful"){
+                    $payment->proof = $appliedCharge['retrievalRefNo'];
+                    $payment->payment_status = 2;
+                    $payment->save();
+                    $sale->status = 1;
+                    $sale->save();
+
+                    return true;
+                }else{
+                    return false;
+                }
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
     }
     /**
      * Payment method creation

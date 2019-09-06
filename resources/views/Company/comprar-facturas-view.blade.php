@@ -79,7 +79,6 @@
                                                 <option value="{{ $paymentMethod->id }}- {{$paymentMethod->payment_gateway}}" >{{ $paymentMethod->name }} {{ $paymentMethod->last_name }} - {{ $paymentMethod->masked_card }}</option>
                                             @endforeach
                                         </select>
-                                        <input hidden id="payment_gateway" name="payment_gateway">
                                     </div>
 
                                     <div class="form-group col-md-12" style="white-space: nowrap;">
@@ -184,15 +183,7 @@
 
 
 @section('footer-scripts')
-
-
 		<script>
-            function getPaymentGateway(){
-                var inputVal = $('#payment_method').val();
-                var splitVal = inputVal.split("-");
-                $('#payment_gateway').val(splitVal[1]);
-            }
-
 		  $(document).ready(function(){
 
 	  	    fillProvincias();

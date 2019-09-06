@@ -24,7 +24,7 @@ class PaymentProcessor extends Model
     *
     *
     */
-    public function createCardToken($number, $cardDescripcion, $cardMonth, $cardYear, $cvc){
+    public function createCardToken($data){
         return true;
     }
     /**
@@ -40,7 +40,7 @@ class PaymentProcessor extends Model
     *
     *
     */
-    public function updateCardToken(){
+    public function updateCardToken($data){
         return true;
     }
     /**
@@ -48,7 +48,7 @@ class PaymentProcessor extends Model
     *
     *
     */
-    public function createPayment(){
+    public function createPayment($data){
         return true;
     }
     /**
@@ -56,7 +56,7 @@ class PaymentProcessor extends Model
     *
     *
     */
-    public function pay(){
+    public function pay($data){
         return true;
     }
     /**
@@ -80,7 +80,7 @@ class PaymentProcessor extends Model
     *
     *
     */
-    public function createPaymentMethod(){
+    public function createPaymentMethod($data){
         return true;
     }
     /**
@@ -88,7 +88,7 @@ class PaymentProcessor extends Model
     *
     *
     */
-    public function updatePaymentMethod(){
+    public function updatePaymentMethod($data){
         return true;
     }
     /**
@@ -96,7 +96,7 @@ class PaymentProcessor extends Model
     *
     *
     */
-    public function deletePaymentMethod(){
+    public function deletePaymentMethod($data){
         return true;
     }
     /**
@@ -140,6 +140,23 @@ class PaymentProcessor extends Model
 
         return $key;
     }
+    /**
+     *
+     *
+     *
+     */
+    public function selectPaymentGateway($payment_gateway){
+        switch ($payment_gateway){
+            case 'cybersource':
+                $class = new CybersourcePaymentProcessor();
+            break;
+            case 'klap':
+                $class = new KlapPaymentProcessor();
+            break;
+        }
+        return $class;
+    }
+
     /**
      * Create invoice eTax
      *
@@ -334,4 +351,50 @@ class PaymentProcessor extends Model
             return false;
         }
     }
+    /**
+     *
+     *
+     *
+     */
+    public function setInvoiceInfo($request){
+        $invoiceData = new stdClass();
+        $invoiceData->client_code = $request->id_number;
+        $invoiceData->client_id_number = $request->id_number;
+        $invoiceData->client_id = '-1';
+        $invoiceData->tipo_persona = $request->tipo_persona;
+        $invoiceData->first_name = $request->first_name;
+        $invoiceData->last_name = $request->last_name;
+        $invoiceData->last_name2 = $request->last_name2;
+        $invoiceData->country = $request->country;
+        $invoiceData->state = $request->state;
+        $invoiceData->city = $request->city;
+        $invoiceData->district = $request->district;
+        $invoiceData->neighborhood = $request->neighborhood;
+        $invoiceData->zip = $request->zip;
+        $invoiceData->address = $request->address;
+        $invoiceData->phone = $request->phone;
+        $invoiceData->es_exento = $request->es_exento;
+        $invoiceData->email = $request->email;
+        $invoiceData->expiry = $request->expiry;
+        $invoiceData->amount = $request->amount;
+        $invoiceData->subtotal = $request->subtotal;
+        $invoiceData->iva_amount = $request->iv;
+        $invoiceData->discount_reason = $request->razonDescuento;
+
+        $item = new stdClass();
+        $item->total = $request->amount;
+        $item->code = $sale->etax_product_id;
+        $item->name = $sale->plan->getName() . " / $recurrency meses";
+        $item->descuento = $montoDescontado;
+        $item->discount_reason = $razonDescuento;
+        $item->cantidad = 1;
+        $item->iva_amount = $iv;
+        $item->unit_price = $costo;
+        $item->subtotal = $subtotal;
+        $item->total = $amount;
+
+        $invoiceData->items = [$item];
+        return $invoiceData;
+    }
+
 }
