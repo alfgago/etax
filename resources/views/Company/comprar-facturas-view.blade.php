@@ -33,7 +33,7 @@
                         <div class="tab-content">
                             <form method="POST" action="/payment/comprar-facturas" enctype="multipart/form-data">
                                 @csrf
-                                
+
                                 <div class="form-row" style="position: relative;">
                                     <div style="position: absolute; left: 0; top: 0; font-size: .8rem; display: flex;">
                                         <div style="margin-right: 2rem;">
@@ -54,14 +54,14 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                     </div>
                                     <div class="form-group col-md-12" style="margin-top: 4rem;">
                                         <h3>
                                             Comprar Facturas Adicionales
                                         </h3>
                                     </div>
-                                    
+
                                     <div class="form-group col-md-6">
                                         <label for="product_id">Seleccione el paquete de facturas que requiere</label>
                                         <select class="form-control col-md-12" name="product_id" id="product_id" >
@@ -70,17 +70,18 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    
+
                                     <div class="form-group col-md-6">
                                         <label for="payment_method">Seleccione su m&eacute;todo de pago</label>
-                                        <select class="form-control select-search" name="payment_method" id="payment_method" >
+                                        <select class="form-control select-search" name="payment_method" id="payment_method" onchange="getPaymentGateway();">
                                             <option value='' selected>-- Seleccione un m&eacute;todo de pago --</option>
                                             @foreach ( $paymentMethods as $paymentMethod )
-                                                <option value="{{ $paymentMethod->id }}" >{{ $paymentMethod->name }} {{ $paymentMethod->last_name }} - {{ $paymentMethod->masked_card }}</option>
+                                                <option value="{{ $paymentMethod->id }}- {{$paymentMethod->payment_gateway}}" >{{ $paymentMethod->name }} {{ $paymentMethod->last_name }} - {{ $paymentMethod->masked_card }}</option>
                                             @endforeach
                                         </select>
+                                        <input hidden id="payment_gateway" name="payment_gateway">
                                     </div>
-                                    
+
                                     <div class="form-group col-md-12" style="white-space: nowrap;">
                                         <h3>
                                             Datos de receptor de la factura de eTax
@@ -97,70 +98,70 @@
                                             <option value="O" >Otro</option>
                                         </select>
                                     </div>
-        
+
                                     <div class="form-group col-md-4">
                                         <label for="id_number">Número de identificación *</label>
                                         <input type="text" class="form-control checkEmpty" name="id_number" id="id_number" value="{{ $company->id_number }}" onchange="getJSONCedula(this.value);" required>
                                     </div>
-        
+
                                     <div class="form-group col-md-4">
                                         <label for="first_name">Nombre *</label>
                                         <input type="text" class="form-control checkEmpty" value="{{ $company->name }}" name="first_name" id="first_name" required>
                                     </div>
-        
+
                                     <div class="form-group col-md-4">
                                         <label for="last_name">Apellido</label>
                                         <input type="text" class="form-control" name="last_name" value="{{ $company->last_name }}" id="last_name" required>
                                     </div>
-        
+
                                     <div class="form-group col-md-4">
                                         <label for="last_name2">Segundo apellido</label>
                                         <input type="text" class="form-control" name="last_name2" value="{{ $company->last_name2 }}" id="last_name2" required>
                                     </div>
-        
+
                                     <div class="form-group col-md-4">
                                         <label for="email">Correo electrónico *</label>
                                         <input type="text" class="form-control checkEmpty" name="email" id="email" value="{{ $company->email }}" required>
                                     </div>
-        
+
                                     <div class="form-group col-md-4">
                                         <label for="phone">Teléfono</label>
                                         <input type="text" class="form-control" name="phone" id="phone" value="<?php echo ($company->phone) ? $company->phone : '' ?>" required>
                                     </div>
-        
+
                                     <div></div>
-        
+
                                     <div class="form-group col-md-4">
                                         <label for="country">País *</label>
                                         <select class="form-control checkEmpty" name="country" id="country">
                                             <option value="CR" selected>Costa Rica</option>
                                         </select>
                                     </div>
-        
+
                                     <div class="form-group col-md-4">
                                         <label for="state">Provincia</label>
                                         <select class="form-control" name="state" id="state" onchange="fillCantones();" required>
                                         </select>
                                     </div>
-        
+
                                     <div class="form-group col-md-4">
                                         <label for="city">Canton</label>
                                         <select class="form-control" name="city" id="city" onchange="fillDistritos();" required>
                                         </select>
                                     </div>
-        
+
                                     <div class="form-group col-md-4">
                                         <label for="district">Distrito</label>
                                         <select class="form-control" name="district" id="district" onchange="fillZip();" required>
                                         </select>
                                     </div>
-        
+
                                     <div class="form-group col-md-4">
                                         <label for="neighborhood">Barrio</label>
                                         <input class="form-control" name="neighborhood" id="neighborhood">
                                         </select>
                                     </div>
-        
+
                                     <div class="form-group col-md-3">
                                         <label for="zip">Código Postal</label>
                                         <input type="text" class="form-control" name="zip" id="zip" readonly >
@@ -169,7 +170,7 @@
                                         <label for="address">Dirección</label>
                                         <input class="form-control" name="address" id="address">
                                     </div>
-                            
+
                                     <button id="btn-submit" type="submit" class="hidden btn btn-primary">Comprar</button>
                                 </div>
                             </form>
@@ -183,16 +184,21 @@
 
 
 @section('footer-scripts')
-	
-		
+
+
 		<script>
-		  
+            function getPaymentGateway(){
+                var inputVal = $('#payment_method').val();
+                var splitVal = inputVal.split("-");
+                $('#payment_gateway').val(splitVal[1]);
+            }
+
 		  $(document).ready(function(){
-		    
+
 	  	    fillProvincias();
-	    
+
 	        toggleApellidos();
-	    
+
     	    //Revisa si tiene estado, canton y distrito marcados.
     	    @if( @$company->state )
     	    	$('#state').val( "{{ $company->state }}" );
@@ -207,7 +213,7 @@
     		    @endif
     	    @endif
 		  });
-		  
+
 		</script>
 
 @endsection
