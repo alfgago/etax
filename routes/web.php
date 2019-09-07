@@ -17,6 +17,12 @@ Route::get('login', function () {
 
 Auth::routes();
 
+//Cierres de mes
+Route::prefix('gosocket')->group(function() {
+    Route::get('/', 'GoSocketController@gosocketvalidate')->name('GoSocketController.gosocketvalidate');
+});
+
+
 // Rutas de exportación
 Route::get('clientes/exportar', 'ClientController@export');
 Route::get('proveedores/exportar', 'ProviderController@export');
@@ -47,6 +53,7 @@ Route::post('/reportes/detalle-credito', 'ReportsController@reporteDetalleCredit
 Route::post('/reportes/libro-ventas', 'ReportsController@reporteLibroVentas');
 Route::post('/reportes/libro-compras', 'ReportsController@reporteLibroCompras');
 Route::get('/reportes/borrador-iva', 'ReportsController@reporteBorradorIVA');
+
 /*Exportar XML DEPRECADOS*/
 Route::post('/reportes/export-cuentas-contables', 'ReportsController@exportCuentasContables');
 Route::post('/reportes/export-detalle-debito-fiscal', 'ReportsController@exportDetalleDebitoFiscal');
