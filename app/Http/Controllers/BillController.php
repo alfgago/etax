@@ -430,15 +430,15 @@ class BillController extends Controller
 
 
     public function validar($id){
-        $current_company = currentCompany();
+        $company = currentCompanyModel();
         $bill = Bill::find($id);
-            $company = Company::select('commercial_activities')->where('id', $current_company)->first();
-            $activities_company = explode(", ", $company->commercial_activities);
+            $companyAct = Company::select('commercial_activities')->where('id', $company->id)->first();
+            $activities_company = explode(", ", $companyAct->commercial_activities);
             $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
             $codigos_etax = CodigoIvaSoportado::where('hidden', false)->get();
             $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
 
-            return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos'));
+            return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos', 'company'));
         
     }
 
