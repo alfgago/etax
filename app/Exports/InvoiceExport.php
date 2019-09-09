@@ -54,6 +54,7 @@ class InvoiceExport implements WithHeadings, WithMapping, FromQuery, WithEvents
                 $event->sheet->getDelegate()->getColumnDimension('Y')->setWidth('20');
                 $event->sheet->getDelegate()->getColumnDimension('Z')->setWidth('20');
                 $event->sheet->getDelegate()->getColumnDimension('AA')->setWidth('20');
+                $event->sheet->getDelegate()->getColumnDimension('AB')->setWidth('20');
                 $event->sheet->getDelegate()->getColumnDimension('AC')->setWidth('20');
                 $cellRangeHeaders = 'A3:AA3'; // All headers
                 $event->sheet->getDelegate()->getStyle($cellRangeHeaders)->getFont()->setSize(12);
