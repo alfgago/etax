@@ -97,8 +97,19 @@
         <option value="1" >Sí</option>
     </select>
 </div>
-
+<input hidden id="cardState" name="cardState">
+<input hidden id="cardCity" name="cardCity">
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-prev" onclick="backFields();toggleStep('step1');">Paso anterior</button>
   <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step3');"  onclick="trackClickEvent( 'PagosPaso3' );">Siguiente paso</button>
 </div>
+<script>
+    $('#state').on('change', function() {
+        var state = $( "#state option:selected" ).text();
+        $('#cardState').val(state);
+    });
+    $('#city').on('change', function() {
+        var city = $( "#city option:selected" ).text();
+        $('#cardCity').val(city);
+    });
+</script>

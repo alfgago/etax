@@ -182,11 +182,10 @@ class KlapPaymentProcessor extends PaymentProcessor
     }
     /**
     * Make payment
-    * Params user_id, chargeTokenId,
+    * Params user_id, chargeTokenId, payment_id
     *
     */
     public function pay($data){
-        $paymentMethod = PaymentMethod::where('user_id', $data->user_id)->where('default_card', 1);
         $bnCharge = new Client();
         $chargeBn = $bnCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppApplyCharge?applicationName=string&applicationPassword=string&userName=string&chargeTokeId=string&cardTokenId=string", [
             'headers' => [

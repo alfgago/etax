@@ -48,12 +48,14 @@
 	</span>
 	<p class="description">* No se aceptan tarjetas American Express</p>
 </div>
+<input type="text" hidden id="IpAddress" name="IpAddress">
+<input type="text" hidden id="deviceFingerprintID" name="deviceFingerprintID">
 <input type="text" hidden id="bncupon" name="bncupon" value="0">
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-prev" onclick="backFields();toggleStep('step2');">Paso anterior</button>
   <button onclick="trackClickEvent( 'ConfirmarPago' );" type="submit" id="btn-submit-tc" class="btn btn-primary btn-next has-spinner" >Confirmar</button>
 </div>
-
+<script src="../assets/js/cybs_devicefingerprint.js"></script>
 <div class="verificado-logos">
     <img src="/assets/images/visa.png">
     <img src="/assets/images/mastercard.png">
@@ -76,6 +78,11 @@
 </style>
 
 <script>
+    $("#deviceFingerprintID").val(cybs_dfprofiler("tc_cr_011007172","test"));
+    //document.write('Session Id <input type="text" name="deviceFingerprintID" value="' + cybs_dfprofiler("tc_cr_01100XXXX","test") + '">');
+    $.getJSON('https://api.ipify.org?format=json', function(data){
+        $("#IpAddress").val(data.ip);
+    });
     function checkCupon() {
         var codigo = $('#coupon').val();
         var precio =  parseFloat( $('.precio-inicial').text().slice(1) );
