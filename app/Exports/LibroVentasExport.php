@@ -67,13 +67,14 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
     public function map($map): array
     {
         $factor = $map->invoice->document_type != '03' ? 1 : -1;
-        return [
+        $array = [
             $map->invoice->documentTypeName(),
             $map->invoice->generatedDate()->format('d/m/Y'),
             $map->invoice->clientName(),
             $map->invoice->commercial_activity ?? 'No indica',
             $map->invoice->document_number,
             $map->item_number,
+            $map->code ?? 'N/A',
             $map->name,
             $map->ivaType ? $map->ivaType->name : 'No indica',
             isset($map->productCategory) ? ($map->productCategory->id . " - " . $map->productCategory->name) : 'No indica categoria',
@@ -85,11 +86,12 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
             round( $map->total * $factor , 2),
             
         ];
+        return $array;
     }						
 
      public function headings(): array 
      {
-        return [
+        $array = [
             [
                 'Tipo Doc.',
                 'Fecha',
@@ -97,6 +99,7 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
                 'Actividad',
                 'Consecutivo',
                 '# Línea',
+                'Cód. Referencia',
                 'Producto',
                 'Tipo IVA',
                 'Cat. Declaración',
@@ -108,6 +111,7 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
                 'Total'
             ]
         ];
+        return $array;
     }
     
     
