@@ -60,9 +60,20 @@ class Company extends Model {
         return $this->belongsToMany('App\CodigoIvaRepercutido');
     }
 
+    //Relacion con Codigos Repercutidos
+    public function soportados()
+    {   
+        return $this->belongsToMany('App\CodigoIvaSoportado');
+    }
+
     public function repercutidosRelation()
     {   
         return $this->hasMany(CodigoIvaRepercutidoCompany::class);
+    }
+
+    public function soportadosRelation()
+    {   
+        return $this->hasMany(CodigoIvaSoportadoCompany::class);
     }
 
     //retorna los codigosRepercutidos Preselectos
@@ -393,6 +404,38 @@ class Company extends Model {
                 $repercutidosCompany->codigo_iva_repercutido_id = $preselected;
                 $repercutidosCompany->company_id = $this->id;
                 $repercutidosCompany->save();      
+            }
+        return true;
+        }  
+        return false;
+    }
+
+    public function preselectSoportados($preselected_sop_codes){
+
+        $soportados = $this->soportadosRelation;
+        if($preselected_sop_codes[0] == 1){
+            foreach($soportados as $soportado){
+                $soportado->delete();    
+            }
+            return true;
+        }else{
+            foreach($soportados as $soportado){
+                $soportado->erase = true;
+                foreach($preselected_sop_codes as $key => $preselected){
+                    if($soportado->codigo_iva_soportado_id === $preselected){
+                        $soportado->erase = false;
+                        unset($preselected_sop_codes[$key]);
+                    }
+                }
+                if($soportado->erase){
+                    $soportado->delete();
+                }
+            }
+            foreach($preselected_sop_codes as $preselected){
+                $soportadoCompany = new CodigoIvaSoportadoCompany();
+                $soportadoCompany->codigo_iva_soportado_id = $preselected;
+                $soportadoCompany->company_id = $this->id;
+                $soportadoCompany->save();      
             }
         return true;
         }  

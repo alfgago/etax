@@ -371,6 +371,7 @@ class CompanyController extends Controller {
         }
 
         $company->preselectVatCodes($request->preselected_vat_code);
+        $company->preselectSoportados($request->preselected_sop_code);
         
         $company->save();
         

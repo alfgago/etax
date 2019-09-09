@@ -24,9 +24,22 @@
     <div class="form-group col-md-12">
       <label for="tipo_iva">Tipo de IVA</label>
       <select class="form-control select-search" id="tipo_iva" >
-        @foreach ( \App\CodigoIvaSoportado::all() as $tipo )
-          <option value="{{ $tipo['code'] }}" is_identificacion_plena="{{ $tipo['is_identificacion_plena'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
-        @endforeach
+        <?php
+            $preselectos = array();
+            foreach($company->soportados as $soportado){
+              $preselectos[] = $soportado->id;
+            }
+          ?>
+          @if(@$company->soportados[0]->id)
+            @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
+              <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}"  >{{ $tipo['name'] }}</option>
+            @endforeach
+            <option class="mostrarTodos" value="1">Mostrar Todos</option>
+          @else
+            @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
+              <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  >{{ $tipo['name'] }}</option>
+            @endforeach
+          @endif
       </select>
     </div>
     
@@ -166,4 +179,20 @@
                 $(this).val($(this).data("old2"));
         })
     });*/
+
+
+    $( document ).ready(function() {
+      $('#tipo_iva').on('select2:selecting', function(e){
+        var selectBox = document.getElementById("tipo_iva");
+        if(e.params.args.data.id == 1){
+           $.each($('.tipo_iva_select'), function (index, value) {
+            $(value).removeClass("hidden");
+          })
+           $('.mostrarTodos').addClass("hidden");
+           e.preventDefault();
+        }
+
+      });
+
+    });  
 </script>
