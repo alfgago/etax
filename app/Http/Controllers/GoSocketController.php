@@ -25,7 +25,7 @@ class GoSocketController extends Controller
 	        'verify' => false,
 	    ]);
 	    $APIStatus = json_decode($APIStatus->getBody()->getContents(), true);
-	    dd($APIStatus);
+	    dd($APIStatus['UserId']);
 	    
     }
      
