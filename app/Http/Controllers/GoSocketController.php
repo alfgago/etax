@@ -46,7 +46,7 @@ class GoSocketController extends Controller
 	    	$user_etax = User::where('email',$user_gs['Email'])->first();
 	    	$company_etax = Company::where('id_number',$company_gs['Code'])->first();
 			
-			dd($company_etax->team->id);
+			//dd($company_etax->team->id);
 			$new_user_gs = User::create([
                     'user_name' => $user_etax['email'].".gs1",
                     'email' => $user_etax['email'],
@@ -60,7 +60,7 @@ class GoSocketController extends Controller
 
 
 	    }
-	    dd("asdas");
+	   // dd("asdas");
 	    if ($user !== null && Auth::loginUsingId($user->user_id)) {
 	    /*	$user = auth()->user();
             $companyId = $request->companyId;
