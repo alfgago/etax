@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use App\IntregracionEmpresa;
+use App\User;
+use App\Company;
 
 class GoSocketController extends Controller
 {
@@ -24,8 +27,38 @@ class GoSocketController extends Controller
 	        ],
 	        'verify' => false,
 	    ]);
-	    $APIStatus = json_decode($APIStatus->getBody()->getContents(), true);
-	    dd($APIStatus['UserId']);
+	    $user_gs = json_decode($APIStatus->getBody()->getContents(), true);
+	    $user = IntregracionEmpresa::where("access_token",$user_gs['UserId'])->where("company_token",$user_gs['CurrentAccountId'])->first();
+	    /*if(is_null($user)){
+	    	$GoSocket = new Client();
+		    $APIStatus = $GoSocket->request('GET', "http://api.sandbox.gosocket.net/api/Gadget/GetAccount?accountId=".$user_gs['CurrentAccountId'], [
+		        'headers' => [
+		            'Content-Type' => "application/json",
+		            'Accept' => "application/json", 
+		            'Authorization' => "Basic " . $base64
+		        ],
+		        'json' => [
+		        ],
+		        'verify' => false,
+		    ]);
+		    $company_gs = json_decode($APIStatus->getBody()->getContents(), true);
+	    	$user_etax = User::where('email',$user_gs['Email'])->first();
+	    	$company_etax = Company::where('id_number',$company_gs['Code'])->first();
+			
+			$new_user_gs = User::create([
+                    'user_name' => $user_etax['email'].".gs",
+                    'email' => $user_etax['email'].".gs",
+                    'first_name' => $user_etax['first_name'],
+                    'last_name' => $user_etax['last_name'],
+                    'last_name2' => $user_etax['last_name2'],
+                    'phone' => $user_etax['phone'],
+                    'password' => 'password'
+        	]);
+			dd($company_etax->team);
+			$E = "slug_" . $company_etax->id . "_" . $new_user_gs->id;
+	        $team = Team::where('slug', $slug)->first();
+
+	    }*/
 	    
     }
      
