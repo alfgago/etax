@@ -248,9 +248,22 @@
                       <td>{{ $item->unit_price }}</td>
                       <td>
                         <select class="form-control tipo_iva tipo_iva_{{ $loop->index+1 }} select-search" name="items[{{ $loop->index }}][tipo_iva]" >
-                            @foreach( $codigos as $tipo)
-                              <option {{ $item->iva_type == $tipo->id ? 'selected' : '' }} value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }} " identificacion="{{$tipo->is_identificacion_plena}}">{{ $tipo['name'] }}</option>
-                            @endforeach
+                            <?php
+                          $preselectos = array();
+                          foreach($company->repercutidos as $repercutido){
+                            $preselectos[] = $repercutido->id;
+                          }
+                        ?>
+                        @if(@$company->repercutidos[0]->id)
+                          @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+                              <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}"  >{{ $tipo['name'] }}</option>
+                          @endforeach
+                          <option class="mostrarTodos" value="1">Mostrar Todos</option>
+                        @else
+                          @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+                          <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  >{{ $tipo['name'] }}</option>
+                          @endforeach
+                        @endif
                         </select>
                         <select class="mt-2 form-control tipo_producto" curr="{{$item->product_type}}" numero="{{ $loop->index+1 }}" name="items[{{ $loop->index }}][category_product]">
                             
@@ -290,6 +303,23 @@
 <script src="/assets/js/form-facturas.js?v=1"></script>
 
 <script>
+  $( document ).ready(function() {
+      $('.tipo_iva').on('select2:selecting', function(e){
+        var selectBox = document.getElementById("tipo_iva");
+        if(e.params.args.data.id == 1){
+           $.each($('.tipo_iva_select'), function (index, value) {
+            $(value).removeClass("hidden");
+          })
+           $('.mostrarTodos').addClass("hidden");
+           e.preventDefault();
+        }
+
+      });
+
+    });  
+
+
+
 $(document).ready(function(){
   
   $(".tipo_iva").change(function(){

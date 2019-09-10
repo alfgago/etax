@@ -127,6 +127,7 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::get('edit-aceptacion', 'BillController@editAccept')->name('Bill.editAccept');
     Route::get('update-aceptacion', 'BillController@updateAccept')->name('Bill.updateAccept');
     Route::patch('switch-ocultar/{id}', 'BillController@hideBill')->name('Bill.hideBill');
+    Route::get('download-pdf/{id}', 'BillController@downloadPdf')->name('Bill.downloadPdf');
 });
 
 // Rutas de Wizard

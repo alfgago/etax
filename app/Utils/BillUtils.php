@@ -28,14 +28,14 @@ class BillUtils
     }
 	
 	
-		public function downloadPdf( $bill, $company )
+	public function downloadPdf( $bill, $company )
     {
         $pdf = PDF::loadView('Pdf/bill', [
             'data_bill' => $bill,
             'company' => $company
         ]);
         
-        return $pdf->download('Bill.pdf');
+        return $pdf->download("$bill->document_key.pdf");
     }
     
     public function downloadXml( $bill, $company )

@@ -246,9 +246,9 @@ class CalculatedTax extends Model
         
     public function calcularFacturacionAcumulado( $year, $prorrataOperativa ) {
 
-      $this->sumAcumulados( $year );
+      $this->sumAcumulados( $year, true );
       $this->setCalculosIVA( $prorrataOperativa, 0 );
-
+      $this->sumAcumulados( $year, false );
       return $this;
       
     }
@@ -523,7 +523,7 @@ class CalculatedTax extends Model
       $this->bases_ventas_con_identificacion = $basesVentasConIdentificacion;
       $this->iva_retenido = $ivaRetenido;
       $this->iva_devuelto = $ivaDevuelto;
-      
+      //if( $month == 8 ) dd($this);
       return $this;
     }
   
@@ -878,7 +878,7 @@ class CalculatedTax extends Model
       $balanceOperativo = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleOperativo;
       $ivaNoDeducible = $this->total_bill_iva - $ivaDeducibleOperativo;
 
-      $ivaRetenido = isset($this->retention_by_card) ? $this->retention_by_card : $this->iva_retenido;
+      $ivaRetenido = $this->retention_by_card ? $this->retention_by_card : $this->iva_retenido;
       $saldoFavor = $balanceOperativo - $ivaRetenido;
       $saldoFavor = $saldoFavor < 0 ? abs( $saldoFavor ) : 0;
       $this->iva_retenido = $ivaRetenido;
@@ -913,7 +913,6 @@ class CalculatedTax extends Model
       
       $this->saldo_favor = $saldoFavor;
       $this->saldo_favor_anterior = $lastBalance;
-      
     }
     
     public function setCalculosPorFactura( $prorrataOperativa, $lastBalance ) {
@@ -1026,7 +1025,7 @@ class CalculatedTax extends Model
       
     }
     
-    function sumAcumulados( $year ) {
+    function sumAcumulados( $year, $allMonths = true ) {
       
       $currentCompanyId = currentCompany();
       $calculosAnteriores = CalculatedTax::where('company_id', $currentCompanyId)->where('is_final', true)->where('year', $year)->where('month', '!=', 0)->get();
@@ -1069,8 +1068,8 @@ class CalculatedTax extends Model
     	$arrayActividades = currentCompanyModel()->getActivities();
 
       for ($i = 0; $i < $countAnteriores; $i++) {
-        
-        if( !( $calculosAnteriores[$i]->year == 2019 && $calculosAnteriores[$i]->month < 7 ) ){
+        if( $allMonths || !( $calculosAnteriores[$i]->year == 2019 && $calculosAnteriores[$i]->month < 7 ) ){
+          
           $this->count_invoices += $calculosAnteriores[$i]->count_invoices;
     			$this->invoices_total += $calculosAnteriores[$i]->invoices_total;
     			$this->invoices_subtotal += $calculosAnteriores[$i]->invoices_subtotal;

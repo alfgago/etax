@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Actividades;
 use App\AvailableInvoices;
 use App\Company;
+use App\CodigoIvaRepercutido;
+use App\CodigoIvaRepercutidoCompany;
 use App\EtaxProducts;
 use App\Payment;
 use App\PaymentMethod;
@@ -368,6 +370,9 @@ class CompanyController extends Controller {
             $company->operative_ratio4 = $request->operative_ratio4;
         }
 
+        $company->preselectVatCodes($request->preselected_vat_code);
+        $company->preselectSoportados($request->preselected_sop_code);
+        
         $company->save();
         
         clearLastTaxesCache( $company->id, 2018);

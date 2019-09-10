@@ -21,7 +21,7 @@
         </a>
       </form>
       @endif
-      <a href="/facturas-emitidas/download-pdf/{{ $data->id }}" title="Descargar PDF" class="text-warning mr-2"> 
+      <a href="/facturas-emitidas/download-pdf/{{ $data->id }}" title="Descargar PDF" class="text-warning mr-2" download > 
         <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
       </a>
       <a href="/facturas-emitidas/download-xml/{{ $data->id }}" title="Descargar XML" class="text-info mr-2"> 

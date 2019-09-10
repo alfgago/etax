@@ -481,7 +481,7 @@ class InvoiceController extends Controller
         $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
         $codigos = CodigoIvaRepercutido::where('hidden', false)->get();
         $units = UnidadMedicion::all()->toArray();
-        return view('Invoice/show', compact('invoice','units','arrayActividades','countries','product_categories','codigos') );
+        return view('Invoice/show', compact('invoice','units','arrayActividades','countries','product_categories','codigos', 'company') );
     }
 
     /**
@@ -629,7 +629,7 @@ class InvoiceController extends Controller
             return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
         }
       
-        return view('Invoice/edit', compact('invoice', 'units', 'arrayActividades', 'countries') );
+        return view('Invoice/edit', compact('invoice', 'units', 'arrayActividades', 'countries', 'company') );
     }
 
     /**
@@ -667,7 +667,7 @@ class InvoiceController extends Controller
             $commercialActivities = Actividades::whereIn('codigo', $companyActivities)->get();
             $codigosEtax = CodigoIvaRepercutido::where('hidden', false)->get();
             $categoriaProductos = ProductCategory::whereNotNull('invoice_iva_code')->get();
-            return view('Invoice/validar', compact('invoice', 'commercialActivities', 'codigosEtax', 'categoriaProductos'));
+            return view('Invoice/validar', compact('invoice', 'commercialActivities', 'codigosEtax', 'categoriaProductos', 'company'));
         
     }
 

@@ -55,11 +55,23 @@
                <th colspan="7">Selección masiva: </th>
                <td>
                   <div class="input-validate-iva">
-                    <select class="form-control iva_type_all"  placeholder="Seleccione un código eTax"  >
-                      <option value="0">-- Seleccione --</option>
-                      @foreach($codigos_etax as $cod)
-                        <option value="{{@$cod->code}}" identificacion="{{@$cod->is_identificacion_plena}}" >{{@$cod->name}}</option>
-                      @endforeach
+                    <select class="form-control iva_type_all"  placeholder="Seleccione un código eTax" id="iva_type_all"  >
+                      <?php
+                        $preselectos = array();
+                        foreach($company->soportados as $soportado){
+                          $preselectos[] = $soportado->id;
+                        }
+                      ?>
+                      @if(@$company->soportados[0]->id)
+                        @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
+                            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="all_tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}"  >{{ $tipo['name'] }}</option>
+                        @endforeach
+                        <option class="all_mostrarTodos" value="1">Mostrar Todos</option>
+                      @else
+                        @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
+                        <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="all_tipo_iva_select"  >{{ $tipo['name'] }}</option>
+                        @endforeach
+                      @endif
                     </select>
                   </div>
                </td>
@@ -100,9 +112,16 @@
                 <td>
                   <div class="input-validate-iva">
                     <select class="form-control iva_type" name="items[{{ $loop->index }}][iva_type]" placeholder="Seleccione un código eTax" required >
-                        @foreach($codigos_etax as $cod)
-                            <option value="{{@$cod->code}}" identificacion="{{@$cod->is_identificacion_plena}}" {{ $item->iva_type == @$cod->code ? 'selected' : '' }}>{{@$cod->name}}</option>
+                        @if(@$company->soportados[0]->id)
+                        @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
+                            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}"  >{{ $tipo['name'] }}</option>
                         @endforeach
+                        <option class="mostrarTodos" value="1">Mostrar Todos</option>
+                      @else
+                        @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
+                        <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  >{{ $tipo['name'] }}</option>
+                        @endforeach
+                      @endif
                     </select>
                   </div>
                 </td>
@@ -194,4 +213,29 @@ $(document).ready(function(){
     <?php } ?>
 });
       
+
+$( document ).ready(function() {
+      $('.iva_type_all').on('change', function(e){
+        if($('.iva_type_all').val() == 1){
+           $.each($('.all_tipo_iva_select'), function (index, value) {
+            $(value).removeClass("hidden");
+          })
+           $('.all_mostrarTodos').addClass("hidden");
+           $('.iva_type_all').val("");
+        }
+      });
+    }); 
+
+    $( document ).ready(function() {
+      $('.iva_type').on('change', function(e){
+        if($('.iva_type').val() == 1){
+           $.each($('.tipo_iva_select'), function (index, value) {
+            $(value).removeClass("hidden");
+          })
+           $('.mostrarTodos').addClass("hidden");
+           $('.iva_type').val("");
+        }
+      });
+    }); 
+
 </script>
