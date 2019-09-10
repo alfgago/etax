@@ -13,7 +13,7 @@ class CreateIntegracionEmpresaTable extends Migration
      */
     public function up()
     {
-        Schema::create('integracion_empresa', function (Blueprint $table) {
+        Schema::create('integracion_empresas', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('access_token')->nullable();
             $table->string('company_token')->nullable();
@@ -32,6 +32,6 @@ class CreateIntegracionEmpresaTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('integracion_empresa');
+        Schema::dropIfExists('integracion_empresas');
     }
 }
