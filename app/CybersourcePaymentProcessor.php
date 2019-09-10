@@ -6,9 +6,12 @@ use App\Utils\BridgeHaciendaApi;
 use Carbon\Carbon;
 use CybsSoapClient;
 use GuzzleHttp\Client;
+use stdClass;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Log;
+
+require __DIR__ . '/../vendor/autoload.php';
 
 class CybersourcePaymentProcessor extends PaymentProcessor
 {
@@ -34,7 +37,7 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         return $bnStatus;
     }
     /**
-     *
+     *check_cc
      *
      *
      */
@@ -81,8 +84,9 @@ class CybersourcePaymentProcessor extends PaymentProcessor
                 $frequency = 'annual';
             break;
         }
+        $referenceCode = 5;
         $client = new CybsSoapClient();
-        $requestClient = $client->createRequest($request->referenceCode);
+        $requestClient = $client->createRequest($referenceCode);
 
         $paySubscriptionCreateService = new stdClass();
         $paySubscriptionCreateService->run = 'true';
@@ -114,16 +118,17 @@ class CybersourcePaymentProcessor extends PaymentProcessor
 
         $recurringSubscriptionInfo = new stdClass();
         $recurringSubscriptionInfo->frequency = $frequency;
-        $recurringSubscriptionInfo->amount = $request->Amount;
+        $recurringSubscriptionInfo->amount = $request->amount;
         $recurringSubscriptionInfo->automaticRenew = 'true';
         $recurringSubscriptionInfo->numberOfPayments = $request->recurrency;
         $recurringSubscriptionInfo->startDate = Carbon::parse(now('America/Costa_Rica'));
         $requestClient->recurringSubscriptionInfo = $recurringSubscriptionInfo;
 
-        return $client->runTransaction($requestClient);
+        $reply = $client->runTransaction($requestClient);
+        return $reply;
     }
     /**
-     * Payment token creation
+     * Payment token delete
      * Params cardNumber, cardDescripcion, expiry, cvc, user_id, user_name
      *
      */
@@ -153,32 +158,32 @@ class CybersourcePaymentProcessor extends PaymentProcessor
      * Params: user_name, user_id, token_bn, cardDescription, cardNumber, cardMonth, cardYear, cvc
      *
      */
-    public function updateCardToken($data){
-        $cardBn = new Client();
-        $cardCreationResult = $cardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserUpdateCard?applicationName=string&userName=string&userPassword=string&cardTokenId=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
-            'headers' => [
-                'Content-Type'  => "application/json",
-            ],
-            'json' => [
-                'applicationName' => config('etax.klap_app_name'),
-                'userName' => $data->user_name,
-                'userPassword' => 'Etax-' . $data->user_id . 'Klap',
-                'cardTokenId' => $data->token_bn,
-                'cardDescription' => $data->cardDescription,
-                'primaryAccountNumber' => $data->cardNumber,
-                "expirationMonth" => (int) $data->cardMonth,
-                "expirationYear" =>  (int) $data->cardYear,
-                "verificationValue" => (int) $data->cvc
-            ],
-            'verify' => false,
-        ]);
-        $card = json_decode($cardCreationResult->getBody()->getContents(), true);
+    public function updateCardToken($request){
+        $client = new CybsSoapClient();
+        $typeCard = $this->check_cc();
+        $requestClient = $client->createRequest($request->referenceCode);
 
+        $paySubscriptionUpdateService = new stdClass();
+        $paySubscriptionUpdateService->run = 'true';
+        $requestClient->paySubscriptionUpdateService = $paySubscriptionUpdateService;
+
+        $card = new stdClass();
+        $card->accountNumber = $request->cardNumber;
+        $card->expirationMonth = (int)substr($request->expiry, 0, 2);
+        $card->expirationYear = (int)'20' . substr($request->expiry, -2);
+        $card->cardType= $typeCard;
+        $requestClient->card = $card;
+
+        $recurringSubscriptionInfo = new stdClass();
+        $recurringSubscriptionInfo->subscriptionID = $request->subscriptionID;
+        $requestClient->recurringSubscriptionInfo = $recurringSubscriptionInfo;
+
+        return $client->runTransaction($requestClient);
     }
     /**
      * Payment creation
      * Params saleId, paymentMethodId, amount, description, user_name
-     *
+     * Requesting an On-Demand Transaction, Payment_Tokenization_SO_API.pdf, page 37
      */
     public function createPayment($request){
         $client = new CybsSoapClient();
@@ -212,9 +217,13 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $client = new CybsSoapClient();
         $requestClient = $client->createRequest($request->referenceCode);
 
-        $CreatePaymentService = new stdClass();
-        $CreatePaymentService->run = 'true';
-        $requestClient->CreatePaymentService = $CreatePaymentService;
+        $ccAuthService = new stdClass();
+        $ccAuthService->run = 'true';
+        $requestClient->ccAuthService = $ccAuthService;
+
+        $ccCaptureService = new stdClass();
+        $ccCaptureService->run = 'true';
+        $requestClient->CreatePaymentService = $ccCaptureService;
 
         $recurringSubscriptionInfo = new stdClass();
         $recurringSubscriptionInfo->subscriptionID = $request->token_bn;
@@ -228,7 +237,7 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         return $client->runTransaction($requestClient);
     }
     /**
-     *comprarProductos
+     *Buy Products
      *
      *
      */
@@ -387,51 +396,7 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         return $delatedCard == true;
     }
     /**
-     *
-     *
-     *
-     */
-    public function setInvoiceInfo($request){
-        $invoiceData = new stdClass();
-        $invoiceData->client_code = $request->id_number;
-        $invoiceData->client_id_number = $request->id_number;
-        $invoiceData->client_id = $request->client_id;
-        $invoiceData->tipo_persona = $request->tipo_persona;
-        $invoiceData->first_name = $request->first_name;
-        $invoiceData->last_name = $request->last_name;
-        $invoiceData->last_name2 = $request->last_name2;
-        $invoiceData->country = $request->country;
-        $invoiceData->state = $request->state;
-        $invoiceData->city = $request->city;
-        $invoiceData->district = $request->district;
-        $invoiceData->neighborhood = $request->neighborhood;
-        $invoiceData->zip = $request->zip;
-        $invoiceData->address = $request->address;
-        $invoiceData->phone = $request->phone;
-        $invoiceData->es_exento = $request->es_exento;
-        $invoiceData->email = $request->email;
-        $invoiceData->expiry = $request->expiry;
-        $invoiceData->amount = $request->amount;
-        $invoiceData->subtotal = $request->subtotal;
-        $invoiceData->iva_amount = $request->iv;
-        $invoiceData->discount_reason = $request->razonDescuento;
-
-        $item = new stdClass();
-        $item->code = $request->etax_product_id;
-        $item->name = $request->item_name;
-        $item->descuento = $request->montoDescontado;
-        $item->discount_reason = $request->razonDescuento;
-        $item->cantidad = 1;
-        $item->iva_amount = $request->iv;
-        $item->unit_price = $request->costo;
-        $item->subtotal = $request->subtotal;
-        $item->total = $request->amount;
-
-        $invoiceData->items = [$item];
-        return $invoiceData;
-    }
-    /**
-     *
+     *crearFacturaClienteEtax
      *
      *
      */
