@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateIntregracionEmpresaTable extends Migration
+class CreateIntegracionEmpresaTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateIntregracionEmpresaTable extends Migration
      */
     public function up()
     {
-        Schema::create('intregracion_empresa', function (Blueprint $table) {
+        Schema::create('integracion_empresa', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('access_token')->nullable();
             $table->string('company_token')->nullable();
@@ -32,6 +32,6 @@ class CreateIntregracionEmpresaTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('intregracion_empresa');
+        Schema::dropIfExists('integracion_empresa');
     }
 }

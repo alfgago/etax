@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateIntregacionesTable extends Migration
+class CreateIntegracionesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateIntregacionesTable extends Migration
      */
     public function up()
     {
-        Schema::create('intregaciones', function (Blueprint $table) {
+        Schema::create('integraciones', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('third_party_name')->nullable();
             $table->timestamps();
@@ -27,6 +27,6 @@ class CreateIntregacionesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('intregaciones');
+        Schema::dropIfExists('integraciones');
     }
 }

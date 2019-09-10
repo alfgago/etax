@@ -13,7 +13,9 @@
 
 Route::get('login', function () {
     return view('login');
-})->name('login');;
+})->name('login');
+
+Route::get('login-sync-gosocket', 'AuthController@loginSyncGoSocket')->name('User.LoginSyncGoSocket');
 
 Auth::routes();
 
