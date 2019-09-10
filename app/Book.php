@@ -177,10 +177,9 @@ class Book extends Model
       $this->cc_clientes_contado = $calculos->total_clientes_contado;  
       $this->cc_clientes_credito_exp = $calculos->total_clientes_credito_exp;
       $this->cc_clientes_contado_exp = $calculos->total_clientes_contado_exp;  
-      
       $this->cc_retenido = $calculos->iva_retenido;  
+      
       $this->cc_clientes_sum = $this->cc_clientes_credito + $this->cc_clientes_contado + $this->cc_clientes_credito_exp + $this->cc_clientes_contado_exp + $this->cc_retenido;
-
     }
     
     public function setCuentaContableAjustes( $calculos ){

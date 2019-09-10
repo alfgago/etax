@@ -53,7 +53,7 @@ class InvoiceUtils
             'provider' => $provider
         ]);
         
-        return $pdf->download('Invoice.pdf');
+        return $pdf->download("$invoice->document_key.pdf");
     }
     
     public function downloadXml( $invoice, $company, $type = null)
