@@ -326,6 +326,20 @@ class BillController extends Controller
     public function exportLibroCompras( $year, $month ) {
         return Excel::download(new LibroComprasExport($year, $month), 'libro-compras.xlsx');
     }
+    
+    public function downloadPdf($id) {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+        
+        $billUtils = new BillUtils();
+        $file = $billUtils->downloadPdf( $bill, currentCompanyModel() );
+        $filename = $bill->document_key . '.pdf';
+        if( ! $bill->document_key ) {
+            $filename = $bill->document_number . '-' . $bill->client_id . '.pdf';
+        }
+        
+        return $file;
+    }
 
     public function importExcel() {
         
