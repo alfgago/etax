@@ -240,7 +240,7 @@ class BillController extends Controller
         $units = UnidadMedicion::all()->toArray();
         $arrayActividades = $company->getActivities();
       
-        return view('Bill/show', compact('bill', 'units', 'arrayActividades') );
+        return view('Bill/show', compact('bill', 'units', 'arrayActividades', 'company') );
     }
 
     /**
@@ -265,7 +265,7 @@ class BillController extends Controller
             } 
             $arrayActividades = $company->getActivities();
 
-        return view('Bill/edit', compact('bill', 'units', 'arrayActividades') );
+        return view('Bill/edit', compact('bill', 'units', 'arrayActividades', 'company') );
         }else{
             return redirect('/facturas-recibidas')->withError('Mes seleccionado ya fue cerrado');
         }
