@@ -250,7 +250,7 @@ $company = currentCompanyModel();
                   <div class="form-group col-md-6">
                     <label for="payment_type">Método de pago</label>
                     <div class="input-group">
-                      <select id="medio_pago" name="payment_type" class="form-control" required>
+                      <select id="medio_pago" name="payment_type" class="form-control" required onchange="calcularTotalFactura();">
                         <option value="01" selected>Efectivo</option>
                         <option value="02">Tarjeta</option>
                         <option value="03">Cheque</option>
