@@ -8,7 +8,6 @@ use App\Sales;
 use App\Utils\PaymentUtils;
 use Carbon\Carbon;
 use stdClass;
-use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Bus\Queueable;
