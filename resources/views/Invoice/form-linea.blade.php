@@ -57,7 +57,7 @@
             <option class="mostrarTodos" value="1">Mostrar Todos</option>
           @else
             @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
-              <option is_identificacion_plena="{{ $tipo['is_identificacion_plena'] }} value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  >{{ $tipo['name'] }}</option>
+              <option is_identificacion_plena="{{ $tipo['is_identificacion_plena'] }}" value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  >{{ $tipo['name'] }}</option>
             @endforeach
           @endif
         </select>
@@ -65,9 +65,9 @@
       <div class="form-group col-md-11">
         <label for="tipo_producto">Categoría de declaración</label>
         <select class="form-control" id="tipo_producto" >
-            @foreach ( \App\ProductCategory::all() as $tipo )
-              <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
-            @endforeach
+          @foreach ( \App\ProductCategory::whereNotNull('bill_iva_code')->get() as $tipo )
+            <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['bill_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
+          @endforeach
         </select>
       </div>
     @else
@@ -87,7 +87,7 @@
             <option class="mostrarTodos" value="1">Mostrar Todos</option>
           @else
             @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
-            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  >{{ $tipo['name'] }}</option>
+            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select">{{ $tipo['name'] }}</option>
             @endforeach
           @endif
           
