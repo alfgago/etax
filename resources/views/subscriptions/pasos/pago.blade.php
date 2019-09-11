@@ -49,7 +49,7 @@
 	<p class="description">* No se aceptan tarjetas American Express</p>
 </div>
 <input type="text" hidden id="IpAddress" name="IpAddress">
-<input type="text" hidden id="deviceFingerprintID" name="deviceFingerprintID">
+<input type="text" hidden id="deviceFingerPrintID" name="deviceFingerPrintID">
 <input type="text" hidden id="bncupon" name="bncupon" value="0">
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-prev" onclick="backFields();toggleStep('step2');">Paso anterior</button>
@@ -78,7 +78,7 @@
 </style>
 
 <script>
-    $("#deviceFingerprintID").val(cybs_dfprofiler("tc_cr_011007172","test"));
+    $("#deviceFingerPrintID").val(cybs_dfprofiler("tc_cr_011007172","test"));
     //document.write('Session Id <input type="text" name="deviceFingerprintID" value="' + cybs_dfprofiler("tc_cr_01100XXXX","test") + '">');
     $.getJSON('https://api.ipify.org?format=json', function(data){
         $("#IpAddress").val(data.ip);

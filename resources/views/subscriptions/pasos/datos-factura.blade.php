@@ -99,17 +99,37 @@
 </div>
 <input hidden id="cardState" name="cardState">
 <input hidden id="cardCity" name="cardCity">
+<input hidden id="address1" name="address1">
+<input hidden id="street1" name="street1">
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-prev" onclick="backFields();toggleStep('step1');">Paso anterior</button>
-  <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step3');"  onclick="trackClickEvent( 'PagosPaso3' );">Siguiente paso</button>
+  <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step3');getAddress();"  onclick="trackClickEvent( 'PagosPaso3' );">Siguiente paso</button>
 </div>
 <script>
     $('#state').on('change', function() {
         var state = $( "#state option:selected" ).text();
+        if(state.length > 40){
+            state = state.substring(0, 40);
+        }
         $('#cardState').val(state);
     });
     $('#city').on('change', function() {
         var city = $( "#city option:selected" ).text();
+        if(city.length > 40){
+            city = city.substring(0, 40);
+        }
         $('#cardCity').val(city);
     });
+    function getAddress(){
+        var address = $('#address').val();
+        if(address.length > 40){
+            address = address.substring(0, 40);
+        }
+        $('#address1').val(address);
+        var neighborhood = $( "#neighborhood" ).val();
+        if(neighborhood.length > 40){
+            neighborhood = neighborhood.substring(0, 40);
+        }
+        $('#street1').val(neighborhood);
+    }
 </script>

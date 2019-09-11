@@ -66,6 +66,7 @@ class CybersourcePaymentProcessor extends PaymentProcessor
      *
      */
     public function createCardToken($request){
+        //dd($request);
         $cards = array(
             $request->number
         );
@@ -73,25 +74,93 @@ class CybersourcePaymentProcessor extends PaymentProcessor
             $check = $this->checkCC($c, true);
             $typeCard = $check;
         }
-        switch ($request->recurrency){
-            case 1:
-                $frequency = 'monthly';
+        switch ($typeCard){
+            case "Visa":
+                $CardType = '001';
             break;
-            case 6:
-                $frequency = 'biannual';
+            case "Mastercard":
+                $CardType = '002';
             break;
-            case 12:
-                $frequency = 'annual';
+            case "American Express":
+                $CardType = '003';
             break;
         }
-        $referenceCode = 5;
+        $referenceCode = $request->product_id;
+        $merchantId = 'tc_cr_011007172';
         $client = new CybsSoapClient();
         $requestClient = $client->createRequest($referenceCode);
 
         $paySubscriptionCreateService = new stdClass();
         $paySubscriptionCreateService->run = 'true';
         $requestClient->paySubscriptionCreateService = $paySubscriptionCreateService;
+
+        $requestClient->ID = $merchantId;
+
+        $merchantDefinedData = new stdClass();
+        $merchantDefinedData->field1 = 'WEB';
+        $requestClient->merchantDefinedData = $merchantDefinedData;
+
+        /*$customer = new stdClass();
+        $customer->firstname = $request->first_name_card;
+        $requestClient->customer = $customer;*/
+
+        $billTo = new stdClass();
+        $billTo->firstName = $request->first_name_card;
+        $billTo->lastName = $request->last_name_card;
+        $billTo->address1 = $request->address1;
+        $billTo->street1 = $request->street1;
+        $billTo->city = $request->cardCity;
+        $billTo->state = $request->cardState;
+        $billTo->postalCode = $request->zip;
+        $billTo->country = $request->country;
+        $billTo->email = $request->email;
+        $billTo->ipAddress = $request->IP;
+        $requestClient->billTo = $billTo;
+
+        $card = new stdClass();
+        $card->accountNumber = $request->number;
+        $card->expirationMonth = (int)substr($request->expiry, 0, 2);
+        $card->expirationYear = (int)'20' . substr($request->expiry, -2);
+        $card->type = $CardType;
+        $requestClient->card = $card;
+
+        $purchaseTotals = new stdClass();
+        $purchaseTotals->currency = 'USD';
+        $requestClient->purchaseTotals = $purchaseTotals;
+
+        $recurringSubscriptionInfo = new stdClass();
+        $recurringSubscriptionInfo->frequency = $request->recurrency;
+        $recurringSubscriptionInfo->amount = $request->amount;
+        $recurringSubscriptionInfo->automaticRenew = 'true';
+        $recurringSubscriptionInfo->numberOfPayments = $request->recurrency;
+        $recurringSubscriptionInfo->startDate = Carbon::parse(now('America/Costa_Rica'));
+        $requestClient->recurringSubscriptionInfo = $recurringSubscriptionInfo;
+        $requestClient->deviceFingerprintID = $request->deviceFingerPrintID;
+        //$requestClient->deviceFingerprintID = '1568232060634';
+        $requestClient->merchantId = $merchantId;
+
+        $reply = $client->runTransaction($requestClient);
+        //dd($reply);
+        return $reply;
+    }
+    /**
+     * Payment token delete
+     * Params cardNumber, cardDescripcion, expiry, cvc, user_id, user_name
+     *
+     */
+    public function deleteCardToken($request){
+        $client = new CybsSoapClient();
+        $referenceCode = null;
+        $merchantId = null;
+        $typeCard = null;
+        $frequency = null;
+        $requestClient = $client->createRequest($referenceCode);
+
+        $paySubscriptionCreateService = new stdClass();
+        $paySubscriptionCreateService->run = 'true';
+        $requestClient->paySubscriptionCreateService = $paySubscriptionCreateService;
         $requestClient->deviceFingerPrintID = $request->deviceFingerPrintID;
+        $requestClient->merchantID = $merchantId;
 
         $billTo = new stdClass();
         $billTo->firstName = $request->firstName;
@@ -125,33 +194,6 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $requestClient->recurringSubscriptionInfo = $recurringSubscriptionInfo;
 
         $reply = $client->runTransaction($requestClient);
-        return $reply;
-    }
-    /**
-     * Payment token delete
-     * Params cardNumber, cardDescripcion, expiry, cvc, user_id, user_name
-     *
-     */
-    public function deleteCardToken($cardTokenId){
-        $user = auth()->user();
-        $cardBn = new Client();
-        $cardDeleted = $cardBn->post('https://emcom.oneklap.com:2263/api/UserDeleteCard', [
-            'headers' => [
-                'Content-Type'  => "application/json",
-            ],
-            'form_params' => [
-                'applicationName' => config('etax.klap_app_name'),
-                'userName' => $user->user_name,
-                'userPassword' => 'Etax-' . $user->id . 'Klap',
-                'cardTokenId' => $cardTokenId
-            ]
-        ]);
-        $card = json_decode($cardDeleted->getBody()->getContents(), true);
-        if($card['apiStatus'] === 'sucess'){
-            return true;
-        }else{
-            return false;
-        }
     }
     /**
      * Payment token update
