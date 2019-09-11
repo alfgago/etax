@@ -664,6 +664,17 @@ toastr.options = {
       codigo = $('#codigo').val( "L" + numero  );
       nombre = $('#nombre').val( "TIPO-" + tipo_iva  );
     }
+    
+    if( docType == '09' ) {
+      if( tariff_heading.length != 12 ) {
+        Swal.fire({
+            type: 'error',
+            title: 'Error',
+            text: 'La tarifa arancelaria debe contener 12 caracteres.'
+        })
+        return false;
+      }
+    }
 
     //Se asegura de que los campos hayan sido llenados
     if( subtotal && codigo && nombre && precio_unitario && cantidad && tipo_iva && tipo_producto && total > 0){

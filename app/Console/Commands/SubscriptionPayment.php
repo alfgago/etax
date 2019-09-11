@@ -59,7 +59,8 @@ class SubscriptionPayment extends Command
 
                 $unpaidSubscriptions = Sales::where('status', 2)->where('is_subscription', true)->get();
                 foreach($unpaidSubscriptions as $sale){
-                    ProcessSubscriptionPayments::dispatch($sale);
+                    sleep(2);
+                    ProcessSubscriptionPayments::dispatch($sale)->onQueue('payments');
                 }
                 
             }else{
