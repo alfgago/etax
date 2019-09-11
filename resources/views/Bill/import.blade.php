@@ -72,37 +72,50 @@
 			<button type="submit" class="btn btn-primary">Importar facturas</button>
 	</form>
 	
-	<form method="POST" action="/facturas-recibidas/importarXML" enctype="multipart/form-data" class="toggle-xml">
-				
-			@csrf	
-				
-			<div class="form-group col-md-12">
-		    <div class="descripcion">
-		    	Arrastre los archivos XML de Hacienda que haya generado desde sistemas de facturación externos. <br>
-		    	
-		    	* Utilice el formato 4.2 si su factura fue emitida antes del 1 de Julio del 2019.
+			<div class="form-group col-md-12 toggl-xml">
+		      <div class="descripcion">
+			    	Arrastre los archivos XML de Hacienda que haya generado desde sistemas de facturación externos. <br>
+			    	
+			    	* Utilice el formato 4.2 si su factura fue emitida antes del 1 de Julio del 2019.
 		    	</div>
+		  
+					<form method="POST" action="/facturas-recibidas/importarXML" class="dropzone toggle-xml" id="xml-dropzone" enctype="multipart/form-data" >
+						@csrf		 
+					  <div class="form-group col-md-12">
+					  	<label for="file"></label>  
+							<div class="">
+								<div class="fallback">
+							      <input name="file" type="file" multiple="true" accept=".xml">
+							  </div>
+							</div>
+						</div>
+						
+					</form>
 		  </div>
-		  
-		  <div class="form-group col-md-12">
-		    <label for="formato_xml">Formato de los XML</label>
-		    <select class="form-control" name="formato_xml" id="formato_xml">
-		      <option value="4.2">4.2</option>
-		      <option value="4.3">4.3</option>
-		    </select>
-			</div>
-		  
-		  <div class="form-group col-md-12">
-		    <label for="xmls[]">Archivos</label>  
-				<div class="">
-					<div class="fallback">
-				      <input name="xmls[]" type="file" multiple="true" accept=".xml">
-				  </div>
-				</div>
-			</div>
-			
-			<button type="submit" class="btn btn-primary">Importar facturas</button>
-			
-		</form>
   </div>
 </div>
+<script type="text/javascript">
+        Dropzone.autoDiscover = false;
+        $(document).ready(function(){
+
+            var baseUrl = "{{ secure_url('/') }}";	
+            var token = "{{ Session::token() }}";
+
+            $("#xml-dropzone").dropzone({
+                paramName: 'file',
+                url: baseUrl+"/facturas-recibidas/importarXML",
+                params: {
+                    _token: token
+                },
+                method : "post",
+                dictDefaultMessage: "Arrastre sus archivos XML aquí o presione para seleccionarlos.",
+                clickable: true,
+                removedfile: function(file) {
+                    // @TODO : Make your own implementation to delete a file
+                },
+                queuecomplete: function() {
+                    // @TODO : Ajax call to load your uploaded files right away if required
+                }
+            });
+        });
+</script>

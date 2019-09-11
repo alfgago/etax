@@ -49,14 +49,14 @@ class ProcessInvoiceSM implements ShouldQueue
      */
     public function handle()
     {
-
+        
         try {
             if ( app()->environment('production') ) {
                 $invoiceUtils = new InvoiceUtils();
                 $client = new Client();
                 $invoice = Invoice::find($this->invoiceId);
                 $company = Company::find($this->companyId);
-                if($company->id != 1110) { //No procese el bulk de SM Seguros aqui
+                if (strpos($invoice->generation_method, 'bulk') !== FALSE) {  // Procese el bulk de SM Seguros aqui
                     Log::info('send job invoice id: '.$this->invoiceId);
                     if ($company->atv_validation ) {
                         if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09')) && $invoice->resend_attempts < 6) {
@@ -118,7 +118,7 @@ class ProcessInvoiceSM implements ShouldQueue
                                         $xml->save();
                                         
                                         $sendPdf = $invoice->generation_method == "etax-bulk";
-                                        $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, $sendPdf);
+                                        $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, true);
                                     }
                                     Log::info('Factura enviada y XML guardado.');
                                 } else if (isset($response['status']) && $response['status'] == 400 &&

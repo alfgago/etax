@@ -44,7 +44,7 @@
         
         <div class="col-md-12 dato-iva asumido">
             <label><span>IVA por ajustar</span></label>
-            <div class="dato">₡{{ number_format( ( $data->iva_no_deducible ), 0 ) }}</div>
+            <div class="dato">₡{{ number_format( ( $data->iva_no_deducible - $data->iva_no_acreditable_identificacion_plena), 0 ) }}</div>
         </div>
         
         @if( $data->iva_no_acreditable_identificacion_plena > 0)
@@ -54,14 +54,21 @@
         </div>
         @endif
         
-        @if( $data->month != 0)
-            @if( $data->iva_retenido > 0)
-            <div class="col-md-12 dato-iva retenido">
-                <label><span style="">IVA retenido por tarjetas</span></label>
-                <div class="dato">₡{{ number_format( $data->iva_retenido, 0 ) }}</div>
-            </div>
-            @endif  
+       
+        @if( $data->iva_retenido > 0)
+        <div class="col-md-12 dato-iva retenido">
+            <label><span style="">IVA retenido por tarjetas</span></label>
+            <div class="dato">₡{{ number_format( $data->iva_retenido, 0 ) }}</div>
+        </div>
         @endif  
+    
+        @if( $data->iva_devuelto > 0 )
+        <div class="col-md-12 dato-iva anterior">
+            <label><span style="">IVA devuelto</span></label>
+            <div class="dato">₡{{ number_format( $data->iva_devuelto, 0 ) }}</div>
+        </div>
+        @endif  
+        
         
         @if( $data->month != 0)
             @if( $data->saldo_favor_anterior > 0 )
@@ -70,7 +77,7 @@
                 <div class="dato">₡{{ number_format( $data->saldo_favor_anterior, 0 ) }}</div>
             </div>
             @endif  
-        @endif 
+        @endif
     </div>
     
 @else
