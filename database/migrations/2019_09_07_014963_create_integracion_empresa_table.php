@@ -15,12 +15,13 @@ class CreateIntegracionEmpresaTable extends Migration
     {
         Schema::create('integracion_empresas', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('access_token')->nullable();
+            $table->string('user_token')->nullable();
             $table->string('company_token')->nullable();
             $table->integer('integration_id')->nullable();
             $table->integer('user_id')->nullable();
             $table->integer('company_id')->nullable();
             $table->boolean('status')->default(false);
+            $table->string('session_token')->nullable();
             $table->timestamps();
         });
     }
