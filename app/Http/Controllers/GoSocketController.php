@@ -30,6 +30,7 @@ class GoSocketController extends Controller
                 'verify' => false,
             ]);
             $user_gs = json_decode($APIStatus->getBody()->getContents(), true);
+            dd($user_gs);
             $user = IntegracionEmpresa::where("access_token",$user_gs['UserId'])->where("company_token",$user_gs['CurrentAccountId'])->first();
             if(is_null($user)){
                 $GoSocket = new Client();
@@ -49,7 +50,7 @@ class GoSocketController extends Controller
 
                 //dd($company_etax->team->id);
                 $new_user_gs = User::create([
-                    'user_name' => $user_etax['email'].".gs1",
+                    'user_name' => "GS_".$user_gs['UserId'],
                     'email' => $user_etax['email'],
                     'first_name' => $user_etax['first_name'],
                     'last_name' => $user_etax['last_name'],
