@@ -49,15 +49,15 @@ class GoSocketController extends Controller
                 $company_etax = Company::where('id_number',$company_gs['Code'])->first();
 
                 //dd($company_etax->team->id);
-                $new_user_gs = User::create([
-                    'user_name' => "GS_".$user_gs['UserId'],
-                    'email' => $user_etax['email'],
+                $new_user_gs = User::firstOrCreate(
+                    ['user_name' => "GS_".$user_gs['UserId']],
+                    ['email' => $user_etax['email'],
                     'first_name' => $user_etax['first_name'],
                     'last_name' => $user_etax['last_name'],
                     'last_name2' => $user_etax['last_name2'],
                     'phone' => $user_etax['phone'],
-                    'password' => 'password'
-                ]);
+                    'password' => 'password']
+                );
                 $E = "slug_" . $company_etax->id . "_" . $new_user_gs->id;
 
 
