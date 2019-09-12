@@ -111,8 +111,8 @@ class GoSocketController extends Controller
                         Cache::forget("cache-currentcompany-$user_login->id");
                     return redirect('/');
                 } else {
-                    return redirect('/a');
-                }*/
+                    return redirect('/login');
+                }
             } else {
                 return redirect('/login');
             }
