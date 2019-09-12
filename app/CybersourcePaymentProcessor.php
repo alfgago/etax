@@ -48,43 +48,103 @@ class CybersourcePaymentProcessor extends PaymentProcessor
             "jcb" => "(35[2-8][89]\d\d\d{10})",
             "maestro" => "((?:5020|5038|6304|6579|6761)\d{12}(?:\d\d)?)",
             "solo" => "((?:6334|6767)\d{12}(?:\d\d)?\d?)",
-            "mastercard" => "(5[1-5]\d{14})",
+            "mastercard" => "(5[1-5][0-9]{14}$)",
             "switch" => "(?:(?:(?:4903|4905|4911|4936|6333|6759)\d{12})|(?:(?:564182|633110)\d{10})(\d\d)?\d?)",
         );
-        $names = array("Visa", "American Express", "JCB", "Maestro", "Solo", "Mastercard", "Switch");
+        $names = array("Visa", "American Express", "JCB", "Maestro", "Solo", "Master Card", "Switch");
         $matches = array();
         $pattern = "#^(?:".implode("|", $cards).")$#";
         $result = preg_match($pattern, str_replace(" ", "", $cc), $matches);
-        if($extra_check && $result > 0){
+        /*if($extra_check && $result > 0){
             $result = (validatecard($cc))?1:0;
-        }
+        }*/
         return ($result>0)?$names[sizeof($matches)-2]:false;
     }
+
+    function validateCC($cc_num, $type) {
+        if($type == "American") {
+            $denum = "American Express";
+        } elseif($type == "Dinners") {
+            $denum = "Diner's Club";
+        } elseif($type == "Discover") {
+            $denum = "Discover";
+        } elseif($type == "Master") {
+            $denum = "Master Card";
+        } elseif($type == "Visa") {
+            $denum = "Visa";
+        } if($type == "American") {
+            $pattern = "/^([34|37]{2})([0-9]{13})$/";
+            //American Express
+            if (preg_match($pattern,$cc_num)) {
+                $verified = true;
+            } else {
+                $verified = false;
+            }
+        } elseif($type == "Dinners") {
+            $pattern = "/^([30|36|38]{2})([0-9]{12})$/";
+            //Diner's Club
+            if (preg_match($pattern,$cc_num)) {
+                $verified = true;
+            } else { $verified = false;
+            }
+        } elseif($type == "Discover") {
+            $pattern = "/^([6011]{4})([0-9]{12})$/";
+            //Discover Card
+            if (preg_match($pattern,$cc_num)) {
+                $verified = true;
+            } else {
+                $verified = false;
+            }
+        } elseif($type == "Master") {
+            $pattern = "/^([51|52|53|54|55]{2})([0-9]{14})$/";
+            //Mastercard
+            if (preg_match($pattern,$cc_num)) {
+                $verified = true;
+            } else {
+                $verified = false;
+            }
+        } elseif($type == "Visa") {
+            $pattern = "/^([4]{1})([0-9]{12,15})$/";
+            //Visa
+            if (preg_match($pattern,$cc_num)) {
+                $verified = true;
+            } else {
+                $verified = false;
+            }
+        } if($verified == false) {
+            //Do something here in case the validation fails
+            echo "Credit card invalid. Please make sure that you entered a valid " . $denum . " credit card ";
+        } else { //if it will pass...do something
+            echo "Your " . $denum . " credit card is valid";
+        }
+    }
+
     /**
      * Payment token creation
      * Params cardNumber, cardDescripcion, expiry, cvc, user_id, user_name
      *
      */
     public function createCardToken($request){
-        //dd($request);
         $cards = array(
             $request->number
         );
         foreach ($cards as $c) {
-            $check = $this->checkCC($c, true);
+            $check = $this->check_cc($c, true);
             $typeCard = $check;
         }
         switch ($typeCard){
             case "Visa":
                 $CardType = '001';
             break;
-            case "Mastercard":
+            case false:
+                $typeCard = 'Mastercard';
                 $CardType = '002';
             break;
             case "American Express":
                 $CardType = '003';
             break;
         }
+        //dd($CardType);
         $referenceCode = $request->product_id;
         $merchantId = 'tc_cr_011007172';
         $client = new CybsSoapClient();
@@ -94,15 +154,19 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $paySubscriptionCreateService->run = 'true';
         $requestClient->paySubscriptionCreateService = $paySubscriptionCreateService;
 
+        $ccCaptureService = new stdClass();
+        $ccCaptureService->run = 'true';
+        $requestClient->ccCaptureService = $ccCaptureService;
+
+        $ccAuthService = new stdClass();
+        $ccAuthService->run = 'true';
+        $requestClient->ccAuthService = $ccAuthService;
+
         $requestClient->ID = $merchantId;
 
         $merchantDefinedData = new stdClass();
         $merchantDefinedData->field1 = 'WEB';
         $requestClient->merchantDefinedData = $merchantDefinedData;
-
-        /*$customer = new stdClass();
-        $customer->firstname = $request->first_name_card;
-        $requestClient->customer = $customer;*/
 
         $billTo = new stdClass();
         $billTo->firstName = $request->first_name_card;
@@ -121,7 +185,90 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $card->accountNumber = $request->number;
         $card->expirationMonth = (int)substr($request->expiry, 0, 2);
         $card->expirationYear = (int)'20' . substr($request->expiry, -2);
-        $card->type = $CardType;
+        $card->cardType = $CardType;
+        $requestClient->card = $card;
+
+        $purchaseTotals = new stdClass();
+        $purchaseTotals->currency = 'USD';
+        $purchaseTotals->grandTotalAmount = $request->amount;
+        $requestClient->purchaseTotals = $purchaseTotals;
+
+        $recurringSubscriptionInfo = new stdClass();
+        $recurringSubscriptionInfo->frequency = 'on-demand';
+        $requestClient->recurringSubscriptionInfo = $recurringSubscriptionInfo;
+
+        $requestClient->deviceFingerprintID = $request->deviceFingerPrintID;
+        $requestClient->merchantId = $merchantId;
+
+        $reply = $client->runTransaction($requestClient);
+
+        return $reply;
+    }
+    /**
+     * create Token Without Fee
+     *
+     *
+     */
+    public function createTokenWithoutFee($request){
+        $cards = array(
+            $request->number
+        );
+        foreach ($cards as $c) {
+            $check = $this->checkCC($c, true);
+            $typeCard = $check;
+        }
+        switch ($typeCard){
+            case "Visa":
+                $CardType = '001';
+                break;
+            case "Mastercard":
+                $CardType = '002';
+                break;
+            case "American Express":
+                $CardType = '003';
+                break;
+        }
+        $referenceCode = $request->product_id;
+        $merchantId = 'tc_cr_011007172';
+        $client = new CybsSoapClient();
+        $requestClient = $client->createRequest($referenceCode);
+
+        $paySubscriptionCreateService = new stdClass();
+        $paySubscriptionCreateService->run = 'true';
+        $requestClient->paySubscriptionCreateService = $paySubscriptionCreateService;
+
+        $ccCaptureService = new stdClass();
+        $ccCaptureService->run = 'true';
+        $requestClient->ccCaptureService = $ccCaptureService;
+
+        $ccAuthService = new stdClass();
+        $ccAuthService->run = 'true';
+        $requestClient->ccAuthService = $ccAuthService;
+
+        $requestClient->ID = $merchantId;
+
+        $merchantDefinedData = new stdClass();
+        $merchantDefinedData->field1 = 'WEB';
+        $requestClient->merchantDefinedData = $merchantDefinedData;
+
+        $billTo = new stdClass();
+        $billTo->firstName = $request->first_name_card;
+        $billTo->lastName = $request->last_name_card;
+        $billTo->address1 = $request->address1;
+        $billTo->street1 = $request->street1;
+        $billTo->city = $request->cardCity;
+        $billTo->state = $request->cardState;
+        $billTo->postalCode = $request->zip;
+        $billTo->country = $request->country;
+        $billTo->email = $request->email;
+        $billTo->ipAddress = $request->IP;
+        $requestClient->billTo = $billTo;
+
+        $card = new stdClass();
+        $card->accountNumber = $request->number;
+        $card->expirationMonth = (int)substr($request->expiry, 0, 2);
+        $card->expirationYear = (int)'20' . substr($request->expiry, -2);
+        $card->cardType = $CardType;
         $requestClient->card = $card;
 
         $purchaseTotals = new stdClass();
@@ -129,18 +276,14 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $requestClient->purchaseTotals = $purchaseTotals;
 
         $recurringSubscriptionInfo = new stdClass();
-        $recurringSubscriptionInfo->frequency = $request->recurrency;
-        $recurringSubscriptionInfo->amount = $request->amount;
-        $recurringSubscriptionInfo->automaticRenew = 'true';
-        $recurringSubscriptionInfo->numberOfPayments = $request->recurrency;
-        $recurringSubscriptionInfo->startDate = Carbon::parse(now('America/Costa_Rica'));
+        $recurringSubscriptionInfo->frequency = 'on-demand';
         $requestClient->recurringSubscriptionInfo = $recurringSubscriptionInfo;
+
         $requestClient->deviceFingerprintID = $request->deviceFingerPrintID;
-        //$requestClient->deviceFingerprintID = '1568232060634';
         $requestClient->merchantId = $merchantId;
 
         $reply = $client->runTransaction($requestClient);
-        //dd($reply);
+
         return $reply;
     }
     /**
@@ -256,8 +399,10 @@ class CybersourcePaymentProcessor extends PaymentProcessor
      *
      */
     public function pay($request){
+        $referenceCode = $request->product_id;
+        $merchantId = 'tc_cr_011007172';
         $client = new CybsSoapClient();
-        $requestClient = $client->createRequest($request->referenceCode);
+        $requestClient = $client->createRequest($referenceCode);
 
         $ccAuthService = new stdClass();
         $ccAuthService->run = 'true';
@@ -275,6 +420,7 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $purchaseTotals->currency = 'USD';
         $purchaseTotals->grandTotalAmount = $request->amount;
         $requestClient->purchaseTotals = $purchaseTotals;
+        $requestClient->merchantId = $merchantId;
 
         return $client->runTransaction($requestClient);
     }
@@ -376,17 +522,21 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $cardData->cvc = $data->cvc;
         $cardData->user_id = $user->user_id;
         $cardData->user_name = $user->user_name;
-        $newCardToken = $this->createCardToken($cardData);
+        $newCardToken = $this->createTokenWithoutFee($cardData);
         if($newCardToken){
             $last_4digits = substr($data->cardNumber, -4);
+            $firstDigits = substr($data->number, 0, 6);
+            $first4 = substr($firstDigits, 0, 4);
+            $last2 = substr($firstDigits, 0, -2);
+            $masked_card = $first4 . '-'. $last2 .'**-****-' . $last_4digits;
             $paymentMethod = PaymentMethod::updateOrCreate([
                 'user_id' => $user->id,
                 'name' => $data->first_name_card,
                 'last_name' => $data->last_name_card,
                 'last_4digits' => $last_4digits,
-                'masked_card' => $newCardToken['maskedCard'],
-                'due_date' => $cardMonth . '/' .$cardYear,
-                'token_bn' => $newCardToken['cardTokenId']
+                'masked_card' => $masked_card,
+                'due_date' => $data->expiry,
+                'token_bn' => $newCardToken->paySubscriptionCreateReply->subscriptionID
             ]);
             if($data->first == 1){
                 $paymentMethod->default_card = 1;

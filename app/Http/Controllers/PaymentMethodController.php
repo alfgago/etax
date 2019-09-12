@@ -81,13 +81,13 @@ class PaymentMethodController extends Controller
                     $cardType = '001';
                     $nameCard = "Visa";
                 break;
-                case "Mastercard":
+                case false:
                     $cardType = '002';
                     $nameCard = "Mastercard";
                 break;
                 case "American Express":
                     $cardType = '003';
-                    $nameCard = "";
+                    $nameCard = "American Express";
                 break;
             }
             $cardYear = substr($request->expiry, -2);

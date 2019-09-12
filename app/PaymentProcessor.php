@@ -2,8 +2,9 @@
 
 namespace App;
 
-use App\Utils\BridgeHaciendaApi;
+use stdClass;
 use Carbon\Carbon;
+use App\Utils\BridgeHaciendaApi;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +29,15 @@ class PaymentProcessor extends Model
         return true;
     }
     /**
-    * Payment token creation
+     *create token without fee
+     *
+     *
+     */
+    public function createTokenWithoutFee($data){
+        return true;
+    }
+    /**
+    * checkCC
     *
     *
     */

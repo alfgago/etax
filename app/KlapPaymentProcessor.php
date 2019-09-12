@@ -290,36 +290,68 @@ class KlapPaymentProcessor extends PaymentProcessor
      * Params cardNumber, cardDescripcion, expiry, cvc, first_name_card, last_name_card, first
      *
      */
-    public function createPaymentMethod($data){
+    public function createPaymentMethod($request){
         $user = auth()->user();
-        $cardYear = substr($data->expiry, -2);
-        $cardMonth = substr($data->expiry, 0, 2);
-        $cardData = new stdClass();
-        $cardData->cardNumber = $data->cardNumber;
-        $cardData->cardDescripcion = $data->cardDescripcion;
-        $cardData->cardYear = $cardYear;
-        $cardData->cardMonth = $cardMonth;
-        $cardData->cvc = $data->cvc;
-        $cardData->user_id = $user->user_id;
-        $cardData->user_name = $user->user_name;
-        $newCardToken = $this->createCardToken($cardData);
-        if($newCardToken){
-            $last_4digits = substr($data->cardNumber, -4);
-            $paymentMethod = PaymentMethod::updateOrCreate([
-                'user_id' => $user->id,
-                'name' => $data->first_name_card,
-                'last_name' => $data->last_name_card,
-                'last_4digits' => $last_4digits,
-                'masked_card' => $newCardToken['maskedCard'],
-                'due_date' => $cardMonth . '/' .$cardYear,
-                'token_bn' => $newCardToken['cardTokenId']
-            ]);
-            if($data->first == 1){
-                $paymentMethod->default_card = 1;
-            }else{
-                $paymentMethod->default_card = 0;
+        $request->number = preg_replace('/\s+/', '',  $request->number);
+        $payment_gateway = new CybersourcePaymentProcessor();
+        $cards = array(
+            $request->number
+        );
+        foreach ($cards as $c) {
+            $check = $payment_gateway->checkCC($c, true);
+            $typeCard = $check;
+        }
+        if(isset($typeCard)){
+            switch ($typeCard) {
+                case "Visa":
+                    $cardType = '001';
+                    $nameCard = "Visa";
+                    break;
+                case false:
+                    $cardType = '002';
+                    $nameCard = "Mastercard";
+                    break;
+                case "American Express":
+                    $cardType = '003';
+                    $nameCard = "American Express";
+                    break;
             }
-            $paymentMethod->save();
+            $cardYear = substr($request->expiry, -2);
+            $cardMonth = substr($request->expiry, 0, 2);
+            $cardBn = new Client();
+            $cardCreationResult = $cardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
+                'headers' => [
+                    'Content-Type' => "application/json",
+                ],
+                'json' => [
+                    'applicationName' => config('etax.klap_app_name'),
+                    'userName' => $user->user_name,
+                    'userPassword' => 'Etax-' . $user->id . 'Klap',
+                    'cardDescription' => $nameCard,
+                    'primaryAccountNumber' => $request->number,
+                    "expirationMonth" => $cardMonth,
+                    "expirationYear" => '20' . $cardYear,
+                    "verificationValue" => $request->cvc
+                ],
+                'verify' => false,
+            ]);
+            $card = json_decode($cardCreationResult->getBody()->getContents(), true);
+
+            if ($card['apiStatus'] == 'Successful') {
+                $last_4digits = substr($request->number, -4);
+                $paymentMethod = PaymentMethod::create([
+                    'user_id' => $user->id,
+                    'name' => $request->first_name,
+                    'last_name' => $request->last_name,
+                    'last_4digits' => $last_4digits,
+                    'masked_card' => $card['maskedCard'],
+                    'due_date' => $request->cardMonth . ' ' . $request->cardYear,
+                    'token_bn' => $card['cardTokenId']
+                ]);
+                return true;
+            } else {
+                return false;
+            }
         }else{
             return false;
         }

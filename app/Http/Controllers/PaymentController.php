@@ -365,7 +365,6 @@ class PaymentController extends Controller
 
             //Agrega la tarjeta. Crea una solicitud de suscripcion en Cybersource, con un Fee
             $card = $paymentGateway->createCardToken($request);
-
             $last_4digits = substr($request->number, -4);
             if($card->decision == 'ACCEPT'){
                 //Se logró agregar la tarjeta y crear el pago, entonces hay un nuevo payment method y un payment.
@@ -380,13 +379,15 @@ class PaymentController extends Controller
                     'last_4digits' => $last_4digits,
                     'masked_card' => $masked_card,
                     'due_date' => $request->expiry,
-                    'token_bn' => $card->subscriptionID,
-                    'default_card' => 1
+                    'token_bn' => $card->paySubscriptionCreateReply->subscriptionID,
+                    'default_card' => 1,
+                    'payment_gateway' => 'cybersource'
                 ]);
             } else {
                 $paymentMethod = PaymentMethod::where('user_id', $user->id)
-                                ->where('last_4digits', $last_4digits)
-                                ->first();
+                    ->where('last_4digits', $last_4digits)
+                    ->where('payment_gateway', 'cybersource')
+                    ->first();
                 if( ! isset($paymentMethod) ) {
                     return redirect()->back()->withError("El método de pago no pudo ser validado.")->withInput();
                 }
@@ -404,18 +405,18 @@ class PaymentController extends Controller
                     'coupon_id' => $cuponId
                 ]
             );
+            $request->token_bn = $paymentMethod->token_bn;
 
             //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
             if( ! isset($payment->charge_token) ) {
                 $chargeIncluded = $paymentGateway->pay($request);
-                $payment->charge_token = $chargeIncluded->ccCaptureReply->requestID;
+                //dd($chargeIncluded);
+                $payment->charge_token = $chargeIncluded->ccAuthReply->reconciliationID;
 
                 $payment->save();
             }
-            $request->subscriptionID = $paymentMethod->token_bn;
-            $appliedCharge = $paymentGateway->pay($request);
-            if ($appliedCharge->decision == "ACCEPT") {
-                $payment->proof = $appliedCharge->requestID;
+            if ($card->ccCaptureReply->reasonCode == 100) {
+                $payment->proof = $card->ccCaptureReply->reconciliationID;
                 $payment->payment_status = 2;
                 $payment->save();
 
@@ -426,7 +427,8 @@ class PaymentController extends Controller
                 $request->item_name = $sale->plan->getName() . " / $recurrency meses";
 
                 $invoiceData = $paymentProcessor->setInvoiceInfo($request);
-                $factura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
+                //$factura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
+                $factura = true;
 
                 if($factura){
                     $this->facturasDisponibles();
