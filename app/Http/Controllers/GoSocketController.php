@@ -21,8 +21,6 @@ class GoSocketController extends Controller
         	if (!empty($token)) {
                 $ApplicationIdGS = config('etax.applicationidgs');
                 $base64 = base64_encode($ApplicationIdGS.":".$token);
-
-                dd($base64); 
                 $GoSocket = new Client();
                 $APIStatus = $GoSocket->request('GET', "http://api.sandbox.gosocket.net/api/Gadget/GetUser", [
                     'headers' => [
@@ -34,6 +32,7 @@ class GoSocketController extends Controller
                     ],
                     'verify' => false,
                 ]);
+                dd($APIStatus);
                 $user_gs = json_decode($APIStatus->getBody()->getContents(), true);
                 /*
                 $user = IntegracionEmpresa::where("user_token",$user_gs['UserId'])->where("company_token",$user_gs['CurrentAccountId'])->first();
