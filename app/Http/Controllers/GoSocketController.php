@@ -16,7 +16,7 @@ class GoSocketController extends Controller
 {
      
     public function gosocketvalidate(Request $request) {
-        //try{
+        try{
         	$token = $request->token;
         	if (!empty($token)) {
                 $ApplicationIdGS = config('etax.applicationidgs');
@@ -32,9 +32,7 @@ class GoSocketController extends Controller
                     ],
                     'verify' => false
                 ]);
-                dd($APIStatus);
                 $user_gs = json_decode($APIStatus->getBody()->getContents(), true);
-                /*
                 $user = IntegracionEmpresa::where("user_token",$user_gs['UserId'])->where("company_token",$user_gs['CurrentAccountId'])->first();
 
                 if(is_null($user)){
@@ -118,11 +116,11 @@ class GoSocketController extends Controller
             } else {
                 return redirect('/login');
             }
-        /*}catch( \Exception $ex ){
+        }catch( \Exception $ex ){
             return redirect('/login');
         }catch( \Throwable $ex ){
             return redirect('/login');
-        }*/
+        }
 	    
     }
      
