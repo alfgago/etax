@@ -21,9 +21,10 @@ class GoSocketController extends Controller
         	if (!empty($token)) {
 
                 $ApplicationIdGS = config('etax.applicationidgs');
-                
-                dd($ApplicationIdGS);
+
                 $base64 = base64_encode($ApplicationIdGS.":".$token);
+                
+                dd($base64);
                 $GoSocket = new Client();
                 $APIStatus = $GoSocket->request('GET', "http://api.sandbox.gosocket.net/api/Gadget/GetUser", [
                     'headers' => [
