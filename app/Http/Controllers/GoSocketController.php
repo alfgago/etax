@@ -16,7 +16,7 @@ class GoSocketController extends Controller
 {
      
     public function gosocketvalidate(Request $request) {
-        try{
+        //try{
         	$token = $request->token;
         	if (!empty($token)) {
                 $ApplicationIdGS = config('etax.applicationidgs');
@@ -117,11 +117,11 @@ class GoSocketController extends Controller
             } else {
                 return redirect('/b');
             }
-        }catch( \Exception $ex ){
+        /*}catch( \Exception $ex ){
             return redirect('/login');
         }catch( \Throwable $ex ){
             return redirect('/login');
-        }
+        }*/
 	    
     }
      
