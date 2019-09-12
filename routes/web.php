@@ -21,7 +21,7 @@ Auth::routes();
 
 //Cierres de mes
 Route::prefix('gosocket')->group(function() {
-    Route::get('/', 'GoSocketController@gosocketvalidate')->name('GoSocketController.gosocketvalidate');
+    Route::get('/', 'GoSocketController@gosocketValidate')->name('GoSocketController.gosocketValidate');
 });
 
 

@@ -11,11 +11,12 @@ use App\Company;
 use App\Team;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class GoSocketController extends Controller
 {
      
-    public function gosocketvalidate(Request $request) {
+    public function gosocketValidate(Request $request) {
         try{
         	$token = $request->token;
         	if (!empty($token)) {
@@ -116,9 +117,11 @@ class GoSocketController extends Controller
             } else {
                 return redirect('/login');
             }
-        }catch( \Exception $ex ){
+        }catch( \Exception $ex ) {
+            Log::error("Error en login gosocket $ex");
             return redirect('/login');
-        }catch( \Throwable $ex ){
+        }catch( \Throwable $ex ) {
+            Log::error("Error en login gosocket $ex");
             return redirect('/login');
         }
 	    
