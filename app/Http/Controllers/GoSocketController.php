@@ -16,7 +16,7 @@ class GoSocketController extends Controller
 {
      
     public function gosocketvalidate(Request $request) {
-        try{
+       // try{
         	$token = $request->token;
         	if (!empty($token)) {
                 $ApplicationIdGS = config('etax.applicationidgs');
@@ -112,16 +112,16 @@ class GoSocketController extends Controller
                         Cache::forget("cache-currentcompany-$user_login->id");
                     return redirect('/');
                 } else {
-                    return redirect('/login');
+                    return redirect('/a');
                 }
             } else {
-                return redirect('/login');
+                return redirect('/b');
             }
-        }catch( \Exception $ex ){
+        /*}catch( \Exception $ex ){
             return redirect('/login');
         }catch( \Throwable $ex ){
             return redirect('/login');
-        }
+        }*/
 	    
     }
      
