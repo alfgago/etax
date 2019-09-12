@@ -18,6 +18,7 @@ class GoSocketController extends Controller
     public function gosocketvalidate(Request $request) {
        // try{
         	$token = $request->token;
+            dd($token);
         	if (!empty($token)) {
                 $ApplicationIdGS = config('etax.applicationidgs');
                 $base64 = base64_encode($ApplicationIdGS.":".$token);
