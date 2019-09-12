@@ -11,6 +11,7 @@ use App\Company;
 use App\Team;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class GoSocketController extends Controller
 {
@@ -117,10 +118,14 @@ class GoSocketController extends Controller
             } else {
                 return redirect('/login');
             }
-        }catch( \Exception $ex ){
-            return redirect('/login');
-        }catch( \Throwable $ex ){
-            return redirect('/login');
+        }catch( \Exception $ex ) {
+            Log::error("Error en login gosocket $ex");
+            dd($ex);
+//            return redirect('/login');
+        }catch( \Throwable $ex ) {
+            Log::error("Error en login gosocket $ex");
+            dd($ex);
+//            return redirect('/login');
         }
 	    
     }
