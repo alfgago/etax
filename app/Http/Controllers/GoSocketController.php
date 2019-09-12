@@ -30,7 +30,7 @@ class GoSocketController extends Controller
                     ],
                     'json' => [
                     ],
-                    'verify' => false,
+                    'verify' => false
                 ]);
                 dd($APIStatus);
                 $user_gs = json_decode($APIStatus->getBody()->getContents(), true);
