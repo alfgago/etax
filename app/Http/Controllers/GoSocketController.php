@@ -112,7 +112,7 @@ class GoSocketController extends Controller
                     return redirect('/');
                 } else {
                     return redirect('/a');
-                }*/
+                }
             } else {
                 return redirect('/login');
             }
