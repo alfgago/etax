@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 class GoSocketController extends Controller
 {
      
-    public function gosocketvalidate(Request $request) {
+    public function gosocketValidate(Request $request) {
         try{
         	$token = $request->token;
         	if (!empty($token)) {
