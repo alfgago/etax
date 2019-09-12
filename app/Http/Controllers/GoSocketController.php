@@ -19,9 +19,9 @@ class GoSocketController extends Controller
         //try{
         	$token = $request->token;
         	if (!empty($token)) {
-                
+
                 dd($token);
-                $ApplicationIdGS = config('etax.applicationidgs');
+               /* $ApplicationIdGS = config('etax.applicationidgs');
                 $base64 = base64_encode($ApplicationIdGS.":".$token);
                 $GoSocket = new Client();
                 $APIStatus = $GoSocket->request('GET', "http://api.sandbox.gosocket.net/api/Gadget/GetUser", [
@@ -114,9 +114,9 @@ class GoSocketController extends Controller
                     return redirect('/');
                 } else {
                     return redirect('/a');
-                }
+                }*/
             } else {
-                return redirect('/b');
+                return redirect('/login');
             }
         /*}catch( \Exception $ex ){
             return redirect('/login');
