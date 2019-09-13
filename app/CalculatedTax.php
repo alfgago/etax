@@ -144,7 +144,7 @@ class CalculatedTax extends Model
       return $applied;
     }
     
-    
+     
     /**
      * calcularFacturacionPorMesAno
      * Calcula y devuelve los datos del mes para dashboard y reportes

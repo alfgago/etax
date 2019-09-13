@@ -80,7 +80,7 @@ class InvoiceItem extends Model
     
     
     public function getSubtotalParaCalculo() {
-      if( $this->invoice->generation_method == 'XML' ) {
+      if( $this->invoice->generation_method == 'XML' || $this->invoice->generation_method == 'XLSX') {
         if( $this->discount > 0){
           return $this->total - $this->iva_amount;
         }
