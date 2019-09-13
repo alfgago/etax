@@ -106,12 +106,12 @@
                         ?>
                         @if(@$company->repercutidos[0]->id)
                           @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
-                              <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}"  >{{ $tipo['name'] }}</option>
+                              <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}" {{$item->iva_type == $tipo->code ? 'selected' : ''}} >{{ $tipo['name'] }}</option>
                           @endforeach
                           <option class="mostrarTodos" value="1">Mostrar Todos</option>
                         @else
                           @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
-                          <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  >{{ $tipo['name'] }}</option>
+                          <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  {{$item->iva_type == $tipo->code ? 'selected' : ''}}>{{ $tipo['name'] }}</option>
                           @endforeach
                         @endif
                       </select>
@@ -209,7 +209,6 @@ $(document).ready(function(){
         }
       });
     }); 
-
 
 
 </script>
