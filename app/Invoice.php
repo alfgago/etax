@@ -670,7 +670,7 @@ class Invoice extends Model
         );
         
         if( $invoice->id ) {
-          Log::warning( "XML: No se pudo guardar la factura de venta. Ya existe para la empresa." );
+          //Log::warning( "XML: No se pudo guardar la factura de venta. Ya existe para la empresa." );
           return false;
         }
         
