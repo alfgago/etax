@@ -33,7 +33,44 @@
 
     <style>
       
- 
+ .dropzone .dz-preview:hover .dz-details .dz-filename {
+    position: absolute;
+    color: #fff;
+    z-index: 999999;
+    bottom: 25px;
+    left: 2.5%;
+    font-size: 9px;
+    width: 95%;
+    transition: .1s ease all;
+}
+
+.dropzone .dz-preview:hover .dz-details {
+    opacity: 1;
+    z-index: 9999;
+    height: 100%;
+    position: absolute;
+    font-weight: bold;
+    color: #000;
+}
+
+.dropzone .dz-preview:hover .dz-size {
+    display: none;
+}
+
+.dropzone .dz-preview:hover .dz-details .dz-filename span {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.5);
+    color: #000;
+    box-shadow: 0 0 15px rgba(0,0,0,0.25);
+    border: 0;
+    transition: .1s ease all;
+}
+
+.dropzone .form-group.col-md-12 {
+    padding: 0;
+    margin: 0;
+    height: 0;
+}
       
     </style>
 
