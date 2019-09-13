@@ -56,6 +56,7 @@
                <td>
                   <div class="input-validate-iva">
                     <select class="form-control iva_type_all"  placeholder="Seleccione un código eTax" id="iva_type_all"  >
+                      <option value="0">-- Seleccione --</option>
                       <?php
                         $preselectos = array();
                         foreach($company->soportados as $soportado){
@@ -64,7 +65,7 @@
                       ?>
                       @if(@$company->soportados[0]->id)
                         @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
-                            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="all_tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}"  is_identificacion_plena="{{ $tipo['is_identificacion_plena'] }}>{{ $tipo['name'] }}</option>
+                            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="all_tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}"  is_identificacion_plena="{{ $tipo['is_identificacion_plena'] }}">{{ $tipo['name'] }}</option>
                         @endforeach
                         <option class="all_mostrarTodos" value="1">Mostrar Todos</option>
                       @else
@@ -114,12 +115,12 @@
                     <select class="form-control iva_type" name="items[{{ $loop->index }}][iva_type]" placeholder="Seleccione un código eTax" required >
                         @if(@$company->soportados[0]->id)
                         @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
-                            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}"  >{{ $tipo['name'] }}</option>
+                            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}" identificacion="{{ $tipo['is_identificacion_plena'] }}" {{$item->iva_type == $tipo->code ? 'selected' : ''}}>{{ $tipo['name'] }}</option>
                         @endforeach
                         <option class="mostrarTodos" value="1">Mostrar Todos</option>
                       @else
                         @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
-                        <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  >{{ $tipo['name'] }}</option>
+                        <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  identificacion="{{ $tipo['is_identificacion_plena'] }}" {{$item->iva_type == $tipo->code ? 'selected' : ''}} >{{ $tipo['name'] }}</option>
                         @endforeach
                       @endif
                     </select>
