@@ -514,6 +514,7 @@ class Invoice extends Model
           $invoice->reference_number =  $data['numeroReferencia'] ?? 0;
           $invoice->xml_schema =  $data['xmlSchema'] ?? 43;
           $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
+          $invoice->buy_order = isset( $data['ordenCompra'] ) ? $data['ordenCompra'] : null;
   
           //Datos generales y para Hacienda
           if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' 
@@ -680,7 +681,11 @@ class Invoice extends Model
         $invoice->commercial_activity = $arr['CodigoActividad'] ?? 0;
         $invoice->xml_schema = $invoice->commercial_activity ? 43 : 42;
         $invoice->sale_condition = isset($arr['CondicionVenta']) ? $arr['CondicionVenta'] : '01';
-        $invoice->credit_time = isset($arr['PlazoCredito']) ? $arr['PlazoCredito'] : null;
+        try{
+          $invoice->credit_time = isset($arr['PlazoCredito']) ? $arr['PlazoCredito'] : null;
+        }catch( \Exception $e ){
+          $invoice->credit_time = null;
+        }
         //$invoice->credit_time = null;
         $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
         if ( is_array($medioPago) ) {
