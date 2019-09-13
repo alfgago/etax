@@ -377,7 +377,7 @@ class InvoiceUtils
                 }
 
             }
-            $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas - $totalServiciosExonerados;
+            $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas - $totalServiciosExonerados - $totalMercaderiasExonerados;
             $totalExento = $totalServiciosExentos + $totalMercaderiasExentas;
             $totalExonerados = $totalServiciosExonerados + $totalMercaderiasExonerados;
             $totalVenta = $totalGravado + $totalExento + $totalExonerados;
