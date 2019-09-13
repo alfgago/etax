@@ -300,7 +300,7 @@ class CalculatedTax extends Model
         $countInvoiceItems = $invoiceItems->count();
         //Recorre las lineas de factura
         for ($i = 0; $i < $countInvoiceItems; $i++) {
-          try {
+          //try {
             $currInvoice = $invoiceItems[$i]->invoice;
             
             if( !$currInvoice->is_void && $currInvoice->is_authorized && $currInvoice->is_code_validated 
@@ -317,6 +317,8 @@ class CalculatedTax extends Model
               $prodType = $invoiceItems[$i]->product_type;
               $invoiceIva = $invoiceItems[$i]->iva_amount * $currInvoice->currency_rate;
               $currentTotal = $subtotal + $invoiceIva;
+              
+              //$montoDescuento = $invoiceItems[$i]['discount'] ? $this->discountCalculator($invoiceItems[$i]['discount_type'], $invoiceItems[$i]['discount'], $subtotal ) : 0;
               
               $prodPorc = $invoiceItems[$i]->ivaType ? $invoiceItems[$i]->ivaType->percentage : '13';
               $prodType = $prodType ? $prodType : '17';
@@ -497,9 +499,9 @@ class CalculatedTax extends Model
 
             }
             
-          }catch( \Throwable $ex ){
+          /*}catch( \Throwable $ex ){
             //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
-          }
+          }9*/
         }
         
       });
@@ -1263,5 +1265,14 @@ class CalculatedTax extends Model
         list($usec, $sec) = explode(" ", microtime());
         return ((float) $usec + (float)$sec);
     }  
+    
+    private function discountCalculator($descType, $value, $amount) {
+        if($descType == "01" && $value > 0 ) {
+             $discount = $amount * ($value / 100);
+        } else {
+            $discount= $value;
+        }
+        return round($discount,2);
+    }
   
 }

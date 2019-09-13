@@ -334,7 +334,7 @@ class InvoiceUtils
             $totalMercaderiasExonerados = 0;
             $totalDescuentos = 0;
             $totalImpuestos = 0;
-            $totalImpuestosNeto = 0;
+            $totalImpuestoExoneracion = 0;
             $totalIvaDevuelto = 0;
             $itemDetails = json_decode($details);
             //Spe, St, Al, Alc, Cm, I, Os
@@ -370,7 +370,7 @@ class InvoiceUtils
 
                 if ($detail->impuesto_monto !== 'false') {
                     $totalImpuestos += $detail->impuesto_monto;
-                    $totalImpuestosNeto += $detail->impuestoneto;
+                    $totalImpuestoExoneracion += $detail->exoneracion_monto;
                 }
                 if ($data['payment_type'] == '02' && $detail->product_type == 12) {
                     $totalIvaDevuelto += $detail->impuesto_monto;
@@ -382,7 +382,8 @@ class InvoiceUtils
             $totalExonerados = $totalServiciosExonerados + $totalMercaderiasExonerados;
             $totalVenta = $totalGravado + $totalExento + $totalExonerados;
             $totalNeta = $totalVenta - $totalDescuentos;
-            $totalComprobante = $totalNeta + ($totalImpuestos - $totalImpuestosNeto);
+            $totalImpuestos = $totalImpuestos - $totalImpuestoExoneracion;
+            $totalComprobante = $totalNeta + $totalImpuestos;
             
             $isCompanyEmisor = true;
             if ($data['document_type'] == '08') {
@@ -454,7 +455,7 @@ class InvoiceUtils
                 'totventa' => $totalVenta,
                 'totdescuentos' => $totalDescuentos,
                 'totventaneta' => $totalNeta,
-                'totimpuestos' => $totalImpuestos - $totalImpuestosNeto,
+                'totimpuestos' => $totalImpuestos,
                 'totalivadevuelto' => $totalIvaDevuelto,
                 'totcomprobante' => $totalComprobante - $totalIvaDevuelto,
                 'detalle' => $details

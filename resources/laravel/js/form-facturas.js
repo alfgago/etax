@@ -44,6 +44,8 @@
       $('#item_iva_amount').val( 0 );
     }
 
+    calcularMontoExoneracion();
+
   }
 
   window.calcularConIvaManual = function(){
@@ -413,11 +415,14 @@
     var monto_iva = 0;
     var total = 0;
     var iva_devuelto = 0;
+    var iva_exonerado = 0;
+    
     $('.item-tabla').each(function(){
       var s = parseFloat($(this).find('.subtotal').val());
       var m = parseFloat($(this).find('.monto_iva').val());
       var t = parseFloat($(this).find('.total').val());
       var tp = parseFloat($(this).find('.tipo_producto').val());
+      var ex = parseFloat($(this).find('.montoExoneracion').val());
 
       if ($('#medio_pago').val() === '02' && tp === 12) {
           iva_devuelto += m;
@@ -425,12 +430,25 @@
       subtotal += s;
       monto_iva += m;	
       total += t;	
+      iva_exonerado += ex;	
     });
     
     $('#subtotal').val(subtotal);
     $('#monto_iva').val(monto_iva);
-    $('#total').val(total - iva_devuelto);
+    $('#total').val(total - iva_devuelto - iva_exonerado);
+    
     $('#total_iva_devuelto').val(iva_devuelto);
+    $('#total_iva_exonerado').val(iva_exonerado);
+    
+    $('#total_iva_devuelto-cont').hide();
+    if(iva_devuelto > 0){
+      $('#total_iva_devuelto-cont').show();
+    }
+    
+    $('#total_iva_exonerado-cont').hide();
+    if(iva_exonerado > 0){
+      $('#total_iva_exonerado-cont').show();
+    }
   }
   
   window.fixComas = function( numero ) {
@@ -481,6 +499,9 @@
     }
     
    window.calcularMontoExoneracion = function() {
+      var hasExoneracion = false;
+      var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184"];
+      if( codigosConExoneracion.includes( $('#tipo_iva').val() ) ){
         var porcentajeExonerado = $('#porcentajeExoneracion').val();
         if(porcentajeExonerado > 0) {
             var monto_iva_detalle = $('#item_iva_amount').val();
@@ -492,8 +513,8 @@
             $('#montoExoneracion').val(monto);
             $('#impuestoNeto').val(impNeto);
             $('#montoTotalLinea').val(montoTotal);
-
         }
+      }
     }
     
     window.toggleCamposExoneracion = function() {

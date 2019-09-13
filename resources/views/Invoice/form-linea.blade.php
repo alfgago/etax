@@ -230,19 +230,19 @@
 
             <div class="form-group col-md-2">
                 <label for="porcentajeExoneracion">% *</label>
-                <input type="number" class="form-control" max="100" min="0" maxlength="3" id="porcentajeExoneracion" placeholder="100%" value="100" onkeyup="calcularMontoExoneracion();">
+                <input type="number" class="form-control" max="100" min="0" maxlength="3" id="porcentajeExoneracion" placeholder="100%" value="100" onchange="calcularMontoExoneracion();">
             </div>
             <div class="form-group col-md-3">
                 <label for="montoExoneracion">Monto Exonerado *</label>
-                <input type="text" class="form-control" id="montoExoneracion"  readonly>
+                <input type="text" class="form-control" id="montoExoneracion" readonly>
             </div>
             <div class="form-group col-md-3">
                 <label for="impuestoNeto">Impuesto Neto </label>
-                <input type="text" class="form-control" id="impuestoNeto"  readonly>
+                <input type="text" class="form-control" id="impuestoNeto" readonly>
             </div>
             <div class="form-group col-md-4">
                 <label for="montoTotalLinea">Monto Total Linea </label>
-                <input type="text" class="form-control" id="montoTotalLinea"  readonly>
+                <input type="text" class="form-control" id="montoTotalLinea" readonly>
             </div>
         </div>
     </div>
