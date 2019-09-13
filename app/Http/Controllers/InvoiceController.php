@@ -18,6 +18,7 @@ use App\Bill;
 use App\BillItem;
 use App\Exports\InvoiceExport;
 use App\Exports\LibroVentasExport;
+use App\Exports\LibroVentasExportSM;
 use App\Imports\InvoiceImport;
 use App\Imports\InvoiceImportSM;
 use GuzzleHttp\Exception\RequestException;
@@ -701,6 +702,10 @@ class InvoiceController extends Controller
     }
     
     public function exportLibroVentas( $year, $month ) {
+        $company = currentCompanyModel();
+        if( $company->id == 1110 ){
+            return Excel::download(new LibroVentasExportSM($year, $month), 'libro-ventas.xlsx');
+        }
         return Excel::download(new LibroVentasExport($year, $month), 'libro-ventas.xlsx');
     }
     
@@ -769,7 +774,7 @@ class InvoiceController extends Controller
                         $totalLinea = $row['totallinea'];
                         $montoDescuento = isset($row['montodescuento']) ? $row['montodescuento'] : 0;
                         $codigoEtax = $row['codigoivaetax'];
-                        $categoriaHacienda = isset($row['categoriahacienda']) ? $row['categoriahacienda'] : null;
+                        $categoriaHacienda = isset($row['categoriahacienda']) ? $row['categoriahacienda'] : (isset($row['categoriadeclaracion']) ? $row['categoriadeclaracion'] : null);
                         $montoIva = (float)$row['montoiva'];
                         $acceptStatus = isset($row['aceptada']) ? $row['aceptada'] : 1;
                         
@@ -785,7 +790,6 @@ class InvoiceController extends Controller
                         $montoExoneracion = $row['montoexoneracion'] ?? 0;
                         $impuestoNeto = $row['impuestoneto'] ?? 0;
                         $totalMontoLinea = $row['totalmontolinea'] ?? 0;
-                        
                         
                         $arrayInsert = array(
                             'metodoGeneracion' => $metodoGeneracion,
@@ -833,6 +837,7 @@ class InvoiceController extends Controller
                             'isAuthorized' => true,
                             'codeValidated' => true
                         );
+                        
                         $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
                     }
                 }
@@ -1469,7 +1474,8 @@ class InvoiceController extends Controller
         
                             //Datos de linea
                             $codigoProducto = $row['num_objeto'] ?? 'N/A';
-                            $detalleProducto =isset($row['descripcion'])  ? $row['descripcion'] : $codigoProducto;
+                            $ordenCompra = $row['num_factura'] ?? 'No indica';
+                            $detalleProducto = isset($descripcion)  ? $descripcion : $codigoProducto;
                             $unidadMedicion = 'Os';
                             $cantidad = isset($row['cantidad']) ? $row['cantidad'] : 1;
                             $precioUnitario = $row['precio_unitario'];
@@ -1546,7 +1552,8 @@ class InvoiceController extends Controller
                                 'categoriaHacienda' => trim($categoriaHacienda),
                                 'acceptStatus' => trim($acceptStatus),
                                 'isAuthorized' => true,
-                                'codeValidated' => true
+                                'codeValidated' => true,
+                                'ordenCompra' => $ordenCompra
                             );
                             
                             $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);

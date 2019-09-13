@@ -336,7 +336,7 @@ class Bill extends Model
         );
         
         if( $bill->id ) {
-          Log::warning( "XML: No se pudo guardar la factura de compra. Ya existe para la empresa." );
+          //Log::warning( "XML: No se pudo guardar la factura de compra. Ya existe para la empresa." );
           return false;
         }
         
@@ -411,7 +411,13 @@ class Bill extends Model
                 $provinciaProveedor = $arr['Emisor']['Ubicacion']['Provincia'];
                 $cantonProveedor = $arr['Emisor']['Ubicacion']['Canton'];
                 $distritoProveedor = $arr['Emisor']['Ubicacion']['Distrito'];
-                $otrasSenas = $arr['Emisor']['Ubicacion']['OtrasSenas'] ?? null;
+                try{
+                  if(is_array($arr['Emisor']['Ubicacion']['OtrasSenas'])){
+                      $otrasSenas = null;
+                  }else{
+                      $otrasSenas = $arr['Emisor']['Ubicacion']['OtrasSenas'] ?? null;
+                  }
+                }catch(\Exception $e){ $otrasSenas = null; }
                 
                 $zipProveedor = 0;
                 if( $cantonProveedor ) {

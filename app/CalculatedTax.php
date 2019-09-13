@@ -144,7 +144,7 @@ class CalculatedTax extends Model
       return $applied;
     }
     
-    
+     
     /**
      * calcularFacturacionPorMesAno
      * Calcula y devuelve los datos del mes para dashboard y reportes
@@ -155,7 +155,7 @@ class CalculatedTax extends Model
      * @bodyParam prorrataOperativa required
      * @return App\CalculatedTax
      */
-    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa, $forceRecalc = false ) {
+    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa, $forceRecalc = true ) {
       
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
@@ -312,7 +312,7 @@ class CalculatedTax extends Model
               
               $invoiceItems[$i]->fixIvaType();
               
-              $subtotal = $invoiceItems[$i]->subtotal * $currInvoice->currency_rate;
+              $subtotal = $invoiceItems[$i]->getSubtotalParaCalculo() * $currInvoice->currency_rate;
               $ivaType = $invoiceItems[$i]->iva_type;
               $prodType = $invoiceItems[$i]->product_type;
               $invoiceIva = $invoiceItems[$i]->iva_amount * $currInvoice->currency_rate;
@@ -1262,6 +1262,6 @@ class CalculatedTax extends Model
     private function microtime_float(){
         list($usec, $sec) = explode(" ", microtime());
         return ((float) $usec + (float)$sec);
-    }  
+    } 
   
 }
