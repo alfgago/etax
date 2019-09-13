@@ -882,9 +882,9 @@ class Invoice extends Model
             $unidadMedicion = $linea['UnidadMedida'];
             $cantidad = $linea['Cantidad'];
             $precioUnitario = (float)$linea['PrecioUnitario'];
+            $montoDescuento = array_key_exists('MontoDescuento', $linea) ? $linea['MontoDescuento'] : 0;
             $subtotalLinea = (float)$linea['SubTotal'];
             $totalLinea = (float)$linea['MontoTotalLinea'];
-            $montoDescuento = array_key_exists('MontoDescuento', $linea) ? $linea['MontoDescuento'] : 0;
             $codigoEtax = 'B103'; //De momento asume que todo en 4.2 es al 13%.
             $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
             $porcentajeIva = null;
@@ -926,7 +926,7 @@ class Invoice extends Model
               'unit_price' => $precioUnitario,
               'subtotal' => $subtotalLinea,
               'total' => $totalLinea,
-              'discount_type' => 'No indica',
+              'discount_type' => '01',
               'discount_reason' => 'No indica',
               'discount_percentage' => $montoDescuento,
               'discount' => $montoDescuento,
@@ -1028,7 +1028,6 @@ class Invoice extends Model
             $this->currency_rate = floatval( str_replace(",","", $invoiceReference->currency_rate ));
             $this->total = floatval( str_replace(",","", $invoiceReference->total ));
             $this->iva_amount = floatval( str_replace(",","", $invoiceReference->iva_amount ));
-
 
             $this->client_first_name = $invoiceReference->client_first_name;
             $this->client_last_name = $invoiceReference->client_last_name;
