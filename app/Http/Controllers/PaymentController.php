@@ -221,7 +221,7 @@ class PaymentController extends Controller
      *
      */
     public function confirmPayment(Request $request){
-        //try{
+        try{
             $user = auth()->user();
             $paymentProcessor = new PaymentProcessor();
             $paymentGateway = new CybersourcePaymentProcessor();
@@ -360,13 +360,16 @@ class PaymentController extends Controller
                 $iv = 0;
             }
             //Datos para cybersource
+
             $request->amount = $amount;
             $request->referenceCode = $request->product_id;
+            $cardData = $paymentProcessor->getCardNameType($request->number);
+            $request->cardType = $cardData->type;
 
             //Agrega la tarjeta. Crea una solicitud de suscripcion en Cybersource, con un Fee
             $card = $paymentGateway->createCardToken($request);
             $last_4digits = substr($request->number, -4);
-            if($card->decision == 'ACCEPT'){
+            if($card->decision === 'ACCEPT'){
                 //Se logró agregar la tarjeta y crear el pago, entonces hay un nuevo payment method y un payment.
                 $firstDigits = substr($request->number, 0, 6);
                 $first4 = substr($firstDigits, 0, 4);
@@ -439,10 +442,10 @@ class PaymentController extends Controller
                 return redirect()->back()->withError($mensaje)->withInput();
             }
 
-        /*}catch( \Throwable $e ){
+        }catch( \Throwable $e ){
             Log::error( "Error en suscripciones ". $e->getMessage() );
             return redirect()->back()->withError("Hubo un error al realizar la suscripción. Por favor reintente o contacte a soporte.")->withInput();
-        }*/
+        }
 
     }
     /**

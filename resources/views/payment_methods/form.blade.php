@@ -9,7 +9,11 @@
         margin-left: 2%;
         margin-top: 15%;
     }
-</style><div class="col-md-12 offset-1">
+    .jp-card-container {
+        margin-left: 0 !important;
+    }
+</style>
+<div class="col-md-12">
     <div class="row">
         <div class="col-md-6">
             <div class="form-row">
@@ -26,36 +30,42 @@
                     <label for="cardCcv">CVV</label>
                     <input type="text" inputmode="numeric" class="form-control checkEmpty" name="cvc" id="cvc" placeholder="CVV:" required>
                 </div>
-                <div class="form-group col-md-12" style="white-space: nowrap;">
-                    <label for="first_name">Nombre:</label>
-                    <input type="text" inputmode="text" class="form-control checkEmpty" value="{{$paymentMethod->name}}" name="first_name" id="first_name" placeholder="Nombre tarjeta-habiente:" required>
+                <div class="form-group col-md-6" style="white-space: nowrap;">
+                    <label for="first_name_card">Nombre:</label>
+                    <input type="text" inputmode="text" class="form-control checkEmpty" value="{{$paymentMethod->name}}" name="first_name_card" id="first_name_card" placeholder="Nombre tarjeta-habiente:" required>
                 </div>
-                <div class="form-group col-md-12" style="white-space: nowrap;">
-                    <label for="last_name">Apellido:</label>
-                    <input type="text" inputmode="text" class="form-control checkEmpty" value="{{$paymentMethod->last_name}}" name="last_name" id="last_name" placeholder="Apellido tarjeta-habiente:" required>
+                <div class="form-group col-md-6" style="white-space: nowrap;">
+                    <label for="last_name_card">Apellido:</label>
+                    <input type="text" inputmode="text" class="form-control checkEmpty" value="{{$paymentMethod->last_name}}" name="last_name_card" id="last_name_card" placeholder="Apellido tarjeta-habiente:" required>
                 </div>
             </div>
             <div class="btn-holder">
                 <h6>Nota: Los datos sensibles de su tarjeta no se guardar&aacute;n en nuestra base de datos, ser&aacute;n utilizados solamente para procesar sus pagos</h6>
             </div>
         </div>
+        <input type="text" hidden id="IpAddress" name="IpAddress">
+        <input type="text" hidden id="deviceFingerPrintID" name="deviceFingerPrintID">
         <div class="vl"></div>
         <div class="col-md-5">
             <div class='card-wrapper newCard'></div>
         </div>
     </div>
 </div>
-<input type="text" hidden id="cardMonth" name="cardMonth">
-<input type="text" hidden id="cardYear" name="cardYear">
 <input type="text" hidden id="Id" name="Id" value="{{$Id}}">
+<script src="../../assets/js/cybs_devicefingerprint.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.css" />
 <script type="text/javascript">
+    $("#deviceFingerPrintID").val(cybs_dfprofiler("tc_cr_011007172","test"));
+    //document.write('Session Id <input type="text" name="deviceFingerprintID" value="' + cybs_dfprofiler("tc_cr_01100XXXX","test") + '">');
+    $.getJSON('https://api.ipify.org?format=json', function(data){
+        $("#IpAddress").val(data.ip);
+    });
     var card = new Card({
         form: 'form.tarjeta',
         container: '.card-wrapper',
         formSelectors: {
-            nameInput: 'input[name="first_name"], input[name="last_name"]'
+            nameInput: 'input[name="first_name_card"], input[name="last_name_card"]'
         }
     });
     function CambiarNombre() {

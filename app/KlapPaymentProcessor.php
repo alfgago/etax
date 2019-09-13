@@ -123,7 +123,7 @@ class KlapPaymentProcessor extends PaymentProcessor
                 'applicationName' => config('etax.klap_app_name'),
                 'userName' => $data->user_name,
                 'userPassword' => 'Etax-' . $data->user_id . 'Klap',
-                'cardTokenId' => $data->token_bn,
+                'cardTokenId' => $data->token,
                 'cardDescription' => $data->cardDescription,
                 'primaryAccountNumber' => $data->cardNumber,
                 "expirationMonth" => (int) $data->cardMonth,
@@ -133,7 +133,7 @@ class KlapPaymentProcessor extends PaymentProcessor
             'verify' => false,
         ]);
         $card = json_decode($cardCreationResult->getBody()->getContents(), true);
-
+        return $card;
     }
     /**
      * Payment creation

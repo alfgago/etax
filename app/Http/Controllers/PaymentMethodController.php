@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\CybersourcePaymentProcessor;
 use App\PaymentMethod;
+use App\PaymentProcessor;
 use App\Team;
+use App\User;
 use App\Utils\PaymentUtils;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -57,7 +59,12 @@ class PaymentMethodController extends Controller
      *
      */
     public function createView(){
-        return view('payment_methods/CreatePaymentMethod');
+        $user = auth()->user();
+        if($user->zip){
+            return view('payment_methods/CreatePaymentMethod');
+        }else{
+            return redirect()->back()->withErrors('Debe actualizar la información de su usuario para continuar');
+        }
     }
     /**
      * Show the form for creating a new resource.
@@ -67,67 +74,36 @@ class PaymentMethodController extends Controller
     public function create(Request $request){
         $user = auth()->user();
         $request->number = preg_replace('/\s+/', '',  $request->number);
+        $paymentProcessor = new PaymentProcessor();
         $payment_gateway = new CybersourcePaymentProcessor();
-        $cards = array(
-            $request->number
-        );
-        foreach ($cards as $c) {
-            $check = $payment_gateway->checkCC($c, true);
-            $typeCard = $check;
-        }
-        if(isset($typeCard)){
-            switch ($typeCard) {
-                case "Visa":
-                    $cardType = '001';
-                    $nameCard = "Visa";
-                break;
-                case false:
-                    $cardType = '002';
-                    $nameCard = "Mastercard";
-                break;
-                case "American Express":
-                    $cardType = '003';
-                    $nameCard = "American Express";
-                break;
-            }
-            $cardYear = substr($request->expiry, -2);
-            $cardMonth = substr($request->expiry, 0, 2);
-            $cardBn = new Client();
-            $cardCreationResult = $cardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserIncludeCard?applicationName=string&userName=string&userPassword=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
-                'headers' => [
-                    'Content-Type' => "application/json",
-                ],
-                'json' => [
-                    'applicationName' => config('etax.klap_app_name'),
-                    'userName' => $user->user_name,
-                    'userPassword' => 'Etax-' . $user->id . 'Klap',
-                    'cardDescription' => $nameCard,
-                    'primaryAccountNumber' => $request->number,
-                    "expirationMonth" => $cardMonth,
-                    "expirationYear" => '20' . $cardYear,
-                    "verificationValue" => $request->cvc
-                ],
-                'verify' => false,
-            ]);
-            $card = json_decode($cardCreationResult->getBody()->getContents(), true);
+        if(isset($request->number)){
+            $request->request->add(['cardCity' => $request->street1]);
+            $request->request->add(['cardState' => 'San Jose']);
+            $request->request->add(['country' => 'CR']);
+            $request->request->add(['zip' => $user->zip]);
+            $request->request->add(['email' => $user->email]);
+            $request->request->add(['user_id' => $user->id]);
+            $newCard = $payment_gateway->createTokenWithoutFee($request);
 
-            if ($card['apiStatus'] == 'Successful') {
-                $last_4digits = substr($request->number, -4);
+            if ($newCard->decision === 'ACCEPT') {
                 $paymentMethod = PaymentMethod::create([
                     'user_id' => $user->id,
-                    'name' => $request->first_name,
-                    'last_name' => $request->last_name,
-                    'last_4digits' => $last_4digits,
-                    'masked_card' => $card['maskedCard'],
-                    'due_date' => $request->cardMonth . ' ' . $request->cardYear,
-                    'token_bn' => $card['cardTokenId']
+                    'name' => $request->first_name_card,
+                    'last_name' => $request->last_name_card,
+                    'last_4digits' => substr($request->number, -4),
+                    'masked_card' => $paymentProcessor->getMaskedCard($request->number),
+                    'due_date' => $request->expiry,
+                    'token_bn' => $newCard->paySubscriptionCreateReply->subscriptionID,
+                    'payment_gateway' => 'cybersource'
                 ]);
-                return redirect()->back()->withMessage('Método de pago creado');
+                $cantidad = PaymentMethod::where('user_id', auth()->user()->id)->get()->count();
+                //return view('payment_methods/index')->with('cantidad', $cantidad);
+                return redirect('/payments-methods')->withMessage('Creado')->with('cantidad', $cantidad);
             } else {
                 return redirect()->back()->withErrors('No se aprobó esta tarjeta');
             }
         }else{
-            return redirect()->back()->withErrors('Solamente se permiten tarjetas Visa o MasterCard');
+            return redirect()->back()->withErrors('Debe ingresar todos los datos');
         }
     }
     /**
@@ -136,7 +112,6 @@ class PaymentMethodController extends Controller
      *
      */
     public function paymentMethodTokenUpdateView($id){
-        $subscription = getCurrentSubscription();
         $paymentMethod = PaymentMethod::find($id);
         return view('payment_methods/updatePaymentMethods')->with('paymentMethod', $paymentMethod)
             ->with('Id', $id);
@@ -147,64 +122,35 @@ class PaymentMethodController extends Controller
      *
      */
     public function tokenUpdate(Request $request){
-        $paymentUtils = new PaymentUtils();
-        $request->number = preg_replace('/\s+/', '',  $request->number);
-        $cards = array(
-            $request->number
-        );
-        foreach($cards as $c){
-            $check = $paymentUtils->checkCC($c, true);
-            $typeCard = $check;
-        }
-        switch ($typeCard){
-            case "Visa":
-                $cardType = '001';
-                break;
-            case "Mastercard":
-                $cardType = '002';
-                break;
-            case "American Express":
-                $cardType = '003';
-                break;
-        }
-        $user = auth()->user();
         $paymentMethod = PaymentMethod::find($request->Id);
-        $bnStatus = $paymentUtils->statusBNAPI();
-        if($bnStatus['apiStatus'] == 'Successful'){
-            $cardBn = new Client();
-            $cardCreationResult = $cardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserUpdateCard?applicationName=string&userName=string&userPassword=string&cardTokenId=string&cardDescription=string&primaryAccountNumber=string&expirationMonth=int&expirationYear=int&verificationValue=int", [
-                'headers' => [
-                    'Content-Type'  => "application/json",
-                ],
-                'json' => [
-                    'applicationName' => config('etax.klap_app_name'),
-                    'userName' => $user->user_name,
-                    'userPassword' => 'Etax-' . $user->id . 'Klap',
-                    'cardTokenId' => $paymentMethod->token_bn,
-                    "cardDescription" => $typeCard,
-                    "primaryAccountNumber" => $request->number,
-                    "expirationMonth" => $request->cardMonth,
-                    "expirationYear" => '20' . $request->cardYear,
-                    "verificationValue" => $request->cvc
-                ],
-                'verify' => false,
-            ]);
-            $card = json_decode($cardCreationResult->getBody()->getContents(), true);
-            if($card['isApproved'] == true) {
-                $last_4digits = substr($request->number, -4);
-                $due_date = $request->cardMonth . ' ' . $request->cardYear;
-                $paymentMethod->last_4digits = $last_4digits;
-                $paymentMethod->due_date = $due_date;
-                $paymentMethod->updated_by = $user->id;
-                $paymentMethod->masked_card = $card['masked_card'];
-                $paymentMethod->save();
-                return redirect()->back()->withMessage('Método de pago actualizado');
-            }else{
-                return redirect()->back()->withError('No se pudo actualizar el metodo de pago');
+        $user = auth()->user();
+
+        $request->number = preg_replace('/\s+/', '', $request->number);
+        $request->request->add(['user_name' => $user->user_name]);
+        $request->request->add(['user_id' => $user->id]);
+        $request->request->add(['token' => $paymentMethod->token_bn]);
+        dd($request);
+        $paymentProcessor = new PaymentProcessor();
+        $paymentGateway = $paymentProcessor->selectPaymentGateway($paymentMethod->payment_gateway);
+        $updatedCard = $paymentGateway->updateCardToken($request);
+        if (gettype($updatedCard) == 'array') {
+            if ($updatedCard['apiStatus'] !== 'Successful') {
+                return redirect()->back()->withError('No se actualizó el método de pago');
             }
-        }else{
-            return redirect()->back()->withError('Transacción no disponible en este momento');
+        } else if (gettype($updatedCard) == 'object'){
+            if ($updatedCard->decision !== 'ACCEPT') {
+                return redirect()->back()->withError('No se actualizó el método de pago');
+            }
         }
+        $paymentMethod->last_4digits = substr($request->number, -4);
+        $paymentMethod->due_date = $request->expiry;
+        $paymentMethod->updated_by = $user->id;
+        $paymentMethod->masked_card = $paymentProcessor->getMaskedCard($request->number);
+        $paymentMethod->token_bn =  $updatedCard->paySubscriptionUpdateReply->subscriptionID ?? $paymentMethod->token_bn;
+
+        $paymentMethod->save();
+        $cantidad = PaymentMethod::where('user_id', auth()->user()->id)->get()->count();
+        return view('payment_methods/index')->with('cantidad', $cantidad);
     }
     /**
      *tokenDelete

@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-    <div class="row">
+    <div class="row form-container">
         <div class="col-xl-9 col-lg-12 col-md-12">
 
             <form method="POST" action="/payment-methods/payment-method-token-update" class="tarjeta">
