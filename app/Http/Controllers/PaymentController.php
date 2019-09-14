@@ -402,7 +402,8 @@ class PaymentController extends Controller
                     'payment_method_id' => $paymentMethod->id,
                     'payment_date' => Carbon::parse(now('America/Costa_Rica')),
                     'amount' => $amount,
-                    'coupon_id' => $cuponId
+                    'coupon_id' => $cuponId,
+                    'payment_gateway' => 'cybersource'
                 ]
             );
             $request->request->add(['token_bn' => $paymentMethod->token_bn]);
@@ -680,7 +681,8 @@ class PaymentController extends Controller
                 'payment_status' => 2,
                 'amount' => 0,
                 'charge_token' => 'N/A',
-                'proof' => "Transferencia"
+                'proof' => "Transferencia",
+                'payment_gateway' => 'bank'
             ]
         );
 

@@ -336,7 +336,8 @@ class CybersourcePaymentProcessor extends PaymentProcessor
                     'payment_date' => $date,
                     'amount' => $request->amount,
                     'proof' => $chargeCreated->requestID,
-                    'payment_status' => 2
+                    'payment_status' => 2,
+                    'payment_gateway' => 'cybersource'
                 ]
             );
             $sale->status = 1;

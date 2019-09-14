@@ -151,7 +151,8 @@ class KlapPaymentProcessor extends PaymentProcessor
                 'payment_date' => $date,
                 'payment_method_id' => $data->paymentMethodId,
                 'amount' => $data->amount,
-                'proof' => 'pending -' . $data->description
+                'proof' => 'pending -' . $data->description,
+                'payment_gateway' => 'klap'
             ]
         );
         $appCharge = new Client();
@@ -239,7 +240,8 @@ class KlapPaymentProcessor extends PaymentProcessor
                     [
                         'payment_method_id' => $paymentMethod->id,
                         'payment_date' => $date,
-                        'amount' => $request->producto_price
+                        'amount' => $request->producto_price,
+                        'payment_gateway' => 'klap'
                     ]
                 );
                 //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
