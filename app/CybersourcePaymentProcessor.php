@@ -309,15 +309,12 @@ class CybersourcePaymentProcessor extends PaymentProcessor
      *
      */
     public function comprarProductos($request){
-        //dd($request);
         $paymentMethod = PaymentMethod::where('id', $request->payment_method)->first();
         $user = auth()->user();
-        $data = new stdClass();
-        $data->amount = $request->amount;
-        $data->referenceCode = $request->product_id;
-        $data->token_bn = $paymentMethod->token_bn;
+        $request->request->add(['referenceCode' => $request->referenceCode]);
+        $request->request->add(['token_bn' => $paymentMethod->token_bn]);
 
-        $chargeCreated = $this->createPayment($data);
+        $chargeCreated = $this->createPayment($request);
 
         if($chargeCreated->decision=== 'ACCEPT'){
             $company = currentCompanyModel();

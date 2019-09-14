@@ -363,6 +363,7 @@ class PaymentController extends Controller
 
             $request->request->add(['referenceCode' => $request->product_id]);
             $request->request->add(['amount' => $amount]);
+            $request->request->add(['iva_amount' => $iv]);
 
             $cardData = $paymentProcessor->getCardNameType($request->number);
             $request->request->add(['cardType' => $cardData->type]);
@@ -386,7 +387,6 @@ class PaymentController extends Controller
             } else {
                 $paymentMethod = PaymentMethod::where('user_id', $user->id)
                     ->where('last_4digits', $last_4digits)
-                    ->where('payment_gateway', 'cybersource')
                     ->first();
                 if( ! isset($paymentMethod) ) {
                     return redirect()->back()->withError("El método de pago no pudo ser validado.")->withInput();
@@ -477,14 +477,13 @@ class PaymentController extends Controller
         $iv = $subtotal * 0.13;
         $amount = $subtotal + $iv;
         $request->request->add(['amount' => $amount]);
-        $request->request->add(['product_id' => $product_id]);
+        $request->request->add(['referenceCode' => $product_id]);
         $request->request->add(['product_name' => $product->name]);
         $payment_info = explode('- ', $request->payment_method);
-        $payment_id = $payment_info[0];
-        $request->request->add(['payment_method_id' => $payment_id]);
+        $request->request->add(['payment_method' => $payment_info[0]]);
         $paymentProcessor = new PaymentProcessor();
         $payment_gateway = $paymentProcessor->selectPaymentGateway($payment_info[1]);
-        if(isset($payment_id)){
+        if(isset($payment_gateway)){
             $pagoProducto = $payment_gateway->comprarProductos($request);
             if($pagoProducto){
                 $client = \App\Client::where('company_id', $company->id)->where('id_number', $request->id_number)->first();
@@ -529,7 +528,7 @@ class PaymentController extends Controller
      *
      */
     public function comprarContabilidades(Request $request){
-        //try{
+        try{
             if(!$request->payment_method){
                 return redirect()->back()->withErrors('Debe seleccionar un método de pago');
             }
@@ -602,12 +601,14 @@ class PaymentController extends Controller
                 $iva_amount = $total * 0.13;
                 $amount = $iva_amount + $total_extras;
                 $request->request->add(['subtotal' => $total_extras]);
+                $request->request->add(['token_bn' => $payment_method->token_bn]);
                 $request->request->add(['unit_price' => $total_extras]);
                 $request->request->add(['iva_amount' => $iva_amount]);
                 $request->request->add(['amount' => $amount]);
                 $request->request->add(['amount' => $amount]);
                 $request->request->add(['total' => $request->amount]);
                 $request->request->add(['item_code' => $sale->etax_product_id]);
+                $request->request->add(['product_id' => $sale->etax_product_id]);
                 $request->request->add(['item_name' => "Contabilidades extra"]);
                 $request->request->add(['descuento' => 0]);
                 $request->request->add(['expiry' => Carbon::parse(now('America/Costa_Rica'))->addMonths(1)]);
@@ -620,14 +621,12 @@ class PaymentController extends Controller
                 $request->request->add(['client_code' => $client->id]);
                 $request->request->add(['client_id_number' => $client->id_number]);
                 $request->request->add(['client_id' => $client->id_number]);
-                $request->request->add(['tipo_persona' => $client->type]);
+                $request->request->add(['tipo_persona' => $client->tipo_persona]);
 
-                //dd($request);
                 $chargeCreated = $payment_gateway->comprarProductos($request);
                 if($chargeCreated){
                     $invoiceData = $payment_gateway->setInvoiceInfo($request);
-                    dd($invoiceData);
-                    //$procesoFactura = $paymentProcessor->crearFacturaClienteEtax($invoiceData);
+                    $procesoFactura = $paymentProcessor->crearFacturaClienteEtax($invoiceData);
                     $company->save();
                     return redirect()->back()->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
                 }else{
@@ -636,10 +635,10 @@ class PaymentController extends Controller
             }else{
                 return redirect()->back()->withErrors('No se pudo procesar el pago');
             }
-        /*}catch ( \Exception $e){
+        }catch ( \Exception $e){
             Log::error('Error al anular facturar -->'.$e);
             return redirect()->back()->withErrors('Hubo un error con el pago');
-        }*/
+        }
     }
     /**
      * skipPaymentCoupon

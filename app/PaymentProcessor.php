@@ -387,7 +387,7 @@ class PaymentProcessor extends Model
         $invoiceData->expiry = $request->expiry;
         $invoiceData->amount = $request->amount;
         $invoiceData->subtotal = $request->subtotal;
-        $invoiceData->iva_amount = $request->iv;
+        $invoiceData->iva_amount = $request->iva_amount;
         $invoiceData->discount_reason = $request->razonDescuento;
 
         $item = new stdClass();
@@ -396,8 +396,8 @@ class PaymentProcessor extends Model
         $item->descuento = $request->montoDescontado;
         $item->discount_reason = $request->razonDescuento;
         $item->cantidad = 1;
-        $item->iva_amount = $request->iv;
-        $item->unit_price = $request->costo;
+        $item->iva_amount = $request->iva_amount;
+        $item->unit_price = $request->subtotal;
         $item->subtotal = $request->subtotal;
         $item->total = $request->amount;
 

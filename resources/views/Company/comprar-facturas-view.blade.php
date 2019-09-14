@@ -184,6 +184,7 @@
     </div>
 @endsection
 @section('footer-scripts')
+    <script src="../assets/js/cybs_devicefingerprint.js"></script>
     <script>
         $("#deviceFingerPrintID").val(cybs_dfprofiler("tc_cr_011007172","test"));
         $.getJSON('https://api.ipify.org?format=json', function(data){
@@ -207,5 +208,5 @@
         @endif
     });
 </script>
-<script src="../assets/js/cybs_devicefingerprint.js"></script>
+
 @endsection
