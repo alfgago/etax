@@ -209,15 +209,15 @@ class KlapPaymentProcessor extends PaymentProcessor
      *
      *
      */
-    public function comprarProductos($request, $producto, $amount){
+    public function comprarProductos($request){
         $bnStatus = $this->statusBNAPI();
         if($bnStatus['apiStatus'] == 'Successful'){
             $date = Carbon::parse(now('America/Costa_Rica'));
             $user = auth()->user();
             $data = new stdClass();
-            $data->description = 'Compra de ' . $producto->name . ' eTax';
+            $data->description = 'Compra de ' . $request->producto_name . ' eTax';
             $data->user_name = $user->user_name;
-            $data->amount = $amount;
+            $data->amount = $request->amount;
             $chargeCreated = $this->paymentIncludeCharge($data);
 
             if($chargeCreated['apiStatus'] == "Successful"){
@@ -227,9 +227,9 @@ class KlapPaymentProcessor extends PaymentProcessor
                 $sale = Sales::updateOrCreate([
                     "user_id" => $user->id,
                     "company_id" => $company->id,
-                    "etax_product_id" => $producto->id,
+                    "etax_product_id" => $request->producto_id,
                     "status" => 2,
-                    "recurrency" => false
+                    "recurrency" => '0'
                 ]);
                 $payment = Payment::updateOrCreate(
                     [
@@ -239,7 +239,7 @@ class KlapPaymentProcessor extends PaymentProcessor
                     [
                         'payment_method_id' => $paymentMethod->id,
                         'payment_date' => $date,
-                        'amount' => $producto->price
+                        'amount' => $request->producto_price
                     ]
                 );
                 //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
@@ -390,6 +390,7 @@ class KlapPaymentProcessor extends PaymentProcessor
      *
      */
     public function deletePaymentMethod($paymentMethodId){
+
         $paymentMethod = PaymentMethod::where('id', $paymentMethodId)->first;
         $delatedCard = $this->deleteCardToken($paymentMethod->token_bn);
 

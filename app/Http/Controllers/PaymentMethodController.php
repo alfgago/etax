@@ -97,8 +97,8 @@ class PaymentMethodController extends Controller
                     'payment_gateway' => 'cybersource'
                 ]);
                 $cantidad = PaymentMethod::where('user_id', auth()->user()->id)->get()->count();
-                //return view('payment_methods/index')->with('cantidad', $cantidad);
-                return redirect('/payments-methods')->withMessage('Creado')->with('cantidad', $cantidad);
+
+                return redirect('/payments-methods')->withMessage('Método de pago creado')->with('cantidad', $cantidad);
             } else {
                 return redirect()->back()->withErrors('No se aprobó esta tarjeta');
             }
@@ -129,7 +129,6 @@ class PaymentMethodController extends Controller
         $request->request->add(['user_name' => $user->user_name]);
         $request->request->add(['user_id' => $user->id]);
         $request->request->add(['token' => $paymentMethod->token_bn]);
-        dd($request);
         $paymentProcessor = new PaymentProcessor();
         $paymentGateway = $paymentProcessor->selectPaymentGateway($paymentMethod->payment_gateway);
         $updatedCard = $paymentGateway->updateCardToken($request);
@@ -158,37 +157,14 @@ class PaymentMethodController extends Controller
      *
      */
     public function tokenDelete($Id){
-        $paymentUtils = new PaymentUtils();
-        $user = auth()->user();
         $paymentMethod = PaymentMethod::find($Id);
+        $paymentProcessor =  new PaymentProcessor($paymentMethod->payment_gateway);
+        $paymetGateway = $paymentProcessor->selectPaymentGateway();
+        $user = auth()->user();
+
         $this->authorize('update', $paymentMethod);
-        $bnStatus = $paymentUtils->statusBNAPI();
-        if($bnStatus['apiStatus'] == 'Successful'){
-            $cardBn = new Client();
-            $cardCreationResult = $cardBn->request('POST', "https://emcom.oneklap.com:2263/api/UserDeleteCard", [
-                'headers' => [
-                    'Content-Type'  => "application/json",
-                ],
-                'json' => [
-                    'applicationName' => config('etax.klap_app_name'),
-                    'userName' => $user->user_name,
-                    'userPassword' => 'Etax-' . $user->id . 'Klap',
-                    'cardTokenId' => $paymentMethod->token_bn
-                ],
-                'verify' => false,
-            ]);
-            $card = json_decode($cardCreationResult->getBody()->getContents(), true);
-            if($card['apiStatus'] == 'Successful') {
-                $paymentMethod->updated_by = $user->id;
-                $paymentMethod->save();
-                $paymentMethod->delete();
-                return redirect()->back()->withMessage('Método de pago eliminado');
-            }else{
-                return redirect()->back()->withError('No se pudo eliminar el método de pago');
-            }
-        }else{
-            return redirect()->back()->withError('Transacción no disponible en este momento');
-        }
+        $tokenDeleted = $paymetGateway->deletePaymentMethod($paymentMethod->id);
+
     }
     /**
      *deactivateOtherMethods
@@ -285,8 +261,13 @@ class PaymentMethodController extends Controller
      * @param  \App\PaymentMethod  $paymentMethod
      * @return \Illuminate\Http\Response
      */
-    public function destroy(PaymentMethod $paymentMethod)
-    {
-        //
+    public function destroy($id){
+        $paymentMethod = PaymentMethod::findOrFail($id);
+        $this->authorize('update', $paymentMethod);
+        $paymentMethod->delete();
+
+        $cantidad = PaymentMethod::where('user_id', auth()->user()->id)->get()->count();
+
+        return redirect('/payments-methods')->withMessage('Método de pago eliminado')->with('cantidad', $cantidad);
     }
 }

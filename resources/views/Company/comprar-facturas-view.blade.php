@@ -139,7 +139,7 @@
 
                                     <div class="form-group col-md-4">
                                         <label for="state">Provincia</label>
-                                        <select class="form-control" name="state" id="state" onchange="fillCantones();" required>
+                                        <select class="form-control" name="state" id="state" value="<?php echo ($company->state) ? $company->state : '' ?>" onchange="fillCantones();" required>
                                         </select>
                                     </div>
 
@@ -157,7 +157,7 @@
 
                                     <div class="form-group col-md-4">
                                         <label for="neighborhood">Barrio</label>
-                                        <input class="form-control" name="neighborhood" id="neighborhood">
+                                        <input class="form-control" name="neighborhood" id="neighborhood" value="<?php echo ($company->neighborhood) ? $company->neighborhood : '' ?>" required>
                                         </select>
                                     </div>
 
@@ -167,7 +167,10 @@
                                     </div>
                                     <div class="form-group col-md-9">
                                         <label for="address">Dirección</label>
-                                        <input class="form-control" name="address" id="address">
+                                        <input class="form-control" name="address" id="address" value="<?php echo ($company->address) ? $company->address : '' ?>" required>
+                                        <input type="text" id="referenceCode" name="referenceCode" value="16" hidden>
+                                        <input type="text" id="IpAddress" name="IpAddress" hidden>
+                                        <input type="text" id="deviceFingerPrintID" name="deviceFingerPrintID" hidden>
                                     </div>
 
                                     <button id="btn-submit" type="submit" class="hidden btn btn-primary">Comprar</button>
@@ -180,31 +183,29 @@
         </div>
     </div>
 @endsection
-
-
 @section('footer-scripts')
-		<script>
-		  $(document).ready(function(){
-
-	  	    fillProvincias();
-
-	        toggleApellidos();
-
-    	    //Revisa si tiene estado, canton y distrito marcados.
-    	    @if( @$company->state )
-    	    	$('#state').val( "{{ $company->state }}" );
-    	    	fillCantones();
-    	    	@if( @$company->city )
-    		    	$('#city').val( "{{ $company->city }}" );
-    		    	fillDistritos();
-    		    	@if( @$company->district )
-    			    	$('#district').val( "{{ $company->district }}" );
-    			    	fillZip();
-    			    @endif
-    		    @endif
-    	    @endif
-		  });
-
-		</script>
-
+    <script>
+        $("#deviceFingerPrintID").val(cybs_dfprofiler("tc_cr_011007172","test"));
+        $.getJSON('https://api.ipify.org?format=json', function(data){
+            $("#IpAddress").val(data.ip);
+        });
+    $(document).ready(function(){
+        fillProvincias();
+        toggleApellidos();
+        //Revisa si tiene estado, canton y distrito marcados.
+        @if( @$company->state )
+            $('#state').val( "{{ $company->state }}" );
+            fillCantones();
+            @if( @$company->city )
+                $('#city').val( "{{ $company->city }}" );
+                fillDistritos();
+                @if( @$company->district )
+                    $('#district').val( "{{ $company->district }}" );
+                    fillZip();
+                @endif
+            @endif
+        @endif
+    });
+</script>
+<script src="../assets/js/cybs_devicefingerprint.js"></script>
 @endsection

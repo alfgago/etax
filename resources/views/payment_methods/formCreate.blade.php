@@ -77,8 +77,8 @@
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.css" />
 <script src="../assets/js/cybs_devicefingerprint.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.css" />
 <script type="text/javascript">
     $("#deviceFingerPrintID").val(cybs_dfprofiler("tc_cr_011007172","test"));
     //document.write('Session Id <input type="text" name="deviceFingerprintID" value="' + cybs_dfprofiler("tc_cr_01100XXXX","test") + '">');
@@ -125,3 +125,4 @@
         }
     }
 </script>
+

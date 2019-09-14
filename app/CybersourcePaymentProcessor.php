@@ -24,10 +24,9 @@ class CybersourcePaymentProcessor extends PaymentProcessor
     public function createCardToken($request){
         $paymentProcessor = new PaymentProcessor();
         $cardData = $paymentProcessor->getCardNameType($request->number);
-        $referenceCode = $request->product_id;
         $merchantId = 'tc_cr_011007172';
         $client = new CybsSoapClient();
-        $requestClient = $client->createRequest($referenceCode);
+        $requestClient = $client->createRequest($request->referenceCode);
 
         $paySubscriptionCreateService = new stdClass();
         $paySubscriptionCreateService->run = 'true';
@@ -57,7 +56,7 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $billTo->postalCode = $request->zip;
         $billTo->country = $request->country;
         $billTo->email = $request->email;
-        $billTo->ipAddress = $request->IP;
+        $billTo->ipAddress = $request->IpAddress;
         $requestClient->billTo = $billTo;
 
         $card = new stdClass();
@@ -101,10 +100,6 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $paySubscriptionCreateService->run = 'true';
         $requestClient->paySubscriptionCreateService = $paySubscriptionCreateService;
 
-        $ccCaptureService = new stdClass();
-        $ccCaptureService->run = 'true';
-        $requestClient->ccCaptureService = $ccCaptureService;
-
         $ccAuthService = new stdClass();
         $ccAuthService->run = 'true';
         $requestClient->ccAuthService = $ccAuthService;
@@ -125,7 +120,7 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $billTo->postalCode = $request->zip;
         $billTo->country = $request->country;
         $billTo->email = $request->email;
-        $billTo->ipAddress = $request->IP;
+        $billTo->ipAddress = $request->IpAddress;
         $requestClient->billTo = $billTo;
 
         $card = new stdClass();
@@ -137,7 +132,7 @@ class CybersourcePaymentProcessor extends PaymentProcessor
 
         $purchaseTotals = new stdClass();
         $purchaseTotals->currency = 'USD';
-        $purchaseTotals->grandTotalAmount = 0.01;
+        $purchaseTotals->grandTotalAmount = 0;
         $requestClient->purchaseTotals = $purchaseTotals;
 
         $recurringSubscriptionInfo = new stdClass();
@@ -250,8 +245,10 @@ class CybersourcePaymentProcessor extends PaymentProcessor
      * Requesting an On-Demand Transaction, Payment_Tokenization_SO_API.pdf, page 37
      */
     public function createPayment($request){
+        $merchantId = 'tc_cr_011007172';
         $client = new CybsSoapClient();
         $requestClient = $client->createRequest($request->referenceCode);
+        $requestClient->ID = $merchantId;
 
         $ccAuthService = new stdClass();
         $ccAuthService->run = 'true';
@@ -269,6 +266,9 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $purchaseTotals->currency = 'USD';
         $purchaseTotals->grandTotalAmount = $request->amount;
         $requestClient->purchaseTotals = $purchaseTotals;
+
+        $requestClient->merchantId = $merchantId;
+        $requestClient->deviceFingerprintID = $request->deviceFingerPrintID;
 
         return $client->runTransaction($requestClient);
     }
@@ -308,68 +308,43 @@ class CybersourcePaymentProcessor extends PaymentProcessor
      *
      *
      */
-    public function comprarProductos($request, $producto, $amount){
-        $bnStatus = $this->statusBNAPI();
-        if($bnStatus['apiStatus'] == 'Successful'){
+    public function comprarProductos($request){
+        //dd($request);
+        $paymentMethod = PaymentMethod::where('id', $request->payment_method)->first();
+        $user = auth()->user();
+        $data = new stdClass();
+        $data->amount = $request->amount;
+        $data->referenceCode = $request->product_id;
+        $data->token_bn = $paymentMethod->token_bn;
+
+        $chargeCreated = $this->createPayment($data);
+
+        if($chargeCreated->decision=== 'ACCEPT'){
+            $company = currentCompanyModel();
             $date = Carbon::parse(now('America/Costa_Rica'));
-            $user = auth()->user();
-            $data = new stdClass();
-            $data->description = 'Compra de ' . $producto->name . ' eTax';
-            $data->user_name = $user->user_name;
-            $data->amount = $amount;
-            $chargeCreated = $this->paymentIncludeCharge($data);
-
-            if($chargeCreated['apiStatus'] == "Successful"){
-                $paymentMethod = PaymentMethod::where('id', $request->payment_method)->first();
-                $company = currentCompanyModel();
-                $date = Carbon::parse(now('America/Costa_Rica'));
-                $sale = Sales::updateOrCreate([
-                    "user_id" => $user->id,
-                    "company_id" => $company->id,
-                    "etax_product_id" => $producto->id,
-                    "status" => 2,
-                    "recurrency" => false
-                ]);
-                $payment = Payment::updateOrCreate(
-                    [
-                        'sale_id' => $sale->id,
-                        'payment_status' => 1,
-                    ],
-                    [
-                        'payment_method_id' => $paymentMethod->id,
-                        'payment_date' => $date,
-                        'amount' => $producto->price
-                    ]
-                );
-                //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
-                if( ! isset($payment->charge_token) ) {
-                    $chargeIncluded = $this->paymentIncludeCharge($data);
-                    $chargeTokenId = $chargeIncluded['chargeTokenId'];
-                    $payment->charge_token = $chargeTokenId;
-                    $payment->save();
-                }
-                $chargeTokenId = $chargeCreated['chargeTokenId'];
-                $charge = new stdClass();
-                $charge->cardTokenId = $paymentMethod->token_bn;
-                $charge->user_name = $user->user_name;
-                $charge->chargeTokenId = $chargeTokenId;
-
-                $appliedCharge = $this->paymentApplyCharge($charge);
-                if($appliedCharge['apiStatus'] == "Successful"){
-                    $payment->proof = $appliedCharge['retrievalRefNo'];
-                    $payment->payment_status = 2;
-                    $payment->save();
-                    $sale->status = 1;
-                    $sale->save();
-
-                    return true;
-                }else{
-                    return false;
-                }
-                return true;
-            }else{
-                return false;
-            }
+            $sale = Sales::updateOrCreate([
+                "user_id" => $user->id,
+                "company_id" => $company->id,
+                "etax_product_id" => $request->product_id,
+                "status" => 2,
+                "recurrency" => '0'
+            ]);
+            $payment = Payment::updateOrCreate(
+                [
+                    'sale_id' => $sale->id,
+                    'payment_status' => 1,
+                ],
+                [
+                    'payment_method_id' => $paymentMethod->id,
+                    'payment_date' => $date,
+                    'amount' => $request->amount,
+                    'proof' => $chargeCreated->requestID,
+                    'payment_status' => 2
+                ]
+            );
+            $sale->status = 1;
+            $sale->save();
+            return true;
         }else{
             return false;
         }
