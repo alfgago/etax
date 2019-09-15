@@ -14,7 +14,7 @@ class AddIvaDevueltoToTaxes extends Migration
     public function up()
     {
         Schema::table('calculated_taxes', function (Blueprint $table) {
-            $table->float('iva_devuelto')->default(0);
+            $table->double('iva_devuelto')->default(0);
         });
     }
 

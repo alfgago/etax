@@ -98,7 +98,7 @@
         Dropzone.autoDiscover = false;
         $(document).ready(function(){
 
-            var baseUrl = "{{ url('/') }}";	
+            var baseUrl = "{{ secure_url('/') }}";	
             var token = "{{ Session::token() }}";
 
             $("#xml-dropzone").dropzone({

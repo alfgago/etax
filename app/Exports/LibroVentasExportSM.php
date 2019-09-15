@@ -11,7 +11,7 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
-class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEvents
+class LibroVentasExportSM implements WithHeadings, WithMapping, FromQuery, WithEvents
 {
     
     public function __construct(int $year, int $month)
@@ -63,7 +63,11 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
         
         return $invoiceItems;
     }
-     
+    
+    /**
+    INTEGRACION SM SEGUROS
+    **/
+    
     public function map($map): array
     {
         $factor = $map->invoice->document_type != '03' ? 1 : -1;
@@ -74,6 +78,7 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
             $map->invoice->commercial_activity ?? 'No indica',
             $map->invoice->document_number,
             $map->item_number,
+            isset($map->invoice->buy_order) ? $map->invoice->buy_order : "No indica",
             $map->code ?? 'N/A',
             $map->name,
             $map->ivaType ? $map->ivaType->name : 'No indica',
@@ -99,6 +104,7 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
                 'Actividad',
                 'Consecutivo',
                 '# Línea',
+                'Núm. Factura',
                 'Cód. Referencia',
                 'Producto',
                 'Tipo IVA',
@@ -113,6 +119,10 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
         ];
         return $array;
     }
+    
+    /**
+    END INTEGRACION SM SEGUROS
+    **/
     
     
 }

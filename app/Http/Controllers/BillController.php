@@ -241,7 +241,7 @@ class BillController extends Controller
         $units = UnidadMedicion::all()->toArray();
         $arrayActividades = $company->getActivities();
       
-        return view('Bill/show', compact('bill', 'units', 'arrayActividades') );
+        return view('Bill/show', compact('bill', 'units', 'arrayActividades', 'company') );
     }
 
     /**
@@ -266,7 +266,7 @@ class BillController extends Controller
             } 
             $arrayActividades = $company->getActivities();
 
-        return view('Bill/edit', compact('bill', 'units', 'arrayActividades') );
+        return view('Bill/edit', compact('bill', 'units', 'arrayActividades', 'company') );
         }else{
             return redirect('/facturas-recibidas')->withError('Mes seleccionado ya fue cerrado');
         }
@@ -325,6 +325,20 @@ class BillController extends Controller
     
     public function exportLibroCompras( $year, $month ) {
         return Excel::download(new LibroComprasExport($year, $month), 'libro-compras.xlsx');
+    }
+    
+    public function downloadPdf($id) {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+        
+        $billUtils = new BillUtils();
+        $file = $billUtils->downloadPdf( $bill, currentCompanyModel() );
+        $filename = $bill->document_key . '.pdf';
+        if( ! $bill->document_key ) {
+            $filename = $bill->document_number . '-' . $bill->client_id . '.pdf';
+        }
+        
+        return $file;
     }
 
     public function importExcel() {
@@ -385,12 +399,10 @@ class BillController extends Controller
                                 Bill::storeXML( $bill, $file );
                             }
                         }else{
-                            //return back()->withError( "El documento $consecutivoComprobante no le pertenece a su compañía actual" );
-                            return Response()->json('El documento $consecutivoComprobante no le pertenece a su compañía actual', 400);
+                            return Response()->json("El documento $consecutivoComprobante no le pertenece a su empresa actual", 400);
                         }
                     }else{
-                        return Response()->json('error mes seleccionado ya fue cerrado', 400);
-                        //return back()->withError('Mes seleccionado ya fue cerrado');
+                        return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
                     }
              
             $company->save();
@@ -398,16 +410,13 @@ class BillController extends Controller
             $time = $time_end - $time_start;
         }catch( \Exception $ex ){
             Log::error('Error importando XML ' . $ex->getMessage());
-            //return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
             return Response()->json('Se ha detectado un error en el tipo de archivo subido.', 400);
         }catch( \Throwable $ex ){
             Log::error('Error importando XML ' . $ex->getMessage());
-            //return back()->withError( 'Se ha detectado un error en el tipo de archivo subido.');
             return Response()->json('Se ha detectado un error en el tipo de archivo subido.', 400);
         }
 
         return Response()->json('Facturas importados exitosamente en '.$time.'s', 200);
-        //return redirect('/facturas-recibidas/aceptaciones')->withMessage('Facturas importados exitosamente en '.$time.'s');
 
     }
     
@@ -435,15 +444,15 @@ class BillController extends Controller
 
 
     public function validar($id){
-        $current_company = currentCompany();
+        $company = currentCompanyModel();
         $bill = Bill::find($id);
-            $company = Company::select('commercial_activities')->where('id', $current_company)->first();
-            $activities_company = explode(", ", $company->commercial_activities);
+            $companyAct = Company::select('commercial_activities')->where('id', $company->id)->first();
+            $activities_company = explode(", ", $companyAct->commercial_activities);
             $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
             $codigos_etax = CodigoIvaSoportado::where('hidden', false)->get();
             $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
 
-            return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos'));
+            return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos', 'company'));
         
     }
 

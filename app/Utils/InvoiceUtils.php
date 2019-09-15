@@ -41,9 +41,9 @@ class InvoiceUtils
     {
         $pdfRoute = 'Pdf/invoice';
         $provider = null;
-        if($company->id_number == '3101015179'){
+        /*if($company->id_number == '3101015179'){
             $pdfRoute = 'Pdf/custom/trifami';
-        }
+        }*/
         if ($invoice->document_type == '08') {
             $provider = Provider::find($invoice->provider_id);
         }
@@ -53,7 +53,7 @@ class InvoiceUtils
             'provider' => $provider
         ]);
         
-        return $pdf->download('Invoice.pdf');
+        return $pdf->download("$invoice->document_key.pdf");
     }
     
     public function downloadXml( $invoice, $company, $type = null)
@@ -334,7 +334,7 @@ class InvoiceUtils
             $totalMercaderiasExonerados = 0;
             $totalDescuentos = 0;
             $totalImpuestos = 0;
-            $totalImpuestosNeto = 0;
+            $totalImpuestoExoneracion = 0;
             $totalIvaDevuelto = 0;
             $itemDetails = json_decode($details);
             //Spe, St, Al, Alc, Cm, I, Os
@@ -370,19 +370,20 @@ class InvoiceUtils
 
                 if ($detail->impuesto_monto !== 'false') {
                     $totalImpuestos += $detail->impuesto_monto;
-                    $totalImpuestosNeto += $detail->impuestoneto;
+                    $totalImpuestoExoneracion += $detail->exoneracion_monto;
                 }
                 if ($data['payment_type'] == '02' && $detail->product_type == 12) {
                     $totalIvaDevuelto += $detail->impuesto_monto;
                 }
 
             }
-            $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas - $totalServiciosExonerados;
+            $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas - $totalServiciosExonerados - $totalMercaderiasExonerados;
             $totalExento = $totalServiciosExentos + $totalMercaderiasExentas;
             $totalExonerados = $totalServiciosExonerados + $totalMercaderiasExonerados;
             $totalVenta = $totalGravado + $totalExento + $totalExonerados;
             $totalNeta = $totalVenta - $totalDescuentos;
-            $totalComprobante = $totalNeta + ($totalImpuestos - $totalImpuestosNeto);
+            $totalImpuestos = $totalImpuestos - $totalImpuestoExoneracion;
+            $totalComprobante = $totalNeta + $totalImpuestos;
             
             $isCompanyEmisor = true;
             if ($data['document_type'] == '08') {
@@ -445,16 +446,16 @@ class InvoiceUtils
                 'servgravados' => $totalServiciosGravados - $totalServiciosExonerados,
                 'servexentos' => $totalServiciosExentos,
                 'servexonerados' => $totalServiciosExonerados,
-                'mercgravados' => $totalMercaderiasGravadas,
+                'mercgravados' => $totalMercaderiasGravadas - $totalMercaderiasExonerados,
                 'mercexentos' => $totalMercaderiasExentas,
-                'mercexonerados' => $totalMercaderiasExonerados - $totalMercaderiasExonerados,
+                'mercexonerados' => $totalMercaderiasExonerados,
                 'totgravado' => $totalGravado,
                 'totexento' => $totalExento,
                 'totexonerados' => $totalExonerados,
                 'totventa' => $totalVenta,
                 'totdescuentos' => $totalDescuentos,
                 'totventaneta' => $totalNeta,
-                'totimpuestos' => $totalImpuestos - $totalImpuestosNeto,
+                'totimpuestos' => $totalImpuestos,
                 'totalivadevuelto' => $totalIvaDevuelto,
                 'totcomprobante' => $totalComprobante - $totalIvaDevuelto,
                 'detalle' => $details
