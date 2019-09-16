@@ -794,7 +794,7 @@ toastr.options = {
       $('.item-factura-form input[type=checkbox]').prop('checked', false);
       
       var docType = $('#document_type').val();
-      if( $('#is-compra').length || docType == '08' ){
+      if( ($('#is-compra').length || docType == '08') && !$('#is-manual').length ){
         $('#tipo_iva').val('B003').change();
       }else {
         $('#tipo_iva').val('B103').change();
@@ -897,7 +897,7 @@ toastr.options = {
     
     $('#subtotal').val(subtotal);
     $('#monto_iva').val(monto_iva);
-    $('#total').val(total - iva_devuelto);
+    $('#total').val(total - iva_devuelto - iva_exonerado);
     
     $('#total_iva_devuelto').val(iva_devuelto);
     $('#total_iva_exonerado').val(iva_exonerado);
