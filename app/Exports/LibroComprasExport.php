@@ -76,7 +76,7 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
             $map->item_number,
             $map->name,
             $map->ivaType ? $map->ivaType->name : 'No indica',
-            $map->productCategory->id . " - " . $map->productCategory->name,
+            isset($map->productCategory) ? $map->productCategory->id . " - " . $map->productCategory->name : 'No indica',
             $map->bill->currency,
             $map->bill->currency_rate ?? '',
             round( $map->subtotal * $factor, 2),
