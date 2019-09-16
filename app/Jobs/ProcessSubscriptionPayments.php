@@ -96,6 +96,8 @@ class ProcessSubscriptionPayments implements ShouldQueue
                 $data->description = "Renovación plan etax $planName";
                 $data->amount = $amount;
                 $data->user_name = $sale->user->user_name;
+                $data->saleId = $sale->id;
+                $data->paymentMethodId = $paymentMethod->id;
 
                 //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
                 if( ! isset($payment->charge_token) ) {
