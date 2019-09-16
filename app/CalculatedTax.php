@@ -300,7 +300,7 @@ class CalculatedTax extends Model
         $countInvoiceItems = $invoiceItems->count();
         //Recorre las lineas de factura
         for ($i = 0; $i < $countInvoiceItems; $i++) {
-          //try {
+          try {
             $currInvoice = $invoiceItems[$i]->invoice;
             
             if( !$currInvoice->is_void && $currInvoice->is_authorized && $currInvoice->is_code_validated 
@@ -496,9 +496,9 @@ class CalculatedTax extends Model
 
             }
             
-          /*}catch( \Throwable $ex ){
+          }catch( \Throwable $ex ){
             //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
-          }*/
+          }
         }
         
       });
@@ -553,7 +553,7 @@ class CalculatedTax extends Model
 
         for ($i = 0; $i < $countBillItems; $i++) {
           
-          //try{
+          try{
             
             $currBill = $billItems[$i]->bill;
             if( !$currBill->is_void && $currBill->is_authorized && $currBill->is_code_validated &&
@@ -623,7 +623,7 @@ class CalculatedTax extends Model
               
               /***SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
               $porc_plena = $billItems[$i]->porc_identificacion_plena ? $billItems[$i]->porc_identificacion_plena : 0;
-              
+              $currAcreditablePleno = 0;
               if ( $porc_plena == 1 || $porc_plena == 5 ) {
                 $porc_plena = 13;
               } 
@@ -633,7 +633,7 @@ class CalculatedTax extends Model
               {
                 //Cuando es al 1%, se puede agreditar el 100%
                 $basesIdentificacionPlena += $subtotal;
-                $ivaAcreditableIdentificacionPlena += $billIva;
+                $currAcreditablePleno = $billIva;
               }
               if( $ivaType == 'B042' || $ivaType == 'B052' || $ivaType == 'B062' || $ivaType == 'B072' ||
                    $ivaType == 'S042' || $ivaType == 'S052' || $ivaType == 'S062' || $ivaType == 'S072' )
@@ -644,7 +644,7 @@ class CalculatedTax extends Model
                 }
                 $menor_porc = $menor/100;
                 
-                $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
+                $currAcreditablePleno = $subtotal * $menor_porc;
                 $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
               }
               if( $ivaType == 'B043' || $ivaType == 'B053' || $ivaType == 'B063' || $ivaType == 'B073' ||
@@ -656,10 +656,10 @@ class CalculatedTax extends Model
                 }
                 $menor_porc = $menor/100;
                 if( $menor != 13) { 
-                  $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
+                  $currAcreditablePleno = $subtotal * $menor_porc;
                   $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
                 }else{
-                  $ivaAcreditableIdentificacionPlena += $billIva;
+                  $currAcreditablePleno = $billIva;
                   $ivaNoAcreditableIdentificacionPlena += 0;
                 }
               }
@@ -672,9 +672,10 @@ class CalculatedTax extends Model
                 }
                 $menor_porc = $menor/100;
                 
-                $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
+                $currAcreditablePleno = $subtotal * $menor_porc;
                 $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
               }
+              $ivaAcreditableIdentificacionPlena += $currAcreditablePleno;
               /***END SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
               
               $currentTotal = $subtotal + $billIva;
@@ -695,7 +696,7 @@ class CalculatedTax extends Model
               }
               $ivaData->$bVar += $subtotal;
               $ivaData->$iVar += $billIva;
-              $ivaData->$iVarPleno += $ivaAcreditableIdentificacionPlena;
+              $ivaData->$iVarPleno += $currAcreditablePleno;
               
               //Cuenta contable de proveedor
               $tipoVenta = $currBill->sale_condition;
@@ -722,9 +723,9 @@ class CalculatedTax extends Model
               $ivaData->$typeVarPorcActividad += $subtotal;
             }  
             
-          /*}catch( \Throwable $ex ){
+          }catch( \Throwable $ex ){
             //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
-          }*/
+          }
           
         }
         
@@ -1274,12 +1275,13 @@ class CalculatedTax extends Model
     			$ivaData = json_decode($this->iva_data);
 	      	$book = $this->book;
           $arrayActividades = $company->getActivities();
+          $prorrataOperativa = $company->getProrrataOperativa($this->year);
           
           $dataDeclaracion = [
             "ano" => $this->year,
             "mes" => $this->month,
             "empresa" => $company->id_number,
-            "prorrataOperativa" => $this->prorrata_operativa,
+            "prorrataOperativa" => $prorrataOperativa
           ];
         
           $actividadDataArray = array();
@@ -1422,8 +1424,8 @@ class CalculatedTax extends Model
       		$impuestos['ventas4'] = $book->cc_ventas_4_iva;
       		$impuestos['ventasTotal'] = $impuestos['ventas1']+$impuestos['ventas2']+$impuestos['ventas13']+$impuestos['ventas4'];
       		
-      		$impuestos['totalCreditosPeriodo'] = ($impuestos['totalesSum'] * $this->prorrata_operativa ) + $impuestos['totalesSume'];
-      		$impuestos['creditosAcreditablesPorTarifas'] = $impuestos['totalesSum'] * $this->prorrata_operativa;
+      		$impuestos['totalCreditosPeriodo'] = ($impuestos['totalesSum'] * $prorrataOperativa ) + $impuestos['totalesSume'];
+      		$impuestos['creditosAcreditablesPorTarifas'] = $impuestos['totalesSum'] * $prorrataOperativa;
       		
           $dataDeclaracion['impuestos'] = $impuestos;
           
