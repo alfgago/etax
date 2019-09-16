@@ -730,7 +730,7 @@ class InvoiceController extends Controller
             $i = 0;
             $invoiceList = array();
             
-            if(count($collection) < 2501){
+            if(count($collection) < 7500){
                 foreach ($collection as $row){
                     $metodoGeneracion = "XLSX";
                   
