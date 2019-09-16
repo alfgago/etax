@@ -879,15 +879,17 @@ class PaymentController extends Controller
             if (gettype($data) == 'array') {
                 if($appliedCharge['apiStatus'] == "Successful"){
                     $paymentAccepted = true;
+                    $appliedChargeId = $appliedCharge['retrievalRefNo'];
                 }
             } else if (gettype($data) == 'object'){
                 if($appliedCharge->decision == 'ACCEPT'){
                     $paymentAccepted = true;
+                    $appliedChargeId = $appliedCharge->requestID;
                 }
             }
 
             if ( $paymentAccepted ) {
-                $payment->proof = $appliedCharge['retrievalRefNo'] ?? $appliedCharge->requestID;
+                $payment->proof = $appliedChargeId;
                 $payment->payment_status = 2;
                 $payment->save();
 
