@@ -332,7 +332,7 @@
       $('.item-factura-form input[type=checkbox]').prop('checked', false);
       
       var docType = $('#document_type').val();
-      if( $('#is-compra').length || docType == '08' ){
+      if( ($('#is-compra').length || docType == '08') && !$('#is-manual').length ){
         $('#tipo_iva').val('B003').change();
       }else {
         $('#tipo_iva').val('B103').change();

@@ -15,6 +15,7 @@
           @csrf
           
           <input type="hidden" id="current-index" value="0">
+          <input type="hidden" id="is-manual" value="1">
           <?php 
             $company = currentCompanyModel();
           ?>
