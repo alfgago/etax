@@ -144,7 +144,7 @@ class CalculatedTax extends Model
       return $applied;
     }
     
-    
+     
     /**
      * calcularFacturacionPorMesAno
      * Calcula y devuelve los datos del mes para dashboard y reportes
@@ -155,7 +155,7 @@ class CalculatedTax extends Model
      * @bodyParam prorrataOperativa required
      * @return App\CalculatedTax
      */
-    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa, $forceRecalc = false ) {
+    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa, $forceRecalc = true ) {
       
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
@@ -246,9 +246,9 @@ class CalculatedTax extends Model
         
     public function calcularFacturacionAcumulado( $year, $prorrataOperativa ) {
 
-      $this->sumAcumulados( $year );
+      $this->sumAcumulados( $year, true );
       $this->setCalculosIVA( $prorrataOperativa, 0 );
-
+      $this->sumAcumulados( $year, false );
       return $this;
       
     }
@@ -312,7 +312,7 @@ class CalculatedTax extends Model
               
               $invoiceItems[$i]->fixIvaType();
               
-              $subtotal = $invoiceItems[$i]->subtotal * $currInvoice->currency_rate;
+              $subtotal = $invoiceItems[$i]->getSubtotalParaCalculo() * $currInvoice->currency_rate;
               $ivaType = $invoiceItems[$i]->iva_type;
               $prodType = $invoiceItems[$i]->product_type;
               $invoiceIva = $invoiceItems[$i]->iva_amount * $currInvoice->currency_rate;
@@ -383,7 +383,8 @@ class CalculatedTax extends Model
               if( $ivaType == '150' || $ivaType == '160' ||  $ivaType == '170' || $ivaType == '199' || $ivaType == '155' ||
                   $ivaType == 'B150' || $ivaType == 'B160' ||  $ivaType == 'B170' || $ivaType == 'B199' || $ivaType == 'B155' ||
                   $ivaType == 'S150' || $ivaType == 'S160' ||  $ivaType == 'S170' || $ivaType == 'S199' || $ivaType == 'S155' ){
-                $subtotal = $subtotal + $invoiceIva;
+                //$subtotal = $subtotal + $invoiceIva;
+                $subtotal = $subtotal;
                 $invoiceIva = 0;
                 $sumRepercutido3 += $subtotal;
                 $sumRepercutidoExentoConCredito += $subtotal;
@@ -414,7 +415,8 @@ class CalculatedTax extends Model
               }
               //No cuenta los que no llevan IVA
               if( $ivaType == 'S300' || $ivaType == 'B300' ){
-                $subtotal = $subtotal + $invoiceIva;
+                $subtotal = $subtotal;
+                $invoiceIva = 0;
                 $sumIvaSinAplicar += $subtotal;
               }
               
@@ -521,7 +523,7 @@ class CalculatedTax extends Model
       $this->bases_ventas_con_identificacion = $basesVentasConIdentificacion;
       $this->iva_retenido = $ivaRetenido;
       $this->iva_devuelto = $ivaDevuelto;
-      
+      //if( $month == 8 ) dd($this);
       return $this;
     }
   
@@ -592,10 +594,6 @@ class CalculatedTax extends Model
                 
               $ivaType = $ivaType ? $ivaType : '003';
               $ivaType = str_pad($ivaType, 3, '0', STR_PAD_LEFT);
-              
-              $billsTotal += $currentTotal;
-              $billsSubtotal += $subtotal;
-              $totalBillIva += $billIva;
               
               if( $ivaType == 'B041' || $ivaType == 'B042' || $ivaType == 'B043' || $ivaType == 'B044' ||
                   $ivaType == 'B051' || $ivaType == 'B052' || $ivaType == 'B053' || $ivaType == 'B054' || 
@@ -681,6 +679,10 @@ class CalculatedTax extends Model
                 $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
               }
               /***END SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
+              
+              $billsTotal += $currentTotal;
+              $billsSubtotal += $subtotal;
+              $totalBillIva += $billIva;
               
               $bVar = "b".$ivaType;
               $iVar = "i".$ivaType;
@@ -876,7 +878,7 @@ class CalculatedTax extends Model
       $balanceOperativo = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleOperativo;
       $ivaNoDeducible = $this->total_bill_iva - $ivaDeducibleOperativo;
 
-      $ivaRetenido = isset($this->retention_by_card) ? $this->retention_by_card : $this->iva_retenido;
+      $ivaRetenido = $this->retention_by_card ? $this->retention_by_card : $this->iva_retenido;
       $saldoFavor = $balanceOperativo - $ivaRetenido;
       $saldoFavor = $saldoFavor < 0 ? abs( $saldoFavor ) : 0;
       $this->iva_retenido = $ivaRetenido;
@@ -911,7 +913,6 @@ class CalculatedTax extends Model
       
       $this->saldo_favor = $saldoFavor;
       $this->saldo_favor_anterior = $lastBalance;
-      
     }
     
     public function setCalculosPorFactura( $prorrataOperativa, $lastBalance ) {
@@ -1024,7 +1025,7 @@ class CalculatedTax extends Model
       
     }
     
-    function sumAcumulados( $year ) {
+    function sumAcumulados( $year, $allMonths = true ) {
       
       $currentCompanyId = currentCompany();
       $calculosAnteriores = CalculatedTax::where('company_id', $currentCompanyId)->where('is_final', true)->where('year', $year)->where('month', '!=', 0)->get();
@@ -1067,8 +1068,8 @@ class CalculatedTax extends Model
     	$arrayActividades = currentCompanyModel()->getActivities();
 
       for ($i = 0; $i < $countAnteriores; $i++) {
-        
-        if( !( $calculosAnteriores[$i]->year == 2019 && $calculosAnteriores[$i]->month < 7 ) ){
+        if( $allMonths || !( $calculosAnteriores[$i]->year == 2019 && $calculosAnteriores[$i]->month < 7 ) ){
+          
           $this->count_invoices += $calculosAnteriores[$i]->count_invoices;
     			$this->invoices_total += $calculosAnteriores[$i]->invoices_total;
     			$this->invoices_subtotal += $calculosAnteriores[$i]->invoices_subtotal;
@@ -1261,6 +1262,6 @@ class CalculatedTax extends Model
     private function microtime_float(){
         list($usec, $sec) = explode(" ", microtime());
         return ((float) $usec + (float)$sec);
-    }  
+    } 
   
 }

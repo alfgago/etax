@@ -43,27 +43,57 @@
     @if( @$document_type == '08' )
       <div class="form-group col-md-12">
         <label for="tipo_iva">Tipo de IVA</label>
-        <select class="form-control select-search" id="tipo_iva" >
-          @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
-            <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
-          @endforeach
+        <select class="form-control select-search" id="tipo_iva">
+          <?php
+            $preselectos = array();
+            foreach($company->soportados as $soportado){
+              $preselectos[] = $soportado->id;
+            }
+          ?>
+          @if(@$company->soportados[0]->id)
+            @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
+              <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}"  is_identificacion_plena="{{ $tipo['is_identificacion_plena'] }}">{{ $tipo['name'] }}</option>
+            @endforeach
+            <option class="mostrarTodos" value="1">Mostrar Todos</option>
+          @else
+            @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
+              <option is_identificacion_plena="{{ $tipo['is_identificacion_plena'] }}" value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  >{{ $tipo['name'] }}</option>
+            @endforeach
+          @endif
         </select>
       </div>
       <div class="form-group col-md-11">
         <label for="tipo_producto">Categoría de declaración</label>
         <select class="form-control" id="tipo_producto" >
-            @foreach ( \App\ProductCategory::all() as $tipo )
-              <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
-            @endforeach
+
+          @foreach ( \App\ProductCategory::whereNotNull('bill_iva_code')->get() as $tipo )
+            <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['bill_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
+          @endforeach
+
         </select>
       </div>
     @else
       <div class="form-group col-md-12">
         <label for="tipo_iva">Tipo de IVA</label>
-        <select class="form-control select-search" id="tipo_iva" >
-          @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
-            <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
-          @endforeach
+        <select class="form-control select-search" id="tipo_iva">
+          <?php
+            $preselectos = array();
+            foreach($company->repercutidos as $repercutido){
+              $preselectos[] = $repercutido->id;
+            }
+          ?>
+          @if(@$company->repercutidos[0]->id)
+            @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+                <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}"  >{{ $tipo['name'] }}</option>
+            @endforeach
+            <option class="mostrarTodos" value="1">Mostrar Todos</option>
+          @else
+            @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select">{{ $tipo['name'] }}</option>
+            @endforeach
+          @endif
+          
+            
         </select>
       </div>
       
@@ -202,19 +232,19 @@
 
             <div class="form-group col-md-2">
                 <label for="porcentajeExoneracion">% *</label>
-                <input type="number" class="form-control" max="100" min="0" maxlength="3" id="porcentajeExoneracion" placeholder="100%" value="100" onkeyup="calcularMontoExoneracion();">
+                <input type="number" class="form-control" max="100" min="0" maxlength="3" id="porcentajeExoneracion" placeholder="100%" value="100" onchange="calcularMontoExoneracion();">
             </div>
             <div class="form-group col-md-3">
                 <label for="montoExoneracion">Monto Exonerado *</label>
-                <input type="text" class="form-control" id="montoExoneracion"  readonly>
+                <input type="text" class="form-control" id="montoExoneracion" readonly>
             </div>
             <div class="form-group col-md-3">
                 <label for="impuestoNeto">Impuesto Neto </label>
-                <input type="text" class="form-control" id="impuestoNeto"  readonly>
+                <input type="text" class="form-control" id="impuestoNeto" readonly>
             </div>
             <div class="form-group col-md-4">
                 <label for="montoTotalLinea">Monto Total Linea </label>
-                <input type="text" class="form-control" id="montoTotalLinea"  readonly>
+                <input type="text" class="form-control" id="montoTotalLinea" readonly>
             </div>
         </div>
     </div>
@@ -274,4 +304,20 @@
             return $(this).val($(this).val().replace(/(,| )/g,''));
         }
     });*/
+    $( document ).ready(function() {
+      $('#tipo_iva').on('select2:selecting', function(e){
+        var selectBox = document.getElementById("tipo_iva");
+        if(e.params.args.data.id == 1){
+           $.each($('.tipo_iva_select'), function (index, value) {
+            $(value).removeClass("hidden");
+          })
+           $('.mostrarTodos').addClass("hidden");
+           e.preventDefault();
+        }
+
+      });
+
+    });   
+
+
 </script>

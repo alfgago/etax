@@ -28,9 +28,9 @@ class InvoiceExport implements WithHeadings, WithMapping, FromQuery, WithEvents
                 $event->sheet->getDelegate()->getStyle($cellRangeExplainer)->getFont()->setSize(8);
                 $event->sheet->getDelegate()->getStyle($cellRangeExplainer)->getAlignment()->setWrapText(true);
                 $event->sheet->getDelegate()->getColumnDimension('A')->setWidth('20');
-                $event->sheet->getDelegate()->getColumnDimension('B')->setAutoSize(true);
+                $event->sheet->getDelegate()->getColumnDimension('B')->setWidth('20');
                 $event->sheet->getDelegate()->getColumnDimension('C')->setAutoSize(true);
-                $event->sheet->getDelegate()->getColumnDimension('D')->setWidth('20');
+                $event->sheet->getDelegate()->getColumnDimension('D')->setAutoSize(true);
                 $event->sheet->getDelegate()->getColumnDimension('E')->setWidth('20');
                 $event->sheet->getDelegate()->getColumnDimension('F')->setWidth('20');
                 $event->sheet->getDelegate()->getColumnDimension('G')->setWidth('20');
@@ -54,6 +54,8 @@ class InvoiceExport implements WithHeadings, WithMapping, FromQuery, WithEvents
                 $event->sheet->getDelegate()->getColumnDimension('Y')->setWidth('20');
                 $event->sheet->getDelegate()->getColumnDimension('Z')->setWidth('20');
                 $event->sheet->getDelegate()->getColumnDimension('AA')->setWidth('20');
+                $event->sheet->getDelegate()->getColumnDimension('AB')->setWidth('20');
+                $event->sheet->getDelegate()->getColumnDimension('AC')->setWidth('20');
                 $cellRangeHeaders = 'A3:AA3'; // All headers
                 $event->sheet->getDelegate()->getStyle($cellRangeHeaders)->getFont()->setSize(12);
                 $event->sheet->getDelegate()->getStyle($cellRangeHeaders)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
@@ -82,7 +84,9 @@ class InvoiceExport implements WithHeadings, WithMapping, FromQuery, WithEvents
     
     public function map($map): array
     {
+        $current_company = currentCompanyModel();
         return [
+            $current_company->id_number,
             $map->invoice->document_type,
             $map->invoice->document_key,
             $map->invoice->document_number,
@@ -118,6 +122,7 @@ class InvoiceExport implements WithHeadings, WithMapping, FromQuery, WithEvents
         return [
             [ "Archivo exportado desde etaxcr.com" ],
             [ 
+                'Ingrese la cédula de su empresa o persona física en todas las líneas.',
                 'Elija el código equivalente al tipo de documento emitido.', 
                 'Indique la clave de su comprobante (50 digitos)', 
                 'Indique el número de consecutivo de su comprobante.', 
@@ -147,6 +152,7 @@ class InvoiceExport implements WithHeadings, WithMapping, FromQuery, WithEvents
                 'Indique el código de la actividad comercial registrada ante Ministerio de Hacienda a la cual corresponde el registro.',    
             ],
             [
+                'CedulaEmpresa',
                 'TipoDocumento',
                 'ClaveFactura',
                 'ConsecutivoComprobante',

@@ -32,6 +32,10 @@
       </form>
     @endif
     
+    <a href="/facturas-recibidas/download-pdf/{{ $data->id }}" title="Descargar PDF" class="text-warning mr-2" download > 
+      <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+    </a>
+    
     <a link="/facturas-recibidas/validar/{{ $data->id }}" titulo="Verificación Compra" class="text-success mr-2" onclick="validarPopup(this);" data-toggle="modal" data-target="#modal_estandar"><i class="fa fa-check" aria-hidden="true"></i></a>
   
     <form id="hidefromtaxes-form-{{  $data->id }}" class="inline-form" method="POST" action="/facturas-recibidas/switch-ocultar/{{ $data->id }}" >

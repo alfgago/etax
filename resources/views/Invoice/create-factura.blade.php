@@ -153,10 +153,15 @@ $company = currentCompanyModel();
                   <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
                 </div>
 
-                  <div class="form-group col-md-4">
-                    <label for="total">IVA Devuelto</label>
-                    <input type="text" class="form-control total" name="total_iva_devuelto" id="total_iva_devuelto" placeholder="" readonly="true" required>
-                  </div>
+                <div class="form-group col-md-4 hidden" id="total_iva_devuelto-cont">
+                  <label for="total">IVA Devuelto</label>
+                  <input type="text" class="form-control total" name="total_iva_devuelto" id="total_iva_devuelto" placeholder="" readonly="true" required>
+                </div>
+
+                <div class="form-group col-md-4 hidden" id="total_iva_exonerado-cont">
+                  <label for="total">IVA Exonerado</label>
+                  <input type="text" class="form-control total" name="total_iva_exonerado" id="total_iva_exonerado" placeholder="" readonly="true" required>
+                </div>
     
                 <div class="form-group col-md-4">
                   <label for="total">Total</label>
@@ -250,7 +255,7 @@ $company = currentCompanyModel();
                   <div class="form-group col-md-6">
                     <label for="payment_type">Método de pago</label>
                     <div class="input-group">
-                      <select id="medio_pago" name="payment_type" class="form-control" required>
+                      <select id="medio_pago" name="payment_type" class="form-control" required onchange="calcularTotalFactura();">
                         <option value="01" selected>Efectivo</option>
                         <option value="02">Tarjeta</option>
                         <option value="03">Cheque</option>

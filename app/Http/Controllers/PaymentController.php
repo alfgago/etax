@@ -383,6 +383,7 @@ class PaymentController extends Controller
                     'token_bn' => $card->paySubscriptionCreateReply->subscriptionID,
                     'default_card' => 1,
                     'payment_gateway' => 'cybersource'
+
                 ]);
             } else {
                 $paymentMethod = PaymentMethod::where('user_id', $user->id)

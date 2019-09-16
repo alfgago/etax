@@ -147,6 +147,13 @@ return [
                 'processes' => 10,
                 'tries' => 3,
             ],
+            'subscriptions-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['payments'],
+                'balance' => 'auto',
+                'processes' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
+                'tries' => 3,
+            ],
         ],
 
         'local' => [
