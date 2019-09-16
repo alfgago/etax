@@ -228,6 +228,7 @@ class ReportsController extends Controller
     public function reporteBorradorIVA( Request $request ) {
         $ano = $request->ano ? $request->ano : 2019;
         $mes = $request->mes ? $request->mes : 7;
+        $nombreMes = Variables::getMonthName($mes);
         $company = currentCompanyModel();
         $prorrataOperativa = $company->getProrrataOperativa($ano);
 
