@@ -27,7 +27,7 @@
 @endsection
 
 @section('breadcrumb-buttons')
-    <button onclick="$('#btn-submit').click();" class="btn btn-primary">Crear</button>
+    <button onclick="getCyberData();$('#btn-submit').click();" class="btn btn-primary">Crear</button>
     <button onclick="volver();" class="btn btn-primary">Volver</button>
 @endsection
 

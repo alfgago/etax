@@ -226,6 +226,8 @@ class PaymentController extends Controller
             $paymentProcessor = new PaymentProcessor();
             $paymentGateway = new CybersourcePaymentProcessor();
             $request->number = preg_replace('/\s+/', '',  $request->number);
+            $ip = $paymentProcessor->getUserIpAddr();
+            $request->request->add(['IpAddress' => $ip]);
 
             if($request->plan_sel == "c"){
                 $coupons = Coupon::where('code', $request->coupon)->where('type',1)->count();
@@ -484,6 +486,8 @@ class PaymentController extends Controller
         $payment_info = explode('- ', $request->payment_method);
         $request->request->add(['payment_method' => $payment_info[0]]);
         $paymentProcessor = new PaymentProcessor();
+        $ip = $paymentProcessor->getUserIpAddr();
+        $request->request->add(['IpAddress' => $ip]);
         $payment_gateway = $paymentProcessor->selectPaymentGateway($payment_info[1]);
         if(isset($payment_gateway)){
             $pagoProducto = $payment_gateway->comprarProductos($request);
@@ -536,6 +540,8 @@ class PaymentController extends Controller
             }
             $payment_method = PaymentMethod::where('id', $request->payment_method)->first();
             $paymentProcessor = new PaymentProcessor();
+            $ip = $paymentProcessor->getUserIpAddr();
+            $request->request->add(['IpAddress' => $ip]);
             $payment_gateway = $paymentProcessor->selectPaymentGateway($payment_method->payment_gateway);
             if(isset($payment_gateway)){
                 $company = currentCompanyModel();

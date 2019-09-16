@@ -206,7 +206,7 @@ class CybersourcePaymentProcessor extends PaymentProcessor
     public function updateCardToken($request){
         $paymentProcessor = new PaymentProcessor();
         $cardData = $paymentProcessor->getCardNameType($request->number);
-        $referenceCode = 5;
+        $referenceCode = $request->user_id;
         $merchantId = 'tc_cr_011007172';
         $client = new CybsSoapClient();
         $requestClient = $client->createRequest($referenceCode);
@@ -229,7 +229,7 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $requestClient->card = $card;
 
         $recurringSubscriptionInfo = new stdClass();
-        $recurringSubscriptionInfo->subscriptionID = $request->subscriptionID;
+        $recurringSubscriptionInfo->subscriptionID = $request->token;
         $requestClient->recurringSubscriptionInfo = $recurringSubscriptionInfo;
 
         $requestClient->deviceFingerprintID = $request->deviceFingerPrintID;

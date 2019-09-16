@@ -32,7 +32,7 @@
 @endsection
 
 @section('breadcrumb-buttons')
-    <button onclick="$('#btn-submit').click();" class="btn btn-primary">Actualizar</button>
+    <button onclick="getCyberData();$('#btn-submit').click();" class="btn btn-primary">Actualizar</button>
     <button onclick="volver();" class="btn btn-primary">Volver</button>
 @endsection
 

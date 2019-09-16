@@ -77,12 +77,16 @@ class PaymentMethodController extends Controller
         $paymentProcessor = new PaymentProcessor();
         $payment_gateway = new CybersourcePaymentProcessor();
         if(isset($request->number)){
+            $ip = $paymentProcessor->getUserIpAddr();
+            //$request->request->add(['IpAddress' => $ip]);
+            $request->request->add(['IpAddress' => '170.81.34.78']);
             $request->request->add(['cardCity' => $request->street1]);
             $request->request->add(['cardState' => 'San Jose']);
             $request->request->add(['country' => 'CR']);
             $request->request->add(['zip' => $user->zip]);
             $request->request->add(['email' => $user->email]);
             $request->request->add(['user_id' => $user->id]);
+            //dd($request);
             $newCard = $payment_gateway->createTokenWithoutFee($request);
 
             if ($newCard->decision === 'ACCEPT') {
@@ -130,8 +134,12 @@ class PaymentMethodController extends Controller
         $request->request->add(['user_id' => $user->id]);
         $request->request->add(['token' => $paymentMethod->token_bn]);
         $paymentProcessor = new PaymentProcessor();
+        $ip = $paymentProcessor->getUserIpAddr();
+        $request->request->add(['IpAddress' => $ip]);
         $paymentGateway = $paymentProcessor->selectPaymentGateway($paymentMethod->payment_gateway);
         $updatedCard = $paymentGateway->updateCardToken($request);
+        $ip = $paymentProcessor->getUserIpAddr();
+        $request->request->add(['IpAddress' => $ip]);
         if (gettype($updatedCard) == 'array') {
             if ($updatedCard['apiStatus'] !== 'Successful') {
                 return redirect()->back()->withError('No se actualizó el método de pago');

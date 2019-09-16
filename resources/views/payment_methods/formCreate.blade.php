@@ -6,14 +6,15 @@
         margin-right: 1%;
     }
     .newCard{
-        margin-left: 2%;
+        margin-left: 10% !important;
         margin-top: 15%;
+        width: 100%;
     }
     .jp-card-container {
         margin-left: 0 !important;
     }
 </style>
-<div class="col-md-12 offset-1">
+<div class="col-md-12 offset-4">
     <div class="row">
         <div class="col-md-6">
             <div class="form-row">
@@ -52,8 +53,6 @@
                     <div class="description">Nota: Los datos sensibles de su tarjeta no se guardar&aacute;n en nuestra base de datos, ser&aacute;n utilizados solamente para procesar sus pagos</div>
                     <p id="alertCardValid" class="alertCardValid"></p>
                 </div>
-                <input type="text" hidden id="IpAddress" name="IpAddress">
-                <input type="text" hidden id="deviceFingerPrintID" name="deviceFingerPrintID">
             </div>
         </div>
         <div class="vl"></div>
@@ -77,14 +76,9 @@
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.min.js"></script>
-<script src="../assets/js/cybs_devicefingerprint.js"></script>
+<!--script src="../assets/js/cybs_devicefingerprint.js"></script-->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.css" />
 <script type="text/javascript">
-    $("#deviceFingerPrintID").val(cybs_dfprofiler("tc_cr_011007172","test"));
-    //document.write('Session Id <input type="text" name="deviceFingerprintID" value="' + cybs_dfprofiler("tc_cr_01100XXXX","test") + '">');
-    $.getJSON('https://api.ipify.org?format=json', function(data){
-        $("#IpAddress").val(data.ip);
-    });
     var card = new Card({
         form: 'form.tarjeta',
         container: '.card-wrapper',

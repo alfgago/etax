@@ -175,7 +175,7 @@ window.setCedulaJSONResults = function(json) {
 	$("#business_name").val( fullname );
 	$("#name").val( fullname );
 	$("#first_name").val( fullname );
-	
+
 	$('#tipo_persona').val( type );
 
 	if( type == "F" ) {
@@ -187,14 +187,14 @@ window.setCedulaJSONResults = function(json) {
         $("#last_name").val( lastname1 );
         $("#last_name2").val( lastname2 );
   }
-  
+
   toggleApellidos();
 }
 
 window.getJSONCedula = function( cedula ) {
-  
+
   if( cedula.length >= 9 ){
-    
+
     var xhttp = new XMLHttpRequest();
     var json;
     xhttp.onreadystatechange = function() {
@@ -206,9 +206,9 @@ window.getJSONCedula = function( cedula ) {
     };
     xhttp.open("GET", "https://apis.gometa.org/cedulas/"+cedula+"&key=1AJTv1VNqFtSMpc", true);
     xhttp.send();
-    
+
   }
-  
+
 }
 
 window.fillProvincias = function() {
@@ -252,14 +252,14 @@ window.fillZip = function() {
 window.agregarClienteNuevo = function() {
 	var allow = true;
 	$('.checkEmpty').each( function() {
-		if( $(this).val() && $(this).val() != "" ){ 
+		if( $(this).val() && $(this).val() != "" ){
 			$(this).attr('style', 'border-color: ;');
 		}else{
 			$(this).attr('style', 'border-color:red;');
 			allow = false;
     }
 	});
-	
+
 	if( allow ){
         var cnombre = $('#first_name').val() + " " + $('#last_name').val() + " " + $('#last_name2').val() ;
         if(! $('#nuevo-cliente-opt').length ) {
@@ -279,19 +279,19 @@ window.toggleTiposImportacion = function (){
 		if(!tipo) {
 		  tipo = 'xlsx';
 		}
-		
+
 		$(".toggle-xml, .toggle-xlsx").hide();
 		$(".toggle-"+tipo).show();
-		
+
 	}
-	
+
 window.initHelpers = function (){
   	$('.helper').each( function() {
-  	  
+
   	  var def = $(this).attr('def');
   	  var helperContent = $('#'+def).html();
   	  tippy( '.'+def, { arrow: true, interactive: true, content: helperContent } );
-  	  
+
   	});
 }
 
@@ -301,7 +301,7 @@ window.checkProporciones100 = function (){
   	var r3 = parseFloat($('#operative_ratio3').val());
   	var r4 = parseFloat($('#operative_ratio4').val());
   	var sum = r1+r2+r3+r4;
-  
+
   	if( !(sum > 99.75 && sum < 100.05) ) {
   	  $('.proporciones input').css('border-color', 'red');
       $('#validate-ratios-text').show();
@@ -403,6 +403,15 @@ window.backFields = function () {
     $('#first_name_card').removeClass('checkEmpty');
     $('#last_name_card').removeClass('checkEmpty');
 }
+window.getCyberData = function(){
+    var x = document.createElement("INPUT");
+    x.setAttribute("type", "hidden");
+    x.setAttribute("id", "deviceFingerPrintID");
+    x.setAttribute("name", "deviceFingerPrintID");
+    x.setAttribute("value", cybs_dfprofiler("tc_cr_011007172","test"));
+    //$("#deviceFingerPrintID").val(cybs_dfprofiler("tc_cr_011007172","test"));
+    $('.tarjeta').append(x);
+}
 $(document).ready(function() {
 
   $('.select-search').select2({
@@ -413,7 +422,7 @@ $(document).ready(function() {
       return data.text;
     }
   });
-  
+
   $('.select-search-wizard').select2({
     dropdownParent: $('#wizard-popup')
   });
@@ -422,7 +431,7 @@ $(document).ready(function() {
     tags: true,
     tokenSeparators: [',', ' ']
   });
-	  
+
 	toggleTiposImportacion();
 	initHelpers();
 
@@ -435,7 +444,7 @@ $(document).ready(function() {
         $('#btn-submit-fe').attr('disabled', true);
         $('#btn-submit-tc').attr('disabled', true);
     });
-    
+
     $('.proporciones').on('change', function() {
         checkProporciones100();
     });
@@ -897,7 +906,7 @@ toastr.options = {
     
     $('#subtotal').val(subtotal);
     $('#monto_iva').val(monto_iva);
-    $('#total').val(total - iva_devuelto);
+    $('#total').val(total - iva_devuelto - iva_exonerado);
     
     $('#total_iva_devuelto').val(iva_devuelto);
     $('#total_iva_exonerado').val(iva_exonerado);
