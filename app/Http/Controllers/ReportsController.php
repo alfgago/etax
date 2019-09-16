@@ -235,14 +235,14 @@ class ReportsController extends Controller
         $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
         
         if( !$data->book ) {
-          return view('/Reports/no-data', compact('nombreMes') );
+          return view('/Reports/no-data', compact('mes') );
         }
         
         $dataDeclaracion = $data->calcularDeclaracion($acumulado);
         
         if(!$dataDeclaracion){
           $this->forceRecalc($ano);
-          return view('/Reports/no-data', compact('nombreMes') );
+          return view('/Reports/no-data', compact('mes') );
         }
         
         return view('/Reports/reporte-borrador-iva', compact('dataDeclaracion') );
