@@ -867,7 +867,16 @@ class PaymentController extends Controller
             //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
             if( ! isset($payment->charge_token) || $payment->charge_token == 'N/A' || $payment->charge_token == '' ) {
                 $chargeIncluded = $payment_gateway->createPayment($data);
-                $chargeTokenId = $chargeIncluded['chargeTokenId'] ?? $chargeIncluded->ccCaptureReply->requestID;
+                if (gettype($chargeIncluded) == 'array') {
+                    if($chargeIncluded['apiStatus'] == "Successful"){
+                        $appliedCharge_Id = $chargeIncluded['retrievalRefNo'];
+                    }
+                } else if (gettype($chargeIncluded) == 'object'){
+                    if($chargeIncluded->decision == 'ACCEPT'){
+                        $appliedCharge_Id = $chargeIncluded->requestID;
+                    }
+                }
+                $chargeTokenId = $appliedCharge_Id;
                 $payment->charge_token = $chargeTokenId;
                 $payment->save();
             }
