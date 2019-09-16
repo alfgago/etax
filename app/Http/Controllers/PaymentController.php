@@ -845,9 +845,8 @@ class PaymentController extends Controller
             $paymentMethod = PaymentMethod::where('user_id', $user->id)->first();
         }
         $payment_gateway = $paymentProcessor->selectPaymentGateway($paymentMethod->payment_gateway);
-
-        if($paymentMethod){
-            $payment = Payment::find($paymentId);
+        $payment = Payment::find($paymentId);
+        if($paymentMethod->payment_gateway === $payment->payment_gateway){
             $payment->payment_date = $date;
             $payment->payment_method_id = $paymentMethod->id;
             $payment->save();
@@ -876,8 +875,17 @@ class PaymentController extends Controller
             $data->token_bn = $paymentMethod->token_bn;
 
             $appliedCharge = $payment_gateway->pay($data);
+            if (gettype($data) == 'array') {
+                if($appliedCharge['apiStatus'] == "Successful"){
+                    $paymentAccepted = true;
+                }
+            } else if (gettype($data) == 'object'){
+                if($appliedCharge->decision == 'ACCEPT'){
+                    $paymentAccepted = true;
+                }
+            }
 
-            if ($appliedCharge['apiStatus'] == "Successful" || $appliedCharge->decision == 'ACCEPT') {
+            if ( $paymentAccepted ) {
                 $payment->proof = $appliedCharge['retrievalRefNo'] ?? $appliedCharge->requestID;
                 $payment->payment_status = 2;
                 $payment->save();
