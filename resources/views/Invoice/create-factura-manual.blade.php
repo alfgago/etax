@@ -35,14 +35,35 @@
                     
                     <div class="form-group col-md-12 with-button">
                       <label for="cliente">Seleccione el cliente</label>
-                      <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
-                        <option value='' selected>-- Seleccione un cliente --</option>
-                        @foreach ( currentCompanyModel()->clients as $cliente )
-                          @if( @$cliente->canInvoice() )
-                          <option value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
-                          @endif
-                        @endforeach
-                      </select>
+                      @if( count(currentCompanyModel()->clients) < 4000 )
+                        <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
+                          <option value='' selected>-- Seleccione un cliente --</option>
+                          @foreach ( currentCompanyModel()->clients as $cliente )
+                            @if( @$cliente->canInvoice() )
+                            <option value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
+                            @endif
+                          @endforeach
+                        </select>
+                      @else
+                        <select class="form-control select-search-many" name="client_id" id="client_id" placeholder="" required>
+                          <option value='' selected>-- Seleccione un cliente --</option>
+                          
+                        </select>
+                        <script>
+                          <?php 
+                            $clientesJson = json_encode(currentCompanyModel()->clientsForSelect2()); 
+                          ?>
+                          var data = '<?php echo $clientesJson ?>';
+                          var jsonData = JSON.parse(data);
+                          $(document).ready(function() { 
+
+                            $('.select-search-many').select2({
+                              data: jsonData
+                            });
+                            
+                          });
+                        </script>
+                      @endif
                     </div>
                   </div>
                 </div>

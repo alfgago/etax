@@ -1,13 +1,14 @@
 <table class="text-12 text-muted m-0 p-2 ivas-table bigtext borrador-presentacion" style="width:100%;">
 	<tbody>
 	<?php
-		$book = $data->book;
+		$impuestos = $dataDeclaracion['impuestos'];
 		
-		$ventas1 = $book->cc_ventas_1_iva;
-		$ventas2 = $book->cc_ventas_2_iva;
-		$ventas13 = $book->cc_ventas_13_iva;
-		$ventas4 = $book->cc_ventas_4_iva;
-		$ventasTotal = $ventas1+$ventas2+$ventas13+$ventas4;
+		$ventas1 = $impuestos['ventas1'];	
+		$ventas2 = $impuestos['ventas2'];	
+		$ventas4 = $impuestos['ventas4'];	
+		$ventas13 = $impuestos['ventas13'];	
+		$ventasTotal = $impuestos['ventasTotal'];	
+	
 	?>
 	<tr class="macro-title">
     <th colspan="7">Total impuesto por ventas y transacciones sujetas</th>
