@@ -17,5 +17,6 @@ class DatabaseSeeder extends Seeder
          $this->call(CodigosSeeder::class);
          $this->call(ProductCategorySeed::class);
          $this->call(CreateClientPassport::class);
+         $this->call(MenuSeeder::class);
     }
 }
