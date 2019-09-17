@@ -82,6 +82,16 @@
                   <label for="iva_amount">Monto IVA </label>
                   <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
                 </div>
+
+                <div class="form-group col-md-4 hidden" id="total_iva_devuelto-cont">
+                  <label for="total">IVA Devuelto</label>
+                  <input type="text" class="form-control total" name="total_iva_devuelto" id="total_iva_devuelto" placeholder="" readonly="true" required>
+                </div>
+
+                <div class="form-group col-md-4 hidden" id="total_iva_exonerado-cont">
+                  <label for="total">IVA Exonerado</label>
+                  <input type="text" class="form-control total" name="total_iva_exonerado" id="total_iva_exonerado" placeholder="" readonly="true" required>
+                </div>
     
                 <div class="form-group col-md-4">
                   <label for="total">Total</label>

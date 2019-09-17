@@ -42,6 +42,11 @@ class InvoiceItem extends Model
             }
             $this->save();
         }
+        
+        if( preg_match('/\s/', $this->iva_type) ){
+          $this->iva_type = trim($this->iva_type);
+          $this->save();
+        }
 
       }catch(\Throwable $e){
         Log::error('No pudo asignar un codigo de producto a legacy bill. ' . $e->getMessage());
@@ -76,6 +81,16 @@ class InvoiceItem extends Model
       }catch(\Throwable $e){
         Log::error('No pudo asignar un codigo de producto a legacy bill. ' . $e->getMessage());
       }
+    }
+    
+    
+    public function getSubtotalParaCalculo() {
+      if( $this->invoice->generation_method == 'XML' || $this->invoice->generation_method == 'XLSX') {
+        if( $this->discount > 0){
+          return $this->total - $this->iva_amount;
+        }
+      }
+      return $this->subtotal;
     }
     
 }

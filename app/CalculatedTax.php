@@ -144,7 +144,7 @@ class CalculatedTax extends Model
       return $applied;
     }
     
-    
+     
     /**
      * calcularFacturacionPorMesAno
      * Calcula y devuelve los datos del mes para dashboard y reportes
@@ -300,7 +300,7 @@ class CalculatedTax extends Model
         $countInvoiceItems = $invoiceItems->count();
         //Recorre las lineas de factura
         for ($i = 0; $i < $countInvoiceItems; $i++) {
-          //try {
+          try {
             $currInvoice = $invoiceItems[$i]->invoice;
             
             if( !$currInvoice->is_void && $currInvoice->is_authorized && $currInvoice->is_code_validated 
@@ -312,13 +312,10 @@ class CalculatedTax extends Model
               
               $invoiceItems[$i]->fixIvaType();
               
-              $subtotal = $invoiceItems[$i]->subtotal * $currInvoice->currency_rate;
+              $subtotal = $invoiceItems[$i]->getSubtotalParaCalculo() * $currInvoice->currency_rate;
               $ivaType = $invoiceItems[$i]->iva_type;
               $prodType = $invoiceItems[$i]->product_type;
               $invoiceIva = $invoiceItems[$i]->iva_amount * $currInvoice->currency_rate;
-              $currentTotal = $subtotal + $invoiceIva;
-              
-              //$montoDescuento = $invoiceItems[$i]['discount'] ? $this->discountCalculator($invoiceItems[$i]['discount_type'], $invoiceItems[$i]['discount'], $subtotal ) : 0;
               
               $prodPorc = $invoiceItems[$i]->ivaType ? $invoiceItems[$i]->ivaType->percentage : '13';
               $prodType = $prodType ? $prodType : '17';
@@ -333,12 +330,10 @@ class CalculatedTax extends Model
               //Redondea todo a 2 decimales
               $subtotal = round($subtotal, 2);
               $invoiceIva = round($invoiceIva, 2);
-              $currentTotal = round($currentTotal, 2);
               
               if( $currInvoice->document_type == '03' ) {
                 $subtotal = $subtotal * -1;
                 $invoiceIva = $invoiceIva * -1;
-                $currentTotal = $currentTotal * -1;
               }
               
               $ivaType = $ivaType ? $ivaType : 'B103';
@@ -430,6 +425,8 @@ class CalculatedTax extends Model
                 $sumRepercutidoExentoConCredito += $subtotal;
               }
                
+              $currentTotal = $subtotal + $invoiceIva;
+              
               //Ingresa retenciones al calculo
               $tipoPago = $currInvoice->payment_type;
               $retenidoLinea = 0;
@@ -499,9 +496,9 @@ class CalculatedTax extends Model
 
             }
             
-          /*}catch( \Throwable $ex ){
+          }catch( \Throwable $ex ){
             //Log::error('Error al leer factura para cálculo: ' . $ex->getMessage());
-          }9*/
+          }
         }
         
       });
@@ -545,6 +542,7 @@ class CalculatedTax extends Model
       $totalProveedoresContado = 0;
       $totalProveedoresCredito = 0;
       $ivaData = json_decode( $this->iva_data ) ?? new \stdClass();
+      $bookData = json_decode( $this->book_data ) ?? new \stdClass();
       $arrayActividades = explode( ',', currentCompanyModel()->commercial_activities );
 
       $query->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$ivaData, &$singleBill, $arrayActividades,
@@ -571,7 +569,6 @@ class CalculatedTax extends Model
               $ivaType = $billItems[$i]->iva_type;
               $prodType = $billItems[$i]->product_type;
               $billIva = $billItems[$i]->iva_amount * $currBill->currency_rate;
-              $currentTotal = $subtotal + $billIva;
               
               $prodPorc = $billItems[$i]->ivaType ? $billItems[$i]->ivaType->percentage : '13';
               $prodType = $prodType ? $prodType : '49';
@@ -586,12 +583,10 @@ class CalculatedTax extends Model
               //Redondea todo a 2 decimales
               $subtotal = round($subtotal, 2);
               $billIva = round($billIva, 2);
-              $currentTotal = round($currentTotal, 2);
               
               if( $currBill->document_type == '03' ) {
                 $subtotal = $subtotal * -1;
                 $billIva = $billIva * -1;
-                $currentTotal = $currentTotal * -1;
               }
                 
               $ivaType = $ivaType ? $ivaType : '003';
@@ -628,7 +623,7 @@ class CalculatedTax extends Model
               
               /***SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
               $porc_plena = $billItems[$i]->porc_identificacion_plena ? $billItems[$i]->porc_identificacion_plena : 0;
-              
+              $currAcreditablePleno = 0;
               if ( $porc_plena == 1 || $porc_plena == 5 ) {
                 $porc_plena = 13;
               } 
@@ -638,7 +633,7 @@ class CalculatedTax extends Model
               {
                 //Cuando es al 1%, se puede agreditar el 100%
                 $basesIdentificacionPlena += $subtotal;
-                $ivaAcreditableIdentificacionPlena += $billIva;
+                $currAcreditablePleno = $billIva;
               }
               if( $ivaType == 'B042' || $ivaType == 'B052' || $ivaType == 'B062' || $ivaType == 'B072' ||
                    $ivaType == 'S042' || $ivaType == 'S052' || $ivaType == 'S062' || $ivaType == 'S072' )
@@ -649,7 +644,7 @@ class CalculatedTax extends Model
                 }
                 $menor_porc = $menor/100;
                 
-                $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
+                $currAcreditablePleno = $subtotal * $menor_porc;
                 $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
               }
               if( $ivaType == 'B043' || $ivaType == 'B053' || $ivaType == 'B063' || $ivaType == 'B073' ||
@@ -661,10 +656,10 @@ class CalculatedTax extends Model
                 }
                 $menor_porc = $menor/100;
                 if( $menor != 13) { 
-                  $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
+                  $currAcreditablePleno = $subtotal * $menor_porc;
                   $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
                 }else{
-                  $ivaAcreditableIdentificacionPlena += $billIva;
+                  $currAcreditablePleno = $billIva;
                   $ivaNoAcreditableIdentificacionPlena += 0;
                 }
               }
@@ -677,26 +672,31 @@ class CalculatedTax extends Model
                 }
                 $menor_porc = $menor/100;
                 
-                $ivaAcreditableIdentificacionPlena += $subtotal * $menor_porc;
+                $currAcreditablePleno = $subtotal * $menor_porc;
                 $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
               }
+              $ivaAcreditableIdentificacionPlena += $currAcreditablePleno;
               /***END SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
               
+              $currentTotal = $subtotal + $billIva;
               $billsTotal += $currentTotal;
               $billsSubtotal += $subtotal;
               $totalBillIva += $billIva;
               
               $bVar = "b".$ivaType;
               $iVar = "i".$ivaType;
+              $iVarPleno = "pleno".$ivaType;
               
               if(!isset($ivaData->$bVar)) {
                 $ivaData->$bVar = 0;
               }
               if(!isset($ivaData->$iVar)) {
                 $ivaData->$iVar = 0;
+                $ivaData->$iVarPleno = 0;
               }
               $ivaData->$bVar += $subtotal;
               $ivaData->$iVar += $billIva;
+              $ivaData->$iVarPleno += $currAcreditablePleno;
               
               //Cuenta contable de proveedor
               $tipoVenta = $currBill->sale_condition;
@@ -721,8 +721,6 @@ class CalculatedTax extends Model
               $ivaData->$typeVarPorc += $subtotal;
               $ivaData->$typeVarActividad += $subtotal;
               $ivaData->$typeVarPorcActividad += $subtotal;
-              
-              
             }  
             
           }catch( \Throwable $ex ){
@@ -1117,8 +1115,10 @@ class CalculatedTax extends Model
     			foreach( CodigoIvaSoportado::all() as $codigo ) {
     			  $bVar = "b$codigo->id";
     			  $iVar = "i$codigo->id";
+            $iVarPleno = "pleno$codigo->id";
     			  $ivaData->$bVar += $ivaDataAnterior->$bVar;
     			  $ivaData->$iVar += $ivaDataAnterior->$iVar;
+    			  $ivaData->$iVarPleno += $ivaDataAnterior->$iVarPleno;
     			}
     			
     			foreach( ProductCategory::all() as $codigo ) {
@@ -1216,8 +1216,10 @@ class CalculatedTax extends Model
 			foreach( CodigoIvaSoportado::all() as $codigo ) {
 			  $bVar = "b$codigo->id";
 			  $iVar = "i$codigo->id";
+			  $iVarPleno = "pleno$codigo->id";
 			  $ivaData->$bVar = 0;
 			  $ivaData->$iVar = 0;
+			  $ivaData->$iVarPleno = 0;
 			}
 			
       $arrayActividades = currentCompanyModel()->getActivities();
@@ -1264,15 +1266,209 @@ class CalculatedTax extends Model
     private function microtime_float(){
         list($usec, $sec) = explode(" ", microtime());
         return ((float) $usec + (float)$sec);
-    }  
+    } 
     
-    private function discountCalculator($descType, $value, $amount) {
-        if($descType == "01" && $value > 0 ) {
-             $discount = $amount * ($value / 100);
-        } else {
-            $discount= $value;
-        }
-        return round($discount,2);
+    
+    public function calcularDeclaracion($acumulado){
+      try{
+          $company = currentCompanyModel();
+    			$ivaData = json_decode($this->iva_data);
+	      	$book = $this->book;
+          $arrayActividades = $company->getActivities();
+          $prorrataOperativa = $company->getProrrataOperativa($this->year);
+          
+          $dataDeclaracion = [
+            "ano" => $this->year,
+            "mes" => $this->month,
+            "empresa" => $company->id_number,
+            "prorrataOperativa" => $prorrataOperativa
+          ];
+        
+          $actividadDataArray = array();
+          foreach( $arrayActividades as $act ){
+            $actividadData = array();
+            $actividadData['codigo'] = $act->codigo;
+            $actividadData['titulo'] = $act->actividad;
+            $actividadData['V1'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 1%", "cats"=>[]];
+            $actividadData['V2'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 2%", "cats"=>[]];
+            $actividadData['V4'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 4%", "cats"=>[]];
+            $actividadData['V13'] = ["title" => "BIENES Y SERVICIOS AFECTOS AL 13%", "cats"=>[]];
+            $actividadData['BI'] =  ["title" => "TOTAL OTROS DETALLES A INCLUIR EN LA BASE IMPONIBLE", "cats"=>[]];
+            $actividadData['VEX'] = ["title" => "VENTAS EXENTAS", "cats"=>[]];
+            $actividadData['VAS'] = ["title" => "VENTAS AUTORIZADAS SIN IMPUESTO (órdenes especiales y otros transitorios)", "cats"=>[]];
+            $actividadData['VNS'] = ["title" => "VENTAS A NO SUJETOS", "cats"=>[]];
+            $actividadData['CL'] =  ["title" => "Compras de bienes y servicios locales", "cats"=>[]];
+            $actividadData['CI'] =  ["title" => "Importación de bienes y adquisición de servicios del exterior", "cats"=>[]];
+            $actividadData['CE'] =  ["title" => "Bienes y servicios exentos", "cats"=>[]];
+            $actividadData['CNR'] =  ["title" => "Bienes y servicios no relacionados directamente con la actividad", "cats"=>[]];
+            $actividadData['CNS'] =  ["title" => "Bienes y servicios no sujetos", "cats"=>[]];
+            $actividadData['CLI'] =  ["title" => " Bienes y servicios del artículo 19 de la LIVA", "cats"=>[]];
+            $actividadData['COE'] =  ["title" => "Compras autorizadas sin impuesto (órdenes especiales)", "cats"=>[]];
+            
+            foreach( \App\ProductCategory::all() as $cat ) {
+              $tipoID = $cat->id;
+              $varName  = "$act->codigo-type$tipoID";
+        			$varName0 = "$act->codigo-type$tipoID-0";
+        			$varName1 = "$act->codigo-type$tipoID-1";
+        			$varName2 = "$act->codigo-type$tipoID-2";
+        			$varName3 = "$act->codigo-type$tipoID-13";
+        			$varName4 = "$act->codigo-type$tipoID-4";
+        			
+        			$m0 = $ivaData->$varName0 ?? 0;
+        			$m1 = $ivaData->$varName1 ?? 0;
+        			$m2 = $ivaData->$varName2 ?? 0;
+        			$m3 = $ivaData->$varName3 ?? 0;
+        			$m4 = $ivaData->$varName4 ?? 0;
+        			
+        			$info = [
+        			  "name"   => $cat->declaracion_name,
+        			  "monto0" => $m0,
+        			  "monto1" => $m1,
+        			  "monto2" => $m2,
+        			  "monto3" => $m3,
+        			  "monto4" => $m4,
+        			];
+        			
+        			if( ! isset($actividadData[$cat->group]["totales"]) ){
+        			  $actividadData[$cat->group]["totales"] = 0;
+        			}
+        			$actividadData[$cat->group]["totales"] = $actividadData[$cat->group]["totales"] + ($m0+$m1+$m2+$m3+$m4);
+    
+        			//Agrega la información al grupo respectivo.
+        			try{ 
+        			  array_push($actividadData["$cat->group"]["cats"], $info); 
+        			}catch(\Throwable $e){}
+            }
+            array_push( $actividadDataArray, $actividadData );
+          }
+          
+          $dataDeclaracion["dataActividades"] = $actividadDataArray;
+          
+          $impuestos = array();
+      		//Compra de servicios
+          $impuestos['iva_compras_S1'] = $this->applyRatios(1, $ivaData->bS001); 
+          $impuestos['iva_compras_S2'] = $this->applyRatios(2, $ivaData->bS002); 
+          $impuestos['iva_compras_S3'] = $this->applyRatios(13, $ivaData->bS003); 
+          $impuestos['iva_compras_S4'] = $this->applyRatios(4, $ivaData->bS004); 
+          $impuestos['iva_importaciones_S1'] = $this->applyRatios(1, $ivaData->bS021);
+          $impuestos['iva_importaciones_S2'] = $this->applyRatios(2, $ivaData->bS022);
+          $impuestos['iva_importaciones_S3'] = $this->applyRatios(13, $ivaData->bS023);
+          $impuestos['iva_importaciones_S4'] = $this->applyRatios(4, $ivaData->bS024);
+          
+          $impuestos['iva_compras_S1e'] = $ivaData->plenoS061; 
+          $impuestos['iva_compras_S2e'] = $ivaData->plenoS062; 
+          $impuestos['iva_compras_S3e'] = $ivaData->plenoS063;  
+          $impuestos['iva_compras_S4e'] = $ivaData->plenoS064;  
+          $impuestos['iva_importaciones_S1e'] = $ivaData->plenoS041; 
+          $impuestos['iva_importaciones_S2e'] = $ivaData->plenoS042; 
+          $impuestos['iva_importaciones_S3e'] = $ivaData->plenoS043; 
+          $impuestos['iva_importaciones_S4e'] = $ivaData->plenoS044; 
+          
+          //Compra de bienes
+          $impuestos['iva_compras_B1'] = $this->applyRatios(1, $ivaData->bB001); 
+          $impuestos['iva_compras_B2'] = $this->applyRatios(2, $ivaData->bB002); 
+          $impuestos['iva_compras_B3'] = $this->applyRatios(13, $ivaData->bB003); 
+          $impuestos['iva_compras_B4'] = $this->applyRatios(4, $ivaData->bB004); 
+          $impuestos['iva_importaciones_B1'] = $this->applyRatios(1, $ivaData->bB021 + $ivaData->bB015);
+          $impuestos['iva_importaciones_B2'] = $this->applyRatios(2, $ivaData->bB022);
+          $impuestos['iva_importaciones_B3'] = $this->applyRatios(13, $ivaData->bB023 + $ivaData->bB016);
+          $impuestos['iva_importaciones_B4'] = $this->applyRatios(4, $ivaData->bB024);
+          
+          $impuestos['iva_compras_B1e'] = $ivaData->plenoB061; 
+          $impuestos['iva_compras_B2e'] = $ivaData->plenoB062; 
+          $impuestos['iva_compras_B3e'] = $ivaData->plenoB063; 
+          $impuestos['iva_compras_B4e'] = $ivaData->plenoB064; 
+          $impuestos['iva_importaciones_B1e'] = $ivaData->plenoB041 + $ivaData->plenoB035; 
+          $impuestos['iva_importaciones_B2e'] = $ivaData->plenoB042; 
+          $impuestos['iva_importaciones_B3e'] = $ivaData->plenoB043 + $ivaData->plenoB036; 
+          $impuestos['iva_importaciones_B4e'] = $ivaData->plenoB044; 
+      
+      		//Bienes de capital
+          $impuestos['iva_bc_L1'] = $this->applyRatios(1, $ivaData->bB011);
+          $impuestos['iva_bc_L2'] = $this->applyRatios(2, $ivaData->bB012);
+          $impuestos['iva_bc_L3'] = $this->applyRatios(13, $ivaData->bB013);
+          $impuestos['iva_bc_L4'] = $this->applyRatios(4, $ivaData->bB014);
+      
+          $impuestos['iva_bc_I1'] = $this->applyRatios(1, $ivaData->bB031);
+          $impuestos['iva_bc_I2'] = $this->applyRatios(2, $ivaData->bB032);
+          $impuestos['iva_bc_I3'] = $this->applyRatios(13, $ivaData->bB033);
+          $impuestos['iva_bc_I4'] = $this->applyRatios(4, $ivaData->bB034);
+          
+          $impuestos['iva_bc_L1e'] = $ivaData->plenoB051; 
+          $impuestos['iva_bc_L2e'] = $ivaData->plenoB052; 
+          $impuestos['iva_bc_L3e'] = $ivaData->plenoB053; 
+          $impuestos['iva_bc_L4e'] = $ivaData->plenoB054; 
+      
+          $impuestos['iva_bc_I1e'] = $ivaData->plenoB071; 
+          $impuestos['iva_bc_I2e'] = $ivaData->plenoB072; 
+          $impuestos['iva_bc_I3e'] = $ivaData->plenoB073; 
+          $impuestos['iva_bc_I4e'] = $ivaData->plenoB074; 
+          
+          //Totales
+          $impuestos['totales1'] = $impuestos['iva_bc_L1'] + $impuestos['iva_bc_I1'] + $impuestos['iva_importaciones_B1'] + $impuestos['iva_importaciones_S1'] + $impuestos['iva_compras_B1'] + $impuestos['iva_compras_S1'];
+          $impuestos['totales2'] = $impuestos['iva_bc_L2'] + $impuestos['iva_bc_I2'] + $impuestos['iva_importaciones_B2'] + $impuestos['iva_importaciones_S2'] + $impuestos['iva_compras_B2'] + $impuestos['iva_compras_S2'];
+          $impuestos['totales3'] = $impuestos['iva_bc_L3'] + $impuestos['iva_bc_I3'] + $impuestos['iva_importaciones_B3'] + $impuestos['iva_importaciones_S3'] + $impuestos['iva_compras_B3'] + $impuestos['iva_compras_S3'];
+          $impuestos['totales4'] = $impuestos['iva_bc_L4'] + $impuestos['iva_bc_I4'] + $impuestos['iva_importaciones_B4'] + $impuestos['iva_importaciones_S4'] + $impuestos['iva_compras_B4'] + $impuestos['iva_compras_S4'];
+          $impuestos['totalesSum'] = $impuestos['totales1'] + $impuestos['totales2'] + $impuestos['totales3'] + $impuestos['totales4'];
+          
+          //Totales con identificacion especifica
+          $impuestos['totales1e'] = $impuestos['iva_bc_L1e'] + $impuestos['iva_bc_I1e'] + $impuestos['iva_importaciones_B1e'] + $impuestos['iva_importaciones_S1e'] + $impuestos['iva_compras_B1e'] + $impuestos['iva_compras_S1e'];
+          $impuestos['totales2e'] = $impuestos['iva_bc_L2e'] + $impuestos['iva_bc_I2e'] + $impuestos['iva_importaciones_B2e'] + $impuestos['iva_importaciones_S2e'] + $impuestos['iva_compras_B2e'] + $impuestos['iva_compras_S2e'];
+          $impuestos['totales3e'] = $impuestos['iva_bc_L3e'] + $impuestos['iva_bc_I3e'] + $impuestos['iva_importaciones_B3e'] + $impuestos['iva_importaciones_S3e'] + $impuestos['iva_compras_B3e'] + $impuestos['iva_compras_S3e'];
+          $impuestos['totales4e'] = $impuestos['iva_bc_L4e'] + $impuestos['iva_bc_I4e'] + $impuestos['iva_importaciones_B4e'] + $impuestos['iva_importaciones_S4e'] + $impuestos['iva_compras_B4e'] + $impuestos['iva_compras_S4e'];
+          $impuestos['totalesSume'] = $impuestos['totales1e'] + $impuestos['totales2e'] + $impuestos['totales3e'] + $impuestos['totales4e'];
+		
+      		$impuestos['ventas1'] = $book->cc_ventas_1_iva;
+      		$impuestos['ventas2'] = $book->cc_ventas_2_iva;
+      		$impuestos['ventas13'] = $book->cc_ventas_13_iva;
+      		$impuestos['ventas4'] = $book->cc_ventas_4_iva;
+      		$impuestos['ventasTotal'] = $impuestos['ventas1']+$impuestos['ventas2']+$impuestos['ventas13']+$impuestos['ventas4'];
+      		
+      		$impuestos['totalCreditosPeriodo'] = ($impuestos['totalesSum'] * $prorrataOperativa ) + $impuestos['totalesSume'];
+      		$impuestos['creditosAcreditablesPorTarifas'] = $impuestos['totalesSum'] * $prorrataOperativa;
+      		
+          $dataDeclaracion['impuestos'] = $impuestos;
+          
+          
+          $determinacion = array();
+        	$determinacion['montoAnualVentasConDerechoCredito'] = $acumulado->numerador_prorrata;
+        	$determinacion['montoAnualVentasSinDerechoCredito'] = $acumulado->invoices_subtotal;
+        	$determinacion['porcentajeProrrataFinal'] = $acumulado->prorrata*100;
+        	$determinacion['creditoFiscalAnualTotal'] = $acumulado->total_bill_iva;
+        	$determinacion['creditoFiscalAnualDeducible'] = $acumulado->iva_deducible_estimado;
+        	$determinacion['creditoAnualFinal'] = $acumulado->iva_por_cobrar;
+        	$determinacion['saldoFavorAnual'] = $acumulado->iva_por_cobrar;
+        	$determinacion['saldoDeudorAnual'] = $acumulado->iva_por_pagar;
+        	
+        	$determinacion['impuestoOperacionesGravadas'] = $this->total_invoice_iva;
+        	$determinacion['totalCreditosPeriodo'] = $this->iva_deducible_operativo;
+        	$determinacion['devolucionIva'] = $this->iva_devuelto;
+        	$determinacion['saldoFavorPeriodo'] = $this->iva_por_cobrar;
+        	$determinacion['saldoDeudorPeriodo'] = $this->iva_por_pagar;
+        	$determinacion['saldoFavorProrrataReal'] = $this->iva_por_cobrar;
+        	$determinacion['saldoDeudorProrrataReal'] = $this->iva_por_pagar;
+        			
+        			 $diff = $this->iva_por_pagar - $this->iva_devuelto;
+        			 $impuestoFinal = $diff;
+        			 $saldoFavor = $this->saldo_favor;
+        			 if($diff < 0){
+        			 		$impuestoFinal = 0;
+        			 		$saldoFavor = $saldoFavor + abs($diff);
+        			 }
+        	 
+        	$determinacion['saldoFavorFinalPeriodo'] = $saldoFavor;
+        	$determinacion['impuestoFinalPeriodo'] = $impuestoFinal;
+        	
+        	$determinacion['retencionImpuestos'] = $this->retention_by_card ? $this->retention_by_card : $this->iva_retenido;
+        	$determinacion['saldoFavorAnterior'] = $this->saldo_favor_anterior;
+          
+          $dataDeclaracion['determinacion'] = $determinacion;
+
+          return $dataDeclaracion;
+      }catch(\Throwable $e){
+        Log::error($e);
+        return false;
+      }
     }
   
 }

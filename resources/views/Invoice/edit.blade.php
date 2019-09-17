@@ -77,6 +77,16 @@
                   <label for="iva_amount">Monto IVA </label>
                   <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
                 </div>
+
+                <div class="form-group col-md-4 hidden" id="total_iva_devuelto-cont">
+                  <label for="total">IVA Devuelto</label>
+                  <input type="text" class="form-control total" name="total_iva_devuelto" id="total_iva_devuelto" placeholder="" readonly="true" required>
+                </div>
+
+                <div class="form-group col-md-4 hidden" id="total_iva_exonerado-cont">
+                  <label for="total">IVA Exonerado</label>
+                  <input type="text" class="form-control total" name="total_iva_exonerado" id="total_iva_exonerado" placeholder="" readonly="true" required>
+                </div>
       
                 <div class="form-group col-md-4">
                   <label for="total">Total</label>
@@ -261,6 +271,7 @@
                         <input type="hidden" class='unidad_medicion' name="items[{{ $loop->index }}][measure_unit]" value="{{ $item->measure_unit }}">
                         <input type="hidden" class='precio_unitario' name="items[{{ $loop->index }}][unit_price]" value="{{ $item->unit_price }}">
                         <input type="hidden" class='tipo_iva' name="items[{{ $loop->index }}][iva_type]" value="{{ $item->iva_type }}">
+                        <input type="hidden" class='tipo_producto' name="items[{{ $loop->index }}][product_type]" value="{{ $item->product_type }}">
                         <input type='hidden' class='porc_identificacion_plena' value='0'>
                         <input type='hidden' class='discount_type' name='items[{{ $loop->index }}][discount_type]' value='{{ $item->discount_type }}'>
                         <input type='hidden' class='discount' name='items[{{ $loop->index }}][discount]' value='{{ $item->discount }}'>
