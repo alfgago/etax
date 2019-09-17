@@ -387,6 +387,10 @@ $(document).ready(function(){
     $('#tipo_iva').val( 'B003' ).change();
   @endif
 
+  @if (@$document_type == '09')
+    $('#tipo_iva').val( 'B150' ).change();
+  @endif
+
   $('#moneda').change(function() {
     if ($(this).val() == 'USD') {
       $('#tipo_cambio').val($('#tipo_cambio').data('rates'))
