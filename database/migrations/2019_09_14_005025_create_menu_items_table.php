@@ -18,6 +18,7 @@ class CreateMenuItemsTable extends Migration
             $table->unsignedBigInteger('menu_id');
             $table->string('nombre');
             $table->string('url');
+            $table->string('icono');
             $table->string('tipo');
             $table->BigInteger('padre');
             $table->integer('estado');

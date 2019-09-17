@@ -1,5 +1,32 @@
-
   <div class="side-content-wrap">
+      <div class="sidebar-left open" >
+          <ul class="navigation-left">
+            <?php 
+                $menu = App\Menu::where('id',1)->first();
+                $items = $menu->items;
+                $i = 0;
+                foreach ($items as $item) {
+                    ?>
+                    <li class="nav-item <?php if($i > 2){ ?> small-nav <?php } ?>" >
+                        <a class="nav-item-hold" href="{{$item->url}}">
+                            <img src="{{asset($item->icono)}}" class="sidemenu-icon">
+                            <span class="nav-text">{{$item->nombre}}</span>
+                        </a>
+                        <div class="subitems">
+                            <?php
+                            $subitems = $item->subitems;
+                            foreach ($subitems as $subitem) {
+                                ?><a {{$subitem->tipo}}="{{$subitem->url}}">{{$subitem->nombre}}</a><?php
+                            }
+                    ?>  </div>
+                    </li> <?php 
+                    $i++;
+                }
+            ?>
+            </ul>
+      </div>
+  </div> 
+ <?php /* <div class="side-content-wrap">
       <div class="sidebar-left open" >
           <ul class="navigation-left">
             <li class="nav-item {{ request()->is('/') ? 'active' : '' }}" >
@@ -134,7 +161,8 @@
             
           </ul>
       </div>
-  </div>
+  </div> 
+  */?>
   <script>
       /*$( "#factExistente" ).mouseover(function() {
           $( "#factExistente01" ).attr('hidden', false);
