@@ -16,12 +16,12 @@ class CreateMenuItemsTable extends Migration
         Schema::create('menu_items', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('menu_id');
-            $table->string('nombre');
-            $table->string('url');
-            $table->string('icono');
-            $table->string('tipo');
-            $table->BigInteger('padre');
-            $table->integer('estado');
+            $table->string('name');
+            $table->string('link');
+            $table->string('icon');
+            $table->string('type');
+            $table->BigInteger('parent');
+            $table->integer('status');
             $table->timestamps();
         });
     }
