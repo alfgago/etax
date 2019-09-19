@@ -212,6 +212,7 @@ class User extends Authenticatable {
                 return $retorno;
             }
         }catch( \Throwable $e) { 
+            \Illuminate\Support\Facades\Log::error('Error items menu'. $e);
             return []; 
         }
     }
