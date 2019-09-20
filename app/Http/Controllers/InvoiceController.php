@@ -532,7 +532,7 @@ class InvoiceController extends Controller
         $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
         $codigos = CodigoIvaRepercutido::where('hidden', false)->get();
         $units = UnidadMedicion::all()->toArray();
-        return view('Invoice/nota-debito', compact('invoice','units','arrayActividades','countries','product_categories','codigos') );
+        return view('Invoice/nota-debito', compact('invoice','units','arrayActividades','countries','product_categories','codigos', 'company') );
     }
 
     public function sendNotaDebito($id, Request $request)
