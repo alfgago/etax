@@ -118,12 +118,12 @@ class MenuSeeder extends Seeder
 			            ]);
 			            foreach($subitem_menu['permisos'] as $permiso){
 			            	$permiso_item = App\MenuItemsPermiso::updateOrCreate(
-		            	 	[
-		            	 		'menu_item_id'=>$menu_subitem->id,
-		            	 		'permission_id'=>$permiso
-		            	 	],
-		            	 	[]
-		            	 );
+			            	 	[
+			            	 		'menu_item_id'=>$menu_subitem->id,
+			            	 		'permission_id'=>$permiso
+			            	 	],
+			            	 	[]
+			            	 );
 			            }
 	            	}
             	}
