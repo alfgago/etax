@@ -1425,7 +1425,7 @@ class InvoiceController extends Controller
         
         
         try {
-            Log::notice("$company->id_number importando ".count($collection)."lineas... Last Invoice: $company->last_invoice_ref_number");
+            Log::notice("$company->id_number importando ".count($collection)." lineas... Last Invoice: $company->last_invoice_ref_number");
             $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
             $i = 0;
             $invoiceList = array();

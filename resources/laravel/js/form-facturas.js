@@ -230,34 +230,33 @@
       var row_id  = "item-tabla-"+numero;
       
       var inputFields = "<div class='hidden'>" +
-                   "<input type='hidden' class='numero' name='items["+index+"][item_number]' value='"+(numero+1)+"'>" +
-                   "<input class='item_id' type='hidden' name='items["+index+"][id]' value='"+item_id+"'>" +
-                   "<input type='hidden' class='codigo' name='items["+index+"][code]' value='"+codigo+"'>" +
-                   "<input type='hidden' class='nombre' name='items["+index+"][name]' value='"+nombre+"'>" +
-                   "<input type='hidden' class='tipo_producto' name='items["+index+"][product_type]' value='"+tipo_producto+"'>" +
-                   "<input type='hidden' class='cantidad' name='items["+index+"][item_count]' value='"+cantidad+"'>" +
-                   "<input type='hidden' class='unidad_medicion' name='items["+index+"][measure_unit]' value='"+unidad_medicion+"'>" +
-                   "<input type='hidden' class='precio_unitario' name='items["+index+"][unit_price]' value='"+precio_unitario+"'>" +
-                   "<input type='hidden' class='tipo_iva' name='items["+index+"][iva_type]' value='"+tipo_iva+"'>" +
-                   "<input type='hidden' class='porc_identificacion_plena' name='items["+index+"][porc_identificacion_plena]' value='"+porc_identificacion_plena+"'>" +
-                   "<input type='hidden' class='discount_type' name='items["+index+"][discount_type]' value='"+tipo_descuento+"'>" +
-                   "<input type='hidden' class='discount' name='items["+index+"][discount]' value='"+descuento+"'>" +
-                   "<input type='hidden' class='subtotal' name='items["+index+"][subtotal]' value='"+subtotal+"'>" +
-                   "<input type='hidden' class='porc_iva' name='items["+index+"][iva_percentage]' value='"+porc_iva+"'>" +
-                   "<input type='hidden' class='monto_iva' name='items["+index+"][iva_amount]' value='"+monto_iva+"'> " +
-                   "<input type='hidden' class='total' name='items["+index+"][total]' value='"+total+"'>" +
-                   "<input type='hidden' class='is_identificacion_especifica' name='items["+index+"][is_identificacion_especifica]' value='"+is_identificacion_especifica+"'>" +
-                   "<input type='hidden' class='typeDocument' name='items["+index+"][typeDocument]' value='"+typeDocument+"'>" +
-                   "<input type='hidden' class='numeroDocumento' name='items["+index+"][numeroDocumento]' value='"+numeroDocumento+"'>" +
-                   "<input type='hidden' class='nombreInstitucion' name='items["+index+"][nombreInstitucion]' value='"+nombreInstitucion+"'>" +
-                   "<input type='hidden' class='exoneration_date' name='items["+index+"][exoneration_date]' value='"+exoneration_date+"'>" +
-                   "<input type='hidden' class='porcentajeExoneracion' name='items["+index+"][porcentajeExoneracion]' value='"+porcentajeExoneracion+"'>" +
-                   "<input type='hidden' class='montoExoneracion' name='items["+index+"][montoExoneracion]' value='"+montoExoneracion+"'>" +
-                   "<input type='hidden' class='impuestoNeto' name='items["+index+"][impuestoNeto]' value='"+impuestoNeto+"'>" +
-                   "<input type='hidden' class='montoTotalLinea' name='items["+index+"][montoTotalLinea]' value='"+montoTotalLinea+"'>" +
-                   "<input type='hidden' class='tariff_heading' name='items["+index+"][tariff_heading]' value='"+tariff_heading+"'>" +
+                   "<input type='hidden' class='numero' name='items["+index+"][item_number]' itemname='item_number' value='"+(numero+1)+"'>" +
+                   "<input class='item_id' type='hidden' name='items["+index+"][id]' itemname='id' value='"+item_id+"'>" +
+                   "<input type='hidden' class='codigo' name='items["+index+"][code]' itemname='code' value='"+codigo+"'>" +
+                   "<input type='hidden' class='nombre' name='items["+index+"][name]' itemname='name' value='"+nombre+"'>" +
+                   "<input type='hidden' class='tipo_producto' name='items["+index+"][product_type]' itemname='product_type' value='"+tipo_producto+"'>" +
+                   "<input type='hidden' class='cantidad' name='items["+index+"][item_count]' itemname='item_count' value='"+cantidad+"'>" +
+                   "<input type='hidden' class='unidad_medicion' name='items["+index+"][measure_unit]' itemname='measure_unit' value='"+unidad_medicion+"'>" +
+                   "<input type='hidden' class='precio_unitario' name='items["+index+"][unit_price]' itemname='unit_price' value='"+precio_unitario+"'>" +
+                   "<input type='hidden' class='tipo_iva' name='items["+index+"][iva_type]' itemname='iva_type' value='"+tipo_iva+"'>" +
+                   "<input type='hidden' class='porc_identificacion_plena' name='items["+index+"][porc_identificacion_plena]' itemname='porc_identificacion_plena' value='"+porc_identificacion_plena+"'>" +
+                   "<input type='hidden' class='discount_type' name='items["+index+"][discount_type]' itemname='discount_type' value='"+tipo_descuento+"'>" +
+                   "<input type='hidden' class='discount' name='items["+index+"][discount]' itemname='discount' value='"+descuento+"'>" +
+                   "<input type='hidden' class='subtotal' name='items["+index+"][subtotal]' itemname='subtotal' value='"+subtotal+"'>" +
+                   "<input type='hidden' class='porc_iva' name='items["+index+"][iva_percentage]' itemname='iva_percentage' value='"+porc_iva+"'>" +
+                   "<input type='hidden' class='monto_iva' name='items["+index+"][iva_amount]' itemname='iva_amount' value='"+monto_iva+"'> " +
+                   "<input type='hidden' class='total' name='items["+index+"][total]' itemname='total' value='"+total+"'>" +
+                   "<input type='hidden' class='is_identificacion_especifica' name='items["+index+"][is_identificacion_especifica]' itemname='is_identificacion_especifica' value='"+is_identificacion_especifica+"'>" +
+                   "<input type='hidden' class='typeDocument' name='items["+index+"][typeDocument]' itemname='typeDocument' value='"+typeDocument+"'>" +
+                   "<input type='hidden' class='numeroDocumento' name='items["+index+"][numeroDocumento]' itemname='numeroDocumento' value='"+numeroDocumento+"'>" +
+                   "<input type='hidden' class='nombreInstitucion' name='items["+index+"][nombreInstitucion]' itemname='nombreInstitucion' value='"+nombreInstitucion+"'>" +
+                   "<input type='hidden' class='exoneration_date' name='items["+index+"][exoneration_date]' itemname='exoneration_date' value='"+exoneration_date+"'>" +
+                   "<input type='hidden' class='porcentajeExoneracion' name='items["+index+"][porcentajeExoneracion]' itemname='porcentajeExoneracion' value='"+porcentajeExoneracion+"'>" +
+                   "<input type='hidden' class='montoExoneracion' name='items["+index+"][montoExoneracion]' itemname='montoExoneracion' value='"+montoExoneracion+"'>" +
+                   "<input type='hidden' class='impuestoNeto' name='items["+index+"][impuestoNeto]' itemname='impuestoNeto' value='"+impuestoNeto+"'>" +
+                   "<input type='hidden' class='montoTotalLinea' name='items["+index+"][montoTotalLinea]' itemname='montoTotalLinea' value='"+montoTotalLinea+"'>" +
+                   "<input type='hidden' class='tariff_heading' name='items["+index+"][tariff_heading]' itemname='tariff_heading' value='"+tariff_heading+"'>" +
               "</div>"
-
                    ;
 
       //Crea la fila en la tabla
@@ -401,12 +400,18 @@
   
   //Recalcula números para asegurar que no haya vacíos
   window.recalcularNumerosItem = function() {
-    $i = 0;
+    var i = 0;
     $( '.item-tabla' ).each( function(){
-      $(this).attr( 'attr-num', $i );   
-      $(this).attr( 'id', 'item-tabla-'+$i );   
-      $(this).find( '.numero-fila').text($i+1 );
-      $i++;        
+      $(this).attr( 'attr-num', i );   
+      $(this).attr( 'id', 'item-tabla-'+i );   
+      $(this).find( '.numero-fila').text(i+1 );
+      $(this).find('.hidden input').each( function(){
+    	  if($(this).attr('itemname').length){
+    		  var itemname = $(this).attr('itemname');
+      		$(this).attr('name', 'items['+i+']['+itemname+']');  
+        }
+      });
+      i++;        
     });
   }
 
