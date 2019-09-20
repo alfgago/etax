@@ -155,7 +155,7 @@ class CalculatedTax extends Model
      * @bodyParam prorrataOperativa required
      * @return App\CalculatedTax
      */
-    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa, $forceRecalc = false ) {
+    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa, $forceRecalc = true ) {
       
       $currentCompanyId = currentCompany();
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
@@ -731,7 +731,6 @@ class CalculatedTax extends Model
         
       });
               
-      
       $this->iva_data = json_encode( $ivaData );
       $this->count_bills = $countBills;
       $this->bills_total = $billsTotal;
@@ -760,6 +759,7 @@ class CalculatedTax extends Model
       $this->iva_acreditable_identificacion_plena = $ivaAcreditableIdentificacionPlena + $acredPorCanasta;
       $this->bills_subtotal1 = 0; //Lo deja en 0 de una vez. Todas deberian contar como base no acreditable.
 
+      
       return $this;
     }
     
