@@ -679,7 +679,7 @@ class Invoice extends Model
         
         $invoice->commercial_activity = $arr['CodigoActividad'] ?? 0;
         $invoice->xml_schema = $invoice->commercial_activity ? 43 : 42;
-        $invoice->sale_condition = isset($arr['CondicionVenta']) ? $arr['CondicionVenta'] : '01';
+        $invoice->sale_condition = isset($arr['CondicionVenta']) ? $arr['CondicionVenta'] :  '01';
         $invoice->credit_time = isset($arr['PlazoCredito']) ? $arr['PlazoCredito'] : null;
         //$invoice->credit_time = null;
         $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
