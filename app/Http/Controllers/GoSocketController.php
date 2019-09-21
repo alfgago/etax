@@ -17,9 +17,8 @@ use Illuminate\Support\Facades\Log;
 
 class GoSocketController extends Controller
 {
-    public function link(){
-        return "http://api.sandbox.gosocket.net/";
-    }
+
+    public $link = "http://api.sandbox.gosocket.net/";
 
     public function gosocketValidate(Request $request) {
         try{
@@ -28,7 +27,7 @@ class GoSocketController extends Controller
                 $ApplicationIdGS = config('etax.applicationidgs');
                 $base64 = base64_encode($ApplicationIdGS.":".$token);
                 $GoSocket = new Client();
-                $APIStatus = $GoSocket->request('GET', $this->link()."api/Gadget/GetUser", [
+                $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetUser", [
                     'headers' => [
                         'Content-Type' => "application/json",
                         'Accept' => "application/json",
@@ -43,7 +42,7 @@ class GoSocketController extends Controller
 
                 if(is_null($user)){
                     $GoSocket = new Client();
-                    $APIStatus = $GoSocket->request('GET', $this->link()."api/Gadget/GetAccount?accountId=".$user_gs['CurrentAccountId'], [
+                    $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetAccount?accountId=".$user_gs['CurrentAccountId'], [
                         'headers' => [
                             'Content-Type' => "application/json",
                             'Accept' => "application/json",
@@ -141,7 +140,7 @@ class GoSocketController extends Controller
     	$ApplicationIdGS = config('etax.applicationidgs');
 		$base64 = base64_encode($ApplicationIdGS.":".$token);
     	$GoSocket = new Client();
-	    $APIStatus = $GoSocket->request('GET', $this->link()."api/Gadget/GetSentDocuments?MyAccountId=fbcd6a77-4396-49d3-85cb-8646453e8460&fromDate=2019-01-01&toDate=2020-01-01&DocumentTypeId=1&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
+	    $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetSentDocuments?MyAccountId=fbcd6a77-4396-49d3-85cb-8646453e8460&fromDate=2019-01-01&toDate=2020-01-01&DocumentTypeId=1&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
 	        'headers' => [
 	            'Content-Type' => "application/json",
 	            'Accept' => "application/json", 
@@ -154,7 +153,7 @@ class GoSocketController extends Controller
         //dd($facturas);
         foreach ($facturas as $factura) {
             $GoSocket = new Client();
-            $APIStatus = $GoSocket->request('GET', $this->link()."api/Gadget/GetXml?DocumentId=".$factura['DocumentId']."", [
+            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetXml?DocumentId=".$factura['DocumentId']."", [
                 'headers' => [
                     'Content-Type' => "application/json",
                     'Accept' => "application/json", 
@@ -192,7 +191,7 @@ class GoSocketController extends Controller
         $ApplicationIdGS = config('etax.applicationidgs');
         $base64 = base64_encode($ApplicationIdGS.":".$token);
         $GoSocket = new Client();
-        $APIStatus = $GoSocket->request('GET', $this->link()."api/Gadget/GetReceivedDocuments?MyAccountId=fbcd6a77-4396-49d3-85cb-8646453e8460&fromDate=2019-01-01&toDate=2020-01-01&DocumentTypeId=1&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
+        $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetReceivedDocuments?MyAccountId=fbcd6a77-4396-49d3-85cb-8646453e8460&fromDate=2019-01-01&toDate=2020-01-01&DocumentTypeId=1&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
             'headers' => [
                 'Content-Type' => "application/json",
                 'Accept' => "application/json", 
@@ -205,7 +204,7 @@ class GoSocketController extends Controller
         //dd($facturas);
         foreach ($facturas as $factura) {
             $GoSocket = new Client();
-            $APIStatus = $GoSocket->request('GET', $this->link()."api/Gadget/GetXml?DocumentId=".$factura['DocumentId']."", [
+            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetXml?DocumentId=".$factura['DocumentId']."", [
                 'headers' => [
                     'Content-Type' => "application/json",
                     'Accept' => "application/json", 
