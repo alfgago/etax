@@ -33,7 +33,7 @@ class Menu extends Model
 						array_push($items, $dato);
 					}
 				}
-				Cache::pull($llave, $items, 3600);
+				Cache::put($llave, $items, 3600);
 			}else{
 				$items  = Cache::get($llave);
 			}
