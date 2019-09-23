@@ -39,6 +39,11 @@ class BillItem extends Model
               $this->iva_type = "B$this->iva_type";
             }
         }
+        
+        if( preg_match('/\s/', $this->iva_type) ){
+          $this->iva_type = trim($this->iva_type);
+          $this->save();
+        }
 
       }catch(\Throwable $e){
         Log::error('No pudo asignar un codigo de producto a legacy bill. ' . $e->getMessage());

@@ -18,7 +18,7 @@ class Team extends TeamworkTeam {
     //Relacion con la empresa
       public function company()
       {
-          return $this->belongsTo(Company::class);
+          return $this->belongsTo(Company::class)->with('repercutidos')->with('soportados');
       }
 
 }

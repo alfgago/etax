@@ -51,10 +51,24 @@
                <td>
                   <div class="input-validate-iva">
                     <select class="form-control iva_type_all"  placeholder="Seleccione un código eTax"  >
-                      <option value="0">-- Seleccione --</option>
-                      @foreach($codigosEtax as $cod)
-                        <option value="{{@$cod->code}}" identificacion="{{@$cod->is_identificacion_plena}}" >{{@$cod->name}}</option>
-                      @endforeach
+                        <option value="0">-- Seleccione --</option>
+                        <?php
+                          $preselectos = array();
+                          foreach($company->repercutidos as $repercutido){
+                            $preselectos[] = $repercutido->id;
+                          }
+                        ?>
+                        @if(@$company->repercutidos[0]->id)
+                          @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+                              <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}"  >{{ $tipo['name'] }}</option>
+                          @endforeach
+                          <option class="mostrarTodos" value="1">Mostrar Todos</option>
+                        @else
+                          @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+                          <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  >{{ $tipo['name'] }}</option>
+                          @endforeach
+                        @endif
+          
                     </select>
                   </div>
                </td>
@@ -84,10 +98,23 @@
                 <td>
                   <div class="input-validate-iva">
                     <select class="form-control iva_type" name="items[{{ $loop->index }}][iva_type]" placeholder="Seleccione un código eTax" required >
-                        @foreach($codigosEtax as $cod)
-                            <option value="{{@$cod->code}}" identificacion="{{@$cod->is_identificacion_plena}}" {{ $item->iva_type == @$cod->code ? 'selected' : '' }}>{{@$cod->name}}</option>
-                        @endforeach
-                    </select>
+                        <?php
+                          $preselectos = array();
+                          foreach($company->repercutidos as $repercutido){
+                            $preselectos[] = $repercutido->id;
+                          }
+                        ?>
+                        @if(@$company->repercutidos[0]->id)
+                          @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+                              <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}" {{$item->iva_type == $tipo->code ? 'selected' : ''}} >{{ $tipo['name'] }}</option>
+                          @endforeach
+                          <option class="mostrarTodos" value="1">Mostrar Todos</option>
+                        @else
+                          @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+                          <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  {{$item->iva_type == $tipo->code ? 'selected' : ''}}>{{ $tipo['name'] }}</option>
+                          @endforeach
+                        @endif
+                      </select>
                   </div>
                 </td>
                 <td>
@@ -157,5 +184,31 @@ $(document).ready(function(){
       });
     <?php } ?>
 });
-      
+  
+  
+    $( document ).ready(function() {
+      $('.iva_type_all').on('change', function(e){
+        if($('.iva_type_all').val() == 1){
+           $.each($('.all_tipo_iva_select'), function (index, value) {
+            $(value).removeClass("hidden");
+          })
+           $('.all_mostrarTodos').addClass("hidden");
+           $('.iva_type_all').val("");
+        }
+      });
+    }); 
+
+    $( document ).ready(function() {
+      $('.iva_type').on('change', function(e){
+        if($('.iva_type').val() == 1){
+           $.each($('.tipo_iva_select'), function (index, value) {
+            $(value).removeClass("hidden");
+          })
+           $('.mostrarTodos').addClass("hidden");
+           $('.iva_type').val("");
+        }
+      });
+    }); 
+
+
 </script>

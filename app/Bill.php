@@ -90,6 +90,46 @@ class Bill extends Model
         return $this->hasOne(XmlHacienda::class);
     }
     
+    public function getCondicionVenta() {
+      
+      $str = "Contado";
+      if( $this->sale_condition == '02' ) {
+        $str = "Crédito";
+      } else if( $this->sale_condition == '03' ) {
+        $str = "Consignación";
+      } else if( $this->sale_condition == '04' ) {
+        $str = "Apartado";
+      } else if( $this->sale_condition == '05' ) {
+        $str = "Arrendamiento con opción de compra";
+      } else if( $this->sale_condition == '06' ) {
+         $str == "Arrendamiento en función financiera";
+      } else if( $this->sale_condition == '99' ) {
+        $str = "Otros";
+      }
+      return $str;
+      
+    }
+    
+    
+    
+    public function getMetodoPago() {
+      
+      $str = "Efectivo";
+      if( $this->payment_type == '02' ) {
+        $str = "Tarjeta";
+      } else if( $this->payment_type == '03' ) {
+        $str = "Cheque";
+      } else if( $this->payment_type == '04' ) {
+        $str = "Transferencia-Depósito Bancario";
+      } else if( $this->payment_type == '05' ) {
+        $str = "Recaudado por terceros";
+      } else if( $this->payment_type == '99' ) {
+        $str = "Otros";
+      }
+      return $str;
+      
+    }
+    
     /**
     * Asigna los datos de la factura segun el request recibido
     **/
@@ -296,7 +336,7 @@ class Bill extends Model
         );
         
         if( $bill->id ) {
-          Log::warning( "XML: No se pudo guardar la factura de compra. Ya existe para la empresa." );
+          //Log::warning( "XML: No se pudo guardar la factura de compra. Ya existe para la empresa." );
           return false;
         }
         
@@ -371,7 +411,13 @@ class Bill extends Model
                 $provinciaProveedor = $arr['Emisor']['Ubicacion']['Provincia'];
                 $cantonProveedor = $arr['Emisor']['Ubicacion']['Canton'];
                 $distritoProveedor = $arr['Emisor']['Ubicacion']['Distrito'];
-                $otrasSenas = $arr['Emisor']['Ubicacion']['OtrasSenas'] ?? null;
+                try{
+                  if(is_array($arr['Emisor']['Ubicacion']['OtrasSenas'])){
+                      $otrasSenas = null;
+                  }else{
+                      $otrasSenas = $arr['Emisor']['Ubicacion']['OtrasSenas'] ?? null;
+                  }
+                }catch(\Exception $e){ $otrasSenas = null; }
                 
                 $zipProveedor = 0;
                 if( $cantonProveedor ) {

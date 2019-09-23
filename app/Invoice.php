@@ -514,6 +514,7 @@ class Invoice extends Model
           $invoice->reference_number =  $data['numeroReferencia'] ?? 0;
           $invoice->xml_schema =  $data['xmlSchema'] ?? 43;
           $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
+          $invoice->buy_order = isset( $data['ordenCompra'] ) ? $data['ordenCompra'] : null;
   
           //Datos generales y para Hacienda
           if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' 
@@ -529,7 +530,7 @@ class Invoice extends Model
           $invoice->credit_time = isset( $invoice->due_date ) ? $invoice->due_date->format('d/m/Y') : null;
           $invoice->description = $data['descripcion'];
 
-          $invoice->generation_method = $data['metodoGeneracion'];
+          $invoice->generation_method = $data['metodoGeneracion']; 
           $invoice->is_authorized = $data['isAuthorized'];
           $invoice->is_code_validated = $data['codeValidated'];
           $invoice->hacienda_status = "03";
@@ -669,7 +670,7 @@ class Invoice extends Model
         );
         
         if( $invoice->id ) {
-          Log::warning( "XML: No se pudo guardar la factura de venta. Ya existe para la empresa." );
+          //Log::warning( "XML: No se pudo guardar la factura de venta. Ya existe para la empresa." );
           return false;
         }
         
@@ -679,8 +680,12 @@ class Invoice extends Model
         
         $invoice->commercial_activity = $arr['CodigoActividad'] ?? 0;
         $invoice->xml_schema = $invoice->commercial_activity ? 43 : 42;
-        $invoice->sale_condition = isset($arr['CondicionVenta']) ? $arr['CondicionVenta'] :  '01';
-        $invoice->credit_time = isset($arr['PlazoCredito']) ? $arr['PlazoCredito'] : null;
+        $invoice->sale_condition = isset($arr['CondicionVenta']) ? $arr['CondicionVenta'] : '01';
+        try{
+          $invoice->credit_time = isset($arr['PlazoCredito']) ? $arr['PlazoCredito'] : null;
+        }catch( \Exception $e ){
+          $invoice->credit_time = null;
+        }
         //$invoice->credit_time = null;
         $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '';
         if ( is_array($medioPago) ) {
@@ -877,9 +882,9 @@ class Invoice extends Model
             $unidadMedicion = $linea['UnidadMedida'];
             $cantidad = $linea['Cantidad'];
             $precioUnitario = (float)$linea['PrecioUnitario'];
+            $montoDescuento = array_key_exists('MontoDescuento', $linea) ? $linea['MontoDescuento'] : 0;
             $subtotalLinea = (float)$linea['SubTotal'];
             $totalLinea = (float)$linea['MontoTotalLinea'];
-            $montoDescuento = array_key_exists('MontoDescuento', $linea) ? $linea['MontoDescuento'] : 0;
             $codigoEtax = 'B103'; //De momento asume que todo en 4.2 es al 13%.
             $montoIva = 0; //En 4.2 toma el IVA como en 0. A pesar de estar con cod. 103.
             $porcentajeIva = null;
@@ -921,7 +926,7 @@ class Invoice extends Model
               'unit_price' => $precioUnitario,
               'subtotal' => $subtotalLinea,
               'total' => $totalLinea,
-              'discount_type' => 'No indica',
+              'discount_type' => '01',
               'discount_reason' => 'No indica',
               'discount_percentage' => $montoDescuento,
               'discount' => $montoDescuento,
@@ -1023,7 +1028,6 @@ class Invoice extends Model
             $this->currency_rate = floatval( str_replace(",","", $invoiceReference->currency_rate ));
             $this->total = floatval( str_replace(",","", $invoiceReference->total ));
             $this->iva_amount = floatval( str_replace(",","", $invoiceReference->iva_amount ));
-
 
             $this->client_first_name = $invoiceReference->client_first_name;
             $this->client_last_name = $invoiceReference->client_last_name;
