@@ -11,6 +11,7 @@ use App\Company;
 use App\Team;
 use App\Invoice;
 use App\Bill;
+use App\UserCompanyPermission;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -91,10 +92,19 @@ class GoSocketController extends Controller
                             'slug' => "(" . $company_etax->id . ") -" .  $user_etax->id
                         ]
                     );
+                    
 
                     $team->save();
                     $user_etax->attachTeam($team);
                     $new_user_gs->attachTeam($team);
+                    $CompanyPermission = UserCompanyPermission::firstOrCreate(
+                        [
+                            'user_id' => $new_user_gs->id,
+                            'company_id' => $company_etax->id
+                        ],
+                        [    'permission_id' => 8
+                        ]
+                    );
                     $user = IntegracionEmpresa::Create(
                         [  "user_token"=> $user_gs['UserId'],
                             "company_token"=> $user_gs['CurrentAccountId'],
