@@ -316,7 +316,7 @@
         <div class='print-content'  style="">
         	<div class="container-fluid" >
 						<div class="row">
-							<h1 class="card-title">Borrador de declaración de IVA {{ $nombreMes }} {{ $ano }} </h1>
+							<h1 class="card-title">Borrador de declaración de IVA {{ App\Variables::getMonthName($dataDeclaracion['mes']) }} {{ $dataDeclaracion['ano'] }} </h1>
 						  <div class="col-sm-12 pl-0 pr-0">
 						  	
 						  	<h2 class="card-subtitle">D-104 - Declaración Jurada del Impuesto al Valor Agregado</h2>
@@ -324,21 +324,21 @@
 						  	<table class="text-12 text-muted m-0 p-2 ivas-table bigtext borrador-presentacion" style="width:100%;">
 									<tbody>
 									    <th>Periodo</th>
-									    <td colspan="5"> <input style="width:100%;" type="text" readonly value='{{ "$mes/$ano" }}' > </td>
+									    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ $dataDeclaracion['mes'].'/'.$dataDeclaracion['ano'] }}" > </td>
 									  </tr>
 									  <tr>
 									    <th>Cédula</th>
 									    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ currentCompanyModel()->id_number }}" > </td>
 									  </tr>
 									  <tr>
-									    <th>Nombre o razó social</th>
+									    <th>Nombre o razón social</th>
 									    <td colspan="5"> <input style="width:100%;" type="text" readonly value="{{ currentCompanyModel()->business_name }}" > </td>
 									  </tr>
 									</tbody>
 								</table>
 						  	
 						  	<h2 class="card-subtitle">Consolidado</h2>
-						  	@foreach( $actividadDataArray as $actividad )
+						  	@foreach( $dataDeclaracion['dataActividades'] as $actividad )
 						  		<div class="declaracion-content">
 						  			<h3 class="card-subtitle m-0">Actividad comercial: {{ $actividad['codigo'] }} - {{ $actividad['titulo'] }}</h3>
 						  			@include('Reports.widgets.declaracion.loop-actividades', ['actividad' => $actividad])	
@@ -346,13 +346,13 @@
 						  	@endforeach
 						  	
 						  	<h2 class="card-subtitle sub2">Impuesto por ventas y transacciones sujetas</h2>
-						  	@include('Reports.widgets.declaracion.ivas-ventas', ['data' => $data])	
+						  	@include('Reports.widgets.declaracion.ivas-ventas', ['dataDeclaracion' => $dataDeclaracion])	
 						  	
 						  	<h2 class="card-subtitle sub2">Créditos fiscales generados por compras</h2>
-						  	@include('Reports.widgets.declaracion.ivas-compras', ['data' => $data])	
+						  	@include('Reports.widgets.declaracion.ivas-compras', ['dataDeclaracion' => $dataDeclaracion])	
 						  	
 						  	<h2 class="card-subtitle sub2">Estimación y liquidación anual de la proporcionalidad</h2>
-						  	@include('Reports.widgets.declaracion.estimacion-liquidacion', ['data' => $data])	
+						  	@include('Reports.widgets.declaracion.estimacion-liquidacion', ['dataDeclaracion' => $dataDeclaracion])	
 	
 			        </div>
 						  

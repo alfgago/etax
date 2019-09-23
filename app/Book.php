@@ -177,10 +177,9 @@ class Book extends Model
       $this->cc_clientes_contado = $calculos->total_clientes_contado;  
       $this->cc_clientes_credito_exp = $calculos->total_clientes_credito_exp;
       $this->cc_clientes_contado_exp = $calculos->total_clientes_contado_exp;  
-      
       $this->cc_retenido = $calculos->iva_retenido;  
+      
       $this->cc_clientes_sum = $this->cc_clientes_credito + $this->cc_clientes_contado + $this->cc_clientes_credito_exp + $this->cc_clientes_contado_exp + $this->cc_retenido;
-
     }
     
     public function setCuentaContableAjustes( $calculos ){
@@ -197,7 +196,7 @@ class Book extends Model
       //Haber 3
         $iva_no_acreditables = $ivaData->iB080 + $ivaData->iB090 + $ivaData->iB097 + $ivaData->i098 + $ivaData->i099 +
                                $ivaData->iS080 + $ivaData->iS090 + $ivaData->iS097 +
-                               $ivaData->bB091 + $ivaData->bB092 + $ivaData->bB093 + $ivaData->bB094 + 
+                               
                                $ivaData->iB091 + $ivaData->iB092 + $ivaData->iB093 + $ivaData->iB094;
       
         $this->cc_ppp_1 = $ivaData->iB011 + $ivaData->iB031 + $ivaData->iB051 + $ivaData->iB071;

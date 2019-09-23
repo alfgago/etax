@@ -506,6 +506,8 @@ toastr.options = {
       $('#item_iva_amount').val( 0 );
     }
 
+    calcularMontoExoneracion();
+
   }
 
   window.calcularConIvaManual = function(){
@@ -664,6 +666,17 @@ toastr.options = {
       codigo = $('#codigo').val( "L" + numero  );
       nombre = $('#nombre').val( "TIPO-" + tipo_iva  );
     }
+    
+    if( docType == '09' ) {
+      if( tariff_heading.length != 12 ) {
+        Swal.fire({
+            type: 'error',
+            title: 'Error',
+            text: 'La tarifa arancelaria debe contener 12 caracteres.'
+        })
+        return false;
+      }
+    }
 
     //Se asegura de que los campos hayan sido llenados
     if( subtotal && codigo && nombre && precio_unitario && cantidad && tipo_iva && tipo_producto && total > 0){
@@ -679,34 +692,33 @@ toastr.options = {
       var row_id  = "item-tabla-"+numero;
       
       var inputFields = "<div class='hidden'>" +
-                   "<input type='hidden' class='numero' name='items["+index+"][item_number]' value='"+(numero+1)+"'>" +
-                   "<input class='item_id' type='hidden' name='items["+index+"][id]' value='"+item_id+"'>" +
-                   "<input type='hidden' class='codigo' name='items["+index+"][code]' value='"+codigo+"'>" +
-                   "<input type='hidden' class='nombre' name='items["+index+"][name]' value='"+nombre+"'>" +
-                   "<input type='hidden' class='tipo_producto' name='items["+index+"][product_type]' value='"+tipo_producto+"'>" +
-                   "<input type='hidden' class='cantidad' name='items["+index+"][item_count]' value='"+cantidad+"'>" +
-                   "<input type='hidden' class='unidad_medicion' name='items["+index+"][measure_unit]' value='"+unidad_medicion+"'>" +
-                   "<input type='hidden' class='precio_unitario' name='items["+index+"][unit_price]' value='"+precio_unitario+"'>" +
-                   "<input type='hidden' class='tipo_iva' name='items["+index+"][iva_type]' value='"+tipo_iva+"'>" +
-                   "<input type='hidden' class='porc_identificacion_plena' name='items["+index+"][porc_identificacion_plena]' value='"+porc_identificacion_plena+"'>" +
-                   "<input type='hidden' class='discount_type' name='items["+index+"][discount_type]' value='"+tipo_descuento+"'>" +
-                   "<input type='hidden' class='discount' name='items["+index+"][discount]' value='"+descuento+"'>" +
-                   "<input type='hidden' class='subtotal' name='items["+index+"][subtotal]' value='"+subtotal+"'>" +
-                   "<input type='hidden' class='porc_iva' name='items["+index+"][iva_percentage]' value='"+porc_iva+"'>" +
-                   "<input type='hidden' class='monto_iva' name='items["+index+"][iva_amount]' value='"+monto_iva+"'> " +
-                   "<input type='hidden' class='total' name='items["+index+"][total]' value='"+total+"'>" +
-                   "<input type='hidden' class='is_identificacion_especifica' name='items["+index+"][is_identificacion_especifica]' value='"+is_identificacion_especifica+"'>" +
-                   "<input type='hidden' class='typeDocument' name='items["+index+"][typeDocument]' value='"+typeDocument+"'>" +
-                   "<input type='hidden' class='numeroDocumento' name='items["+index+"][numeroDocumento]' value='"+numeroDocumento+"'>" +
-                   "<input type='hidden' class='nombreInstitucion' name='items["+index+"][nombreInstitucion]' value='"+nombreInstitucion+"'>" +
-                   "<input type='hidden' class='exoneration_date' name='items["+index+"][exoneration_date]' value='"+exoneration_date+"'>" +
-                   "<input type='hidden' class='porcentajeExoneracion' name='items["+index+"][porcentajeExoneracion]' value='"+porcentajeExoneracion+"'>" +
-                   "<input type='hidden' class='montoExoneracion' name='items["+index+"][montoExoneracion]' value='"+montoExoneracion+"'>" +
-                   "<input type='hidden' class='impuestoNeto' name='items["+index+"][impuestoNeto]' value='"+impuestoNeto+"'>" +
-                   "<input type='hidden' class='montoTotalLinea' name='items["+index+"][montoTotalLinea]' value='"+montoTotalLinea+"'>" +
-                   "<input type='hidden' class='tariff_heading' name='items["+index+"][tariff_heading]' value='"+tariff_heading+"'>" +
+                   "<input type='hidden' class='numero' name='items["+index+"][item_number]' itemname='item_number' value='"+(numero+1)+"'>" +
+                   "<input class='item_id' type='hidden' name='items["+index+"][id]' itemname='id' value='"+item_id+"'>" +
+                   "<input type='hidden' class='codigo' name='items["+index+"][code]' itemname='code' value='"+codigo+"'>" +
+                   "<input type='hidden' class='nombre' name='items["+index+"][name]' itemname='name' value='"+nombre+"'>" +
+                   "<input type='hidden' class='tipo_producto' name='items["+index+"][product_type]' itemname='product_type' value='"+tipo_producto+"'>" +
+                   "<input type='hidden' class='cantidad' name='items["+index+"][item_count]' itemname='item_count' value='"+cantidad+"'>" +
+                   "<input type='hidden' class='unidad_medicion' name='items["+index+"][measure_unit]' itemname='measure_unit' value='"+unidad_medicion+"'>" +
+                   "<input type='hidden' class='precio_unitario' name='items["+index+"][unit_price]' itemname='unit_price' value='"+precio_unitario+"'>" +
+                   "<input type='hidden' class='tipo_iva' name='items["+index+"][iva_type]' itemname='iva_type' value='"+tipo_iva+"'>" +
+                   "<input type='hidden' class='porc_identificacion_plena' name='items["+index+"][porc_identificacion_plena]' itemname='porc_identificacion_plena' value='"+porc_identificacion_plena+"'>" +
+                   "<input type='hidden' class='discount_type' name='items["+index+"][discount_type]' itemname='discount_type' value='"+tipo_descuento+"'>" +
+                   "<input type='hidden' class='discount' name='items["+index+"][discount]' itemname='discount' value='"+descuento+"'>" +
+                   "<input type='hidden' class='subtotal' name='items["+index+"][subtotal]' itemname='subtotal' value='"+subtotal+"'>" +
+                   "<input type='hidden' class='porc_iva' name='items["+index+"][iva_percentage]' itemname='iva_percentage' value='"+porc_iva+"'>" +
+                   "<input type='hidden' class='monto_iva' name='items["+index+"][iva_amount]' itemname='iva_amount' value='"+monto_iva+"'> " +
+                   "<input type='hidden' class='total' name='items["+index+"][total]' itemname='total' value='"+total+"'>" +
+                   "<input type='hidden' class='is_identificacion_especifica' name='items["+index+"][is_identificacion_especifica]' itemname='is_identificacion_especifica' value='"+is_identificacion_especifica+"'>" +
+                   "<input type='hidden' class='typeDocument' name='items["+index+"][typeDocument]' itemname='typeDocument' value='"+typeDocument+"'>" +
+                   "<input type='hidden' class='numeroDocumento' name='items["+index+"][numeroDocumento]' itemname='numeroDocumento' value='"+numeroDocumento+"'>" +
+                   "<input type='hidden' class='nombreInstitucion' name='items["+index+"][nombreInstitucion]' itemname='nombreInstitucion' value='"+nombreInstitucion+"'>" +
+                   "<input type='hidden' class='exoneration_date' name='items["+index+"][exoneration_date]' itemname='exoneration_date' value='"+exoneration_date+"'>" +
+                   "<input type='hidden' class='porcentajeExoneracion' name='items["+index+"][porcentajeExoneracion]' itemname='porcentajeExoneracion' value='"+porcentajeExoneracion+"'>" +
+                   "<input type='hidden' class='montoExoneracion' name='items["+index+"][montoExoneracion]' itemname='montoExoneracion' value='"+montoExoneracion+"'>" +
+                   "<input type='hidden' class='impuestoNeto' name='items["+index+"][impuestoNeto]' itemname='impuestoNeto' value='"+impuestoNeto+"'>" +
+                   "<input type='hidden' class='montoTotalLinea' name='items["+index+"][montoTotalLinea]' itemname='montoTotalLinea' value='"+montoTotalLinea+"'>" +
+                   "<input type='hidden' class='tariff_heading' name='items["+index+"][tariff_heading]' itemname='tariff_heading' value='"+tariff_heading+"'>" +
               "</div>"
-
                    ;
 
       //Crea la fila en la tabla
@@ -781,7 +793,7 @@ toastr.options = {
       $('.item-factura-form input[type=checkbox]').prop('checked', false);
       
       var docType = $('#document_type').val();
-      if( $('#is-compra').length || docType == '08' ){
+      if( ($('#is-compra').length || docType == '08') && !$('#is-manual').length ){
         $('#tipo_iva').val('B003').change();
       }else {
         $('#tipo_iva').val('B103').change();
@@ -850,12 +862,18 @@ toastr.options = {
   
   //Recalcula números para asegurar que no haya vacíos
   window.recalcularNumerosItem = function() {
-    $i = 0;
+    var i = 0;
     $( '.item-tabla' ).each( function(){
-      $(this).attr( 'attr-num', $i );   
-      $(this).attr( 'id', 'item-tabla-'+$i );   
-      $(this).find( '.numero-fila').text($i+1 );
-      $i++;        
+      $(this).attr( 'attr-num', i );   
+      $(this).attr( 'id', 'item-tabla-'+i );   
+      $(this).find( '.numero-fila').text(i+1 );
+      $(this).find('.hidden input').each( function(){
+    	  if($(this).attr('itemname').length){
+    		  var itemname = $(this).attr('itemname');
+      		$(this).attr('name', 'items['+i+']['+itemname+']');  
+        }
+      });
+      i++;        
     });
   }
 
@@ -864,24 +882,40 @@ toastr.options = {
     var monto_iva = 0;
     var total = 0;
     var iva_devuelto = 0;
+    var iva_exonerado = 0;
+    
     $('.item-tabla').each(function(){
       var s = parseFloat($(this).find('.subtotal').val());
       var m = parseFloat($(this).find('.monto_iva').val());
       var t = parseFloat($(this).find('.total').val());
       var tp = parseFloat($(this).find('.tipo_producto').val());
-
+      var ex = parseFloat($(this).find('.montoExoneracion').val());
+      if(!ex){ ex = 0; }
       if ($('#medio_pago').val() === '02' && tp === 12) {
           iva_devuelto += m;
       }
       subtotal += s;
       monto_iva += m;	
       total += t;	
+      iva_exonerado += ex;	
     });
     
     $('#subtotal').val(subtotal);
     $('#monto_iva').val(monto_iva);
-    $('#total').val(total - iva_devuelto);
+    $('#total').val(total - iva_devuelto - iva_exonerado);
+    
     $('#total_iva_devuelto').val(iva_devuelto);
+    $('#total_iva_exonerado').val(iva_exonerado);
+    
+    $('#total_iva_devuelto-cont').hide();
+    if(iva_devuelto > 0){
+      $('#total_iva_devuelto-cont').show();
+    }
+    
+    $('#total_iva_exonerado-cont').hide();
+    if(iva_exonerado > 0){
+      $('#total_iva_exonerado-cont').show();
+    }
   }
   
   window.fixComas = function( numero ) {
@@ -932,6 +966,9 @@ toastr.options = {
     }
     
    window.calcularMontoExoneracion = function() {
+      var hasExoneracion = false;
+      var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184"];
+      if( codigosConExoneracion.includes( $('#tipo_iva').val() ) ){
         var porcentajeExonerado = $('#porcentajeExoneracion').val();
         if(porcentajeExonerado > 0) {
             var monto_iva_detalle = $('#item_iva_amount').val();
@@ -943,8 +980,8 @@ toastr.options = {
             $('#montoExoneracion').val(monto);
             $('#impuestoNeto').val(impNeto);
             $('#montoTotalLinea').val(montoTotal);
-
         }
+      }
     }
     
     window.toggleCamposExoneracion = function() {

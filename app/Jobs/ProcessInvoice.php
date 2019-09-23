@@ -51,7 +51,7 @@ class ProcessInvoice implements ShouldQueue
     {
 
         try {
-            if ( app()->environment('production') ) {
+            //if ( app()->environment('production') ) {
                 $invoiceUtils = new InvoiceUtils();
                 $client = new Client();
                 $invoice = Invoice::find($this->invoiceId);
@@ -144,7 +144,7 @@ class ProcessInvoice implements ShouldQueue
                         Log::warning('El job Invoices no se procesó, porque la empresa no tiene un certificado válido.'.$company->id_number);
                     }
                 }
-            }
+            //}
         } catch ( \Exception $e) {
             Log::error('ERROR Enviando parametros  API HACIENDA Invoice: '.$this->invoiceId.'-->>'.$e);
         }

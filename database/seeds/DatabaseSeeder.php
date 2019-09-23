@@ -11,6 +11,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+         $this->call(PermisoGSSeeder::class);
          $this->call(ActividadesSeeder::class);
          $this->call(EtaxProductsSeeder::class);
          $this->call(UnidadMedidaTableSeeder::class);
@@ -18,5 +19,6 @@ class DatabaseSeeder extends Seeder
          $this->call(CodigosSeeder::class);
          $this->call(ProductCategorySeed::class);
          $this->call(CreateClientPassport::class);
+         $this->call(MenuSeeder::class);
     }
 }

@@ -11,6 +11,7 @@ use App\CalculatedTax;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class Company extends Model {
 
@@ -53,7 +54,40 @@ class Company extends Model {
     public function actividades(){
         return $this->hasOne(Actividades::class);
     }
-    
+
+    //Relacion con Codigos Repercutidos
+    public function repercutidos()
+    {   
+        return $this->belongsToMany('App\CodigoIvaRepercutido');
+    }
+
+    //Relacion con Codigos Repercutidos
+    public function soportados()
+    {   
+        return $this->belongsToMany('App\CodigoIvaSoportado');
+    }
+
+    public function repercutidosRelation()
+    {   
+        return $this->hasMany(CodigoIvaRepercutidoCompany::class);
+    }
+
+    public function soportadosRelation()
+    {   
+        return $this->hasMany(CodigoIvaSoportadoCompany::class);
+    }
+
+    //retorna los codigosRepercutidos Preselectos
+    public function codigosRepercutidos(){
+        $repercutidos = $this->repercutidos;
+        if(count($repercutidos) < 1){
+            return CodigoIvaRepercutido::all();
+        }else{
+            return $repercutidos;
+        }
+    }
+
+ 
     //Revisa si el certificado existe
     public function certificateExists() {
         if( $this->atv ){
@@ -95,6 +129,16 @@ class Company extends Model {
     	}
     	
     	return $arrayActividades;
+    }
+    
+    public function clientsForSelect2( $limit = 25000 ){
+        $clients = DB::table('clients')->select(
+          array(
+            'id',
+            DB::raw('CONCAT(id_number, " - ", IFNULL(first_name, ""), " ", IFNULL(last_name, ""), " ", IFNULL(last_name2, "")) AS text')
+          )
+        )->where('company_id', $this->id)->take($limit)->get();
+        return $clients;
     }
 
     /* Changes the current selected company to chosen plan. As long as the plan has available company slots. */
@@ -343,6 +387,70 @@ class Company extends Model {
         } else {
             return false;
         }
+    }
+
+    public function preselectVatCodes($preselected_vat_codes){
+
+        $repercutidos = $this->repercutidosRelation;
+        if($preselected_vat_codes[0] == 1){
+            foreach($repercutidos as $repercutido){
+                $repercutido->delete();    
+            }
+            return true;
+        }else{
+            foreach($repercutidos as $repercutido){
+                $repercutido->erase = true;
+                foreach($preselected_vat_codes as $key => $preselected){
+                    if($repercutido->codigo_iva_repercutido_id === $preselected){
+                        $repercutido->erase = false;
+                        unset($preselected_vat_codes[$key]);
+                    }
+                }
+                if($repercutido->erase){
+                    $repercutido->delete();
+                }
+            }
+            foreach($preselected_vat_codes as $preselected){
+                $repercutidosCompany = new CodigoIvaRepercutidoCompany();
+                $repercutidosCompany->codigo_iva_repercutido_id = $preselected;
+                $repercutidosCompany->company_id = $this->id;
+                $repercutidosCompany->save();      
+            }
+        return true;
+        }  
+        return false;
+    }
+
+    public function preselectSoportados($preselected_sop_codes){
+
+        $soportados = $this->soportadosRelation;
+        if($preselected_sop_codes[0] == 1){
+            foreach($soportados as $soportado){
+                $soportado->delete();    
+            }
+            return true;
+        }else{
+            foreach($soportados as $soportado){
+                $soportado->erase = true;
+                foreach($preselected_sop_codes as $key => $preselected){
+                    if($soportado->codigo_iva_soportado_id === $preselected){
+                        $soportado->erase = false;
+                        unset($preselected_sop_codes[$key]);
+                    }
+                }
+                if($soportado->erase){
+                    $soportado->delete();
+                }
+            }
+            foreach($preselected_sop_codes as $preselected){
+                $soportadoCompany = new CodigoIvaSoportadoCompany();
+                $soportadoCompany->codigo_iva_soportado_id = $preselected;
+                $soportadoCompany->company_id = $this->id;
+                $soportadoCompany->save();      
+            }
+        return true;
+        }  
+        return false;
     }
     
     /*
