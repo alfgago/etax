@@ -270,11 +270,12 @@ class InvoiceUtils
                     $iva_amount = 'false';
                 }
                 
-                $montoSinIva = ($value['unit_price'] && $value['item_count']) ? round($value['item_count'] * $value['unit_price'], 2) : 0;
+                $itemCount = $value['item_count'] ? round($value['item_count'], 3) : 1;
+                $montoSinIva = ($value['unit_price'] && $itemCount) ? round($itemCount * $value['unit_price'], 2) : 0;
                 $montoDescuento = $value['discount'] ? $this->discountCalculator($value['discount_type'], $value['discount'], $montoSinIva ) : 0;
 
                 $details[$key] = array(
-                    'cantidad' => $value['item_count'] ?? 1,
+                    'cantidad' => $itemCount,
                     'unidadMedida' => $value['measure_unit'] ?? '',
                     'detalle' => $value['name'] ?? '',
                     'precioUnitario' => $value['unit_price'] ?? 0,
@@ -308,7 +309,7 @@ class InvoiceUtils
         }
     }
 
-    public function setInvoiceData43( Invoice $data, $details ) {
+    public function setInvoiceData43( Invoice $data, $details, $returnRequest = true ) {
         try {
             $provider = null;
             $company = $data->company;
@@ -471,6 +472,11 @@ class InvoiceUtils
 
             Log::info("Request Data from invoices id: $data->id  --> ".json_encode($invoiceData));
             $invoiceData['atvcertFile'] = Storage::get($company->atv->key_url);
+            
+            //Para el PDF, retorna el invoiceData completo. Si es para emitir, retorna el request.
+            if( !$returnRequest ){
+                return $invoiceData;
+            }
 
             foreach ($invoiceData as $key => $values) {
                 if ($key == 'atvcertFile') {

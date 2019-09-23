@@ -172,7 +172,7 @@ class CalculatedTax extends Model
               ]
           );
             
-          if ( $month > 0 ) {
+          if ( $month > 0 ) { //El 0 significa que es acumulado anual
             
             if( !$data->is_closed || $forceRecalc ) {
               $data->resetVars();
@@ -249,6 +249,7 @@ class CalculatedTax extends Model
       $this->sumAcumulados( $year, true );
       $this->setCalculosIVA( $prorrataOperativa, 0 );
       $this->sumAcumulados( $year, false );
+      
       return $this;
       
     }
@@ -683,6 +684,13 @@ class CalculatedTax extends Model
               $billsSubtotal += $subtotal;
               $totalBillIva += $billIva;
               
+              //Cuenta contable de proveedor
+              $tipoVenta = $currBill->sale_condition;
+              if( $tipoVenta == '01' ) {
+                $totalProveedoresContado += $currentTotal;
+              }else{
+                $totalProveedoresCredito += $currentTotal;
+              }
               $bVar = "b".$ivaType;
               $iVar = "i".$ivaType;
               $iVarPleno = "pleno".$ivaType;
@@ -694,18 +702,10 @@ class CalculatedTax extends Model
                 $ivaData->$iVar = 0;
                 $ivaData->$iVarPleno = 0;
               }
+              
               $ivaData->$bVar += $subtotal;
               $ivaData->$iVar += $billIva;
               $ivaData->$iVarPleno += $currAcreditablePleno;
-              
-              //Cuenta contable de proveedor
-              $tipoVenta = $currBill->sale_condition;
-              if( $tipoVenta == '01' ) {
-                $totalProveedoresContado += $currentTotal;
-              }else{
-                $totalProveedoresCredito += $currentTotal;
-              }
-              
               $typeVar = "type$prodType";
               $typeVarPorc = "type$prodType-$prodPorc";
               $typeVarActividad = $currActivity."-".$typeVar;
@@ -1031,7 +1031,7 @@ class CalculatedTax extends Model
       $calculosAnteriores = CalculatedTax::where('company_id', $currentCompanyId)->where('is_final', true)->where('year', $year)->where('month', '!=', 0)->get();
       $countAnteriores = count( $calculosAnteriores );
       
-      $this->count_invoices = 0;
+      /*$this->count_invoices = 0;
 			$this->invoices_total = 0;
 			$this->invoices_subtotal = 0;
 			$this->total_invoice_iva = 0;
@@ -1062,7 +1062,9 @@ class CalculatedTax extends Model
 			$this->iva_no_acreditable_identificacion_plena = 0;
 			$this->total_proveedores_contado = 0;
 			$this->total_proveedores_credito = 0;
-			$this->iva_retenido = 0;
+			$this->iva_retenido = 0;*/
+			
+			$this->resetVars();
       
     	$ivaData = json_decode($this->iva_data);
     	$arrayActividades = currentCompanyModel()->getActivities();
