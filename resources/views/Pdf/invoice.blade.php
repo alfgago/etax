@@ -285,60 +285,25 @@
 
     </tr>
     <?php
-        $totalServiciosGravados = 0;
-        $totalServiciosExentos = 0;
-        $totalMercaderiasGravadas = 0;
-        $totalMercaderiasExentas = 0;
-        $totalDescuentos = 0;
-        $totalImpuestos = 0;
-        $totalIvaDevuelto = 0;
-        
-        foreach ($data_invoice->items as $item){
-            $productType = $item->ivaType;
-            if( !isset($productType) ){
-                $item->fixIvaType();
-                $productType = $item->ivaType;
-            }
-            $isGravado = isset($productType) ? $productType->is_gravado : true;
-            $netaLinea = $item->item_count * $item->unit_price;
-            
-            if($item->measure_unit == 'Sp' || $item->measure_unit == 'Spe' || $item->measure_unit == 'St'
-                || $item->measure_unit == 'Al' || $item->measure_unit == 'Alc' || $item->measure_unit == 'Cm'
-                || $item->measure_unit == 'I' || $item->measure_unit == 'Os'){
-                if($item->iva_amount == 0 && !$isGravado ){
-                    $totalServiciosExentos += $netaLinea;
-                }else{
-                    $totalServiciosGravados += $netaLinea;
-                }
-
-            } else {
-                if($item->iva_amount == 0 && !$isGravado ){
-                    $totalMercaderiasExentas += $netaLinea;
-                }else{
-                    $totalMercaderiasGravadas += $netaLinea;
-                }
-            }
-            $discount = 0;
-            if( $item['discount'] ) {
-                if($item['discount_type'] == "01" && $item['discount'] > 0 ) {
-                     $discount = $netaLinea * ($item['discount'] / 100);
-                } else {
-                    $discount= $item['discount'];
-                }
-            }
-
-            if ($data_invoice->payment_type == '02' && $item->product_type == 12) {
-                $totalIvaDevuelto += $item->iva_amount;
-            }
-            
-            $totalDescuentos += $discount;
-            $totalImpuestos += $item->iva_amount;
-        }
-        $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas;
-        $totalExento = $totalServiciosExentos + $totalMercaderiasExentas;
-        $totalVenta = $totalGravado + $totalExento;
-        $totalNeta = $totalVenta - $totalDescuentos;
-        $totalComprobante = $totalNeta + $totalImpuestos;
+        $invoiceUtils = new \App\Utils\InvoiceUtils();
+        $requestDetails = $invoiceUtils->setDetails43($data_invoice->items);
+        $requestData = $invoiceUtils->setInvoiceData43($data_invoice, $requestDetails, false);
+    
+        $totalServiciosGravados = $requestData['servgravados'] ?? 0;
+        $totalServiciosExentos = $requestData['servexentos'] ?? 0;
+        $totalServiciosExonerados = $requestData['servexonerados'] ?? 0;
+        $totalMercaderiasGravadas = $requestData['mercgravados'] ?? 0;
+        $totalMercaderiasExentas = $requestData['mercexentos'] ?? 0;
+        $totalMercaderiasExonerados = $requestData['mercexonerados'] ?? 0;
+        $totalDescuentos = $requestData['totdescuentos'] ?? 0;
+        $totalImpuestos = $requestData['totimpuestos'] ?? 0;
+        $totalIvaDevuelto = $requestData['totalivadevuelto'] ?? 0;
+        $totalGravado = $requestData['totgravado'] ?? 0;
+        $totalExento = $requestData['totexento'] ?? 0;
+        $totalExonerados = $requestData['totexonerados'] ?? 0;
+        $totalVenta = $requestData['totventa'] ?? 0;
+        $totalNeta = $requestData['totventaneta'] ?? 0;
+        $totalComprobante = $requestData['totcomprobante'] ?? 0;
     ?>
     @foreach($data_invoice->items as $item)
         <tr class="item">
@@ -401,6 +366,10 @@
                         <td><span>{{ number_format($totalServiciosExentos, 2)}}</span></td>
                     </tr>
                     <tr>
+                        <td><b>Total servicios exonerados</b></td>
+                        <td><span>{{ number_format($totalServiciosExonerados, 2)}}</span></td>
+                    </tr>
+                    <tr>
                         <td><b>Total mercancías gravadas</b></td>
                         <td><span>{{ number_format($totalMercaderiasGravadas, 2)}}</span></td>
                     </tr>
@@ -409,12 +378,20 @@
                         <td><span>{{ number_format($totalMercaderiasExentas, 2)}}</span></td>
                     </tr>
                     <tr>
+                        <td><b>Total mercancías exoneradas</b></td>
+                        <td><span>{{ number_format($totalMercaderiasExonerados, 2)}}</span></td>
+                    </tr>
+                    <tr>
                         <td><b>Total gravado</b></td>
                         <td><span>{{ number_format($totalGravado, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total exento</b></td>
                         <td><span>{{ number_format($totalExento, 2)}}</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>Total exonerado</b></td>
+                        <td><span>{{ number_format($totalExonerados, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total venta</b></td>
@@ -438,7 +415,7 @@
                     </tr>
                     <tr>
                         <td><b>Total comprobante</b></td>
-                        <td><span>{{ number_format( ($totalComprobante - $totalIvaDevuelto) , 2)}}</span></td>
+                        <td><span>{{ number_format( ($totalComprobante) , 2)}}</span></td>
                     </tr>
                 </table>
                 
