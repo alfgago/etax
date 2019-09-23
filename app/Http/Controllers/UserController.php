@@ -124,7 +124,7 @@ class UserController extends Controller {
     public function editPassword() {
         return view('users.edit-password');
     }
-    
+   
     
     /**
      * Actualiza contraseña de usuario logueado
