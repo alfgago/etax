@@ -535,6 +535,56 @@ class InvoiceController extends Controller
         return view('Invoice/nota-debito', compact('invoice','units','arrayActividades','countries','product_categories','codigos', 'company') );
     }
 
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Invoice  $invoice
+     * @return \Illuminate\Http\Response
+     */
+    public function notaCredito($id)
+    {
+        $company = currentCompanyModel(false);
+
+        if ( !$company->atv_validation && $company->use_invoicing ) {
+            $apiHacienda = new BridgeHaciendaApi();
+            $token = $apiHacienda->login(false);
+            $validateAtv = $apiHacienda->validateAtv($token, $company);
+            if( $validateAtv ) {
+                if ($validateAtv['status'] == 400) {
+                    Log::info('Atv Not Validated Company: '. $company->id_number);
+                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                    }
+                    return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
+
+                } else {
+                    Log::info('Atv Validated Company: '. $company->id_number);
+                    $company->atv_validation = true;
+                    $company->save();
+
+                    $user = auth()->user();
+                    Cache::forget("cache-currentcompany-$user->id");
+                }
+            }else {
+                return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
+            }
+        }
+        if($company->last_debit_note_ref_number === null) {
+            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota de debito');
+        }
+
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        $company = currentCompanyModel();
+        $arrayActividades = $company->getActivities();
+        $countries  = CodigosPaises::all()->toArray();
+
+        $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
+        $codigos = CodigoIvaRepercutido::where('hidden', false)->get();
+        $units = UnidadMedicion::all()->toArray();
+        return view('Invoice/nota-credito', compact('invoice','units','arrayActividades','countries','product_categories','codigos', 'company') );
+    }
+
     public function sendNotaDebito($id, Request $request)
     {
         try {
@@ -672,6 +722,7 @@ class InvoiceController extends Controller
         
     }
 
+
     public function guardarValidar(Request $request)
     {
         $invoice = Invoice::findOrFail($request->invoice);
@@ -696,7 +747,9 @@ class InvoiceController extends Controller
         }
 
     }
-    
+
+
+
     public function export( $year, $month ) {
         return Excel::download(new InvoiceExport($year, $month), 'documentos-emitidos.xlsx');
     }
@@ -870,14 +923,14 @@ class InvoiceController extends Controller
         list($usec, $sec) = explode(" ", microtime());
         return ((float) $usec + (float)$sec);
     }
-
-    public function anularInvoice($id)
+ 
+    public function anularInvoice($id, Request $request)
     {
         try {
-            Log::info('Anulacion de facturar -->'.$id);
-            $invoice = Invoice::findOrFail($id); 
+            Log::info('Enviando nota de credito de facturar -->'.$id);
+            $invoice = Invoice::findOrFail($id);
 
-            if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
+            if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){
                 $apiHacienda = new BridgeHaciendaApi();
                 $tokenApi = $apiHacienda->login();
                 if ($tokenApi !== false) {
@@ -892,9 +945,11 @@ class InvoiceController extends Controller
                     $note->payment_status = "01";
                     $note->payment_receipt = "";
                     $note->generation_method = "etax";
+                    $note->reason = $request->reason ?? "Anular Factura";
+                    $note->code_note = $request->code_note ?? "01";
                     $note->reference_number = $company->last_note_ref_number + 1;
                     $note->save();
-                    $noteData = $note->setNoteData($invoice);
+                    $noteData = $note->setNoteData($invoice, $request->items, $note->document_type);
                     if (!empty($noteData)) {
                         $apiHacienda->createCreditNote($noteData, $tokenApi);
                     }
@@ -904,7 +959,7 @@ class InvoiceController extends Controller
 
                     clearInvoiceCache($invoice);
 
-                    return redirect('/facturas-emitidas')->withMessage('Nota de crédito creada.');
+                    return redirect('/facturas-emitidas')->withMessage('Nota de credito creada.');
 
                 } else {
                     return back()->withError( 'Ha ocurrido un error al enviar factura.' );
@@ -919,6 +974,7 @@ class InvoiceController extends Controller
         }
 
     }
+    
 
     private function get_rates()
     {
