@@ -198,12 +198,12 @@ class User extends Authenticatable {
 
     public function permisos(){
         try{
-            if( auth()->user()->isTeamOwner()) {
+            $current_company = currentCompanyModel();
+            if( auth()->user()->isOwnerOfTeam($current_company->team)) {
                 return [1];
             }else{
                 $user_id = auth()->user()->id;
-                $current_company = currentCompany();
-                $permisos = UserCompanyPermission::where('company_id',$current_company)
+                $permisos = UserCompanyPermission::where('company_id',$current_company->id)
                             ->where('user_id',$user_id)->get();
                 $retorno = [];
                 foreach($permisos as $permiso){
@@ -212,6 +212,7 @@ class User extends Authenticatable {
                 return $retorno;
             }
         }catch( \Throwable $e) { 
+            
             \Illuminate\Support\Facades\Log::error('Error items menu'. $e);
             return []; 
         }
