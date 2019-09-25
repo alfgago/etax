@@ -117,7 +117,7 @@ class ProcessInvoice implements ShouldQueue
                                         $xml->xml_message = $pathMH;
                                         $xml->save();
                                         
-                                        $sendPdf = $invoice->generation_method == "etax-bulk";
+                                        $sendPdf = true;
                                         $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, $sendPdf);
                                     }
                                     Log::info('Factura enviada y XML guardado.');
