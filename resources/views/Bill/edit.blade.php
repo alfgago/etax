@@ -330,6 +330,35 @@
             </div>
           </div>
         
+        
+          <div class="form-row" id="tabla-otroscargos-factura" style="display: none;">  
+
+            <div class="form-group col-md-12">
+              <h3>
+                Otros cargos
+              </h3>
+            </div>
+            
+            <div class="form-group col-md-12" >
+              <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
+                <thead class="thead-dark">
+                  <tr>
+                    <th>#</th>
+                    <th>Tipo</th>
+                    <th>Receptor</th>
+                    <th>Detalle</th>
+                    <th>Monto del cargo</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          @include( 'Bill.form-otros-cargos' )
           @include( 'Bill.form-linea' )
           @include( 'Bill.form-nuevo-proveedor' )
         

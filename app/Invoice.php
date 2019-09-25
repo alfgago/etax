@@ -78,6 +78,12 @@ class Invoice extends Model
         return $this->hasMany(InvoiceItem::class);
     }
   
+    //Relación con facturas emitidas
+    public function otherCharges()
+    {
+        return $this->hasMany(OtherCharges::class);
+    }
+  
     //Devuelve la fecha de generación en formato Carbon
     public function generatedDate()
     {
@@ -296,6 +302,7 @@ class Invoice extends Model
             }
             $this->save();
 
+            //Recorrer Items
             $lids = array();
             $i = 1;
             $totalIvaDevuelto = 0;
@@ -310,19 +317,40 @@ class Invoice extends Model
                 array_push( $lids, $item_modificado->id );
                 $i++;
             }
-
             foreach ($this->items as $item) {
                 if (!in_array( $item->id, $lids )) {
                     $item->delete();
                 }
             }
-
             foreach ($this->items as $item) {
                 if ($this->payment_type == '02' && $item->product_type == 12) {
                     $totalIvaDevuelto += $item->iva_amount;
                 }
             }
             $this->total_iva_devuelto = $totalIvaDevuelto;
+            
+            try{
+              //Recorrer OtrosCargos
+              $oids = array();
+              $i = 1;
+              $totalOtrosCargos = 0;
+              foreach ($request->otros as $item) {
+                  $item['item_number'] = $i;
+                  $item['item_id'] = $item['id'] ? $item['id'] : 0;
+                  $cargo_modificado = $this->addEditOtherCharges($item);
+                  array_push( $oids, $cargo_modificado->id );
+                  $totalOtrosCargos += $cargo_modificado->amount;
+                  $i++;
+              }
+              foreach ($this->otherCharges as $item) {
+                  if (!in_array( $item->id, $oids )) {
+                      $item->delete();
+                  }
+              }
+              $this->total_otros_cargos = $totalOtrosCargos;
+            }catch(\Exception $e){}
+            
+            //Guarda nuevamente el invoice
             $this->save();
 
             return $this;
@@ -333,7 +361,7 @@ class Invoice extends Model
         }
     }
   
-    public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, 
+    /*public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, 
                              $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt, $typeDocument,
                             $numeroDocumento, $nombreInstitucion, $porcentajeExoneracion, $montoExoneracion, $impuestoNeto, $montoTotalLinea)
     {
@@ -367,7 +395,7 @@ class Invoice extends Model
         'exoneration_total_amount' => $montoTotalLinea ?? 0
       ]);
       
-    }
+    }*/
   
     public function addEditItem(array $data)
     {
@@ -416,6 +444,37 @@ class Invoice extends Model
                     $item->save();
                 }
 
+                return $item;
+            } else {
+                return false;
+            }
+        } catch ( \Exception $e) {
+            Log::error("Error en lineas de factura-->> $e");
+            return false;
+        }
+
+    }
+    
+    public function addEditOtherCharges(array $data)
+    {
+        try {
+            if (isset($data['item_number'])) {
+                $item = OtherCharges::updateOrCreate([
+                    'item_number' => $data['item_number'],
+                    'invoice_id' => $this->id
+                ], 
+                [
+                    'company_id' => $this->company_id,
+                    'year'  => $this->year,
+                    'month' => $this->month,
+                    'document_type' => $data['document_type'] ?? '99',
+                    'provider_id_number' => $data['provider_id_number'] ? trim($data['provider_id_number']) : null,
+                    'provider_name'   => $data['provider_name'] ? trim($data['provider_name']) : null,
+                    'description'   => $data['description'] ? trim($data['description']) : null,
+                    'percentage'   => $data['percentage'] ?? 0,
+                    'amount'   => $data['amount'] ?? 0,
+                ]
+                );
                 return $item;
             } else {
                 return false;

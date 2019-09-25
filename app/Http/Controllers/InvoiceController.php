@@ -388,7 +388,6 @@ class InvoiceController extends Controller
                     }
                     
                     $invoice->save();
-                    
                     if (!empty($invoiceData)) {
                         $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
                     }
