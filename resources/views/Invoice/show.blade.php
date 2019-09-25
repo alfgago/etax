@@ -90,7 +90,34 @@
                 </div>
       
               </div>
-                
+              
+
+              @if($invoice->document_type == "03")
+                  <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <h3>
+                                    Información de referencia
+                                </h3>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="subtotal">Tipo</label>
+                                <select name="code_note" id="code_note" class="form-control" required readonly disabled>
+                                    <option value="01" @if($invoice->reason == "01") selected @endif >Anula documento de referencia</option>
+                                    <option value="02" @if($invoice->reason == "02") selected @endif>Corrige texto de ocumento de referencia</option>
+                                    <option value="03" @if($invoice->reason == "03") selected @endif>Corrige monto</option>
+                                    <option value="04" @if($invoice->reason == "04") selected @endif>Referencia a otro documento</option>
+                                    <option value="05" @if($invoice->reason == "05") selected @endif>Sustituye comprobante provisional por contigencia</option>
+                                    <option value="99" @if($invoice->reason == "99") selected @endif>Otros</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="iva_amount">Razón</label>
+                                <input type="text" class="form-control" name="reason" id="reason" placeholder="" readonly value="{{$invoice->reason}}">
+                            </div>
+                        </div>
+              @endif
             </div>
             
             <div class="col-md offset-md-1">  
