@@ -256,6 +256,7 @@ window.backFields = function () {
     $('#first_name_card').removeClass('checkEmpty');
     $('#last_name_card').removeClass('checkEmpty');
 }
+
 window.getCyberData = function(){
     var x = document.createElement("INPUT");
     x.setAttribute("type", "hidden");
@@ -264,7 +265,33 @@ window.getCyberData = function(){
     x.setAttribute("value", cybs_dfprofiler("tc_cr_011007172","test"));
     //$("#deviceFingerPrintID").val(cybs_dfprofiler("tc_cr_011007172","test"));
     $('.tarjeta').append(x);
+    
+    var state = $( "#state option:selected" ).text();
+    if(state.length > 40){
+        state = state.substring(0, 40);
+    }
+    $('#cardState').val(state);
+    
+    var city = $( "#city option:selected" ).text();
+    if(city.length > 40){
+        city = city.substring(0, 40);
+    }
+    $('#cardCity').val(city);
+    
+    var address = $('#address').val();
+    if(address.length > 40){
+        address = address.substring(0, 40);
+    }
+    
+    $('#address1').val(address);
+    var neighborhood = $( "#neighborhood" ).val();
+    if(neighborhood.length > 40){
+        neighborhood = neighborhood.substring(0, 40);
+    }
+    $('#street1').val(neighborhood);
+    
 }
+
 $(document).ready(function() {
 
   $('.select-search').select2({

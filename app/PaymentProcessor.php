@@ -33,9 +33,9 @@ class PaymentProcessor extends Model
      *
      *
      */
-    public function createTokenWithoutFee($data){
+    /*public function createTokenWithoutFee($data){
         return true;
-    }
+    }*/
     /**
     * checkCC
     *
@@ -188,7 +188,7 @@ class PaymentProcessor extends Model
      *
      *
      */
-    private function getDocReference($docType, $companyId = null) {
+    public function getDocReference($docType, $companyId = null) {
         if( $companyId ){
             $company = Company::find($companyId);
         }else{
@@ -204,7 +204,7 @@ class PaymentProcessor extends Model
      *
      *
      */
-    private function getDocumentKey($docType, $companyId = null) {
+    public function getDocumentKey($docType, $companyId = null) {
         if( $companyId ){
             $company = Company::find($companyId);
         }else{
@@ -221,7 +221,7 @@ class PaymentProcessor extends Model
      *
      *
      */
-    public function selectPaymentGateway($payment_gateway){
+    public static function selectPaymentGateway($payment_gateway){
         switch ($payment_gateway){
             case 'cybersource':
                 $class = new CybersourcePaymentProcessor();
