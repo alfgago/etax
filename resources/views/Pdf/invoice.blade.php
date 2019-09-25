@@ -288,7 +288,7 @@
         $invoiceUtils = new \App\Utils\InvoiceUtils();
         $requestDetails = $invoiceUtils->setDetails43($data_invoice->items);
         $requestData = $invoiceUtils->setInvoiceData43($data_invoice, $requestDetails, false);
-    
+ 
         $totalServiciosGravados = $requestData['servgravados'] ?? 0;
         $totalServiciosExentos = $requestData['servexentos'] ?? 0;
         $totalServiciosExonerados = $requestData['servexonerados'] ?? 0;

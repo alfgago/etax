@@ -13,13 +13,9 @@
         </a>
         @endif
       @if( $data->document_type == ('01' || '08' || '09' || '04') &&  $data->reference_document_key == null)
-      <form id="anular-form-{{ $data->id }}" class="inline-form" method="POST" action="/facturas-emitidas/anular/{{  $data->id }}" >
-        @csrf
-        @method('patch')
-        <a type="button" class="text-danger mr-2" title="Anular factura" onclick="confirmAnular({{  $data->id }});">
-          <i class="fa fa-ban" aria-hidden="true"></i>
-        </a>
-      </form>
+      <a href="/facturas-emitidas/nota-credito/{{ $data->id }}" title="Crear nota de credito" class="text-warning mr-2">
+        <i class="fa fa-ban" aria-hidden="true"></i>
+      </a>
       @endif
       <a href="/facturas-emitidas/download-pdf/{{ $data->id }}" title="Descargar PDF" class="text-warning mr-2" download > 
         <i class="fa fa-file-pdf-o" aria-hidden="true"></i>

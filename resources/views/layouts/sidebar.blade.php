@@ -1,16 +1,10 @@
- <?php 
-            
-                $menu = new App\Menu;
-                $items = $menu->menu(1);
-                $i = 0;
-                ?>
   <div class="side-content-wrap">
       <div class="sidebar-left open" >
           <ul class="navigation-left">
             <?php 
             
                 $menu = new App\Menu;
-                $items = $menu->menu(1);
+                $items = $menu->menu('menu_sidebar');
                 $i = 0;
                 foreach ($items as $item) {
                     ?>
