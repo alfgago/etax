@@ -434,8 +434,7 @@ class BillController extends Controller
                         ->where('is_totales', false)
                         ->where('is_code_validated', false)
                         ->where('is_authorized', true)
-                        ->orderBy('generated_date', 'DESC')
-                        ->orderBy('reference_number', 'DESC')->paginate(10);
+                        ->orderBy('generated_date', 'DESC')->paginate(10);
         return view('Bill/index-validaciones', [
           'bills' => $bills
         ]);
