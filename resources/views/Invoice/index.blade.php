@@ -5,9 +5,13 @@
 @endsection
 
 @section('breadcrumb-buttons')
-    <a class="btn btn-primary" href="/facturas-emitidas/emitir-factura/01">Emitir factura nueva</a>
-    <a class="btn btn-primary" href="/facturas-emitidas/create">Ingresar factura existente</a>
-    <div onclick="abrirPopup('importar-emitidas-popup');" class="btn btn-primary">Importar facturas emitidas</div>
+  <?php 
+  $menu = new App\Menu;
+  $items = $menu->menu('menu_ventas');
+  foreach ($items as $item) { ?>
+    <a class="btn btn-primary" style="color: #ffffff;" {{$item->type}}="{{$item->link}}">{{$item->name}}</a>
+  <?php } ?>
+    
 @endsection 
 
 @section('content') 

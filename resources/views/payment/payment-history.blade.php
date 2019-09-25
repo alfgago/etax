@@ -13,17 +13,14 @@
                 <div class="row">
                     <div class="col-3">
                         <ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                            @if( !auth()->user()->is_guest )
+                             <?php 
+                              $menu = new App\Menu;
+                              $items = $menu->menu('menu_gestion_pagos');
+                              foreach ($items as $item) { ?>
                                 <li>
-                                    <a class="nav-link" aria-selected="true" href="/payments-methods">M&eacute;todos de pagos</a>
+                                    <a class="nav-link" aria-selected="true"  style="color: #ffffff;" {{$item->type}}="{{$item->link}}">{{$item->name}}</a>
                                 </li>
-                                <li>
-                                    <a class="nav-link active" aria-selected="true" href="/payments">Historial de pagos</a>
-                                </li>
-                                <li>
-                                    <a class="nav-link" aria-selected="false" href="/payment/pending-charges">Cargos Pendientes</a>
-                                </li>
-                            @endif
+                              <?php } ?>
                         </ul>
                     </div>
                     <div class="col-9">
