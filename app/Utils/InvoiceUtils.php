@@ -464,8 +464,8 @@ class InvoiceUtils
 
             if ($data['document_type'] == ('03' || '02')) {
                 $invoiceData['referencia_doc_type'] = $data['reference_doc_type'];
-                $invoiceData['referencia_codigo'] = '01';
-                $invoiceData['referencia_razon'] = 'Anular Factura';
+                $invoiceData['referencia_codigo'] = $data['code_note'] ?? "01";
+                $invoiceData['referencia_razon'] = $data['reason'] ?? 'Anular Factura';
                 $invoiceData['fecha_emision_factura'] = $data['reference_generated_date'];
                 $invoiceData['clave_factura'] = $data['reference_document_key'];
             }

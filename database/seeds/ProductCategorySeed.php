@@ -53,7 +53,7 @@ class ProductCategorySeed extends Seeder
           ['grupo'=>'VEX','nombre'=>'Venta de sillas de ruedas y similares, equipo ortopédico, prótesis y equipo', 'invoice_iva_code'=>'B200', 'open_codes'=>'B200,S200'],
           ['grupo'=>'VEX','nombre'=>'Venta de bienes y servicios a instituciones públicas y privadas exentas', 'invoice_iva_code'=>'B260', 'open_codes'=>'B260,S260'],
           ['grupo'=>'VEX','nombre'=>'Aranceles por matrícula y créditos de cursos en universidades públicas y privadas exentas', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
-          ['grupo'=>'VEX','nombre'=>'Servicios de transporte terrestre de pasajeros y cabotaje de personas con concesión', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
+          ['grupo'=>'VEX','nombre'=>'Servicios de transporte terrestre de pasajeros y cabotaje de personas con concesión', 'invoice_iva_code'=>'S170', 'open_codes'=>'S170,B200,S200'],
           ['grupo'=>'VEX','nombre'=>'Venta, arrendamiento y leasing de autobuses y embarcaciones', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
           ['grupo'=>'VEX','nombre'=>'Comisiones por el servicio de subasta ganadera y transacción de animales', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
           ['grupo'=>'VEX','nombre'=>'Venta, comercialización y matanza de animales vivos', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
