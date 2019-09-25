@@ -31,6 +31,11 @@
                             <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
                         </li>
                         @endif
+                        @if( auth()->user()->isInfluencers())
+                         <li>
+                                <a class="nav-link" aria-selected="false" href="/usuario/wallet">Billetera</a>
+                           </li>
+                        @endif
                         
                     </ul>
                 </div>

@@ -22,7 +22,7 @@
                 $items = $menu->menu('menu_empresas');
                 foreach ($items as $item) { ?>
                     <li>
-                        <a class="nav-link" aria-selected="false"  style="color: #ffffff;" {{$item->type}}="{{$item->link}}">{{$item->name}}</a>
+                        <a class="nav-link @if($item->link == '/empresas/certificado') active @endif" aria-selected="false"  style="color: #ffffff;" {{$item->type}}="{{$item->link}}">{{$item->name}}</a>
                     </li>
                 <?php } ?>
             </ul>

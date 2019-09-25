@@ -17,7 +17,7 @@
                               $items = $menu->menu('menu_gestion_pagos');
                               foreach ($items as $item) { ?>
                                 <li>
-                                    <a class="nav-link" aria-selected="true"  style="color: #ffffff;" {{$item->type}}="{{$item->link}}">{{$item->name}}</a>
+                                    <a class="nav-link @if($item->link == '/payment/pending-charges') active @endif" aria-selected="true"  style="color: #ffffff;" {{$item->type}}="{{$item->link}}">{{$item->name}}</a>
                                 </li>
                               <?php } ?>
                         </ul>
