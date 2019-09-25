@@ -1060,7 +1060,7 @@ class Invoice extends Model
         
     }
 
-    public function setNoteData($invoiceReference, $requestItems = null, $noteType = null) {
+    public function setNoteData($invoiceReference, $requestItems = null, $noteType = null, $request = []) {
         try {
             $noteType = $noteType ?? '03';
             $this->document_key = getDocumentKey($noteType, $this->reference_number, $invoiceReference->company->id_number);
@@ -1084,11 +1084,11 @@ class Invoice extends Model
 
             //Datos de factura
             $this->description = $invoiceReference->description;
-            $this->subtotal = floatval( str_replace(",","", $invoiceReference->subtotal ));
+            $this->subtotal = floatval( str_replace(",","", $request->subtotal ));
             $this->currency = $invoiceReference->currency;
             $this->currency_rate = floatval( str_replace(",","", $invoiceReference->currency_rate ));
-            $this->total = floatval( str_replace(",","", $invoiceReference->total ));
-            $this->iva_amount = floatval( str_replace(",","", $invoiceReference->iva_amount ));
+            $this->total = floatval( str_replace(",","", $request->total ));
+            $this->iva_amount = floatval( str_replace(",","", $request->iva_amount ));
 
             $this->client_first_name = $invoiceReference->client_first_name;
             $this->client_last_name = $invoiceReference->client_last_name;
