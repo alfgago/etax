@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddColumnSlugMenuTable extends Migration
+class AddColumnOrderMenuItems extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddColumnSlugMenuTable extends Migration
      */
     public function up()
     {
-        Schema::table('menus', function (Blueprint $table) {
-            $table->string('slug')->nullable();
+        Schema::table('menu_items', function (Blueprint $table) {
+            $table->integer('order')->default(100000);
         });
     }
 
@@ -25,8 +25,8 @@ class AddColumnSlugMenuTable extends Migration
      */
     public function down()
     {
-        Schema::table('menus', function (Blueprint $table) {
-            $table->dropColumn('slug');
+        Schema::table('menu_items', function (Blueprint $table) {
+            $table->dropColumn('order');
         });
     }
 }
