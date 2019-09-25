@@ -51,7 +51,7 @@ class ProcessInvoice implements ShouldQueue
     {
 
         try {
-            if ( app()->environment('production') ) {
+            //if ( app()->environment('production') ) {
                 $invoiceUtils = new InvoiceUtils();
                 $client = new Client();
                 $invoice = Invoice::find($this->invoiceId);
@@ -62,7 +62,8 @@ class ProcessInvoice implements ShouldQueue
                         if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09')) && $invoice->resend_attempts < 6) {
                             if ($invoice->xml_schema == 43) {
                                 $requestDetails = $invoiceUtils->setDetails43($invoice->items);
-                                $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
+                                $requestOtherCharges = $invoiceUtils->setOtherCharges($invoice->otherCharges);
+                                $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails, $requestOtherCharges);
                             } else {
                                 $requestDetails = $this->setDetails($invoice->items);
                                 $requestData = $this->setInvoiceData($invoice, $requestDetails);
@@ -117,7 +118,7 @@ class ProcessInvoice implements ShouldQueue
                                         $xml->xml_message = $pathMH;
                                         $xml->save();
                                         
-                                        $sendPdf = $invoice->generation_method == "etax-bulk";
+                                        $sendPdf = true;
                                         $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, $sendPdf);
                                     }
                                     Log::info('Factura enviada y XML guardado.');
@@ -144,7 +145,7 @@ class ProcessInvoice implements ShouldQueue
                         Log::warning('El job Invoices no se procesó, porque la empresa no tiene un certificado válido.'.$company->id_number);
                     }
                 }
-            }
+            //}
         } catch ( \Exception $e) {
             Log::error('ERROR Enviando parametros  API HACIENDA Invoice: '.$this->invoiceId.'-->>'.$e);
         }

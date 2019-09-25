@@ -323,14 +323,17 @@ form h3 {
     display: inline-block;
 }
 
+.otros-factura-form .botones-editar,
 .item-factura-form .botones-editar {
   display: none;
 }
 
+.otros-factura-form.editando .botones-editar,
 .item-factura-form.editando .botones-editar {
   display: block;
 }
 
+.otros-factura-form.editando .botones-agregar,
 .item-factura-form.editando .botones-agregar {
   display: none;
 }
@@ -366,6 +369,16 @@ input.type-zone {
     text-align: center;
     padding: .25em .5em;
     font-size: 0.7rem;
+}
+
+.btn.btn-agregar.btn-otroscargos {
+    border: 0; 
+    background: none; 
+    color: #15408E; 
+    border-bottom: 1px solid #15408E; 
+    padding: 0; 
+    margin-left: 1.5rem; 
+    border-radius: 0;
 }
 
 .inline-form.inline-checkbox label {

@@ -6,11 +6,13 @@
         <div id=""></div>
       <div class="card-title" id="escritorio">Enlaces rápidos</div>
       <div class="quicklinks">
-        <a class="btn btn-primary" href="/facturas-emitidas/emitir-factura/01">Emitir facturas</a>
-        <a class="btn btn-primary" href="#" onclick="abrirPopup('importar-emitidas-popup');">Importar facturas de venta</a>
-        <a class="btn btn-primary" href="#" onclick="abrirPopup('importar-recibidas-popup');">Importar facturas de compra</a>
-        <a class="btn btn-primary" href="/cierres">Cierres de mes</a>
-        <a class="btn btn-primary" href="/reportes">Generar presentación de IVA</a>
+        <?php     
+        $menu = new App\Menu;
+        $items = $menu->menu('menu_dashboard');
+        foreach ($items as $item) { ?>
+            <a class="btn btn-primary" style="color: #ffffff;" {{$item->type}}="{{$item->link}}">{{$item->name}}</a>
+        <?php } ?>
+
           <div id="content">
               <p></p>
           </div>

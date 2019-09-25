@@ -22,6 +22,7 @@
               <th>Subtotal</th>
               <th>Monto IVA</th>
               <th data-priority="4">Total</th>
+              <th data-priority="4">Fecha</th>
               <th data-priority="1">Acciones</th>
             </tr>
           </thead>
@@ -35,6 +36,7 @@
                   <td class="text-right">{{ number_format( $data->subtotal, 2 ) }}</td>
                   <td class="text-right">{{ number_format( $data->iva_amount, 2 ) }}</td>
                   <td class="text-right">{{ number_format( $data->total, 2 ) }}</td>
+                  <td>{{ @$data->generatedDate()->format('d/m/Y') }}</td>
                   <td>
                     <a link="/facturas-recibidas/validar/{{ $data->id }}" titulo="Verificación de compra" class="btn btn-primary m-0 verificar_compra" style="color:#fff; font-size: 0.85em;" onclick="" data-toggle="modal" data-target="#modal_estandar">Validar</a>
                   </td>

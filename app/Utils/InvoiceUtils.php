@@ -270,11 +270,12 @@ class InvoiceUtils
                     $iva_amount = 'false';
                 }
                 
-                $montoSinIva = ($value['unit_price'] && $value['item_count']) ? round($value['item_count'] * $value['unit_price'], 2) : 0;
+                $itemCount = $value['item_count'] ? round($value['item_count'], 3) : 1;
+                $montoSinIva = ($value['unit_price'] && $itemCount) ? round($itemCount * $value['unit_price'], 2) : 0;
                 $montoDescuento = $value['discount'] ? $this->discountCalculator($value['discount_type'], $value['discount'], $montoSinIva ) : 0;
 
                 $details[$key] = array(
-                    'cantidad' => $value['item_count'] ?? 1,
+                    'cantidad' => $itemCount,
                     'unidadMedida' => $value['measure_unit'] ?? '',
                     'detalle' => $value['name'] ?? '',
                     'precioUnitario' => $value['unit_price'] ?? 0,
@@ -308,7 +309,27 @@ class InvoiceUtils
         }
     }
 
-    public function setInvoiceData43( Invoice $data, $details ) {
+    public function setOtherCharges($data) {
+        try {
+            $details = [];
+            foreach ($data as $key => $value) {
+                    $details[$key] = array(
+                        'tipodocumento' => $value['document_type'] ?? '',
+                        'numeroidentidadtercero' => $value['provider_id_number'] ?? '',
+                        'nombretercero' => $value['provider_name'] ?? '',
+                        'detalle' => $value['description'] ?? '',
+                        'porcentaje' => $value['percentage'] ?? '',
+                        'montocargo' => $value['amount'] ?? 0
+                );
+            }
+            return json_encode($details, true);
+        } catch (\Exception $error) {
+            Log::error('Error al crear otros cargos request -->>'. $error->getMessage() );
+            return false;
+        }
+    }
+
+    public function setInvoiceData43( Invoice $data, $details, $otherCharges = false, $returnRequest = true ) {
         try {
             $provider = null;
             $company = $data->company;
@@ -457,20 +478,30 @@ class InvoiceUtils
                 'totventaneta' => $totalNeta,
                 'totimpuestos' => $totalImpuestos,
                 'totalivadevuelto' => $totalIvaDevuelto,
-                'totcomprobante' => $totalComprobante - $totalIvaDevuelto,
-                'detalle' => $details
+                'totalotroscargos' => $data['total_otros_cargos'] ?? 0,
+                'totcomprobante' => $totalComprobante + $data['total_otros_cargos'] - $totalIvaDevuelto,
+                'detalle' => $details,
             );
 
-            if ($data['document_type'] == ('03' || '02')) {
+            if ($otherCharges !== false) {
+                $invoiceData['otroscargos'] = $otherCharges;
+            }
+
+            if ($data['document_type'] == '03' || $data['document_type'] == '02') {
                 $invoiceData['referencia_doc_type'] = $data['reference_doc_type'];
-                $invoiceData['referencia_codigo'] = '01';
-                $invoiceData['referencia_razon'] = 'Anular Factura';
+                $invoiceData['referencia_codigo'] = $data['code_note'] ?? "01";
+                $invoiceData['referencia_razon'] = $data['reason'] ?? 'Anular Factura';
                 $invoiceData['fecha_emision_factura'] = $data['reference_generated_date'];
                 $invoiceData['clave_factura'] = $data['reference_document_key'];
             }
 
             Log::info("Request Data from invoices id: $data->id  --> ".json_encode($invoiceData));
             $invoiceData['atvcertFile'] = Storage::get($company->atv->key_url);
+            
+            //Para el PDF, retorna el invoiceData completo. Si es para emitir, retorna el request.
+            if( !$returnRequest ){
+                return $invoiceData;
+            }
 
             foreach ($invoiceData as $key => $values) {
                 if ($key == 'atvcertFile') {

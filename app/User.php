@@ -13,6 +13,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use App\Coupon;
 use App\SubscriptionPlan;
+use App\UserCompanyPermission;
 
 class User extends Authenticatable {
 
@@ -193,6 +194,28 @@ class User extends Authenticatable {
         }catch( \Throwable $e) { return false; }
         
         return false;
+    }
+
+    public function permisos(){
+        try{
+            $current_company = currentCompanyModel();
+            if( auth()->user()->isOwnerOfTeam($current_company->team)) {
+                return [1];
+            }else{
+                $user_id = auth()->user()->id;
+                $permisos = UserCompanyPermission::where('company_id',$current_company->id)
+                            ->where('user_id',$user_id)->get();
+                $retorno = [];
+                foreach($permisos as $permiso){
+                    array_push($retorno,$permiso->permission_id);
+                }
+                return $retorno;
+            }
+        }catch( \Throwable $e) { 
+            
+            \Illuminate\Support\Facades\Log::error('Error items menu'. $e);
+            return []; 
+        }
     }
 
 

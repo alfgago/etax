@@ -355,6 +355,10 @@ class CompanyController extends Controller {
         $company->last_ticket_ref_number = $request->last_document_ticket ? getInvoiceReference($request->last_document_ticket) : 0;
         $company->last_document_debit_note = $request->last_document_debit_note;
         $company->last_debit_note_ref_number = $request->last_document_debit_note ? getInvoiceReference($request->last_document_debit_note) : 0;
+        $company->last_document_invoice_pur = $request->last_document_invoice_pur;
+        $company->last_invoice_pur_ref_number = $request->last_document_invoice_pur ? getInvoiceReference($request->last_document_invoice_pur) : 0;
+        $company->last_document_invoice_exp = $request->last_document_invoice_exp;
+        $company->last_invoice_exp_ref_number = $request->last_document_invoice_exp ? getInvoiceReference($request->last_document_invoice_exp) : 0;
         $company->first_prorrata = $request->first_prorrata;
         $company->first_prorrata_type = $request->first_prorrata_type;
         $company->use_invoicing = $request->use_invoicing;

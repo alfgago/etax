@@ -174,7 +174,7 @@ window.companyChange = function($redirect = false) {
         }
     });
     jQuery.ajax({
-        url: "/change-company",
+        url: "/change-company", 
         method: 'post',
         data: {
             companyId: sel

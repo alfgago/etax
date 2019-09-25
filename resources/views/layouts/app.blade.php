@@ -26,54 +26,14 @@
     <script src="../assets/js/cybs_devicefingerprint.js"></script>
     <script src="../../assets/js/cybs_devicefingerprint.js"></script>
 
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=6.03">
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=6.03"></script>
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=6.17">
+    <script src="{{asset('assets/js/common-bundle.js')}}?v=6.17"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
 
     @yield('header-scripts')
 
     <style>
-
- .dropzone .dz-preview:hover .dz-details .dz-filename {
-    position: absolute;
-    color: #fff;
-    z-index: 999999;
-    bottom: 25px;
-    left: 2.5%;
-    font-size: 9px;
-    width: 95%;
-    transition: .1s ease all;
-}
-
-.dropzone .dz-preview:hover .dz-details {
-    opacity: 1;
-    z-index: 9999;
-    height: 100%;
-    position: absolute;
-    font-weight: bold;
-    color: #000;
-}
-
-.dropzone .dz-preview:hover .dz-size {
-    display: none;
-}
-
-.dropzone .dz-preview:hover .dz-details .dz-filename span {
-    opacity: 1;
-    background: rgba(255, 255, 255, 0.5);
-    color: #000;
-    box-shadow: 0 0 15px rgba(0,0,0,0.25);
-    border: 0;
-    transition: .1s ease all;
-}
-
-.dropzone .form-group.col-md-12 {
-    padding: 0;
-    margin: 0;
-    height: 0;
-}
-
     </style>
 
 </head>

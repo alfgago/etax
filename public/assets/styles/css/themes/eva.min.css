@@ -17182,14 +17182,17 @@ form h3 {
   display: inline-block;
 }
 
+.otros-factura-form .botones-editar,
 .item-factura-form .botones-editar {
   display: none;
 }
 
+.otros-factura-form.editando .botones-editar,
 .item-factura-form.editando .botones-editar {
   display: block;
 }
 
+.otros-factura-form.editando .botones-agregar,
 .item-factura-form.editando .botones-agregar {
   display: none;
 }
@@ -17225,6 +17228,16 @@ input.type-zone {
   text-align: center;
   padding: 0.25em 0.5em;
   font-size: 0.7rem;
+}
+
+.btn.btn-agregar.btn-otroscargos {
+  border: 0;
+  background: none;
+  color: #15408E;
+  border-bottom: 1px solid #15408E;
+  padding: 0;
+  margin-left: 1.5rem;
+  border-radius: 0;
 }
 
 .inline-form.inline-checkbox label {
@@ -17724,6 +17737,48 @@ div#importar-emitidas-popup .popup-container {
   left: 0;
   height: 100%;
   word-break: break-word;
+}
+
+.dropzone .dz-preview:hover .dz-details .dz-filename {
+  position: absolute;
+  color: #fff;
+  z-index: 999999;
+  bottom: 25px;
+  left: 2.5%;
+  font-size: 9px;
+  width: 95%;
+  -webkit-transition: .1s ease all;
+  transition: .1s ease all;
+}
+
+.dropzone .dz-preview:hover .dz-details {
+  opacity: 1;
+  z-index: 9999;
+  height: 100%;
+  position: absolute;
+  font-weight: bold;
+  color: #000;
+}
+
+.dropzone .dz-preview:hover .dz-size {
+  display: none;
+}
+
+.dropzone .dz-preview:hover .dz-details .dz-filename span {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.5);
+  color: #000;
+  -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.25);
+          box-shadow: 0 0 15px rgba(0, 0, 0, 0.25);
+  border: 0;
+  -webkit-transition: .1s ease all;
+  transition: .1s ease all;
+}
+
+.dropzone .form-group.col-md-12 {
+  padding: 0;
+  margin: 0;
+  height: 0;
 }
 
 @media only screen and (max-width: 600px) {

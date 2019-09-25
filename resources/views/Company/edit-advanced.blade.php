@@ -145,6 +145,16 @@
 								  <input type="text" class="form-control" name="last_document_debit_note" id="last_document_debit_note" value="{{ $company->last_document_debit_note === null ? '00100001020000000000' : @$company->last_document_debit_note }}" required>
 								  <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
 							  </div>
+							  <div class="form-group col-md-6">
+								  <label for="last_document_ticket">Último documento emitio factura electronica de compra</label>
+								  <input type="text" class="form-control" name="last_document_invoice_pur" id="last_document_invoice_pur" value="{{ $company->last_document_invoice_pur === null ? '00100001080000000000' : @$company->last_document_invoice_pur }}" required>
+								  <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
+							  </div>
+							  <div class="form-group col-md-6">
+								  <label for="last_document_ticket">Último documento emitio factura electronica de exportacion</label>
+								  <input type="text" class="form-control" name="last_document_invoice_exp" id="last_document_invoice_exp" value="{{ $company->last_document_invoice_exp === null ? '00100001090000000000' : @$company->last_document_invoice_exp }}" required>
+								  <div class="description">Si utilizaba otro sistema de facturación antes de eTax, por favor digite el último número de documento emitido.</div>
+							  </div>
 							  
 								<div class="form-group col-md-12">
 								  <label for="default_category_producto_code">Categoría de declaración por defecto</label>

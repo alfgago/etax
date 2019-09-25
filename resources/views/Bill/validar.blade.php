@@ -44,6 +44,7 @@
               <th>Precio unitario</th>
               <th>Subtotal</th>
               <th>IVA</th>
+              <th>%</th>
               <th>Total</th>
               <th>Tipo IVA</th>
               <th>Categoría</th>
@@ -109,6 +110,7 @@
                 <td>{{ number_format($item->unit_price,2) }} </td>
                 <td>{{ number_format($item->subtotal,2) }}</td>
                 <td>{{ number_format($item->iva_amount,2) }}</td>
+                <td>{{ number_format($item->iva_percentage,0) }}%</td>
                 <td>{{ number_format($item->total,2) }} </td>
                 <td>
                   <div class="input-validate-iva">
