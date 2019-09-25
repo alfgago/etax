@@ -4,24 +4,24 @@ namespace App;
 
 use App\Utils\BridgeHaciendaApi;
 use Carbon\Carbon;
-use CybsSoapClient;
+//use CybsSoapClient;
 use GuzzleHttp\Client;
 use stdClass;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Log;
-
-require __DIR__ . '/../vendor/autoload.php';
+use App\Utils\Cybersource\CybsSoapClient;
 
 class CybersourcePaymentProcessor extends PaymentProcessor
 {
     use SoftDeletes;
+    
     /**
      * Payment token creation
      * Params cardNumber, cardDescripcion, expiry, cvc, user_id, user_name
      *
      */
-    public function createCardToken($request){
+    /*public function createCardTokenWithCharge($request){
         $paymentProcessor = new PaymentProcessor();
         $cardData = $paymentProcessor->getCardNameType($request->number);
         $merchantId = 'tc_cr_011007172';
@@ -80,14 +80,18 @@ class CybersourcePaymentProcessor extends PaymentProcessor
 
         $reply = $client->runTransaction($requestClient);
 
+        $this->pay($request);
+
         return $reply;
-    }
+    }*/
     /**
      * create Token Without Fee
      *
      *
      */
-    public function createTokenWithoutFee($request){
+    public function createCardToken($request){
+        $user = auth()->user();
+        
         $paymentProcessor = new PaymentProcessor();
         $cardData = $paymentProcessor->getCardNameType($request->number);
 
@@ -143,8 +147,32 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $requestClient->merchantId = $merchantId;
 
         $reply = $client->runTransaction($requestClient);
+        
+        $last_4digits = substr($request->number, -4);
+        if($reply->decision === 'ACCEPT'){
+            //Se logró agregar la tarjeta y crear el pago, entonces hay un nuevo payment method y un payment.
+            $paymentMethod = PaymentMethod::updateOrCreate([
+                'user_id' => $user->id,
+                'name' => $request->first_name_card,
+                'last_name' => $request->last_name_card,
+                'last_4digits' => $last_4digits,
+                'masked_card' => $paymentGateway->getMaskedCard($request->number),
+                'due_date' => $request->expiry,
+                'token_bn' => $reply->paySubscriptionCreateReply->subscriptionID,
+                'default_card' => 1,
+                'payment_gateway' => 'cybersource'
 
-        return $reply;
+            ]);
+        } else {
+            $paymentMethod = PaymentMethod::where('user_id', $user->id)
+                ->where('last_4digits', $last_4digits)
+                ->first();
+            if( ! isset($paymentMethod) ) {
+                return redirect()->back()->withError("El método de pago no pudo ser validado.")->withInput();
+            }
+        }
+
+        return $paymentMethod;
     }
     /**
      * Payment token delete
