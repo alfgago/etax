@@ -40,6 +40,7 @@
               <th>Precio unitario</th>
               <th>Subtotal</th>
               <th>IVA</th>
+              <th>%</th>
               <th>Total</th>
               <th>Tipo IVA</th>
               <th>Categoría</th>
@@ -47,7 +48,7 @@
           </thead>
           <tbody>
              <tr>
-               <th colspan="7">Selección masiva: </th>
+               <th colspan="8">Selección masiva: </th>
                <td>
                   <div class="input-validate-iva">
                     <select class="form-control iva_type_all"  placeholder="Seleccione un código eTax"  >
@@ -94,6 +95,7 @@
                 <td>{{ number_format($item->unit_price,2) }} </td>
                 <td>{{ number_format($item->subtotal,2) }}</td>
                 <td>{{ number_format($item->iva_amount,2) }}</td>
+                <td>{{ number_format($item->iva_percentage,0) }}%</td>
                 <td>{{ number_format($item->total,2) }} </td>
                 <td>
                   <div class="input-validate-iva">
