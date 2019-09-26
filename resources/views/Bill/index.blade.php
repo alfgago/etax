@@ -5,10 +5,13 @@
 @endsection
 
 @section('breadcrumb-buttons')
-    <a type="submit" class="btn btn-primary" href="/facturas-recibidas/create">Ingresar factura existente</a>
-    <div onclick="abrirPopup('importar-recibidas-popup');" class="btn btn-primary">Importar facturas recibidas</div>
-    <a type="submit" class="btn btn-primary" href="/facturas-recibidas/aceptaciones">Aceptación de facturas</a>
-    <a href="/facturas-recibidas/autorizaciones" class="btn btn-primary">Autorizar facturas por email</a>
+  <?php 
+  $menu = new App\Menu;
+  $items = $menu->menu('menu_compras');
+  foreach ($items as $item) { ?>
+    <a class="btn btn-primary" style="color: #ffffff;" {{$item->type}}="{{$item->link}}">{{$item->name}}</a>
+  <?php } ?>
+   
 @endsection 
 
 @section('content') 

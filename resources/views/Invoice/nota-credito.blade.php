@@ -95,7 +95,7 @@
                                 <label for="subtotal">Tipo</label>
                                 <select name="code_note" id="code_note" class="form-control" required>
                                     <option value="01" selected="">Anula documento de referencia</option>
-                                    <option value="02">Corrige texto de ocumento de referencia</option>
+                                    <option value="02">Corrige texto de documento de referencia</option>
                                     <option value="03">Corrige monto</option>
                                     <option value="04">Referencia a otro documento</option>
                                     <option value="05">Sustituye comprobante provisional por contigencia</option>
