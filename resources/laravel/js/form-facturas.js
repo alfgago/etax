@@ -230,35 +230,33 @@
       var row_id  = "item-tabla-"+numero;
       
       var inputFields = "<div class='hidden'>" +
-                   "<input type='hidden' class='numero' name='items["+index+"][item_number]' value='"+(numero+1)+"'>" +
-                   "<input class='item_id' type='hidden' name='items["+index+"][id]' value='"+item_id+"'>" +
-                   "<input type='hidden' class='codigo' name='items["+index+"][code]' value='"+codigo+"'>" +
-                   "<input type='hidden' class='nombre' name='items["+index+"][name]' value='"+nombre+"'>" +
-                   "<input type='hidden' class='tipo_producto' name='items["+index+"][product_type]' value='"+tipo_producto+"'>" +
-                   "<input type='hidden' class='cantidad' name='items["+index+"][item_count]' value='"+cantidad+"'>" +
-                   "<input type='hidden' class='unidad_medicion' name='items["+index+"][measure_unit]' value='"+unidad_medicion+"'>" +
-                   "<input type='hidden' class='precio_unitario' name='items["+index+"][unit_price]' value='"+precio_unitario+"'>" +
-                   "<input type='hidden' class='tipo_iva' name='items["+index+"][iva_type]' value='"+tipo_iva+"'>" +
-                   "<input type='hidden' class='porc_identificacion_plena' name='items["+index+"][porc_identificacion_plena]' value='"+porc_identificacion_plena+"'>" +
-                   "<input type='hidden' class='discount_type' name='items["+index+"][discount_type]' value='"+tipo_descuento+"'>" +
-                   "<input type='hidden' class='discount' name='items["+index+"][discount]' value='"+descuento+"'>" +
-                   "<input type='hidden' class='subtotal' name='items["+index+"][subtotal]' value='"+subtotal+"'>" +
-                   "<input type='hidden' class='porc_iva' name='items["+index+"][iva_percentage]' value='"+porc_iva+"'>" +
-                   "<input type='hidden' class='monto_iva' name='items["+index+"][iva_amount]' value='"+monto_iva+"'> " +
-                   "<input type='hidden' class='total' name='items["+index+"][total]' value='"+total+"'>" +
-                   "<input type='hidden' class='is_identificacion_especifica' name='items["+index+"][is_identificacion_especifica]' value='"+is_identificacion_especifica+"'>" +
-                   "<input type='hidden' class='typeDocument' name='items["+index+"][typeDocument]' value='"+typeDocument+"'>" +
-                   "<input type='hidden' class='numeroDocumento' name='items["+index+"][numeroDocumento]' value='"+numeroDocumento+"'>" +
-                   "<input type='hidden' class='nombreInstitucion' name='items["+index+"][nombreInstitucion]' value='"+nombreInstitucion+"'>" +
-                   "<input type='hidden' class='exoneration_date' name='items["+index+"][exoneration_date]' value='"+exoneration_date+"'>" +
-                   "<input type='hidden' class='porcentajeExoneracion' name='items["+index+"][porcentajeExoneracion]' value='"+porcentajeExoneracion+"'>" +
-                   "<input type='hidden' class='montoExoneracion' name='items["+index+"][montoExoneracion]' value='"+montoExoneracion+"'>" +
-                   "<input type='hidden' class='impuestoNeto' name='items["+index+"][impuestoNeto]' value='"+impuestoNeto+"'>" +
-                   "<input type='hidden' class='montoTotalLinea' name='items["+index+"][montoTotalLinea]' value='"+montoTotalLinea+"'>" +
-                   "<input type='hidden' class='tariff_heading' name='items["+index+"][tariff_heading]' value='"+tariff_heading+"'>" +
-              "</div>"
-
-                   ;
+                   "<input type='hidden' class='numero' name='items["+index+"][item_number]' itemname='item_number' value='"+(numero+1)+"'>" +
+                   "<input class='item_id' type='hidden' name='items["+index+"][id]' itemname='id' value='"+item_id+"'>" +
+                   "<input type='hidden' class='codigo' name='items["+index+"][code]' itemname='code' value='"+codigo+"'>" +
+                   "<input type='hidden' class='nombre' name='items["+index+"][name]' itemname='name' value='"+nombre+"'>" +
+                   "<input type='hidden' class='tipo_producto' name='items["+index+"][product_type]' itemname='product_type' value='"+tipo_producto+"'>" +
+                   "<input type='hidden' class='cantidad' name='items["+index+"][item_count]' itemname='item_count' value='"+cantidad+"'>" +
+                   "<input type='hidden' class='unidad_medicion' name='items["+index+"][measure_unit]' itemname='measure_unit' value='"+unidad_medicion+"'>" +
+                   "<input type='hidden' class='precio_unitario' name='items["+index+"][unit_price]' itemname='unit_price' value='"+precio_unitario+"'>" +
+                   "<input type='hidden' class='tipo_iva' name='items["+index+"][iva_type]' itemname='iva_type' value='"+tipo_iva+"'>" +
+                   "<input type='hidden' class='porc_identificacion_plena' name='items["+index+"][porc_identificacion_plena]' itemname='porc_identificacion_plena' value='"+porc_identificacion_plena+"'>" +
+                   "<input type='hidden' class='discount_type' name='items["+index+"][discount_type]' itemname='discount_type' value='"+tipo_descuento+"'>" +
+                   "<input type='hidden' class='discount' name='items["+index+"][discount]' itemname='discount' value='"+descuento+"'>" +
+                   "<input type='hidden' class='subtotal' name='items["+index+"][subtotal]' itemname='subtotal' value='"+subtotal+"'>" +
+                   "<input type='hidden' class='porc_iva' name='items["+index+"][iva_percentage]' itemname='iva_percentage' value='"+porc_iva+"'>" +
+                   "<input type='hidden' class='monto_iva' name='items["+index+"][iva_amount]' itemname='iva_amount' value='"+monto_iva+"'> " +
+                   "<input type='hidden' class='total' name='items["+index+"][total]' itemname='total' value='"+total+"'>" +
+                   "<input type='hidden' class='is_identificacion_especifica' name='items["+index+"][is_identificacion_especifica]' itemname='is_identificacion_especifica' value='"+is_identificacion_especifica+"'>" +
+                   "<input type='hidden' class='typeDocument' name='items["+index+"][typeDocument]' itemname='typeDocument' value='"+typeDocument+"'>" +
+                   "<input type='hidden' class='numeroDocumento' name='items["+index+"][numeroDocumento]' itemname='numeroDocumento' value='"+numeroDocumento+"'>" +
+                   "<input type='hidden' class='nombreInstitucion' name='items["+index+"][nombreInstitucion]' itemname='nombreInstitucion' value='"+nombreInstitucion+"'>" +
+                   "<input type='hidden' class='exoneration_date' name='items["+index+"][exoneration_date]' itemname='exoneration_date' value='"+exoneration_date+"'>" +
+                   "<input type='hidden' class='porcentajeExoneracion' name='items["+index+"][porcentajeExoneracion]' itemname='porcentajeExoneracion' value='"+porcentajeExoneracion+"'>" +
+                   "<input type='hidden' class='montoExoneracion' name='items["+index+"][montoExoneracion]' itemname='montoExoneracion' value='"+montoExoneracion+"'>" +
+                   "<input type='hidden' class='impuestoNeto' name='items["+index+"][impuestoNeto]' itemname='impuestoNeto' value='"+impuestoNeto+"'>" +
+                   "<input type='hidden' class='montoTotalLinea' name='items["+index+"][montoTotalLinea]' itemname='montoTotalLinea' value='"+montoTotalLinea+"'>" +
+                   "<input type='hidden' class='tariff_heading' name='items["+index+"][tariff_heading]' itemname='tariff_heading' value='"+tariff_heading+"'>" +
+              "</div>";
 
       //Crea la fila en la tabla
       var htmlCols = "<td><span class='numero-fila'>"+(numero+1)+"</span> </td>";
@@ -330,9 +328,11 @@
   window.limpiarFormItem = function(){
       $('.item-factura-form input, .item-factura-form select').val('');
       $('.item-factura-form input[type=checkbox]').prop('checked', false);
+      $('.otros-factura-form input, .otros-factura-form select').val('');
+      $('.otros-factura-form input[type=checkbox]').prop('checked', false);
       
       var docType = $('#document_type').val();
-      if( $('#is-compra').length || docType == '08' ){
+      if( ($('#is-compra').length || docType == '08') && !$('#is-manual').length ){
         $('#tipo_iva').val('B003').change();
       }else {
         $('#tipo_iva').val('B103').change();
@@ -385,6 +385,23 @@
     togglePorcentajeIdentificacionPlena();
     calcularConIvaManual();
   }
+
+  //Carga la item para ser editada
+  window.cargarFormOtros = function( index ) {
+    $('.otros-factura-form').addClass('editando');
+    
+    var item = $('.otros-index-'+index );
+    $('#otros-lnum').val( item.attr('attr-num') );
+    $('#otros_id').val( item.find('.item_id ').val() );
+    $('#otros-document_type').val( item.find('.otros-document_type ').val() ).change();
+    $('#otros-provider_id_number').val( item.find('.otros-provider_id_number ').val() );
+    $('#otros-provider_name').val( item.find('.otros-provider_name ').val() );
+    $('#otros-description').val( item.find('.otros-description ').val() );
+    $('#otros-percentage').val( item.find('.otros-percentage ').val() );
+    $('#otros-amount').val( item.find('.otros-amount ').val() );
+    
+    toggleCobroTercero();
+  }
   
   //Acción para cancelar la edición
   window.cancelarEdicion = function(){
@@ -401,13 +418,45 @@
   
   //Recalcula números para asegurar que no haya vacíos
   window.recalcularNumerosItem = function() {
-    $i = 0;
+    var i = 0;
     $( '.item-tabla' ).each( function(){
-      $(this).attr( 'attr-num', $i );   
-      $(this).attr( 'id', 'item-tabla-'+$i );   
-      $(this).find( '.numero-fila').text($i+1 );
-      $i++;        
+      $(this).attr( 'attr-num', i );   
+      $(this).attr( 'id', 'item-tabla-'+i );   
+      $(this).find( '.numero-fila').text(i+1 );
+      $(this).find('.hidden input').each( function(){
+    	  if($(this).attr('itemname').length){
+    		  var itemname = $(this).attr('itemname');
+      		$(this).attr('name', 'items['+i+']['+itemname+']');  
+        }
+      });
+      i++;        
     });
+    var j = 0;
+    $( '.otros-tabla' ).each( function(){
+      $(this).attr( 'attr-num', j );   
+      $(this).attr( 'id', 'otros-tabla-'+j );   
+      $(this).find( '.numero-fila').text(j+1 );
+      $(this).find('.hidden input').each( function(){
+    	  if($(this).attr('itemname').length){
+    		  var itemname = $(this).attr('itemname');
+      		$(this).attr('name', 'otros['+j+']['+itemname+']');  
+        }
+      });
+      j++;        
+    });
+  }
+  
+  //Acción para cancelar la edición
+  window.cancelarEdicionOtros = function(){
+    $('.otros-factura-form').removeClass('editando');
+    limpiarFormItem();
+  }
+  
+  //Elimina la item
+  window.eliminarOtros = function( index ){
+    $('.otros-index-'+index ).remove();
+    recalcularNumerosItem();
+    calcularTotalFactura();
   }
 
   window.calcularTotalFactura = function() {
@@ -416,6 +465,7 @@
     var total = 0;
     var iva_devuelto = 0;
     var iva_exonerado = 0;
+    var otros_cargos = 0;
     
     $('.item-tabla').each(function(){
       var s = parseFloat($(this).find('.subtotal').val());
@@ -423,7 +473,7 @@
       var t = parseFloat($(this).find('.total').val());
       var tp = parseFloat($(this).find('.tipo_producto').val());
       var ex = parseFloat($(this).find('.montoExoneracion').val());
-
+      if(!ex){ ex = 0; }
       if ($('#medio_pago').val() === '02' && tp === 12) {
           iva_devuelto += m;
       }
@@ -433,12 +483,20 @@
       iva_exonerado += ex;	
     });
     
+    $('.otros-tabla').each(function(){
+      var ot = parseFloat($(this).find('.otros-amount').val());
+      
+      if(!ot){ ot = 0; }
+      otros_cargos += ot;	
+    });
+    
     $('#subtotal').val(subtotal);
     $('#monto_iva').val(monto_iva);
-    $('#total').val(total - iva_devuelto - iva_exonerado);
+    $('#total').val(total - iva_devuelto - iva_exonerado + otros_cargos);
     
     $('#total_iva_devuelto').val(iva_devuelto);
     $('#total_iva_exonerado').val(iva_exonerado);
+    $('#total_otros_cargos').val(otros_cargos);
     
     $('#total_iva_devuelto-cont').hide();
     if(iva_devuelto > 0){
@@ -448,6 +506,11 @@
     $('#total_iva_exonerado-cont').hide();
     if(iva_exonerado > 0){
       $('#total_iva_exonerado-cont').show();
+    }
+    
+    $('#total_otros_cargos-cont').hide();
+    if(otros_cargos > 0){
+      $('#total_otros_cargos-cont').show();
     }
   }
   
@@ -551,6 +614,106 @@
             $('#divImpuestoNeto').attr('hidden', true);
         }
     }
+    
+    
+    window.agregarEditarOtros = function() {
+    
+    //Si esta editando, usa lnum y item_id para identificar la fila.
+    var lnum = $('#otros-lnum').val() ? $('#otros-lnum').val() : '';
+    var otros_id = $('#otros_id').val() ? $('#otros_id').val() : '';
+    
+    var numero = parseInt( $('.otros-tabla:last-of-type').attr('attr-num') ) + 1;
+    var index = parseInt( $('#current-index-otros').val() ) + 1;
+    var document_type = $('#otros-document_type').val();
+    var document_type_string = $('#otros-document_type :selected').text();
+    var provider_id_number = $('#otros-provider_id_number').val();
+    var provider_name = $('#otros-provider_name').val();
+    var description = $('#otros-description').val();
+    var percentage = $('#otros-percentage').val();
+    var amount = $('#otros-amount').val();
+
+    if( !provider_name || !provider_id_number || document_type != "04" ){
+      provider_id_number = "-";
+      provider_name = "N/A";
+    }
+
+    if( !percentage ) {
+      percentage = 10;
+      $('#otros-percentage').val(10);
+    }
+    if( !amount ) {
+      amount = 0;
+      $('#otros-amount').val(0);
+    }
+
+    //Se asegura de que los campos hayan sido llenados
+    if( amount && description ){
+      
+      //Crear el ID de la fila.
+      var itemExistente = false;
+      if( lnum && lnum !== '' ){
+        numero = lnum;
+        itemExistente = $('#otros-tabla-' + numero);
+        index = itemExistente.attr('index');
+        itemExistente.html("");
+      }
+      var row_id  = "otros-tabla-"+numero;
+      
+      var inputFields = "<div class='hidden'>" +
+                   "<input type='hidden' class='otros-item_number' name='otros["+index+"][item_number]' itemname='item_number' value='"+(numero+1)+"'>" +
+                   "<input type='hidden' class='otros_id'  name='otros["+index+"][id]' itemname='id' value='"+otros_id+"'>" +
+                   "<input type='hidden' class='otros-document_type' name='otros["+index+"][document_type]' itemname='document_type' value='"+document_type+"'>" +
+                   "<input type='hidden' class='otros-provider_id_number' name='otros["+index+"][provider_id_number]' itemname='provider_id_number' value='"+provider_id_number+"'>" +
+                   "<input type='hidden' class='otros-provider_name' name='otros["+index+"][provider_name]' itemname='provider_name' value='"+provider_name+"'>" +
+                   "<input type='hidden' class='otros-description' name='otros["+index+"][description]' itemname='description' value='"+description+"'>" +
+                   "<input type='hidden' class='otros-percentage' name='otros["+index+"][percentage]' itemname='percentage' value='"+percentage+"'>" +
+                   "<input type='hidden' class='otros-amount' name='otros["+index+"][amount]' itemname='amount' value='"+amount+"'>" +
+              "</div>";
+
+      //Crea la fila en la tabla
+      var htmlCols = "<td><span class='numero-fila'>"+(numero+1)+"</span> </td>";
+        htmlCols += "<td>"+document_type_string + inputFields + " </td>";
+        htmlCols += "<td>"+provider_id_number+" "+provider_name+" </td>";
+        htmlCols += "<td>"+description+" </td>";
+        htmlCols += "<td>"+ fixComas(amount) +" </td>";
+        htmlCols += "<td class='acciones'><span class='btn-editar-item text-success mr-2' title='Editar otros cargos' onclick='abrirPopup(\"otros-popup\");cargarFormOtros("+index+");'> <i class='fa fa-pencil' aria-hidden='true'></i> </span> <span title='Eliminar otros cargos' onclick='eliminarOtros("+index+");' class='btn-eliminar-item text-danger mr-2'> <i class='fa fa-trash-o' aria-hidden='true'></i> </span> </td>";
+
+      if( !itemExistente ) {
+        var htmlRow = "<tr class='otros-tabla otros-index-"+index+"' index='"+index+"' attr-num='"+numero+"' id='"+row_id+"' > " + htmlCols + "</tr>";
+        $('#tabla-otroscargos-factura tbody').append(htmlRow);
+      }else{
+        itemExistente.append(htmlCols);
+      }
+      
+      $('#tabla-otroscargos-factura').show();
+
+      //Limpia los datos del formulario
+      limpiarFormItem();
+     
+      //Recalcula números para asegurar que no haya vacíos
+      recalcularNumerosItem();
+      
+      //Calcula total de factura
+      calcularTotalFactura();
+      
+      //Aumenta el indice de filas para evitar cualquier conflicto si hubo eliminados. El index nunca debe cambiar ni repetirse, los números pueden cambiar.
+      $('#current-index-otros').val(index);
+      
+      //Si estaba editando, quita la clase
+      $('.otros-factura-form').removeClass('editando');
+
+      cerrarPopup('otros-popup');
+      
+    }else{
+        Swal.fire({
+            type: 'error',
+            title: 'Error',
+            text: 'Por favor, asegúrese que todos los datos sean válidos antes de continuar.'
+        })
+        return false;
+    }
+    
+  }
   
 
 $( document ).ready(function() {
@@ -572,16 +735,6 @@ $( document ).ready(function() {
       togglePorcentajeIdentificacionPlena();
       if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
     });
-  
-    /*$('#tipo_producto').on('change', function(){
-      
-      presetTipoIVA();
-      presetPorcentaje();
-      calcularSubtotalItem();
-      togglePorcentajeIdentificacionPlena();
-      if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
-      
-    });*/
     
     $('#item_iva_amount').on('change', function(){
       calcularConIvaManual();
@@ -594,7 +747,7 @@ $( document ).ready(function() {
     $('#cliente_exento').on('change', function(){
   
       if( $('#cliente_exento:checked').length ){
-        $('#tipo_iva').val('260');
+        $('#tipo_iva').val('S260');
         $('#tipo_iva').prop('readonly', true);
       }else{
         presetTipoIVA();

@@ -11,6 +11,7 @@ use App\CalculatedTax;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class Company extends Model {
 
@@ -128,6 +129,16 @@ class Company extends Model {
     	}
     	
     	return $arrayActividades;
+    }
+    
+    public function clientsForSelect2( $limit = 25000 ){
+        $clients = DB::table('clients')->select(
+          array(
+            'id',
+            DB::raw('CONCAT(id_number, " - ", IFNULL(first_name, ""), " ", IFNULL(last_name, ""), " ", IFNULL(last_name2, "")) AS text')
+          )
+        )->where('company_id', $this->id)->take($limit)->get();
+        return $clients;
     }
 
     /* Changes the current selected company to chosen plan. As long as the plan has available company slots. */

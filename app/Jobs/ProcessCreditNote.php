@@ -105,21 +105,29 @@ class ProcessCreditNote implements ShouldQueue
                                 $save = Storage::put(
                                     $path,
                                     ltrim($response['data']['xmlFirmado'], '\n'));
+                                $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
+                                $saveMH = Storage::put(
+                                    $pathMH,
+                                    ltrim($response['data']['mensajeHacienda'], '\n')
+                                );
                                 if ($save) {
                                     $xml = new XmlHacienda();
                                     $xml->invoice_id = $invoice->id;
                                     $xml->bill_id = 0;
                                     $xml->xml = $path;
+                                    $xml->xml_message = $pathMH;
                                     $xml->save();
                                     if (isset($invoice->client_id)) {
                                         if (!empty($invoice->send_emails)) {
                                             Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new CreditNoteNotificacion([
                                                 'xml' => $path,
+                                                'xml_hacienda' => $pathMH,
                                                 'data_invoice' => $invoice, 'data_company' => $company
                                             ]));
                                         } else {
                                             Mail::to($invoice->client_email)->send(new CreditNoteNotificacion([
                                                 'xml' => $path,
+                                                'xml_hacienda' => $pathMH,
                                                 'data_invoice' => $invoice, 'data_company' => $company
                                             ]));
                                         }

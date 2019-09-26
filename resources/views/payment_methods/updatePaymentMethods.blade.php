@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-    <div class="row">
+    <div class="row form-container">
         <div class="col-xl-9 col-lg-12 col-md-12">
 
             <form method="POST" action="/payment-methods/payment-method-token-update" class="tarjeta">
@@ -32,7 +32,7 @@
 @endsection
 
 @section('breadcrumb-buttons')
-    <button onclick="$('#btn-submit').click();" class="btn btn-primary">Actualizar</button>
+    <button onclick="getCyberData();$('#btn-submit').click();" class="btn btn-primary">Actualizar</button>
     <button onclick="volver();" class="btn btn-primary">Volver</button>
 @endsection
 

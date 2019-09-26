@@ -229,88 +229,24 @@ class ReportsController extends Controller
         $ano = $request->ano ? $request->ano : 2019;
         $mes = $request->mes ? $request->mes : 7;
         $nombreMes = Variables::getMonthName($mes);
-        
-        try{
-          $company = currentCompanyModel();
-          $prorrataOperativa = $company->getProrrataOperativa($ano);
+        $company = currentCompanyModel();
+        $prorrataOperativa = $company->getProrrataOperativa($ano);
 
-          $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
-
-    			$ivaData = json_decode($data->iva_data);
-          $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
-          $arrayActividades = $company->getActivities();
-          
-          if( !$data->book ) {
-            return view('/Reports/no-data', compact('nombreMes') );
-          }
-          
-          $actividadDataArray = array();
-          foreach( $arrayActividades as $act ){
-            $actividadData = array();
-            $actividadData['codigo'] = $act->codigo;
-            $actividadData['titulo'] = $act->actividad;
-            $actividadData['V1'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 1%", "cats"=>[]];
-            $actividadData['V2'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 2%", "cats"=>[]];
-            $actividadData['V4'] =  ["title" => "BIENES Y SERVICIOS AFECTOS AL 4%", "cats"=>[]];
-            $actividadData['V13'] = ["title" => "BIENES Y SERVICIOS AFECTOS AL 13%", "cats"=>[]];
-            $actividadData['BI'] =  ["title" => "TOTAL OTROS DETALLES A INCLUIR EN LA BASE IMPONIBLE", "cats"=>[]];
-            $actividadData['VEX'] = ["title" => "VENTAS EXENTAS", "cats"=>[]];
-            $actividadData['VAS'] = ["title" => "VENTAS AUTORIZADAS SIN IMPUESTO (órdenes especiales y otros transitorios)", "cats"=>[]];
-            $actividadData['VNS'] = ["title" => "VENTAS A NO SUJETOS", "cats"=>[]];
-            $actividadData['CL'] =  ["title" => "Compras de bienes y servicios locales", "cats"=>[]];
-            $actividadData['CI'] =  ["title" => "Importación de bienes y adquisición de servicios del exterior", "cats"=>[]];
-            $actividadData['CE'] =  ["title" => "Bienes y servicios exentos", "cats"=>[]];
-            $actividadData['CNR'] =  ["title" => "Bienes y servicios no relacionados directamente con la actividad", "cats"=>[]];
-            $actividadData['CNS'] =  ["title" => "Bienes y servicios no sujetos", "cats"=>[]];
-            $actividadData['CLI'] =  ["title" => " Bienes y servicios del artículo 19 de la LIVA", "cats"=>[]];
-            $actividadData['COE'] =  ["title" => "Compras autorizadas sin impuesto (órdenes especiales)", "cats"=>[]];
-            
-            foreach( \App\ProductCategory::all() as $cat ) {
-              $tipoID = $cat->id;
-              $varName  = "$act->codigo-type$tipoID";
-        			$varName0 = "$act->codigo-type$tipoID-0";
-        			$varName1 = "$act->codigo-type$tipoID-1";
-        			$varName2 = "$act->codigo-type$tipoID-2";
-        			$varName3 = "$act->codigo-type$tipoID-13";
-        			$varName4 = "$act->codigo-type$tipoID-4";
-        			
-        			$m0 = $ivaData->$varName0 ?? 0;
-        			$m1 = $ivaData->$varName1 ?? 0;
-        			$m2 = $ivaData->$varName2 ?? 0;
-        			$m3 = $ivaData->$varName3 ?? 0;
-        			$m4 = $ivaData->$varName4 ?? 0;
-        			
-        			$info = [
-        			  "name"   => $cat->declaracion_name,
-        			  "monto0" => $m0,
-        			  "monto1" => $m1,
-        			  "monto2" => $m2,
-        			  "monto3" => $m3,
-        			  "monto4" => $m4,
-        			];
-        			
-        			if( ! isset($actividadData[$cat->group]["totales"]) ){
-        			  $actividadData[$cat->group]["totales"] = 0;
-        			}
-        			$actividadData[$cat->group]["totales"] = $actividadData[$cat->group]["totales"] + ($m0+$m1+$m2+$m3+$m4);
-    
-        			//Agrega la información al grupo respectivo.
-        			try{ 
-        			  array_push($actividadData["$cat->group"]["cats"], $info); 
-        			}catch(\Throwable $e){}
-            }
-            array_push( $actividadDataArray, $actividadData );
-          }
+        $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
+        $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
         
-        }catch(\Throwable $e){
+        if( !$data->book ) {
+          return view('/Reports/no-data', compact('nombreMes') );
+        }
+        
+        $dataDeclaracion = $data->calcularDeclaracion($acumulado);
+        
+        if(!$dataDeclaracion){
           $this->forceRecalc($ano);
           return view('/Reports/no-data', compact('nombreMes') );
         }
         
-        return view('/Reports/reporte-borrador-iva', compact('data', 'mes', 'ano', 'nombreMes', 'actividadDataArray', 'acumulado') );
-      
-      
-      
+        return view('/Reports/reporte-borrador-iva', compact('dataDeclaracion') );
     }
     
     public function reporteDetalleDebitoFiscal( Request $request ) {

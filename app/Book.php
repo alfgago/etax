@@ -196,7 +196,7 @@ class Book extends Model
       //Haber 3
         $iva_no_acreditables = $ivaData->iB080 + $ivaData->iB090 + $ivaData->iB097 + $ivaData->i098 + $ivaData->i099 +
                                $ivaData->iS080 + $ivaData->iS090 + $ivaData->iS097 +
-                               $ivaData->bB091 + $ivaData->bB092 + $ivaData->bB093 + $ivaData->bB094 + 
+                               
                                $ivaData->iB091 + $ivaData->iB092 + $ivaData->iB093 + $ivaData->iB094;
       
         $this->cc_ppp_1 = $ivaData->iB011 + $ivaData->iB031 + $ivaData->iB051 + $ivaData->iB071;
@@ -276,12 +276,12 @@ class Book extends Model
         
         if( $this->cc_por_pagar > 0 ) {
             $this->cc_sum2 = $this->cc_ppp_1 + $this->cc_ppp_2 + $this->cc_ppp_3 + $this->cc_ppp_4 + $this->cc_por_pagar
-                             + $this->cc_bs_1 + $this->cc_bs_2 + $this->cc_bs_3 + $this->cc_bs_4;
+                             + $this->cc_bs_1 + $this->cc_bs_2 + $this->cc_bs_3 + $this->cc_bs_4 + $calculos->saldo_favor_anterior;
             $this->cc_sum1 = $this->cc_iva_emitido_1 + $this->cc_iva_emitido_2 + $this->cc_iva_emitido_3 + 
                                   $this->cc_iva_emitido_4 + $this->cc_ajuste_ppp + $this->cc_ajuste_bs + $this->cc_gasto_no_acreditable;
         }else {
             $this->cc_sum2 = $this->cc_ppp_1 + $this->cc_ppp_2 + $this->cc_ppp_3 + $this->cc_ppp_4 
-                             + $this->cc_bs_1 + $this->cc_bs_2 + $this->cc_bs_3 + $this->cc_bs_4;
+                             + $this->cc_bs_1 + $this->cc_bs_2 + $this->cc_bs_3 + $this->cc_bs_4 + $calculos->saldo_favor_anterior;
             $this->cc_sum1 = $this->cc_iva_emitido_1 + $this->cc_iva_emitido_2 + $this->cc_iva_emitido_3 + 
             $this->cc_iva_emitido_4 + $this->cc_ajuste_ppp + $this->cc_ajuste_bs + abs($this->cc_por_pagar) + $this->cc_gasto_no_acreditable;
         }

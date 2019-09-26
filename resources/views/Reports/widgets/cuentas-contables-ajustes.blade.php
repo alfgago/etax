@@ -100,6 +100,12 @@
                 <td>-</td>
               </tr>
               
+              <tr>
+                <th>IVA a favor de periodos anteriores:</td>
+                <td>-</td>
+                <td>  ₡{{ number_format( $data->saldo_favor_anterior, 0 ) }} </td>
+              </tr>
+              
               @if( $data->book->cc_por_pagar > 0)
               <tr>
                 <th>IVA por pagar a Hacienda</td>

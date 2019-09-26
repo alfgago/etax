@@ -47,7 +47,8 @@ class BridgeHaciendaApi
         try {
             $invoiceUtils = new InvoiceUtils();
             $requestDetails = $invoiceUtils->setDetails43($invoice->items);
-            $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
+            $requestOtherCharges = $invoiceUtils->setOtherCharges($invoice->otherCharges);
+            $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails, $requestOtherCharges);
             $company = $invoice->company;
             if ($requestData !== false) {
                 $client = new Client();

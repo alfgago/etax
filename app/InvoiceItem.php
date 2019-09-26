@@ -14,7 +14,7 @@ class InvoiceItem extends Model
     
     protected $guarded = [];
   
-    //Relacion con el cliente
+    //Relacion con la factura
     public function invoice()
     {
         return $this->belongsTo(Invoice::class, 'invoice_id');
@@ -41,6 +41,11 @@ class InvoiceItem extends Model
               $this->iva_type = "B$this->iva_type";
             }
             $this->save();
+        }
+        
+        if( preg_match('/\s/', $this->iva_type) ){
+          $this->iva_type = trim($this->iva_type);
+          $this->save();
         }
 
       }catch(\Throwable $e){

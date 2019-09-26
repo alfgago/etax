@@ -4,7 +4,7 @@
 
     <div class="form-group col-md-12">
       <h3>
-        Linea de factura
+        Línea de factura
       </h3>
     </div>
                 
@@ -29,16 +29,12 @@
         <input type="text" class="form-control" id="nombre" value="" name="description" maxlength="200">
     </div>
 
-    <?php if( @$document_type == "09"){ ?>
-        <div class="form-group col-md-4">
-            <label for="nombre">Partida Arancelaria</label>
-            <input type="text" class="form-control" id="tariff_heading" value="" maxlength="12">
-        </div>
-    <?php
-      $class = 'form-group col-md-8';
-    }else{
-        $class = 'form-group col-md-12';
-    } ?>
+    @if( @$document_type == '09' )
+      <div class="form-group col-md-4">
+          <label for="nombre">Partida Arancelaria</label>
+          <input type="text" class="form-control" id="tariff_heading" value="" maxlength="12">
+      </div>
+    @endif
 
     @if( @$document_type == '08' )
       <div class="form-group col-md-12">
@@ -89,7 +85,11 @@
             <option class="mostrarTodos" value="1">Mostrar Todos</option>
           @else
             @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
-            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select">{{ $tipo['name'] }}</option>
+             @if(@$document_type == '09')
+                <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ $tipo['code'] !== 'B150' ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
+             @else
+                <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select">{{ $tipo['name'] }}</option>
+             @endif
             @endforeach
           @endif
           

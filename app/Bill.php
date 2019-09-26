@@ -110,8 +110,6 @@ class Bill extends Model
       
     }
     
-    
-    
     public function getMetodoPago() {
       
       $str = "Efectivo";
