@@ -607,7 +607,7 @@ class InvoiceController extends Controller
                     $note->generation_method = "etax";
                     $note->reference_number = $company->last_debit_note_ref_number + 1;
                     $note->save();
-                    $noteData = $note->setNoteData($invoice, $request->items, $note->document_type);
+                    $noteData = $note->setNoteData($invoice, $request->items, $note->document_type, $request);
                     if (!empty($noteData)) {
                         $apiHacienda->createCreditNote($noteData, $tokenApi);
                     }
@@ -948,7 +948,7 @@ class InvoiceController extends Controller
                     $note->code_note = $request->code_note ?? "01";
                     $note->reference_number = $company->last_note_ref_number + 1;
                     $note->save();
-                    $noteData = $note->setNoteData($invoice, $request->items, $note->document_type);
+                    $noteData = $note->setNoteData($invoice, $request->items, $note->document_type, $request);
                     if (!empty($noteData)) {
                         $apiHacienda->createCreditNote($noteData, $tokenApi);
                     }
