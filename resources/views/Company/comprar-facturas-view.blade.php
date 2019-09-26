@@ -12,21 +12,14 @@
                 <div class="row">
                     <div class="col-sm-3">
                         <ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                            <li class="active">
-                                <a class="nav-link" aria-selected="false" href="/empresas/editar">Editar perfil de empresa</a>
-                            </li>
-                            <li>
-                                <a class="nav-link" aria-selected="false" href="/empresas/configuracion">Configuración avanzada</a>
-                            </li>
-                            <li>
-                                <a class="nav-link" aria-selected="false" href="/empresas/certificado">Certificado digital</a>
-                            </li>
-                            <li>
-                                <a class="nav-link" aria-selected="false" href="/empresas/equipo">Equipo de trabajo</a>
-                            </li>
-                            <li>
-                                <a class="nav-link active" aria-selected="true" href="/empresas/comprar-facturas-vista">Comprar facturas</a>
-                            </li>
+                            <?php 
+                              $menu = new App\Menu;
+                              $items = $menu->menu('menu_empresas');
+                              foreach ($items as $item) { ?>
+                                <li>
+                                    <a class="nav-link @if($item->link == '/empresas/comprar-facturas-vista') active @endif" aria-selected="false"  style="color: #ffffff;" {{$item->type}}="{{$item->link}}">{{$item->name}}</a>
+                                </li>
+                              <?php } ?>
                         </ul>
                     </div>
                     <div class="col-sm-9">

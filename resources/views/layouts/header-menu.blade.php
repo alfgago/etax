@@ -48,12 +48,13 @@
                     <div class="dropdown-header">
                         <i class="i-Lock-User mr-1"></i> {{Auth::user()->first_name.' '.Auth::user()->last_name.' '.Auth::user()->last_name2}}
                     </div>
-                    <a class="dropdown-item" href="/usuario/perfil">Perfil</a>                     
-                    <a class="dropdown-item" href="/empresas/editar">Configuración de empresa</a>   
-                    <a class="dropdown-item" href="/payments-methods">Gesti&oacute;n de pagos</a>
-                    <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('frm-logout').submit();">
-                        Cerrar sesión
-                    </a>
+                    <?php 
+                    $menu = new App\Menu;
+                    $items = $menu->menu('menu_dropdown_header');
+                    foreach ($items as $item) { ?>
+                        <a class="dropdown-item" {{$item->type}}="{{$item->link}}">{{$item->name}}</a>
+                    <?php } ?>
+                    
                     <form id="frm-logout" action="{{ route('logout') }}" method="POST" style="display: none;">
                         {{ csrf_field() }}
                     </form>
