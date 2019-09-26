@@ -23,5 +23,9 @@ return [
     'klap_app_name' => env('KLAP_APP_NAME', 'ETAX TEST'),
     'klap_app_password' => env('KLAP_APP_PASSWORD', 'ETFTTJUN0619%'),
     'applicationidgs' => env('APPLICATIONIDGS', '39d67874-d18d-4a38-a5b6-c3e6c2bbd1fa'),
-    'queue_connections' => env('QUEUE_CONNECTION', 'redis')
+    'queue_connections' => env('QUEUE_CONNECTION', 'redis'),
+    'merchant_id' => env('MERCHANT_ID', 'tc_cr_011007172'),
+    'cybersource_transaction_key' => env('CYBERSOURCE_TRANSACTION_KEY'),
+    'cybersource_url_wsdl' => env('CYBERSOURCE_URL_WSDL'),
+    'cybersource_url_nvp_wsdl' => env('CYBERSOURCE_URL_NVP_WSDL')
 ];

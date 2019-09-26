@@ -37,6 +37,19 @@
     function volver() {
         window.history.back();
     }
+    fillProvincias();
+    @if( @$company->state )
+        $('#state').val( {{ $company->state }} );
+        fillCantones();
+        @if( @$company->city )
+            $('#city').val( {{ $company->city }} );
+            fillDistritos();
+            @if( @$company->district )
+                $('#district').val( {{ $company->district }} );
+                fillZip();
+            @endif
+        @endif
+    @endif
 </script>
 
 @endsection

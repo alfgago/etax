@@ -16,17 +16,17 @@ class CybsSoapClient extends CybsClient
     {
         //$properties = parse_ini_file('cybs.ini');
         $properties = [
-          "merchant_id" => "tc_cr_011007172",
-          "transaction_key" => "0QGJoZxR+mSbUFwdsNSi5jk+8jhXSW3cxk5aUu1nt7eYhckgji+BDr0JTMmYQK6FmBOvsf5bScbtvxD3HIWiLxg3F7p6mhzN7cUIXeiL7t2u6L280DrhioY1U6f00Po+IJQiLmvOA9LXrV+ozf+Xo4NJatXo5mCZV+3AeU6TTR2w4zNwabGTKA4LwRPEtMSEL+puNfiHb0u9J0KkLxdZ42yHxDje+A4X89PkMTncsI3Yuf/jOZsYkTJnpNYWE+IevgAhMKs6qJeXni63RVhiIrGsZaLrFeTBxUwjXWOJtdG8fKIZkDvFoUaU9S+H3xPff8/ZWe2zOJVaSvDgc6/lJA==",
-          "wsdl" => "https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.120.wsdl",
-          "nvp_wsdl" => "https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_NVP_1.120.wsdl"
+          "merchant_id" => config('etax.merchant_id'),
+          "transaction_key" => config('etax.cybersource_transaction_key'),
+          "wsdl" => config("etax.cybersource_url_wsdl"),
+          "nvp_wsdl" => config("etax.cybersource_url_nvp_wsdl")
         ];
-        
+
         parent::__construct($options, $properties);
     }
 
     /**
-     * Returns a properly formatted request object from a SimpleXMLElement. 
+     * Returns a properly formatted request object from a SimpleXMLElement.
      *
      * @param SimpleXMLElement $simpleXml Representation of an XML structure
      * @return stdClass A request with the data from the SimpleXMLElement.
@@ -56,7 +56,7 @@ class CybsSoapClient extends CybsClient
                     foreach($array as $k => $value) {
                         $newArray[$k] = $this->simpleXmlToCybsRequest($value);
                     }
-                    $request->$key = $newArray; 
+                    $request->$key = $newArray;
                 }
             } else if ($element instanceof SimpleXMLElement) {
                 $request->$key = $this->simpleXmlToCybsRequest($element);
@@ -87,7 +87,7 @@ class CybsSoapClient extends CybsClient
      *
      * @param string $filePath The path to the XML file
      * @param string $merchantReferenceCode Desired reference code for the request
-     * @return stdClass An object representation of the transaction response.     
+     * @return stdClass An object representation of the transaction response.
      */
     public function runTransactionFromXml($xml, $merchantReferenceCode)
     {
@@ -103,7 +103,7 @@ class CybsSoapClient extends CybsClient
      *
      * @param string $filePath The path to the XML file
      * @param string $merchantReferenceCode Desired reference code for the request
-     * @return stdClass An object representation of the transaction response.     
+     * @return stdClass An object representation of the transaction response.
      */
     public function runTransactionFromFile($filePath, $merchantReferenceCode)
     {
