@@ -156,7 +156,7 @@ class CybersourcePaymentProcessor extends PaymentProcessor
                 'name' => $request->first_name_card,
                 'last_name' => $request->last_name_card,
                 'last_4digits' => $last_4digits,
-                'masked_card' => $paymentGateway->getMaskedCard($request->number),
+                'masked_card' => $this->getMaskedCard($request->number),
                 'due_date' => $request->expiry,
                 'token_bn' => $reply->paySubscriptionCreateReply->subscriptionID,
                 'default_card' => 1,
@@ -267,13 +267,15 @@ class CybersourcePaymentProcessor extends PaymentProcessor
 
         return $reply;
     }
+    
     /**
      * Payment creation
      * Params saleId, paymentMethodId, amount, description, user_name
      * Requesting an On-Demand Transaction, Payment_Tokenization_SO_API.pdf, page 37
      */
     public function createPayment($request){
-        $merchantId = 'tc_cr_011007172';
+        return false;
+        /*$merchantId = 'tc_cr_011007172';
         $client = new CybsSoapClient();
         $requestClient = $client->createRequest($request->referenceCode);
         $requestClient->ID = $merchantId;
@@ -298,8 +300,9 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $requestClient->merchantId = $merchantId;
         $requestClient->deviceFingerprintID = $request->deviceFingerPrintID;
 
-        return $client->runTransaction($requestClient);
+        return $client->runTransaction($requestClient);*/
     }
+    
     /**
      * Make payment
      * Params referenceCode, deviceFingerPrintID, subscriptionID, Amount
@@ -329,7 +332,13 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $requestClient->purchaseTotals = $purchaseTotals;
         $requestClient->merchantId = $merchantId;
 
-        return $client->runTransaction($requestClient);
+        $appliedCharge = $client->runTransaction($requestClient);
+        
+        if($appliedCharge->decision == 'ACCEPT'){
+            $appliedChargeId = $appliedCharge->requestID;
+            return $appliedChargeId;
+        }
+        return false;
     }
     /**
      *Buy Products
@@ -467,6 +476,15 @@ class CybersourcePaymentProcessor extends PaymentProcessor
 
         return $delatedCard == true;
     }
+    
+    public function getChargeProof($chargeIncluded){
+        if($chargeIncluded->decision == 'ACCEPT'){
+            $appliedCharge_Id = $chargeIncluded->requestID;
+        }else{
+            return false;
+        }
+    }
+    
     /**
      *crearFacturaClienteEtax
      *

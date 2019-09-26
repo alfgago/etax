@@ -108,6 +108,11 @@ class PaymentProcessor extends Model
     public function deletePaymentMethod($data){
         return true;
     }
+    
+    public function getChargeProof($chargeIncluded){
+        
+    }
+    
     /**
      *check_cc
      *
@@ -343,7 +348,7 @@ class PaymentProcessor extends Model
                 clearInvoiceCache($invoice);
 
             }catch(\Throwable $e){
-                Log::error('Error al crear factura de compra eTax. ' . $e->getMessage() );
+                Log::error('Error al crear factura de compra eTax. ' . $e );
             }
 
             Log::info( 'Factura de suscripción exitosa.' );

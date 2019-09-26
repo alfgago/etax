@@ -151,7 +151,7 @@ class PaymentController extends Controller
             $availableCompanies = $plan->num_companies;
             $availableCompanies += -1 ;
 
-            if($activeCompanies >  $availableCompanies  ){
+            if($activeCompanies > $availableCompanies){
                 $companies = Company::where('user_id',$user_id)->where('id','!=',$company->id)->where('status',1)->get();
                 foreach ($companies as $company) {
                     $availableCompanies += -1 ;
@@ -163,7 +163,7 @@ class PaymentController extends Controller
 
                 }
                 $availableCompanies = $plan->num_companies;
-                return view('payment.companySelect')->with('companies',$companies)->with('companies_puedo',$availableCompanies);
+                return view('payment.companySelect')->with('companies',$companies)->with('companies_puedo',$availableCompanies)->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
             }
         }catch(\Throwable $e){
             Log::error($e->getMessage());
@@ -390,15 +390,15 @@ class PaymentController extends Controller
 
             //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
             if( ! isset($payment->charge_token) ) {
-                $chargeIncluded = $paymentGateway->pay($request);
-                
-                if($chargeIncluded->ccCaptureReply->reasonCode == 100){
-                    $payment->charge_token = $chargeIncluded->ccAuthReply->reconciliationID;
+                $chargeProof = $paymentGateway->pay($request);
+                //dd($chargeIncluded);
+                if($chargeProof){
+                    $payment->charge_token = $chargeProof;
                     $payment->save();
                 }
             }
             
-            if ( $payment->charge_token ) {
+            if ( $chargeProof ) {
                 $payment->proof = $payment->charge_token;
                 $payment->payment_status = 2;
                 $payment->save();
@@ -413,7 +413,8 @@ class PaymentController extends Controller
                 $factura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
                 if($factura){
                     $this->facturasDisponibles();
-                    return $this->companyDisponible();
+                    return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+                    //return $this->companyDisponible();
                 }else{
                     $mensaje = 'El pago fue realizado, pero hubo un error al generar su factura. Por favor contacte a soporte para más información.';
                     return redirect('/')->withError($mensaje)->withInput();
@@ -424,7 +425,7 @@ class PaymentController extends Controller
             return redirect()->back()->withError($mensaje)->withInput();
 
         }catch( \Throwable $e ){
-            Log::error( "Error en suscripciones ". $e->getMessage() );
+            Log::error( "Error en suscripciones ". $e );
             return redirect()->back()->withError("Hubo un error al realizar la suscripción. Por favor reintente o contacte a soporte.")->withInput();
         }
 
