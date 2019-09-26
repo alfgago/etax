@@ -174,7 +174,7 @@ window.companyChange = function($redirect = false) {
         }
     });
     jQuery.ajax({
-        url: "/change-company", 
+        url: "/change-company",
         method: 'post',
         data: {
             companyId: sel
@@ -265,31 +265,35 @@ window.getCyberData = function(){
     x.setAttribute("value", cybs_dfprofiler("tc_cr_011007172","test"));
     //$("#deviceFingerPrintID").val(cybs_dfprofiler("tc_cr_011007172","test"));
     $('.tarjeta').append(x);
-    
+
     var state = $( "#state option:selected" ).text();
-    if(state.length > 40){
-        state = state.substring(0, 40);
+    if(state){
+        if(state.length > 40){
+            state = state.substring(0, 40);
+        }
+        $('#cardState').val(state);
     }
-    $('#cardState').val(state);
-    
+
     var city = $( "#city option:selected" ).text();
-    if(city.length > 40){
-        city = city.substring(0, 40);
+    if(city){
+        if(city.length > 40){
+            city = city.substring(0, 40);
+        }
+        $('#cardCity').val(city);
     }
-    $('#cardCity').val(city);
-    
+
     var address = $('#address').val();
     if(address.length > 40){
         address = address.substring(0, 40);
     }
-    
+
     $('#address1').val(address);
     var neighborhood = $( "#neighborhood" ).val();
     if(neighborhood.length > 40){
         neighborhood = neighborhood.substring(0, 40);
     }
     $('#street1').val(neighborhood);
-    
+
 }
 
 $(document).ready(function() {

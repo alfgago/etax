@@ -24,6 +24,7 @@
         "webpack-cli": "^3.3.5"
     },
     "dependencies": {
-        "card": "^2.4.0"
+        "card": "^2.4.0",
+        "cross-env": "^6.0.0"
     }
 }

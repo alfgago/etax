@@ -38,13 +38,21 @@
                     <label for="last_name">Apellido:</label>
                     <input type="text" inputmode="text" class="form-control checkEmpty" name="last_name_card" id="last_name_card" placeholder="Apellido:" required>
                 </div>
-                <div class="form-group col-md-12" style="white-space: nowrap;">
-                    <label for="street1">Ciudad:</label>
-                    <input type="text" inputmode="text" class="form-control checkEmpty" name="street1" id="street1" placeholder="Ciudad:" maxlength="40" required>
+                <div class="form-group col-md-6" style="white-space: nowrap;">
+                    <label for="cardState">Estado:</label>
+                    <input type="text" inputmode="text" class="form-control checkEmpty" name="cardState" id="cardState" placeholder="Estado:" maxlength="40" required>
                 </div>
-                <div class="form-group col-md-12" style="white-space: nowrap;">
-                    <label for="address1">Dirección:</label>
-                    <input type="text" inputmode="text" class="form-control checkEmpty" name="address1" id="address1" placeholder="Dirección:" maxlength="40" required>
+                <div class="form-group col-md-6" style="white-space: nowrap;">
+                    <label for="cardCity">Ciudad:</label>
+                    <input type="text" inputmode="text" class="form-control checkEmpty" name="cardCity" id="cardCity" placeholder="Ciudad:" maxlength="40" required>
+                </div>
+                <div class="form-group col-md-6" style="white-space: nowrap;">
+                    <label for="street1">Dirección:</label>
+                    <input type="text" inputmode="text" class="form-control checkEmpty" name="street1" id="neighborhood" placeholder="Dirección:" maxlength="40" required>
+                </div>
+                <div class="form-group col-md-6" style="white-space: nowrap;">
+                    <label for="address1">Calle:</label>
+                    <input type="text" inputmode="text" class="form-control checkEmpty" name="address1" id="address" placeholder="Calle:" maxlength="40" required>
                 </div>
 
                 <input type="text" hidden id="cardMonth" name="cardMonth">
@@ -76,7 +84,6 @@
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.min.js"></script>
-<!--script src="../assets/js/cybs_devicefingerprint.js"></script-->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.css" />
 <script type="text/javascript">
     var card = new Card({

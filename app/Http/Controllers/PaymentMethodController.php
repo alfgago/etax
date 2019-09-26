@@ -86,9 +86,8 @@ class PaymentMethodController extends Controller
             $request->request->add(['zip' => $user->zip]);
             $request->request->add(['email' => $user->email]);
             $request->request->add(['user_id' => $user->id]);
-            //dd($request);
-            $newCard = $payment_gateway->createTokenWithoutFee($request);
 
+            $newCard = $payment_gateway->createCardToken($request);
             if ($newCard->decision === 'ACCEPT') {
                 $paymentMethod = PaymentMethod::create([
                     'user_id' => $user->id,
