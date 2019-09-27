@@ -263,7 +263,7 @@ class PaymentController extends Controller
                 $monthly_price += $total_extras;
                 $six_price += $total_extras;
                 $annual_price += $total_extras;
-                
+
                 $plan = SubscriptionPlan::updateOrCreate(
                     [
                         'plan_tier' => $plan_tier
@@ -317,6 +317,7 @@ class PaymentController extends Controller
                 }
             }
             $request->razonDescuento = $razonDescuento ?? null;
+            $discountReason = $razonDescuento ?? null;
             //Crea/actualiza el sale de suscripción
             $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
 
@@ -364,14 +365,17 @@ class PaymentController extends Controller
 
             $request->request->add(['referenceCode' => $request->product_id]);
             $request->request->add(['amount' => $amount]);
+            $request->request->add(['subtotal' => $subtotal]);
             $request->request->add(['iva_amount' => $iv]);
+            $request->request->add(['montoDescontado' => $montoDescontado]);
+            $request->request->add(['discount_reason' => $discountReason]);
 
             $cardData = $paymentGateway->getCardNameType($request->number);
             $request->request->add(['cardType' => $cardData->type]);
 
             //Agrega la tarjeta. Retorna el paymentMethod
             $paymentMethod = $paymentGateway->createCardToken($request);
-            
+
             $payment = Payment::updateOrCreate(
                 [
                     'sale_id' => $sale->id,
@@ -396,7 +400,7 @@ class PaymentController extends Controller
                     $payment->save();
                 }
             }
-            
+
             if ( $chargeProof ) {
                 $payment->proof = $payment->charge_token;
                 $payment->payment_status = 2;
@@ -419,7 +423,7 @@ class PaymentController extends Controller
                     return redirect('/')->withError($mensaje)->withInput();
                 }
             }
-            
+
             $mensaje = 'El pago ha sido denegado';
             return redirect()->back()->withError($mensaje)->withInput();
 
