@@ -202,8 +202,15 @@ class KlapPaymentProcessor extends PaymentProcessor
             'verify' => false,
         ]);
         $charge = json_decode($chargeBn->getBody()->getContents(), true);
+        
+        if($appliedCharge['apiStatus'] == "Successful"){
+            $paymentAccepted = true;
+            $appliedChargeId = $appliedCharge['retrievalRefNo'];
+        }else{
+            return false;
+        }
 
-        return $charge['apiStatus'] === "Successful";
+        //return $charge['apiStatus'] === "Successful";
     }
     /**
      *comprarProductos
@@ -398,4 +405,13 @@ class KlapPaymentProcessor extends PaymentProcessor
 
         return $delatedCard == true;
     }
+    
+    public function getChargeProof($chargeIncluded){
+        if($chargeIncluded['apiStatus'] == "Successful"){
+            $appliedCharge_Id = $chargeIncluded['retrievalRefNo'];
+        }else{
+            return false;
+        }
+    }
+    
 }

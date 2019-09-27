@@ -40,6 +40,8 @@
                     <input type="text" inputmode="text" class="form-control checkEmpty" value="{{$paymentMethod->last_name}}" name="last_name_card" id="last_name_card" placeholder="Apellido tarjeta-habiente:" required>
                 </div>
             </div>
+            <input type="text" hidden id="neighborhood" name="neighborhood">
+            <input type="text" hidden id="address" name="address">
             <div class="btn-holder">
                 <h6>Nota: Los datos sensibles de su tarjeta no se guardar&aacute;n en nuestra base de datos, ser&aacute;n utilizados solamente para procesar sus pagos</h6>
             </div>

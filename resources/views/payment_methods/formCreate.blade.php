@@ -38,17 +38,37 @@
                     <label for="last_name">Apellido:</label>
                     <input type="text" inputmode="text" class="form-control checkEmpty" name="last_name_card" id="last_name_card" placeholder="Apellido:" required>
                 </div>
-                <div class="form-group col-md-12" style="white-space: nowrap;">
-                    <label for="street1">Ciudad:</label>
-                    <input type="text" inputmode="text" class="form-control checkEmpty" name="street1" id="street1" placeholder="Ciudad:" maxlength="40" required>
+                <div class="form-group col-md-6">
+                    <label for="state">Provincia</label>
+                    <select class="form-control checkEmpty" name="state" id="state" onchange="fillCantones();" required>
+                    </select>
                 </div>
-                <div class="form-group col-md-12" style="white-space: nowrap;">
-                    <label for="address1">Dirección:</label>
-                    <input type="text" inputmode="text" class="form-control checkEmpty" name="address1" id="address1" placeholder="Dirección:" maxlength="40" required>
+                <div class="form-group col-md-6">
+                    <label for="city">Canton</label>
+                    <select class="form-control checkEmpty" name="city" id="city" onchange="fillDistritos();" required>
+                    </select>
                 </div>
-
+                <div class="form-group col-md-6">
+                    <label for="district">Distrito</label>
+                    <select class="form-control checkEmpty" name="district" id="district" onchange="fillZip();" required>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="neighborhood">Barrio</label>
+                    <input class="form-control" name="neighborhood" id="neighborhood" value="{{ @$company->neighborhood }}" required>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="zip">Código Postal</label>
+                    <input type="text" class="form-control" name="zip" id="zip" readonly >
+                </div>
                 <input type="text" hidden id="cardMonth" name="cardMonth">
                 <input type="text" hidden id="cardYear" name="cardYear">
+                <input type="text" hidden id="cardState" name="cardState">
+                <input type="text" hidden id="cardCity" name="cardCity">
+                <input type="text" hidden id="street1" name="street1">
+                <input type="text" hidden id="address1" name="address1">
+                <input type="text" hidden id="address" name="address">
                 <div class="btn-holder">
                     <div class="description">Nota: Los datos sensibles de su tarjeta no se guardar&aacute;n en nuestra base de datos, ser&aacute;n utilizados solamente para procesar sus pagos</div>
                     <p id="alertCardValid" class="alertCardValid"></p>
@@ -76,7 +96,6 @@
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.min.js"></script>
-<!--script src="../assets/js/cybs_devicefingerprint.js"></script-->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.css" />
 <script type="text/javascript">
     var card = new Card({
