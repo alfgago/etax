@@ -368,7 +368,7 @@ class PaymentController extends Controller
             $request->request->add(['subtotal' => $subtotal]);
             $request->request->add(['iva_amount' => $iv]);
             $request->request->add(['montoDescontado' => $montoDescontado]);
-            $request->request->add(['discount_reason' => $discountReason]);
+            $request->request->add(['razonDescuento' => $discountReason]);
 
             $cardData = $paymentGateway->getCardNameType($request->number);
             $request->request->add(['cardType' => $cardData->type]);
@@ -410,6 +410,7 @@ class PaymentController extends Controller
                 $sale->next_payment_date = $nextPaymentDate;
                 $sale->save();
 
+                $request->request->add(['item_code' => $subscriptionPlan->id]);
                 $request->request->add(['item_name' => $sale->plan->getName() . " / $recurrency meses"]);
 
                 $invoiceData = $paymentGateway->setInvoiceInfo($request);
