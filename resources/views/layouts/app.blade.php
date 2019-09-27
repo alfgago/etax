@@ -24,15 +24,16 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css" />
     <link href="https://unpkg.com/dropzone/dist/dropzone.css" rel="stylesheet"/>
 
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=6.17">
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=6.17"></script>
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=6.19">
+    
+    <script src="/assets/js/cybs_devicefingerprint.js"></script>
+    <script src="{{asset('assets/js/common-bundle.js')}}?v=6.19"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
 
     @yield('header-scripts')
 
     <style>
-          
     </style>
 
 </head>
@@ -53,9 +54,9 @@
                 @yield('breadcrumb-buttons')
               </div>
           </div>
-          
+
           <div class="separator-breadcrumb border-top"></div>
-          
+
           @yield('content')
 
            @include('layouts.footer')
@@ -68,7 +69,7 @@
     <script src="/assets/js/ubicacion.js"></script>
     <script src="/assets/js/vendor/tagging.min.js"></script>
     <script src="{{asset('assets/js/es5/script.js')}}"></script>
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/3.4.1/tippy.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/js/jquery.dataTables.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/js/dataTables.bootstrap4.min.js"></script>
@@ -84,13 +85,13 @@
           toastr.success( "{{ session()->get('message') }}" );
         </script>
     @endif
-    
+
     @if( session()->has('error') )
         <script>
           toastr.error( "{{ session()->get('error') }}" );
         </script>
     @endif
-    
+
     @if (count($errors) > 0)
       <script>
         @foreach ($errors->all() as $error)
@@ -98,11 +99,11 @@
         @endforeach
       </script>
     @endif
-  
+
     @yield('header-scripts')
 
     @yield('footer-scripts')
-    
+
     @include( 'Bill.import' )
     @include( 'Invoice.import' )
     @include( 'Client.import' )
@@ -112,7 +113,7 @@
 
     @include('layouts.helper-terms')
     @include('layouts.bootstrap-modal')
-    
+
     <!-- Global site tag (gtag.js) - Google Analytics -->
       <script async src="https://www.googletagmanager.com/gtag/js?id=UA-134999499-1"></script>
       <script>
@@ -122,7 +123,7 @@
 
         gtag('config', 'UA-134999499-1');
       </script>
-      
+
       <!-- Facebook Pixel Code -->
       <script>
       !function(f,b,e,v,n,t,s)
@@ -133,11 +134,11 @@
       t.src=v;s=b.getElementsByTagName(e)[0];
       s.parentNode.insertBefore(t,s)}(window,document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');;
-       fbq('init', '2079941852310831'); 
+       fbq('init', '2079941852310831');
       fbq('track', 'PageView');
       </script>
       <noscript>
-       <img height="1" width="1" 
+       <img height="1" width="1"
       src="https://www.facebook.com/tr?id=2079941852310831&ev=PageView
       &noscript=1"/>
       </noscript>
@@ -163,7 +164,7 @@
             location.href = "mailto:soporte@etaxcr.com?subject=Solicitud de Soporte&body=Agradezco la ayuda con el siguiente requerimiento:";
         }
     </script>
-    
+
 </body>
 
 </html>

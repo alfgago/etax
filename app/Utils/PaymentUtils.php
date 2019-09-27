@@ -40,8 +40,7 @@ class PaymentUtils
       $bnStatus = json_decode($APIStatus->getBody()->getContents(), true);
       return $bnStatus;
   	}
-    
-    
+
     public function checkCC($cc, $extra_check = false){
         $cards = array(
             "visa" => "(4\d{12}(?:\d{3})?)",
@@ -56,12 +55,10 @@ class PaymentUtils
         $matches = array();
         $pattern = "#^(?:".implode("|", $cards).")$#";
         $result = preg_match($pattern, str_replace(" ", "", $cc), $matches);
-        /*if($extra_check && $result > 0){
-            $result = (validatecard($cc))?1:0;
-        }*/
+
         return ($result>0) ? $names[ sizeof($matches)-2 ] : false;
     }
-    
+
     public function userCardInclusion($number, $cardDescripcion, $cardMonth, $cardYear, $cvc){
         $user = auth()->user();
         $cardBn = new Client();
@@ -124,7 +121,7 @@ class PaymentUtils
                     "status" => 2,
                     "recurrency" => false
                 ]);
-                
+
                 $payment = Payment::updateOrCreate(
                     [
                         'sale_id' => $sale->id,
@@ -144,7 +141,7 @@ class PaymentUtils
                     $payment->charge_token = $chargeTokenId;
                     $payment->save();
                 }
-                
+
                 $chargeTokenId = $chargeCreated['chargeTokenId'];
                 $charge = new stdClass();
                 $charge->cardTokenId = $paymentMethod->token_bn;
@@ -196,7 +193,7 @@ class PaymentUtils
 
         return $key;
     }
-    
+
     public function paymentIncludeCharge($request){
         $appCharge = new Client();
         $appChargeBn = $appCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppIncludeCharge?applicationName=string&applicationPassword=string&chargeDescription=string&userName=string&transactionCurrency=string&transactionAmount=double", [
@@ -235,7 +232,7 @@ class PaymentUtils
         $charge = json_decode($chargeBn->getBody()->getContents(), true);
         return $charge;
     }
-    
+
     public function paymentApplyCharge($request){
         $bnCharge = new Client();
         $chargeBn = $bnCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppApplyCharge?applicationName=string&applicationPassword=string&userName=string&chargeTokeId=string&cardTokenId=string", [
@@ -272,7 +269,7 @@ class PaymentUtils
         $charges = json_decode($userRequestCharges->getBody()->getContents(), true);
         return $charges;
     }
-    
+
     public function crearFacturaClienteEtax($invoiceData){
         $apiHacienda = new BridgeHaciendaApi();
         $tokenApi = $apiHacienda->login(false);
@@ -305,7 +302,7 @@ class PaymentUtils
             $data->codigo_cliente = $invoiceData->client_code;
             $data->code = $invoiceData->client_code;
             $data->id_number = $invoiceData->client_id_number;
-            
+
             $data->commercial_activity = 722003;
 
             $data->client_code = $invoiceData->client_id_number;
@@ -365,10 +362,10 @@ class PaymentUtils
             $item['is_exempt'] = 0;
 
             $data->items = [ $item ];
-            
+
             try{
                 $invoiceDataSent = $invoice->setInvoiceData($data);
-                
+
                 Log::info('Suscriptor: '. $data->client_id_number . ", Nombre: " . $data->first_name . " " . $data->last_name . " " . $data->last_name2 . ", Plan:" . $invoiceData->items[0]->name );
                 if ( !empty($invoiceDataSent) ) {
                     $invoice = $apiHacienda->createInvoice($invoiceDataSent, $tokenApi);
@@ -377,7 +374,7 @@ class PaymentUtils
                 $company->last_document = $invoice->document_number;
                 $company->save();
                 clearInvoiceCache($invoice);
-                
+
             }catch(\Throwable $e){
                 Log::error('Error al crear factura de compra eTax. ' . $e->getMessage() );
             }
@@ -388,5 +385,5 @@ class PaymentUtils
             return false;
         }
     }
-	
+
 }

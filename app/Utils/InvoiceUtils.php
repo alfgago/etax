@@ -309,7 +309,27 @@ class InvoiceUtils
         }
     }
 
-    public function setInvoiceData43( Invoice $data, $details, $returnRequest = true ) {
+    public function setOtherCharges($data) {
+        try {
+            $details = [];
+            foreach ($data as $key => $value) {
+                    $details[$key] = array(
+                        'tipodocumento' => $value['document_type'] ?? '',
+                        'numeroidentidadtercero' => $value['provider_id_number'] ?? '',
+                        'nombretercero' => $value['provider_name'] ?? '',
+                        'detalle' => $value['description'] ?? '',
+                        'porcentaje' => $value['percentage'] ?? '',
+                        'montocargo' => $value['amount'] ?? 0
+                );
+            }
+            return json_encode($details, true);
+        } catch (\Exception $error) {
+            Log::error('Error al crear otros cargos request -->>'. $error->getMessage() );
+            return false;
+        }
+    }
+
+    public function setInvoiceData43( Invoice $data, $details, $otherCharges = false, $returnRequest = true ) {
         try {
             $provider = null;
             $company = $data->company;
@@ -458,11 +478,16 @@ class InvoiceUtils
                 'totventaneta' => $totalNeta,
                 'totimpuestos' => $totalImpuestos,
                 'totalivadevuelto' => $totalIvaDevuelto,
-                'totcomprobante' => $totalComprobante - $totalIvaDevuelto,
-                'detalle' => $details
+                'totalotroscargos' => $data['total_otros_cargos'] ?? 0,
+                'totcomprobante' => $totalComprobante + $data['total_otros_cargos'] - $totalIvaDevuelto,
+                'detalle' => $details,
             );
 
-            if ($data['document_type'] == ('03' || '02')) {
+            if ($otherCharges !== false) {
+                $invoiceData['otroscargos'] = $otherCharges;
+            }
+
+            if ($data['document_type'] == '03' || $data['document_type'] == '02') {
                 $invoiceData['referencia_doc_type'] = $data['reference_doc_type'];
                 $invoiceData['referencia_codigo'] = $data['code_note'] ?? "01";
                 $invoiceData['referencia_razon'] = $data['reason'] ?? 'Anular Factura';

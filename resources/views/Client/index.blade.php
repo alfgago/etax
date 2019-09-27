@@ -4,9 +4,12 @@
   Clientes
 @endsection
 
-@section('breadcrumb-buttons')
-      <a type="submit" class="btn btn-primary" href="/clientes/create">Ingresar cliente nuevo</a>
-      <div onclick="abrirPopup('importar-clientes-popup');" class="btn btn-primary">Importar clientes</div>
+@section('breadcrumb-buttons') <?php 
+  $menu = new App\Menu;
+  $items = $menu->menu('menu_clientes');
+  foreach ($items as $item) { ?>
+    <a class="btn btn-primary" style="color: #ffffff;" {{$item->type}}="{{$item->link}}">{{$item->name}}</a>
+  <?php } ?>
 @endsection 
 
 

@@ -97,8 +97,12 @@
         <option value="1" >Sí</option>
     </select>
 </div>
-
+<input hidden id="cardState" name="cardState">
+<input hidden id="cardCity" name="cardCity">
+<input hidden id="address1" name="address1">
+<input hidden id="street1" name="street1">
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-prev" onclick="backFields();toggleStep('step1');">Paso anterior</button>
   <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step3');"  onclick="trackClickEvent( 'PagosPaso3' );">Siguiente paso</button>
 </div>
+

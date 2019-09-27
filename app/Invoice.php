@@ -348,7 +348,9 @@ class Invoice extends Model
                   }
               }
               $this->total_otros_cargos = $totalOtrosCargos;
-            }catch(\Exception $e){}
+            }catch(\Exception $e){
+                Log::error("Error al guardar otros cargos");
+            }
             
             //Guarda nuevamente el invoice
             $this->save();

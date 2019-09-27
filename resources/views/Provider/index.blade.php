@@ -4,9 +4,13 @@
   Proveedores
 @endsection
 
-@section('breadcrumb-buttons')        
-      <a type="submit" class="btn btn-primary" href="/proveedores/create">Ingresar proveedor nuevo</a>
-      <div onclick="abrirPopup('importar-proveedores-popup');" class="btn btn-primary">Importar proveedores</div>
+@section('breadcrumb-buttons')   
+ <?php 
+  $menu = new App\Menu;
+  $items = $menu->menu('menu_proveedores');
+  foreach ($items as $item) { ?>
+    <a class="btn btn-primary" style="color: #ffffff;" {{$item->type}}="{{$item->link}}">{{$item->name}}</a>
+  <?php } ?>     
 @endsection 
 
 @section('content') 

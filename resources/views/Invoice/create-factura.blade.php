@@ -57,7 +57,7 @@ $company = currentCompanyModel();
                     <div class="form-group col-md-12 with-button">
                       <label for="cliente">Seleccione el cliente</label>
                       
-                      @if( count(currentCompanyModel()->clients) < 4000 )
+                      @if( count(currentCompanyModel()->clients) < 400000 )
                         <select class="form-control select-search" name="client_id" id="client_id" placeholder="" @if(@$document_type !== '04') required @endif>
                           <option value='' selected>-- Seleccione un cliente --</option>
                           @foreach ( currentCompanyModel()->clients as $cliente )
