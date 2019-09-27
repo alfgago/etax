@@ -263,8 +263,7 @@ class PaymentController extends Controller
                 $monthly_price += $total_extras;
                 $six_price += $total_extras;
                 $annual_price += $total_extras;
-                $six_price = $six_price * 6;
-                $annual_price = $annual_price * 12;
+                
                 $plan = SubscriptionPlan::updateOrCreate(
                     [
                         'plan_tier' => $plan_tier
