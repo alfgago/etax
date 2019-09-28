@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\LogActivityHandler as Activity;
 use Mpociot\Teamwork\Facades\Teamwork;
 
 class InviteController extends Controller {
@@ -44,6 +45,16 @@ class InviteController extends Controller {
             return redirect()->back()->withError('Usted no está autorizado para eliminar invitaciones');
         }
         
+            $user = auth()->user();
+              Activity::dispatch(
+                  $user,
+                  $invite,
+                  [
+                      'company_id' => $invite->company_id
+                  ],
+                  "La invitación ha sido eliminada satisfactoriamente."
+              )->onConnection(config('etax.queue_connections'))
+              ->onQueue('log_queue');
         $invite->delete();
         
         return redirect('/empresas/equipo')->withMessage('La invitación ha sido eliminada satisfactoriamente.');

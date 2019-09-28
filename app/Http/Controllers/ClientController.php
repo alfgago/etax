@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\LogActivityHandler as Activity;
 use \Carbon\Carbon;
 use App\Company;
 use App\Client;
@@ -136,6 +137,17 @@ class ClientController extends Controller
       
         $cliente->save();
       
+        $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $cliente,
+            [
+                'company_id' => $cliente->company_id,
+                'id' => $cliente->id
+            ],
+            "Cliente creado."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return redirect('/clientes')->withMessage('Cliente creado');
     }
 
@@ -212,7 +224,17 @@ class ClientController extends Controller
         $cliente->fullname = $cliente->toString();
       
         $cliente->save();
-      
+      $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $cliente,
+            [
+                'company_id' => $cliente->company_id,
+                'id' => $cliente->id
+            ],
+            "Cliente actualizado."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return redirect('/clientes')->withMessage('Cliente actualizado');
     }
 
@@ -228,6 +250,17 @@ class ClientController extends Controller
         $this->authorize('update', $cliente);
         $cliente->delete();
         
+      $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $cliente,
+            [
+                'company_id' => $cliente->company_id,
+                'id' => $cliente->id
+            ],
+            "Cliente eliminado."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return redirect('/clientes')->withMessage('Cliente eliminado');
     }
     
@@ -272,7 +305,7 @@ class ClientController extends Controller
             $correosCopia = str_replace(";", ",", $correosCopia);
             
             
-            Client::updateOrCreate(
+            $cliente = Client::updateOrCreate(
                 [
                     'id_number' => $row['identificacion'],
                     'company_id' => $company_id,
@@ -301,7 +334,19 @@ class ClientController extends Controller
                     'emisor_receptor' => $row['emisorreceptor']
                 ]
             );
-            
+
+          $user = auth()->user();
+          Activity::dispatch(
+              $user,
+              $cliente,
+              [
+                  'company_id' => $cliente->company_id,
+                  'id' => $cliente->id
+              ],
+              "Cliente creado por excel."
+          )->onConnection(config('etax.queue_connections'))
+          ->onQueue('log_queue');
+              
         }
         $time_end = getMicrotime();
         $time = $time_end - $time_start;
@@ -322,7 +367,18 @@ class ClientController extends Controller
             return 404;
         }
         $rest->restore();
-        
+        $user = auth()->user();
+          Activity::dispatch(
+              $user,
+              $rest,
+              [
+                  'company_id' => $rest->company_id,
+                  'id' => $rest->id
+              ],
+              "El cliente ha sido restaurado satisfactoriamente."
+          )->onConnection(config('etax.queue_connections'))
+          ->onQueue('log_queue');
+              
         return redirect('/clientes')->withMessage('El cliente ha sido restaurado satisfactoriamente.');
     }   
     

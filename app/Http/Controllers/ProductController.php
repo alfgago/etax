@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\LogActivityHandler as Activity;
 use App\Company;
 use App\Imports\ProductImport;
 use App\Product;
@@ -113,6 +114,17 @@ class ProductController extends Controller
       
         $product->save();
       
+        $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $product,
+            [
+                'company_id' => $product->company_id,
+                'id' => $product->id
+            ],
+            "El producto ha sido agregado satisfactoriamente."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return redirect('/productos')->withMessage('El producto ha sido agregado satisfactoriamente.');
     }
 
@@ -125,7 +137,7 @@ class ProductController extends Controller
         $productos = Excel::toCollection( new ProductImport(), request()->file('archivo') );
         $company_id = currentCompany();
         foreach ($productos[0] as $row){
-            Product::updateOrCreate(
+            $product = Product::updateOrCreate(
                 [
                     'code' => $row['codigo'] ? $row['codigo'] : '',
                     'company_id' => $company_id,
@@ -140,6 +152,17 @@ class ProductController extends Controller
                     'default_iva_type' => $row['codigoetax']
                 ]
             );
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $product,
+                [
+                    'company_id' => $product->company_id,
+                    'id' => $product->id
+                ],
+                "El producto ha sido importado satisfactoriamente desde excel."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
 
         }
         $time_start = getMicrotime();
@@ -207,7 +230,17 @@ class ProductController extends Controller
         $product->is_catalogue = true;
       
         $product->save();
-      
+        $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $product,
+            [
+                'company_id' => $product->company_id,
+                'id' => $product->id
+            ],
+            "El producto ha sido editado satisfactoriamente."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return redirect('/products')->withMessage('El producto ha sido editado satisfactoriamente.');
     }
 
@@ -223,6 +256,17 @@ class ProductController extends Controller
         $this->authorize('update', $product);
         $product->delete();
         
+        $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $product,
+            [
+                'company_id' => $product->company_id,
+                'id' => $product->id
+            ],
+            "El producto ha sido editado satisfactoriamente."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return redirect('/productos')->withMessage('El producto ha sido eliminado satisfactoriamente.');
     }
     
@@ -240,6 +284,17 @@ class ProductController extends Controller
         }
         $product->restore();
         
+        $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $product,
+            [
+                'company_id' => $product->company_id,
+                'id' => $product->id
+            ],
+            "El producto ha sido recuperado satisfactoriamente."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return redirect('/productos')->withMessage('El producto ha sido recuperado satisfactoriamente.');
     }    
 

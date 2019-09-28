@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\LogActivityHandler as Activity;
 use \Carbon\Carbon;
 use App\Company;
 use App\Provider;
@@ -123,6 +124,18 @@ class ProviderController extends Controller
       
         $provider->save();
       
+        $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $provider,
+            [
+                'company_id' => $provider->company_id,
+                'id' => $provider->id
+            ],
+            "Proveedor creado satisfactoriamente."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
+
         return redirect('/proveedores')->withMessage('Proveedor creado');
     }
 
@@ -190,7 +203,17 @@ class ProviderController extends Controller
         $provider->fullname = $provider->toString();
       
         $provider->save();
-      
+       $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $provider,
+            [
+                'company_id' => $provider->company_id,
+                'id' => $provider->id
+            ],
+            "Proveedor editado satisfactoriamente."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return redirect('/proveedores')->withMessage('Proveedor editado');
     }
 
@@ -247,7 +270,7 @@ class ProviderController extends Controller
                 }
             }*/
             
-            Provider::updateOrCreate(
+            $provider = Provider::updateOrCreate(
                 [
                     'id_number' => $row['identificacion'],
                     'company_id' => $company_id,
@@ -272,6 +295,17 @@ class ProviderController extends Controller
                     'es_exento' => false
                 ]
             );
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $provider,
+                [
+                    'company_id' => $provider->company_id,
+                    'id' => $provider->id
+                ],
+                "Proveedor importado satisfactoriamente desde excel."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             
         }
         $time_end = getMicrotime();
@@ -293,7 +327,17 @@ class ProviderController extends Controller
             return 404;
         }
         $rest->restore();
-        
+        $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $provider,
+            [
+                'company_id' => $provider->company_id,
+                'id' => $provider->id
+            ],
+            "'El proveedor ha sido restaurado satisfactoriamente."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return redirect('/proveedores')->withMessage('El proveedor ha sido restaurado satisfactoriamente.');
     }    
     

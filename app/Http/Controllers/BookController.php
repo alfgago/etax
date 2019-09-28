@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\LogActivityHandler as Activity;
 use \Carbon\Carbon;
 use App\Company;
 use App\CalculatedTax;
@@ -85,7 +86,17 @@ class BookController extends Controller
         if( $prevOpenBooks ) {
           return redirect()->back()->with('error', "Debe cerrar los asientos anteriores antes de cerrar el $mes/$ano." );
         }
-      
+        $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $calc,
+            [
+                'company_id' => $calc->company_id,
+                'id' => $calc->id
+            ],
+            "Cierres de mes satisfactorio."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         $calc->is_closed = true;
         $calc->save();
         clearCierreCache($current_company, $mes, $ano);
@@ -173,7 +184,17 @@ class BookController extends Controller
             $cacheKey = "cache-estadoCierre-$current_company-$mes-$ano";
             Cache::forever( $cacheKey, false );
         }
-      
+      $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $calc,
+            [
+                'company_id' => $calc->company_id,
+                'id' => $calc->id
+            ],
+            "Rectificación abierta."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return redirect('/cierres')->withMessage('Rectificación abierta');
     }
 
@@ -234,6 +255,17 @@ class BookController extends Controller
             clearCierreCache($company->id, $calc->month, $calc->year);
         }
         
+        $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $calc,
+            [
+                'company_id' => $calc->company_id,
+                'id' => $calc->id
+            ],
+            "Retención por tarjeta actualizada exitosamente."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return redirect('/cierres')->withMessage('Retención por tarjeta actualizada exitosamente.');
     }
 
