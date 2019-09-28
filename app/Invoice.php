@@ -226,6 +226,8 @@ class Invoice extends Model
               $this->client_zip = $client->zip;
               $this->client_phone = preg_replace('/[^0-9]/', '', $client->phone);
               $this->client_id_number = $client->id_number;
+              $this->client_id_type = $client->tipo_persona;
+
             } else {
               $this->client_first_name = 'N/A';
             }
@@ -244,6 +246,7 @@ class Invoice extends Model
                 $this->client_zip = $this->company->zip;
                 $this->client_phone = preg_replace('/[^0-9]/', '', $this->company->phone);
                 $this->client_id_number = trim($this->company->id_number);
+                $this->client_id_type = $this->company->type;
 
                 //Datos de proveedor
                 if ($request->provider_id == '-1') {
@@ -1102,6 +1105,7 @@ class Invoice extends Model
             $this->client_zip = $invoiceReference->client_zip;
             $this->client_phone = $invoiceReference->client_phone;
             $this->client_id_number = $invoiceReference->client_id_number;
+            $this->client_id_type = $invoiceReference->client_id_type;
 
             $fecha = Carbon::parse(now('America/Costa_Rica'));
             $this->generated_date = $fecha;
