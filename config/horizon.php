@@ -142,17 +142,26 @@ return [
         'production' => [
             'horizon-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['default', 'invoices', 'receptions', 'imports', 'bulk'],
+                'queue' => ['default', 'invoices', 'receptions', 'imports'],
                 'balance' => 'auto',
                 'processes' => 10,
-                'tries' => 3,
+                'tries' => 1,
+            ],
+            'bulk-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['bulk'],
+                'balance' => 'auto',
+                'processes' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
+                'minProcesses' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
+                'maxProcesses' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
+                'tries' => 1,
             ],
             'subscriptions-supervisor' => [
                 'connection' => 'redis',
                 'queue' => ['payments'],
-                'balance' => 'auto',
+                'balance' => 'simple',
                 'processes' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
-                'tries' => 3,
+                'tries' => 1,
             ],
         ],
 

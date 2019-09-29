@@ -176,7 +176,7 @@ class ProcessSubscriptionPayments implements ShouldQueue
                     Log::warning("Error en cobro de usuario: $sale->user_id / empresa: $sale->company_id, no se encontró tarjeta");
                 }
             }catch(\Exception $e){
-                Log::error($e);
+                Log::error( "Error al procesar cobro recurrente: " . $e->getMessage() );
             }
         }
     }
