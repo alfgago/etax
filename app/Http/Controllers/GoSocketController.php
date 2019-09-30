@@ -150,7 +150,7 @@ class GoSocketController extends Controller
     	$ApplicationIdGS = config('etax.applicationidgs');
 		$base64 = base64_encode($ApplicationIdGS.":".$token);
     	$GoSocket = new Client();
-	    $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetSentDocuments?MyAccountId=fbcd6a77-4396-49d3-85cb-8646453e8460&fromDate=2019-01-01&toDate=2020-01-01&DocumentTypeId=1&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
+	    $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetSentDocuments?MyAccountId=".$user->company_token."&fromDate=2019-01-01&toDate=2020-01-01&DocumentTypeId=1&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
 	        'headers' => [
 	            'Content-Type' => "application/json",
 	            'Accept' => "application/json", 
@@ -201,7 +201,7 @@ class GoSocketController extends Controller
         $ApplicationIdGS = config('etax.applicationidgs');
         $base64 = base64_encode($ApplicationIdGS.":".$token);
         $GoSocket = new Client();
-        $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetReceivedDocuments?MyAccountId=fbcd6a77-4396-49d3-85cb-8646453e8460&fromDate=2019-01-01&toDate=2020-01-01&DocumentTypeId=1&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
+        $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetReceivedDocuments?MyAccountId=".$user->company_token."&fromDate=2019-01-01&toDate=2020-01-01&DocumentTypeId=1&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
             'headers' => [
                 'Content-Type' => "application/json",
                 'Accept' => "application/json", 
