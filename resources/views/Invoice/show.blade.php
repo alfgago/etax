@@ -28,10 +28,7 @@
                     <div class="form-group col-md-12 with-button">
                       <label for="cliente">Seleccione el cliente</label>
                       <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required disabled>
-                        <option value=''>-- Seleccione un cliente --</option>
-                        @foreach ( currentCompanyModel()->clients as $cliente )
-                          <option  {{ $invoice->client_id == $cliente->id ? 'selected' : '' }} value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
-                        @endforeach
+                         <option value="{{ $invoice->client_id  }}" >{{ $invoice->client_id_number }} - {{ $invoice->client_first_name }}</option>
                       </select>
                     </div>
                   </div>
