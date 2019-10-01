@@ -124,8 +124,9 @@ class GoSocketController extends Controller
     
     public function getInvoices($user) {
         $token = $user->session_token;
+        dd($user->compose_token);
         $apiGoSocket = new BridgeGoSocketApi();
-	    $facturas = $apiGoSocket->getSentDocuments($token, $user->compose_token);
+	    $facturas = $apiGoSocket->getSentDocuments($token, $user->company_token);
 
         foreach ($facturas as $factura) {
             $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
@@ -156,7 +157,7 @@ class GoSocketController extends Controller
     public function getBills($user) {
         $token = $user->session_token;
         $apiGoSocket = new BridgeGoSocketApi();
-        $facturas = $apiGoSocket->getReceivedDocuments($token, $user->compose_token);
+        $facturas = $apiGoSocket->getReceivedDocuments($token, $user->company_token);
 
         foreach ($facturas as $factura) {
             $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
