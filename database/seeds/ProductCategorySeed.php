@@ -25,11 +25,11 @@ class ProductCategorySeed extends Seeder
           ['grupo'=>'V2','nombre'=>'Bienes y servicios que hagan las instituciones estatales de educación superior y otras autorizadas', 'invoice_iva_code'=>'S102', 'open_codes'=>'B102,S102,B162,S162,B122,S122,B126,S126,B172'],
           ['grupo'=>'V2','nombre'=>'Otros servicios de educación privada no acreditados por el MEP y/o CONESUP', 'invoice_iva_code'=>'S102', 'open_codes'=>'B102,S102,B162,S162,B122,S122,B126,S126,B172'],
           //Ventas al 4%
-          ['grupo'=>'V4','nombre'=>'Boletos o pasajes aéreos nacionales', 'invoice_iva_code'=>'S104', 'open_codes'=>'S104,B104,S128,S124'],
-          ['grupo'=>'V4','nombre'=>'Boletos o pasajes aéreos internacionales', 'invoice_iva_code'=>'S104', 'open_codes'=>'S104,B104,S128,S124'],
-          ['grupo'=>'V4','nombre'=>'Servicios de salud privados', 'invoice_iva_code'=>'S104', 'open_codes'=>'S104,B104,S128,S124'],
-          ['grupo'=>'V4','nombre'=>'Servicios de ingeniería, arquitectura, topografía, y construcción de obra civil', 'invoice_iva_code'=>'S114', 'open_codes'=>'S114,S118'],
-          ['grupo'=>'V4','nombre'=>'Servicios de recolección, clasificación y almacenamiento de bienes reciclables y reutilizables, inscritos ante la AT y el Ministerio de Salud', 'invoice_iva_code'=>'S114', 'open_codes'=>'S114,S118'],
+          ['grupo'=>'V4','nombre'=>'Boletos o pasajes aéreos nacionales', 'invoice_iva_code'=>'S104', 'open_codes'=>'S104,B104,S128,S124,S164,B164'],
+          ['grupo'=>'V4','nombre'=>'Boletos o pasajes aéreos internacionales', 'invoice_iva_code'=>'S104', 'open_codes'=>'S104,B104,S128,S124,S164,B164'],
+          ['grupo'=>'V4','nombre'=>'Servicios de salud privados', 'invoice_iva_code'=>'S104', 'open_codes'=>'S104,B104,S128,S124,S164'],
+          ['grupo'=>'V4','nombre'=>'Servicios de ingeniería, arquitectura, topografía, y construcción de obra civil', 'invoice_iva_code'=>'S114', 'open_codes'=>'S114,S118,S164'],
+          ['grupo'=>'V4','nombre'=>'Servicios de recolección, clasificación y almacenamiento de bienes reciclables y reutilizables, inscritos ante la AT y el Ministerio de Salud', 'invoice_iva_code'=>'S114', 'open_codes'=>'S114,S118,S164'],
           //Ventas al 13%
           ['grupo'=>'V13','nombre'=>'Bienes generales al 13%', 'declaracion_name'=>'Bienes', 'invoice_iva_code'=>'B103', 'open_codes'=>'B103,B130,B163'],
           ['grupo'=>'V13','nombre'=>'Bienes de capital al 13%', 'declaracion_name'=>'Bienes de capital', 'invoice_iva_code'=>'B173', 'open_codes'=>'B173'],
@@ -51,7 +51,7 @@ class ProductCategorySeed extends Seeder
           ['grupo'=>'VEX','nombre'=>'Venta o entrega de agua residencial no mayor a 30 M3', 'invoice_iva_code'=>'S201', 'open_codes'=>'S201'],
           ['grupo'=>'VEX','nombre'=>'Autoconsumo de bienes y servicios sin aplicación de créditos total o parcial', 'invoice_iva_code'=>'B240', 'open_codes'=>'B240,S240'],
           ['grupo'=>'VEX','nombre'=>'Venta de sillas de ruedas y similares, equipo ortopédico, prótesis y equipo', 'invoice_iva_code'=>'B200', 'open_codes'=>'B200,S200'],
-          ['grupo'=>'VEX','nombre'=>'Venta de bienes y servicios a instituciones públicas y privadas exentas', 'invoice_iva_code'=>'B260', 'open_codes'=>'B260,S260'],
+          ['grupo'=>'VEX','nombre'=>'Venta de bienes y servicios a instituciones públicas y privadas exentas', 'invoice_iva_code'=>'B260', 'open_codes'=>'B260,S260,S160,B160,B181,B182,B183,B184,S181,S182,S183,S184'],
           ['grupo'=>'VEX','nombre'=>'Aranceles por matrícula y créditos de cursos en universidades públicas y privadas exentas', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
           ['grupo'=>'VEX','nombre'=>'Servicios de transporte terrestre de pasajeros y cabotaje de personas con concesión', 'invoice_iva_code'=>'S170', 'open_codes'=>'S170,B200,S200'],
           ['grupo'=>'VEX','nombre'=>'Venta, arrendamiento y leasing de autobuses y embarcaciones', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
@@ -74,7 +74,7 @@ class ProductCategorySeed extends Seeder
         ];
         
         $listaCompras = [
-          ['grupo'=>'CL','nombre'=>'Compras locales de bienes utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Bienes', 'bill_iva_code'=>'B003', 'open_codes'=>'B003,B063,B008,B068,B004,B064,B002,B062,B001,B011'],
+          ['grupo'=>'CL','nombre'=>'Compras locales de bienes utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Bienes', 'bill_iva_code'=>'B003', 'open_codes'=>'B003,B063,B008,B068,B004,B064,B002,B062,B001,B011,B080'],
           ['grupo'=>'CL','nombre'=>'Compras locales de servicios utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Servicios', 'bill_iva_code'=>'S003', 'open_codes'=>'S003,S063,S008,S068,S004,S064,S002,S062,S001,S011'],
           ['grupo'=>'CL','nombre'=>'Compras locales de bienes de capital utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Bienes de capital', 'bill_iva_code'=>'B013', 'open_codes'=>'B013,S013,B016,S016,B073,S073,B018,B078,B014,B012,B072,B015,S015,B011,S011,B071,S071'],
           ['grupo'=>'CI','nombre'=>'Importaciones de bienes utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Bienes', 'bill_iva_code'=>'B023', 'open_codes'=>'B023,B043,B028,B048,B024,B044,B022,B042,B021,B041'],
