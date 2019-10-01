@@ -124,33 +124,11 @@ class GoSocketController extends Controller
     
     public function getInvoices($user) {
         $token = $user->session_token;
-    	$ApplicationIdGS = config('etax.applicationidgs');
-		$base64 = base64_encode($ApplicationIdGS.":".$token);
-    	$GoSocket = new Client();
-	    $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetSentDocuments?MyAccountId=".$user->company_token."&fromDate=2019-01-01&toDate=2020-01-01&DocumentTypeId=1&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
-	        'headers' => [
-	            'Content-Type' => "application/json",
-	            'Accept' => "application/json", 
-	            'Authorization' => "Basic " . $base64
-	        ],
-	        'json' => [],
-	        'verify' => false,
-	    ]);
-	    $facturas = json_decode($APIStatus->getBody()->getContents(), true);
-        //dd($facturas);
-        foreach ($facturas as $factura) {
-            $GoSocket = new Client();
-            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetXml?DocumentId=".$factura['DocumentId']."", [
-                'headers' => [
-                    'Content-Type' => "application/json",
-                    'Accept' => "application/json", 
-                    'Authorization' => "Basic " . $base64
-                ],
-                'json' => [],
-                'verify' => false,
-            ]);
-            $APIStatus = json_decode($APIStatus->getBody()->getContents(), true);
+        $apiGoSocket = new BridgeGoSocketApi();
+	    $facturas = $apiGoSocket->getSentDocuments($token, $user->compose_token);
 
+        foreach ($facturas as $factura) {
+            $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
             $company = currentCompanyModel();
             $xml  = base64_decode($APIStatus);
             $xml = simplexml_load_string( $xml);
@@ -181,14 +159,14 @@ class GoSocketController extends Controller
         $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetReceivedDocuments?MyAccountId=".$user->company_token."&fromDate=2019-01-01&toDate=2020-01-01&DocumentTypeId=1&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
             'headers' => [
                 'Content-Type' => "application/json",
-                'Accept' => "application/json", 
+                'Accept' => "application/json",
                 'Authorization' => "Basic " . $base64
             ],
             'json' => [],
             'verify' => false,
         ]);
         $facturas = json_decode($APIStatus->getBody()->getContents(), true);
-        //dd($facturas);
+
         foreach ($facturas as $factura) {
             $GoSocket = new Client();
             $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetXml?DocumentId=".$factura['DocumentId']."", [

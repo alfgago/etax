@@ -23,5 +23,6 @@ return [
     'klap_app_name' => env('KLAP_APP_NAME', 'ETAX TEST'),
     'klap_app_password' => env('KLAP_APP_PASSWORD', 'ETFTTJUN0619%'),
     'applicationidgs' => env('APPLICATIONIDGS', '39d67874-d18d-4a38-a5b6-c3e6c2bbd1fa'),
+    'gosocket_url' => env('GOSOCKETURL', 'http://api.sandbox.gosocket.net/'),
     'queue_connections' => env('QUEUE_CONNECTION', 'redis')
 ];
