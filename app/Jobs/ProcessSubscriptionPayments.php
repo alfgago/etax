@@ -76,7 +76,9 @@ class ProcessSubscriptionPayments implements ShouldQueue
     
                 if(!$paymentMethod){
                     $paymentMethod = PaymentMethod::where('user_id', $sale->user_id)->first();
-                }else{
+                }
+                
+                if(!$paymentMethod){
                     Log::warning("El usuario $sale->user_id no tiene un método de pago.");
                     return true;
                 }
