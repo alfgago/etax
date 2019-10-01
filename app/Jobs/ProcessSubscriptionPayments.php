@@ -49,6 +49,11 @@ class ProcessSubscriptionPayments implements ShouldQueue
                 $date = Carbon::parse(now('America/Costa_Rica'));
     
                 $sale = $this->sale;
+                
+                if($sale->status == 1){
+                    return true;
+                    Log::warning("El usuario $sale->user_id ya tiene la suscripción activa.");
+                }
     
                 $subscriptionPlan = $sale->plan;
                 $planName = $subscriptionPlan->getName();
