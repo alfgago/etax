@@ -85,8 +85,26 @@ class BridgeGoSocketApi
         }
     }
 
-    public function getReceivedDocuments() {
+    public function getReceivedDocuments($token, $companyToken) {
+        try {
+            $ApplicationIdGS = config('etax.applicationidgs');
+            $base64 = base64_encode($ApplicationIdGS.":".$token);
+            $GoSocket = new Client();
+            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetReceivedDocuments?MyAccountId=".$companyToken."&fromDate=2019-01-01&toDate=2020-01-01&DocumentTypeId=1&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
+                'headers' => [
+                    'Content-Type' => "application/json",
+                    'Accept' => "application/json",
+                    'Authorization' => "Basic " . $base64
+                ],
+                'json' => [],
+                'verify' => false,
+            ]);
+            return json_decode($APIStatus->getBody()->getContents(), true);
 
+        } catch (\Exception $e) {
+            Log::info('Error al traer invoices GoSocket -->>'. $e->getMessage());
+            return false;
+        }
     }
 
     public function getXML($token, $factura) {
