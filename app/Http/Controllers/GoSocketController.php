@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Utils\BridgeGoSocketApi;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -19,41 +20,17 @@ use Illuminate\Support\Facades\Log;
 class GoSocketController extends Controller
 {
 
-    public $link = "http://api.sandbox.gosocket.net/";
 
     public function gosocketValidate(Request $request) {
         try{
         	$token = $request->token;
         	if (!empty($token)) {
-                $ApplicationIdGS = config('etax.applicationidgs');
-                $base64 = base64_encode($ApplicationIdGS.":".$token);
-                $GoSocket = new Client();
-                $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetUser", [
-                    'headers' => [
-                        'Content-Type' => "application/json",
-                        'Accept' => "application/json",
-                        'Authorization' => "Basic " . $base64
-                    ],
-                    'json' => [
-                    ],
-                    'verify' => false
-                ]);
-                $user_gs = json_decode($APIStatus->getBody()->getContents(), true);
+                $apiGoSocket = new BridgeGoSocketApi();
+                $user_gs = $apiGoSocket->getUser($token);
                 $user = IntegracionEmpresa::where("user_token",$user_gs['UserId'])->where("company_token",$user_gs['CurrentAccountId'])->first();
 
-                if(is_null($user)){
-                    $GoSocket = new Client();
-                    $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetAccount?accountId=".$user_gs['CurrentAccountId'], [
-                        'headers' => [
-                            'Content-Type' => "application/json",
-                            'Accept' => "application/json",
-                            'Authorization' => "Basic " . $base64
-                        ],
-                        'json' => [
-                        ],
-                        'verify' => false,
-                    ]);
-                    $company_gs = json_decode($APIStatus->getBody()->getContents(), true);
+                if (is_null($user)) {
+                    $company_gs = $apiGoSocket->getAccount($token, $user_gs['CurrentAccountId']);
                     $user_etax = User::firstOrCreate(
                         ['email' => $user_gs['Email']],
                         ['user_name' => $user_gs['Email'],
@@ -145,7 +122,7 @@ class GoSocketController extends Controller
     }
      
     
-    public function getInvoices($user){
+    public function getInvoices($user) {
         $token = $user->session_token;
     	$ApplicationIdGS = config('etax.applicationidgs');
 		$base64 = base64_encode($ApplicationIdGS.":".$token);
@@ -196,7 +173,7 @@ class GoSocketController extends Controller
     }
 
 
-    public function getBills($user){
+    public function getBills($user) {
         $token = $user->session_token;
         $ApplicationIdGS = config('etax.applicationidgs');
         $base64 = base64_encode($ApplicationIdGS.":".$token);

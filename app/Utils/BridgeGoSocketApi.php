@@ -11,16 +11,41 @@ namespace App\Utils;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Log;
+use mysql_xdevapi\Exception;
 
 
 class BridgeGoSocketApi
 {
-    public function login($token) {
+    public $link = "http://api.sandbox.gosocket.net/";
+
+    public function getUser($token) {
         try {
-            $ApplicationIdGS = config('etax.applicationidgs');
-            $base64 = base64_encode($ApplicationIdGS.":".$token);
+            $applicationIdGS = config('etax.applicationidgs');
+            $base64 = base64_encode($applicationIdGS.":".$token);
             $GoSocket = new Client();
-            $APIStatus = $GoSocket->request('GET', "http://api.sandbox.gosocket.net/api/Gadget/GetUser", [
+            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetUser", [
+                'headers' => [
+                    'Content-Type' => "application/json",
+                    'Accept' => "application/json",
+                    'Authorization' => "Basic " . $base64
+                ],
+                'json' => [
+                ],
+                'verify' => false
+            ]);
+            return json_decode($APIStatus->getBody()->getContents(), true);
+        } catch ( \Exception $e) {
+            Log::info('Error al iniciar session con GoSocket -->>'. $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getAccount($token, $user) {
+        try {
+            $applicationIdGS = config('etax.applicationidgs');
+            $base64 = base64_encode($applicationIdGS.":".$token);
+            $GoSocket = new Client();
+            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetAccount?accountId=".$user, [
                 'headers' => [
                     'Content-Type' => "application/json",
                     'Accept' => "application/json",
@@ -30,10 +55,10 @@ class BridgeGoSocketApi
                 ],
                 'verify' => false,
             ]);
-            $user_gs = json_decode($APIStatus->getBody()->getContents(), true);
+             return json_decode($APIStatus->getBody()->getContents(), true);
 
-        } catch (ClientException $error) {
-            Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
+        } catch ( \Exception $e) {
+            Log::info('Error al traer cuenta GoSocket -->>'. $e->getMessage());
             return false;
         }
     }
