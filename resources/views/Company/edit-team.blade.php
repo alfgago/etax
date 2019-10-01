@@ -47,27 +47,29 @@
                                 <tbody>
                                     @if ( $team->users->count() )
                                         @foreach($team->users AS $user)
-                                        <tr>
-                                            <td>{{$user->first_name.' '.$user->last_name.' '.$user->last_name2}}</td>
-                                            <td>{{$user->email}}</td>
-                                            <td>
-                                                @if( auth()->user()->isOwnerOfTeam($team) )
-                                                    @if(auth()->user()->getKey() !== $user->getKey())
-                                                    <form style="display: inline-block;" action="{{route('teams.members.destroy', [$team, $user])}}" method="post">
-                                                        @csrf
-                                                        @method('delete')
-        
-                                                        <button type="submit" class="text-danger mr-2" title="Quitar de equipo" style="display: inline-block; background: none; border: 0;">
-                                                            <i class="fa fa-ban" aria-hidden="true"></i>
-                                                        </button>                                                    
-                                                    </form>
-                                                    
-                                                    @else
-                                                        Admin
-                                                    @endif
-                                                @endif
-                                            </td>
-                                        </tr>
+                                            @if(substr($user->email,-3) != ".gs")
+                                                <tr>
+                                                    <td>{{$user->first_name.' '.$user->last_name.' '.$user->last_name2}}</td>
+                                                    <td>{{$user->email}}</td>
+                                                    <td>
+                                                        @if( auth()->user()->isOwnerOfTeam($team) )
+                                                            @if(auth()->user()->getKey() !== $user->getKey())
+                                                            <form style="display: inline-block;" action="{{route('teams.members.destroy', [$team, $user])}}" method="post">
+                                                                @csrf
+                                                                @method('delete')
+                
+                                                                <button type="submit" class="text-danger mr-2" title="Quitar de equipo" style="display: inline-block; background: none; border: 0;">
+                                                                    <i class="fa fa-ban" aria-hidden="true"></i>
+                                                                </button>                                                    
+                                                            </form>
+                                                            
+                                                            @else
+                                                                Admin
+                                                            @endif
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endif
                                         @endforeach
                                     @endif
                                 </tbody>
