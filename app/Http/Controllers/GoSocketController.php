@@ -124,7 +124,6 @@ class GoSocketController extends Controller
     
     public function getInvoices($user) {
         $token = $user->session_token;
-        dd($user->compose_token);
         $apiGoSocket = new BridgeGoSocketApi();
 	    $facturas = $apiGoSocket->getSentDocuments($token, $user->company_token);
 
