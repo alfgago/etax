@@ -25,3 +25,7 @@
   <a link="/facturas-recibidas/validar/{{ $bill->id }}" titulo="Verificación Compra" class="btn btn-dark btn-agregar m-0 " style="color:#fff; border-color: #333; background: #333; font-size: 0.85em;" onclick="validarPopup(this);" data-toggle="modal" data-target="#modal_estandar">Requiere validación</a>
 
 @endif
+
+  <a style="margin-left: .5rem;" href="/facturas-recibidas/download-pdf/{{ $bill->id }}" title="Descargar PDF" class="text-warning mr-2" download > 
+    <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+  </a>

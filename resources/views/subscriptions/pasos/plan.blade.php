@@ -70,15 +70,14 @@
           <label for="">Saltar suscripción y entrar como:</label>
           <div class="form-group">
               <select class="form-control" id="company_change" onchange="companyChange(false);">
+                 
+                  <option value="" selected >Seleccione compañia </option>
                   @foreach( auth()->user()->teams as $row )
-                    <?php
-                          $c = $row->company;
-                          if($c) {
-                            if($c->status == 1){
-                            $name = $c->name ? $c->name.' '.$c->last_name.' '.$c->last_name2 : '-- Nueva Empresa --';  ?>
-                            <option value="{{ $c->id }}" {{ $c->id == currentCompany() ? 'selected' : ''  }} > {{ $name }} </option>
-                    <?php   }
-                          } ?>
+                      <?php  
+                          $c = $row->company;  
+                          $name = $c->name ? $c->name.' '.$c->last_name.' '.$c->last_name2 : '-- Nueva Empresa --';  
+                      ?>
+                      <option value="{{ $c->id }}" > {{ $name }} </option>
                   @endforeach
               </select>
           </div>

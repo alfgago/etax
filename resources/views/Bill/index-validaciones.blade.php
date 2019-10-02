@@ -39,6 +39,9 @@
                   <td>{{ @$data->generatedDate()->format('d/m/Y') }}</td>
                   <td>
                     <a link="/facturas-recibidas/validar/{{ $data->id }}" titulo="Verificación de compra" class="btn btn-primary m-0 verificar_compra" style="color:#fff; font-size: 0.85em;" onclick="" data-toggle="modal" data-target="#modal_estandar">Validar</a>
+                    <a style="margin-left: .5rem;" href="/facturas-recibidas/download-pdf/{{ $data->id }}" title="Descargar PDF" class="text-warning mr-2" download > 
+                      <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+                    </a>
                   </td>
                 </tr>
               @endforeach

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\LogActivityHandler as Activity;
 use App\Invoice;
 use App\UnidadMedicion;
 use App\Utils\BridgeHaciendaApi;
@@ -217,6 +218,18 @@ class BillController extends Controller
             $company->save();
             
             clearBillCache($bill);
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $bill,
+                [
+                    'company_id' => $bill->company_id,
+                    'id' => $bill->id,
+                    'document_key' => $bill->document_key
+                ],
+                "Crear factura de compra."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-recibidas');
             
         }else{
@@ -295,6 +308,19 @@ class BillController extends Controller
             $bill->setBillData($request);
             
             clearBillCache($bill);
+
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $bill,
+                [
+                    'company_id' => $bill->company_id,
+                    'id' => $bill->id,
+                    'document_key' => $bill->document_key
+                ],
+                "Editar factura de compra."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
         
         }else{
             return redirect('/facturas-recibidas')->withError('Mes seleccionado ya fue cerrado');
@@ -362,6 +388,16 @@ class BillController extends Controller
           return back()->withError( "Error en validación: Asegúrese de agregar la columna CedulaEmpresa a su archivo de excel, con la cédula de su empresa en todas las lineas. La línea 1 no le pertenece a la empresa actual. ($company->id_number)" );
         }
       
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $collectionArray,
+                [
+                    'company_id' => $collectionArray[0]['cedulaempresa']
+                ],
+                "Importar factura de compra por excel."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
         if( count($collectionArray) < 1800 ){
             ProcessBillsImport::dispatchNow($collectionArray, $company);
         }else{
@@ -398,6 +434,19 @@ class BillController extends Controller
                             if( $bill ) {
                                 Bill::storeXML( $bill, $file );
                             }
+
+                            $user = auth()->user();
+                            Activity::dispatch(
+                                $user,
+                                $bill,
+                                [
+                                    'company_id' => $bill->company_id,
+                                    'id' => $bill->id,
+                                    'document_key' => $bill->document_key
+                                ],
+                                "Importar factura de compra por XML."
+                            )->onConnection(config('etax.queue_connections'))
+                            ->onQueue('log_queue');
                         }else{
                             return Response()->json("El documento $consecutivoComprobante no le pertenece a su empresa actual", 400);
                         }
@@ -474,6 +523,18 @@ class BillController extends Controller
             
             clearBillCache($bill);
 
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $bill,
+                [
+                    'company_id' => $bill->company_id,
+                    'id' => $bill->id,
+                    'document_key' => $bill->document_key
+                ],
+                "Validar factura de compra."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return back()->withMessage( 'La factura '. $bill->document_number . ' ha sido validada');
         }else{
             return back()->withError('Mes seleccionado ya fue cerrado');
@@ -490,11 +551,36 @@ class BillController extends Controller
             $bill->hide_from_taxes = true;
             $bill->save();
             clearBillCache($bill);
+
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $bill,
+                [
+                    'company_id' => $bill->company_id,
+                    'id' => $bill->id,
+                    'document_key' => $bill->document_key
+                ],
+                "La factura ". $bill->document_number . " se ha ocultado para cálculo de IVA."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-recibidas')->withMessage( 'La factura '. $bill->document_number . ' se ha ocultado para cálculo de IVA.');
         }else{
             $bill->hide_from_taxes = false;
             $bill->save();
             clearBillCache($bill);
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $bill,
+                [
+                    'company_id' => $bill->company_id,
+                    'id' => $bill->id,
+                    'document_key' => $bill->document_key
+                ],
+                "La factura ". $bill->document_number . " se ha incluido nuevamente para cálculo de IVA."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-recibidas')->withMessage( 'La factura '. $bill->document_number . ' se ha incluido nuevamente para cálculo de IVA.');
         }
     }
@@ -518,7 +604,18 @@ class BillController extends Controller
                 clearLastTaxesCache($bill->company->id, 2018);
             }
             clearBillCache($bill);
-            
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $bill,
+                [
+                    'company_id' => $bill->company_id,
+                    'id' => $bill->id,
+                    'document_key' => $bill->document_key
+                ],
+                "La factura ". $bill->document_number . " ha sido validada."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido validada');
         }else{
             return redirect('/facturas-recibidas/aceptaciones')->withError('Mes seleccionado ya fue cerrado');
@@ -577,7 +674,20 @@ class BillController extends Controller
             if ( $request->autorizar ) {
                 $bill->is_authorized = true;
                 $bill->save();
-            clearBillCache($bill);
+                clearBillCache($bill);
+
+                $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $bill,
+                    [
+                        'company_id' => $bill->company_id,
+                        'id' => $bill->id,
+                        'document_key' => $bill->document_key
+                    ],
+                    "La factura ". $bill->document_number . " ha sido autorizada. Recuerde validar el código."
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
                 return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido autorizada. Recuerde validar el código');
             }else {
                 $bill->is_authorized = false;
@@ -585,6 +695,18 @@ class BillController extends Controller
                 BillItem::where('bill_id', $bill->id)->delete();
                 $bill->delete();
                 clearBillCache($bill);
+                $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $bill,
+                    [
+                        'company_id' => $bill->company_id,
+                        'id' => $bill->id,
+                        'document_key' => $bill->document_key
+                    ],
+                    "La factura ". $bill->document_number . " ha sido rechazada."
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
                 return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido rechazada');
             }
 
@@ -717,6 +839,20 @@ class BillController extends Controller
             $bill->is_code_validated = false;
             $bill->save();
             clearBillCache($bill);
+
+                $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $bill,
+                    [
+                        'company_id' => $bill->company_id,
+                        'id' => $bill->id,
+                        'document_key' => $bill->document_key
+                    ],
+                    "La factura ". $bill->document_number . " ha sido incluida para aceptación."
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
+
             return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido incluida para aceptación');
         }else{
             return redirect('/facturas-recibidas/aceptaciones')->withError('Mes seleccionado ya fue cerrado');
@@ -751,6 +887,19 @@ class BillController extends Controller
                         $mensaje = 'Rechazo de factura enviado';
                     }
                     clearBillCache($bill);
+
+                $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $bill,
+                    [
+                        'company_id' => $bill->company_id,
+                        'id' => $bill->id,
+                        'document_key' => $bill->document_key
+                    ],
+                    $mensaje
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
                     return redirect('/facturas-recibidas/aceptaciones')->withMessage( $mensaje );
     
                 } else {
@@ -785,6 +934,18 @@ class BillController extends Controller
 
             $bill->save();
             clearBillCache($bill);
+            $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $bill,
+                    [
+                        'company_id' => $bill->company_id,
+                        'id' => $bill->id,
+                        'document_key' => $bill->document_key
+                    ],
+                    "La factura ". $bill->document_number . " ha sido aceptada"
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
             return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido aceptada');
         }else{
             return redirect('/facturas-recibidas/aceptaciones')->withError('Mes seleccionado ya fue cerrado');
@@ -804,6 +965,18 @@ class BillController extends Controller
         $this->authorize('update', $bill);
         clearBillCache($bill);
         BillItem::where('bill_id', $bill->id)->delete();
+        $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $bill,
+                    [
+                        'company_id' => $bill->company_id,
+                        'id' => $bill->id,
+                        'document_key' => $bill->document_key
+                    ],
+                    "La factura ha sido eliminada satisfactoriamente."
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
         $bill->delete();
         
         return redirect('/facturas-recibidas')->withMessage('La factura ha sido eliminada satisfactoriamente.');
@@ -824,7 +997,18 @@ class BillController extends Controller
         $bill->restore();
         BillItem::onlyTrashed()->where('bill_id', $bill->id)->restore();
         clearBillCache($bill);
-        
+        $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $bill,
+                    [
+                        'company_id' => $bill->company_id,
+                        'id' => $bill->id,
+                        'document_key' => $bill->document_key
+                    ],
+                    "La factura ha sido restaurada satisfactoriamente."
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
         return redirect('/facturas-recibidas')->withMessage('La factura ha sido restaurada satisfactoriamente.');
     }  
     

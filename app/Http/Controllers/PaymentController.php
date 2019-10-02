@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\LogActivityHandler as Activity;
 use App\Company;
 use App\CybersourcePaymentProcessor;
 use App\EtaxProducts;
@@ -133,6 +134,17 @@ class PaymentController extends Controller
         $cliente->billing_emails = $request->email;
         $cliente->save();
 
+        $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $cliente,
+            [
+                'company_id' => $cliente->company_id,
+                'id' => $cliente->id
+            ],
+            "Cliente creado exitosamente."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return $cliente;
     }
     /**
@@ -385,16 +397,21 @@ class PaymentController extends Controller
                     'payment_method_id' => $paymentMethod->id,
                     'payment_date' => Carbon::parse(now('America/Costa_Rica')),
                     'amount' => $amount,
-                    'coupon_id' => $cuponId,
-                    'payment_gateway' => 'cybersource'
+                    'coupon_id' => $cuponId
                 ]
             );
+
+            if($payment->payment_gateway === 'klap' || $payment->payment_gateway === ''){
+                $payment->payment_gateway = 'cybersource';
+                $payment->charge_token = null;
+                $payment->save();
+            }
+
             $request->request->add(['token_bn' => $paymentMethod->token_bn]);
 
             //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
             if( ! isset($payment->charge_token) ) {
                 $chargeProof = $paymentGateway->pay($request);
-                //dd($chargeIncluded);
                 if($chargeProof){
                     $payment->charge_token = $chargeProof;
                     $payment->save();
@@ -418,7 +435,6 @@ class PaymentController extends Controller
                 if($factura){
                     $this->facturasDisponibles();
                     return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
-                    //return $this->companyDisponible();
                 }else{
                     $mensaje = 'El pago fue realizado, pero hubo un error al generar su factura. Por favor contacte a soporte para más información.';
                     return redirect('/')->withError($mensaje)->withInput();
