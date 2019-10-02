@@ -142,19 +142,6 @@ class KlapPaymentProcessor extends PaymentProcessor
      */
     public function createPayment($data){
         $date = Carbon::parse(now('America/Costa_Rica'));
-        $payment = Payment::updateOrCreate(
-            [
-                'sale_id' => $data->saleId,
-                'payment_status' => 1,
-            ],
-            [
-                'payment_date' => $date,
-                'payment_method_id' => $data->paymentMethodId,
-                'amount' => $data->amount,
-                'proof' => 'pending -' . $data->description,
-                'payment_gateway' => 'klap'
-            ]
-        );
         $appCharge = new Client();
         $appChargeBn = $appCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppIncludeCharge?applicationName=string&applicationPassword=string&chargeDescription=string&userName=string&transactionCurrency=string&transactionAmount=double", [
             'headers' => [
@@ -172,11 +159,7 @@ class KlapPaymentProcessor extends PaymentProcessor
         ]);
         $chargeIncluded = json_decode($appChargeBn->getBody()->getContents(), true);
         if($chargeIncluded['apiStatus'] === "Successful"){
-            $payment->charge_token = $chargeIncluded['chargeTokenId'];
-            $payment->proof = $chargeIncluded['retrievalRefNo'];
-            $payment->save();
-
-            return $payment;
+            return $chargeIncluded['chargeTokenId'];
         }else{
             return false;
         }
@@ -203,7 +186,11 @@ class KlapPaymentProcessor extends PaymentProcessor
         ]);
         $charge = json_decode($chargeBn->getBody()->getContents(), true);
 
-        return $charge['apiStatus'] === "Successful";
+        if($charge['apiStatus'] === "Successful"){
+            return $charge;
+        }else{
+            return false;
+        }
     }
     /**
      *comprarProductos
@@ -398,4 +385,13 @@ class KlapPaymentProcessor extends PaymentProcessor
 
         return $delatedCard == true;
     }
+
+    public function getChargeProof($chargeIncluded){
+        if($chargeIncluded['apiStatus'] == "Successful"){
+            $appliedCharge_Id = $chargeIncluded['retrievalRefNo'];
+        }else{
+            return false;
+        }
+    }
+
 }

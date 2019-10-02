@@ -443,6 +443,7 @@ class InvoiceUtils
                 'receptor_phone' => !empty($data['client_phone']) ? preg_replace('/[^0-9]/', '', $data['client_phone']) : '00000000',
                 'receptor_cedula_numero' => $data['client_id_number'] ? str_pad(preg_replace("/[^0-9]/", "",
                     $data['client_id_number']), 9, '0', STR_PAD_LEFT) : '',
+                'receptor_cedula_tipo' => $data['client_id_type'] ?? 'F',
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',
                 'tipocambio' => $data['currency_rate'] ?? '',

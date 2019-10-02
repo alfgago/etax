@@ -70,7 +70,7 @@ class ProcessInvoice implements ShouldQueue
                             }
                             $invoice->in_queue = false;
                             $invoice->save();
-                            sleep(10);
+                            sleep(15);
                             $apiHacienda = new BridgeHaciendaApi();
                             $tokenApi = $apiHacienda->login(false);
                             if ($requestData !== false) {

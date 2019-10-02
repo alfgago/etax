@@ -383,4 +383,16 @@ class ClientController extends Controller
     }   
     
     
+    public function select2RemoteDataSource (Request $request)
+    {
+        $search = $request->get('search');
+        $data = Client::select(['id', 'first_name', 'last_name', 'last_name2', 'id_number'])
+            ->where('id_number', 'like', '%' . $search . '%')
+            ->orWhere('first_name', 'like', '%' . $search . '%')
+            ->orWhere('last_name', 'like', '%' . $search . '%')
+            ->orWhere('last_name2', 'like', '%' . $search . '%')->orderBy('first_name')->paginate(10);
+        return response()->json(['items' => $data->toArray()['data'], 'pagination' => $data->nextPageUrl() ? true : false]);
+    }
+    
+    
 }

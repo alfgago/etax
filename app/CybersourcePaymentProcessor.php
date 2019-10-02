@@ -4,24 +4,24 @@ namespace App;
 
 use App\Utils\BridgeHaciendaApi;
 use Carbon\Carbon;
-use CybsSoapClient;
+//use CybsSoapClient;
 use GuzzleHttp\Client;
 use stdClass;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Log;
-
-require __DIR__ . '/../vendor/autoload.php';
+use App\Utils\Cybersource\CybsSoapClient;
 
 class CybersourcePaymentProcessor extends PaymentProcessor
 {
     use SoftDeletes;
+    
     /**
      * Payment token creation
      * Params cardNumber, cardDescripcion, expiry, cvc, user_id, user_name
      *
      */
-    public function createCardToken($request){
+    /*public function createCardTokenWithCharge($request){
         $paymentProcessor = new PaymentProcessor();
         $cardData = $paymentProcessor->getCardNameType($request->number);
         $merchantId = 'tc_cr_011007172';
@@ -80,14 +80,18 @@ class CybersourcePaymentProcessor extends PaymentProcessor
 
         $reply = $client->runTransaction($requestClient);
 
+        $this->pay($request);
+
         return $reply;
-    }
+    }*/
     /**
      * create Token Without Fee
      *
      *
      */
-    public function createTokenWithoutFee($request){
+    public function createCardToken($request){
+        $user = auth()->user();
+        
         $paymentProcessor = new PaymentProcessor();
         $cardData = $paymentProcessor->getCardNameType($request->number);
 
@@ -143,8 +147,32 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $requestClient->merchantId = $merchantId;
 
         $reply = $client->runTransaction($requestClient);
+        
+        $last_4digits = substr($request->number, -4);
+        if($reply->decision === 'ACCEPT'){
+            //Se logró agregar la tarjeta y crear el pago, entonces hay un nuevo payment method y un payment.
+            $paymentMethod = PaymentMethod::updateOrCreate([
+                'user_id' => $user->id,
+                'name' => $request->first_name_card,
+                'last_name' => $request->last_name_card,
+                'last_4digits' => $last_4digits,
+                'masked_card' => $this->getMaskedCard($request->number),
+                'due_date' => $request->expiry,
+                'token_bn' => $reply->paySubscriptionCreateReply->subscriptionID,
+                'default_card' => 1,
+                'payment_gateway' => 'cybersource'
 
-        return $reply;
+            ]);
+        } else {
+            $paymentMethod = PaymentMethod::where('user_id', $user->id)
+                ->where('last_4digits', $last_4digits)
+                ->first();
+            if( ! isset($paymentMethod) ) {
+                return redirect()->back()->withError("El método de pago no pudo ser validado.")->withInput();
+            }
+        }
+
+        return $paymentMethod;
     }
     /**
      * Payment token delete
@@ -239,13 +267,15 @@ class CybersourcePaymentProcessor extends PaymentProcessor
 
         return $reply;
     }
+    
     /**
      * Payment creation
      * Params saleId, paymentMethodId, amount, description, user_name
      * Requesting an On-Demand Transaction, Payment_Tokenization_SO_API.pdf, page 37
      */
     public function createPayment($request){
-        $merchantId = 'tc_cr_011007172';
+        return false;
+        /*$merchantId = 'tc_cr_011007172';
         $client = new CybsSoapClient();
         $requestClient = $client->createRequest($request->referenceCode);
         $requestClient->ID = $merchantId;
@@ -270,8 +300,9 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $requestClient->merchantId = $merchantId;
         $requestClient->deviceFingerprintID = $request->deviceFingerPrintID;
 
-        return $client->runTransaction($requestClient);
+        return $client->runTransaction($requestClient);*/
     }
+    
     /**
      * Make payment
      * Params referenceCode, deviceFingerPrintID, subscriptionID, Amount
@@ -301,7 +332,13 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         $requestClient->purchaseTotals = $purchaseTotals;
         $requestClient->merchantId = $merchantId;
 
-        return $client->runTransaction($requestClient);
+        $appliedCharge = $client->runTransaction($requestClient);
+        
+        if($appliedCharge->decision == 'ACCEPT'){
+            $appliedChargeId = $appliedCharge->requestID;
+            return $appliedChargeId;
+        }
+        return false;
     }
     /**
      *Buy Products
@@ -439,6 +476,15 @@ class CybersourcePaymentProcessor extends PaymentProcessor
 
         return $delatedCard == true;
     }
+    
+    public function getChargeProof($chargeIncluded){
+        if($chargeIncluded->decision == 'ACCEPT'){
+            $appliedCharge_Id = $chargeIncluded->requestID;
+        }else{
+            return false;
+        }
+    }
+    
     /**
      *crearFacturaClienteEtax
      *

@@ -163,7 +163,7 @@ class PaymentController extends Controller
             $availableCompanies = $plan->num_companies;
             $availableCompanies += -1 ;
 
-            if($activeCompanies >  $availableCompanies  ){
+            if($activeCompanies > $availableCompanies){
                 $companies = Company::where('user_id',$user_id)->where('id','!=',$company->id)->where('status',1)->get();
                 foreach ($companies as $company) {
                     $availableCompanies += -1 ;
@@ -175,7 +175,7 @@ class PaymentController extends Controller
 
                 }
                 $availableCompanies = $plan->num_companies;
-                return view('payment.companySelect')->with('companies',$companies)->with('companies_puedo',$availableCompanies);
+                return view('payment.companySelect')->with('companies',$companies)->with('companies_puedo',$availableCompanies)->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
             }
         }catch(\Throwable $e){
             Log::error($e->getMessage());
@@ -235,10 +235,10 @@ class PaymentController extends Controller
     public function confirmPayment(Request $request){
         try{
             $user = auth()->user();
-            $paymentProcessor = new PaymentProcessor();
+            //$paymentProcessor = new PaymentProcessor();
             $paymentGateway = new CybersourcePaymentProcessor();
             $request->number = preg_replace('/\s+/', '',  $request->number);
-            $ip = $paymentProcessor->getUserIpAddr();
+            $ip = $paymentGateway->getUserIpAddr();
             $request->request->add(['IpAddress' => $ip]);
 
             if($request->plan_sel == "c"){
@@ -275,8 +275,7 @@ class PaymentController extends Controller
                 $monthly_price += $total_extras;
                 $six_price += $total_extras;
                 $annual_price += $total_extras;
-                $six_price = $six_price * 6;
-                $annual_price = $annual_price * 12;
+
                 $plan = SubscriptionPlan::updateOrCreate(
                     [
                         'plan_tier' => $plan_tier
@@ -330,6 +329,7 @@ class PaymentController extends Controller
                 }
             }
             $request->razonDescuento = $razonDescuento ?? null;
+            $discountReason = $razonDescuento ?? null;
             //Crea/actualiza el sale de suscripción
             $sale = Sales::createUpdateSubscriptionSale( $request->product_id, $request->recurrency );
 
@@ -377,36 +377,16 @@ class PaymentController extends Controller
 
             $request->request->add(['referenceCode' => $request->product_id]);
             $request->request->add(['amount' => $amount]);
+            $request->request->add(['subtotal' => $subtotal]);
             $request->request->add(['iva_amount' => $iv]);
+            $request->request->add(['montoDescontado' => $montoDescontado]);
+            $request->request->add(['razonDescuento' => $discountReason]);
 
-            $cardData = $paymentProcessor->getCardNameType($request->number);
+            $cardData = $paymentGateway->getCardNameType($request->number);
             $request->request->add(['cardType' => $cardData->type]);
 
-            //Agrega la tarjeta. Crea una solicitud de suscripcion en Cybersource, con un Fee
-            $card = $paymentGateway->createCardToken($request);
-            $last_4digits = substr($request->number, -4);
-            if($card->decision === 'ACCEPT'){
-                //Se logró agregar la tarjeta y crear el pago, entonces hay un nuevo payment method y un payment.
-                $paymentMethod = PaymentMethod::updateOrCreate([
-                    'user_id' => $user->id,
-                    'name' => $request->first_name_card,
-                    'last_name' => $request->last_name_card,
-                    'last_4digits' => $last_4digits,
-                    'masked_card' => $paymentProcessor->getMaskedCard($request->number),
-                    'due_date' => $request->expiry,
-                    'token_bn' => $card->paySubscriptionCreateReply->subscriptionID,
-                    'default_card' => 1,
-                    'payment_gateway' => 'cybersource'
-
-                ]);
-            } else {
-                $paymentMethod = PaymentMethod::where('user_id', $user->id)
-                    ->where('last_4digits', $last_4digits)
-                    ->first();
-                if( ! isset($paymentMethod) ) {
-                    return redirect()->back()->withError("El método de pago no pudo ser validado.")->withInput();
-                }
-            }
+            //Agrega la tarjeta. Retorna el paymentMethod
+            $paymentMethod = $paymentGateway->createCardToken($request);
 
             $payment = Payment::updateOrCreate(
                 [
@@ -425,13 +405,16 @@ class PaymentController extends Controller
 
             //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
             if( ! isset($payment->charge_token) ) {
-                $chargeIncluded = $paymentGateway->pay($request);
-                $payment->charge_token = $chargeIncluded->ccAuthReply->reconciliationID;
-
-                $payment->save();
+                $chargeProof = $paymentGateway->pay($request);
+                //dd($chargeIncluded);
+                if($chargeProof){
+                    $payment->charge_token = $chargeProof;
+                    $payment->save();
+                }
             }
-            if ($card->ccCaptureReply->reasonCode == 100) {
-                $payment->proof = $card->ccCaptureReply->reconciliationID;
+
+            if ( $chargeProof ) {
+                $payment->proof = $payment->charge_token;
                 $payment->payment_status = 2;
                 $payment->save();
 
@@ -439,21 +422,26 @@ class PaymentController extends Controller
                 $sale->next_payment_date = $nextPaymentDate;
                 $sale->save();
 
+                $request->request->add(['item_code' => $subscriptionPlan->id]);
                 $request->request->add(['item_name' => $sale->plan->getName() . " / $recurrency meses"]);
 
-                $invoiceData = $paymentProcessor->setInvoiceInfo($request);
+                $invoiceData = $paymentGateway->setInvoiceInfo($request);
                 $factura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
                 if($factura){
                     $this->facturasDisponibles();
-                    return $this->companyDisponible();
+                    return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+                    //return $this->companyDisponible();
+                }else{
+                    $mensaje = 'El pago fue realizado, pero hubo un error al generar su factura. Por favor contacte a soporte para más información.';
+                    return redirect('/')->withError($mensaje)->withInput();
                 }
-            } else {
-                $mensaje = 'El pago ha sido denegado';
-                return redirect()->back()->withError($mensaje)->withInput();
             }
 
+            $mensaje = 'El pago ha sido denegado';
+            return redirect()->back()->withError($mensaje)->withInput();
+
         }catch( \Throwable $e ){
-            Log::error( "Error en suscripciones ". $e->getMessage() );
+            Log::error( "Error en suscripciones ". $e );
             return redirect()->back()->withError("Hubo un error al realizar la suscripción. Por favor reintente o contacte a soporte.")->withInput();
         }
 
@@ -495,14 +483,14 @@ class PaymentController extends Controller
         $request->request->add(['amount' => $amount]);
         $request->request->add(['referenceCode' => $product_id]);
         $request->request->add(['product_name' => $product->name]);
-        $payment_info = explode('- ', $request->payment_method);
-        $request->request->add(['payment_method' => $payment_info[0]]);
-        $paymentProcessor = new PaymentProcessor();
-        $ip = $paymentProcessor->getUserIpAddr();
+        $paymentInfo = explode('- ', $request->payment_method);
+        $request->request->add(['payment_method' => $paymentInfo[0]]);
+        //$paymentProcessor = new PaymentProcessor();
+        $paymentGateway = PaymentProcessor::selectPaymentGateway($paymentInfo[1]);
+        $ip = $paymentGateway->getUserIpAddr();
         $request->request->add(['IpAddress' => $ip]);
-        $payment_gateway = $paymentProcessor->selectPaymentGateway($payment_info[1]);
-        if(isset($payment_gateway)){
-            $pagoProducto = $payment_gateway->comprarProductos($request);
+        if(isset($paymentGateway)){
+            $pagoProducto = $paymentGateway->comprarProductos($request);
             if($pagoProducto){
                 $client = \App\Client::where('company_id', $company->id)->where('id_number', $request->id_number)->first();
                 $request->request->add(['client_code' => $request->id_number]);
@@ -526,8 +514,8 @@ class PaymentController extends Controller
                 $request->request->add(['discount_reason' => null]);
                 $request->request->add(['tipo_persona' => $client->tipo_persona]);
 
-                $invoiceData = $payment_gateway->setInvoiceInfo($request);
-                $procesoFactura = $paymentProcessor->crearFacturaClienteEtax($invoiceData);
+                $invoiceData = $paymentGateway->setInvoiceInfo($request);
+                $procesoFactura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
 
                 $company->additional_invoices = $additional_invoices;
                 $company->save();
@@ -550,12 +538,12 @@ class PaymentController extends Controller
             if(!$request->payment_method){
                 return redirect()->back()->withErrors('Debe seleccionar un método de pago');
             }
-            $payment_method = PaymentMethod::where('id', $request->payment_method)->first();
-            $paymentProcessor = new PaymentProcessor();
-            $ip = $paymentProcessor->getUserIpAddr();
+            $paymentMethod = PaymentMethod::where('id', $request->payment_method)->first();
+            //$paymentProcessor = new PaymentProcessor();
+            $paymentGateway = PaymentProcessor::selectPaymentGateway($paymentMethod->payment_gateway);
+            $ip = $paymentGateway->getUserIpAddr();
             $request->request->add(['IpAddress' => $ip]);
-            $payment_gateway = $paymentProcessor->selectPaymentGateway($payment_method->payment_gateway);
-            if(isset($payment_gateway)){
+            if(isset($paymentGateway)){
                 $company = currentCompanyModel();
                 $sale = Sales::join('subscription_plans','subscription_plans.id','sales.etax_product_id')->where('company_id', $company->id)
                 ->where('is_subscription', 1)->first();
@@ -621,7 +609,7 @@ class PaymentController extends Controller
                 $iva_amount = $total * 0.13;
                 $amount = $iva_amount + $total_extras;
                 $request->request->add(['subtotal' => $total_extras]);
-                $request->request->add(['token_bn' => $payment_method->token_bn]);
+                $request->request->add(['token_bn' => $paymentMethod->token_bn]);
                 $request->request->add(['unit_price' => $total_extras]);
                 $request->request->add(['iva_amount' => $iva_amount]);
                 $request->request->add(['amount' => $amount]);
@@ -643,10 +631,10 @@ class PaymentController extends Controller
                 $request->request->add(['client_id' => $client->id_number]);
                 $request->request->add(['tipo_persona' => $client->tipo_persona]);
 
-                $chargeCreated = $payment_gateway->comprarProductos($request);
+                $chargeCreated = $paymentGateway->comprarProductos($request);
                 if($chargeCreated){
-                    $invoiceData = $payment_gateway->setInvoiceInfo($request);
-                    $procesoFactura = $paymentProcessor->crearFacturaClienteEtax($invoiceData);
+                    $invoiceData = $paymentGateway->setInvoiceInfo($request);
+                    $procesoFactura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
                     $company->save();
                     return redirect()->back()->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
                 }else{
@@ -734,9 +722,9 @@ class PaymentController extends Controller
 
             $paymentMethod = PaymentMethod::where('user_id', $sale->user->id)->where('default_card', true)->first();
             $company = $sale->company;
-            $paymentProcessor = new PaymentProcessor();
-            $payment_gateway = $paymentProcessor->selectPaymentGateway($paymentMethod->payment_gateway);
-            if($payment_gateway){
+            //$paymentProcessor = new PaymentProcessor();
+            $paymentGateway = PaymentProcessor::selectPaymentGateway($paymentMethod->payment_gateway);
+            if($paymentGateway){
                 $data = new stdClass();
                 $data->description = 'Pago suscripción eTax';
                 $data->amount = $amount;
@@ -745,7 +733,7 @@ class PaymentController extends Controller
                 $data->cardTokenId = $paymentMethod->token_bn;
 
                 if( ! isset($payment->charge_token) ) {
-                    $payment = $payment_gateway->createPayment($data);
+                    $payment = $paymentGateway->createPayment($data);
                 }
                 if (gettype($data) == 'array') {
                     $data->chargeTokenId = $payment['charge_token'];
@@ -755,7 +743,7 @@ class PaymentController extends Controller
                 $data->token_bn = $paymentMethod->token_bn;
                 $data->referenceCode = $sale->plan->id;
 
-                $appliedCharge = $payment_gateway->pay($data);
+                $appliedCharge = $paymentGateway->pay($data);
 
                 if (gettype($appliedCharge) == 'array') {
                     $payment->proof = $appliedCharge['retrievalRefNo'];
@@ -784,9 +772,9 @@ class PaymentController extends Controller
                     $company->subtotal = $subtotal;
                     $company->total = $amount;
 
-                    $invoiceData = $paymentProcessor->setInvoiceInfo($company);
+                    $invoiceData = $paymentGateway->setInvoiceInfo($company);
 
-                    $factura = $paymentProcessor->crearFacturaClienteEtax($invoiceData);
+                    $factura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
                 }else{
                     \Mail::to($company->email)->send(new \App\Mail\SubscriptionPaymentFailure(
                         [
@@ -852,18 +840,17 @@ class PaymentController extends Controller
      *
      */
     public function pagarCargo($paymentId){
-        $paymentProcessor = new PaymentProcessor();
-
         $date = Carbon::parse(now('America/Costa_Rica'));
         $company = currentCompanyModel();
         $user = auth()->user();
 
+        //$paymentProcessor = new PaymentProcessor();
         $paymentMethod = PaymentMethod::where('user_id', $user->id)->where('default_card', true)->first();
+        $paymentGateway = PaymentProcessor::selectPaymentGateway($paymentMethod->payment_gateway);
 
         if(!$paymentMethod){
             $paymentMethod = PaymentMethod::where('user_id', $user->id)->first();
         }
-        $payment_gateway = $paymentProcessor->selectPaymentGateway($paymentMethod->payment_gateway);
         $payment = Payment::find($paymentId);
         if($paymentMethod->payment_gateway === $payment->payment_gateway){
             $payment->payment_date = $date;
@@ -884,7 +871,7 @@ class PaymentController extends Controller
 
             //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
             if( ! isset($payment->charge_token) || $payment->charge_token == 'N/A' || $payment->charge_token == '' ) {
-                $chargeIncluded = $payment_gateway->createPayment($data);
+                $chargeIncluded = $paymentGateway->createPayment($data);
                 if (gettype($chargeIncluded) == 'array') {
                     if($chargeIncluded['apiStatus'] == "Successful"){
                         $appliedCharge_Id = $chargeIncluded['retrievalRefNo'];
@@ -902,7 +889,7 @@ class PaymentController extends Controller
             $data->chargeTokenId = $payment->charge_token;
             $data->token_bn = $paymentMethod->token_bn;
 
-            $appliedCharge = $payment_gateway->pay($data);
+            $appliedCharge = $paymentGateway->pay($data);
             if (gettype($data) == 'array') {
                 if($appliedCharge['apiStatus'] == "Successful"){
                     $paymentAccepted = true;
@@ -937,8 +924,8 @@ class PaymentController extends Controller
                 $company->subtotal = $subtotal;
                 $company->total = $amount;
 
-                $invoiceData = $paymentProcessor->setInvoiceInfo($company);
-                $factura = $payment_gateway->crearFacturaClienteEtax($invoiceData);
+                $invoiceData = $paymentGateway->setInvoiceInfo($company);
+                $factura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
                 return redirect()->back()->withMessage('Pago procesado');
             }else{
                 return redirect()->back()->withErrors('El pago no pudo ser procesado. Por favor intente más tarde.');

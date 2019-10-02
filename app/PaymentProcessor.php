@@ -33,9 +33,9 @@ class PaymentProcessor extends Model
      *
      *
      */
-    public function createTokenWithoutFee($data){
+    /*public function createTokenWithoutFee($data){
         return true;
-    }
+    }*/
     /**
     * checkCC
     *
@@ -108,6 +108,11 @@ class PaymentProcessor extends Model
     public function deletePaymentMethod($data){
         return true;
     }
+    
+    public function getChargeProof($chargeIncluded){
+        
+    }
+    
     /**
      *check_cc
      *
@@ -188,7 +193,7 @@ class PaymentProcessor extends Model
      *
      *
      */
-    private function getDocReference($docType, $companyId = null) {
+    public function getDocReference($docType, $companyId = null) {
         if( $companyId ){
             $company = Company::find($companyId);
         }else{
@@ -204,7 +209,7 @@ class PaymentProcessor extends Model
      *
      *
      */
-    private function getDocumentKey($docType, $companyId = null) {
+    public function getDocumentKey($docType, $companyId = null) {
         if( $companyId ){
             $company = Company::find($companyId);
         }else{
@@ -221,7 +226,7 @@ class PaymentProcessor extends Model
      *
      *
      */
-    public function selectPaymentGateway($payment_gateway){
+    public static function selectPaymentGateway($payment_gateway){
         switch ($payment_gateway){
             case 'cybersource':
                 $class = new CybersourcePaymentProcessor();
@@ -343,7 +348,7 @@ class PaymentProcessor extends Model
                 clearInvoiceCache($invoice);
 
             }catch(\Throwable $e){
-                Log::error('Error al crear factura de compra eTax. ' . $e->getMessage() );
+                Log::error('Error al crear factura de compra eTax. ' . $e );
             }
 
             Log::info( 'Factura de suscripción exitosa.' );

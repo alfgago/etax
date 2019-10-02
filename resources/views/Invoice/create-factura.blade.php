@@ -57,7 +57,7 @@ $company = currentCompanyModel();
                     <div class="form-group col-md-12 with-button">
                       <label for="cliente">Seleccione el cliente</label>
                       
-                      @if( count(currentCompanyModel()->clients) < 4000 )
+                      @if( count(currentCompanyModel()->clients) < 5000 )
                         <select class="form-control select-search" name="client_id" id="client_id" placeholder="" @if(@$document_type !== '04') required @endif>
                           <option value='' selected>-- Seleccione un cliente --</option>
                           @foreach ( currentCompanyModel()->clients as $cliente )
@@ -68,22 +68,42 @@ $company = currentCompanyModel();
                         </select>
                       @else
                         <select class="form-control select-search-many" name="client_id" id="client_id" placeholder="" required>
-                          <option value='' selected>-- Seleccione un cliente --</option>
                         </select>
                         <script>
-                          <?php 
-                            $clientesJson = json_encode(currentCompanyModel()->clientsForSelect2()); 
-                          ?>
-                          var data = '<?php echo $clientesJson ?>';
-                          var jsonData = JSON.parse(data);
-                          $(document).ready(function() { 
-
+                        $(document).ready(function () {
                             $('.select-search-many').select2({
-                              data: jsonData
+                                ajax: {
+                                    url: '/clients/select2-remote-data-source',
+                                    data: function (params) {
+                                        return {
+                                            search: params.term,
+                                            page: params.page || 1
+                                        };
+                                    },
+                                    dataType: 'json',
+                                    processResults: function (data) {
+                                        data.page = data.page || 1;
+                                        return {
+                                            results: data.items.map(function (item) {
+                                                return {
+                                                    id: item.id,
+                                                    text: item.id_number + " - " + item.first_name
+                                                };
+                                            }),
+                                            pagination: {
+                                                more: data.pagination
+                                            }
+                                        }
+                                    },
+                                    cache: true,
+                                    delay: 250
+                                },
+                                placeholder: '-- Seleccione un cliente --',
+                                minimumInputLength: 5,
+                                multiple: false
                             });
-                            
-                          });
-                        </script>
+                        });
+                      </script>
                       @endif
                       
                       @if($document_type == "04")

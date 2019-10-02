@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\LogActivityHandler as Activity;
+use App\Company;
 use App\CybersourcePaymentProcessor;
 use App\PaymentMethod;
 use App\PaymentProcessor;
@@ -61,8 +62,9 @@ class PaymentMethodController extends Controller
      */
     public function createView(){
         $user = auth()->user();
+        $company = Company::where('user_id', $user->id)->first();
         if($user->zip){
-            return view('payment_methods/CreatePaymentMethod');
+            return view('payment_methods/CreatePaymentMethod')->with('company', $company);
         }else{
             return redirect()->back()->withErrors('Debe actualizar la información de su usuario para continuar');
         }
@@ -79,28 +81,17 @@ class PaymentMethodController extends Controller
         $payment_gateway = new CybersourcePaymentProcessor();
         if(isset($request->number)){
             $ip = $paymentProcessor->getUserIpAddr();
-            //$request->request->add(['IpAddress' => $ip]);
-            $request->request->add(['IpAddress' => '170.81.34.78']);
-            $request->request->add(['cardCity' => $request->street1]);
-            $request->request->add(['cardState' => 'San Jose']);
+            $request->request->add(['IpAddress' => $ip]);
+            $request->request->add(['cardCity' => $request->cardCity]);
+            $request->request->add(['cardState' => $request->cardState]);
             $request->request->add(['country' => 'CR']);
-            $request->request->add(['zip' => $user->zip]);
+            $request->request->add(['zip' => $request->zip]);
             $request->request->add(['email' => $user->email]);
             $request->request->add(['user_id' => $user->id]);
-            //dd($request);
-            $newCard = $payment_gateway->createTokenWithoutFee($request);
+            $request->request->add(['deviceFingerPrintID' => $request->deviceFingerPrintID]);
 
-            if ($newCard->decision === 'ACCEPT') {
-                $paymentMethod = PaymentMethod::create([
-                    'user_id' => $user->id,
-                    'name' => $request->first_name_card,
-                    'last_name' => $request->last_name_card,
-                    'last_4digits' => substr($request->number, -4),
-                    'masked_card' => $paymentProcessor->getMaskedCard($request->number),
-                    'due_date' => $request->expiry,
-                    'token_bn' => $newCard->paySubscriptionCreateReply->subscriptionID,
-                    'payment_gateway' => 'cybersource'
-                ]);
+            $newCard = $payment_gateway->createCardToken($request);
+            if ($newCard->token_bn) {
                 $cantidad = PaymentMethod::where('user_id', auth()->user()->id)->get()->count();
 
                 return redirect('/payments-methods')->withMessage('Método de pago creado')->with('cantidad', $cantidad);
