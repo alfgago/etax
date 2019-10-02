@@ -49,6 +49,11 @@ class ProcessSubscriptionPayments implements ShouldQueue
                 $date = Carbon::parse(now('America/Costa_Rica'));
     
                 $sale = $this->sale;
+                
+                if($sale->status == 1){
+                    return true;
+                    Log::warning("El usuario $sale->user_id ya tiene la suscripción activa.");
+                }
     
                 $subscriptionPlan = $sale->plan;
                 $planName = $subscriptionPlan->getName();
@@ -76,6 +81,11 @@ class ProcessSubscriptionPayments implements ShouldQueue
     
                 if(!$paymentMethod){
                     $paymentMethod = PaymentMethod::where('user_id', $sale->user_id)->first();
+                }
+                
+                if(!$paymentMethod){
+                    Log::warning("El usuario $sale->user_id no tiene un método de pago.");
+                    return true;
                 }
                 
                 $paymentGateway = PaymentProcessor::selectPaymentGateway($paymentMethod->payment_gateway);
