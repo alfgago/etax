@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\LogActivityHandler as Activity;
 use App\Company;
 use App\CybersourcePaymentProcessor;
 use App\EtaxProducts;
@@ -133,6 +134,17 @@ class PaymentController extends Controller
         $cliente->billing_emails = $request->email;
         $cliente->save();
 
+        $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $cliente,
+            [
+                'company_id' => $cliente->company_id,
+                'id' => $cliente->id
+            ],
+            "Cliente creado exitosamente."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return $cliente;
     }
     /**

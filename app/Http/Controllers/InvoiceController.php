@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Jobs\LogActivityHandler as Activity;
 use App\Actividades;
 use App\AvailableInvoices;
 use App\CodigosPaises;
@@ -320,7 +320,18 @@ class InvoiceController extends Controller
             $company->save();
             
             clearInvoiceCache($invoice);
-          
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "Factura registrada con éxito."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-emitidas')->withMessage('Factura registrada con éxito');
         }else{
             return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
@@ -410,7 +421,18 @@ class InvoiceController extends Controller
 
                     $company->save();
                     clearInvoiceCache($invoice);
-
+                    $user = auth()->user();
+                    Activity::dispatch(
+                        $user,
+                        $invoice,
+                        [
+                            'company_id' => $invoice->company_id,
+                            'id' => $invoice->id,
+                            'document_key' => $invoice->document_key
+                        ],
+                        "Factura registrada con éxito."
+                    )->onConnection(config('etax.queue_connections'))
+                    ->onQueue('log_queue');
                     return redirect('/facturas-emitidas')->withMessage('Factura registrada con éxito');
                 } else {
                     return back()->withError( 'Ha ocurrido un error al enviar factura.' );
@@ -450,6 +472,18 @@ class InvoiceController extends Controller
         $company->last_bill_ref_number = $bill->reference_number;
         $company->save();
 
+        $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $invoice,
+            [
+                'company_id' => $invoice->company_id,
+                'id' => $invoice->id,
+                'document_key' => $invoice->document_key
+            ],
+            "Factura registrada con éxito FEC."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         clearBillCache($bill);
 
     }
@@ -544,6 +578,8 @@ class InvoiceController extends Controller
     {
         $company = currentCompanyModel(false);
 
+
+
         if ( !$company->atv_validation && $company->use_invoicing ) {
             $apiHacienda = new BridgeHaciendaApi();
             $token = $apiHacienda->login(false);
@@ -581,6 +617,7 @@ class InvoiceController extends Controller
         $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
         $codigos = CodigoIvaRepercutido::where('hidden', false)->get();
         $units = UnidadMedicion::all()->toArray();
+
         return view('Invoice/nota-credito', compact('invoice','units','arrayActividades','countries','product_categories','codigos', 'company') );
     }
 
@@ -616,7 +653,18 @@ class InvoiceController extends Controller
                     $company->save();
 
                     clearInvoiceCache($invoice);
-
+                    $user = auth()->user();
+                    Activity::dispatch(
+                        $user,
+                        $invoice,
+                        [
+                            'company_id' => $invoice->company_id,
+                            'id' => $invoice->id,
+                            'document_key' => $invoice->document_key
+                        ],
+                        "Nota de debito creada."
+                    )->onConnection(config('etax.queue_connections'))
+                    ->onQueue('log_queue');
                     return redirect('/facturas-emitidas')->withMessage('Nota de debito creada.');
 
                 } else {
@@ -645,6 +693,19 @@ class InvoiceController extends Controller
                     ->update(['product_type'=>$item['category_product'],'iva_type'=>$item['tipo_iva']]);
                 }
             }catch(\Throwable $e){}
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "Factura validada satisfactoriamente."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
+
             return redirect('/facturas-emitidas/')->withMessage('Factura validada satisfactoriamente');
         }else{
             return back()->withError('Mes seleccionado ya fue cerrado');
@@ -703,6 +764,18 @@ class InvoiceController extends Controller
             $invoice->setInvoiceData($request);
             
             clearInvoiceCache($invoice);
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "Factura editada con éxito."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-emitidas')->withMessage('Factura editada con éxito');
         } else{
             return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
@@ -737,6 +810,18 @@ class InvoiceController extends Controller
             }
             
             $invoice->save();
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "La factura ". $invoice->document_number . " ha sido validada."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             
             clearInvoiceCache($invoice);
 
@@ -957,7 +1042,18 @@ class InvoiceController extends Controller
                     $company->save();
 
                     clearInvoiceCache($invoice);
-
+                    $user = auth()->user();
+                    Activity::dispatch(
+                        $user,
+                        $invoice,
+                        [
+                            'company_id' => $invoice->company_id,
+                            'id' => $invoice->id,
+                            'document_key' => $invoice->document_key
+                        ],
+                        "Nota de credito creada."
+                    )->onConnection(config('etax.queue_connections'))
+                    ->onQueue('log_queue');
                     return redirect('/facturas-emitidas')->withMessage('Nota de credito creada.');
 
                 } else {
@@ -1054,6 +1150,19 @@ class InvoiceController extends Controller
                         if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                             //Registra el XML. Si todo sale bien, lo guarda en S3.
                             $invoice = Invoice::saveInvoiceXML( $arr, 'XML' );
+
+                            $user = auth()->user();
+                            Activity::dispatch(
+                                $user,
+                                $invoice,
+                                [
+                                    'company_id' => $invoice->company_id,
+                                    'id' => $invoice->id,
+                                    'document_key' => $invoice->document_key
+                                ],
+                                "Factura de compra importada por xml."
+                            )->onConnection(config('etax.queue_connections'))
+                            ->onQueue('log_queue');
                             if( $invoice ) {
                                 Invoice::storeXML( $invoice, $file );
                             }
@@ -1113,6 +1222,18 @@ class InvoiceController extends Controller
             
             $invoice->is_code_validated = true;
             $invoice->save();
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "La factura ". $invoice->document_number . " ha sido validada."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             
             if( $invoice->year == 2018 ) {
                 clearLastTaxesCache($invoice->company->id, 2018);
@@ -1185,11 +1306,35 @@ class InvoiceController extends Controller
             $invoice->hide_from_taxes = true;
             $invoice->save();
             clearInvoiceCache($invoice);
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "La factura ". $invoice->document_number . " se ha ocultado para cálculo de IVA."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-emitidas')->withMessage( 'La factura '. $invoice->document_number . ' se ha ocultado para cálculo de IVA.');
         }else{
             $invoice->hide_from_taxes = false;
             $invoice->save();
             clearInvoiceCache($invoice);
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "La factura ". $invoice->document_number . " se ha incluido nuevamente para cálculo de IVA."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-emitidas')->withMessage( 'La factura '. $invoice->document_number . ' se ha incluido nuevamente para cálculo de IVA.');
         }
     }
@@ -1204,11 +1349,35 @@ class InvoiceController extends Controller
             if ( $request->autorizar ) {
                 $invoice->is_authorized = true;
                 $invoice->save();
+                $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $invoice,
+                    [
+                        'company_id' => $invoice->company_id,
+                        'id' => $invoice->id,
+                        'document_key' => $invoice->document_key
+                    ],
+                    "La factura ". $invoice->document_number . " ha sido autorizada."
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
                 return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . ' ha sido autorizada');
             }else {
                 $invoice->is_authorized = false;
                 $invoice->is_void = true;
                 InvoiceItem::where('invoice_id', $invoice->id)->delete();
+                $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $invoice,
+                    [
+                        'company_id' => $invoice->company_id,
+                        'id' => $invoice->id,
+                        'document_key' => $invoice->document_key
+                    ],
+                    "La factura ". $invoice->document_number . " ha sido rechazada."
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
                 $invoice->delete();
                 return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . ' ha sido rechazada');
             }
@@ -1233,6 +1402,18 @@ class InvoiceController extends Controller
             $invoice->delete();
             clearInvoiceCache($invoice);
             
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "La factura ha sido eliminada satisfactoriamente."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-emitidas')->withMessage('La factura ha sido eliminada satisfactoriamente.');
         }else{
             return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
@@ -1256,6 +1437,19 @@ class InvoiceController extends Controller
             InvoiceItem::onlyTrashed()->where('invoice_id', $invoice->id)->restore();
             clearInvoiceCache($invoice);
             
+            
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "La factura ha sido restaurada satisfactoriamente."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-emitidas')->withMessage('La factura ha sido restaurada satisfactoriamente.');
         }else{
             return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
@@ -1331,6 +1525,18 @@ class InvoiceController extends Controller
             return back()->withError( 'El correo electrónico no pudo ser reenviado.');
         }
         
+        $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $invoice,
+            [
+                'company_id' => $invoice->company_id,
+                'id' => $invoice->id,
+                'document_key' => $invoice->document_key
+            ],
+            "Se han reenviado los correos exitosamente."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return back()->withMessage( 'Se han reenviado los correos exitosamente.');
     }
     
