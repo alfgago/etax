@@ -95,12 +95,13 @@
   </div>
 </div>
 <script type="text/javascript">
-        Dropzone.autoDiscover = false;
+
+		Dropzone.autoDiscover = false;
         $(document).ready(function(){
 
             var baseUrl = "{{ secure_url('/') }}";	
             var token = "{{ Session::token() }}";
-
+			        
             $("#xml-dropzone").dropzone({
                 paramName: 'file',
                 url: baseUrl+"/facturas-recibidas/importarXML",
