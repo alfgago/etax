@@ -142,7 +142,7 @@ return [
         'production' => [
             'horizon-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['default', 'invoices', 'receptions', 'imports'],
+                'queue' => ['default', 'invoices', 'receptions', 'imports', 'log_queue'],
                 'balance' => 'auto',
                 'processes' => 10,
                 'tries' => 1,
