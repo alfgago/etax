@@ -31,6 +31,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('invoice:resend')->timezone(config('app.timezone'))->everyThirtyMinutes()->runInBackground();
         $schedule->command('creditnote:resend')->timezone(config('app.timezone'))->hourly()->runInBackground();
         $schedule->command('reception:resend')->timezone(config('app.timezone'))->everyFifteenMinutes()->runInBackground();
+        $schedule->command('gosocket:sync')->timezone(config('app.timezone'))->dailyAt('03:30')->runInBackground();
         //Comandos de checkout
         $schedule->command('subscription:checkout')->timezone(config('app.timezone'))->dailyAt('01:30')->runInBackground();
         $schedule->command('subscription:payment')->timezone(config('app.timezone'))->twiceDaily(2, 5)->runInBackground(); //Una vez al día. Aveces se acumulan porque por alguna vez no correo y puede haber doble cargo. Hya un sleep de 3s entre cobro
