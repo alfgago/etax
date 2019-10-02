@@ -72,25 +72,28 @@ class GoSocketInvoicesSync implements ShouldQueue
     private function getBills($user) {
         $token = $user->session_token;
         $apiGoSocket = new BridgeGoSocketApi();
-        $facturas = $apiGoSocket->getReceivedDocuments($token, $user->company_token);
+        $tipos_facturas = $apiGoSocket->getDocumentTypes($token);
+        foreach ($tipos_facturas as $tipo_factura) {
+            $facturas = $apiGoSocket->getReceivedDocuments($token, $user->company_token, $tipo_factura);
 
-        foreach ($facturas as $factura) {
-            $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
-            $company = currentCompanyModel();
-            $xml  = base64_decode($APIStatus);
-            $xml = simplexml_load_string( $xml);
-            $json = json_encode( $xml );
-            $arr = json_decode( $json, TRUE );
-            $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
-            $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-            $consecutivoComprobante = $arr['NumeroConsecutivo'];
-            $clave = $arr['Clave'];
-            //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-            if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
-                //Registra el XML. Si todo sale bien, lo guarda en S3
-                Bill::saveBillXML( $arr, 'XML' );
+            foreach ($facturas as $factura) {
+                $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
+                $company = currentCompanyModel();
+                $xml  = base64_decode($APIStatus);
+                $xml = simplexml_load_string( $xml);
+                $json = json_encode( $xml );
+                $arr = json_decode( $json, TRUE );
+                $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
+                $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+                $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                $clave = $arr['Clave'];
+                //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
+                    //Registra el XML. Si todo sale bien, lo guarda en S3
+                    Bill::saveBillXML( $arr, 'XML' );
+                }
+                $company->save();
             }
-            $company->save();
         }
     }
 }
