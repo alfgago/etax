@@ -36,7 +36,7 @@ class GoSocketInvoicesSync implements ShouldQueue
         $this->getBills($this->user);
     }
 
-    private function getInvoices($user) {
+     private function getInvoices($user) {
         $token = $user->session_token;
         $apiGoSocket = new BridgeGoSocketApi();
         $tipos_facturas = $apiGoSocket->getDocumentTypes($token);

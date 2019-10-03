@@ -65,13 +65,14 @@ class BridgeGoSocketApi
 
     public function getSentDocuments($token, $companyToken, $tipo_factura) {
         try {
+
             $today = Carbon::parse(now('America/Costa_Rica'));
             $first_date = $today->year."-01-01";
-            $second_date = ($today->year + 1)."-01-01";
+            $second_date = $today->year."-12-31";
             $ApplicationIdGS = config('etax.applicationidgs');
             $base64 = base64_encode($ApplicationIdGS . ":" . $token);
             $GoSocket = new Client();
-            $APIStatus = $GoSocket->request('GET', $this->link . "api/Gadget/GetSentDocuments?MyAccountId=" . $companyToken . "&fromDate=".$first_date."&toDate=".$second_date."&DocumentTypeId=".$tipo_factura->DocumentTypeId."&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
+            $APIStatus = $GoSocket->request('GET', $this->link . "api/Gadget/GetSentDocuments?MyAccountId=" . $companyToken . "&fromDate=".$first_date."&toDate=".$second_date."&DocumentTypeId=".$tipo_factura['DocumentTypeId']."&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json", [
                 'headers' => [
                     'Content-Type' => "application/json",
                     'Accept' => "application/json",
@@ -92,11 +93,11 @@ class BridgeGoSocketApi
         try {
             $today = Carbon::parse(now('America/Costa_Rica'));
             $first_date = $today->year."-01-01";
-            $second_date = ($today->year + 1)."-01-01";
+            $second_date = $today->year."-12-31";
             $ApplicationIdGS = config('etax.applicationidgs');
             $base64 = base64_encode($ApplicationIdGS.":".$token);
             $GoSocket = new Client();
-            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetReceivedDocuments?MyAccountId=".$companyToken."&fromDate=".$first_date."&toDate=".$second_date."&DocumentTypeId=".$tipo_factura->DocumentTypeId."&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
+            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetReceivedDocuments?MyAccountId=".$companyToken."&fromDate=".$first_date."&toDate=".$second_date."&DocumentTypeId=".$tipo_factura['DocumentTypeId']."&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
                 'headers' => [
                     'Content-Type' => "application/json",
                     'Accept' => "application/json",
