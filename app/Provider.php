@@ -3,11 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Kyslik\ColumnSortable\Sortable;
 
 class Provider extends Model
 {
-  use Sortable;
+  use Sortable, SoftDeletes;
   
   protected $guarded = [];
   public $sortable = ['code', 'first_name', 'email', 'id_number'];
