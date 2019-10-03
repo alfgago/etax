@@ -94,6 +94,7 @@ class GoSocketController extends Controller
                     );
                 }
                 if ($user !== null && Auth::loginUsingId($user->user_id)) {
+
                         $user->session_token = $token;
                         $user->save();
                         $companyId = $user->company_id;
@@ -102,10 +103,8 @@ class GoSocketController extends Controller
                         $user_login->switchTeam( $team );
                         
                         Cache::forget("cache-currentcompany-$user_login->id");
-
                         GoSocketInvoicesSync::dispatch($user)->onConnection(config('etax.queue_connections'))
                             ->onQueue('gosocket');
-                        
                     return redirect('/');
                 } else {
                     return redirect('/login');
@@ -122,6 +121,12 @@ class GoSocketController extends Controller
         }
 	    
     }
+
+
+
+   
+
+
 
 }
     

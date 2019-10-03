@@ -12,7 +12,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Log;
 use mysql_xdevapi\Exception;
-
+use \Carbon\Carbon;
 
 class BridgeGoSocketApi
 {
@@ -63,12 +63,16 @@ class BridgeGoSocketApi
         }
     }
 
-    public function getSentDocuments($token, $companyToken) {
+    public function getSentDocuments($token, $companyToken, $tipo_factura) {
         try {
+
+            $today = Carbon::parse(now('America/Costa_Rica'));
+            $first_date = $today->year."-01-01";
+            $second_date = $today->year."-12-31";
             $ApplicationIdGS = config('etax.applicationidgs');
             $base64 = base64_encode($ApplicationIdGS . ":" . $token);
             $GoSocket = new Client();
-            $APIStatus = $GoSocket->request('GET', $this->link . "api/Gadget/GetSentDocuments?MyAccountId=" . $companyToken . "&fromDate=2019-01-01&toDate=2020-01-01&DocumentTypeId=1&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
+            $APIStatus = $GoSocket->request('GET', $this->link . "api/Gadget/GetSentDocuments?MyAccountId=" . $companyToken . "&fromDate=".$first_date."&toDate=".$second_date."&DocumentTypeId=".$tipo_factura['DocumentTypeId']."&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json", [
                 'headers' => [
                     'Content-Type' => "application/json",
                     'Accept' => "application/json",
@@ -85,12 +89,15 @@ class BridgeGoSocketApi
         }
     }
 
-    public function getReceivedDocuments($token, $companyToken) {
+    public function getReceivedDocuments($token, $companyToken, $tipo_factura) {
         try {
+            $today = Carbon::parse(now('America/Costa_Rica'));
+            $first_date = $today->year."-01-01";
+            $second_date = $today->year."-12-31";
             $ApplicationIdGS = config('etax.applicationidgs');
             $base64 = base64_encode($ApplicationIdGS.":".$token);
             $GoSocket = new Client();
-            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetReceivedDocuments?MyAccountId=".$companyToken."&fromDate=2019-01-01&toDate=2020-01-01&DocumentTypeId=1&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
+            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetReceivedDocuments?MyAccountId=".$companyToken."&fromDate=".$first_date."&toDate=".$second_date."&DocumentTypeId=".$tipo_factura['DocumentTypeId']."&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
                 'headers' => [
                     'Content-Type' => "application/json",
                     'Accept' => "application/json",
@@ -113,6 +120,29 @@ class BridgeGoSocketApi
             $base64 = base64_encode($ApplicationIdGS . ":" . $token);
             $GoSocket = new Client();
             $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetXml?DocumentId=".$factura."", [
+                'headers' => [
+                    'Content-Type' => "application/json",
+                    'Accept' => "application/json",
+                    'Authorization' => "Basic " . $base64
+                ],
+                'json' => [],
+                'verify' => false,
+            ]);
+
+            return json_decode($APIStatus->getBody()->getContents(), true);
+
+        } catch (\Exception $e) {
+            Log::info('Error al traer invoices GoSocket -->>'. $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getDocumentTypes($token) {
+        try {
+            $ApplicationIdGS = config('etax.applicationidgs');
+            $base64 = base64_encode($ApplicationIdGS . ":" . $token);
+            $GoSocket = new Client();
+            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetDocumentTypes", [
                 'headers' => [
                     'Content-Type' => "application/json",
                     'Accept' => "application/json",
