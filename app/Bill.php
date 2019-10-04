@@ -261,6 +261,7 @@ class Bill extends Model
 
     public function addEditItem(array $data)
     {
+
       if(isset($data['item_number'])) {
           $item = BillItem::updateOrCreate([
               'item_number' => $data['item_number'],
@@ -286,24 +287,29 @@ class Bill extends Model
                   'porc_identificacion_plena' =>  $data['porc_identificacion_plena'] ?? 0
               ]
           );
+
           
           try {
             $exonerationDate = isset( $data['exoneration_date'] )  ? Carbon::createFromFormat('d/m/Y', $data['exoneration_date']) : null;
+
           }catch( \Exception $e ) {
             $exonerationDate = null;
           }
           if( $exonerationDate && isset($data['exoneration_document_type']) && isset($data['exoneration_document_number']) ) {
+            
+          
             $item->exoneration_document_type = $data['exoneration_document_type'] ?? null;
             $item->exoneration_document_number = $data['exoneration_document_number'] ?? null;
             $item->exoneration_company_name = $data['exoneration_company_name'] ?? null;
             $item->exoneration_porcent = $data['exoneration_porcent'] ?? 0;
-            $item->exoneration_amount = $data['exoneration_amount'] ?? 0;
+            $item->exoneration_amount = $data['montoExoneracion'] ?? 0;
             $item->exoneration_date = $exonerationDate;
             $item->exoneration_total_amount = $data['exoneration_total_amount'] ?? 0;
             $item->impuesto_neto = isset($data['impuesto_neto']) ? $data['iva_amount'] - $data['montoExoneracion'] : $data['iva_amount'];
-            $item->save();
-          }
+
+          } 
           
+            $item->save();
           return $item;
       } else {
           return false;
@@ -312,7 +318,7 @@ class Bill extends Model
     
     
     public static function saveBillXML( $arr, $metodoGeneracion ) {
-      
+        
         $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
         if( $metodoGeneracion != "Email" ){
           $company = currentCompanyModel();
@@ -542,6 +548,10 @@ class Bill extends Model
                   $documentoExoneracion = $linea['Impuesto']['Exoneracion']['NumeroDocumento']  ?? null;
                   $companiaExoneracion = $linea['Impuesto']['Exoneracion']['NombreInstitucion'] ?? null;
                   $fechaExoneracion = $linea['Impuesto']['Exoneracion']['FechaEmision'] ?? null;
+                  if($fechaExoneracion){
+                    $fechaExoneracion = Carbon::createFromFormat('Y-m-d', substr($fechaExoneracion, 0, 10));
+                    $fechaExoneracion = $fechaExoneracion->day."/".$fechaExoneracion->month."/".$fechaExoneracion->year;
+                  }
                   $porcentajeExoneracion = $linea['Impuesto']['Exoneracion']['PorcentajeExoneracion'] ?? 0;
                   $montoExoneracion = $linea['Impuesto']['Exoneracion']['MontoExoneracion'] ?? 0;
                   if( $montoExoneracion ){
@@ -591,7 +601,7 @@ class Bill extends Model
               'exoneration_document_number' => $documentoExoneracion,
               'exoneration_company_name' => $companiaExoneracion,
               'exoneration_porcent' => $porcentajeExoneracion,
-              'exoneration_amount' => $montoExoneracion,
+              'montoExoneracion' => $montoExoneracion,
               'exoneration_total_amount' => $totalMontoLinea,
               'is_exempt' => false,
               'porc_identificacion_plena' => 13,
@@ -616,7 +626,23 @@ class Bill extends Model
                 $totalIvaDevuelto += $item->iva_amount;
             }
         }
-        $bill->total_iva_devuelto = $totalIvaDevuelto;
+        $bill->total_iva_devuelto = $arr['ResumenFactura']['TotalIVADevuelto'] ?? 0;
+        $bill->total_serv_gravados = $arr['ResumenFactura']['TotalServGravados'] ?? 0;
+        $bill->total_serv_exentos = $arr['ResumenFactura']['TotalServExentos'] ?? 0;
+        $bill->total_merc_gravados = $arr['ResumenFactura']['TotalMercanciasGravadas'] ?? 0;
+        $bill->total_merc_exentas = $arr['ResumenFactura']['TotalMercanciasExentas'] ?? 0;
+        $bill->total_exento = $arr['ResumenFactura']['TotalExento'] ?? 0;
+        $bill->total_descuento = $arr['ResumenFactura']['TotalDescuentos'] ?? 0;
+        $bill->total_venta_neta = $arr['ResumenFactura']['TotalVentaNeta'] ?? 0;
+        $bill->total_iva = $arr['ResumenFactura']['TotalExento'] ?? 0;
+        $bill->total_venta = $arr['ResumenFactura']['TotalVenta'] ?? 0;
+        $bill->total_comprobante = $arr['ResumenFactura']['TotalComprobante'] ?? 0;
+        $bill->total_otros_cargos = $arr['ResumenFactura']['TotalOtrosCargos'] ?? 0;
+
+        $bill->total_serv_exonerados = $arr['ResumenFactura']['TotalServExonerado'] ?? 0;
+        $bill->total_merc_exonerados = $arr['ResumenFactura']['TotalMercExonerada'] ?? 0;
+        $bill->total_exonerados = $arr['ResumenFactura']['TotalExonerado'] ?? 0;
+        $bill->total_gravado = $arr['ResumenFactura']['TotalGravado'] ?? 0;
         $bill->save();
         
         return $bill;

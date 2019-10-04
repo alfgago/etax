@@ -405,6 +405,7 @@ class Invoice extends Model
     public function addEditItem(array $data)
     {
         try {
+
             if (isset($data['item_number'])) {
                 $item = InvoiceItem::updateOrCreate([
                     'item_number' => $data['item_number'],
@@ -435,8 +436,8 @@ class Invoice extends Model
                 }catch( \Exception $e ) {
                     $exonerationDate = null;
                 }
-
                 if ($exonerationDate && isset($data['typeDocument']) && isset($data['numeroDocumento']) && $data['porcentajeExoneracion'] > 0) {
+
                     $item->exoneration_document_type = $data['typeDocument'] ?? null;
                     $item->exoneration_document_number = $data['numeroDocumento'] ?? null;
                     $item->exoneration_company_name = $data['nombreInstitucion'] ?? null;
@@ -446,9 +447,9 @@ class Invoice extends Model
                     $item->exoneration_total_amount = $data['montoExoneracion'] ?? 0;
                     $item->exoneration_total_gravado = (($item->item_count * $item->unit_price) * $item->exoneration_porcent) / 100 ;
                     $item->impuesto_neto = $data['impuestoNeto'] ?? $data['iva_amount'] - $data['montoExoneracion'];
-                    $item->save();
+                    
                 }
-
+                $item->save();
                 return $item;
             } else {
                 return false;
@@ -929,7 +930,23 @@ class Invoice extends Model
         if( array_key_exists( 'NumeroLinea', $lineas ) ) {
             $lineas = [$arr['DetalleServicio']['LineaDetalle']];
         }
-        
+        $invoice->total_iva_devuelto = $arr['ResumenFactura']['TotalIVADevuelto'] ?? 0;
+        $invoice->total_serv_gravados = $arr['ResumenFactura']['TotalServGravados'] ?? 0;
+        $invoice->total_serv_exentos = $arr['ResumenFactura']['TotalServExentos'] ?? 0;
+        $invoice->total_merc_gravados = $arr['ResumenFactura']['TotalMercanciasGravadas'] ?? 0;
+        $invoice->total_merc_exentas = $arr['ResumenFactura']['TotalMercanciasExentas'] ?? 0;
+        $invoice->total_exento = $arr['ResumenFactura']['TotalExento'] ?? 0;
+        $invoice->total_descuento = $arr['ResumenFactura']['TotalDescuentos'] ?? 0;
+        $invoice->total_venta_neta = $arr['ResumenFactura']['TotalVentaNeta'] ?? 0;
+        $invoice->total_iva = $arr['ResumenFactura']['TotalExento'] ?? 0;
+        $invoice->total_venta = $arr['ResumenFactura']['TotalVenta'] ?? 0;
+        $invoice->total_comprobante = $arr['ResumenFactura']['TotalComprobante'] ?? 0;
+        $invoice->total_otros_cargos = $arr['ResumenFactura']['TotalOtrosCargos'] ?? 0;
+
+        $invoice->total_serv_exonerados = $arr['ResumenFactura']['TotalServExonerado'] ?? 0;
+        $invoice->total_merc_exonerados = $arr['ResumenFactura']['TotalMercExonerada'] ?? 0;
+        $invoice->total_exonerados = $arr['ResumenFactura']['TotalExonerado'] ?? 0;
+        $invoice->total_gravado = $arr['ResumenFactura']['TotalGravado'] ?? 0;
         $invoice->save();
         
         $lids = array();
@@ -971,6 +988,10 @@ class Invoice extends Model
                 $documentoExoneracion = $linea['Impuesto']['Exoneracion']['NumeroDocumento']  ?? null;
                 $companiaExoneracion = $linea['Impuesto']['Exoneracion']['NombreInstitucion'] ?? null;
                 $fechaExoneracion = $linea['Impuesto']['Exoneracion']['FechaEmision'] ?? null;
+                if($fechaExoneracion){
+                  $fechaExoneracion = Carbon::createFromFormat('Y-m-d', substr($fechaExoneracion, 0, 10));
+                  $fechaExoneracion = $fechaExoneracion->day."/".$fechaExoneracion->month."/".$fechaExoneracion->year;
+                }
                 $porcentajeExoneracion = $linea['Impuesto']['Exoneracion']['PorcentajeExoneracion'] ?? 0;
                 $montoExoneracion = $linea['Impuesto']['Exoneracion']['MontoExoneracion'] ?? 0;
               }
@@ -999,16 +1020,15 @@ class Invoice extends Model
               'iva_amount' => $montoIva,
               'impuesto_neto' => $impuestoNeto,
               'exoneration_date' => $fechaExoneracion,
-              'exoneration_document_type' => $tipoDocumentoExoneracion,
-              'exoneration_document_number' => $documentoExoneracion,
-              'exoneration_company_name' => $companiaExoneracion,
-              'exoneration_porcent' => $porcentajeExoneracion,
-              'exoneration_amount' => $montoExoneracion,
+              'typeDocument' => $tipoDocumentoExoneracion,
+              'numeroDocumento' => $documentoExoneracion,
+              'nombreInstitucion' => $companiaExoneracion,
+              'porcentajeExoneracion' => $porcentajeExoneracion,
+              'montoExoneracion' => $montoExoneracion,
               'exoneration_total_amount' => $totalMontoLinea,
               'is_exempt' => false,
               'porc_identificacion_plena' => 13,
             );
-            
             $item_modificado = $invoice->addEditItem($item);
             array_push( $lids, $item_modificado->id );
         }
@@ -1018,6 +1038,7 @@ class Invoice extends Model
             $item->delete();
           }
         }
+        
         $invoice->save();
         
         return $invoice;
