@@ -413,10 +413,10 @@ class BillController extends Controller
             $time_start = getMicrotime();
             $company = currentCompanyModel();
             $file = Input::file('file');
-                    $xml = simplexml_load_string( file_get_contents($file) );
-                    $json = json_encode( $xml ); // convert the XML string to JSON
-                    $arr = json_decode( $json, TRUE );
-
+            $xml = simplexml_load_string( file_get_contents($file) );
+            $json = json_encode( $xml ); // convert the XML string to JSON
+            $arr = json_decode( $json, TRUE );                
+            if(substr($arr['NumeroConsecutivo'],8,2) != "04"){
                     $FechaEmision = explode("T", $arr['FechaEmision']);
                     $FechaEmision = explode("-", $FechaEmision[0]);
                     $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
@@ -433,26 +433,31 @@ class BillController extends Controller
                             $bill = Bill::saveBillXML( $arr, 'XML' );
                             if( $bill ) {
                                 Bill::storeXML( $bill, $file );
-                            }
 
-                            $user = auth()->user();
-                            Activity::dispatch(
-                                $user,
-                                $bill,
-                                [
-                                    'company_id' => $bill->company_id,
-                                    'id' => $bill->id,
-                                    'document_key' => $bill->document_key
-                                ],
-                                "Importar factura de compra por XML."
-                            )->onConnection(config('etax.queue_connections'))
-                            ->onQueue('log_queue');
+                                $user = auth()->user();
+                                Activity::dispatch(
+                                    $user,
+                                    $bill,
+                                    [
+                                        'company_id' => $bill->company_id,
+                                        'id' => $bill->id,
+                                        'document_key' => $bill->document_key
+                                    ],
+                                    "Importar factura de compra por XML."
+                                )->onConnection(config('etax.queue_connections'))
+                                ->onQueue('log_queue');
+                            }
                         }else{
                             return Response()->json("El documento $consecutivoComprobante no le pertenece a su empresa actual", 400);
                         }
                     }else{
                         return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
                     }
+                }else{
+
+                    return Response()->json('Error: No se puede importar un tiquete electrónico.', 400);
+                }
+
              
             $company->save();
             $time_end = getMicrotime();
