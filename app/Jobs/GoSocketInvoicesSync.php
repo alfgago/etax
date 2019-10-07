@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Bill;
+use App\Company;
 use App\Invoice;
 use App\Utils\BridgeGoSocketApi;
 use Illuminate\Bus\Queueable;
@@ -16,13 +17,15 @@ class GoSocketInvoicesSync implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private $user = '';
+    private $companyId = '';
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($user = '') {
+    public function __construct($user = '', $companyId = '') {
         $this->user = $user;
+        $this->companyId = $companyId;
     }
 
     /**
@@ -32,11 +35,11 @@ class GoSocketInvoicesSync implements ShouldQueue
      */
     public function handle()
     {
-        $this->getInvoices($this->user);
-        $this->getBills($this->user);
+        $this->getInvoices($this->user, $this->companyId);
+        $this->getBills($this->user, $this->companyId);
     }
 
-     private function getInvoices($user) {
+     private function getInvoices($user, $companyId) {
         $token = $user->session_token;
         $apiGoSocket = new BridgeGoSocketApi();
         $tipos_facturas = $apiGoSocket->getDocumentTypes($token);
@@ -44,7 +47,7 @@ class GoSocketInvoicesSync implements ShouldQueue
             $facturas = $apiGoSocket->getSentDocuments($token, $user->company_token, $tipo_factura);
             foreach ($facturas as $factura) {
                 $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
-                $company = currentCompanyModel();
+                $company = Company::find($companyId);
                 $xml  = base64_decode($APIStatus);
                 $xml = simplexml_load_string( $xml);
                 $json = json_encode( $xml );
@@ -69,7 +72,7 @@ class GoSocketInvoicesSync implements ShouldQueue
     }
 
 
-    private function getBills($user) {
+    private function getBills($user, $companyId) {
         $token = $user->session_token;
         $apiGoSocket = new BridgeGoSocketApi();
         $tipos_facturas = $apiGoSocket->getDocumentTypes($token);
@@ -78,7 +81,7 @@ class GoSocketInvoicesSync implements ShouldQueue
 
             foreach ($facturas as $factura) {
                 $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
-                $company = currentCompanyModel();
+                $company = Company::find($companyId);
                 $xml  = base64_decode($APIStatus);
                 $xml = simplexml_load_string( $xml);
                 $json = json_encode( $xml );

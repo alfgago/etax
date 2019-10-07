@@ -103,7 +103,7 @@ class GoSocketController extends Controller
                         $user_login->switchTeam( $team );
                         
                         Cache::forget("cache-currentcompany-$user_login->id");
-                        GoSocketInvoicesSync::dispatch($user)->onConnection(config('etax.queue_connections'))
+                        GoSocketInvoicesSync::dispatch($user, $companyId)->onConnection(config('etax.queue_connections'))
                             ->onQueue('gosocket');
                     return redirect('/');
                 } else {
@@ -121,12 +121,6 @@ class GoSocketController extends Controller
         }
 	    
     }
-
-
-
-   
-
-
 
 }
     
