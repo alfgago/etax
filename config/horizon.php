@@ -142,7 +142,7 @@ return [
         'production' => [
             'horizon-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['default', 'invoices', 'receptions', 'imports', 'bulk'],
+                'queue' => ['default', 'invoices', 'receptions', 'imports', 'bulk', 'gosocket'],
                 'balance' => 'auto',
                 'processes' => 10,
                 'tries' => 3,
@@ -159,7 +159,7 @@ return [
         'local' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['default', 'invoices', 'receptions', 'imports', 'bulk'],
+                'queue' => ['default', 'invoices', 'receptions', 'imports', 'bulk', 'gosocket'],
                 'balance' => 'auto',
                 'processes' => 3,
                 'tries' => 3,
