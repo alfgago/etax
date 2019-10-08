@@ -1694,5 +1694,22 @@ class InvoiceController extends Controller
         
         
     }
-    
+
+    public function envioMasivoExcel(){
+        request()->validate([
+          'archivo' => 'required',
+        ]);
+        $collection = Excel::toCollection( new InvoiceImportSM(), request()->file('archivo') );
+        $companyId = currentCompany();
+        $invoiceList = $collection->toArray()[0];
+        try {
+            Log::debug('Creando job de registro de facturas.');
+            foreach (array_chunk ( $invoiceList, 100 ) as $facturas) {
+                ProcessSendExcelInvoices::dispatch($facturas, $companyId)->onQueue('bulk');
+            }
+        }catch( \Throwable $ex ){
+            Log::error("Error importando excel archivo:" . $ex);
+        }
+        return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
+    }
 }
