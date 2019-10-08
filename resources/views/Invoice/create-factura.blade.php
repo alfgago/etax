@@ -176,6 +176,7 @@ $company = currentCompanyModel();
                 </div>
                 
                 @if( @$document_type == '08' )
+
                   <div class="form-group col-md-12">
                     <label for="tipo_compra">Tipo de compra</label>
                     <select class="form-control" id="tipo_compra" name="tipo_compra">
@@ -183,6 +184,49 @@ $company = currentCompanyModel();
                         <option value="import">Importación de servicios</option>
                     </select>
                   </div>
+                  <div class="form-row">
+                    <div class="form-group col-md-12">
+                      <h3>
+                        Información de referencia
+                      </h3>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                      <label for="ref_doc_type">Tipo</label>
+                      <select name="ref_doc_type" id="ref_doc_type" class="form-control" required>
+                        <option value="14" selected="">Comprobante aportado por contribuyente del Regimen Simplificado.</option>
+                        <option value="15">Sustituye una factura electrónica de compra.</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                      <label for="ref_number">Numero de documento</label>
+                      <input type="text" class="form-control" name="ref_number" id="ref_number" placeholder="">
+                    </div>
+
+                    <div class="form-group col-md-6">
+                      <label for="ref_date">Fecha de emision</label>
+                      <div class='input-group date inputs-fecha'>
+                        <input id="ref_date" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="ref_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->addDays(3)->format('d/m/Y') }}" maxlength="10">
+                        <span class="input-group-addon">
+                        <i class="icon-regular i-Calendar-4"></i>
+                      </span>
+                      </div>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                      <label for="code_note">Codigo referencia</label>
+                      <select name="code_note" id="code_note" class="form-control" required>
+                        <option value="04" selected="">Referencia a otro documento.</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                      <label for="reason">Razón</label>
+                      <input type="text" class="form-control" name="reason" id="reason" placeholder="">
+                    </div>
+                  </div>
+
                 @endif
                 
                  <div class="form-group col-md-4">

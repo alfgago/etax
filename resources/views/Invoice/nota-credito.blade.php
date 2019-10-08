@@ -107,9 +107,6 @@
                                 <label for="iva_amount">Razón</label>
                                 <input type="text" class="form-control" name="reason" id="reason" placeholder="">
                             </div>
-
-
-
                         </div>
 
                     </div>
