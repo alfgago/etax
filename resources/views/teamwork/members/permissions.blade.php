@@ -51,22 +51,24 @@ Editar permisos de equipo "{{$team->name}}"
                 </thead>
                 <tbody>
                     @if ( $team->users->count() )           
-                    @foreach($team->users AS $user)
-                    @if(auth()->user()->id != $user->id)
-                    @php $user_permissions = get_user_company_permissions($team->company_id,$user->id)@endphp
-                    <tr>
-                        <td>{{$user->first_name.' '.$user->last_name.' '.$user->last_name2}}</td>
-                        <td>{{$user->email}}</td>                    
-                        @foreach($permissions as $permission)
-                        <td><label class="checkbox checkbox-primary">
-                                <input type="checkbox" name="permissions[<?php echo $user->id ?>][]" value="{{$permission->id}}" <?php echo in_array($permission->id, $user_permissions) ? 'checked' : ''; ?>>                
-                                <span class="checkmark"></span>
-                            </label>
-                        </td>
-                        @endforeach                                   
-                    </tr>
-                    @endif
-                    @endforeach
+                        @foreach($team->users AS $user)
+                            @if(auth()->user()->id != $user->id)
+                                @if(substr($user->email,-3) != ".gs")
+                                    @php $user_permissions = get_user_company_permissions($team->company_id,$user->id)@endphp
+                                    <tr>
+                                        <td>{{$user->first_name.' '.$user->last_name.' '.$user->last_name2}}</td>
+                                        <td>{{$user->email}}</td>                    
+                                        @foreach($permissions as $permission)
+                                        <td><label class="checkbox checkbox-primary">
+                                                <input type="checkbox" name="permissions[<?php echo $user->id ?>][]" value="{{$permission->id}}" <?php echo in_array($permission->id, $user_permissions) ? 'checked' : ''; ?>>                
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        </td>
+                                        @endforeach                                   
+                                    </tr>
+                                @endif
+                            @endif
+                        @endforeach
                     @endif
                 </tbody>
             </table>

@@ -1128,9 +1128,11 @@ class InvoiceController extends Controller
             $company = currentCompanyModel();
             $file = Input::file('file');
 
-                    $xml = simplexml_load_string( file_get_contents($file) );
-                    $json = json_encode( $xml ); // convert the XML string to json  
-                    $arr = json_decode( $json, TRUE );
+            $xml = simplexml_load_string( file_get_contents($file) );
+            $json = json_encode( $xml ); // convert the XML string to json  
+            $arr = json_decode( $json, TRUE );
+
+                if(substr($arr['NumeroConsecutivo'],8,2) != "04"){
                     $FechaEmision = explode("T", $arr['FechaEmision']);
                     $FechaEmision = explode("-", $FechaEmision[0]);
                     $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
@@ -1150,20 +1152,20 @@ class InvoiceController extends Controller
                         if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                             //Registra el XML. Si todo sale bien, lo guarda en S3.
                             $invoice = Invoice::saveInvoiceXML( $arr, 'XML' );
-
-                            $user = auth()->user();
-                            Activity::dispatch(
-                                $user,
-                                $invoice,
-                                [
-                                    'company_id' => $invoice->company_id,
-                                    'id' => $invoice->id,
-                                    'document_key' => $invoice->document_key
-                                ],
-                                "Factura de compra importada por xml."
-                            )->onConnection(config('etax.queue_connections'))
-                            ->onQueue('log_queue');
+                            
                             if( $invoice ) {
+                                $user = auth()->user();
+                                Activity::dispatch(
+                                    $user,
+                                    $invoice,
+                                    [
+                                        'company_id' => $invoice->company_id,
+                                        'id' => $invoice->id,
+                                        'document_key' => $invoice->document_key
+                                    ],
+                                    "Factura de compra importada por xml."
+                                )->onConnection(config('etax.queue_connections'))
+                                ->onQueue('log_queue');
                                 Invoice::storeXML( $invoice, $file );
                             }
                         }else{
@@ -1173,6 +1175,10 @@ class InvoiceController extends Controller
                         return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
                         //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
                     } 
+                }else{
+                    return Response()->json('Error: No se puede subir tiquetes electrónicos.', 400);
+                        //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
+                } 
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
