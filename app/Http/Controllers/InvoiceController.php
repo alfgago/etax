@@ -475,11 +475,11 @@ class InvoiceController extends Controller
         $user = auth()->user();
         Activity::dispatch(
             $user,
-            $invoice,
+            $bill,
             [
-                'company_id' => $invoice->company_id,
-                'id' => $invoice->id,
-                'document_key' => $invoice->document_key
+                'company_id' => $bill->company_id,
+                'id' => $bill->id,
+                'document_key' => $bill->document_key
             ],
             "Factura registrada con éxito FEC."
         )->onConnection(config('etax.queue_connections'))
