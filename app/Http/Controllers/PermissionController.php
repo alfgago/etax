@@ -28,7 +28,7 @@ class PermissionController extends Controller {
     public function index() {
         $permissions = Permission::latest()->paginate(10);
         return view('permissions.index', compact('permissions'))
-                        ->with('i', (request()->input('page', 1) - 1) * 10);
+                        ->with('i', (request()->input('page', 1) - 1) * 10); 
     }
 
     /**
