@@ -441,7 +441,7 @@ class InvoiceController extends Controller
                 return back()->withError('Mes seleccionado ya fue cerrado');
             }
         } catch( \Exception $ex ) {
-            Log::error("ERROR Envio de factura a hacienda -> ".$ex->getMessage());
+            Log::error("ERROR Envio de factura a hacienda -> ".$ex);
             return back()->withError( 'Ha ocurrido un error al enviar factura.' );
         }
     }
@@ -475,11 +475,11 @@ class InvoiceController extends Controller
         $user = auth()->user();
         Activity::dispatch(
             $user,
-            $invoice,
+            $bill,
             [
-                'company_id' => $invoice->company_id,
-                'id' => $invoice->id,
-                'document_key' => $invoice->document_key
+                'company_id' => $bill->company_id,
+                'id' => $bill->id,
+                'document_key' => $bill->document_key
             ],
             "Factura registrada con éxito FEC."
         )->onConnection(config('etax.queue_connections'))

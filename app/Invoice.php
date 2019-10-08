@@ -248,6 +248,16 @@ class Invoice extends Model
                 $this->client_id_number = trim($this->company->id_number);
                 $this->client_id_type = $this->company->type;
 
+                //Set reference invoice
+                if (isset($request->ref_number)) {
+                    $this->code_note = $request->code_note ?? '04';
+                    $this->reason = $request->reason ?? 'Razon';
+                    $this->reference_generated_date = Carbon::createFromFormat('d/m/Y g:i A',
+                        $request->ref_date . ' ' . '12:00 AM');
+                    $this->reference_document_key = $request->ref_number;
+                    $this->reference_doc_type = $request->ref_doc_type;
+                }
+
                 //Datos de proveedor
                 if ($request->provider_id == '-1') {
                     $tipo_persona = $request->tipo_persona;
@@ -361,7 +371,7 @@ class Invoice extends Model
             return $this;
 
         } catch (\Exception $e) {
-            Log::error('Error al crear factura: '.$e->getMessage());
+            Log::error('Error al crear factura: '.$e);
             return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
         }
     }
