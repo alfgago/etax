@@ -150,8 +150,9 @@ class InvoiceUtils
                     'data_invoice' => $invoice, 'data_company' =>$company]));
             }
             Log::info('Se enviaron correos con PDF y XML: ' .$invoice->id );
-        }catch( \Throwable $e ){
+        }catch( \Exception $e ){
             Log::error('Fallo el envío de correos: ' .$invoice->id );
+            Log::error('Fallo el envío de correos: ' .$e );
         }
     }
     
