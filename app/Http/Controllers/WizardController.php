@@ -11,6 +11,7 @@ use App\Invoice;
 use App\AtvCertificate;
 use App\Team;
 use App\CalculatedTax;
+use App\UserCompanyPermission;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cache;
@@ -168,9 +169,12 @@ class WizardController extends Controller
             );
 
             $team = Team::where('company_id', $company->id)->first();
-
+            $user_id = auth()->user()->id;
+            $current_company = currentCompany();
+            $permisos = UserCompanyPermission::where('company_id',$current_company)
+                        ->where('user_id',$user_id)->where('permission_id',8)->get();
             /* Only owner of company or user invited as admin for that company can edit company details */
-            if ( !auth()->user()->isOwnerOfTeam($team) ) 
+            if ( !auth()->user()->isOwnerOfTeam($team) && !$permisos) 
             {
                 abort(403);
             }

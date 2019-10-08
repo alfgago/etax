@@ -320,7 +320,7 @@ class Bill extends Model
     public static function saveBillXML( $arr, $metodoGeneracion ) {
         
         $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
-        if( $metodoGeneracion != "Email" ){
+        if($metodoGeneracion != "Email" && $metodoGeneracion != 'GS' ){
           $company = currentCompanyModel();
         }else{
           //Si es email, busca por ID del receptor para encontrar la compañia

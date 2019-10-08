@@ -715,7 +715,7 @@ class Invoice extends Model
     public static function saveInvoiceXML( $arr, $metodoGeneracion ) {
       
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
-        if( $metodoGeneracion != "Email" ){
+        if( $metodoGeneracion != "Email" && $metodoGeneracion != 'GS' ){
           $company = currentCompanyModel();
         }else{
           //Si es email, busca por ID del proveedor para encontrar la compañia
