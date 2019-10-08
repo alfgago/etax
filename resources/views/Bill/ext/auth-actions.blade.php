@@ -16,3 +16,7 @@
         Rechazar
       </a>
     </form>
+    
+    <a href="/facturas-recibidas/download-pdf/{{ $id }}" title="Descargar PDF" class="text-warning mr-2" download > 
+      <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+    </a>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\LogActivityHandler as Activity;
 use App\Jobs\GoSocketInvoicesSync;
 use App\Utils\BridgeGoSocketApi;
 use Illuminate\Http\Request;

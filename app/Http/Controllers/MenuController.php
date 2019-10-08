@@ -8,10 +8,6 @@ use App\Menu;
 class MenuController extends Controller
 {
 
-	public function menu($nombre){
-		$menu = Menu::where('nombre',$nombre)->first();
-		$items = $menu->items;
-		dd($items)
-	}
+
     
 }

@@ -28,10 +28,7 @@
                     <div class="form-group col-md-12 with-button">
                       <label for="cliente">Seleccione el cliente</label>
                       <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required disabled>
-                        <option value=''>-- Seleccione un cliente --</option>
-                        @foreach ( currentCompanyModel()->clients as $cliente )
-                          <option  {{ $invoice->client_id == $cliente->id ? 'selected' : '' }} value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
-                        @endforeach
+                         <option value="{{ $invoice->client_id  }}" >{{ $invoice->client_id_number }} - {{ $invoice->client_first_name }}</option>
                       </select>
                     </div>
                   </div>
@@ -77,12 +74,21 @@
                   <label for="iva_amount">Monto IVA </label>
                   <input type="text" class="form-control" value="{{number_format($invoice->iva_amount, 2)}}" disabled name="iva_amount" required>
                 </div>
-                @if($invoice->total_iva_devuelto > 0)
-                <div class="form-group col-md-4">
+
+                <div class="form-group col-md-4 hidden" id="total_iva_devuelto-cont">
                   <label for="total">IVA Devuelto</label>
-                  <input type="text" class="form-control total" value="{{number_format($invoice->total_iva_devuelto, 2)}}" disabled name="total"  >
+                  <input type="text" class="form-control total" name="total_iva_devuelto" id="total_iva_devuelto" placeholder="" readonly="true" required>
                 </div>
-                @endif
+
+                <div class="form-group col-md-4 hidden" id="total_iva_exonerado-cont">
+                  <label for="total">IVA Exonerado</label>
+                  <input type="text" class="form-control total" name="total_iva_exonerado" id="total_iva_exonerado" placeholder="" readonly="true" required>
+                </div>
+
+                <div class="form-group col-md-4 hidden" id="total_otros_cargos-cont">
+                  <label for="total">Otros cargos</label>
+                  <input type="text" class="form-control total" name="total_otros_cargos" id="total_otros_cargos" placeholder="" readonly="true" required>
+                </div>
       
                 <div class="form-group col-md-4">
                   <label for="total">Total</label>
@@ -90,7 +96,34 @@
                 </div>
       
               </div>
-                
+              
+
+              @if($invoice->document_type == "03")
+                  <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <h3>
+                                    Información de referencia
+                                </h3>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="subtotal">Tipo</label>
+                                <select name="code_note" id="code_note" class="form-control" required readonly disabled>
+                                    <option value="01" @if($invoice->reason == "01") selected @endif >Anula documento de referencia</option>
+                                    <option value="02" @if($invoice->reason == "02") selected @endif>Corrige texto de ocumento de referencia</option>
+                                    <option value="03" @if($invoice->reason == "03") selected @endif>Corrige monto</option>
+                                    <option value="04" @if($invoice->reason == "04") selected @endif>Referencia a otro documento</option>
+                                    <option value="05" @if($invoice->reason == "05") selected @endif>Sustituye comprobante provisional por contigencia</option>
+                                    <option value="99" @if($invoice->reason == "99") selected @endif>Otros</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="iva_amount">Razón</label>
+                                <input type="text" class="form-control" name="reason" id="reason" placeholder="" readonly value="{{$invoice->reason}}">
+                            </div>
+                        </div>
+              @endif
             </div>
             
             <div class="col-md offset-md-1">  
@@ -278,6 +311,55 @@
                       <td class='acciones'>
                         <span title='Editar linea' class='btn-editar-item text-success mr-2' onclick="abrirPopup('linea-popup'); cargarFormItem({{ $loop->index }});"><i class='nav-icon i-Pen-2'></i> </span> 
                         <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ $loop->index }});' ><i class='nav-icon i-Close-Window'></i> </span> 
+                      </td>
+                  </tr>
+                  @endforeach
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="form-row" id="tabla-otroscargos-factura" style="{{ isset($invoice->otherCharges[0]) ? '' : 'display: none;'}}">  
+
+            <div class="form-group col-md-12">
+              <h3>
+                Otros cargos
+              </h3>
+            </div>
+            
+            <div class="form-group col-md-12" >
+              <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
+                <thead class="thead-dark">
+                  <tr>
+                    <th>#</th>
+                    <th>Tipo</th>
+                    <th>Receptor</th>
+                    <th>Detalle</th>
+                    <th>Monto del cargo</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach ( $invoice->otherCharges as $item )
+                   <tr class="otros-tabla otros-index-{{ $loop->index }}" index="{{ $loop->index }}" attr-num="{{ $loop->index }}" id="otros-tabla-{{ $loop->index }}">
+                      <td><span class="numero-fila">{{ $loop->index+1 }}</span></td>
+                      <td>{{ $item->document_type }}</td>
+                      <td>{{ $item->provider_id_number }} {{ $item->provider_name }}</td>
+                      <td>{{ $item->description }}</td>
+                      <td>{{ number_format($item->amount,2) }} </td>
+                      <td class='acciones'>
+                        <span title='Editar linea' class='btn-editar-item text-success mr-2' onclick="abrirPopup('otros-popup'); cargarFormOtros({{ $loop->index }});"> <i class="fa fa-pencil" aria-hidden="true"></i> </span> 
+                        <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarOtros({{ $loop->index }});' > <i class="fa fa-trash-o" aria-hidden="true"></i> </span> 
+                      </td>
+                      <td class="hidden">
+                        <input type="hidden" class='otros-item_number' name="otros[{{ $loop->index }}][item_number]" itemname="item_number" value="{{ $loop->index+1 }}">
+                        <input type="hidden" class="otros_id" name="otros[{{ $loop->index }}][id]" itemname="id" value="{{ $item->id }}"> 
+                        <input type="hidden" class="otros-document_type" name="otros[{{ $loop->index }}][document_type]" itemname="document_type" value="{{ $item->document_type }}"> 
+                        <input type="hidden" class='otros-provider_id_number' name="otros[{{ $loop->index }}][provider_id_number]" itemname="provider_id_number" value="{{ $item->provider_id_number }}">
+                        <input type="hidden" class='otros-provider_name' name="otros[{{ $loop->index }}][provider_name]" itemname="provider_name" value="{{ $item->provider_name }}">
+                        <input type="hidden" class='otros-description' name="otros[{{ $loop->index }}][description]" itemname="description" value="{{ $item->description }}">
+                        <input type="hidden" class='otros-amount' name="otros[{{ $loop->index }}][amount]" itemname="amount" value="{{ $item->amount }}">
+                        <input type="hidden" class='otros-percentage' name="otros[{{ $loop->index }}][percentage]" itemname="percentage" value="{{ $item->percentage }}">
                       </td>
                   </tr>
                   @endforeach

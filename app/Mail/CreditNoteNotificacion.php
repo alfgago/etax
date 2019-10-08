@@ -38,6 +38,7 @@ class CreditNoteNotificacion extends Mailable
             ->from('info@etaxcr.com', $fromName);
 
         $message->attachFromStorage($this->content['xml']);
+        $message->attachFromStorage($this->content['xml_hacienda']);
         return $message;
     }
 }

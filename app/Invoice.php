@@ -78,6 +78,12 @@ class Invoice extends Model
         return $this->hasMany(InvoiceItem::class);
     }
   
+    //Relación con facturas emitidas
+    public function otherCharges()
+    {
+        return $this->hasMany(OtherCharges::class);
+    }
+  
     //Devuelve la fecha de generación en formato Carbon
     public function generatedDate()
     {
@@ -220,6 +226,8 @@ class Invoice extends Model
               $this->client_zip = $client->zip;
               $this->client_phone = preg_replace('/[^0-9]/', '', $client->phone);
               $this->client_id_number = $client->id_number;
+              $this->client_id_type = $client->tipo_persona;
+
             } else {
               $this->client_first_name = 'N/A';
             }
@@ -238,6 +246,7 @@ class Invoice extends Model
                 $this->client_zip = $this->company->zip;
                 $this->client_phone = preg_replace('/[^0-9]/', '', $this->company->phone);
                 $this->client_id_number = trim($this->company->id_number);
+                $this->client_id_type = $this->company->type;
 
                 //Datos de proveedor
                 if ($request->provider_id == '-1') {
@@ -296,6 +305,7 @@ class Invoice extends Model
             }
             $this->save();
 
+            //Recorrer Items
             $lids = array();
             $i = 1;
             $totalIvaDevuelto = 0;
@@ -310,19 +320,42 @@ class Invoice extends Model
                 array_push( $lids, $item_modificado->id );
                 $i++;
             }
-
             foreach ($this->items as $item) {
                 if (!in_array( $item->id, $lids )) {
                     $item->delete();
                 }
             }
-
             foreach ($this->items as $item) {
                 if ($this->payment_type == '02' && $item->product_type == 12) {
                     $totalIvaDevuelto += $item->iva_amount;
                 }
             }
             $this->total_iva_devuelto = $totalIvaDevuelto;
+            
+            try{
+              //Recorrer OtrosCargos
+              $oids = array();
+              $i = 1;
+              $totalOtrosCargos = 0;
+              foreach ($request->otros as $item) {
+                  $item['item_number'] = $i;
+                  $item['item_id'] = $item['id'] ? $item['id'] : 0;
+                  $cargo_modificado = $this->addEditOtherCharges($item);
+                  array_push( $oids, $cargo_modificado->id );
+                  $totalOtrosCargos += $cargo_modificado->amount;
+                  $i++;
+              }
+              foreach ($this->otherCharges as $item) {
+                  if (!in_array( $item->id, $oids )) {
+                      $item->delete();
+                  }
+              }
+              $this->total_otros_cargos = $totalOtrosCargos;
+            }catch(\Exception $e){
+                Log::error("Error al guardar otros cargos");
+            }
+            
+            //Guarda nuevamente el invoice
             $this->save();
 
             return $this;
@@ -333,7 +366,7 @@ class Invoice extends Model
         }
     }
   
-    public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, 
+    /*public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, 
                              $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt, $typeDocument,
                             $numeroDocumento, $nombreInstitucion, $porcentajeExoneracion, $montoExoneracion, $impuestoNeto, $montoTotalLinea)
     {
@@ -367,11 +400,12 @@ class Invoice extends Model
         'exoneration_total_amount' => $montoTotalLinea ?? 0
       ]);
       
-    }
+    }*/
   
     public function addEditItem(array $data)
     {
         try {
+
             if (isset($data['item_number'])) {
                 $item = InvoiceItem::updateOrCreate([
                     'item_number' => $data['item_number'],
@@ -402,8 +436,8 @@ class Invoice extends Model
                 }catch( \Exception $e ) {
                     $exonerationDate = null;
                 }
-
                 if ($exonerationDate && isset($data['typeDocument']) && isset($data['numeroDocumento']) && $data['porcentajeExoneracion'] > 0) {
+
                     $item->exoneration_document_type = $data['typeDocument'] ?? null;
                     $item->exoneration_document_number = $data['numeroDocumento'] ?? null;
                     $item->exoneration_company_name = $data['nombreInstitucion'] ?? null;
@@ -413,9 +447,40 @@ class Invoice extends Model
                     $item->exoneration_total_amount = $data['montoExoneracion'] ?? 0;
                     $item->exoneration_total_gravado = (($item->item_count * $item->unit_price) * $item->exoneration_porcent) / 100 ;
                     $item->impuesto_neto = $data['impuestoNeto'] ?? $data['iva_amount'] - $data['montoExoneracion'];
-                    $item->save();
+                    
                 }
+                $item->save();
+                return $item;
+            } else {
+                return false;
+            }
+        } catch ( \Exception $e) {
+            Log::error("Error en lineas de factura-->> $e");
+            return false;
+        }
 
+    }
+    
+    public function addEditOtherCharges(array $data)
+    {
+        try {
+            if (isset($data['item_number'])) {
+                $item = OtherCharges::updateOrCreate([
+                    'item_number' => $data['item_number'],
+                    'invoice_id' => $this->id
+                ], 
+                [
+                    'company_id' => $this->company_id,
+                    'year'  => $this->year,
+                    'month' => $this->month,
+                    'document_type' => $data['document_type'] ?? '99',
+                    'provider_id_number' => $data['provider_id_number'] ? trim($data['provider_id_number']) : null,
+                    'provider_name'   => $data['provider_name'] ? trim($data['provider_name']) : null,
+                    'description'   => $data['description'] ? trim($data['description']) : null,
+                    'percentage'   => $data['percentage'] ?? 0,
+                    'amount'   => $data['amount'] ?? 0,
+                ]
+                );
                 return $item;
             } else {
                 return false;
@@ -865,7 +930,23 @@ class Invoice extends Model
         if( array_key_exists( 'NumeroLinea', $lineas ) ) {
             $lineas = [$arr['DetalleServicio']['LineaDetalle']];
         }
-        
+        $invoice->total_iva_devuelto = $arr['ResumenFactura']['TotalIVADevuelto'] ?? 0;
+        $invoice->total_serv_gravados = $arr['ResumenFactura']['TotalServGravados'] ?? 0;
+        $invoice->total_serv_exentos = $arr['ResumenFactura']['TotalServExentos'] ?? 0;
+        $invoice->total_merc_gravados = $arr['ResumenFactura']['TotalMercanciasGravadas'] ?? 0;
+        $invoice->total_merc_exentas = $arr['ResumenFactura']['TotalMercanciasExentas'] ?? 0;
+        $invoice->total_exento = $arr['ResumenFactura']['TotalExento'] ?? 0;
+        $invoice->total_descuento = $arr['ResumenFactura']['TotalDescuentos'] ?? 0;
+        $invoice->total_venta_neta = $arr['ResumenFactura']['TotalVentaNeta'] ?? 0;
+        $invoice->total_iva = $arr['ResumenFactura']['TotalExento'] ?? 0;
+        $invoice->total_venta = $arr['ResumenFactura']['TotalVenta'] ?? 0;
+        $invoice->total_comprobante = $arr['ResumenFactura']['TotalComprobante'] ?? 0;
+        $invoice->total_otros_cargos = $arr['ResumenFactura']['TotalOtrosCargos'] ?? 0;
+
+        $invoice->total_serv_exonerados = $arr['ResumenFactura']['TotalServExonerado'] ?? 0;
+        $invoice->total_merc_exonerados = $arr['ResumenFactura']['TotalMercExonerada'] ?? 0;
+        $invoice->total_exonerados = $arr['ResumenFactura']['TotalExonerado'] ?? 0;
+        $invoice->total_gravado = $arr['ResumenFactura']['TotalGravado'] ?? 0;
         $invoice->save();
         
         $lids = array();
@@ -907,6 +988,10 @@ class Invoice extends Model
                 $documentoExoneracion = $linea['Impuesto']['Exoneracion']['NumeroDocumento']  ?? null;
                 $companiaExoneracion = $linea['Impuesto']['Exoneracion']['NombreInstitucion'] ?? null;
                 $fechaExoneracion = $linea['Impuesto']['Exoneracion']['FechaEmision'] ?? null;
+                if($fechaExoneracion){
+                  $fechaExoneracion = Carbon::createFromFormat('Y-m-d', substr($fechaExoneracion, 0, 10));
+                  $fechaExoneracion = $fechaExoneracion->day."/".$fechaExoneracion->month."/".$fechaExoneracion->year;
+                }
                 $porcentajeExoneracion = $linea['Impuesto']['Exoneracion']['PorcentajeExoneracion'] ?? 0;
                 $montoExoneracion = $linea['Impuesto']['Exoneracion']['MontoExoneracion'] ?? 0;
               }
@@ -935,16 +1020,15 @@ class Invoice extends Model
               'iva_amount' => $montoIva,
               'impuesto_neto' => $impuestoNeto,
               'exoneration_date' => $fechaExoneracion,
-              'exoneration_document_type' => $tipoDocumentoExoneracion,
-              'exoneration_document_number' => $documentoExoneracion,
-              'exoneration_company_name' => $companiaExoneracion,
-              'exoneration_porcent' => $porcentajeExoneracion,
-              'exoneration_amount' => $montoExoneracion,
+              'typeDocument' => $tipoDocumentoExoneracion,
+              'numeroDocumento' => $documentoExoneracion,
+              'nombreInstitucion' => $companiaExoneracion,
+              'porcentajeExoneracion' => $porcentajeExoneracion,
+              'montoExoneracion' => $montoExoneracion,
               'exoneration_total_amount' => $totalMontoLinea,
               'is_exempt' => false,
               'porc_identificacion_plena' => 13,
             );
-            
             $item_modificado = $invoice->addEditItem($item);
             array_push( $lids, $item_modificado->id );
         }
@@ -954,6 +1038,7 @@ class Invoice extends Model
             $item->delete();
           }
         }
+        
         $invoice->save();
         
         return $invoice;
@@ -999,7 +1084,7 @@ class Invoice extends Model
         
     }
 
-    public function setNoteData($invoiceReference, $requestItems = null, $noteType = null) {
+    public function setNoteData($invoiceReference, $requestItems = null, $noteType = null, $request = []) {
         try {
             $noteType = $noteType ?? '03';
             $this->document_key = getDocumentKey($noteType, $this->reference_number, $invoiceReference->company->id_number);
@@ -1023,11 +1108,11 @@ class Invoice extends Model
 
             //Datos de factura
             $this->description = $invoiceReference->description;
-            $this->subtotal = floatval( str_replace(",","", $invoiceReference->subtotal ));
+            $this->subtotal = floatval( str_replace(",","", $request->subtotal ));
             $this->currency = $invoiceReference->currency;
             $this->currency_rate = floatval( str_replace(",","", $invoiceReference->currency_rate ));
-            $this->total = floatval( str_replace(",","", $invoiceReference->total ));
-            $this->iva_amount = floatval( str_replace(",","", $invoiceReference->iva_amount ));
+            $this->total = floatval( str_replace(",","", $request->total ));
+            $this->iva_amount = floatval( str_replace(",","", $request->iva_amount ));
 
             $this->client_first_name = $invoiceReference->client_first_name;
             $this->client_last_name = $invoiceReference->client_last_name;
@@ -1041,6 +1126,7 @@ class Invoice extends Model
             $this->client_zip = $invoiceReference->client_zip;
             $this->client_phone = $invoiceReference->client_phone;
             $this->client_id_number = $invoiceReference->client_id_number;
+            $this->client_id_type = $invoiceReference->client_id_type;
 
             $fecha = Carbon::parse(now('America/Costa_Rica'));
             $this->generated_date = $fecha;

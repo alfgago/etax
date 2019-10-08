@@ -4,7 +4,7 @@
 
     <div class="form-group col-md-12">
       <h3>
-        Linea de factura
+        Línea de factura
       </h3>
     </div>
                 

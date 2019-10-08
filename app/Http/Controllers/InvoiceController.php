@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Jobs\LogActivityHandler as Activity;
 use App\Actividades;
 use App\AvailableInvoices;
 use App\CodigosPaises;
@@ -320,7 +320,18 @@ class InvoiceController extends Controller
             $company->save();
             
             clearInvoiceCache($invoice);
-          
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "Factura registrada con éxito."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-emitidas')->withMessage('Factura registrada con éxito');
         }else{
             return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
@@ -388,7 +399,6 @@ class InvoiceController extends Controller
                     }
                     
                     $invoice->save();
-                    
                     if (!empty($invoiceData)) {
                         $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
                     }
@@ -411,7 +421,18 @@ class InvoiceController extends Controller
 
                     $company->save();
                     clearInvoiceCache($invoice);
-
+                    $user = auth()->user();
+                    Activity::dispatch(
+                        $user,
+                        $invoice,
+                        [
+                            'company_id' => $invoice->company_id,
+                            'id' => $invoice->id,
+                            'document_key' => $invoice->document_key
+                        ],
+                        "Factura registrada con éxito."
+                    )->onConnection(config('etax.queue_connections'))
+                    ->onQueue('log_queue');
                     return redirect('/facturas-emitidas')->withMessage('Factura registrada con éxito');
                 } else {
                     return back()->withError( 'Ha ocurrido un error al enviar factura.' );
@@ -451,6 +472,18 @@ class InvoiceController extends Controller
         $company->last_bill_ref_number = $bill->reference_number;
         $company->save();
 
+        $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $invoice,
+            [
+                'company_id' => $invoice->company_id,
+                'id' => $invoice->id,
+                'document_key' => $invoice->document_key
+            ],
+            "Factura registrada con éxito FEC."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         clearBillCache($bill);
 
     }
@@ -535,6 +568,59 @@ class InvoiceController extends Controller
         return view('Invoice/nota-debito', compact('invoice','units','arrayActividades','countries','product_categories','codigos', 'company') );
     }
 
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Invoice  $invoice
+     * @return \Illuminate\Http\Response
+     */
+    public function notaCredito($id)
+    {
+        $company = currentCompanyModel(false);
+
+
+
+        if ( !$company->atv_validation && $company->use_invoicing ) {
+            $apiHacienda = new BridgeHaciendaApi();
+            $token = $apiHacienda->login(false);
+            $validateAtv = $apiHacienda->validateAtv($token, $company);
+            if( $validateAtv ) {
+                if ($validateAtv['status'] == 400) {
+                    Log::info('Atv Not Validated Company: '. $company->id_number);
+                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                    }
+                    return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
+
+                } else {
+                    Log::info('Atv Validated Company: '. $company->id_number);
+                    $company->atv_validation = true;
+                    $company->save();
+
+                    $user = auth()->user();
+                    Cache::forget("cache-currentcompany-$user->id");
+                }
+            }else {
+                return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
+            }
+        }
+        if($company->last_debit_note_ref_number === null) {
+            return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota de debito');
+        }
+
+        $invoice = Invoice::findOrFail($id);
+        $this->authorize('update', $invoice);
+        $company = currentCompanyModel();
+        $arrayActividades = $company->getActivities();
+        $countries  = CodigosPaises::all()->toArray();
+
+        $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
+        $codigos = CodigoIvaRepercutido::where('hidden', false)->get();
+        $units = UnidadMedicion::all()->toArray();
+
+        return view('Invoice/nota-credito', compact('invoice','units','arrayActividades','countries','product_categories','codigos', 'company') );
+    }
+
     public function sendNotaDebito($id, Request $request)
     {
         try {
@@ -558,7 +644,7 @@ class InvoiceController extends Controller
                     $note->generation_method = "etax";
                     $note->reference_number = $company->last_debit_note_ref_number + 1;
                     $note->save();
-                    $noteData = $note->setNoteData($invoice, $request->items, $note->document_type);
+                    $noteData = $note->setNoteData($invoice, $request->items, $note->document_type, $request);
                     if (!empty($noteData)) {
                         $apiHacienda->createCreditNote($noteData, $tokenApi);
                     }
@@ -567,7 +653,18 @@ class InvoiceController extends Controller
                     $company->save();
 
                     clearInvoiceCache($invoice);
-
+                    $user = auth()->user();
+                    Activity::dispatch(
+                        $user,
+                        $invoice,
+                        [
+                            'company_id' => $invoice->company_id,
+                            'id' => $invoice->id,
+                            'document_key' => $invoice->document_key
+                        ],
+                        "Nota de debito creada."
+                    )->onConnection(config('etax.queue_connections'))
+                    ->onQueue('log_queue');
                     return redirect('/facturas-emitidas')->withMessage('Nota de debito creada.');
 
                 } else {
@@ -596,6 +693,19 @@ class InvoiceController extends Controller
                     ->update(['product_type'=>$item['category_product'],'iva_type'=>$item['tipo_iva']]);
                 }
             }catch(\Throwable $e){}
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "Factura validada satisfactoriamente."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
+
             return redirect('/facturas-emitidas/')->withMessage('Factura validada satisfactoriamente');
         }else{
             return back()->withError('Mes seleccionado ya fue cerrado');
@@ -654,6 +764,18 @@ class InvoiceController extends Controller
             $invoice->setInvoiceData($request);
             
             clearInvoiceCache($invoice);
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "Factura editada con éxito."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-emitidas')->withMessage('Factura editada con éxito');
         } else{
             return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
@@ -672,6 +794,7 @@ class InvoiceController extends Controller
         
     }
 
+
     public function guardarValidar(Request $request)
     {
         $invoice = Invoice::findOrFail($request->invoice);
@@ -687,6 +810,18 @@ class InvoiceController extends Controller
             }
             
             $invoice->save();
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "La factura ". $invoice->document_number . " ha sido validada."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             
             clearInvoiceCache($invoice);
 
@@ -696,7 +831,9 @@ class InvoiceController extends Controller
         }
 
     }
-    
+
+
+
     public function export( $year, $month ) {
         return Excel::download(new InvoiceExport($year, $month), 'documentos-emitidos.xlsx');
     }
@@ -870,14 +1007,14 @@ class InvoiceController extends Controller
         list($usec, $sec) = explode(" ", microtime());
         return ((float) $usec + (float)$sec);
     }
-
-    public function anularInvoice($id)
+ 
+    public function anularInvoice($id, Request $request)
     {
         try {
-            Log::info('Anulacion de facturar -->'.$id);
-            $invoice = Invoice::findOrFail($id); 
+            Log::info('Enviando nota de credito de facturar -->'.$id);
+            $invoice = Invoice::findOrFail($id);
 
-            if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
+            if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){
                 $apiHacienda = new BridgeHaciendaApi();
                 $tokenApi = $apiHacienda->login();
                 if ($tokenApi !== false) {
@@ -892,9 +1029,11 @@ class InvoiceController extends Controller
                     $note->payment_status = "01";
                     $note->payment_receipt = "";
                     $note->generation_method = "etax";
+                    $note->reason = $request->reason ?? "Anular Factura";
+                    $note->code_note = $request->code_note ?? "01";
                     $note->reference_number = $company->last_note_ref_number + 1;
                     $note->save();
-                    $noteData = $note->setNoteData($invoice);
+                    $noteData = $note->setNoteData($invoice, $request->items, $note->document_type, $request);
                     if (!empty($noteData)) {
                         $apiHacienda->createCreditNote($noteData, $tokenApi);
                     }
@@ -903,8 +1042,19 @@ class InvoiceController extends Controller
                     $company->save();
 
                     clearInvoiceCache($invoice);
-
-                    return redirect('/facturas-emitidas')->withMessage('Nota de crédito creada.');
+                    $user = auth()->user();
+                    Activity::dispatch(
+                        $user,
+                        $invoice,
+                        [
+                            'company_id' => $invoice->company_id,
+                            'id' => $invoice->id,
+                            'document_key' => $invoice->document_key
+                        ],
+                        "Nota de credito creada."
+                    )->onConnection(config('etax.queue_connections'))
+                    ->onQueue('log_queue');
+                    return redirect('/facturas-emitidas')->withMessage('Nota de credito creada.');
 
                 } else {
                     return back()->withError( 'Ha ocurrido un error al enviar factura.' );
@@ -919,6 +1069,7 @@ class InvoiceController extends Controller
         }
 
     }
+    
 
     private function get_rates()
     {
@@ -977,9 +1128,11 @@ class InvoiceController extends Controller
             $company = currentCompanyModel();
             $file = Input::file('file');
 
-                    $xml = simplexml_load_string( file_get_contents($file) );
-                    $json = json_encode( $xml ); // convert the XML string to json  
-                    $arr = json_decode( $json, TRUE );
+            $xml = simplexml_load_string( file_get_contents($file) );
+            $json = json_encode( $xml ); // convert the XML string to json  
+            $arr = json_decode( $json, TRUE );
+
+                if(substr($arr['NumeroConsecutivo'],8,2) != "04"){
                     $FechaEmision = explode("T", $arr['FechaEmision']);
                     $FechaEmision = explode("-", $FechaEmision[0]);
                     $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
@@ -999,7 +1152,20 @@ class InvoiceController extends Controller
                         if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                             //Registra el XML. Si todo sale bien, lo guarda en S3.
                             $invoice = Invoice::saveInvoiceXML( $arr, 'XML' );
+                            
                             if( $invoice ) {
+                                $user = auth()->user();
+                                Activity::dispatch(
+                                    $user,
+                                    $invoice,
+                                    [
+                                        'company_id' => $invoice->company_id,
+                                        'id' => $invoice->id,
+                                        'document_key' => $invoice->document_key
+                                    ],
+                                    "Factura de compra importada por xml."
+                                )->onConnection(config('etax.queue_connections'))
+                                ->onQueue('log_queue');
                                 Invoice::storeXML( $invoice, $file );
                             }
                         }else{
@@ -1009,6 +1175,10 @@ class InvoiceController extends Controller
                         return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
                         //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
                     } 
+                }else{
+                    return Response()->json('Error: No se puede subir tiquetes electrónicos.', 400);
+                        //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
+                } 
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
@@ -1037,8 +1207,7 @@ class InvoiceController extends Controller
                     ->where('is_totales', false)
                     ->where('is_code_validated', false)
                     ->where('is_authorized', true)
-                    ->orderBy('generated_date', 'DESC')
-                    ->orderBy('reference_number', 'DESC')->paginate(10);
+                    ->orderBy('generated_date', 'DESC')->paginate(10);
         return view('Invoice/index-validaciones', [
           'invoices' => $invoices
         ]);
@@ -1059,6 +1228,18 @@ class InvoiceController extends Controller
             
             $invoice->is_code_validated = true;
             $invoice->save();
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "La factura ". $invoice->document_number . " ha sido validada."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             
             if( $invoice->year == 2018 ) {
                 clearLastTaxesCache($invoice->company->id, 2018);
@@ -1131,11 +1312,35 @@ class InvoiceController extends Controller
             $invoice->hide_from_taxes = true;
             $invoice->save();
             clearInvoiceCache($invoice);
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "La factura ". $invoice->document_number . " se ha ocultado para cálculo de IVA."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-emitidas')->withMessage( 'La factura '. $invoice->document_number . ' se ha ocultado para cálculo de IVA.');
         }else{
             $invoice->hide_from_taxes = false;
             $invoice->save();
             clearInvoiceCache($invoice);
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "La factura ". $invoice->document_number . " se ha incluido nuevamente para cálculo de IVA."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-emitidas')->withMessage( 'La factura '. $invoice->document_number . ' se ha incluido nuevamente para cálculo de IVA.');
         }
     }
@@ -1150,11 +1355,35 @@ class InvoiceController extends Controller
             if ( $request->autorizar ) {
                 $invoice->is_authorized = true;
                 $invoice->save();
+                $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $invoice,
+                    [
+                        'company_id' => $invoice->company_id,
+                        'id' => $invoice->id,
+                        'document_key' => $invoice->document_key
+                    ],
+                    "La factura ". $invoice->document_number . " ha sido autorizada."
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
                 return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . ' ha sido autorizada');
             }else {
                 $invoice->is_authorized = false;
                 $invoice->is_void = true;
                 InvoiceItem::where('invoice_id', $invoice->id)->delete();
+                $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $invoice,
+                    [
+                        'company_id' => $invoice->company_id,
+                        'id' => $invoice->id,
+                        'document_key' => $invoice->document_key
+                    ],
+                    "La factura ". $invoice->document_number . " ha sido rechazada."
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
                 $invoice->delete();
                 return redirect('/facturas-emitidas/autorizaciones')->withMessage( 'La factura '. $invoice->document_number . ' ha sido rechazada');
             }
@@ -1179,6 +1408,18 @@ class InvoiceController extends Controller
             $invoice->delete();
             clearInvoiceCache($invoice);
             
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "La factura ha sido eliminada satisfactoriamente."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-emitidas')->withMessage('La factura ha sido eliminada satisfactoriamente.');
         }else{
             return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
@@ -1202,6 +1443,19 @@ class InvoiceController extends Controller
             InvoiceItem::onlyTrashed()->where('invoice_id', $invoice->id)->restore();
             clearInvoiceCache($invoice);
             
+            
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id,
+                    'document_key' => $invoice->document_key
+                ],
+                "La factura ha sido restaurada satisfactoriamente."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
             return redirect('/facturas-emitidas')->withMessage('La factura ha sido restaurada satisfactoriamente.');
         }else{
             return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
@@ -1277,6 +1531,18 @@ class InvoiceController extends Controller
             return back()->withError( 'El correo electrónico no pudo ser reenviado.');
         }
         
+        $user = auth()->user();
+        Activity::dispatch(
+            $user,
+            $invoice,
+            [
+                'company_id' => $invoice->company_id,
+                'id' => $invoice->id,
+                'document_key' => $invoice->document_key
+            ],
+            "Se han reenviado los correos exitosamente."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return back()->withMessage( 'Se han reenviado los correos exitosamente.');
     }
     
@@ -1411,171 +1677,14 @@ class InvoiceController extends Controller
       
 
         $collection = Excel::toCollection( new InvoiceImportSM(), request()->file('archivo') );
-        $company = currentCompanyModel(false);
-        $collection = $collection->toArray()[0];
-        
-        /*$i=0;
-        Log::debug($company->id_number . " importanto Excel ventas con ".count($collection)." lineas");
-        foreach (array_chunk ( $collection, 50 ) as $facturas) {
-            $i = $i + 50;
-            Log::debug("Enviando a queue $i de ".count($collection));
-            ProcessExcelSM::dispatch($facturas, $company->id);
-        }
-        Log::debug("Envios a queue finalizados $company->id_number");*/
-        
+        $companyId = currentCompany();
+        $invoiceList = $collection->toArray()[0];
         
         try {
-            Log::notice("$company->id_number importando ".count($collection)." lineas... Last Invoice: $company->last_invoice_ref_number");
-            $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
-            $i = 0;
-            $invoiceList = array();
-
-            foreach ($collection as $row){
-                try{
-
-                    $metodoGeneracion = "etax-bulk";
-    
-                    if( isset($row['doc_identificacion']) ){
-                        
-                        $descripcion = isset($row['descripcion']) ? $row['descripcion'] : ($row['descricpion'] ?? null);
-                        $totalDocumento = $row['total'];
-                        if( ! Invoice::where("description", $descripcion)
-                              ->where('total', $totalDocumento)->count() ){
-                            $i++;
-        
-                            //Datos de proveedor
-                            $nombreCliente = $row['nombre_tomador'];
-                            $identificacionCliente = ltrim($row['doc_identificacion'], '0') ?? null;
-                            $codigoCliente = $identificacionCliente;
-                            $tipoPersona = $row['tipo_id'][0];
-                            $correoCliente = $row['correo'] ?? null;
-                            $telefonoCliente = $row['telefono_celular'] ? $row['telefono_celular'] : ( $row['telefono_habitacion'] ?? null );
-                            $today = Carbon::parse( now('America/Costa_Rica') )->subDays(2);;
-                        
-                            //Datos de factura
-                            $consecutivoComprobante = $this->getDocReference('01', $company);
-                            $claveFactura = $this->getDocumentKey('01', $company);
-                            $company->last_invoice_ref_number = $company->last_invoice_ref_number+1;
-                            $company->last_document = $consecutivoComprobante;
-                            $refNumber = $company->last_invoice_ref_number;
-                            
-                            $condicionVenta = '02';
-                            $metodoPago = str_pad((int)$row['medio_pago'], 2, '0', STR_PAD_LEFT);
-                            //$metodoPago = '99';
-                            $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
-                            $fechaEmision = $today->format('d/m/Y');
-                            $fechaVencimiento = isset($row['fecha_pago']) ? $row['fecha_pago']."" : $fechaEmision; 
-                            $fechaVencimiento = "30/".$fechaVencimiento[4].$fechaVencimiento[5]."/".$fechaVencimiento[0].$fechaVencimiento[1].$fechaVencimiento[2].$fechaVencimiento[3];
-                            
-                            $idMoneda = 'CRC';
-                            $tipoCambio = $row['tipocambio'] ?? 1;
-                            $totalDocumento = $row['total'];
-                            $tipoDocumento = '01';
-        
-                            //Datos de linea
-                            $codigoProducto = $row['num_objeto'] ?? 'N/A';
-                            $ordenCompra = $row['num_factura'] ?? 'No indica';
-                            $detalleProducto = isset($descripcion)  ? $descripcion : $codigoProducto;
-                            $unidadMedicion = 'Os';
-                            $cantidad = isset($row['cantidad']) ? $row['cantidad'] : 1;
-                            $precioUnitario = $row['precio_unitario'];
-                            $subtotalLinea = (float)$row['precio_unitario'];
-                            $totalLinea = $row['total'];
-                            $montoDescuento = isset($row['montodescuento']) ? $row['montodescuento'] : 0;
-                            $codigoEtax = $row['codigoivaetax'] ?? 'S102';
-                            $categoriaHacienda = 7;
-                            $montoIva = (float)$row['impuesto'];
-                            $acceptStatus = isset($row['aceptada']) ? $row['aceptada'] : 1;
-                            
-                            //$codigoActividad = $row['actividad_comercial'] ?? $mainAct;
-                            $codigoActividad = 660101; //No viene en el Excel del todo.
-                            $xmlSchema = 43;
-                            
-                            //Exoneraciones
-                            $totalNeto = 0;
-                            $tipoDocumentoExoneracion = $row['tipodocumentoexoneracion'] ?? null;
-                            $documentoExoneracion = $row['documentoexoneracion'] ?? null;
-                            $companiaExoneracion = $row['companiaexoneracion'] ?? null;
-                            $porcentajeExoneracion = $row['porcentajeexoneracion'] ?? 0;
-                            $montoExoneracion = $row['montoexoneracion'] ?? 0;
-                            $impuestoNeto = $row['impuestoneto'] ?? 0;
-                            $totalMontoLinea = $row['totalmontolinea'] ?? 0;
-                            
-                            $direccion = $row['des_direccion'] ?? null;
-                            $zip = $row['codigo_postal'] ?? '10101';
-                            
-                            $arrayInsert = array(
-                                'metodoGeneracion' => trim($metodoGeneracion),
-                                'idEmisor' => 0,
-                                'nombreCliente' => trim($nombreCliente),
-                                'descripcion' => trim($descripcion),
-                                'codigoCliente' => trim($codigoCliente),
-                                'tipoPersona' => trim($tipoPersona),
-                                'identificacionCliente' => trim($identificacionCliente),
-                                'correoCliente' => trim($correoCliente),
-                                'telefonoCliente' => trim($telefonoCliente),
-                                'direccion' => trim($direccion),
-                                'zip' => trim($zip),
-                                'claveFactura' => trim($claveFactura),
-                                'consecutivoComprobante' => trim($consecutivoComprobante),
-                                'numeroReferencia' => $refNumber,
-                                'condicionVenta' => trim($condicionVenta),
-                                'metodoPago' => trim($metodoPago),
-                                'numeroLinea' => trim($numeroLinea),
-                                'fechaEmision' => trim($fechaEmision),
-                                'fechaVencimiento' => trim($fechaVencimiento),
-                                'moneda' => trim($idMoneda),
-                                'tipoCambio' => trim($tipoCambio),
-                                'totalDocumento' => trim($totalDocumento),
-                                'totalNeto' => trim($totalNeto),
-                                'cantidad' => trim($cantidad),
-                                'precioUnitario' => trim($precioUnitario),
-                                'totalLinea' => trim($totalLinea),
-                                'montoIva' => trim($montoIva),
-                                'porcentajeIva' => 2,
-                                'codigoEtax' => trim($codigoEtax),
-                                'montoDescuento' => trim($montoDescuento),
-                                'subtotalLinea' => trim($subtotalLinea),
-                                'tipoDocumento' => trim($tipoDocumento),
-                                'codigoProducto' => trim($codigoProducto),
-                                'detalleProducto' => trim($detalleProducto),
-                                'unidadMedicion' => trim($unidadMedicion),
-                                'tipoDocumentoExoneracion' => trim($tipoDocumentoExoneracion),
-                                'documentoExoneracion' => trim($documentoExoneracion),
-                                'companiaExoneracion' => trim($companiaExoneracion),
-                                'porcentajeExoneracion' => trim($porcentajeExoneracion),
-                                'montoExoneracion' => trim($montoExoneracion),
-                                'impuestoNeto' => trim($impuestoNeto),
-                                'totalMontoLinea' => trim($totalMontoLinea),
-                                'xmlSchema' => trim($xmlSchema),
-                                'codigoActividad' => trim($codigoActividad),
-                                'categoriaHacienda' => trim($categoriaHacienda),
-                                'acceptStatus' => trim($acceptStatus),
-                                'isAuthorized' => true,
-                                'codeValidated' => true,
-                                'ordenCompra' => $ordenCompra
-                            );
-                            
-                            $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
-                          
-                        }else {
-                            //Log::warning('Factura repetida en envio masivo '.$identificacionCliente);
-                        }
-                    }
-                }catch( \Throwable $ex ){
-                    Log::error("Error en factura SM:" . $ex);
-                }
-            }
-            
             Log::debug('Creando job de registro de facturas.');
-            foreach (array_chunk ( $invoiceList, 250 ) as $facturas) {
-                ProcessSendExcelInvoices::dispatch($facturas)->onQueue('bulk');
+            foreach (array_chunk ( $invoiceList, 100 ) as $facturas) {
+                ProcessSendExcelInvoices::dispatch($facturas, $companyId)->onQueue('bulk');
             }
-            $company->save();
-            $userId = $company->user_id;
-            Cache::forget("cache-currentcompany-$userId");
-            Log::notice("$i procesadas...");
-            
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
         }

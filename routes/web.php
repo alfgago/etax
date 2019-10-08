@@ -100,6 +100,7 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
     Route::get('emitir-tiquete', 'InvoiceController@emitTiquete')->name('Invoice.emit_04');
     Route::get('nota-debito/{id}', 'InvoiceController@notaDebito')->name('Invoice.notadebito');
+    Route::get('nota-credito/{id}', 'InvoiceController@notaCredito')->name('Invoice.notacredito');
     Route::get('validaciones', 'InvoiceController@indexValidaciones')->name('Invoice.validaciones');
     Route::patch('confirmar-validacion/{id}', 'InvoiceController@confirmarValidacion')->name('Invoice.confirmar_validacion');
     Route::get('autorizaciones', 'InvoiceController@indexAuthorize')->name('Invoice.validaciones');
@@ -154,7 +155,6 @@ Route::post('/confirmar-plan', 'SubscriptionPlanController@confirmPlanChange')->
 Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}/{plan}/{companies}', 'SubscriptionPlanController@confirmCode')->name('Subscription.confirmar_code');
 Route::get('/codigo-contador/{codigo}', 'SubscriptionPlanController@confirmCodeAccount')->name('Subscription.confirmCodeAccount');
 Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');
-Route::post('/suscripciones/confirmar-pruebas', 'SubscriptionPlanController@confirmStartTrial')->name('Subscription.confirmStartTrial');
 Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}', 'SubscriptionPlanController@confirmCode')->name('Subscription.confirmar_code');
 
 
@@ -196,7 +196,9 @@ Route::prefix('payment')->group(function(){
 Route::prefix('clients')->group(function(){
     Route::get('clients-update-view/{id}', 'ClientController@edit')->name('clients_update_view');
     Route::delete('clients-delete/{id}', 'ClientController@destroy')->name('clients_delete');
+    Route::get('/select2-remote-data-source', 'ClientController@select2RemoteDataSource');
 });
+
 Route::prefix('payment-methods')->group(function(){
     Route::get('payment-method-create-view', 'PaymentMethodController@createView')->name('PaymentMethod.payment_method_create_view');
     Route::post('payment-method-create', 'PaymentMethodController@create')->name('PaymentMethod.payment_create');

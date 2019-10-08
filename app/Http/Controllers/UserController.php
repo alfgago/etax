@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\LogActivityHandler as Activity;
 use App\Actividades;
 use App\Payment;
 use Illuminate\Http\Request;
@@ -111,6 +112,17 @@ class UserController extends Controller {
         $user->address = $request->address;
         $user->phone = $request->phone;
         $user->save();
+        $usario = auth()->user();
+        Activity::dispatch(
+            $usario,
+            $user,
+            [
+                'company_id' => $user->company_id,
+                'id' => $user->id
+            ],
+            "La información de su perfil ha sido actualizada."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         
         return redirect()->back()->withMessage('La información de su perfil ha sido actualizada');
         
@@ -155,6 +167,16 @@ class UserController extends Controller {
         }
 
         $user->update($input);
+        $usario = auth()->user();
+        Activity::dispatch(
+            $usario,
+            $user,
+            [
+                'id' => $user->id
+            ],
+            "Profile password updated successfully."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return redirect()->back()->withMessage('Profile password updated successfully');
     }
 
@@ -239,11 +261,22 @@ class UserController extends Controller {
         
         $user = auth()->user();
         
-        Company::where('user_id', $user->id)->delete();
+        $company = Company::where('user_id', $user->id)->delete();
         $user->delete;
         
         Auth::logout();
         
+        $usario = auth()->user();
+        Activity::dispatch(
+            $usario,
+            $company,
+            [
+                'company_id' => $company->company_id,
+                'id' => $company->id
+            ],
+            "Profile password updated successfully."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return redirect('/')->with('success', 'Su cuenta ha sido eliminada. Tiene 15 días para solicitar una restauración antes de que sus datos sean eliminados permanentemente.');
     }
     
@@ -253,8 +286,7 @@ class UserController extends Controller {
     public function zendeskJwt(){
        $user = auth()->user();
        $iat = Carbon::parse( now('America/Costa_Rica') )->timestamp ;
-       $exp = Carbon::parse( now('America/Costa_Rica') )->addMinutes(5)->timestamp ;
-       
+       $exp = Carbon::parse( now('America/Costa_Rica') )->addMinutes(5)->timestamp;
        $payload = array(
            'name' => $user->first_name . ' ' . $user->last_name . ' ' . $user->last_name2,
            'email' => $user->email,
@@ -263,10 +295,8 @@ class UserController extends Controller {
            'jti' => $user->id,
            'external_id' => $user->id
        );
-       
        $key = 'A128DF3DC9D9DB0718AD9E31D76463A5B34928F3E4FC689137D80C128AEA3D8F';
        $jwt = JWT::encode($payload, $key);
-       
        return $jwt;
     }
 
@@ -328,6 +358,17 @@ class UserController extends Controller {
         $user->phone = $request->phone;
         $user->save();
         
+        $usuario = auth()->user();
+        Activity::dispatch(
+            $usuario,
+            $user,
+            [
+                'company_id' => $user->company_id,
+                'id' => $user->id
+            ],
+            "La información del usuario $user->email ha sido actualizada."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return redirect()->back()->withMessage('La información del usuario $user->email ha sido actualizada');
         
     }
@@ -371,6 +412,7 @@ class UserController extends Controller {
     public function cancelar(){
         return view('users.cancelar');
     }
+
     public function updatecancelar(Request $request){
         $company = currentCompanyModel();
         $user_id = auth()->user()->companies->first()->user_id;
@@ -381,6 +423,16 @@ class UserController extends Controller {
 
         Mail::to($company->email)->send(new \App\Mail\NotifyCancellation(auth()->user()->companies->first()));
         Auth::logout();
+        $usuario = auth()->user();
+        Activity::dispatch(
+            $usuario,
+            $company,
+            [
+                'company_id' => $company->id
+            ],
+            "La información del usuario ".$user->email." ha sido actualizada."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
         return redirect("login")->withError('Su subscripción se ha cancelado');
     }
 
@@ -396,7 +448,6 @@ class UserController extends Controller {
         $fechavencimiento = date('Y-m-d', strtotime($sale->next_payment_date));
         $fechavencimiento = Carbon::parse($fechavencimiento);
         $diff = $fechavencimiento->diffInDays($date_now);
-        //dd($diff);
         $fechavencimiento = date('d/m/Y', strtotime($sale->next_payment_date));
         return view('users.compra_contabilidades')->with('company', $company)
                                     ->with('sale', $sale)

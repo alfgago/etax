@@ -43,11 +43,20 @@
 		Precio de <span class="precio-text precio-inicial">9.99</span> <span class="recurrencia-text">/ mes</span> + IVA
 	</span>
 </div>
-
+<input hidden id="amount" name="amount">
 <div class="btn-holder">
   <a class="btn btn-primary btn-prev" target="_blank" href="https://etaxcr.com/planes">Ver detalle de planes</a>
-  <button type="button" class="btn btn-primary btn-next" onclick="fowardFields();toggleStep('step2');" onclick="trackClickEvent( 'PagosPaso2' );">Siguiente paso</button>
+  <button type="button" class="btn btn-primary btn-next" onclick="fowardFields();toggleStep('step2');getPrice();" onclick="trackClickEvent( 'PagosPaso2' );">Siguiente paso</button>
 </div>
+<script>
+    function getPrice() {
+        var text = $('.precio-text').text();
+        var num1 = text.slice(1);
+        var num = num1.split(" /");
+        var amount = parseFloat(num[0]).toFixed(2);
+        $('#amount').val(amount);
+    }
+</script>
 <style>
     .biginputs .form-group select, .biginputs .form-group input {
         font-size: 1.5rem;
@@ -61,15 +70,14 @@
           <label for="">Saltar suscripción y entrar como:</label>
           <div class="form-group">
               <select class="form-control" id="company_change" onchange="companyChange(false);">
+                 
+                  <option value="" selected >Seleccione compañia </option>
                   @foreach( auth()->user()->teams as $row )
-                    <?php  
-                          $c = $row->company;
-                          if($c) { 
-                            if($c->status == 1){
-                            $name = $c->name ? $c->name.' '.$c->last_name.' '.$c->last_name2 : '-- Nueva Empresa --';  ?> 
-                            <option value="{{ $c->id }}" {{ $c->id == currentCompany() ? 'selected' : ''  }} > {{ $name }} </option>
-                    <?php   } 
-                          } ?>
+                      <?php  
+                          $c = $row->company;  
+                          $name = $c->name ? $c->name.' '.$c->last_name.' '.$c->last_name2 : '-- Nueva Empresa --';  
+                      ?>
+                      <option value="{{ $c->id }}" > {{ $name }} </option>
                   @endforeach
               </select>
           </div>

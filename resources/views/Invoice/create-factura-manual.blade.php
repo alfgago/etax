@@ -36,34 +36,53 @@
                     
                     <div class="form-group col-md-12 with-button">
                       <label for="cliente">Seleccione el cliente</label>
-                      @if( count(currentCompanyModel()->clients) < 4000 )
-                        <select class="form-control select-search" name="client_id" id="client_id" placeholder="" required>
+                      @if( count(currentCompanyModel()->clients) < 5000 )
+                        <select class="form-control select-search" name="client_id" id="client_id" placeholder="" @if(@$document_type !== '04') required @endif>
                           <option value='' selected>-- Seleccione un cliente --</option>
                           @foreach ( currentCompanyModel()->clients as $cliente )
-                            @if( @$cliente->canInvoice() )
-                            <option value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
+                            @if( @$cliente->canInvoice($document_type) )
+                              <option value="{{ $cliente->id }}" >{{ $cliente->toString() }}</option>
                             @endif
                           @endforeach
                         </select>
                       @else
                         <select class="form-control select-search-many" name="client_id" id="client_id" placeholder="" required>
-                          <option value='' selected>-- Seleccione un cliente --</option>
-                          
                         </select>
                         <script>
-                          <?php 
-                            $clientesJson = json_encode(currentCompanyModel()->clientsForSelect2()); 
-                          ?>
-                          var data = '<?php echo $clientesJson ?>';
-                          var jsonData = JSON.parse(data);
-                          $(document).ready(function() { 
-
+                        $(document).ready(function () {
                             $('.select-search-many').select2({
-                              data: jsonData
+                                ajax: {
+                                    url: '/clients/select2-remote-data-source',
+                                    data: function (params) {
+                                        return {
+                                            search: params.term,
+                                            page: params.page || 1
+                                        };
+                                    },
+                                    dataType: 'json',
+                                    processResults: function (data) {
+                                        data.page = data.page || 1;
+                                        return {
+                                            results: data.items.map(function (item) {
+                                                return {
+                                                    id: item.id,
+                                                    text: item.id_number + " - " + item.first_name
+                                                };
+                                            }),
+                                            pagination: {
+                                                more: data.pagination
+                                            }
+                                        }
+                                    },
+                                    cache: true,
+                                    delay: 250
+                                },
+                                placeholder: '-- Seleccione un cliente --',
+                                minimumInputLength: 5,
+                                multiple: false
                             });
-                            
-                          });
-                        </script>
+                        });
+                      </script>
                       @endif
                     </div>
                   </div>
@@ -131,6 +150,11 @@
                   <label for="total">IVA Exonerado</label>
                   <input type="text" class="form-control total" name="total_iva_exonerado" id="total_iva_exonerado" placeholder="" readonly="true" required>
                 </div>
+
+                <div class="form-group col-md-4 hidden" id="total_otros_cargos-cont">
+                  <label for="total">Otros cargos</label>
+                  <input type="text" class="form-control total" name="total_otros_cargos" id="total_otros_cargos" placeholder="" readonly="true" required>
+                </div>
     
                 <div class="form-group col-md-4">
                   <label for="total">Total</label>
@@ -139,6 +163,7 @@
                 
                 <div class="form-group col-md-12">
                   <div onclick="abrirPopup('linea-popup');" class="btn btn-dark btn-agregar">Agregar línea</div>
+                  <div onclick="abrirPopup('otros-popup');" class="btn btn-dark btn-agregar btn-otroscargos">Agregar otros cargos</div>
                 </div>
     
               </div>
@@ -299,7 +324,35 @@
             </div>
           </div>
           
+          <div class="form-row" id="tabla-otroscargos-factura" style="display: none;">  
+
+            <div class="form-group col-md-12">
+              <h3>
+                Otros cargos
+              </h3>
+            </div>
+            
+            <div class="form-group col-md-12" >
+              <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
+                <thead class="thead-dark">
+                  <tr>
+                    <th>#</th>
+                    <th>Tipo</th>
+                    <th>Receptor</th>
+                    <th>Detalle</th>
+                    <th>Monto del cargo</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
           @include( 'Invoice.form-linea' )
+          @include( 'Invoice.form-otros-cargos' )
           @include( 'Invoice.form-nuevo-cliente' )
 
           <div class="btn-holder hidden">

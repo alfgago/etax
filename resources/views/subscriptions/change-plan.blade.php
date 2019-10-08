@@ -1,12 +1,12 @@
 @extends('layouts/wizard-layout')
 
-@section('title') 
+@section('title')
 	Configuración de plan inicial
 @endsection
 
 @section('slug', 'wizard')
 
-@section('content') 
+@section('content')
 
 <?php
     $company = currentCompanyModel();
@@ -16,7 +16,7 @@
 ?>
 
 <div class="wizard-container">
-  
+
   <div class="wizard-popup">
     <div class="titulo-bienvenida">
       <h2>Cambio de plan eTax </h2>
@@ -33,7 +33,7 @@
         <span>Método de pago</span>
       </div>
     </div>
-    
+
     <div class="form-container">
       <form method="POST" action="/payment/confirm-payment" class="wizard-form tarjeta" enctype="multipart/form-data">
         @csrf
@@ -53,16 +53,16 @@
           </div>
         </div>
       </form>
-    </div>  
+    </div>
   </div>
-  
-  <a class="btn btn-cerrarsesion" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('frm-logout').submit();">
+
+  <a class="btn btn-cerrarsesion" href="{{ route('logout') }}" onclick="event.preventDefault(); getCyberData(); document.getElementById('frm-logout').submit();">
     Cerrar sesión
   </a>
   <form id="frm-logout" action="{{ route('logout') }}" method="POST" style="display: none;">
     {{ csrf_field() }}
   </form>
-</div>  
+</div>
 @endsection
 
 @section('footer-scripts')
@@ -182,8 +182,6 @@
       var exp = $("#expiry").val();
       $('#cardMonth').val(exp.substr(0,2));
       $('#cardYear').val(exp.substring(exp.length - 2, exp.length));
-      var FingerprintID = cybs_dfprofiler("tc_cr_011007172","test");
-      $("#deviceFingerPrintID").val(FingerprintID);
   }
   function valid_credit_card(value) {
       // accept only digits, dashes or spaces
@@ -269,7 +267,7 @@
 		          nameInput: 'input[name="first_name_card"], input[name="last_name_card"]'
 		      }
 		  });
-		  
+
 		  @if( @$company->state )
 	    	$('#state').val( {{ $company->state }} );
 	    	fillCantones();

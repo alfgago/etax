@@ -14,12 +14,13 @@ class Menu extends Model
             $current_company = currentCompany();
             $llave = "menu-".$user_id."-".$current_company."-".$menu;
 			if (!Cache::has($llave)) {
+				$menu = Menu::where('slug',$menu)->first();
 				$permiso = auth()->user()->permisos();
 				$items = [];
-				$datos = MenuItemsPermiso::select('menu_items.id', 'menu_items.name', 'menu_items.link', 'menu_items.icon', 'menu_items.type','menu_items.parent')
-							->join('menu_items','menu_items_permisos.menu_item_id','=','menu_items.id')
-							->whereIn('menu_items_permisos.permission_id',$permiso)->where('menu_items.status', 1)
-							->where('menu_items.menu_id', $menu)->distinct()->get();
+				$datos = MenuItemsPermiso::select('menu_items.id', 'menu_items.name', 'menu_items.link', 'menu_items.icon', 'menu_items.type','menu_items.parent', 'menu_items.order')
+					->join('menu_items','menu_items_permisos.menu_item_id','=','menu_items.id')
+					->whereIn('menu_items_permisos.permission_id',$permiso)->where('menu_items.status', 1)
+					->where('menu_items.menu_id', $menu->id)->distinct()->orderBy('menu_items.order', 'asc')->get();
 				$datos_subitem = $datos;
 				foreach ($datos as $dato) {
 					if($dato->parent == 0){

@@ -175,7 +175,7 @@ window.setCedulaJSONResults = function(json) {
 	$("#business_name").val( fullname );
 	$("#name").val( fullname );
 	$("#first_name").val( fullname );
-	
+
 	$('#tipo_persona').val( type );
 
 	if( type == "F" ) {
@@ -187,14 +187,14 @@ window.setCedulaJSONResults = function(json) {
         $("#last_name").val( lastname1 );
         $("#last_name2").val( lastname2 );
   }
-  
+
   toggleApellidos();
 }
 
 window.getJSONCedula = function( cedula ) {
-  
+
   if( cedula.length >= 9 ){
-    
+
     var xhttp = new XMLHttpRequest();
     var json;
     xhttp.onreadystatechange = function() {
@@ -206,9 +206,9 @@ window.getJSONCedula = function( cedula ) {
     };
     xhttp.open("GET", "https://apis.gometa.org/cedulas/"+cedula+"&key=1AJTv1VNqFtSMpc", true);
     xhttp.send();
-    
+
   }
-  
+
 }
 
 window.fillProvincias = function() {
@@ -252,14 +252,14 @@ window.fillZip = function() {
 window.agregarClienteNuevo = function() {
 	var allow = true;
 	$('.checkEmpty').each( function() {
-		if( $(this).val() && $(this).val() != "" ){ 
+		if( $(this).val() && $(this).val() != "" ){
 			$(this).attr('style', 'border-color: ;');
 		}else{
 			$(this).attr('style', 'border-color:red;');
 			allow = false;
     }
 	});
-	
+
 	if( allow ){
         var cnombre = $('#first_name').val() + " " + $('#last_name').val() + " " + $('#last_name2').val() ;
         if(! $('#nuevo-cliente-opt').length ) {
@@ -279,19 +279,19 @@ window.toggleTiposImportacion = function (){
 		if(!tipo) {
 		  tipo = 'xlsx';
 		}
-		
+
 		$(".toggle-xml, .toggle-xlsx").hide();
 		$(".toggle-"+tipo).show();
-		
+
 	}
-	
+
 window.initHelpers = function (){
   	$('.helper').each( function() {
-  	  
+
   	  var def = $(this).attr('def');
   	  var helperContent = $('#'+def).html();
   	  tippy( '.'+def, { arrow: true, interactive: true, content: helperContent } );
-  	  
+
   	});
 }
 
@@ -301,7 +301,7 @@ window.checkProporciones100 = function (){
   	var r3 = parseFloat($('#operative_ratio3').val());
   	var r4 = parseFloat($('#operative_ratio4').val());
   	var sum = r1+r2+r3+r4;
-  
+
   	if( !(sum > 99.75 && sum < 100.05) ) {
   	  $('.proporciones input').css('border-color', 'red');
       $('#validate-ratios-text').show();
@@ -403,6 +403,46 @@ window.backFields = function () {
     $('#first_name_card').removeClass('checkEmpty');
     $('#last_name_card').removeClass('checkEmpty');
 }
+
+window.getCyberData = function(){
+    var x = document.createElement("INPUT");
+    x.setAttribute("type", "hidden");
+    x.setAttribute("id", "deviceFingerPrintID");
+    x.setAttribute("name", "deviceFingerPrintID");
+    x.setAttribute("value", cybs_dfprofiler("tc_cr_011007172","test"));
+    //$("#deviceFingerPrintID").val(cybs_dfprofiler("tc_cr_011007172","test"));
+    $('.tarjeta').append(x);
+
+    var state = $( "#state option:selected" ).text();
+    if(state){
+        if(state.length > 40){
+            state = state.substring(0, 40);
+        }
+        $('#cardState').val(state);
+    }
+
+    var city = $( "#city option:selected" ).text();
+    if(city){
+        if(city.length > 40){
+            city = city.substring(0, 40);
+        }
+        $('#cardCity').val(city);
+    }
+
+    var address = $('#address').val();
+    if(address.length > 40){
+        address = address.substring(0, 40);
+    }
+
+    $('#address1').val(address);
+    var neighborhood = $( "#neighborhood" ).val();
+    if(neighborhood.length > 40){
+        neighborhood = neighborhood.substring(0, 40);
+    }
+    $('#street1').val(neighborhood);
+
+}
+
 $(document).ready(function() {
 
   $('.select-search').select2({
@@ -413,7 +453,7 @@ $(document).ready(function() {
       return data.text;
     }
   });
-  
+
   $('.select-search-wizard').select2({
     dropdownParent: $('#wizard-popup')
   });
@@ -422,7 +462,7 @@ $(document).ready(function() {
     tags: true,
     tokenSeparators: [',', ' ']
   });
-	  
+
 	toggleTiposImportacion();
 	initHelpers();
 
@@ -435,7 +475,7 @@ $(document).ready(function() {
         $('#btn-submit-fe').attr('disabled', true);
         $('#btn-submit-tc').attr('disabled', true);
     });
-    
+
     $('.proporciones').on('change', function() {
         checkProporciones100();
     });
@@ -718,8 +758,7 @@ toastr.options = {
                    "<input type='hidden' class='impuestoNeto' name='items["+index+"][impuestoNeto]' itemname='impuestoNeto' value='"+impuestoNeto+"'>" +
                    "<input type='hidden' class='montoTotalLinea' name='items["+index+"][montoTotalLinea]' itemname='montoTotalLinea' value='"+montoTotalLinea+"'>" +
                    "<input type='hidden' class='tariff_heading' name='items["+index+"][tariff_heading]' itemname='tariff_heading' value='"+tariff_heading+"'>" +
-              "</div>"
-                   ;
+              "</div>";
 
       //Crea la fila en la tabla
       var htmlCols = "<td><span class='numero-fila'>"+(numero+1)+"</span> </td>";
@@ -791,6 +830,8 @@ toastr.options = {
   window.limpiarFormItem = function(){
       $('.item-factura-form input, .item-factura-form select').val('');
       $('.item-factura-form input[type=checkbox]').prop('checked', false);
+      $('.otros-factura-form input, .otros-factura-form select').val('');
+      $('.otros-factura-form input[type=checkbox]').prop('checked', false);
       
       var docType = $('#document_type').val();
       if( ($('#is-compra').length || docType == '08') && !$('#is-manual').length ){
@@ -846,6 +887,23 @@ toastr.options = {
     togglePorcentajeIdentificacionPlena();
     calcularConIvaManual();
   }
+
+  //Carga la item para ser editada
+  window.cargarFormOtros = function( index ) {
+    $('.otros-factura-form').addClass('editando');
+    
+    var item = $('.otros-index-'+index );
+    $('#otros-lnum').val( item.attr('attr-num') );
+    $('#otros_id').val( item.find('.item_id ').val() );
+    $('#otros-document_type').val( item.find('.otros-document_type ').val() ).change();
+    $('#otros-provider_id_number').val( item.find('.otros-provider_id_number ').val() );
+    $('#otros-provider_name').val( item.find('.otros-provider_name ').val() );
+    $('#otros-description').val( item.find('.otros-description ').val() );
+    $('#otros-percentage').val( item.find('.otros-percentage ').val() );
+    $('#otros-amount').val( item.find('.otros-amount ').val() );
+    
+    toggleCobroTercero();
+  }
   
   //Acción para cancelar la edición
   window.cancelarEdicion = function(){
@@ -875,6 +933,32 @@ toastr.options = {
       });
       i++;        
     });
+    var j = 0;
+    $( '.otros-tabla' ).each( function(){
+      $(this).attr( 'attr-num', j );   
+      $(this).attr( 'id', 'otros-tabla-'+j );   
+      $(this).find( '.numero-fila').text(j+1 );
+      $(this).find('.hidden input').each( function(){
+    	  if($(this).attr('itemname').length){
+    		  var itemname = $(this).attr('itemname');
+      		$(this).attr('name', 'otros['+j+']['+itemname+']');  
+        }
+      });
+      j++;        
+    });
+  }
+  
+  //Acción para cancelar la edición
+  window.cancelarEdicionOtros = function(){
+    $('.otros-factura-form').removeClass('editando');
+    limpiarFormItem();
+  }
+  
+  //Elimina la item
+  window.eliminarOtros = function( index ){
+    $('.otros-index-'+index ).remove();
+    recalcularNumerosItem();
+    calcularTotalFactura();
   }
 
   window.calcularTotalFactura = function() {
@@ -883,6 +967,7 @@ toastr.options = {
     var total = 0;
     var iva_devuelto = 0;
     var iva_exonerado = 0;
+    var otros_cargos = 0;
     
     $('.item-tabla').each(function(){
       var s = parseFloat($(this).find('.subtotal').val());
@@ -900,12 +985,20 @@ toastr.options = {
       iva_exonerado += ex;	
     });
     
+    $('.otros-tabla').each(function(){
+      var ot = parseFloat($(this).find('.otros-amount').val());
+      
+      if(!ot){ ot = 0; }
+      otros_cargos += ot;	
+    });
+    
     $('#subtotal').val(subtotal);
     $('#monto_iva').val(monto_iva);
-    $('#total').val(total - iva_devuelto - iva_exonerado);
+    $('#total').val(total - iva_devuelto - iva_exonerado + otros_cargos);
     
     $('#total_iva_devuelto').val(iva_devuelto);
     $('#total_iva_exonerado').val(iva_exonerado);
+    $('#total_otros_cargos').val(otros_cargos);
     
     $('#total_iva_devuelto-cont').hide();
     if(iva_devuelto > 0){
@@ -915,6 +1008,11 @@ toastr.options = {
     $('#total_iva_exonerado-cont').hide();
     if(iva_exonerado > 0){
       $('#total_iva_exonerado-cont').show();
+    }
+    
+    $('#total_otros_cargos-cont').hide();
+    if(otros_cargos > 0){
+      $('#total_otros_cargos-cont').show();
     }
   }
   
@@ -1018,6 +1116,106 @@ toastr.options = {
             $('#divImpuestoNeto').attr('hidden', true);
         }
     }
+    
+    
+    window.agregarEditarOtros = function() {
+    
+    //Si esta editando, usa lnum y item_id para identificar la fila.
+    var lnum = $('#otros-lnum').val() ? $('#otros-lnum').val() : '';
+    var otros_id = $('#otros_id').val() ? $('#otros_id').val() : '';
+    
+    var numero = parseInt( $('.otros-tabla:last-of-type').attr('attr-num') ) + 1;
+    var index = parseInt( $('#current-index-otros').val() ) + 1;
+    var document_type = $('#otros-document_type').val();
+    var document_type_string = $('#otros-document_type :selected').text();
+    var provider_id_number = $('#otros-provider_id_number').val();
+    var provider_name = $('#otros-provider_name').val();
+    var description = $('#otros-description').val();
+    var percentage = $('#otros-percentage').val();
+    var amount = $('#otros-amount').val();
+
+    if( !provider_name || !provider_id_number || document_type != "04" ){
+      provider_id_number = "-";
+      provider_name = "N/A";
+    }
+
+    if( !percentage ) {
+      percentage = 10;
+      $('#otros-percentage').val(10);
+    }
+    if( !amount ) {
+      amount = 0;
+      $('#otros-amount').val(0);
+    }
+
+    //Se asegura de que los campos hayan sido llenados
+    if( amount && description ){
+      
+      //Crear el ID de la fila.
+      var itemExistente = false;
+      if( lnum && lnum !== '' ){
+        numero = lnum;
+        itemExistente = $('#otros-tabla-' + numero);
+        index = itemExistente.attr('index');
+        itemExistente.html("");
+      }
+      var row_id  = "otros-tabla-"+numero;
+      
+      var inputFields = "<div class='hidden'>" +
+                   "<input type='hidden' class='otros-item_number' name='otros["+index+"][item_number]' itemname='item_number' value='"+(numero+1)+"'>" +
+                   "<input type='hidden' class='otros_id'  name='otros["+index+"][id]' itemname='id' value='"+otros_id+"'>" +
+                   "<input type='hidden' class='otros-document_type' name='otros["+index+"][document_type]' itemname='document_type' value='"+document_type+"'>" +
+                   "<input type='hidden' class='otros-provider_id_number' name='otros["+index+"][provider_id_number]' itemname='provider_id_number' value='"+provider_id_number+"'>" +
+                   "<input type='hidden' class='otros-provider_name' name='otros["+index+"][provider_name]' itemname='provider_name' value='"+provider_name+"'>" +
+                   "<input type='hidden' class='otros-description' name='otros["+index+"][description]' itemname='description' value='"+description+"'>" +
+                   "<input type='hidden' class='otros-percentage' name='otros["+index+"][percentage]' itemname='percentage' value='"+percentage+"'>" +
+                   "<input type='hidden' class='otros-amount' name='otros["+index+"][amount]' itemname='amount' value='"+amount+"'>" +
+              "</div>";
+
+      //Crea la fila en la tabla
+      var htmlCols = "<td><span class='numero-fila'>"+(numero+1)+"</span> </td>";
+        htmlCols += "<td>"+document_type_string + inputFields + " </td>";
+        htmlCols += "<td>"+provider_id_number+" "+provider_name+" </td>";
+        htmlCols += "<td>"+description+" </td>";
+        htmlCols += "<td>"+ fixComas(amount) +" </td>";
+        htmlCols += "<td class='acciones'><span class='btn-editar-item text-success mr-2' title='Editar otros cargos' onclick='abrirPopup(\"otros-popup\");cargarFormOtros("+index+");'> <i class='fa fa-pencil' aria-hidden='true'></i> </span> <span title='Eliminar otros cargos' onclick='eliminarOtros("+index+");' class='btn-eliminar-item text-danger mr-2'> <i class='fa fa-trash-o' aria-hidden='true'></i> </span> </td>";
+
+      if( !itemExistente ) {
+        var htmlRow = "<tr class='otros-tabla otros-index-"+index+"' index='"+index+"' attr-num='"+numero+"' id='"+row_id+"' > " + htmlCols + "</tr>";
+        $('#tabla-otroscargos-factura tbody').append(htmlRow);
+      }else{
+        itemExistente.append(htmlCols);
+      }
+      
+      $('#tabla-otroscargos-factura').show();
+
+      //Limpia los datos del formulario
+      limpiarFormItem();
+     
+      //Recalcula números para asegurar que no haya vacíos
+      recalcularNumerosItem();
+      
+      //Calcula total de factura
+      calcularTotalFactura();
+      
+      //Aumenta el indice de filas para evitar cualquier conflicto si hubo eliminados. El index nunca debe cambiar ni repetirse, los números pueden cambiar.
+      $('#current-index-otros').val(index);
+      
+      //Si estaba editando, quita la clase
+      $('.otros-factura-form').removeClass('editando');
+
+      cerrarPopup('otros-popup');
+      
+    }else{
+        Swal.fire({
+            type: 'error',
+            title: 'Error',
+            text: 'Por favor, asegúrese que todos los datos sean válidos antes de continuar.'
+        })
+        return false;
+    }
+    
+  }
   
 
 $( document ).ready(function() {
@@ -1039,16 +1237,6 @@ $( document ).ready(function() {
       togglePorcentajeIdentificacionPlena();
       if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
     });
-  
-    /*$('#tipo_producto').on('change', function(){
-      
-      presetTipoIVA();
-      presetPorcentaje();
-      calcularSubtotalItem();
-      togglePorcentajeIdentificacionPlena();
-      if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
-      
-    });*/
     
     $('#item_iva_amount').on('change', function(){
       calcularConIvaManual();
@@ -1061,7 +1249,7 @@ $( document ).ready(function() {
     $('#cliente_exento').on('change', function(){
   
       if( $('#cliente_exento:checked').length ){
-        $('#tipo_iva').val('260');
+        $('#tipo_iva').val('S260');
         $('#tipo_iva').prop('readonly', true);
       }else{
         presetTipoIVA();

@@ -5,9 +5,13 @@
 @endsection
 
 @section('breadcrumb-buttons')
-    <a class="btn btn-primary" href="/facturas-emitidas/emitir-factura/01">Emitir factura nueva</a>
-    <a class="btn btn-primary" href="/facturas-emitidas/create">Ingresar factura existente</a>
-    <div onclick="abrirPopup('importar-emitidas-popup');" class="btn btn-primary">Importar facturas emitidas</div>
+  <?php 
+  $menu = new App\Menu;
+  $items = $menu->menu('menu_ventas');
+  foreach ($items as $item) { ?>
+    <a class="btn btn-primary" style="color: #ffffff;" {{$item->type}}="{{$item->link}}">{{$item->name}}</a>
+  <?php } ?>
+    
 @endsection 
 
 @section('content') 
@@ -116,37 +120,6 @@ function confirmDelete( id ) {
   
 }
 
-function confirmAnular( id ) {  
-  var formId = "#anular-form-"+id;
-
-  @if(currentCompanyModel(false)->atv_validation)
-    var title = '¿Está seguro que desea anular la factura';
-    var texto = "Este proceso anulará la factura ante Hacienda y enviará una nueva nota de crédito al cliente.";
-    Swal.fire({
-      title: title,
-      text: texto,
-      type: 'warning',
-      showCloseButton: true,
-      showCancelButton: true,
-      confirmButtonText: 'Sí, quiero anularla'
-    }).then((result) => {
-      if (result.value) {
-        $(formId).submit();
-      }
-    })
-  @else
-    var title = 'No puede anular factura';
-    var texto = "Debe tener un certificado ATV válido para poder hacer anulaciones y generar nota de crédito.";
-    Swal.fire({
-      title: title,
-      text: texto,
-      type: 'warning',
-      showCloseButton: true,
-      confirmButtonText: 'Ok'
-    });
-  @endif
-  
-}
 
 function confirmRecover( id ) {
   

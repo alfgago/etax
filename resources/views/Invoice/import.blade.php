@@ -104,7 +104,8 @@
 
             $("#xml-dropzone2").dropzone({
                 paramName: 'file',
-                url: baseUrl+"/facturas-emitidas/importarXML",
+                //url: baseUrl+"/facturas-emitidas/importarXML",
+                url: "http://etax.test/facturas-emitidas/importarXML",
                 params: {
                     _token: token
                 },

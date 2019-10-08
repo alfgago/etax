@@ -8,7 +8,7 @@
 <div class="col-md-4">
     <div class="row">
         <div class="form-group col-md-12" style="white-space: nowrap;margin-top:2px;">
-            <input type="text" inputmode="numeric" class="form-control checkEmpty" name="number" id="number" placeholder="N&#250;mero de tarjeta" required onblur="valid_credit_card(this.value);">
+            <input type="text" inputmode="numeric" class="form-control checkEmpty" maxlength="19" name="number" id="number" placeholder="N&#250;mero de tarjeta" required onblur="valid_credit_card(this.value);">
         </div>
         <div class="form-group col-md-6" style="white-space: nowrap;">
             <input type="text" inputmode="numeric" class="form-control checkEmpty" name="expiry" id="expiry" placeholder="Mes / A&#241;o" required>
@@ -51,30 +51,25 @@
 <input type="text" hidden id="bncupon" name="bncupon" value="0">
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-prev" onclick="backFields();toggleStep('step2');">Paso anterior</button>
-  <button onclick="trackClickEvent( 'ConfirmarPago' );" type="submit" id="btn-submit-tc" class="btn btn-primary btn-next has-spinner" >Confirmar</button>
+  <button onclick="getCyberData();trackClickEvent( 'ConfirmarPago' );" type="submit" id="btn-submit-tc" class="btn btn-primary btn-next has-spinner" >Confirmar</button>
 </div>
-
 <div class="verificado-logos">
     <img src="/assets/images/visa.png">
     <img src="/assets/images/mastercard.png">
     <img src="/assets/images/logo-banco-nacional.png">
 </div>
-
-
 <style>
 .verificado-logos {
     margin-top: 1.5rem;
     text-align: right;
     width: 100%;
 }
-
 .verificado-logos img {
     display: inline-block;
     max-width: 75px;
     margin: 0 1rem;
 }
 </style>
-
 <script>
     function checkCupon() {
         var codigo = $('#coupon').val();

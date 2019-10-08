@@ -49,7 +49,7 @@ class ProcessSendExcelSingleInvoice implements ShouldQueue
      */
     public function handle()
     {
-        if ( app()->environment('production') ) {
+        //if ( app()->environment('production') ) {
             $invoiceArr = $this->invoiceArr;
             $fac = $invoiceArr['factura'];
             $lineas = $invoiceArr['lineas'];
@@ -102,7 +102,7 @@ class ProcessSendExcelSingleInvoice implements ShouldQueue
             }catch( \Throwable $ex ){
                 Log::error("Error importando lineas de factura " . $ex);
             }
-        }
+        //}
     }
 
 }
