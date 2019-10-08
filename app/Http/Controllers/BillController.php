@@ -387,17 +387,8 @@ class BillController extends Controller
         if( $company->id_number != $cedulaEmpresa ){ 
           return back()->withError( "Error en validación: Asegúrese de agregar la columna CedulaEmpresa a su archivo de excel, con la cédula de su empresa en todas las lineas. La línea 1 no le pertenece a la empresa actual. ($company->id_number)" );
         }
-      
-            $user = auth()->user();
-            Activity::dispatch(
-                $user,
-                $collectionArray,
-                [
-                    'company_id' => $collectionArray[0]['cedulaempresa']
-                ],
-                "Importar factura de compra por excel."
-            )->onConnection(config('etax.queue_connections'))
-            ->onQueue('log_queue');
+            
+
         if( count($collectionArray) < 1800 ){
             ProcessBillsImport::dispatchNow($collectionArray, $company);
         }else{
