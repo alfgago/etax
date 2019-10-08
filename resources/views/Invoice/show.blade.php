@@ -4,7 +4,9 @@
   Ver factura emitida
 @endsection
 @section('breadcrumb-buttons')
+    @if ($invoice->generation_method !== 'etax')
   <button type="submit" onclick="$('#btn-submit-form').click();"  class="btn btn-primary">Guardar factura</button>
+    @endif
 @endsection 
 @section('content') 
 <div class="row form-container">
@@ -280,7 +282,7 @@
                       <td>{{ \App\UnidadMedicion::getUnidadMedicionName($item->measure_unit) }}</td>
                       <td>{{ $item->unit_price }}</td>
                       <td>
-                        <select class="form-control tipo_iva tipo_iva_{{ $loop->index+1 }} select-search" name="items[{{ $loop->index }}][tipo_iva]" >
+                        <select class="form-control tipo_iva tipo_iva_{{ $loop->index+1 }} select-search" name="items[{{ $loop->index }}][tipo_iva]" {{ $invoice->generation_method == 'etax' ? 'disabled' : '' }}>
                             <?php
                           $preselectos = array();
                           foreach($company->repercutidos as $repercutido){
@@ -298,7 +300,7 @@
                           @endforeach
                         @endif
                         </select>
-                        <select class="mt-2 form-control tipo_producto" curr="{{$item->product_type}}" numero="{{ $loop->index+1 }}" name="items[{{ $loop->index }}][category_product]">
+                        <select class="mt-2 form-control tipo_producto" curr="{{$item->product_type}}" numero="{{ $loop->index+1 }}" name="items[{{ $loop->index }}][category_product]" {{ $invoice->generation_method == 'etax' ? 'disabled' : '' }}>
                             
                             @foreach( $product_categories as $tipo)
                               <option {{ $item->product_type == $tipo->id ? 'selected' : '' }} value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
