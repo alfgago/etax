@@ -24,13 +24,17 @@ class InvoiceUtils
     public function streamPdf( $invoice, $company )
     {
         $pdfRoute = 'Pdf/invoice';
+        $provider = null;
         /*if($company->id_number == '3101015179'){
             $pdfRoute = 'Pdf/custom/trifami';
         }*/
-        
+        if ($invoice->document_type == '08') {
+            $provider = Provider::find($invoice->provider_id);
+        }
         $pdf = PDF::loadView($pdfRoute, [
             'data_invoice' => $invoice,
-            'company' => $company
+            'company' => $company,
+            'provider' => $provider
         ]);
         
         return $pdf->stream('Invoice.pdf');
@@ -489,12 +493,12 @@ class InvoiceUtils
                 $invoiceData['otroscargos'] = $otherCharges;
             }
 
-            if ($data['document_type'] == '03' || $data['document_type'] == '02') {
+            if ($data['document_type'] == '03' || $data['document_type'] == '02' || $data['document_type'] == '08') {
                 $invoiceData['referencia_doc_type'] = $data['reference_doc_type'];
                 $invoiceData['referencia_codigo'] = $data['code_note'] ?? "01";
                 $invoiceData['referencia_razon'] = $data['reason'] ?? 'Anular Factura';
                 $invoiceData['fecha_emision_factura'] = $data['reference_generated_date'];
-                $invoiceData['clave_factura'] = $data['reference_document_key'];
+                $invoiceData['clave_factura'] = $data['reference_document_key'] ?? '';
             }
 
             Log::info("Request Data from invoices id: $data->id  --> ".json_encode($invoiceData));
