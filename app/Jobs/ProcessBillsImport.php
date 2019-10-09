@@ -107,12 +107,22 @@ class ProcessBillsImport implements ShouldQueue
                                 $totalLinea = $row['totallinea'];
                                 $montoDescuento = isset($row['montodescuento']) ? $row['montodescuento'] : 0;
                                 $codigoEtax = $row['codigoivaetax'];
-                                $categoriaHacienda = isset($row['categoriahacienda']) ? $row['categoriahacienda'] : null;
+                                $categoriaHacienda = isset($row['categoriahacienda']) ? $row['categoriahacienda'] : (isset($row['categoriadeclaracion']) ? $row['categoriadeclaracion'] : null);
                                 $montoIva = (float)$row['montoiva'];
                                 $acceptStatus = isset($row['aceptada']) ? $row['aceptada'] : 1;
                                 $codigoActividad = $row['actividadcomercial'] ?? $mainAct;
                                 $xmlSchema = $row['xmlschema'] ?? 43;
-        
+                                $identificacionEspecifica = $row['tarifaidentificacionespecifica'] ?? 13;
+                                
+
+                                 //verificar si fue validada
+                                if($numeroLinea == 1){
+                                    $codeValidated = isset($categoriaHacienda) ? (isset($codigoEtax) ? true : false) : false;
+                                }else{
+                                    $codeValidated = isset($categoriaHacienda) ? (isset($codigoEtax) ? null : false) : false;    
+                                }
+
+
                                 //Datos de exoneracion
                                 $totalNeto = 0;
                                 $tipoDocumentoExoneracion = $row['tipodocumentoexoneracion'] ?? null;
@@ -156,9 +166,10 @@ class ProcessBillsImport implements ShouldQueue
                                     'montoDescuento' => $montoDescuento,
                                     'codigoEtax' => $codigoEtax,
                                     'montoIva' => $montoIva,
+                                    'identificacionEspecifica' => $identificacionEspecifica,
                                     'descripcion' => $descripcion,
                                     'isAuthorized' => true,
-                                    'codeValidated' => true,
+                                    'codeValidated' => $codeValidated,
                                     'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
                                     'documentoExoneracion' => $documentoExoneracion,
                                     'companiaExoneracion' => $companiaExoneracion,
