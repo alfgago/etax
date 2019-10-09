@@ -312,7 +312,7 @@ class BridgeHaciendaApi
                     $invoice->hacienda_status = '03';
                     $invoice->save();
                 } else if (strpos($response['data']['response'],"ESTADO=procesando") !== false) {
-                    $invoice->hacienda_status = '03';
+                    $invoice->hacienda_status = '05';
                     $invoice->save();
                 }
             } else {
