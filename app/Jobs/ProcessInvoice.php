@@ -98,7 +98,11 @@ class ProcessInvoice implements ShouldQueue
                                 ]);
                                 if (isset($response['status']) && $response['status'] == 200) {
                                     Log::info('API HACIENDA 200 :'. $invoice->document_number);
-                                    $invoice->hacienda_status = '03';
+                                    if (strpos($response['data']['response'],"ESTADO=procesando") !== false) {
+                                        $invoice->hacienda_status = '05';
+                                    } else {
+                                        $invoice->hacienda_status = '03';
+                                    }
                                     $invoice->save();
                                     $path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
                                     $save = Storage::put(
