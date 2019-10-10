@@ -143,14 +143,14 @@ return [
             'default-supervisor' => [
                 'connection' => 'redis',
                 'queue' => ['default'],
-                'balance' => 'simple',
+                'balance' => 'auto',
                 'processes' => 5,
                 'tries' => 2,
             ],
             'invoice-supervisor' => [
                 'connection' => 'redis',
                 'queue' => ['invoices', 'receptions'],
-                'balance' => 'simple',
+                'balance' => 'auto',
                 'processes' => 5,
                 'tries' => 2,
             ],
