@@ -140,11 +140,32 @@ return [
 
     'environments' => [
         'production' => [
-            'horizon-supervisor' => [
+            'default-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['default', 'invoices', 'receptions', 'imports', 'log_queue', 'gosocket'],
+                'queue' => ['default'],
                 'balance' => 'auto',
-                'processes' => 10,
+                'processes' => 5,
+                'tries' => 2,
+            ],
+            'invoice-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['invoices', 'receptions'],
+                'balance' => 'auto',
+                'processes' => 5,
+                'tries' => 2,
+            ],
+            'imports-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['imports', 'gosocket'],
+                'balance' => 'auto',
+                'processes' => 2,
+                'tries' => 2,
+            ],
+            'log-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['log_queue'],
+                'balance' => 'auto',
+                'processes' => 2,
                 'tries' => 1,
             ],
             'bulk-supervisor' => [
