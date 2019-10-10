@@ -144,8 +144,8 @@ return [
                 'connection' => 'redis',
                 'queue' => ['default', 'invoices', 'receptions', 'imports', 'log_queue', 'gosocket'],
                 'balance' => 'auto',
-                'processes' => 10,
-                'tries' => 1,
+                'processes' => 5,
+                'tries' => 2,
             ],
             'bulk-supervisor' => [
                 'connection' => 'redis',
