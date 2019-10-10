@@ -126,6 +126,12 @@ return array(
                         'port' => env('REDIS_PORT', '6379'),
                         'database' => 1,
                 ],
+                
+                'queue' => array(
+                        'host'     => env('REDIS_HOST', 'etax-redis.blqt4v.ng.0001.use1.cache.amazonaws.com'),
+                        'port'     => env('REDIS_PORT', '6379'),
+                        'database' => 2,
+                ),
 
         ),
 
