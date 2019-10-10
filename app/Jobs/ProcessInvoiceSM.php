@@ -69,7 +69,7 @@ class ProcessInvoiceSM implements ShouldQueue
                             }
                             $invoice->in_queue = false;
                             $invoice->save();
-                            sleep(15);
+                            sleep(10);
                             $apiHacienda = new BridgeHaciendaApi();
                             $tokenApi = $apiHacienda->login(false);
                             if ($requestData !== false) {
@@ -138,6 +138,8 @@ class ProcessInvoiceSM implements ShouldQueue
                                     $invoice->save();
                                 }
                                 Log::info('Proceso de facturación finalizado con éxito.');
+                            }else {
+                                Log::error('Hacienda request data viene vacio. '.$company->id_number);
                             }
                         }
                     }else {
