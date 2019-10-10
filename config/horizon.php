@@ -150,7 +150,7 @@ return [
             'invoice-supervisor' => [
                 'connection' => 'redis',
                 'queue' => ['invoices', 'receptions'],
-                'balance' => 'auto',
+                'balance' => 'simple',
                 'processes' => 5,
                 'tries' => 2,
             ],
@@ -187,12 +187,49 @@ return [
         ],
 
         'local' => [
-            'supervisor-1' => [
+            'default-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['default', 'invoices', 'receptions', 'imports', 'bulk', 'gosocket'],
+                'queue' => ['default'],
                 'balance' => 'auto',
-                'processes' => 3,
-                'tries' => 3,
+                'processes' => 5,
+                'tries' => 2,
+            ],
+            'invoice-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['invoices', 'receptions'],
+                'balance' => 'simple',
+                'processes' => 5,
+                'tries' => 2,
+            ],
+            'imports-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['imports', 'gosocket'],
+                'balance' => 'auto',
+                'processes' => 2,
+                'tries' => 2,
+            ],
+            'log-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['log_queue'],
+                'balance' => 'auto',
+                'processes' => 2,
+                'tries' => 1,
+            ],
+            'bulk-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['bulk'],
+                'balance' => 'auto',
+                'processes' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
+                'minProcesses' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
+                'maxProcesses' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
+                'tries' => 1,
+            ],
+            'subscriptions-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['payments'],
+                'balance' => 'simple',
+                'processes' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
+                'tries' => 1,
             ],
         ],
     ],
