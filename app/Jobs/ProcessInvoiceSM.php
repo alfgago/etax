@@ -58,6 +58,8 @@ class ProcessInvoiceSM implements ShouldQueue
                 $company = Company::find($this->companyId);
                 //if (strpos($invoice->generation_method, 'bulk') !== FALSE) {  // Procese el bulk de SM Seguros aqui
                     Log::info('send job invoice id: '.$this->invoiceId);
+                    $invoice->in_queue = false;
+                    $invoice->save();
                     if ($company->atv_validation ) {
                         sleep(10);
                         if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09')) && $invoice->resend_attempts < 6) {
@@ -68,8 +70,6 @@ class ProcessInvoiceSM implements ShouldQueue
                                 $requestDetails = $this->setDetails($invoice->items);
                                 $requestData = $this->setInvoiceData($invoice, $requestDetails);
                             }
-                            $invoice->in_queue = false;
-                            $invoice->save();
                             
                             $apiHacienda = new BridgeHaciendaApi();
                             $tokenApi = $apiHacienda->login(false);
@@ -143,7 +143,7 @@ class ProcessInvoiceSM implements ShouldQueue
                                 Log::error('Hacienda request data viene vacio. '.$invoice->id);
                             }
                         }else{
-                            Log::error('No se pudo enviar la factura:  '.$invoice->id);
+                            Log::error('No se pudo enviar la factura:  '. var_dump($invoice));
                         }
                     }else {
                         Log::warning('El job Invoices no se procesó, porque la empresa no tiene un certificado válido.'.$company->id_number);
