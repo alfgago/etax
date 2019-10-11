@@ -853,7 +853,7 @@ class CalculatedTax extends Model
       
       //Calcula el balance estimado.
       $ivaDeducibleEstimado = ($cfdpEstimado * $prorrata) + $this->iva_acreditable_identificacion_plena;
-      $balanceEstimado = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleEstimado;
+      $balanceEstimado = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleEstimado - $this->iva_devuelto;
 
       $ratio1_operativo = $company->operative_ratio1 / 100;
       $ratio2_operativo = $company->operative_ratio2 / 100;
@@ -875,7 +875,7 @@ class CalculatedTax extends Model
       
       //Calcula el balance operativo.
       $ivaDeducibleOperativo = ($cfdp  * $prorrataOperativa) + $this->iva_acreditable_identificacion_plena;
-      $balanceOperativo = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleOperativo;
+      $balanceOperativo = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleOperativo - $this->iva_devuelto;
       $ivaNoDeducible = $this->total_bill_iva - $ivaDeducibleOperativo;
 
       $ivaRetenido = $this->retention_by_card ? $this->retention_by_card : $this->iva_retenido;
@@ -1445,20 +1445,31 @@ class CalculatedTax extends Model
         	$determinacion['impuestoOperacionesGravadas'] = $this->total_invoice_iva;
         	$determinacion['totalCreditosPeriodo'] = $this->iva_deducible_operativo;
         	$determinacion['devolucionIva'] = $this->iva_devuelto;
+        	
+        	 /*$diff = $this->iva_por_pagar - $this->iva_devuelto;
+    			 $impuestoFinal = $diff;
+    			 $saldoFavor = $this->iva_por_cobrar;
+    			 if($diff < 0){
+    			 		$impuestoFinal = 0;
+    			 		$saldoFavor = $saldoFavor + abs($diff);
+    			 }*/
+        	
         	$determinacion['saldoFavorPeriodo'] = $this->iva_por_cobrar;
         	$determinacion['saldoDeudorPeriodo'] = $this->iva_por_pagar;
-        	$determinacion['saldoFavorProrrataReal'] = $this->iva_por_cobrar;
-        	$determinacion['saldoDeudorProrrataReal'] = $this->iva_por_pagar;
-        			
-        			 $diff = $this->iva_por_pagar - $this->iva_devuelto;
-        			 $impuestoFinal = $diff;
-        			 $saldoFavor = $this->saldo_favor;
-        			 if($diff < 0){
-        			 		$impuestoFinal = 0;
-        			 		$saldoFavor = $saldoFavor + abs($diff);
-        			 }
+        	$saldoFavorFinal = $this->iva_por_cobrar;
+        	$impuestoFinal = $this->iva_por_pagar;
+        	
+        	if( $this->month != 12 ) {
+          	$determinacion['saldoFavorProrrataReal'] = 0;
+          	$determinacion['saldoDeudorProrrataReal'] = 0;
+        	}else{
+        	  $saldoFavorFinal = $this->balance_estimado < 0 ? abs($this->balance_estimado) : 0;
+            $impuestoFinal = $this->balance_estimado > 0 ? $this->balance_estimado : 0;
+        	  $determinacion['saldoFavorProrrataReal'] = $saldoFavorFinal;
+          	$determinacion['saldoDeudorProrrataReal'] = $impuestoFinal;
+        	}
         	 
-        	$determinacion['saldoFavorFinalPeriodo'] = $saldoFavor;
+        	$determinacion['saldoFavorFinalPeriodo'] = $saldoFavorFinal;
         	$determinacion['impuestoFinalPeriodo'] = $impuestoFinal;
         	
         	$determinacion['retencionImpuestos'] = $this->retention_by_card ? $this->retention_by_card : $this->iva_retenido;
@@ -1468,7 +1479,7 @@ class CalculatedTax extends Model
 
           return $dataDeclaracion;
       }catch(\Throwable $e){
-        Log::error($e);
+        Log::error($e->getMessage());
         return false;
       }
     }
