@@ -144,14 +144,18 @@ return [
                 'connection' => 'redis',
                 'queue' => ['default'],
                 'balance' => 'auto',
-                'processes' => 5,
+                'processes' => 3,
+                'minProcesses' => 3,
+                'maxProcesses' => 3,
                 'tries' => 2,
             ],
             'invoice-supervisor' => [
                 'connection' => 'redis',
                 'queue' => ['invoices', 'receptions'],
                 'balance' => 'auto',
-                'processes' => 5,
+                'processes' => 3,
+                'minProcesses' => 3,
+                'maxProcesses' => 3,
                 'tries' => 1,
             ],
             'sendbulk-supervisor' => [
@@ -168,6 +172,8 @@ return [
                 'queue' => ['imports', 'gosocket'],
                 'balance' => 'auto',
                 'processes' => 2,
+                'minProcesses' => 2,
+                'maxProcesses' => 2,
                 'tries' => 2,
             ],
             'log-supervisor' => [
@@ -175,6 +181,8 @@ return [
                 'queue' => ['log_queue'],
                 'balance' => 'auto',
                 'processes' => 2,
+                'minProcesses' => 2,
+                'maxProcesses' => 2,
                 'tries' => 1,
             ],
             'bulk-supervisor' => [
@@ -191,6 +199,8 @@ return [
                 'queue' => ['payments'],
                 'balance' => 'simple',
                 'processes' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
+                'minProcesses' => 1,
+                'maxProcesses' => 1,
                 'tries' => 1,
             ],
         ],
