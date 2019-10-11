@@ -152,15 +152,15 @@ return [
                 'queue' => ['invoices', 'receptions'],
                 'balance' => 'auto',
                 'processes' => 5,
-                'tries' => 2,
+                'tries' => 1,
             ],
             'sendbulk-supervisor' => [
                 'connection' => 'redis',
                 'queue' => ['sendbulk'],
                 'balance' => 'auto',
-                'processes' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
-                'minProcesses' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
-                'maxProcesses' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
+                'processes' => 3,
+                'minProcesses' => 3,
+                'maxProcesses' => 3,
                 'tries' => 1,
             ],
             'imports-supervisor' => [
