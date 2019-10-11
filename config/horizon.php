@@ -154,6 +154,15 @@ return [
                 'processes' => 5,
                 'tries' => 2,
             ],
+            'sendbulk-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['sendbulk'],
+                'balance' => 'auto',
+                'processes' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
+                'minProcesses' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
+                'maxProcesses' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
+                'tries' => 1,
+            ],
             'imports-supervisor' => [
                 'connection' => 'redis',
                 'queue' => ['imports', 'gosocket'],
