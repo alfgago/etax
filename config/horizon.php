@@ -158,9 +158,9 @@ return [
                 'connection' => 'redis',
                 'queue' => ['sendbulk'],
                 'balance' => 'auto',
-                'processes' => 1,
-                'minProcesses' => 1,
-                'maxProcesses' => 1,
+                'processes' => 3,
+                'minProcesses' => 3,
+                'maxProcesses' => 3,
                 'tries' => 1,
             ],
             'imports-supervisor' => [
