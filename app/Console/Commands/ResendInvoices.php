@@ -60,7 +60,7 @@ class ResendInvoices extends Command
                 $this->info('Sending invoice ....'. $invoice->document_key);
                 sleep(2);
                 ProcessInvoice::dispatch($invoice->id, $company->id, $tokenApi)
-                    ->onConnection(config('etax.queue_connections'))->onQueue('sendbulk');
+                    ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
             }
         } catch ( \Exception $e) {
             Log::error('Error resend command '.$e);
