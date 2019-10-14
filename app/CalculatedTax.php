@@ -1446,13 +1446,9 @@ class CalculatedTax extends Model
         	$determinacion['totalCreditosPeriodo'] = $this->iva_deducible_operativo;
         	$determinacion['devolucionIva'] = $this->iva_devuelto;
         	
-        	 /*$diff = $this->iva_por_pagar - $this->iva_devuelto;
-    			 $impuestoFinal = $diff;
-    			 $saldoFavor = $this->iva_por_cobrar;
-    			 if($diff < 0){
-    			 		$impuestoFinal = 0;
-    			 		$saldoFavor = $saldoFavor + abs($diff);
-    			 }*/
+        	$balanceOperativo = $this->balance_operativo < 0 ? ($this->balance_operativo + $this->saldo_favor_anterior) : ($this->balance_operativo - $this->saldo_favor_anterior);
+        	$this->iva_por_cobrar = $balanceOperativo < 0 ? abs($balanceOperativo) : 0;
+          $this->iva_por_pagar = $balanceOperativo > 0 ? $balanceOperativo : 0;
         	
         	$determinacion['saldoFavorPeriodo'] = $this->iva_por_cobrar;
         	$determinacion['saldoDeudorPeriodo'] = $this->iva_por_pagar;
