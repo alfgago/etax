@@ -7,12 +7,12 @@
         <a href="/facturas-emitidas/{{ $data->id }}" title="Ver detalle de factura" class="text-info mr-2">
             <i class="fa fa-pencil" aria-hidden="true"></i>
         </a>
-        @if( $data->document_type == ('01' || '08' || '09' || '04') &&  $data->reference_document_key == null)
+        @if(in_array($data->document_type, ['01', '08', '09', '04']))
         <a href="/facturas-emitidas/nota-debito/{{ $data->id }}" title="Crear nota de debito" class="text-warning mr-2">
             <i class="fa fa-pencil" aria-hidden="true"></i>
         </a>
         @endif
-      @if( $data->document_type == ('01' || '08' || '09' || '04') &&  $data->reference_document_key == null)
+      @if(in_array($data->document_type, ['01', '08', '09', '04']))
       <a href="/facturas-emitidas/nota-credito/{{ $data->id }}" title="Crear nota de credito" class="text-warning mr-2">
         <i class="fa fa-ban" aria-hidden="true"></i>
       </a>
