@@ -56,7 +56,7 @@ class ProcessInvoice implements ShouldQueue
                 $client = new Client();
                 $invoice = Invoice::find($this->invoiceId);
                 $company = Company::find($this->companyId);
-                if (strpos($invoice->generation_method, 'bulk') === FALSE) { 
+                //if (strpos($invoice->generation_method, 'bulk') === FALSE) { 
                     Log::info('send job invoice id: '.$this->invoiceId);
                     if ($company->atv_validation ) {
                         if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09')) && $invoice->resend_attempts < 6) {
@@ -70,7 +70,7 @@ class ProcessInvoice implements ShouldQueue
                             }
                             $invoice->in_queue = false;
                             $invoice->save();
-                            sleep(15);
+                            sleep(10);
                             $apiHacienda = new BridgeHaciendaApi();
                             $tokenApi = $apiHacienda->login(false);
                             if ($requestData !== false) {
@@ -148,7 +148,7 @@ class ProcessInvoice implements ShouldQueue
                     }else {
                         Log::warning('El job Invoices no se procesó, porque la empresa no tiene un certificado válido.'.$company->id_number);
                     }
-                }
+                //}
             //}
         } catch ( \Exception $e) {
             Log::error('ERROR Enviando parametros  API HACIENDA Invoice: '.$this->invoiceId.'-->>'.$e);
