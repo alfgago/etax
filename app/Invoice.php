@@ -878,61 +878,61 @@ class Invoice extends Model
               $otrasSenas = null;
             }
 
-        if( $identificacionCliente ){
-          $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
-          if ( !Cache::has($clientCacheKey) ) {
-              $clienteCache =  Client::updateOrCreate(
-                  [
-                      'id_number' => $identificacionCliente ?? null,
-                      'company_id' => $company->id,
-                  ],
-                  [
-                      'code' => $identificacionCliente,
-                      'company_id' => $company->id,
-                      'tipo_persona' => $tipoPersona ?? null,
-                      'id_number' => $identificacionCliente,
-                      'first_name' => $nombreCliente ?? null,
-                      'email' => $correoCliente ?? null,
-                      'phone' => $telefonoCliente ?? null,
-                      'fullname' => "$identificacionCliente - " . $nombreCliente ?? null,
-                      'country' => 'CR',
-                      'state' => $provinciaCliente ?? null,
-                      'city' => $cantonCliente ?? null,
-                      'district' => $distritoCliente ?? null,
-                      'zip' => $zipCliente ?? null,
-                      'address' => $otrasSenas ?? null,
-                      'foreign_address' => $otrasSenas ?? null,
-                  ]
-              );
-              Cache::put($clientCacheKey, $clienteCache, 30);
+          if( $identificacionCliente ){
+            $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
+            if ( !Cache::has($clientCacheKey) ) {
+                $clienteCache =  Client::updateOrCreate(
+                    [
+                        'id_number' => $identificacionCliente ?? null,
+                        'company_id' => $company->id,
+                    ],
+                    [
+                        'code' => $identificacionCliente,
+                        'company_id' => $company->id,
+                        'tipo_persona' => $tipoPersona ?? null,
+                        'id_number' => $identificacionCliente,
+                        'first_name' => $nombreCliente ?? null,
+                        'email' => $correoCliente ?? null,
+                        'phone' => $telefonoCliente ?? null,
+                        'fullname' => "$identificacionCliente - " . $nombreCliente ?? null,
+                        'country' => 'CR',
+                        'state' => $provinciaCliente ?? null,
+                        'city' => $cantonCliente ?? null,
+                        'district' => $distritoCliente ?? null,
+                        'zip' => $zipCliente ?? null,
+                        'address' => $otrasSenas ?? null,
+                        'foreign_address' => $otrasSenas ?? null,
+                    ]
+                );
+                Cache::put($clientCacheKey, $clienteCache, 30);
+            }
+            $cliente = Cache::get($clientCacheKey);
+
+            $invoice->client_id = $cliente->id;
+            $invoice->client_id_number = $identificacionCliente;
+            $invoice->client_first_name = $nombreCliente;
+            $invoice->client_email = $correoCliente;
+            $invoice->client_address = $otrasSenas;
+            $invoice->client_country = 'CR';
+            $invoice->client_state = $provinciaCliente;
+            $invoice->client_city = $cantonCliente;
+            $invoice->client_district = $distritoCliente;
+            $invoice->client_zip = $zipCliente;
+            $invoice->client_phone = $telefonoCliente;
+            $invoice->foreign_address = $otrasSenas;
+          }else{
+            $invoice->client_email = $arr['Receptor']['CorreoElectronico'] ??'N/A';
+            $invoice->client_phone = $arr['Receptor']['Telefono']['NumTelefono'] ?? 'N/A';
+            $invoice->client_id_number = $arr['Receptor']['Identificacion']['Numero'] ?? 0;
+            $invoice->client_first_name = $arr['Receptor']['Nombre'] ?? 'N/A';
           }
-          $cliente = Cache::get($clientCacheKey);
-
-          $invoice->client_id = $cliente->id;
-          $invoice->client_id_number = $identificacionCliente;
-          $invoice->client_first_name = $nombreCliente;
-          $invoice->client_email = $correoCliente;
-          $invoice->client_address = $otrasSenas;
-          $invoice->client_country = 'CR';
-          $invoice->client_state = $provinciaCliente;
-          $invoice->client_city = $cantonCliente;
-          $invoice->client_district = $distritoCliente;
-          $invoice->client_zip = $zipCliente;
-          $invoice->client_phone = $telefonoCliente;
-          $invoice->foreign_address = $otrasSenas;
-        }else{
-          $invoice->client_email = $arr['Receptor']['CorreoElectronico'] ??'N/A';
-          $invoice->client_phone = $arr['Receptor']['Telefono']['NumTelefono'] ?? 'N/A';
-          $invoice->client_id_number = $arr['Receptor']['Identificacion']['Numero'] ?? 0;
-          $invoice->client_first_name = $arr['Receptor']['Nombre'] ?? 'N/A';
-        }
 
         }else{
-        $invoice->client_email = 'N/A';
-        $invoice->client_phone = 'N/A';
-        $invoice->client_id_number = 0;
-        $invoice->client_first_name = 'N/A';
-        $invoice->document_type = '04';
+          $invoice->client_email = 'N/A';
+          $invoice->client_phone = 'N/A';
+          $invoice->client_id_number = 0;
+          $invoice->client_first_name = 'N/A';
+          $invoice->document_type = $tipoDocumento ?? '04';
         }
               
         //End DATOS CLIENTE
