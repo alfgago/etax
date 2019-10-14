@@ -74,10 +74,12 @@
                   <option value="" selected >Seleccione compañia </option>
                   @foreach( auth()->user()->teams as $row )
                       <?php  
-                          $c = $row->company;  
+                      $c = $row->company;  
+                      if($c) {
                           $name = $c->name ? $c->name.' '.$c->last_name.' '.$c->last_name2 : '-- Nueva Empresa --';  
                       ?>
-                      <option value="{{ $c->id }}" > {{ $name }} </option>
+                          <option value="{{ $c->id }}" > {{ $name }} </option>
+                      <?php  } ?>
                   @endforeach
               </select>
           </div>
