@@ -4,9 +4,9 @@ namespace App;
 
 use App\Company;
 use App\InvoiceItem;
+use App\XmlHacienda;
 use \Carbon\Carbon;
 use App\Client;
-use App\XmlHacienda;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
@@ -100,6 +100,12 @@ class Invoice extends Model
     public function xmlHacienda()
     {
         return $this->hasOne(XmlHacienda::class);
+    }
+
+    //Relacion con reference
+    public function documentReference()
+    {
+        return $this->hasOne(DocumentReference::class);
     }
     
     public function getCondicionVenta() {
@@ -1115,6 +1121,14 @@ class Invoice extends Model
             $invoiceReference->save();
             $this->save();
             $this->client_id = $invoiceReference->client_id;
+
+            //Reference data
+            $reference = new DocumentReference();
+            $reference->invoice_id = $invoiceReference->id;
+            $reference->ref_invoice_id = $this->id;
+            $reference->invoice_document_key = $invoiceReference->document_key;
+            $reference->reference_document_key = $this->document_key;
+            $reference->save();
 
             //Datos de factura
             $this->description = $invoiceReference->description;
