@@ -13,11 +13,13 @@ class AddColumnReferenceIdInvoiceTable extends Migration
      */
     public function up()
     {
+
         if (! Schema::hasColumn('invoices', 'reference_id')){
             Schema::table('invoices', function (Blueprint $table) {
                 $table->bigInteger('reference_id')->nullable();
             });
         }
+
     }
 
     /**

@@ -159,7 +159,7 @@ class KlapPaymentProcessor extends PaymentProcessor
         ]);
         $chargeIncluded = json_decode($appChargeBn->getBody()->getContents(), true);
         if($chargeIncluded['apiStatus'] === "Successful"){
-            return $chargeIncluded['chargeTokenId'];
+            return $chargeIncluded;
         }else{
             return false;
         }
@@ -388,7 +388,7 @@ class KlapPaymentProcessor extends PaymentProcessor
 
     public function getChargeProof($chargeIncluded){
         if($chargeIncluded['apiStatus'] == "Successful"){
-            $appliedCharge_Id = $chargeIncluded['retrievalRefNo'];
+            return $chargeIncluded['retrievalRefNo'];
         }else{
             return false;
         }
