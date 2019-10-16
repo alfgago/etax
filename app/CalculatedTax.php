@@ -1233,7 +1233,11 @@ class CalculatedTax extends Model
 			  $ivaData->$iVarPleno = 0;
 			}
 			
-      $arrayActividades = $this->currentCompany->getActivities();
+			if( !isset($this->currentCompany) ){
+        $this->currentCompany = currentCompanyModel();
+			}
+			$arrayActividades = $this->currentCompany->getActivities();
+      
 			foreach( ProductCategory::all() as $codigo ) {
 			  $varName  = "type$codigo->id";
 			  $varName0 = "type$codigo->id-0";
