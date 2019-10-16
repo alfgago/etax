@@ -963,7 +963,6 @@ class CalculatedTax extends Model
     public static function getProrrataPeriodoAnterior($anoAnterior) {
       
       $currentCompany = currentCompanyModel();
-      $this->currentCompany = $currentCompany;
       $currentCompanyId = $currentCompany->id;
       
       $cacheKey = "cache-lasttaxes-$currentCompanyId-0-$anoAnterior";
@@ -976,6 +975,8 @@ class CalculatedTax extends Model
                 'is_final' => true,
             ]
         );
+        
+        $data->currentCompany = $currentCompany;
 
         if($anoAnterior == 2018 && $currentCompany->first_prorrata_type == 2 ){
           
