@@ -108,11 +108,11 @@ class PaymentProcessor extends Model
     public function deletePaymentMethod($data){
         return true;
     }
-    
+
     public function getChargeProof($chargeIncluded){
-        
+
     }
-    
+
     /**
      *check_cc
      *
@@ -398,7 +398,8 @@ class PaymentProcessor extends Model
         $item = new stdClass();
         $item->code = $request->item_code;
         $item->name = $request->item_name;
-        $item->descuento = $request->montoDescontado;
+        $item->montoDescontado = $request->montoDescontado;
+        $item->descuento = $request->descuento;
         $item->discount_reason = $request->razonDescuento;
         $item->cantidad = 1;
         $item->iva_amount = $request->iva_amount;

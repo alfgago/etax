@@ -381,6 +381,7 @@ class PaymentController extends Controller
             $request->request->add(['iva_amount' => $iv]);
             $request->request->add(['montoDescontado' => $montoDescontado]);
             $request->request->add(['razonDescuento' => $discountReason]);
+            $request->request->add(['descuento' => $descuento]);
 
             $cardData = $paymentGateway->getCardNameType($request->number);
             $request->request->add(['cardType' => $cardData->type]);
