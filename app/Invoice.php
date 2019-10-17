@@ -316,7 +316,7 @@ class Invoice extends Model
             $this->month = $fecha->month;
             $this->credit_time = $fechaV->format('d/m/Y');
             
-            if (!$this->id) {
+            if ($this->id) {
               $this->company->addSentInvoice( $this->year, $this->month );
             }
             $this->save();
@@ -754,7 +754,7 @@ class Invoice extends Model
           //Log::warning( "XML: No se pudo guardar la factura de venta. Ya existe para la empresa." );
           return false;
         }
-        
+
         $invoice->hacienda_status = "03";
         $invoice->payment_status = "01";
         $invoice->generation_method = $metodoGeneracion;
@@ -964,6 +964,8 @@ class Invoice extends Model
         $invoice->total_exonerados = $arr['ResumenFactura']['TotalExonerado'] ?? 0;
         $invoice->total_gravado = $arr['ResumenFactura']['TotalGravado'] ?? 0;
         $invoice->save();
+
+        $invoice->company->addSentInvoice($invoice->year, $invoice->month);
         
         $lids = array();
         $items = array();
@@ -1159,6 +1161,10 @@ class Invoice extends Model
             $this->year = Carbon::now()->year;
             $this->month = Carbon::now()->month;
             $this->save();
+
+            if ($this->id) {
+                $this->company->addSentInvoice( $this->year, $this->month );
+            }
 
             $lids = array();
             $dataItems = $requestItems ?? $invoiceReference->items->toArray();

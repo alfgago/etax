@@ -215,7 +215,7 @@ class InvoiceController extends Controller
         $company = currentCompanyModel(false);
         
         $errors = $company->validateEmit();
-        if( $errors ){
+        if( $errors ) {
             return redirect($errors['url'])->withError($errors['mensaje']);
         }
 
@@ -563,6 +563,7 @@ class InvoiceController extends Controller
         }
 
         $invoice = Invoice::findOrFail($id);
+        dd(Invoice::firstOrNew(['company_id', 4]));
         $this->authorize('update', $invoice);
         $company = currentCompanyModel();
         $arrayActividades = $company->getActivities();
