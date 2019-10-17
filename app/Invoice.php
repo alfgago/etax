@@ -306,6 +306,7 @@ class Invoice extends Model
                 }
             }
             
+            //Revisa si la factura es nueva. Si no tiene ID, es nueva y suma al contador.
             if (!$this->id) {
               $this->company->addSentInvoice( $this->year, $this->month );
             }
