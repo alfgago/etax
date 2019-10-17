@@ -305,10 +305,10 @@ class Invoice extends Model
 
                 }
             }
-            
             //Revisa si la factura es nueva. Si no tiene ID, es nueva y suma al contador.
             if (!$this->id) {
-              $this->company->addSentInvoice( $this->year, $this->month );
+              $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
+              $this->company->addSentInvoice( $fecha->year, $fecha->month );
             }
 
             $this->save();
