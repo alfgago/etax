@@ -215,7 +215,7 @@ class InvoiceController extends Controller
         $company = currentCompanyModel(false);
         
         $errors = $company->validateEmit();
-        if( $errors ){
+        if( $errors ) {
             return redirect($errors['url'])->withError($errors['mensaje']);
         }
 

@@ -315,7 +315,7 @@ class Company extends Model {
             $available_invoices->save();
             return $available_invoices;
 
-        }catch (\Throwable $ex){
+        } catch (\Throwable $ex) {
              Log::warning('Error en addSentInvoice: ' . $ex->getMessage() );
         }
     }
