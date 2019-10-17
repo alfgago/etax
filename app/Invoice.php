@@ -305,6 +305,11 @@ class Invoice extends Model
 
                 }
             }
+            
+            if (!$this->id) {
+              $this->company->addSentInvoice( $this->year, $this->month );
+            }
+
             $this->save();
             //Fechas
             $fecha = Carbon::createFromFormat('d/m/Y g:i A',
@@ -315,11 +320,6 @@ class Invoice extends Model
             $this->year = $fecha->year;
             $this->month = $fecha->month;
             $this->credit_time = $fechaV->format('d/m/Y');
-            
-            if ($this->id) {
-              $this->company->addSentInvoice( $this->year, $this->month );
-            }
-            $this->save();
 
             //Recorrer Items
             $lids = array();
@@ -368,7 +368,7 @@ class Invoice extends Model
               }
               $this->total_otros_cargos = $totalOtrosCargos;
             }catch(\Exception $e){
-                Log::error("Error al guardar otros cargos");
+                Log::error("Error al guardar otros cargos " . $e);
             }
             
             //Guarda nuevamente el invoice
