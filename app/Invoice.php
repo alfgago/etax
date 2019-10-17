@@ -305,6 +305,12 @@ class Invoice extends Model
 
                 }
             }
+            
+            //Revisa si la factura es nueva. Si no tiene ID, es nueva y suma al contador.
+            if (!$this->id) {
+              $this->company->addSentInvoice( $this->year, $this->month );
+            }
+
             $this->save();
             //Fechas
             $fecha = Carbon::createFromFormat('d/m/Y g:i A',
@@ -315,11 +321,6 @@ class Invoice extends Model
             $this->year = $fecha->year;
             $this->month = $fecha->month;
             $this->credit_time = $fechaV->format('d/m/Y');
-            
-            if (!$this->id) {
-              $this->company->addSentInvoice( $this->year, $this->month );
-            }
-            $this->save();
 
             //Recorrer Items
             $lids = array();
@@ -368,7 +369,7 @@ class Invoice extends Model
               }
               $this->total_otros_cargos = $totalOtrosCargos;
             }catch(\Exception $e){
-                Log::error("Error al guardar otros cargos");
+                Log::error("Error al guardar otros cargos " . $e);
             }
             
             //Guarda nuevamente el invoice
@@ -754,7 +755,7 @@ class Invoice extends Model
           //Log::warning( "XML: No se pudo guardar la factura de venta. Ya existe para la empresa." );
           return false;
         }
-        
+
         $invoice->hacienda_status = "03";
         $invoice->payment_status = "01";
         $invoice->generation_method = $metodoGeneracion;
@@ -964,6 +965,8 @@ class Invoice extends Model
         $invoice->total_exonerados = $arr['ResumenFactura']['TotalExonerado'] ?? 0;
         $invoice->total_gravado = $arr['ResumenFactura']['TotalGravado'] ?? 0;
         $invoice->save();
+
+        $invoice->company->addSentInvoice($invoice->year, $invoice->month);
         
         $lids = array();
         $items = array();
@@ -1159,6 +1162,10 @@ class Invoice extends Model
             $this->year = Carbon::now()->year;
             $this->month = Carbon::now()->month;
             $this->save();
+
+            if ($this->id) {
+                $this->company->addSentInvoice( $this->year, $this->month );
+            }
 
             $lids = array();
             $dataItems = $requestItems ?? $invoiceReference->items->toArray();

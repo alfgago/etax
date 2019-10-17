@@ -105,7 +105,7 @@
 
                             <div class="form-group col-md-6">
                                 <label for="iva_amount">Razón</label>
-                                <input type="text" class="form-control" name="reason" id="reason" placeholder="">
+                                <input type="text" class="form-control" name="reason" id="reason" placeholder="" required>
                             </div>
                         </div>
 
