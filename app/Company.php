@@ -300,12 +300,12 @@ class Company extends Model {
     
     public function addSentInvoice($year, $month) {
         try {
-            if($month && $year) {
+            if(!$month || !$year) {
                 $today = Carbon::parse(now('America/Costa_Rica'));
                 $month = $today->month;
                 $year = $today->year;
             }
-        
+             
             $available_invoices = AvailableInvoices::where('company_id', $this->id)
                                 ->where('month', $month)
                                 ->where('year', $year)
