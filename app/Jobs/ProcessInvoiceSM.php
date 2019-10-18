@@ -87,6 +87,7 @@ class ProcessInvoiceSM implements ShouldQueue
     
     private function signXML($invoice, $requestData){
         $company = $invoice->company;
+        $token = $this->token;
                 
         if ($requestData !== false) {
             $client = new Client();
