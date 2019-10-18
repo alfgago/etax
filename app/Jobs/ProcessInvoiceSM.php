@@ -132,6 +132,7 @@ class ProcessInvoiceSM implements ShouldQueue
     }
     
     private function sendXML($invoice, $requestData){
+        $invoiceUtils = new InvoiceUtils();
         $company = $invoice->company;
         $client = new Client();
         $apiHacienda = new BridgeHaciendaApi();
