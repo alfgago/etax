@@ -164,7 +164,7 @@ class CalculatedTax extends Model
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
       
       if ( !Cache::has($cacheKey) || $forceRecalc ) {
-          
+
           //Busca el calculo del mes en Base de Datos.
           $data = CalculatedTax::firstOrNew(
               [
