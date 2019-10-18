@@ -38,9 +38,9 @@ class BookController extends Controller
      */
     public function index()
     {
-        $current_company = currentCompany();
+        $currentCompany = currentCompanyModel();
         $books = CalculatedTax::where([ 
-            ['company_id', $current_company],
+            ['company_id', $currentCompany->id],
             ['month', '!=', 0],
             ['month', '!=', -1],
             ['year', '!=', 2018]
@@ -49,7 +49,8 @@ class BookController extends Controller
         
         foreach ( $books as $book ) {
             if( ! $book->is_closed ) {
-                $book = CalculatedTax::calcularFacturacionPorMesAno( $book->month, $book->year, 0, $book->saldo_favor_anterior );
+                $prorrataOperativa = $currentCompany->getProrrataOperativa($book->year);
+                $book = CalculatedTax::calcularFacturacionPorMesAno( $book->month, $book->year, $book->saldo_favor_anterior, $prorrataOperativa );
             }
         }
         
