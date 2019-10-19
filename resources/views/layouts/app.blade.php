@@ -106,6 +106,7 @@
 
     @include( 'Bill.import' )
     @include( 'Invoice.import' )
+    @include( 'Invoice.envio-masivo' )
     @include( 'Client.import' )
     @include( 'Provider.import' )
     @include( 'Product.import' )
