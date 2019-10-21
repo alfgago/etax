@@ -18,6 +18,7 @@ use App\InvoiceItem;
 use App\Bill;
 use App\BillItem;
 use App\Company;
+use App\Client;
 use App\Exports\InvoiceExport;
 use App\Exports\LibroVentasExport;
 use App\Exports\LibroVentasExportSM;
@@ -1746,6 +1747,8 @@ class InvoiceController extends Controller
                         ]);
                         $xls_invoice->consecutivo = $row['consecutivo'];
                         $xls_invoice->tipoDocumento = $row['tipodocumento'];
+                        $xls_invoice->fechaEmision = $row['fechaemision'];
+                        $xls_invoice->fechaVencimiento = $row['fechavencimiento'];
                         $xls_invoice->company_id = $company->id;
                         $xls_invoice->numeroLinea = $row['numerolinea'];
                         $xls_invoice->codigoActividad = $row['codigoactividad'];
@@ -1836,18 +1839,25 @@ class InvoiceController extends Controller
     }
 
     public function validarEnvioExcel(Request $request){
+        
         $companyId = currentCompany();
         foreach ($request->facturas as $factura) {
-            XlsInvoice::where('company_id',$companyId)
+            if (isset($factura["autorizado"])) {
+                XlsInvoice::where('company_id',$companyId)
                       ->where('consecutivo', $factura["consecutivo"])
-                      ->update(['autorizado' => $factura["autorizado"]]);
+                      ->update(['autorizado' => 1]);
+            }else{
+                XlsInvoice::where('company_id',$companyId)
+                      ->where('consecutivo', $factura["consecutivo"])
+                      ->update(['autorizado' => 0]);
+            }
         }
         $XlsInvoices = XlsInvoice::select('consecutivo', 'company_id','autorizado')
             ->where('company_id',$companyId)->where('autorizado',1)->distinct('consecutivo')->get();
         $this->guardarEnvioExcel($XlsInvoices);
     }
 
-    public function guardarEnvioExcel($XlsInvoices){
+   public function guardarEnvioExcel($XlsInvoices){
         $company = Company::find($XlsInvoices[0]->company_id);
         $apiHacienda = new BridgeHaciendaApi();
         $tokenApi = $apiHacienda->login(false);
@@ -1870,7 +1880,7 @@ class InvoiceController extends Controller
                 }
                 if ($invoice->document_type == '8') {
                     $invoice->reference_number = $company->last_invoice_pur_ref_number + 1;
-                
+                }
                 if ($invoice->document_type == '9') {
                     $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
                 }
@@ -1879,7 +1889,7 @@ class InvoiceController extends Controller
                 }
                 /*$invoice->document_key = $factura[0]->document_key;
                 $invoice->document_number = $factura[0]->document_number;*/
-                $invoice->sale_condition = $factura[0]->condicionVenta;
+               $invoice->sale_condition = $factura[0]->condicionVenta;
                 $invoice->payment_type = $factura[0]->medioPago;
                 $invoice->credit_time = $factura[0]->plazoCredito;
                 if ($factura[0]->codigoActividad) {
@@ -1910,7 +1920,7 @@ class InvoiceController extends Controller
                 );
 
                 $factura[0]->client_id = $client->id;
-                 $request->tipoCambio = $factura[0]->tipoCambio ? $factura[0]->tipoCambio : 1;
+                 $factura[0]->tipoCambio = $factura[0]->tipoCambio ? $factura[0]->tipoCambio : 1;
                 //Datos de factura
                 $invoice->description = $factura[0]->notas ?? null;
                 $invoice->subtotal = floatval( str_replace(",","", $factura[0]->subtotal ));
@@ -1939,26 +1949,20 @@ class InvoiceController extends Controller
                 }
                 //Fechas
                 $fecha = Carbon::createFromFormat('d/m/Y g:i A',
-                    $request->generated_date . ' ' . $request->hora);
+                    $factura[0]->fechaEmision);
                 $invoice->generated_date = $fecha;
-                $fechaV = Carbon::createFromFormat('d/m/Y', $request->due_date );
+                $fechaV = Carbon::createFromFormat('d/m/Y g:i A', $factura[0]->fechaVencimiento );
                 $invoice->due_date = $fechaV;
                 $invoice->year = $fecha->year;
                 $invoice->month = $fecha->month;
                 $invoice->credit_time = $fechaV->format('d/m/Y');
-                
-                if (!$invoice->id) {
-                  $invoice->company->addSentInvoice( $invoice->year, $invoice->month );
-                }
                 $invoice->save();
-            /*
-                $invoiceData = $invoice->setInvoiceData($request);
-                    
-                $invoice->document_key = $this->getDocumentKey($request->document_type);
-                $invoice->document_number = $this->getDocReference($request->document_type);
-                $request->document_key = $invoice->document_key;
-                $request->document_number = $invoice->document_number;
-*/
+                $invoice->document_key = $this->getDocumentKey($invoice->document_type);
+                $invoice->document_number = $this->getDocReference($invoice->document_type);
+                $lineas = XlsInvoice::where('company_id',$company_id)->where('consecutivo',$factura[0]->consecutivo)->get();
+                foreach ($lineas as $linea) {
+                    # code...
+                }
                 dd($invoice);
                 dd($factura);
             }

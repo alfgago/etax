@@ -95,7 +95,7 @@ class ProcessSendExcelInvoices implements ShouldQueue
                         
                         $idMoneda = 'CRC';
                         $tipoCambio = $row['tipocambio'] ?? 1;
-                        $totalDocumento = $row['total'];
+                        $totalDocumento = $row['total']; 
                         $tipoDocumento = '01';
     
                         //Datos de linea

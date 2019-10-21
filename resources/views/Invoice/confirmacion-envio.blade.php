@@ -43,14 +43,10 @@
 							<td>{{$factura->totalComprobante}}</td>
 							<td>
 									<input type="text" value="{{$factura->consecutivo}}" id="consecutivo-{{$factura->consecutivo}}" name="facturas[{{$i}}][consecutivo]" class="hidden" />
-									<input type="text" value="{{$factura->autorizado}}"  name="facturas[{{$i}}][autorizado]" id="autorizado-{{$factura->consecutivo}}" class="hidden" />
-
-								@if($factura->autorizado == 1)
-									<a class="validar-envio btn btn-md btn-success text-white" id="button-{{$factura->consecutivo}}"  autorizado="1" consecutivo="{{$factura->consecutivo}}" onclick="validarEnvio('button-'+{{$factura->consecutivo}})"  >Enviar</a>
-								@else
-									<a class="validar-envio btn btn-md btn-danger text-white"  id="button-{{$factura->consecutivo}}" autorizado="0" consecutivo="{{$factura->consecutivo}}" onclick="validarEnvio('button-'+{{$factura->consecutivo}})" >No enviar</a>
-
-								@endif
+								<div class="form-check">
+									<input type="checkbox" @if($factura->autorizado) checked @endif  name="facturas[{{$i}}][autorizado]" id="autorizado-{{$factura->consecutivo}}" class="form-check-input" />
+								</div>
+								
 							</td>
 							<td>
 								<a class="text-black" id="ver-mas-{{$factura->consecutivo}}" onclick="verMas({{$factura->consecutivo}})" ><i class="fa fa-eye" aria-hidden="true"></i></a>

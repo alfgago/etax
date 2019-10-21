@@ -18,6 +18,8 @@ class CreateXlsInvoicesTable extends Migration
             $table->bigInteger('company_id')->default(0);
             $table->string('tipoDocumento')->nullable();
             $table->string('consecutivo')->nullable();
+            $table->string('fechaEmision')->nullable();
+            $table->string('fechaVencimiento')->nullable();
             $table->string('codigoActividad')->nullable();
             $table->string('nombreReceptor')->nullable();
             $table->string('tipoIdentificacion')->nullable();
