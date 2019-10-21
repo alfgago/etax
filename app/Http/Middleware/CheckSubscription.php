@@ -15,12 +15,11 @@ class CheckSubscription
      */
     public function handle($request, Closure $next)
     {
-        //return $next($request);
-        $sale = getCurrentSubscription();
-        if ($sale->status == 3) {
-            return redirect('/login');
-        }
-        return $next($request);
+       $sale = getCurrentSubscription();
+       if ($sale->status == 3) {
+           return redirect('/login');
+       }
+       return $next($request);
     }
     
 }
