@@ -15,7 +15,7 @@ class CheckSubscription
      */
     public function handle($request, Closure $next)
     {
-        return $next($request);
+        //return $next($request);
         $company = currentCompanyModel();
         dd($company);
         if ($company->subscription->status == 3) {
