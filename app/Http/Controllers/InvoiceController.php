@@ -50,7 +50,7 @@ class InvoiceController extends Controller
     public function __construct()
     {
         $this->middleware('auth', ['except' => ['receiveEmailInvoices']] );
-        $this->middleware('CheckSubscription', ['except' => ['receiveEmailInvoices']]);
+        //////////$this->middleware('CheckSubscription', ['except' => ['receiveEmailInvoices']]);
     }
   
     /**

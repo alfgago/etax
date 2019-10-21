@@ -16,6 +16,7 @@ class CheckSubscription
     public function handle($request, Closure $next)
     {
         $company = currentCompanyModel();
+        dd($company);
         if ($company->subscription->status == 3) {
             return redirect('/login');
         }
