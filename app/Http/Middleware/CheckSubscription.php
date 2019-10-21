@@ -21,4 +21,5 @@ class CheckSubscription
        }
        return $next($request);
     }
+    
 }
