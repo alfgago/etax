@@ -133,7 +133,7 @@ window.toggleTiposImportacion = function (){
 		  tipo = 'xlsx';
 		}
 
-		$(".toggle-xml, .toggle-xlsx").hide();
+		$(".toggle-xml, .toggle-xlsx, .toggle-sm").hide();
 		$(".toggle-"+tipo).show();
 
 	}
