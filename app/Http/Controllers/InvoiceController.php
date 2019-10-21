@@ -50,6 +50,7 @@ class InvoiceController extends Controller
     public function __construct()
     {
         $this->middleware('auth', ['except' => ['receiveEmailInvoices']] );
+        $this->middleware('CheckSubscription', ['except' => ['receiveEmailInvoices']]);
     }
   
     /**
@@ -59,6 +60,8 @@ class InvoiceController extends Controller
      */
     public function index()
     {
+        
+
         $company = currentCompanyModel(false);
 
         if ( !$company->atv_validation && $company->use_invoicing ) {

@@ -44,6 +44,7 @@ class BillController extends Controller
     public function __construct()
     {
         $this->middleware('auth', ['except' => ['receiveEmailBills']] );
+        $this->middleware('CheckSubscription', ['except' => ['receiveEmailBills']]);
     }
   
     /**
