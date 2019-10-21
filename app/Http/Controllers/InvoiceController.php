@@ -1865,7 +1865,6 @@ class InvoiceController extends Controller
                 $invoice->payment_receipt = "";
                 $invoice->generation_method = "xls-masivo";
                 $invoice->xml_schema = 43;
-                /*
                 if ($invoice->document_type == '1') {
                     $invoice->reference_number = $company->last_invoice_ref_number + 1;
                 }
@@ -1877,7 +1876,89 @@ class InvoiceController extends Controller
                 }
                 if ($invoice->document_type == '4') {
                     $invoice->reference_number = $company->last_ticket_ref_number + 1;
-                }*/
+                }
+                /*$invoice->document_key = $factura[0]->document_key;
+                $invoice->document_number = $factura[0]->document_number;*/
+                $invoice->sale_condition = $factura[0]->condicionVenta;
+                $invoice->payment_type = $factura[0]->medioPago;
+                $invoice->credit_time = $factura[0]->plazoCredito;
+                if ($factura[0]->codigoActividad) {
+                    $invoice->commercial_activity = $factura[0]->codigoActividad;
+                }
+                /******************************************************************************/
+                $tipo_persona = $factura[0]->tipoIdentificacion;
+                $identificacion_cliente = preg_replace("/[^0-9]/", "", $factura[0]->Identificacion );
+                
+                $client = Client::updateOrCreate(
+                    [
+                        'id_number' => $identificacion_cliente,
+                        'company_id' => $company->id,
+                    ],
+                    [
+                        'company_id' => $company->id,
+                        'tipo_persona' => $tipo_persona,
+                        'id_number' => trim($identificacion_cliente),
+                        'fullname' => $factura[0]->nombreReceptor,
+                        'emisor_receptor' => 'ambos',
+                        'country' => $factura[0]->plazoCredito,
+                        'state' => $factura[0]->provincia,
+                        'city' => $factura[0]->canton,
+                        'district' => $factura[0]->distrito,
+                        'address' => trim($factura[0]->direccion),
+                        'email' => trim($factura[0]->correo),
+                    ]
+                );
+
+                $factura[0]->client_id = $client->id;
+                 $request->tipoCambio = $factura[0]->tipoCambio ? $factura[0]->tipoCambio : 1;
+                //Datos de factura
+                $invoice->description = $factura[0]->notas ?? null;
+                $invoice->subtotal = floatval( str_replace(",","", $factura[0]->subtotal ));
+                $invoice->currency = $factura[0]->codigoMoneda;
+                $invoice->currency_rate = floatval( str_replace(",","", $factura[0]->tipoCambio ));
+                $invoice->total = floatval( str_replace(",","", $factura[0]->totalComprobante ));
+                $invoice->iva_amount = floatval( str_replace(",","", $factura[0]->totalImpuesto ));
+
+                if (isset($client)) {
+                  $invoice->client_first_name = $client->first_name;
+                  $invoice->client_last_name = $client->last_name;
+                  $invoice->client_last_name2 = $client->last_name2;
+                  $invoice->client_email = $client->email;
+                  $invoice->client_address = $client->address;
+                  $invoice->client_country = $client->country;
+                  $invoice->client_state = $client->state;
+                  $invoice->client_city = $client->city;
+                  $invoice->client_district = $client->district;
+                  $invoice->client_zip = $client->zip;
+                  $invoice->client_phone = preg_replace('/[^0-9]/', '', $client->phone);
+                  $invoice->client_id_number = $client->id_number;
+                  $invoice->client_id_type = $client->tipo_persona;
+
+                } else {
+                  $invoice->client_first_name = 'N/A';
+                }
+                //Fechas
+                $fecha = Carbon::createFromFormat('d/m/Y g:i A',
+                    $request->generated_date . ' ' . $request->hora);
+                $invoice->generated_date = $fecha;
+                $fechaV = Carbon::createFromFormat('d/m/Y', $request->due_date );
+                $invoice->due_date = $fechaV;
+                $invoice->year = $fecha->year;
+                $invoice->month = $fecha->month;
+                $invoice->credit_time = $fechaV->format('d/m/Y');
+                
+                if (!$invoice->id) {
+                  $invoice->company->addSentInvoice( $invoice->year, $invoice->month );
+                }
+                $invoice->save();
+            /*
+                $invoiceData = $invoice->setInvoiceData($request);
+                    
+                $invoice->document_key = $this->getDocumentKey($request->document_type);
+                $invoice->document_number = $this->getDocReference($request->document_type);
+                $request->document_key = $invoice->document_key;
+                $request->document_number = $invoice->document_number;
+*/
                 dd($invoice);
                 dd($factura);
             }
