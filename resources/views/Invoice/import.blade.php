@@ -14,9 +14,35 @@
 	    <select class="form-control" name="tipo_archivo" id="tipo_archivo" onchange="toggleTiposImportacion()" required>
 	      <option value="xlsx">Excel</option>
 	      <option value="xml">XML de Hacienda</option>
+	      @if(currentCompanyModel()->id==1110 || currentCompanyModel()->id==437) <option value="sm">Envio masivo SM Seguros</option> @endif 
 	    </select>
 	  </div>
-		  
+	  
+	  @if(currentCompanyModel()->id==1110 || currentCompanyModel()->id==437)
+	  <div class="toggle-sm form-group col-md-12">
+		    <div class="form-group col-md-12">
+		      <h3>
+		        Importación de Excel para facturación SM Seguros
+		      </h3>
+		    </div>
+		    
+				<form method="POST" action="/facturas-emitidas/importarExcelSM" enctype="multipart/form-data" class="toggle-sm mt-3">
+											
+				  @csrf
+					<div class="form-group col-md-12">
+				    <label for="archivo">Excel SM Seguros para envio masivo</label>  
+						<div class="">
+							<div class="fallback">
+						      <input name="archivo" type="file" multiple="false" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+						  </div>
+						  <small class="descripcion">Hasta 5000 líneas por archivo.</small>
+						</div>
+						<button type="submit" class="btn btn-primary">Importar y enviar facturas</button>
+					</div>
+				</form>
+	  </div>
+		@endif 
+		
 		<form method="POST" action="/facturas-emitidas/importarExcel" enctype="multipart/form-data" class="toggle-xlsx">
 			
 			@csrf
@@ -72,7 +98,7 @@
 			<button type="submit" class="btn btn-primary">Importar facturas</button>
 		</form>	
 		
-		<div class="form-group col-md-12 toggl-xml">
+			<div class="form-group col-md-12 toggle-xml">
 		      <div class="descripcion">
 			    	Arrastre los archivos XML de Hacienda que haya generado desde sistemas de facturación externos. <br>
 			    	
