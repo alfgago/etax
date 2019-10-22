@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Jobs\LogActivityHandler as Activity;
 use App\Actividades;
 use App\OtherCharges;
+use App\Provider;
 use App\AvailableInvoices;
 use App\CodigosPaises;
 use App\UnidadMedicion;
@@ -1866,8 +1867,7 @@ class InvoiceController extends Controller
     }
 
    public function guardarEnvioExcel($XlsInvoices){
-    
-        dd($XlsInvoices);
+
         $company = Company::find($XlsInvoices[0]->company_id);
         $apiHacienda = new BridgeHaciendaApi();
         $tokenApi = $apiHacienda->login(false);
@@ -1885,16 +1885,16 @@ class InvoiceController extends Controller
                 $invoice->payment_receipt = "";
                 $invoice->generation_method = "xls-masivo";
                 $invoice->xml_schema = 43;
-                if ($invoice->document_type == '1') {
+                if ($invoice->document_type == '01') {
                     $invoice->reference_number = $company->last_invoice_ref_number + 1;
                 }
-                if ($invoice->document_type == '8') {
+                if ($invoice->document_type == '08') {
                     $invoice->reference_number = $company->last_invoice_pur_ref_number + 1;
                 }
-                if ($invoice->document_type == '9') {
+                if ($invoice->document_type == '09') {
                     $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
                 }
-                if ($invoice->document_type == '4') {
+                if ($invoice->document_type == '04') {
                     $invoice->reference_number = $company->last_ticket_ref_number + 1;
                 }
                 /*$invoice->document_key = $factura[0]->document_key;
@@ -1906,8 +1906,8 @@ class InvoiceController extends Controller
                     $invoice->commercial_activity = $factura[0]->codigoActividad;
                 }
                 /******************************************************************************/
-                $tipo_persona = $factura[0]->tipoIdentificacion;
-                $identificacion_cliente = preg_replace("/[^0-9]/", "", $factura[0]->Identificacion );
+                $tipo_persona = $factura[0]->tipoIdentificacionReceptor;
+                $identificacion_cliente = preg_replace("/[^0-9]/", "", $factura[0]->identificacionReceptor );
                 
                 $client = Client::updateOrCreate(
                     [
@@ -1920,16 +1920,14 @@ class InvoiceController extends Controller
                         'id_number' => trim($identificacion_cliente),
                         'fullname' => $factura[0]->nombreReceptor,
                         'emisor_receptor' => 'ambos',
-                        'country' => $factura[0]->plazoCredito,
-                        'state' => $factura[0]->provincia,
-                        'city' => $factura[0]->canton,
-                        'district' => $factura[0]->distrito,
-                        'address' => trim($factura[0]->direccion),
-                        'email' => trim($factura[0]->correo),
+                        'state' => $factura[0]->provinciaReceptor,
+                        'city' => $factura[0]->cantonReceptor,
+                        'district' => $factura[0]->distritoReceptor,
+                        'address' => trim($factura[0]->direccionReceptor),
+                        'email' => trim($factura[0]->correoReceptor),
                     ]
                 );
-
-                $factura[0]->client_id = $client->id;
+                $invoice->client_id = $client->id;
                  $factura[0]->tipoCambio = $factura[0]->tipoCambio ? $factura[0]->tipoCambio : 1;
                 //Datos de factura
                 $invoice->description = $factura[0]->notas ?? null;
@@ -1939,7 +1937,6 @@ class InvoiceController extends Controller
                 $invoice->total = floatval( str_replace(",","", $factura[0]->totalComprobante ));
                 $invoice->iva_amount = floatval( str_replace(",","", $factura[0]->totalImpuesto ));
 
-                if (isset($client)) {
                   $invoice->client_first_name = $client->first_name;
                   $invoice->client_last_name = $client->last_name;
                   $invoice->client_last_name2 = $client->last_name2;
@@ -1954,9 +1951,6 @@ class InvoiceController extends Controller
                   $invoice->client_id_number = $client->id_number;
                   $invoice->client_id_type = $client->tipo_persona;
 
-                } else {
-                  $invoice->client_first_name = 'N/A';
-                }
                 
 
                 //Fechas
@@ -1980,9 +1974,9 @@ class InvoiceController extends Controller
                 $invoice->total_iva = $factura[0]->totalImpuesto;
                 $invoice->total_otros_cargos = $factura[0]->totalOtrosCargos;
                 $invoice->total_comprobante = $factura[0]->totalComprobante;
+                $invoice->document_key = $this->getDocumentKey($invoice->document_type, $company);
+                $invoice->document_number = $this->getDocReference($invoice->document_type,$company);
                 $invoice->save();
-                $invoice->document_key = $this->getDocumentKey($invoice->document_type);
-                $invoice->document_number = $this->getDocReference($invoice->document_type);
                 $lineas = XlsInvoice::where('company_id',$company->id)->where('consecutivo',$factura[0]->consecutivo)->get();
                 foreach ($lineas as $linea) {
                     if($linea->tipoLinea == 1){
@@ -2046,7 +2040,7 @@ class InvoiceController extends Controller
                         );
                     }
                 }
-                if ($request->document_type == '08' ) {
+                if ($invoice->document_type == '08' ) {
                  
                     $bill = new Bill();
                     $bill->company_id = $company->id;
@@ -2080,20 +2074,20 @@ class InvoiceController extends Controller
                                   'id_number' => $identificacion_provider
                               ]
                           );
-                          $provider->first_name = $invoice->first_name;
-                          $provider->last_name = $invoice->last_name;
-                          $provider->last_name2 = $invoice->last_name2;
-                          $provider->country = $invoice->country;
-                          $provider->state = $invoice->state;
-                          $provider->city = $invoice->city;
-                          $provider->district = $invoice->district;
-                          $provider->neighborhood = $invoice->neighborhood;
-                          $provider->zip = $invoice->zip;
-                          $provider->address = $invoice->address;
+                          $provider->first_name = $invoice->first_name ?? null;
+                          $provider->last_name = $invoice->last_name ?? null;
+                          $provider->last_name2 = $invoice->last_name2 ?? null;
+                          $provider->country = $invoice->country ?? null;
+                          $provider->state = $invoice->state ?? null;
+                          $provider->city = $invoice->city ?? null;
+                          $provider->district = $invoice->district ?? null;
+                          $provider->neighborhood = $invoice->neighborhood ?? null;
+                          $provider->zip = $invoice->zip ?? null;
+                          $provider->address = $invoice->address ?? null;
                           $provider->foreign_address = $invoice->foreign_address ?? null;
-                          $provider->phone = $invoice->phone;
-                          $provider->es_exento = $invoice->es_exento;
-                          $provider->email = $invoice->email;
+                          $provider->phone = $invoice->phone ?? null;
+                          $provider->es_exento = $invoice->es_exento ?? 0;
+                          $provider->email = $invoice->email ?? null;
                           $provider->save();
                               
                           $bill->provider_id = $provider->id;
@@ -2119,9 +2113,9 @@ class InvoiceController extends Controller
                       $bill->provider_id_number = $provider->id_number;
 
                       //Fechas
-                      $fecha = Carbon::createFromFormat('d/m/Y g:i A', $invoice->generated_date . ' ' . $invoice->hora);
+                      $fecha =  $invoice->generated_date ;
                       $bill->generated_date = $fecha;
-                      $fechaV = Carbon::createFromFormat('d/m/Y', $invoice->due_date );
+                      $fechaV =  $invoice->due_date ;
                       $bill->due_date = $fechaV;
                       
                       $bill->year = $invoice->year;
@@ -2157,14 +2151,28 @@ class InvoiceController extends Controller
                     $bill->accept_iva_gasto = 0;
                     //$bill->description = "FEC" . ($request->description ?? '');
                     $bill->save();
+                    dd($bill);
                     $company->last_bill_ref_number = $bill->reference_number;
-                    $company->save();
 
                 }
-
-
+                $invoice->company->addSentInvoice( $invoice->year, $invoice->month );
+                if ($invoice->document_type == '1') {
+                    $company->last_invoice_ref_number = $invoice->reference_number;
+                }
+                if ($invoice->document_type == '8') {
+                    $company->last_invoice_pur_ref_number = $invoice->reference_number;
+                }
+                if ($invoice->document_type == '9') {
+                    $company->last_invoice_exp_ref_number = $invoice->reference_number;
+                }
+                if ($invoice->document_type == '4') {
+                   $company->last_ticket_ref_number = $invoice->reference_number;
+                }
+                $company->save();
             }
         }
+
+                dd($invoice);
     }
         
 }
