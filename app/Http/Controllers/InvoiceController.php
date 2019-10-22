@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Jobs\LogActivityHandler as Activity;
 use App\Actividades;
+use App\OtherCharges;
 use App\AvailableInvoices;
 use App\CodigosPaises;
 use App\UnidadMedicion;
@@ -1714,7 +1715,7 @@ class InvoiceController extends Controller
         /*}catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
         }*/
-        $XlsInvoices = XlsInvoice::select('consecutivo', 'codigoActividad', 'nombreReceptor', 'tipoIdentificacion', 'Identificacion', 'correo', 'condicionVenta', 'plazoCredito', 'medioPago', 'codigoMoneda', 'tipoCambio', 'totalServGravados', 'totalServExentos', 'totalMercanciasGravadas', 'totalMercanciasExentas', 'totalGravado', 'totalExento', 'totalVenta', 'totalDescuentos', 'totalVentaNeta', 'totalImpuesto', 'totalOtrosCargos', 'totalComprobante','autorizado')
+        $XlsInvoices = XlsInvoice::select('consecutivo', 'codigoActividad', 'nombreReceptor', 'tipoIdentificacionReceptor', 'IdentificacionReceptor', 'correoReceptor', 'condicionVenta', 'plazoCredito', 'medioPago', 'codigoMoneda', 'tipoCambio', 'totalServGravados', 'totalServExentos', 'totalMercanciasGravadas', 'totalMercanciasExentas', 'totalGravado', 'totalExento', 'totalVenta', 'totalDescuentos', 'totalVentaNeta', 'totalImpuesto', 'totalOtrosCargos', 'totalComprobante','autorizado')
             ->where('company_id',$companyId)->distinct('consecutivo')->get();
         return view("Invoice/confirmacion-envio")->with('facturas', $XlsInvoices);
         
@@ -1735,7 +1736,7 @@ class InvoiceController extends Controller
             //try{
                 if($row['cedulaempresa'] == $company->id_number){
 
-                    if( isset($row['identificacion']) ){
+                    if( isset($row['identificacionreceptor']) ){
                         
                         $xls_invoice = XlsInvoice::updateOrCreate([
                             'consecutivo' => $row['consecutivo'],
@@ -1752,39 +1753,55 @@ class InvoiceController extends Controller
                         $xls_invoice->company_id = $company->id;
                         $xls_invoice->numeroLinea = $row['numerolinea'];
                         $xls_invoice->codigoActividad = $row['codigoactividad'];
+                        $xls_invoice->nombreEmisor = $row['nombreemisor'];
+                        $xls_invoice->tipoIdentificacionEmisor = $row['tipoidentificacionemisor'];
+                        $xls_invoice->identificacionEmisor = $row['identificacionemisor'];
+                        $xls_invoice->provinciaEmisor = $row['provinciaemisor'];
+                        $xls_invoice->cantonEmisor = $row['cantonemisor'];
+                        $xls_invoice->distritoEmisor = $row['distritoemisor'];
+                        $xls_invoice->direccionEmisor = $row['direccionemisor'];
+                        $xls_invoice->correoEmisor = $row['correoemisor'];
                         $xls_invoice->nombreReceptor = $row['nombrereceptor'];
-                        $xls_invoice->tipoIdentificacion = $row['tipoidentificacion'];
-                        $xls_invoice->Identificacion = $row['identificacion'];
-                        $xls_invoice->provincia = $row['provincia'];
-                        $xls_invoice->canton = $row['canton'];
-                        $xls_invoice->distrito = $row['distrito'];
-                        $xls_invoice->direccion = $row['direccion'];
-                        $xls_invoice->correo = $row['correo'];
+                        $xls_invoice->tipoIdentificacionReceptor = $row['tipoidentificacionreceptor'];
+                        $xls_invoice->identificacionReceptor = $row['identificacionreceptor'];
+                        $xls_invoice->provinciaReceptor = $row['provinciareceptor'];
+                        $xls_invoice->cantonReceptor = $row['cantonreceptor'];
+                        $xls_invoice->distritoReceptor = $row['distritoreceptor'];
+                        $xls_invoice->direccionReceptor = $row['direccionreceptor'];
+                        $xls_invoice->correoReceptor = $row['correoreceptor'];
                         $xls_invoice->condicionVenta = $row['condicionventa'];
                         $xls_invoice->plazoCredito = $row['plazocredito'];
                         $xls_invoice->medioPago = $row['mediopago'];
+                        $xls_invoice->tipoLinea = $row['tipolinea'];
                         $xls_invoice->numeroLinea = $row['numerolinea'];
-                        $xls_invoice->cantidad = $row['cantidad'];
-                        $xls_invoice->unidadMedida = $row['unidadmedida'];
-                        $xls_invoice->detalle = $row['detalle'];
-                        $xls_invoice->precioUnitario = $row['preciounitario'];
-                        $xls_invoice->montoTotal = $row['montototal'];
-                        $xls_invoice->montoDescuento = $row['montodescuento'];
+                        $xls_invoice->exento = $row['exento'];
+                        $xls_invoice->cantidad = $row['cantidad'] ?? 0;
+                        $xls_invoice->unidadMedida = $row['unidadmedida'] ?? 0;
+                        $xls_invoice->detalle = $row['detalle'] ?? 0;
+                        $xls_invoice->precioUnitario = $row['preciounitario'] ?? 0;
+                        $xls_invoice->montoTotal = $row['montototal'] ?? 0;
+                        $xls_invoice->montoDescuento = $row['montodescuento'] ?? 0;
                         if($row['naturalezadescuento']){
-                            $xls_invoice->naturalezaDescuento = $row['naturalezadescuento'];
+                            $xls_invoice->naturalezaDescuento = $row['naturalezadescuento'] ?? null;
                         }
-                        $xls_invoice->subTotal = $row['subtotal'];
-                        $xls_invoice->codigoImpuesto = $row['codigoimpuesto'];
-                        $xls_invoice->codigoTarifa = $row['codigotarifa'];
-                        $xls_invoice->tarifaImpuesto = $row['tarifaimpuesto'];
-                        $xls_invoice->montoImpuesto = $row['montoimpuesto'];
+                        $xls_invoice->subTotal = $row['subtotal'] ?? 0;
+                        $xls_invoice->codigoImpuesto = $row['codigoimpuesto'] ?? 0;
+                        $xls_invoice->codigoTarifa = $row['codigotarifa'] ?? 0;
+                        $xls_invoice->tarifaImpuesto = $row['tarifaimpuesto'] ?? 0;
+                        $xls_invoice->montoImpuesto = $row['montoimpuesto'] ?? 0;
                         $xls_invoice->tipoDocumentoExoneracion = $row['tipodocumentoexoneracion'] ?? null;
                         $xls_invoice->numeroDocumentoExoneracion = $row['numerodocumentoexoneracion'] ?? null;
                         $xls_invoice->nombreInstitucionExoneracion = $row['nombreinstitucionexoneracion'] ?? null;
                         $xls_invoice->fechaEmisionExoneracion = $row['fechaemisionexoneracion'] ?? null;
                         $xls_invoice->porcentajeExoneracionExoneracion = $row['porcentajeexoneracionexoneracion'] ?? null;
                         $xls_invoice->montoExoneracionExoneracion = $row['montoexoneracionexoneracion'] ?? null;
-                        $xls_invoice->montoTotalLinea = $row['montototallinea'];
+                        $xls_invoice->montoTotalLinea = $row['montototallinea'] ?? 0;
+                        $xls_invoice->tipoCargo = $row['tipocargo'] ?? null;
+                        $xls_invoice->identidadTercero = $row['identidadtercero'] ?? null;
+                        $xls_invoice->nombreTercero = $row['nombretercero'] ?? null;
+                        $xls_invoice->detalleCargo = $row['detallecargo'] ?? null;
+                        $xls_invoice->porcentajeCargo = $row['porcentajecargo'] ??null;
+                        $xls_invoice->montoCargo = $row['montoCargo'] ?? 0;
                         $xls_invoice->codigoMoneda = $row['codigomoneda'];
                         $xls_invoice->tipoCambio = $row['tipocambio'];
                         $xls_invoice->totalServGravados = $row['totalservgravados'];
@@ -1819,15 +1836,6 @@ class InvoiceController extends Controller
             }*/
         }
         $company->save();
-        /*$userId = $company->user_id;
-        Cache::forget("cache-currentcompany-$userId");
-                
-        Log::debug("Agregando facturas a queue");
-        foreach($invoiceList as $fac){
-            ProcessSendExcelSingleInvoice::dispatch($fac)->onQueue('imports');
-        }
-        Log::debug($i." facturas importadas por excel");
-        */
     }
 
 
@@ -1858,6 +1866,8 @@ class InvoiceController extends Controller
     }
 
    public function guardarEnvioExcel($XlsInvoices){
+    
+        dd($XlsInvoices);
         $company = Company::find($XlsInvoices[0]->company_id);
         $apiHacienda = new BridgeHaciendaApi();
         $tokenApi = $apiHacienda->login(false);
@@ -1947,6 +1957,8 @@ class InvoiceController extends Controller
                 } else {
                   $invoice->client_first_name = 'N/A';
                 }
+                
+
                 //Fechas
                 $fecha = Carbon::createFromFormat('d/m/Y g:i A',
                     $factura[0]->fechaEmision);
@@ -1956,15 +1968,201 @@ class InvoiceController extends Controller
                 $invoice->year = $fecha->year;
                 $invoice->month = $fecha->month;
                 $invoice->credit_time = $fechaV->format('d/m/Y');
+                $invoice->total_serv_gravados = $factura[0]->totalServGravados;
+                $invoice->total_serv_exentos = $factura[0]->totalServExentos;
+                $invoice->total_merc_gravados = $factura[0]->totalMercanciasGravadas;
+                $invoice->total_merc_exentas = $factura[0]->totalMercanciasExentas;
+                $invoice->total_gravado = $factura[0]->totalGravado;
+                $invoice->total_exento = $factura[0]->totalExento;
+                $invoice->total_venta = $factura[0]->totalVenta;
+                $invoice->total_descuento = $factura[0]->totalDescuentos;
+                $invoice->total_venta_neta = $factura[0]->totalVentaNeta;
+                $invoice->total_iva = $factura[0]->totalImpuesto;
+                $invoice->total_otros_cargos = $factura[0]->totalOtrosCargos;
+                $invoice->total_comprobante = $factura[0]->totalComprobante;
                 $invoice->save();
                 $invoice->document_key = $this->getDocumentKey($invoice->document_type);
                 $invoice->document_number = $this->getDocReference($invoice->document_type);
-                $lineas = XlsInvoice::where('company_id',$company_id)->where('consecutivo',$factura[0]->consecutivo)->get();
+                $lineas = XlsInvoice::where('company_id',$company->id)->where('consecutivo',$factura[0]->consecutivo)->get();
                 foreach ($lineas as $linea) {
-                    # code...
+                    if($linea->tipoLinea == 1){
+                        $item = InvoiceItem::updateOrCreate([
+                            'item_number' => $linea->numeroLinea,
+                            'invoice_id' => $invoice->id
+                        ], [
+                            'company_id' => $invoice->company_id,
+                            'year'  => $invoice->year,
+                            'month' => $invoice->month,
+                            'name'  => $linea->detalle ? trim($linea->detalle) : null,
+                            'measure_unit' => $linea->unidadmedida ?? 'Unid',
+                            'item_count'   => $linea->cantidad ? trim($linea->cantidad) : 1,
+                            'unit_price'   => $linea->precioUnitario ?? 0,
+                            'subtotal'     => $linea->subTotal ?? 0,
+                            'total' => $linea->montoTotalLinea ?? 0,
+                            'discount_type' => $linea->naturalezaDescuento ?? null,
+                            'discount' => $linea->montoDescuento ?? 0,
+                            'iva_type' => $linea->codigoImpuesto ?? null,
+                            'iva_percentage' => $linea->codigoTarifa ?? 0,
+                            'iva_amount' => $linea->montoImpuesto ?? 0,
+                            'tariff_heading' => $linea->tarifaImpuesto ?? null,
+                             'is_exempt' => $linea->exento
+                            ]
+                        );
+                        try {
+                            $exonerationDate = isset($linea->fechaEmisionExoneracion )  ? Carbon::createFromFormat('d/m/Y', $linea->fechaEmisionExoneracion) : null;
+                        }catch( \Exception $e ) {
+                            $exonerationDate = null;
+                        }
+                        if ($exonerationDate && $linea->tipoDocumentoExoneracion && $linea->numeroDocumentoExoneracion && $linea->porcentajeExoneracionExoneracion > 0) {
+
+                            $item->exoneration_document_type = $linea->tipoDocumentoExoneracion ?? null;
+                            $item->exoneration_document_number = $linea->numeroDocumentoExoneracion ?? null;
+                            $item->exoneration_company_name = $linea->nombreInstitucionExoneracion ?? null;
+                            $item->exoneration_porcent = $linea->porcentajeExoneracionExoneracion ?? 0;
+                            $item->exoneration_amount = $linea->montoExoneracionExoneracion ?? 0;
+                            $item->exoneration_date = $exonerationDate;
+                            $item->exoneration_total_amount = $linea->montoExoneracionExoneracion ?? 0;
+                            $item->exoneration_total_gravado = (($item->item_count * $item->unit_price) * $item->exoneration_porcent) / 100 ;
+                            $item->impuesto_neto = $linea->montoImpuesto ?? $linea->montoImpuesto - $linea->montoExoneracionExoneracion;
+                            
+                        }
+                        $item->save();
+                    }else{
+                        OtherCharges::updateOrCreate([
+                            'item_number' => $linea->numeroLinea,
+                            'invoice_id' => $invoice->id
+                        ], 
+                        [
+                            'company_id' => $invoice->company_id,
+                            'year'  => $invoice->year,
+                            'month' => $invoice->month,
+                            'document_type' => $linea->tipoCargo ?? '99',
+                            'provider_id_number' =>  $linea->identidadTercero ? trim( $linea->identidadTercero) : null,
+                            'provider_name'   => $linea->nombreTercero ? trim($linea->nombreTercero) : null,
+                            'description'   => $linea->detalleCargo ? trim($linea->detalleCargo) : null,
+                            'percentage'   =>$linea->porcentajeCargo ?? 0,
+                            'amount'   => $linea->montoCargo ?? 0,
+                        ]
+                        );
+                    }
                 }
-                dd($invoice);
-                dd($factura);
+                if ($request->document_type == '08' ) {
+                 
+                    $bill = new Bill();
+                    $bill->company_id = $company->id;
+                    //Datos generales y para Hacienda
+                    $bill->document_type = "01";
+                    $bill->hacienda_status = "03";
+                    $bill->status = "02";
+                    $bill->payment_status = "01";
+                    $bill->payment_receipt = "";
+                    $bill->generation_method = "Masivo-Excel";
+                    $bill->reference_number = $company->last_bill_ref_number + 1;
+
+                    
+                    $bill->document_key = $invoice->document_key;
+                      $bill->document_number = $invoice->document_number;
+                      $bill->sale_condition = $invoice->sale_condition;
+                      $bill->payment_type = $invoice->payment_type;
+                      $bill->credit_time = $invoice->credit_time;
+                    
+                      $bill->xml_schema =  43;
+
+                          $identificacion_provider = preg_replace("/[^0-9]/", "", $invoice->id_number );
+                          
+                          $provider = Provider::firstOrCreate(
+                              [
+                                  'id_number' => $identificacion_provider,
+                                  'company_id' => $invoice->company_id,
+                              ],
+                              [
+                                  'company_id' => $invoice->company_id,
+                                  'id_number' => $identificacion_provider
+                              ]
+                          );
+                          $provider->first_name = $invoice->first_name;
+                          $provider->last_name = $invoice->last_name;
+                          $provider->last_name2 = $invoice->last_name2;
+                          $provider->country = $invoice->country;
+                          $provider->state = $invoice->state;
+                          $provider->city = $invoice->city;
+                          $provider->district = $invoice->district;
+                          $provider->neighborhood = $invoice->neighborhood;
+                          $provider->zip = $invoice->zip;
+                          $provider->address = $invoice->address;
+                          $provider->foreign_address = $invoice->foreign_address ?? null;
+                          $provider->phone = $invoice->phone;
+                          $provider->es_exento = $invoice->es_exento;
+                          $provider->email = $invoice->email;
+                          $provider->save();
+                              
+                          $bill->provider_id = $provider->id;
+                      //Datos de factura
+                      $bill->description = $invoice->description;
+                      $bill->subtotal = floatval( str_replace(",","", $invoice->subtotal ));
+                      $bill->currency = $invoice->currency;
+                      $bill->currency_rate = floatval( str_replace(",","", $invoice->currency_rate ));
+                      $bill->total = floatval( str_replace(",","", $invoice->total ));
+                      $bill->iva_amount = floatval( str_replace(",","", $invoice->iva_amount ));
+                      
+                      $bill->provider_first_name = $provider->first_name;
+                      $bill->provider_last_name = $provider->last_name;
+                      $bill->provider_last_name2 = $provider->last_name2;
+                      $bill->provider_email = $provider->email;
+                      $bill->provider_address = $provider->address;
+                      $bill->provider_country = $provider->country;
+                      $bill->provider_state = $provider->state;
+                      $bill->provider_city = $provider->city;
+                      $bill->provider_district = $provider->district;
+                      $bill->provider_zip = $provider->zip;
+                      $bill->provider_phone = $provider->phone;
+                      $bill->provider_id_number = $provider->id_number;
+
+                      //Fechas
+                      $fecha = Carbon::createFromFormat('d/m/Y g:i A', $invoice->generated_date . ' ' . $invoice->hora);
+                      $bill->generated_date = $fecha;
+                      $fechaV = Carbon::createFromFormat('d/m/Y', $invoice->due_date );
+                      $bill->due_date = $fechaV;
+                      
+                      $bill->year = $invoice->year;
+                      $bill->month = $invoice->month;
+                    $bill->xml_schema = 43;
+                    /*
+                      if( $request->activity_company_verification ){
+                        $bill->activity_company_verification = $request->activity_company_verification;
+                      }
+                      
+                      $bill->accept_status = $request->accept_status ? 1 : 0;
+                      if( !$bill->accept_status ) {
+                        $bill->is_code_validated = false;
+                      }
+                      
+                      if( $request->accept_iva_condition ){
+                        $bill->accept_iva_condition = $request->accept_iva_condition;
+                      }
+                      if( $request->accept_iva_acreditable ){
+                        $bill->accept_iva_acreditable = $request->accept_iva_acreditable;
+                      }
+                      if( $request->accept_iva_gasto ){
+                        $bill->accept_iva_gasto = $request->accept_iva_gasto;
+                      }
+                    */
+
+
+                    
+                    $bill->is_code_validated = 1;
+                    $bill->accept_status = 1;
+                    $bill->accept_iva_condition = '01';
+                    $bill->accept_iva_acreditable = $bill->iva_amount;
+                    $bill->accept_iva_gasto = 0;
+                    //$bill->description = "FEC" . ($request->description ?? '');
+                    $bill->save();
+                    $company->last_bill_ref_number = $bill->reference_number;
+                    $company->save();
+
+                }
+
+
             }
         }
     }
