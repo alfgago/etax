@@ -21,6 +21,7 @@ class CreateXlsInvoicesTable extends Migration
             $table->string('fechaEmision')->nullable();
             $table->string('fechaVencimiento')->nullable();
             $table->string('codigoActividad')->nullable();
+            $table->string('descripcion')->nullable();
             $table->string('nombreEmisor')->nullable();
             $table->string('tipoIdentificacionEmisor')->nullable();
             $table->string('identificacionEmisor')->nullable();
@@ -72,10 +73,13 @@ class CreateXlsInvoicesTable extends Migration
             $table->double('tipoCambio')->default(0);
             $table->double('totalServGravados')->default(0);
             $table->double('totalServExentos')->default(0);
+            $table->double('totalServExonerados')->default(0);
             $table->double('totalMercanciasGravadas')->default(0);
             $table->double('totalMercanciasExentas')->default(0);
+            $table->double('totalMercanciasExonerada')->default(0);
             $table->double('totalGravado')->default(0);
             $table->double('totalExento')->default(0);
+            $table->double('totalExonerado')->default(0);
             $table->double('totalVenta')->default(0);
             $table->double('totalDescuentos')->default(0);
             $table->double('totalVentaNeta')->default(0);

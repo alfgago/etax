@@ -1730,11 +1730,10 @@ class InvoiceController extends Controller
         $year = $start_date->year;
         $available_invoices = $company->getAvailableInvoices( $year, $month );
         $facturas_disponibles = $available_invoices->monthly_quota;
-        $facturas_disponibles = 5;
         $consecutivo = null;
         $invoiceList = array();
         foreach ($facturas as $row){
-            //try{
+            try{
                 if($row['cedulaempresa'] == $company->id_number){
 
                     if( isset($row['identificacionreceptor']) ){
@@ -1751,6 +1750,7 @@ class InvoiceController extends Controller
                         $xls_invoice->tipoDocumento = $row['tipodocumento'];
                         $xls_invoice->fechaEmision = $row['fechaemision'];
                         $xls_invoice->fechaVencimiento = $row['fechavencimiento'];
+                        $xls_invoice->descripcion = $row['descripcion'];
                         $xls_invoice->company_id = $company->id;
                         $xls_invoice->numeroLinea = $row['numerolinea'];
                         $xls_invoice->codigoActividad = $row['codigoactividad'];
@@ -1807,10 +1807,13 @@ class InvoiceController extends Controller
                         $xls_invoice->tipoCambio = $row['tipocambio'];
                         $xls_invoice->totalServGravados = $row['totalservgravados'];
                         $xls_invoice->totalServExentos = $row['totalservexentos'];
+                        $xls_invoice->totalServExonerados = $row['totalservexonerados'];
                         $xls_invoice->totalMercanciasGravadas = $row['totalmercanciasgravadas'];
                         $xls_invoice->totalMercanciasExentas = $row['totalmercanciasexentas'];
+                        $xls_invoice->totalMercanciasExonerada = $row['totalmercanciasexonerada'];
                         $xls_invoice->totalGravado = $row['totalgravado'];
                         $xls_invoice->totalExento = $row['totalexento'];
+                        $xls_invoice->totalExonerado = $row['totalexonerado'];
                         $xls_invoice->totalVenta = $row['totalventa'];
                         $xls_invoice->totalDescuentos = $row['totaldescuentos'];
                         $xls_invoice->totalVentaNeta = $row['totalventaneta'];
@@ -1832,9 +1835,9 @@ class InvoiceController extends Controller
                     //Log::warning('Factura repetida en envio masivo '.$identificacionCliente);
                 }
                    
-            /*}catch( \Throwable $ex ){
-                Log::error("Error en factura SM:" . $ex);
-            }*/
+            }catch( \Throwable $ex ){
+                Log::error("Error en factura ENVIO MASIVO EXCEL:" . $ex);
+            }
         }
         $company->save();
     }
@@ -1864,6 +1867,8 @@ class InvoiceController extends Controller
         $XlsInvoices = XlsInvoice::select('consecutivo', 'company_id','autorizado')
             ->where('company_id',$companyId)->where('autorizado',1)->distinct('consecutivo')->get();
         $this->guardarEnvioExcel($XlsInvoices);
+        return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
+
     }
 
    public function guardarEnvioExcel($XlsInvoices){
@@ -1900,6 +1905,7 @@ class InvoiceController extends Controller
                 /*$invoice->document_key = $factura[0]->document_key;
                 $invoice->document_number = $factura[0]->document_number;*/
                $invoice->sale_condition = $factura[0]->condicionVenta;
+               $invoice->description = $factura[0]->descripcion;
                 $invoice->payment_type = $factura[0]->medioPago;
                 $invoice->credit_time = $factura[0]->plazoCredito;
                 if ($factura[0]->codigoActividad) {
@@ -1971,6 +1977,9 @@ class InvoiceController extends Controller
                 $invoice->total_venta = $factura[0]->totalVenta;
                 $invoice->total_descuento = $factura[0]->totalDescuentos;
                 $invoice->total_venta_neta = $factura[0]->totalVentaNeta;
+                $invoice->total_serv_exonerados = $factura[0]->totalServExonerados;
+                $invoice->total_merc_exonerados = $factura[0]->totalMercanciasExonerada;
+                $invoice->total_exonerados = $factura[0]->totalExonerado;
                 $invoice->total_iva = $factura[0]->totalImpuesto;
                 $invoice->total_otros_cargos = $factura[0]->totalOtrosCargos;
                 $invoice->total_comprobante = $factura[0]->totalComprobante;
@@ -2111,7 +2120,21 @@ class InvoiceController extends Controller
                       $bill->provider_zip = $provider->zip;
                       $bill->provider_phone = $provider->phone;
                       $bill->provider_id_number = $provider->id_number;
-
+                      $bill->total_serv_gravados = $factura[0]->totalServGravados;
+                    $bill->total_serv_exentos = $factura[0]->totalServExentos;
+                    $bill->total_merc_gravados = $factura[0]->totalMercanciasGravadas;
+                    $bill->total_merc_exentas = $factura[0]->totalMercanciasExentas;
+                    $bill->total_gravado = $factura[0]->totalGravado;
+                    $bill->total_exento = $factura[0]->totalExento;
+                    $bill->total_venta = $factura[0]->totalVenta;
+                    $bill->total_descuento = $factura[0]->totalDescuentos;
+                    $bill->total_venta_neta = $factura[0]->totalVentaNeta;
+                    $bill->total_serv_exonerados = $factura[0]->totalServExonerados;
+                    $bill->total_merc_exonerados = $factura[0]->totalMercanciasExonerada;
+                    $bill->total_exonerados = $factura[0]->totalExonerado;
+                    $bill->total_iva = $factura[0]->totalImpuesto;
+                    $bill->total_otros_cargos = $factura[0]->totalOtrosCargos;
+                    $bill->total_comprobante = $factura[0]->totalComprobante;
                       //Fechas
                       $fecha =  $invoice->generated_date ;
                       $bill->generated_date = $fecha;
@@ -2121,16 +2144,10 @@ class InvoiceController extends Controller
                       $bill->year = $invoice->year;
                       $bill->month = $invoice->month;
                     $bill->xml_schema = 43;
-                    /*
-                      if( $request->activity_company_verification ){
-                        $bill->activity_company_verification = $request->activity_company_verification;
-                      }
-                      
-                      $bill->accept_status = $request->accept_status ? 1 : 0;
-                      if( !$bill->accept_status ) {
-                        $bill->is_code_validated = false;
-                      }
-                      
+                    
+                    $bill->activity_company_verification = $invoice->commercial_activity;
+                    
+                      /*
                       if( $request->accept_iva_condition ){
                         $bill->accept_iva_condition = $request->accept_iva_condition;
                       }
@@ -2149,9 +2166,8 @@ class InvoiceController extends Controller
                     $bill->accept_iva_condition = '01';
                     $bill->accept_iva_acreditable = $bill->iva_amount;
                     $bill->accept_iva_gasto = 0;
-                    //$bill->description = "FEC" . ($request->description ?? '');
+                    $bill->description = "FEC" . ($invoice->description ?? '');
                     $bill->save();
-                    dd($bill);
                     $company->last_bill_ref_number = $bill->reference_number;
 
                 }
@@ -2172,7 +2188,6 @@ class InvoiceController extends Controller
             }
         }
 
-                dd($invoice);
     }
         
 }
