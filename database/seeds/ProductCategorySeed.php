@@ -74,7 +74,7 @@ class ProductCategorySeed extends Seeder
         ];
         
         $listaCompras = [
-          ['grupo'=>'CL','nombre'=>'Compras locales de bienes utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Bienes', 'bill_iva_code'=>'B003', 'open_codes'=>'B003,B063,B008,B068,B004,B064,B002,B062,B001,B011,B080'],
+          ['grupo'=>'CL','nombre'=>'Compras locales de bienes utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Bienes', 'bill_iva_code'=>'B003', 'open_codes'=>'B003,B063,B008,B068,B004,B064,B002,B062,B001,B011,B080,R001,R002,R003,R004,R005,R006'],
           ['grupo'=>'CL','nombre'=>'Compras locales de servicios utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Servicios', 'bill_iva_code'=>'S003', 'open_codes'=>'S003,S063,S008,S068,S004,S064,S002,S062,S001,S011'],
           ['grupo'=>'CL','nombre'=>'Compras locales de bienes de capital utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Bienes de capital', 'bill_iva_code'=>'B013', 'open_codes'=>'B013,S013,B016,S016,B073,S073,B018,B078,B014,B012,B072,B015,S015,B011,S011,B071,S071'],
           ['grupo'=>'CI','nombre'=>'Importaciones de bienes utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Bienes', 'bill_iva_code'=>'B023', 'open_codes'=>'B023,B043,B028,B048,B024,B044,B022,B042,B021,B041'],

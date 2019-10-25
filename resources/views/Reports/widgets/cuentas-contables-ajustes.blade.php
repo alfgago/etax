@@ -89,6 +89,12 @@
               </tr>
               
               <tr>
+                <th>IVA de facturas recibidas con recaudación a nivel Mayorista, Fábrica o Aduana:</th>
+                <td>-</td>
+                <td>  ₡{{ number_format( $data->book->cc_iva_restaurantes, 0 ) }} </td>
+              </tr>
+              
+              <tr>
                 <th>IVA por ajustar de bienes y servicios:</td>
                 <td>  ₡{{ number_format( $data->book->cc_ajuste_bs, 0 ) }} </td>
                 <td>-</td>
