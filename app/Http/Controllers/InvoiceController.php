@@ -1570,6 +1570,9 @@ class InvoiceController extends Controller
         if ($docType == '04') {
             $lastSale = $company->last_ticket_ref_number + 1;
         }
+        if ($docType == '03') {
+            $lastSale = $company->last_note_ref_number + 1;
+        }
         $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
 
         return $consecutive;
@@ -1594,6 +1597,9 @@ class InvoiceController extends Controller
         }
         if ($docType == '04') {
             $ref = $company->last_ticket_ref_number + 1;
+        }
+        if ($docType == '03') {
+            $lastSale = $company->last_note_ref_number + 1;
         }
         $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType, $company).
             '1'.$invoice->getHashFromRef($ref);
