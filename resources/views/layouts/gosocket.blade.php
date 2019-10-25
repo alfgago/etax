@@ -268,11 +268,39 @@
         });
         
         jQuery("#facturas-emitidas").change(function(){
-          console.log(jQuery(this).val());
+          jQuery("#text-facturas-emitidas").html("<b>"+jQuery(this).val()+"</b>");
+          select_plan();
         });
         jQuery("#facturas-recibidas").change(function(){
-          console.log(jQuery(this).val());
+          jQuery("#text-facturas-recibidas").html("<b>"+jQuery(this).val()+"</b>");
+          select_plan();
         });
+
+        function select_plan(){
+          var recibidas = jQuery("#facturas-recibidas").val();
+          var emitidas = jQuery("#facturas-emitidas").val();
+          var plan = "EN";
+          if(recibidas <= 5 && emitidas <= 40 ){
+            plan = "PB";
+          }
+          if((recibidas > 5 && recibidas <= 25) || emitidas <= 200 ){
+            plan = "PI";
+          }
+          if(recibidas <= 50 && emitidas <= 400 ){
+            plan = "PP";
+          }
+          if(recibidas <= 250 ){
+            plan = "EI";
+          }
+          if(recibidas <= 2000 ){
+            plan = "EI";
+          }
+          if(recibidas <= 5000 ){
+            plan = "EI";
+          }
+          console.log(emitidas+" "+recibidas+" "+plan);
+
+        }
       </script>  
       
   

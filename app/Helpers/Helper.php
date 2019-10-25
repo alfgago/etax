@@ -197,7 +197,7 @@ if (!function_exists('currentCompanyModel')) {
             //$company->codigos = $codigos->codigosRepercutidos();
             Illuminate\Support\Facades\Cache::put($cacheKey, $company, now()->addMinutes(15));
         }
-        return Illuminate\Support\Facades\Cache::get($cacheKey);;
+        return Illuminate\Support\Facades\Cache::get($cacheKey);
     }
 
 }

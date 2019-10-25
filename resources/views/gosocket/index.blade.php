@@ -39,11 +39,11 @@
 			</p>
 			<form>
 			  <div class="form-group">
-			    <label for="facturas-emitidas">Cantidad de facturas emitidas al mes que debemos procesar:</label>
+			    <label for="facturas-emitidas">Cantidad de facturas emitidas al mes que debemos procesar: </label><span id="text-facturas-emitidas"><b>25</b></span>
 			    <input type="range" class="form-control-range " id="facturas-emitidas" name="facturas-emitidas" value="25" min="1" max="10001" step="1">
 			  </div>
 			  <div class="form-group">
-			    <label for="facturas-recibidas">Cantidad de facturas recibidas al mes que debemos procesar: </label>
+			    <label for="facturas-recibidas">Cantidad de facturas recibidas al mes que debemos procesar: </label><span id="text-facturas-recibidas"><b>25</b></span>
 			    <input type="range" class="form-control-range" id="facturas-recibidas" name="facturas-recibidas" value="25" min="10" max="10001" step="1">
 			  </div>
 			  <button type="submit" class="btn btn-primary">Enviar</button>
