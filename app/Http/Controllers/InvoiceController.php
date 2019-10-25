@@ -1684,6 +1684,7 @@ class InvoiceController extends Controller
           'archivo' => 'required',
         ]);
       
+        $fileType = request()->fileType ?? '01';
 
         $collection = Excel::toCollection( new InvoiceImportSM(), request()->file('archivo') );
         $companyId = currentCompany();
@@ -1692,7 +1693,7 @@ class InvoiceController extends Controller
         try {
             Log::debug('Creando job de registro de facturas.');
             foreach (array_chunk ( $invoiceList, 100 ) as $facturas) {
-                ProcessSendExcelInvoices::dispatch($facturas, $companyId)->onQueue('bulk');
+                ProcessSendExcelInvoices::dispatch($facturas, $companyId, $fileType)->onQueue('bulk');
             }
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);

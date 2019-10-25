@@ -157,7 +157,7 @@ class CalculatedTax extends Model
      * @bodyParam prorrataOperativa required
      * @return App\CalculatedTax
      */
-    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa, $forceRecalc = false ) {
+    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa, $forceRecalc = true ) {
       
       $currentCompanyId = currentCompany();
       
@@ -596,7 +596,7 @@ class CalculatedTax extends Model
                 $billIva = $billIva * -1;
               }
                 
-              $ivaType = $ivaType ? $ivaType : '003';
+              $ivaType = $ivaType ? $ivaType : 'B003';
               $ivaType = str_pad($ivaType, 3, '0', STR_PAD_LEFT);
               
               if( $ivaType == 'B041' || $ivaType == 'B042' || $ivaType == 'B043' || $ivaType == 'B044' ||
@@ -606,6 +606,7 @@ class CalculatedTax extends Model
                   $ivaType == 'S041' || $ivaType == 'S042' || $ivaType == 'S043' || $ivaType == 'S044' ||
                   $ivaType == 'S051' || $ivaType == 'S052' || $ivaType == 'S053' || $ivaType == 'S054' || 
                   $ivaType == 'S061' || $ivaType == 'S062' || $ivaType == 'S063' || $ivaType == 'S064' || 
+                  $ivaType == 'R001' || $ivaType == 'R002' || $ivaType == 'R003' || $ivaType == 'R004' || $ivaType == 'R005' || $ivaType == 'R006' || 
                   $ivaType == 'S071' || $ivaType == 'S072' || $ivaType == 'S073' || $ivaType == 'S074'
               )
               {
@@ -631,7 +632,9 @@ class CalculatedTax extends Model
               /***SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
               $porc_plena = $billItems[$i]->porc_identificacion_plena ? $billItems[$i]->porc_identificacion_plena : 0;
               $currAcreditablePleno = 0;
-              if ( $porc_plena == 1 || $porc_plena == 5 ) {
+              
+              //Asigna 13%, porque para efectos de algoritmo. Me puedo acreditar la totaliddad para canasta basica y para compras al 0% acreditable
+              if ( $porc_plena == 1 || $porc_plena == 5 ) { 
                 $porc_plena = 13;
               } 
               
@@ -682,6 +685,11 @@ class CalculatedTax extends Model
                 $currAcreditablePleno = $subtotal * $menor_porc;
                 $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
               }
+              if( $ivaType == 'R001' || $ivaType == 'R002' || $ivaType == 'R003' || $ivaType == 'R004' || $ivaType == 'R005' || $ivaType == 'R006')
+              {
+                $currAcreditablePleno = $billIva;
+              }
+              
               $ivaAcreditableIdentificacionPlena += $currAcreditablePleno;
               /***END SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
               
@@ -1391,7 +1399,7 @@ class CalculatedTax extends Model
           
           $impuestos['iva_compras_B1e'] = $ivaData->plenoB061; 
           $impuestos['iva_compras_B2e'] = $ivaData->plenoB062; 
-          $impuestos['iva_compras_B3e'] = $ivaData->plenoB063; 
+          $impuestos['iva_compras_B3e'] = $ivaData->plenoB063 + $ivaData->plenoR001 + $ivaData->plenoR002 + $ivaData->plenoR003 + $ivaData->plenoR004 + $ivaData->plenoR005 + $ivaData->plenoR006; 
           $impuestos['iva_compras_B4e'] = $ivaData->plenoB064; 
           $impuestos['iva_importaciones_B1e'] = $ivaData->plenoB041 + $ivaData->plenoB035; 
           $impuestos['iva_importaciones_B2e'] = $ivaData->plenoB042; 
