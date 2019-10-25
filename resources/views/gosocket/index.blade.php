@@ -98,18 +98,67 @@
 			    </div>
 			    <div class="item">
 			    	<div class="plan-column" id="">
+                        <div class="plan-header n-h">
+					    <div class="titulo">
+					        Profesional Intermedio    
+					    </div>
+					    <div class="precio">
+					        <small>Desde</small> $12.99 <small>+ IVA / mes (pagoanual)</small>
+					    </div>
+					    <div class="precio-mensual">$15.99 + IVA / mes (pago mensual)</div>
+						</div>                                        <div class="plan-detail">
+		        		<div class="plan-feature title">Funcionalidades</div>
+		            	<div class="plan-feature si">
+		                	<i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
+		            	</div>
+		        		<div class="plan-feature si">
+		                	<i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
+		            	</div>
+		        		<div class="plan-feature si">
+		                	<i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)    
+		            	</div>
+		        		<div class="plan-feature si">
+		                	<i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual    
+		            	</div>
+		        		<div class="plan-feature si">
+		                	<i class="fa fa-check" aria-hidden="true"></i>1 usuario    
+		            	</div>
+		        		<div class="plan-feature si">
+		        			<i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
+		        		</div>
+		            
+		           		<div class="plan-feature title">Procesamiento de</div>
+		            	<div class="plan-feature">
+		            		<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>25</span> facturas emitidas    
+		            	</div>
+		        		<div class="plan-feature">
+		        			<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>200</span> facturas recibidas    
+		        		</div>
+		        		<div class="plan-feature">
+		        			<i class="fa fa-caret-right" aria-hidden="true"></i>Facturación electrónica incluida    
+		        		</div>
+		        	</div>                                        
+                    <div id="prueba" class="texto-promocion">
+                        <p>Disfrute de sus 48 horas gratis!</p>
+                    </div>
+                    <div class="plan-button">
+                    	<a href="https://app.etaxcr.com/register">Comprar ya</a>
+                    </div>
+                </div>
+			    <div class="item">
+			    	<div class="plan-column" id="">
                         <div class="plan-header text-center n-h">
-    						<span class="titulo">Profesional Intermedio</span>
+    						<span class="titulo">Profesional Pro</span>
 						    <div class="precio">
-						        <small>Desde</small> $82.99 <small>+ IVA / mes (pago anual)</small>
+						        <small>Desde</small> $19.99 <small>+ IVA / mes (pago anual)</small>
 						    </div>
-						    <div class="precio-mensual">$99.99 + IVA / mes (pago mensual)</div>
+						    <div class="precio-mensual">$24.99 + IVA / mes (pago mensual)</div>
 						</div>
 						<div class="plan-detail">
 					        <div class="plan-feature title">Funcionalidades</div>
-				            <div class="plan-feature si">
-				                <i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
-				            </div>
+					        <div class="plan-feature si">
+					            <i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
+					        </div>
 					        <div class="plan-feature si">
 					            <i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
 					        </div>
@@ -120,15 +169,62 @@
 					            <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual    
 					        </div>
 					        <div class="plan-feature si">
-					            <i class="fa fa-check" aria-hidden="true"></i>Hasta 4 usuarios    
+					            <i class="fa fa-check" aria-hidden="true"></i>Hasta 2 usuarios    
 					        </div>
 					        <div class="plan-feature si">
 					            <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
 					        </div>
-
 					        <div class="plan-feature title">Procesamiento de</div>
 					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>2000</span> facturas emitidas
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>50</span> facturas emitidas    
+					        </div>
+					        <div class="plan-feature">
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>400</span> facturas recibidas    
+					        </div>
+					        <div class="plan-feature">
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturación electrónica incluida    
+					        </div>
+					    </div>                                                                               
+                        <div id="prueba" class="texto-promocion">
+                            <p>Disfrute de sus 48 horas gratis!</p>
+                        </div>
+		                <div class="plan-button">
+		                	<a href="https://app.etaxcr.com/register">Comprar ya</a>
+		                </div>
+		            </div>
+			    </div>
+			    <div class="item">
+			    	<div class="plan-column" id="">
+                        <div class="plan-header text-center n-h">
+    						<span class="titulo">Empresarial Básico</span>
+						    <div class="precio">
+						        <small>Desde</small> $32.99 <small>+ IVA / mes (pagoanual)</small>
+						    </div>
+						    <div class="precio-mensual">$39.99 + IVA / mes (pago mensual)</div>
+						</div>
+						<div class="plan-detail">
+					        <div class="plan-feature title">Funcionalidades</div>
+            				<div class="plan-feature si">
+					            <i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
+					        </div>
+					        <div class="plan-feature si">
+					            <i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
+					        </div>
+					        <div class="plan-feature si">
+					            <i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)    
+					        </div>
+					        <div class="plan-feature si">
+					            <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual    
+					        </div>
+					        <div class="plan-feature si">
+					            <i class="fa fa-check" aria-hidden="true"></i>Hasta 2 usuarios    
+					        </div>
+					        <div class="plan-feature si">
+					            <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
+					        </div>
+					        <div class="plan-feature title">Procesamiento de</div>
+					        <div class="plan-feature">
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>250</span> facturas emitidas    
 					        </div>
 					        <div class="plan-feature">
 					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturas recibidas ilimitadas    
@@ -148,125 +244,38 @@
 			    <div class="item">
 			    	<div class="plan-column" id="">
                         <div class="plan-header text-center n-h">
-    						<span class="titulo">Profesional Pro</span>
-						    <div class="precio">
-						        <small>Desde</small>$9.99 <small>+ IVA / mes (pago anual)</small>
-						    </div>
-						    <div class="precio-mensual">$11.99 + sIVA / mes (pago mensual)</div>
-						</div>
-						<div class="plan-detail">
-					        <div class="plan-feature title">Funcionalidades</div>
-					        <div class="plan-feature si">
-					            <i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
-					        </div>
-						    <div class="plan-feature si">
-						        <i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
-						    </div>
-					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)
-					        </div>
-					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual
-					        </div>
-					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
-					        </div>
-					        <div class="plan-feature title">Procesamiento de</div>
-					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>5</span> facturas emitidas    
-					        </div>
-					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>40</span> facturas recibidas    
-					        </div>
-					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturación electrónica incluida    
-					        </div>
-					    </div>                                        
-                        <div id="prueba" class="texto-promocion">
-                            <p>Disfrute de sus 48 horas gratis!</p>
-                        </div>
-		                <div class="plan-button">
-		                	<a href="https://app.etaxcr.com/register">Comprar ya</a>
-		                </div>
-		            </div>
-			    </div>
-			    <div class="item">
-			    	<div class="plan-column" id="">
-                        <div class="plan-header text-center n-h">
-    						<span class="titulo">Empresarial Básico</span>
-						    <div class="precio">
-						        <small>Desde</small>$9.99 <small>+ IVA / mes (pago anual)</small>
-						    </div>
-						    <div class="precio-mensual">$11.99 + sIVA / mes (pago mensual)</div>
-						</div>
-						<div class="plan-detail">
-					        <div class="plan-feature title">Funcionalidades</div>
-					        <div class="plan-feature si">
-					            <i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
-					        </div>
-						    <div class="plan-feature si">
-						        <i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
-						    </div>
-					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)
-					        </div>
-					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual
-					        </div>
-					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
-					        </div>
-					        <div class="plan-feature title">Procesamiento de</div>
-					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>5</span> facturas emitidas    
-					        </div>
-					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>40</span> facturas recibidas    
-					        </div>
-					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturación electrónica incluida    
-					        </div>
-					    </div>                                        
-                        <div id="prueba" class="texto-promocion">
-                            <p>Disfrute de sus 48 horas gratis!</p>
-                        </div>
-		                <div class="plan-button">
-		                	<a href="https://app.etaxcr.com/register">Comprar ya</a>
-		                </div>
-		            </div>
-			    </div>
-			    <div class="item">
-			    	<div class="plan-column" id="">
-                        <div class="plan-header text-center n-h">
     						<span class="titulo">Empresarial Intermedio</span>
 						    <div class="precio">
-						        <small>Desde</small>$9.99 <small>+ IVA / mes (pago anual)</small>
+						        <small>Desde</small> $82.99 <small>+ IVA / mes (pago anual)</small>
 						    </div>
-						    <div class="precio-mensual">$11.99 + sIVA / mes (pago mensual)</div>
+						    <div class="precio-mensual">$99.99 + IVA / mes (pago mensual)</div>
 						</div>
 						<div class="plan-detail">
 					        <div class="plan-feature title">Funcionalidades</div>
-					        <div class="plan-feature si">
+				            <div class="plan-feature si">
 					            <i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
 					        </div>
-						    <div class="plan-feature si">
-						        <i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
-						    </div>
 					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)
+					            <i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
 					        </div>
 					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual
+					            <i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)    
 					        </div>
 					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
+					            <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual    
+					        </div>
+					        <div class="plan-feature si">
+					            <i class="fa fa-check" aria-hidden="true"></i>Hasta 4 usuarios    
+					        </div>
+					        <div class="plan-feature si">
+					            <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
 					        </div>
 					        <div class="plan-feature title">Procesamiento de</div>
 					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>5</span> facturas emitidas    
+					            <i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>2000</span> facturas emitidas    
 					        </div>
 					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>40</span> facturas recibidas    
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturas recibidas ilimitadas    
 					        </div>
 					        <div class="plan-feature">
 					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturación electrónica incluida    
@@ -285,33 +294,90 @@
                         <div class="plan-header text-center n-h">
     						<span class="titulo">Empresarial Pro</span>
 						    <div class="precio">
-						        <small>Desde</small>$9.99 <small>+ IVA / mes (pago anual)</small>
+						        <small>Desde</small>$124.99 <small>+ IVA / mes (pago anual)</small>
 						    </div>
-						    <div class="precio-mensual">$11.99 + sIVA / mes (pago mensual)</div>
+						    <div class="precio-mensual">$149.99 + IVA / mes (pago mensual)</div>
 						</div>
 						<div class="plan-detail">
 					        <div class="plan-feature title">Funcionalidades</div>
 					        <div class="plan-feature si">
 					            <i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
 					        </div>
-						    <div class="plan-feature si">
-						        <i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
-						    </div>
 					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)
+					            <i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
 					        </div>
 					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual
+					            <i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)    
 					        </div>
 					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
+					            <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual    
+					        </div>
+					        <div class="plan-feature si">
+					            <i class="fa fa-check" aria-hidden="true"></i>Hasta 10 usuarios    
+					        </div>
+					        <div class="plan-feature si">
+					            <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
 					        </div>
 					        <div class="plan-feature title">Procesamiento de</div>
 					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>5</span> facturas emitidas    
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>5000</span> facturas emitidas    
 					        </div>
 					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>40</span> facturas recibidas    
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturas recibidas ilimitadas    
+					        </div>
+					        <div class="plan-feature">
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturación electrónica incluida    
+					        </div>
+					    </div>                                        
+                        <div id="prueba" class="texto-promocion">
+                            <p>Disfrute de sus 48 horas gratis!</p>
+                        </div>
+		                <div class="plan-button">
+		                	<a href="https://app.etaxcr.com/register">Comprar ya</a>
+		                </div>
+		            </div>
+			    </div>
+			    <div class="item">
+			    	<div class="plan-column" id="">
+                        <div class="plan-header text-center n-h">
+    						<span class="titulo">Empresarial Pro</span>
+						    <div class="precio">
+						        <h4>Realizado a la Medida</h4>
+						    </div>
+						    <div class="precio-mensual">Contactenos al </div>
+						</div>
+						<div class="plan-detail">
+					        <div class="plan-feature title">Funcionalidades</div>
+					        <div class="plan-feature si">
+				                <i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
+				            </div>
+				        	<div class="plan-feature si">
+				                <i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
+				            </div>
+				        	<div class="plan-feature si">
+				                <i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)    
+				            </div>
+				        	<div class="plan-feature si">
+				                <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual    
+				            </div>
+				        	<div class="plan-feature si">
+				                <i class="fa fa-check" aria-hidden="true"></i>Contabilidades según necesidad    
+				            </div>
+				        	<div class="plan-feature si">
+				                <i class="fa fa-check" aria-hidden="true"></i>Usuarios por contabilidad según necesidad    
+				            </div>
+				        	<div class="plan-feature si">
+				                <i class="fa fa-check" aria-hidden="true"></i>Integraciones a la medida    
+				            </div>
+				        	<div class="plan-feature si">
+				                <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
+				            </div>
+					        <div class="plan-feature title">Procesamiento de</div>
+					        <div class="plan-feature">
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturas emitidas ilimitadas    
+					        </div>
+					        <div class="plan-feature">
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturas recibidas ilimitadas    
 					        </div>
 					        <div class="plan-feature">
 					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturación electrónica incluida    
