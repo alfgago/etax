@@ -1,0 +1,85 @@
+
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/php:7.2-cli
+        environment:
+          APP_ENV=testing
+          REDIS_HOST=127.0.0.1
+      - image: circleci/mysql:5.7
+        command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_bin --innodb-large-prefix=true --innodb-file-format=Barracuda
+        environment:
+          MYSQL_USER: root
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+      - image: redis:latest
+
+    working_directory: ~/working_dir
+
+    steps:
+      - run:
+          name: Install System Dependencies
+          command: |
+            sudo apt-get update -y
+            sudo apt-get install -y git
+            sudo apt-get install -y redis-tools
+            echo "CONFIG SET save ''" | redis-cli -x
+            sudo apt-get install -y libmcrypt-dev git unzip wget libpng-dev
+            # These are required for e2e tests
+            sudo apt-get install -y libsqlite3-dev libnss3 libgconf-2-4 libfontconfig1 chromium xvfb
+            sudo apt-get -y -f install mysql-client
+      - run:
+          name: Run database
+          command: mysql  -h 127.0.0.1 -u root -e "create database nissan_cee_dev;"
+
+      - run:
+          name: Install PHP Extensions
+          command: sudo docker-php-ext-install -j$(nproc) mcrypt pdo_mysql pdo_sqlite gd zip
+
+      - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "composer.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: 
+          name: Running composer
+          command: |
+            cd ~/working_dir/project
+            composer install --no-progress --no-suggest
+
+      - save_cache:
+          paths:
+            - ./vendor
+          key: v1-dependencies-{{ checksum "composer.json" }}
+
+      # setting up environment
+      - run:
+          name: Setting up environment
+          command: |
+            cd ~/working_dir/project
+            sudo chmod -R 777 ./storage
+            sudo chmod -R 777 ./bootstrap
+            cp ./.env.example ./.env
+            php artisan api:install
+      # run stylecode tests
+      - run:
+          name: Run CS Tests
+          command: |
+            cd ~/working_dir/project
+            vendor/bin/phpcs --report=full
+      # run tests!
+      - run:
+          name: Running Tests !
+          command: |
+            cd ~/working_dir/project
+            mkdir -p ~/working_dir/project/phpunit
+            php artisan db:seed --class=TestingSeeder
+            php -dzend_extension=xdebug.so 
+            APP_ENV=testing vendor/bin/phpunit --coverage-clover=phpunit/coverage-clover.xml --coverage-html=phpunit/coverage
+      - store_test_results:
+          path: ~/working_dir/project/phpunit
+      - store_artifacts:
+          path: ~/working_dir/project/phpunit      
