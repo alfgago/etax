@@ -24,7 +24,8 @@ class GoSocketController extends Controller
 {
 
     public function index(Request $request){
-        return view('gosocket.index');
+        $token = $request->token;
+        return view('gosocket.index')->with('token',$token);
     }
 
     public function gosocketValidate(Request $request) {

@@ -92,58 +92,60 @@
                             <p>Disfrute de sus 48 horas gratis!</p>
                         </div>
 		                <div class="plan-button">
-		                	<a href="https://app.etaxcr.com/register">Comprar ya</a>
+		                	<a href="/gosocket/ingresar?token={{$token}}">Comprar ya</a>
 		                </div>
 		            </div>
 			    </div>
 			    <div class="item">
 			    	<div class="plan-column" id="">
-                        <div class="plan-header n-h">
-					    <div class="titulo">
-					        Profesional Intermedio    
-					    </div>
-					    <div class="precio">
-					        <small>Desde</small> $12.99 <small>+ IVA / mes (pagoanual)</small>
-					    </div>
-					    <div class="precio-mensual">$15.99 + IVA / mes (pago mensual)</div>
-						</div>                                        <div class="plan-detail">
-		        		<div class="plan-feature title">Funcionalidades</div>
-		            	<div class="plan-feature si">
-		                	<i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
-		            	</div>
-		        		<div class="plan-feature si">
-		                	<i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
-		            	</div>
-		        		<div class="plan-feature si">
-		                	<i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)    
-		            	</div>
-		        		<div class="plan-feature si">
-		                	<i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual    
-		            	</div>
-		        		<div class="plan-feature si">
-		                	<i class="fa fa-check" aria-hidden="true"></i>1 usuario    
-		            	</div>
-		        		<div class="plan-feature si">
-		        			<i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
-		        		</div>
-		            
-		           		<div class="plan-feature title">Procesamiento de</div>
-		            	<div class="plan-feature">
-		            		<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>25</span> facturas emitidas    
-		            	</div>
-		        		<div class="plan-feature">
-		        			<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>200</span> facturas recibidas    
-		        		</div>
-		        		<div class="plan-feature">
-		        			<i class="fa fa-caret-right" aria-hidden="true"></i>Facturación electrónica incluida    
-		        		</div>
-		        	</div>                                        
-                    <div id="prueba" class="texto-promocion">
-                        <p>Disfrute de sus 48 horas gratis!</p>
-                    </div>
-                    <div class="plan-button">
-                    	<a href="https://app.etaxcr.com/register">Comprar ya</a>
-                    </div>
+                        <div class="plan-header text-center n-h">
+						    <div class="titulo">
+						        Profesional Intermedio    
+						    </div>
+						    <div class="precio">
+						        <small>Desde</small> $12.99 <small>+ IVA / mes (pagoanual)</small>
+						    </div>
+						    <div class="precio-mensual">$15.99 + IVA / mes (pago mensual)</div>
+						</div>                                        
+						<div class="plan-detail">
+			        		<div class="plan-feature title">Funcionalidades</div>
+			            	<div class="plan-feature si">
+			                	<i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
+			            	</div>
+			        		<div class="plan-feature si">
+			                	<i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
+			            	</div>
+			        		<div class="plan-feature si">
+			                	<i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)    
+			            	</div>
+			        		<div class="plan-feature si">
+			                	<i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual    
+			            	</div>
+			        		<div class="plan-feature si">
+			                	<i class="fa fa-check" aria-hidden="true"></i>1 usuario    
+			            	</div>
+			        		<div class="plan-feature si">
+			        			<i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
+			        		</div>
+			            
+			           		<div class="plan-feature title">Procesamiento de</div>
+			            	<div class="plan-feature">
+			            		<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>25</span> facturas emitidas    
+			            	</div>
+			        		<div class="plan-feature">
+			        			<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>200</span> facturas recibidas    
+			        		</div>
+			        		<div class="plan-feature">
+			        			<i class="fa fa-caret-right" aria-hidden="true"></i>Facturación electrónica incluida    
+			        		</div>
+			        	</div>                                        
+	                    <div id="prueba" class="texto-promocion">
+	                        <p>Disfrute de sus 48 horas gratis!</p>
+	                    </div>
+	                    <div class="plan-button">
+	                    	<a href="/gosocket/ingresar?token={{$token}}">Comprar ya</a>
+	                    </div>
+	                </div>
                 </div>
 			    <div class="item">
 			    	<div class="plan-column" id="">
@@ -169,9 +171,6 @@
 					            <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual    
 					        </div>
 					        <div class="plan-feature si">
-					            <i class="fa fa-check" aria-hidden="true"></i>Hasta 2 usuarios    
-					        </div>
-					        <div class="plan-feature si">
 					            <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
 					        </div>
 					        <div class="plan-feature title">Procesamiento de</div>
@@ -189,7 +188,7 @@
                             <p>Disfrute de sus 48 horas gratis!</p>
                         </div>
 		                <div class="plan-button">
-		                	<a href="https://app.etaxcr.com/register">Comprar ya</a>
+		                	<a href="/gosocket/ingresar?token={{$token}}">Comprar ya</a>
 		                </div>
 		            </div>
 			    </div>
@@ -217,9 +216,6 @@
 					            <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual    
 					        </div>
 					        <div class="plan-feature si">
-					            <i class="fa fa-check" aria-hidden="true"></i>Hasta 2 usuarios    
-					        </div>
-					        <div class="plan-feature si">
 					            <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
 					        </div>
 					        <div class="plan-feature title">Procesamiento de</div>
@@ -237,7 +233,7 @@
                             <p>Disfrute de sus 48 horas gratis!</p>
                         </div>
 		                <div class="plan-button">
-		                	<a href="https://app.etaxcr.com/register">Comprar ya</a>
+		                	<a href="/gosocket/ingresar?token={{$token}}">Comprar ya</a>
 		                </div>
 		            </div>
 			    </div>
@@ -265,9 +261,6 @@
 					            <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual    
 					        </div>
 					        <div class="plan-feature si">
-					            <i class="fa fa-check" aria-hidden="true"></i>Hasta 4 usuarios    
-					        </div>
-					        <div class="plan-feature si">
 					            <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
 					        </div>
 					        <div class="plan-feature title">Procesamiento de</div>
@@ -285,7 +278,7 @@
                             <p>Disfrute de sus 48 horas gratis!</p>
                         </div>
 		                <div class="plan-button">
-		                	<a href="https://app.etaxcr.com/register">Comprar ya</a>
+		                	<a href="/gosocket/ingresar?token={{$token}}">Comprar ya</a>
 		                </div>
 		            </div>
 			    </div>
@@ -313,9 +306,6 @@
 					            <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual    
 					        </div>
 					        <div class="plan-feature si">
-					            <i class="fa fa-check" aria-hidden="true"></i>Hasta 10 usuarios    
-					        </div>
-					        <div class="plan-feature si">
 					            <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
 					        </div>
 					        <div class="plan-feature title">Procesamiento de</div>
@@ -333,18 +323,18 @@
                             <p>Disfrute de sus 48 horas gratis!</p>
                         </div>
 		                <div class="plan-button">
-		                	<a href="https://app.etaxcr.com/register">Comprar ya</a>
+		                	<a href="/gosocket/ingresar?token={{$token}}">Comprar ya</a>
 		                </div>
 		            </div>
 			    </div>
 			    <div class="item">
 			    	<div class="plan-column" id="">
                         <div class="plan-header text-center n-h">
-    						<span class="titulo">Empresarial Pro</span>
+    						<span class="titulo">Enterprise</span>
 						    <div class="precio">
 						        <h4>Realizado a la Medida</h4>
 						    </div>
-						    <div class="precio-mensual">Contactenos al </div>
+						    <div class="precio-mensual">Contactenos al <br>info@etaxcr.com / +506 4001 5935.</div>
 						</div>
 						<div class="plan-detail">
 					        <div class="plan-feature title">Funcionalidades</div>
@@ -364,9 +354,6 @@
 				                <i class="fa fa-check" aria-hidden="true"></i>Contabilidades según necesidad    
 				            </div>
 				        	<div class="plan-feature si">
-				                <i class="fa fa-check" aria-hidden="true"></i>Usuarios por contabilidad según necesidad    
-				            </div>
-				        	<div class="plan-feature si">
 				                <i class="fa fa-check" aria-hidden="true"></i>Integraciones a la medida    
 				            </div>
 				        	<div class="plan-feature si">
@@ -383,12 +370,12 @@
 					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturación electrónica incluida    
 					        </div>
 					    </div>                                        
-                        <div id="prueba" class="texto-promocion">
+                        <!--<div id="prueba" class="texto-promocion">
                             <p>Disfrute de sus 48 horas gratis!</p>
                         </div>
 		                <div class="plan-button">
-		                	<a href="https://app.etaxcr.com/register">Comprar ya</a>
-		                </div>
+		                	<a href="/ingresar?token={{$token}}">Comprar ya</a>
+		                </div>-->
 		            </div>
 			    </div>
 			</div>
