@@ -115,13 +115,17 @@
 @section('footer-scripts')
 
 <script>
+
+  var d = new Date();
+  var dayNumber = d.getMonth() + 1;
+  $("#input-mes").val(dayNumber);
   
   function toggleFilters(){
     
     var hideClass = $("#reportes-select :selected").attr("hideClass");
     $(".form-control, .form-control option").show();
     $(hideClass).hide();
-    $("#input-mes").val(1);
+    $("#input-mes").val(dayNumber);
     
   }
 

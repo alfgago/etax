@@ -30,6 +30,7 @@ class ProcessSendExcelInvoices implements ShouldQueue
 
     private $excelCollection = null;
     private $companyId = null;
+    private $fileType = null;
 
 
     /**
@@ -37,10 +38,11 @@ class ProcessSendExcelInvoices implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($excelCollection, $companyId)
+    public function __construct($excelCollection, $companyId, $fileType)
     {
         $this->excelCollection = $excelCollection;
         $this->companyId = $companyId;
+        $this->fileType = $fileType;
     }
 
     /**
@@ -52,6 +54,7 @@ class ProcessSendExcelInvoices implements ShouldQueue
     {
         $company = Company::find($this->companyId);
         $excelCollection = $this->excelCollection;
+        $fileType = $this->fileType;
         
         Log::notice("$company->id_number importando ".count($excelCollection)." lineas... Last Invoice: $company->last_invoice_ref_number");
         $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
@@ -61,7 +64,6 @@ class ProcessSendExcelInvoices implements ShouldQueue
             try{
 
                 $metodoGeneracion = "etax-bulk";
-
                     
                 if( isset($row['doc_identificacion']) ){
                     $descripcion = isset($row['descripcion']) ? $row['descripcion'] : ($row['descricpion'] ?? null);
@@ -91,13 +93,17 @@ class ProcessSendExcelInvoices implements ShouldQueue
                         $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
                         $fechaEmision = $today->format('d/m/Y');
                         $fechaVencimiento = isset($row['fecha_pago']) ? $row['fecha_pago']."" : $fechaEmision; 
-                        $fechaVencimiento = "30/".$fechaVencimiento[4].$fechaVencimiento[5]."/".$fechaVencimiento[0].$fechaVencimiento[1].$fechaVencimiento[2].$fechaVencimiento[3];
+                        if (!isset($fechaVencimiento) || $fechaVencimiento == "" ){
+                            $fechaVencimiento = $fechaEmision;
+                        }else{
+                            $fechaVencimiento = "30/".$fechaVencimiento[4].$fechaVencimiento[5]."/".$fechaVencimiento[0].$fechaVencimiento[1].$fechaVencimiento[2].$fechaVencimiento[3];
+                        }
                         
                         $idMoneda = 'CRC';
                         $tipoCambio = $row['tipocambio'] ?? 1;
                         $totalDocumento = $row['total'];
-                        $tipoDocumento = '01';
-    
+                        $tipoDocumento = $fileType ?? '01';
+                        
                         //Datos de linea
                         $codigoProducto = $row['num_objeto'] ?? 'N/A';
                         $ordenCompra = $row['num_factura'] ?? 'No indica';

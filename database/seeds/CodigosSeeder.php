@@ -106,6 +106,13 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'B093 - Compras de bienes con IVA no acreditable desde origen', 'codigo'=>'B093', 'porcentaje'=>'13', 'is_bienes'=>true, 'is_gravado'=>true],
           ['nombre'=>'B094 - Compras de bienes con IVA no acreditable desde origen', 'codigo'=>'B094', 'porcentaje'=>'4', 'is_bienes'=>true, 'is_gravado'=>true],
           
+          ['nombre'=>'R001 - Impuesto específico sobre Bebidas Gaseosas de fabricación Nacional', 'codigo'=>'R001', 'porcentaje'=>'13.688935', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'R002 - Impuesto específico sobre Bebidas Gaseosas Importadas', 'codigo'=>'R002', 'porcentaje'=>'13.688935', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'R003 - Impuesto específico sobre Cerveza', 'codigo'=>'R003', 'porcentaje'=>'14.45', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'R004 - Impuesto específico sobre Cigarrillos', 'codigo'=>'R004', 'porcentaje'=>'13', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'R005 - Impuesto específico sobre Destilados (licores)', 'codigo'=>'R005', 'porcentaje'=>'17.2', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'R006 - Impuesto específico sobre Destilados (licores Fanal)', 'codigo'=>'R006', 'porcentaje'=>'12.433', 'is_bienes'=>true, 'is_gravado'=>true],
+          
           ['nombre'=>'098 - Inversion del sujeto pasivo base', 'codigo'=>'098', 'porcentaje'=>'0', 'is_gravado'=>false, 'hide'=>true, 'hidden2018'=>true],
           ['nombre'=>'099 - Inversion del sujeto pasivo base no acreditable', 'codigo'=>'099', 'porcentaje'=>'0', 'is_gravado'=>false, 'hide'=>true, 'hidden2018'=>true]
         ];

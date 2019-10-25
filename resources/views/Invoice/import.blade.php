@@ -9,7 +9,7 @@
 	    </h3>
 	  </div>
 		
-		<div class="form-group col-md-12">
+	  <div class="form-group col-md-12">
 	    <label for="tipo_archivo">Tipo de archivo</label>
 	    <select class="form-control" name="tipo_archivo" id="tipo_archivo" onchange="toggleTiposImportacion()" required>
 	      <option value="xlsx">Excel</option>
@@ -29,9 +29,17 @@
 				<form method="POST" action="/facturas-emitidas/importarExcelSM" enctype="multipart/form-data" class="toggle-sm mt-3">
 											
 				  @csrf
+		    	  <div class="form-group col-md-12">
+				    <label for="fileType">Tipo de documento para enviar</label>
+				    <select class="form-control" name="fileType" id="fileType" required>
+				      <option value="01">Facturas</option>
+				      <option value="03">Notas de crédito</option>
+				    </select>
+				  </div>
 					<div class="form-group col-md-12">
 				    <label for="archivo">Excel SM Seguros para envio masivo</label>  
 						<div class="">
+							
 							<div class="fallback">
 						      <input name="archivo" type="file" multiple="false" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
 						  </div>
