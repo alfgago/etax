@@ -1564,6 +1564,9 @@ class InvoiceController extends Controller
         if ($docType == '09') {
             $lastSale = $company->last_invoice_exp_ref_number + 1;
         }
+        if ($docType == '03') {
+            $lastSale = $company->last_note_ref_number + 1;
+        }
         if ($docType == '04') {
             $lastSale = $company->last_ticket_ref_number + 1;
         }
@@ -1585,6 +1588,9 @@ class InvoiceController extends Controller
         }
         if ($docType == '09') {
             $ref = $company->last_invoice_exp_ref_number + 1;
+        }
+        if ($docType == '03') {
+            $lastSale = $company->last_note_ref_number + 1;
         }
         if ($docType == '04') {
             $ref = $company->last_ticket_ref_number + 1;
@@ -1733,7 +1739,9 @@ class InvoiceController extends Controller
         $consecutivo = null;
         $invoiceList = array();
         foreach ($facturas as $row){
-            try{
+            //try{
+
+            //dd($company->id_number."=".$row['cedulaempresa']);
                 if($row['cedulaempresa'] == $company->id_number){
 
                     if( isset($row['identificacionreceptor']) ){
@@ -1835,11 +1843,12 @@ class InvoiceController extends Controller
                     //Log::warning('Factura repetida en envio masivo '.$identificacionCliente);
                 }
                    
-            }catch( \Throwable $ex ){
+            /*}catch( \Throwable $ex ){
                 Log::error("Error en factura ENVIO MASIVO EXCEL:" . $ex);
-            }
+            }*/
         }
         $company->save();
+      //  dd($facturas);
     }
 
 
