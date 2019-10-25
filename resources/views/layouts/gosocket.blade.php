@@ -205,6 +205,24 @@
     .slick-active .plan-column {
         transform: scale(1);
     }
+    .dots-gs{
+      text-align: center;
+      position: relative;
+      list-style: none;
+    }
+    .dots-gs li{
+      display: contents;
+    }
+    .dots-gs li button{
+      background: #8e8e8e;
+      border: 0px;
+      border-radius: 20px;
+      height: 20px;
+      width: 20px;
+      font-size: 5px;
+      color: transparent;
+      margin: 5px;
+    }
   </style>
 
 </head>
@@ -247,6 +265,10 @@
           arrows: false,
           autoplay: true,
           autoplaySpeed: 5000,
+          dots: true,
+          dotsClass: 'dots-gs',
+          infinite: true,
+          speed: 500,
           responsive: [
             {
               breakpoint: 768,
@@ -268,36 +290,45 @@
         });
         
         jQuery("#facturas-emitidas").change(function(){
-          jQuery("#text-facturas-emitidas").html("<b>"+jQuery(this).val()+"</b>");
+          var emitidas = jQuery("#facturas-emitidas").val();
+          if(emitidas > 5000){
+              emitidas = "+5000";
+          }
+          jQuery("#text-facturas-emitidas").html("<b>"+emitidas+"</b>");
           select_plan();
         });
         jQuery("#facturas-recibidas").change(function(){
-          jQuery("#text-facturas-recibidas").html("<b>"+jQuery(this).val()+"</b>");
+          var recibidas = jQuery("#facturas-recibidas").val();
+          if(recibidas > 5000){
+              recibidas = "+5000";
+          }
+          jQuery("#text-facturas-recibidas").html("<b>"+recibidas+"</b>");
           select_plan();
         });
 
         function select_plan(){
           var recibidas = jQuery("#facturas-recibidas").val();
           var emitidas = jQuery("#facturas-emitidas").val();
-          var plan = "EN";
-          if(recibidas <= 5 && emitidas <= 40 ){
-            plan = "PB";
+          var plan = 7;
+          if(emitidas <= 5000 ){
+            plan = 6;
           }
-          if((recibidas > 5 && recibidas <= 25) || emitidas <= 200 ){
-            plan = "PI";
+          if(emitidas <= 2000 ){
+            plan = 5;
           }
-          if(recibidas <= 50 && emitidas <= 400 ){
-            plan = "PP";
+          if(emitidas <= 250 ){
+            plan = 4;
           }
-          if(recibidas <= 250 ){
-            plan = "EI";
+          if(emitidas <= 50 && recibidas <= 400 ){
+            plan = 3;
           }
-          if(recibidas <= 2000 ){
-            plan = "EI";
+          if(emitidas <= 25 && recibidas <= 200 ){
+            plan = 2;
           }
-          if(recibidas <= 5000 ){
-            plan = "EI";
+          if(emitidas <= 5 && recibidas <= 40 ){
+            plan = 1;
           }
+          jQuery('ul.dots-gs li:nth-of-type('+plan+')').click();
           console.log(emitidas+" "+recibidas+" "+plan);
 
         }

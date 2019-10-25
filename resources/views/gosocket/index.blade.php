@@ -29,7 +29,7 @@
 		</div>
 	</div>
 	<div class="row m-4">
-		<div class="col-md-5 mt-4">
+		<div class="col-md-6 mt-4">
 			<div class="text-center">
 				<img src="https://etaxcr.com/wp-content/uploads/2019/07/planes-a-1.png" class="image-responsive mt-4" height="200px">
 			</div>
@@ -40,16 +40,15 @@
 			<form>
 			  <div class="form-group">
 			    <label for="facturas-emitidas">Cantidad de facturas emitidas al mes que debemos procesar: </label><span id="text-facturas-emitidas"><b>25</b></span>
-			    <input type="range" class="form-control-range " id="facturas-emitidas" name="facturas-emitidas" value="25" min="1" max="10001" step="1">
+			    <input type="range" class="form-control-range " id="facturas-emitidas" name="facturas-emitidas" value="50" min="1" max="5001" step="1">
 			  </div>
 			  <div class="form-group">
 			    <label for="facturas-recibidas">Cantidad de facturas recibidas al mes que debemos procesar: </label><span id="text-facturas-recibidas"><b>25</b></span>
-			    <input type="range" class="form-control-range" id="facturas-recibidas" name="facturas-recibidas" value="25" min="10" max="10001" step="1">
+			    <input type="range" class="form-control-range" id="facturas-recibidas" name="facturas-recibidas" value="300" min="1" max="5001" step="1">
 			  </div>
-			  <button type="submit" class="btn btn-primary">Enviar</button>
 			</form>
 		</div>
-		<div class="col-md-7">
+		<div class="col-md-6">
 			
 			<div class="slider">
 			    <div class="item">
@@ -59,7 +58,7 @@
 						    <div class="precio">
 						        <small>Desde</small>$9.99 <small>+ IVA / mes (pago anual)</small>
 						    </div>
-						    <div class="precio-mensual">$11.99 + sIVA / mes (pago mensual)</div>
+						    <div class="precio-mensual">$11.99 + IVA / mes (pago mensual)</div>
 						</div>
 						<div class="plan-detail">
 					        <div class="plan-feature title">Funcionalidades</div>
@@ -102,33 +101,37 @@
                         <div class="plan-header text-center n-h">
     						<span class="titulo">Profesional Intermedio</span>
 						    <div class="precio">
-						        <small>Desde</small>$9.99 <small>+ IVA / mes (pago anual)</small>
+						        <small>Desde</small> $82.99 <small>+ IVA / mes (pago anual)</small>
 						    </div>
-						    <div class="precio-mensual">$11.99 + sIVA / mes (pago mensual)</div>
+						    <div class="precio-mensual">$99.99 + IVA / mes (pago mensual)</div>
 						</div>
 						<div class="plan-detail">
 					        <div class="plan-feature title">Funcionalidades</div>
+				            <div class="plan-feature si">
+				                <i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
+				            </div>
 					        <div class="plan-feature si">
-					            <i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
-					        </div>
-						    <div class="plan-feature si">
-						        <i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
-						    </div>
-					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)
+					            <i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
 					        </div>
 					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual
+					            <i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)    
 					        </div>
 					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
+					            <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual    
 					        </div>
+					        <div class="plan-feature si">
+					            <i class="fa fa-check" aria-hidden="true"></i>Hasta 4 usuarios    
+					        </div>
+					        <div class="plan-feature si">
+					            <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
+					        </div>
+
 					        <div class="plan-feature title">Procesamiento de</div>
 					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>5</span> facturas emitidas    
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>2000</span> facturas emitidas
 					        </div>
 					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>40</span> facturas recibidas    
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturas recibidas ilimitadas    
 					        </div>
 					        <div class="plan-feature">
 					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturación electrónica incluida    
