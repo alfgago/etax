@@ -169,7 +169,7 @@ class KlapPaymentProcessor extends PaymentProcessor
     * Params user_id, chargeTokenId, payment_id
     *
     */
-    public function pay($data){
+    public function pay($data) {
         $bnCharge = new Client();
         $chargeBn = $bnCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppApplyCharge?applicationName=string&applicationPassword=string&userName=string&chargeTokeId=string&cardTokenId=string", [
             'headers' => [
