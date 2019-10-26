@@ -2,14 +2,14 @@
 	<div class="col-md-3 col-sm-12">
 		<h3>Cliente</h3><br>
 		<label>nombreReceptor</label>: {{$factura[0]->nombreReceptor}}<br>
-		<label>tipoIdentificacion</label>: {{$factura[0]->tipoIdentificacion}}<br>
-		<label>Identificacion</label>: {{$factura[0]->Identificacion}}<br>
-		<label>correo</label>: {{$factura[0]->correo}}<br>
+		<label>tipoIdentificacion</label>: {{$factura[0]->tipoIdentificacionReceptor}}<br>
+		<label>Identificacion</label>: {{$factura[0]->IdentificacionReceptor}}<br>
+		<label>correo</label>: {{$factura[0]->correoReceptor}}<br>
 		<!--
 		<label>provincia</label>: {{$factura[0]->provincia}}<br>
 		<label>canton</label>: {{$factura[0]->canton}}<br>
 		<label>distrito</label>: {{$factura[0]->distrito}}<br>-->
-		<label>direccion</label>: {{$factura[0]->direccion}}<br>
+		<label>direccion</label>: {{$factura[0]->direccionReceptor}}<br>
 	</div>
 	<div class="col-md-3 col-sm-12">
 		<h3>Detalle Factura</h3><br>

@@ -49,7 +49,7 @@ class CreateXlsInvoicesTable extends Migration
             $table->double('precioUnitario')->default(0);
             $table->double('montoTotal')->default(0);
             $table->double('montoDescuento')->default(0);
-            $table->double('naturalezaDescuento')->default(0);
+            $table->string('naturalezaDescuento')->nullable();
             $table->double('subTotal')->default(0);
             $table->string('codigoImpuesto')->nullable();
             $table->string('codigoTarifa')->nullable();

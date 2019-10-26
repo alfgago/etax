@@ -32,8 +32,8 @@
 						<tr>
 							<td>{{$factura->consecutivo}}</td>
 							<td>{{$factura->nombreReceptor}}</td>
-							<td>{{$factura->Identificacion}}</td>
-							<td>{{$factura->correo}}</td>
+							<td>{{$factura->IdentificacionReceptor}}</td>
+							<td>{{$factura->correoReceptor}}</td>
 							<td>{{$factura->totalGravado}}</td>
 							<td>{{$factura->totalExento}}</td>
 							<td>{{$factura->totalVenta}}</td>
@@ -49,7 +49,7 @@
 								
 							</td>
 							<td>
-								<a class="text-black" id="ver-mas-{{$factura->consecutivo}}" onclick="verMas({{$factura->consecutivo}})" ><i class="fa fa-eye" aria-hidden="true"></i></a>
+								<a class="text-black" id="ver-mas-{{$factura->consecutivo}}" onclick="detalle_xls('{{$factura->consecutivo}}')" ><i class="fa fa-eye" aria-hidden="true"></i></a>
 							</td>
 						</tr>
 						<tr  id="tr-{{$factura->consecutivo}}" class="div-oculto-detalle hidden">
@@ -96,7 +96,7 @@
 		}
 
 	}
-	function verMas(consecutivo){
+	function detalle_xls(consecutivo){
 		$(".div-mostrado-detalle").toggle();
 		$(".div-mostrado-detalle").addClass("div-oculto-detalle");
 		if(!$("#tr-"+consecutivo).hasClass("div-mostrado-detalle")){
