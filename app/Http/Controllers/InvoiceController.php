@@ -1987,6 +1987,7 @@ class InvoiceController extends Controller
                 $invoice->total_venta = $factura[0]->totalVenta;
                 $invoice->total_descuento = $factura[0]->totalDescuentos;
                 $invoice->total_venta_neta = $factura[0]->totalVentaNeta;
+                $invoice->subtotal = $factura[0]->totalVentaNeta;
                 $invoice->total_serv_exonerados = $factura[0]->totalServExonerados;
                 $invoice->total_merc_exonerados = $factura[0]->totalMercanciasExonerada;
                 $invoice->total_exonerados = $factura[0]->totalExonerado;
@@ -2198,7 +2199,6 @@ class InvoiceController extends Controller
             }
         }
         XlsInvoice::where('company_id',$company->id)->delete();
-
     }
         
 }
