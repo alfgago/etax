@@ -18,7 +18,7 @@ class KlapPaymentProcessor extends PaymentProcessor
      *
      *
      */
-    public function statusAPI(){
+    public function statusAPI() {
         $BnEcomAPIStatus = new Client();
         $APIStatus = $BnEcomAPIStatus->request('POST', "https://emcom.oneklap.com:2263/api/LogOnApp?applicationName=string&applicationPassword=string", [
             'headers' => [
@@ -197,8 +197,8 @@ class KlapPaymentProcessor extends PaymentProcessor
      *
      *
      */
-    public function comprarProductos($request){
-        $bnStatus = $this->statusBNAPI();
+    public function comprarProductos($request) {
+        $bnStatus = $this->statusAPI();
         if($bnStatus['apiStatus'] == 'Successful'){
             $date = Carbon::parse(now('America/Costa_Rica'));
             $user = auth()->user();
@@ -206,7 +206,7 @@ class KlapPaymentProcessor extends PaymentProcessor
             $data->description = 'Compra de ' . $request->producto_name . ' eTax';
             $data->user_name = $user->user_name;
             $data->amount = $request->amount;
-            $chargeCreated = $this->paymentIncludeCharge($data);
+            $chargeCreated = $this->createPayment($data);
 
             if($chargeCreated['apiStatus'] == "Successful"){
                 $paymentMethod = PaymentMethod::where('id', $request->payment_method)->first();
@@ -227,13 +227,13 @@ class KlapPaymentProcessor extends PaymentProcessor
                     [
                         'payment_method_id' => $paymentMethod->id,
                         'payment_date' => $date,
-                        'amount' => $request->producto_price,
+                        'amount' => $request->producto_price ?? $request->amount,
                         'payment_gateway' => 'klap'
                     ]
                 );
                 //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
                 if( ! isset($payment->charge_token) ) {
-                    $chargeIncluded = $this->paymentIncludeCharge($data);
+                    $chargeIncluded = $this->createPayment($data);
                     $chargeTokenId = $chargeIncluded['chargeTokenId'];
                     $payment->charge_token = $chargeTokenId;
                     $payment->save();
@@ -244,7 +244,7 @@ class KlapPaymentProcessor extends PaymentProcessor
                 $charge->user_name = $user->user_name;
                 $charge->chargeTokenId = $chargeTokenId;
 
-                $appliedCharge = $this->paymentApplyCharge($charge);
+                $appliedCharge = $this->pay($charge);
                 if($appliedCharge['apiStatus'] == "Successful"){
                     $payment->proof = $appliedCharge['retrievalRefNo'];
                     $payment->payment_status = 2;
