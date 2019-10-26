@@ -652,7 +652,7 @@ class BillController extends Controller
                 ])->render();
             }) 
             ->editColumn('provider', function(Bill $bill) {
-                return $bill->provider->getFullName();
+                return $bill->providerName();
             })
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');
@@ -802,7 +802,7 @@ class BillController extends Controller
                 return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_iva_gasto;
             })
             ->editColumn('provider', function(Bill $bill) {
-                return $bill->provider->getFullName();
+                return $bill->providerName();
             })
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');

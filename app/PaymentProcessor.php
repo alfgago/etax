@@ -399,7 +399,7 @@ class PaymentProcessor extends Model
         $item->code = $request->item_code;
         $item->name = $request->item_name;
         $item->montoDescontado = $request->montoDescontado;
-        $item->descuento = $request->descuento;
+        $item->descuento = $request->montoDescontado;
         $item->discount_reason = $request->razonDescuento;
         $item->cantidad = 1;
         $item->iva_amount = $request->iva_amount;
