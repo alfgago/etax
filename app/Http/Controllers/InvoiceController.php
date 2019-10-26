@@ -2197,7 +2197,7 @@ class InvoiceController extends Controller
                 $company->save();
             }
         }
-        XlsInvoice::where('company_id',$companyId)->delete();
+        XlsInvoice::where('company_id',$company->id)->delete();
 
     }
         
