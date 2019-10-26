@@ -308,7 +308,7 @@ class CybersourcePaymentProcessor extends PaymentProcessor
      * Params referenceCode, deviceFingerPrintID, subscriptionID, Amount
      *
      */
-    public function pay($request){
+    public function pay($request, $isBuy = false) {
         $referenceCode = $request->product_id;
         $merchantId = 'tc_cr_011007172';
         $client = new CybsSoapClient();
@@ -334,9 +334,12 @@ class CybersourcePaymentProcessor extends PaymentProcessor
 
         $appliedCharge = $client->runTransaction($requestClient);
         
-        if($appliedCharge->decision == 'ACCEPT'){
-            $appliedChargeId = $appliedCharge->requestID;
-            return $appliedChargeId;
+        if($appliedCharge->decision === 'ACCEPT') {
+            if ($isBuy) {
+               return $appliedCharge;
+            }
+
+            return $appliedCharge->requestID;
         }
         return false;
     }
@@ -345,42 +348,46 @@ class CybersourcePaymentProcessor extends PaymentProcessor
      *
      *
      */
-    public function comprarProductos($request){
+    public function comprarProductos($request) {
         $paymentMethod = PaymentMethod::where('id', $request->payment_method)->first();
         $user = auth()->user();
         $request->request->add(['referenceCode' => $request->referenceCode]);
         $request->request->add(['token_bn' => $paymentMethod->token_bn]);
 
-        $chargeCreated = $this->createPayment($request);
+        $company = currentCompanyModel();
+        $date = Carbon::parse(now('America/Costa_Rica'));
+        $sale = Sales::updateOrCreate([
+            "user_id" => $user->id,
+            "company_id" => $company->id,
+            "etax_product_id" => $request->product_id,
+            "status" => 2,
+            "recurrency" => '0',
+            "is_subscription" => false
+        ]);
+        $payment = Payment::updateOrCreate(
+            [
+                'sale_id' => $sale->id,
+                'payment_status' => 1,
+            ],
+            [
+                'payment_method_id' => $paymentMethod->id,
+                'payment_date' => $date,
+                'amount' => $request->amount,
+                'payment_gateway' => 'cybersource'
+            ]
+        );
 
-        if($chargeCreated->decision=== 'ACCEPT'){
-            $company = currentCompanyModel();
-            $date = Carbon::parse(now('America/Costa_Rica'));
-            $sale = Sales::updateOrCreate([
-                "user_id" => $user->id,
-                "company_id" => $company->id,
-                "etax_product_id" => $request->product_id,
-                "status" => 2,
-                "recurrency" => '0'
-            ]);
-            $payment = Payment::updateOrCreate(
-                [
-                    'sale_id' => $sale->id,
-                    'payment_status' => 1,
-                ],
-                [
-                    'payment_method_id' => $paymentMethod->id,
-                    'payment_date' => $date,
-                    'amount' => $request->amount,
-                    'proof' => $chargeCreated->requestID,
-                    'payment_status' => 2,
-                    'payment_gateway' => 'cybersource'
-                ]
-            );
+        $payment->save();
+
+        $chargeCreated = $this->pay($request, true);
+        if($chargeCreated->decision === "ACCEPT") {
             $sale->status = 1;
+            $payment->proof = $chargeCreated->requestID;
+            $payment->payment_status = 2;
             $sale->save();
+            $payment->save();
             return true;
-        }else{
+        } else {
             return false;
         }
     }

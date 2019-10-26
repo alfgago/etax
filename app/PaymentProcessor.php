@@ -226,7 +226,11 @@ class PaymentProcessor extends Model
      *
      *
      */
-    public static function selectPaymentGateway($payment_gateway){
+    public static function selectPaymentGateway($payment_gateway) {
+
+        if ($payment_gateway === null) {
+            return false;
+        }
         switch ($payment_gateway){
             case 'cybersource':
                 $class = new CybersourcePaymentProcessor();
