@@ -1828,6 +1828,11 @@ class InvoiceController extends Controller
                         $xls_invoice->totalImpuesto = $row['totalimpuesto'];
                         $xls_invoice->totalOtrosCargos = $row['totalotroscargos'];
                         $xls_invoice->totalComprobante = $row['totalcomprobante'];
+                        $xls_invoice->tipoDocumentoReferencia = $row['tipodocumentoreferencia'] ?? null;
+                        $xls_invoice->numeroDocumentoReferencia = $row['numerodocumentoreferencia'] ?? null;
+                        $xls_invoice->fechaEmisionReferencia = $row['fechaemisionreferencia'] ?? null;
+                        $xls_invoice->codigoNota = $row['codigonota'] ?? null;
+                        $xls_invoice->razonNota = $row['razonnota'] ?? null;
                         if($row['consecutivo'] != $consecutivo){
                             $facturas_disponibles--; 
                         }
@@ -1994,6 +1999,13 @@ class InvoiceController extends Controller
                 $invoice->total_iva = $factura[0]->totalImpuesto;
                 $invoice->total_otros_cargos = $factura[0]->totalOtrosCargos;
                 $invoice->total_comprobante = $factura[0]->totalComprobante;
+
+                $invoice->reference_doc_type = $factura[0]->tipoDocumentoReferencia;
+                $invoice->reference_document_key = $factura[0]->numeroDocumentoReferencia;
+                $invoice->reference_generated_date = $factura[0]->fechaEmisionReferencia;
+                $invoice->code_note = $factura[0]->codigoNota;
+                $invoice->reason = $factura[0]->razonNota;
+
                 $invoice->document_key = $this->getDocumentKey($invoice->document_type, $company);
                 $invoice->document_number = $this->getDocReference($invoice->document_type,$company);
                 $invoice->save();

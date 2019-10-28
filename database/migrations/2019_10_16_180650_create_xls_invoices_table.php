@@ -86,6 +86,11 @@ class CreateXlsInvoicesTable extends Migration
             $table->double('totalImpuesto')->default(0);
             $table->double('totalOtrosCargos')->default(0);
             $table->double('totalComprobante')->default(0);
+            $table->string('tipoDocumentoReferencia')->nullable();
+            $table->string('numeroDocumentoReferencia')->nullable();
+            $table->string('fechaEmisionReferencia')->nullable();
+            $table->string('codigoNota')->nullable();
+            $table->string('razonNota')->nullable();
             $table->integer('autorizado')->default(1);
             $table->timestamps();
             $table->softDeletes();
