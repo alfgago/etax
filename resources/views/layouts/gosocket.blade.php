@@ -178,8 +178,6 @@
       font-weight: 600;
       padding: 0.5rem 1rem;
       border-radius: 15px;
-      -webkit-box-shadow: 6px 6px #999;
-      box-shadow: 6px 6px #999;
       font-size: 1.1rem;
       margin-top: 0;
       border: 0;
@@ -205,6 +203,16 @@
     .slick-active .plan-column {
         transform: scale(1);
     }
+    .transparencia{    
+      background: rgba(255, 255, 255, 0.60);
+      height: 100%;
+      width: 100%;
+      position: fixed;
+      z-index: 9;
+    }
+    .slick-active .plan-column .transparencia{
+        background: none;
+    }
     .dots-gs{
       text-align: center;
       position: relative;
@@ -223,6 +231,94 @@
       color: transparent;
       margin: 5px;
     }
+    
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      margin: 7.5px 0;
+    }
+    input[type=range]:focus {
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 5px;
+      cursor: pointer;
+      box-shadow: 0px 0px 0px rgba(217, 64, 121, 0), 0px 0px 0px rgba(221, 85, 136, 0);
+      background: #d94079;
+      border-radius: 10px;
+      border: 1px solid #d94079;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      box-shadow: 0px 0px 0px rgba(40, 65, 112, 0), 0px 0px 0px rgba(47, 76, 131, 0);
+      border: 1px solid #284170;
+      height: 20px;
+      width: 20px;
+      border-radius: 10px;
+      background: #284170;
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin-top: -8.5px;
+    }
+    input[type=range]:focus::-webkit-slider-runnable-track {
+      background: #d94079;
+    }
+    input[type=range]::-moz-range-track {
+      width: 100%;
+      height: 5px;
+      cursor: pointer;
+      box-shadow: 0px 0px 0px rgba(217, 64, 121, 0), 0px 0px 0px rgba(221, 85, 136, 0);
+      background: #d94079;
+      border-radius: 10px;
+      border: 1px solid #d94079;
+    }
+    input[type=range]::-moz-range-thumb {
+      box-shadow: 0px 0px 0px rgba(40, 65, 112, 0), 0px 0px 0px rgba(47, 76, 131, 0);
+      border: 1px solid #284170;
+      height: 20px;
+      width: 20px;
+      border-radius: 10px;
+      background: #284170;
+      cursor: pointer;
+    }
+    input[type=range]::-ms-track {
+      width: 100%;
+      height: 5px;
+      cursor: pointer;
+      background: transparent;
+      border-color: transparent;
+      color: transparent;
+    }
+    input[type=range]::-ms-fill-lower {
+      background: #d94079;
+      border: 1px solid #d94079;
+      border-radius: 20px;
+      box-shadow: 0px 0px 0px rgba(217, 64, 121, 0), 0px 0px 0px rgba(221, 85, 136, 0);
+    }
+    input[type=range]::-ms-fill-upper {
+      background: #d94079;
+      border: 1px solid #d94079;
+      border-radius: 20px;
+      box-shadow: 0px 0px 0px rgba(217, 64, 121, 0), 0px 0px 0px rgba(221, 85, 136, 0);
+    }
+    input[type=range]::-ms-thumb {
+      box-shadow: 0px 0px 0px rgba(40, 65, 112, 0), 0px 0px 0px rgba(47, 76, 131, 0);
+      border: 1px solid #284170;
+      height: 20px;
+      width: 20px;
+      border-radius: 10px;
+      background: #284170;
+      cursor: pointer;
+      height: 5px;
+    }
+    input[type=range]:focus::-ms-fill-lower {
+      background: #d94079;
+    }
+    input[type=range]:focus::-ms-fill-upper {
+      background: #d94079;
+    }
+
+
   </style>
 
 </head>
@@ -263,7 +359,7 @@
           centerMode: true,
           slidesToShow: 1,
           arrows: false,
-          autoplay: true,
+          autoplay: false,
           autoplaySpeed: 5000,
           dots: true,
           dotsClass: 'dots-gs',
@@ -329,7 +425,6 @@
             plan = 1;
           }
           jQuery('ul.dots-gs li:nth-of-type('+plan+')').click();
-          console.log(emitidas+" "+recibidas+" "+plan);
 
         }
       </script>  

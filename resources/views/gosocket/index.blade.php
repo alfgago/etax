@@ -31,7 +31,7 @@
 	<div class="row m-4">
 		<div class="col-md-6 mt-4">
 			<div class="text-center">
-				<img src="https://etaxcr.com/wp-content/uploads/2019/07/planes-a-1.png" class="image-responsive mt-4" height="200px">
+				<img src="https://etaxcr.com/wp-content/uploads/2019/07/planes-a-1.png" class="image-responsive mt-4" height="300px">
 			</div>
 			<h2 class="titulo-secundario-gs m-4" >Elija el plan de su conveniencia: </h2>
 			<p>
@@ -39,12 +39,12 @@
 			</p>
 			<form>
 			  <div class="form-group">
-			    <label for="facturas-emitidas">Cantidad de facturas emitidas al mes que debemos procesar: </label><span id="text-facturas-emitidas"><b>25</b></span>
-			    <input type="range" class="form-control-range " id="facturas-emitidas" name="facturas-emitidas" value="50" min="1" max="5001" step="1">
+			    <label for="facturas-emitidas">Cantidad de facturas emitidas al mes que debemos procesar: </label><span id="text-facturas-emitidas"><b>5</b></span>
+			    <input type="range" class="form-control-range mt-4" id="facturas-emitidas" name="facturas-emitidas" value="5" min="0" max="5005" step="5">
 			  </div>
 			  <div class="form-group">
-			    <label for="facturas-recibidas">Cantidad de facturas recibidas al mes que debemos procesar: </label><span id="text-facturas-recibidas"><b>25</b></span>
-			    <input type="range" class="form-control-range" id="facturas-recibidas" name="facturas-recibidas" value="300" min="1" max="5001" step="1">
+			    <label for="facturas-recibidas">Cantidad de facturas recibidas al mes que debemos procesar: </label><span id="text-facturas-recibidas"><b>40</b></span>
+			    <input type="range" class="form-control-range mt-4" id="facturas-recibidas" name="facturas-recibidas" value="40" min="0" max="5005" step="5">
 			  </div>
 			</form>
 		</div>
@@ -53,6 +53,7 @@
 			<div class="slider">
 			    <div class="item">
 			    	<div class="plan-column" id="">
+			    		<div class="transparencia"></div>
                         <div class="plan-header text-center n-h">
     						<span class="titulo">Profesional Básico</span>
 						    <div class="precio">
@@ -98,6 +99,7 @@
 			    </div>
 			    <div class="item">
 			    	<div class="plan-column" id="">
+			    		<div class="transparencia"></div>
                         <div class="plan-header text-center n-h">
 						    <div class="titulo">
 						        Profesional Intermedio    
@@ -149,6 +151,7 @@
                 </div>
 			    <div class="item">
 			    	<div class="plan-column" id="">
+			    		<div class="transparencia"></div>
                         <div class="plan-header text-center n-h">
     						<span class="titulo">Profesional Pro</span>
 						    <div class="precio">
@@ -194,6 +197,7 @@
 			    </div>
 			    <div class="item">
 			    	<div class="plan-column" id="">
+			    		<div class="transparencia"></div>
                         <div class="plan-header text-center n-h">
     						<span class="titulo">Empresarial Básico</span>
 						    <div class="precio">
@@ -239,6 +243,7 @@
 			    </div>
 			    <div class="item">
 			    	<div class="plan-column" id="">
+			    		<div class="transparencia"></div>
                         <div class="plan-header text-center n-h">
     						<span class="titulo">Empresarial Intermedio</span>
 						    <div class="precio">
@@ -284,6 +289,7 @@
 			    </div>
 			    <div class="item">
 			    	<div class="plan-column" id="">
+			    		<div class="transparencia"></div>
                         <div class="plan-header text-center n-h">
     						<span class="titulo">Empresarial Pro</span>
 						    <div class="precio">
@@ -329,6 +335,7 @@
 			    </div>
 			    <div class="item">
 			    	<div class="plan-column" id="">
+			    		<div class="transparencia"></div>
                         <div class="plan-header text-center n-h">
     						<span class="titulo">Enterprise</span>
 						    <div class="precio">
@@ -370,19 +377,19 @@
 					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturación electrónica incluida    
 					        </div>
 					    </div>                                        
-                        <!--<div id="prueba" class="texto-promocion">
-                            <p>Disfrute de sus 48 horas gratis!</p>
+                        <div id="prueba" class="texto-promocion">
+                            <p>Contactenos al</p>
                         </div>
 		                <div class="plan-button">
-		                	<a href="/ingresar?token={{$token}}">Comprar ya</a>
-		                </div>-->
+		                	<a href="mailto:info@etaxcr.com">info@etaxcr.com</a>
+		                </div>
 		            </div>
 			    </div>
 			</div>
 		</div>
 	</div>
 	<div class="row m-4">
-		<div class="col-md-8">
+		<div class="col-md-10">
 			<h2  class="titulo-secundario-gs">Respaldo</h2>
 			<p>
 				<ul>
@@ -391,9 +398,6 @@
 					<li>Un ingreso al día y automatizado de los datos de ventas y compras le permite ahorrar tiempo y conocer el estado real de su negocio.</li>
 				</ul>
 			</p>
-		</div>
-		<div class="col-md-4">
-			<img src="https://etaxcr.com/wp-content/uploads/2019/07/planes-a-1.png" class="image-responsive" height="250px">
 		</div>
 	</div>
 
