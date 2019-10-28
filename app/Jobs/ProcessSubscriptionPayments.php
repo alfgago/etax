@@ -180,7 +180,7 @@ class ProcessSubscriptionPayments implements ShouldQueue
                         Log::info("Creando factura de cliente");
                         $factura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
                     }else{
-                        Log::warning("Error en cobro: ".$appliedCharge['apiStatus']);
+                        Log::warning("Error en cobro ha fallado con data: " . json_encode($data) );
                     }
                 }else{
                     Log::warning("Error en cobro de usuario: $sale->user_id / empresa: $sale->company_id, no se encontró tarjeta");
