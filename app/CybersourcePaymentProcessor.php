@@ -334,6 +334,8 @@ class CybersourcePaymentProcessor extends PaymentProcessor
 
         $appliedCharge = $client->runTransaction($requestClient);
         
+        Log::info("Resultado CyberSource: " . json_encode($appliedCharge) );
+        
         if($appliedCharge->decision === 'ACCEPT') {
             if ($isBuy) {
                return $appliedCharge;
