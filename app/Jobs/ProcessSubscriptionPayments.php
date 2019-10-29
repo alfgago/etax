@@ -76,7 +76,11 @@ class ProcessSubscriptionPayments implements ShouldQueue
                 $iv = round($iv, 2);
                 $amount = $subtotal + $iv;
     
-                $paymentMethod = PaymentMethod::where('user_id', $sale->user_id)->where('default_card', true)->first();
+                $paymentMethod = PaymentMethod::where('user_id', $sale->user_id)
+                                 ->where('default_card', true)
+                                 ->where('payment_gateway', 'cybersource')
+                                 ->first();
+                                 
                 $company = $sale->company;
     
                 if(!$paymentMethod){
