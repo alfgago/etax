@@ -12,6 +12,7 @@ use App\User;
 use App\Utils\PaymentUtils;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Mpociot\Teamwork\TeamworkTeam;
 
 /**
@@ -74,32 +75,37 @@ class PaymentMethodController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request){
-        $user = auth()->user();
-        $request->number = preg_replace('/\s+/', '',  $request->number);
-        $paymentProcessor = new PaymentProcessor();
-        $payment_gateway = new CybersourcePaymentProcessor();
-        if(isset($request->number)){
-            $ip = $paymentProcessor->getUserIpAddr();
-            $request->request->add(['IpAddress' => $ip]);
-            $request->request->add(['cardCity' => $request->cardCity]);
-            $request->request->add(['cardState' => $request->cardState]);
-            $request->request->add(['country' => 'CR']);
-            $request->request->add(['zip' => $request->zip]);
-            $request->request->add(['email' => $user->email]);
-            $request->request->add(['user_id' => $user->id]);
-            $request->request->add(['deviceFingerPrintID' => $request->deviceFingerPrintID]);
+    public function create(Request $request) {
+        try {
+            $user = auth()->user();
+            Log::info("Creating new paymethod user id: $user->id");
+            $request->number = preg_replace('/\s+/', '',  $request->number);
+            $paymentProcessor = new PaymentProcessor();
+            $payment_gateway = new CybersourcePaymentProcessor();
+            if(isset($request->number)){
+                $ip = $paymentProcessor->getUserIpAddr();
+                $request->request->add(['IpAddress' => $ip]);
+                $request->request->add(['cardCity' => $request->cardCity]);
+                $request->request->add(['cardState' => $request->cardState]);
+                $request->request->add(['country' => 'CR']);
+                $request->request->add(['zip' => $request->zip]);
+                $request->request->add(['email' => $user->email]);
+                $request->request->add(['user_id' => $user->id]);
+                $request->request->add(['deviceFingerPrintID' => $request->deviceFingerPrintID]);
 
-            $newCard = $payment_gateway->createCardToken($request);
-            if ($newCard->token_bn) {
-                $cantidad = PaymentMethod::where('user_id', auth()->user()->id)->get()->count();
+                $newCard = $payment_gateway->createCardToken($request);
+                if (isset($newCard->token_bn)) {
+                    $cantidad = PaymentMethod::where('user_id', auth()->user()->id)->get()->count();
 
-                return redirect('/payments-methods')->withMessage('Método de pago creado')->with('cantidad', $cantidad);
+                    return redirect('/payments-methods')->withMessage('Método de pago creado')->with('cantidad', $cantidad);
+                } else {
+                    return redirect()->back()->withErrors('No se aprobó esta tarjeta');
+                }
             } else {
-                return redirect()->back()->withErrors('No se aprobó esta tarjeta');
+                return redirect()->back()->withErrors('Debe ingresar todos los datos');
             }
-        }else{
-            return redirect()->back()->withErrors('Debe ingresar todos los datos');
+        } catch ( \Exception $e) {
+            Log::error("Error creando tarjeta: -->>" .$e);
         }
     }
     /**
@@ -156,14 +162,20 @@ class PaymentMethodController extends Controller
      *
      *
      */
-    public function tokenDelete($Id){
-        $paymentMethod = PaymentMethod::find($Id);
-        $paymentProcessor =  new PaymentProcessor($paymentMethod->payment_gateway);
-        $paymetGateway = $paymentProcessor->selectPaymentGateway();
-        $user = auth()->user();
+    public function tokenDelete($Id) {
+        try {
+            $paymentMethod = PaymentMethod::find($Id);
+            $paymentProcessor =  new PaymentProcessor();
+            $paymetGateway = $paymentProcessor->selectPaymentGateway($paymentMethod->payment_gateway);
 
-        $this->authorize('update', $paymentMethod);
-        $tokenDeleted = $paymetGateway->deletePaymentMethod($paymentMethod->id);
+            $this->authorize('update', $paymentMethod);
+            $tokenDeleted = $paymetGateway->deletePaymentMethod($paymentMethod->id);
+            $cantidad = PaymentMethod::where('user_id', auth()->user()->id)->get()->count();
+
+            return redirect('/payments-methods')->withMessage('Método de pago eliminado')->with('cantidad', $cantidad);
+        } catch (\Exception $e) {
+            Log::error("Error al eliminar tarjeta: $Id");
+        }
 
     }
     /**
