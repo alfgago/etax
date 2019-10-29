@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Support\Facades\Log;
 use stdClass;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -102,7 +103,7 @@ class KlapPaymentProcessor extends PaymentProcessor
             ]
         ]);
         $card = json_decode($cardDeleted->getBody()->getContents(), true);
-        if($card['apiStatus'] === 'sucess'){
+        if($card['apiStatus'] === 'sucess') {
             return true;
         }else{
             return false;
@@ -379,11 +380,15 @@ class KlapPaymentProcessor extends PaymentProcessor
      *
      */
     public function deletePaymentMethod($paymentMethodId){
+        try {
+            $paymentMethod = PaymentMethod::where('id', $paymentMethodId)->first();
+            $delatedCard = $this->deleteCardToken($paymentMethod->token_bn);
+            $paymentMethod->delete();
+            return $delatedCard == true;
 
-        $paymentMethod = PaymentMethod::where('id', $paymentMethodId)->first;
-        $delatedCard = $this->deleteCardToken($paymentMethod->token_bn);
-
-        return $delatedCard == true;
+        } catch (\Exception $e) {
+            Log::error("Error en eliminar tarjeta en Klap: $paymentMethodId");
+        }
     }
 
     public function getChargeProof($chargeIncluded){
