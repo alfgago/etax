@@ -30,7 +30,7 @@ class BillItem extends Model
     public function fixIvaType() {
       try{
         $initial = $this->iva_type[0];
-        if( $initial != 'S' && $initial != 'B' && 
+        if( $initial != 'S' && $initial != 'B' &&  $initial != 'R' && 
             $this->iva_type != '098' && $this->iva_type != '099' ){
             $um = $this->measure_unit;
             if($um == 'Sp' || $um == 'Spe' || $um == 'St' || $um == 'Al' || $um == 'Alc' || $um == 'Cm' || $um == 'I' || $um == 'Os'){

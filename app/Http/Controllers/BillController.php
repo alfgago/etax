@@ -44,6 +44,7 @@ class BillController extends Controller
     public function __construct()
     {
         $this->middleware('auth', ['except' => ['receiveEmailBills']] );
+        $this->middleware('CheckSubscription', ['except' => ['receiveEmailBills']]);
     }
   
     /**
@@ -387,17 +388,8 @@ class BillController extends Controller
         if( $company->id_number != $cedulaEmpresa ){ 
           return back()->withError( "Error en validación: Asegúrese de agregar la columna CedulaEmpresa a su archivo de excel, con la cédula de su empresa en todas las lineas. La línea 1 no le pertenece a la empresa actual. ($company->id_number)" );
         }
-      
-            $user = auth()->user();
-            Activity::dispatch(
-                $user,
-                $collectionArray,
-                [
-                    'company_id' => $collectionArray[0]['cedulaempresa']
-                ],
-                "Importar factura de compra por excel."
-            )->onConnection(config('etax.queue_connections'))
-            ->onQueue('log_queue');
+            
+
         if( count($collectionArray) < 1800 ){
             ProcessBillsImport::dispatchNow($collectionArray, $company);
         }else{
@@ -660,7 +652,7 @@ class BillController extends Controller
                 ])->render();
             }) 
             ->editColumn('provider', function(Bill $bill) {
-                return $bill->provider->getFullName();
+                return $bill->providerName();
             })
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');
@@ -810,7 +802,7 @@ class BillController extends Controller
                 return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_iva_gasto;
             })
             ->editColumn('provider', function(Bill $bill) {
-                return $bill->provider->getFullName();
+                return $bill->providerName();
             })
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');

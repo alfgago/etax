@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=6.19">
     
     <script src="/assets/js/cybs_devicefingerprint.js"></script>
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=6.19"></script>
+    <script src="{{asset('assets/js/common-bundle.js')}}?v=6.20"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
 

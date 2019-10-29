@@ -55,6 +55,7 @@ class InvoiceController extends Controller
     public function __construct()
     {
         $this->middleware('auth', ['except' => ['receiveEmailInvoices']] );
+        $this->middleware('CheckSubscription', ['except' => ['receiveEmailInvoices']]);
     }
   
     /**
@@ -64,6 +65,8 @@ class InvoiceController extends Controller
      */
     public function index()
     {
+        
+
         $company = currentCompanyModel(false);
 
         if ( !$company->atv_validation && $company->use_invoicing ) {
@@ -158,6 +161,12 @@ class InvoiceController extends Controller
                             <i class="fa fa-refresh" aria-hidden="true"></i>
                         </a>';
                 }
+                if ($invoice->hacienda_status == '05') {
+                    return '<div class="orange"> <span class="tooltiptext">Esperando respuesta de hacienda</span></div>
+                        <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
+                            <i class="fa fa-refresh" aria-hidden="true"></i>
+                        </a>';
+                }
 
                 return '<div class="yellow"><span class="tooltiptext">Procesando...</span></div>
                     <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
@@ -214,7 +223,7 @@ class InvoiceController extends Controller
         $company = currentCompanyModel(false);
         
         $errors = $company->validateEmit();
-        if( $errors ){
+        if( $errors ) {
             return redirect($errors['url'])->withError($errors['mensaje']);
         }
 
@@ -446,7 +455,7 @@ class InvoiceController extends Controller
                 return back()->withError('Mes seleccionado ya fue cerrado');
             }
         } catch( \Exception $ex ) {
-            Log::error("ERROR Envio de factura a hacienda -> ".$ex->getMessage());
+            Log::error("ERROR Envio de factura a hacienda -> ".$ex);
             return back()->withError( 'Ha ocurrido un error al enviar factura.' );
         }
     }
@@ -480,11 +489,11 @@ class InvoiceController extends Controller
         $user = auth()->user();
         Activity::dispatch(
             $user,
-            $invoice,
+            $bill,
             [
-                'company_id' => $invoice->company_id,
-                'id' => $invoice->id,
-                'document_key' => $invoice->document_key
+                'company_id' => $bill->company_id,
+                'id' => $bill->id,
+                'document_key' => $bill->document_key
             ],
             "Factura registrada con éxito FEC."
         )->onConnection(config('etax.queue_connections'))
@@ -1137,7 +1146,7 @@ class InvoiceController extends Controller
             $json = json_encode( $xml ); // convert the XML string to json  
             $arr = json_decode( $json, TRUE );
 
-                if(substr($arr['NumeroConsecutivo'],8,2) != "04"){
+                //if(substr($arr['NumeroConsecutivo'],8,2) != "04"){
                     $FechaEmision = explode("T", $arr['FechaEmision']);
                     $FechaEmision = explode("-", $FechaEmision[0]);
                     $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
@@ -1180,10 +1189,10 @@ class InvoiceController extends Controller
                         return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
                         //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
                     } 
-                }else{
+                /*}else{
                     return Response()->json('Error: No se puede subir tiquetes electrónicos.', 400);
                         //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
-                } 
+                }*/ 
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
@@ -1686,6 +1695,7 @@ class InvoiceController extends Controller
           'archivo' => 'required',
         ]);
       
+        $fileType = request()->fileType ?? '01';
 
         $collection = Excel::toCollection( new InvoiceImportSM(), request()->file('archivo') );
         $companyId = currentCompany();
@@ -1694,7 +1704,7 @@ class InvoiceController extends Controller
         try {
             Log::debug('Creando job de registro de facturas.');
             foreach (array_chunk ( $invoiceList, 100 ) as $facturas) {
-                ProcessSendExcelInvoices::dispatch($facturas, $companyId)->onQueue('bulk');
+                ProcessSendExcelInvoices::dispatch($facturas, $companyId, $fileType)->onQueue('bulk');
             }
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);

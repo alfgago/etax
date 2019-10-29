@@ -76,6 +76,7 @@ class ProcessSingleInvoiceImport implements ShouldQueue
             
             $invoice->subtotal = 0;
             $invoice->iva_amount = 0;
+            $invoice->is_code_validated = true;
             
             foreach( $lineas as $linea ){
                 $linea['invoice_id'] = $invoice->id;

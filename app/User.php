@@ -200,6 +200,7 @@ class User extends Authenticatable {
         try{
             $current_company = currentCompanyModel();
             if( auth()->user()->isOwnerOfTeam($current_company->team)) {
+
                 return [1];
             }else{
                 $user_id = auth()->user()->id;

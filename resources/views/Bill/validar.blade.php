@@ -53,7 +53,7 @@
           </thead>
           <tbody>
              <tr>
-               <th colspan="7">Selección masiva: </th>
+               <th colspan="8">Selección masiva: </th>
                <td>
                   <div class="input-validate-iva">
                     <select class="form-control iva_type_all"  placeholder="Seleccione un código eTax" id="iva_type_all"  >
@@ -95,6 +95,7 @@
                       <option value="1" >1%</option>
                       <option value="2" >2%</option>
                       <option value="4" >4%</option>
+                      <option value="5" >0% con derecho a crédito</option>
                     </select>
                   </div>
                </td>
@@ -144,6 +145,7 @@
                         <option value="1" {{ $item->porc_identificacion_plena == 1 ? 'selected' : '' }}>1%</option>
                         <option value="2" {{ $item->porc_identificacion_plena == 2 ? 'selected' : '' }}>2%</option>
                         <option value="4" {{ $item->porc_identificacion_plena == 4 ? 'selected' : '' }}>4%</option>
+                        <option value="5" {{ $item->porc_identificacion_plena == 5 ? 'selected' : '' }}>0% con derecho a crédito</option>
                     </select>
                   </div>
                 </td>

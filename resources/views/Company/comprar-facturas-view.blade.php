@@ -66,7 +66,7 @@
 
                                     <div class="form-group col-md-6">
                                         <label for="payment_method">Seleccione su m&eacute;todo de pago</label>
-                                        <select class="form-control select-search" name="payment_method" id="payment_method" onchange="getPaymentGateway();">
+                                        <select class="form-control select-search" name="payment_method" id="payment_method" onchange="getPaymentGateway();" required>
                                             <option value='' selected>-- Seleccione un m&eacute;todo de pago --</option>
                                             @foreach ( $paymentMethods as $paymentMethod )
                                                 <option value="{{ $paymentMethod->id }}- {{$paymentMethod->payment_gateway}}" >{{ $paymentMethod->name }} {{ $paymentMethod->last_name }} - {{ $paymentMethod->masked_card }}</option>

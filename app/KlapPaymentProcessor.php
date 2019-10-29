@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Support\Facades\Log;
 use stdClass;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -18,7 +19,7 @@ class KlapPaymentProcessor extends PaymentProcessor
      *
      *
      */
-    public function statusAPI(){
+    public function statusAPI() {
         $BnEcomAPIStatus = new Client();
         $APIStatus = $BnEcomAPIStatus->request('POST', "https://emcom.oneklap.com:2263/api/LogOnApp?applicationName=string&applicationPassword=string", [
             'headers' => [
@@ -102,7 +103,7 @@ class KlapPaymentProcessor extends PaymentProcessor
             ]
         ]);
         $card = json_decode($cardDeleted->getBody()->getContents(), true);
-        if($card['apiStatus'] === 'sucess'){
+        if($card['apiStatus'] === 'sucess') {
             return true;
         }else{
             return false;
@@ -159,7 +160,7 @@ class KlapPaymentProcessor extends PaymentProcessor
         ]);
         $chargeIncluded = json_decode($appChargeBn->getBody()->getContents(), true);
         if($chargeIncluded['apiStatus'] === "Successful"){
-            return $chargeIncluded['chargeTokenId'];
+            return $chargeIncluded;
         }else{
             return false;
         }
@@ -169,7 +170,7 @@ class KlapPaymentProcessor extends PaymentProcessor
     * Params user_id, chargeTokenId, payment_id
     *
     */
-    public function pay($data){
+    public function pay($data) {
         $bnCharge = new Client();
         $chargeBn = $bnCharge->request('POST', "https://emcom.oneklap.com:2263/api/AppApplyCharge?applicationName=string&applicationPassword=string&userName=string&chargeTokeId=string&cardTokenId=string", [
             'headers' => [
@@ -197,8 +198,8 @@ class KlapPaymentProcessor extends PaymentProcessor
      *
      *
      */
-    public function comprarProductos($request){
-        $bnStatus = $this->statusBNAPI();
+    public function comprarProductos($request) {
+        $bnStatus = $this->statusAPI();
         if($bnStatus['apiStatus'] == 'Successful'){
             $date = Carbon::parse(now('America/Costa_Rica'));
             $user = auth()->user();
@@ -206,7 +207,7 @@ class KlapPaymentProcessor extends PaymentProcessor
             $data->description = 'Compra de ' . $request->producto_name . ' eTax';
             $data->user_name = $user->user_name;
             $data->amount = $request->amount;
-            $chargeCreated = $this->paymentIncludeCharge($data);
+            $chargeCreated = $this->createPayment($data);
 
             if($chargeCreated['apiStatus'] == "Successful"){
                 $paymentMethod = PaymentMethod::where('id', $request->payment_method)->first();
@@ -227,13 +228,13 @@ class KlapPaymentProcessor extends PaymentProcessor
                     [
                         'payment_method_id' => $paymentMethod->id,
                         'payment_date' => $date,
-                        'amount' => $request->producto_price,
+                        'amount' => $request->producto_price ?? $request->amount,
                         'payment_gateway' => 'klap'
                     ]
                 );
                 //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
                 if( ! isset($payment->charge_token) ) {
-                    $chargeIncluded = $this->paymentIncludeCharge($data);
+                    $chargeIncluded = $this->createPayment($data);
                     $chargeTokenId = $chargeIncluded['chargeTokenId'];
                     $payment->charge_token = $chargeTokenId;
                     $payment->save();
@@ -244,7 +245,7 @@ class KlapPaymentProcessor extends PaymentProcessor
                 $charge->user_name = $user->user_name;
                 $charge->chargeTokenId = $chargeTokenId;
 
-                $appliedCharge = $this->paymentApplyCharge($charge);
+                $appliedCharge = $this->pay($charge);
                 if($appliedCharge['apiStatus'] == "Successful"){
                     $payment->proof = $appliedCharge['retrievalRefNo'];
                     $payment->payment_status = 2;
@@ -379,16 +380,20 @@ class KlapPaymentProcessor extends PaymentProcessor
      *
      */
     public function deletePaymentMethod($paymentMethodId){
+        try {
+            $paymentMethod = PaymentMethod::where('id', $paymentMethodId)->first();
+            $delatedCard = $this->deleteCardToken($paymentMethod->token_bn);
+            $paymentMethod->delete();
+            return $delatedCard == true;
 
-        $paymentMethod = PaymentMethod::where('id', $paymentMethodId)->first;
-        $delatedCard = $this->deleteCardToken($paymentMethod->token_bn);
-
-        return $delatedCard == true;
+        } catch (\Exception $e) {
+            Log::error("Error en eliminar tarjeta en Klap: $paymentMethodId");
+        }
     }
 
     public function getChargeProof($chargeIncluded){
         if($chargeIncluded['apiStatus'] == "Successful"){
-            $appliedCharge_Id = $chargeIncluded['retrievalRefNo'];
+            return $chargeIncluded['retrievalRefNo'];
         }else{
             return false;
         }

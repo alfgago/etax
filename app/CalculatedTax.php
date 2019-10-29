@@ -28,6 +28,8 @@ class CalculatedTax extends Model
     
     protected $guarded = [];
     
+    protected $currentCompany = null;
+    
     //Relacion con la empresa
     public function company()
     {
@@ -114,7 +116,7 @@ class CalculatedTax extends Model
      */
     public function applyRatios( $porc, $value ) {
       
-      $company = currentCompanyModel();
+      $company = $this->currentCompany;
      
       $ratio1_operativo = $company->operative_ratio1 / 100;
       $ratio2_operativo = $company->operative_ratio2 / 100;
@@ -158,6 +160,7 @@ class CalculatedTax extends Model
     public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa, $forceRecalc = false ) {
       
       $currentCompanyId = currentCompany();
+      
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
       
       if ( !Cache::has($cacheKey) || $forceRecalc ) {
@@ -171,6 +174,8 @@ class CalculatedTax extends Model
                   'is_final' => true,
               ]
           );
+          
+          $data->currentCompany = currentCompanyModel();
             
           if ( $month > 0 ) { //El 0 significa que es acumulado anual
             
@@ -221,8 +226,9 @@ class CalculatedTax extends Model
      * @return App\CalculatedTax
      */
     public function calcularFacturacion( $month, $year, $lastBalance, $prorrataOperativa ) {
-
-      $currentCompany = currentCompanyModel();
+      
+      $currentCompany = $this->currentCompany;
+      
       //Si recibe el balance anterior en 0, intenta buscarlo.
       if( !$lastBalance ) {
         $lastBalance = $currentCompany->getLastBalance($month, $year);
@@ -281,12 +287,12 @@ class CalculatedTax extends Model
       $ivaDevuelto = 0;
       
       $filterTotales = false;
-      if( $month == 0 && $year == 2018 && currentCompanyModel()->first_prorrata_type == 2 ) {
+      if( $month == 0 && $year == 2018 && $this->currentCompany->first_prorrata_type == 2 ) {
         $filterTotales = true;
       }
       
       $ivaData = json_decode( $this->iva_data ) ?? new \stdClass();
-      $arrayActividades = explode( ',', currentCompanyModel()->commercial_activities );
+      $arrayActividades = explode( ',', $this->currentCompany->commercial_activities );
       
       InvoiceItem::with('invoice')
                   ->with('ivaType')
@@ -544,7 +550,7 @@ class CalculatedTax extends Model
       $totalProveedoresCredito = 0;
       $ivaData = json_decode( $this->iva_data ) ?? new \stdClass();
       $bookData = json_decode( $this->book_data ) ?? new \stdClass();
-      $arrayActividades = explode( ',', currentCompanyModel()->commercial_activities );
+      $arrayActividades = explode( ',', $this->currentCompany->commercial_activities );
 
       $query->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$ivaData, &$singleBill, $arrayActividades,
        &$billsTotal, &$billsSubtotal, &$totalBillIva, &$basesIdentificacionPlena, &$basesNoDeducibles, &$ivaAcreditableIdentificacionPlena, 
@@ -590,8 +596,15 @@ class CalculatedTax extends Model
                 $billIva = $billIva * -1;
               }
                 
-              $ivaType = $ivaType ? $ivaType : '003';
+              $ivaType = $ivaType ? $ivaType : 'B003';
               $ivaType = str_pad($ivaType, 3, '0', STR_PAD_LEFT);
+              
+              
+              if( $ivaType == 'R001' || $ivaType == 'R002' || $ivaType == 'R003' || $ivaType == 'R004' || $ivaType == 'R005' || $ivaType == 'R006')
+              {
+                $billIva = $subtotal * ($prodPorc / 100);
+                $subtotal = $subtotal - $billIva;
+              }
               
               if( $ivaType == 'B041' || $ivaType == 'B042' || $ivaType == 'B043' || $ivaType == 'B044' ||
                   $ivaType == 'B051' || $ivaType == 'B052' || $ivaType == 'B053' || $ivaType == 'B054' || 
@@ -600,6 +613,7 @@ class CalculatedTax extends Model
                   $ivaType == 'S041' || $ivaType == 'S042' || $ivaType == 'S043' || $ivaType == 'S044' ||
                   $ivaType == 'S051' || $ivaType == 'S052' || $ivaType == 'S053' || $ivaType == 'S054' || 
                   $ivaType == 'S061' || $ivaType == 'S062' || $ivaType == 'S063' || $ivaType == 'S064' || 
+                  $ivaType == 'R001' || $ivaType == 'R002' || $ivaType == 'R003' || $ivaType == 'R004' || $ivaType == 'R005' || $ivaType == 'R006' || 
                   $ivaType == 'S071' || $ivaType == 'S072' || $ivaType == 'S073' || $ivaType == 'S074'
               )
               {
@@ -625,7 +639,9 @@ class CalculatedTax extends Model
               /***SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
               $porc_plena = $billItems[$i]->porc_identificacion_plena ? $billItems[$i]->porc_identificacion_plena : 0;
               $currAcreditablePleno = 0;
-              if ( $porc_plena == 1 || $porc_plena == 5 ) {
+              
+              //Asigna 13%, porque para efectos de algoritmo. Me puedo acreditar la totaliddad para canasta basica y para compras al 0% acreditable
+              if ( $porc_plena == 1 || $porc_plena == 5 ) { 
                 $porc_plena = 13;
               } 
               
@@ -676,6 +692,11 @@ class CalculatedTax extends Model
                 $currAcreditablePleno = $subtotal * $menor_porc;
                 $ivaNoAcreditableIdentificacionPlena += $billIva - ($subtotal * $menor_porc);
               }
+              if( $ivaType == 'R001' || $ivaType == 'R002' || $ivaType == 'R003' || $ivaType == 'R004' || $ivaType == 'R005' || $ivaType == 'R006')
+              {
+                $currAcreditablePleno = $billIva;
+              }
+              
               $ivaAcreditableIdentificacionPlena += $currAcreditablePleno;
               /***END SACA IVAS DEDUCIBLES DE IDENTIFICAIONES PLENAS**/
               
@@ -701,6 +722,11 @@ class CalculatedTax extends Model
               if(!isset($ivaData->$iVar)) {
                 $ivaData->$iVar = 0;
                 $ivaData->$iVarPleno = 0;
+              }
+              
+              if( $ivaType == 'R001' || $ivaType == 'R002' || $ivaType == 'R003' || $ivaType == 'R004' || $ivaType == 'R005' || $ivaType == 'R006')
+              {
+                $prodPorc = 13;
               }
               
               $ivaData->$bVar += $subtotal;
@@ -764,7 +790,7 @@ class CalculatedTax extends Model
     }
     
     public function setCalculosIVA( $prorrataOperativa, $lastBalance ) {
-      $company = currentCompanyModel();
+      $company = $this->currentCompany;
       $subtotalAplicado =  $this->invoices_subtotal - $this->sum_iva_sin_aplicar;
       
       //Determina numerador y denominador de la prorrata.
@@ -853,7 +879,7 @@ class CalculatedTax extends Model
       
       //Calcula el balance estimado.
       $ivaDeducibleEstimado = ($cfdpEstimado * $prorrata) + $this->iva_acreditable_identificacion_plena;
-      $balanceEstimado = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleEstimado;
+      $balanceEstimado = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleEstimado - $this->iva_devuelto;
 
       $ratio1_operativo = $company->operative_ratio1 / 100;
       $ratio2_operativo = $company->operative_ratio2 / 100;
@@ -875,7 +901,7 @@ class CalculatedTax extends Model
       
       //Calcula el balance operativo.
       $ivaDeducibleOperativo = ($cfdp  * $prorrataOperativa) + $this->iva_acreditable_identificacion_plena;
-      $balanceOperativo = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleOperativo;
+      $balanceOperativo = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleOperativo - $this->iva_devuelto;
       $ivaNoDeducible = $this->total_bill_iva - $ivaDeducibleOperativo;
 
       $ivaRetenido = $this->retention_by_card ? $this->retention_by_card : $this->iva_retenido;
@@ -969,6 +995,8 @@ class CalculatedTax extends Model
                 'is_final' => true,
             ]
         );
+        
+        $data->currentCompany = $currentCompany;
 
         if($anoAnterior == 2018 && $currentCompany->first_prorrata_type == 2 ){
           
@@ -1027,7 +1055,8 @@ class CalculatedTax extends Model
     
     function sumAcumulados( $year, $allMonths = true ) {
       
-      $currentCompanyId = currentCompany();
+      $currentCompany = $this->currentCompany;
+      $currentCompanyId = $currentCompany->id;
       $calculosAnteriores = CalculatedTax::where('company_id', $currentCompanyId)->where('is_final', true)->where('year', $year)->where('month', '!=', 0)->get();
       $countAnteriores = count( $calculosAnteriores );
       
@@ -1067,7 +1096,7 @@ class CalculatedTax extends Model
 			$this->resetVars();
       
     	$ivaData = json_decode($this->iva_data);
-    	$arrayActividades = currentCompanyModel()->getActivities();
+    	$arrayActividades = $currentCompany->getActivities();
 
       for ($i = 0; $i < $countAnteriores; $i++) {
         if( $allMonths || !( $calculosAnteriores[$i]->year == 2019 && $calculosAnteriores[$i]->month < 7 ) ){
@@ -1224,7 +1253,11 @@ class CalculatedTax extends Model
 			  $ivaData->$iVarPleno = 0;
 			}
 			
-      $arrayActividades = currentCompanyModel()->getActivities();
+			if( !isset($this->currentCompany) ){
+        $this->currentCompany = currentCompanyModel();
+			}
+			$arrayActividades = $this->currentCompany->getActivities();
+      
 			foreach( ProductCategory::all() as $codigo ) {
 			  $varName  = "type$codigo->id";
 			  $varName0 = "type$codigo->id-0";
@@ -1273,7 +1306,7 @@ class CalculatedTax extends Model
     
     public function calcularDeclaracion($acumulado){
       try{
-          $company = currentCompanyModel();
+          $company = $this->currentCompany;
     			$ivaData = json_decode($this->iva_data);
 	      	$book = $this->book;
           $arrayActividades = $company->getActivities();
@@ -1378,7 +1411,7 @@ class CalculatedTax extends Model
           
           $impuestos['iva_compras_B1e'] = $ivaData->plenoB061; 
           $impuestos['iva_compras_B2e'] = $ivaData->plenoB062; 
-          $impuestos['iva_compras_B3e'] = $ivaData->plenoB063; 
+          $impuestos['iva_compras_B3e'] = $ivaData->plenoB063 + $ivaData->plenoR001 + $ivaData->plenoR002 + $ivaData->plenoR003 + $ivaData->plenoR004 + $ivaData->plenoR005 + $ivaData->plenoR006; 
           $impuestos['iva_compras_B4e'] = $ivaData->plenoB064; 
           $impuestos['iva_importaciones_B1e'] = $ivaData->plenoB041 + $ivaData->plenoB035; 
           $impuestos['iva_importaciones_B2e'] = $ivaData->plenoB042; 
@@ -1445,20 +1478,27 @@ class CalculatedTax extends Model
         	$determinacion['impuestoOperacionesGravadas'] = $this->total_invoice_iva;
         	$determinacion['totalCreditosPeriodo'] = $this->iva_deducible_operativo;
         	$determinacion['devolucionIva'] = $this->iva_devuelto;
+        	
+        	$balanceOperativo = $this->balance_operativo < 0 ? ($this->balance_operativo + $this->saldo_favor_anterior) : ($this->balance_operativo - $this->saldo_favor_anterior);
+        	$this->iva_por_cobrar = $balanceOperativo < 0 ? abs($balanceOperativo) : 0;
+          $this->iva_por_pagar = $balanceOperativo > 0 ? $balanceOperativo : 0;
+        	
         	$determinacion['saldoFavorPeriodo'] = $this->iva_por_cobrar;
         	$determinacion['saldoDeudorPeriodo'] = $this->iva_por_pagar;
-        	$determinacion['saldoFavorProrrataReal'] = $this->iva_por_cobrar;
-        	$determinacion['saldoDeudorProrrataReal'] = $this->iva_por_pagar;
-        			
-        			 $diff = $this->iva_por_pagar - $this->iva_devuelto;
-        			 $impuestoFinal = $diff;
-        			 $saldoFavor = $this->saldo_favor;
-        			 if($diff < 0){
-        			 		$impuestoFinal = 0;
-        			 		$saldoFavor = $saldoFavor + abs($diff);
-        			 }
+        	$saldoFavorFinal = $this->iva_por_cobrar;
+        	$impuestoFinal = $this->iva_por_pagar;
+        	
+        	if( $this->month != 12 ) {
+          	$determinacion['saldoFavorProrrataReal'] = 0;
+          	$determinacion['saldoDeudorProrrataReal'] = 0;
+        	}else{
+        	  $saldoFavorFinal = $this->balance_estimado < 0 ? abs($this->balance_estimado) : 0;
+            $impuestoFinal = $this->balance_estimado > 0 ? $this->balance_estimado : 0;
+        	  $determinacion['saldoFavorProrrataReal'] = $saldoFavorFinal;
+          	$determinacion['saldoDeudorProrrataReal'] = $impuestoFinal;
+        	}
         	 
-        	$determinacion['saldoFavorFinalPeriodo'] = $saldoFavor;
+        	$determinacion['saldoFavorFinalPeriodo'] = $saldoFavorFinal;
         	$determinacion['impuestoFinalPeriodo'] = $impuestoFinal;
         	
         	$determinacion['retencionImpuestos'] = $this->retention_by_card ? $this->retention_by_card : $this->iva_retenido;
@@ -1468,7 +1508,7 @@ class CalculatedTax extends Model
 
           return $dataDeclaracion;
       }catch(\Throwable $e){
-        Log::error($e);
+        Log::error($e->getMessage());
         return false;
       }
     }

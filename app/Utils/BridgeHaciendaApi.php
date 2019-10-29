@@ -88,7 +88,7 @@ class BridgeHaciendaApi
                         $file = $invoiceUtils->sendInvoiceEmail($invoice, $company, $path);
                         
                         ProcessInvoice::dispatch($invoice->id, $company->id, $token)
-                            ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
+                            ->onConnection(config('etax.queue_connections'))->onQueue('invoicing');
                         return $invoice;
                     }
                 }else{
@@ -108,7 +108,7 @@ class BridgeHaciendaApi
             $company = $invoice->company;
             //Send to queue invoice
             ProcessCreditNote::dispatch($invoice->id, $company->id, $token)
-                ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
+                ->onConnection(config('etax.queue_connections'))->onQueue('invoicing');
             return $invoice;
 
         } catch (ClientException $error) {
@@ -312,7 +312,7 @@ class BridgeHaciendaApi
                     $invoice->hacienda_status = '03';
                     $invoice->save();
                 } else if (strpos($response['data']['response'],"ESTADO=procesando") !== false) {
-                    $invoice->hacienda_status = '03';
+                    $invoice->hacienda_status = '05';
                     $invoice->save();
                 }
             } else {

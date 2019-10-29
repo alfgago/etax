@@ -84,6 +84,11 @@
                 <td>-</td>
               </tr>
               <tr>
+                <th>Compras a nivel Mayorista, Fábrica o Aduana:</th>
+                <td>  ₡{{ number_format( $data->book->cc_restaurantes, 0 ) }} </td>
+                <td>-</td>
+              </tr>
+              <tr>
                 <th>IVA de facturas recibidas de bienes y servicios por compras locales al 1%:</th>
                 <td>  ₡{{ number_format( $data->book->cc_iva_compras1, 0 ) }} </td>
                 <td>-</td>
@@ -141,6 +146,11 @@
               <tr>
                 <th>IVA de facturas recibidas de propiedad, planta y equipo por compras locales al 4%:</th>
                 <td>  ₡{{ number_format( $data->book->cc_iva_propiedades4, 0 ) }} </td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <th>IVA de facturas recibidas con recaudación a nivel Mayorista, Fábrica o Aduana:</th>
+                <td>  ₡{{ number_format( $data->book->cc_iva_restaurantes, 0 ) }} </td>
                 <td>-</td>
               </tr>
               <tr>

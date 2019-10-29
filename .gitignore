@@ -5,6 +5,7 @@
 /vendor
 /.idea
 /.vscode
+/.c9
 /nbproject
 /.vagrant
 Homestead.json
@@ -15,3 +16,4 @@ yarn-error.log
 bk.env
 .phpunit.result.cache
 .DS_Store
+/docker/.DS_Store

@@ -320,7 +320,7 @@ class Bill extends Model
     public static function saveBillXML( $arr, $metodoGeneracion ) {
         
         $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
-        if( $metodoGeneracion != "Email" ){
+        if($metodoGeneracion != "Email" && $metodoGeneracion != 'GS' ){
           $company = currentCompanyModel();
         }else{
           //Si es email, busca por ID del receptor para encontrar la compañia
@@ -754,7 +754,7 @@ class Bill extends Model
 
           $bill->generation_method = $data['metodoGeneracion'];
           $bill->is_authorized = $data['isAuthorized'];
-          $bill->is_code_validated = $data['codeValidated'];
+
 
           $bill->provider_id_number = preg_replace("/[^0-9]/", "", $data['identificacionProveedor']);
           $bill->provider_first_name = $data['nombreProveedor'] ?? null;
@@ -779,9 +779,9 @@ class Bill extends Model
             }
           }
 
-          $bill->is_void = false;
-          
-          $bill->is_code_validated = $data['codeValidated'];
+          //revisar si esta validada.
+          $bill->is_void = false;     
+
           $bill->is_authorized = $data['isAuthorized'];
           $bill->currency_rate = $data['tipoCambio'] ?? 1;
           //Datos de factura
@@ -796,6 +796,7 @@ class Bill extends Model
             $bill->accept_status = 1;
             $bill->hacienda_status = "03";
           }
+
 
           //$bill->description = $row['description'] ? $row['description'] : '';
           try{
@@ -831,7 +832,7 @@ class Bill extends Model
       $bill = Cache::get($billCacheKey);
       $year = $bill->generatedDate()->year;
       $month = $bill->generatedDate()->month;
-    
+
       /**LINEA DE FACTURA**/
       $subtotalLinea = $data['subtotalLinea'] ?? 0;
       $montoIvaLinea = $data['montoIva'] ?? 0;
@@ -855,6 +856,7 @@ class Bill extends Model
           'code' => $data['codigoProducto'] ?? 'N/A',
           'name' => $data['detalleProducto'] ?? 'No indica',
           'product_type' => $data['categoriaHacienda'] ?? null,
+          'porc_identificacion_plena' => $data['identificacionEspecifica'] ?? 13,
           'measure_unit' => $data['unidadMedicion'],
           'item_count' => $cantidadLinea,
           'unit_price' => $precioUnitarioLinea,
@@ -883,6 +885,12 @@ class Bill extends Model
       if( $data['totalNeto'] != 0 ) {
         $bill->subtotal = $data['totalNeto'];
       }
+
+      if(isset($data['codeValidated'])){
+        $bill->is_code_validated = $data['codeValidated'];
+      }
+
+
       $bill->save();
       return $bill;
       
