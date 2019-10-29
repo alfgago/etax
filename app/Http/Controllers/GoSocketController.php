@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use App\IntegracionEmpresa;
+use App\Integracion;
 use App\User;
 use App\Company;
 use App\Team;
@@ -22,6 +23,10 @@ use Illuminate\Support\Facades\Log;
 class GoSocketController extends Controller
 {
 
+    public function index(Request $request){
+        $token = $request->token;
+        return view('gosocket.index')->with('token',$token);
+    }
 
     public function gosocketValidate(Request $request) {
         try{
@@ -121,6 +126,50 @@ class GoSocketController extends Controller
             return redirect('/login');
         }
 	    
+    }
+
+    public function reporteUsuarios(){
+        $integraciones = IntegracionEmpresa::where('integration_id',1)->get();
+        $usuarios = [];
+        foreach ($integraciones as $integracion) {
+            $usergs = new \stdClass();
+            $usergs->user_token = $integracion->user_token;
+            $usergs->company_token = $integracion->company_token;
+            $usergs->nombre_empresa = $integracion->company->business_name;
+            $usergs->cedula_empresa = $integracion->company->id_number;
+            $usergs->nombre_usuario = $integracion->user->first_name;
+            $usergs->correo_usuario = $integracion->user->email;
+            $usergs->tipo_plan = $integracion->company->subscription->plan->plan_type ?? null;
+            if($usergs->tipo_plan != "Contador"){
+                $usergs->plan = $integracion->company->subscription->plan->plan_tier ?? null;
+                $usergs->recurrencia = $integracion->company->subscription->recurrency ?? null;
+                if(isset($integracion->company->subscription->recurrency)){
+                    if($integracion->company->subscription->recurrency == 1){
+                        $usergs->precio = $integracion->company->subscription->plan->monthly_price ?? 0;
+                    }elseif($integracion->company->subscription->recurrency == 6){
+                        $usergs->precio = $integracion->company->subscription->plan->six_price ?? 0;
+                    }elseif($integracion->company->subscription->recurrency == 12){
+                        $usergs->precio = $integracion->company->subscription->plan->annual_price ?? 0;
+                    }else{
+                        $usergs->precio = 0;
+                    }
+                }else{
+                    $usergs->precio = 0;
+                }
+            }else{
+                $usergs->plan = null;
+                $usergs->precio = 0;
+                $usergs->recurrencia = 0;
+            }
+            
+            array_push($usuarios , $usergs);
+        }
+        dd($usuarios);
+    }
+
+    public function reporteCompanies(){
+        $integraciones = IntegracionEmpresa::where('integration_id',1)->get();
+        dd($integraciones);
     }
 
 }
