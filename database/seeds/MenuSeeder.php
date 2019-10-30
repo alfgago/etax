@@ -86,7 +86,9 @@ class MenuSeeder extends Seeder
 	          	'items'=>[
 	          		['nombre'=>'Emitir factura nueva','url'=>'/facturas-emitidas/emitir-factura/01','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,2], 'orden' => '0'],
 	          		['nombre'=>'Ingresar factura existente','url'=>'/facturas-emitidas/create','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'','orden' => '1', 'permisos'=>[1,2]],
-	          		['nombre'=>'Importar facturas emitidas','url'=>'abrirPopup("importar-emitidas-popup");','padre'=>'0', 'subitems'=>[],'tipo'=>'onclick', 'icono'=>'', 'permisos'=>[1,2], 'orden' => '2']
+	          		['nombre'=>'Importar facturas emitidas','url'=>'abrirPopup("importar-emitidas-popup");','padre'=>'0', 'subitems'=>[],'tipo'=>'onclick', 'icono'=>'', 'permisos'=>[1,2], 'orden' => '2'],
+	          		['nombre'=>'Envio masivo de Facturas','url'=>'abrirPopup("enviar-emitidas-popup");','padre'=>'0', 'subitems'=>[],'tipo'=>'onclick', 'icono'=>'', 'permisos'=>[1,2], 'orden' => '3']
+	          	
 	          	]
 	        ],
 	        [
@@ -129,8 +131,7 @@ class MenuSeeder extends Seeder
 	          	'items'=>[
 	          		['nombre'=>'Perfil','url'=>'/usuario/perfil','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,2,3,4,5,6,7,8], 'orden' => '0'],
 	          		['nombre'=>'Configuración de empresa','url'=>'/empresas/editar','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,8], 'orden' => '1'],
-	          		['nombre'=>'Gestión de pagos','url'=>'/payments-methods','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,8], 'orden' => '2'],
-	          		['nombre'=>'Cerrar sesión','url'=>'event.preventDefault(); document.getElementById("frm-logout").submit();','padre'=>'0', 'subitems'=>[],'tipo'=>'onclick', 'icono'=>'', 'permisos'=>[1,2,3,4,5,6,7,8], 'orden' => '3']
+	          		['nombre'=>'Gestión de pagos','url'=>'/payments-methods','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,8], 'orden' => '2']
 	          	]
 	        ],
 	        [
@@ -139,8 +140,7 @@ class MenuSeeder extends Seeder
 	          	'items'=>[
 	          		['nombre'=>'Editar información personal','url'=>'/usuario/perfil','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,2,3,4,5,6,7,8], 'orden' => '0'],
 	          		['nombre'=>'Seguridad','url'=>'/usuario/seguridad','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,2,3,4,5,6,7,8], 'orden' => '1'],
-	          		['nombre'=>'Cambiar plan','url'=>'/cambiar-plan','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,2,3,4,5,6,7,8], 'orden' => '2'],
-	          		['nombre'=>'Empresas','url'=>'/usuario/empresas','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,2,3,4,5,6,7,8], 'orden' => '3']
+	          		['nombre'=>'Cambiar plan','url'=>'/cambiar-plan','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,2,3,4,5,6,7,8], 'orden' => '2']
 	          	]
 	        ],
 	        [
