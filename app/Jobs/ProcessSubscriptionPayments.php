@@ -6,6 +6,7 @@ use App\Payment;
 use App\PaymentMethod;
 use App\PaymentProcessor;
 use App\Sales;
+use App\TransactionsLog;
 use App\Utils\PaymentUtils;
 use Carbon\Carbon;
 use stdClass;
@@ -44,18 +45,19 @@ class ProcessSubscriptionPayments implements ShouldQueue
      */
     public function handle()
     {
-        if ( app()->environment('production') ) {
+        if (app()->environment('production')) {
             try{
                 $date = Carbon::parse(now('America/Costa_Rica'));
     
                 $sale = $this->sale;
                 
-                if($sale->status == 1){
+                if ($sale->status == 1) {
                     return true;
                     Log::warning("El usuario $sale->user_id ya tiene la suscripción activa.");
                 }
     
                 $subscriptionPlan = $sale->plan;
+                Log::info("Plan de sale =>" .$subscriptionPlan);
                 $planName = $subscriptionPlan->getName();
                 Log::info("Procesando cobro $sale->company_id");
                 $subtotal = $subscriptionPlan->monthly_price;
@@ -83,7 +85,7 @@ class ProcessSubscriptionPayments implements ShouldQueue
                                  
                 $company = $sale->company;
     
-                if(!$paymentMethod){
+                if(!$paymentMethod) {
                     $paymentMethod = PaymentMethod::where('user_id', $sale->user_id)->first();
                 }
                 
@@ -129,10 +131,17 @@ class ProcessSubscriptionPayments implements ShouldQueue
                     $data->chargeTokenId = $payment->charge_token;
                     $data->cardTokenId = $paymentMethod->token_bn;
                     $data->token_bn = $paymentMethod->token_bn;
-    
-                    $chargeProof = $paymentGateway->pay($data);
+                    $data->product_id = $sale->etax_product_id;
+                    $transLog = TransactionsLog::create([
+                        'id_payment' => $payment->id ?? '',
+                        'status' => 'processing',
+                        'id_paymethod' => $paymentMethod->id ?? '',
+                        'processor' => $paymentMethod->payment_gateway ?? ''
+                    ]);
+                    $transLog->save();
+                    $chargeProof = $paymentGateway->pay($data, false, $transLog);
                     if ($chargeProof) {
-                        if(!$payment->charge_token){
+                        if(!$payment->charge_token) {
                             $payment->charge_token = $chargeProof;
                         }
                         
@@ -189,8 +198,8 @@ class ProcessSubscriptionPayments implements ShouldQueue
                 }else{
                     Log::warning("Error en cobro de usuario: $sale->user_id / empresa: $sale->company_id, no se encontró tarjeta");
                 }
-            }catch(\Exception $e){
-                Log::error( "Error al procesar cobro recurrente: " . $e->getMessage() );
+            }catch (\Exception $e) {
+                Log::error( "Error al procesar cobro recurrente: " . $e);
             }
         }
     }
