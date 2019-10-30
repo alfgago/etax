@@ -58,6 +58,11 @@ class ProcessSubscriptionPayments implements ShouldQueue
     
                 $subscriptionPlan = $sale->plan;
                 Log::info("Plan de sale =>" .$subscriptionPlan);
+
+                if ($subscriptionPlan === null) {
+                    Log::warning("El sale $sale->id no tiene producto asociado.");
+                    return false;
+                }
                 $planName = $subscriptionPlan->getName();
                 Log::info("Procesando cobro $sale->company_id");
                 $subtotal = $subscriptionPlan->monthly_price;
