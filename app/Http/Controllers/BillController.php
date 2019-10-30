@@ -56,7 +56,164 @@ class BillController extends Controller
     {
         return view('Bill/index');
     }
-    
+
+
+    /**
+     * Index Validar Masivo
+     * Index de las lineas de las facturas. Usa indexData para cargar las facturas con AJAX
+     * @return \Illuminate\Http\Response
+     */
+    public function indexValidarMasivo(){
+        $company = currentCompanyModel();
+        $categoriaProductos = ProductCategory::get();
+        $unidades = BillItem::select('bill_items.measure_unit')->where('bill_items.company_id', '=', $company->id)->groupBy('bill_items.measure_unit')->get();
+        return view('Bill/index-masivo', compact('company', 'categoriaProductos', 'unidades'));
+    }
+
+    public function indexOne($id){
+
+        $bill = Bill::findOrFail($id);
+        $bill->provider_first_name = $bill->providerName();
+        $bill->generated_date = $bill->generatedDate()->format('d-m-Y');
+
+        return $bill;
+
+    }
+
+
+    public function indexDataMas( Request $request ) {
+        $company = currentCompanyModel();
+        $current_company = currentCompany();
+
+
+        $query = BillItem::
+                select('bill_items.id as item_id', 'bill_items.*')->
+                where('bill_items.company_id', $current_company)
+                ->join('bills', 'bill_items.bill_id', '=', 'bills.id' )
+                ->join('providers', 'bills.provider_id', '=', 'providers.id' )
+                ;
+
+        $cat = [];
+        $cat['todo'] = CodigoIvaSoportado::where('hidden', false)->get();
+
+        $filtroTarifa = $request->get('filtroTarifa');
+        switch($filtroTarifa){
+            case 10:
+                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('(bill_items.iva_amount / bill_items.subtotal * 100) = 0');
+                $cat['cero'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 0)->get();
+                break;
+            case 1:
+                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('(bill_items.iva_amount / bill_items.subtotal * 100) = 1');
+                $cat['uno'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 1)->get();
+                break;
+            case 2:
+                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('(bill_items.iva_amount / bill_items.subtotal * 100) = 2');
+                $cat['dos'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 2)->get();
+                break;
+            case 13:
+                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('(bill_items.iva_amount / bill_items.subtotal * 100) = 13');
+                $cat['trece'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 13)->get();
+                break;
+            case 4:
+                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('(bill_items.iva_amount / bill_items.subtotal * 100) = 4');
+                $cat['cuatro'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 4)->get();
+                break;
+            case 8:
+                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('(bill_items.iva_amount / bill_items.subtotal * 100) = 8');
+                $cat['ocho'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 8)->get();;
+                break;
+            default:
+                $cat['cero'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 0)->get();
+                $cat['uno'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 1)->get();
+                $cat['dos'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 2)->get();
+                $cat['trece'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 13)->get();
+                $cat['cuatro'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 4)->get();
+                $cat['ocho'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 8)->get();
+        }
+
+       $filtroValidado = $request->get('filtroValidado');
+       switch($filtroValidado){
+            case 1:
+                $query = $query->where('bills.is_code_validated', false);
+                break;
+            case 2:
+                $query = $query->where('bills.is_code_validated', true);
+                break;
+        }
+
+        $filtroUnidad = $request->get('filtroUnidad');
+        if(isset($filtroUnidad)){
+            $query = $query->where('measure_unit', '=', $filtroUnidad);
+        }
+
+        $categorias = ProductCategory::get(); 
+                
+
+        $return = datatables()->eloquent( $query )
+            ->addColumn('document_number', function(BillItem $billItem) {
+                return $billItem->bill->document_number;
+            })
+            ->addColumn('client', function(BillItem $billItem) {
+                return !empty($billItem->bill->provider_first_name) ? $billItem->bill->provider_first_name.' '.$billItem->bill->provider_last_name : $billItem->bill->clientName();
+            })
+            ->editColumn('unidad', function(BillItem $billItem) {
+                return $billItem->measure_unit ?? 'Unid';
+            })
+            ->editColumn('document_type', function(BillItem $billItem) {
+                return $billItem->bill->documentTypeName();
+            })
+            ->addColumn('tarifa_iva', function(BillItem $billItem) {
+                $billItem->tarifa_iva = !empty($billItem->iva_amount) ? ($billItem->iva_amount / $billItem->subtotal * 100) : 0;
+                return $billItem->tarifa_iva;
+            })
+            ->editColumn('generated_date', function(BillItem $billItem) {
+                return $billItem->bill->generatedDate()->format('d/m/Y');
+            })
+            ->addColumn('codigo_etax', function(BillItem $billItem) use($cat, $company) {
+                
+                //dd($invoiceItem);    
+
+                if($billItem->tarifa_iva == 13){
+                    $CatPorcentaje = $cat['trece'];
+                }elseif($billItem->tarifa_iva == 0){
+                    $CatPorcentaje = $cat['cero'];
+                }elseif($billItem->tarifa_iva == 1){
+                    $CatPorcentaje = $cat['uno'];
+                }elseif($billItem->tarifa_iva == 2){
+                    $CatPorcentaje = $cat['dos'];
+                }elseif($billItem->tarifa_iva == 4){
+                    $CatPorcentaje = $cat['cuatro'];
+                }elseif($billItem->tarifa_iva == 8){
+                    $CatPorcentaje = $cat['ocho'];
+                }else{
+                    $CatPorcentaje = $cat['todo'];
+                }
+
+                return view('Bill.ext.select-codigos', [
+                    'company' => $company,
+                    'cat' => $CatPorcentaje,
+                    'item' => $billItem
+                ])->render();                    
+            })
+            ->editColumn('categoria_hacienda', function(BillItem $billItem) use($categorias) {
+                return view('Bill.ext.select-categorias', [
+                    'categoriaProductos' => $categorias,
+                    'item' => $billItem
+                ])->render();
+                
+            })
+            ->addColumn('actions', function($billItem) {
+                return view('Bill.ext.deny-action', [
+                    'bill' => $billItem->bill,])->render();
+            })
+            ->rawColumns(['categoria_hacienda', 'codigo_etax', 'actions'])
+            ->toJson();
+            return $return;
+
+    }
+
+
+
     /**
      * Index Data
      * Funcion AJAX para cargar data de las facturas.
@@ -498,6 +655,64 @@ class BillController extends Controller
             $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
 
             return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos', 'company'));
+        
+    }
+
+
+    public function validarMasivo(Request $request){
+        $resultBills = [];
+        $errors = false;
+        foreach( $request->items as $key => $item ) {
+            $billItem = BillItem::findOrFail($key);
+            $bill = $billItem->bill;
+            if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
+                BillItem::where('id', $key)
+                ->update([
+                  'iva_type' =>  $item['iva_type'],
+                  'product_type' =>  $item['product_type']
+                ]);
+                $validated = true;
+                foreach($bill->items as $item){
+                    if(!isset($item->iva_type) || !isset($item->product_type)){
+                        $validated = false;
+                    }
+                }
+                if($validated){
+                    $bill->is_code_validated = true;
+                    $bill->save();
+                }
+                
+                $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $bill,
+                    [
+                        'company_id' => $bill->company_id,
+                        'id' => $bill->id,
+                        'document_key' => $bill->document_key
+                    ],
+                    "La factura ". $bill->document_number . " ha sido validada."
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
+                
+                clearBillCache($bill);
+            }else{
+                $errors = true;
+                $resultBills[$bill->document_number] = ['status' => 0];
+
+            }
+        }
+        if($errors){
+            $result = 'Las lineas de las facturas: ';
+            foreach($resultBills as $key => $bill){
+                $result = $result . $key . " ";              
+            }
+            $result = $result . 'fallaron ya que el mes ya fue cerrado.';
+            return back()->withError($result);
+        }else{
+            return back()->withMessage('Todas las facturas fueron validadas correctamente.'); 
+        }
+        
         
     }
 

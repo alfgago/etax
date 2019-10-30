@@ -121,6 +121,8 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::patch('switch-ocultar/{id}', 'InvoiceController@hideInvoice')->name('Invoice.hideInvoice');
     Route::get('validar/{id}', 'InvoiceController@validar')->name('Invoice.validar');
     Route::post('guardar-validar', 'InvoiceController@guardarValidar')->name('Invoice.GuardarValidar');
+    Route::get('lista-validar-masivo', 'InvoiceController@indexValidarMasivo')->name('Invoice.indexValidarMasivo');
+    Route::post('validacion-masiva', 'InvoiceController@validarMasivo')->name('Invoice.validacion-masiva');
 });
 
 // Rutas de facturacion recibida
@@ -141,6 +143,8 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::get('update-aceptacion', 'BillController@updateAccept')->name('Bill.updateAccept');
     Route::patch('switch-ocultar/{id}', 'BillController@hideBill')->name('Bill.hideBill');
     Route::get('download-pdf/{id}', 'BillController@downloadPdf')->name('Bill.downloadPdf');
+    Route::get('lista-validar-masivo', 'BillController@indexValidarMasivo')->name('Bill.indexValidarMasivo');
+    Route::post('validacion-masiva', 'BillController@validarMasivo')->name('Bill.validacion-masiva');
 });
 
 // Rutas de Wizard
@@ -213,6 +217,8 @@ Route::prefix('payment-methods')->group(function(){
 
 // Rutas de API data para ajax
 Route::get('/api/invoices', 'InvoiceController@indexData')->name('Invoice.data');
+Route::get('/api/invoices-masivo', 'InvoiceController@indexDataMas')->name('Invoice.dataMasivo');
+Route::get('/api/bills-masivo', 'BillController@indexDataMas')->name('Bill.dataMasivo');
 Route::get('/api/invoicesAuthorize', 'InvoiceController@indexDataAuthorize')->name('Invoice.data_authorizes');
 Route::get('/api/bills', 'BillController@indexData')->name('Bill.data');
 Route::get('/api/billsAccepts', 'BillController@indexDataAccepts')->name('Bill.data_accepts');
@@ -223,6 +229,8 @@ Route::get('/api/products', 'ProductController@indexData')->name('Product.data')
 Route::get('/api/books', 'BookController@indexData')->name('Book.data');
 Route::get('/api/payments', 'PaymentController@indexData')->name('Payment.data');
 Route::get('/api/paymentsMethods', 'PaymentMethodController@indexData')->name('PaymentMethod.data');
+Route::get('/api/oneBill/{id}', 'BillController@indexOne')->name('Bill.indexOne');
+
 
 
 //Rutas de recover
