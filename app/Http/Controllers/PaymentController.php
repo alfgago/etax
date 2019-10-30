@@ -18,6 +18,7 @@ use App\PaymentMethod;
 use App\SubscriptionPlan;
 use App\AvailableInvoices;
 use App\Team;
+use App\TransactionsLog;
 use Carbon\Carbon;
 use CybsSoapClient;
 use Illuminate\Http\Request;
@@ -242,7 +243,7 @@ class PaymentController extends Controller
             $ip = $paymentGateway->getUserIpAddr();
             $request->request->add(['IpAddress' => $ip]);
 
-            if($request->plan_sel == "c"){
+            if($request->plan_sel == "c") {
                 $coupons = Coupon::where('code', $request->coupon)->where('type',1)->count();
                 $precio_25 = 8;
                 $precio_10 = 10;
@@ -399,7 +400,8 @@ class PaymentController extends Controller
                     'payment_method_id' => $paymentMethod->id,
                     'payment_date' => Carbon::parse(now('America/Costa_Rica')),
                     'amount' => $amount,
-                    'coupon_id' => $cuponId
+                    'coupon_id' => $cuponId,
+                    'payment_gateway' => 'cybersource'
                 ]
             );
 
@@ -413,7 +415,14 @@ class PaymentController extends Controller
 
             //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
             if( ! isset($payment->charge_token) ) {
-                $chargeProof = $paymentGateway->pay($request);
+                $transLog = TransactionsLog::Create([
+                    'id_payment' => $payment->id ?? '',
+                    'status' => 'processing',
+                    'id_paymethod' => $paymentMethod->id ?? '',
+                    'processor' => $paymentMethod->payment_gateway ?? ''
+                ]);
+                $transLog->save();
+                $chargeProof = $paymentGateway->pay($request, false, $transLog);
                 if($chargeProof){
                     $payment->charge_token = $chargeProof;
                     $payment->save();
