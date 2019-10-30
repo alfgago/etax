@@ -132,7 +132,7 @@ class ProcessSubscriptionPayments implements ShouldQueue
                     $data->cardTokenId = $paymentMethod->token_bn;
                     $data->token_bn = $paymentMethod->token_bn;
                     $data->product_id = $sale->etax_product_id;
-                    $transLog = TransactionsLog::Create([
+                    $transLog = TransactionsLog::create([
                         'id_payment' => $payment->id ?? '',
                         'status' => 'processing',
                         'id_paymethod' => $paymentMethod->id ?? '',

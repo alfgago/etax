@@ -415,7 +415,7 @@ class PaymentController extends Controller
 
             //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
             if( ! isset($payment->charge_token) ) {
-                $transLog = TransactionsLog::Create([
+                $transLog = TransactionsLog::create([
                     'id_payment' => $payment->id ?? '',
                     'status' => 'processing',
                     'id_paymethod' => $paymentMethod->id ?? '',
