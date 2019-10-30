@@ -314,7 +314,7 @@ class CybersourcePaymentProcessor extends PaymentProcessor
      * Params referenceCode, deviceFingerPrintID, subscriptionID, Amount
      *
      */
-    public function pay($request, $isBuy = false) {
+    public function pay($request, $isBuy = false, $transLog = false) {
         $referenceCode = $request->product_id;
         $merchantId = 'tc_cr_011007172';
         $client = new CybsSoapClient();
@@ -340,7 +340,14 @@ class CybersourcePaymentProcessor extends PaymentProcessor
 
         $appliedCharge = $client->runTransaction($requestClient);
         
-        Log::info("Resultado CyberSource: " . json_encode($appliedCharge) );
+        Log::info("Resultado CyberSource: " . json_encode($appliedCharge));
+
+        if ($transLog) {
+            $transLog->response = json_encode($appliedCharge);
+            $transLog->status = $appliedCharge->decision === 'ACCEPT' ? 'ACCEPT' : 'REJECTED';
+            $transLog->save();
+        }
+
         
         if($appliedCharge->decision === 'ACCEPT') {
             if ($isBuy) {
