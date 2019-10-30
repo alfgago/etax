@@ -1749,9 +1749,8 @@ class InvoiceController extends Controller
         $consecutivo = null;
         $invoiceList = array();
         foreach ($facturas as $row){
-            //try{
+            try{
 
-            //dd($company->id_number."=".$row['cedulaempresa']);
                 if($row['cedulaempresa'] == $company->id_number){
 
                     if( isset($row['identificacionreceptor']) ){
@@ -1858,12 +1857,11 @@ class InvoiceController extends Controller
                     //Log::warning('Factura repetida en envio masivo '.$identificacionCliente);
                 }
                    
-            /*}catch( \Throwable $ex ){
+            }catch( \Throwable $ex ){
                 Log::error("Error en factura ENVIO MASIVO EXCEL:" . $ex);
-            }*/
+            }
         }
         $company->save();
-      //  dd($facturas);
     }
 
 
