@@ -11,7 +11,7 @@
   
   <div class="wizard-popup">
     <div class="titulo-bienvenida">
-      <h2>¡Bienvenido a eTax! En poco tiempo podrá disfrutar de su prueba de 48 horas.
+      <h2>¡Bienvenido a eTax! En poco tiempo podrá disfrutar de su prueba de 15 días.
       </h2>
       <p>En poco tiempo podrá utilizar la herramienta más fiable para el cálculo de IVA y facturación electrónica. Para iniciar, complete sus datos a continuación.
       </p>
