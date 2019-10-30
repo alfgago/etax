@@ -91,6 +91,12 @@ class InvoiceController extends Controller
         return view('Invoice/index');
     }
     
+
+    /**
+     * Index Validar Masivo
+     * Index de las lineas de las facturas. Usa indexData para cargar las facturas con AJAX
+     * @return \Illuminate\Http\Response
+     */
     public function indexValidarMasivo(){
         $company = currentCompanyModel();
         $categoriaProductos = ProductCategory::get();
@@ -121,13 +127,6 @@ class InvoiceController extends Controller
         $querySelect = CodigoIvaRepercutido::where('hidden', false);
         
         $cat['todo'] = CodigoIvaRepercutido::where('hidden', false)->get();
-        
-        
-        
-        
-        
-        
-        
 
         $filtroTarifa = $request->get('filtroTarifa');
         switch($filtroTarifa){
@@ -222,14 +221,14 @@ class InvoiceController extends Controller
                     $CatPorcentaje = $cat['todo'];
                 }
 
-                return view('Invoice.ext.select-codigos', [
+                return view('Bill.ext.select-codigos', [
                     'company' => $company,
                     'cat' => $CatPorcentaje,
                     'item' => $invoiceItem
                 ])->render();                    
             })
             ->editColumn('categoria_hacienda', function(InvoiceItem $invoiceItem) use($categorias) {
-                return view('Invoice.ext.select-categorias', [
+                return view('Bill.ext.select-categorias', [
                     'categoriaProductos' => $categorias,
                     'item' => $invoiceItem
                 ])->render();
@@ -950,6 +949,7 @@ class InvoiceController extends Controller
             return view('Invoice/validar', compact('invoice', 'commercialActivities', 'codigosEtax', 'categoriaProductos', 'company'));
         
     }
+    
     public function validarMasivo(Request $request){
         $failInvoices = [];
         $errors = false;

@@ -41,14 +41,14 @@
             </select>
           </div>
       </div>
-    <form method="POST" action="/facturas-emitidas/validacion-masiva" class="show-form btn-submit-form">
+    <form method="POST" action="/facturas-recibidas/validacion-masiva" class="show-form btn-submit-form">
       @csrf
       @method('post') 
-      <table id="invoice-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+      <table id="bill-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
               <th data-priority="3">Comprobante</th>
-              <th data-priority="3">Receptor</th>
+              <th data-priority="3">Proveedor</th>
               <th data-priority="5">Unidad</th>
               <th data-priority="5">Subtotal</th>
               <th data-priority="5">Monto IVA</th>
@@ -56,6 +56,7 @@
               <th data-priority="5">Tarifa Iva</th>
               <th data-priority="3">Código eTax</th>
               <th data-priority="3">Categoría Hacienda</th>
+              <!--th data-priority="4">Acciones</th-->
             </tr>
           </thead>
           <thead>
@@ -64,21 +65,21 @@
                <td>
                   <div class="">
                     <select class="form-control iva_type_all"  placeholder="Seleccione un código eTax"  >
-                        <option value="0" porcentaje="">-- Seleccione --</option>
+                        <option value="0" porcentaje="101" preselect=1>-- Seleccione --</option>
                         <?php
                           $preselectos = array();
-                          foreach($company->repercutidos as $repercutido){
-                            $preselectos[] = $repercutido->id;
+                          foreach($company->soportados as $soportado){
+                            $preselectos[] = $soportado->id;
                           }
                         ?>
-                        @if(@$company->repercutidos[0]->id)
-                          @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+                        @if(@$company->soportados[0]->id)
+                          @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
                               <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select_all" {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden preselect=0' : 'preselect=1' }}  >{{ $tipo['name'] }}</option>
                           @endforeach
-                          <option class="mostrarTodos_all" porcentaje="" preselect="1" value="1">Mostrar Todos</option>
+                          <option class="mostrarTodos_all" porcentaje="101" preselect="1" value="1">Mostrar Todos</option>
                         @else
-                          @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
-                          <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select_all"  preselect="1">{{ $tipo['name'] }}</option>
+                          @foreach ( \App\CodigoIvaSoportado::where('hidden', false)->get() as $tipo )
+                          <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select_all" preselect="1">{{ $tipo['name'] }}</option>
                           @endforeach
                         @endif
           
@@ -95,6 +96,7 @@
                     </select>
                   </div>
                </td>
+               <!--td></td-->
              </tr>
 
           </thead>
@@ -116,13 +118,13 @@
   
 var datatable;
 $(function() {
-  datatable = $('#invoice-table').DataTable({
+  datatable = $('#bill-table').DataTable({
     processing: true,
     serverSide: true,
     lengthMenu: [ 100, 500, 1000, 2000],
     pageLength: 1000,
     ajax: {
-      url: "/api/invoices-masivo",
+      url: "/api/bills-masivo",
       data: function(d){
           d.filtroTarifa = $( '#filtro-select-tarifa' ).val();
           d.filtroValidado = $( '#filtro-select-codificadas' ).val();
@@ -134,7 +136,7 @@ $(function() {
     order: [[ 1, 'desc' ]],
     columns: [
       { data: 'document_number', name: 'invoices.document_number' },
-      { data: 'client', name: 'clients.fullname' },
+      { data: 'client', name: 'providers.fullname' },
       { data: 'unidad', name: 'invoice_items.measure_unit'},
       { data: 'subtotal', name: 'invoice_items.subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
       { data: 'iva_amount', name: 'invoice_items.iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
@@ -142,6 +144,7 @@ $(function() {
       { data: 'tarifa_iva', name: 'invoice_items.tarifa_iva', orderable: false, searchable: false },
       { data: 'codigo_etax', name: 'codigo_etax', orderable: false, searchable: false },
       { data: 'categoria_hacienda', name: 'categoria_hacienda', orderable: false, searchable: false },
+      //{ data: 'actions', name: 'actions', orderable: false, searchable: false }, //Queda documentado pero con desbloquear esto y arriba la tabla se podria rechazar desde esta parte tambien.
     ],
     createdRow: function (row, data, index) {
       if(data.hide_from_taxes){
@@ -195,7 +198,9 @@ function reloadDataTableTarifa() {
     parent.find('option').hide();
     parent.find("option").each(function(){
     var porcentaje = $(this).attr('porcentaje');
-      if(porcentaje == filtroTarifa){
+    var preselect = $(this).attr('preselect');
+      if((porcentaje == filtroTarifa && preselect == 1) || porcentaje == 101){
+        $(this).removeAttr("hidden");
         $(this).show();
       }
     });
@@ -208,6 +213,40 @@ function reloadDataTableTarifa() {
   reloadDataTable();
 }
 
+
+function confirmDecline( id ) {
+  $.ajax({
+      url: "/api/oneBill/"+id,
+      dataType: 'json',
+      type: 'GET',
+      success: function(bill){
+        console.log(bill);
+        var formId = "#decline-form-"+id;
+        Swal.fire({
+          title: '¿Está seguro que desea rechazar la factura a la que pertenece esta linea?',
+          html: '<table class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%"><thead><tr>'+
+              '<th>Consecutivo</th>'+
+              '<th>Receptor</th>'+
+              '<th>Total Factura</th>'+
+              '<th>F. Generada</th>'+
+              '</tr></thead><tbody><tr>'+
+              '<th>'+ bill["document_number"] +'</th>'+
+              '<th>'+ bill["provider_first_name"] +'</th>'+
+              '<th>'+ bill["total"] +'</th>'+
+              '<th>'+ bill["generated_date"] +'</th>'+
+              '</tr></tbody>',
+          type: 'warning',
+          showCloseButton: true,
+          showCancelButton: true,
+          confirmButtonText: 'Sí, quiero eliminarla'
+        }).then((result) => {
+          if (result.value) {
+            $(formId).submit();
+          }
+        })
+      }
+  });
+}
 
 $(document).ready(function(){
 
@@ -237,32 +276,14 @@ $(document).ready(function(){
         parent.find('.product_type_all').val( tipoProducto ).change();
 
     });
-    $(".iva_type").change(function(){
-      var iva_type  = $(this).val(); 
-      var parent = $(this).parents('tr');
-      console.log(parent);
-      parent.find('.product_type option').hide();
-      var tipoProducto = 0;
-      parent.find(".product_type option").each(function(){
-        var posibles = $(this).attr('posibles').split(",");
-        if(posibles.includes(iva_type)){
-          $(this).show();
-          if( !tipoProducto ){
-            tipoProducto = $(this).val();
-          }
-        }
-      });
-      parent.find('.product_type').val( tipoProducto ).change();
-
-      });
+    $(".iva_type").change(function(){    
+    });
       $('.iva_type').change();
       $(".product_type").each(function(){
         $(this).val($(this).attr('curr')).change();
-      })
+      });
 });
-  
-  
-    $( document ).ready(function() {
+   $( document ).ready(function() {
 
       $(".iva_type_all").change(function(){
         var filtroTarifa = $( '#filtro-select-tarifa' ).val();
@@ -285,6 +306,7 @@ $(document).ready(function(){
           })
         }
       });     
+
     }); 
 
   
