@@ -286,8 +286,8 @@ $company = currentCompanyModel();
                     <input type="text" class="form-control" name="document_key" id="document_key" value="{{$document_key}}" required readonly="readonly">
                   </div>
 
-                  <div class="form-group col-md-4 hidden">
-                    <label for="generated_date">Fecha</label>
+                  <div class="form-group col-md-6 ">
+                    <label for="generated_date">Fecha Emision</label>
                     <div class='input-group date inputs-fecha'>
                         <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
                         <span class="input-group-addon">
@@ -315,6 +315,205 @@ $company = currentCompanyModel();
                       </span>
                     </div>
                   </div>
+
+
+                  <div class="form-group col-md-6">
+                    <label for="due_date">Recurrencia</label>
+                    <div class='input-group date inputs-fecha'>
+                      <select class="form-control" id="recurrencia" name="recurrencia">
+                        <option value="0">Ninguna</option>
+                        <option value="1">Semanal</option>
+                        <option value="2">Quincenal</option>
+                        <option value="3">Mensual</option>
+                        <option value="4">Anual</option>
+                        <option value="5">Cantidad de días</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 div-semanal div-recurrencia hidden">
+                    <div class="row">
+                      <div class="form-group col-md-12">
+                        <label for="due_date">Día de la semana</label>
+                        <div class='input-group date inputs-fecha'>
+                          <select class="form-control" id="dia" name="dia">
+                            <option value="1">Lunes</option>
+                            <option value="2">Martes</option>
+                            <option value="3">Miercoles</option>
+                            <option value="4">Jueves</option>
+                            <option value="5">Viernes</option>
+                            <option value="6">Sabado</option>
+                            <option value="7">Domingo</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 div-quincenal div-recurrencia hidden">
+                    <div class="row">
+                      <div class="form-group col-md-6">
+                        <label for="due_date">Primer quincena</label>
+                        <div class='input-group date inputs-fecha'>
+                          <select class="form-control" id="primer_quincena" name="primer_quincena">
+                            <option value="01">01</option>
+                            <option value="02">02</option>
+                            <option value="03">03</option>
+                            <option value="04">04</option>
+                            <option value="05">05</option>
+                            <option value="06">06</option>
+                            <option value="07">07</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
+                            <option value="14">14</option>
+                            <option value="15">15</option>
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <div class="form-group col-md-6">
+                        <label for="due_date">Segunda quincena</label>
+                        <div class='input-group date inputs-fecha'>
+                          <select class="form-control" id="segunda_quincena" name="segunda_quincena">
+                            <option value="15">15</option>
+                            <option value="16">16</option>
+                            <option value="17">17</option>
+                            <option value="18">18</option>
+                            <option value="19">19</option>
+                            <option value="20">20</option>
+                            <option value="21">21</option>
+                            <option value="22">22</option>
+                            <option value="23">23</option>
+                            <option value="24">24</option>
+                            <option value="25">25</option>
+                            <option value="26">26</option>
+                            <option value="27">27</option>
+                            <option value="28">28</option>
+                            <option value="29">29</option>
+                            <option value="30">30</option>
+                            <option value="31">31</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 div-mensual div-recurrencia hidden">
+                    <div class="row">
+                      <div class="form-group col-md-12">
+                        <label for="due_date">Día</label>
+                        <div class='input-group date inputs-fecha'>
+                          <select class="form-control" id="mensual" name="mensual">
+                            <option value="01">01</option>
+                            <option value="02">02</option>
+                            <option value="03">03</option>
+                            <option value="04">04</option>
+                            <option value="05">05</option>
+                            <option value="06">06</option>
+                            <option value="07">07</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
+                            <option value="14">14</option>
+                            <option value="15">15</option>
+                            <option value="16">16</option>
+                            <option value="17">17</option>
+                            <option value="18">18</option>
+                            <option value="19">19</option>
+                            <option value="20">20</option>
+                            <option value="21">21</option>
+                            <option value="22">22</option>
+                            <option value="23">23</option>
+                            <option value="24">24</option>
+                            <option value="25">25</option>
+                            <option value="26">26</option>
+                            <option value="27">27</option>
+                            <option value="28">28</option>
+                            <option value="29">29</option>
+                            <option value="30">30</option>
+                            <option value="31">31</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 div-anual div-recurrencia hidden">
+                    <div class="row">
+                      <div class="form-group col-md-4">
+                        <label for="due_date">Día</label>
+                        <div class='input-group date inputs-fecha'>
+                          <select class="form-control" id="dia_recurrencia" name="dia_recurrencia">
+                            <option value="01">01</option>
+                            <option value="02">02</option>
+                            <option value="03">03</option>
+                            <option value="04">04</option>
+                            <option value="05">05</option>
+                            <option value="06">06</option>
+                            <option value="07">07</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
+                            <option value="14">14</option>
+                            <option value="15">15</option>
+                            <option value="16">16</option>
+                            <option value="17">17</option>
+                            <option value="18">18</option>
+                            <option value="19">19</option>
+                            <option value="20">20</option>
+                            <option value="21">21</option>
+                            <option value="22">22</option>
+                            <option value="23">23</option>
+                            <option value="24">24</option>
+                            <option value="25">25</option>
+                            <option value="26">26</option>
+                            <option value="27">27</option>
+                            <option value="28">28</option>
+                            <option value="29">29</option>
+                            <option value="30">30</option>
+                            <option value="31">31</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="form-group col-md-8">
+                        <label for="due_date">Mes</label>
+                        <div class='input-group date inputs-fecha'>
+                          <select class="form-control" id="mes_recurrencia" name="mes_recurrencia">
+                            <option value="01">Enero</option>
+                            <option value="02">Febrero</option>
+                            <option value="03">Marzo</option>
+                            <option value="04">Abril</option>
+                            <option value="05">Mayo</option>
+                            <option value="06">Junio</option>
+                            <option value="07">Julio</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Setiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 div-cantidad-dias div-recurrencia hidden">
+                    <div class="row">
+                      <div class="form-group col-md-12">
+                        <label for="due_date">Día de la semana</label>
+                        <div class='input-group date inputs-fecha'>
+                          <input type="number" min="0" class="form-control" id="cantidad_dias" name="cantidad_dias"/>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
 
                   <div class="form-group col-md-12">
                       <label for="payment_type">Actividad Comercial</label>
@@ -495,6 +694,26 @@ $(document).ready(function(){
     } else {
       $('#tipo_cambio').val('1.00')
     }
+  });
+
+  $('#recurrencia').change(function() {
+    var recurrencia = $(this).val();
+    $(".div-recurrencia").addClass("hidden");
+    if(recurrencia == 1){
+      $(".div-semanal").removeClass("hidden");
+    }
+    if(recurrencia == 2){
+      $(".div-quincenal").removeClass("hidden");
+    }
+    if(recurrencia == 3){
+      $(".div-mensual").removeClass("hidden");
+    }
+    if(recurrencia == 4){
+      $(".div-anual").removeClass("hidden");
+    }
+    if(recurrencia == 5){
+      $(".div-cantidad-dias").removeClass("hidden");
+    }          
   });
 });
 
