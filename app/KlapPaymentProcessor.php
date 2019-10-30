@@ -216,9 +216,10 @@ class KlapPaymentProcessor extends PaymentProcessor
                 $sale = Sales::updateOrCreate([
                     "user_id" => $user->id,
                     "company_id" => $company->id,
-                    "etax_product_id" => $request->producto_id,
+                    "etax_product_id" => $request->product_id,
                     "status" => 2,
-                    "recurrency" => '0'
+                    "recurrency" => '0',
+                    "is_subscription" => false
                 ]);
                 $payment = Payment::updateOrCreate(
                     [
