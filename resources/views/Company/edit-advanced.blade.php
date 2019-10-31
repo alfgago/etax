@@ -203,7 +203,15 @@
 	                                    @endforeach
 	                                </select>
 	                            </div>
-						    
+
+						    <div class="form-group col-md-6">
+						      <label for="default_currency">Aceptar facturas por correo automáticamente</label>
+						      <select class="form-control" name="auto_accept_email" id="default_currency" required>
+                                <option value="1" {{ @$company->auto_accept_email == 1 ? 'selected' : '' }}>Sí</option>
+                                <option value="0" {{ @$company->auto_accept_email == 0 ? 'selected' : '' }}>No</option>
+                              </select>
+						    </div>
+
 						    <div class="form-group col-md-6">
 						      <label for="default_currency">Tipo de moneda por defecto</label>
 						      <select class="form-control" name="default_currency" id="default_currency" required>
@@ -211,7 +219,7 @@
                                 <option value="USD" {{ @$company->default_currency == 'USD' ? 'selected' : '' }}>USD</option>
                               </select>
 						    </div>
-						    
+			    
 						    <div class="form-group col-md-6">
 						      <label for="card_retention">% Retención Tarjetas</label>
 						      <select class="form-control" id="card_retention" name="card_retention" >
