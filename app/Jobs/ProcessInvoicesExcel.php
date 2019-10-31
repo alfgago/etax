@@ -373,8 +373,17 @@ class ProcessInvoicesExcel implements ShouldQueue
                         $bill->accept_iva_acreditable = $bill->iva_amount;
                         $bill->accept_iva_gasto = 0;
                         $bill->description = "FEC" . ($invoice->description ?? '');
+                        if($today <= $fechaComparacion){
+                            $bill->hacienda_status = '99';
+                            $bill->generation_method = "etax-programada";
+                            $bill->document_key = $invoice->document_key."programada";
+                            $bill->document_number = "programada";
+                        }
                         $bill->save();
-                        $company->last_bill_ref_number = $bill->reference_number;
+
+                        if($invoice->hacienda_status != "99"){
+                            $company->last_bill_ref_number = $bill->reference_number;
+                        }
 
                     }
                     if($invoice->hacienda_status != "99"){
