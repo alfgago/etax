@@ -1901,10 +1901,7 @@ class InvoiceController extends Controller
 
     } 
 
-    public function envioProgramada(){
-        $invoices = Invoice::where("hacienda_status","99")->get();
-
-    }
+    
    /*public function guardarEnvioExcel($xlsInvoices){
 
         $company = Company::find($xlsInvoices[0]->company_id);
