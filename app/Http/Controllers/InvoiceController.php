@@ -358,10 +358,8 @@ class InvoiceController extends Controller
      */
     public function sendHacienda(Request $request)
     {
-
-        dd($request);
         //revision de branch para segmentacion de funcionalidades por tipo de documento
-        try {
+        //try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
             $request->validate([
                 'subtotal' => 'required',
@@ -413,14 +411,39 @@ class InvoiceController extends Controller
 
                     $start_date = Carbon::parse(now('America/Costa_Rica'));
                     $today = $start_date->day."/".$start_date->month."/".$start_date->year;
+
                     if($today != $request->generated_date){
                         $invoice->hacienda_status = '99';
                         $invoice->generation_method = "etax-programada";
                         $invoice->document_key = $invoice->document_key."programada";
                         $invoice->document_number = "programada";
                     }
-                    $invoice->save();
-
+                    $invoice->save();                    
+                    if($request->recurrencia != "0"){
+                        $recurrencia = new RecurringInvoice();
+                        $recurrencia->company_id = $company->id;
+                        $recurrencia->invoice_id = $invoice->id;
+                        $recurrencia->frecuency = $request->recurrencia;
+                        $options = null;
+                        if($request->recurrencia == "1"){
+                            $options = $request->dia;
+                        }
+                        if($request->recurrencia == "2"){
+                            $options = $request->primer_quincena.",".$request->segunda_quincena;
+                        }
+                        if($request->recurrencia == "3"){
+                            $options = $request->mensual;
+                        }
+                        if($request->recurrencia == "4"){
+                            $options = $request->dia_recurrencia."/".$request->mes_recurrencia;
+                        }
+                        if($request->recurrencia == "5"){
+                            $options = $request->cantidad_dias;
+                        }
+                        $recurrencia->options = $options;
+                        $recurrencia->next_send = $recurrencia->proximo_envio($today,$request->generated_date);
+                        $recurrencia->save();    
+                    }
                     if($invoice->hacienda_status != '99'){
                         if (!empty($invoiceData)) {
                             $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
@@ -464,10 +487,10 @@ class InvoiceController extends Controller
             }else{
                 return back()->withError('Mes seleccionado ya fue cerrado');
             }
-        } catch( \Exception $ex ) {
+        /*} catch( \Exception $ex ) {
             Log::error("ERROR Envio de factura a hacienda -> ".$ex);
             return back()->withError( 'Ha ocurrido un error al enviar factura.' );
-        }
+        }*/
     }
     
     private function storeBillFEC($request) {
