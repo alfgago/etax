@@ -644,15 +644,14 @@ class PaymentController extends Controller
                 $request->request->add(['discount_reason' => null]);
                 $request->request->add(['etax_product_id' => 16]);
                 $request->request->add(['referenceCode' => 16]);
-
-                $client = \App\Client::where('company_id', $company->id)->where('id_number', $request->id_number)->first();
+                $client = \App\Client::where('company_id', 1)->where('id_number', $request->id_number)->first();
                 $request->request->add(['client_code' => $client->id]);
                 $request->request->add(['client_id_number' => $client->id_number]);
                 $request->request->add(['client_id' => $client->id_number]);
                 $request->request->add(['tipo_persona' => $client->tipo_persona]);
 
                 $chargeCreated = $paymentGateway->comprarProductos($request);
-                if($chargeCreated){
+                if($chargeCreated) {
                     $invoiceData = $paymentGateway->setInvoiceInfo($request);
                     $procesoFactura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
                     $company->save();
@@ -664,7 +663,7 @@ class PaymentController extends Controller
                 return redirect()->back()->withErrors('No se pudo procesar el pago');
             }
         }catch ( \Exception $e){
-            Log::error('Error al anular facturar -->'.$e);
+            Log::error('Error en compra de contabilidad -->'.$e);
             return redirect()->back()->withErrors('Hubo un error con el pago');
         }
     }
