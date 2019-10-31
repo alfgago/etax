@@ -414,22 +414,21 @@ class PaymentController extends Controller
             $request->request->add(['token_bn' => $paymentMethod->token_bn]);
 
             //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
-            if( ! isset($payment->charge_token) ) {
-                $transLog = TransactionsLog::create([
-                    'id_payment' => $payment->id ?? '',
-                    'status' => 'processing',
-                    'id_paymethod' => $paymentMethod->id ?? '',
-                    'processor' => $paymentMethod->payment_gateway ?? ''
-                ]);
-                $transLog->save();
-                $chargeProof = $paymentGateway->pay($request, false, $transLog);
-                if($chargeProof){
-                    $payment->charge_token = $chargeProof;
-                    $payment->save();
-                }
+            $transLog = TransactionsLog::create([
+                'id_payment' => $payment->id ?? '',
+                'status' => 'processing',
+                'id_paymethod' => $paymentMethod->id ?? '',
+                'processor' => $paymentMethod->payment_gateway ?? ''
+            ]);
+            $transLog->save();
+
+            $chargeProof = $paymentGateway->pay($request, false, $transLog);
+            if($chargeProof) {
+                $payment->charge_token = $chargeProof;
+                $payment->save();
             }
 
-            if ( $chargeProof ) {
+            if ($chargeProof) {
                 $payment->proof = $payment->charge_token;
                 $payment->payment_status = 2;
                 $payment->save();
