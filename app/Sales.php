@@ -85,7 +85,7 @@ class Sales extends Model
     }
     
     public static function startTrial ( $productId, $recurrency ) {
-        $trialEndDate = Carbon::parse( now('America/Costa_Rica') )->addDays(2);
+        $trialEndDate = Carbon::parse( now('America/Costa_Rica') )->addDays(15);
         
         $sale = Sales::createUpdateSubscriptionSale ( $productId, $recurrency );
         $sale->status = 4;

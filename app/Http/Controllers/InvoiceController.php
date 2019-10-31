@@ -99,6 +99,153 @@ class InvoiceController extends Controller
         return view('Invoice/index');
     }
     
+
+    /**
+     * Index Validar Masivo
+     * Index de las lineas de las facturas. Usa indexData para cargar las facturas con AJAX
+     * @return \Illuminate\Http\Response
+     */
+    public function indexValidarMasivo(){
+        $company = currentCompanyModel();
+        $categoriaProductos = ProductCategory::get();
+        $unidades = InvoiceItem::select('invoice_items.measure_unit')->where('invoice_items.company_id', '=', $company->id)->groupBy('invoice_items.measure_unit')->get();
+        return view('Invoice/index-masivo', compact('company', 'categoriaProductos', 'unidades'));
+    }
+
+     /**
+     * Returns the required ajax data for massive categorization.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexDataMasivo( Request $request ) {
+        $company = currentCompanyModel();
+
+        $query = InvoiceItem::
+                select('invoice_items.id as item_id', 'invoice_items.*')->
+                where('invoice_items.company_id', $company->id)
+                ->join('invoices', 'invoice_items.invoice_id', '=', 'invoices.id' )
+                //->join('clients', 'invoices.client_id', '=', 'clients.id' )
+                ;
+
+        $cat = [];
+
+        $querySelect = CodigoIvaRepercutido::where('hidden', false);
+        
+        $cat['todo'] = CodigoIvaRepercutido::where('hidden', false)->get();
+
+        $filtroTarifa = $request->get('filtroTarifa');
+        switch($filtroTarifa){
+            case 10:
+                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 0');
+                $cat['cero'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 0)->get();
+                break;
+            case 1:
+                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 1');
+                $cat['uno'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 1)->get();
+                break;
+            case 2:
+                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 2');
+                $cat['dos'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 2)->get();
+                break;
+            case 13:
+                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 13');
+                $cat['trece'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 13)->get();
+                break;
+            case 4:
+                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 4');
+                $cat['cuatro'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 4)->get();
+                break;
+            case 8:
+                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 8');
+                $cat['ocho'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 8)->get();;
+                break;
+            default:
+                $cat['cero'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 0)->get();
+                $cat['uno'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 1)->get();
+                $cat['dos'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 2)->get();
+                $cat['trece'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 13)->get();
+                $cat['cuatro'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 4)->get();
+                $cat['ocho'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 8)->get();
+        }
+
+       $filtroValidado = $request->get('filtroValidado');
+       switch($filtroValidado){
+            case 1:
+                $query = $query->where('invoices.is_code_validated', false);
+                break;
+            case 2:
+                $query = $query->where('invoices.is_code_validated', true);
+                break;
+        }
+
+        $filtroUnidad = $request->get('filtroUnidad');
+        if(isset($filtroUnidad)){
+            $query = $query->where('measure_unit', '=', $filtroUnidad);
+        }
+
+        $categorias = ProductCategory::get(); 
+                
+
+        $return = datatables()->eloquent( $query )
+            ->addColumn('document_number', function(InvoiceItem $invoiceItem) {
+                return $invoiceItem->invoice->document_number;
+            })
+            ->addColumn('client', function(InvoiceItem $invoiceItem) {
+                return !empty($invoiceItem->invoice->client_first_name) ? $invoiceItem->invoice->client_first_name.' '.$invoiceItem->invoice->client_last_name : $invoiceItem->invoice->clientName();
+            })
+            ->editColumn('unidad', function(InvoiceItem $invoiceItem) {
+                return $invoiceItem->measure_unit ?? 'Unid';
+            })
+            ->editColumn('document_type', function(InvoiceItem $invoiceItem) {
+                return $invoiceItem->invoice->documentTypeName();
+            })
+            ->addColumn('tarifa_iva', function(InvoiceItem $invoiceItem) {
+                $invoiceItem->tarifa_iva = !empty($invoiceItem->iva_amount) ? ($invoiceItem->iva_amount / $invoiceItem->subtotal * 100) : 0;
+                $invoiceItem->tarifa_iva = round($invoiceItem->tarifa_iva * 100) / 100;
+                return $invoiceItem->tarifa_iva;
+            })
+            ->editColumn('generated_date', function(InvoiceItem $invoiceItem) {
+                return $invoiceItem->invoice->generatedDate()->format('d/m/Y');
+            })
+            ->addColumn('codigo_etax', function(InvoiceItem $invoiceItem) use($cat, $company) {
+                
+
+                if($invoiceItem->tarifa_iva == 13){
+                    $catPorcentaje = $cat['trece'];
+                }elseif($invoiceItem->tarifa_iva == 0){
+                    $catPorcentaje = $cat['cero'];
+                }elseif($invoiceItem->tarifa_iva == 1){
+                    $catPorcentaje = $cat['uno'];
+                }elseif($invoiceItem->tarifa_iva == 2){
+                    $catPorcentaje = $cat['dos'];
+                }elseif($invoiceItem->tarifa_iva == 4){
+                    $catPorcentaje = $cat['cuatro'];
+                }elseif($invoiceItem->tarifa_iva == 8){
+                    $catPorcentaje = $cat['ocho'];
+                }else{
+                    $catPorcentaje = $cat['todo'];
+                }
+
+                return view('Bill.ext.select-codigos', [
+                    'company' => $company,
+                    'cat' => $catPorcentaje,
+                    'item' => $invoiceItem
+                ])->render();                    
+            })
+            ->editColumn('categoria_hacienda', function(InvoiceItem $invoiceItem) use($categorias) {
+                return view('Bill.ext.select-categorias', [
+                    'categoriaProductos' => $categorias,
+                    'item' => $invoiceItem
+                ])->render();
+                
+            })
+            ->rawColumns(['categoria_hacienda', 'codigo_etax'])
+            ->toJson();
+            return $return;
+
+    }
+
+
     /**
      * Returns the required ajax data.
      *
@@ -805,6 +952,63 @@ class InvoiceController extends Controller
             $codigosEtax = CodigoIvaRepercutido::where('hidden', false)->get();
             $categoriaProductos = ProductCategory::whereNotNull('invoice_iva_code')->get();
             return view('Invoice/validar', compact('invoice', 'commercialActivities', 'codigosEtax', 'categoriaProductos', 'company'));
+        
+    }
+    
+    public function validarMasivo(Request $request){
+        $failInvoices = [];
+        $errors = false;
+        foreach( $request->items as $key => $item ) {
+            $invoiceItem = InvoiceItem::with('invoices')->findOrFail($key);
+            $invoice = $invoiceItem->invoice;
+            if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
+                InvoiceItem::where('id', $key)
+                ->update([
+                  'iva_type' =>  $item['iva_type'],
+                  'product_type' =>  $item['product_type']
+                ]);
+                $validated = true;
+                foreach($invoice->items as $item){
+                    if(!isset($item->iva_type) || !isset($item->product_type)){
+                        $validated = false;
+                    }
+                }
+                if($validated){
+                    $invoice->is_code_validated = true;
+                    $invoice->save();
+                }
+                
+                $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $invoice,
+                    [
+                        'company_id' => $invoice->company_id,
+                        'id' => $invoice->id,
+                        'document_key' => $invoice->document_key
+                    ],
+                    "La factura ". $invoice->document_number . " ha sido validada."
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
+                
+                clearInvoiceCache($invoice);
+            }else{
+                $errors = true;
+                $resultInvoices[$invoice->document_number] = ['status' => 0];
+
+            }
+        }
+        if($errors){
+            $result = 'Las lineas de las facturas: ';
+            foreach($resultInvoices as $key => $invoice){
+                $result = $result . $key . " ";              
+            }
+            $result = $result . 'fallaron ya que el mes ya fue cerrado.';
+            return back()->withError($result);
+        }else{
+            return back()->withMessage('Todas las facturas fueron validadas correctamente.'); 
+        }
+        
         
     }
 

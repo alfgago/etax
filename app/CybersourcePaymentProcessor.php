@@ -315,48 +315,53 @@ class CybersourcePaymentProcessor extends PaymentProcessor
      *
      */
     public function pay($request, $isBuy = false, $transLog = false) {
-        $referenceCode = $request->product_id;
-        $merchantId = 'tc_cr_011007172';
-        $client = new CybsSoapClient();
-        $requestClient = $client->createRequest($referenceCode);
+        try {
+            Log::info("Corriendo transaccion en Cybersource");
+            $referenceCode = $request->product_id;
+            $merchantId = 'tc_cr_011007172';
+            $client = new CybsSoapClient();
+            $requestClient = $client->createRequest($referenceCode);
 
-        $ccAuthService = new stdClass();
-        $ccAuthService->run = 'true';
-        $requestClient->ccAuthService = $ccAuthService;
+            $ccAuthService = new stdClass();
+            $ccAuthService->run = 'true';
+            $requestClient->ccAuthService = $ccAuthService;
 
-        $ccCaptureService = new stdClass();
-        $ccCaptureService->run = 'true';
-        $requestClient->CreatePaymentService = $ccCaptureService;
+            $ccCaptureService = new stdClass();
+            $ccCaptureService->run = 'true';
+            $requestClient->CreatePaymentService = $ccCaptureService;
 
-        $recurringSubscriptionInfo = new stdClass();
-        $recurringSubscriptionInfo->subscriptionID = $request->token_bn;
-        $requestClient->recurringSubscriptionInfo = $recurringSubscriptionInfo;
+            $recurringSubscriptionInfo = new stdClass();
+            $recurringSubscriptionInfo->subscriptionID = $request->token_bn;
+            $requestClient->recurringSubscriptionInfo = $recurringSubscriptionInfo;
 
-        $purchaseTotals = new stdClass();
-        $purchaseTotals->currency = 'USD';
-        $purchaseTotals->grandTotalAmount = $request->amount;
-        $requestClient->purchaseTotals = $purchaseTotals;
-        $requestClient->merchantId = $merchantId;
+            $purchaseTotals = new stdClass();
+            $purchaseTotals->currency = 'USD';
+            $purchaseTotals->grandTotalAmount = $request->amount;
+            $requestClient->purchaseTotals = $purchaseTotals;
+            $requestClient->merchantId = $merchantId;
 
-        $appliedCharge = $client->runTransaction($requestClient);
-        
-        Log::info("Resultado CyberSource: " . json_encode($appliedCharge));
+            $appliedCharge = $client->runTransaction($requestClient);
 
-        if ($transLog) {
-            $transLog->response = json_encode($appliedCharge);
-            $transLog->status = $appliedCharge->decision === 'ACCEPT' ? 'ACCEPT' : 'REJECTED';
-            $transLog->save();
-        }
+            Log::info("Resultado CyberSource: " . json_encode($appliedCharge));
 
-        
-        if($appliedCharge->decision === 'ACCEPT') {
-            if ($isBuy) {
-               return $appliedCharge;
+            if ($transLog) {
+                $transLog->response = json_encode($appliedCharge);
+                $transLog->status = $appliedCharge->decision === 'ACCEPT' ? 'ACCEPT' : 'REJECTED';
+                $transLog->save();
             }
 
-            return $appliedCharge->requestID;
+
+            if($appliedCharge->decision === 'ACCEPT') {
+                if ($isBuy) {
+                    return $appliedCharge;
+                }
+
+                return $appliedCharge->requestID;
+            }
+            return false;
+        } catch (\Exception $e) {
+            Log::error("Error corriendo transaccion en Cybersource");
         }
-        return false;
     }
     /**
      *Buy Products
@@ -394,8 +399,16 @@ class CybersourcePaymentProcessor extends PaymentProcessor
 
         $payment->save();
 
-        $chargeCreated = $this->pay($request, true);
-        if($chargeCreated->decision === "ACCEPT") {
+        $transLog = TransactionsLog::create([
+            'id_payment' => $payment->id ?? '',
+            'status' => 'processing',
+            'id_paymethod' => $paymentMethod->id ?? '',
+            'processor' => $paymentMethod->payment_gateway ?? ''
+        ]);
+        $transLog->save();
+
+        $chargeCreated = $this->pay($request, true, $transLog);
+        if(isset($chargeCreated->decision) === true && $chargeCreated->decision === "ACCEPT") {
             $sale->status = 1;
             $payment->proof = $chargeCreated->requestID;
             $payment->payment_status = 2;
