@@ -15,6 +15,7 @@ use \Carbon\Carbon;
 use App\Invoice;
 use App\InvoiceItem;
 use App\Bill;
+use App\Company;
 use App\BillItem;
 use App\RecurringInvoice;
 use App\Exports\InvoiceExport;
@@ -1752,6 +1753,37 @@ class InvoiceController extends Controller
         return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
         
         
+    }
+
+    public function envioProgramada(){
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $today = $start_date->year."-".$start_date->month."-".$start_date->day.' 23:59:59';
+        $invoices = Invoice::where("hacienda_status",'99')->where('generated_date', '<=',$today)->get();
+        foreach ($invoices as $invoice) {
+            $company = Company::where('id',$invoice->company_id)->first();
+            $invoice->document_key = $this->getDocumentKey($invoice->document_type,$company);
+            $invoice->document_number = $this->getDocReference($invoice->document_type,$company);
+            $invoice->hacienda_status = '01';
+            if($invoice->hacienda_status != '01'){
+                if ($request->document_type == '01') {
+                    $company->last_invoice_ref_number = $invoice->reference_number;
+                    $company->last_document = $invoice->document_number;
+
+                } elseif ($request->document_type == '08') {
+                    $company->last_invoice_pur_ref_number = $invoice->reference_number;
+                    $company->last_document_invoice_pur = $invoice->document_number;
+
+                } elseif ($request->document_type == '09') {
+                    $company->last_invoice_exp_ref_number = $invoice->reference_number;
+                    $company->last_document_invoice_exp = $invoice->document_number;
+                } elseif ($request->document_type == '04') {
+                    $company->last_ticket_ref_number = $invoice->reference_number;
+                    $company->last_document_ticket = $invoice->document_number;
+                }
+            }
+            $company->save();
+            $invoice->save();
+        }
     }
     
 }

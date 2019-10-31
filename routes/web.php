@@ -118,6 +118,7 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::patch('switch-ocultar/{id}', 'InvoiceController@hideInvoice')->name('Invoice.hideInvoice');
     Route::get('validar/{id}', 'InvoiceController@validar')->name('Invoice.validar');
     Route::post('guardar-validar', 'InvoiceController@guardarValidar')->name('Invoice.GuardarValidar');
+    Route::get('envioProgramada', 'InvoiceController@envioProgramada')->name('Invoice.envioProgramada');
 });
 
 // Rutas de facturacion recibida
