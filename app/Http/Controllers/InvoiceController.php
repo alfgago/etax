@@ -959,7 +959,7 @@ class InvoiceController extends Controller
         $failInvoices = [];
         $errors = false;
         foreach( $request->items as $key => $item ) {
-            $invoiceItem = InvoiceItem::with('invoices')->findOrFail($key);
+            $invoiceItem = InvoiceItem::with('invoice')->findOrFail($key);
             $invoice = $invoiceItem->invoice;
             if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
                 InvoiceItem::where('id', $key)
@@ -999,7 +999,7 @@ class InvoiceController extends Controller
             }
         }
         if($errors){
-            $result = 'Las lineas de las facturas: ';
+            $result = 'Las líneas de las facturas: ';
             foreach($resultInvoices as $key => $invoice){
                 $result = $result . $key . " ";              
             }
