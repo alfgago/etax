@@ -37,6 +37,7 @@ use PDF;
 use App\Jobs\ProcessInvoice;
 use App\Jobs\ProcessInvoicesImport;
 use App\Jobs\ProcessSendExcelInvoices;
+use App\Jobs\ProcessInvoicesExcel;
 use Illuminate\Support\Facades\Input;
 
 /**
@@ -1936,9 +1937,9 @@ class InvoiceController extends Controller
         /*}catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
         }*/
-        $XlsInvoices = XlsInvoice::select('consecutivo', 'codigoActividad', 'nombreReceptor', 'tipoIdentificacionReceptor', 'IdentificacionReceptor', 'correoReceptor', 'condicionVenta', 'plazoCredito', 'medioPago', 'codigoMoneda', 'tipoCambio', 'totalServGravados', 'totalServExentos', 'totalMercanciasGravadas', 'totalMercanciasExentas', 'totalGravado', 'totalExento', 'totalVenta', 'totalDescuentos', 'totalVentaNeta', 'totalImpuesto', 'totalOtrosCargos', 'totalComprobante','autorizado')
+        $xlsInvoices = XlsInvoice::select('consecutivo', 'codigoActividad', 'nombreReceptor', 'tipoIdentificacionReceptor', 'IdentificacionReceptor', 'correoReceptor', 'condicionVenta', 'plazoCredito', 'medioPago', 'codigoMoneda', 'tipoCambio', 'totalServGravados', 'totalServExentos', 'totalMercanciasGravadas', 'totalMercanciasExentas', 'totalGravado', 'totalExento', 'totalVenta', 'totalDescuentos', 'totalVentaNeta', 'totalImpuesto', 'totalOtrosCargos', 'totalComprobante','autorizado')
             ->where('company_id',$companyId)->distinct('consecutivo')->get();
-        return view("Invoice/confirmacion-envio")->with('facturas', $XlsInvoices);
+        return view("Invoice/confirmacion-envio")->with('facturas', $xlsInvoices);
         
     }
 
@@ -1953,9 +1954,8 @@ class InvoiceController extends Controller
         $consecutivo = null;
         $invoiceList = array();
         foreach ($facturas as $row){
-            //try{
+            try{
 
-            //dd($company->id_number."=".$row['cedulaempresa']);
                 if($row['cedulaempresa'] == $company->id_number){
 
                     if( isset($row['identificacionreceptor']) ){
@@ -2044,7 +2044,7 @@ class InvoiceController extends Controller
                         $xls_invoice->totalComprobante = $row['totalcomprobante'];
                         $xls_invoice->tipoDocumentoReferencia = $row['tipodocumentoreferencia'] ?? null;
                         $xls_invoice->numeroDocumentoReferencia = $row['numerodocumentoreferencia'] ?? null;
-                        $xls_invoice->fechaEmisionReferencia = $row['fechaemisionreferencia'] ?? null;
+                        $xls_invoice->fechaEmisionReferencia = Carbon::createFromFormat('d/m/Y g:i A',$row['fechaemisionreferencia']) ?? null;
                         $xls_invoice->codigoNota = $row['codigonota'] ?? null;
                         $xls_invoice->razonNota = $row['razonnota'] ?? null;
                         if($row['consecutivo'] != $consecutivo){
@@ -2062,54 +2062,60 @@ class InvoiceController extends Controller
                     //Log::warning('Factura repetida en envio masivo '.$identificacionCliente);
                 }
                    
-            /*}catch( \Throwable $ex ){
+            }catch( \Throwable $ex ){
                 Log::error("Error en factura ENVIO MASIVO EXCEL:" . $ex);
-            }*/
+            }
         }
         $company->save();
-      //  dd($facturas);
     }
 
 
     public function detalleXlsInvoice($consecutivo){
 
         $companyId = currentCompany();
-        $XlsInvoice = XlsInvoice::where('company_id',$companyId)->where('consecutivo',$consecutivo)->get();
-        return view("Invoice/detalle-xls")->with('factura', $XlsInvoice);
+        $xlsInvoice = XlsInvoice::where('company_id',$companyId)->where('consecutivo',$consecutivo)->get();
+        return view("Invoice/detalle-xls")->with('factura', $xlsInvoice);
         
     }
 
     public function validarEnvioExcel(Request $request){
-        
-        $companyId = currentCompany();
-        foreach ($request->facturas as $factura) {
-            if (isset($factura["autorizado"])) {
-                XlsInvoice::where('company_id',$companyId)
-                      ->where('consecutivo', $factura["consecutivo"])
-                      ->update(['autorizado' => 1]);
-            }else{
-                XlsInvoice::where('company_id',$companyId)
-                      ->where('consecutivo', $factura["consecutivo"])
-                      ->update(['autorizado' => 0]);
+        try{
+            $companyId = currentCompany();
+            $company = currentCompanyModel();
+            foreach ($request->facturas as $factura) {
+                if (isset($factura["autorizado"])) {
+                    XlsInvoice::where('company_id',$companyId)
+                          ->where('consecutivo', $factura["consecutivo"])
+                          ->update(['autorizado' => 1]);
+                }else{
+                    XlsInvoice::where('company_id',$companyId)
+                          ->where('consecutivo', $factura["consecutivo"])
+                          ->update(['autorizado' => 0]);
+                }
             }
+            Log::info("Enviando facturas al job ProcessInvoicesExcel");
+            ProcessInvoicesExcel::dispatch($company)->onConnection(config('etax.queue_connections'))->onQueue('createinvoice');
+            //$this->guardarEnvioExcel($xlsInvoices);
+            return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
+        } catch ( \Exception $e) {
+            Log::error("Error en factura ENVIO MASIVO EXCEL:" . $e);
+
+            return redirect('/facturas-emitidas')->withError('Error en factura ENVIO MASIVO EXCEL.');
         }
-        $XlsInvoices = XlsInvoice::select('consecutivo', 'company_id','autorizado')
-            ->where('company_id',$companyId)->where('autorizado',1)->distinct('consecutivo')->get();
-        $this->guardarEnvioExcel($XlsInvoices);
-        return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
 
-    }
+    } 
 
-   public function guardarEnvioExcel($XlsInvoices){
+    
+   /*public function guardarEnvioExcel($xlsInvoices){
 
-        $company = Company::find($XlsInvoices[0]->company_id);
+        $company = Company::find($xlsInvoices[0]->company_id);
         $apiHacienda = new BridgeHaciendaApi();
         $tokenApi = $apiHacienda->login(false);
         if ($tokenApi !== false) {
         
-            foreach ($XlsInvoices as $XlsInvoice) {
-                $factura = XlsInvoice::where('company_id',$XlsInvoice->company_id)
-                        ->where('consecutivo',$XlsInvoice->consecutivo)->get();
+            foreach ($xlsInvoices as $xlsInvoice) {
+                $factura = XlsInvoice::where('company_id',$xlsInvoice->company_id)
+                        ->where('consecutivo',$xlsInvoice->consecutivo)->get();
                 
                 $invoice = new Invoice();
                 $invoice->company_id = $company->id;
@@ -2131,8 +2137,6 @@ class InvoiceController extends Controller
                 if ($invoice->document_type == '04') {
                     $invoice->reference_number = $company->last_ticket_ref_number + 1;
                 }
-                /*$invoice->document_key = $factura[0]->document_key;
-                $invoice->document_number = $factura[0]->document_number;*/
                $invoice->sale_condition = $factura[0]->condicionVenta;
                $invoice->description = $factura[0]->descripcion;
                 $invoice->payment_type = $factura[0]->medioPago;
@@ -2140,7 +2144,6 @@ class InvoiceController extends Controller
                 if ($factura[0]->codigoActividad) {
                     $invoice->commercial_activity = $factura[0]->codigoActividad;
                 }
-                /******************************************************************************/
                 $tipo_persona = $factura[0]->tipoIdentificacionReceptor;
                 $identificacion_cliente = preg_replace("/[^0-9]/", "", $factura[0]->identificacionReceptor );
                 
@@ -2383,19 +2386,7 @@ class InvoiceController extends Controller
                     $bill->xml_schema = 43;
                     
                     $bill->activity_company_verification = $invoice->commercial_activity;
-                    
-                      /*
-                      if( $request->accept_iva_condition ){
-                        $bill->accept_iva_condition = $request->accept_iva_condition;
-                      }
-                      if( $request->accept_iva_acreditable ){
-                        $bill->accept_iva_acreditable = $request->accept_iva_acreditable;
-                      }
-                      if( $request->accept_iva_gasto ){
-                        $bill->accept_iva_gasto = $request->accept_iva_gasto;
-                      }
-                    */
-
+                
 
                     
                     $bill->is_code_validated = 1;
@@ -2425,6 +2416,6 @@ class InvoiceController extends Controller
             }
         }
         XlsInvoice::where('company_id',$company->id)->delete();
-    }
+    }*/
         
 }
