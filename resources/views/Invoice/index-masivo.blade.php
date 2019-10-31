@@ -134,7 +134,7 @@ $(function() {
     order: [[ 1, 'desc' ]],
     columns: [
       { data: 'document_number', name: 'invoices.document_number' },
-      { data: 'client', name: 'clients.fullname' },
+      { data: 'client', name: 'invoices.client_first_name'},
       { data: 'unidad', name: 'invoice_items.measure_unit'},
       { data: 'subtotal', name: 'invoice_items.subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
       { data: 'iva_amount', name: 'invoice_items.iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
