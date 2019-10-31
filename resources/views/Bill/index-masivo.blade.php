@@ -295,6 +295,9 @@ $(document).ready(function(){
            $.each($('.tipo_iva_select_all'), function (index, value) { 
            var porcentaje = $(this).attr('porcentaje');
            if(filtroTarifa != 99){
+              if(filtroTarifa == 10){
+                filtroTarifa = 0;
+              }
               if(porcentaje == filtroTarifa){
                 $(this).removeAttr("hidden");
                 $(this).show();

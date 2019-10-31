@@ -20,7 +20,7 @@
                 <option value="1">1%</option>
                 <option value="2">2%</option>
                 <option value="4">4%</option>
-                <option style="display:none;" value="4">4%</option>
+                <option style="display:none;" value="8">8%</option>
                 <option value="13">13%</option>
             </select>
           </div>
@@ -273,6 +273,9 @@ $(document).ready(function(){
            $.each($('.tipo_iva_select_all'), function (index, value) { 
            var porcentaje = $(this).attr('porcentaje');
            if(filtroTarifa != 99){
+            if(filtroTarifa == 10){
+              filtroTarifa = 0;
+            }
               if(porcentaje == filtroTarifa){
                 $(this).removeAttr("hidden");
                 $(this).show();
