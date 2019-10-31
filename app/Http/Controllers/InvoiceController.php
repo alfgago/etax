@@ -137,27 +137,32 @@ class InvoiceController extends Controller
         $filtroTarifa = $request->get('filtroTarifa');
         switch($filtroTarifa){
             case 10:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 0');
+                $query = $query->where(function($q){
+                    $q->WhereNull('invoice_items.subtotal')
+                    ->orWhere('invoice_items.subtotal', '=', 0)
+                    ->orwhereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 0')                    
+                    ;
+                });
                 $cat['cero'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 0)->get();
                 break;
             case 1:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 1');
+                $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 1');
                 $cat['uno'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 1)->get();
                 break;
             case 2:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 2');
+                $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 2');
                 $cat['dos'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 2)->get();
                 break;
             case 13:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 13');
+                $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 13');
                 $cat['trece'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 13)->get();
                 break;
             case 4:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 4');
+                $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 4');
                 $cat['cuatro'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 4)->get();
                 break;
             case 8:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 8');
+                $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 8');
                 $cat['ocho'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 8)->get();;
                 break;
             default:
@@ -172,10 +177,12 @@ class InvoiceController extends Controller
        $filtroValidado = $request->get('filtroValidado');
        switch($filtroValidado){
             case 1:
-                $query = $query->where('invoices.is_code_validated', false);
+                $query = $query->where(function($q){
+                    $q->whereNull('invoice_items.product_type')->orWhereNull('invoice_items.iva_type');
+                });
                 break;
             case 2:
-                $query = $query->where('invoices.is_code_validated', true);
+                $query = $query->whereNotNull('invoice_items.product_type')->WhereNotNull('invoice_items.iva_type');
                 break;
         }
 
@@ -201,8 +208,12 @@ class InvoiceController extends Controller
                 return $invoiceItem->invoice->documentTypeName();
             })
             ->addColumn('tarifa_iva', function(InvoiceItem $invoiceItem) {
-                $invoiceItem->tarifa_iva = !empty($invoiceItem->iva_amount) ? ($invoiceItem->iva_amount / $invoiceItem->subtotal * 100) : 0;
-                $invoiceItem->tarifa_iva = round($invoiceItem->tarifa_iva * 100) / 100;
+                if(!$invoiceItem->subtotal > 0){
+                    $invoiceItem->tarifa_iva = 0;
+                }else{
+                    $invoiceItem->tarifa_iva = !empty($invoiceItem->iva_amount) ? ($invoiceItem->iva_amount / $invoiceItem->subtotal * 100) : 0;
+                    $invoiceItem->tarifa_iva = round($invoiceItem->tarifa_iva * 100) / 100;    
+                }
                 return $invoiceItem->tarifa_iva;
             })
             ->editColumn('generated_date', function(InvoiceItem $invoiceItem) {
