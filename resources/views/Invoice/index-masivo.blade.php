@@ -5,7 +5,7 @@
 @endsection
 
 @section('breadcrumb-buttons')
-    <button type="submit" onclick="$('#btn-submit-form').click();" class="btn btn-primary">Validar Lineas</button>
+    <button type="submit" onclick="$('#btn-submit-form').click();" class="btn btn-primary">Validar Líneas</button>
 @endsection 
 
 @section('content') 
@@ -20,7 +20,7 @@
                 <option value="1">1%</option>
                 <option value="2">2%</option>
                 <option value="4">4%</option>
-                <!--option value="8">8%</option-->
+                <option style="display:none;" value="4">4%</option>
                 <option value="13">13%</option>
             </select>
           </div>
