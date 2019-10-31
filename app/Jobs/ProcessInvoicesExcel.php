@@ -73,7 +73,7 @@ class ProcessInvoicesExcel implements ShouldQueue
 
                     $invoice->company_id = $company->id;
                     $invoice->document_type = $factura[0]->tipoDocumento;
-                    $invoice->hacienda_status = '99';
+                    $invoice->hacienda_status = '01';
                     $invoice->payment_status = "01";
                     $invoice->payment_receipt = "";
                     $invoice->generation_method = "xls-masivo";
@@ -181,6 +181,16 @@ class ProcessInvoicesExcel implements ShouldQueue
 
                     $invoice->document_key = $this->getDocumentKey($invoice->document_type, $company);
                     $invoice->document_number = $this->getDocReference($invoice->document_type,$company);
+                    $start_date = Carbon::parse(now('America/Costa_Rica'));
+                    $today = $start_date->day."/".$start_date->month."/".$start_date->year;
+                    $fechaComparacion = $fecha->day."/".$fecha->month."/".$fecha->year;
+
+                    if($today <= $fechaComparacion){
+                        $invoice->hacienda_status = '99';
+                        $invoice->generation_method = "etax-programada";
+                        $invoice->document_key = $invoice->document_key."programada";
+                        $invoice->document_number = "programada";
+                    }
                     $invoice->save();
                     $lineas = XlsInvoice::where('company_id',$company->id)->where('consecutivo',$factura[0]->consecutivo)->get();
                     foreach ($lineas as $linea) {
@@ -367,18 +377,21 @@ class ProcessInvoicesExcel implements ShouldQueue
                         $company->last_bill_ref_number = $bill->reference_number;
 
                     }
-                    $invoice->company->addSentInvoice( $invoice->year, $invoice->month );
-                    if ($invoice->document_type == '1') {
-                        $company->last_invoice_ref_number = $invoice->reference_number;
-                    }
-                    if ($invoice->document_type == '8') {
-                        $company->last_invoice_pur_ref_number = $invoice->reference_number;
-                    }
-                    if ($invoice->document_type == '9') {
-                        $company->last_invoice_exp_ref_number = $invoice->reference_number;
-                    }
-                    if ($invoice->document_type == '4') {
-                       $company->last_ticket_ref_number = $invoice->reference_number;
+                    if($invoice->hacienda_status != "99"){
+                        $invoice->company->addSentInvoice( $invoice->year, $invoice->month );
+
+                        if ($invoice->document_type == '1') {
+                            $company->last_invoice_ref_number = $invoice->reference_number;
+                        }
+                        if ($invoice->document_type == '8') {
+                            $company->last_invoice_pur_ref_number = $invoice->reference_number;
+                        }
+                        if ($invoice->document_type == '9') {
+                            $company->last_invoice_exp_ref_number = $invoice->reference_number;
+                        }
+                        if ($invoice->document_type == '4') {
+                           $company->last_ticket_ref_number = $invoice->reference_number;
+                        }
                     }
                     $company->save();
                 }
