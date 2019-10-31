@@ -700,7 +700,7 @@ class BillController extends Controller
             }
         }
         if($errors){
-            $result = 'Las lineas de las facturas: ';
+            $result = 'Las líneas de las facturas: ';
             foreach($resultBills as $key => $bill){
                 $result = $result . $key . " ";              
             }

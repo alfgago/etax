@@ -991,7 +991,7 @@ class InvoiceController extends Controller
             }
         }
         if($errors){
-            $result = 'Las lineas de las facturas: ';
+            $result = 'Las líneas de las facturas: ';
             foreach($resultInvoices as $key => $invoice){
                 $result = $result . $key . " ";              
             }
