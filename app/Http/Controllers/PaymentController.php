@@ -18,9 +18,11 @@ use App\PaymentMethod;
 use App\SubscriptionPlan;
 use App\AvailableInvoices;
 use App\Team;
+use App\TransactionsLog;
 use Carbon\Carbon;
 use CybsSoapClient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use stdClass;
 use GuzzleHttp\Client;
@@ -241,7 +243,7 @@ class PaymentController extends Controller
             $ip = $paymentGateway->getUserIpAddr();
             $request->request->add(['IpAddress' => $ip]);
 
-            if($request->plan_sel == "c"){
+            if($request->plan_sel == "c") {
                 $coupons = Coupon::where('code', $request->coupon)->where('type',1)->count();
                 $precio_25 = 8;
                 $precio_10 = 10;
@@ -398,7 +400,8 @@ class PaymentController extends Controller
                     'payment_method_id' => $paymentMethod->id,
                     'payment_date' => Carbon::parse(now('America/Costa_Rica')),
                     'amount' => $amount,
-                    'coupon_id' => $cuponId
+                    'coupon_id' => $cuponId,
+                    'payment_gateway' => 'cybersource'
                 ]
             );
 
@@ -412,7 +415,14 @@ class PaymentController extends Controller
 
             //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
             if( ! isset($payment->charge_token) ) {
-                $chargeProof = $paymentGateway->pay($request);
+                $transLog = TransactionsLog::create([
+                    'id_payment' => $payment->id ?? '',
+                    'status' => 'processing',
+                    'id_paymethod' => $paymentMethod->id ?? '',
+                    'processor' => $paymentMethod->payment_gateway ?? ''
+                ]);
+                $transLog->save();
+                $chargeProof = $paymentGateway->pay($request, false, $transLog);
                 if($chargeProof){
                     $payment->charge_token = $chargeProof;
                     $payment->save();
@@ -458,7 +468,7 @@ class PaymentController extends Controller
      */
     public function comprarFacturas(Request $request){
         $company = currentCompanyModel();
-        $available_company_invoices = !$company->additional_invoices ? $available_company_invoices = 0 : $company->additional_invoices;
+        $available_company_invoices = $company->additional_invoices ?? 0;
         $product_id = $request->product_id;
 
         $product = EtaxProducts::find($product_id);
@@ -488,16 +498,18 @@ class PaymentController extends Controller
         $request->request->add(['amount' => $amount]);
         $request->request->add(['referenceCode' => $product_id]);
         $request->request->add(['product_name' => $product->name]);
+
         $paymentInfo = explode('- ', $request->payment_method);
         $request->request->add(['payment_method' => $paymentInfo[0]]);
         //$paymentProcessor = new PaymentProcessor();
-        $paymentGateway = PaymentProcessor::selectPaymentGateway($paymentInfo[1]);
-        $ip = $paymentGateway->getUserIpAddr();
-        $request->request->add(['IpAddress' => $ip]);
-        if(isset($paymentGateway)){
+
+        $paymentGateway = PaymentProcessor::selectPaymentGateway($paymentInfo[1] ?? null);
+        if($paymentGateway) {
+            $ip = $paymentGateway->getUserIpAddr();
+            $request->request->add(['IpAddress' => $ip]);
             $pagoProducto = $paymentGateway->comprarProductos($request);
-            if($pagoProducto){
-                $client = \App\Client::where('company_id', $company->id)->where('id_number', $request->id_number)->first();
+            if($pagoProducto) {
+                $client = \App\Client::where('company_id', 1)->where('id_number', $request->id_number)->first();
                 $request->request->add(['client_code' => $request->id_number]);
                 $request->request->add(['client_id_number' => $request->id_number]);
                 if($client){
@@ -505,6 +517,7 @@ class PaymentController extends Controller
                 }else{
                     $client_id = '-1';
                 }
+
                 $request->request->add(['client_id' => $client_id]);
                 $request->request->add(['subtotal' => $subtotal]);
                 $request->request->add(['unit_price' => $subtotal]);
@@ -517,19 +530,21 @@ class PaymentController extends Controller
                 $request->request->add(['expiry' => Carbon::parse(now('America/Costa_Rica'))->addMonths(1)]);
                 $request->request->add(['es_exento' => false]);
                 $request->request->add(['discount_reason' => null]);
-                $request->request->add(['tipo_persona' => $client->tipo_persona]);
+                $request->request->add(['tipo_persona' => $client->tipo_persona ?? 'F']);
 
                 $invoiceData = $paymentGateway->setInvoiceInfo($request);
                 $procesoFactura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
 
                 $company->additional_invoices = $additional_invoices;
                 $company->save();
+                $userId = auth()->user()->id;
+                Cache::forget("cache-currentcompany-$userId");
 
                 return redirect('/empresas/comprar-facturas-vista')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
             }else{
                 return redirect('/empresas/comprar-facturas-vista')->withErrors('No pudo procesarse el pago');
             }
-        }else{
+        } else {
             return redirect('/empresas/comprar-facturas-vista')->withErrors('Debe seleccionar un método de pago');
         }
     }
@@ -629,15 +644,14 @@ class PaymentController extends Controller
                 $request->request->add(['discount_reason' => null]);
                 $request->request->add(['etax_product_id' => 16]);
                 $request->request->add(['referenceCode' => 16]);
-
-                $client = \App\Client::where('company_id', $company->id)->where('id_number', $request->id_number)->first();
+                $client = \App\Client::where('company_id', 1)->where('id_number', $request->id_number)->first();
                 $request->request->add(['client_code' => $client->id]);
                 $request->request->add(['client_id_number' => $client->id_number]);
                 $request->request->add(['client_id' => $client->id_number]);
                 $request->request->add(['tipo_persona' => $client->tipo_persona]);
 
                 $chargeCreated = $paymentGateway->comprarProductos($request);
-                if($chargeCreated){
+                if($chargeCreated) {
                     $invoiceData = $paymentGateway->setInvoiceInfo($request);
                     $procesoFactura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
                     $company->save();
@@ -649,7 +663,7 @@ class PaymentController extends Controller
                 return redirect()->back()->withErrors('No se pudo procesar el pago');
             }
         }catch ( \Exception $e){
-            Log::error('Error al anular facturar -->'.$e);
+            Log::error('Error en compra de contabilidad -->'.$e);
             return redirect()->back()->withErrors('Hubo un error con el pago');
         }
     }

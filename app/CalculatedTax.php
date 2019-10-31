@@ -599,6 +599,13 @@ class CalculatedTax extends Model
               $ivaType = $ivaType ? $ivaType : 'B003';
               $ivaType = str_pad($ivaType, 3, '0', STR_PAD_LEFT);
               
+              
+              if( $ivaType == 'R001' || $ivaType == 'R002' || $ivaType == 'R003' || $ivaType == 'R004' || $ivaType == 'R005' || $ivaType == 'R006')
+              {
+                $billIva = $subtotal * ($prodPorc / 100);
+                $subtotal = $subtotal - $billIva;
+              }
+              
               if( $ivaType == 'B041' || $ivaType == 'B042' || $ivaType == 'B043' || $ivaType == 'B044' ||
                   $ivaType == 'B051' || $ivaType == 'B052' || $ivaType == 'B053' || $ivaType == 'B054' || 
                   $ivaType == 'B061' || $ivaType == 'B062' || $ivaType == 'B063' || $ivaType == 'B064' || 
@@ -715,6 +722,11 @@ class CalculatedTax extends Model
               if(!isset($ivaData->$iVar)) {
                 $ivaData->$iVar = 0;
                 $ivaData->$iVarPleno = 0;
+              }
+              
+              if( $ivaType == 'R001' || $ivaType == 'R002' || $ivaType == 'R003' || $ivaType == 'R004' || $ivaType == 'R005' || $ivaType == 'R006')
+              {
+                $prodPorc = 13;
               }
               
               $ivaData->$bVar += $subtotal;

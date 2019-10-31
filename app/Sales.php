@@ -31,10 +31,11 @@ class Sales extends Model
     
     public function plan()
     {
-        if($this->is_subscription){
+
+        if($this->is_subscription) {
             return $this->belongsTo(SubscriptionPlan::class, 'etax_product_id');
-        }else{
-            return $this->belongsTo(EtaxProducts::class, 'etax_product_id'); 
+        } else {
+            return $this->belongsTo(EtaxProducts::class, 'etax_product_id');
         }
     }
     
@@ -75,7 +76,8 @@ class Sales extends Model
                 'recurrency' => $recurrency,
                 'start_date' => $startDate, 
                 'next_payment_date' => $nextPaymentDate, 
-                'etax_product_id' => $productId
+                'etax_product_id' => $productId,
+                'subscription_plan_id' => $productId
             ]
         );
         
@@ -83,7 +85,7 @@ class Sales extends Model
     }
     
     public static function startTrial ( $productId, $recurrency ) {
-        $trialEndDate = Carbon::parse( now('America/Costa_Rica') )->addDays(2);
+        $trialEndDate = Carbon::parse( now('America/Costa_Rica') )->addDays(15);
         
         $sale = Sales::createUpdateSubscriptionSale ( $productId, $recurrency );
         $sale->status = 4;
