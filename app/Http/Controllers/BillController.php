@@ -660,7 +660,7 @@ class BillController extends Controller
         $resultBills = [];
         $errors = false;
         foreach( $request->items as $key => $item ) {
-            $billItem = BillItem::with('bills')->findOrFail($key);
+            $billItem = BillItem::with('bill')->findOrFail($key);
             $bill = $billItem->bill;
             if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
                 BillItem::where('id', $key)
