@@ -81,16 +81,14 @@ class BillController extends Controller
     }
 
 
-    public function indexDataMas( Request $request ) {
+    public function indexDataMasivo( Request $request ) {
         $company = currentCompanyModel();
-        $current_company = currentCompany();
-
 
         $query = BillItem::
                 select('bill_items.id as item_id', 'bill_items.*')->
-                where('bill_items.company_id', $current_company)
+                where('bill_items.company_id', $company->id)
                 ->join('bills', 'bill_items.bill_id', '=', 'bills.id' )
-                ->join('providers', 'bills.provider_id', '=', 'providers.id' )
+                //->join('providers', 'bills.provider_id', '=', 'providers.id' )
                 ;
 
         $cat = [];
@@ -99,27 +97,27 @@ class BillController extends Controller
         $filtroTarifa = $request->get('filtroTarifa');
         switch($filtroTarifa){
             case 10:
-                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('(bill_items.iva_amount / bill_items.subtotal * 100) = 0');
+                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 0');
                 $cat['cero'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 0)->get();
                 break;
             case 1:
-                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('(bill_items.iva_amount / bill_items.subtotal * 100) = 1');
+                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 1');
                 $cat['uno'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 1)->get();
                 break;
             case 2:
-                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('(bill_items.iva_amount / bill_items.subtotal * 100) = 2');
+                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 2');
                 $cat['dos'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 2)->get();
                 break;
             case 13:
-                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('(bill_items.iva_amount / bill_items.subtotal * 100) = 13');
+                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 13');
                 $cat['trece'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 13)->get();
                 break;
             case 4:
-                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('(bill_items.iva_amount / bill_items.subtotal * 100) = 4');
+                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 4');
                 $cat['cuatro'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 4)->get();
                 break;
             case 8:
-                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('(bill_items.iva_amount / bill_items.subtotal * 100) = 8');
+                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 8');
                 $cat['ocho'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 8)->get();;
                 break;
             default:
@@ -164,6 +162,7 @@ class BillController extends Controller
             })
             ->addColumn('tarifa_iva', function(BillItem $billItem) {
                 $billItem->tarifa_iva = !empty($billItem->iva_amount) ? ($billItem->iva_amount / $billItem->subtotal * 100) : 0;
+                $billItem->tarifa_iva = round($billItem->tarifa_iva * 100) / 100;
                 return $billItem->tarifa_iva;
             })
             ->editColumn('generated_date', function(BillItem $billItem) {
@@ -171,27 +170,26 @@ class BillController extends Controller
             })
             ->addColumn('codigo_etax', function(BillItem $billItem) use($cat, $company) {
                 
-                //dd($invoiceItem);    
-
+ 
                 if($billItem->tarifa_iva == 13){
-                    $CatPorcentaje = $cat['trece'];
+                    $catPorcentaje = $cat['trece'];
                 }elseif($billItem->tarifa_iva == 0){
-                    $CatPorcentaje = $cat['cero'];
+                    $catPorcentaje = $cat['cero'];
                 }elseif($billItem->tarifa_iva == 1){
-                    $CatPorcentaje = $cat['uno'];
+                    $catPorcentaje = $cat['uno'];
                 }elseif($billItem->tarifa_iva == 2){
-                    $CatPorcentaje = $cat['dos'];
+                    $catPorcentaje = $cat['dos'];
                 }elseif($billItem->tarifa_iva == 4){
-                    $CatPorcentaje = $cat['cuatro'];
+                    $catPorcentaje = $cat['cuatro'];
                 }elseif($billItem->tarifa_iva == 8){
-                    $CatPorcentaje = $cat['ocho'];
+                    $catPorcentaje = $cat['ocho'];
                 }else{
-                    $CatPorcentaje = $cat['todo'];
+                    $catPorcentaje = $cat['todo'];
                 }
 
                 return view('Bill.ext.select-codigos', [
                     'company' => $company,
-                    'cat' => $CatPorcentaje,
+                    'cat' => $catPorcentaje,
                     'item' => $billItem
                 ])->render();                    
             })
@@ -663,7 +661,7 @@ class BillController extends Controller
         $resultBills = [];
         $errors = false;
         foreach( $request->items as $key => $item ) {
-            $billItem = BillItem::findOrFail($key);
+            $billItem = BillItem::with('bills')->findOrFail($key);
             $bill = $billItem->bill;
             if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
                 BillItem::where('id', $key)

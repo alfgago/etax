@@ -117,19 +117,16 @@ class InvoiceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexDataMas( Request $request ) {
+    public function indexDataMasivo( Request $request ) {
         $company = currentCompanyModel();
-        $current_company = currentCompany();
-
 
         $query = InvoiceItem::
                 select('invoice_items.id as item_id', 'invoice_items.*')->
-                where('invoice_items.company_id', $current_company)
-                //->where('invoice_items.invoice_id', '=', 'invoice.id')
+                where('invoice_items.company_id', $company->id)
                 ->join('invoices', 'invoice_items.invoice_id', '=', 'invoices.id' )
-                ->join('clients', 'invoices.client_id', '=', 'clients.id' )
+                //->join('clients', 'invoices.client_id', '=', 'clients.id' )
                 ;
-        //dd($query->first());
+
         $cat = [];
 
         $querySelect = CodigoIvaRepercutido::where('hidden', false);
@@ -139,27 +136,27 @@ class InvoiceController extends Controller
         $filtroTarifa = $request->get('filtroTarifa');
         switch($filtroTarifa){
             case 10:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('(invoice_items.iva_amount / invoice_items.subtotal * 100) = 0');
+                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 0');
                 $cat['cero'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 0)->get();
                 break;
             case 1:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('(invoice_items.iva_amount / invoice_items.subtotal * 100) = 1');
+                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 1');
                 $cat['uno'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 1)->get();
                 break;
             case 2:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('(invoice_items.iva_amount / invoice_items.subtotal * 100) = 2');
+                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 2');
                 $cat['dos'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 2)->get();
                 break;
             case 13:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('(invoice_items.iva_amount / invoice_items.subtotal * 100) = 13');
+                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 13');
                 $cat['trece'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 13)->get();
                 break;
             case 4:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('(invoice_items.iva_amount / invoice_items.subtotal * 100) = 4');
+                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 4');
                 $cat['cuatro'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 4)->get();
                 break;
             case 8:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('(invoice_items.iva_amount / invoice_items.subtotal * 100) = 8');
+                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 8');
                 $cat['ocho'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 8)->get();;
                 break;
             default:
@@ -204,6 +201,7 @@ class InvoiceController extends Controller
             })
             ->addColumn('tarifa_iva', function(InvoiceItem $invoiceItem) {
                 $invoiceItem->tarifa_iva = !empty($invoiceItem->iva_amount) ? ($invoiceItem->iva_amount / $invoiceItem->subtotal * 100) : 0;
+                $invoiceItem->tarifa_iva = round($invoiceItem->tarifa_iva * 100) / 100;
                 return $invoiceItem->tarifa_iva;
             })
             ->editColumn('generated_date', function(InvoiceItem $invoiceItem) {
@@ -211,27 +209,26 @@ class InvoiceController extends Controller
             })
             ->addColumn('codigo_etax', function(InvoiceItem $invoiceItem) use($cat, $company) {
                 
-                //dd($invoiceItem);    
 
                 if($invoiceItem->tarifa_iva == 13){
-                    $CatPorcentaje = $cat['trece'];
+                    $catPorcentaje = $cat['trece'];
                 }elseif($invoiceItem->tarifa_iva == 0){
-                    $CatPorcentaje = $cat['cero'];
+                    $catPorcentaje = $cat['cero'];
                 }elseif($invoiceItem->tarifa_iva == 1){
-                    $CatPorcentaje = $cat['uno'];
+                    $catPorcentaje = $cat['uno'];
                 }elseif($invoiceItem->tarifa_iva == 2){
-                    $CatPorcentaje = $cat['dos'];
+                    $catPorcentaje = $cat['dos'];
                 }elseif($invoiceItem->tarifa_iva == 4){
-                    $CatPorcentaje = $cat['cuatro'];
+                    $catPorcentaje = $cat['cuatro'];
                 }elseif($invoiceItem->tarifa_iva == 8){
-                    $CatPorcentaje = $cat['ocho'];
+                    $catPorcentaje = $cat['ocho'];
                 }else{
-                    $CatPorcentaje = $cat['todo'];
+                    $catPorcentaje = $cat['todo'];
                 }
 
                 return view('Bill.ext.select-codigos', [
                     'company' => $company,
-                    'cat' => $CatPorcentaje,
+                    'cat' => $catPorcentaje,
                     'item' => $invoiceItem
                 ])->render();                    
             })
@@ -962,7 +959,7 @@ class InvoiceController extends Controller
         $failInvoices = [];
         $errors = false;
         foreach( $request->items as $key => $item ) {
-            $invoiceItem = InvoiceItem::findOrFail($key);
+            $invoiceItem = InvoiceItem::with('invoices')->findOrFail($key);
             $invoice = $invoiceItem->invoice;
             if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
                 InvoiceItem::where('id', $key)

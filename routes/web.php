@@ -217,8 +217,8 @@ Route::prefix('payment-methods')->group(function(){
 
 // Rutas de API data para ajax
 Route::get('/api/invoices', 'InvoiceController@indexData')->name('Invoice.data');
-Route::get('/api/invoices-masivo', 'InvoiceController@indexDataMas')->name('Invoice.dataMasivo');
-Route::get('/api/bills-masivo', 'BillController@indexDataMas')->name('Bill.dataMasivo');
+Route::get('/api/invoices-masivo', 'InvoiceController@indexDataMasivo')->name('Invoice.dataMasivo');
+Route::get('/api/bills-masivo', 'BillController@indexDataMasivo')->name('Bill.dataMasivo');
 Route::get('/api/invoicesAuthorize', 'InvoiceController@indexDataAuthorize')->name('Invoice.data_authorizes');
 Route::get('/api/bills', 'BillController@indexData')->name('Bill.data');
 Route::get('/api/billsAccepts', 'BillController@indexDataAccepts')->name('Bill.data_accepts');
