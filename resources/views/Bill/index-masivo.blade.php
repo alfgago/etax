@@ -20,14 +20,14 @@
                 <option value="1">1%</option>
                 <option value="2">2%</option>
                 <option value="4">4%</option>
-                <option value="8">8%</option>
+                <!--option value="8">8%</option-->
                 <option value="13">13%</option>
             </select>
           </div>
           <div class="periodo-selects">
             <select id="filtro-select-codificadas" name="filtro-validado" onchange="reloadDataTable();">
-                <option value="99" selected>Todas las lineas</option>
-                <option value="1">Lineas por validar</option>
+                <option value="99" >Todas las lineas</option>
+                <option value="1" selected>Lineas por validar</option>
                 <option value="2">Lineas ya validadas</option>
             </select>
           </div>
