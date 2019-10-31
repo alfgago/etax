@@ -662,6 +662,7 @@ class BillController extends Controller
     public function validarMasivo(Request $request){
         $resultBills = [];
         $errors = false;
+        $company = currentCompanyModel();
         foreach( $request->items as $key => $item ) {
             $billItem = BillItem::findOrFail($key);
             $bill = $billItem->bill;
@@ -679,6 +680,9 @@ class BillController extends Controller
                 }
                 if($validated){
                     $bill->is_code_validated = true;
+                    if(!$company->use_invoicing){
+                        $bill->accept_status = 1;
+                    }
                     $bill->save();
                 }
                 
@@ -718,6 +722,7 @@ class BillController extends Controller
 
     public function guardarValidar(Request $request)
     {
+        $company = currentCompanyModel();
         $bill = Bill::findOrFail($request->bill);
         if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
             $bill->activity_company_verification = $request->actividad_comercial;
@@ -730,7 +735,9 @@ class BillController extends Controller
                   'porc_identificacion_plena' =>  $item['porc_identificacion_plena']
                 ]);
             }
-            
+            if(!$company->use_invoicing){
+                $bill->accept_status = 1;
+            }
             $bill->save();
             
             clearBillCache($bill);
