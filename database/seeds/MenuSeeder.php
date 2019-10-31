@@ -31,9 +31,9 @@ class MenuSeeder extends Seeder
 	          				['nombre'=>'Registrar factura existente', 'orden' => '1','url'=>'/facturas-recibidas/create','tipo'=>'href','icono'=>'', 'permisos'=>[1,3]],
 	          				['nombre'=>'Importar facturas', 'orden' => '2','url'=>'abrirPopup("importar-recibidas-popup");','tipo'=>'onclick','icono'=>'', 'permisos'=>[1,3]],
 	          				['nombre'=>'Validar facturas', 'orden' => '3','url'=>"/facturas-recibidas/validaciones",'tipo'=>'href','icono'=>'', 'permisos'=>[1,3,4,8]],
-	          				['nombre'=>'Validar masivamente', 'orden' => '3','url'=>"/facturas-recibidas/lista-validar-masivo",'tipo'=>'href','icono'=>'', 'permisos'=>[1,3,4,8]],
-	          				['nombre'=>'Aceptación de facturas recibidas', 'orden' => '4','url'=>'/facturas-recibidas/aceptaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,3,4,8]],
-	          				['nombre'=>'Autorizar facturas por email', 'orden' => '5','url'=>'/facturas-recibidas/autorizaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,3,4,8]]
+	          				['nombre'=>'Validar masivamente', 'orden' => '4','url'=>"/facturas-recibidas/lista-validar-masivo",'tipo'=>'href','icono'=>'', 'permisos'=>[1,3,4,8]],
+	          				['nombre'=>'Aceptación de facturas recibidas', 'orden' => '5','url'=>'/facturas-recibidas/aceptaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,3,4,8]],
+	          				['nombre'=>'Autorizar facturas por email', 'orden' => '6','url'=>'/facturas-recibidas/autorizaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,3,4,8]]
 	          			]
 	          		],
 	          		['nombre'=>'Facturación','url'=>'/facturas-emitidas','padre'=>'0', 'tipo'=>'href', 'icono'=>'assets/images/iconos/facturacion.png', 'permisos'=>[1,2,3], 'orden' => '4',  'subitems'=>[

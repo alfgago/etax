@@ -662,7 +662,7 @@ class BillController extends Controller
         $errors = false;
         $company = currentCompanyModel();
         foreach( $request->items as $key => $item ) {
-            $billItem = BillItem::with('bills')->findOrFail($key);
+            $billItem = BillItem::with('bill')->findOrFail($key);
             $bill = $billItem->bill;
             if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
                 BillItem::where('id', $key)
@@ -705,7 +705,7 @@ class BillController extends Controller
             }
         }
         if($errors){
-            $result = 'Las lineas de las facturas: ';
+            $result = 'Las líneas de las facturas: ';
             foreach($resultBills as $key => $bill){
                 $result = $result . $key . " ";              
             }
