@@ -220,11 +220,15 @@ class BillController extends Controller
                 ])->render();
                 
             })
+            ->addColumn('identificacion_especifica', function($billItem) {
+                return view('Bill.ext.select-identificacion', [
+                    'item' => $billItem])->render();
+            })
             ->addColumn('actions', function($billItem) {
                 return view('Bill.ext.deny-action', [
                     'bill' => $billItem->bill,])->render();
             })
-            ->rawColumns(['categoria_hacienda', 'codigo_etax', 'actions'])
+            ->rawColumns(['categoria_hacienda', 'codigo_etax', 'actions', 'identificacion_especifica'])
             ->toJson();
             return $return;
 
@@ -688,7 +692,8 @@ class BillController extends Controller
                 BillItem::where('id', $key)
                 ->update([
                   'iva_type' =>  $item['iva_type'],
-                  'product_type' =>  $item['product_type']
+                  'product_type' =>  $item['product_type'],
+                  'porc_identificacion_plena' =>  $item['porc_identificacion_plena']
                 ]);
                 $validated = true;
                 foreach($bill->items as $item){
