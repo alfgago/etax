@@ -85,6 +85,12 @@ class ProcessInvoicesExcel implements ShouldQueue
                     if ($invoice->document_type == '09') {
                         $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
                     }
+                    if ($invoice->document_type== '02') {
+                        $invoice->reference_number = $company->last_debit_note_ref_number + 1;
+                    }
+                    if ($invoice->document_type == '03') {
+                        $invoice->reference_number= $company->last_note_ref_number + 1;
+                    }
                     if ($invoice->document_type == '04') {
                         $invoice->reference_number = $company->last_ticket_ref_number + 1;
                     }
@@ -356,16 +362,22 @@ class ProcessInvoicesExcel implements ShouldQueue
                     if($invoice->hacienda_status != "99"){
                         $invoice->company->addSentInvoice( $invoice->year, $invoice->month );
 
-                        if ($invoice->document_type == '1') {
+                        if ($invoice->document_type == '01') {
                             $company->last_invoice_ref_number = $invoice->reference_number;
                         }
-                        if ($invoice->document_type == '8') {
+                        if ($invoice->document_type == '08') {
                             $company->last_invoice_pur_ref_number = $invoice->reference_number;
                         }
-                        if ($invoice->document_type == '9') {
+                        if ($invoice->document_type== '02') {
+                            $company->last_debit_note_ref_number = $invoice->reference_number;
+                        }
+                        if ($invoice->document_type == '03') {
+                           $company->last_note_ref_number = $invoice->reference_number;
+                        }
+                        if ($invoice->document_type == '09') {
                             $company->last_invoice_exp_ref_number = $invoice->reference_number;
                         }
-                        if ($invoice->document_type == '4') {
+                        if ($invoice->document_type == '04') {
                            $company->last_ticket_ref_number = $invoice->reference_number;
                         }
                     }
@@ -394,6 +406,9 @@ class ProcessInvoicesExcel implements ShouldQueue
         if ($docType == '09') {
             $lastSale = $company->last_invoice_exp_ref_number + 1;
         }
+        if ($docType == '02') {
+            $lastSale = $company->last_debit_note_ref_number + 1;
+        }
         if ($docType == '03') {
             $lastSale = $company->last_note_ref_number + 1;
         }
@@ -419,8 +434,11 @@ class ProcessInvoicesExcel implements ShouldQueue
         if ($docType == '09') {
             $ref = $company->last_invoice_exp_ref_number + 1;
         }
+        if ($docType == '02') {
+            $ref = $company->last_debit_note_ref_number + 1;
+        }
         if ($docType == '03') {
-            $lastSale = $company->last_note_ref_number + 1;
+            $ref = $company->last_note_ref_number + 1;
         }
         if ($docType == '04') {
             $ref = $company->last_ticket_ref_number + 1;
