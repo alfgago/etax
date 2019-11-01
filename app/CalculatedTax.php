@@ -420,7 +420,7 @@ class CalculatedTax extends Model
               }
               //No cuenta los que no llevan IVA
               if(  $ivaType == 'S300' || $ivaType == 'B300' 
-                || $ivaType == 'S260' || $ivaType == 'B260'
+                || $ivaType == 'S260' || $ivaType == 'B260' 
               ){
                 $subtotal = $subtotal;
                 $invoiceIva = 0;
