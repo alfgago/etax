@@ -1956,10 +1956,9 @@ class InvoiceController extends Controller
         foreach ($facturas as $row){
             try{
 
-                if($row['cedulaempresa'] == $company->id_number){
-
-                    if( isset($row['identificacionreceptor']) ){
-                        
+                
+                if( isset($row['identificacionreceptor']) ){
+                    if($row['cedulaempresa'] == $company->id_number){
                         $xls_invoice = XlsInvoice::updateOrCreate([
                             'consecutivo' => $row['identificador'],
                             'company_id' => $company->id,
@@ -2044,10 +2043,8 @@ class InvoiceController extends Controller
                         $consecutivo = $row['identificador'];
                         $xls_invoice->save();
                     }else {
-                        Log::warning('Error en factura ENVIO MASIVO EXCEL No tiene identificacionreceptor');
+                        Log::warning('Error en factura ENVIO MASIVO EXCEL no coinciden las cedulas');
                     }
-                }else {
-                    Log::warning('Error en factura ENVIO MASIVO EXCEL no coinciden las cedulas');
                 }
                    
             }catch( \Throwable $ex ){

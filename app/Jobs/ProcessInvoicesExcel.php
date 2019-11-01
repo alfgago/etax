@@ -170,8 +170,8 @@ class ProcessInvoicesExcel implements ShouldQueue
                     $invoice->document_key = $this->getDocumentKey($invoice->document_type, $company);
                     $invoice->document_number = $this->getDocReference($invoice->document_type,$company);
                     $start_date = Carbon::parse(now('America/Costa_Rica'));
-                    $today = $start_date->day."/".$start_date->month."/".$start_date->year;
-                    $fechaComparacion = $fecha->day."/".$fecha->month."/".$fecha->year;
+                    $today = $start_date->year."-".$start_date->month."-".$start_date->day;
+                    $fechaComparacion = $fecha->year."-".$fecha->month."-".$fecha->day;
 
                     if($today < $fechaComparacion){
                         $invoice->hacienda_status = '99';
