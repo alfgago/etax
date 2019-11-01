@@ -134,6 +134,11 @@ class BillController extends Controller
                 $cat['ocho'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 8)->get();
         }
 
+       $filtroMes = $request->get('filtroMes');
+       if($filtroMes > 0){
+            $query = $query->where('bill_items.month', $filtroMes);
+       }
+
        $filtroValidado = $request->get('filtroValidado');
        switch($filtroValidado){
             case 1:
