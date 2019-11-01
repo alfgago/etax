@@ -84,7 +84,7 @@ class ProductCategorySeed extends Seeder
           ['grupo'=>'CE','nombre'=>'Importaciones de bienes y servicios exentos', 'declaracion_name'=>'Importados', 'bill_iva_code'=>'B040', 'open_codes'=>'B040,S040,B050,S050'],
           ['grupo'=>'CNR','nombre'=>'Compras locales de bienes y servicios no relacionados directamente con la actividad', 'declaracion_name'=>'Locales', 'bill_iva_code'=>'B097', 'open_codes'=>'B097,S097,B090,B091,B092,B093,B094'],
           ['grupo'=>'CNR','nombre'=>'Importaciones de bienes y servicios no relacionados directamente con la actividad', 'declaracion_name'=>'Importados', 'bill_iva_code'=>'B090', 'open_codes'=>'B090,S090,099'],
-          ['grupo'=>'CNS','nombre'=>'Compras locales de bienes y servicios no sujetos', 'declaracion_name'=>'Locales', 'bill_iva_code'=>'B093', 'open_codes'=>'B060,B080,S080,B091,B092,B093,B094'],
+          ['grupo'=>'CNS','nombre'=>'Compras locales de bienes y servicios no sujetos', 'declaracion_name'=>'Locales', 'bill_iva_code'=>'B093', 'open_codes'=>'B060,S060,B080,S080,B091,B092,B093,B094'],
           ['grupo'=>'CNS','nombre'=>'Importaciones de bienes y servicios no sujetos', 'declaracion_name'=>'Importados', 'bill_iva_code'=>'B093', 'open_codes'=>'B080,S080,B091,B092,B093,B094'],
           ['grupo'=>'CLI','nombre'=>'Bienes y servicios del artículo 19 de la LIVA', 'bill_iva_code'=>'B080', 'open_codes'=>'B080,S080'],
           ['grupo'=>'COE','nombre'=>'Autorizadas por la Dirección General de Hacienda', 'bill_iva_code'=>'B080', 'open_codes'=>'B080,S080'],
