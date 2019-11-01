@@ -13,7 +13,7 @@ class CreateRecurringInvoiceTable extends Migration
      */
     public function up()
     {
-        Schema::create('recurring_invoice', function (Blueprint $table) {
+        Schema::create('recurring_invoices', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('company_id');
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');

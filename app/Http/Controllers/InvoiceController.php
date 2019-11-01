@@ -443,7 +443,10 @@ class InvoiceController extends Controller
                         }
                         $recurrencia->options = $options;
                         $recurrencia->next_send = $recurrencia->proximo_envio($today,$request->generated_date);
-                        $recurrencia->save();    
+                        $recurrencia->save();   
+                        
+                        $invoice->recurring_id = $recurrencia->id;
+                        $invoice->save();     
                     }
                     if($invoice->hacienda_status != '99'){
                         if (!empty($invoiceData)) {
