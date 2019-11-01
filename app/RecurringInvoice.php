@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use \Carbon\Carbon;
+use App\Invoice;
 
 class RecurringInvoice extends Model
 {
@@ -62,5 +63,10 @@ class RecurringInvoice extends Model
 	        }
     	}
         return $next_send;
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class, 'recurring_id');
     }
 }
