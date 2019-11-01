@@ -1937,7 +1937,7 @@ class InvoiceController extends Controller
         /*}catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
         }*/
-        $xlsInvoices = XlsInvoice::select('consecutivo', 'codigoActividad', 'nombreReceptor', 'tipoIdentificacionReceptor', 'IdentificacionReceptor', 'correoReceptor', 'condicionVenta', 'plazoCredito', 'medioPago', 'codigoMoneda', 'tipoCambio', 'totalServGravados', 'totalServExentos', 'totalMercanciasGravadas', 'totalMercanciasExentas', 'totalGravado', 'totalExento', 'totalVenta', 'totalDescuentos', 'totalVentaNeta', 'totalImpuesto', 'totalOtrosCargos', 'totalComprobante','autorizado')
+        $xlsInvoices = XlsInvoice::select('consecutivo', 'codigoActividad', 'nombreReceptor', 'tipoIdentificacionReceptor', 'IdentificacionReceptor', 'correoReceptor', 'condicionVenta', 'plazoCredito', 'medioPago', 'codigoMoneda', 'tipoCambio','autorizado')
             ->where('company_id',$companyId)->distinct('consecutivo')->get();
         return view("Invoice/confirmacion-envio")->with('facturas', $xlsInvoices);
         
@@ -2032,19 +2032,19 @@ class InvoiceController extends Controller
                         $xls_invoice->fechaEmisionReferencia = Carbon::createFromFormat('d/m/Y g:i A',$row['fechaemisionreferencia']) ?? null;
                         $xls_invoice->codigoNota = $row['codigonota'] ?? null;
                         $xls_invoice->razonNota = $row['razonnota'] ?? null;
-                        if($row['consecutivo'] != $consecutivo){
+                        if($row['identificador'] != $consecutivo){
                             $facturas_disponibles--; 
                         }
                         if($facturas_disponibles < 0){
                             $xls_invoice->autorizado = 0;
                         }
-                        $consecutivo = $row['consecutivo'];
+                        $consecutivo = $row['identificador'];
                         $xls_invoice->save();
                     }else {
-                        //Log::warning('Factura repetida en envio masivo '.$identificacionCliente);
+                        Log::warning('Error en factura ENVIO MASIVO EXCEL No tiene identificacionreceptor');
                     }
                 }else {
-                    //Log::warning('Factura repetida en envio masivo '.$identificacionCliente);
+                    Log::warning('Error en factura ENVIO MASIVO EXCEL no coinciden las cedulas');
                 }
                    
             }catch( \Throwable $ex ){

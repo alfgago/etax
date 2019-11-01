@@ -1,5 +1,5 @@
 <div class="row">
-	<div class="col-md-3 col-sm-12">
+	<div class="col-md-4 col-sm-12">
 		<h3>Cliente</h3><br>
 		<label>nombre Receptor</label>: {{$factura[0]->nombreReceptor}}<br>
 		<label>tipo Identificacion</label>: {{$factura[0]->tipoIdentificacionReceptor}}<br>
@@ -11,7 +11,7 @@
 		<label>distrito</label>: {{$factura[0]->distrito}}<br>-->
 		<label>direccion</label>: {{$factura[0]->direccionReceptor}}<br>
 	</div>
-	<div class="col-md-3 col-sm-12">
+	<div class="col-md-4 col-sm-12">
 		<h3>Detalle Factura</h3><br>
 		<label>condicion Venta</label>: {{$factura[0]->condicionVenta}}<br>
 		<label>plazo Credito</label>: {{$factura[0]->plazoCredito}}<br>
@@ -19,27 +19,22 @@
 		<label>codigo Moneda</label>: {{$factura[0]->codigoMoneda}}<br>
 		<label>tipo Cambio</label>: {{$factura[0]->tipoCambio}}<br>
 	</div>
-	<div class="col-md-3 col-sm-12">
-		<h3>Totales Detallados</h3><br>
-		<label>total Servicios Gravados</label>: {{$factura[0]->totalServGravados}}<br>
-		<label>total Servicios Exentos</label>: {{$factura[0]->totalServExentos}}<br>
-		<label>total Mercancias Gravadas</label>: {{$factura[0]->totalMercanciasGravadas}}<br>
-		<label>total Mercancias Exentas</label>: {{$factura[0]->totalMercanciasExentas}}<br>
-		<label>total Gravado</label>: {{$factura[0]->totalGravado}}<br>
-		<label>total Exento</label>: {{$factura[0]->totalExento}}<br>
-	</div>
-	<div class="col-md-3 col-sm-12">
-		<h3>Totales Factura</h3><br>
-		<label>total Venta</label>: {{$factura[0]->totalVenta}}<br>
-		<label>total Descuentos</label>: {{$factura[0]->totalDescuentos}}<br>
-		<label>total Venta Neta</label>: {{$factura[0]->totalVentaNeta}}<br>
-		<label>total Impuesto</label>: {{$factura[0]->totalImpuesto}}<br>
-		<label>total Otros Cargos</label>: {{$factura[0]->totalOtrosCargos}}<br>
-		<label>total Comprobante</label>: {{$factura[0]->totalComprobante}}<br>
+	<?php $total = 0; ?>
+	@foreach ( $factura as $linea )
+		@if($linea->tipoLinea == 1)
+			<?php $total = $total + $linea->montoTotalLinea; ?>
+		@endif
+		@if($linea->tipoLinea == 2)
+			<?php $total = $total + $linea->montoCargo; ?>
+		@endif
+	@endforeach
+	<div class="col-md-4 col-sm-12">
+		<h3>Total Factura</h3><br>
+		<h2>{{$total}}</h2>
 	</div>
 </div>
 <div class="row">
-	<div class="col-md-12">
+	<div class="col-md-10">
 		<h3>Líneas de factura</h3><br>
 		<table id="invoice-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
@@ -51,7 +46,6 @@
 				<th>precio Unitario</th>
 				<th>monto Total</th>
 				<th>monto Descuento</th>
-				<th>naturaleza Descuento</th>
 				<th>subTotal</th>
 				<th>codigo Impuesto</th>
 				<th>codigo Tarifa</th>
@@ -78,7 +72,6 @@
 						<td>{{$linea->precioUnitario}}</td>
 						<td>{{$linea->montoTotal}}</td>
 						<td>{{$linea->montoDescuento}}</td>
-						<td>{{$linea->naturalezaDescuento}}</td>
 						<td>{{$linea->subTotal}}</td>
 						<td>{{$linea->codigoImpuesto}}</td>
 						<td>{{$linea->codigoTarifa}}</td>
@@ -92,6 +85,40 @@
 						<td>{{$linea->porcentajeExoneracionExoneracion}}</td> 
 						<td>{{$linea->montoExoneracionExoneracion}}</td> -->
 						<td>{{$linea->montoTotalLinea}}</td> 
+		            </tr>
+	            @endif
+			@endforeach
+           </tbody>
+        </table>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-10">
+		<h3>Otros Cargos</h3><br>
+		<table id="invoice-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+          <thead>
+            <tr>
+            	<th>numero Linea</th>
+				<th>tipoCargo</th>
+				<th>identidadTercero</th>
+				<th>nombreTercero</th>
+				<th>detalleCargo</th>
+				<th>porcentajeCargo</th>
+				<th>montoCargo</th>
+            </tr>
+          </thead>
+          <tbody>
+			@foreach ( $factura as $linea )
+				@if($linea->tipoLinea == 2)
+		            <tr>
+		            	<td>{{$linea->numeroLinea}}</td>
+						<td>{{$linea->tipoCargo}}</td>
+						<td>{{$linea->identidadTercero}}</td>
+						<td>{{$linea->nombreTercero}}</td>
+						<td>{{$linea->detalleCargo}}</td>
+						<td>{{$linea->porcentajeCargo}}</td>
+						<td>{{$linea->montoCargo}}</td>
 		            </tr>
 	            @endif
 			@endforeach

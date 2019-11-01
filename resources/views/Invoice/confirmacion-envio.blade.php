@@ -11,17 +11,10 @@
 		<div class="col-md-12">
 		  	<table id="invoice-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
 				<thead>
-					<th>Consecutivo</th>
+					<th>Identificador</th>
 					<th>Cliente</th>
 					<th>Identificación</th>
 					<th>Correo</th>
-					<th>Total gravado</th>
-					<th>Total exento</th>
-					<th>Total venta</th>
-					<th>Total descuento</th>
-					<th>Total Impuesto</th>
-					<th>Total Otros cargos</th>
-					<th>Total Comprobante</th>
 					<th>Autorizada</th>
 					<th></th>
 				</thead>
@@ -34,13 +27,6 @@
 							<td>{{$factura->nombreReceptor}}</td>
 							<td>{{$factura->IdentificacionReceptor}}</td>
 							<td>{{$factura->correoReceptor}}</td>
-							<td>{{$factura->totalGravado}}</td>
-							<td>{{$factura->totalExento}}</td>
-							<td>{{$factura->totalVenta}}</td>
-							<td>{{$factura->totalDescuentos}}</td>
-							<td>{{$factura->totalImpuesto}}</td>
-							<td>{{$factura->totalOtrosCargos}}</td>
-							<td>{{$factura->totalComprobante}}</td>
 							<td>
 									<input type="text" value="{{$factura->consecutivo}}" id="consecutivo-{{$factura->consecutivo}}" name="facturas[{{$i}}][consecutivo]" class="hidden" />
 								<div class="form-check">
