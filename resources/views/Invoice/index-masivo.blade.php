@@ -33,6 +33,23 @@
             </select>
           </div>
           <div class="periodo-selects">
+            <select id="filtro-select-codificadas" name="filtro-validado" onchange="reloadDataTable();">
+                <option value="0" selected>Todos los meses</option>
+                <option value="1" >Enero</option>
+                <option value="2">Febrero</option>
+                <option value="3">Marzo</option>
+                <option value="4">Abril</option>
+                <option value="5">Mayo</option>
+                <option value="6">Junio</option>
+                <option value="7">Julio</option>
+                <option value="8">Agosto</option>
+                <option value="9">Setiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+            </select>
+          </div>
+          <div class="periodo-selects">
             <select id="filtro-select-unidad" name="filtro-validado" onchange="reloadDataTable();">
                 <option value="" selected>Todas las unidades</option>
                 @foreach ( $unidades as $unidad )
@@ -128,6 +145,7 @@ $(function() {
           d.filtroTarifa = $( '#filtro-select-tarifa' ).val();
           d.filtroValidado = $( '#filtro-select-codificadas' ).val();
           d.filtroUnidad = $( '#filtro-select-unidad' ).val();
+          d.filtroMes = $( '#filtro-select-mes' ).val();
           
       },
       type: 'GET'
