@@ -175,7 +175,7 @@ $(function() {
                 $(value).removeClass("hidden");
               })
                $('.mostrarTodos').addClass("hidden");
-               $('.iva_type').val("");
+               //$('.iva_type').val("");
             }
             var iva_type  = $(this).val(); 
             var parent = $(this).parents('tr');

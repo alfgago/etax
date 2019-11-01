@@ -191,7 +191,7 @@ $(function() {
                 $(value).removeClass("hidden");
               })
                $('.mostrarTodos').addClass("hidden");
-               $('.iva_type').val("");
+               //$('.iva_type').val("");
             }
             var iva_type  = $(this).val(); 
             var identificacion = $(this).find(':selected').attr('is_identificacion_plena');
