@@ -42,7 +42,7 @@ class ProductCategorySeed extends Seeder
           //Ventas exentas
           ['grupo'=>'VEX','nombre'=>'Exportaciones de bienes', 'invoice_iva_code'=>'B150', 'open_codes'=>'B150'],
           ['grupo'=>'VEX','nombre'=>'Exportaciones de servicios', 'invoice_iva_code'=>'S150', 'open_codes'=>'S150'],
-          ['grupo'=>'VEX','nombre'=>'Venta local de bienes exentos', 'invoice_iva_code'=>'B200', 'open_codes'=>'B200'],
+          ['grupo'=>'VEX','nombre'=>'Venta local de bienes exentos', 'invoice_iva_code'=>'B200', 'open_codes'=>'B200,B155'],
           ['grupo'=>'VEX','nombre'=>'Venta local de servicios exentos', 'invoice_iva_code'=>'S200', 'open_codes'=>'S200'],
           ['grupo'=>'VEX','nombre'=>'Créditos para descuentos de facturas y arrendamientos financieros', 'invoice_iva_code'=>'S200', 'open_codes'=>'S200'],
           ['grupo'=>'VEX','nombre'=>'Arrendamientos destinados a viviendas y accesorios, así como los lugares de culto religioso', 'invoice_iva_code'=>'S201', 'open_codes'=>'S201'],
@@ -51,7 +51,7 @@ class ProductCategorySeed extends Seeder
           ['grupo'=>'VEX','nombre'=>'Venta o entrega de agua residencial no mayor a 30 M3', 'invoice_iva_code'=>'S201', 'open_codes'=>'S201'],
           ['grupo'=>'VEX','nombre'=>'Autoconsumo de bienes y servicios sin aplicación de créditos total o parcial', 'invoice_iva_code'=>'B240', 'open_codes'=>'B240,S240'],
           ['grupo'=>'VEX','nombre'=>'Venta de sillas de ruedas y similares, equipo ortopédico, prótesis y equipo', 'invoice_iva_code'=>'B200', 'open_codes'=>'B200,S200'],
-          ['grupo'=>'VEX','nombre'=>'Venta de bienes y servicios a instituciones públicas y privadas exentas', 'invoice_iva_code'=>'B260', 'open_codes'=>'B260,S260,S160,B160,B181,B182,B183,B184,S181,S182,S183,S184'],
+          ['grupo'=>'VEX','nombre'=>'Venta de bienes y servicios a instituciones públicas y privadas exentas', 'invoice_iva_code'=>'B260', 'open_codes'=>'S160,B160,B181,B182,B183,B184,S181,S182,S183,S184'],
           ['grupo'=>'VEX','nombre'=>'Aranceles por matrícula y créditos de cursos en universidades públicas y privadas exentas', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
           ['grupo'=>'VEX','nombre'=>'Servicios de transporte terrestre de pasajeros y cabotaje de personas con concesión', 'invoice_iva_code'=>'S170', 'open_codes'=>'S170,B200,S200'],
           ['grupo'=>'VEX','nombre'=>'Venta, arrendamiento y leasing de autobuses y embarcaciones', 'invoice_iva_code'=>'S200', 'open_codes'=>'B200,S200'],
@@ -68,23 +68,23 @@ class ProductCategorySeed extends Seeder
           //Ventas no sujetas
           ['grupo'=>'VNS','nombre'=>'Bienes y servicios a la Caja Costarricense de Seguro Social', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184,B170,S170'],
           ['grupo'=>'VNS','nombre'=>'Bienes y servicios a las corporaciones municipales', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184,B170,S170'],
-          ['grupo'=>'VNS','nombre'=>'Otras ventas no sujetas', 'invoice_iva_code'=>'B173', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184,S300,B300,B170,S170'],
+          ['grupo'=>'VNS','nombre'=>'Otras ventas no sujetas', 'invoice_iva_code'=>'B173', 'open_codes'=>'B260,S260,S300,B300,B170'],
           //Usado para notas de débito.
           ['grupo'=>'DP','nombre'=>'Devoluciones a proveedores', 'invoice_iva_code'=>'B065', 'open_codes'=>'B065,B066,B067']
         ];
         
         $listaCompras = [
           ['grupo'=>'CL','nombre'=>'Compras locales de bienes utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Bienes', 'bill_iva_code'=>'B003', 'open_codes'=>'B003,B063,B008,B068,B004,B064,B002,B062,B001,B011,B080,R001,R002,R003,R004,R005,R006'],
-          ['grupo'=>'CL','nombre'=>'Compras locales de servicios utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Servicios', 'bill_iva_code'=>'S003', 'open_codes'=>'S003,S063,S008,S068,S004,S064,S002,S062,S001,S011'],
+          ['grupo'=>'CL','nombre'=>'Compras locales de servicios utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Servicios', 'bill_iva_code'=>'S003', 'open_codes'=>'S003,S063,S008,S068,S004,S064,S002,S062,S061,S001,S011'],
           ['grupo'=>'CL','nombre'=>'Compras locales de bienes de capital utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Bienes de capital', 'bill_iva_code'=>'B013', 'open_codes'=>'B013,S013,B016,S016,B073,S073,B018,B078,B014,B012,B072,B015,S015,B011,S011,B071,S071'],
           ['grupo'=>'CI','nombre'=>'Importaciones de bienes utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Bienes', 'bill_iva_code'=>'B023', 'open_codes'=>'B023,B043,B028,B048,B024,B044,B022,B042,B021,B041'],
           ['grupo'=>'CI','nombre'=>'Importaciones de servicios utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Servicios', 'bill_iva_code'=>'S023', 'open_codes'=>'S023,S043,S028,S048,S024,S044,S022,S042,S021,S041'],
           ['grupo'=>'CI','nombre'=>'Importaciones de bienes de capital utilizados en operaciones sujetas y no exentas', 'declaracion_name'=>'Bienes de capital', 'bill_iva_code'=>'B033', 'open_codes'=>'B033,B036,S033,S036,B053,S053,B038,S038,B058,S058,B034,B054,S034,S054,B032,B052,S052,S032,B031,B035,B051,S031,S035,S051'],
-          ['grupo'=>'CE','nombre'=>'Compras locales de bienes y servicios exentos', 'declaracion_name'=>'Locales', 'bill_iva_code'=>'B060', 'open_codes'=>'B060,S060,B070,S070'],
+          ['grupo'=>'CE','nombre'=>'Compras locales de bienes y servicios exentos', 'declaracion_name'=>'Locales', 'bill_iva_code'=>'B060', 'open_codes'=>'B060,S060,B061,S061,B070,S070,B080'],
           ['grupo'=>'CE','nombre'=>'Importaciones de bienes y servicios exentos', 'declaracion_name'=>'Importados', 'bill_iva_code'=>'B040', 'open_codes'=>'B040,S040,B050,S050'],
-          ['grupo'=>'CNR','nombre'=>'Compras locales de bienes y servicios no relacionados directamente con la actividad', 'declaracion_name'=>'Locales', 'bill_iva_code'=>'B097', 'open_codes'=>'B097,S097'],
+          ['grupo'=>'CNR','nombre'=>'Compras locales de bienes y servicios no relacionados directamente con la actividad', 'declaracion_name'=>'Locales', 'bill_iva_code'=>'B097', 'open_codes'=>'B097,S097,B090,B091,B092,B093,B094'],
           ['grupo'=>'CNR','nombre'=>'Importaciones de bienes y servicios no relacionados directamente con la actividad', 'declaracion_name'=>'Importados', 'bill_iva_code'=>'B090', 'open_codes'=>'B090,S090,099'],
-          ['grupo'=>'CNS','nombre'=>'Compras locales de bienes y servicios no sujetos', 'declaracion_name'=>'Locales', 'bill_iva_code'=>'B093', 'open_codes'=>'B080,S080,B091,B092,B093,B094'],
+          ['grupo'=>'CNS','nombre'=>'Compras locales de bienes y servicios no sujetos', 'declaracion_name'=>'Locales', 'bill_iva_code'=>'B093', 'open_codes'=>'B060,S060,B080,S080,B091,B092,B093,B094'],
           ['grupo'=>'CNS','nombre'=>'Importaciones de bienes y servicios no sujetos', 'declaracion_name'=>'Importados', 'bill_iva_code'=>'B093', 'open_codes'=>'B080,S080,B091,B092,B093,B094'],
           ['grupo'=>'CLI','nombre'=>'Bienes y servicios del artículo 19 de la LIVA', 'bill_iva_code'=>'B080', 'open_codes'=>'B080,S080'],
           ['grupo'=>'COE','nombre'=>'Autorizadas por la Dirección General de Hacienda', 'bill_iva_code'=>'B080', 'open_codes'=>'B080,S080'],
