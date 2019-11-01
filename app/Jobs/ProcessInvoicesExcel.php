@@ -248,7 +248,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                                 'amount'   => $linea->montoCargo ?? 0,
                             ]
                             );
-                            
+
                             $totalComprobante = $totalComprobante + $linea->montoCargo;
                         }
                     }
@@ -256,7 +256,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                     $invoice->iva_amount = $totaliva;
                     $invoice->total = $totalComprobante;
                     
-                    
+                    $invoice->save();
                     
                     if ($invoice->document_type == '08' ) {
                      
