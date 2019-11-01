@@ -1033,7 +1033,7 @@ class BillController extends Controller
                 return $bill->total * $bill->currency_rate;
             })
             ->editColumn('accept_iva_total', function(Bill $bill) {
-                return $bill->iva_amount;
+                return $bill->iva_amount * $bill->currency_rate;
             })
             ->editColumn('accept_iva_acreditable', function(Bill $bill) {
                 return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_iva_acreditable;
