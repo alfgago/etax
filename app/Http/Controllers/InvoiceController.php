@@ -2029,7 +2029,10 @@ class InvoiceController extends Controller
                         $xls_invoice->tipoCambio = $row['tipocambio'];
                         $xls_invoice->tipoDocumentoReferencia = $row['tipodocumentoreferencia'] ?? null;
                         $xls_invoice->numeroDocumentoReferencia = $row['numerodocumentoreferencia'] ?? null;
-                        $xls_invoice->fechaEmisionReferencia = Carbon::createFromFormat('d/m/Y g:i A',$row['fechaemisionreferencia']) ?? null;
+                        //dd($row);
+                        if(!$row['fechaemisionreferencia']){
+                            $xls_invoice->fechaEmisionReferencia = Carbon::createFromFormat('d/m/Y g:i A',$row['fechaemisionreferencia']) ?? null;
+                        }
                         $xls_invoice->codigoNota = $row['codigonota'] ?? null;
                         $xls_invoice->razonNota = $row['razonnota'] ?? null;
                         if($row['identificador'] != $consecutivo){
