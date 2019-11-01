@@ -121,6 +121,8 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::patch('switch-ocultar/{id}', 'InvoiceController@hideInvoice')->name('Invoice.hideInvoice');
     Route::get('validar/{id}', 'InvoiceController@validar')->name('Invoice.validar');
     Route::post('guardar-validar', 'InvoiceController@guardarValidar')->name('Invoice.GuardarValidar');
+    Route::get('envioProgramada', 'InvoiceController@envioProgramada')->name('Invoice.envioProgramada');
+    Route::get('recurrentes', 'InvoiceController@recurrentes')->name('Invoice.recurrentes');
     Route::get('lista-validar-masivo', 'InvoiceController@indexValidarMasivo')->name('Invoice.indexValidarMasivo');
     Route::post('validacion-masiva', 'InvoiceController@validarMasivo')->name('Invoice.validacion-masiva');
 });
