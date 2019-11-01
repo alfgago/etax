@@ -309,7 +309,7 @@ class InvoiceUtils
             }
             return json_encode($details, true);
         } catch (ClientException $error) {
-            Log::error('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
+            Log::error('Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         }
     }
@@ -525,7 +525,7 @@ class InvoiceUtils
             }
             return $request;
         } catch (\Exception $error) {
-            Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage());
+            Log::info('Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         }
     }

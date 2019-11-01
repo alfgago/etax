@@ -81538,4 +81538,17 @@ table.dataTable.no-footer {
   -webkit-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
-
+.columnas-excel {
+    list-style-type: upper-alpha;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    font-size: 0.6785rem;
+    padding-left: 1rem;
+}
+.columnas-excel li {
+  width: 33%;
+  padding-right: 1rem;
+}

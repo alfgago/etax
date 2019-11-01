@@ -53,13 +53,13 @@ class ProcessSingleInvoiceImport implements ShouldQueue
         $fac = $invoiceArr['factura'];
         $lineas = $invoiceArr['lineas'];
         try {
-            $invoice = Invoice::firstOrNew(
-              [
-                  'company_id' => $fac->company_id,
-                  'document_number' => $fac->document_number,
-                  'document_key' => $fac->document_key,
-                  'client_id_number' => $fac->client_id_number,
-              ], $fac->toArray()
+            $invoice = Invoice::firstOrNew(	
+              [	
+                  'company_id' => $fac->company_id,	
+                  'document_number' => $fac->document_number,	
+                  'document_key' => $fac->document_key,	
+                  'client_id_number' => $fac->client_id_number,	
+              ], $fac->toArray()	
             );
             
             if( !$invoice->id ){

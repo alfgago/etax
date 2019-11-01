@@ -18,6 +18,7 @@ use App\PaymentMethod;
 use App\SubscriptionPlan;
 use App\AvailableInvoices;
 use App\Team;
+use App\TransactionsLog;
 use Carbon\Carbon;
 use CybsSoapClient;
 use Illuminate\Http\Request;
@@ -242,7 +243,7 @@ class PaymentController extends Controller
             $ip = $paymentGateway->getUserIpAddr();
             $request->request->add(['IpAddress' => $ip]);
 
-            if($request->plan_sel == "c"){
+            if($request->plan_sel == "c") {
                 $coupons = Coupon::where('code', $request->coupon)->where('type',1)->count();
                 $precio_25 = 8;
                 $precio_10 = 10;
@@ -403,24 +404,35 @@ class PaymentController extends Controller
                 ]
             );
 
-            if($payment->payment_gateway === 'klap' || $payment->payment_gateway === ''){
-                $payment->payment_gateway = 'cybersource';
+            if($payment->payment_gateway === 'klap' || $payment->payment_gateway === '') {
                 $payment->charge_token = null;
-                $payment->save();
             }
+            $payment->payment_gateway = 'cybersource';
+            $payment->save();
 
             $request->request->add(['token_bn' => $paymentMethod->token_bn]);
-
             //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
             if( ! isset($payment->charge_token) ) {
-                $chargeProof = $paymentGateway->pay($request);
+                $transLog = TransactionsLog::create([
+                    'id_payment' => $payment->id ?? '',
+                    'status' => 'processing',
+                    'id_paymethod' => $paymentMethod->id ?? '',
+                    'processor' => $paymentMethod->payment_gateway ?? ''
+                ]);
+                $transLog->save();
+                $chargeProof = $paymentGateway->pay($request, false, $transLog);
                 if($chargeProof){
                     $payment->charge_token = $chargeProof;
                     $payment->save();
                 }
             }
 
-            if ( $chargeProof ) {
+            if($chargeProof) {
+                $payment->charge_token = $chargeProof;
+                $payment->save();
+            }
+
+            if ($chargeProof) {
                 $payment->proof = $payment->charge_token;
                 $payment->payment_status = 2;
                 $payment->save();
@@ -635,15 +647,14 @@ class PaymentController extends Controller
                 $request->request->add(['discount_reason' => null]);
                 $request->request->add(['etax_product_id' => 16]);
                 $request->request->add(['referenceCode' => 16]);
-
-                $client = \App\Client::where('company_id', $company->id)->where('id_number', $request->id_number)->first();
+                $client = \App\Client::where('company_id', 1)->where('id_number', $request->id_number)->first();
                 $request->request->add(['client_code' => $client->id]);
                 $request->request->add(['client_id_number' => $client->id_number]);
                 $request->request->add(['client_id' => $client->id_number]);
                 $request->request->add(['tipo_persona' => $client->tipo_persona]);
 
                 $chargeCreated = $paymentGateway->comprarProductos($request);
-                if($chargeCreated){
+                if($chargeCreated) {
                     $invoiceData = $paymentGateway->setInvoiceInfo($request);
                     $procesoFactura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
                     $company->save();
@@ -655,7 +666,7 @@ class PaymentController extends Controller
                 return redirect()->back()->withErrors('No se pudo procesar el pago');
             }
         }catch ( \Exception $e){
-            Log::error('Error al anular facturar -->'.$e);
+            Log::error('Error en compra de contabilidad -->'.$e);
             return redirect()->back()->withErrors('Hubo un error con el pago');
         }
     }

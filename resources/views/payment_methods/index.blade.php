@@ -5,9 +5,9 @@
 @endsection
 
 @section('breadcrumb-buttons')
-    @if($cantidad < 3)
+    
         <a type="submit" class="btn btn-primary" href="/payment-methods/payment-method-create-view">Registrar nuevo método de pago</a>
-    @endif
+    
 @endsection
 
 @section('content')

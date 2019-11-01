@@ -1,7 +1,5 @@
 <?php
-
 use Illuminate\Database\Seeder;
-
 class MenuSeeder extends Seeder
 {
     /**
@@ -22,9 +20,11 @@ class MenuSeeder extends Seeder
 	          				['nombre'=>'Emitir factura electrónica', 'orden' => '1', 'url'=>'/facturas-emitidas/emitir-factura/01','tipo'=>'href','icono'=>'2', 'permisos'=>[1,2]],
 	          				['nombre'=>'Registrar factura existente', 'orden' => '2','url'=>'/facturas-emitidas/create','tipo'=>'href','icono'=>'', 'permisos'=>[1,2]],
 	          				['nombre'=>'Importar facturas', 'orden' => '3','url'=>"abrirPopup('importar-emitidas-popup');",'tipo'=>'onclick','icono'=>'', 'permisos'=>[1,2]],
-	          				['nombre'=>'Validar facturas', 'orden' => '4','url'=>'/facturas-emitidas/validaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,2,4,8]],
-	          				['nombre'=>'Autorizar facturas por email', 'orden' => '5','url'=>'/facturas-emitidas/autorizaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,2,4,8]],
-	          				['nombre'=>'Facturas recurrentes', 'orden' => '9','url'=>'/facturas-emitidas/recurrentes','tipo'=>'href','icono'=>'', 'permisos'=>[1,2]]
+	          				['nombre'=>'Facturas recurrentes', 'orden' => '4','url'=>'/facturas-emitidas/recurrentes','tipo'=>'href','icono'=>'', 'permisos'=>[1,2]]
+	          				['nombre'=>'Envio masivo de Facturas','url'=>'abrirPopup("enviar-emitidas-popup");','padre'=>'0', 'subitems'=>[],'tipo'=>'onclick', 'icono'=>'', 'permisos'=>[1,2], 'orden' => '5'],
+	          				['nombre'=>'Validar facturas', 'orden' => '6','url'=>'/facturas-emitidas/validaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,2,4,8]],
+	          				['nombre'=>'Validar masivamente', 'orden' => '7','url'=>'/facturas-emitidas/lista-validar-masivo','tipo'=>'href','icono'=>'', 'permisos'=>[1,2,4,8]],
+	          				['nombre'=>'Autorizar facturas por email', 'orden' => '8','url'=>'/facturas-emitidas/autorizaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,2,4,8]]
 	          			]
 	          		],
 	          		['nombre'=>'Compras','url'=>'/facturas-recibidas','padre'=>'0', 'tipo'=>'href', 'icono'=>'assets/images/iconos/compras.png', 'permisos'=>[1,3,4,6,8], 'orden' => '3', 'subitems'=>[
@@ -32,17 +32,19 @@ class MenuSeeder extends Seeder
 	          				['nombre'=>'Registrar factura existente', 'orden' => '1','url'=>'/facturas-recibidas/create','tipo'=>'href','icono'=>'', 'permisos'=>[1,3]],
 	          				['nombre'=>'Importar facturas', 'orden' => '2','url'=>'abrirPopup("importar-recibidas-popup");','tipo'=>'onclick','icono'=>'', 'permisos'=>[1,3]],
 	          				['nombre'=>'Validar facturas', 'orden' => '3','url'=>"/facturas-recibidas/validaciones",'tipo'=>'href','icono'=>'', 'permisos'=>[1,3,4,8]],
-	          				['nombre'=>'Aceptación de facturas recibidas', 'orden' => '4','url'=>'/facturas-recibidas/aceptaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,3,4,8]],
-	          				['nombre'=>'Autorizar facturas por email', 'orden' => '5','url'=>'/facturas-recibidas/autorizaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,3,4,8]]
+	          				['nombre'=>'Validar masivamente', 'orden' => '4','url'=>"/facturas-recibidas/lista-validar-masivo",'tipo'=>'href','icono'=>'', 'permisos'=>[1,3,4,8]],
+	          				['nombre'=>'Aceptación de facturas recibidas', 'orden' => '5','url'=>'/facturas-recibidas/aceptaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,3,4,8]],
+	          				['nombre'=>'Autorizar facturas por email', 'orden' => '6','url'=>'/facturas-recibidas/autorizaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,3,4,8]]
 	          			]
 	          		],
 	          		['nombre'=>'Facturación','url'=>'/facturas-emitidas','padre'=>'0', 'tipo'=>'href', 'icono'=>'assets/images/iconos/facturacion.png', 'permisos'=>[1,2,3], 'orden' => '4',  'subitems'=>[
 	          				['nombre'=>'Ver documentos emitidos', 'orden' => '0','url'=>'/facturas-emitidas','tipo'=>'href','icono'=>'', 'permisos'=>[1,2]],
 	          				['nombre'=>'Emitir factura electrónica', 'orden' => '1','url'=>'/facturas-emitidas/emitir-factura/01','tipo'=>'href','icono'=>'', 'permisos'=>[1,2]],
 	          				['nombre'=>'Emitir tiquete electrónico', 'orden' => '2','url'=>'/facturas-emitidas/emitir-factura/04','tipo'=>'href','icono'=>'', 'permisos'=>[1,2]],
-	          				['nombre'=>'Emitir factura electrónica de exportación', 'orden' => '3','url'=>'/facturas-emitidas/emitir-factura/09','tipo'=>'href','icono'=>'', 'permisos'=>[1,2]],
-	          				['nombre'=>'Emitir factura electrónica de compra', 'orden' => '4','url'=>'/facturas-emitidas/emitir-factura/08','tipo'=>'href','icono'=>'', 'permisos'=>[1,2]],
-	          				['nombre'=>'Aceptación de facturas recibidas', 'orden' => '5','url'=>'/facturas-recibidas/aceptaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,3]]
+	          				['nombre'=>'Envio masivo de Facturas','url'=>'abrirPopup("enviar-emitidas-popup");','padre'=>'0', 'subitems'=>[],'tipo'=>'onclick', 'icono'=>'', 'permisos'=>[1,2], 'orden' => '3'],
+	          				['nombre'=>'Emitir factura electrónica de exportación', 'orden' => '4','url'=>'/facturas-emitidas/emitir-factura/09','tipo'=>'href','icono'=>'', 'permisos'=>[1,2]],
+	          				['nombre'=>'Emitir factura electrónica de compra', 'orden' => '5','url'=>'/facturas-emitidas/emitir-factura/08','tipo'=>'href','icono'=>'', 'permisos'=>[1,2]],
+	          				['nombre'=>'Aceptación de facturas recibidas', 'orden' => '6','url'=>'/facturas-recibidas/aceptaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,3]]
 	          			]
 	          		],
 	          		['nombre'=>'Cierres de mes','url'=>'/cierres','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'assets/images/iconos/report.png', 'permisos'=>[1,5,8], 'orden' => '5'],
@@ -87,7 +89,9 @@ class MenuSeeder extends Seeder
 	          	'items'=>[
 	          		['nombre'=>'Emitir factura nueva','url'=>'/facturas-emitidas/emitir-factura/01','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,2], 'orden' => '0'],
 	          		['nombre'=>'Ingresar factura existente','url'=>'/facturas-emitidas/create','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'','orden' => '1', 'permisos'=>[1,2]],
-	          		['nombre'=>'Importar facturas emitidas','url'=>'abrirPopup("importar-emitidas-popup");','padre'=>'0', 'subitems'=>[],'tipo'=>'onclick', 'icono'=>'', 'permisos'=>[1,2], 'orden' => '2']
+	          		['nombre'=>'Importar facturas emitidas','url'=>'abrirPopup("importar-emitidas-popup");','padre'=>'0', 'subitems'=>[],'tipo'=>'onclick', 'icono'=>'', 'permisos'=>[1,2], 'orden' => '2'],
+	          		['nombre'=>'Envio masivo de Facturas','url'=>'abrirPopup("enviar-emitidas-popup");','padre'=>'0', 'subitems'=>[],'tipo'=>'onclick', 'icono'=>'', 'permisos'=>[1,2], 'orden' => '3']
+	          	
 	          	]
 	        ],
 	        [
@@ -130,8 +134,7 @@ class MenuSeeder extends Seeder
 	          	'items'=>[
 	          		['nombre'=>'Perfil','url'=>'/usuario/perfil','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,2,3,4,5,6,7,8], 'orden' => '0'],
 	          		['nombre'=>'Configuración de empresa','url'=>'/empresas/editar','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,8], 'orden' => '1'],
-	          		['nombre'=>'Gestión de pagos','url'=>'/payments-methods','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,8], 'orden' => '2'],
-	          		['nombre'=>'Cerrar sesión','url'=>'event.preventDefault(); document.getElementById("frm-logout").submit();','padre'=>'0', 'subitems'=>[],'tipo'=>'onclick', 'icono'=>'', 'permisos'=>[1,2,3,4,5,6,7,8], 'orden' => '3']
+	          		['nombre'=>'Gestión de pagos','url'=>'/payments-methods','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,8], 'orden' => '2']
 	          	]
 	        ],
 	        [
@@ -140,8 +143,7 @@ class MenuSeeder extends Seeder
 	          	'items'=>[
 	          		['nombre'=>'Editar información personal','url'=>'/usuario/perfil','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,2,3,4,5,6,7,8], 'orden' => '0'],
 	          		['nombre'=>'Seguridad','url'=>'/usuario/seguridad','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,2,3,4,5,6,7,8], 'orden' => '1'],
-	          		['nombre'=>'Cambiar plan','url'=>'/cambiar-plan','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,2,3,4,5,6,7,8], 'orden' => '2'],
-	          		['nombre'=>'Empresas','url'=>'/usuario/empresas','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,2,3,4,5,6,7,8], 'orden' => '3']
+	          		['nombre'=>'Cambiar plan','url'=>'/cambiar-plan','padre'=>'0', 'subitems'=>[],'tipo'=>'href', 'icono'=>'', 'permisos'=>[1,2,3,4,5,6,7,8], 'orden' => '2']
 	          	]
 	        ],
 	        [
@@ -165,7 +167,6 @@ class MenuSeeder extends Seeder
 	          	]
 	        ]
       	];
-
       	foreach( $lista as $item ) {
           try{
             	$menu = App\Menu::updateOrCreate(
@@ -176,7 +177,6 @@ class MenuSeeder extends Seeder
 		              'name' => $item['nombre'],
 		              'status' => 1
 		            ]);	
-
             	foreach($item['items'] as $item_menu){
             		$menu_item = App\MenuItem::updateOrCreate(
 		            [ 
@@ -192,7 +192,6 @@ class MenuSeeder extends Seeder
 		              'status' => 1
 		            ]);
 		            foreach($item_menu['permisos'] as $permiso){
-
 		            	$permiso_item  = App\MenuItemsPermiso::updateOrCreate(
 		            	 	[
 		            	 		'menu_item_id'=>$menu_item->id,
@@ -228,6 +227,5 @@ class MenuSeeder extends Seeder
             	}
           }catch(\Throwable $e){}
         }
-
     }
 }

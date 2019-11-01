@@ -76,7 +76,7 @@
                <td>
                  <div class="input-validate-iva">
                    <select class="form-control product_type_all"  placeholder="Seleccione una categoría de hacienda" >
-                      <option value="0">-- Seleccione --</option>
+                      <option value="0" posibles="">-- Seleccione --</option>
                       @foreach($categoriaProductos as $cat)
                          <option value="{{@$cat->id}}" codigo="{{ @$cat->invoice_iva_code }}" posibles="{{@$cat->open_codes}}" >{{@$cat->name}}</option>
                       @endforeach
@@ -146,10 +146,6 @@ $(document).ready(function(){
         var product_type  = $(this).val(); 
         if(product_type != 0){
         $(".product_type").val(product_type);
-        var iva_type  = $(this).val(); 
-        if(iva_type != 0){
-          $(".iva_type").val(iva_type);
-        }
       }
     });
     $(".iva_type_all").change(function(){
@@ -157,6 +153,22 @@ $(document).ready(function(){
         if(iva_type != 0){
           $(".iva_type").val(iva_type);
         }
+        console.log(iva_type);
+        var parent = $(this).parents('tr');
+        parent.find('.product_type_all option').hide();
+        var tipoProducto = 0;
+        parent.find(".product_type_all option").each(function(){
+          console.log($(this).attr('posibles'));
+          var posibles = $(this).attr('posibles').split(",");
+          if(posibles.includes(iva_type)){
+            $(this).show();
+            if( !tipoProducto ){
+              tipoProducto = $(this).val();
+            }
+          }
+        });
+        parent.find('.product_type_all').val( tipoProducto ).change();
+
     });
 
     $(".iva_type").change(function(){

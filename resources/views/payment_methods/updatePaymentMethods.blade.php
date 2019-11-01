@@ -19,7 +19,7 @@
                             Actualizaci&oacute;n del m&eacute;todo de pago
                         </h3>
                     </div>
-                    @include( 'Payment_Methods.form', ['payment_methods' => $paymentMethod] )
+                    @include( 'payment_methods.form', ['payment_methods' => $paymentMethod] )
 
                 </div>
 

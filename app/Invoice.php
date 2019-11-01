@@ -799,7 +799,7 @@ class Invoice extends Model
         $invoice->total = $arr['ResumenFactura']['TotalComprobante'];
         
         $authorize = true;
-        if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
+        if( ($metodoGeneracion == "Email" && !$company->auto_accept_email) || $metodoGeneracion == "XML-A" ) {
             $authorize = false;
         }
         $invoice->is_authorized = $authorize;
