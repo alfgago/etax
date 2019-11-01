@@ -1948,7 +1948,7 @@ class InvoiceController extends Controller
         /*}catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
         }*/
-        $xlsInvoices = XlsInvoice::select('consecutivo', 'codigoActividad', 'nombreReceptor', 'tipoIdentificacionReceptor', 'IdentificacionReceptor', 'correoReceptor', 'condicionVenta', 'plazoCredito', 'medioPago', 'codigoMoneda', 'tipoCambio', 'totalServGravados', 'totalServExentos', 'totalMercanciasGravadas', 'totalMercanciasExentas', 'totalGravado', 'totalExento', 'totalVenta', 'totalDescuentos', 'totalVentaNeta', 'totalImpuesto', 'totalOtrosCargos', 'totalComprobante','autorizado')
+        $xlsInvoices = XlsInvoice::select('consecutivo', 'codigoActividad', 'nombreReceptor', 'tipoIdentificacionReceptor', 'IdentificacionReceptor', 'correoReceptor', 'condicionVenta', 'plazoCredito', 'medioPago', 'codigoMoneda', 'tipoCambio','autorizado')
             ->where('company_id',$companyId)->distinct('consecutivo')->get();
         return view("Invoice/confirmacion-envio")->with('facturas', $xlsInvoices);
         
@@ -1972,14 +1972,14 @@ class InvoiceController extends Controller
                     if( isset($row['identificacionreceptor']) ){
                         
                         $xls_invoice = XlsInvoice::updateOrCreate([
-                            'consecutivo' => $row['consecutivo'],
+                            'consecutivo' => $row['identificador'],
                             'company_id' => $company->id,
                             'numeroLinea' => $row['numerolinea']
                         ],
                         [   
                             'cantidad' => $row['cantidad']
                         ]);
-                        $xls_invoice->consecutivo = $row['consecutivo'];
+                        $xls_invoice->consecutivo = $row['identificador'];
                         $xls_invoice->tipoDocumento = $row['tipodocumento'];
                         $xls_invoice->fechaEmision = $row['fechaemision'];
                         $xls_invoice->fechaVencimiento = $row['fechavencimiento'];
@@ -2038,39 +2038,24 @@ class InvoiceController extends Controller
                         $xls_invoice->montoCargo = $row['montoCargo'] ?? 0;
                         $xls_invoice->codigoMoneda = $row['codigomoneda'];
                         $xls_invoice->tipoCambio = $row['tipocambio'];
-                        $xls_invoice->totalServGravados = $row['totalservgravados'];
-                        $xls_invoice->totalServExentos = $row['totalservexentos'];
-                        $xls_invoice->totalServExonerados = $row['totalservexonerados'];
-                        $xls_invoice->totalMercanciasGravadas = $row['totalmercanciasgravadas'];
-                        $xls_invoice->totalMercanciasExentas = $row['totalmercanciasexentas'];
-                        $xls_invoice->totalMercanciasExonerada = $row['totalmercanciasexonerada'];
-                        $xls_invoice->totalGravado = $row['totalgravado'];
-                        $xls_invoice->totalExento = $row['totalexento'];
-                        $xls_invoice->totalExonerado = $row['totalexonerado'];
-                        $xls_invoice->totalVenta = $row['totalventa'];
-                        $xls_invoice->totalDescuentos = $row['totaldescuentos'];
-                        $xls_invoice->totalVentaNeta = $row['totalventaneta'];
-                        $xls_invoice->totalImpuesto = $row['totalimpuesto'];
-                        $xls_invoice->totalOtrosCargos = $row['totalotroscargos'];
-                        $xls_invoice->totalComprobante = $row['totalcomprobante'];
                         $xls_invoice->tipoDocumentoReferencia = $row['tipodocumentoreferencia'] ?? null;
                         $xls_invoice->numeroDocumentoReferencia = $row['numerodocumentoreferencia'] ?? null;
                         $xls_invoice->fechaEmisionReferencia = Carbon::createFromFormat('d/m/Y g:i A',$row['fechaemisionreferencia']) ?? null;
                         $xls_invoice->codigoNota = $row['codigonota'] ?? null;
                         $xls_invoice->razonNota = $row['razonnota'] ?? null;
-                        if($row['consecutivo'] != $consecutivo){
+                        if($row['identificador'] != $consecutivo){
                             $facturas_disponibles--; 
                         }
                         if($facturas_disponibles < 0){
                             $xls_invoice->autorizado = 0;
                         }
-                        $consecutivo = $row['consecutivo'];
+                        $consecutivo = $row['identificador'];
                         $xls_invoice->save();
                     }else {
-                        //Log::warning('Factura repetida en envio masivo '.$identificacionCliente);
+                        Log::warning('Error en factura ENVIO MASIVO EXCEL No tiene identificacionreceptor');
                     }
                 }else {
-                    //Log::warning('Factura repetida en envio masivo '.$identificacionCliente);
+                    Log::warning('Error en factura ENVIO MASIVO EXCEL no coinciden las cedulas');
                 }
                    
             }catch( \Throwable $ex ){

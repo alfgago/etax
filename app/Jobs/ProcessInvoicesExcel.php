@@ -156,22 +156,6 @@ class ProcessInvoicesExcel implements ShouldQueue
                     $invoice->year = $fecha->year;
                     $invoice->month = $fecha->month;
                     $invoice->credit_time = $fechaV->format('d/m/Y');
-                    $invoice->total_serv_gravados = $factura[0]->totalServGravados;
-                    $invoice->total_serv_exentos = $factura[0]->totalServExentos;
-                    $invoice->total_merc_gravados = $factura[0]->totalMercanciasGravadas;
-                    $invoice->total_merc_exentas = $factura[0]->totalMercanciasExentas;
-                    $invoice->total_gravado = $factura[0]->totalGravado;
-                    $invoice->total_exento = $factura[0]->totalExento;
-                    $invoice->total_venta = $factura[0]->totalVenta;
-                    $invoice->total_descuento = $factura[0]->totalDescuentos;
-                    $invoice->total_venta_neta = $factura[0]->totalVentaNeta;
-                    $invoice->subtotal = $factura[0]->totalVentaNeta;
-                    $invoice->total_serv_exonerados = $factura[0]->totalServExonerados;
-                    $invoice->total_merc_exonerados = $factura[0]->totalMercanciasExonerada;
-                    $invoice->total_exonerados = $factura[0]->totalExonerado;
-                    $invoice->total_iva = $factura[0]->totalImpuesto;
-                    $invoice->total_otros_cargos = $factura[0]->totalOtrosCargos;
-                    $invoice->total_comprobante = $factura[0]->totalComprobante;
 
                     $invoice->reference_doc_type = $factura[0]->tipoDocumentoReferencia;
                     $invoice->reference_document_key = $factura[0]->numeroDocumentoReferencia;
@@ -326,21 +310,6 @@ class ProcessInvoicesExcel implements ShouldQueue
                           $bill->provider_zip = $provider->zip;
                           $bill->provider_phone = $provider->phone;
                           $bill->provider_id_number = $provider->id_number;
-                          $bill->total_serv_gravados = $factura[0]->totalServGravados;
-                        $bill->total_serv_exentos = $factura[0]->totalServExentos;
-                        $bill->total_merc_gravados = $factura[0]->totalMercanciasGravadas;
-                        $bill->total_merc_exentas = $factura[0]->totalMercanciasExentas;
-                        $bill->total_gravado = $factura[0]->totalGravado;
-                        $bill->total_exento = $factura[0]->totalExento;
-                        $bill->total_venta = $factura[0]->totalVenta;
-                        $bill->total_descuento = $factura[0]->totalDescuentos;
-                        $bill->total_venta_neta = $factura[0]->totalVentaNeta;
-                        $bill->total_serv_exonerados = $factura[0]->totalServExonerados;
-                        $bill->total_merc_exonerados = $factura[0]->totalMercanciasExonerada;
-                        $bill->total_exonerados = $factura[0]->totalExonerado;
-                        $bill->total_iva = $factura[0]->totalImpuesto;
-                        $bill->total_otros_cargos = $factura[0]->totalOtrosCargos;
-                        $bill->total_comprobante = $factura[0]->totalComprobante;
                           //Fechas
                           $fecha =  $invoice->generated_date ;
                           $bill->generated_date = $fecha;
