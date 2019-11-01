@@ -682,7 +682,7 @@ class BillController extends Controller
         foreach( $request->items as $key => $item ) {
             $billItem = BillItem::with('bill')->findOrFail($key);
             $bill = $billItem->bill;
-            if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
+            if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/Y') )){ 
                 BillItem::where('id', $key)
                 ->update([
                   'iva_type' =>  $item['iva_type'],
@@ -736,7 +736,7 @@ class BillController extends Controller
     public function guardarValidar(Request $request)
     {
         $bill = Bill::findOrFail($request->bill);
-        if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
+        if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/Y') )){ 
             $bill->activity_company_verification = $request->actividad_comercial;
             $bill->is_code_validated = true;
             foreach( $request->items as $item ) {

@@ -77,6 +77,7 @@ class CalculatedTax extends Model
           ['year', $year]
         ])->count();
         
+
         if( !$existe ){
           return true;
         }else{
