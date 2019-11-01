@@ -37,6 +37,7 @@ use PDF;
 use App\Jobs\ProcessInvoice;
 use App\Jobs\ProcessInvoicesImport;
 use App\Jobs\ProcessSendExcelInvoices;
+use App\Jobs\ProcessInvoicesExcel;
 use Illuminate\Support\Facades\Input;
 
 /**
@@ -136,27 +137,32 @@ class InvoiceController extends Controller
         $filtroTarifa = $request->get('filtroTarifa');
         switch($filtroTarifa){
             case 10:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 0');
+                $query = $query->where(function($q){
+                    $q->WhereNull('invoice_items.subtotal')
+                    ->orWhere('invoice_items.subtotal', '=', 0)
+                    ->orwhereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 0')                    
+                    ;
+                });
                 $cat['cero'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 0)->get();
                 break;
             case 1:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 1');
+                $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 1');
                 $cat['uno'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 1)->get();
                 break;
             case 2:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 2');
+                $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 2');
                 $cat['dos'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 2)->get();
                 break;
             case 13:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 13');
+                $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 13');
                 $cat['trece'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 13)->get();
                 break;
             case 4:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 4');
+                $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 4');
                 $cat['cuatro'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 4)->get();
                 break;
             case 8:
-                $query = $query->whereNotNull('invoice_items.subtotal')->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 8');
+                $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 8');
                 $cat['ocho'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 8)->get();;
                 break;
             default:
@@ -168,13 +174,23 @@ class InvoiceController extends Controller
                 $cat['ocho'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 8)->get();
         }
 
+       $filtroMes = $request->get('filtroMes');
+       if($filtroMes > 0){
+            $query = $query->where('invoice_items.month', $filtroMes);
+       }
+
        $filtroValidado = $request->get('filtroValidado');
        switch($filtroValidado){
             case 1:
-                $query = $query->where('invoices.is_code_validated', false);
+                $query = $query->where(function($q){
+                    $q->whereNull('invoice_items.product_type')->orWhereNull('invoice_items.iva_type');
+                });
                 break;
             case 2:
-                $query = $query->where('invoices.is_code_validated', true);
+                $query = $query->whereNotNull('invoice_items.product_type')->WhereNotNull('invoice_items.iva_type');
+                break;
+            case 3:
+                $query = $query->where('invoices.is_code_validated', false);
                 break;
         }
 
@@ -200,8 +216,12 @@ class InvoiceController extends Controller
                 return $invoiceItem->invoice->documentTypeName();
             })
             ->addColumn('tarifa_iva', function(InvoiceItem $invoiceItem) {
-                $invoiceItem->tarifa_iva = !empty($invoiceItem->iva_amount) ? ($invoiceItem->iva_amount / $invoiceItem->subtotal * 100) : 0;
-                $invoiceItem->tarifa_iva = round($invoiceItem->tarifa_iva * 100) / 100;
+                if(!$invoiceItem->subtotal > 0){
+                    $invoiceItem->tarifa_iva = 0;
+                }else{
+                    $invoiceItem->tarifa_iva = !empty($invoiceItem->iva_amount) ? ($invoiceItem->iva_amount / $invoiceItem->subtotal * 100) : 0;
+                    $invoiceItem->tarifa_iva = round($invoiceItem->tarifa_iva * 100) / 100;    
+                }
                 return $invoiceItem->tarifa_iva;
             })
             ->editColumn('generated_date', function(InvoiceItem $invoiceItem) {
@@ -226,14 +246,14 @@ class InvoiceController extends Controller
                     $catPorcentaje = $cat['todo'];
                 }
 
-                return view('Bill.ext.select-codigos', [
+                return view('Invoice.ext.select-codigos', [
                     'company' => $company,
                     'cat' => $catPorcentaje,
                     'item' => $invoiceItem
                 ])->render();                    
             })
             ->editColumn('categoria_hacienda', function(InvoiceItem $invoiceItem) use($categorias) {
-                return view('Bill.ext.select-categorias', [
+                return view('Invoice.ext.select-categorias', [
                     'categoriaProductos' => $categorias,
                     'item' => $invoiceItem
                 ])->render();
@@ -961,7 +981,7 @@ class InvoiceController extends Controller
         foreach( $request->items as $key => $item ) {
             $invoiceItem = InvoiceItem::with('invoice')->findOrFail($key);
             $invoice = $invoiceItem->invoice;
-            if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
+            if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/Y') )){ 
                 InvoiceItem::where('id', $key)
                 ->update([
                   'iva_type' =>  $item['iva_type'],
@@ -1016,7 +1036,7 @@ class InvoiceController extends Controller
     public function guardarValidar(Request $request)
     {
         $invoice = Invoice::findOrFail($request->invoice);
-        if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
+        if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/Y') )){ 
             $invoice->commercial_activity = $request->actividad_comercial;
             $invoice->is_code_validated = true;
             foreach( $request->items as $item ) {
@@ -1927,18 +1947,18 @@ class InvoiceController extends Controller
         $collection = Excel::toCollection( new InvoiceImport(), request()->file('archivo') );
         $companyId = currentCompany();
         $invoiceList = $collection->toArray()[0];
-        //try {
+        try {
             //Log::debug('Creando job de registro de facturas.');
             foreach (array_chunk ( $invoiceList, 200 ) as $facturas) {
                 $this->guardarMasivoExcel($facturas, $companyId);
                 //ProcessSendExcelInvoices::dispatch($facturas, $companyId)->onQueue('bulk');
             }
-        /*}catch( \Throwable $ex ){
+        }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
-        }*/
-        $XlsInvoices = XlsInvoice::select('consecutivo', 'codigoActividad', 'nombreReceptor', 'tipoIdentificacionReceptor', 'IdentificacionReceptor', 'correoReceptor', 'condicionVenta', 'plazoCredito', 'medioPago', 'codigoMoneda', 'tipoCambio', 'totalServGravados', 'totalServExentos', 'totalMercanciasGravadas', 'totalMercanciasExentas', 'totalGravado', 'totalExento', 'totalVenta', 'totalDescuentos', 'totalVentaNeta', 'totalImpuesto', 'totalOtrosCargos', 'totalComprobante','autorizado')
+        }
+        $xlsInvoices = XlsInvoice::select('consecutivo', 'codigoActividad', 'nombreReceptor', 'tipoIdentificacionReceptor', 'IdentificacionReceptor', 'correoReceptor', 'condicionVenta', 'plazoCredito', 'medioPago', 'codigoMoneda', 'tipoCambio','autorizado')
             ->where('company_id',$companyId)->distinct('consecutivo')->get();
-        return view("Invoice/confirmacion-envio")->with('facturas', $XlsInvoices);
+        return view("Invoice/confirmacion-envio")->with('facturas', $xlsInvoices);
         
     }
 
@@ -1953,22 +1973,20 @@ class InvoiceController extends Controller
         $consecutivo = null;
         $invoiceList = array();
         foreach ($facturas as $row){
-            //try{
+            try{
 
-            //dd($company->id_number."=".$row['cedulaempresa']);
-                if($row['cedulaempresa'] == $company->id_number){
-
-                    if( isset($row['identificacionreceptor']) ){
-                        
+                
+                if( isset($row['identificacionreceptor']) ){
+                    if($row['cedulaempresa'] == $company->id_number){
                         $xls_invoice = XlsInvoice::updateOrCreate([
-                            'consecutivo' => $row['consecutivo'],
+                            'consecutivo' => $row['identificador'],
                             'company_id' => $company->id,
                             'numeroLinea' => $row['numerolinea']
                         ],
                         [   
                             'cantidad' => $row['cantidad']
                         ]);
-                        $xls_invoice->consecutivo = $row['consecutivo'];
+                        $xls_invoice->consecutivo = $row['identificador'];
                         $xls_invoice->tipoDocumento = $row['tipodocumento'];
                         $xls_invoice->fechaEmision = $row['fechaemision'];
                         $xls_invoice->fechaVencimiento = $row['fechavencimiento'];
@@ -2027,89 +2045,81 @@ class InvoiceController extends Controller
                         $xls_invoice->montoCargo = $row['montoCargo'] ?? 0;
                         $xls_invoice->codigoMoneda = $row['codigomoneda'];
                         $xls_invoice->tipoCambio = $row['tipocambio'];
-                        $xls_invoice->totalServGravados = $row['totalservgravados'];
-                        $xls_invoice->totalServExentos = $row['totalservexentos'];
-                        $xls_invoice->totalServExonerados = $row['totalservexonerados'];
-                        $xls_invoice->totalMercanciasGravadas = $row['totalmercanciasgravadas'];
-                        $xls_invoice->totalMercanciasExentas = $row['totalmercanciasexentas'];
-                        $xls_invoice->totalMercanciasExonerada = $row['totalmercanciasexonerada'];
-                        $xls_invoice->totalGravado = $row['totalgravado'];
-                        $xls_invoice->totalExento = $row['totalexento'];
-                        $xls_invoice->totalExonerado = $row['totalexonerado'];
-                        $xls_invoice->totalVenta = $row['totalventa'];
-                        $xls_invoice->totalDescuentos = $row['totaldescuentos'];
-                        $xls_invoice->totalVentaNeta = $row['totalventaneta'];
-                        $xls_invoice->totalImpuesto = $row['totalimpuesto'];
-                        $xls_invoice->totalOtrosCargos = $row['totalotroscargos'];
-                        $xls_invoice->totalComprobante = $row['totalcomprobante'];
                         $xls_invoice->tipoDocumentoReferencia = $row['tipodocumentoreferencia'] ?? null;
                         $xls_invoice->numeroDocumentoReferencia = $row['numerodocumentoreferencia'] ?? null;
-                        $xls_invoice->fechaEmisionReferencia = $row['fechaemisionreferencia'] ?? null;
+                        //dd($row);
+                        if($row['fechaemisionreferencia']){
+                            $xls_invoice->fechaEmisionReferencia = Carbon::createFromFormat('d/m/Y g:i A',$row['fechaemisionreferencia']) ?? null;
+                        }
                         $xls_invoice->codigoNota = $row['codigonota'] ?? null;
                         $xls_invoice->razonNota = $row['razonnota'] ?? null;
-                        if($row['consecutivo'] != $consecutivo){
+                        if($row['identificador'] != $consecutivo){
                             $facturas_disponibles--; 
                         }
                         if($facturas_disponibles < 0){
                             $xls_invoice->autorizado = 0;
                         }
-                        $consecutivo = $row['consecutivo'];
+                        $consecutivo = $row['identificador'];
                         $xls_invoice->save();
                     }else {
-                        //Log::warning('Factura repetida en envio masivo '.$identificacionCliente);
+                        Log::warning('Error en factura ENVIO MASIVO EXCEL no coinciden las cedulas');
                     }
-                }else {
-                    //Log::warning('Factura repetida en envio masivo '.$identificacionCliente);
                 }
                    
-            /*}catch( \Throwable $ex ){
+            }catch( \Throwable $ex ){
                 Log::error("Error en factura ENVIO MASIVO EXCEL:" . $ex);
-            }*/
+            }
         }
         $company->save();
-      //  dd($facturas);
     }
 
 
     public function detalleXlsInvoice($consecutivo){
 
         $companyId = currentCompany();
-        $XlsInvoice = XlsInvoice::where('company_id',$companyId)->where('consecutivo',$consecutivo)->get();
-        return view("Invoice/detalle-xls")->with('factura', $XlsInvoice);
+        $xlsInvoice = XlsInvoice::where('company_id',$companyId)->where('consecutivo',$consecutivo)->get();
+        return view("Invoice/detalle-xls")->with('factura', $xlsInvoice);
         
     }
 
     public function validarEnvioExcel(Request $request){
-        
-        $companyId = currentCompany();
-        foreach ($request->facturas as $factura) {
-            if (isset($factura["autorizado"])) {
-                XlsInvoice::where('company_id',$companyId)
-                      ->where('consecutivo', $factura["consecutivo"])
-                      ->update(['autorizado' => 1]);
-            }else{
-                XlsInvoice::where('company_id',$companyId)
-                      ->where('consecutivo', $factura["consecutivo"])
-                      ->update(['autorizado' => 0]);
+        try{
+            $companyId = currentCompany();
+            $company = currentCompanyModel();
+            foreach ($request->facturas as $factura) {
+                if (isset($factura["autorizado"])) {
+                    XlsInvoice::where('company_id',$companyId)
+                          ->where('consecutivo', $factura["consecutivo"])
+                          ->update(['autorizado' => 1]);
+                }else{
+                    XlsInvoice::where('company_id',$companyId)
+                          ->where('consecutivo', $factura["consecutivo"])
+                          ->update(['autorizado' => 0]);
+                }
             }
+            Log::info("Enviando facturas al job ProcessInvoicesExcel");
+            ProcessInvoicesExcel::dispatch($company)->onConnection(config('etax.queue_connections'))->onQueue('createinvoice');
+            //$this->guardarEnvioExcel($xlsInvoices);
+            return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
+        } catch ( \Exception $e) {
+            Log::error("Error en factura ENVIO MASIVO EXCEL:" . $e);
+
+            return redirect('/facturas-emitidas')->withError('Error en factura ENVIO MASIVO EXCEL.');
         }
-        $XlsInvoices = XlsInvoice::select('consecutivo', 'company_id','autorizado')
-            ->where('company_id',$companyId)->where('autorizado',1)->distinct('consecutivo')->get();
-        $this->guardarEnvioExcel($XlsInvoices);
-        return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
 
-    }
+    } 
 
-   public function guardarEnvioExcel($XlsInvoices){
+    
+   /*public function guardarEnvioExcel($xlsInvoices){
 
-        $company = Company::find($XlsInvoices[0]->company_id);
+        $company = Company::find($xlsInvoices[0]->company_id);
         $apiHacienda = new BridgeHaciendaApi();
         $tokenApi = $apiHacienda->login(false);
         if ($tokenApi !== false) {
         
-            foreach ($XlsInvoices as $XlsInvoice) {
-                $factura = XlsInvoice::where('company_id',$XlsInvoice->company_id)
-                        ->where('consecutivo',$XlsInvoice->consecutivo)->get();
+            foreach ($xlsInvoices as $xlsInvoice) {
+                $factura = XlsInvoice::where('company_id',$xlsInvoice->company_id)
+                        ->where('consecutivo',$xlsInvoice->consecutivo)->get();
                 
                 $invoice = new Invoice();
                 $invoice->company_id = $company->id;
@@ -2131,8 +2141,6 @@ class InvoiceController extends Controller
                 if ($invoice->document_type == '04') {
                     $invoice->reference_number = $company->last_ticket_ref_number + 1;
                 }
-                /*$invoice->document_key = $factura[0]->document_key;
-                $invoice->document_number = $factura[0]->document_number;*/
                $invoice->sale_condition = $factura[0]->condicionVenta;
                $invoice->description = $factura[0]->descripcion;
                 $invoice->payment_type = $factura[0]->medioPago;
@@ -2140,7 +2148,6 @@ class InvoiceController extends Controller
                 if ($factura[0]->codigoActividad) {
                     $invoice->commercial_activity = $factura[0]->codigoActividad;
                 }
-                /******************************************************************************/
                 $tipo_persona = $factura[0]->tipoIdentificacionReceptor;
                 $identificacion_cliente = preg_replace("/[^0-9]/", "", $factura[0]->identificacionReceptor );
                 
@@ -2383,19 +2390,7 @@ class InvoiceController extends Controller
                     $bill->xml_schema = 43;
                     
                     $bill->activity_company_verification = $invoice->commercial_activity;
-                    
-                      /*
-                      if( $request->accept_iva_condition ){
-                        $bill->accept_iva_condition = $request->accept_iva_condition;
-                      }
-                      if( $request->accept_iva_acreditable ){
-                        $bill->accept_iva_acreditable = $request->accept_iva_acreditable;
-                      }
-                      if( $request->accept_iva_gasto ){
-                        $bill->accept_iva_gasto = $request->accept_iva_gasto;
-                      }
-                    */
-
+                
 
                     
                     $bill->is_code_validated = 1;
@@ -2425,6 +2420,6 @@ class InvoiceController extends Controller
             }
         }
         XlsInvoice::where('company_id',$company->id)->delete();
-    }
+    }*/
         
 }

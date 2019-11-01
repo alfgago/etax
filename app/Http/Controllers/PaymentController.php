@@ -400,19 +400,17 @@ class PaymentController extends Controller
                     'payment_method_id' => $paymentMethod->id,
                     'payment_date' => Carbon::parse(now('America/Costa_Rica')),
                     'amount' => $amount,
-                    'coupon_id' => $cuponId,
-                    'payment_gateway' => 'cybersource'
+                    'coupon_id' => $cuponId
                 ]
             );
 
-            if($payment->payment_gateway === 'klap' || $payment->payment_gateway === ''){
-                $payment->payment_gateway = 'cybersource';
+            if($payment->payment_gateway === 'klap' || $payment->payment_gateway === '') {
                 $payment->charge_token = null;
-                $payment->save();
             }
+            $payment->payment_gateway = 'cybersource';
+            $payment->save();
 
             $request->request->add(['token_bn' => $paymentMethod->token_bn]);
-
             //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
             if( ! isset($payment->charge_token) ) {
                 $transLog = TransactionsLog::create([
@@ -429,7 +427,12 @@ class PaymentController extends Controller
                 }
             }
 
-            if ( $chargeProof ) {
+            if($chargeProof) {
+                $payment->charge_token = $chargeProof;
+                $payment->save();
+            }
+
+            if ($chargeProof) {
                 $payment->proof = $payment->charge_token;
                 $payment->payment_status = 2;
                 $payment->save();

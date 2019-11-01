@@ -97,27 +97,33 @@ class BillController extends Controller
         $filtroTarifa = $request->get('filtroTarifa');
         switch($filtroTarifa){
             case 10:
-                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 0');
+
+                $query = $query->where(function($q){
+                    $q->WhereNull('bill_items.subtotal')
+                    ->orWhere('bill_items.subtotal', '=', 0)
+                    ->orwhereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 0')                    
+                    ;
+                });
                 $cat['cero'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 0)->get();
                 break;
             case 1:
-                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 1');
+                $query = $query->whereNotNull('bill_items.subtotal')->where('bill_items.subtotal', '>', 0)->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 1');
                 $cat['uno'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 1)->get();
                 break;
             case 2:
-                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 2');
+                $query = $query->whereNotNull('bill_items.subtotal')->where('bill_items.subtotal', '>', 0)->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 2');
                 $cat['dos'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 2)->get();
                 break;
             case 13:
-                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 13');
+                $query = $query->whereNotNull('bill_items.subtotal')->where('bill_items.subtotal', '>', 0)->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 13');
                 $cat['trece'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 13)->get();
                 break;
             case 4:
-                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 4');
+                $query = $query->whereNotNull('bill_items.subtotal')->where('bill_items.subtotal', '>', 0)->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 4');
                 $cat['cuatro'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 4)->get();
                 break;
             case 8:
-                $query = $query->whereNotNull('bill_items.subtotal')->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 8');
+                $query = $query->whereNotNull('bill_items.subtotal')->where('bill_items.subtotal', '>', 0)->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 8');
                 $cat['ocho'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 8)->get();;
                 break;
             default:
@@ -129,13 +135,23 @@ class BillController extends Controller
                 $cat['ocho'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 8)->get();
         }
 
+       $filtroMes = $request->get('filtroMes');
+       if($filtroMes > 0){
+            $query = $query->where('bill_items.month', $filtroMes);
+       }
+
        $filtroValidado = $request->get('filtroValidado');
        switch($filtroValidado){
             case 1:
-                $query = $query->where('bills.is_code_validated', false);
+                $query = $query->where(function($q){
+                    $q->whereNull('bill_items.product_type')->orWhereNull('bill_items.iva_type');
+                });
                 break;
             case 2:
-                $query = $query->where('bills.is_code_validated', true);
+                $query = $query->whereNotNull('bill_items.product_type')->WhereNotNull('bill_items.iva_type');
+                break;
+            case 3:
+                $query = $query->where('bills.is_code_validated', false);
                 break;
         }
 
@@ -161,8 +177,12 @@ class BillController extends Controller
                 return $billItem->bill->documentTypeName();
             })
             ->addColumn('tarifa_iva', function(BillItem $billItem) {
-                $billItem->tarifa_iva = !empty($billItem->iva_amount) ? ($billItem->iva_amount / $billItem->subtotal * 100) : 0;
-                $billItem->tarifa_iva = round($billItem->tarifa_iva * 100) / 100;
+                if(!$billItem->subtotal > 0){
+                    $billItem->tarifa_iva = 0;
+                }else{
+                    $billItem->tarifa_iva = !empty($billItem->iva_amount) ? ($billItem->iva_amount / $billItem->subtotal * 100) : 0;
+                    $billItem->tarifa_iva = round($billItem->tarifa_iva * 100) / 100;    
+                }
                 return $billItem->tarifa_iva;
             })
             ->editColumn('generated_date', function(BillItem $billItem) {
@@ -200,11 +220,15 @@ class BillController extends Controller
                 ])->render();
                 
             })
+            ->addColumn('identificacion_especifica', function($billItem) {
+                return view('Bill.ext.select-identificacion', [
+                    'item' => $billItem])->render();
+            })
             ->addColumn('actions', function($billItem) {
                 return view('Bill.ext.deny-action', [
                     'bill' => $billItem->bill,])->render();
             })
-            ->rawColumns(['categoria_hacienda', 'codigo_etax', 'actions'])
+            ->rawColumns(['categoria_hacienda', 'codigo_etax', 'actions', 'identificacion_especifica'])
             ->toJson();
             return $return;
 
@@ -664,11 +688,12 @@ class BillController extends Controller
         foreach( $request->items as $key => $item ) {
             $billItem = BillItem::with('bill')->findOrFail($key);
             $bill = $billItem->bill;
-            if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
+            if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/Y') )){ 
                 BillItem::where('id', $key)
                 ->update([
                   'iva_type' =>  $item['iva_type'],
-                  'product_type' =>  $item['product_type']
+                  'product_type' =>  $item['product_type'],
+                  'porc_identificacion_plena' =>  $item['porc_identificacion_plena']
                 ]);
                 $validated = true;
                 foreach($bill->items as $item){
@@ -722,7 +747,7 @@ class BillController extends Controller
     {
         $company = currentCompanyModel();
         $bill = Bill::findOrFail($request->bill);
-        if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
+        if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/Y') )){ 
             $bill->activity_company_verification = $request->actividad_comercial;
             $bill->is_code_validated = true;
             foreach( $request->items as $item ) {
@@ -1013,7 +1038,7 @@ class BillController extends Controller
                 return $bill->total * $bill->currency_rate;
             })
             ->editColumn('accept_iva_total', function(Bill $bill) {
-                return $bill->iva_amount;
+                return $bill->iva_amount * $bill->currency_rate;
             })
             ->editColumn('accept_iva_acreditable', function(Bill $bill) {
                 return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_iva_acreditable;
