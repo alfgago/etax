@@ -226,11 +226,11 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'S300 - Sevicios de periodos anteriores a la Ley del IVA', 'codigo'=>'S300', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
           ['nombre'=>'B300 - Bienes de periodos anteriores a la Ley del IVA', 'codigo'=>'B300', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>false],
 
-          ['nombre'=>'B065 - Devoluciones a proveedores con IVA al 1% de compras con derecho a acreditación', 'codigo'=>'B065', 'porcentaje'=>'1', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
-          ['nombre'=>'B066 - Devoluciones a proveedores con IVA al 2% de compras con derecho a acreditación', 'codigo'=>'B066', 'porcentaje'=>'2', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
-          ['nombre'=>'B067 - Devoluciones a proveedores con IVA al 13% de compras con derecho a acreditación', 'codigo'=>'B067', 'porcentaje'=>'13', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B065 - Devoluciones a proveedores con IVA al 1% de compras con derecho a acreditación', 'codigo'=>'B065', 'codigo_tarifa' => '01','porcentaje'=>'1', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B066 - Devoluciones a proveedores con IVA al 2% de compras con derecho a acreditación', 'codigo'=>'B066', 'codigo_tarifa' => '01','porcentaje'=>'2', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B067 - Devoluciones a proveedores con IVA al 13% de compras con derecho a acreditación', 'codigo'=>'B067', 'codigo_tarifa' => '01','porcentaje'=>'13', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
           
-          ['nombre'=>'999 - Otros cargos que no corresponden a ventas.', 'codigo'=>'999', 'porcentaje'=>'13', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true, 'hide'=>false, 'hidden2018'=>false]
+          ['nombre'=>'999 - Otros cargos que no corresponden a ventas.', 'codigo'=>'999', 'porcentaje'=>'13', 'hide'=>true, 'is_bienes'=>true, 'codigo_tarifa' => '01','is_identificacion_plena'=>true, 'hide'=>false, 'hidden2018'=>false]
           
         ];
         

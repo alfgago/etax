@@ -346,9 +346,9 @@ class CalculatedTax extends Model
               $ivaType = $ivaType ? $ivaType : 'B103';
               
               //Procesa los códigos que llevan IVA como costo dentro del subtotal de la factura.
-              if( $ivaType == '200' || $ivaType == '201' || $ivaType == '240' || $ivaType == '250' || $ivaType == '260' || $ivaType == '245' || 
-                  $ivaType == 'B200' || $ivaType == 'B201' || $ivaType == 'B240' || $ivaType == 'B250' || $ivaType == 'B260' || $ivaType == 'B245' ||
-                  $ivaType == 'S200' || $ivaType == 'S201' || $ivaType == 'S240' || $ivaType == 'S250' || $ivaType == 'S260' || $ivaType == 'S245' ){
+              if( $ivaType == '200' || $ivaType == '201' || $ivaType == '240' || $ivaType == '250' || $ivaType == '245' || 
+                  $ivaType == 'B200' || $ivaType == 'B201' || $ivaType == 'B240' || $ivaType == 'B250' || $ivaType == 'B245' ||
+                  $ivaType == 'S200' || $ivaType == 'S201' || $ivaType == 'S240' || $ivaType == 'S250' || $ivaType == 'S245' ){
                 $subtotal = $subtotal + $invoiceIva;
                 $invoiceIva = 0;
                 $sumRepercutidoExentoSinCredito += $subtotal;
@@ -418,7 +418,9 @@ class CalculatedTax extends Model
                 $sumRepercutidoExentoConCredito += $subtotal;
               }
               //No cuenta los que no llevan IVA
-              if( $ivaType == 'S300' || $ivaType == 'B300' ){
+              if(  $ivaType == 'S300' || $ivaType == 'B300' 
+                || $ivaType == 'S260' || $ivaType == 'B260'
+              ){
                 $subtotal = $subtotal;
                 $invoiceIva = 0;
                 $sumIvaSinAplicar += $subtotal;

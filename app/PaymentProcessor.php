@@ -137,10 +137,9 @@ class PaymentProcessor extends Model
         }*/
         return ($result>0)?$names[sizeof($matches)-2]:false;
     }
+    
     /**
      * getCardNameType
-     *
-     *
      */
     public function getCardNameType($number){
         $cards = array(
