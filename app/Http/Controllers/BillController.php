@@ -168,7 +168,7 @@ class BillController extends Controller
                 return $billItem->bill->documentTypeName();
             })
             ->addColumn('tarifa_iva', function(BillItem $billItem) {
-                if(!isset($billItem->subtotal)){
+                if(!$billItem->subtotal > 0){
                     $billItem->tarifa_iva = 0;
                 }else{
                     $billItem->tarifa_iva = !empty($billItem->iva_amount) ? ($billItem->iva_amount / $billItem->subtotal * 100) : 0;
