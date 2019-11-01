@@ -246,14 +246,14 @@ class InvoiceController extends Controller
                     $catPorcentaje = $cat['todo'];
                 }
 
-                return view('Bill.ext.select-codigos', [
+                return view('Invoice.ext.select-codigos', [
                     'company' => $company,
                     'cat' => $catPorcentaje,
                     'item' => $invoiceItem
                 ])->render();                    
             })
             ->editColumn('categoria_hacienda', function(InvoiceItem $invoiceItem) use($categorias) {
-                return view('Bill.ext.select-categorias', [
+                return view('Invoice.ext.select-categorias', [
                     'categoriaProductos' => $categorias,
                     'item' => $invoiceItem
                 ])->render();
