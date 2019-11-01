@@ -1947,15 +1947,15 @@ class InvoiceController extends Controller
         $collection = Excel::toCollection( new InvoiceImport(), request()->file('archivo') );
         $companyId = currentCompany();
         $invoiceList = $collection->toArray()[0];
-        //try {
+        try {
             //Log::debug('Creando job de registro de facturas.');
             foreach (array_chunk ( $invoiceList, 200 ) as $facturas) {
                 $this->guardarMasivoExcel($facturas, $companyId);
                 //ProcessSendExcelInvoices::dispatch($facturas, $companyId)->onQueue('bulk');
             }
-        /*}catch( \Throwable $ex ){
+        }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
-        }*/
+        }
         $xlsInvoices = XlsInvoice::select('consecutivo', 'codigoActividad', 'nombreReceptor', 'tipoIdentificacionReceptor', 'IdentificacionReceptor', 'correoReceptor', 'condicionVenta', 'plazoCredito', 'medioPago', 'codigoMoneda', 'tipoCambio','autorizado')
             ->where('company_id',$companyId)->distinct('consecutivo')->get();
         return view("Invoice/confirmacion-envio")->with('facturas', $xlsInvoices);

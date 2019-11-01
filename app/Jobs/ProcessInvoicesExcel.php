@@ -57,7 +57,6 @@ class ProcessInvoicesExcel implements ShouldQueue
             $xlsInvoices = XlsInvoice::select('consecutivo', 'company_id','autorizado')
                 ->where('company_id',$company->id)->where('autorizado',1)->distinct('consecutivo')->get();
 
-            Log::info("Iniciando job  ProcessInvoicesExcel:".$xlsInvoices->count());
             $apiHacienda = new BridgeHaciendaApi();
             $tokenApi = $apiHacienda->login(false);
             if ($tokenApi !== false) {
@@ -65,7 +64,6 @@ class ProcessInvoicesExcel implements ShouldQueue
 
                 foreach ($xlsInvoices as $xlsInvoice) {
 
-                    Log::info("xlsinvoice ".$xlsInvoice->consecutivo);
                     $factura = XlsInvoice::where('company_id',$xlsInvoice->company_id)
                             ->where('consecutivo',$xlsInvoice->consecutivo)->get();
                     
@@ -86,6 +84,12 @@ class ProcessInvoicesExcel implements ShouldQueue
                     }
                     if ($invoice->document_type == '09') {
                         $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
+                    }
+                    if ($invoice->document_type== '02') {
+                        $invoice->reference_number = $company->last_debit_note_ref_number + 1;
+                    }
+                    if ($invoice->document_type == '03') {
+                        $invoice->reference_number= $company->last_note_ref_number + 1;
                     }
                     if ($invoice->document_type == '04') {
                         $invoice->reference_number = $company->last_ticket_ref_number + 1;
@@ -169,7 +173,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                     $today = $start_date->day."/".$start_date->month."/".$start_date->year;
                     $fechaComparacion = $fecha->day."/".$fecha->month."/".$fecha->year;
 
-                    if($today <= $fechaComparacion){
+                    if($today < $fechaComparacion){
                         $invoice->hacienda_status = '99';
                         $invoice->generation_method = "etax-programada";
                         $invoice->document_key = $invoice->document_key."programada";
@@ -358,16 +362,22 @@ class ProcessInvoicesExcel implements ShouldQueue
                     if($invoice->hacienda_status != "99"){
                         $invoice->company->addSentInvoice( $invoice->year, $invoice->month );
 
-                        if ($invoice->document_type == '1') {
+                        if ($invoice->document_type == '01') {
                             $company->last_invoice_ref_number = $invoice->reference_number;
                         }
-                        if ($invoice->document_type == '8') {
+                        if ($invoice->document_type == '08') {
                             $company->last_invoice_pur_ref_number = $invoice->reference_number;
                         }
-                        if ($invoice->document_type == '9') {
+                        if ($invoice->document_type== '02') {
+                            $company->last_debit_note_ref_number = $invoice->reference_number;
+                        }
+                        if ($invoice->document_type == '03') {
+                           $company->last_note_ref_number = $invoice->reference_number;
+                        }
+                        if ($invoice->document_type == '09') {
                             $company->last_invoice_exp_ref_number = $invoice->reference_number;
                         }
-                        if ($invoice->document_type == '4') {
+                        if ($invoice->document_type == '04') {
                            $company->last_ticket_ref_number = $invoice->reference_number;
                         }
                     }
@@ -396,6 +406,9 @@ class ProcessInvoicesExcel implements ShouldQueue
         if ($docType == '09') {
             $lastSale = $company->last_invoice_exp_ref_number + 1;
         }
+        if ($docType == '02') {
+            $lastSale = $company->last_debit_note_ref_number + 1;
+        }
         if ($docType == '03') {
             $lastSale = $company->last_note_ref_number + 1;
         }
@@ -421,8 +434,11 @@ class ProcessInvoicesExcel implements ShouldQueue
         if ($docType == '09') {
             $ref = $company->last_invoice_exp_ref_number + 1;
         }
+        if ($docType == '02') {
+            $ref = $company->last_debit_note_ref_number + 1;
+        }
         if ($docType == '03') {
-            $lastSale = $company->last_note_ref_number + 1;
+            $ref = $company->last_note_ref_number + 1;
         }
         if ($docType == '04') {
             $ref = $company->last_ticket_ref_number + 1;
