@@ -981,7 +981,7 @@ class InvoiceController extends Controller
         foreach( $request->items as $key => $item ) {
             $invoiceItem = InvoiceItem::with('invoice')->findOrFail($key);
             $invoice = $invoiceItem->invoice;
-            if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
+            if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/Y') )){ 
                 InvoiceItem::where('id', $key)
                 ->update([
                   'iva_type' =>  $item['iva_type'],
@@ -1036,7 +1036,7 @@ class InvoiceController extends Controller
     public function guardarValidar(Request $request)
     {
         $invoice = Invoice::findOrFail($request->invoice);
-        if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){ 
+        if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/Y') )){ 
             $invoice->commercial_activity = $request->actividad_comercial;
             $invoice->is_code_validated = true;
             foreach( $request->items as $item ) {
