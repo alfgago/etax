@@ -175,6 +175,9 @@ class InvoiceController extends Controller
             case 2:
                 $query = $query->whereNotNull('invoice_items.product_type')->WhereNotNull('invoice_items.iva_type');
                 break;
+            case 3:
+                $query = $query->where('invoices.is_code_validated', false);
+                break;
         }
 
         $filtroUnidad = $request->get('filtroUnidad');

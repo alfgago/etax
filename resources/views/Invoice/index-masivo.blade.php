@@ -29,6 +29,7 @@
                 <option value="99">Todas las líneas</option>
                 <option value="1" selected>Líneas por validar</option>
                 <option value="2">Líneas ya validadas</option>
+                <option value="3">Líneas en facturas no validadas</option>
             </select>
           </div>
           <div class="periodo-selects">
