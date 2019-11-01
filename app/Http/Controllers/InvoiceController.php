@@ -1789,4 +1789,14 @@ class InvoiceController extends Controller
         }
     }
     
+    public function recurrentes(){
+        try{
+            $current_company = currentCompany();
+            $recurrentes = RecurringInvoice::where('company_id',$current_company)->get();
+            return view('Invoice/recurrentes')->with('recurrentes',$recurrentes);
+        }catch( \Throwable $ex ){
+            Log::error("error en visualizar recurrentes:" . $ex);
+            return redirect()->back()->withError("Error en visualizar recurrentes");
+        }
+    }
 }

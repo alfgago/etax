@@ -23,7 +23,8 @@ class MenuSeeder extends Seeder
 	          				['nombre'=>'Registrar factura existente', 'orden' => '2','url'=>'/facturas-emitidas/create','tipo'=>'href','icono'=>'', 'permisos'=>[1,2]],
 	          				['nombre'=>'Importar facturas', 'orden' => '3','url'=>"abrirPopup('importar-emitidas-popup');",'tipo'=>'onclick','icono'=>'', 'permisos'=>[1,2]],
 	          				['nombre'=>'Validar facturas', 'orden' => '4','url'=>'/facturas-emitidas/validaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,2,4,8]],
-	          				['nombre'=>'Autorizar facturas por email', 'orden' => '5','url'=>'/facturas-emitidas/autorizaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,2,4,8]]
+	          				['nombre'=>'Autorizar facturas por email', 'orden' => '5','url'=>'/facturas-emitidas/autorizaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,2,4,8]],
+	          				['nombre'=>'Facturas recurrentes', 'orden' => '9','url'=>'/facturas-emitidas/recurrentes','tipo'=>'href','icono'=>'', 'permisos'=>[1,2]]
 	          			]
 	          		],
 	          		['nombre'=>'Compras','url'=>'/facturas-recibidas','padre'=>'0', 'tipo'=>'href', 'icono'=>'assets/images/iconos/compras.png', 'permisos'=>[1,3,4,6,8], 'orden' => '3', 'subitems'=>[

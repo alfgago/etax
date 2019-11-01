@@ -65,8 +65,74 @@ class RecurringInvoice extends Model
         return $next_send;
     }
 
+    public function invoice()
+    {
+        return $this->belongsTo(Invoice::class);
+    }
+
     public function invoices()
     {
         return $this->hasMany(Invoice::class, 'recurring_id');
     }
+
+    public function tipo(){
+    	$tipo = "";
+    	if($this->frecuency == "1"){
+    		$tipo = "Semanal";
+	    }
+    	if($this->frecuency == "2"){
+    		$tipo = "Quincenal";
+	    }
+    	if($this->frecuency == "3"){
+    		$tipo = "Mensual";
+	    }
+    	if($this->frecuency == "4"){
+    		$tipo = "Anual";
+	    }
+    	if($this->frecuency == "5"){
+    		$tipo = "Cantidad de días";
+	    }
+	    return $tipo;
+	}
+
+    public function opciones(){
+    	$opciones = "";
+    	if($this->frecuency == "1"){
+    		if($this->options == 0){
+    			$opciones = "Domingos";
+    		}
+    		if($this->options == 1){
+    			$opciones = "Lunes";
+    		}
+    		if($this->options == 2){
+    			$opciones = "Martes";
+    		}
+    		if($this->options == 3){
+    			$opciones = "Miercoles";
+    		}
+    		if($this->options == 4){
+    			$opciones = "Jueves";
+    		}
+    		if($this->options == 5){
+    			$opciones = "Viernes";
+    		}
+    		if($this->options == 6){
+    			$opciones = "Sabado";
+    		}
+	    }
+    	if($this->frecuency == "2"){
+    		$options = explode(",",$this->options);
+    		$opciones = $options[0]." y ".$options[1];
+	    }
+    	if($this->frecuency == "3"){
+    		$opciones = $this->options;
+	    }
+    	if($this->frecuency == "4"){
+    		$opciones = $this->options;
+	    }
+    	if($this->frecuency == "5"){
+    		$opciones = $this->options;
+	    }
+	    return $opciones;
+	}
 }
