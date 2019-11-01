@@ -145,6 +145,9 @@ class BillController extends Controller
             case 2:
                 $query = $query->whereNotNull('bill_items.product_type')->WhereNotNull('bill_items.iva_type');
                 break;
+            case 3:
+                $query = $query->where('bills.is_code_validated', false);
+                break;
         }
 
         $filtroUnidad = $request->get('filtroUnidad');
