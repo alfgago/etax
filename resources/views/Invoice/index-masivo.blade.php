@@ -29,6 +29,24 @@
                 <option value="99">Todas las líneas</option>
                 <option value="1" selected>Líneas por validar</option>
                 <option value="2">Líneas ya validadas</option>
+                <option value="3">Líneas en facturas no validadas</option>
+            </select>
+          </div>
+          <div class="periodo-selects">
+            <select id="filtro-select-mes" name="filtro-validado" onchange="reloadDataTable();">
+                <option style="display:none;" value="0" >Todos los meses</option>
+                <option value="1" {{date('n') == 1 ? 'selected' : ''}}>Enero</option>
+                <option value="2" {{date('n') == 2 ? 'selected' : ''}}>Febrero</option>
+                <option value="3" {{date('n') == 3 ? 'selected' : ''}}>Marzo</option>
+                <option value="4" {{date('n') == 4 ? 'selected' : ''}}>Abril</option>
+                <option value="5" {{date('n') == 5 ? 'selected' : ''}}>Mayo</option>
+                <option value="6" {{date('n') == 6 ? 'selected' : ''}}>Junio</option>
+                <option value="7" {{date('n') == 7 ? 'selected' : ''}}>Julio</option>
+                <option value="8" {{date('n') == 8 ? 'selected' : ''}}>Agosto</option>
+                <option value="9" {{date('n') == 9 ? 'selected' : ''}}>Setiembre</option>
+                <option value="10" {{date('n') == 10 ? 'selected' : ''}}>Octubre</option>
+                <option value="11" {{date('n') == 11 ? 'selected' : ''}}>Noviembre</option>
+                <option value="12" {{date('n') == 12 ? 'selected' : ''}}>Diciembre</option>
             </select>
           </div>
           <div class="periodo-selects">
@@ -53,7 +71,7 @@
               <th data-priority="5">Subtotal</th>
               <th data-priority="5">Monto IVA</th>
               <th data-priority="5">Total</th>
-              <th data-priority="5">Tarifa Iva</th>
+              <th data-priority="5">Tarifa IVA</th>
               <th data-priority="3">Código eTax</th>
               <th data-priority="3">Categoría Hacienda</th>
             </tr>
@@ -127,6 +145,7 @@ $(function() {
           d.filtroTarifa = $( '#filtro-select-tarifa' ).val();
           d.filtroValidado = $( '#filtro-select-codificadas' ).val();
           d.filtroUnidad = $( '#filtro-select-unidad' ).val();
+          d.filtroMes = $( '#filtro-select-mes' ).val();
           
       },
       type: 'GET'
@@ -173,6 +192,7 @@ $(function() {
             });
             parent.find('.product_type').val( tipoProducto ).change();
         });
+        element.change();
     },
     language: {
       url: "/lang/datatables-es_ES.json",

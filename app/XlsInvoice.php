@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
+use App\XlsInvoice;
 
 class XlsInvoice extends Model
 {
@@ -12,4 +13,6 @@ class XlsInvoice extends Model
     protected $fillable = [
         'id_number'
     ];
+
+
 }

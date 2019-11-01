@@ -33,8 +33,7 @@
 
     @yield('header-scripts')
 
-    <style>
-    </style>
+   
 
 </head>
 

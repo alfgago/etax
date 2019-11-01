@@ -29,6 +29,24 @@
                 <option value="99" >Todas las líneas</option>
                 <option value="1" selected>Líneas por validar</option>
                 <option value="2">Líneas ya validadas</option>
+                <option value="3">Líneas en facturas no validadas</option>
+            </select>
+          </div>
+          <div class="periodo-selects">
+            <select id="filtro-select-mes" name="filtro-validado" onchange="reloadDataTable();">
+                <option style="display:none;" value="0" >Todos los meses</option>
+                <option value="1" {{date('n') == 1 ? 'selected' : ''}}>Enero</option>
+                <option value="2" {{date('n') == 2 ? 'selected' : ''}}>Febrero</option>
+                <option value="3" {{date('n') == 3 ? 'selected' : ''}}>Marzo</option>
+                <option value="4" {{date('n') == 4 ? 'selected' : ''}}>Abril</option>
+                <option value="5" {{date('n') == 5 ? 'selected' : ''}}>Mayo</option>
+                <option value="6" {{date('n') == 6 ? 'selected' : ''}}>Junio</option>
+                <option value="7" {{date('n') == 7 ? 'selected' : ''}}>Julio</option>
+                <option value="8" {{date('n') == 8 ? 'selected' : ''}}>Agosto</option>
+                <option value="9" {{date('n') == 9 ? 'selected' : ''}}>Setiembre</option>
+                <option value="10" {{date('n') == 10 ? 'selected' : ''}}>Octubre</option>
+                <option value="11" {{date('n') == 11 ? 'selected' : ''}}>Noviembre</option>
+                <option value="12" {{date('n') == 12 ? 'selected' : ''}}>Diciembre</option>
             </select>
           </div>
           <div class="periodo-selects">
@@ -47,15 +65,16 @@
       <table id="bill-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
-              <th data-priority="3">Comprobante</th>
-              <th data-priority="3">Proveedor</th>
+              <th data-priority="4">Comprobante</th>
+              <th data-priority="4">Proveedor</th>
               <th data-priority="5">Unidad</th>
               <th data-priority="5">Subtotal</th>
               <th data-priority="5">Monto IVA</th>
               <th data-priority="5">Total</th>
-              <th data-priority="5">Tarifa Iva</th>
+              <th data-priority="5">Tarifa IVA</th>
               <th data-priority="3">Código eTax</th>
               <th data-priority="3">Categoría Hacienda</th>
+              <th data-priority="6">Identificación plena</th>
               <!--th data-priority="4">Acciones</th-->
             </tr>
           </thead>
@@ -96,7 +115,18 @@
                     </select>
                   </div>
                </td>
-               <!--td></td-->
+               <td>
+                  <div class="">
+                   <select class="form-control identificacion_especifica_all"  placeholder="Seleccione una categoría de hacienda" >
+                      <option value="0" posibles="">-- Seleccione --</option>
+                      <option value="10" posibles="">0%</option>
+                      <option value="1" posibles="">1%</option>
+                      <option value="2" posibles="">2%</option>
+                      <option value="4" posibles="">4%</option>
+                      <option value="13" posibles="">13%</option>
+                    </select>
+                  </div>
+               </td>
              </tr>
 
           </thead>
@@ -105,7 +135,7 @@
         </table>
         <div class="btn-holder hidden">
             <button id="btn-submit-form" type="submit" class="btn btn-primary">Guardar factura</button>
-          </div>
+        </div>
       </form>
   </div>  
 </div>
@@ -129,21 +159,22 @@ $(function() {
           d.filtroTarifa = $( '#filtro-select-tarifa' ).val();
           d.filtroValidado = $( '#filtro-select-codificadas' ).val();
           d.filtroUnidad = $( '#filtro-select-unidad' ).val();
-          
+          d.filtroMes = $( '#filtro-select-mes' ).val();          
       },
       type: 'GET'
     },
     order: [[ 1, 'desc' ]],
     columns: [
-      { data: 'document_number', name: 'invoices.document_number' },
+      { data: 'document_number', name: 'bills.document_number' },
       { data: 'client', name: 'bills.provider_first_name' },
-      { data: 'unidad', name: 'invoice_items.measure_unit'},
-      { data: 'subtotal', name: 'invoice_items.subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
-      { data: 'iva_amount', name: 'invoice_items.iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
-      { data: 'total', name: 'invoice_items.total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
-      { data: 'tarifa_iva', name: 'invoice_items.tarifa_iva', orderable: false, searchable: false },
+      { data: 'unidad', name: 'bill_items.measure_unit'},
+      { data: 'subtotal', name: 'bill_items.subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
+      { data: 'iva_amount', name: 'bill_items.iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
+      { data: 'total', name: 'bill_items.total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
+      { data: 'tarifa_iva', name: 'bill_items.tarifa_iva', orderable: false, searchable: false },
       { data: 'codigo_etax', name: 'codigo_etax', orderable: false, searchable: false },
       { data: 'categoria_hacienda', name: 'categoria_hacienda', orderable: false, searchable: false },
+      { data: 'identificacion_especifica', name: 'identificacion_especifica', orderable: false, searchable: false },
       //{ data: 'actions', name: 'actions', orderable: false, searchable: false }, //Queda documentado pero con desbloquear esto y arriba la tabla se podria rechazar desde esta parte tambien.
     ],
     createdRow: function (row, data, index) {
@@ -152,6 +183,7 @@ $(function() {
       }
     },
     rowCallback: function (row, data) {
+
         var element = $(row).find('.iva_type');
         element.on("change", function () {
             if($(this).val() == 1){
@@ -162,7 +194,15 @@ $(function() {
                $('.iva_type').val("");
             }
             var iva_type  = $(this).val(); 
+            var identificacion = $(this).find(':selected').attr('is_identificacion_plena');
             var parent = $(this).parents('tr');
+            if(identificacion == 1){
+                parent.find(".porc_identificacion_plena").removeClass("hidden");
+                parent.find(".porc_identificacion_plena").attr("required");
+            }else{
+                parent.find(".porc_identificacion_plena").addClass("hidden");
+                parent.find(".porc_identificacion_plena").removeAttr("required");
+            }
             parent.find('.product_type option').hide();
             var tipoProducto = 0;
             parent.find(".product_type option").each(function(){
@@ -176,6 +216,7 @@ $(function() {
             });
             parent.find('.product_type').val( tipoProducto ).change();
         });
+        element.change();
     },
     language: {
       url: "/lang/datatables-es_ES.json",
@@ -254,6 +295,12 @@ $(document).ready(function(){
         var product_type  = $(this).val(); 
         if(product_type != 0){
         $(".product_type").val(product_type);
+      }
+    });
+    $(".identificacion_especifica_all").change(function(){
+        var identificacion  = $(this).val(); 
+        if(identificacion != 0){
+        $(".porc_identificacion_plena").val(identificacion);
       }
     });
     $(".iva_type_all").change(function(){
