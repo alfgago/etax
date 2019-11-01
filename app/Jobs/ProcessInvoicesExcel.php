@@ -57,7 +57,6 @@ class ProcessInvoicesExcel implements ShouldQueue
             $xlsInvoices = XlsInvoice::select('consecutivo', 'company_id','autorizado')
                 ->where('company_id',$company->id)->where('autorizado',1)->distinct('consecutivo')->get();
 
-            Log::info("Iniciando job  ProcessInvoicesExcel:".$xlsInvoices->count());
             $apiHacienda = new BridgeHaciendaApi();
             $tokenApi = $apiHacienda->login(false);
             if ($tokenApi !== false) {
@@ -65,7 +64,6 @@ class ProcessInvoicesExcel implements ShouldQueue
 
                 foreach ($xlsInvoices as $xlsInvoice) {
 
-                    Log::info("xlsinvoice ".$xlsInvoice->consecutivo);
                     $factura = XlsInvoice::where('company_id',$xlsInvoice->company_id)
                             ->where('consecutivo',$xlsInvoice->consecutivo)->get();
                     
@@ -169,7 +167,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                     $today = $start_date->day."/".$start_date->month."/".$start_date->year;
                     $fechaComparacion = $fecha->day."/".$fecha->month."/".$fecha->year;
 
-                    if($today <= $fechaComparacion){
+                    if($today < $fechaComparacion){
                         $invoice->hacienda_status = '99';
                         $invoice->generation_method = "etax-programada";
                         $invoice->document_key = $invoice->document_key."programada";
