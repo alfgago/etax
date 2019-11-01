@@ -400,29 +400,33 @@ class PaymentController extends Controller
                     'payment_method_id' => $paymentMethod->id,
                     'payment_date' => Carbon::parse(now('America/Costa_Rica')),
                     'amount' => $amount,
-                    'coupon_id' => $cuponId,
-                    'payment_gateway' => 'cybersource'
+                    'coupon_id' => $cuponId
                 ]
             );
 
-            if($payment->payment_gateway === 'klap' || $payment->payment_gateway === ''){
-                $payment->payment_gateway = 'cybersource';
+            if($payment->payment_gateway === 'klap' || $payment->payment_gateway === '') {
                 $payment->charge_token = null;
-                $payment->save();
             }
+            $payment->payment_gateway = 'cybersource';
+            $payment->save();
 
             $request->request->add(['token_bn' => $paymentMethod->token_bn]);
-
             //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
-            $transLog = TransactionsLog::create([
-                'id_payment' => $payment->id ?? '',
-                'status' => 'processing',
-                'id_paymethod' => $paymentMethod->id ?? '',
-                'processor' => $paymentMethod->payment_gateway ?? ''
-            ]);
-            $transLog->save();
+            if( ! isset($payment->charge_token) ) {
+                $transLog = TransactionsLog::create([
+                    'id_payment' => $payment->id ?? '',
+                    'status' => 'processing',
+                    'id_paymethod' => $paymentMethod->id ?? '',
+                    'processor' => $paymentMethod->payment_gateway ?? ''
+                ]);
+                $transLog->save();
+                $chargeProof = $paymentGateway->pay($request, false, $transLog);
+                if($chargeProof){
+                    $payment->charge_token = $chargeProof;
+                    $payment->save();
+                }
+            }
 
-            $chargeProof = $paymentGateway->pay($request, false, $transLog);
             if($chargeProof) {
                 $payment->charge_token = $chargeProof;
                 $payment->save();
