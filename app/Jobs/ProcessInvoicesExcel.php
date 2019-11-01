@@ -170,8 +170,8 @@ class ProcessInvoicesExcel implements ShouldQueue
                     $invoice->document_key = $this->getDocumentKey($invoice->document_type, $company);
                     $invoice->document_number = $this->getDocReference($invoice->document_type,$company);
                     $start_date = Carbon::parse(now('America/Costa_Rica'));
-                    $today = $start_date->day."/".$start_date->month."/".$start_date->year;
-                    $fechaComparacion = $fecha->day."/".$fecha->month."/".$fecha->year;
+                    $today = $start_date->year."-".$start_date->month."-".$start_date->day;
+                    $fechaComparacion = $fecha->year."-".$fecha->month."-".$fecha->day;
 
                     if($today < $fechaComparacion){
                         $invoice->hacienda_status = '99';
@@ -181,6 +181,9 @@ class ProcessInvoicesExcel implements ShouldQueue
                     }
                     $invoice->save();
                     $lineas = XlsInvoice::where('company_id',$company->id)->where('consecutivo',$factura[0]->consecutivo)->get();
+                    $subtotal = 0;
+                    $totaliva = 0;
+                    $totalComprobante = 0;
                     foreach ($lineas as $linea) {
                         if($linea->tipoLinea == 1){
                             $item = InvoiceItem::updateOrCreate([
@@ -205,6 +208,10 @@ class ProcessInvoicesExcel implements ShouldQueue
                                  'is_exempt' => $linea->exento
                                 ]
                             );
+
+                            $subtotal = $subtotal + $linea->subTotal;
+                            $totaliva = $totaliva + $linea->montoImpuesto;
+                            $totalComprobante = $totalComprobante + $linea->montoImpuesto;
                             try {
                                 $exonerationDate = isset($linea->fechaEmisionExoneracion )  ? Carbon::createFromFormat('d/m/Y', $linea->fechaEmisionExoneracion) : null;
                             }catch( \Exception $e ) {
@@ -221,8 +228,8 @@ class ProcessInvoicesExcel implements ShouldQueue
                                 $item->exoneration_total_amount = $linea->montoExoneracionExoneracion ?? 0;
                                 $item->exoneration_total_gravado = (($item->item_count * $item->unit_price) * $item->exoneration_porcent) / 100 ;
                                 $item->impuesto_neto = $linea->montoImpuesto ?? $linea->montoImpuesto - $linea->montoExoneracionExoneracion;
-                                
                             }
+
                             $item->save();
                         }else{
                             OtherCharges::updateOrCreate([
@@ -241,8 +248,16 @@ class ProcessInvoicesExcel implements ShouldQueue
                                 'amount'   => $linea->montoCargo ?? 0,
                             ]
                             );
+
+                            $totalComprobante = $totalComprobante + $linea->montoCargo;
                         }
                     }
+                    $invoice->subtotal = $subtotal;
+                    $invoice->iva_amount = $totaliva;
+                    $invoice->total = $totalComprobante;
+                    
+                    $invoice->save();
+                    
                     if ($invoice->document_type == '08' ) {
                      
                         $bill = new Bill();
