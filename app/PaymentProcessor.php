@@ -373,45 +373,49 @@ class PaymentProcessor extends Model
      *
      *
      */
-    public function setInvoiceInfo($request){
-        $invoiceData = new stdClass();
-        $invoiceData->client_code = $request->id_number;
-        $invoiceData->client_id_number = $request->id_number;
-        $invoiceData->client_id = $request->client_id;
-        $invoiceData->tipo_persona = $request->tipo_persona;
-        $invoiceData->first_name = $request->first_name;
-        $invoiceData->last_name = $request->last_name ?? null;
-        $invoiceData->last_name2 = $request->last_name2 ?? null;
-        $invoiceData->country = $request->country;
-        $invoiceData->state = $request->state;
-        $invoiceData->city = $request->city;
-        $invoiceData->district = $request->district;
-        $invoiceData->neighborhood = $request->neighborhood;
-        $invoiceData->zip = $request->zip;
-        $invoiceData->address = $request->address;
-        $invoiceData->phone = $request->phone;
-        $invoiceData->es_exento = $request->es_exento;
-        $invoiceData->email = $request->email;
-        $invoiceData->expiry = $request->expiry;
-        $invoiceData->amount = $request->amount;
-        $invoiceData->subtotal = $request->subtotal;
-        $invoiceData->iva_amount = $request->iva_amount;
-        $invoiceData->discount_reason = $request->razonDescuento;
+    public function setInvoiceInfo($request) {
+        try  {
+            $invoiceData = new stdClass();
+            $invoiceData->client_code = $request->id_number;
+            $invoiceData->client_id_number = $request->id_number;
+            $invoiceData->client_id = $request->client_id;
+            $invoiceData->tipo_persona = $request->tipo_persona;
+            $invoiceData->first_name = $request->first_name;
+            $invoiceData->last_name = $request->last_name ?? null;
+            $invoiceData->last_name2 = $request->last_name2 ?? null;
+            $invoiceData->country = $request->country;
+            $invoiceData->state = $request->state;
+            $invoiceData->city = $request->city;
+            $invoiceData->district = $request->district;
+            $invoiceData->neighborhood = $request->neighborhood;
+            $invoiceData->zip = $request->zip;
+            $invoiceData->address = $request->address;
+            $invoiceData->phone = $request->phone;
+            $invoiceData->es_exento = $request->es_exento;
+            $invoiceData->email = $request->email;
+            $invoiceData->expiry = $request->expiry;
+            $invoiceData->amount = $request->amount;
+            $invoiceData->subtotal = $request->subtotal;
+            $invoiceData->iva_amount = $request->iva_amount;
+            $invoiceData->discount_reason = $request->razonDescuento;
 
-        $item = new stdClass();
-        $item->code = $request->item_code;
-        $item->name = $request->item_name;
-        $item->montoDescontado = $request->montoDescontado;
-        $item->descuento = $request->montoDescontado;
-        $item->discount_reason = $request->razonDescuento;
-        $item->cantidad = 1;
-        $item->iva_amount = $request->iva_amount;
-        $item->unit_price = $request->subtotal;
-        $item->subtotal = $request->subtotal;
-        $item->total = $request->amount;
+            $item = new stdClass();
+            $item->code = $request->item_code;
+            $item->name = $request->item_name;
+            $item->montoDescontado = $request->montoDescontado;
+            $item->descuento = $request->montoDescontado;
+            $item->discount_reason = $request->razonDescuento;
+            $item->cantidad = 1;
+            $item->iva_amount = $request->iva_amount;
+            $item->unit_price = $request->unit_price ?? $request->subtotal;
+            $item->subtotal = $request->subtotal;
+            $item->total = $request->amount;
 
-        $invoiceData->items = [$item];
-        return $invoiceData;
+            $invoiceData->items = [$item];
+            return $invoiceData;
+        } catch ( \Exception $e) {
+            Log::error("Error al generar informacion de factura en Payment Processor". $e);
+        }
     }
     /**
      *

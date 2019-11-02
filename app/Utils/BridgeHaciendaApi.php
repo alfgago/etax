@@ -96,8 +96,8 @@ class BridgeHaciendaApi
                 }
                 return $invoice;
             }
-        } catch (ClientException $error) {
-            Log::error('Error al crear factura en API HACIENDA -->>'. $error->getMessage() );
+        } catch ( \Exception $error) {
+            Log::error('Error al crear factura en API HACIENDA -->>'. $error);
             return $invoice;
         }
     }
