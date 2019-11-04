@@ -31,12 +31,14 @@ class GoSocketController extends Controller
     public function gosocketValidate(Request $request) {
         try{
         	$token = $request->token;
+        	Log::info("Iniciando validacion de token gosocket: " . $token);
         	if (!empty($token)) {
                 $apiGoSocket = new BridgeGoSocketApi();
                 $user_gs = $apiGoSocket->getUser($token);
                 $user = IntegracionEmpresa::where("user_token",$user_gs['UserId'])->where("company_token",$user_gs['CurrentAccountId'])->first();
 
                 if (is_null($user)) {
+                    Log::info("Creando usuario");
                     $company_gs = $apiGoSocket->getAccount($token, $user_gs['CurrentAccountId']);
                     $user_etax = User::firstOrCreate(
                         ['email' => $user_gs['Email']],
@@ -101,21 +103,24 @@ class GoSocketController extends Controller
                 }
                 if ($user !== null && Auth::loginUsingId($user->user_id)) {
 
-                        $user->session_token = $token;
-                        $user->save();
-                        $companyId = $user->company_id;
-                    	$user_login = auth()->user();
-                        $team = Team::where( 'company_id', $companyId )->first();
-                        $user_login->switchTeam( $team );
-                        
-                        Cache::forget("cache-currentcompany-$user_login->id");
-                        GoSocketInvoicesSync::dispatch($user, $companyId)->onConnection(config('etax.queue_connections'))->onQueue('gosocket');
+                    $user->session_token = $token;
+                    $user->save();
+                    $companyId = $user->company_id;
+                    $user_login = auth()->user();
+                    $team = Team::where( 'company_id', $companyId )->first();
+                    $user_login->switchTeam( $team );
+
+                    Cache::forget("cache-currentcompany-$user_login->id");
+                    Log::info("El usuario existe y se inicio sesion enviando job del sync gosocket");
+                    GoSocketInvoicesSync::dispatch($user, $companyId)->onConnection(config('etax.queue_connections'))->onQueue('gosocket');
 
                     return redirect('/');
                 } else {
+                    Log::info("El usuario Gosocket no se puedo loguear");
                     return redirect('/login');
                 }
             } else {
+                Log::info("El usuario Gosocket no se puedo loguear");
                 return redirect('/login');
             }
         }catch( \Exception $ex ) {
