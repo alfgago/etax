@@ -40,6 +40,9 @@ class GoSocketInvoicesSync implements ShouldQueue
     }
 
      private function getInvoices($user, $companyId) {
+        
+        Log::info("getInvoices ");
+        try{
         $token = $user->session_token;
         $apiGoSocket = new BridgeGoSocketApi();
         $tipos_facturas = $apiGoSocket->getDocumentTypes($token);
@@ -69,10 +72,20 @@ class GoSocketInvoicesSync implements ShouldQueue
                 $company->save();
             }
         }
+        }catch( \Exception $ex ) {
+            Log::error("Error en login gosocket ".$ex);
+            return redirect('/login');
+        }catch( \Throwable $ex ) {
+            Log::error("Error en login gosocket ".$ex);
+            return redirect('/login');
+        }
     }
 
 
     private function getBills($user, $companyId) {
+
+        Log::info("getbills ");
+        try{
         $token = $user->session_token;
         $apiGoSocket = new BridgeGoSocketApi();
         $tipos_facturas = $apiGoSocket->getDocumentTypes($token);
@@ -97,6 +110,13 @@ class GoSocketInvoicesSync implements ShouldQueue
                 }
                 $company->save();
             }
+        }
+        }catch( \Exception $ex ) {
+            Log::error("Error en login gosocket ".$ex);
+            return redirect('/login');
+        }catch( \Throwable $ex ) {
+            Log::error("Error en login gosocket ".$ex);
+            return redirect('/login');
         }
     }
 }

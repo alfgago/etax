@@ -119,10 +119,10 @@ class GoSocketController extends Controller
                 return redirect('/login');
             }
         }catch( \Exception $ex ) {
-            Log::error("Error en login gosocket $ex");
+            Log::error("Error en login gosocket ".$ex);
             return redirect('/login');
         }catch( \Throwable $ex ) {
-            Log::error("Error en login gosocket $ex");
+            Log::error("Error en login gosocket ".$ex);
             return redirect('/login');
         }
 	    
