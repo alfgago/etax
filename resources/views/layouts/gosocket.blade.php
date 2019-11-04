@@ -212,6 +212,10 @@
     }
     .slick-active .plan-column .transparencia{
         background: none;
+        z-index: 0;
+        height: 0%;
+        width: 0%;
+        position: fixed;
     }
     .dots-gs{
       text-align: center;
