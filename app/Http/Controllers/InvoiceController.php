@@ -18,7 +18,6 @@ use \Carbon\Carbon;
 use App\Invoice;
 use App\InvoiceItem;
 use App\Bill;
-use App\Company;
 use App\BillItem;
 use App\RecurringInvoice;
 use App\Company;
