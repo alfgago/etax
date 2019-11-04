@@ -20,7 +20,7 @@ class MenuSeeder extends Seeder
 	          				['nombre'=>'Emitir factura electrónica', 'orden' => '1', 'url'=>'/facturas-emitidas/emitir-factura/01','tipo'=>'href','icono'=>'2', 'permisos'=>[1,2]],
 	          				['nombre'=>'Registrar factura existente', 'orden' => '2','url'=>'/facturas-emitidas/create','tipo'=>'href','icono'=>'', 'permisos'=>[1,2]],
 	          				['nombre'=>'Importar facturas', 'orden' => '3','url'=>"abrirPopup('importar-emitidas-popup');",'tipo'=>'onclick','icono'=>'', 'permisos'=>[1,2]],
-	          				['nombre'=>'Facturas recurrentes', 'orden' => '4','url'=>'/facturas-emitidas/recurrentes','tipo'=>'href','icono'=>'', 'permisos'=>[1,2]]
+	          				['nombre'=>'Facturas recurrentes', 'orden' => '4','url'=>'/facturas-emitidas/recurrentes','tipo'=>'href','icono'=>'', 'permisos'=>[1,2]],
 	          				['nombre'=>'Envio masivo de Facturas','url'=>'abrirPopup("enviar-emitidas-popup");','padre'=>'0', 'subitems'=>[],'tipo'=>'onclick', 'icono'=>'', 'permisos'=>[1,2], 'orden' => '5'],
 	          				['nombre'=>'Validar facturas', 'orden' => '6','url'=>'/facturas-emitidas/validaciones','tipo'=>'href','icono'=>'', 'permisos'=>[1,2,4,8]],
 	          				['nombre'=>'Validar masivamente', 'orden' => '7','url'=>'/facturas-emitidas/lista-validar-masivo','tipo'=>'href','icono'=>'', 'permisos'=>[1,2,4,8]],

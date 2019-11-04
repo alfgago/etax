@@ -29,7 +29,7 @@
                   <td>{{ number_format( $data->invoice->total, 2 ) }}</td>
                   <td>{{ $data->next_send}}</td>
                   <td>
-                    <!--<a link="/facturas-emitidas/validar/{{ $data->id }}" titulo="Verificación de venta" class="btn btn-primary m-0 verificar_compra" style="color:#fff; font-size: 0.85em;" onclick="" data-toggle="modal" data-target="#modal_estandar">Validar</a>-->
+                    <a href="/facturas-emitidas/editar-recurrente/{{ $data->id }}" titulo="Editar recurrente" class="btn btn-primary m-0" style="color:#fff; font-size: 0.85em;">Editar</a>
                   </td>
                 </tr>
               @endforeach
