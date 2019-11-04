@@ -25,7 +25,7 @@
                 </div>
                 <div class="form-group col-md-6" style="white-space: nowrap;">
                     <label for="expiry">Expira</label>
-                    <input type="text" inputmode="numeric" class="form-control checkEmpty" value="{{$paymentMethod->due_date}}" name="expiry" id="expiry" placeholder="Mes / A&#241;o:" required onblur="CambiarNombre();">
+                    <input type="text" inputmode="numeric" class="form-control checkEmpty" value="{{$paymentMethod->due_date ?? ''}}" name="expiry" id="expiry" placeholder="Mes / A&#241;o:" required onblur="CambiarNombre();">
                 </div>
                 <div class="form-group col-md-6" style="white-space: nowrap;">
                     <label for="cardCcv">CVV</label>
@@ -33,11 +33,11 @@
                 </div>
                 <div class="form-group col-md-6" style="white-space: nowrap;">
                     <label for="first_name_card">Nombre:</label>
-                    <input type="text" inputmode="text" class="form-control checkEmpty" value="{{$paymentMethod->name}}" name="first_name_card" id="first_name_card" placeholder="Nombre tarjeta-habiente:" required>
+                    <input type="text" inputmode="text" class="form-control checkEmpty" value="{{$paymentMethod->name ?? ''}}" name="first_name_card" id="first_name_card" placeholder="Nombre tarjeta-habiente:" required>
                 </div>
                 <div class="form-group col-md-6" style="white-space: nowrap;">
                     <label for="last_name_card">Apellido:</label>
-                    <input type="text" inputmode="text" class="form-control checkEmpty" value="{{$paymentMethod->last_name}}" name="last_name_card" id="last_name_card" placeholder="Apellido tarjeta-habiente:" required>
+                    <input type="text" inputmode="text" class="form-control checkEmpty" value="{{$paymentMethod->last_name ?? ''}}" name="last_name_card" id="last_name_card" placeholder="Apellido tarjeta-habiente:" required>
                 </div>
             </div>
             <input type="text" hidden id="neighborhood" name="neighborhood">

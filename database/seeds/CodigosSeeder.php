@@ -47,7 +47,7 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'B041 - Importaciones con IVA al 1% de bienes de acreditación plena con identificación específica', 'codigo'=>'B041', 'porcentaje'=>'1', 'is_bienes'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
           ['nombre'=>'B042 - Importaciones con IVA al 2% de bienes de acreditación plena con identificación específica', 'codigo'=>'B042', 'porcentaje'=>'2', 'is_bienes'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
           ['nombre'=>'B043 - Importaciones con IVA al 13% de bienes de acreditación plena con identificación específica', 'codigo'=>'B043', 'porcentaje'=>'13', 'is_bienes'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
-          ['nombre'=>'B044 - Importaciones con IVA al 4% de bienes de acreditación plena con identificación específica', 'codigo'=>'B044', 'porcentaje'=>'4', 'is_bienes'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B044 - Importaciones con IVA al 4% de bienes de acreditación plena con identificación específica', 'codigo'=>'B044', 'porcentaje'=>'4', 'is_bienes'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true, 'hide'=>true],
           
           ['nombre'=>'B050 - Importaciones de bienes de capital exentos', 'codigo'=>'B050', 'porcentaje'=>'0', 'is_servicio'=>true, 'is_importacion'=>true],
           ['nombre'=>'B051 - Importaciones con IVA al 1% de bienes de capital de acreditación plena con identificación específica', 'codigo'=>'B051', 'porcentaje'=>'1', 'is_servicio'=>true, 'is_importacion'=>true, 'is_identificacion_plena'=>true],
@@ -106,6 +106,13 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'B093 - Compras de bienes con IVA no acreditable desde origen', 'codigo'=>'B093', 'porcentaje'=>'13', 'is_bienes'=>true, 'is_gravado'=>true],
           ['nombre'=>'B094 - Compras de bienes con IVA no acreditable desde origen', 'codigo'=>'B094', 'porcentaje'=>'4', 'is_bienes'=>true, 'is_gravado'=>true],
           
+          ['nombre'=>'R001 - Impuesto específico sobre Bebidas Gaseosas de fabricación Nacional', 'codigo'=>'R001', 'porcentaje'=>'13.688935', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'R002 - Impuesto específico sobre Bebidas Gaseosas Importadas', 'codigo'=>'R002', 'porcentaje'=>'13.688935', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'R003 - Impuesto específico sobre Cerveza', 'codigo'=>'R003', 'porcentaje'=>'14.45', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'R004 - Impuesto específico sobre Cigarrillos', 'codigo'=>'R004', 'porcentaje'=>'13', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'R005 - Impuesto específico sobre Destilados (licores)', 'codigo'=>'R005', 'porcentaje'=>'17.2', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'R006 - Impuesto específico sobre Destilados (licores Fanal)', 'codigo'=>'R006', 'porcentaje'=>'12.433', 'is_bienes'=>true, 'is_gravado'=>true],
+          
           ['nombre'=>'098 - Inversion del sujeto pasivo base', 'codigo'=>'098', 'porcentaje'=>'0', 'is_gravado'=>false, 'hide'=>true, 'hidden2018'=>true],
           ['nombre'=>'099 - Inversion del sujeto pasivo base no acreditable', 'codigo'=>'099', 'porcentaje'=>'0', 'is_gravado'=>false, 'hide'=>true, 'hidden2018'=>true]
         ];
@@ -146,27 +153,27 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'B121 - Autoconsumo de bienes con derecho a crédito al 1%', 'codigo'=>'B121', 'porcentaje'=>'1', 'hidden2018'=>true, 'codigo_tarifa' => '02', 'is_bienes'=>true, 'is_gravado'=>true],
           ['nombre'=>'B122 - Autoconsumo de bienes con derecho a crédito al 2%', 'codigo'=>'B122', 'porcentaje'=>'2', 'hidden2018'=>true, 'codigo_tarifa' => '03', 'is_bienes'=>true, 'is_gravado'=>true],
           ['nombre'=>'B123 - Autoconsumo de bienes con derecho a crédito al 13%', 'codigo'=>'B123', 'porcentaje'=>'13', 'hidden2018'=>true, 'codigo_tarifa' => '08', 'is_bienes'=>true, 'is_gravado'=>true],
-          ['nombre'=>'B124 - Autoconsumo de bienes con derecho a crédito al 4%', 'codigo'=>'B124', 'porcentaje'=>'4', 'hidden2018'=>true, 'codigo_tarifa' => '04', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'B124 - Autoconsumo de bienes con derecho a crédito al 4%', 'codigo'=>'B124', 'porcentaje'=>'4', 'hidden2018'=>true, 'codigo_tarifa' => '04', 'is_bienes'=>true, 'is_gravado'=>true, 'hide'=>true],
           ['nombre'=>'B125 - Transferencia de bienes sin contraprestación de terceros al 1%', 'codigo'=>'B125', 'porcentaje'=>'1', 'hidden2018'=>true, 'codigo_tarifa' => '02', 'is_bienes'=>true, 'is_gravado'=>true],
           ['nombre'=>'B126 - Transferencia de bienes sin contraprestación de terceros al 2%', 'codigo'=>'B126', 'porcentaje'=>'2', 'hidden2018'=>true, 'codigo_tarifa' => '03', 'is_bienes'=>true, 'is_gravado'=>true],
           ['nombre'=>'B127 - Transferencia de bienes sin contraprestación de terceros al 13%', 'codigo'=>'B127', 'porcentaje'=>'13', 'hidden2018'=>true, 'codigo_tarifa' => '08', 'is_bienes'=>true, 'is_gravado'=>true],
-          ['nombre'=>'B128 - Transferencia de bienes sin contraprestación de terceros al 4%', 'codigo'=>'B128', 'porcentaje'=>'4', 'hidden2018'=>true, 'codigo_tarifa' => '04', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'B128 - Transferencia de bienes sin contraprestación de terceros al 4%', 'codigo'=>'B128', 'porcentaje'=>'4', 'hidden2018'=>true, 'codigo_tarifa' => '04', 'is_bienes'=>true, 'is_gravado'=>true, 'hide'=>true],
           
           ['nombre'=>'B130 - Ventas de bienes con límites sobrepasados al 13% con derecho a crédito', 'codigo'=>'B130', 'porcentaje'=>'13', 'hidden2018'=>true, 'codigo_tarifa' => '08', 'is_bienes'=>true, 'is_gravado'=>true, 'hide'=>true],
           ['nombre'=>'S140 - Inversión del sujeto pasivo', 'codigo'=>'S140', 'porcentaje'=>'13', 'hidden2018'=>true, 'codigo_tarifa' => '08', 'is_bienes'=>true, 'is_gravado'=>true],
           ['nombre'=>'B150 - Ventas por exportación de bienes con derecho a crédito', 'codigo'=>'B150', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true],
-          ['nombre'=>'B155 - Ventas de bienes con derecho a crédito por ventas con IVA recaudado desde aduanas.', 'codigo'=>'B155', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true],
+          ['nombre'=>'B155 - Ventas de bienes con derecho a crédito por ventas con IVA recaudado desde aduanas.', 'codigo'=>'B155', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true, 'hide'=>true],
           ['nombre'=>'B160 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 0%', 'codigo'=>'B160', 'porcentaje'=>'0', 'codigo_tarifa' => '05', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true, 'hide'=>true, 'hidden2018'=>true],
           ['nombre'=>'B161 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 1%', 'codigo'=>'B161', 'porcentaje'=>'0', 'codigo_tarifa' => '02', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true],
           ['nombre'=>'B162 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 2%', 'codigo'=>'B162', 'porcentaje'=>'0', 'codigo_tarifa' => '03', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true],
           ['nombre'=>'B163 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 13%', 'codigo'=>'B163', 'porcentaje'=>'0', 'codigo_tarifa' => '08', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true],
           ['nombre'=>'B164 - Ventas de bienes al Estado e Instituciones con derecho a crédito al 4%', 'codigo'=>'B164', 'porcentaje'=>'0', 'codigo_tarifa' => '04', 'is_bienes'=>true, 'is_gravado'=>true, 'is_estado'=>true],
           ['nombre'=>'B165 - Ventas de bienes de canasta básica con tarifa transitoria de 0% con acreditación plena', 'codigo'=>'B165', 'porcentaje'=>'0', 'codigo_tarifa' => '05', 'is_bienes'=>true, 'is_gravado'=>true],
-          ['nombre'=>'B170 - Ventas de bienes a no sujetos y exentos con derecho a crédito', 'codigo'=>'B170', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true, 'hide'=>false, 'hidden2018'=>false],
+          ['nombre'=>'B170 - Ventas de bienes a no sujetos y exentos con derecho a crédito', 'codigo'=>'B170', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true, 'hide'=>true, 'hidden2018'=>false],
           ['nombre'=>'B171 - Ventas locales de bienes de capital al 1%', 'codigo'=>'B171', 'porcentaje'=>'1', 'codigo_tarifa' => '02', 'is_bienes'=>true, 'is_gravado'=>true, 'is_servicio'=>true],
           ['nombre'=>'B172 - Ventas locales de bienes de capital al 2%', 'codigo'=>'B172', 'porcentaje'=>'2', 'codigo_tarifa' => '03', 'is_bienes'=>true, 'is_gravado'=>true, 'is_servicio'=>true],
           ['nombre'=>'B173 - Ventas locales de bienes de capital al 13%', 'codigo'=>'B173', 'porcentaje'=>'13', 'codigo_tarifa' => '08', 'is_bienes'=>true, 'is_gravado'=>true, 'is_servicio'=>true],
-          ['nombre'=>'B174 - Ventas locales de bienes de capital al 4%', 'codigo'=>'B174', 'porcentaje'=>'4', 'codigo_tarifa' => '04', 'is_bienes'=>true, 'is_gravado'=>true, 'is_servicio'=>true],
+          ['nombre'=>'B174 - Ventas locales de bienes de capital al 4%', 'codigo'=>'B174', 'porcentaje'=>'4', 'codigo_tarifa' => '04', 'is_bienes'=>true, 'is_gravado'=>true, 'is_servicio'=>true, 'hide'=>true],
           ['nombre'=>'B181 - Ventas de bienes a no sujetos y exentos con derecho a crédito al 1%', 'codigo'=>'B181', 'porcentaje'=>'1', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true],
           ['nombre'=>'B182 - Ventas de bienes a no sujetos y exentos con derecho a crédito al 2%', 'codigo'=>'B182', 'porcentaje'=>'2', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true],
           ['nombre'=>'B183 - Ventas de bienes a no sujetos y exentos con derecho a crédito al 13%', 'codigo'=>'B183', 'porcentaje'=>'13', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true],
@@ -219,11 +226,11 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'S300 - Sevicios de periodos anteriores a la Ley del IVA', 'codigo'=>'S300', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
           ['nombre'=>'B300 - Bienes de periodos anteriores a la Ley del IVA', 'codigo'=>'B300', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>false],
 
-          ['nombre'=>'B065 - Devoluciones a proveedores con IVA al 1% de compras con derecho a acreditación', 'codigo'=>'B065', 'porcentaje'=>'1', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
-          ['nombre'=>'B066 - Devoluciones a proveedores con IVA al 2% de compras con derecho a acreditación', 'codigo'=>'B066', 'porcentaje'=>'2', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
-          ['nombre'=>'B067 - Devoluciones a proveedores con IVA al 13% de compras con derecho a acreditación', 'codigo'=>'B067', 'porcentaje'=>'13', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B065 - Devoluciones a proveedores con IVA al 1% de compras con derecho a acreditación', 'codigo'=>'B065', 'codigo_tarifa' => '01','porcentaje'=>'1', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B066 - Devoluciones a proveedores con IVA al 2% de compras con derecho a acreditación', 'codigo'=>'B066', 'codigo_tarifa' => '01','porcentaje'=>'2', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
+          ['nombre'=>'B067 - Devoluciones a proveedores con IVA al 13% de compras con derecho a acreditación', 'codigo'=>'B067', 'codigo_tarifa' => '01','porcentaje'=>'13', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true],
           
-          ['nombre'=>'999 - Otros cargos que no corresponden a ventas.', 'codigo'=>'999', 'porcentaje'=>'13', 'hide'=>true, 'is_bienes'=>true, 'is_identificacion_plena'=>true, 'hide'=>false, 'hidden2018'=>false]
+          ['nombre'=>'999 - Otros cargos que no corresponden a ventas.', 'codigo'=>'999', 'porcentaje'=>'13', 'hide'=>true, 'is_bienes'=>true, 'codigo_tarifa' => '01','is_identificacion_plena'=>true, 'hide'=>false, 'hidden2018'=>false]
           
         ];
         

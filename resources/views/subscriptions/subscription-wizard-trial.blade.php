@@ -11,7 +11,7 @@
   
   <div class="wizard-popup">
     <div class="titulo-bienvenida">
-      <h2>¡Bienvenido a eTax! En poco tiempo podrá disfrutar de su prueba de 48 horas.
+      <h2>¡Bienvenido a eTax! En poco tiempo podrá disfrutar de su prueba de 15 días.
       </h2>
       <p>En poco tiempo podrá utilizar la herramienta más fiable para el cálculo de IVA y facturación electrónica. Para iniciar, complete sus datos a continuación.
       </p>
@@ -83,9 +83,12 @@
                               @foreach( auth()->user()->teams as $row )
                                   <?php  
                                       $c = $row->company;  
-                                      $name = $c->name ? $c->name.' '.$c->last_name.' '.$c->last_name2 : '-- Nueva Empresa --';  
+                                      if( isset($c) ){
+                                        $name = $c->name ? $c->name.' '.$c->last_name.' '.$c->last_name2 : '-- Nueva Empresa --';
+                                        $companyId = $c->id;
+                                        echo "<option value='$companyId' > $name </option>";
+                                      }
                                   ?>
-                                  <option value="{{ $c->id }}" > {{ $name }} </option>
                               @endforeach
                           </select>
                       </div>

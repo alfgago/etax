@@ -83,32 +83,17 @@
         <div class="card-title" id="manuales">Manuales eTax</div>
         <ul>
     			<li>
-    			  <a download href="/assets/files/guias/Manual_completo_eTax.pdf">Descargar Manual completo de eTax</a>
+    			  <a href="https://etaxcr.com/knowledge-base/que-son-los-codigos-de-etax/">Manual de códigos en eTax</a>
     			</li>
     			<li>
-    				<a download href="/assets/files/guias/Manual_de_codigos_de_eTax.pdf">Descargar Manual de códigos de eTax</a>
+    				<a href="https://etaxcr.com/manual-de-usuario/">Manual general de eTax</a>
     			</li>
     			<li>
-    				<a download href="/assets/files/guias/Manual_de_Configuracion.pdf">Descargar Manual de configuración</a>
+    				<a href="https://etaxcr.com/blog/">Blog de eTax</a>
     			</li>
     			<li>
-    				<a download href="/assets/files/guias/Manual_Derechos_de_Acreditacion_operativos.pdf">Descargar Manual de derechos de acreditación operativos</a>
+    				<a href="https://etaxcr.com/soporte/">Base de conocimiento</a>
     			</li>
-    			<li>
-    				<a download href="/assets/files/guias/Manual_Facturacion_Electronica.pdf">Descargar Manual de facturación electrónica</a>
-    			</li>
-    			<li>
-    				<a download href="/assets/files/guias/Manual_Facturas_Recibidas.pdf">Descargar Manual de facturas recibidas</a>
-    			</li>
-    			<li>
-    				<a download href="/assets/files/guias/Manual_Navegar_en_el_escritorio.pdf">Descargar Manual navegar en el escritorio</a>
-    			</li>
-    			<li>
-    				<a download href="/assets/files/guias/Manual_Registro_Facturas_Emitidas.pdf">Descargar Manual registro facturas emitidas</a>
-    			</li>
-                <li onclick="actualizarTutorial();">
-                    <a style="cursor: pointer">Tutorial r&aacute;pido</a>
-                </li>
     		</ul>
 
       </div>

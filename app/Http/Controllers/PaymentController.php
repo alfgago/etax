@@ -18,9 +18,11 @@ use App\PaymentMethod;
 use App\SubscriptionPlan;
 use App\AvailableInvoices;
 use App\Team;
+use App\TransactionsLog;
 use Carbon\Carbon;
 use CybsSoapClient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use stdClass;
 use GuzzleHttp\Client;
@@ -241,7 +243,7 @@ class PaymentController extends Controller
             $ip = $paymentGateway->getUserIpAddr();
             $request->request->add(['IpAddress' => $ip]);
 
-            if($request->plan_sel == "c"){
+            if($request->plan_sel == "c") {
                 $coupons = Coupon::where('code', $request->coupon)->where('type',1)->count();
                 $precio_25 = 8;
                 $precio_10 = 10;
@@ -313,6 +315,7 @@ class PaymentController extends Controller
             }
 
             $cuponId = null;
+            $cuponConsultado = null;
             //Si tiene un cupon adicional, este aplica sobre el de la tarjeta del BN.
             if ( isset($request->coupon) ) {
                 $cuponConsultado = Coupon::where('code', $request->coupon)->first();
@@ -381,6 +384,7 @@ class PaymentController extends Controller
             $request->request->add(['iva_amount' => $iv]);
             $request->request->add(['montoDescontado' => $montoDescontado]);
             $request->request->add(['razonDescuento' => $discountReason]);
+            $request->request->add(['descuento' => $descuento]);
 
             $cardData = $paymentGateway->getCardNameType($request->number);
             $request->request->add(['cardType' => $cardData->type]);
@@ -401,24 +405,35 @@ class PaymentController extends Controller
                 ]
             );
 
-            if($payment->payment_gateway === 'klap' || $payment->payment_gateway === ''){
-                $payment->payment_gateway = 'cybersource';
+            if($payment->payment_gateway === 'klap' || $payment->payment_gateway === '') {
                 $payment->charge_token = null;
-                $payment->save();
             }
+            $payment->payment_gateway = 'cybersource';
+            $payment->save();
 
             $request->request->add(['token_bn' => $paymentMethod->token_bn]);
-
             //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
             if( ! isset($payment->charge_token) ) {
-                $chargeProof = $paymentGateway->pay($request);
+                $transLog = TransactionsLog::create([
+                    'id_payment' => $payment->id ?? '',
+                    'status' => 'processing',
+                    'id_paymethod' => $paymentMethod->id ?? '',
+                    'processor' => $paymentMethod->payment_gateway ?? ''
+                ]);
+                $transLog->save();
+                $chargeProof = $paymentGateway->pay($request, false, $transLog);
                 if($chargeProof){
                     $payment->charge_token = $chargeProof;
                     $payment->save();
                 }
             }
 
-            if ( $chargeProof ) {
+            if($chargeProof) {
+                $payment->charge_token = $chargeProof;
+                $payment->save();
+            }
+
+            if ($chargeProof) {
                 $payment->proof = $payment->charge_token;
                 $payment->payment_status = 2;
                 $payment->save();
@@ -430,6 +445,8 @@ class PaymentController extends Controller
                 $request->request->add(['item_code' => $subscriptionPlan->id]);
                 $request->request->add(['item_name' => $sale->plan->getName() . " / $recurrency meses"]);
 
+                $request->montoDescontado = $cuponConsultado->discount_percentage ?? 0;
+                $request->unit_price = $costo;
                 $invoiceData = $paymentGateway->setInvoiceInfo($request);
                 $factura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
                 if($factura){
@@ -455,81 +472,93 @@ class PaymentController extends Controller
      *
      *
      */
-    public function comprarFacturas(Request $request){
-        $company = currentCompanyModel();
-        $available_company_invoices = !$company->additional_invoices ? $available_company_invoices = 0 : $company->additional_invoices;
-        $product_id = $request->product_id;
+    public function comprarFacturas(Request $request) {
+        try {
+            $company = currentCompanyModel();
+            $available_company_invoices = $company->additional_invoices ?? 0;
+            $product_id = $request->product_id;
 
-        $product = EtaxProducts::find($product_id);
-        switch ($product_id){
-            case 9:
-                $additional_invoices = $available_company_invoices + 5;
-            break;
-            case 10:
-                $additional_invoices = $available_company_invoices + 25;
-            break;
-            case 11:
-                $additional_invoices = $available_company_invoices + 50;
-            break;
-            case 12:
-                $additional_invoices = $available_company_invoices + 250;
-            break;
-            case 13:
-                $additional_invoices = $available_company_invoices + 2000;
-            break;
-            case 14:
-                $additional_invoices = $available_company_invoices + 5000;
-            break;
-        }
-        $subtotal = $product->price;
-        $iv = $subtotal * 0.13;
-        $amount = $subtotal + $iv;
-        $request->request->add(['amount' => $amount]);
-        $request->request->add(['referenceCode' => $product_id]);
-        $request->request->add(['product_name' => $product->name]);
-        $paymentInfo = explode('- ', $request->payment_method);
-        $request->request->add(['payment_method' => $paymentInfo[0]]);
-        //$paymentProcessor = new PaymentProcessor();
-        $paymentGateway = PaymentProcessor::selectPaymentGateway($paymentInfo[1]);
-        $ip = $paymentGateway->getUserIpAddr();
-        $request->request->add(['IpAddress' => $ip]);
-        if(isset($paymentGateway)){
-            $pagoProducto = $paymentGateway->comprarProductos($request);
-            if($pagoProducto){
-                $client = \App\Client::where('company_id', $company->id)->where('id_number', $request->id_number)->first();
-                $request->request->add(['client_code' => $request->id_number]);
-                $request->request->add(['client_id_number' => $request->id_number]);
-                if($client){
-                    $client_id = $client->id;
-                }else{
-                    $client_id = '-1';
-                }
-                $request->request->add(['client_id' => $client_id]);
-                $request->request->add(['subtotal' => $subtotal]);
-                $request->request->add(['unit_price' => $subtotal]);
-                $request->request->add(['iva_amount' => $iv]);
-                $request->request->add(['amount' => $amount]);
-                $request->request->add(['total' => $amount]);
-                $request->request->add(['item_code' => $product->id]);
-                $request->request->add(['item_name' => $product->name]);
-                $request->request->add(['descuento' => 0]);
-                $request->request->add(['expiry' => Carbon::parse(now('America/Costa_Rica'))->addMonths(1)]);
-                $request->request->add(['es_exento' => false]);
-                $request->request->add(['discount_reason' => null]);
-                $request->request->add(['tipo_persona' => $client->tipo_persona]);
-
-                $invoiceData = $paymentGateway->setInvoiceInfo($request);
-                $procesoFactura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
-
-                $company->additional_invoices = $additional_invoices;
-                $company->save();
-
-                return redirect('/empresas/comprar-facturas-vista')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
-            }else{
-                return redirect('/empresas/comprar-facturas-vista')->withErrors('No pudo procesarse el pago');
+            $product = EtaxProducts::find($product_id);
+            switch ($product_id){
+                case 9:
+                    $additional_invoices = $available_company_invoices + 5;
+                    break;
+                case 10:
+                    $additional_invoices = $available_company_invoices + 25;
+                    break;
+                case 11:
+                    $additional_invoices = $available_company_invoices + 50;
+                    break;
+                case 12:
+                    $additional_invoices = $available_company_invoices + 250;
+                    break;
+                case 13:
+                    $additional_invoices = $available_company_invoices + 2000;
+                    break;
+                case 14:
+                    $additional_invoices = $available_company_invoices + 5000;
+                    break;
             }
-        }else{
-            return redirect('/empresas/comprar-facturas-vista')->withErrors('Debe seleccionar un método de pago');
+            $subtotal = $product->price;
+            $iv = $subtotal * 0.13;
+            $amount = $subtotal + $iv;
+            $request->request->add(['amount' => $amount]);
+            $request->request->add(['referenceCode' => $product_id]);
+            $request->request->add(['product_name' => $product->name]);
+
+            $paymentInfo = explode('- ', $request->payment_method);
+            $request->request->add(['payment_method' => $paymentInfo[0]]);
+            //$paymentProcessor = new PaymentProcessor();
+
+            $paymentGateway = PaymentProcessor::selectPaymentGateway($paymentInfo[1] ?? null);
+            if($paymentGateway) {
+                $ip = $paymentGateway->getUserIpAddr();
+                $request->request->add(['IpAddress' => $ip]);
+                $pagoProducto = $paymentGateway->comprarProductos($request);
+                if ($pagoProducto) {
+                    $client = \App\Client::where('company_id', 1)->where('id_number', $request->id_number)->first();
+                    $request->request->add(['client_code' => $request->id_number]);
+                    $request->request->add(['client_id_number' => $request->id_number]);
+                    if($client){
+                        $client_id = $client->id;
+                    }else{
+                        $client_id = '-1';
+                    }
+
+                    $request->request->add(['client_id' => $client_id]);
+                    $request->request->add(['subtotal' => $subtotal]);
+                    $request->request->add(['unit_price' => $subtotal]);
+                    $request->request->add(['iva_amount' => $iv]);
+                    $request->request->add(['amount' => $amount]);
+                    $request->request->add(['total' => $amount]);
+                    $request->request->add(['item_code' => $product->id]);
+                    $request->request->add(['item_name' => $product->name]);
+                    $request->request->add(['descuento' => 0]);
+                    $request->request->add(['expiry' => Carbon::parse(now('America/Costa_Rica'))->addMonths(1)]);
+                    $request->request->add(['es_exento' => false]);
+                    $request->request->add(['discount_reason' => null]);
+                    $request->request->add(['tipo_persona' => $client->tipo_persona ?? 'F']);
+
+                    $request->montoDescontado = 0;
+                    $request->unit_price = $subtotal;
+                    $invoiceData = $paymentGateway->setInvoiceInfo($request);
+                    $procesoFactura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
+
+                    $company->additional_invoices = $additional_invoices;
+                    $company->save();
+                    $userId = auth()->user()->id;
+                    Cache::forget("cache-currentcompany-$userId");
+
+                    return redirect('/empresas/comprar-facturas-vista')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
+                }else{
+                    return redirect('/empresas/comprar-facturas-vista')->withErrors('No pudo procesarse el pago');
+                }
+            } else {
+                return redirect('/empresas/comprar-facturas-vista')->withErrors('Debe seleccionar un método de pago');
+            }
+
+        } catch ( \Exception $e) {
+            Log::error("Error al compras" . $e);
         }
     }
     /**
@@ -628,15 +657,14 @@ class PaymentController extends Controller
                 $request->request->add(['discount_reason' => null]);
                 $request->request->add(['etax_product_id' => 16]);
                 $request->request->add(['referenceCode' => 16]);
-
-                $client = \App\Client::where('company_id', $company->id)->where('id_number', $request->id_number)->first();
+                $client = \App\Client::where('company_id', 1)->where('id_number', $request->id_number)->first();
                 $request->request->add(['client_code' => $client->id]);
                 $request->request->add(['client_id_number' => $client->id_number]);
                 $request->request->add(['client_id' => $client->id_number]);
                 $request->request->add(['tipo_persona' => $client->tipo_persona]);
 
                 $chargeCreated = $paymentGateway->comprarProductos($request);
-                if($chargeCreated){
+                if($chargeCreated) {
                     $invoiceData = $paymentGateway->setInvoiceInfo($request);
                     $procesoFactura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
                     $company->save();
@@ -648,7 +676,7 @@ class PaymentController extends Controller
                 return redirect()->back()->withErrors('No se pudo procesar el pago');
             }
         }catch ( \Exception $e){
-            Log::error('Error al anular facturar -->'.$e);
+            Log::error('Error en compra de contabilidad -->'.$e);
             return redirect()->back()->withErrors('Hubo un error con el pago');
         }
     }
@@ -843,100 +871,106 @@ class PaymentController extends Controller
      *
      *
      */
-    public function pagarCargo($paymentId){
-        $date = Carbon::parse(now('America/Costa_Rica'));
-        $company = currentCompanyModel();
-        $user = auth()->user();
+    public function pagarCargo($paymentId) {
+        try {
+            $date = Carbon::parse(now('America/Costa_Rica'));
+            $company = currentCompanyModel();
+            $user = auth()->user();
 
-        //$paymentProcessor = new PaymentProcessor();
-        $paymentMethod = PaymentMethod::where('user_id', $user->id)->where('default_card', true)->first();
-        $paymentGateway = PaymentProcessor::selectPaymentGateway($paymentMethod->payment_gateway);
+            //$paymentProcessor = new PaymentProcessor();
+            $paymentMethod = PaymentMethod::where('user_id', $user->id)->where('default_card', true)->first();
+            $paymentGateway = PaymentProcessor::selectPaymentGateway($paymentMethod->payment_gateway);
 
-        if(!$paymentMethod){
-            $paymentMethod = PaymentMethod::where('user_id', $user->id)->first();
-        }
-        $payment = Payment::find($paymentId);
-        if($paymentMethod->payment_gateway === $payment->payment_gateway){
-            $payment->payment_date = $date;
-            $payment->payment_method_id = $paymentMethod->id;
-            $payment->save();
-
-            $sale = Sales::find($payment->sale_id);
-
-            $amount = $payment->amount;
-            $subtotal = $amount / 1.13;
-            $iv = $amount - $subtotal;
-
-            $data = new stdClass();
-            $data->referenceCode = $sale->etax_product_id;
-            $data->description = $sale->saleDescription();
-            $data->user_name = $user->user_name;
-            $data->amount = $amount;
-
-            //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
-            if( ! isset($payment->charge_token) || $payment->charge_token == 'N/A' || $payment->charge_token == '' ) {
-                $chargeIncluded = $paymentGateway->createPayment($data);
-                if (gettype($chargeIncluded) == 'array') {
-                    if($chargeIncluded['apiStatus'] == "Successful"){
-                        $appliedCharge_Id = $chargeIncluded['retrievalRefNo'];
-                    }
-                } else if (gettype($chargeIncluded) == 'object'){
-                    if($chargeIncluded->decision == 'ACCEPT'){
-                        $appliedCharge_Id = $chargeIncluded->requestID;
-                    }
-                }
-                $chargeTokenId = $appliedCharge_Id;
-                $payment->charge_token = $chargeTokenId;
-                $payment->save();
+            if(!$paymentMethod){
+                $paymentMethod = PaymentMethod::where('user_id', $user->id)->first();
             }
-
-            $data->chargeTokenId = $payment->charge_token;
-            $data->token_bn = $paymentMethod->token_bn;
-
-            $appliedCharge = $paymentGateway->pay($data);
-            if (gettype($data) == 'array') {
-                if($appliedCharge['apiStatus'] == "Successful"){
-                    $paymentAccepted = true;
-                    $appliedChargeId = $appliedCharge['retrievalRefNo'];
-                }
-            } else if (gettype($data) == 'object'){
-                if($appliedCharge->decision == 'ACCEPT'){
-                    $paymentAccepted = true;
-                    $appliedChargeId = $appliedCharge->requestID;
-                }
-            }
-
-            if ( $paymentAccepted ) {
-                $payment->proof = $appliedChargeId;
-                $payment->payment_status = 2;
+            $payment = Payment::find($paymentId);
+            if($paymentMethod->payment_gateway === $payment->payment_gateway){
+                $payment->payment_date = $date;
+                $payment->payment_method_id = $paymentMethod->id;
                 $payment->save();
 
-                $sale->next_payment_date = Carbon::parse(now('America/Costa_Rica'))->addMonths($sale->recurrency);
-                $sale->status = 1;
-                $sale->save();
+                $sale = Sales::find($payment->sale_id);
 
-                $company->item_code = $sale->id;
-                $company->item_name = $sale->saleDescription();
-                $company->amount = $amount;
-                $company->subtotal = $subtotal;
-                $company->iva_amount = $iv;
-                $company->discount_reason = null;
-                $company->descuento = 0;
-                $company->discount_reason = null;
-                $company->iva_amount = $iv;
-                $company->unit_price = $subtotal;
-                $company->subtotal = $subtotal;
-                $company->total = $amount;
+                $amount = $payment->amount;
+                $subtotal = $amount / 1.13;
+                $iv = $amount - $subtotal;
 
-                $invoiceData = $paymentGateway->setInvoiceInfo($company);
-                $factura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
-                return redirect()->back()->withMessage('Pago procesado');
+                $data = new stdClass();
+                $data->referenceCode = $sale->etax_product_id;
+                $data->description = $sale->saleDescription();
+                $data->user_name = $user->user_name;
+                $data->amount = $amount;
+
+                //Si no hay un charge token, significa que no ha sido aplicado. Entonces va y lo aplica
+                if( ! isset($payment->charge_token) || $payment->charge_token == 'N/A' || $payment->charge_token == '' ) {
+                    $chargeIncluded = $paymentGateway->createPayment($data);
+                    if (gettype($chargeIncluded) == 'array') {
+                        if($chargeIncluded['apiStatus'] == "Successful"){
+                            $appliedCharge_Id = $chargeIncluded['retrievalRefNo'];
+                        }
+                    } else if (gettype($chargeIncluded) == 'object'){
+                        if($chargeIncluded->decision == 'ACCEPT'){
+                            $appliedCharge_Id = $chargeIncluded->requestID;
+                        }
+                    }
+                    $chargeTokenId = $appliedCharge_Id;
+                    $payment->charge_token = $chargeTokenId;
+                    $payment->save();
+                }
+
+                $data->chargeTokenId = $payment->charge_token;
+                $data->token_bn = $paymentMethod->token_bn;
+
+                $appliedCharge = $paymentGateway->pay($data);
+                if (gettype($data) == 'array') {
+                    if($appliedCharge['apiStatus'] == "Successful"){
+                        $paymentAccepted = true;
+                        $appliedChargeId = $appliedCharge['retrievalRefNo'];
+                    }
+                } else if (gettype($data) == 'object'){
+                    if($appliedCharge->decision == 'ACCEPT'){
+                        $paymentAccepted = true;
+                        $appliedChargeId = $appliedCharge->requestID;
+                    }
+                }
+
+                if ( $paymentAccepted ) {
+                    $payment->proof = $appliedChargeId;
+                    $payment->payment_status = 2;
+                    $payment->save();
+
+                    $sale->next_payment_date = Carbon::parse(now('America/Costa_Rica'))->addMonths($sale->recurrency);
+                    $sale->status = 1;
+                    $sale->save();
+
+                    $company->item_code = $sale->id;
+                    $company->item_name = $sale->saleDescription();
+                    $company->amount = $amount;
+                    $company->subtotal = $subtotal;
+                    $company->iva_amount = $iv;
+                    $company->discount_reason = null;
+                    $company->descuento = 0;
+                    $company->discount_reason = null;
+                    $company->iva_amount = $iv;
+                    $company->unit_price = $subtotal;
+                    $company->subtotal = $subtotal;
+                    $company->total = $amount;
+
+                    $invoiceData = $paymentGateway->setInvoiceInfo($company);
+                    $factura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
+                    return redirect()->back()->withMessage('Pago procesado');
+                }else{
+                    return redirect()->back()->withErrors('El pago no pudo ser procesado. Por favor intente más tarde.');
+                }
             }else{
-                return redirect()->back()->withErrors('El pago no pudo ser procesado. Por favor intente más tarde.');
+                return redirect()->back()->withErrors('Debe seleccionar un método de pago por defecto');
             }
-        }else{
-            return redirect()->back()->withErrors('Debe seleccionar un método de pago por defecto');
+
+        } catch ( \Exception $e) {
+            Log::error("Error al pagar cardo" .$e);
         }
+
     }
     /**
      * Show the form for editing the specified resource.

@@ -45,6 +45,8 @@ class CompanyController extends Controller {
      */
     public function __construct() {
         $this->middleware('auth');
+        $this->middleware('CheckSubscription', ['except' => ['changeCompany']]);
+        
     }
 
     /**
@@ -389,7 +391,9 @@ class CompanyController extends Controller {
         $company->card_retention  =  $request->card_retention;
         $company->default_product_category = $request->default_category_producto_code;
         $company->saldo_favor_2018 = $request->saldo_favor_2018;
-        
+        $company->auto_accept_email = $request->auto_accept_email;
+
+                
         if( $company->first_prorrata_type == 1 ) {
             $company->operative_prorrata = $request->first_prorrata;
             $company->operative_ratio1 = $request->operative_ratio1;
@@ -524,12 +528,15 @@ class CompanyController extends Controller {
         }
 
         try {
+
             $user = auth()->user();
             $companyId = $request->companyId;
             $team = Team::where( 'company_id', $companyId )->first();
 	        $user->switchTeam( $team );
 	        Cache::forget("cache-currentcompany-$user->id");
-        } catch( UserNotInTeamException $e ) { }
+        } catch( UserNotInTeamException $e ) { 
+          Log::warning( 'Error en cambiar la compañia' );  
+        }
         
     }
     

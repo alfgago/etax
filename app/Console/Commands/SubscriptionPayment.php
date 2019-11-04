@@ -60,6 +60,8 @@ class SubscriptionPayment extends Command
                 $unpaidSubscriptions = Sales::where('status', 2)->where('is_subscription', true)->get();
                 foreach($unpaidSubscriptions as $sale){
                     sleep(2);
+                    $this->info(json_encode($sale));
+                    Log::info("Sale data : ".json_encode($sale));
                     ProcessSubscriptionPayments::dispatch($sale)->onQueue('payments');
                 }
                 

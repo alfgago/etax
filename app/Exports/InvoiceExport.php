@@ -100,7 +100,7 @@ class InvoiceExport implements WithHeadings, WithMapping, FromQuery, WithEvents
             $map->invoice->client_email ? $map->invoice->client_email : $map->invoice->client->email,
             $map->invoice->sale_condition,
             $map->invoice->payment_type,
-            $map->item_number,
+            $map->item_number == 0 ? '0' : $map->item_number,
             $map->name,
             $map->code,
             $map->item_count,

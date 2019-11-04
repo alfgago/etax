@@ -38,7 +38,7 @@ class BridgeHaciendaApi
             });
             return $value;
         } catch (ClientException $error) {
-            Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
+            Log::info('Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         }
     }
@@ -88,7 +88,7 @@ class BridgeHaciendaApi
                         $file = $invoiceUtils->sendInvoiceEmail($invoice, $company, $path);
                         
                         ProcessInvoice::dispatch($invoice->id, $company->id, $token)
-                            ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
+                            ->onConnection(config('etax.queue_connections'))->onQueue('invoicing');
                         return $invoice;
                     }
                 }else{
@@ -96,8 +96,8 @@ class BridgeHaciendaApi
                 }
                 return $invoice;
             }
-        } catch (ClientException $error) {
-            Log::error('Error al crear factura en API HACIENDA -->>'. $error->getMessage() );
+        } catch ( \Exception $error) {
+            Log::error('Error al crear factura en API HACIENDA -->>'. $error);
             return $invoice;
         }
     }
@@ -108,7 +108,7 @@ class BridgeHaciendaApi
             $company = $invoice->company;
             //Send to queue invoice
             ProcessCreditNote::dispatch($invoice->id, $company->id, $token)
-                ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
+                ->onConnection(config('etax.queue_connections'))->onQueue('invoicing');
             return $invoice;
 
         } catch (ClientException $error) {
@@ -148,7 +148,7 @@ class BridgeHaciendaApi
             }
             return json_encode($details, true);
         } catch (ClientException $error) {
-            Log::error('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
+            Log::error('Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         }
     }
@@ -215,10 +215,10 @@ class BridgeHaciendaApi
             
             return $request;
         } catch (ClientException $error) {
-            Log::error('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
+            Log::error('Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         } catch ( \Throwable $error ) {
-            Log::error('Error en facturacion -->>'. $error->getMessage() );
+            Log::error('Error en facturacion -->>'. $error);
         }
     }
 
@@ -312,7 +312,7 @@ class BridgeHaciendaApi
                     $invoice->hacienda_status = '03';
                     $invoice->save();
                 } else if (strpos($response['data']['response'],"ESTADO=procesando") !== false) {
-                    $invoice->hacienda_status = '03';
+                    $invoice->hacienda_status = '05';
                     $invoice->save();
                 }
             } else {
@@ -353,7 +353,7 @@ class BridgeHaciendaApi
             }
             return $request;
         } catch (ClientException $error) {
-            Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
+            Log::info('Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         }
     }
@@ -387,7 +387,7 @@ class BridgeHaciendaApi
             }
             return $request;
         } catch (ClientException $error) {
-            Log::info('Error al iniciar session en API HACIENDA -->>'. $error->getMessage() );
+            Log::info('Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         }
     }

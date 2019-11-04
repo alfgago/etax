@@ -4,9 +4,9 @@ namespace App;
 
 use App\Company;
 use App\InvoiceItem;
+use App\XmlHacienda;
 use \Carbon\Carbon;
 use App\Client;
-use App\XmlHacienda;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
@@ -100,6 +100,12 @@ class Invoice extends Model
     public function xmlHacienda()
     {
         return $this->hasOne(XmlHacienda::class);
+    }
+
+    //Relacion con reference
+    public function documentReference()
+    {
+        return $this->hasOne(DocumentReference::class);
     }
     
     public function getCondicionVenta() {
@@ -248,6 +254,16 @@ class Invoice extends Model
                 $this->client_id_number = trim($this->company->id_number);
                 $this->client_id_type = $this->company->type;
 
+                //Set reference invoice
+                if (isset($request->ref_number)) {
+                    $this->code_note = $request->code_note ?? '04';
+                    $this->reason = $request->reason ?? 'Razon';
+                    $this->reference_generated_date = Carbon::createFromFormat('d/m/Y g:i A',
+                        $request->ref_date . ' ' . '12:00 AM');
+                    $this->reference_document_key = $request->ref_number;
+                    $this->reference_doc_type = $request->ref_doc_type;
+                }
+
                 //Datos de proveedor
                 if ($request->provider_id == '-1') {
                     $tipo_persona = $request->tipo_persona;
@@ -289,6 +305,12 @@ class Invoice extends Model
 
                 }
             }
+            //Revisa si la factura es nueva. Si no tiene ID, es nueva y suma al contador.
+            if (!$this->id) {
+              $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
+              $this->company->addSentInvoice( $fecha->year, $fecha->month );
+            }
+
             $this->save();
             //Fechas
             $fecha = Carbon::createFromFormat('d/m/Y g:i A',
@@ -299,11 +321,6 @@ class Invoice extends Model
             $this->year = $fecha->year;
             $this->month = $fecha->month;
             $this->credit_time = $fechaV->format('d/m/Y');
-            
-            if (!$this->id) {
-              $this->company->addSentInvoice( $this->year, $this->month );
-            }
-            $this->save();
 
             //Recorrer Items
             $lids = array();
@@ -352,7 +369,7 @@ class Invoice extends Model
               }
               $this->total_otros_cargos = $totalOtrosCargos;
             }catch(\Exception $e){
-                Log::error("Error al guardar otros cargos");
+                Log::error("Error al guardar otros cargos " . $e);
             }
             
             //Guarda nuevamente el invoice
@@ -361,7 +378,7 @@ class Invoice extends Model
             return $this;
 
         } catch (\Exception $e) {
-            Log::error('Error al crear factura: '.$e->getMessage());
+            Log::error('Error al crear factura: '.$e);
             return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
         }
     }
@@ -738,7 +755,7 @@ class Invoice extends Model
           //Log::warning( "XML: No se pudo guardar la factura de venta. Ya existe para la empresa." );
           return false;
         }
-        
+
         $invoice->hacienda_status = "03";
         $invoice->payment_status = "01";
         $invoice->generation_method = $metodoGeneracion;
@@ -782,7 +799,7 @@ class Invoice extends Model
         $invoice->total = $arr['ResumenFactura']['TotalComprobante'];
         
         $authorize = true;
-        if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML-A" ) {
+        if( ($metodoGeneracion == "Email" && !$company->auto_accept_email) || $metodoGeneracion == "XML-A" ) {
             $authorize = false;
         }
         $invoice->is_authorized = $authorize;
@@ -862,61 +879,61 @@ class Invoice extends Model
               $otrasSenas = null;
             }
 
-        if( $identificacionCliente ){
-          $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
-          if ( !Cache::has($clientCacheKey) ) {
-              $clienteCache =  Client::updateOrCreate(
-                  [
-                      'id_number' => $identificacionCliente ?? null,
-                      'company_id' => $company->id,
-                  ],
-                  [
-                      'code' => $identificacionCliente,
-                      'company_id' => $company->id,
-                      'tipo_persona' => $tipoPersona ?? null,
-                      'id_number' => $identificacionCliente,
-                      'first_name' => $nombreCliente ?? null,
-                      'email' => $correoCliente ?? null,
-                      'phone' => $telefonoCliente ?? null,
-                      'fullname' => "$identificacionCliente - " . $nombreCliente ?? null,
-                      'country' => 'CR',
-                      'state' => $provinciaCliente ?? null,
-                      'city' => $cantonCliente ?? null,
-                      'district' => $distritoCliente ?? null,
-                      'zip' => $zipCliente ?? null,
-                      'address' => $otrasSenas ?? null,
-                      'foreign_address' => $otrasSenas ?? null,
-                  ]
-              );
-              Cache::put($clientCacheKey, $clienteCache, 30);
+          if( $identificacionCliente ){
+            $clientCacheKey = "import-clientes-$identificacionCliente-".$company->id;
+            if ( !Cache::has($clientCacheKey) ) {
+                $clienteCache =  Client::updateOrCreate(
+                    [
+                        'id_number' => $identificacionCliente ?? null,
+                        'company_id' => $company->id,
+                    ],
+                    [
+                        'code' => $identificacionCliente,
+                        'company_id' => $company->id,
+                        'tipo_persona' => $tipoPersona ?? null,
+                        'id_number' => $identificacionCliente,
+                        'first_name' => $nombreCliente ?? null,
+                        'email' => $correoCliente ?? null,
+                        'phone' => $telefonoCliente ?? null,
+                        'fullname' => "$identificacionCliente - " . $nombreCliente ?? null,
+                        'country' => 'CR',
+                        'state' => $provinciaCliente ?? null,
+                        'city' => $cantonCliente ?? null,
+                        'district' => $distritoCliente ?? null,
+                        'zip' => $zipCliente ?? null,
+                        'address' => $otrasSenas ?? null,
+                        'foreign_address' => $otrasSenas ?? null,
+                    ]
+                );
+                Cache::put($clientCacheKey, $clienteCache, 30);
+            }
+            $cliente = Cache::get($clientCacheKey);
+
+            $invoice->client_id = $cliente->id;
+            $invoice->client_id_number = $identificacionCliente;
+            $invoice->client_first_name = $nombreCliente;
+            $invoice->client_email = $correoCliente;
+            $invoice->client_address = $otrasSenas;
+            $invoice->client_country = 'CR';
+            $invoice->client_state = $provinciaCliente;
+            $invoice->client_city = $cantonCliente;
+            $invoice->client_district = $distritoCliente;
+            $invoice->client_zip = $zipCliente;
+            $invoice->client_phone = $telefonoCliente;
+            $invoice->foreign_address = $otrasSenas;
+          }else{
+            $invoice->client_email = $arr['Receptor']['CorreoElectronico'] ??'N/A';
+            $invoice->client_phone = $arr['Receptor']['Telefono']['NumTelefono'] ?? 'N/A';
+            $invoice->client_id_number = $arr['Receptor']['Identificacion']['Numero'] ?? 0;
+            $invoice->client_first_name = $arr['Receptor']['Nombre'] ?? 'N/A';
           }
-          $cliente = Cache::get($clientCacheKey);
-
-          $invoice->client_id = $cliente->id;
-          $invoice->client_id_number = $identificacionCliente;
-          $invoice->client_first_name = $nombreCliente;
-          $invoice->client_email = $correoCliente;
-          $invoice->client_address = $otrasSenas;
-          $invoice->client_country = 'CR';
-          $invoice->client_state = $provinciaCliente;
-          $invoice->client_city = $cantonCliente;
-          $invoice->client_district = $distritoCliente;
-          $invoice->client_zip = $zipCliente;
-          $invoice->client_phone = $telefonoCliente;
-          $invoice->foreign_address = $otrasSenas;
-        }else{
-          $invoice->client_email = $arr['Receptor']['CorreoElectronico'] ??'N/A';
-          $invoice->client_phone = $arr['Receptor']['Telefono']['NumTelefono'] ?? 'N/A';
-          $invoice->client_id_number = $arr['Receptor']['Identificacion']['Numero'] ?? 0;
-          $invoice->client_first_name = $arr['Receptor']['Nombre'] ?? 'N/A';
-        }
 
         }else{
-        $invoice->client_email = 'N/A';
-        $invoice->client_phone = 'N/A';
-        $invoice->client_id_number = 0;
-        $invoice->client_first_name = 'N/A';
-        $invoice->document_type = '04';
+          $invoice->client_email = 'N/A';
+          $invoice->client_phone = 'N/A';
+          $invoice->client_id_number = 0;
+          $invoice->client_first_name = 'N/A';
+          $invoice->document_type = $tipoDocumento ?? '04';
         }
               
         //End DATOS CLIENTE
@@ -948,6 +965,8 @@ class Invoice extends Model
         $invoice->total_exonerados = $arr['ResumenFactura']['TotalExonerado'] ?? 0;
         $invoice->total_gravado = $arr['ResumenFactura']['TotalGravado'] ?? 0;
         $invoice->save();
+
+        $invoice->company->addSentInvoice($invoice->year, $invoice->month);
         
         $lids = array();
         $items = array();
@@ -1106,6 +1125,14 @@ class Invoice extends Model
             $this->save();
             $this->client_id = $invoiceReference->client_id;
 
+            //Reference data
+            $reference = new DocumentReference();
+            $reference->invoice_id = $invoiceReference->id;
+            $reference->ref_invoice_id = $this->id;
+            $reference->invoice_document_key = $invoiceReference->document_key;
+            $reference->reference_document_key = $this->document_key;
+            $reference->save();
+
             //Datos de factura
             $this->description = $invoiceReference->description;
             $this->subtotal = floatval( str_replace(",","", $request->subtotal ));
@@ -1135,6 +1162,10 @@ class Invoice extends Model
             $this->year = Carbon::now()->year;
             $this->month = Carbon::now()->month;
             $this->save();
+
+            if ($this->id) {
+                $this->company->addSentInvoice( $this->year, $this->month );
+            }
 
             $lids = array();
             $dataItems = $requestItems ?? $invoiceReference->items->toArray();

@@ -40,7 +40,7 @@ class CybsClient extends SoapClient
 
         foreach ($required as $req) {
             if (empty($properties[$req])) {
-                throw new Exception($req . ' not found in cybs.ini.');
+                throw new \Exception($req . ' not found in cybs.ini.');
             }
         }
 

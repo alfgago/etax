@@ -72,7 +72,7 @@
 			<button type="submit" class="btn btn-primary">Importar facturas</button>
 	</form>
 	
-			<div class="form-group col-md-12 toggl-xml">
+			<div class="form-group col-md-12 toggle-xml">
 		      <div class="descripcion">
 			    	Arrastre los archivos XML de Hacienda que haya generado desde sistemas de facturación externos. <br>
 			    	
@@ -105,7 +105,7 @@
             $("#xml-dropzone").dropzone({
                 paramName: 'file',
                 //url: baseUrl+"/facturas-recibidas/importarXML",
-                url: "http://etax.test/facturas-recibidas/importarXML",
+                url: "/facturas-recibidas/importarXML",
                 params: {
                     _token: token
                 },
