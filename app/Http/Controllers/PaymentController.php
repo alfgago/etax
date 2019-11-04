@@ -309,8 +309,10 @@ class PaymentController extends Controller
             //El descuento por defecto es cero.
             $descuento = 0;
             //Aplica descuento del Banco Nacional
-            if( $request->bncupon ) {
+            $descuentoBN = 0;
+            if($request->bncupon) {
                 $descuento = 0.1;
+                $descuentoBN = 10;
                 $razonDescuento = "Cupón BN";
             }
 
@@ -444,8 +446,8 @@ class PaymentController extends Controller
 
                 $request->request->add(['item_code' => $subscriptionPlan->id]);
                 $request->request->add(['item_name' => $sale->plan->getName() . " / $recurrency meses"]);
-
-                $request->montoDescontado = $cuponConsultado->discount_percentage ?? 0;
+                $discountPercent = $cuponConsultado->discount_percentage ?? 0;
+                $request->montoDescontado = $descuentoBN + $discountPercent;
                 $request->unit_price = $costo;
                 $invoiceData = $paymentGateway->setInvoiceInfo($request);
                 $factura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
