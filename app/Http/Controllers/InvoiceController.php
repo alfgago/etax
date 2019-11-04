@@ -1361,7 +1361,7 @@ class InvoiceController extends Controller
 
 
     public function importXML(Request $request) {
-        try {
+        //try {
             $time_start = getMicrotime();
             $company = currentCompanyModel();
             $file = Input::file('file');
@@ -1422,13 +1422,13 @@ class InvoiceController extends Controller
             $time = $time_end - $time_start;
                         
 
-        }catch( \Exception $ex ){
+        /*}catch( \Exception $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
             return Response()->json('Error importando con archivo inválido', 400);
         }catch( \Throwable $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
             return Response()->json('Error importando con archivo inválido', 400);
-        }
+        }*/
         return Response()->json('success', 200);
     }
     
