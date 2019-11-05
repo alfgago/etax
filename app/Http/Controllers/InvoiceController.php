@@ -727,10 +727,9 @@ class InvoiceController extends Controller
      * @param  \App\Invoice  $invoice
      * @return \Illuminate\Http\Response
      */
-    public function editarRecurrentes($id)
+    public function show($id)
     {
-        $recurrente = RecurringInvoice::findOrFail($id);
-        $invoice = Invoice::findOrFail($recurrente->id);
+        $invoice = Invoice::findOrFail($id);
         $this->authorize('update', $invoice);
         $company = currentCompanyModel();
         $arrayActividades = $company->getActivities();
@@ -749,7 +748,7 @@ class InvoiceController extends Controller
         $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
         $codigos = CodigoIvaRepercutido::where('hidden', false)->get();
         $units = UnidadMedicion::all()->toArray();
-        return view('Invoice/editar-recurrente', compact('invoice','units','arrayActividades','countries','product_categories','codigos', 'company','recurrente') );
+        return view('Invoice/show', compact('invoice','units','arrayActividades','countries','product_categories','codigos', 'company') );
     }
 
     /**
