@@ -584,14 +584,14 @@ class InvoiceController extends Controller
                     $start_date = Carbon::parse(now('America/Costa_Rica'));
                     $today = $start_date->day."/".$start_date->month."/".$start_date->year;
 
-                    if($today != $request->generated_date){
+                    /*if($today != $request->generated_date){
                         $invoice->hacienda_status = '99';
                         $invoice->generation_method = "etax-programada";
                         $invoice->document_key = $invoice->document_key."programada";
                         $invoice->document_number = "programada";
-                    }
+                    }*/
                     $invoice->save();                    
-                    if($request->recurrencia != "0"){
+                    /*if($request->recurrencia != "0"){
                         $recurrencia = new RecurringInvoice();
                         $recurrencia->company_id = $company->id;
                         $recurrencia->invoice_id = $invoice->id;
@@ -618,7 +618,7 @@ class InvoiceController extends Controller
                         
                         $invoice->recurring_id = $recurrencia->id;
                         $invoice->save();     
-                    }
+                    }*/
                     if($invoice->hacienda_status != '99'){
                         if (!empty($invoiceData)) {
                             $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
