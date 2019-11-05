@@ -25,10 +25,21 @@ class GoSocketController extends Controller
 
     public function index(Request $request){
         $token = $request->token;
+        if (!empty($token)) {
+            $apiGoSocket = new BridgeGoSocketApi();
+            $user_gs = $apiGoSocket->getUser($token);
+            $user = IntegracionEmpresa::where("user_token",$user_gs['UserId'])->where("company_token",$user_gs['CurrentAccountId'])->first();
+            if (is_null($user)) {
+                return view('gosocket.index')->with('token',$token);
+            }else{
+                return redirect('gosocket/ingresar?token='.$token);
+            }
+        }
         return view('gosocket.index')->with('token',$token);
     }
 
     public function gosocketValidate(Request $request) {
+
         try{
         	$token = $request->token;
         	Log::info("Iniciando validacion de token gosocket: " . $token);

@@ -40,7 +40,7 @@ class ReportsController extends Controller
       $user = auth()->user();
       
       if( !$user->has_klap_user ) {
-          $user->createKlapUser();
+          //$user->createKlapUser();
       }
       
       /* Logic for New User Invite */
