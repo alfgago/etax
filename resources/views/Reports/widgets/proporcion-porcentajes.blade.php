@@ -3,7 +3,7 @@
     <div class="card-title"> {{ $titulo }} 
       <span class="helper helper-proporcion" def="helper-proporcion">  <i class="fa fa-question-circle" aria-hidden="true"></i> </span> 
     </div>
-@if( allowTo('reports') )    
+@if( allowTo('reports') || 1 == 1)   
 
 
     @if( $data->count_invoices  )
@@ -21,7 +21,7 @@
 
 </div>
 
-@if( allowTo('reports') )
+@if( allowTo('reports')  || 1 == 1) 
 <script>
 
   $(document).ready(function() {
@@ -127,5 +127,4 @@
   });
 
 </script>
-
 @endif 

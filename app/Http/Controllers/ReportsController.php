@@ -129,7 +129,6 @@ class ReportsController extends Controller
     }
     
     public function reporteDashboard( Request $request ) {
-      
       try {
         $ano = $request->ano ? $request->ano : 2019;
         $mes = $request->mes ? $request->mes : 1;
@@ -163,6 +162,7 @@ class ReportsController extends Controller
       }
       
       if( !$request->vista || $request->vista == 'basica' ){
+        
         return view('/Dashboard/dashboard-basico', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes'));
       } else {
         return view('/Dashboard/dashboard-gerencial', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes'));
