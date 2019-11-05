@@ -38,7 +38,7 @@ class ReportsController extends Controller
   
     public function dashboard() {
       $user = auth()->user();
-      
+      dd($user->permisos());
       if( !$user->has_klap_user ) {
           //$user->createKlapUser();
       }
