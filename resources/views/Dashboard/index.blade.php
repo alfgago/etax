@@ -43,6 +43,8 @@
 
 <?php 
   $permisos = new App\User;
+dd($permisos->permisos());
+
   ?>
 @if(in_array(1, $permisos->permisos()) || in_array(6, $permisos->permisos()) || in_array(8, $permisos->permisos()))     
 
