@@ -13,7 +13,7 @@ class Menu extends Model
 			$user_id = auth()->user()->id;
             $current_company = currentCompany();
             $llave = "menu-".$user_id."-".$current_company."-".$menu;
-			if (!Cache::has($llave)) {
+			if (Cache::has($llave)) {
 				$menu = Menu::where('slug',$menu)->first();
 				$permiso = auth()->user()->permisos();
 				$items = [];
