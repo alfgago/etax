@@ -610,6 +610,7 @@ class CybersourcePaymentProcessor extends PaymentProcessor
             $item['subtotal'] = $invoiceData->items[0]->subtotal;
 
             $item['discount_percentage'] = $invoiceData->items[0]->descuento;
+            $item['discount_type'] = '01';
             $item['discount_reason'] = $invoiceData->items[0]->discount_reason;
             $item['discount'] = $invoiceData->items[0]->descuento;
 
