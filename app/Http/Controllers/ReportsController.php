@@ -38,7 +38,10 @@ class ReportsController extends Controller
   
     public function dashboard() {
       $user = auth()->user();
-      dd($user->permisos());
+      $mostrar_dashboard = 0;
+      if(in_array(1, $user->permisos()) || in_array(6, $user->permisos()) || in_array(8, $user->permisos())){
+        $mostrar_dashboard = 1;
+      }  
       if( !$user->has_klap_user ) {
           //$user->createKlapUser();
       }
@@ -75,8 +78,7 @@ class ReportsController extends Controller
       if( !currentCompanyModel()->wizard_finished ) {
         return redirect('/wizard');
       }
-
-      return view('/Dashboard/index', compact( 'subscription' ) );
+      return view('/Dashboard/index', compact( 'subscription','mostrar_dashboard' ) );
       
     }
     
