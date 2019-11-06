@@ -35,15 +35,14 @@ class EnvioProgramadas implements ShouldQueue
     {
         Log::error("inicio job de envio de programadas");
         try{
-        $start_date = Carbon::parse(now('America/Costa_Rica'));
+            $start_date = Carbon::parse(now('America/Costa_Rica'));
             $today = $start_date->year."-".$start_date->month."-".$start_date->day." 23:59:59";
             $invoices = Invoice::where("hacienda_status",'99')
                                 ->where('generated_date', '<=',$today)
-                                ->with('company')
                                 ->get();
             foreach ($invoices as $invoice) {
                 try{
-                    $company = $invoice->company;
+                    $company = Company::find($invoices->id);
                     if( $invoice->document_number == 'programada') {
                         if ($invoice->document_type == '01') {
                             $invoice->reference_number = $company->last_invoice_ref_number + 1;
