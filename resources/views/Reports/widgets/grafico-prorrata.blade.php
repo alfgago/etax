@@ -36,7 +36,7 @@
 <div class="widget text-center ">
     <div class="card-title"> {{ $titulo }} </div>
     
-@if( allowTo('reports')  && in_array(8, auth()->user()->permisos()))   
+@if( allowTo('reports')  || in_array(8, auth()->user()->permisos()))   
 
     <div id="echartGauge" style="height: 180px;"></div>
     <div class="row comparacion-prorratas">
@@ -100,7 +100,7 @@
     
 </div>
 
-@if( allowTo('reports') && in_array(8, auth()->user()->permisos()) )   
+@if( allowTo('reports') || in_array(8, auth()->user()->permisos()) )   
 
 <script>
 

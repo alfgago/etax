@@ -1,7 +1,7 @@
 <div class="sidebar-dashboard">
     <div class="card-title">{{ $titulo }}</div>
     
-@if( allowTo('reports') && in_array(8, auth()->user()->permisos()))     
+@if( allowTo('reports') || in_array(8, auth()->user()->permisos()))     
     
     <div class="row">
         

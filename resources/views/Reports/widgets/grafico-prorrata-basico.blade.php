@@ -27,7 +27,7 @@
 <div class="widget">
     <div class="card-title"> {{ $titulo }} </div>
     
-@if( allowTo('reports')  && in_array(8, auth()->user()->permisos())) 
+@if( allowTo('reports')  || in_array(8, auth()->user()->permisos())) 
     
     <div class="row comparacion-prorratas m-0">
       <div class="col-lg-12 dif text-left" style="">
