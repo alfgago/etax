@@ -33,7 +33,9 @@
               <select class="form-control " name="plan_sel" id="plan-sel" onchange="togglePlan();">
               	<option value="p" >Profesional</option>
               	<option value="e" selected>Empresarial</option>
-              	<option value="c">Contador</option>
+                @if(!in_array(8, auth()->user()->permisos()) )
+              	   <option value="c">Contador</option>
+                @endif
               </select>
             </div>
             
