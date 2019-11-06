@@ -2044,8 +2044,10 @@ class InvoiceController extends Controller
                     $company->save();
                     $invoice->save();
                     Log::info("Factura  programada enviada de la compañia".$company->id." con la llave" . $invoice->document_key);
+                    dd("Factura  programada enviada de la compañia".$company->id." con la llave" . $invoice->document_key);
                 }catch( \Throwable $ex ){
                     Log::error("error en envio de programada ".$invoice->id." error :" . $ex);
+                    dd("error en envio de programada ".$invoice->id." error :" . $ex);
                 }
             }
     }
