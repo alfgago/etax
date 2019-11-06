@@ -39,6 +39,7 @@ use App\Jobs\ProcessInvoice;
 use App\Jobs\ProcessInvoicesImport;
 use App\Jobs\ProcessSendExcelInvoices;
 use App\Jobs\ProcessInvoicesExcel;
+use App\Jobs\EnvioProgramadas;
 use Illuminate\Support\Facades\Input;
 
 /**
@@ -1993,7 +1994,10 @@ class InvoiceController extends Controller
     }
 
     public function envioProgramada(){
-            $start_date = Carbon::parse(now('America/Costa_Rica'));
+        dd("hola");
+        EnvioProgramadas::dispatch()->onQueue('facturasprogramadas');
+
+           /* $start_date = Carbon::parse(now('America/Costa_Rica'));
             $today = $start_date->year."-".$start_date->month."-".$start_date->day." 23:59:59";
             $invoices = Invoice::where("hacienda_status",'99')->where('generated_date', '<=',$today)->get();
             foreach ($invoices as $invoice) {
@@ -2049,7 +2053,7 @@ class InvoiceController extends Controller
                     Log::error("error en envio de programada ".$invoice->id." error :" . $ex);
                     dd("error en envio de programada ".$invoice->id." error :" . $ex);
                 }
-            }
+            }*/
     }
     
     public function recurrentes(){
