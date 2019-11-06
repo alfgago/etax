@@ -37,55 +37,61 @@ class EnvioProgramadas implements ShouldQueue
         try{
         $start_date = Carbon::parse(now('America/Costa_Rica'));
             $today = $start_date->year."-".$start_date->month."-".$start_date->day." 23:59:59";
-            $invoices = Invoice::where("hacienda_status",'99')->where('generated_date', '<=',$today)->get();
+            $invoices = Invoice::where("hacienda_status",'99')
+                                ->where('generated_date', '<=',$today)
+                                ->with('company')
+                                ->get();
             foreach ($invoices as $invoice) {
                 try{
-                    $company = Company::where('id',$invoice->company_id)->first();
-                    if ($invoice->document_type == '01') {
-                        $invoice->reference_number = $company->last_invoice_ref_number + 1;
-                    }
-                    if ($invoice->document_type == '08') {
-                        $invoice->reference_number = $company->last_invoice_pur_ref_number + 1;
-                    }
-                    if ($invoice->document_type == '09') {
-                        $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
-                    }
-                    if ($invoice->document_type == '04') {
-                        $invoice->reference_number = $company->last_ticket_ref_number + 1;
-                    }
-                    if ($invoice->document_type== '02') {
-                        $invoice->reference_number = $company->last_debit_note_ref_number + 1;
-                    }
-                    if ($invoice->document_type == '03') {
-                        $invoice->reference_number= $company->last_note_ref_number + 1;
-                    }
-                    $invoice->document_key = $this->getDocumentKey($invoice->document_type,$company);
-                    $invoice->document_number = $this->getDocReference($invoice->document_type,$company);
-                    $invoice->hacienda_status = '01';
-                    $invoice->company->addSentInvoice( $invoice->year, $invoice->month );
+                    $company = $invoice->company;
+                    if( $invoice->document_number == 'programada') {
+                        if ($invoice->document_type == '01') {
+                            $invoice->reference_number = $company->last_invoice_ref_number + 1;
+                        }
+                        if ($invoice->document_type == '08') {
+                            $invoice->reference_number = $company->last_invoice_pur_ref_number + 1;
+                        }
+                        if ($invoice->document_type == '09') {
+                            $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
+                        }
+                        if ($invoice->document_type == '04') {
+                            $invoice->reference_number = $company->last_ticket_ref_number + 1;
+                        }
+                        if ($invoice->document_type== '02') {
+                            $invoice->reference_number = $company->last_debit_note_ref_number + 1;
+                        }
+                        if ($invoice->document_type == '03') {
+                            $invoice->reference_number= $company->last_note_ref_number + 1;
+                        }
+                        $invoice->document_key = $this->getDocumentKey($invoice->document_type,$company);
+                        $invoice->document_number = $this->getDocReference($invoice->document_type,$company);
+                        $invoice->company->addSentInvoice( $invoice->year, $invoice->month );
 
-                    if ($invoice->document_type == '01') {
-                         $company->last_invoice_ref_number = $invoice->reference_number;
+                        if ($invoice->document_type == '01') {
+                             $company->last_invoice_ref_number = $invoice->reference_number;
+                        }
+                        if ($invoice->document_type == '08') {
+                            $company->last_invoice_pur_ref_number = $invoice->reference_number;
+                        }
+                        if ($invoice->document_type== '02') {
+                            $company->last_debit_note_ref_number = $invoice->reference_number;
+                        }
+                        if ($invoice->document_type == '03') {
+                           $company->last_note_ref_number = $invoice->reference_number;
+                        }
+                        if ($invoice->document_type == '09') {
+                            $company->last_invoice_exp_ref_number = $invoice->reference_number;
+                        }
+                        if ($invoice->document_type == '04') {
+                            $company->last_ticket_ref_number = $invoice->reference_number;
+                        }
                     }
-                    if ($invoice->document_type == '08') {
-                        $company->last_invoice_pur_ref_number = $invoice->reference_number;
-                    }
-                    if ($invoice->document_type== '02') {
-                        $company->last_debit_note_ref_number = $invoice->reference_number;
-                    }
-                    if ($invoice->document_type == '03') {
-                       $company->last_note_ref_number = $invoice->reference_number;
-                    }
-                    if ($invoice->document_type == '09') {
-                        $company->last_invoice_exp_ref_number = $invoice->reference_number;
-                    }
-                    if ($invoice->document_type == '04') {
-                        $company->last_ticket_ref_number = $invoice->reference_number;
-                    }
+                    
+                    $invoice->hacienda_status = '01';
                     
                     $company->save();
                     $invoice->save();
-                    Log::info("Factura  programada enviada de la compañia".$company->id." con la llave" . $invoice->document_key);
+                    Log::info("Factura  programada enviada de la compañia".$company->id." con la llave: " . $invoice->document_key);
                 }catch( \Throwable $ex ){
                     Log::error("error en envio de programada ".$invoice->id." error :" . $ex);
                 }
