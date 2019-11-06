@@ -8,7 +8,7 @@
       <span class="helper helper-resumen-mensual" def="helper-resumen-mensual">  <i class="fa fa-question-circle" aria-hidden="true"></i> </span> 
     </div>
     
- @if( allowTo('reports')  || 1 == 1)
+ @if( allowTo('reports')  && in_array(8, auth()->user()->permisos()))
 
     <div class="row">
         

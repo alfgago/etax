@@ -73,7 +73,7 @@
               <button onclick="trackClickEvent( 'ConfirmarPago' );" type="submit" id="btn-submit-tc" class="btn btn-primary btn-next has-spinner" >Iniciar periodo de pruebas</button>
             </div>
             
-             @if( !empty( auth()->user()->teams ) )
+             @if( !empty( auth()->user()->teams ) && !in_array(8, auth()->user()->permisos()) )
                 @if( sizeof(auth()->user()->teams) > 1 )
                   <div class="companyParent suscripciones">
                       <label for="">Saltar suscripción y entrar como:</label>

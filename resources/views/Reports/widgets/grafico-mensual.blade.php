@@ -1,6 +1,6 @@
 <div class="widget ">
   <div class="card-title">{{ $titulo }}</div>
-@if( allowTo('reports')  || 1 == 1)     
+@if( allowTo('reports')  && in_array(8, auth()->user()->permisos()))     
   <div id="echartBar" style="height: 300px;"></div>
   
 @else
@@ -11,7 +11,7 @@
   
 </div>
 
-@if( allowTo('reports')  || 1 == 1)  
+@if( allowTo('reports')  && in_array(8, auth()->user()->permisos()))  
 <script>
 
 var echartBar;

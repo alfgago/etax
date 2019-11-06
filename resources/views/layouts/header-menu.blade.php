@@ -18,7 +18,7 @@
 
     <div class="header-part-right">
         
-        @if( !empty( auth()->user()->teams ) )
+        @if( !empty( auth()->user()->teams )  && !in_array(8, auth()->user()->permisos()))
             <div class="companyParent">
                 <label for="country">Empresa actual:</label>
                 <div class="form-group">
