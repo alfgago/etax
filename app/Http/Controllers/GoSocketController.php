@@ -128,17 +128,21 @@ class GoSocketController extends Controller
                     return redirect('/');
                 } else {
                     Log::info("El usuario Gosocket no se puedo loguear");
+                    dd("El usuario Gosocket no se puedo loguear");
                     return redirect('/login');
                 }
             } else {
-                Log::info("El usuario Gosocket no se puedo loguear");
+                Log::info("El usuario Gosocket no se puedo loguear no tiene token");
+                dd("no tiene token");
                 return redirect('/login');
             }
         }catch( \Exception $ex ) {
             Log::error("Error en login gosocket ".$ex);
+            dd("Error en login gosocket ".$ex);
             return redirect('/login');
         }catch( \Throwable $ex ) {
             Log::error("Error en login gosocket ".$ex);
+            dd("Error en login gosocket ".$ex);
             return redirect('/login');
         }
 	    
