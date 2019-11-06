@@ -34,6 +34,7 @@ class EnvioProgramadas implements ShouldQueue
     public function handle()
     {
         Log::error("inicio job de envio de programadas");
+        try{
         $start_date = Carbon::parse(now('America/Costa_Rica'));
             $today = $start_date->year."-".$start_date->month."-".$start_date->day." 23:59:59";
             $invoices = Invoice::where("hacienda_status",'99')->where('generated_date', '<=',$today)->get();
@@ -89,6 +90,9 @@ class EnvioProgramadas implements ShouldQueue
                     Log::error("error en envio de programada ".$invoice->id." error :" . $ex);
                 }
             }
+        }catch( \Throwable $ex ){
+            Log::error("error en envio de programada  :" . $ex);
+        }
     }
 
 

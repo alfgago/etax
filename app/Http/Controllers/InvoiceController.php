@@ -1994,7 +1994,7 @@ class InvoiceController extends Controller
     }
 
     public function envioProgramada(){
-        dd("hola");
+        Log::info("disparo de job envio programada");
         EnvioProgramadas::dispatch()->onQueue('facturasprogramadas');
 
            /* $start_date = Carbon::parse(now('America/Costa_Rica'));
