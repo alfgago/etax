@@ -232,7 +232,7 @@
 
             <div class="form-group col-md-2">
                 <label for="porcentajeExoneracion">% *</label>
-                <input type="number" class="form-control" max="100" min="0" maxlength="3" id="porcentajeExoneracion" placeholder="100%" value="100" onchange="calcularMontoExoneracion();">
+                <input type="number" class="form-control" max="100" min="0" maxlength="3" id="porcentajeExoneracion" value="100" onchange="calcularMontoExoneracion();">
             </div>
             <div class="form-group col-md-3">
                 <label for="montoExoneracion">Monto Exonerado *</label>
