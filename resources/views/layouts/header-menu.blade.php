@@ -55,10 +55,12 @@
                         <a class="dropdown-item" {{$item->type}}="{{$item->link}}">{{$item->name}}</a>
                     <?php } ?>
 
+                    <!-- @if( !in_array(8, auth()->user()->permisos()))     -->
                         <a class="dropdown-item" onclick="event.preventDefault(); document.getElementById(&quot;frm-logout&quot;).submit();">Cerrar sesión</a>
                     <form id="frm-logout" action="{{ route('logout') }}" method="POST" style="display: none;">
                         {{ csrf_field() }} 
                     </form>
+                    <!-- @endif -->
                 </div>
             </div>
         </div>
