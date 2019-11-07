@@ -45,6 +45,8 @@ class CompanyController extends Controller {
      */
     public function __construct() {
         $this->middleware('auth');
+        $this->middleware('CheckSubscription', ['except' => ['changeCompany']]);
+        
     }
 
     /**
@@ -526,12 +528,15 @@ class CompanyController extends Controller {
         }
 
         try {
+
             $user = auth()->user();
             $companyId = $request->companyId;
             $team = Team::where( 'company_id', $companyId )->first();
 	        $user->switchTeam( $team );
 	        Cache::forget("cache-currentcompany-$user->id");
-        } catch( UserNotInTeamException $e ) { }
+        } catch( UserNotInTeamException $e ) { 
+          Log::warning( 'Error en cambiar la compañia' );  
+        }
         
     }
     

@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 use App\Jobs\LogActivityHandler as Activity;
 use App\Actividades;
+use App\OtherCharges;
+use App\Provider;
 use App\AvailableInvoices;
 use App\CodigosPaises;
 use App\UnidadMedicion;
 use App\ProductCategory;
 use App\CodigoIvaRepercutido;
 use App\CalculatedTax;
+use App\XlsInvoice;
 use App\Utils\BridgeHaciendaApi;
 use App\Utils\InvoiceUtils;
 use \Carbon\Carbon;
@@ -16,6 +19,9 @@ use App\Invoice;
 use App\InvoiceItem;
 use App\Bill;
 use App\BillItem;
+use App\RecurringInvoice;
+use App\Company;
+use App\Client;
 use App\Exports\InvoiceExport;
 use App\Exports\LibroVentasExport;
 use App\Exports\LibroVentasExportSM;
@@ -32,6 +38,7 @@ use PDF;
 use App\Jobs\ProcessInvoice;
 use App\Jobs\ProcessInvoicesImport;
 use App\Jobs\ProcessSendExcelInvoices;
+use App\Jobs\ProcessInvoicesExcel;
 use Illuminate\Support\Facades\Input;
 
 /**
@@ -50,6 +57,7 @@ class InvoiceController extends Controller
     public function __construct()
     {
         $this->middleware('auth', ['except' => ['receiveEmailInvoices']] );
+        $this->middleware('CheckSubscription', ['except' => ['receiveEmailInvoices']]);
     }
   
     /**
@@ -59,6 +67,8 @@ class InvoiceController extends Controller
      */
     public function index()
     {
+        
+
         $company = currentCompanyModel(false);
 
         if ( !$company->atv_validation && $company->use_invoicing ) {
@@ -237,14 +247,14 @@ class InvoiceController extends Controller
                     $catPorcentaje = $cat['todo'];
                 }
 
-                return view('Bill.ext.select-codigos', [
+                return view('Invoice.ext.select-codigos', [
                     'company' => $company,
                     'cat' => $catPorcentaje,
                     'item' => $invoiceItem
                 ])->render();                    
             })
             ->editColumn('categoria_hacienda', function(InvoiceItem $invoiceItem) use($categorias) {
-                return view('Bill.ext.select-categorias', [
+                return view('Invoice.ext.select-categorias', [
                     'categoriaProductos' => $categorias,
                     'item' => $invoiceItem
                 ])->render();
@@ -381,7 +391,7 @@ class InvoiceController extends Controller
         $company = currentCompanyModel(false);
         
         $errors = $company->validateEmit();
-        if( $errors ){
+        if( $errors ) {
             return redirect($errors['url'])->withError($errors['mensaje']);
         }
 
@@ -521,7 +531,7 @@ class InvoiceController extends Controller
     public function sendHacienda(Request $request)
     {
         //revision de branch para segmentacion de funcionalidades por tipo de documento
-        try {
+        //try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
             $request->validate([
                 'subtotal' => 'required',
@@ -536,6 +546,7 @@ class InvoiceController extends Controller
                     $company = currentCompanyModel();
                     $invoice->company_id = $company->id;
 
+                    
                     //Datos generales y para Hacienda
                     $invoice->document_type = $request->document_type;
                     $invoice->hacienda_status = '01';
@@ -555,7 +566,7 @@ class InvoiceController extends Controller
                     if ($request->document_type == '04') {
                         $invoice->reference_number = $company->last_ticket_ref_number + 1;
                     }
-                    
+
                     $invoiceData = $invoice->setInvoiceData($request);
                     
                     $invoice->document_key = $this->getDocumentKey($request->document_type);
@@ -569,26 +580,65 @@ class InvoiceController extends Controller
                             $invoice->is_void = true;
                         }
                     }
-                    
-                    $invoice->save();
-                    if (!empty($invoiceData)) {
-                        $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
+
+                    $start_date = Carbon::parse(now('America/Costa_Rica'));
+                    $today = $start_date->day."/".$start_date->month."/".$start_date->year;
+
+                    if($today != $request->generated_date){
+                        $invoice->hacienda_status = '99';
+                        $invoice->generation_method = "etax-programada";
+                        $invoice->document_key = $invoice->document_key."programada";
+                        $invoice->document_number = "programada";
                     }
+                    $invoice->save();                    
+                    if($request->recurrencia != "0"){
+                        $recurrencia = new RecurringInvoice();
+                        $recurrencia->company_id = $company->id;
+                        $recurrencia->invoice_id = $invoice->id;
+                        $recurrencia->frecuency = $request->recurrencia;
+                        $options = null;
+                        if($request->recurrencia == "1"){
+                            $options = $request->dia;
+                        }
+                        if($request->recurrencia == "2"){
+                            $options = $request->primer_quincena.",".$request->segunda_quincena;
+                        }
+                        if($request->recurrencia == "3"){
+                            $options = $request->mensual;
+                        }
+                        if($request->recurrencia == "4"){
+                            $options = $request->dia_recurrencia."/".$request->mes_recurrencia;
+                        }
+                        if($request->recurrencia == "5"){
+                            $options = $request->cantidad_dias;
+                        }
+                        $recurrencia->options = $options;
+                        $recurrencia->next_send = $recurrencia->proximo_envio($today,$request->generated_date);
+                        $recurrencia->save();   
+                        
+                        $invoice->recurring_id = $recurrencia->id;
+                        $invoice->save();     
+                    }
+                    if($invoice->hacienda_status != '99'){
+                        if (!empty($invoiceData)) {
+                            $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
+                        }
                     
-                    if ($request->document_type == '01') {
-                        $company->last_invoice_ref_number = $invoice->reference_number;
-                        $company->last_document = $invoice->document_number;
+                        if ($request->document_type == '01') {
+                            $company->last_invoice_ref_number = $invoice->reference_number;
+                            $company->last_document = $invoice->document_number;
 
-                    } elseif ($request->document_type == '08') {
-                        $company->last_invoice_pur_ref_number = $invoice->reference_number;
-                        $company->last_document_invoice_pur = $invoice->document_number;
+                        } elseif ($request->document_type == '08') {
+                            $company->last_invoice_pur_ref_number = $invoice->reference_number;
+                            $company->last_document_invoice_pur = $invoice->document_number;
 
-                    } elseif ($request->document_type == '09') {
-                        $company->last_invoice_exp_ref_number = $invoice->reference_number;
-                        $company->last_document_invoice_exp = $invoice->document_number;
-                    } elseif ($request->document_type == '04') {
-                        $company->last_ticket_ref_number = $invoice->reference_number;
-                        $company->last_document_ticket = $invoice->document_number;
+                        } elseif ($request->document_type == '09') {
+                            $company->last_invoice_exp_ref_number = $invoice->reference_number;
+                            $company->last_document_invoice_exp = $invoice->document_number;
+                        } elseif ($request->document_type == '04') {
+                            $company->last_ticket_ref_number = $invoice->reference_number;
+                            $company->last_document_ticket = $invoice->document_number;
+                        }
                     }
 
                     $company->save();
@@ -612,10 +662,10 @@ class InvoiceController extends Controller
             }else{
                 return back()->withError('Mes seleccionado ya fue cerrado');
             }
-        } catch( \Exception $ex ) {
+        /*} catch( \Exception $ex ) {
             Log::error("ERROR Envio de factura a hacienda -> ".$ex);
             return back()->withError( 'Ha ocurrido un error al enviar factura.' );
-        }
+        }*/
     }
     
     private function storeBillFEC($request) {
@@ -640,8 +690,19 @@ class InvoiceController extends Controller
         $bill->accept_iva_acreditable = $bill->iva_amount;
         $bill->accept_iva_gasto = 0;
         $bill->description = "FEC" . ($request->description ?? '');
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $today = $start_date->day."/".$start_date->month."/".$start_date->year;
+        if($today != $request->generated_date){
+            $bill->hacienda_status = '99';
+            $bill->generation_method = "etax-programada";
+            $bill->document_key = $invoice->document_key."pr";
+            $bill->document_number = $invoice->document_number."pr";
+        }
         $bill->save();
-        $company->last_bill_ref_number = $bill->reference_number;
+        if($bill->hacienda_status = '99'){
+            $company->last_bill_ref_number = $bill->reference_number;
+
+        }
         $company->save();
 
         $user = auth()->user();
@@ -1361,12 +1422,11 @@ class InvoiceController extends Controller
             $json = json_encode( $xml ); // convert the XML string to json  
             $arr = json_decode( $json, TRUE );
 
-                //if(substr($arr['NumeroConsecutivo'],8,2) != "04"){
+                if(substr($arr['NumeroConsecutivo'],8,2) != "04"){
                     $FechaEmision = explode("T", $arr['FechaEmision']);
                     $FechaEmision = explode("-", $FechaEmision[0]);
                     $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
                     if(CalculatedTax::validarMes($FechaEmision)){
-                        
                         //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                         try { 
                             $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0 ;
@@ -1376,10 +1436,10 @@ class InvoiceController extends Controller
                         $consecutivoComprobante = $arr['NumeroConsecutivo'];
                         $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
                         $consecutivoComprobante = $arr['NumeroConsecutivo'];
-                    
                         //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                         if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                             //Registra el XML. Si todo sale bien, lo guarda en S3.
+
                             $invoice = Invoice::saveInvoiceXML( $arr, 'XML' );
                             
                             if( $invoice ) {
@@ -1404,10 +1464,10 @@ class InvoiceController extends Controller
                         return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
                         //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
                     } 
-                /*}else{
+                }else{
                     return Response()->json('Error: No se puede subir tiquetes electrónicos.', 400);
                         //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
-                }*/ 
+                }
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
@@ -1788,6 +1848,9 @@ class InvoiceController extends Controller
         if ($docType == '09') {
             $lastSale = $company->last_invoice_exp_ref_number + 1;
         }
+        if ($docType == '03') {
+            $lastSale = $company->last_note_ref_number + 1;
+        }
         if ($docType == '04') {
             $lastSale = $company->last_ticket_ref_number + 1;
         }
@@ -1809,6 +1872,9 @@ class InvoiceController extends Controller
         }
         if ($docType == '09') {
             $ref = $company->last_invoice_exp_ref_number + 1;
+        }
+        if ($docType == '03') {
+            $lastSale = $company->last_note_ref_number + 1;
         }
         if ($docType == '04') {
             $ref = $company->last_ticket_ref_number + 1;
@@ -1904,6 +1970,7 @@ class InvoiceController extends Controller
           'archivo' => 'required',
         ]);
       
+        $fileType = request()->fileType ?? '01';
 
         $collection = Excel::toCollection( new InvoiceImportSM(), request()->file('archivo') );
         $companyId = currentCompany();
@@ -1912,7 +1979,7 @@ class InvoiceController extends Controller
         try {
             Log::debug('Creando job de registro de facturas.');
             foreach (array_chunk ( $invoiceList, 100 ) as $facturas) {
-                ProcessSendExcelInvoices::dispatch($facturas, $companyId)->onQueue('bulk');
+                ProcessSendExcelInvoices::dispatch($facturas, $companyId, $fileType)->onQueue('bulk');
             }
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
@@ -1923,5 +1990,529 @@ class InvoiceController extends Controller
         
         
     }
+
+    public function envioProgramada(){
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $today = $start_date->year."-".$start_date->month."-".$start_date->day.' 23:59:59';
+        $invoices = Invoice::where("hacienda_status",'99')->where('generated_date', '<=',$today)->get();
+        foreach ($invoices as $invoice) {
+            $company = Company::where('id',$invoice->company_id)->first();
+            $invoice->document_key = $this->getDocumentKey($invoice->document_type,$company);
+            $invoice->document_number = $this->getDocReference($invoice->document_type,$company);
+            $invoice->hacienda_status = '01';
+            if($invoice->hacienda_status != '01'){
+                if ($request->document_type == '01') {
+                    $company->last_invoice_ref_number = $invoice->reference_number;
+                    $company->last_document = $invoice->document_number;
+
+                } elseif ($request->document_type == '08') {
+                    $company->last_invoice_pur_ref_number = $invoice->reference_number;
+                    $company->last_document_invoice_pur = $invoice->document_number;
+
+                } elseif ($request->document_type == '09') {
+                    $company->last_invoice_exp_ref_number = $invoice->reference_number;
+                    $company->last_document_invoice_exp = $invoice->document_number;
+                } elseif ($request->document_type == '04') {
+                    $company->last_ticket_ref_number = $invoice->reference_number;
+                    $company->last_document_ticket = $invoice->document_number;
+                }
+            }
+            $company->save();
+            $invoice->save();
+        }
+    }
     
+    public function recurrentes(){
+        try{
+            $current_company = currentCompany();
+            $recurrentes = RecurringInvoice::where('company_id',$current_company)->get();
+            return view('Invoice/recurrentes')->with('recurrentes',$recurrentes);
+        }catch( \Throwable $ex ){
+            Log::error("error en visualizar recurrentes:" . $ex);
+            return redirect()->back()->withError("Error en visualizar recurrentes");
+        }
+    }
+
+    public function envioMasivoExcel(){
+        request()->validate([
+          'archivo' => 'required',
+        ]);
+        $collection = Excel::toCollection( new InvoiceImport(), request()->file('archivo') );
+        $companyId = currentCompany();
+        $invoiceList = $collection->toArray()[0];
+        try {
+            //Log::debug('Creando job de registro de facturas.');
+            foreach (array_chunk ( $invoiceList, 200 ) as $facturas) {
+                $this->guardarMasivoExcel($facturas, $companyId);
+                //ProcessSendExcelInvoices::dispatch($facturas, $companyId)->onQueue('bulk');
+            }
+        }catch( \Throwable $ex ){
+            Log::error("Error importando excel archivo:" . $ex);
+        }
+        $xlsInvoices = XlsInvoice::select('consecutivo', 'codigoActividad', 'nombreReceptor', 'tipoIdentificacionReceptor', 'IdentificacionReceptor', 'correoReceptor', 'condicionVenta', 'plazoCredito', 'medioPago', 'codigoMoneda', 'tipoCambio','autorizado')
+            ->where('company_id',$companyId)->distinct('consecutivo')->get();
+        return view("Invoice/confirmacion-envio")->with('facturas', $xlsInvoices);
+        
+    }
+
+    public function guardarMasivoExcel($facturas, $companyId){
+        $company = Company::find($companyId);
+        //Revisa límite de facturas emitidas en el mes actual1
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $month = $start_date->month;
+        $year = $start_date->year;
+        $available_invoices = $company->getAvailableInvoices( $year, $month );
+        $facturas_disponibles = $available_invoices->monthly_quota;
+        $consecutivo = null;
+        $invoiceList = array();
+        foreach ($facturas as $row){
+            try{
+
+                
+                if( isset($row['identificacionreceptor']) ){
+                    if($row['cedulaempresa'] == $company->id_number){
+                        $xls_invoice = XlsInvoice::updateOrCreate([
+                            'consecutivo' => $row['identificador'],
+                            'company_id' => $company->id,
+                            'numeroLinea' => $row['numerolinea']
+                        ],
+                        [   
+                            'cantidad' => $row['cantidad']
+                        ]);
+                        $xls_invoice->consecutivo = $row['identificador'];
+                        $xls_invoice->tipoDocumento = $row['tipodocumento'];
+                        $xls_invoice->fechaEmision = $row['fechaemision'];
+                        $xls_invoice->fechaVencimiento = $row['fechavencimiento'];
+                        $xls_invoice->descripcion = $row['descripcion'];
+                        $xls_invoice->company_id = $company->id;
+                        $xls_invoice->numeroLinea = $row['numerolinea'];
+                        $xls_invoice->codigoActividad = $row['codigoactividad'];
+                        $xls_invoice->nombreEmisor = $row['nombreemisor'];
+                        $xls_invoice->tipoIdentificacionEmisor = $row['tipoidentificacionemisor'];
+                        $xls_invoice->identificacionEmisor = $row['identificacionemisor'];
+                        $xls_invoice->provinciaEmisor = $row['provinciaemisor'];
+                        $xls_invoice->cantonEmisor = $row['cantonemisor'];
+                        $xls_invoice->distritoEmisor = $row['distritoemisor'];
+                        $xls_invoice->direccionEmisor = $row['direccionemisor'];
+                        $xls_invoice->correoEmisor = $row['correoemisor'];
+                        $xls_invoice->nombreReceptor = $row['nombrereceptor'];
+                        $xls_invoice->tipoIdentificacionReceptor = $row['tipoidentificacionreceptor'];
+                        $xls_invoice->identificacionReceptor = $row['identificacionreceptor'];
+                        $xls_invoice->provinciaReceptor = $row['provinciareceptor'];
+                        $xls_invoice->cantonReceptor = $row['cantonreceptor'];
+                        $xls_invoice->distritoReceptor = $row['distritoreceptor'];
+                        $xls_invoice->direccionReceptor = $row['direccionreceptor'];
+                        $xls_invoice->correoReceptor = $row['correoreceptor'];
+                        $xls_invoice->condicionVenta = $row['condicionventa'];
+                        $xls_invoice->plazoCredito = $row['plazocredito'];
+                        $xls_invoice->medioPago = $row['mediopago'];
+                        $xls_invoice->tipoLinea = $row['tipolinea'];
+                        $xls_invoice->numeroLinea = $row['numerolinea'];
+                        $xls_invoice->exento = $row['exento'];
+                        $xls_invoice->cantidad = $row['cantidad'] ?? 0;
+                        $xls_invoice->unidadMedida = $row['unidadmedida'] ?? 0;
+                        $xls_invoice->detalle = $row['detalle'] ?? 0;
+                        $xls_invoice->precioUnitario = $row['preciounitario'] ?? 0;
+                        $xls_invoice->montoTotal = $row['montototal'] ?? 0;
+                        $xls_invoice->montoDescuento = $row['montodescuento'] ?? 0;
+                        if($row['naturalezadescuento']){
+                            $xls_invoice->naturalezaDescuento = $row['naturalezadescuento'] ?? null;
+                        }
+                        $xls_invoice->subTotal = $row['subtotal'] ?? 0;
+                        $xls_invoice->codigoImpuesto = $row['codigoimpuesto'] ?? 0;
+                        $xls_invoice->codigoTarifa = $row['codigotarifa'] ?? 0;
+                        $xls_invoice->tarifaImpuesto = $row['tarifaimpuesto'] ?? 0;
+                        $xls_invoice->montoImpuesto = $row['montoimpuesto'] ?? 0;
+                        $xls_invoice->tipoDocumentoExoneracion = $row['tipodocumentoexoneracion'] ?? null;
+                        $xls_invoice->numeroDocumentoExoneracion = $row['numerodocumentoexoneracion'] ?? null;
+                        $xls_invoice->nombreInstitucionExoneracion = $row['nombreinstitucionexoneracion'] ?? null;
+                        $xls_invoice->fechaEmisionExoneracion = $row['fechaemisionexoneracion'] ?? null;
+                        $xls_invoice->porcentajeExoneracionExoneracion = $row['porcentajeexoneracionexoneracion'] ?? null;
+                        $xls_invoice->montoExoneracionExoneracion = $row['montoexoneracionexoneracion'] ?? null;
+                        $xls_invoice->montoTotalLinea = $row['montototallinea'] ?? 0;
+                        $xls_invoice->tipoCargo = $row['tipocargo'] ?? null;
+                        $xls_invoice->identidadTercero = $row['identidadtercero'] ?? null;
+                        $xls_invoice->nombreTercero = $row['nombretercero'] ?? null;
+                        $xls_invoice->detalleCargo = $row['detallecargo'] ?? null;
+                        $xls_invoice->porcentajeCargo = $row['porcentajecargo'] ??null;
+                        $xls_invoice->montoCargo = $row['montoCargo'] ?? 0;
+                        $xls_invoice->codigoMoneda = $row['codigomoneda'];
+                        $xls_invoice->tipoCambio = $row['tipocambio'];
+                        $xls_invoice->tipoDocumentoReferencia = $row['tipodocumentoreferencia'] ?? null;
+                        $xls_invoice->numeroDocumentoReferencia = $row['numerodocumentoreferencia'] ?? null;
+                        //dd($row);
+                        if($row['fechaemisionreferencia']){
+                            $xls_invoice->fechaEmisionReferencia = Carbon::createFromFormat('d/m/Y g:i A',$row['fechaemisionreferencia']) ?? null;
+                        }
+                        $xls_invoice->codigoNota = $row['codigonota'] ?? null;
+                        $xls_invoice->razonNota = $row['razonnota'] ?? null;
+                        if($row['identificador'] != $consecutivo){
+                            $facturas_disponibles--; 
+                        }
+                        if($facturas_disponibles < 0){
+                            $xls_invoice->autorizado = 0;
+                        }
+                        $consecutivo = $row['identificador'];
+                        $xls_invoice->save();
+                    }else {
+                        Log::warning('Error en factura ENVIO MASIVO EXCEL no coinciden las cedulas');
+                    }
+                }
+                   
+            }catch( \Throwable $ex ){
+                Log::error("Error en factura ENVIO MASIVO EXCEL:" . $ex);
+            }
+        }
+        $company->save();
+    }
+
+
+    public function detalleXlsInvoice($consecutivo){
+
+        $companyId = currentCompany();
+        $xlsInvoice = XlsInvoice::where('company_id',$companyId)->where('consecutivo',$consecutivo)->get();
+        return view("Invoice/detalle-xls")->with('factura', $xlsInvoice);
+        
+    }
+
+    public function validarEnvioExcel(Request $request){
+        try{
+            $companyId = currentCompany();
+            $company = currentCompanyModel();
+            foreach ($request->facturas as $factura) {
+                if (isset($factura["autorizado"])) {
+                    XlsInvoice::where('company_id',$companyId)
+                          ->where('consecutivo', $factura["consecutivo"])
+                          ->update(['autorizado' => 1]);
+                }else{
+                    XlsInvoice::where('company_id',$companyId)
+                          ->where('consecutivo', $factura["consecutivo"])
+                          ->update(['autorizado' => 0]);
+                }
+            }
+            Log::info("Enviando facturas al job ProcessInvoicesExcel");
+            ProcessInvoicesExcel::dispatch($company)->onConnection(config('etax.queue_connections'))->onQueue('createinvoice');
+            //$this->guardarEnvioExcel($xlsInvoices);
+            return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
+        } catch ( \Exception $e) {
+            Log::error("Error en factura ENVIO MASIVO EXCEL:" . $e);
+
+            return redirect('/facturas-emitidas')->withError('Error en factura ENVIO MASIVO EXCEL.');
+        }
+
+    } 
+
+    
+   /*public function guardarEnvioExcel($xlsInvoices){
+
+        $company = Company::find($xlsInvoices[0]->company_id);
+        $apiHacienda = new BridgeHaciendaApi();
+        $tokenApi = $apiHacienda->login(false);
+        if ($tokenApi !== false) {
+        
+            foreach ($xlsInvoices as $xlsInvoice) {
+                $factura = XlsInvoice::where('company_id',$xlsInvoice->company_id)
+                        ->where('consecutivo',$xlsInvoice->consecutivo)->get();
+                
+                $invoice = new Invoice();
+                $invoice->company_id = $company->id;
+                $invoice->document_type = $factura[0]->tipoDocumento;
+                $invoice->hacienda_status = '99';
+                $invoice->payment_status = "01";
+                $invoice->payment_receipt = "";
+                $invoice->generation_method = "xls-masivo";
+                $invoice->xml_schema = 43;
+                if ($invoice->document_type == '01') {
+                    $invoice->reference_number = $company->last_invoice_ref_number + 1;
+                }
+                if ($invoice->document_type == '08') {
+                    $invoice->reference_number = $company->last_invoice_pur_ref_number + 1;
+                }
+                if ($invoice->document_type == '09') {
+                    $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
+                }
+                if ($invoice->document_type == '04') {
+                    $invoice->reference_number = $company->last_ticket_ref_number + 1;
+                }
+               $invoice->sale_condition = $factura[0]->condicionVenta;
+               $invoice->description = $factura[0]->descripcion;
+                $invoice->payment_type = $factura[0]->medioPago;
+                $invoice->credit_time = $factura[0]->plazoCredito;
+                if ($factura[0]->codigoActividad) {
+                    $invoice->commercial_activity = $factura[0]->codigoActividad;
+                }
+                $tipo_persona = $factura[0]->tipoIdentificacionReceptor;
+                $identificacion_cliente = preg_replace("/[^0-9]/", "", $factura[0]->identificacionReceptor );
+                
+                $client = Client::updateOrCreate(
+                    [
+                        'id_number' => $identificacion_cliente,
+                        'company_id' => $company->id,
+                    ],
+                    [
+                        'company_id' => $company->id,
+                        'tipo_persona' => $tipo_persona,
+                        'id_number' => trim($identificacion_cliente),
+                        'fullname' => $factura[0]->nombreReceptor,
+                        'emisor_receptor' => 'ambos',
+                        'state' => $factura[0]->provinciaReceptor,
+                        'city' => $factura[0]->cantonReceptor,
+                        'district' => $factura[0]->distritoReceptor,
+                        'address' => trim($factura[0]->direccionReceptor),
+                        'email' => trim($factura[0]->correoReceptor),
+                    ]
+                );
+                $invoice->client_id = $client->id;
+                 $factura[0]->tipoCambio = $factura[0]->tipoCambio ? $factura[0]->tipoCambio : 1;
+                //Datos de factura
+                $invoice->description = $factura[0]->notas ?? null;
+                $invoice->subtotal = floatval( str_replace(",","", $factura[0]->subtotal ));
+                $invoice->currency = $factura[0]->codigoMoneda;
+                $invoice->currency_rate = floatval( str_replace(",","", $factura[0]->tipoCambio ));
+                $invoice->total = floatval( str_replace(",","", $factura[0]->totalComprobante ));
+                $invoice->iva_amount = floatval( str_replace(",","", $factura[0]->totalImpuesto ));
+
+                  $invoice->client_first_name = $client->first_name;
+                  $invoice->client_last_name = $client->last_name;
+                  $invoice->client_last_name2 = $client->last_name2;
+                  $invoice->client_email = $client->email;
+                  $invoice->client_address = $client->address;
+                  $invoice->client_country = $client->country;
+                  $invoice->client_state = $client->state;
+                  $invoice->client_city = $client->city;
+                  $invoice->client_district = $client->district;
+                  $invoice->client_zip = $client->zip;
+                  $invoice->client_phone = preg_replace('/[^0-9]/', '', $client->phone);
+                  $invoice->client_id_number = $client->id_number;
+                  $invoice->client_id_type = $client->tipo_persona;
+
+                
+
+                //Fechas
+                $fecha = Carbon::createFromFormat('d/m/Y g:i A',
+                    $factura[0]->fechaEmision);
+                $invoice->generated_date = $fecha;
+                $fechaV = Carbon::createFromFormat('d/m/Y g:i A', $factura[0]->fechaVencimiento );
+                $invoice->due_date = $fechaV;
+                $invoice->year = $fecha->year;
+                $invoice->month = $fecha->month;
+                $invoice->credit_time = $fechaV->format('d/m/Y');
+                $invoice->total_serv_gravados = $factura[0]->totalServGravados;
+                $invoice->total_serv_exentos = $factura[0]->totalServExentos;
+                $invoice->total_merc_gravados = $factura[0]->totalMercanciasGravadas;
+                $invoice->total_merc_exentas = $factura[0]->totalMercanciasExentas;
+                $invoice->total_gravado = $factura[0]->totalGravado;
+                $invoice->total_exento = $factura[0]->totalExento;
+                $invoice->total_venta = $factura[0]->totalVenta;
+                $invoice->total_descuento = $factura[0]->totalDescuentos;
+                $invoice->total_venta_neta = $factura[0]->totalVentaNeta;
+                $invoice->subtotal = $factura[0]->totalVentaNeta;
+                $invoice->total_serv_exonerados = $factura[0]->totalServExonerados;
+                $invoice->total_merc_exonerados = $factura[0]->totalMercanciasExonerada;
+                $invoice->total_exonerados = $factura[0]->totalExonerado;
+                $invoice->total_iva = $factura[0]->totalImpuesto;
+                $invoice->total_otros_cargos = $factura[0]->totalOtrosCargos;
+                $invoice->total_comprobante = $factura[0]->totalComprobante;
+
+                $invoice->reference_doc_type = $factura[0]->tipoDocumentoReferencia;
+                $invoice->reference_document_key = $factura[0]->numeroDocumentoReferencia;
+                $invoice->reference_generated_date = $factura[0]->fechaEmisionReferencia;
+                $invoice->code_note = $factura[0]->codigoNota;
+                $invoice->reason = $factura[0]->razonNota;
+
+                $invoice->document_key = $this->getDocumentKey($invoice->document_type, $company);
+                $invoice->document_number = $this->getDocReference($invoice->document_type,$company);
+                $invoice->save();
+                $lineas = XlsInvoice::where('company_id',$company->id)->where('consecutivo',$factura[0]->consecutivo)->get();
+                foreach ($lineas as $linea) {
+                    if($linea->tipoLinea == 1){
+                        $item = InvoiceItem::updateOrCreate([
+                            'item_number' => $linea->numeroLinea,
+                            'invoice_id' => $invoice->id
+                        ], [
+                            'company_id' => $invoice->company_id,
+                            'year'  => $invoice->year,
+                            'month' => $invoice->month,
+                            'name'  => $linea->detalle ? trim($linea->detalle) : null,
+                            'measure_unit' => $linea->unidadmedida ?? 'Unid',
+                            'item_count'   => $linea->cantidad ? trim($linea->cantidad) : 1,
+                            'unit_price'   => $linea->precioUnitario ?? 0,
+                            'subtotal'     => $linea->subTotal ?? 0,
+                            'total' => $linea->montoTotalLinea ?? 0,
+                            'discount_type' => $linea->naturalezaDescuento ?? null,
+                            'discount' => $linea->montoDescuento ?? 0,
+                            'iva_type' => $linea->codigoImpuesto ?? null,
+                            'iva_percentage' => $linea->codigoTarifa ?? 0,
+                            'iva_amount' => $linea->montoImpuesto ?? 0,
+                            'tariff_heading' => $linea->tarifaImpuesto ?? null,
+                             'is_exempt' => $linea->exento
+                            ]
+                        );
+                        try {
+                            $exonerationDate = isset($linea->fechaEmisionExoneracion )  ? Carbon::createFromFormat('d/m/Y', $linea->fechaEmisionExoneracion) : null;
+                        }catch( \Exception $e ) {
+                            $exonerationDate = null;
+                        }
+                        if ($exonerationDate && $linea->tipoDocumentoExoneracion && $linea->numeroDocumentoExoneracion && $linea->porcentajeExoneracionExoneracion > 0) {
+
+                            $item->exoneration_document_type = $linea->tipoDocumentoExoneracion ?? null;
+                            $item->exoneration_document_number = $linea->numeroDocumentoExoneracion ?? null;
+                            $item->exoneration_company_name = $linea->nombreInstitucionExoneracion ?? null;
+                            $item->exoneration_porcent = $linea->porcentajeExoneracionExoneracion ?? 0;
+                            $item->exoneration_amount = $linea->montoExoneracionExoneracion ?? 0;
+                            $item->exoneration_date = $exonerationDate;
+                            $item->exoneration_total_amount = $linea->montoExoneracionExoneracion ?? 0;
+                            $item->exoneration_total_gravado = (($item->item_count * $item->unit_price) * $item->exoneration_porcent) / 100 ;
+                            $item->impuesto_neto = $linea->montoImpuesto ?? $linea->montoImpuesto - $linea->montoExoneracionExoneracion;
+                            
+                        }
+                        $item->save();
+                    }else{
+                        OtherCharges::updateOrCreate([
+                            'item_number' => $linea->numeroLinea,
+                            'invoice_id' => $invoice->id
+                        ], 
+                        [
+                            'company_id' => $invoice->company_id,
+                            'year'  => $invoice->year,
+                            'month' => $invoice->month,
+                            'document_type' => $linea->tipoCargo ?? '99',
+                            'provider_id_number' =>  $linea->identidadTercero ? trim( $linea->identidadTercero) : null,
+                            'provider_name'   => $linea->nombreTercero ? trim($linea->nombreTercero) : null,
+                            'description'   => $linea->detalleCargo ? trim($linea->detalleCargo) : null,
+                            'percentage'   =>$linea->porcentajeCargo ?? 0,
+                            'amount'   => $linea->montoCargo ?? 0,
+                        ]
+                        );
+                    }
+                }
+                if ($invoice->document_type == '08' ) {
+                 
+                    $bill = new Bill();
+                    $bill->company_id = $company->id;
+                    //Datos generales y para Hacienda
+                    $bill->document_type = "01";
+                    $bill->hacienda_status = "03";
+                    $bill->status = "02";
+                    $bill->payment_status = "01";
+                    $bill->payment_receipt = "";
+                    $bill->generation_method = "Masivo-Excel";
+                    $bill->reference_number = $company->last_bill_ref_number + 1;
+
+                    
+                    $bill->document_key = $invoice->document_key;
+                      $bill->document_number = $invoice->document_number;
+                      $bill->sale_condition = $invoice->sale_condition;
+                      $bill->payment_type = $invoice->payment_type;
+                      $bill->credit_time = $invoice->credit_time;
+                    
+                      $bill->xml_schema =  43;
+
+                          $identificacion_provider = preg_replace("/[^0-9]/", "", $invoice->id_number );
+                          
+                          $provider = Provider::firstOrCreate(
+                              [
+                                  'id_number' => $identificacion_provider,
+                                  'company_id' => $invoice->company_id,
+                              ],
+                              [
+                                  'company_id' => $invoice->company_id,
+                                  'id_number' => $identificacion_provider
+                              ]
+                          );
+                          $provider->first_name = $invoice->first_name ?? null;
+                          $provider->last_name = $invoice->last_name ?? null;
+                          $provider->last_name2 = $invoice->last_name2 ?? null;
+                          $provider->country = $invoice->country ?? null;
+                          $provider->state = $invoice->state ?? null;
+                          $provider->city = $invoice->city ?? null;
+                          $provider->district = $invoice->district ?? null;
+                          $provider->neighborhood = $invoice->neighborhood ?? null;
+                          $provider->zip = $invoice->zip ?? null;
+                          $provider->address = $invoice->address ?? null;
+                          $provider->foreign_address = $invoice->foreign_address ?? null;
+                          $provider->phone = $invoice->phone ?? null;
+                          $provider->es_exento = $invoice->es_exento ?? 0;
+                          $provider->email = $invoice->email ?? null;
+                          $provider->save();
+                              
+                          $bill->provider_id = $provider->id;
+                      //Datos de factura
+                      $bill->description = $invoice->description;
+                      $bill->subtotal = floatval( str_replace(",","", $invoice->subtotal ));
+                      $bill->currency = $invoice->currency;
+                      $bill->currency_rate = floatval( str_replace(",","", $invoice->currency_rate ));
+                      $bill->total = floatval( str_replace(",","", $invoice->total ));
+                      $bill->iva_amount = floatval( str_replace(",","", $invoice->iva_amount ));
+                      
+                      $bill->provider_first_name = $provider->first_name;
+                      $bill->provider_last_name = $provider->last_name;
+                      $bill->provider_last_name2 = $provider->last_name2;
+                      $bill->provider_email = $provider->email;
+                      $bill->provider_address = $provider->address;
+                      $bill->provider_country = $provider->country;
+                      $bill->provider_state = $provider->state;
+                      $bill->provider_city = $provider->city;
+                      $bill->provider_district = $provider->district;
+                      $bill->provider_zip = $provider->zip;
+                      $bill->provider_phone = $provider->phone;
+                      $bill->provider_id_number = $provider->id_number;
+                      $bill->total_serv_gravados = $factura[0]->totalServGravados;
+                    $bill->total_serv_exentos = $factura[0]->totalServExentos;
+                    $bill->total_merc_gravados = $factura[0]->totalMercanciasGravadas;
+                    $bill->total_merc_exentas = $factura[0]->totalMercanciasExentas;
+                    $bill->total_gravado = $factura[0]->totalGravado;
+                    $bill->total_exento = $factura[0]->totalExento;
+                    $bill->total_venta = $factura[0]->totalVenta;
+                    $bill->total_descuento = $factura[0]->totalDescuentos;
+                    $bill->total_venta_neta = $factura[0]->totalVentaNeta;
+                    $bill->total_serv_exonerados = $factura[0]->totalServExonerados;
+                    $bill->total_merc_exonerados = $factura[0]->totalMercanciasExonerada;
+                    $bill->total_exonerados = $factura[0]->totalExonerado;
+                    $bill->total_iva = $factura[0]->totalImpuesto;
+                    $bill->total_otros_cargos = $factura[0]->totalOtrosCargos;
+                    $bill->total_comprobante = $factura[0]->totalComprobante;
+                      //Fechas
+                      $fecha =  $invoice->generated_date ;
+                      $bill->generated_date = $fecha;
+                      $fechaV =  $invoice->due_date ;
+                      $bill->due_date = $fechaV;
+                      
+                      $bill->year = $invoice->year;
+                      $bill->month = $invoice->month;
+                    $bill->xml_schema = 43;
+                    
+                    $bill->activity_company_verification = $invoice->commercial_activity;
+                
+
+                    
+                    $bill->is_code_validated = 1;
+                    $bill->accept_status = 1;
+                    $bill->accept_iva_condition = '01';
+                    $bill->accept_iva_acreditable = $bill->iva_amount;
+                    $bill->accept_iva_gasto = 0;
+                    $bill->description = "FEC" . ($invoice->description ?? '');
+                    $bill->save();
+                    $company->last_bill_ref_number = $bill->reference_number;
+
+                }
+                $invoice->company->addSentInvoice( $invoice->year, $invoice->month );
+                if ($invoice->document_type == '1') {
+                    $company->last_invoice_ref_number = $invoice->reference_number;
+                }
+                if ($invoice->document_type == '8') {
+                    $company->last_invoice_pur_ref_number = $invoice->reference_number;
+                }
+                if ($invoice->document_type == '9') {
+                    $company->last_invoice_exp_ref_number = $invoice->reference_number;
+                }
+                if ($invoice->document_type == '4') {
+                   $company->last_ticket_ref_number = $invoice->reference_number;
+                }
+                $company->save();
+            }
+        }
+        XlsInvoice::where('company_id',$company->id)->delete();
+    }*/
+        
 }

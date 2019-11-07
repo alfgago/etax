@@ -27,14 +27,13 @@
     <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=6.19">
     
     <script src="/assets/js/cybs_devicefingerprint.js"></script>
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=6.19"></script>
+    <script src="{{asset('assets/js/common-bundle.js')}}?v=6.20"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
 
     @yield('header-scripts')
 
-    <style>
-    </style>
+   
 
 </head>
 
@@ -106,6 +105,7 @@
 
     @include( 'Bill.import' )
     @include( 'Invoice.import' )
+    @include( 'Invoice.envio-masivo' )
     @include( 'Client.import' )
     @include( 'Provider.import' )
     @include( 'Product.import' )
@@ -156,6 +156,14 @@
     <?php } ?>
 
     <script type="text/javascript">
+        $(document).keypress(
+          function(event){
+            if (event.which == '13') {
+              console.log('Acción de \"Enter\" bloqueada por seguridad.');
+              event.preventDefault();
+            }
+        });
+    
         function popupReproductor(){
             window.open('https://www.callmyway.com/Welcome/SupportChatInfo/171479/?chat_type_id=5&contact_name={{ $user->first_name . " " . $user->last_name }}&contact_email={{ $user->email }}&contact_phone={{ $user->phone ? $user->phone : '' }}&contact_request=Chat de ayuda iniciado..&autoSubmit=1', 'Soporte eTax', 'height=350,width=350,resizable=0,marginwidth=0,marginheight=0,frameborder=0');
         };

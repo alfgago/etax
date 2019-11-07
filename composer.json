@@ -36,7 +36,8 @@
         "spatie/laravel-permission": "^2.37",
         "yajra/laravel-datatables-buttons": "^4.6",
         "yajra/laravel-datatables-oracle": "~9.2",
-        "spatie/laravel-activitylog": "*"
+        "spatie/laravel-activitylog": "*",
+        "morrislaptop/laravel-queue-clear": "~1.0"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",

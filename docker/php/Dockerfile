@@ -6,16 +6,20 @@ RUN apt-get update && apt-get install -y mysql-client apt-utils supervisor git \
 RUN apt-get update -y && apt-get install -y sendmail libpng-dev
 
 RUN apt-get update && \
+    apt-get install -y libxml2-dev
+
+RUN apt-get update && \
     apt-get install -y \
         zlib1g-dev \
         libjpeg-dev \
 	libjpeg62-turbo-dev \
-	libpng-dev 
+	libpng-dev
 
 RUN docker-php-ext-install bcmath
 
 RUN docker-php-ext-install zip
 RUN docker-php-ext-install pcntl
+RUN docker-php-ext-install soap
 
 RUN docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr; 
 RUN docker-php-ext-install gd

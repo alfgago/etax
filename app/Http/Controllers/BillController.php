@@ -44,6 +44,7 @@ class BillController extends Controller
     public function __construct()
     {
         $this->middleware('auth', ['except' => ['receiveEmailBills']] );
+        $this->middleware('CheckSubscription', ['except' => ['receiveEmailBills']]);
     }
   
     /**
@@ -219,11 +220,15 @@ class BillController extends Controller
                 ])->render();
                 
             })
+            ->addColumn('identificacion_especifica', function($billItem) {
+                return view('Bill.ext.select-identificacion', [
+                    'item' => $billItem])->render();
+            })
             ->addColumn('actions', function($billItem) {
                 return view('Bill.ext.deny-action', [
                     'bill' => $billItem->bill,])->render();
             })
-            ->rawColumns(['categoria_hacienda', 'codigo_etax', 'actions'])
+            ->rawColumns(['categoria_hacienda', 'codigo_etax', 'actions', 'identificacion_especifica'])
             ->toJson();
             return $return;
 
@@ -679,6 +684,7 @@ class BillController extends Controller
     public function validarMasivo(Request $request){
         $resultBills = [];
         $errors = false;
+        $company = currentCompanyModel();
         foreach( $request->items as $key => $item ) {
             $billItem = BillItem::with('bill')->findOrFail($key);
             $bill = $billItem->bill;
@@ -686,7 +692,8 @@ class BillController extends Controller
                 BillItem::where('id', $key)
                 ->update([
                   'iva_type' =>  $item['iva_type'],
-                  'product_type' =>  $item['product_type']
+                  'product_type' =>  $item['product_type'],
+                  'porc_identificacion_plena' =>  $item['porc_identificacion_plena']
                 ]);
                 $validated = true;
                 foreach($bill->items as $item){
@@ -696,6 +703,9 @@ class BillController extends Controller
                 }
                 if($validated){
                     $bill->is_code_validated = true;
+                    if(!$company->use_invoicing){
+                        $bill->accept_status = 1;
+                    }
                     $bill->save();
                 }
                 
@@ -735,6 +745,7 @@ class BillController extends Controller
 
     public function guardarValidar(Request $request)
     {
+        $company = currentCompanyModel();
         $bill = Bill::findOrFail($request->bill);
         if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/Y') )){ 
             $bill->activity_company_verification = $request->actividad_comercial;
@@ -747,7 +758,9 @@ class BillController extends Controller
                   'porc_identificacion_plena' =>  $item['porc_identificacion_plena']
                 ]);
             }
-            
+            if(!$company->use_invoicing){
+                $bill->accept_status = 1;
+            }
             $bill->save();
             
             clearBillCache($bill);
@@ -884,7 +897,7 @@ class BillController extends Controller
                 ])->render();
             }) 
             ->editColumn('provider', function(Bill $bill) {
-                return $bill->provider->getFullName();
+                return $bill->providerName();
             })
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');
@@ -1025,7 +1038,7 @@ class BillController extends Controller
                 return $bill->total * $bill->currency_rate;
             })
             ->editColumn('accept_iva_total', function(Bill $bill) {
-                return $bill->iva_amount;
+                return $bill->iva_amount * $bill->currency_rate;
             })
             ->editColumn('accept_iva_acreditable', function(Bill $bill) {
                 return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_iva_acreditable;
@@ -1034,7 +1047,7 @@ class BillController extends Controller
                 return $bill->xml_schema == 42 ? 'N/A en 4.2' :  $bill->accept_iva_gasto;
             })
             ->editColumn('provider', function(Bill $bill) {
-                return $bill->provider->getFullName();
+                return $bill->providerName();
             })
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');

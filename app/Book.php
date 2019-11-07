@@ -103,7 +103,10 @@ class Book extends Model
                                       $ivaData->iB080 + $ivaData->iB090 + $ivaData->iB097 + $ivaData->i098 + $ivaData->i099 +
                                       $ivaData->bS080 + $ivaData->bS090 + $ivaData->bS097 +
                                       $ivaData->iS080 + $ivaData->iS090 + $ivaData->iS097 +
-                                      $ivaData->bB091 + $ivaData->bB092 + $ivaData->bB093 + $ivaData->bB094 + $ivaData->iB091 + $ivaData->iB092 + $ivaData->iB093 + $ivaData->iB094;                                
+                                      $ivaData->bB091 + $ivaData->bB092 + $ivaData->bB093 + $ivaData->bB094 + $ivaData->iB091 + $ivaData->iB092 + $ivaData->iB093 + $ivaData->iB094;    
+                                      
+      $this->cc_restaurantes = $ivaData->bR001 + $ivaData->bR002 + $ivaData->bR003 + $ivaData->bR004 + $ivaData->bR005 + $ivaData->bR006;
+      $this->cc_iva_restaurantes = $ivaData->iR001 + $ivaData->iR002 + $ivaData->iR003 + $ivaData->iR004 + $ivaData->iR005 + $ivaData->iR006;
       
       $this->cc_compras_sum = $this->cc_compras1 + $this->cc_compras2 + $this->cc_compras3 + $this->cc_compras4 + 
                               $this->cc_importaciones1 + $this->cc_importaciones2 + $this->cc_importaciones3 + $this->cc_importaciones4 +
@@ -111,7 +114,7 @@ class Book extends Model
                               $this->cc_iva_compras1 + $this->cc_iva_compras2 + $this->cc_iva_compras3 + $this->cc_iva_compras4 + 
                               $this->cc_iva_importaciones1 + $this->cc_iva_importaciones2 + $this->cc_iva_importaciones3 + $this->cc_iva_importaciones4 + 
                               $this->cc_iva_propiedades1 + $this->cc_iva_propiedades2 + $this->cc_iva_propiedades3 + $this->cc_iva_propiedades4 + 
-                              $this->cc_compras_sin_derecho + $this->cc_compras_exentas;
+                              $this->cc_compras_sin_derecho + $this->cc_compras_exentas + $this->cc_restaurantes + $this->cc_iva_restaurantes;
       
      //Haber 1
       $this->cc_proveedores_credito = $calculos->total_proveedores_credito;
@@ -212,6 +215,8 @@ class Book extends Model
                          $ivaData->iS003 + $ivaData->iS023 + $ivaData->iS043 + $ivaData->iS063;
         $this->cc_bs_4 = $ivaData->iB004 + $ivaData->iB024 + $ivaData->iB044 + $ivaData->iB064 +
                          $ivaData->iS004 + $ivaData->iS024 + $ivaData->iS044 + $ivaData->iS064;
+                         
+        $this->cc_iva_restaurantes = $ivaData->iR001 + $ivaData->iR002 + $ivaData->iR003 + $ivaData->iR004 + $ivaData->iR005 + $ivaData->iR006;
         
         $this->cc_por_pagar = $calculos->balance_operativo;
       
@@ -274,17 +279,19 @@ class Book extends Model
         
         $this->cc_gasto_no_acreditable = $calculos->iva_no_acreditable_identificacion_plena;
         
-        if( $this->cc_por_pagar > 0 ) {
-            $this->cc_sum2 = $this->cc_ppp_1 + $this->cc_ppp_2 + $this->cc_ppp_3 + $this->cc_ppp_4 + $this->cc_por_pagar
-                             + $this->cc_bs_1 + $this->cc_bs_2 + $this->cc_bs_3 + $this->cc_bs_4 + $calculos->saldo_favor_anterior;
-            $this->cc_sum1 = $this->cc_iva_emitido_1 + $this->cc_iva_emitido_2 + $this->cc_iva_emitido_3 + 
-                                  $this->cc_iva_emitido_4 + $this->cc_ajuste_ppp + $this->cc_ajuste_bs + $this->cc_gasto_no_acreditable;
+        
+        //Sumatoria de Haber
+        $this->cc_sum2 = $this->cc_ppp_1 + $this->cc_ppp_2 + $this->cc_ppp_3 + $this->cc_ppp_4 + $this->cc_iva_restaurantes
+                         + $this->cc_bs_1 + $this->cc_bs_2 + $this->cc_bs_3 + $this->cc_bs_4 + $calculos->saldo_favor_anterior;
+        //Sumatoria de Debe
+        $this->cc_sum1 = $this->cc_iva_emitido_1 + $this->cc_iva_emitido_2 + $this->cc_iva_emitido_3 
+                         + $this->cc_iva_emitido_4 + $this->cc_ajuste_ppp + $this->cc_ajuste_bs + $this->cc_gasto_no_acreditable;
+            
+        /*if( $this->cc_por_pagar > 0 ) {
+            $this->cc_sum2 += $this->cc_por_pagar;
         }else {
-            $this->cc_sum2 = $this->cc_ppp_1 + $this->cc_ppp_2 + $this->cc_ppp_3 + $this->cc_ppp_4 
-                             + $this->cc_bs_1 + $this->cc_bs_2 + $this->cc_bs_3 + $this->cc_bs_4 + $calculos->saldo_favor_anterior;
-            $this->cc_sum1 = $this->cc_iva_emitido_1 + $this->cc_iva_emitido_2 + $this->cc_iva_emitido_3 + 
-            $this->cc_iva_emitido_4 + $this->cc_ajuste_ppp + $this->cc_ajuste_bs + abs($this->cc_por_pagar) + $this->cc_gasto_no_acreditable;
-        }
+            $this->cc_sum1 += abs($this->cc_por_pagar);
+        }*/
 
     }
     

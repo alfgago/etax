@@ -4,9 +4,9 @@ namespace App;
 
 use App\Company;
 use App\InvoiceItem;
+use App\XmlHacienda;
 use \Carbon\Carbon;
 use App\Client;
-use App\XmlHacienda;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
@@ -100,6 +100,12 @@ class Invoice extends Model
     public function xmlHacienda()
     {
         return $this->hasOne(XmlHacienda::class);
+    }
+
+    //Relacion con reference
+    public function documentReference()
+    {
+        return $this->hasOne(DocumentReference::class);
     }
     
     public function getCondicionVenta() {
@@ -299,6 +305,12 @@ class Invoice extends Model
 
                 }
             }
+            //Revisa si la factura es nueva. Si no tiene ID, es nueva y suma al contador.
+            if (!$this->id) {
+              $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
+              $this->company->addSentInvoice( $fecha->year, $fecha->month );
+            }
+
             $this->save();
             //Fechas
             $fecha = Carbon::createFromFormat('d/m/Y g:i A',
@@ -309,11 +321,6 @@ class Invoice extends Model
             $this->year = $fecha->year;
             $this->month = $fecha->month;
             $this->credit_time = $fechaV->format('d/m/Y');
-            
-            if (!$this->id) {
-              $this->company->addSentInvoice( $this->year, $this->month );
-            }
-            $this->save();
 
             //Recorrer Items
             $lids = array();
@@ -362,7 +369,7 @@ class Invoice extends Model
               }
               $this->total_otros_cargos = $totalOtrosCargos;
             }catch(\Exception $e){
-                Log::error("Error al guardar otros cargos");
+                Log::error("Error al guardar otros cargos " . $e);
             }
             
             //Guarda nuevamente el invoice
@@ -748,7 +755,7 @@ class Invoice extends Model
           //Log::warning( "XML: No se pudo guardar la factura de venta. Ya existe para la empresa." );
           return false;
         }
-        
+
         $invoice->hacienda_status = "03";
         $invoice->payment_status = "01";
         $invoice->generation_method = $metodoGeneracion;
@@ -756,8 +763,15 @@ class Invoice extends Model
         $invoice->commercial_activity = $arr['CodigoActividad'] ?? 0;
         $invoice->xml_schema = $invoice->commercial_activity ? 43 : 42;
         $invoice->sale_condition = isset($arr['CondicionVenta']) ? $arr['CondicionVenta'] : '01';
+
+        
+
         try{
-          $invoice->credit_time = isset($arr['PlazoCredito']) ? $arr['PlazoCredito'] : null;
+          if (strpos($arr['PlazoCredito'], " ")){
+            $invoice->credit_time = null;
+          }else{
+            $invoice->credit_time = isset($arr['PlazoCredito']) ? $arr['PlazoCredito'] : null;
+          }
         }catch( \Exception $e ){
           $invoice->credit_time = null;
         }
@@ -767,7 +781,6 @@ class Invoice extends Model
           $medioPago = $medioPago[0];
         }
         $invoice->payment_type = $medioPago;
-        
         //Fechas
         $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10));
         $invoice->generated_date = $fechaEmision;
@@ -928,7 +941,7 @@ class Invoice extends Model
           $invoice->client_first_name = 'N/A';
           $invoice->document_type = $tipoDocumento ?? '04';
         }
-              
+        
         //End DATOS CLIENTE
         
         //El subtotal y iva_amount inicia en 0, lo va sumando conforme recorre las lineas.
@@ -940,6 +953,7 @@ class Invoice extends Model
         if( array_key_exists( 'NumeroLinea', $lineas ) ) {
             $lineas = [$arr['DetalleServicio']['LineaDetalle']];
         }
+
         $invoice->total_iva_devuelto = $arr['ResumenFactura']['TotalIVADevuelto'] ?? 0;
         $invoice->total_serv_gravados = $arr['ResumenFactura']['TotalServGravados'] ?? 0;
         $invoice->total_serv_exentos = $arr['ResumenFactura']['TotalServExentos'] ?? 0;
@@ -957,7 +971,10 @@ class Invoice extends Model
         $invoice->total_merc_exonerados = $arr['ResumenFactura']['TotalMercExonerada'] ?? 0;
         $invoice->total_exonerados = $arr['ResumenFactura']['TotalExonerado'] ?? 0;
         $invoice->total_gravado = $arr['ResumenFactura']['TotalGravado'] ?? 0;
+
         $invoice->save();
+/****************************************/
+        $invoice->company->addSentInvoice($invoice->year, $invoice->month);
         
         $lids = array();
         $items = array();
@@ -1116,6 +1133,14 @@ class Invoice extends Model
             $this->save();
             $this->client_id = $invoiceReference->client_id;
 
+            //Reference data
+            $reference = new DocumentReference();
+            $reference->invoice_id = $invoiceReference->id;
+            $reference->ref_invoice_id = $this->id;
+            $reference->invoice_document_key = $invoiceReference->document_key;
+            $reference->reference_document_key = $this->document_key;
+            $reference->save();
+
             //Datos de factura
             $this->description = $invoiceReference->description;
             $this->subtotal = floatval( str_replace(",","", $request->subtotal ));
@@ -1145,6 +1170,10 @@ class Invoice extends Model
             $this->year = Carbon::now()->year;
             $this->month = Carbon::now()->month;
             $this->save();
+
+            if ($this->id) {
+                $this->company->addSentInvoice( $this->year, $this->month );
+            }
 
             $lids = array();
             $dataItems = $requestItems ?? $invoiceReference->items->toArray();

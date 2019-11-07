@@ -71,7 +71,7 @@
               <th data-priority="5">Subtotal</th>
               <th data-priority="5">Monto IVA</th>
               <th data-priority="5">Total</th>
-              <th data-priority="5">Tarifa Iva</th>
+              <th data-priority="5">Tarifa IVA</th>
               <th data-priority="3">Código eTax</th>
               <th data-priority="3">Categoría Hacienda</th>
             </tr>
@@ -175,7 +175,7 @@ $(function() {
                 $(value).removeClass("hidden");
               })
                $('.mostrarTodos').addClass("hidden");
-               $('.iva_type').val("");
+               //$('.iva_type').val("");
             }
             var iva_type  = $(this).val(); 
             var parent = $(this).parents('tr');
@@ -192,6 +192,7 @@ $(function() {
             });
             parent.find('.product_type').val( tipoProducto ).change();
         });
+        element.change();
     },
     language: {
       url: "/lang/datatables-es_ES.json",
