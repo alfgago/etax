@@ -12,10 +12,16 @@
 
     <div class="form-group col-md-12 text-center">
       <h3>
-        Iniciar sesión
+        Validar sesión
       </h3>
     </div>
 
+    <div class="form-group col-md-12">
+        <div class="description">
+        Ya existe una cuenta de etax con la cédula de esta empresa.<br>
+        Por favor validar su cuenta.
+      </div>
+    </div>
     <div class="form-group col-md-12">
       <div>
         <input placeholder="{{ __('Correo electrónico') }}" id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ old('email') }}" required autofocus> 
