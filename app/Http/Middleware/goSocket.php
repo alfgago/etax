@@ -16,7 +16,7 @@ class goSocket
     public function handle($request, Closure $next)
     {
         if (! $request->expectsJson()) {
-            return redirect('login?token=gosocket');
+            return redirect('login/gosocket');
         }
     }
 }
