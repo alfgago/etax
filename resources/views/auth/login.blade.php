@@ -56,7 +56,6 @@
     <div class="form-group col-md-12 text-center">
       <button type="submit" class="btn btn-primary" onclick="trackClickEvent( 'IniciarSesion' );">{{ __('Iniciar sesión') }}</button>
     </div>
-    @if ($token != "gosocket")
       <div class="form-group col-md-12 button-container text-center">
 
         <div class="inline-block text-center">
@@ -81,7 +80,6 @@
         </div>
 
       </div>
-    @endif
   </div>
 
 </form>
