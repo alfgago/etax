@@ -725,7 +725,7 @@ class BillController extends Controller
                     
                     clearBillCache($bill);
                 }catch(\Exception $e){
-                    Log::error('Error ' . $ex->getMessage());
+                    Log::error('Error ' . $e->getMessage());
                     $errors = true;
                     $resultBills[$bill->document_number] = ['status' => 1];
                 } 
