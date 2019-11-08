@@ -316,7 +316,6 @@ $company = currentCompanyModel();
                     </div>
                   </div>
 
-
                   <div class="form-group col-md-6 hidden">
                     <label for="due_date">Recurrencia</label>
                     <div class='input-group date inputs-fecha'>

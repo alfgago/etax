@@ -1993,6 +1993,7 @@ class InvoiceController extends Controller
     }
 
     public function envioProgramada(){
+
         Log::info("disparo de job envio programada");
         EnvioProgramadas::dispatch()->onQueue('sendbulk');
 
@@ -2053,6 +2054,7 @@ class InvoiceController extends Controller
                     dd("error en envio de programada ".$invoice->id." error :" . $ex);
                 }
             }*/
+
     }
     
     public function recurrentes(){
@@ -2229,14 +2231,8 @@ class InvoiceController extends Controller
             return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
         } catch ( \Exception $e) {
             Log::error("Error en factura ENVIO MASIVO EXCEL:" . $e);
-
             return redirect('/facturas-emitidas')->withError('Error en factura ENVIO MASIVO EXCEL.');
         }
-
-    } 
-
- 
-
-  
-        
+    }  
+    
 }

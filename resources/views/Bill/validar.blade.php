@@ -171,7 +171,7 @@ $(document).ready(function(){
     });
     $(".iva_type_all").change(function(){
         var iva_type  = $(this).val(); 
-        if(iva_type != 0){
+        if(iva_type != 0 && iva_type != 1){
           $(".iva_type").val(iva_type);
         }
     });
@@ -225,8 +225,12 @@ $( document ).ready(function() {
            $.each($('.all_tipo_iva_select'), function (index, value) {
             $(value).removeClass("hidden");
           })
+           $.each($('.tipo_iva_select'), function (index, value) {
+            $(value).removeClass("hidden");
+          })
            $('.all_mostrarTodos').addClass("hidden");
-           $('.iva_type_all').val("");
+           $('.mostrarTodos').addClass("hidden");
+           $('.iva_type_all').val(0);
         }
       });
     }); 
@@ -238,7 +242,7 @@ $( document ).ready(function() {
             $(value).removeClass("hidden");
           })
            $('.mostrarTodos').addClass("hidden");
-           $('.iva_type').val("");
+           
         }
       });
     }); 
