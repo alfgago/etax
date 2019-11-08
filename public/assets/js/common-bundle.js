@@ -1070,12 +1070,13 @@ toastr.options = {
         var porcentajeExonerado = $('#porcentajeExoneracion').val();
         if(porcentajeExonerado > 0) {
             var monto_iva_detalle = $('#item_iva_amount').val();
-            var monto = monto_iva_detalle * (porcentajeExonerado / 100);
-            var impNeto = monto_iva_detalle - monto;
+            var monto = (monto_iva_detalle * (porcentajeExonerado / 100));
+			var redondeo = Math.round(monto * 100000) / 100000;
+            var impNeto = Math.round((monto_iva_detalle - redondeo) * 100000) / 100000;
             var subTotal = $('#item_subtotal').val();
             var montoTotal = parseFloat(subTotal) + parseFloat(impNeto);
 
-            $('#montoExoneracion').val(monto);
+            $('#montoExoneracion').val(redondeo);
             $('#impuestoNeto').val(impNeto);
             $('#montoTotalLinea').val(montoTotal);
         }
