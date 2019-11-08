@@ -90,7 +90,7 @@
 					        </div>
 					    </div>                                        
                         <div id="prueba" class="texto-promocion">
-                            <p>Disfrute de sus 48 horas gratis!</p>
+                            <p>¡Disfrute de sus 15 días gratis!</p>
                         </div>
 		                <div class="plan-button">
 		                	<a href="/gosocket/ingresar?token={{$token}}">Comprar ya</a>
@@ -142,7 +142,7 @@
 			        		</div>
 			        	</div>                                        
 	                    <div id="prueba" class="texto-promocion">
-	                        <p>Disfrute de sus 48 horas gratis!</p>
+	                        <p>¡Disfrute de sus 15 días gratis!</p>
 	                    </div>
 	                    <div class="plan-button">
 	                    	<a href="/gosocket/ingresar?token={{$token}}">Comprar ya</a>
@@ -188,7 +188,7 @@
 					        </div>
 					    </div>                                                                               
                         <div id="prueba" class="texto-promocion">
-                            <p>Disfrute de sus 48 horas gratis!</p>
+                            <p>¡Disfrute de sus 15 días gratis!</p>
                         </div>
 		                <div class="plan-button">
 		                	<a href="/gosocket/ingresar?token={{$token}}">Comprar ya</a>
@@ -234,7 +234,7 @@
 					        </div>
 					    </div>                                        
                         <div id="prueba" class="texto-promocion">
-                            <p>Disfrute de sus 48 horas gratis!</p>
+                            <p>¡Disfrute de sus 15 días gratis!</p>
                         </div>
 		                <div class="plan-button">
 		                	<a href="/gosocket/ingresar?token={{$token}}">Comprar ya</a>
@@ -280,7 +280,7 @@
 					        </div>
 					    </div>                                        
                         <div id="prueba" class="texto-promocion">
-                            <p>Disfrute de sus 48 horas gratis!</p>
+                            <p>¡Disfrute de sus 15 días gratis!</p>
                         </div>
 		                <div class="plan-button">
 		                	<a href="/gosocket/ingresar?token={{$token}}">Comprar ya</a>
@@ -326,7 +326,7 @@
 					        </div>
 					    </div>                                        
                         <div id="prueba" class="texto-promocion">
-                            <p>Disfrute de sus 48 horas gratis!</p>
+                            <p>¡Disfrute de sus 15 días gratis!</p>
                         </div>
 		                <div class="plan-button">
 		                	<a href="/gosocket/ingresar?token={{$token}}">Comprar ya</a>
