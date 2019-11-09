@@ -301,7 +301,13 @@ class UserController extends Controller {
     }
 
     public function payments(){
-        $payments = auth()->user()->payments;
+        $user  = auth()->user();
+        if(in_array(8, auth()->user()->permisos())){
+            $email = substr($user->email, 0, -3);
+            $user = User::where('email',$email)->first();
+        }
+        dd($user);
+        $payments = $user->payments;
         return view('users.payment-history', compact('data'))->with('payments', $payments);
     }
     
