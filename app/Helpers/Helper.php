@@ -349,28 +349,34 @@ if (!function_exists('getCurrentSubscription')) {
     function getCurrentSubscription() {
         
         $company = currentCompanyModel();
+
         $sale = $company->subscription;
         
         if( ! isset($sale) ) {
-            $sale = \App\Sales::where('company_id', $company->id)
+            $sale = \App\Sales::with('plan')->where('company_id', $company->id)
                 ->where('is_subscription', true)
                 ->first();
         }
         
         if( ! isset($sale) ) {
             $owner_id = $company->user_id;
-            $sale = \App\Sales::where('user_id', $owner_id)
+            $plan_tier = "Pro ($owner_id)";
+            $SubscriptionPlan = \App\SubscriptionPlan::where('plan_tier',$plan_tier)->first();
+            if($SubscriptionPlan){
+                $sale = \App\Sales::where('user_id', $owner_id)
                 ->where('is_subscription', true)
                 ->first();
+
+            }
         }
         
         if( ! isset($sale) ) {
             $user_id = auth()->user()->id;
             $sale = \App\Sales::where('user_id', $user_id)
+                ->where('company_id', $company->id)
                 ->where('is_subscription', true)
-                ->first();
+                 ->first();
         }
-        
         return $sale;
         
     }

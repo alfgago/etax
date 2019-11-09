@@ -9,7 +9,9 @@
   <select class="form-control " name="plan_sel" id="plan-sel" onchange="togglePlan();">
   	<option value="p" selected>Profesional</option>
   	<option value="e">Empresarial</option>
-  	<option value="c">Contador</option>
+    @if(!in_array(8, auth()->user()->permisos()))
+    	<option value="c">Contador</option>
+    @endif
   </select>
 </div>
 
@@ -64,7 +66,7 @@
         height: 38px;
     }
 </style>
- @if( !empty( auth()->user()->teams ) )
+ @if( !empty( auth()->user()->teams ) && !in_array(8, auth()->user()->permisos()))
     @if( sizeof(auth()->user()->teams) > 1 )
       <div class="companyParent suscripciones">
           <label for="">Saltar suscripción y entrar como:</label>
