@@ -48,8 +48,7 @@
 			  </div>
 			</form>
 		</div>
-		<div class="col-md-6">
-			
+		<div class="col-md-6">			
 			<div class="slider">
 			    <div class="item">
 			    	<div class="plan-column" id="">

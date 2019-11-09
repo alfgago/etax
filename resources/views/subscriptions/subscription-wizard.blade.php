@@ -57,13 +57,14 @@
       </form>
     </div>  
   </div>
-  
+  @if(!in_array(8, auth()->user()->permisos()))
   <a class="btn btn-cerrarsesion" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('frm-logout').submit();">
     Cerrar sesión
   </a>
   <form id="frm-logout" action="{{ route('logout') }}" method="POST" style="display: none;">
     {{ csrf_field() }}
   </form>
+  @endif
 </div>  
 @endsection
 

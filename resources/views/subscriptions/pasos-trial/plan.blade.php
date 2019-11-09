@@ -51,7 +51,7 @@
   <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step2');" onclick="trackClickEvent( 'PagosPaso2' );">Siguiente paso</button>
 </div>
 
- @if( !empty( auth()->user()->teams ) )
+ @if( !empty( auth()->user()->teams ) && !in_array(8, auth()->user()->permisos()))
     @if( sizeof(auth()->user()->teams) > 1 )
       <div class="companyParent suscripciones">
           <label for="">Saltar suscripción y entrar como:</label>
