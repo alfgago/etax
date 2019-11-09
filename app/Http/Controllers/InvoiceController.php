@@ -1423,7 +1423,6 @@ class InvoiceController extends Controller
             $json = json_encode( $xml ); // convert the XML string to json  
             $arr = json_decode( $json, TRUE );
 
-                if(substr($arr['NumeroConsecutivo'],8,2) != "04"){
                     $FechaEmision = explode("T", $arr['FechaEmision']);
                     $FechaEmision = explode("-", $FechaEmision[0]);
                     $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
@@ -1465,10 +1464,6 @@ class InvoiceController extends Controller
                         return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
                         //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
                     } 
-                }else{
-                    return Response()->json('Error: No se puede subir tiquetes electrónicos.', 400);
-                        //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
-                }
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
