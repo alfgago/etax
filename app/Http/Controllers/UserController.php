@@ -306,7 +306,6 @@ class UserController extends Controller {
             $email = substr($user->email, 0, -3);
             $user = User::where('email',$email)->first();
         }
-        dd($user);
         $payments = $user->payments;
         return view('users.payment-history', compact('data'))->with('payments', $payments);
     }
