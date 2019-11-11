@@ -1436,7 +1436,7 @@ class InvoiceController extends Controller
                         $consecutivoComprobante = $arr['NumeroConsecutivo'];
                         $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
                         $consecutivoComprobante = $arr['NumeroConsecutivo'];
-                        //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                        //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla.
                         if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                             //Registra el XML. Si todo sale bien, lo guarda en S3.
 
