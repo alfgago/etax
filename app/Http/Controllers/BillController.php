@@ -143,12 +143,10 @@ class BillController extends Controller
        $filtroValidado = $request->get('filtroValidado');
        switch($filtroValidado){
             case 1:
-                $query = $query->where(function($q){
-                    $q->whereNull('bill_items.product_type')->orWhereNull('bill_items.iva_type');
-                });
+                $query = $query->where('bill_items.is_code_validated', false);
                 break;
             case 2:
-                $query = $query->whereNotNull('bill_items.product_type')->WhereNotNull('bill_items.iva_type');
+                $query = $query->where('bill_items.is_code_validated', true);
                 break;
             case 3:
                 $query = $query->where('bills.is_code_validated', false);
@@ -694,11 +692,12 @@ class BillController extends Controller
                     ->update([
                       'iva_type' =>  $item['iva_type'],
                       'product_type' =>  $item['product_type'],
-                      'porc_identificacion_plena' =>  $item['porc_identificacion_plena']
+                      'porc_identificacion_plena' =>  $item['porc_identificacion_plena'],
+                      'is_code_validated' =>  true,
                     ]);
                     $validated = true;
                     foreach($bill->items as $item){
-                        if(!isset($item->iva_type) || !isset($item->product_type)){
+                        if(!$item->is_code_validated){
                             $validated = false;
                         }
                     }
