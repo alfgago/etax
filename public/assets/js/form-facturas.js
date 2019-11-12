@@ -266,6 +266,7 @@ window.cargarFormItem = function (index) {
   $('.item-factura-form').addClass('editando');
 
   var item = $('.item-index-' + index);
+  console.log(item);
   $('#lnum').val(item.attr('attr-num'));
   $('#item_id').val(item.find('.item_id ').val());
   $('#codigo').val(item.find('.codigo ').val());
@@ -279,7 +280,7 @@ window.cargarFormItem = function (index) {
   $('#porc_iva').val(item.find('.porc_iva ').val());
   $('#item_iva_amount').val(item.find('.monto_iva ').val());
   $('#porc_identificacion_plena').val(item.find('.porc_identificacion_plena ').val());
-
+  $('#porcentajeExoneracion').val('100');
   if (parseInt(item.find('.is_identificacion_especifica').val())) {
     $('#is_identificacion_especifica').prop('checked', true);
   } else {

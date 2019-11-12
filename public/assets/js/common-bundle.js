@@ -875,7 +875,27 @@ toastr.options = {
     $('#montoExoneracion').val( item.find('.montoExoneracion ').val() );
     $('#impuestoNeto').val( item.find('.impuestoNeto ').val() );
     $('#montoTotalLinea').val( item.find('.montoTotalLinea ').val() );
-    
+    /*****************************************
+    exoneration_document_type
+    exoneration_document_number
+    exoneration_company_name
+    exoneration_porcent
+    exoneration_amount
+    impuesto_neto
+    exoneration_total_amount
+    exoneration_date
+    tariff_heading
+    exoneration_total_gravado
+    *****************************************/
+  	$('#porcentajeExoneracion').val(item.find('.exoneration_porcent ').val());
+  	$('#typeDocument').val( item.find('.exoneration_document_type ').val() );
+  	$('#numeroDocumento').val(item.find('.exoneration_document_number ').val());
+  	$('#nombreInstitucion').val(item.find('.exoneration_company_name ').val());
+  	$('#exoneration_date').val(item.find('.exoneration_date ').val());
+  	$('#montoExoneracion').val(item.find('.exoneration_amount ').val());
+  	$('#impuestoNeto').val(item.find('.impuesto_neto ').val());
+  	$('#montoTotalLinea').val(item.find('.exoneration_total_gravado ').val());
+
     if( parseInt(item.find('.is_identificacion_especifica').val()) ) {
       $('#is_identificacion_especifica').prop( 'checked', true );
     }else {

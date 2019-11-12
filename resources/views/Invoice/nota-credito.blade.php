@@ -285,7 +285,6 @@
                                         <span title='Editar linea' class='btn-editar-item text-success mr-2' onclick="abrirPopup('linea-popup'); cargarFormItem({{ $loop->index }});"> <i class="fa fa-pencil" aria-hidden="true"></i> </span>
                                         <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ $loop->index }});' > <i class="fa fa-trash-o" aria-hidden="true"></i> </span>
                                     </td>
-                                    
                                     <td class="hidden">
                                 <input type="hidden" class='numero' name="items[{{ $loop->index }}][item_number]" itemname="item_number" value="{{ $loop->index+1 }}">
                                 <input type="hidden" class="item_id" name="items[{{ $loop->index }}][id]" itemname="id" value="{{ $item->id }}"> 
@@ -304,6 +303,21 @@
                                 <input class="porc_iva" type="hidden" name="items[{{ $loop->index }}][iva_percentage]" itemname="iva_percentage" value="{{ $item->iva_percentage }}">
                                 <input class="monto_iva" type="hidden" name="items[{{ $loop->index }}][iva_amount]" itemname="iva_amount" value="{{ $item->iva_amount }}">
                                 <input class="total" type="hidden" name="items[{{ $loop->index }}][total]" itemname="total" value="{{ $item->total }}">
+
+
+                                <input class="exoneration_document_type" type="hidden" name="items[{{ $loop->index }}][exoneration_document_type]" itemname="exoneration_document_type" value="{{ $item->exoneration_document_type }}">
+                                <input class="exoneration_document_number" type="hidden" name="items[{{ $loop->index }}][exoneration_document_number]" itemname="exoneration_document_number" value="{{ $item->exoneration_document_number }}">
+                                <input class="exoneration_company_name" type="hidden" name="items[{{ $loop->index }}][exoneration_company_name]" itemname="exoneration_company_name" value="{{ $item->exoneration_company_name }}">
+                                <input class="exoneration_porcent" type="hidden" name="items[{{ $loop->index }}][exoneration_porcent]" itemname="exoneration_porcent" value="{{ $item->exoneration_porcent }}">
+                                <input class="exoneration_amount" type="hidden" name="items[{{ $loop->index }}][exoneration_amount]" itemname="exoneration_amount" value="{{ $item->exoneration_amount }}">
+                                <input class="impuesto_neto" type="hidden" name="items[{{ $loop->index }}][impuesto_neto]" itemname="impuesto_neto" value="{{ $item->impuesto_neto }}">
+                                <input class="exoneration_total_amount" type="hidden" name="items[{{ $loop->index }}][exoneration_total_amount]" itemname="exoneration_total_amount" value="{{ $item->exoneration_total_amount }}">
+                                <input class="exoneration_date" type="hidden" name="items[{{ $loop->index }}][exoneration_date]" itemname="exoneration_date" value="{{date('d/m/Y', strtotime($item->exoneration_date))}}">
+                                <input class="tariff_heading" type="hidden" name="items[{{ $loop->index }}][tariff_heading]" itemname="tariff_heading" value="{{ $item->tariff_heading }}">
+                                <input class="exoneration_total_gravado" type="hidden" name="items[{{ $loop->index }}][exoneration_total_gravado]" itemname="exoneration_total_gravado" value="{{ $item->exoneration_total_gravado }}">
+
+
+
                                 <input class="is_identificacion_especifica" type="hidden" name="items[{{ $loop->index }}][is_identificacion_especifica]" itemname="is_identificacion_especifica" value="{{ $item->is_identificacion_especifica }}">
                               </td>
                                 </tr>
@@ -339,18 +353,25 @@
             var subtotal = 0;
             var monto_iva = 0;
             var total = 0;
+            var exonerado = 0;
             $('.item-tabla').each(function(){
                 var s = parseFloat($(this).find('.subtotal').val());
                 var m = parseFloat($(this).find('.monto_iva').val());
                 var t = parseFloat($(this).find('.total').val());
+                var e = parseFloat($(this).find('.exoneration_amount').val());
                 subtotal += s;
                 monto_iva += m;
                 total += t;
+                exonerado += e;
             });
 
             $('#subtotal').val( fixComas(subtotal) );
             $('#monto_iva').val( fixComas(monto_iva) );
             $('#total').val( fixComas(total) );
+            $('#total_iva_exonerado').val( fixComas(exonerado) );
+            if(exonerado > 0){
+                $('#total_iva_exonerado-cont').removeClass('hidden');
+            }
 
             toggleRetencion();
         });
