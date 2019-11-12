@@ -717,7 +717,6 @@ toastr.options = {
         return false;
       }
     }
-
     var exoneradalinea = $('#exoneradalinea').val();
     var datos = false;
     if(exoneradalinea == 1){
@@ -726,17 +725,12 @@ toastr.options = {
       } 
     }else{
       if( subtotal && codigo && nombre && precio_unitario && cantidad && tipo_iva && tipo_producto && total > 0 ){
-      	 typeDocument = '';
-      	 numeroDocumento = '';
-      	 nombreInstitucion = '';
-      	 exoneration_date = '';
-      	 porcentajeExoneracion = 0;
-      	 montoExoneracion = 0;
-         datos = true;
+          datos = true;
       } 
     }
     //Se asegura de que los campos hayan sido llenados
     if( datos){
+      
       //Crear el ID de la fila.
       var itemExistente = false;
       if( lnum && lnum !== '' ){
@@ -844,9 +838,8 @@ toastr.options = {
   }
   
   //Se encarga de limpiar el formulario de "Agregar items"
-  window.limpiarFormItem = function(){
-
-      var  typeDocument =   $('#typeDocument').val();
+  window.limpiarFormItem = function(){ 
+    var  typeDocument =   $('#typeDocument').val();
       var  numeroDocumento =   $('#numeroDocumento').val();
       var  exoneration_date =   $('#exoneration_date').val();
       var  porcentajeExoneracion =   $('#porcentajeExoneracion').val();
@@ -858,16 +851,13 @@ toastr.options = {
       $('.item-factura-form input[type=checkbox]').prop('checked', false);
       $('.otros-factura-form input, .otros-factura-form select').val('');
       $('.otros-factura-form input[type=checkbox]').prop('checked', false);
-
-
+         $('#exoneradalinea').val(0);
       $('#typeDocument').val(typeDocument);
       $('#numeroDocumento').val(numeroDocumento);
       $('#exoneration_date').val(exoneration_date);
       $('#porcentajeExoneracion').val(porcentajeExoneracion);
       $('#montoTotalLinea').val(montoTotalLinea);
       $('#nombreInstitucion').val(nombreInstitucion);
-
-
       var docType = $('#document_type').val();
       if( ($('#is-compra').length || docType == '08') && !$('#is-manual').length ){
         $('#tipo_iva').val('B003').change();
@@ -910,28 +900,8 @@ toastr.options = {
     $('#montoExoneracion').val( item.find('.montoExoneracion ').val() );
     $('#impuestoNeto').val( item.find('.impuestoNeto ').val() );
     $('#montoTotalLinea').val( item.find('.montoTotalLinea ').val() );
-    /*****************************************
-    exoneration_document_type
-    exoneration_document_number
-    exoneration_company_name
-    exoneration_porcent
-    exoneration_amount
-    impuesto_neto
-    exoneration_total_amount
-    exoneration_date
-    tariff_heading
-    exoneration_total_gravado
-    *****************************************/
-  	$('#porcentajeExoneracion').val(item.find('.exoneration_porcent ').val());
-  	$('#typeDocument').val( item.find('.exoneration_document_type ').val() );
-  	$('#numeroDocumento').val(item.find('.exoneration_document_number ').val());
-  	$('#nombreInstitucion').val(item.find('.exoneration_company_name ').val());
-  	$('#exoneration_date').val(item.find('.exoneration_date ').val());
-  	$('#montoExoneracion').val(item.find('.exoneration_amount ').val());
-  	$('#impuestoNeto').val(item.find('.impuesto_neto ').val());
-  	$('#montoTotalLinea').val(item.find('.exoneration_total_gravado ').val());
-  	$('#exoneradalinea').val(item.find('.exoneradalinea ').val());
-
+    $('#exoneradalinea').val( item.find('.exoneradalinea ').val() );
+    
     if( parseInt(item.find('.is_identificacion_especifica').val()) ) {
       $('#is_identificacion_especifica').prop( 'checked', true );
     }else {
@@ -1122,17 +1092,18 @@ toastr.options = {
    window.calcularMontoExoneracion = function() {
       var hasExoneracion = false;
       var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184"];
-      if( codigosConExoneracion.includes( $('#tipo_iva').val() ) ){
+      var construccion = jQuery("#tipo_producto").val() == 43; //Servicios de construcción e ingenieria al 0% transitorio. Llevan exoneración
+      
+      if( codigosConExoneracion.includes( $('#tipo_iva').val() ) || construccion ){
         var porcentajeExonerado = $('#porcentajeExoneracion').val();
         if(porcentajeExonerado > 0) {
             var monto_iva_detalle = $('#item_iva_amount').val();
-            var monto = (monto_iva_detalle * (porcentajeExonerado / 100));
-			var redondeo = Math.round(monto * 100000) / 100000;
-            var impNeto = Math.round((monto_iva_detalle - redondeo) * 100000) / 100000;
+            var monto = monto_iva_detalle * (porcentajeExonerado / 100);
+            var impNeto = monto_iva_detalle - monto;
             var subTotal = $('#item_subtotal').val();
             var montoTotal = parseFloat(subTotal) + parseFloat(impNeto);
 
-            $('#montoExoneracion').val(redondeo);
+            $('#montoExoneracion').val(monto);
             $('#impuestoNeto').val(impNeto);
             $('#montoTotalLinea').val(montoTotal);
         }
@@ -1145,7 +1116,9 @@ toastr.options = {
         
         var hasExoneracion = false;
         var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184"];
-        if( codigosConExoneracion.includes( $('#tipo_iva').val() ) ){
+        var construccion = jQuery("#tipo_producto").val() == 43; //Servicios de construcción e ingenieria al 0% transitorio. Llevan exoneración
+        
+        if( codigosConExoneracion.includes( $('#tipo_iva').val() ) || construccion ){
           hasExoneracion = true;
         }
         
@@ -1160,7 +1133,7 @@ toastr.options = {
             $('#divMontoExoneracion').attr('hidden', false);
             $('#divMontoTotalLinea').attr('hidden', false);
             $('#divImpuestoNeto').attr('hidden', false);
-            $('#exoneradalinea').val('1');
+            $('#exoneradalinea').val(1);
         }else{
             $(".exoneracion-cont").hide();
             $('#etiqTotal').text('');
@@ -1172,7 +1145,7 @@ toastr.options = {
             $('#divMontoExoneracion').attr('hidden', true);
             $('#divMontoTotalLinea').attr('hidden', true);
             $('#divImpuestoNeto').attr('hidden', true);
-            $('#exoneradalinea').val('0');
+            $('#exoneradalinea').val(0);
         }
     }
     
@@ -1295,6 +1268,10 @@ $( document ).ready(function() {
       calcularSubtotalItem();
       togglePorcentajeIdentificacionPlena();
       if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
+    });
+  
+    $('#tipo_producto').on('change', function(){
+      toggleCamposExoneracion();
     });
     
     $('#item_iva_amount').on('change', function(){

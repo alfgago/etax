@@ -252,10 +252,16 @@ class CalculatedTax extends Model
     
         
     public function calcularFacturacionAcumulado( $year, $prorrataOperativa ) {
-
+      
       $this->sumAcumulados( $year, true );
       $this->setCalculosIVA( $prorrataOperativa, 0 );
+      $prorrata_operativa = $this->prorrata_operativa;
+      $prorrata_estimada = $this->prorrata;
+      
       $this->sumAcumulados( $year, false );
+      $this->setCalculosIVA( $prorrataOperativa, 0 );
+      $this->prorrata_operativa = $prorrata_operativa;
+      $this->prorrata = $prorrata_estimada;
       
       return $this;
       
@@ -326,6 +332,19 @@ class CalculatedTax extends Model
               $invoiceIva = $invoiceItems[$i]->iva_amount * $currInvoice->currency_rate;
               
               $prodPorc = $invoiceItems[$i]->ivaType ? $invoiceItems[$i]->ivaType->percentage : '13';
+              $ivaCode = $invoiceItems[$i]->ivaType ? $invoiceItems[$i]->ivaType->invoice_code : '08';
+              if( $ivaCode == '01' ) {
+                $prodPorc = '0';
+              }else if( $ivaCode == '02' ) {
+                $prodPorc = '1';
+              }else if( $ivaCode == '03' ) {
+                $prodPorc = '2';
+              }else if( $ivaCode == '04' ) {
+                $prodPorc = '4';
+              }else if( $ivaCode == '08' ) {
+                $prodPorc = '13';
+              }
+              
               $prodType = $prodType ? $prodType : '17';
               $currActivity = $currInvoice->commercial_activity;
               
@@ -942,6 +961,8 @@ class CalculatedTax extends Model
       
       $this->saldo_favor = $saldoFavor;
       $this->saldo_favor_anterior = $lastBalance;
+      
+      $this->setValoresPeriodoSinIva();
     }
     
     public function setCalculosPorFactura( $prorrataOperativa, $lastBalance ) {
@@ -1062,39 +1083,6 @@ class CalculatedTax extends Model
       $currentCompanyId = $currentCompany->id;
       $calculosAnteriores = CalculatedTax::where('company_id', $currentCompanyId)->where('is_final', true)->where('year', $year)->where('month', '!=', 0)->get();
       $countAnteriores = count( $calculosAnteriores );
-      
-      /*$this->count_invoices = 0;
-			$this->invoices_total = 0;
-			$this->invoices_subtotal = 0;
-			$this->total_invoice_iva = 0;
-			$this->total_clientes_contado_exp = 0;
-			$this->total_clientes_credito_exp = 0;
-			$this->total_clientes_contado = 0;
-			$this->total_clientes_credito = 0;
-			$this->sum_repercutido1 = 0;
-			$this->sum_repercutido2 = 0;
-			$this->sum_repercutido3 = 0;
-			$this->sum_repercutido4 = 0;
-			$this->sum_repercutido_exento_con_credito = 0;
-			$this->sum_repercutido_exento_sin_credito = 0;
-			$this->bases_ventas_con_identificacion = 0;
-			$this->sum_iva_sin_aplicar = 0;
-
-			$this->count_bills = 0;
-			$this->bills_total = 0;
-			$this->bills_subtotal = 0;
-			$this->bills_subtotal1 = 0;
-			$this->bills_subtotal2 = 0;
-			$this->bills_subtotal3 = 0;
-			$this->bills_subtotal4 = 0;
-			$this->total_bill_iva = 0;
-			$this->bases_identificacion_plena = 0;
-			$this->bases_no_deducibles = 0;
-			$this->iva_acreditable_identificacion_plena = 0;
-			$this->iva_no_acreditable_identificacion_plena = 0;
-			$this->total_proveedores_contado = 0;
-			$this->total_proveedores_credito = 0;
-			$this->iva_retenido = 0;*/
 			
 			$this->resetVars();
       
@@ -1102,7 +1090,7 @@ class CalculatedTax extends Model
     	$arrayActividades = $currentCompany->getActivities();
 
       for ($i = 0; $i < $countAnteriores; $i++) {
-        if( $allMonths || !( $calculosAnteriores[$i]->year == 2019 && $calculosAnteriores[$i]->month < 7 ) ){
+        if( $allMonths || !( $calculosAnteriores[$i]->year <= 2019 && $calculosAnteriores[$i]->month <= 6 && $calculosAnteriores[$i]->month != 0 ) ){
           
           $this->count_invoices += $calculosAnteriores[$i]->count_invoices;
     			$this->invoices_total += $calculosAnteriores[$i]->invoices_total;
@@ -1306,6 +1294,24 @@ class CalculatedTax extends Model
         return ((float) $usec + (float)$sec);
     } 
     
+    private function setValoresPeriodoSinIva() {
+      if($this->year <= 2019 && $this->month <= 6 && $this->month != 0){
+        $this->saldo_favor = 0;
+        $this->saldo_favor_anterior = 0;
+        $this->iva_deducible_estimado = 0;
+        $this->balance_estimado = 0;
+        $this->iva_deducible_operativo = 0;
+        $this->balance_operativo = 0;
+        $this->iva_no_deducible = 0;
+        $this->iva_por_cobrar = 0;
+        $this->iva_por_pagar = 0;
+        $this->iva_retenido = 0;
+        $this->total_bill_iva = 0;
+        $this->total_invoice_iva = 0;
+        $this->iva_no_deducible = 0;
+        $this->iva_no_acreditable_identificacion_plena = 0;
+      }
+    }
     
     public function calcularDeclaracion($acumulado){
       try{
@@ -1467,16 +1473,24 @@ class CalculatedTax extends Model
       		
           $dataDeclaracion['impuestos'] = $impuestos;
           
-          
           $determinacion = array();
         	$determinacion['montoAnualVentasConDerechoCredito'] = $acumulado->numerador_prorrata;
         	$determinacion['montoAnualVentasSinDerechoCredito'] = $acumulado->invoices_subtotal;
         	$determinacion['porcentajeProrrataFinal'] = $acumulado->prorrata*100;
         	$determinacion['creditoFiscalAnualTotal'] = $acumulado->total_bill_iva;
         	$determinacion['creditoFiscalAnualDeducible'] = $acumulado->iva_deducible_estimado;
-        	$determinacion['creditoAnualFinal'] = $acumulado->iva_por_cobrar;
-        	$determinacion['saldoFavorAnual'] = $acumulado->iva_por_cobrar;
-        	$determinacion['saldoDeudorAnual'] = $acumulado->iva_por_pagar;
+        	$determinacion['creditoAnualFinal'] = $acumulado->iva_deducible_operativo;
+        	
+        	if($acumulado->iva_deducible_operativo > $acumulado->iva_deducible_estimado) {
+        	  $saldoDeudorAnual = $acumulado->iva_deducible_operativo - $acumulado->iva_deducible_estimado;
+        	  $saldoFavorAnual = 0;
+        	}else{
+        	  $saldoDeudorAnual = 0;
+        	  $saldoFavorAnual = $acumulado->iva_deducible_estimado - $acumulado->iva_deducible_operativo;
+        	}
+        	
+        	$determinacion['saldoFavorAnual'] = $saldoFavorAnual;
+        	$determinacion['saldoDeudorAnual'] = $saldoDeudorAnual;
         	
         	$determinacion['impuestoOperacionesGravadas'] = $this->total_invoice_iva;
         	$determinacion['totalCreditosPeriodo'] = $this->iva_deducible_operativo;
