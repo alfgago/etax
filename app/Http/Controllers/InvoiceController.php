@@ -184,12 +184,10 @@ class InvoiceController extends Controller
        $filtroValidado = $request->get('filtroValidado');
        switch($filtroValidado){
             case 1:
-                $query = $query->where(function($q){
-                    $q->whereNull('invoice_items.product_type')->orWhereNull('invoice_items.iva_type');
-                });
+                $query = $query->where('invoice_items.is_code_validated', false);
                 break;
             case 2:
-                $query = $query->whereNotNull('invoice_items.product_type')->WhereNotNull('invoice_items.iva_type');
+                $query = $query->where('invoice_items.is_code_validated', true);
                 break;
             case 3:
                 $query = $query->where('invoices.is_code_validated', false);
@@ -1038,11 +1036,12 @@ class InvoiceController extends Controller
                 InvoiceItem::where('id', $key)
                 ->update([
                   'iva_type' =>  $item['iva_type'],
-                  'product_type' =>  $item['product_type']
+                  'product_type' =>  $item['product_type'],
+                  'is_code_validated' =>  true,
                 ]);
                 $validated = true;
                 foreach($invoice->items as $item){
-                    if(!isset($item->iva_type) || !isset($item->product_type)){
+                    if(!$item->is_code_validated){
                         $validated = false;
                     }
                 }
