@@ -453,7 +453,8 @@ class Invoice extends Model
                 }catch( \Exception $e ) {
                     $exonerationDate = null;
                 }
-                if ($exonerationDate && isset($data['typeDocument']) && isset($data['numeroDocumento']) && $data['porcentajeExoneracion'] > 0) {
+                $exoneradalinea = $data['exoneradalinea'] ?? 1;
+                if ($exonerationDate && isset($data['typeDocument']) && isset($data['numeroDocumento']) && $data['porcentajeExoneracion'] > 0 && $exoneradalinea == 1) {
 
                     $item->exoneration_document_type = $data['typeDocument'] ?? null;
                     $item->exoneration_document_number = $data['numeroDocumento'] ?? null;

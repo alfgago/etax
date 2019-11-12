@@ -370,23 +370,28 @@
 $(document).ready(function(){
   
   $('#tipo_producto').val(17).change();
-  
   var subtotal = 0;
   var monto_iva = 0;
   var total = 0;
+  var exonerado = 0;
   $('.item-tabla').each(function(){
     var s = parseFloat($(this).find('.subtotal').val());
     var m = parseFloat($(this).find('.monto_iva').val());
     var t = parseFloat($(this).find('.total').val());
+    var e = parseFloat($(this).find('.exoneration_amount').val());
     subtotal += s;
-    monto_iva += m;	
-    total += t;	
+    monto_iva += m;
+    total += t;
+    exonerado += e;
   });
 
   $('#subtotal').val( fixComas(subtotal) );
   $('#monto_iva').val( fixComas(monto_iva) );
   $('#total').val( fixComas(total) );
-  
+  $('#total_iva_exonerado').val( fixComas(exonerado) );
+  if(exonerado > 0){
+      $('#total_iva_exonerado-cont').removeClass('hidden');
+  }
   toggleRetencion();
 });
 

@@ -532,7 +532,7 @@ class InvoiceController extends Controller
     public function sendHacienda(Request $request)
     {
         //revision de branch para segmentacion de funcionalidades por tipo de documento
-        //try {
+        try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
             $request->validate([
                 'subtotal' => 'required',
@@ -663,10 +663,10 @@ class InvoiceController extends Controller
             }else{
                 return back()->withError('Mes seleccionado ya fue cerrado');
             }
-        /*} catch( \Exception $ex ) {
+        } catch( \Exception $ex ) {
             Log::error("ERROR Envio de factura a hacienda -> ".$ex);
             return back()->withError( 'Ha ocurrido un error al enviar factura.' );
-        }*/
+        }
     }
     
     private function storeBillFEC($request) {
