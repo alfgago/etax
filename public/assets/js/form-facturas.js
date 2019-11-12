@@ -250,15 +250,42 @@ window.agregarEditarItem = function () {
 
 //Se encarga de limpiar el formulario de "Agregar items"
 window.limpiarFormItem = function () {
-  $('.item-factura-form input, .item-factura-form select').val('');
-  $('.item-factura-form input[type=checkbox]').prop('checked', false);
+   var  typeDocument =   $('#typeDocument').val();
+      var  numeroDocumento =   $('#numeroDocumento').val();
+      var  exoneration_date =   $('#exoneration_date').val();
+      var  porcentajeExoneracion =   $('#porcentajeExoneracion').val();
+      var  montoExoneracion =   $('#montoExoneracion').val();
+      var  impuestoNeto =   $('#impuestoNeto').val();
+      var  montoTotalLinea =  $('#montoTotalLinea').val();
+      var  nombreInstitucion =  $('#nombreInstitucion').val();
+      $('.item-factura-form input, .item-factura-form select').val('');
+      $('.item-factura-form input[type=checkbox]').prop('checked', false);
+      $('.otros-factura-form input, .otros-factura-form select').val('');
+      $('.otros-factura-form input[type=checkbox]').prop('checked', false);
 
-  $('#tipo_producto').val(1).change();
-  $('#unidad_medicion').val(1);
-  $('#cantidad').val(1);
-  $('#porc_identificacion_plena').val(1);
-  $('#discount_type').val('01');
-  $('#discount').val(0);
+      $('#exoneradalinea').val(0);
+      $('#typeDocument').val(typeDocument);
+      $('#numeroDocumento').val(numeroDocumento);
+      $('#exoneration_date').val(exoneration_date);
+      $('#porcentajeExoneracion').val(porcentajeExoneracion);
+      $('#montoExoneracion').val(montoExoneracion);
+      $('#impuestoNeto').val(impuestoNeto);
+      $('#montoTotalLinea').val(montoTotalLinea);
+      $('#nombreInstitucion').val(nombreInstitucion);
+
+
+      var docType = $('#document_type').val();
+      if( ($('#is-compra').length || docType == '08') && !$('#is-manual').length ){
+        $('#tipo_iva').val('B003').change();
+      }else {
+        $('#tipo_iva').val('B103').change();
+      }
+      $('#unidad_medicion').val('Unid');
+      $('#cantidad').val(1);
+      $('#porc_identificacion_plena').val(13);
+      $('#discount_type').val('01');
+      $('#discount').val(0);
+      $('#tipo_producto').change();
 };
 
 //Carga la item para ser editada
@@ -266,6 +293,7 @@ window.cargarFormItem = function (index) {
   $('.item-factura-form').addClass('editando');
 
   var item = $('.item-index-' + index);
+  console.log(item);
   $('#lnum').val(item.attr('attr-num'));
   $('#item_id').val(item.find('.item_id ').val());
   $('#codigo').val(item.find('.codigo ').val());
@@ -279,7 +307,14 @@ window.cargarFormItem = function (index) {
   $('#porc_iva').val(item.find('.porc_iva ').val());
   $('#item_iva_amount').val(item.find('.monto_iva ').val());
   $('#porc_identificacion_plena').val(item.find('.porc_identificacion_plena ').val());
-
+  $('#porcentajeExoneracion').val(item.find('.exoneration_porcent ').val());
+    $('#typeDocument').val( item.find('.exoneration_document_type ').val() );
+    $('#numeroDocumento').val(item.find('.exoneration_document_number ').val());
+    $('#nombreInstitucion').val(item.find('.exoneration_company_name ').val());
+    $('#exoneration_date').val(item.find('.exoneration_date ').val());
+    $('#montoExoneracion').val(item.find('.exoneration_amount ').val());
+    $('#impuestoNeto').val(item.find('.impuesto_neto ').val());
+    $('#montoTotalLinea').val(item.find('.exoneration_total_gravado ').val());
   if (parseInt(item.find('.is_identificacion_especifica').val())) {
     $('#is_identificacion_especifica').prop('checked', true);
   } else {
