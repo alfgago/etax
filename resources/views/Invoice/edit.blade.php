@@ -78,20 +78,20 @@
                   <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
                 </div>
 
-                <div class="form-group col-md-4 hidden" id="total_iva_devuelto-cont">
+              <div class="form-group col-md-4 hidden" id="total_iva_devuelto-cont">
                   <label for="total">IVA Devuelto</label>
                   <input type="text" class="form-control total" name="total_iva_devuelto" id="total_iva_devuelto" placeholder="" readonly="true" required>
-                </div>
+              </div>
 
-                <div class="form-group col-md-4 hidden" id="total_iva_exonerado-cont">
-                  <label for="total">IVA Exonerado</label>
-                  <input type="text" class="form-control total" name="total_iva_exonerado" id="total_iva_exonerado" placeholder="" readonly="true" required>
-                </div>
+              <div class="form-group col-md-4 hidden" id="total_iva_exonerado-cont">
+                <label for="total">IVA Exonerado</label>
+                <input type="text" class="form-control total" name="total_iva_exonerado" id="total_iva_exonerado" placeholder="" readonly="true" required>
+              </div>
 
-                <div class="form-group col-md-4 hidden" id="total_otros_cargos-cont">
-                  <label for="total">Otros cargos</label>
-                  <input type="text" class="form-control total" name="total_otros_cargos" id="total_otros_cargos" placeholder="" readonly="true" required>
-                </div>
+              <div class="form-group col-md-4 hidden" id="total_otros_cargos-cont">
+                <label for="total">Otros cargos</label>
+                <input type="text" class="form-control total" name="total_otros_cargos" id="total_otros_cargos" placeholder="" readonly="true" required>
+              </div>
       
                 <div class="form-group col-md-4">
                   <label for="total">Total</label>
@@ -286,6 +286,19 @@
                         <input class="monto_iva" type="hidden" name="items[{{ $loop->index }}][iva_amount]" itemname="iva_amount" value="{{ $item->iva_amount }}">
                         <input class="total" type="hidden" name="items[{{ $loop->index }}][total]" itemname="total" value="{{ $item->total }}">
                         <input class="is_identificacion_especifica" type="hidden" name="items[{{ $loop->index }}][is_identificacion_especifica]" itemname="is_identificacion_especifica" value="{{ $item->is_identificacion_especifica }}">
+
+
+                        <input class="typeDocument" type="hidden" name="items[{{ $loop->index }}][typeDocument]" itemname="typeDocument" value="{{ $item->exoneration_document_type }}">
+                        <input class="nombreInstitucion" type="hidden" name="items[{{ $loop->index }}][nombreInstitucion]" itemname="nombreInstitucion" value="{{ $item->exoneration_document_number }}">
+                        <input class="nombreInstitucion" type="hidden" name="items[{{ $loop->index }}][nombreInstitucion]" itemname="nombreInstitucion" value="{{ $item->exoneration_company_name }}">
+                        <input class="porcentajeExoneracion" type="hidden" name="items[{{ $loop->index }}][porcentajeExoneracion]" itemname="porcentajeExoneracion" value="{{ $item->exoneration_porcent }}">
+                        <input class="montoExoneracion" type="hidden" name="items[{{ $loop->index }}][montoExoneracion]" itemname="montoExoneracion" value="{{ $item->exoneration_amount }}">
+                        <input class="impuestoNeto" type="hidden" name="items[{{ $loop->index }}][impuestoNeto]" itemname="impuestoNeto" value="{{ $item->impuesto_neto }}">
+                        <input class="exoneration_total_amount montoExoneracion" type="hidden" name="items[{{ $loop->index }}][montoExoneracion]" itemname="exoneration_total_amount" value="{{ $item->exoneration_total_amount }}">
+                        <input class="exoneration_date" type="hidden" name="items[{{ $loop->index }}][exoneration_date]" itemname="exoneration_date" value="{{date('d/m/Y', strtotime($item->exoneration_date))}}">
+                        <input class="tariff_heading" type="hidden" name="items[{{ $loop->index }}][tariff_heading]" itemname="tariff_heading" value="{{ $item->tariff_heading }}">
+                        <input class="exoneration_total_gravado" type="hidden" name="items[{{ $loop->index }}][exoneration_total_gravado]" itemname="exoneration_total_gravado" value="{{ $item->exoneration_total_gravado }}">
+
                       </td>
                   </tr>
                   @endforeach
@@ -368,30 +381,7 @@
 
 <script>
 $(document).ready(function(){
-  
-  $('#tipo_producto').val(17).change();
-  var subtotal = 0;
-  var monto_iva = 0;
-  var total = 0;
-  var exonerado = 0;
-  $('.item-tabla').each(function(){
-    var s = parseFloat($(this).find('.subtotal').val());
-    var m = parseFloat($(this).find('.monto_iva').val());
-    var t = parseFloat($(this).find('.total').val());
-    var e = parseFloat($(this).find('.exoneration_amount').val());
-    subtotal += s;
-    monto_iva += m;
-    total += t;
-    exonerado += e;
-  });
-
-  $('#subtotal').val( fixComas(subtotal) );
-  $('#monto_iva').val( fixComas(monto_iva) );
-  $('#total').val( fixComas(total) );
-  $('#total_iva_exonerado').val( fixComas(exonerado) );
-  if(exonerado > 0){
-      $('#total_iva_exonerado-cont').removeClass('hidden');
-  }
+  calcularTotalFactura();
   toggleRetencion();
 });
 

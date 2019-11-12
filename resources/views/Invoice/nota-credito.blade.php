@@ -305,18 +305,16 @@
                                 <input class="total" type="hidden" name="items[{{ $loop->index }}][total]" itemname="total" value="{{ $item->total }}">
 
 
-                                <input class="exoneration_document_type" type="hidden" name="items[{{ $loop->index }}][exoneration_document_type]" itemname="exoneration_document_type" value="{{ $item->exoneration_document_type }}">
-                                <input class="exoneration_document_number" type="hidden" name="items[{{ $loop->index }}][exoneration_document_number]" itemname="exoneration_document_number" value="{{ $item->exoneration_document_number }}">
-                                <input class="exoneration_company_name" type="hidden" name="items[{{ $loop->index }}][exoneration_company_name]" itemname="exoneration_company_name" value="{{ $item->exoneration_company_name }}">
-                                <input class="exoneration_porcent" type="hidden" name="items[{{ $loop->index }}][exoneration_porcent]" itemname="exoneration_porcent" value="{{ $item->exoneration_porcent }}">
-                                <input class="exoneration_amount" type="hidden" name="items[{{ $loop->index }}][exoneration_amount]" itemname="exoneration_amount" value="{{ $item->exoneration_amount }}">
-                                <input class="impuesto_neto" type="hidden" name="items[{{ $loop->index }}][impuesto_neto]" itemname="impuesto_neto" value="{{ $item->impuesto_neto }}">
-                                <input class="exoneration_total_amount" type="hidden" name="items[{{ $loop->index }}][exoneration_total_amount]" itemname="exoneration_total_amount" value="{{ $item->exoneration_total_amount }}">
+                                <input class="typeDocument" type="hidden" name="items[{{ $loop->index }}][typeDocument]" itemname="typeDocument" value="{{ $item->exoneration_document_type }}">
+                                <input class="nombreInstitucion" type="hidden" name="items[{{ $loop->index }}][nombreInstitucion]" itemname="nombreInstitucion" value="{{ $item->exoneration_document_number }}">
+                                <input class="nombreInstitucion" type="hidden" name="items[{{ $loop->index }}][nombreInstitucion]" itemname="nombreInstitucion" value="{{ $item->exoneration_company_name }}">
+                                <input class="porcentajeExoneracion" type="hidden" name="items[{{ $loop->index }}][porcentajeExoneracion]" itemname="porcentajeExoneracion" value="{{ $item->exoneration_porcent }}">
+                                <input class="montoExoneracion" type="hidden" name="items[{{ $loop->index }}][montoExoneracion]" itemname="montoExoneracion" value="{{ $item->exoneration_amount }}">
+                                <input class="impuestoNeto" type="hidden" name="items[{{ $loop->index }}][impuestoNeto]" itemname="impuestoNeto" value="{{ $item->impuesto_neto }}">
+                                <input class="exoneration_total_amount montoExoneracion" type="hidden" name="items[{{ $loop->index }}][montoExoneracion]" itemname="exoneration_total_amount" value="{{ $item->exoneration_total_amount }}">
                                 <input class="exoneration_date" type="hidden" name="items[{{ $loop->index }}][exoneration_date]" itemname="exoneration_date" value="{{date('d/m/Y', strtotime($item->exoneration_date))}}">
                                 <input class="tariff_heading" type="hidden" name="items[{{ $loop->index }}][tariff_heading]" itemname="tariff_heading" value="{{ $item->tariff_heading }}">
                                 <input class="exoneration_total_gravado" type="hidden" name="items[{{ $loop->index }}][exoneration_total_gravado]" itemname="exoneration_total_gravado" value="{{ $item->exoneration_total_gravado }}">
-
-
 
                                 <input class="is_identificacion_especifica" type="hidden" name="items[{{ $loop->index }}][is_identificacion_especifica]" itemname="is_identificacion_especifica" value="{{ $item->is_identificacion_especifica }}">
                               </td>
@@ -348,31 +346,7 @@
     <script>
         $(document).ready(function(){
 
-            $('#tipo_producto').val(17).change();
-
-            var subtotal = 0;
-            var monto_iva = 0;
-            var total = 0;
-            var exonerado = 0;
-            $('.item-tabla').each(function(){
-                var s = parseFloat($(this).find('.subtotal').val());
-                var m = parseFloat($(this).find('.monto_iva').val());
-                var t = parseFloat($(this).find('.total').val());
-                var e = parseFloat($(this).find('.exoneration_amount').val());
-                subtotal += s;
-                monto_iva += m;
-                total += t;
-                exonerado += e;
-            });
-
-            $('#subtotal').val( fixComas(subtotal) );
-            $('#monto_iva').val( fixComas(monto_iva) );
-            $('#total').val( fixComas(total) );
-            $('#total_iva_exonerado').val( fixComas(exonerado) );
-            if(exonerado > 0){
-                $('#total_iva_exonerado-cont').removeClass('hidden');
-            }
-
+             calcularTotalFactura();
             toggleRetencion();
         });
 
