@@ -1156,7 +1156,6 @@ toastr.options = {
             $('#divMontoExoneracion').attr('hidden', false);
             $('#divMontoTotalLinea').attr('hidden', false);
             $('#divImpuestoNeto').attr('hidden', false);
-            $('#typeDocument').attr('required', true);
             $('#exoneradalinea').val('1');
         }else{
             $(".exoneracion-cont").hide();
