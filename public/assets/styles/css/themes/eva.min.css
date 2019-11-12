@@ -21202,18 +21202,3 @@ body:after {
   }
 }
 
-
-.columnas-excel {
-    list-style-type: upper-alpha;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-wrap: wrap;
-    flex-wrap: wrap;
-    font-size: 0.6785rem;
-    padding-left: 1rem;
-}
-.columnas-excel li {
-  width: 33%;
-  padding-right: 1rem;
-}

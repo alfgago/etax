@@ -590,7 +590,9 @@
    window.calcularMontoExoneracion = function() {
       var hasExoneracion = false;
       var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184"];
-      if( codigosConExoneracion.includes( $('#tipo_iva').val() ) ){
+      var construccion = jQuery("#tipo_producto").val() == 43; //Servicios de construcción e ingenieria al 0% transitorio. Llevan exoneración
+      
+      if( codigosConExoneracion.includes( $('#tipo_iva').val() ) || construccion ){
         var porcentajeExonerado = $('#porcentajeExoneracion').val();
         if(porcentajeExonerado > 0) {
             var monto_iva_detalle = $('#item_iva_amount').val();
@@ -612,7 +614,9 @@
         
         var hasExoneracion = false;
         var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184"];
-        if( codigosConExoneracion.includes( $('#tipo_iva').val() ) ){
+        var construccion = jQuery("#tipo_producto").val() == 43; //Servicios de construcción e ingenieria al 0% transitorio. Llevan exoneración
+        
+        if( codigosConExoneracion.includes( $('#tipo_iva').val() ) || construccion ){
           hasExoneracion = true;
         }
         
@@ -762,6 +766,10 @@ $( document ).ready(function() {
       calcularSubtotalItem();
       togglePorcentajeIdentificacionPlena();
       if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
+    });
+  
+    $('#tipo_producto').on('change', function(){
+      toggleCamposExoneracion();
     });
     
     $('#item_iva_amount').on('change', function(){
