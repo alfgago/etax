@@ -8,7 +8,7 @@
 			<span class="no">No</span>
 		</span>
   </th>
-	<th class="posrel" colspan="6">{{ $title }} <input class="sumtot" readonly="" value="{{ number_format($totales, 2) }}"></th>
+	<th class="posrel" colspan="6">{{ $title }} <input class="sumtot" readonly="" value="{{ number_format($totales, 0) }}"></th>
 </tr>
 @endif
 @if( $desplegar == "desplegar-true" )
@@ -50,7 +50,7 @@
 			<tr class="desplegar-true">
 		  	<th colspan="4">{{ $info['name'] }}</th>
 			  <td colspan="2">
-			  	<input readonly value="{{ number_format( $info['monto0'], 2 ) }}"/>
+			  	<input readonly value="{{ number_format( $info['monto0'], 0 ) }}"/>
 			  </td>
 			</tr>
 		@endif
