@@ -858,8 +858,6 @@ toastr.options = {
       $('#numeroDocumento').val(numeroDocumento);
       $('#exoneration_date').val(exoneration_date);
       $('#porcentajeExoneracion').val(porcentajeExoneracion);
-      $('#montoExoneracion').val(montoExoneracion);
-      $('#impuestoNeto').val(impuestoNeto);
       $('#montoTotalLinea').val(montoTotalLinea);
       $('#nombreInstitucion').val(nombreInstitucion);
 
