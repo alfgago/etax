@@ -726,7 +726,13 @@ toastr.options = {
       } 
     }else{
       if( subtotal && codigo && nombre && precio_unitario && cantidad && tipo_iva && tipo_producto && total > 0 ){
-          datos = true;
+      	 typeDocument = '';
+      	 numeroDocumento = '';
+      	 nombreInstitucion = '';
+      	 exoneration_date = '';
+      	 porcentajeExoneracion = 0;
+      	 montoExoneracion = 0;
+         datos = true;
       } 
     }
     //Se asegura de que los campos hayan sido llenados
