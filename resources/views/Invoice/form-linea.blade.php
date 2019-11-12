@@ -110,6 +110,7 @@
     <div class="form-group col-md-1">
       <label for="porc_iva">% IVA</label>
       <input type="number" min="0" class="form-control pr-0" id="porc_iva" placeholder="13" value="13" readonly>
+      <input type="text"  class="hidden" id="exoneradalinea"  value="0" >
     </div>
     
     <div class="form-group col-md-12 inline-form inline-checkbox hidden">
