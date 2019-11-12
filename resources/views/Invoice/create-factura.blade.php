@@ -316,7 +316,7 @@ $company = currentCompanyModel();
                     </div>
                   </div>
 
-                  <div class="form-group col-md-6 hidden">
+                  <div class="form-group col-md-6">
                     <label for="due_date">Recurrencia</label>
                     <div class='input-group date inputs-fecha'>
                       <select class="form-control" id="recurrencia" name="recurrencia">

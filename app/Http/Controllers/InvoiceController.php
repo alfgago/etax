@@ -531,7 +531,7 @@ class InvoiceController extends Controller
     public function sendHacienda(Request $request)
     {
         //revision de branch para segmentacion de funcionalidades por tipo de documento
-        //try {
+        try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
             $request->validate([
                 'subtotal' => 'required',
@@ -581,12 +581,9 @@ class InvoiceController extends Controller
                         }
                     }
 
-                    $start_date = Carbon::parse(now('America/Costa_Rica'));
-                    $comparacion = Carbon::createFromFormat('d/m/Y', $request->generated_date);
-                    $today = $start_date->year."-".$start_date->month."-".$start_date->day;
-                    $fecha_comparacion = $comparacion->year."-".$comparacion->month."-".$comparacion->day;
-
-                    if($today < $fecha_comparacion){
+                    $today = Carbon::parse(now('America/Costa_Rica'));
+                    $generated_date = Carbon::createFromFormat('d/m/Y', $request->generated_date);
+                    if($today->format("d/m/Y") <  $generated_date->format("d/m/Y")){
                         $invoice->hacienda_status = '99';
                         $invoice->generation_method = "etax-programada";
                         $invoice->document_key = $invoice->document_key."programada";
@@ -615,7 +612,7 @@ class InvoiceController extends Controller
                             $options = $request->cantidad_dias;
                         }
                         $recurrencia->options = $options;
-                        $recurrencia->next_send = $recurrencia->proximo_envio($today,$request->generated_date);
+                        $recurrencia->next_send = $recurrencia->proximo_envio($today,$generated_date);
                         $recurrencia->save();   
                         
                         $invoice->recurring_id = $recurrencia->id;
@@ -664,10 +661,10 @@ class InvoiceController extends Controller
             }else{
                 return back()->withError('Mes seleccionado ya fue cerrado');
             }
-        /*} catch( \Exception $ex ) {
+        } catch( \Exception $ex ) {
             Log::error("ERROR Envio de factura a hacienda -> ".$ex);
             return back()->withError( 'Ha ocurrido un error al enviar factura.' );
-        }*/
+        }
     }
     
     private function storeBillFEC($request) {
