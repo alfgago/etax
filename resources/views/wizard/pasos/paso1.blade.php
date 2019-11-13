@@ -18,7 +18,7 @@
 
 <div class="form-group col-md-4" style="white-space: nowrap;">
   <label for="id_number">Número de identificación *</label>
-  <input type="number" class="form-control checkEmpty" name="id_number" id="id_number" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);">
+  <input type="number" class="form-control checkEmpty" name="id_number" id="id_number" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);" @if(in_array(8, auth()->user()->permisos()) ) readonly @endif>
 </div>
 
 <div class="form-group col-md-4">

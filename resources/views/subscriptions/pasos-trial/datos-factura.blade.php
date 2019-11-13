@@ -19,7 +19,8 @@
 
 <div class="form-group col-md-4" style="white-space: nowrap;">
     <label for="id_number">Número de identificación *</label>
-    <input type="number" class="form-control checkEmpty" name="id_number" id="id_number" onchange="getJSONCedula(this.value);" value="{{ @old('id_number') }}">
+    <input type="number" class="form-control checkEmpty" name="id_number" id="id_number" onchange="getJSONCedula(this.value);" value="{{ @old('id_number') }}" 
+                @if(in_array(8, auth()->user()->permisos()) ) readonly @endif>
 </div>
 
 <div class="form-group col-md-4">
