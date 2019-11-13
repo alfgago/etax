@@ -143,12 +143,10 @@ class BillController extends Controller
        $filtroValidado = $request->get('filtroValidado');
        switch($filtroValidado){
             case 1:
-                $query = $query->where(function($q){
-                    $q->whereNull('bill_items.product_type')->orWhereNull('bill_items.iva_type');
-                });
+                $query = $query->where('bill_items.is_code_validated', false);
                 break;
             case 2:
-                $query = $query->whereNotNull('bill_items.product_type')->WhereNotNull('bill_items.iva_type');
+                $query = $query->where('bill_items.is_code_validated', true);
                 break;
             case 3:
                 $query = $query->where('bills.is_code_validated', false);
@@ -688,41 +686,49 @@ class BillController extends Controller
         foreach( $request->items as $key => $item ) {
             $billItem = BillItem::with('bill')->findOrFail($key);
             $bill = $billItem->bill;
-            if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/Y') )){ 
-                BillItem::where('id', $key)
-                ->update([
-                  'iva_type' =>  $item['iva_type'],
-                  'product_type' =>  $item['product_type'],
-                  'porc_identificacion_plena' =>  $item['porc_identificacion_plena']
-                ]);
-                $validated = true;
-                foreach($bill->items as $item){
-                    if(!isset($item->iva_type) || !isset($item->product_type)){
-                        $validated = false;
+            if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/Y') )){
+                try{
+                    BillItem::where('id', $key)
+                    ->update([
+                      'iva_type' =>  $item['iva_type'],
+                      'product_type' =>  $item['product_type'],
+                      'porc_identificacion_plena' =>  $item['porc_identificacion_plena'],
+                      'is_code_validated' =>  true
+                    ]);
+                    $validated = true;
+                    foreach($bill->items as $item){
+                        if(!$item->is_code_validated){
+                            $validated = false;
+                        }
                     }
-                }
-                if($validated){
-                    $bill->is_code_validated = true;
-                    if(!$company->use_invoicing){
-                        $bill->accept_status = 1;
+                    if($validated){
+                        $bill->is_code_validated = true;
+                        if(!$company->use_invoicing){
+                            $bill->accept_status = 1;
+                        }
+                        $bill->save();
                     }
-                    $bill->save();
-                }
+                    
+                    $user = auth()->user();
+                    Activity::dispatch(
+                        $user,
+                        $bill,
+                        [
+                            'company_id' => $bill->company_id,
+                            'id' => $bill->id,
+                            'document_key' => $bill->document_key
+                        ],
+                        "La factura ". $bill->document_number . " ha sido validada."
+                    )->onConnection(config('etax.queue_connections'))
+                    ->onQueue('log_queue');
+                    
+                    clearBillCache($bill);
+                }catch(\Exception $e){
+                    Log::error('Error ' . $e->getMessage());
+                    $errors = true;
+                    $resultBills[$bill->document_number] = ['status' => 1];
+                } 
                 
-                $user = auth()->user();
-                Activity::dispatch(
-                    $user,
-                    $bill,
-                    [
-                        'company_id' => $bill->company_id,
-                        'id' => $bill->id,
-                        'document_key' => $bill->document_key
-                    ],
-                    "La factura ". $bill->document_number . " ha sido validada."
-                )->onConnection(config('etax.queue_connections'))
-                ->onQueue('log_queue');
-                
-                clearBillCache($bill);
             }else{
                 $errors = true;
                 $resultBills[$bill->document_number] = ['status' => 0];
@@ -734,7 +740,7 @@ class BillController extends Controller
             foreach($resultBills as $key => $bill){
                 $result = $result . $key . " ";              
             }
-            $result = $result . 'fallaron ya que el mes ya fue cerrado.';
+            $result = $result . 'fallaron durante la validacion.';
             return back()->withError($result);
         }else{
             return back()->withMessage('Todas las facturas fueron validadas correctamente.'); 
@@ -755,7 +761,8 @@ class BillController extends Controller
                 ->update([
                   'iva_type' =>  $item['iva_type'],
                   'product_type' =>  $item['product_type'],
-                  'porc_identificacion_plena' =>  $item['porc_identificacion_plena']
+                  'porc_identificacion_plena' =>  $item['porc_identificacion_plena'],
+                  'is_code_validated' =>  true
                 ]);
             }
             if(!$company->use_invoicing){

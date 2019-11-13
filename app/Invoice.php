@@ -18,7 +18,7 @@ class Invoice extends Model
     use SoftDeletes;
 
     protected $guarded = [];
-    
+
     //Relacion con la empresa
     public function company()
     {
@@ -30,12 +30,12 @@ class Invoice extends Model
     {
         return $this->belongsTo(Client::class);
     }
-    
+
     public function activity()
     {
         return $this->belongsTo(Actividades::class, 'commercial_activity');
     }
-    
+
     public function clientName() {
       try{
         if( isset($this->client_first_name)) {
@@ -49,7 +49,7 @@ class Invoice extends Model
         }
       }catch(\Throwable $e){ return 'N/A'; }
     }
-    
+
     public function documentTypeName() {
       $tipo = 'Factura electrónica';
       try{
@@ -68,34 +68,34 @@ class Invoice extends Model
            $this->save();
         }
       }catch(\Throwable $e){ return 'N/A'; }
-      
+
       return $tipo;
     }
-  
+
     //Relación con facturas emitidas
     public function items()
     {
         return $this->hasMany(InvoiceItem::class);
     }
-  
+
     //Relación con facturas emitidas
     public function otherCharges()
     {
         return $this->hasMany(OtherCharges::class);
     }
-  
+
     //Devuelve la fecha de generación en formato Carbon
     public function generatedDate()
     {
         return Carbon::parse($this->generated_date);
     }
-  
+
     //Devuelve la fecha de vencimiento en formato Carbon
     public function dueDate()
     {
         return Carbon::parse($this->due_date);
     }
-    
+
     //Relacion con hacienda
     public function xmlHacienda()
     {
@@ -107,9 +107,9 @@ class Invoice extends Model
     {
         return $this->hasOne(DocumentReference::class);
     }
-    
+
     public function getCondicionVenta() {
-      
+
       $str = "Contado";
       if( $this->sale_condition == '02' ) {
         $str = "Crédito";
@@ -125,11 +125,11 @@ class Invoice extends Model
         $str = "Otros";
       }
       return $str;
-      
+
     }
-    
+
     public function getMetodoPago() {
-      
+
       $str = "Efectivo";
       if( $this->payment_type == '02' ) {
         $str = "Tarjeta";
@@ -143,9 +143,9 @@ class Invoice extends Model
         $str = "Otros";
       }
       return $str;
-      
+
     }
-    
+
     /**
     * Asigna los datos de la factura segun el request recibido
     **/
@@ -171,7 +171,7 @@ class Invoice extends Model
                 $tipo_persona = $request->tipo_persona;
                 $identificacion_cliente = preg_replace("/[^0-9]/", "", $request->id_number );
                 $codigo_cliente = $request->code;
-                
+
                 $billing_emails = isset($request->billing_emails) ? trim($request->billing_emails) : $request->email;
 
                 $client = Client::updateOrCreate(
@@ -237,7 +237,7 @@ class Invoice extends Model
             } else {
               $this->client_first_name = 'N/A';
             }
-            
+
             if ($this->document_type == '08' && isset($request->provider_id)) {
 
                 $this->client_first_name = trim($this->company->name);
@@ -348,7 +348,7 @@ class Invoice extends Model
                 }
             }
             $this->total_iva_devuelto = $totalIvaDevuelto;
-            
+
             try{
               //Recorrer OtrosCargos
               $oids = array();
@@ -371,7 +371,7 @@ class Invoice extends Model
             }catch(\Exception $e){
                 Log::error("Error al guardar otros cargos " . $e);
             }
-            
+
             //Guarda nuevamente el invoice
             $this->save();
 
@@ -382,8 +382,8 @@ class Invoice extends Model
             return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
         }
     }
-  
-    /*public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal, 
+
+    /*public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal,
                              $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt, $typeDocument,
                             $numeroDocumento, $nombreInstitucion, $porcentajeExoneracion, $montoExoneracion, $impuestoNeto, $montoTotalLinea)
     {
@@ -416,9 +416,9 @@ class Invoice extends Model
         'impuestoNeto' => $impuestoNeto ?? 0,
         'exoneration_total_amount' => $montoTotalLinea ?? 0
       ]);
-      
+
     }*/
-  
+
     public function addEditItem(array $data)
     {
         try {
@@ -453,7 +453,8 @@ class Invoice extends Model
                 }catch( \Exception $e ) {
                     $exonerationDate = null;
                 }
-                if ($exonerationDate && isset($data['typeDocument']) && isset($data['numeroDocumento']) && $data['porcentajeExoneracion'] > 0) {
+                $exoneradalinea = $data['exoneradalinea'] ?? 1;
+                if ($exonerationDate && isset($data['typeDocument']) && isset($data['numeroDocumento']) && $data['porcentajeExoneracion'] > 0 && $exoneradalinea == 1) {
 
                     $item->exoneration_document_type = $data['typeDocument'] ?? null;
                     $item->exoneration_document_number = $data['numeroDocumento'] ?? null;
@@ -464,7 +465,7 @@ class Invoice extends Model
                     $item->exoneration_total_amount = $data['montoExoneracion'] ?? 0;
                     $item->exoneration_total_gravado = (($item->item_count * $item->unit_price) * $item->exoneration_porcent) / 100 ;
                     $item->impuesto_neto = $data['impuestoNeto'] ?? $data['iva_amount'] - $data['montoExoneracion'];
-                    
+
                 }
                 $item->save();
                 return $item;
@@ -477,7 +478,7 @@ class Invoice extends Model
         }
 
     }
-    
+
     public function addEditOtherCharges(array $data)
     {
         try {
@@ -485,7 +486,7 @@ class Invoice extends Model
                 $item = OtherCharges::updateOrCreate([
                     'item_number' => $data['item_number'],
                     'invoice_id' => $this->id
-                ], 
+                ],
                 [
                     'company_id' => $this->company_id,
                     'year'  => $this->year,
@@ -508,7 +509,7 @@ class Invoice extends Model
         }
 
     }
-    
+
     /*
     * importInvoiceRow Es la función que se usa para importar por Excel.
     */
@@ -521,12 +522,12 @@ class Invoice extends Model
           //Si es email, busca por ID del receptor para encontrar la compañia
           $company = Company::where('id_number', $data['idEmisor'])->first();
         }
-        
+
         if( ! $company ) {
           return false;
         }
       }
-      
+
       $idCliente = 0;
       $identificacionCliente = preg_replace("/[^0-9]/", "", $data['identificacionCliente'] );
       if( $identificacionCliente ) {
@@ -568,11 +569,11 @@ class Invoice extends Model
         $tipoDocumento = '04'; //Si no trae cliente, es un tiquete.
       }
       $idCliente = preg_replace("/[^0-9]/", "", $idCliente );
-      
+
       $arrayKey = "import-factura-" . $data['claveFactura'] . "-$identificacionCliente";
       //Usa Cache por si viene la misma factura en varios lugares del Excel, las siguientes veces no reinicia el subtotal de la factura.
-      if ( !isset($invoiceList[$arrayKey]) ) { 
-        
+      if ( !isset($invoiceList[$arrayKey]) ) {
+
           $invoice = new Invoice();
           try{
             $invoice->generated_date = Carbon::createFromFormat('d/m/Y', $data['fechaEmision']);
@@ -588,7 +589,7 @@ class Invoice extends Model
           }
           $year = $invoice->generated_date->year;
           $month = $invoice->generated_date->month;
-      
+
           $invoice->company_id = $company->id;
           $invoice->client_id = $idCliente;
           $invoice->document_key =  $data['claveFactura'];
@@ -597,26 +598,26 @@ class Invoice extends Model
           $invoice->xml_schema =  $data['xmlSchema'] ?? 43;
           $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
           $invoice->buy_order = isset( $data['ordenCompra'] ) ? $data['ordenCompra'] : null;
-  
+
           //Datos generales y para Hacienda
-          if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' 
+          if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04'
               || $tipoDocumento == '05' || $tipoDocumento == '06' || $tipoDocumento == '07' || $tipoDocumento == '08' || $tipoDocumento == '99' ) {
-              $invoice->document_type = $tipoDocumento;    
+              $invoice->document_type = $tipoDocumento;
           } else {
-             $invoice->document_type = '01'; 
+             $invoice->document_type = '01';
           }
-          
+
           //Datos generales
           $invoice->sale_condition = $data['condicionVenta'];
           $invoice->payment_type = $data['metodoPago'];
           $invoice->credit_time = isset( $invoice->due_date ) ? $invoice->due_date->format('d/m/Y') : null;
           $invoice->description = $data['descripcion'];
 
-          $invoice->generation_method = $data['metodoGeneracion']; 
+          $invoice->generation_method = $data['metodoGeneracion'];
           $invoice->is_authorized = $data['isAuthorized'];
           $invoice->is_code_validated = $data['codeValidated'];
           $invoice->hacienda_status = "03";
-          
+
           $invoice->client_id_number = preg_replace("/[^0-9]/", "", $data['identificacionCliente']);
           $invoice->client_first_name = $data['nombreCliente'] ?? null;
           $invoice->client_email = $data['correoCliente'] ?? null;
@@ -631,7 +632,7 @@ class Invoice extends Model
               $invoice->client_district = $data['zip'];
             }catch( \Throwable $e ){ }
           }
-          
+
           //Datos de factura
           $invoice->currency_rate = $data['tipoCambio'] ?? 1;
           //Datos de factura
@@ -641,7 +642,7 @@ class Invoice extends Model
           if($invoice->currency == 'CRC'){
             $invoice->currency_rate = 1;
           }
-          
+
           $invoice->commercial_activity =  $data['codigoActividad'] ?? '0';
           $invoice->year = $year;
           $invoice->month = $month;
@@ -650,19 +651,19 @@ class Invoice extends Model
           $invoice->subtotal = 0;
           $invoice->iva_amount = 0;
           $invoice->total = $data['totalDocumento'] ?? 0;
-          
+
           $invoiceList[$arrayKey]['lineas'] = array();
           $invoiceList[$arrayKey]['factura'] = $invoice;
       }
-      
-      /*if( !CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/Y'), $company )){ 
-        return false; 
+
+      /*if( !CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/Y'), $company )){
+        return false;
       }*/
-      
+
       $invoice = $invoiceList[$arrayKey]['factura'];
       $year = $invoice->generatedDate()->year;
       $month = $invoice->generatedDate()->month;
-    
+
       /**LINEA DE FACTURA**/
       $subtotalLinea = $data['subtotalLinea'] ?? 0;
       $montoIvaLinea = $data['montoIva'] ?? 0;
@@ -671,9 +672,9 @@ class Invoice extends Model
       $montoDescuentoLinea = $data['montoDescuento'] ?? 0;
       $cantidadLinea = $data['cantidad'] ?? 0;
       $porcentajeIva = $data['porcentajeIva'] ?? 13;
-      
+
       $discount_reason = "";
-      
+
       $item = [
           'company_id' => $company->id,
           'year' => $year,
@@ -701,11 +702,11 @@ class Invoice extends Model
           'exoneration_total_amount' => $data['totalMontoLinea']
       ];
       array_push($invoiceList[$arrayKey]['lineas'], $item);
-      
+
       if( $data['totalNeto'] != 0 ) {
         $invoice->subtotal = $data['totalNeto'];
       }
-      
+
       return $invoiceList;
     }
 
@@ -728,9 +729,9 @@ class Invoice extends Model
         }
         return substr('0000'.hexdec(substr(sha1($ref.'Factel'.$salesId.'Facthor'), 0, 15)) % 999999999, -8);
     }
-    
+
     public static function saveInvoiceXML( $arr, $metodoGeneracion ) {
-      
+
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
         if( $metodoGeneracion != "Email" && $metodoGeneracion != 'GS' ){
           $company = currentCompanyModel();
@@ -742,7 +743,7 @@ class Invoice extends Model
         if( ! $company ) {
           return false;
         }
-      
+
         $invoice = Invoice::firstOrNew(
               [
                   'company_id' => $company->id,
@@ -750,7 +751,7 @@ class Invoice extends Model
                   'document_key' => $arr['Clave'],
               ]
         );
-        
+
         if( $invoice->id ) {
           //Log::warning( "XML: No se pudo guardar la factura de venta. Ya existe para la empresa." );
           return false;
@@ -759,12 +760,19 @@ class Invoice extends Model
         $invoice->hacienda_status = "03";
         $invoice->payment_status = "01";
         $invoice->generation_method = $metodoGeneracion;
-        
+
         $invoice->commercial_activity = $arr['CodigoActividad'] ?? 0;
         $invoice->xml_schema = $invoice->commercial_activity ? 43 : 42;
         $invoice->sale_condition = isset($arr['CondicionVenta']) ? $arr['CondicionVenta'] : '01';
+
+
+
         try{
-          $invoice->credit_time = isset($arr['PlazoCredito']) ? $arr['PlazoCredito'] : null;
+          if (strpos($arr['PlazoCredito'], " ")){
+            $invoice->credit_time = null;
+          }else{
+            $invoice->credit_time = isset($arr['PlazoCredito']) ? $arr['PlazoCredito'] : null;
+          }
         }catch( \Exception $e ){
           $invoice->credit_time = null;
         }
@@ -774,17 +782,16 @@ class Invoice extends Model
           $medioPago = $medioPago[0];
         }
         $invoice->payment_type = $medioPago;
-        
         //Fechas
         $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10));
         $invoice->generated_date = $fechaEmision;
         $invoice->due_date = $fechaEmision;
-        
+
         $month = $fechaEmision->month;
         $year = $fechaEmision->year;
         $invoice->month = $month;
         $invoice->year = $year;
-        
+
         if( array_key_exists( 'CodigoTipoMoneda', $arr['ResumenFactura'] ) ) {
           $idMoneda = $arr['ResumenFactura']['CodigoTipoMoneda']['CodigoMoneda'] ?? '';
           $tipoCambio = $arr['ResumenFactura']['CodigoTipoMoneda']['TipoCambio'] ?? 1;
@@ -794,10 +801,10 @@ class Invoice extends Model
         }
         $invoice->currency = $idMoneda;
         $invoice->currency_rate = $tipoCambio;
-        
+
         $invoice->description = 'XML Importado';
         $invoice->total = $arr['ResumenFactura']['TotalComprobante'];
-        
+
         $authorize = true;
         if( ($metodoGeneracion == "Email" && !$company->auto_accept_email) || $metodoGeneracion == "XML-A" ) {
             $authorize = false;
@@ -809,7 +816,7 @@ class Invoice extends Model
             $tipoDocumento = substr($arr['Clave'], 29, 2);
         }
         $invoice->document_type = $tipoDocumento ?? '01';
-        
+
         //Start DATOS CLIENTE
         if ( array_key_exists('Receptor', $arr) ){
             if( isset( $arr['Receptor']['CorreoElectronico'] ) ){
@@ -935,18 +942,19 @@ class Invoice extends Model
           $invoice->client_first_name = 'N/A';
           $invoice->document_type = $tipoDocumento ?? '04';
         }
-              
+
         //End DATOS CLIENTE
-        
+
         //El subtotal y iva_amount inicia en 0, lo va sumando conforme recorre las lineas.
         $invoice->subtotal = 0;
         $invoice->iva_amount = 0;
-        
+
         //Revisa si es una sola linea. Si solo es una linea, lo hace un array para poder entrar en el foreach.
         $lineas = $arr['DetalleServicio']['LineaDetalle'];
         if( array_key_exists( 'NumeroLinea', $lineas ) ) {
             $lineas = [$arr['DetalleServicio']['LineaDetalle']];
         }
+
         $invoice->total_iva_devuelto = $arr['ResumenFactura']['TotalIVADevuelto'] ?? 0;
         $invoice->total_serv_gravados = $arr['ResumenFactura']['TotalServGravados'] ?? 0;
         $invoice->total_serv_exentos = $arr['ResumenFactura']['TotalServExentos'] ?? 0;
@@ -964,10 +972,11 @@ class Invoice extends Model
         $invoice->total_merc_exonerados = $arr['ResumenFactura']['TotalMercExonerada'] ?? 0;
         $invoice->total_exonerados = $arr['ResumenFactura']['TotalExonerado'] ?? 0;
         $invoice->total_gravado = $arr['ResumenFactura']['TotalGravado'] ?? 0;
-        $invoice->save();
 
+        $invoice->save();
+/****************************************/
         $invoice->company->addSentInvoice($invoice->year, $invoice->month);
-        
+
         $lids = array();
         $items = array();
         $numeroLinea = 0;
@@ -990,7 +999,7 @@ class Invoice extends Model
             $porcentajeIva = null;
             $impuestoNeto = $linea['ImpuestoNeto'] ?? 0;
             $totalMontoLinea = $linea['MontoTotalLinea'] ?? 0;
-            
+
             $tipoDocumentoExoneracion = null;
             $documentoExoneracion = null;
             $companiaExoneracion = null;
@@ -1001,7 +1010,7 @@ class Invoice extends Model
               //$codigoEtax = $linea['Impuesto']['CodigoTarifa'];
               $montoIva = trim($linea['Impuesto']['Monto']);
               $porcentajeIva = trim($linea['Impuesto']['Tarifa']);
-              
+
               if( array_key_exists('Exoneracion', $linea['Impuesto']) ) {
                 $tipoDocumentoExoneracion = $linea['Impuesto']['Exoneracion']['TipoDocumento'] ?? null;
                 $documentoExoneracion = $linea['Impuesto']['Exoneracion']['NumeroDocumento']  ?? null;
@@ -1014,9 +1023,9 @@ class Invoice extends Model
                 $porcentajeExoneracion = $linea['Impuesto']['Exoneracion']['PorcentajeExoneracion'] ?? 0;
                 $montoExoneracion = $linea['Impuesto']['Exoneracion']['MontoExoneracion'] ?? 0;
               }
-              
+
             }
-            
+
             $invoice->subtotal = $invoice->subtotal + $subtotalLinea;
             $invoice->iva_amount = $invoice->iva_amount + $montoIva;
 
@@ -1051,31 +1060,31 @@ class Invoice extends Model
             $item_modificado = $invoice->addEditItem($item);
             array_push( $lids, $item_modificado->id );
         }
-        
+
         foreach ( $invoice->items as $item ) {
           if( !in_array( $item->id, $lids ) ) {
             $item->delete();
           }
         }
-        
+
         $invoice->save();
-        
+
         return $invoice;
     }
-    
+
     public static function storeXML($invoice, $file) {
         $cedulaEmpresa = $invoice->company->id_number;
         //$cedulaCliente = $invoice->client->id_number;
         $consecutivoComprobante = $invoice->document_number;
-        
+
         if ( Storage::exists("empresa-$cedulaEmpresa/facturas_ventas/$invoice->year/$invoice->month/$consecutivoComprobante.xml")) {
              Storage::delete("empresa-$cedulaEmpresa/facturas_ventas/$invoice->year/$invoice->month/$consecutivoComprobante.xml");
         }
-        
+
         $path = \Storage::putFileAs(
             "empresa-$cedulaEmpresa/facturas_ventas", $file, "$invoice->year/$invoice->month/$consecutivoComprobante.xml"
         );
-        
+
         try{
           $xmlHacienda = new XmlHacienda();
           $xmlHacienda->xml = $path;
@@ -1085,7 +1094,7 @@ class Invoice extends Model
         }catch( \Throwable $e ){
           Log::error( 'Error al registrar en tabla XMLHacienda: ' . $e->getMessage() );
         }
-        
+
         try{
           $available_invoices = AvailableInvoices::where('company_id', $invoice->company_id)
                               ->where('year', $invoice->year)
@@ -1098,9 +1107,9 @@ class Invoice extends Model
         }catch( \Throwable $e ){
           Log::error( 'Error al sumar en AvailableInvoices ' . $e->getMessage() );
         }
-        
+
         return $path;
-        
+
     }
 
     public function setNoteData($invoiceReference, $requestItems = null, $noteType = null, $request = []) {

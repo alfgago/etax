@@ -1,7 +1,7 @@
 @extends('layouts/app')
 
 @section('title') 
-  Facturas emitidas
+  Facturas recibidas
 @endsection
 
 @section('breadcrumb-buttons')
