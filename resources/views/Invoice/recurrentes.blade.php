@@ -27,12 +27,12 @@
                   <td>{{ $data->tipo() }}</td>
                   <td>{{ $data->opciones() }}</td>
                   <td>{{ number_format( $data->invoice->total, 2 ) }}</td>
-                  <td>{{ $data->next_send->format('d/m/Y')}}</td>
+                  <td>{{date('d/m/Y', strtotime($data->next_send))}}</td>
                   <td>
-                    <a href="/facturas-emitidas/editar-recurrente/{{ $data->id }}" titulo="Editar recurrencia" class="btn btn-primary m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-clock-o" aria-hidden="true"></i></a>
-                    <a href="/facturas-emitidas/editar-recurrente/{{ $data->id }}" titulo="Ver factura" class="btn btn-primary m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-eye" aria-hidden="true"></i></i></a>
-                    <a href="/facturas-emitidas/editar-recurrente/{{ $data->id }}" titulo="Cambiar factura" class="btn btn-primary m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-file" aria-hidden="true"></i></a>
-                    <a href="/facturas-emitidas/editar-recurrente/{{ $data->id }}" titulo="Eliminar recurrencia" class="btn btn-primary m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                    <a href="/facturas-emitidas/editar-recurrente/{{ $data->id }}" alt="Editar recurrencia" class="btn btn-warning m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-clock-o" aria-hidden="true"></i></a>
+                    <a href="/facturas-emitidas/editar-recurrente/{{ $data->id }}" alt="Ver factura" class="btn btn-info m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-eye" aria-hidden="true"></i></i></a>
+                    <a href="/facturas-emitidas/editar-recurrente/{{ $data->id }}" alt="Cambiar factura" class="btn btn-success m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-file" aria-hidden="true"></i></a>
+                    <a href="/facturas-emitidas/editar-recurrente/{{ $data->id }}" alt="Eliminar recurrencia" class="btn btn-danger m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-trash" aria-hidden="true"></i></a>
                   </td>
                 </tr>
               @endforeach

@@ -65,9 +65,10 @@ class RecurringInvoice extends Model
         return $this->belongsTo(Invoice::class);
     }
 
-    public function invoices()
+    public function enviadas()
     {
-        return $this->hasMany(Invoice::class, 'recurring_id');
+    	$invoices = Invoice::where('recurring_id',$this->id)->get();
+        return $invoices;
     }
 
     public function tipo(){
@@ -127,6 +128,26 @@ class RecurringInvoice extends Model
 	    }
     	if($this->frecuency == "5"){
     		$opciones = $this->options;
+	    }
+	    return $opciones;
+	}
+
+	public function valores(){
+    	$opciones = ["",""];
+    	if($this->frecuency == "1"){
+    		$opciones[0] = $this->options;
+	    }
+    	if($this->frecuency == "2"){
+    		$opciones = explode(",",$this->options);
+	    }
+    	if($this->frecuency == "3"){
+    		$opciones[0] = $this->options;
+	    }
+    	if($this->frecuency == "4"){
+    		$opciones = explode("/",$this->options);
+	    }
+    	if($this->frecuency == "5"){
+    		$opciones[0] = $this->options;
 	    }
 	    return $opciones;
 	}

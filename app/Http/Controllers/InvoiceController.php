@@ -2175,6 +2175,7 @@ class InvoiceController extends Controller
         
     }
 
+
     public function validarEnvioExcel(Request $request){
         try{
             $companyId = currentCompany();
@@ -2199,9 +2200,16 @@ class InvoiceController extends Controller
 
             return redirect('/facturas-emitidas')->withError('Error en factura ENVIO MASIVO EXCEL.');
         }
-
     } 
 
+
+    public function editarRecurrentes($id){
+
+        $companyId = currentCompany();
+        $recurringInvoice = RecurringInvoice::find($id);
+        return view("Invoice/detalle-recurrentes")->with('recurringInvoice', $recurringInvoice);
+        
+    }
     
   
         
