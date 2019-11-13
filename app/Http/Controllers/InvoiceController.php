@@ -145,7 +145,9 @@ class InvoiceController extends Controller
                     ->orwhereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 0')
                     ;
                 });
-                $cat['cero'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 0)->get();
+                $cat['cero'] = CodigoIvaRepercutido::where('hidden', false)->where(function($q){
+                    $q->where('invoice_code', '=', '01')->orWhere('percentage', '=', 0);
+                })->get();
                 break;
             case 1:
                 $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 1');
@@ -168,7 +170,9 @@ class InvoiceController extends Controller
                 $cat['ocho'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 8)->get();;
                 break;
             default:
-                $cat['cero'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 0)->get();
+                $cat['cero'] = CodigoIvaRepercutido::where('hidden', false)->where(function($q){
+                    $q->where('invoice_code', '=', '01')->orWhere('percentage', '=', 0);
+                })->get();
                 $cat['uno'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 1)->get();
                 $cat['dos'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 2)->get();
                 $cat['trece'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 13)->get();
@@ -1066,7 +1070,7 @@ class InvoiceController extends Controller
                 ->update([
                   'iva_type' =>  $item['iva_type'],
                   'product_type' =>  $item['product_type'],
-                  'is_code_validated' =>  true,
+                  'is_code_validated' =>  true
                 ]);
                 $validated = true;
                 foreach($invoice->items as $item){
@@ -1124,7 +1128,8 @@ class InvoiceController extends Controller
                 InvoiceItem::where('id', $item['id'])
                 ->update([
                   'iva_type' =>  $item['iva_type'],
-                  'product_type' =>  $item['product_type']
+                  'product_type' =>  $item['product_type'],
+                  'is_code_validated' =>  true
                 ]);
             }
 

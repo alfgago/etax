@@ -693,7 +693,7 @@ class BillController extends Controller
                       'iva_type' =>  $item['iva_type'],
                       'product_type' =>  $item['product_type'],
                       'porc_identificacion_plena' =>  $item['porc_identificacion_plena'],
-                      'is_code_validated' =>  true,
+                      'is_code_validated' =>  true
                     ]);
                     $validated = true;
                     foreach($bill->items as $item){
@@ -761,7 +761,8 @@ class BillController extends Controller
                 ->update([
                   'iva_type' =>  $item['iva_type'],
                   'product_type' =>  $item['product_type'],
-                  'porc_identificacion_plena' =>  $item['porc_identificacion_plena']
+                  'porc_identificacion_plena' =>  $item['porc_identificacion_plena'],
+                  'is_code_validated' =>  true
                 ]);
             }
             if(!$company->use_invoicing){
