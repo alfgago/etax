@@ -3,7 +3,9 @@
 @section('title') 
   	Facturas recurrentes
 @endsection
-
+@section('breadcrumb-buttons')
+  <button type="submit" onclick="$('#btn-submit-form').click();"  class="btn btn-primary">Guardar factura</button>
+@endsection 
 @section('content') 
 <div class="row">
   <div class="col-md-6">
