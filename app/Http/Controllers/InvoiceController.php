@@ -1066,7 +1066,7 @@ class InvoiceController extends Controller
                 ->update([
                   'iva_type' =>  $item['iva_type'],
                   'product_type' =>  $item['product_type'],
-                  'is_code_validated' =>  true,
+                  'is_code_validated' =>  true
                 ]);
                 $validated = true;
                 foreach($invoice->items as $item){
@@ -1124,7 +1124,8 @@ class InvoiceController extends Controller
                 InvoiceItem::where('id', $item['id'])
                 ->update([
                   'iva_type' =>  $item['iva_type'],
-                  'product_type' =>  $item['product_type']
+                  'product_type' =>  $item['product_type'],
+                  'is_code_validated' =>  true
                 ]);
             }
 
