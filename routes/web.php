@@ -19,7 +19,7 @@ Route::get('login-sync-gosocket', 'AuthController@loginSyncGoSocket')->name('Use
 
 Auth::routes();
 
-//Cierres de mes
+//gosocket de mes
 Route::prefix('gosocket')->group(function() {
     Route::get('/', 'GoSocketController@gosocketValidate')->name('GoSocketController.gosocketValidate');
 });

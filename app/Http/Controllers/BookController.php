@@ -108,6 +108,7 @@ class BookController extends Controller
         return redirect('/cierres')->withMessage('Cierres de mes satisfactorio');
     }
     
+    //validar si el mes puede ser cerrado.
     public function validar($cierre){
         $book = Book::join('calculated_taxes','calculated_taxes.id','books.calculated_tax_id')
             ->where('books.id',$cierre)->first();

@@ -65,9 +65,12 @@ class BillController extends Controller
      */
     public function indexValidarMasivo(){
         $company = currentCompanyModel();
+        $companyAct = Company::select('commercial_activities')->where('id', $company->id)->first();
+        $activities_company = explode(", ", $companyAct->commercial_activities);
+        $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
         $categoriaProductos = ProductCategory::get();
         $unidades = BillItem::select('bill_items.measure_unit')->where('bill_items.company_id', '=', $company->id)->groupBy('bill_items.measure_unit')->get();
-        return view('Bill/index-masivo', compact('company', 'categoriaProductos', 'unidades'));
+        return view('Bill/index-masivo', compact('company', 'categoriaProductos', 'unidades', 'commercial_activities'));
     }
 
     public function indexOne($id){
@@ -88,6 +91,7 @@ class BillController extends Controller
                 select('bill_items.id as item_id', 'bill_items.*')->
                 where('bill_items.company_id', $company->id)
                 ->join('bills', 'bill_items.bill_id', '=', 'bills.id' )
+                ->where('bills.is_authorized', 1)
                 //->join('providers', 'bills.provider_id', '=', 'providers.id' )
                 ;
 
@@ -688,6 +692,7 @@ class BillController extends Controller
             $bill = $billItem->bill;
             if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/Y') )){
                 try{
+                	$bill->activity_company_verification = $request->actividad_comercial;
                     BillItem::where('id', $key)
                     ->update([
                       'iva_type' =>  $item['iva_type'],
