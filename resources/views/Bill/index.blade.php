@@ -22,8 +22,10 @@
             <div class="periodo-selects">
               <select id="filtro-select" name="filtro" onchange="reloadDataTable();">
                   <option value="99" selected>Todos los documentos</option>
-                  <option value="1">Facturas electrónicas</option>
-                  <option value="3">Notas de crédito</option>
+                  <option value="01">Facturas electrónicas</option>
+                  <option value="03">Notas de crédito</option>
+                  <option value="08">Facturas de compra</option>
+                  <option value="04">Tiquetes electrónicos</option>
                   <option value="0">Documentos eliminados</option>
               </select>
             </div>
