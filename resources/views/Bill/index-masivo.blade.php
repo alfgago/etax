@@ -80,7 +80,14 @@
           </thead>
           <thead>
             <tr>
-               <th colspan="7">Selección masiva: </th>
+               <th colspan="1">Actividad Comercial: </th>
+               <th colspan="2">
+               <select name="actividad_comercial" class="form-control"  placeholder="Seleccione actividad comercial">
+               	@foreach($commercial_activities as $commercial)
+                    <option value="{{@$commercial->codigo}}">{{@$commercial->actividad}}</option>
+                @endforeach
+               </th>
+               <th colspan="4">Selección masiva: </th>
                <td>
                   <div class="">
                     <select class="form-control iva_type_all"  placeholder="Seleccione un código eTax"  >
