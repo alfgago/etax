@@ -93,7 +93,7 @@ class InvoiceController extends Controller
                     Cache::forget("cache-currentcompany-$user->id");
                 }
             }else {
-                return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
+                return view('Invoice/index')->withErrors('Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto.');
             }
         }
         if($company->last_note_ref_number === null) {
@@ -127,6 +127,7 @@ class InvoiceController extends Controller
                 select('invoice_items.id as item_id', 'invoice_items.*')->
                 where('invoice_items.company_id', $company->id)
                 ->join('invoices', 'invoice_items.invoice_id', '=', 'invoices.id' )
+                ->where('invoices.is_authorized', 1)
                 //->join('clients', 'invoices.client_id', '=', 'clients.id' )
                 ;
 
@@ -276,9 +277,9 @@ class InvoiceController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function indexData( Request $request ) {
-        $current_company = currentCompany();
+        $company = currentCompanyModel();
 
-        $query = Invoice::where('invoices.company_id', $current_company)
+        $query = Invoice::where('invoices.company_id', $company->id)
                 ->where('is_void', false)
                 ->where('is_authorized', true)
                 ->where('is_code_validated', true)
@@ -303,14 +304,15 @@ class InvoiceController extends Controller
         }
 
         return datatables()->eloquent( $query )
-            ->addColumn('actions', function($invoice) {
+            ->addColumn('actions', function($invoice) use($company){
                 $oficialHacienda = false;
                 if( $invoice->generation_method != 'M' && $invoice->generation_method != 'XLSX' ){
                     $oficialHacienda =  true;
                 }
                 return view('Invoice.ext.actions', [
                     'oficialHacienda' => $oficialHacienda,
-                    'data' => $invoice
+                    'data' => $invoice,
+                    'company' => $company
                 ])->render();
             })
             ->editColumn('client', function(Invoice $invoice) {
@@ -1310,16 +1312,16 @@ class InvoiceController extends Controller
                 }
                 Log::info("Envios a queue finalizados $company->id_number");
             }else{
-                return redirect('/facturas-emitidas')->withError('Error importando. El archivo tiene más de 2500 lineas.');
+                return back()->withError('Error importando. El archivo tiene más de 2500 lineas.');
             }
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
-            return redirect('/facturas-emitidas')->withError('Error importando. Archivo excede el tamaño mínimo.');
+            return back()->withError('Error importando. Archivo excede el tamaño mínimo.');
         }
 
         $company->save();
 
-        return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
+        return back()->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
 
 
     }
