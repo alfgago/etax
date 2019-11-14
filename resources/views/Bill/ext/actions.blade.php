@@ -36,6 +36,10 @@
       <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
     </a>
     
+    <a href="/facturas-recibidas/download-xml/{{ $data->id }}" title="Descargar XML" class="text-info mr-2"> 
+      <i class="fa fa-file-text-o" aria-hidden="true"></i>
+    </a>
+    
     <a link="/facturas-recibidas/validar/{{ $data->id }}" titulo="Verificación Compra" class="text-success mr-2" onclick="validarPopup(this);" data-toggle="modal" data-target="#modal_estandar"><i class="fa fa-check" aria-hidden="true"></i></a>
   
     <form id="hidefromtaxes-form-{{  $data->id }}" class="inline-form" method="POST" action="/facturas-recibidas/switch-ocultar/{{ $data->id }}" >

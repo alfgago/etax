@@ -287,6 +287,7 @@ class Bill extends Model
                   'porc_identificacion_plena' =>  $data['porc_identificacion_plena'] ?? 0
               ]
           );
+
           
           try {
             $exonerationDate = isset( $data['exoneration_date'] )  ? Carbon::createFromFormat('d/m/Y', $data['exoneration_date']) : null;
@@ -307,8 +308,6 @@ class Bill extends Model
             $item->impuesto_neto = isset($data['impuesto_neto']) ? $data['iva_amount'] - $data['montoExoneracion'] : $data['iva_amount'];
 
           } 
-          
-          $item->fixCategoria();
           
           $item->save();
           return $item;

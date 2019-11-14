@@ -150,6 +150,7 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::get('download-pdf/{id}', 'BillController@downloadPdf')->name('Bill.downloadPdf');
     Route::get('lista-validar-masivo', 'BillController@indexValidarMasivo')->name('Bill.indexValidarMasivo');
     Route::post('validacion-masiva', 'BillController@validarMasivo')->name('Bill.validacion-masiva');
+    Route::get('download-xml/{id}', 'BillController@downloadXml')->name('Bill.downloadXml');
 });
 
 // Rutas de Wizard
