@@ -677,7 +677,7 @@ class Bill extends Model
         
     }
     
-    public static function importBillRow ( $data, $company = false ) {
+    public static function importBillRow ( $data, $billList, $company = false ) {
       if(!$company){
         //Revisa si el método es por correo electrónico. De ser así, usa busca la compañia por cedula.
         if( $data['metodoGeneracion'] != "Email" ){
@@ -716,8 +716,8 @@ class Bill extends Model
       }
       $proveedor = Cache::get($providerCacheKey);
       
-      $billCacheKey = "import-factura-" . $data['claveFactura'] . $company->id . "-" . $data['consecutivoComprobante'];
-      if ( !Cache::has($billCacheKey) ) {
+      $arrayKey = "import-factura-" . $data['claveFactura'] . $company->id . "-" . $data['consecutivoComprobante'];
+      if ( !isset($billList[$arrayKey]) ) {
       
           $bill = Bill::firstOrNew(
               [
@@ -797,7 +797,6 @@ class Bill extends Model
             $bill->hacienda_status = "03";
           }
 
-
           //$bill->description = $row['description'] ? $row['description'] : '';
           try{
             $bill->generated_date = Carbon::createFromFormat('d/m/Y', $data['fechaEmision']);
@@ -822,14 +821,16 @@ class Bill extends Model
           $bill->iva_amount = 0;
           $bill->total = $data['totalDocumento'] ?? 0;
 
-          if(!$bill->id){
+          /*if(!$bill->id){
             $bill->save();
           }
-          $company->save();
+          $company->save();*/
              
-          Cache::put($billCacheKey, $bill, 30);
+          $billList[$arrayKey]['lineas'] = array();
+          $billList[$arrayKey]['factura'] = $bill;
       }
-      $bill = Cache::get($billCacheKey);
+      
+      $bill = $billList[$arrayKey]['factura'];
       $year = $bill->generatedDate()->year;
       $month = $bill->generatedDate()->month;
 
@@ -843,11 +844,7 @@ class Bill extends Model
       $bill->subtotal = $bill->subtotal + $subtotalLinea;
       $bill->iva_amount = $bill->iva_amount + $montoIvaLinea;
       
-      $item = BillItem::updateOrCreate(
-      [
-          'bill_id' => $bill->id,
-          'item_number' => $data['numeroLinea'],
-      ],[
+      $item = [
           'bill_id' => $bill->id,
           'company_id' => $company->id,
           'year' => $year,
@@ -873,14 +870,9 @@ class Bill extends Model
           'exoneration_amount' => $data['montoExoneracion'],
           'impuesto_neto' => $data['impuestoNeto'],
           'exoneration_total_amount' => $data['totalMontoLinea']
-      ]);
+      ];
       
-      if( $bill->year == 2018 ) {
-         clearLastTaxesCache($company->id, 2018);
-      }
-      
-      $item->fixCategoria();
-      clearBillCache($bill);
+      array_push($billList[$arrayKey]['lineas'], $item);
       
       if( $data['totalNeto'] != 0 ) {
         $bill->subtotal = $data['totalNeto'];
@@ -889,10 +881,8 @@ class Bill extends Model
       if(isset($data['codeValidated'])){
         $bill->is_code_validated = $data['codeValidated'];
       }
-
-
-      $bill->save();
-      return $bill;
+      
+      return $billList;
       
     }
     
