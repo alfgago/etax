@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Jobs\LogActivityHandler as Activity;
 use App\Jobs\GoSocketInvoicesSync;
 use App\Utils\BridgeGoSocketApi;
+use App\Utils\CompanyUtils;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -47,10 +48,13 @@ class GoSocketController extends Controller
                 $apiGoSocket = new BridgeGoSocketApi();
                 $user_gs = $apiGoSocket->getUser($token);
                 $user = IntegracionEmpresa::where("user_token",$user_gs['UserId'])->where("company_token",$user_gs['CurrentAccountId'])->first();
+                $company_gs = $apiGoSocket->getAccount($token, $user_gs['CurrentAccountId']);
+                $companyUtils = new CompanyUtils();
+                $datosCedula = $companyUtils->datosCedula($company_gs['Code']);
+                dd($company_gs,$user_gs,$datosCedula);
 
                 if (is_null($user)) {
                     Log::info("Creando usuario");
-                    $company_gs = $apiGoSocket->getAccount($token, $user_gs['CurrentAccountId']);
                     $company_etax = Company::where('id_number',$company_gs['Code'])->first();
                     if($company_etax){
                         return redirect('gosocket/login?token='.$token);
@@ -132,21 +136,17 @@ class GoSocketController extends Controller
                     return redirect('/');
                 } else {
                     Log::info("El usuario Gosocket no se puedo loguear");
-                    dd("El usuario Gosocket no se puedo loguear");
                     return redirect('/login');
                 }
             } else {
                 Log::info("El usuario Gosocket no se puedo loguear no tiene token");
-                dd("El usuario Gosocket no se puedo loguear no tiene token");
                 return redirect('/login');
             }
         }catch( \Exception $ex ) {
             Log::error("Error en login gosocket ".$ex);
-            dd("Error en login gosocket ".$ex);
             return redirect('/login');
         }catch( \Throwable $ex ) {
             Log::error("Error en login gosocket ".$ex);
-            dd("Error en login gosocket ".$ex);
             return redirect('/login');
         }
 	    
