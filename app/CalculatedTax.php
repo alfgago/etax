@@ -585,7 +585,7 @@ class CalculatedTax extends Model
           try{
             
             $currBill = $billItems[$i]->bill;
-            if( !$currBill->is_void && $currBill->is_authorized && $currBill->is_code_validated && $currBill->document_type != '04' &&
+            if( !$currBill->is_void && $currBill->is_authorized && $currBill->is_code_validated &&
                 ( $singleBill || $currBill->accept_status == 1 ) && $currBill->hide_from_taxes == false ) {
             
               if( $currBill->currency == 'CRC' ) {

@@ -726,47 +726,46 @@ class BillController extends Controller
             $xml = simplexml_load_string( file_get_contents($file) );
             $json = json_encode( $xml ); // convert the XML string to JSON
             $arr = json_decode( $json, TRUE );                
-            if(substr($arr['NumeroConsecutivo'],8,2) != "04"){
-                    $FechaEmision = explode("T", $arr['FechaEmision']);
-                    $FechaEmision = explode("-", $FechaEmision[0]);
-                    $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+            //if(substr($arr['NumeroConsecutivo'],8,2) != "04"){
+                $FechaEmision = explode("T", $arr['FechaEmision']);
+                $FechaEmision = explode("-", $FechaEmision[0]);
+                $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
 
-                    if(CalculatedTax::validarMes($FechaEmision)){
-                        $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
-                        $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-                        $consecutivoComprobante = $arr['NumeroConsecutivo'];
-                        $clave = $arr['Clave'];
-                        
-                        //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                        if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
-                            //Registra el XML. Si todo sale bien, lo guarda en S3
-                            $bill = Bill::saveBillXML( $arr, 'XML' );
-                            if( $bill ) {
-                                Bill::storeXML( $bill, $file );
+                if(CalculatedTax::validarMes($FechaEmision)){
+                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
+                    $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+                    $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                    $clave = $arr['Clave'];
+                    
+                    //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
+                        //Registra el XML. Si todo sale bien, lo guarda en S3
+                        $bill = Bill::saveBillXML( $arr, 'XML' );
+                        if( $bill ) {
+                            Bill::storeXML( $bill, $file );
 
-                                $user = auth()->user();
-                                Activity::dispatch(
-                                    $user,
-                                    $bill,
-                                    [
-                                        'company_id' => $bill->company_id,
-                                        'id' => $bill->id,
-                                        'document_key' => $bill->document_key
-                                    ],
-                                    "Importar factura de compra por XML."
-                                )->onConnection(config('etax.queue_connections'))
-                                ->onQueue('log_queue');
-                            }
-                        }else{
-                            return Response()->json("El documento $consecutivoComprobante no le pertenece a su empresa actual", 400);
+                            $user = auth()->user();
+                            Activity::dispatch(
+                                $user,
+                                $bill,
+                                [
+                                    'company_id' => $bill->company_id,
+                                    'id' => $bill->id,
+                                    'document_key' => $bill->document_key
+                                ],
+                                "Importar factura de compra por XML."
+                            )->onConnection(config('etax.queue_connections'))
+                            ->onQueue('log_queue');
                         }
                     }else{
-                        return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
+                        return Response()->json("El documento $consecutivoComprobante no le pertenece a su empresa actual", 400);
                     }
                 }else{
-
-                    return Response()->json('Error: No se puede importar un tiquete electrónico.', 400);
+                    return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
                 }
+            /*}else{
+                return Response()->json('Error: No se puede importar un tiquete electrónico.', 400);
+            }*/
 
              
             $company->save();
@@ -1402,6 +1401,30 @@ class BillController extends Controller
                 ->onQueue('log_queue');
         return redirect('/facturas-recibidas')->withMessage('La factura ha sido restaurada satisfactoriamente.');
     }  
+    
+    public function downloadXml($id) {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+
+        $billUtils = new BillUtils();
+        $file = $billUtils->downloadXml( $bill, currentCompanyModel() );
+        $filename = $bill->document_key . '.xml';
+        if( ! $bill->document_key ) {
+            $filename = $bill->document_number . '-' . $bill->provider_id . '.xml';
+        }
+
+        if(!$file) {
+            return redirect()->back()->withError('No se encontró el XML de la factura. Por favor contacte a soporte.');
+        }
+
+        $headers = [
+            'Content-Type' => 'application/xml',
+            'Content-Description' => 'File Transfer',
+            'Content-Disposition' => "attachment; filename={$filename}",
+            'filename'=> $filename
+        ];
+        return response($file, 200, $headers);
+    }
     
     public function fixImports() {
         $billUtils = new BillUtils();
