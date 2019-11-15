@@ -17,6 +17,7 @@ use App\Team;
 use App\Invoice;
 use App\Bill;
 use App\UserCompanyPermission;
+use App\Actividades;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -39,8 +40,12 @@ class GoSocketController extends Controller
         return view('gosocket.index')->with('token',$token);
     }
 
-    public function gosocketValidate(Request $request) {
+    public function configuracion(){
+        $actividades = Actividades::all();
+        return view('gosocket.configuracion')->with('actividades',$actividades);
+    }
 
+    public function gosocketValidate(Request $request) {
         try{
         	$token = $request->token;
         	Log::info("Iniciando validacion de token gosocket: " . $token);
@@ -48,13 +53,12 @@ class GoSocketController extends Controller
                 $apiGoSocket = new BridgeGoSocketApi();
                 $user_gs = $apiGoSocket->getUser($token);
                 $user = IntegracionEmpresa::where("user_token",$user_gs['UserId'])->where("company_token",$user_gs['CurrentAccountId'])->first();
-                $company_gs = $apiGoSocket->getAccount($token, $user_gs['CurrentAccountId']);
-                $companyUtils = new CompanyUtils();
-                $datosCedula = $companyUtils->datosCedula($company_gs['Code']);
-                dd($company_gs,$user_gs,$datosCedula);
 
                 if (is_null($user)) {
                     Log::info("Creando usuario");
+                    $company_gs = $apiGoSocket->getAccount($token, $user_gs['CurrentAccountId']);
+                    $companyUtils = new CompanyUtils();
+                    $datosCedula = $companyUtils->datosCedula($company_gs['Code']);
                     $company_etax = Company::where('id_number',$company_gs['Code'])->first();
                     if($company_etax){
                         return redirect('gosocket/login?token='.$token);
@@ -73,6 +77,7 @@ class GoSocketController extends Controller
                         'last_name' => $user_etax['last_name'],
                         'last_name2' => $user_etax['last_name2'],
                         'phone' => $user_etax['phone'],
+                        'type' => $datosCedula['type'],
                         'password' => 'password']
                     );
 
@@ -85,7 +90,7 @@ class GoSocketController extends Controller
                         'district' => $company_gs['Address'],
                         'city' => $company_gs['City'],
                         'state' => $company_gs['Province'],
-                        'email' => $company_gs['ContactEmail']
+                        'email' => $user_etax['email']
                         ]
                     );
                     $team = Team::firstOrCreate(
