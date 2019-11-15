@@ -147,38 +147,63 @@ class InvoiceController extends Controller
                     ;
                 });
                 $cat['cero'] = CodigoIvaRepercutido::where('hidden', false)->where(function($q){
-                    $q->where('invoice_code', '=', '01')->orWhere('percentage', '=', 0);
+                    $q->where('invoice_code', '=', '01')->orWhere('percentage', '=', 0)->orWhere('code', '=', 'S097');
                 })->get();
                 break;
             case 1:
                 $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 1');
-                $cat['uno'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 1)->get();
+
+                $cat['uno'] = CodigoIvaRepercutido::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 1)->orWhere('code', '=', 'S097');
+                })->get();
                 break;
             case 2:
                 $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 2');
-                $cat['dos'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 2)->get();
+
+                $cat['dos'] = CodigoIvaRepercutido::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 2)->orWhere('code', '=', 'S097');
+                })->get();
                 break;
             case 13:
                 $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 13');
-                $cat['trece'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 13)->get();
+
+                $cat['trece'] = CodigoIvaRepercutido::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 13)->orWhere('code', '=', 'S097');
+                })->get();
                 break;
             case 4:
                 $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 4');
-                $cat['cuatro'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 4)->get();
+
+                $cat['cuatro'] = CodigoIvaRepercutido::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 4)->orWhere('code', '=', 'S097');
+                })->get();
                 break;
             case 8:
                 $query = $query->whereNotNull('invoice_items.subtotal')->where('invoice_items.subtotal', '>', 0)->whereRaw('ROUND(invoice_items.iva_amount / invoice_items.subtotal * 100) = 8');
-                $cat['ocho'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 8)->get();;
+
+                $cat['ocho'] = CodigoIvaRepercutido::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 8)->orWhere('code', '=', 'S097');
+                })->get();
                 break;
             default:
                 $cat['cero'] = CodigoIvaRepercutido::where('hidden', false)->where(function($q){
                     $q->where('invoice_code', '=', '01')->orWhere('percentage', '=', 0);
                 })->get();
-                $cat['uno'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 1)->get();
-                $cat['dos'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 2)->get();
-                $cat['trece'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 13)->get();
-                $cat['cuatro'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 4)->get();
-                $cat['ocho'] = CodigoIvaRepercutido::where('hidden', false)->where('percentage', '=', 8)->get();
+                $cat['uno'] = CodigoIvaRepercutido::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 1)->orWhere('code', '=', 'S097');
+                })->get();
+                $cat['dos'] = CodigoIvaRepercutido::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 2)->orWhere('code', '=', 'S097');
+                })->get();
+                $cat['trece'] = CodigoIvaRepercutido::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 13)->orWhere('code', '=', 'S097');
+                })->get();
+                $cat['cuatro'] = CodigoIvaRepercutido::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 4)->orWhere('code', '=', 'S097');
+                })->get();
+                $cat['ocho'] = CodigoIvaRepercutido::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 8)->orWhere('code', '=', 'S097');
+                })->get();
         }
 
        $filtroMes = $request->get('filtroMes');

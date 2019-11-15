@@ -251,6 +251,9 @@ function reloadDataTableTarifa() {
         $(this).removeAttr("hidden");
         $(this).show();
       }
+      if($(this).val().indexOf("S097") >= 0){
+        $(this).show();
+      }
     });
   }else{
     var parent = $(".iva_type_all")
