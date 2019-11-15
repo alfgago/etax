@@ -251,7 +251,7 @@ function reloadDataTableTarifa() {
         $(this).removeAttr("hidden");
         $(this).show();
       }
-      if($(this).val().indexOf("S097") >= 0){
+      if($(this).val().indexOf("S097") >= 0 || $(this).val().indexOf("B097") >= 0  ){
         $(this).show();
       }
     });
