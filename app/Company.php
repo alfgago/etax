@@ -300,23 +300,14 @@ class Company extends Model {
     
     public function addSentInvoice($year, $month) {
         try {
-            if(!$month || !$year) {
-                $today = Carbon::parse(now('America/Costa_Rica'));
-                $month = $today->month;
-                $year = $today->year;
-            }
-             
-            $available_invoices = AvailableInvoices::where('company_id', $this->id)
-                                ->where('month', $month)
-                                ->where('year', $year)
-                                ->first();
+            $available_invoices = $this->getAvailableInvoices(0,0);
 
             $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
             $available_invoices->save();
             return $available_invoices;
 
         } catch (\Throwable $ex) {
-             Log::warning('Error en addSentInvoice: ' . $ex->getMessage() );
+             Log::error('Error en addSentInvoice: ' . $ex->getMessage() );
         }
     }
     
