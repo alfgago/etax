@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Jobs\LogActivityHandler as Activity;
 use App\Jobs\GoSocketInvoicesSync;
 use App\Utils\BridgeGoSocketApi;
+use App\Utils\CompanyUtils;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -16,6 +17,7 @@ use App\Team;
 use App\Invoice;
 use App\Bill;
 use App\UserCompanyPermission;
+use App\Actividades;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -38,8 +40,101 @@ class GoSocketController extends Controller
         return view('gosocket.index')->with('token',$token);
     }
 
-    public function gosocketValidate(Request $request) {
+    public function configuracion(){
+        $actividades = Actividades::all();
+        return view('gosocket.configuracion')->with('actividades',$actividades);
+    }
 
+    public function updateWizard(Request $request){
+        try{
+           $company = currentCompanyModel();
+            $invoice = Invoice::firstOrNew(
+                [
+                    'company_id' => $company->id,
+                    'is_totales' => true,
+                    'year' => 2018
+                ]
+            );
+
+            $team = Team::where('company_id', $company->id)->first();
+            /* Only owner of company or user invited as admin for that company can edit company details */
+            if ( !auth()->user()->isOwnerOfTeam($team) && !in_array(8, auth()->user()->permisos())) 
+            {
+                abort(403);
+            }
+
+            $company->commercial_activities = $request->commercial_activities;
+            $company->default_currency = 'CRC';
+            $company->first_prorrata = $request->first_prorrata;
+            $company->first_prorrata_type = $request->first_prorrata_type;
+            $company->use_invoicing = false;
+            
+            if( $company->first_prorrata_type == 1 ) {
+                $company->operative_prorrata = $request->first_prorrata;
+                $company->operative_ratio1 = $request->operative_ratio1;
+                $company->operative_ratio2 = $request->operative_ratio2;
+                $company->operative_ratio3 = $request->operative_ratio3;
+                $company->operative_ratio4 = $request->operative_ratio4;
+            }
+            
+                
+            $company->wizard_finished = true;
+            $company->save();
+
+
+            clearLastTaxesCache($company->id, 2018);
+            
+            if ($company->first_prorrata_type == 2) {
+                $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $company,
+                    [
+                        'company_id' => $company->id
+                    ],
+                    "La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior."
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
+                return redirect('/editar-totales-2018')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
+
+            }
+
+            if ($company->first_prorrata_type == 3) {
+                $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $company,
+                    [
+                        'company_id' => $company->id
+                    ],
+                    "La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior."
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
+                return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
+            }
+                $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $company,
+                    [
+                        'company_id' => $company->id
+                    ],
+                    "La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento."
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
+
+            return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento.');
+
+        }catch( \Exception $ex ) {
+            Log::error("Error en wizard gosocket ".$ex);
+            return redirect()->back()->withError('Error en guardar configuracion');
+        }catch( \Throwable $ex ) {
+            Log::error("Error en login gosocket ".$ex);
+            return redirect()->back()->withError('Error en guardar configuracion');
+        }
+    }
+
+    public function gosocketValidate(Request $request) {
         try{
         	$token = $request->token;
         	Log::info("Iniciando validacion de token gosocket: " . $token);
@@ -51,6 +146,8 @@ class GoSocketController extends Controller
                 if (is_null($user)) {
                     Log::info("Creando usuario");
                     $company_gs = $apiGoSocket->getAccount($token, $user_gs['CurrentAccountId']);
+                    $companyUtils = new CompanyUtils();
+                    $datosCedula = $companyUtils->datosCedula($company_gs['Code']);
                     $company_etax = Company::where('id_number',$company_gs['Code'])->first();
                     if($company_etax){
                         return redirect('gosocket/login?token='.$token);
@@ -69,6 +166,7 @@ class GoSocketController extends Controller
                         'last_name' => $user_etax['last_name'],
                         'last_name2' => $user_etax['last_name2'],
                         'phone' => $user_etax['phone'],
+                        'type' => $datosCedula['type'],
                         'password' => 'password']
                     );
 
@@ -81,7 +179,7 @@ class GoSocketController extends Controller
                         'district' => $company_gs['Address'],
                         'city' => $company_gs['City'],
                         'state' => $company_gs['Province'],
-                        'email' => $company_gs['ContactEmail']
+                        'email' => $user_etax['email']
                         ]
                     );
                     $team = Team::firstOrCreate(
@@ -132,21 +230,17 @@ class GoSocketController extends Controller
                     return redirect('/');
                 } else {
                     Log::info("El usuario Gosocket no se puedo loguear");
-                    dd("El usuario Gosocket no se puedo loguear");
                     return redirect('/login');
                 }
             } else {
                 Log::info("El usuario Gosocket no se puedo loguear no tiene token");
-                dd("El usuario Gosocket no se puedo loguear no tiene token");
                 return redirect('/login');
             }
         }catch( \Exception $ex ) {
             Log::error("Error en login gosocket ".$ex);
-            dd("Error en login gosocket ".$ex);
             return redirect('/login');
         }catch( \Throwable $ex ) {
             Log::error("Error en login gosocket ".$ex);
-            dd("Error en login gosocket ".$ex);
             return redirect('/login');
         }
 	    

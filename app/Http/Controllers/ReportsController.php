@@ -76,6 +76,9 @@ class ReportsController extends Controller
       }
       
       if( !currentCompanyModel()->wizard_finished ) {
+        if(in_array(8, $user->permisos()) ){
+          return redirect('/gosocket/configuracion');
+        }
         return redirect('/wizard');
       }
       return view('/Dashboard/index', compact( 'subscription','mostrar_dashboard' ) );

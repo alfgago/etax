@@ -26,6 +26,8 @@ Route::prefix('gosocket')->group(function() {
     Route::get('/ingresar', 'GoSocketController@gosocketValidate')->name('GoSocketController.gosocketValidate');
     Route::get('/usuarios', 'GoSocketController@reporteUsuarios')->name('GoSocketController.reporteUsuarios');
     Route::get('/login', 'GoSocketController@login')->name('GoSocketController.login');
+    Route::get('/configuracion', 'GoSocketController@configuracion')->name('GoSocketController.configuracion');
+    Route::post('/update-wizard', 'GoSocketController@updateWizard')->name('GoSocketController.updateWizard');
     Route::post('/validar-cuenta', 'GoSocketController@validarCuenta')->name('GoSocketController.validarCuenta');
 
 });
