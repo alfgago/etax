@@ -3,11 +3,16 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Kyslik\ColumnSortable\Sortable;
 use \Carbon\Carbon;
 use App\Invoice;
 
 class RecurringInvoice extends Model
 {
+
+    use Sortable, SoftDeletes;
+
     public function proximo_envio($today,$generated_date){
     	$next_send = $generated_date;
 	    if($this->frecuency == "1"){
@@ -60,13 +65,11 @@ class RecurringInvoice extends Model
         return $next_send;
     }
 
-    public function invoice()
-    {
+    public function invoice(){
         return $this->belongsTo(Invoice::class);
     }
 
-    public function enviadas()
-    {
+    public function enviadas(){
     	$invoices = Invoice::where('recurring_id',$this->id)->get();
         return $invoices;
     }
@@ -151,4 +154,13 @@ class RecurringInvoice extends Model
 	    }
 	    return $opciones;
 	}
+
+    public function proximoVencimiento(){
+        $invoice = $this->invoice;
+        $date = Carbon::parse($invoice->generated_date); 
+        $now = Carbon::parse($invoice->due_date);
+        $diff = $date->diffInDays($now);
+        $next = Carbon::parse($this->next_send);
+        return $next->addDays($diff);
+    }
 }

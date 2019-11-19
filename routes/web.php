@@ -123,9 +123,10 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::post('guardar-validar', 'InvoiceController@guardarValidar')->name('Invoice.GuardarValidar');
     Route::get('envioProgramada', 'InvoiceController@envioProgramada')->name('Invoice.envioProgramada');
     Route::get('recurrentes', 'InvoiceController@recurrentes')->name('Invoice.recurrentes');
-    Route::get('ver-recurrente/{id}', 'InvoiceController@editarRecurrentes')->name('Invoice.editarRecurrentes');
-    Route::get('eliminar-recurrente/{id}', 'InvoiceController@editarRecurrentes')->name('Invoice.editarRecurrentes');
-    Route::get('editar-recurrente/{id}', 'InvoiceController@editarRecurrentes')->name('Invoice.editarRecurrentes');
+    Route::get('ver-recurrente/{id}', 'InvoiceController@verRecurrentes')->name('Invoice.editarRecurrentes');
+    Route::delete('eliminar-recurrente/{id}', 'InvoiceController@eliminarRecurrentes')->name('Invoice.eliminarRecurrentes');
+    Route::delete('eliminar-programada/{id}', 'InvoiceController@eliminarProgramada')->name('Invoice.eliminarProgramada');
+    Route::get('editar-factura/{id}', 'InvoiceController@editarRecurrentes')->name('Invoice.editarRecurrentes');
     Route::get('lista-validar-masivo', 'InvoiceController@indexValidarMasivo')->name('Invoice.indexValidarMasivo');
     Route::post('validacion-masiva', 'InvoiceController@validarMasivo')->name('Invoice.validacion-masiva');
 });

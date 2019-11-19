@@ -318,7 +318,7 @@ $company = currentCompanyModel();
 
                   <div class="form-group col-md-6">
                     <label for="due_date">Recurrencia</label>
-                    <div class='input-group date inputs-fecha'>
+                    <div class='input-group'>
                       <select class="form-control" id="recurrencia" name="recurrencia">
                         <option value="0">Ninguna</option>
                         <option value="1">Semanal</option>
@@ -327,6 +327,8 @@ $company = currentCompanyModel();
                         <option value="4">Anual</option>
                         <option value="5">Cantidad de días</option>
                       </select>
+
+                      <input id="id_recurrente"  class="form-control hidden" name="id_recurrente" required value="0">
                     </div>
                   </div>
 
