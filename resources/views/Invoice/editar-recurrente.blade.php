@@ -450,24 +450,38 @@
                                         <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ $loop->index }});' > <i class="fa fa-trash-o" aria-hidden="true"></i> </span>
                                     </td>
                                     <td class="hidden">
-                                        <input type="hidden" class='numero' name="items[{{ $loop->index }}][item_number]" value="{{ $loop->index+1 }}">
-                                        <input type="hidden" class="item_id" name="items[{{ $loop->index }}][id]" value="{{ $item->id }}"> </td>
-                                    <input type="hidden" class='codigo' name="items[{{ $loop->index }}][code]" value="{{ $item->code }}">
-                                    <input type="hidden" class='nombre' name="items[{{ $loop->index }}][name]" value="{{ $item->name }}">
-                                    <input type="hidden" class='tipo_producto' name="items[{{ $loop->index }}][product_type]" value="{{ $item->product_type }}">
-                                    <input type="hidden" class='cantidad' name="items[{{ $loop->index }}][item_count]" value="{{ $item->item_count }}">
-                                    <input type="hidden" class='unidad_medicion' name="items[{{ $loop->index }}][measure_unit]" value="{{ $item->measure_unit }}">
-                                    <input type="hidden" class='precio_unitario' name="items[{{ $loop->index }}][unit_price]" value="{{ $item->unit_price }}">
-                                    <input type="hidden" class='tipo_iva' name="items[{{ $loop->index }}][iva_type]" value="{{ $item->iva_type }}">
-                                    <input type='hidden' class='porc_identificacion_plena' value='0'>
-                                    <input type='hidden' class='discount_type' name='items[{{ $loop->index }}][discount_type]' value='{{ $item->discount_type }}'>
-                                    <input type='hidden' class='discount' name='items[{{ $loop->index }}][discount]' value='{{ $item->discount }}'>
-                                    <input class="subtotal" type="hidden" name="items[{{ $loop->index }}][subtotal]" value="{{ $item->subtotal }}">
-                                    <input class="porc_iva" type="hidden" name="items[{{ $loop->index }}][iva_percentage]" value="{{ $item->iva_percentage }}">
-                                    <input class="monto_iva" type="hidden" name="items[{{ $loop->index }}][iva_amount]" value="{{ $item->iva_amount }}">
-                                    <input class="total" type="hidden" name="items[{{ $loop->index }}][total]" value="{{ $item->total }}">
-                                    <input class="is_identificacion_especifica" type="hidden" name="items[{{ $loop->index }}][is_identificacion_especifica]" value="{{ $item->is_identificacion_especifica }}">
-                                    </td>
+                                <input type="hidden" class='numero' name="items[{{ $loop->index }}][item_number]" itemname="item_number" value="{{ $loop->index+1 }}">
+                                <input type="hidden" class="item_id" name="items[{{ $loop->index }}][id]" itemname="id" value="{{ $item->id }}"> 
+                                <input type="hidden" class='codigo' name="items[{{ $loop->index }}][code]" itemname="code" value="{{ $item->code }}">
+                                <input type="hidden" class='nombre' name="items[{{ $loop->index }}][name]" itemname="name" value="{{ $item->name }}">
+                                <input type="hidden" class='tipo_producto' name="items[{{ $loop->index }}][product_type]" itemname="product_type" value="{{ $item->product_type }}">
+                                <input type="hidden" class='cantidad' name="items[{{ $loop->index }}][item_count]" itemname="item_count" value="{{ $item->item_count }}">
+                                <input type="hidden" class='unidad_medicion' name="items[{{ $loop->index }}][measure_unit]" itemname="measure_unit" value="{{ $item->measure_unit }}">
+                                <input type="hidden" class='precio_unitario' name="items[{{ $loop->index }}][unit_price]" itemname="unit_price" value="{{ $item->unit_price }}">
+                                <input type="hidden" class='tipo_iva' name="items[{{ $loop->index }}][iva_type]" itemname="iva_type" value="{{ $item->iva_type }}">
+                                <input type="hidden" class='tipo_producto' name="items[{{ $loop->index }}][product_type]" itemname="product_type" value="{{ $item->product_type }}">
+                                <input type='hidden' class='porc_identificacion_plena' itemname="porc_identificacion_plena" value='0'>
+                                <input type='hidden' class='discount_type' name='items[{{ $loop->index }}][discount_type]' itemname="discount_type" value='{{ $item->discount_type }}'>
+                                <input type='hidden' class='discount' name='items[{{ $loop->index }}][discount]' itemname="discount" value='{{ $item->discount }}'>
+                                <input class="subtotal" type="hidden" name="items[{{ $loop->index }}][subtotal]" itemname="subtotal" value="{{ $item->subtotal }}">
+                                <input class="porc_iva" type="hidden" name="items[{{ $loop->index }}][iva_percentage]" itemname="iva_percentage" value="{{ $item->iva_percentage }}">
+                                <input class="monto_iva" type="hidden" name="items[{{ $loop->index }}][iva_amount]" itemname="iva_amount" value="{{ $item->iva_amount }}">
+                                <input class="total" type="hidden" name="items[{{ $loop->index }}][total]" itemname="total" value="{{ $item->total }}">
+
+
+                                <input class="typeDocument" type="hidden" name="items[{{ $loop->index }}][typeDocument]" itemname="typeDocument" value="{{ $item->exoneration_document_type }}">
+                                <input class="nombreInstitucion" type="hidden" name="items[{{ $loop->index }}][nombreInstitucion]" itemname="nombreInstitucion" value="{{ $item->exoneration_document_number }}">
+                                <input class="nombreInstitucion" type="hidden" name="items[{{ $loop->index }}][nombreInstitucion]" itemname="nombreInstitucion" value="{{ $item->exoneration_company_name }}">
+                                <input class="porcentajeExoneracion" type="hidden" name="items[{{ $loop->index }}][porcentajeExoneracion]" itemname="porcentajeExoneracion" value="{{ $item->exoneration_porcent }}">
+                                <input class="montoExoneracion" type="hidden" name="items[{{ $loop->index }}][montoExoneracion]" itemname="montoExoneracion" value="{{ $item->exoneration_amount }}">
+                                <input class="impuestoNeto" type="hidden" name="items[{{ $loop->index }}][impuestoNeto]" itemname="impuestoNeto" value="{{ $item->impuesto_neto }}">
+                                <input class="exoneration_total_amount montoExoneracion" type="hidden" name="items[{{ $loop->index }}][montoExoneracion]" itemname="exoneration_total_amount" value="{{ $item->exoneration_total_amount }}">
+                                <input class="exoneration_date" type="hidden" name="items[{{ $loop->index }}][exoneration_date]" itemname="exoneration_date" value="{{date('d/m/Y', strtotime($item->exoneration_date))}}">
+                                <input class="tariff_heading" type="hidden" name="items[{{ $loop->index }}][tariff_heading]" itemname="tariff_heading" value="{{ $item->tariff_heading }}">
+                                <input class="exoneration_total_gravado" type="hidden" name="items[{{ $loop->index }}][exoneration_total_gravado]" itemname="exoneration_total_gravado" value="{{ $item->exoneration_total_gravado }}">
+
+                                <input class="is_identificacion_especifica" type="hidden" name="items[{{ $loop->index }}][is_identificacion_especifica]" itemname="is_identificacion_especifica" value="{{ $item->is_identificacion_especifica }}">
+                              </td>
                                 </tr>
                             @endforeach
                             </tbody>
