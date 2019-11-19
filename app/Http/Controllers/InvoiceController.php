@@ -2215,7 +2215,7 @@ class InvoiceController extends Controller
         
     }
     
-    public function editarRecurrentes($id)
+    public function editarFactura($id)
     {
         $company = currentCompanyModel(false);
         if ( !$company->atv_validation && $company->use_invoicing ) {
@@ -2243,8 +2243,9 @@ class InvoiceController extends Controller
             }
         }
 
-        $recurringInvoice = RecurringInvoice::findOrFail($id);
-        $invoice = Invoice::findOrFail($recurringInvoice->invoice_id);
+        
+        $invoice = Invoice::findOrFail($id);
+        $recurringInvoice = RecurringInvoice::find($invoice->recurring_id);
         $this->authorize('update', $invoice);
         $company = currentCompanyModel();
         $arrayActividades = $company->getActivities();
