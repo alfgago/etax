@@ -532,7 +532,7 @@ class InvoiceController extends Controller
      */
     public function sendHacienda(Request $request)
     {
-        //dd($request);
+        dd($request);
         //revision de branch para segmentacion de funcionalidades por tipo de documento
         try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
@@ -545,14 +545,29 @@ class InvoiceController extends Controller
                 $tokenApi = $apiHacienda->login(false);
 
                 if ($tokenApi !== false) {
-                    $invoice = new Invoice();
+                    $editar = false;
+                    if(isset($request->invoice_id)){
+                        if($request->invoice_id != 0){
+                            $invoice = Invoice::find($request->invoice_id); 
+                            if($invoice){
+                                if($invoice->hacienda_status == 99 ){
+                                    $editar = true;
+                                }
+                            }
+                        }
+                    }
+                    if(!$editar){
+                        $invoice = new Invoice();
+                    }
                     $company = currentCompanyModel();
                     $invoice->company_id = $company->id;
 
                     
                     //Datos generales y para Hacienda
                     $invoice->document_type = $request->document_type;
-                    $invoice->hacienda_status = '01';
+                    if(!$editar){
+                        $invoice->hacienda_status = '01';
+                    }
                     $invoice->payment_status = "01";
                     $invoice->payment_receipt = "";
                     $invoice->generation_method = "etax";

@@ -116,7 +116,7 @@
                             <div class="form-group col-md-6">
                                 <label for="generated_date">Fecha</label>
                                 <div class='input-group date inputs-fecha'>
-                                    <input id="fecha_generada"  class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{date('d/m/Y', strtotime($recurringInvoice->next_send))}}">
+                                    <input id="fecha_generada"  class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="@if($recurringInvoice) {{date('d/m/Y', strtotime($recurringInvoice->next_send))}} @else {{ $invoice->generatedDate()->format('d/m/Y')  }} @endif">
                                     <span class="input-group-addon">
                           <i class="icon-regular i-Calendar-4"></i>
                         </span>
@@ -136,7 +136,7 @@
                             <div class="form-group col-md-6">
                                 <label for="due_date">Fecha de vencimiento</label>
                                 <div class='input-group date inputs-fecha'>
-                                    <input id="fecha_vencimiento"  class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="{{date('d/m/Y', strtotime($recurringInvoice->proximoVencimiento()))}}">
+                                    <input id="fecha_vencimiento"  class="form-control input-fecha" placeholder="dd/mm/yyyy" name="due_date" required value="@if($recurringInvoice) {{date('d/m/Y', strtotime($recurringInvoice->proximoVencimiento()))}} @else {{ $invoice->dueDate()->format('d/m/Y')  }} @endif">
                                     <span class="input-group-addon">
                         <i class="icon-regular i-Calendar-4"></i>
                       </span>
@@ -146,55 +146,55 @@
       <label>Tipo de recurrencia:</label>
       <div class='input-group'>
         <select class="form-control" id="recurrencia" name="recurrencia">
-          <option value="0" @if($recurringInvoice->frecuency == "0" ) selected @endif >Ninguna</option>
-          <option value="1" @if($recurringInvoice->frecuency == "1" ) selected @endif >Semanal</option>
-          <option value="2" @if($recurringInvoice->frecuency == "2" ) selected @endif >Quincenal</option>
-          <option value="3" @if($recurringInvoice->frecuency == "3" ) selected @endif >Mensual</option>
-          <option value="4" @if($recurringInvoice->frecuency == "4" ) selected @endif >Anual</option>
-          <option value="5" @if($recurringInvoice->frecuency == "5" ) selected @endif >Cantidad de días</option>
+          <option value="0" @if($recurringInvoice) @if($recurringInvoice->frecuency == "0" )  selected @endif @endif >Ninguna</option>
+          <option value="1" @if($recurringInvoice)  @if($recurringInvoice->frecuency == "1" ) selected @endif @endif >Semanal</option>
+          <option value="2" @if($recurringInvoice)  @if($recurringInvoice->frecuency == "2" ) selected @endif @endif >Quincenal</option>
+          <option value="3" @if($recurringInvoice)  @if($recurringInvoice->frecuency == "3" ) selected @endif @endif >Mensual</option>
+          <option value="4" @if($recurringInvoice)  @if($recurringInvoice->frecuency == "4" ) selected @endif @endif >Anual</option>
+          <option value="5" @if($recurringInvoice)  @if($recurringInvoice->frecuency == "5" ) selected @endif @endif >Cantidad de días</option>
         </select>
-        <input id="id_recurrente"  class="form-control hidden" name="id_recurrente" required value="{{$recurringInvoice->id}}">
+        <input id="id_recurrente"  class="form-control hidden" name="id_recurrente" required value="@if($recurringInvoice) {{$recurringInvoice->id}} @else 0 @endif">
       </div>
     </div>
-    <div class="col-md-6 div-semanal div-recurrencia @if($recurringInvoice->frecuency != '1') hidden @endif">
+    <div class="col-md-6 div-semanal div-recurrencia @if($recurringInvoice) @if($recurringInvoice->frecuency != '1') hidden @endif @else hidden @endif">
       <div class="row">
         <div class="form-group col-md-12">
           <label><b>Día de la semana</b></label>
           <div class='input-group date inputs-fecha'>
             <select class="form-control" id="dia" name="dia">
-              <option value="1" @if($recurringInvoice->valores()[0] == "1" ) selected @endif >Lunes</option>
-              <option value="2" @if($recurringInvoice->valores()[0] == "2" ) selected @endif >Martes</option>
-              <option value="3" @if($recurringInvoice->valores()[0] == "3" ) selected @endif >Miercoles</option>
-              <option value="4" @if($recurringInvoice->valores()[0] == "4" ) selected @endif >Jueves</option>
-              <option value="5" @if($recurringInvoice->valores()[0] == "5" ) selected @endif >Viernes</option>
-              <option value="6" @if($recurringInvoice->valores()[0] == "6" ) selected @endif >Sabado</option>
-              <option value="0" @if($recurringInvoice->valores()[0] == "0" ) selected @endif >Domingo</option>
+              <option value="1" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "1" ) selected @endif  @endif>Lunes</option>
+              <option value="2" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "2" ) selected @endif  @endif>Martes</option>
+              <option value="3" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "3" ) selected @endif  @endif>Miercoles</option>
+              <option value="4" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "4" ) selected @endif  @endif>Jueves</option>
+              <option value="5" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "5" ) selected @endif  @endif>Viernes</option>
+              <option value="6" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "6" ) selected @endif  @endif>Sabado</option>
+              <option value="0" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "0" ) selected @endif  @endif>Domingo</option>
             </select>
           </div>
         </div>
       </div>
     </div>
-    <div class="col-md-6 div-quincenal div-recurrencia  @if($recurringInvoice->frecuency != '2') hidden @endif">
+    <div class="col-md-6 div-quincenal div-recurrencia @if($recurringInvoice) @if($recurringInvoice->frecuency != '2') hidden @endif @else hidden @endif">
       <div class="row">
         <div class="form-group col-md-6">
           <label>Primer quincena</label>
           <div class='input-group date inputs-fecha'>
             <select class="form-control" id="primer_quincena" name="primer_quincena">
-              <option value="01" @if($recurringInvoice->valores()[0] == "01" ) selected @endif>01</option>
-              <option value="02" @if($recurringInvoice->valores()[0] == "02" ) selected @endif>02</option>
-              <option value="03" @if($recurringInvoice->valores()[0] == "03" ) selected @endif>03</option>
-              <option value="04" @if($recurringInvoice->valores()[0] == "04" ) selected @endif>04</option>
-              <option value="05" @if($recurringInvoice->valores()[0] == "05" ) selected @endif>05</option>
-              <option value="06" @if($recurringInvoice->valores()[0] == "06" ) selected @endif>06</option>
-              <option value="07" @if($recurringInvoice->valores()[0] == "07" ) selected @endif>07</option>
-              <option value="08" @if($recurringInvoice->valores()[0] == "08" ) selected @endif>08</option>
-              <option value="09" @if($recurringInvoice->valores()[0] == "09" ) selected @endif>09</option>
-              <option value="10" @if($recurringInvoice->valores()[0] == "10" ) selected @endif>10</option>
-              <option value="11" @if($recurringInvoice->valores()[0] == "11" ) selected @endif>11</option>
-              <option value="12" @if($recurringInvoice->valores()[0] == "12" ) selected @endif>12</option>
-              <option value="13" @if($recurringInvoice->valores()[0] == "13" ) selected @endif>13</option>
-              <option value="14" @if($recurringInvoice->valores()[0] == "14" ) selected @endif>14</option>
-              <option value="15" @if($recurringInvoice->valores()[0] == "15" ) selected @endif>15</option>
+              <option value="01" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "01" ) selected @endif  @endif>01</option>
+              <option value="02" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "02" ) selected @endif  @endif>02</option>
+              <option value="03" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "03" ) selected @endif  @endif>03</option>
+              <option value="04" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "04" ) selected @endif  @endif>04</option>
+              <option value="05" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "05" ) selected @endif  @endif>05</option>
+              <option value="06" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "06" ) selected @endif  @endif>06</option>
+              <option value="07" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "07" ) selected @endif  @endif>07</option>
+              <option value="08" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "08" ) selected @endif  @endif>08</option>
+              <option value="09" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "09" ) selected @endif  @endif>09</option>
+              <option value="10" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "10" ) selected @endif  @endif>10</option>
+              <option value="11" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "11" ) selected @endif  @endif>11</option>
+              <option value="12" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "12" ) selected @endif  @endif>12</option>
+              <option value="13" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "13" ) selected @endif  @endif>13</option>
+              <option value="14" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "14" ) selected @endif  @endif>14</option>
+              <option value="15" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "15" ) selected @endif  @endif>15</option>
             </select>
           </div>
         </div>
@@ -202,107 +202,107 @@
           <label for="due_date">Segunda quincena</label>
           <div class='input-group date inputs-fecha'>
             <select class="form-control" id="segunda_quincena" name="segunda_quincena">
-              <option value="15" @if($recurringInvoice->valores()[1] == "15" ) selected @endif>15</option>
-              <option value="16" @if($recurringInvoice->valores()[1] == "16" ) selected @endif>16</option>
-              <option value="17" @if($recurringInvoice->valores()[1] == "17" ) selected @endif>17</option>
-              <option value="18" @if($recurringInvoice->valores()[1] == "18" ) selected @endif>18</option>
-              <option value="19" @if($recurringInvoice->valores()[1] == "19" ) selected @endif>19</option>
-              <option value="20" @if($recurringInvoice->valores()[1] == "20" ) selected @endif>20</option>
-              <option value="21" @if($recurringInvoice->valores()[1] == "21" ) selected @endif>21</option>
-              <option value="22" @if($recurringInvoice->valores()[1] == "22" ) selected @endif>22</option>
-              <option value="23" @if($recurringInvoice->valores()[1] == "23" ) selected @endif>23</option>
-              <option value="24" @if($recurringInvoice->valores()[1] == "24" ) selected @endif>24</option>
-              <option value="25" @if($recurringInvoice->valores()[1] == "25" ) selected @endif>25</option>
-              <option value="26" @if($recurringInvoice->valores()[1] == "26" ) selected @endif>26</option>
-              <option value="27" @if($recurringInvoice->valores()[1] == "27" ) selected @endif>27</option>
-              <option value="28" @if($recurringInvoice->valores()[1] == "28" ) selected @endif>28</option>
-              <option value="29" @if($recurringInvoice->valores()[1] == "29" ) selected @endif>29</option>
-              <option value="30" @if($recurringInvoice->valores()[1] == "30" ) selected @endif>30</option>
-              <option value="31" @if($recurringInvoice->valores()[1] == "31" ) selected @endif>31</option>
+              <option value="15" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "15" ) selected @endif  @endif>15</option>
+              <option value="16" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "16" ) selected @endif  @endif>16</option>
+              <option value="17" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "17" ) selected @endif  @endif>17</option>
+              <option value="18" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "18" ) selected @endif  @endif>18</option>
+              <option value="19" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "19" ) selected @endif  @endif>19</option>
+              <option value="20" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "20" ) selected @endif  @endif>20</option>
+              <option value="21" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "21" ) selected @endif  @endif>21</option>
+              <option value="22" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "22" ) selected @endif  @endif>22</option>
+              <option value="23" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "23" ) selected @endif  @endif>23</option>
+              <option value="24" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "24" ) selected @endif  @endif>24</option>
+              <option value="25" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "25" ) selected @endif  @endif>25</option>
+              <option value="26" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "26" ) selected @endif  @endif>26</option>
+              <option value="27" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "27" ) selected @endif  @endif>27</option>
+              <option value="28" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "28" ) selected @endif  @endif>28</option>
+              <option value="29" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "29" ) selected @endif  @endif>29</option>
+              <option value="30" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "30" ) selected @endif  @endif>30</option>
+              <option value="31" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "31" ) selected @endif  @endif>31</option>
             </select>
           </div>
         </div>
       </div>
     </div>
-    <div class="col-md-6 div-mensual div-recurrencia  @if($recurringInvoice->frecuency != '3') hidden @endif">
+    <div class="col-md-6 div-mensual div-recurrencia @if($recurringInvoice) @if($recurringInvoice->frecuency != '3') hidden @endif @else hidden @endif">
       <div class="row">
         <div class="form-group col-md-12">
           <label>Día</label>
           <div class='input-group date inputs-fecha'>
             <select class="form-control" id="mensual" name="mensual">
-              <option value="01" @if($recurringInvoice->valores()[0] == "01" ) selected @endif>01</option>
-              <option value="02" @if($recurringInvoice->valores()[0] == "02" ) selected @endif>02</option>
-              <option value="03" @if($recurringInvoice->valores()[0] == "03" ) selected @endif>03</option>
-              <option value="04" @if($recurringInvoice->valores()[0] == "04" ) selected @endif>04</option>
-              <option value="05" @if($recurringInvoice->valores()[0] == "05" ) selected @endif>05</option>
-              <option value="06" @if($recurringInvoice->valores()[0] == "06" ) selected @endif>06</option>
-              <option value="07" @if($recurringInvoice->valores()[0] == "07" ) selected @endif>07</option>
-              <option value="08" @if($recurringInvoice->valores()[0] == "08" ) selected @endif>08</option>
-              <option value="09" @if($recurringInvoice->valores()[0] == "09" ) selected @endif>09</option>
-              <option value="10" @if($recurringInvoice->valores()[0] == "10" ) selected @endif>10</option>
-              <option value="11" @if($recurringInvoice->valores()[0] == "11" ) selected @endif>11</option>
-              <option value="12" @if($recurringInvoice->valores()[0] == "12" ) selected @endif>12</option>
-              <option value="13" @if($recurringInvoice->valores()[0] == "13" ) selected @endif>13</option>
-              <option value="14" @if($recurringInvoice->valores()[0] == "14" ) selected @endif>14</option>
-              <option value="15" @if($recurringInvoice->valores()[0] == "15" ) selected @endif>15</option>
-              <option value="16" @if($recurringInvoice->valores()[0] == "16" ) selected @endif>16</option>
-              <option value="17" @if($recurringInvoice->valores()[0] == "17" ) selected @endif>17</option>
-              <option value="18" @if($recurringInvoice->valores()[0] == "18" ) selected @endif>18</option>
-              <option value="19" @if($recurringInvoice->valores()[0] == "19" ) selected @endif>19</option>
-              <option value="20" @if($recurringInvoice->valores()[0] == "20" ) selected @endif>20</option>
-              <option value="21" @if($recurringInvoice->valores()[0] == "21" ) selected @endif>21</option>
-              <option value="22" @if($recurringInvoice->valores()[0] == "22" ) selected @endif>22</option>
-              <option value="23" @if($recurringInvoice->valores()[0] == "23" ) selected @endif>23</option>
-              <option value="24" @if($recurringInvoice->valores()[0] == "24" ) selected @endif>24</option>
-              <option value="25" @if($recurringInvoice->valores()[0] == "25" ) selected @endif>25</option>
-              <option value="26" @if($recurringInvoice->valores()[0] == "26" ) selected @endif>26</option>
-              <option value="27" @if($recurringInvoice->valores()[0] == "27" ) selected @endif>27</option>
-              <option value="28" @if($recurringInvoice->valores()[0] == "28" ) selected @endif>28</option>
-              <option value="29" @if($recurringInvoice->valores()[0] == "29" ) selected @endif>29</option>
-              <option value="30" @if($recurringInvoice->valores()[0] == "30" ) selected @endif>30</option>
-              <option value="31" @if($recurringInvoice->valores()[0] == "31" ) selected @endif>31</option>
+              <option value="01" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "01" ) selected @endif  @endif>01</option>
+              <option value="02" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "02" ) selected @endif  @endif>02</option>
+              <option value="03" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "03" ) selected @endif  @endif>03</option>
+              <option value="04" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "04" ) selected @endif  @endif>04</option>
+              <option value="05" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "05" ) selected @endif  @endif>05</option>
+              <option value="06" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "06" ) selected @endif  @endif>06</option>
+              <option value="07" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "07" ) selected @endif  @endif>07</option>
+              <option value="08" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "08" ) selected @endif  @endif>08</option>
+              <option value="09" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "09" ) selected @endif  @endif>09</option>
+              <option value="10" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "10" ) selected @endif  @endif>10</option>
+              <option value="11" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "11" ) selected @endif  @endif>11</option>
+              <option value="12" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "12" ) selected @endif  @endif>12</option>
+              <option value="13" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "13" ) selected @endif  @endif>13</option>
+              <option value="14" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "14" ) selected @endif  @endif>14</option>
+              <option value="15" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "15" ) selected @endif  @endif>15</option>
+              <option value="16" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "16" ) selected @endif  @endif>16</option>
+              <option value="17" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "17" ) selected @endif  @endif>17</option>
+              <option value="18" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "18" ) selected @endif  @endif>18</option>
+              <option value="19" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "19" ) selected @endif  @endif>19</option>
+              <option value="20" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "20" ) selected @endif  @endif>20</option>
+              <option value="21" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "21" ) selected @endif  @endif>21</option>
+              <option value="22" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "22" ) selected @endif  @endif>22</option>
+              <option value="23" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "23" ) selected @endif  @endif>23</option>
+              <option value="24" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "24" ) selected @endif  @endif>24</option>
+              <option value="25" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "25" ) selected @endif  @endif>25</option>
+              <option value="26" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "26" ) selected @endif  @endif>26</option>
+              <option value="27" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "27" ) selected @endif  @endif>27</option>
+              <option value="28" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "28" ) selected @endif  @endif>28</option>
+              <option value="29" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "29" ) selected @endif  @endif>29</option>
+              <option value="30" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "30" ) selected @endif  @endif>30</option>
+              <option value="31" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "31" ) selected @endif  @endif>31</option>
             </select>
           </div>
         </div>
       </div>
     </div>
-    <div class="col-md-6 div-anual div-recurrencia  @if($recurringInvoice->frecuency != '4') hidden @endif">
+    <div class="col-md-6 div-anual div-recurrencia @if($recurringInvoice) @if($recurringInvoice->frecuency != '4') hidden @endif @else hidden @endif ">
       <div class="row">
         <div class="form-group col-md-4">
           <label>Día</label>
           <div class='input-group date inputs-fecha'>
             <select class="form-control" id="dia_recurrencia" name="dia_recurrencia">
-              <option value="01" @if($recurringInvoice->valores()[0] == "01" ) selected @endif>01</option>
-              <option value="02" @if($recurringInvoice->valores()[0] == "02" ) selected @endif>02</option>
-              <option value="03" @if($recurringInvoice->valores()[0] == "03" ) selected @endif>03</option>
-              <option value="04" @if($recurringInvoice->valores()[0] == "04" ) selected @endif>04</option>
-              <option value="05" @if($recurringInvoice->valores()[0] == "05" ) selected @endif>05</option>
-              <option value="06" @if($recurringInvoice->valores()[0] == "06" ) selected @endif>06</option>
-              <option value="07" @if($recurringInvoice->valores()[0] == "07" ) selected @endif>07</option>
-              <option value="08" @if($recurringInvoice->valores()[0] == "08" ) selected @endif>08</option>
-              <option value="09" @if($recurringInvoice->valores()[0] == "09" ) selected @endif>09</option>
-              <option value="10" @if($recurringInvoice->valores()[0] == "10" ) selected @endif>10</option>
-              <option value="11" @if($recurringInvoice->valores()[0] == "11" ) selected @endif>11</option>
-              <option value="12" @if($recurringInvoice->valores()[0] == "12" ) selected @endif>12</option>
-              <option value="13" @if($recurringInvoice->valores()[0] == "13" ) selected @endif>13</option>
-              <option value="14" @if($recurringInvoice->valores()[0] == "14" ) selected @endif>14</option>
-              <option value="15" @if($recurringInvoice->valores()[0] == "15" ) selected @endif>15</option>
-              <option value="16" @if($recurringInvoice->valores()[0] == "16" ) selected @endif>16</option>
-              <option value="17" @if($recurringInvoice->valores()[0] == "17" ) selected @endif>17</option>
-              <option value="18" @if($recurringInvoice->valores()[0] == "18" ) selected @endif>18</option>
-              <option value="19" @if($recurringInvoice->valores()[0] == "19" ) selected @endif>19</option>
-              <option value="20" @if($recurringInvoice->valores()[0] == "20" ) selected @endif>20</option>
-              <option value="21" @if($recurringInvoice->valores()[0] == "21" ) selected @endif>21</option>
-              <option value="22" @if($recurringInvoice->valores()[0] == "22" ) selected @endif>22</option>
-              <option value="23" @if($recurringInvoice->valores()[0] == "23" ) selected @endif>23</option>
-              <option value="24" @if($recurringInvoice->valores()[0] == "24" ) selected @endif>24</option>
-              <option value="25" @if($recurringInvoice->valores()[0] == "25" ) selected @endif>25</option>
-              <option value="26" @if($recurringInvoice->valores()[0] == "26" ) selected @endif>26</option>
-              <option value="27" @if($recurringInvoice->valores()[0] == "27" ) selected @endif>27</option>
-              <option value="28" @if($recurringInvoice->valores()[0] == "28" ) selected @endif>28</option>
-              <option value="29" @if($recurringInvoice->valores()[0] == "29" ) selected @endif>29</option>
-              <option value="30" @if($recurringInvoice->valores()[0] == "30" ) selected @endif>30</option>
-              <option value="31" @if($recurringInvoice->valores()[0] == "31" ) selected @endif>31</option>
+              <option value="01" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "01" ) selected @endif  @endif>01</option>
+              <option value="02" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "02" ) selected @endif  @endif>02</option>
+              <option value="03" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "03" ) selected @endif  @endif>03</option>
+              <option value="04" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "04" ) selected @endif  @endif>04</option>
+              <option value="05" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "05" ) selected @endif  @endif>05</option>
+              <option value="06" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "06" ) selected @endif  @endif>06</option>
+              <option value="07" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "07" ) selected @endif  @endif>07</option>
+              <option value="08" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "08" ) selected @endif  @endif>08</option>
+              <option value="09" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "09" ) selected @endif  @endif>09</option>
+              <option value="10" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "10" ) selected @endif  @endif>10</option>
+              <option value="11" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "11" ) selected @endif @endif>11</option>
+              <option value="12" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "12" ) selected @endif @endif>12</option>
+              <option value="13" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "13" ) selected @endif @endif>13</option>
+              <option value="14" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "14" ) selected @endif @endif>14</option>
+              <option value="15" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "15" ) selected @endif @endif>15</option>
+              <option value="16" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "16" ) selected @endif @endif>16</option>
+              <option value="17" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "17" ) selected @endif @endif>17</option>
+              <option value="18" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "18" ) selected @endif @endif>18</option>
+              <option value="19" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "19" ) selected @endif @endif>19</option>
+              <option value="20" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "20" ) selected @endif @endif>20</option>
+              <option value="21" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "21" ) selected @endif @endif>21</option>
+              <option value="22" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "22" ) selected @endif @endif>22</option>
+              <option value="23" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "23" ) selected @endif @endif>23</option>
+              <option value="24" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "24" ) selected @endif @endif>24</option>
+              <option value="25" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "25" ) selected @endif @endif>25</option>
+              <option value="26" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "26" ) selected @endif @endif>26</option>
+              <option value="27" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "27" ) selected @endif @endif>27</option>
+              <option value="28" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "28" ) selected @endif @endif>28</option>
+              <option value="29" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "29" ) selected @endif @endif>29</option>
+              <option value="30" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "30" ) selected @endif @endif>30</option>
+              <option value="31" @if($recurringInvoice)  @if($recurringInvoice->valores()[0] == "31" ) selected @endif @endif>31</option>
             </select>
           </div>
         </div>
@@ -310,29 +310,29 @@
           <label><b>Mes</b></label>
           <div class='input-group date inputs-fecha'>
             <select class="form-control" id="mes_recurrencia" name="mes_recurrencia">
-              <option value="01" @if($recurringInvoice->valores()[1] == "01" ) selected @endif>Enero</option>
-              <option value="02" @if($recurringInvoice->valores()[1] == "02" ) selected @endif>Febrero</option>
-              <option value="03" @if($recurringInvoice->valores()[1] == "03" ) selected @endif>Marzo</option>
-              <option value="04" @if($recurringInvoice->valores()[1] == "04" ) selected @endif>Abril</option>
-              <option value="05" @if($recurringInvoice->valores()[1] == "05" ) selected @endif>Mayo</option>
-              <option value="06" @if($recurringInvoice->valores()[1] == "06" ) selected @endif>Junio</option>
-              <option value="07" @if($recurringInvoice->valores()[1] == "07" ) selected @endif>Julio</option>
-              <option value="08" @if($recurringInvoice->valores()[1] == "08" ) selected @endif>Agosto</option>
-              <option value="09" @if($recurringInvoice->valores()[1] == "09" ) selected @endif>Setiembre</option>
-              <option value="10" @if($recurringInvoice->valores()[1] == "10" ) selected @endif>Octubre</option>
-              <option value="11" @if($recurringInvoice->valores()[1] == "11" ) selected @endif>Noviembre</option>
-              <option value="12" @if($recurringInvoice->valores()[1] == "12" ) selected @endif>Diciembre</option>
+              <option value="01" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "01" ) selected @endif  @endif>Enero</option>
+              <option value="02" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "02" ) selected @endif  @endif>Febrero</option>
+              <option value="03" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "03" ) selected @endif  @endif>Marzo</option>
+              <option value="04" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "04" ) selected @endif  @endif>Abril</option>
+              <option value="05" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "05" ) selected @endif  @endif>Mayo</option>
+              <option value="06" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "06" ) selected @endif  @endif>Junio</option>
+              <option value="07" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "07" ) selected @endif  @endif>Julio</option>
+              <option value="08" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "08" ) selected @endif  @endif>Agosto</option>
+              <option value="09" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "09" ) selected @endif  @endif>Setiembre</option>
+              <option value="10" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "10" ) selected @endif  @endif>Octubre</option>
+              <option value="11" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "11" ) selected @endif  @endif>Noviembre</option>
+              <option value="12" @if($recurringInvoice)  @if($recurringInvoice->valores()[1] == "12" ) selected @endif  @endif>Diciembre</option>
             </select>
           </div>
         </div>
       </div>
     </div>
-    <div class="col-md-6 div-cantidad-dias div-recurrencia  @if($recurringInvoice->frecuency != '5') hidden @endif">
+    <div class="col-md-6 div-cantidad-dias div-recurrencia @if($recurringInvoice) @if($recurringInvoice->frecuency != '5') hidden @endif @else hidden @endif">
       <div class="row">
         <div class="form-group col-md-12">
           <label><b>Cantidad de días</b></label>
           <div class='input-group date inputs-fecha'>
-            <input type="number" min="0" class="form-control" value="{{$recurringInvoice->valores()[0]}}" id="cantidad_dias" name="cantidad_dias"/>
+            <input type="number" min="0" class="form-control" value="@if($recurringInvoice) {{$recurringInvoice->valores()[0]}} @endif" id="cantidad_dias" name="cantidad_dias"/>
           </div>
         </div>
       </div>
@@ -479,6 +479,7 @@
                 <div class="btn-holder hidden">
 
                     <input type="text" hidden value="{{ $document_type }}" name="document_type" id="document_type">
+                    <input type="text" hidden value="{{ $invoice->id }}" name="invoice_id" id="invoice_id">
                     <button id="btn-submit" type="submit" class="btn btn-primary">Enviar factura electrónica</button>
                 </div>
             </form>
