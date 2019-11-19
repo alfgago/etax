@@ -39,6 +39,7 @@ use App\Jobs\ProcessInvoice;
 use App\Jobs\ProcessInvoicesImport;
 use App\Jobs\ProcessSendExcelInvoices;
 use App\Jobs\ProcessInvoicesExcel;
+use App\Jobs\EnvioProgramadas;
 use Illuminate\Support\Facades\Input;
 
 /**
@@ -1440,12 +1441,10 @@ class InvoiceController extends Controller
             $json = json_encode( $xml ); // convert the XML string to json  
             $arr = json_decode( $json, TRUE );
 
-                //if(substr($arr['NumeroConsecutivo'],8,2) != "04"){
                     $FechaEmision = explode("T", $arr['FechaEmision']);
                     $FechaEmision = explode("-", $FechaEmision[0]);
                     $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
                     if(CalculatedTax::validarMes($FechaEmision)){
-                        
                         //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                         try { 
                             $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0 ;
@@ -1455,10 +1454,10 @@ class InvoiceController extends Controller
                         $consecutivoComprobante = $arr['NumeroConsecutivo'];
                         $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
                         $consecutivoComprobante = $arr['NumeroConsecutivo'];
-                    
-                        //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                        //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla.
                         if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                             //Registra el XML. Si todo sale bien, lo guarda en S3.
+
                             $invoice = Invoice::saveInvoiceXML( $arr, 'XML' );
                             
                             if( $invoice ) {
@@ -1483,10 +1482,6 @@ class InvoiceController extends Controller
                         return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
                         //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
                     } 
-                /*}else{
-                    return Response()->json('Error: No se puede subir tiquetes electrónicos.', 400);
-                        //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
-                }*/ 
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
@@ -2011,34 +2006,68 @@ class InvoiceController extends Controller
     }
 
     public function envioProgramada(){
-        $start_date = Carbon::parse(now('America/Costa_Rica'));
-        $today = $start_date->year."-".$start_date->month."-".$start_date->day.' 23:59:59';
-        $invoices = Invoice::where("hacienda_status",'99')->where('generated_date', '<=',$today)->get();
-        foreach ($invoices as $invoice) {
-            $company = Company::where('id',$invoice->company_id)->first();
-            $invoice->document_key = $this->getDocumentKey($invoice->document_type,$company);
-            $invoice->document_number = $this->getDocReference($invoice->document_type,$company);
-            $invoice->hacienda_status = '01';
-            if($invoice->hacienda_status != '01'){
-                if ($request->document_type == '01') {
-                    $company->last_invoice_ref_number = $invoice->reference_number;
-                    $company->last_document = $invoice->document_number;
 
-                } elseif ($request->document_type == '08') {
-                    $company->last_invoice_pur_ref_number = $invoice->reference_number;
-                    $company->last_document_invoice_pur = $invoice->document_number;
+        Log::info("disparo de job envio programada");
+        EnvioProgramadas::dispatch()->onQueue('sendbulk');
 
-                } elseif ($request->document_type == '09') {
-                    $company->last_invoice_exp_ref_number = $invoice->reference_number;
-                    $company->last_document_invoice_exp = $invoice->document_number;
-                } elseif ($request->document_type == '04') {
-                    $company->last_ticket_ref_number = $invoice->reference_number;
-                    $company->last_document_ticket = $invoice->document_number;
+           /* $start_date = Carbon::parse(now('America/Costa_Rica'));
+            $today = $start_date->year."-".$start_date->month."-".$start_date->day." 23:59:59";
+            $invoices = Invoice::where("hacienda_status",'99')->where('generated_date', '<=',$today)->get();
+            foreach ($invoices as $invoice) {
+                try{
+                    $company = Company::where('id',$invoice->company_id)->first();
+                    if ($invoice->document_type == '01') {
+                        $invoice->reference_number = $company->last_invoice_ref_number + 1;
+                    }
+                    if ($invoice->document_type == '08') {
+                        $invoice->reference_number = $company->last_invoice_pur_ref_number + 1;
+                    }
+                    if ($invoice->document_type == '09') {
+                        $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
+                    }
+                    if ($invoice->document_type == '04') {
+                        $invoice->reference_number = $company->last_ticket_ref_number + 1;
+                    }
+                    if ($invoice->document_type== '02') {
+                        $invoice->reference_number = $company->last_debit_note_ref_number + 1;
+                    }
+                    if ($invoice->document_type == '03') {
+                        $invoice->reference_number= $company->last_note_ref_number + 1;
+                    }
+                    $invoice->document_key = $this->getDocumentKey($invoice->document_type,$company);
+                    $invoice->document_number = $this->getDocReference($invoice->document_type,$company);
+                    $invoice->hacienda_status = '01';
+                    $invoice->company->addSentInvoice( $invoice->year, $invoice->month );
+
+                    if ($invoice->document_type == '01') {
+                         $company->last_invoice_ref_number = $invoice->reference_number;
+                    }
+                    if ($invoice->document_type == '08') {
+                        $company->last_invoice_pur_ref_number = $invoice->reference_number;
+                    }
+                    if ($invoice->document_type== '02') {
+                        $company->last_debit_note_ref_number = $invoice->reference_number;
+                    }
+                    if ($invoice->document_type == '03') {
+                       $company->last_note_ref_number = $invoice->reference_number;
+                    }
+                    if ($invoice->document_type == '09') {
+                        $company->last_invoice_exp_ref_number = $invoice->reference_number;
+                    }
+                    if ($invoice->document_type == '04') {
+                        $company->last_ticket_ref_number = $invoice->reference_number;
+                    }
+                    
+                    $company->save();
+                    $invoice->save();
+                    Log::info("Factura  programada enviada de la compañia".$company->id." con la llave" . $invoice->document_key);
+                    dd("Factura  programada enviada de la compañia".$company->id." con la llave" . $invoice->document_key);
+                }catch( \Throwable $ex ){
+                    Log::error("error en envio de programada ".$invoice->id." error :" . $ex);
+                    dd("error en envio de programada ".$invoice->id." error :" . $ex);
                 }
-            }
-            $company->save();
-            $invoice->save();
-        }
+            }*/
+
     }
     
     public function recurrentes(){
@@ -2216,9 +2245,9 @@ class InvoiceController extends Controller
             return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
         } catch ( \Exception $e) {
             Log::error("Error en factura ENVIO MASIVO EXCEL:" . $e);
-
             return redirect('/facturas-emitidas')->withError('Error en factura ENVIO MASIVO EXCEL.');
         }
+
     } 
 
 

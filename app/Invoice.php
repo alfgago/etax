@@ -456,7 +456,8 @@ class Invoice extends Model
                 }catch( \Exception $e ) {
                     $exonerationDate = null;
                 }
-                if ($exonerationDate && isset($data['typeDocument']) && isset($data['numeroDocumento']) && $data['porcentajeExoneracion'] > 0) {
+                $exoneradalinea = $data['exoneradalinea'] ?? 1;
+                if ($exonerationDate && isset($data['typeDocument']) && isset($data['numeroDocumento']) && $data['porcentajeExoneracion'] > 0 && $exoneradalinea == 1) {
 
                     $item->exoneration_document_type = $data['typeDocument'] ?? null;
                     $item->exoneration_document_number = $data['numeroDocumento'] ?? null;
@@ -766,8 +767,15 @@ class Invoice extends Model
         $invoice->commercial_activity = $arr['CodigoActividad'] ?? 0;
         $invoice->xml_schema = $invoice->commercial_activity ? 43 : 42;
         $invoice->sale_condition = isset($arr['CondicionVenta']) ? $arr['CondicionVenta'] : '01';
+
+        
+
         try{
-          $invoice->credit_time = isset($arr['PlazoCredito']) ? $arr['PlazoCredito'] : null;
+          if (strpos($arr['PlazoCredito'], " ")){
+            $invoice->credit_time = null;
+          }else{
+            $invoice->credit_time = isset($arr['PlazoCredito']) ? $arr['PlazoCredito'] : null;
+          }
         }catch( \Exception $e ){
           $invoice->credit_time = null;
         }
@@ -777,7 +785,6 @@ class Invoice extends Model
           $medioPago = $medioPago[0];
         }
         $invoice->payment_type = $medioPago;
-        
         //Fechas
         $fechaEmision = Carbon::createFromFormat('Y-m-d', substr($arr['FechaEmision'], 0, 10));
         $invoice->generated_date = $fechaEmision;
@@ -938,7 +945,7 @@ class Invoice extends Model
           $invoice->client_first_name = 'N/A';
           $invoice->document_type = $tipoDocumento ?? '04';
         }
-              
+        
         //End DATOS CLIENTE
         
         //El subtotal y iva_amount inicia en 0, lo va sumando conforme recorre las lineas.
@@ -950,6 +957,7 @@ class Invoice extends Model
         if( array_key_exists( 'NumeroLinea', $lineas ) ) {
             $lineas = [$arr['DetalleServicio']['LineaDetalle']];
         }
+
         $invoice->total_iva_devuelto = $arr['ResumenFactura']['TotalIVADevuelto'] ?? 0;
         $invoice->total_serv_gravados = $arr['ResumenFactura']['TotalServGravados'] ?? 0;
         $invoice->total_serv_exentos = $arr['ResumenFactura']['TotalServExentos'] ?? 0;
@@ -967,8 +975,9 @@ class Invoice extends Model
         $invoice->total_merc_exonerados = $arr['ResumenFactura']['TotalMercExonerada'] ?? 0;
         $invoice->total_exonerados = $arr['ResumenFactura']['TotalExonerado'] ?? 0;
         $invoice->total_gravado = $arr['ResumenFactura']['TotalGravado'] ?? 0;
-        $invoice->save();
 
+        $invoice->save();
+/****************************************/
         $invoice->company->addSentInvoice($invoice->year, $invoice->month);
         
         $lids = array();

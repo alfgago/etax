@@ -110,6 +110,7 @@
     <div class="form-group col-md-1">
       <label for="porc_iva">% IVA</label>
       <input type="number" min="0" class="form-control pr-0" id="porc_iva" placeholder="13" value="13" readonly>
+      <input type="text"  class="hidden" id="exoneradalinea"  value="0" >
     </div>
     
     <div class="form-group col-md-12 inline-form inline-checkbox hidden">
@@ -232,7 +233,7 @@
 
             <div class="form-group col-md-2">
                 <label for="porcentajeExoneracion">% *</label>
-                <input type="number" class="form-control" max="100" min="0" maxlength="3" id="porcentajeExoneracion" placeholder="100%" value="100" onchange="calcularMontoExoneracion();">
+                <input type="number" class="form-control" max="100" min="0" maxlength="3" id="porcentajeExoneracion" value="100" onchange="calcularMontoExoneracion();">
             </div>
             <div class="form-group col-md-3">
                 <label for="montoExoneracion">Monto Exonerado *</label>
