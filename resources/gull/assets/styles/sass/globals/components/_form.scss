@@ -7,6 +7,21 @@
         margin-bottom: 0.266rem;
     }
 }
+
+.checkbox-div {
+    outline: initial !important;
+    background: $white;
+    color: $dark;
+    padding: 0.25rem 0rem;
+    &::placeholder {
+        color: $gray-600;
+    }
+    &.rounded, &.form-control-rounded {
+        border-radius: 1.33rem;
+    }
+}
+
+
 .form-control {
     border: 0.0666rem solid #999;
     outline: initial !important;
