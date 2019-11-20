@@ -754,20 +754,18 @@ class BillController extends Controller
             $file = Input::file('file');
             $xml = simplexml_load_string( file_get_contents($file) );
             $json = json_encode( $xml ); // convert the XML string to JSON
-            $arr = json_decode( $json, TRUE );                
-            //if(substr($arr['NumeroConsecutivo'],8,2) != "04"){
+            $arr = json_decode( $json, TRUE ); 
                 $FechaEmision = explode("T", $arr['FechaEmision']);
                 $FechaEmision = explode("-", $FechaEmision[0]);
                 $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
 
                 if(CalculatedTax::validarMes($FechaEmision)){
-                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
-                    $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : $company->id_number;
+                    $identificacionEmisor = array_key_exists('Emisor', $arr) ? $arr['Emisor']['Identificacion']['Numero'] : 0;
                     $consecutivoComprobante = $arr['NumeroConsecutivo'];
                     $clave = $arr['Clave'];
-                    
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
+                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor )  || substr($arr['NumeroConsecutivo'],8,2) == "04" ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3
                         $bill = Bill::saveBillXML( $arr, 'XML' );
                         if( $bill ) {
@@ -787,14 +785,12 @@ class BillController extends Controller
                             ->onQueue('log_queue');
                         }
                     }else{
-                        return Response()->json("El documento $consecutivoComprobante no le pertenece a su empresa actual", 400);
+                        return Response()->json("El documento no le pertenece a su empresa actual.", 400);
                     }
                 }else{
-                    return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
+                    return Response()->json('Error: El mes de la factura ya fue cerrado.', 400);
                 }
-            /*}else{
-                return Response()->json('Error: No se puede importar un tiquete electrónico.', 400);
-            }*/
+            
 
              
             $company->save();
@@ -807,8 +803,10 @@ class BillController extends Controller
             Log::error('Error importando XML ' . $ex->getMessage());
             return Response()->json('Se ha detectado un error en el tipo de archivo subido.', 400);
         }
-
-        return Response()->json('Facturas importados exitosamente en '.$time.'s', 200);
+        if( substr($arr['NumeroConsecutivo'],8,2) == "04" ) {
+            return Response()->json('Se importo un tiquete sin cedula de receptor.', 206 );
+        }
+        return Response()->json('Factura importada exitosamente.', 200);
 
     }
     
