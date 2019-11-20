@@ -286,7 +286,7 @@ $company = currentCompanyModel();
                     <input type="text" class="form-control" name="document_key" id="document_key" value="{{$document_key}}" required readonly="readonly">
                   </div>
 
-                  <div class="form-group col-md-6 hidden">
+                  <div class="form-group col-md-6">
                     <label for="generated_date">Fecha Emision</label>
                     <div class='input-group date inputs-fecha'>
                         <input id="fecha_generada" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="generated_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
@@ -316,9 +316,9 @@ $company = currentCompanyModel();
                     </div>
                   </div>
 
-                  <div class="form-group col-md-6 hidden">
+                  <div class="form-group col-md-6">
                     <label for="due_date">Recurrencia</label>
-                    <div class='input-group date inputs-fecha'>
+                    <div class='input-group'>
                       <select class="form-control" id="recurrencia" name="recurrencia">
                         <option value="0">Ninguna</option>
                         <option value="1">Semanal</option>
@@ -327,6 +327,8 @@ $company = currentCompanyModel();
                         <option value="4">Anual</option>
                         <option value="5">Cantidad de días</option>
                       </select>
+
+                      <input id="id_recurrente"  class="form-control hidden" name="id_recurrente" required value="0">
                     </div>
                   </div>
 

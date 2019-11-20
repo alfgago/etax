@@ -27,13 +27,21 @@
                   <td>{{ $data->tipo() }}</td>
                   <td>{{ $data->opciones() }}</td>
                   <td>{{ number_format( $data->invoice->total, 2 ) }}</td>
-                  <td>{{ $data->next_send}}</td>
+                  <td>{{date('d/m/Y', strtotime($data->next_send))}}</td>
                   <td>
-                    <a href="/facturas-emitidas/editar-recurrente/{{ $data->id }}" titulo="Editar recurrencia" class="btn btn-primary m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-clock-o" aria-hidden="true"></i></a>
-                    <a href="/facturas-emitidas/editar-recurrente/{{ $data->id }}" titulo="Ver factura" class="btn btn-primary m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-eye" aria-hidden="true"></i></i></a>
-                    <a href="/facturas-emitidas/editar-recurrente/{{ $data->id }}" titulo="Cambiar factura" class="btn btn-primary m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-file" aria-hidden="true"></i></a>
-                    <a href="/facturas-emitidas/editar-recurrente/{{ $data->id }}" titulo="Eliminar recurrencia" class="btn btn-primary m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-trash" aria-hidden="true"></i></a>
-                    <!--<a link="/facturas-emitidas/validar/{{ $data->id }}" titulo="Verificación de venta" class="btn btn-primary m-0 verificar_compra" style="color:#fff; font-size: 0.85em;" onclick="" data-toggle="modal" data-target="#modal_estandar">Validar</a>-->
+
+                    <a href="/facturas-emitidas/ver-recurrente/{{ $data->id }}" alt="Editar recurrencia" class="btn btn-warning m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-clock-o" aria-hidden="true"></i></a>
+                    <a href="/facturas-emitidas/{{ $data->invoice->id }}" alt="Ver factura" class="btn btn-info m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-eye" aria-hidden="true"></i></i></a>
+                    <a href="/facturas-emitidas/editar-factura/{{ $data->invoice->id }}" alt="Cambiar factura" class="btn btn-success m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-file" aria-hidden="true"></i></a>
+                    <form id="delete-form-{{ $data->id }}" class="inline-form" method="POST" action="/facturas-emitidas/eliminar-recurrente/{{ $data->id }}" >
+                      @csrf
+                      @method('delete')
+                      <a type="button" class="btn btn-danger m-0" title="Eliminar recurrente"
+                         style="color:#fff; font-size: 0.85em;" onclick="confirmDelete({{ $data->id }});">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                      </a>
+                    </form>
+
                   </td>
                 </tr>
               @endforeach
@@ -48,7 +56,24 @@
 @endsection
 
 @section('footer-scripts')
+<script>
+function confirmDelete( id ) {
+    var formId = "#delete-form-"+id;
+    Swal.fire({
+        title: '¿Está seguro que desea eliminar la recurrencia?',
+        text: "",
+        type: 'warning',
+        showCloseButton: true,
+        showCancelButton: true,
+        confirmButtonText: 'Sí, deseo eliminarlo'
+    }).then((result) => {
+        if (result.value) {
+            $(formId).submit();
+        }
+    })
 
+} 
+</script>
 
 
 @endsection

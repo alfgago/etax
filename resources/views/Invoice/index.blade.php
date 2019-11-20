@@ -120,6 +120,23 @@ function confirmDelete( id ) {
   
 }
 
+function confirmDeleteProgramada( id ) {
+  var formId = "#delete-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea eliminar la factura programada' ,
+    text: "",
+    type: 'warning',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero eliminarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
+
 
 function confirmRecover( id ) {
   

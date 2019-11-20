@@ -324,9 +324,10 @@ class Invoice extends Model
 
             //Recorrer Items
             $lids = array();
-            $i = 1;
+            $i = 0;
             $totalIvaDevuelto = 0;
             foreach ($request->items as $item) {
+                $i++;
                 $item['item_number'] = $i;
                 $item['item_id'] = $item['id'] ? $item['id'] : 0;
                 if( $this->document_type == '08' ){
@@ -335,8 +336,8 @@ class Invoice extends Model
                 }
                 $item_modificado = $this->addEditItem($item);
                 array_push( $lids, $item_modificado->id );
-                $i++;
             }
+            InvoiceItem::where('invoice_id',$this->id)->where('item_number','>',$i)->delete();
             foreach ($this->items as $item) {
                 if (!in_array( $item->id, $lids )) {
                     $item->delete();
@@ -352,16 +353,18 @@ class Invoice extends Model
             try{
               //Recorrer OtrosCargos
               $oids = array();
-              $i = 1;
+              $i = 0;
               $totalOtrosCargos = 0;
               foreach ($request->otros as $item) {
+                  $i++;
                   $item['item_number'] = $i;
                   $item['item_id'] = $item['id'] ? $item['id'] : 0;
                   $cargo_modificado = $this->addEditOtherCharges($item);
                   array_push( $oids, $cargo_modificado->id );
                   $totalOtrosCargos += $cargo_modificado->amount;
-                  $i++;
               }
+
+              OtherCharges::where('invoice_id',$this->id)->where('item_number','>',$i)->delete();
               foreach ($this->otherCharges as $item) {
                   if (!in_array( $item->id, $oids )) {
                       $item->delete();

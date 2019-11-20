@@ -340,7 +340,9 @@ class InvoiceController extends Controller
                             <i class="fa fa-refresh" aria-hidden="true"></i>
                         </a>';
                 }
-
+                if ($invoice->hacienda_status == '99') {
+                      return '<div class="blue"><span class="tooltiptext">Programada...</span></div>';
+                }
                 return '<div class="yellow"><span class="tooltiptext">Procesando...</span></div>
                     <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
                         <i class="fa fa-refresh" aria-hidden="true"></i>
@@ -535,6 +537,7 @@ class InvoiceController extends Controller
      */
     public function sendHacienda(Request $request)
     {
+        //dd($request);
         //revision de branch para segmentacion de funcionalidades por tipo de documento
         try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
@@ -547,14 +550,29 @@ class InvoiceController extends Controller
                 $tokenApi = $apiHacienda->login(false);
 
                 if ($tokenApi !== false) {
-                    $invoice = new Invoice();
+                    $editar = false;
+                    if(isset($request->invoice_id)){
+                        if($request->invoice_id != 0){
+                            $invoice = Invoice::find($request->invoice_id); 
+                            if($invoice){
+                                if($invoice->hacienda_status == 99 ){
+                                    $editar = true;
+                                }
+                            }
+                        }
+                    }
+                    if(!$editar){
+                        $invoice = new Invoice();
+                    }
                     $company = currentCompanyModel(false);
                     $invoice->company_id = $company->id;
 
 
                     //Datos generales y para Hacienda
                     $invoice->document_type = $request->document_type;
-                    $invoice->hacienda_status = '01';
+                    if(!$editar){
+                        $invoice->hacienda_status = '01';
+                    }
                     $invoice->payment_status = "01";
                     $invoice->payment_receipt = "";
                     $invoice->generation_method = "etax";
@@ -614,18 +632,21 @@ class InvoiceController extends Controller
                         }
                     }
 
-                    $start_date = Carbon::parse(now('America/Costa_Rica'));
-                    $today = $start_date->day."/".$start_date->month."/".$start_date->year;
-
-                    /*if($today != $request->generated_date){
+                    $today = Carbon::parse(now('America/Costa_Rica'));
+                    $generated_date = Carbon::createFromFormat('d/m/Y', $request->generated_date);
+                    if($today->format("Y-m-d") <  $generated_date->format("Y-m-d")){
                         $invoice->hacienda_status = '99';
                         $invoice->generation_method = "etax-programada";
                         $invoice->document_key = $invoice->document_key."programada";
-                        $invoice->document_number = "programada";
-                    }*/
-                    $invoice->save();
-                    /*if($request->recurrencia != "0"){
-                        $recurrencia = new RecurringInvoice();
+                        $invoice->document_number = "Programada";
+                    }
+                    $invoice->save();                    
+                    if($request->recurrencia != "0"){
+                        if($request->id_recurrente == 0){
+                            $recurrencia = new RecurringInvoice();
+                        }else{
+                            $recurrencia = RecurringInvoice::find($request->id_recurrente);
+                        }
                         $recurrencia->company_id = $company->id;
                         $recurrencia->invoice_id = $invoice->id;
                         $recurrencia->frecuency = $request->recurrencia;
@@ -646,12 +667,12 @@ class InvoiceController extends Controller
                             $options = $request->cantidad_dias;
                         }
                         $recurrencia->options = $options;
-                        $recurrencia->next_send = $recurrencia->proximo_envio($today,$request->generated_date);
-                        $recurrencia->save();
-
+                        $recurrencia->next_send = $recurrencia->proximo_envio($today,$generated_date);
+                        $recurrencia->save();   
+                        
                         $invoice->recurring_id = $recurrencia->id;
-                        $invoice->save();
-                    }*/
+                        $invoice->save();     
+                    }
                     if($invoice->hacienda_status != '99'){
                         if (!empty($invoiceData)) {
                             $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
@@ -844,9 +865,6 @@ class InvoiceController extends Controller
     public function notaCredito($id)
     {
         $company = currentCompanyModel(false);
-
-
-
         if ( !$company->atv_validation && $company->use_invoicing ) {
             $apiHacienda = new BridgeHaciendaApi();
             $token = $apiHacienda->login(false);
@@ -2250,6 +2268,7 @@ class InvoiceController extends Controller
 
     }
 
+
     public function validarEnvioExcel(Request $request){
         try{
             $companyId = currentCompany();
@@ -2273,6 +2292,123 @@ class InvoiceController extends Controller
             Log::error("Error en factura ENVIO MASIVO EXCEL:" . $e);
             return redirect('/facturas-emitidas')->withError('Error en factura ENVIO MASIVO EXCEL.');
         }
+
+    } 
+
+
+    public function verRecurrentes($id){
+
+        $companyId = currentCompany();
+        $recurringInvoice = RecurringInvoice::find($id);
+        return view("Invoice/detalle-recurrentes")->with('recurringInvoice', $recurringInvoice);
+        
+    }
+    
+    public function editarFactura($id)
+    {
+        $company = currentCompanyModel(false);
+        if ( !$company->atv_validation && $company->use_invoicing ) {
+            $apiHacienda = new BridgeHaciendaApi();
+            $token = $apiHacienda->login(false);
+            $validateAtv = $apiHacienda->validateAtv($token, $company);
+            if( $validateAtv ) {
+                if ($validateAtv['status'] == 400) {
+                    Log::info('Atv Not Validated Company: '. $company->id_number);
+                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                    }
+                    return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
+
+                } else {
+                    Log::info('Atv Validated Company: '. $company->id_number);
+                    $company->atv_validation = true;
+                    $company->save();
+
+                    $user = auth()->user();
+                    Cache::forget("cache-currentcompany-$user->id");
+                }
+            }else {
+                return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
+            }
+        }
+
+        
+        $invoice = Invoice::findOrFail($id);
+        $recurringInvoice = RecurringInvoice::find($invoice->recurring_id);
+        $this->authorize('update', $invoice);
+        $company = currentCompanyModel();
+        $arrayActividades = $company->getActivities();
+        $countries  = CodigosPaises::all()->toArray();
+
+        $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
+        $codigos = CodigoIvaRepercutido::where('hidden', false)->get();
+        $units = UnidadMedicion::all()->toArray();
+        $document_type = $invoice->document_type;
+        $rate = $this->get_rates();
+        $document_number = $this->getDocReference($document_type);
+        $document_key = $this->getDocumentKey($document_type);
+        return view('Invoice/editar-recurrente', compact('invoice','units','arrayActividades','countries','product_categories','codigos', 'company','recurringInvoice','document_type','rate','document_number','document_key') );
     }
 
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Client  $client
+     * @return \Illuminate\Http\Response
+     */
+    public function eliminarRecurrentes($id)
+    {
+        try{
+            $recurrencia = RecurringInvoice::findOrFail($id);
+            $recurrencia->delete();
+        
+          $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $recurrencia,
+                [
+                    'company_id' => $recurrencia->company_id,
+                    'id' => $recurrencia->id
+                ],
+                "Recurrencia eliminada."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
+            return redirect()->back()->withMessage('Recurrencia eliminada');
+        } catch ( \Exception $e) {
+            Log::error("Error en eliminar recurrencia:" . $e);
+
+            return redirect()->back()->withError('Error en eliminar recurrencia.');
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Client  $client
+     * @return \Illuminate\Http\Response
+     */
+    public function eliminarProgramada($id)
+    {
+        try{
+            $invoice = Invoice::findOrFail($id);
+            $invoice->delete();
+        
+          $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id
+                ],
+                "Factura eliminada."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
+            return redirect()->back()->withMessage('Factura eliminada');
+        } catch ( \Exception $e) {
+            Log::error("Error en eliminar factura:" . $e);
+            return redirect()->back()->withError('Error en eliminar factura.');
+        }
+    }
+        
 }
