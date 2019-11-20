@@ -129,6 +129,7 @@
 		            $(file.previewElement).addClass('dz-complete');
 		            $(file.previewElement).addClass('dz-success ');
                 	if(response == 'Se importo un tiquete sin cedula de receptor.'){
+		            	$(file.previewElement).addClass('dz-warning');
                     	toastr.warning('Se importo un tiquete sin cédula de receptor. Archivo: '+file['name']);
                 	}
                 }

@@ -15996,6 +15996,18 @@ html [type=button],
   fill: green;
 }
 
+.dz-warning .dz-success-mark g path {
+  fill: #ffab13;
+}
+
+.dz-success .dz-success-mark {
+  opacity: 1 !important;
+}
+
+.dz-warning .dz-success-mark {
+  opacity: 1 !important;
+}
+
 .dropdown-toggle {
   position: relative;
 }
