@@ -300,7 +300,7 @@ class Company extends Model {
     
     public function addSentInvoice($year, $month) {
         try {
-            $available_invoices = $this->getAvailableInvoices(0,0);
+            $available_invoices = $this->getAvailableInvoices($year , $month);
 
             $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
             $available_invoices->save();
