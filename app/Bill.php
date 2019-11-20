@@ -322,6 +322,7 @@ class Bill extends Model
         $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
         if($metodoGeneracion != "Email" && $metodoGeneracion != 'GS' ){
           $company = currentCompanyModel();
+          $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : $company->id_number;
         }else{
           //Si es email, busca por ID del receptor para encontrar la compañia
           $company = Company::where('id_number', $identificacionReceptor)->first();
