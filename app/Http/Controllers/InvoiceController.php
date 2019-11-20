@@ -570,52 +570,61 @@ class InvoiceController extends Controller
 
                     //Datos generales y para Hacienda
                     $invoice->document_type = $request->document_type;
-                    if(!$editar){
-                        $invoice->hacienda_status = '01';
-                    }
+                    $invoice->hacienda_status = '01';
                     $invoice->payment_status = "01";
                     $invoice->payment_receipt = "";
                     $invoice->generation_method = "etax";
                     $invoice->xml_schema = 43;
-                    if ($request->document_type == '01') {
-                        $invoice->reference_number = $company->last_invoice_ref_number + 1;
-                        $company->last_invoice_ref_number = $invoice->reference_number;
-                        $company->save();
-                        $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
-                        $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
-                        $company->last_document = $invoice->document_number;
-                        $company->save();
-                        $invoice->save();
+                    $today = Carbon::parse(now('America/Costa_Rica'));
+                    $generated_date = Carbon::createFromFormat('d/m/Y', $request->generated_date);
+                    if($today->format("Y-m-d") <  $generated_date->format("Y-m-d")){
+                        $invoice->hacienda_status = '99';
+                        $invoice->generation_method = "etax-programada";
+                        $invoice->document_key = "Key Programada";
+                        $invoice->document_number = "Programada";
                     }
-                    if ($request->document_type == '08') {
-                        $invoice->reference_number = $company->last_invoice_pur_ref_number + 1;
-                        $company->last_invoice_pur_ref_number = $invoice->reference_number;
-                        $company->save();
-                        $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
-                        $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
-                        $company->last_document_invoice_pur = $invoice->document_number;
-                        $company->save();
-                        $invoice->save();
-                    }
-                    if ($request->document_type == '09') {
-                        $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
-                        $company->last_invoice_exp_ref_number = $invoice->reference_number;
-                        $company->save();
-                        $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
-                        $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
-                        $company->last_document_invoice_exp = $invoice->document_number;
-                        $company->save();
-                        $invoice->save();
-                    }
-                    if ($request->document_type == '04') {
-                        $invoice->reference_number = $company->last_ticket_ref_number + 1;
-                        $company->last_ticket_ref_number = $invoice->reference_number;
-                        $company->save();
-                        $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
-                        $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
-                        $company->last_document_ticket = $invoice->document_number;
-                        $company->save();
-                        $invoice->save();
+
+                    if($invoice->hacienda_status != '99'){
+                        if ($request->document_type == '01') {
+                            $invoice->reference_number = $company->last_invoice_ref_number + 1;
+                            $company->last_invoice_ref_number = $invoice->reference_number;
+                            $company->save();
+                            $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
+                            $company->last_document = $invoice->document_number;
+                            $company->save();
+                            $invoice->save();
+                        }
+                        if ($request->document_type == '08') {
+                            $invoice->reference_number = $company->last_invoice_pur_ref_number + 1;
+                            $company->last_invoice_pur_ref_number = $invoice->reference_number;
+                            $company->save();
+                            $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
+                            $company->last_document_invoice_pur = $invoice->document_number;
+                            $company->save();
+                            $invoice->save();
+                        }
+                        if ($request->document_type == '09') {
+                            $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
+                            $company->last_invoice_exp_ref_number = $invoice->reference_number;
+                            $company->save();
+                            $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
+                            $company->last_document_invoice_exp = $invoice->document_number;
+                            $company->save();
+                            $invoice->save();
+                        }
+                        if ($request->document_type == '04') {
+                            $invoice->reference_number = $company->last_ticket_ref_number + 1;
+                            $company->last_ticket_ref_number = $invoice->reference_number;
+                            $company->save();
+                            $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
+                            $company->last_document_ticket = $invoice->document_number;
+                            $company->save();
+                            $invoice->save();
+                        }
                     }
 
                     $invoice->save();
@@ -632,14 +641,7 @@ class InvoiceController extends Controller
                         }
                     }
 
-                    $today = Carbon::parse(now('America/Costa_Rica'));
-                    $generated_date = Carbon::createFromFormat('d/m/Y', $request->generated_date);
-                    if($today->format("Y-m-d") <  $generated_date->format("Y-m-d")){
-                        $invoice->hacienda_status = '99';
-                        $invoice->generation_method = "etax-programada";
-                        $invoice->document_key = $invoice->document_key."programada";
-                        $invoice->document_number = "Programada";
-                    }
+                    
                     $invoice->save();                    
                     if($request->recurrencia != "0"){
                         if($request->id_recurrente == 0){

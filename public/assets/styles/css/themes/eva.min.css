@@ -16309,6 +16309,38 @@ table#invoice-table td {
   margin-bottom: 0.266rem;
 }
 
+.checkbox-div {
+  outline: initial !important;
+  background: #fff;
+  color: #050505;
+  padding: 0.25rem 0rem;
+}
+
+.checkbox-div::-webkit-input-placeholder {
+  color: #501a68;
+}
+
+.checkbox-div::-moz-placeholder {
+  color: #501a68;
+}
+
+.checkbox-div:-ms-input-placeholder {
+  color: #501a68;
+}
+
+.checkbox-div::-ms-input-placeholder {
+  color: #501a68;
+}
+
+.checkbox-div::placeholder {
+  color: #501a68;
+}
+
+.checkbox-div.rounded,
+.checkbox-div.form-control-rounded {
+  border-radius: 1.33rem;
+}
+
 .form-control {
   border: 0.0666rem solid #999;
   outline: initial !important;
