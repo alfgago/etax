@@ -72,17 +72,30 @@
 
                             <div class="form-group col-md-4">
                                 <label for="subtotal">Subtotal </label>
-                                <input type="text" class="form-control" name="subtotal" id="subtotal" placeholder="" onlyread="true" required>
+                                <input type="text" class="form-control" name="subtotal" id="subtotal" placeholder="" readonly="true" required>
                             </div>
 
                             <div class="form-group col-md-4">
                                 <label for="iva_amount">Monto IVA </label>
-                                <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" onlyread="true" required>
+                                <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
+                            </div>
+                            <div class="form-group col-md-4 hidden" id="total_iva_devuelto-cont">
+                              <label for="total">IVA Devuelto</label>
+                              <input type="text" class="form-control total" name="total_iva_devuelto" id="total_iva_devuelto" placeholder="" readonly="true" required>
                             </div>
 
+                            <div class="form-group col-md-4 hidden" id="total_iva_exonerado-cont">
+                              <label for="total">IVA Exonerado</label>
+                              <input type="text" class="form-control total" name="total_iva_exonerado" id="total_iva_exonerado" placeholder="" readonly="true" required>
+                            </div>
+
+                            <div class="form-group col-md-4 hidden" id="total_otros_cargos-cont">
+                              <label for="total">Otros cargos</label>
+                              <input type="text" class="form-control total" name="total_otros_cargos" id="total_otros_cargos" placeholder="" readonly="true" required>
+                            </div>
                             <div class="form-group col-md-4">
                                 <label for="total">Total</label>
-                                <input type="text" class="form-control total" name="total" id="total" placeholder="" onlyread="true" required>
+                                <input type="text" class="form-control total" name="total" id="total" placeholder="" readonly="true" required>
                             </div>
 
                             <div class="form-group col-md-12">
@@ -488,7 +501,60 @@
                         </table>
                     </div>
                 </div>
+          <div class="form-row" id="tabla-otroscargos-factura" style="{{ isset($invoice->otherCharges[0]) ? '' : 'display: none;'}}"> 
 
+            <div class="form-group col-md-12">
+              <h3>
+                Otros cargos
+              </h3>
+            </div>
+            
+            <div class="form-group col-md-12" >
+              <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
+                <thead class="thead-dark">
+                  <tr>
+                    <th>#</th>
+                    <th>Tipo</th>
+                    <th>Receptor</th>
+                    <th>Detalle</th>
+                    <th>Monto del cargo</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach ( $invoice->otherCharges as $item )
+                   <tr class="otros-tabla otros-index-{{ $item->item_number }}" index="{{ $item->item_number }}" attr-num="{{ $item->item_number }}" id="otros-tabla-{{ $item->item_number }}">
+                      <td><span class="numero-fila">{{ $item->item_number }}</span></td>
+                      <td>{{ $item->document_type }}</td>
+                      <td>{{ $item->provider_id_number }} {{ $item->provider_name }}</td>
+                      <td>{{ $item->description }}</td>
+                      <td>{{ number_format($item->amount,2) }} </td>
+                      <td class='acciones'>
+                        <span title='Editar linea' class='btn-editar-item text-success mr-2' onclick="abrirPopup('otros-popup'); cargarFormOtros({{ $loop->index }});"> <i class="fa fa-pencil" aria-hidden="true"></i> </span> 
+                        <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarOtros({{ $loop->index }});' > <i class="fa fa-trash-o" aria-hidden="true"></i> </span> 
+                      </td>
+                      <td class="hidden">
+                        <input type="hidden" class='otros-item_number' name="otros[{{ $loop->index }}][item_number]" itemname="item_number" value="{{ $loop->index+1 }}">
+                        <input type="hidden" class="otros_id" name="otros[{{ $loop->index }}][id]" itemname="id" value="{{ $item->id }}"> 
+                        <input type="hidden" class="otros-document_type" name="otros[{{ $loop->index }}][document_type]" itemname="document_type" value="{{ $item->document_type }}"> 
+                        <input type="hidden" class='otros-provider_id_number' name="otros[{{ $loop->index }}][provider_id_number]" itemname="provider_id_number" value="{{ $item->provider_id_number }}">
+                        <input type="hidden" class='otros-provider_name' name="otros[{{ $loop->index }}][provider_name]" itemname="provider_name" value="{{ $item->provider_name }}">
+                        <input type="hidden" class='otros-description' name="otros[{{ $loop->index }}][description]" itemname="description" value="{{ $item->description }}">
+                        <input type="hidden" class='otros-amount' name="otros[{{ $loop->index }}][amount]" itemname="amount" value="{{ $item->amount }}">
+                        <input type="hidden" class='otros-percentage' name="otros[{{ $loop->index }}][percentage]" itemname="percentage" value="{{ $item->percentage }}">
+                      </td>
+                  </tr>
+                  @endforeach
+                </tbody>
+              </table>
+            </div>
+          </div>
+        @include( 'Invoice.form-otros-cargos' )
+        @if($document_type != "08")
+          @include('Invoice.form-nuevo-cliente')
+        @else
+          @include('Bill.form-nuevo-proveedor')
+        @endif
                 @include( 'Invoice.form-linea' )
                 <div class="btn-holder hidden">
 

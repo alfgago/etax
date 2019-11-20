@@ -533,7 +533,7 @@ class InvoiceController extends Controller
      */
     public function sendHacienda(Request $request)
     {
-        dd($request);
+        //dd($request);
         //revision de branch para segmentacion de funcionalidades por tipo de documento
         try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
