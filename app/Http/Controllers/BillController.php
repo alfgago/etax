@@ -65,9 +65,12 @@ class BillController extends Controller
      */
     public function indexValidarMasivo(){
         $company = currentCompanyModel();
+        $companyAct = Company::select('commercial_activities')->where('id', $company->id)->first();
+        $activities_company = explode(", ", $companyAct->commercial_activities);
+        $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
         $categoriaProductos = ProductCategory::get();
         $unidades = BillItem::select('bill_items.measure_unit')->where('bill_items.company_id', '=', $company->id)->groupBy('bill_items.measure_unit')->get();
-        return view('Bill/index-masivo', compact('company', 'categoriaProductos', 'unidades'));
+        return view('Bill/index-masivo', compact('company', 'categoriaProductos', 'unidades', 'commercial_activities'));
     }
 
     public function indexOne($id){
@@ -88,6 +91,7 @@ class BillController extends Controller
                 select('bill_items.id as item_id', 'bill_items.*')->
                 where('bill_items.company_id', $company->id)
                 ->join('bills', 'bill_items.bill_id', '=', 'bills.id' )
+                ->where('bills.is_authorized', 1)
                 //->join('providers', 'bills.provider_id', '=', 'providers.id' )
                 ;
 
@@ -104,35 +108,64 @@ class BillController extends Controller
                     ->orwhereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 0')                    
                     ;
                 });
-                $cat['cero'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 0)->get();
+                $cat['cero'] = CodigoIvaSoportado::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 0)->orWhere('code', '=', 'S097')->orWhere('code', '=', 'B097');
+                })->get();
                 break;
             case 1:
                 $query = $query->whereNotNull('bill_items.subtotal')->where('bill_items.subtotal', '>', 0)->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 1');
-                $cat['uno'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 1)->get();
+
+                $cat['uno'] = CodigoIvaSoportado::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 1)->orWhere('code', '=', 'S097')->orWhere('code', '=', 'B097');
+                })->get();
                 break;
             case 2:
                 $query = $query->whereNotNull('bill_items.subtotal')->where('bill_items.subtotal', '>', 0)->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 2');
-                $cat['dos'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 2)->get();
+
+                $cat['dos'] = CodigoIvaSoportado::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 2)->orWhere('code', '=', 'S097')->orWhere('code', '=', 'B097');
+                })->get();
                 break;
             case 13:
                 $query = $query->whereNotNull('bill_items.subtotal')->where('bill_items.subtotal', '>', 0)->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 13');
-                $cat['trece'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 13)->get();
+
+                $cat['trece'] = CodigoIvaSoportado::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 13)->orWhere('code', '=', 'S097')->orWhere('code', '=', 'B097');
+                })->get();
                 break;
             case 4:
                 $query = $query->whereNotNull('bill_items.subtotal')->where('bill_items.subtotal', '>', 0)->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 4');
-                $cat['cuatro'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 4)->get();
+
+                $cat['cuatro'] = CodigoIvaSoportado::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 4)->orWhere('code', '=', 'S097')->orWhere('code', '=', 'B097');
+                })->get();
                 break;
             case 8:
                 $query = $query->whereNotNull('bill_items.subtotal')->where('bill_items.subtotal', '>', 0)->whereRaw('ROUND(bill_items.iva_amount / bill_items.subtotal * 100) = 8');
-                $cat['ocho'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 8)->get();;
+
+                $cat['ocho'] = CodigoIvaSoportado::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 8)->orWhere('code', '=', 'S097')->orWhere('code', '=', 'B097');
+                })->get();
                 break;
             default:
-                $cat['cero'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 0)->get();
-                $cat['uno'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 1)->get();
-                $cat['dos'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 2)->get();
-                $cat['trece'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 13)->get();
-                $cat['cuatro'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 4)->get();
-                $cat['ocho'] = CodigoIvaSoportado::where('hidden', false)->where('percentage', '=', 8)->get();
+                $cat['cero'] = CodigoIvaSoportado::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 0)->orWhere('code', '=', 'S097')->orWhere('code', '=', 'B097');
+                })->get();
+                $cat['uno'] = CodigoIvaSoportado::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 1)->orWhere('code', '=', 'S097')->orWhere('code', '=', 'B097');
+                })->get();
+                $cat['dos'] = CodigoIvaSoportado::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 2)->orWhere('code', '=', 'S097')->orWhere('code', '=', 'B097');
+                })->get();
+                $cat['trece'] = CodigoIvaSoportado::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 13)->orWhere('code', '=', 'S097')->orWhere('code', '=', 'B097');
+                })->get();
+                $cat['cuatro'] = CodigoIvaSoportado::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 4)->orWhere('code', '=', 'S097')->orWhere('code', '=', 'B097');
+                })->get();
+                $cat['ocho'] = CodigoIvaSoportado::where('hidden', false)->where(function($q){
+                    $q->where('percentage', '=', 8)->orWhere('code', '=', 'S097')->orWhere('code', '=', 'B097');
+                })->get();
         }
 
        $filtroMes = $request->get('filtroMes');
@@ -143,12 +176,10 @@ class BillController extends Controller
        $filtroValidado = $request->get('filtroValidado');
        switch($filtroValidado){
             case 1:
-                $query = $query->where(function($q){
-                    $q->whereNull('bill_items.product_type')->orWhereNull('bill_items.iva_type');
-                });
+                $query = $query->where('bill_items.is_code_validated', false);
                 break;
             case 2:
-                $query = $query->whereNotNull('bill_items.product_type')->WhereNotNull('bill_items.iva_type');
+                $query = $query->where('bill_items.is_code_validated', true);
                 break;
             case 3:
                 $query = $query->where('bills.is_code_validated', false);
@@ -563,18 +594,155 @@ class BillController extends Controller
         }
         
         $company = currentCompanyModel();
-        $cedulaEmpresa = isset($collectionArray[0]['cedulaempresa']) ? $collectionArray[0]['cedulaempresa'] : null;
-        if( $company->id_number != $cedulaEmpresa ){ 
-          return back()->withError( "Error en validación: Asegúrese de agregar la columna CedulaEmpresa a su archivo de excel, con la cédula de su empresa en todas las lineas. La línea 1 no le pertenece a la empresa actual. ($company->id_number)" );
-        }
+        
+        try {
+            Log::info($company->id_number . " importanto Excel compras con ".count($collectionArray)." lineas");
+            $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
+            $i = 0;
+            $billList = array();
             
-
-        if( count($collectionArray) < 1800 ){
-            ProcessBillsImport::dispatchNow($collectionArray, $company);
-        }else{
-            ProcessBillsImport::dispatch($collectionArray, $company);
+            if(count($collectionArray) < 2500){
+                foreach ($collectionArray as $row){
+                    $i++;
+    
+                    $metodoGeneracion = "XLSX";
+                    
+                    if( isset($row['consecutivocomprobante']) ){
+                        //Datos de proveedor
+                        $nombreProveedor = $row['nombreproveedor'];
+                        $codigoProveedor = $row['codigoproveedor'] ? $row['codigoproveedor'] : '';
+                        $tipoPersona = (int)$row['tipoidentificacion'];
+                        if( isset($row['identificacionproveedor']) ){
+                            $identificacionProveedor = $row['identificacionproveedor'];
+                        }else{
+                            $identificacionProveedor = $row['identificacionreceptor'];
+                        }
+                        if( isset($row['correoproveedor']) ){
+                            $correoProveedor = $row['correoproveedor'];
+                        }else{
+                            $correoProveedor = $row['correoreceptor'];
+                        }
+                        
+                        $telefonoProveedor = null;
+    
+                        //Datos de factura
+                        $consecutivoComprobante = $row['consecutivocomprobante'];
+                        $claveFactura = isset($row['clavefactura']) ? $row['clavefactura'] : $consecutivoComprobante;
+                        $condicionVenta = str_pad((int)$row['condicionventa'], 2, '0', STR_PAD_LEFT);
+                        $metodoPago = str_pad((int)$row['metodopago'], 2, '0', STR_PAD_LEFT);
+                        $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
+                        $fechaEmision = $row['fechaemision'];
+                        $fechaVencimiento = isset($row['fechavencimiento']) ? $row['fechavencimiento'] : $fechaEmision;
+                        $moneda = $row['moneda'];
+                        $tipoCambio = $row['tipocambio'];
+                        $totalDocumento = $row['totaldocumento'];
+                        $tipoDocumento = str_pad((int)$row['tipodocumento'], 2, '0', STR_PAD_LEFT);
+                        $descripcion = isset($row['descripcion']) ? $row['descripcion'] : '';
+    
+                        //Datos de linea
+                        $codigoProducto = $row['codigoproducto'];
+                        $detalleProducto = $row['detalleproducto'];
+                        $unidadMedicion = $row['unidadmedicion'];
+                        $cantidad = isset($row['cantidad']) ? $row['cantidad'] : 1;
+                        $precioUnitario = $row['preciounitario'];
+                        $subtotalLinea = (float)$row['subtotallinea'];
+                        $totalLinea = $row['totallinea'];
+                        $montoDescuento = isset($row['montodescuento']) ? $row['montodescuento'] : 0;
+                        $codigoEtax = $row['codigoivaetax'];
+                        $categoriaHacienda = isset($row['categoriahacienda']) ? $row['categoriahacienda'] : (isset($row['categoriadeclaracion']) ? $row['categoriadeclaracion'] : null);
+                        $montoIva = (float)$row['montoiva'];
+                        $acceptStatus = isset($row['aceptada']) ? $row['aceptada'] : 1;
+                        $codigoActividad = $row['actividadcomercial'] ?? $mainAct;
+                        $xmlSchema = $row['xmlschema'] ?? 43;
+                        $identificacionEspecifica = $row['tarifaidentificacionespecifica'] ?? 13;
+                        
+    
+                         //verificar si fue validada
+                        if($numeroLinea == 1){
+                            $codeValidated = isset($categoriaHacienda) ? (isset($codigoEtax) ? true : false) : false;
+                        }else{
+                            $codeValidated = isset($categoriaHacienda) ? (isset($codigoEtax) ? null : false) : false;    
+                        }
+    
+    
+                        //Datos de exoneracion
+                        $totalNeto = 0;
+                        $tipoDocumentoExoneracion = $row['tipodocumentoexoneracion'] ?? null;
+                        $documentoExoneracion = $row['documentoexoneracion'] ?? null;
+                        $companiaExoneracion = $row['companiaexoneracion'] ?? null;
+                        $porcentajeExoneracion = $row['porcentajeexoneracion'] ?? 0;
+                        $montoExoneracion = $row['montoexoneracion'] ?? 0;
+                        $impuestoNeto = $row['impuestoneto'] ?? 0;
+                        $totalMontoLinea = $row['totalmontolinea'] ?? 0;
+    
+                        $codigoEtax = str_pad($codigoEtax, 3, '0', STR_PAD_LEFT);
+    
+                        $arrayImportBill = array(
+                            'metodoGeneracion' => $metodoGeneracion,
+                            'idReceptor' => 0,
+                            'nombreProveedor' => $nombreProveedor,
+                            'codigoProveedor' => $codigoProveedor,
+                            'tipoPersona' => $tipoPersona,
+                            'identificacionProveedor' => $identificacionProveedor,
+                            'correoProveedor' => $correoProveedor,
+                            'telefonoProveedor' => $telefonoProveedor,
+                            'claveFactura' => $claveFactura,
+                            'consecutivoComprobante' => $consecutivoComprobante,
+                            'condicionVenta' => $condicionVenta,
+                            'metodoPago' => $metodoPago,
+                            'numeroLinea' => $numeroLinea,
+                            'fechaEmision' => $fechaEmision,
+                            'fechaVencimiento' => $fechaVencimiento,
+                            'moneda' => $moneda,
+                            'tipoCambio' => $tipoCambio,
+                            'totalDocumento' => $totalDocumento,
+                            'totalNeto' => $totalNeto,
+                            'tipoDocumento' => $tipoDocumento,
+                            'codigoProducto' => $codigoProducto,
+                            'detalleProducto' => $detalleProducto,
+                            'unidadMedicion' => $unidadMedicion,
+                            'cantidad' => $cantidad,
+                            'precioUnitario' => $precioUnitario,
+                            'subtotalLinea' => $subtotalLinea,
+                            'totalLinea' => $totalLinea,
+                            'montoDescuento' => $montoDescuento,
+                            'codigoEtax' => $codigoEtax,
+                            'montoIva' => $montoIva,
+                            'identificacionEspecifica' => $identificacionEspecifica,
+                            'descripcion' => $descripcion,
+                            'isAuthorized' => true,
+                            'codeValidated' => $codeValidated,
+                            'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
+                            'documentoExoneracion' => $documentoExoneracion,
+                            'companiaExoneracion' => $companiaExoneracion,
+                            'porcentajeExoneracion' => $porcentajeExoneracion,
+                            'montoExoneracion' => $montoExoneracion,
+                            'impuestoNeto' => $impuestoNeto,
+                            'totalMontoLinea' => $totalMontoLinea,
+                            'xmlSchema' => $xmlSchema,
+                            'codigoActividad' => $codigoActividad,
+                            'categoriaHacienda' => $categoriaHacienda,
+                            'acceptStatus' => $acceptStatus
+                        );
+                        $billList = Bill::importBillRow($arrayImportBill, $billList, $company);
+                    }
+                }
+                Log::info("$i procesadas...");
+                foreach (array_chunk ( $billList, 100 ) as $facturas) {
+                    Log::info("Mandando 100 a queue...");
+                    ProcessBillsImport::dispatch($facturas);
+                }
+                Log::info("Envios a queue finalizados $company->id_number");
+            }else{
+                return redirect('/facturas-emitidas')->withError('Error importando. El archivo tiene más de 2500 lineas.');
+            }
+        }catch( \Throwable $ex ){
+            Log::error("Error importando Excel. Empresa: ".$company->id_number.", Archivo:" . $ex);
+            return redirect('/facturas-recibidas')->withError('Error importando. Archivo excede el tamaño mínimo.');
         }
-            
+        
+        $company->save();
+        
         return redirect('/facturas-recibidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
 
     }
@@ -586,48 +754,43 @@ class BillController extends Controller
             $file = Input::file('file');
             $xml = simplexml_load_string( file_get_contents($file) );
             $json = json_encode( $xml ); // convert the XML string to JSON
-            $arr = json_decode( $json, TRUE );                
-            if(substr($arr['NumeroConsecutivo'],8,2) != "04"){
-                    $FechaEmision = explode("T", $arr['FechaEmision']);
-                    $FechaEmision = explode("-", $FechaEmision[0]);
-                    $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+            $arr = json_decode( $json, TRUE ); 
+                $FechaEmision = explode("T", $arr['FechaEmision']);
+                $FechaEmision = explode("-", $FechaEmision[0]);
+                $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
 
-                    if(CalculatedTax::validarMes($FechaEmision)){
-                        $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
-                        $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-                        $consecutivoComprobante = $arr['NumeroConsecutivo'];
-                        $clave = $arr['Clave'];
-                        
-                        //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                        if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
-                            //Registra el XML. Si todo sale bien, lo guarda en S3
-                            $bill = Bill::saveBillXML( $arr, 'XML' );
-                            if( $bill ) {
-                                Bill::storeXML( $bill, $file );
+                if(CalculatedTax::validarMes($FechaEmision)){
+                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : $company->id_number;
+                    $identificacionEmisor = array_key_exists('Emisor', $arr) ? $arr['Emisor']['Identificacion']['Numero'] : 0;
+                    $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                    $clave = $arr['Clave'];
+                    //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor )  || substr($arr['NumeroConsecutivo'],8,2) == "04" ) {
+                        //Registra el XML. Si todo sale bien, lo guarda en S3
+                        $bill = Bill::saveBillXML( $arr, 'XML' );
+                        if( $bill ) {
+                            Bill::storeXML( $bill, $file );
 
-                                $user = auth()->user();
-                                Activity::dispatch(
-                                    $user,
-                                    $bill,
-                                    [
-                                        'company_id' => $bill->company_id,
-                                        'id' => $bill->id,
-                                        'document_key' => $bill->document_key
-                                    ],
-                                    "Importar factura de compra por XML."
-                                )->onConnection(config('etax.queue_connections'))
-                                ->onQueue('log_queue');
-                            }
-                        }else{
-                            return Response()->json("El documento $consecutivoComprobante no le pertenece a su empresa actual", 400);
+                            $user = auth()->user();
+                            Activity::dispatch(
+                                $user,
+                                $bill,
+                                [
+                                    'company_id' => $bill->company_id,
+                                    'id' => $bill->id,
+                                    'document_key' => $bill->document_key
+                                ],
+                                "Importar factura de compra por XML."
+                            )->onConnection(config('etax.queue_connections'))
+                            ->onQueue('log_queue');
                         }
                     }else{
-                        return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
+                        return Response()->json("El documento no le pertenece a su empresa actual.", 400);
                     }
                 }else{
-
-                    return Response()->json('Error: No se puede importar un tiquete electrónico.', 400);
+                    return Response()->json('Error: El mes de la factura ya fue cerrado.', 400);
                 }
+            
 
              
             $company->save();
@@ -640,8 +803,10 @@ class BillController extends Controller
             Log::error('Error importando XML ' . $ex->getMessage());
             return Response()->json('Se ha detectado un error en el tipo de archivo subido.', 400);
         }
-
-        return Response()->json('Facturas importados exitosamente en '.$time.'s', 200);
+        if( substr($arr['NumeroConsecutivo'],8,2) == "04" ) {
+            return Response()->json('Se importo un tiquete sin cedula de receptor.', 206 );
+        }
+        return Response()->json('Factura importada exitosamente.', 200);
 
     }
     
@@ -690,15 +855,17 @@ class BillController extends Controller
             $bill = $billItem->bill;
             if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/Y') )){
                 try{
+                	$bill->activity_company_verification = $request->actividad_comercial;
                     BillItem::where('id', $key)
                     ->update([
                       'iva_type' =>  $item['iva_type'],
                       'product_type' =>  $item['product_type'],
-                      'porc_identificacion_plena' =>  $item['porc_identificacion_plena']
+                      'porc_identificacion_plena' =>  $item['porc_identificacion_plena'],
+                      'is_code_validated' =>  true
                     ]);
                     $validated = true;
                     foreach($bill->items as $item){
-                        if(!isset($item->iva_type) || !isset($item->product_type)){
+                        if(!$item->is_code_validated){
                             $validated = false;
                         }
                     }
@@ -762,7 +929,8 @@ class BillController extends Controller
                 ->update([
                   'iva_type' =>  $item['iva_type'],
                   'product_type' =>  $item['product_type'],
-                  'porc_identificacion_plena' =>  $item['porc_identificacion_plena']
+                  'porc_identificacion_plena' =>  $item['porc_identificacion_plena'],
+                  'is_code_validated' =>  true
                 ]);
             }
             if(!$company->use_invoicing){
@@ -1260,6 +1428,30 @@ class BillController extends Controller
                 ->onQueue('log_queue');
         return redirect('/facturas-recibidas')->withMessage('La factura ha sido restaurada satisfactoriamente.');
     }  
+    
+    public function downloadXml($id) {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+
+        $billUtils = new BillUtils();
+        $file = $billUtils->downloadXml( $bill, currentCompanyModel() );
+        $filename = $bill->document_key . '.xml';
+        if( ! $bill->document_key ) {
+            $filename = $bill->document_number . '-' . $bill->provider_id . '.xml';
+        }
+
+        if(!$file) {
+            return redirect()->back()->withError('No se encontró el XML de la factura. Por favor contacte a soporte.');
+        }
+
+        $headers = [
+            'Content-Type' => 'application/xml',
+            'Content-Description' => 'File Transfer',
+            'Content-Disposition' => "attachment; filename={$filename}",
+            'filename'=> $filename
+        ];
+        return response($file, 200, $headers);
+    }
     
     public function fixImports() {
         $billUtils = new BillUtils();

@@ -218,6 +218,9 @@ function reloadDataTableTarifa() {
       if(porcentaje == filtroTarifa){
         $(this).show();
       }
+      if(filtroTarifa == 0 && ($(this).val().indexOf("S18") >= 0 || $(this).val().indexOf("B18") >= 0 )){
+        $(this).show();
+      }
     });
   }else{
     var parent = $(".iva_type_all")

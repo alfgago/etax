@@ -14,7 +14,7 @@
 						<span class="no">No</span>
 					</span>
 			  </th>
-		    <th class="posrel" colspan="5">Ventas sujetas (Base imponible) <input class="sumtot" readonly="" value="{{ number_format($totVentasSujetas, 2) }}"></th>
+		    <th class="posrel" colspan="5">Ventas sujetas (Base imponible) <input class="sumtot" readonly="" value="{{ number_format($totVentasSujetas, 0) }}"></th>
 		  </tr>
 		  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
 				'title' 	 => $actividad['V1']['title'], 
@@ -87,7 +87,7 @@
 						<span class="no">No</span>
 					</span>
 			  </th>
-		    <th class="posrel" colspan="5">Ventas exentas (Art.8) <input class="sumtot" readonly="" value="{{ number_format($totVentasExentas, 2) }}"></th>
+		    <th class="posrel" colspan="5">Ventas exentas (Art.8) <input class="sumtot" readonly="" value="{{ number_format($totVentasExentas, 0) }}"></th>
 		  </tr>
 		  @if($actividad['VEX']['totales'])
 			  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
@@ -123,7 +123,7 @@
 						<span class="no">No</span>
 					</span>
 			  </th>
-		    <th class="posrel" colspan="5">Ventas no sujetas (Art.9) <input class="sumtot" readonly="" value="{{ number_format($actividad['VNS']['totales'], 2) }}"></th>
+		    <th class="posrel" colspan="5">Ventas no sujetas (Art.9) <input class="sumtot" readonly="" value="{{ number_format($actividad['VNS']['totales'], 0) }}"></th>
 		  </tr>
 		  @if($actividad['VNS']['totales'])
 		  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
@@ -159,7 +159,7 @@
 						<span class="no">No</span>
 					</span>
 			  </th>
-		    <th class="posrel" colspan="5">Compras con IVA soportado acreditable <input class="sumtot" readonly="" value="{{ number_format($totComprasAcred, 2) }}"></th>
+		    <th class="posrel" colspan="5">Compras con IVA soportado acreditable <input class="sumtot" readonly="" value="{{ number_format($totComprasAcred, 0) }}"></th>
 		  </tr>
 		  @if($totComprasAcred)
 			  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 
@@ -195,7 +195,7 @@
 						<span class="no">No</span>
 					</span>
 			  </th>
-		    <th class="posrel" colspan="5">Compras sin IVA soportado y/o con IVA soportado no acreditable <input class="sumtot" readonly="" value="{{ number_format($totComprasNAcred, 2) }}"></th>
+		    <th class="posrel" colspan="5">Compras sin IVA soportado y/o con IVA soportado no acreditable <input class="sumtot" readonly="" value="{{ number_format($totComprasNAcred, 0) }}"></th>
 		  </tr>
 			@if($totComprasNAcred)
 			  @include('Reports.widgets.declaracion.loop-actividades-cols', [ 

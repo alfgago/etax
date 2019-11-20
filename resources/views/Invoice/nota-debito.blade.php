@@ -288,7 +288,7 @@
 
 
                                      <input class="typeDocument" type="hidden" name="items[{{ $loop->index }}][typeDocument]" itemname="typeDocument" value="{{ $item->exoneration_document_type }}">
-                                    <input class="nombreInstitucion" type="hidden" name="items[{{ $loop->index }}][nombreInstitucion]" itemname="nombreInstitucion" value="{{ $item->exoneration_document_number }}">
+                                    <input class="numeroDocumento" type="hidden" name="items[{{ $loop->index }}][numeroDocumento]" itemname="numeroDocumento" value="{{ $item->exoneration_document_number }}">
                                     <input class="nombreInstitucion" type="hidden" name="items[{{ $loop->index }}][nombreInstitucion]" itemname="nombreInstitucion" value="{{ $item->exoneration_company_name }}">
                                     <input class="porcentajeExoneracion" type="hidden" name="items[{{ $loop->index }}][porcentajeExoneracion]" itemname="porcentajeExoneracion" value="{{ $item->exoneration_porcent }}">
                                     <input class="montoExoneracion" type="hidden" name="items[{{ $loop->index }}][montoExoneracion]" itemname="montoExoneracion" value="{{ $item->exoneration_amount }}">
@@ -327,7 +327,7 @@
     <script>
         $(document).ready(function(){
 
-           
+
             calcularTotalFactura();
 
             toggleRetencion();

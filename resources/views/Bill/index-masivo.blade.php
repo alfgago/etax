@@ -1,7 +1,7 @@
 @extends('layouts/app')
 
 @section('title') 
-  Facturas emitidas
+  Facturas recibidas
 @endsection
 
 @section('breadcrumb-buttons')
@@ -80,7 +80,14 @@
           </thead>
           <thead>
             <tr>
-               <th colspan="7">Selección masiva: </th>
+               <th colspan="1">Actividad Comercial: </th>
+               <th colspan="2">
+               <select name="actividad_comercial" class="form-control"  placeholder="Seleccione actividad comercial">
+               	@foreach($commercial_activities as $commercial)
+                    <option value="{{@$commercial->codigo}}">{{@$commercial->actividad}}</option>
+                @endforeach
+               </th>
+               <th colspan="4">Selección masiva: </th>
                <td>
                   <div class="">
                     <select class="form-control iva_type_all"  placeholder="Seleccione un código eTax"  >
@@ -242,6 +249,9 @@ function reloadDataTableTarifa() {
     var preselect = $(this).attr('preselect');
       if((porcentaje == filtroTarifa && preselect == 1) || porcentaje == 101){
         $(this).removeAttr("hidden");
+        $(this).show();
+      }
+      if($(this).val().indexOf("S097") >= 0 || $(this).val().indexOf("B097") >= 0  ){
         $(this).show();
       }
     });
