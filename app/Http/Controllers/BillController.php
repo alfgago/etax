@@ -760,7 +760,7 @@ class BillController extends Controller
                 $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
 
                 if(CalculatedTax::validarMes($FechaEmision)){
-                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
+                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : $company->id_number;
                     $identificacionEmisor = array_key_exists('Emisor', $arr) ? $arr['Emisor']['Identificacion']['Numero'] : 0;
                     $consecutivoComprobante = $arr['NumeroConsecutivo'];
                     $clave = $arr['Clave'];
