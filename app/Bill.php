@@ -677,6 +677,26 @@ class Bill extends Model
         return $path;
         
     }
+
+    public static function storeXMLError($cedulaEmpresa, $file) {
+        
+        try{
+          
+          if ( Storage::exists("empresa-$cedulaEmpresa/facturas_compras/error/email/$file->getClientOriginalName()")) {
+              Storage::delete("empresa-$cedulaEmpresa/facturas_compras/error/email/$file->getClientOriginalName()");
+          }
+          
+          $path = \Storage::putFileAs(
+              "empresa-$cedulaEmpresa/facturas_compras", $file, "error/email/$file->getClientOriginalName()"
+          );
+        }catch( \Throwable $e ){
+          Log::error( 'Error al guardar xml de error: ' . $e->getMessage() );
+        }
+        
+        return $path;
+        
+    }
+    
     
     public static function importBillRow ( $data, $billList, $company = false ) {
       if(!$company){

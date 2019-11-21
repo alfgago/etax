@@ -15,10 +15,9 @@ class CreateNotifyUserTable extends Migration
     {
         Schema::create('notification_users', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->unsignedBigInteger('notification_id')->default(0);
-            $table->foreign('notification_id')->references('id')->on('notifications')->onDelete('cascade');
+            $table->BigInteger('user_id');
+            $table->BigInteger('notification_id')->default(0);
+            $table->integer('status')->default(1);
             $table->timestamps();
             $table->softDeletes();
         });

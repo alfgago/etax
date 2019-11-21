@@ -95,7 +95,12 @@ class EmailController extends Controller
                 Log::info( "CORREO: Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor");
             }
         }catch( \Throwable $ex ){
-            Log::warning( "CORREO: No se pudo guardar la factura de compra via Email. Mensaje: " . $ex->getMessage());
+            Log::warning( "CORREO: No se pudo guardar la factura de compra via Email. Mensaje: $file->getClientOriginalName()" . $ex->getMessage());
+            $company = Company::where('id_number',$identificacionReceptor)->first();
+
+            $this->notify(2, $company->id, 'Error recibir factura de compra por correo', '','empresa-'.$identificacionReceptor.'/facturas_compras/error/email/'.$file->getClientOriginalName(), 'danger', 'EmailController/processAttachment -> saveBill');
+
+            Bill::storeXMLError($identificacionReceptor, $file);
         }
        
         try {
@@ -105,7 +110,13 @@ class EmailController extends Controller
                 Log::info( "CORREO: Se registró la factura de venta $consecutivoComprobante para la empresa $identificacionEmisor");
             }
         }catch( \Throwable $ex ){
-            Log::warning( "CORREO: No se pudo guardar la factura de venta via Email. Mensaje: " . $ex->getMessage());
+            Log::warning( "CORREO: No se pudo guardar la factura de venta via Email. Mensaje: $file->getClientOriginalName() " . $ex->getMessage());
+
+            $company = Company::where('id_number',$identificacionEmisor)->first();
+
+            $this->notify(2, $company->id, 'Error recibir factura de venta por correo', '','empresa-'.$identificacionReceptor.'/facturas_compras/error/email/'.$file->getClientOriginalName(), 'danger', 'EmailController/processAttachment -> saveBill');
+
+            Invoice::storeXMLError($identificacionEmisor, $file);
         }
         
         return true;

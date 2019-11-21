@@ -15,9 +15,9 @@ class CreateNotifyTable extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->bigIncrements('id');
-             $table->integer('type')->default(0);
+             $table->string('type')->default(0);
              $table->string('title')->nullable();
-             $table->string('text')->nullable();
+             $table->text('text')->nullable();
              $table->string('link')->nullable();
              $table->string('function')->nullable();
              $table->datetime('date')->nullable();
