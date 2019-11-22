@@ -108,6 +108,7 @@ class EmailController extends Controller
             if( $invoice ) {
                 Invoice::storeXML( $invoice, $file );
                 Log::info( "CORREO: Se registró la factura de venta $consecutivoComprobante para la empresa $identificacionEmisor");
+                $this->notificar(2, $invoice->company_id, 'prueba correo ok ', 'hola prueba', 'danger', 'prueba','');
                 $this->notify(2, $invoice->company_id, 'Recibio una factura de venta por correo', 'Se registró la factura de venta $consecutivoComprobante para la empresa $identificacionEmisor','success','EmailController/processAttachment -> saveInvoice','/facturas_ventas/'.$invoice->id);
             }
         }catch( \Throwable $ex ){
