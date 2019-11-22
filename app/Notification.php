@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use App\Notification;
 use App\NotificationUser;
+use App\User;
 
 class Notification extends Model
 {
@@ -98,11 +99,18 @@ class Notification extends Model
 
    public function reiniciarNotificaciones($user_id,$company_id){
    		try{
-			$company = currentCompany();
-			auth()->user()->teams
-            $llave = "notificaciones-".$user_id."-".$company;
-			$items = NotificationUser::with('notification')->where('user_id',$user_id)->whereIn('company_id',array($company_id,0))->where('status',1)->orderby('created_at','desc')->get();
-            Cache::put($llave, $items, now()->addDays(10));
+   			$user = User::findOrFail($user_id);
+   			if($company_id != 0){
+	            $llave = "notificaciones-".$user_id."-".$company_id;
+				$items = NotificationUser::with('notification')->where('user_id',$user_id)->whereIn('company_id',array($company_id,0))->where('status',1)->orderby('created_at','desc')->get();
+	            Cache::put($llave, $items, now()->addDays(10));
+   			}else{
+   				foreach ($user->teams as $team) {
+   					$llave = "notificaciones-".$user_id."-".$team->company_id;
+					$items = NotificationUser::with('notification')->where('user_id',$user_id)->whereIn('company_id',array($team->company_id,0))->where('status',1)->orderby('created_at','desc')->get();
+		            Cache::put($llave, $items, now()->addDays(10));
+   				}
+   			}
 			return true;
 		}catch( \Throwable $e) { 
             Log::error('Error agregar notificacion $llave'. $e);

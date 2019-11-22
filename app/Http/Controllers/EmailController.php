@@ -118,8 +118,8 @@ class EmailController extends Controller
 
             $company = Company::where('id_number',$identificacionEmisor)->first();
 
-            $this->notificar(2, $company->id, $company->id, 'Error recibir factura de venta por correo', 'No se pudo guardar la factura de venta via Email. Mensaje: '.$file->getClientOriginalName().' ','danger','EmailController/processAttachment -> saveInvoice','empresa-'.$identificacionEmisor.'/facturas_ventas/error/email/'.$file->getClientOriginalName());
             Invoice::storeXMLError($identificacionEmisor, $file);
+            $this->notificar(2, $company->id, $company->id, 'Error recibir factura de venta por correo', 'No se pudo guardar la factura de venta via Email. Mensaje: '.$file->getClientOriginalName().' ','danger','EmailController/processAttachment -> saveInvoice','empresa-'.$identificacionEmisor.'/facturas_ventas/error/email/'.$file->getClientOriginalName());
         }
         
         return true;
