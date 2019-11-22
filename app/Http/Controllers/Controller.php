@@ -14,7 +14,8 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests, LogsActivity;
 
-	//$this->notificar(2, 3, 'prueba', 'hola prueba', 'danger', 'prueba','');
+	//$this->notificar(opcion, id, 'titulo', 'detalle', 'tipo', 'funcion','enlace');
+
  	public function notificar($option, $id, $title, $text = '', $type = 'info', $function = '', $link = '' ){ 
     	$notify = new Notification();
         Log::info( "prueba notificacion");
