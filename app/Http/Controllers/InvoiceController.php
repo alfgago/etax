@@ -2417,7 +2417,7 @@ class InvoiceController extends Controller
     }
     public function guardarRecurrentes (Request $request)
     {
-        //try{
+        try{
             if($request->recurrencia != "0" ){
                 if($request->cantidad_dias == null || $request->cantidad_dias == ''){
                     $request->cantidad_dias = 0;
@@ -2451,10 +2451,10 @@ class InvoiceController extends Controller
                 return  $this->eliminarProgramada($request->id_recurrente);
             }
 
-        /*}catch ( \Exception $e) {
+        }catch ( \Exception $e) {
             Log::error("Error en actualizar recurrencia:" . $e);
             return redirect()->back()->withError('Error en actualizar recurrencia.');
-        }*/
+        }
     }
         
 }
