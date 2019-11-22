@@ -124,6 +124,7 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('envioProgramada', 'InvoiceController@envioProgramada')->name('Invoice.envioProgramada');
     Route::get('recurrentes', 'InvoiceController@recurrentes')->name('Invoice.recurrentes');
     Route::get('ver-recurrente/{id}', 'InvoiceController@verRecurrentes')->name('Invoice.editarRecurrentes');
+    Route::post('guardar-recurrencia', 'InvoiceController@guardarRecurrentes')->name('Invoice.guardarRecurrentes');
     Route::delete('eliminar-recurrente/{id}', 'InvoiceController@eliminarRecurrentes')->name('Invoice.eliminarRecurrentes');
     Route::delete('eliminar-programada/{id}', 'InvoiceController@eliminarProgramada')->name('Invoice.eliminarProgramada');
     Route::get('editar-factura/{id}', 'InvoiceController@editarFactura')->name('Invoice.editarFactura');

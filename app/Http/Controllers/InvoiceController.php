@@ -643,8 +643,11 @@ class InvoiceController extends Controller
 
                     
                     $invoice->save();                    
-                    if($request->recurrencia != "0"){
-                        if($request->id_recurrente == 0){
+                    if($request->recurrencia != "0" ){
+                        if($request->cantidad_dias == null || $request->cantidad_dias == ''){
+                             $request->cantidad_dias = 0;
+                        }
+                       if($request->id_recurrente == 0){
                             $recurrencia = new RecurringInvoice();
                         }else{
                             $recurrencia = RecurringInvoice::find($request->id_recurrente);
@@ -2406,11 +2409,52 @@ class InvoiceController extends Controller
                 "Factura eliminada."
             )->onConnection(config('etax.queue_connections'))
             ->onQueue('log_queue');
-            return redirect()->back()->withMessage('Factura eliminada');
+            return redirect('/facturas-emitidas/recurrentes')->withMessage('Factura eliminada');
         } catch ( \Exception $e) {
             Log::error("Error en eliminar factura:" . $e);
-            return redirect()->back()->withError('Error en eliminar factura.');
+            return redirect('/facturas-emitidas/recurrentes')->withError('Error en eliminar factura.');
         }
+    }
+    public function guardarRecurrentes (Request $request)
+    {
+        //try{
+            if($request->recurrencia != "0" ){
+                if($request->cantidad_dias == null || $request->cantidad_dias == ''){
+                    $request->cantidad_dias = 0;
+                }
+                $recurrencia = RecurringInvoice::find($request->id_recurrente);
+                $recurrencia->frecuency = $request->recurrencia;
+                $options = null;
+                if($request->recurrencia == "1"){
+                    $options = $request->dia;
+                }
+                if($request->recurrencia == "2"){
+                    $options = $request->primer_quincena.",".$request->segunda_quincena;
+                }
+                if($request->recurrencia == "3"){
+                    $options = $request->mensual;
+                }
+                if($request->recurrencia == "4"){
+                    $options = $request->dia_recurrencia."/".$request->mes_recurrencia;
+                }
+                if($request->recurrencia == "5"){
+                    $options = $request->cantidad_dias;
+                }
+                $recurrencia->options = $options;
+
+                $today = Carbon::parse(now('America/Costa_Rica'));
+                $generated_date = Carbon::createFromFormat('Y-m-d H:i:s', $recurrencia->invoice->generated_date);
+                $recurrencia->next_send = $recurrencia->proximo_envio($today,$generated_date);
+                $recurrencia->save();
+                return redirect()->back()->withMessage('Recurrencia actualizada.');
+            }else{
+                return  $this->eliminarProgramada($request->id_recurrente);
+            }
+
+        /*}catch ( \Exception $e) {
+            Log::error("Error en actualizar recurrencia:" . $e);
+            return redirect()->back()->withError('Error en actualizar recurrencia.');
+        }*/
     }
         
 }

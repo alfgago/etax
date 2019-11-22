@@ -4,7 +4,7 @@
   	Facturas recurrentes
 @endsection
 @section('breadcrumb-buttons')
-  <button type="submit" onclick="$('#btn-submit-form').click();"  class="btn btn-primary">Guardar factura</button>
+  <button type="submit" onclick="$('#btn-submit').click();"  class="btn btn-primary">Guardar factura</button>
 @endsection 
 @section('content') 
 <div class="row">
@@ -21,6 +21,9 @@
       <label><b>Proximo envio: </b></label>{{date('d/m/Y', strtotime($recurringInvoice->next_send))}}<br/>
   </div>
   <div class="col-md-6">
+
+    <form method="POST" action="/facturas-emitidas/guardar-recurrencia">
+      @csrf
     <div class="col-md-6">
       <label><b>Tipo de recurrencia: </b></label>
       <div class='input-group date inputs-fecha'>
@@ -49,6 +52,8 @@
               <option value="0" @if($recurringInvoice->valores()[0] == "0" ) selected @endif >Domingo</option>
             </select>
           </div>
+
+        <input id="id_recurrente"  class="form-control hidden" name="id_recurrente" required value="{{$recurringInvoice->id}}">
         </div>
       </div>
     </div>
@@ -215,6 +220,9 @@
         </div>
       </div>
     </div>
+
+    <button id="btn-submit" type="submit" class="hidden">guardar recurrencia</button>
+  </form>
   </div>
 </div>  
 <div class="row">
