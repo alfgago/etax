@@ -16,6 +16,7 @@ class Controller extends BaseController
 	//$this->notificar(2, 3, 'prueba', 'hola prueba', 'danger', 'prueba','');
  	public function notificar($option, $id, $title, $text = '', $type = 'info', $function = '', $link = '' ){ 
     	$notify = new Notification();
+                Log::info( "prueba notificacion");
     	return $notify->enviar($option, $id, $title, $text, $type, $function, $link);
     }
 
