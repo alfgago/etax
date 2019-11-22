@@ -118,12 +118,12 @@
 
                             <div class="form-group col-md-6">
                                 <label for="document_number">Número de documento</label>
-                                <input type="text" class="form-control"  name="document_number" id="document_number" value="{{ $document_number }}" onlyread required>
+                                <input type="text" class="form-control"  name="document_number" id="document_number" value="{{ $document_number }}" readonly required>
                             </div>
 
                             <div class="form-group col-md-6">
                                 <label for="document_key">Clave de factura</label>
-                                <input type="text" class="form-control" onlyread name="document_key" id="document_key" value="{{ $document_key }}" >
+                                <input type="text" class="form-control" readonly name="document_key" id="document_key" value="{{ $document_key }}" >
                             </div>
 
                             <div class="form-group col-md-6">

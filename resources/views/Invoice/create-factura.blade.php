@@ -509,7 +509,7 @@ $company = currentCompanyModel();
                       <div class="form-group col-md-12">
                         <label for="due_date">Día de la semana</label>
                         <div class='input-group date inputs-fecha'>
-                          <input type="number" min="0" class="form-control" id="cantidad_dias" name="cantidad_dias"/>
+                          <input type="number" min="0" value="0" class="form-control" id="cantidad_dias" name="cantidad_dias"/>
                         </div>
                       </div>
                     </div>
