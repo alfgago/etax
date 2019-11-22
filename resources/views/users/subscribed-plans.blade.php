@@ -26,12 +26,12 @@ Mis Planes Suscritos
                             </li>
                         <?php } ?>
                         @if( auth()->user()->isContador() )
-                            <li>
+                            <li style="display:none;">
                                 <a class="nav-link active" aria-selected="true" href="/usuario/empresas">Empresas</a>
                             </li>
                         @endif
                         @if( auth()->user()->isInfluencers())
-                         <li>
+                         <li style="display:none;">
                                 <a class="nav-link" aria-selected="false" href="/usuario/wallet">Billetera</a>
                            </li>
                         @endif
