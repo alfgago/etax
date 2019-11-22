@@ -18,7 +18,7 @@ class Controller extends BaseController
 
  	public function notificar($option, $id, $title, $text = '', $type = 'info', $function = '', $link = '' ){ 
     	$notify = new Notification();
-        Log::info( "prueba notificacion");
+        Log::info($text);
     	return $notify->enviar($option, $id, $title, $text, $type, $function, $link);
     }
 
