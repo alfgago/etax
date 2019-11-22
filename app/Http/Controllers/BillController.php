@@ -199,7 +199,7 @@ class BillController extends Controller
                 return $billItem->bill->document_number;
             })
             ->addColumn('client', function(BillItem $billItem) {
-                return !empty($billItem->bill->provider_first_name) ? $billItem->bill->provider_first_name.' '.$billItem->bill->provider_last_name : $billItem->bill->clientName();
+                return !empty($billItem->bill->provider_first_name) ? $billItem->bill->provider_first_name.' '.$billItem->bill->provider_last_name : $billItem->bill->providerName();
             })
             ->editColumn('unidad', function(BillItem $billItem) {
                 return $billItem->measure_unit ?? 'Unid';
@@ -561,6 +561,29 @@ class BillController extends Controller
     }
     
     public function exportLibroCompras( $year, $month ) {
+        $current_company = currentCompany();
+        
+        //Busca todos los que aun no tienen el IVA calculado, lo calcula y lo guarda
+        $billItems = BillItem::query()
+        ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
+        ->where('year', $year)
+        ->where('month', $month)
+        ->where('iva_amount', '>', 0)
+        ->where('iva_acreditable', 0)
+        ->where('iva_gasto', 0)
+        ->whereHas('bill', function ($query) use ($current_company){
+            $query->where('company_id', $current_company)
+            ->where('is_void', false)
+            ->where('is_authorized', true)
+            ->where('is_code_validated', true)
+            ->where('accept_status', 1)
+            ->where('hide_from_taxes', false);
+        })->get();
+        
+        foreach($billItems as $item){
+              $item->calcularAcreditablePorLinea();
+        }
+        
         return Excel::download(new LibroComprasExport($year, $month), 'libro-compras.xlsx');
     }
     
@@ -835,13 +858,13 @@ class BillController extends Controller
     public function validar($id){
         $company = currentCompanyModel();
         $bill = Bill::find($id);
-            $companyAct = Company::select('commercial_activities')->where('id', $company->id)->first();
-            $activities_company = explode(", ", $companyAct->commercial_activities);
-            $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
-            $codigos_etax = CodigoIvaSoportado::where('hidden', false)->get();
-            $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
+        $companyAct = Company::select('commercial_activities')->where('id', $company->id)->first();
+        $activities_company = explode(", ", $companyAct->commercial_activities);
+        $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
+        $codigos_etax = CodigoIvaSoportado::where('hidden', false)->get();
+        $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
 
-            return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos', 'company'));
+        return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos', 'company'));
         
     }
 
@@ -874,6 +897,7 @@ class BillController extends Controller
                         if(!$company->use_invoicing){
                             $bill->accept_status = 1;
                         }
+                        $billItem->calcularAcreditablePorLinea();
                         $bill->save();
                     }
                     
@@ -920,7 +944,7 @@ class BillController extends Controller
     public function guardarValidar(Request $request)
     {
         $company = currentCompanyModel();
-        $bill = Bill::findOrFail($request->bill);
+        $bill = Bill::with('items')->findOrFail($request->bill);
         if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/Y') )){ 
             $bill->activity_company_verification = $request->actividad_comercial;
             $bill->is_code_validated = true;
@@ -937,6 +961,10 @@ class BillController extends Controller
                 $bill->accept_status = 1;
             }
             $bill->save();
+            
+            foreach($bill->items as $item){
+                $item->calcularAcreditablePorLinea();
+            }
             
             clearBillCache($bill);
 
