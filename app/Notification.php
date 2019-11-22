@@ -12,7 +12,7 @@ use App\NotificationUser;
 
 class Notification extends Model
 {
-   public function enviar($option, $id, $title, $text, $type, $function, $link){
+   public function enviar($option, $id, $company , $title, $text, $type, $function, $link){
    		try{
 	   		$today = Carbon::parse(now('America/Costa_Rica'));
 	    	$this->type = $type;
@@ -49,13 +49,14 @@ class Notification extends Model
 	   			$NotificationUser  = NotificationUser::updateOrCreate(
 	                [
 	                    'user_id' => $user,
+	                    'company_id' => $company,
 	                    'notification_id' => $this->id,
 	                ],
 	                [
 	                	'status' => 1
 	                ]
 	            );
-	            $this->reiniciarNotificaciones($user);
+	            $this->reiniciarNotificaciones($user,$company);
 	   		}
 	   		return true;
 	   	}catch( \Exception $ex ) {
@@ -70,9 +71,10 @@ class Notification extends Model
    public function notificaciones(){
    		try{
 			$user_id = auth()->user()->id;
-            $llave = "notificaciones-".$user_id;
+			$company = currentCompany();
+            $llave = "notificaciones-".$user_id."-".$company;
 			if (!Cache::has($llave)) {
-				$items = NotificationUser::with('notification')->where('user_id',$user_id)->where('status',1)->orderby('created_at','desc')->get();
+				$items = NotificationUser::with('notification')->where('user_id',$user_id)->whereIn('company_id',array($company,0))->where('status',1)->orderby('created_at','desc')->get();
                 Cache::put($llave, $items, now()->addDays(10));
 			}else{
 				$items  = Cache::get($llave);
@@ -94,10 +96,12 @@ class Notification extends Model
 		}
    }
 
-   public function reiniciarNotificaciones($user_id){
+   public function reiniciarNotificaciones($user_id,$company_id){
    		try{
-            $llave = "notificaciones-".$user_id;
-			$items = NotificationUser::with('notification')->where('user_id',$user_id)->where('status',1)->orderby('created_at','desc')->get();
+			$company = currentCompany();
+			auth()->user()->teams
+            $llave = "notificaciones-".$user_id."-".$company;
+			$items = NotificationUser::with('notification')->where('user_id',$user_id)->whereIn('company_id',array($company_id,0))->where('status',1)->orderby('created_at','desc')->get();
             Cache::put($llave, $items, now()->addDays(10));
 			return true;
 		}catch( \Throwable $e) { 
