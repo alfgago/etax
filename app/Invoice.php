@@ -1115,6 +1115,21 @@ class Invoice extends Model
 
     }
 
+    public static function storeXMLError($cedulaEmpresa, $file) {
+        //$cedulaCliente = $invoice->client->id_number;
+
+        if ( Storage::exists("empresa-$cedulaEmpresa/facturas_ventas/error/email/$file->getClientOriginalName()")) {
+             Storage::delete("empresa-$cedulaEmpresa/facturas_ventas/error/email/$file->getClientOriginalName()");
+        }
+
+        $path = \Storage::putFileAs(
+            "empresa-$cedulaEmpresa/facturas_ventas", $file, "error/email/$file->getClientOriginalName()"
+        );
+
+        return $path;
+
+    }
+
     public function setNoteData($invoiceReference, $requestItems = null, $noteType = null, $request = []) {
         try {
             $noteType = $noteType ?? '03';

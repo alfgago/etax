@@ -174,6 +174,10 @@ Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}', 'SubscriptionPlanContr
 
 // Rutas de usuario
 Route::prefix('usuario')->group(function() {
+    Route::get('notificaciones-nuevas', 'UserController@notificationNew')->name('User.notificationNew');
+    Route::get('notificaciones/{id}', 'UserController@notification')->name('User.notification');
+    Route::get('notificaciones-vista/{id}', 'UserController@notificationVista')->name('User.notificationVista');
+    Route::get('notificaciones-contador', 'UserController@notificationCount')->name('User.notificationCount');
     Route::get('perfil', 'UserController@edit')->name('User.edit');
     Route::patch('update-perfil', 'UserController@update')->name('User.update');
     Route::get('admin-edit/{email}', 'UserController@adminEdit')->name('User.admin_edit');
