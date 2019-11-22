@@ -1133,6 +1133,62 @@ class BillController extends Controller
             return redirect('/facturas-recibidas/autorizaciones')->withError('Mes seleccionado ya fue cerrado');
         }
     }
+
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexAcceptsMasivo()
+    {
+        $query = Bill::where('bills.company_id', currentCompany())
+        ->where('is_void', false)
+        ->where('accept_status', '0')
+        ->where('is_totales', false)
+        ->where('is_authorized', true)
+        ->with('provider')->get();
+        
+        foreach ($query as $bill) {
+            $bill->calculateAcceptFields();
+        }
+        
+        $current_company = currentCompanyModel();
+
+        if( $current_company->use_invoicing ) {
+            if ($current_company->atv_validation == false) {
+                $apiHacienda = new BridgeHaciendaApi();
+                $token = $apiHacienda->login(false);
+                $validateAtv = $apiHacienda->validateAtv($token, $current_company);
+    
+                if($validateAtv) {
+                    if ($validateAtv['status'] == 400) {
+                        Log::info('Atv Not Validated Company: '. $current_company->id_number);
+                        if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                            $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                        }
+                        return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
+    
+                    } else {
+                        Log::info('Atv Validated Company: '. $current_company->id_number);
+                        $current_company->atv_validation = true;
+                        $current_company->save();
+                    }
+                }else {
+                    return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
+                }
+            }
+        }else{
+            return view('Bill/index-aceptaciones-hacienda')->withMessage('Usted no tiene un facturación con eTax activada, por lo que esta pantalla únicamente validará los códigos eTax para cálculo y no realizará aceptaciones con Hacienda.');
+        }
+
+        if ($current_company->last_rec_ref_number === null) {
+            return redirect('/empresas/configuracion')->withError( "No ha ingresado ultimo consecutivo de recepcion");
+        }
+        
+        return view('Bill/index-aceptacion-masiva-hacienda');
+    }
+
     
     /**
      * Display a listing of the resource.
