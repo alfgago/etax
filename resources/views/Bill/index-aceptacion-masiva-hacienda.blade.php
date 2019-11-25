@@ -5,13 +5,13 @@
 @endsection
 
 @section('breadcrumb-buttons')
-	<div onclick="abrirPopup('importar-aceptacion-popup');" class="btn btn-primary hidden">Importar facturas para aceptación</div>
-    <a href="/facturas-recibidas/aceptaciones-otros" class="btn btn-primary">Aceptación manual de facturas</a>
+    <button type="submit" onclick="$('#btn-submit-form').click();" class="btn btn-primary">Aceptar facturas marcadas</button>
+@endsection 
 @section('content') 
 <div class="row">
   <div class="col-md-12">
         <div class="descripcion mb-2">
-          Este proceso genera la aceptación o rechazo ante Hacienda.
+          Este proceso genera la aceptación o rechazo ante Hacienda. Cualquier factura que este chequeada se aceptara ante hacienda y las que no lo esten se rechazaran ante hacienda.
         </div>
         
         @if( currentCompanyModel()->use_invoicing )
@@ -21,22 +21,31 @@
           Usted no tiene facturación con eTax habilitada, por lo que esta pantalla únicamente incluirá o no las facturas en eTax para cálculo, y <b><u>no</u></b> realizará aceptaciones con Hacienda.
         </h2>
         @endif
-        <table id="bill-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
-          <thead>
-            <tr>
-              <th>Comprobante</th>
-              <th>Emisor</th>
-              <th>Total en <br>factura</th>
-              <th>Total en <br>aceptación (₡)</th>
-              <th>IVA <br>Total (₡)</th>
-              <th>IVA <br>Acreditable (₡)</th>
-              <th>IVA <br>Gasto (₡)</th>
-              <th>F. Generada</th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
+        <form method="POST" action="/facturas-recibidas/aceptacion-masiva" class="show-form btn-submit-form">
+	      @csrf
+	      @method('post') 
+        	<table id="bill-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+	        	<thead>
+	            	<tr>
+	              	<th>Comprobante</th>
+		              <th>Emisor</th>
+		              <th>Total en <br>factura</th>
+		              <th>Total en <br>aceptación (₡)</th>
+		              <th>IVA <br>Total (₡)</th>
+		              <th>IVA <br>Acreditable (₡)</th>
+		              <th>IVA <br>Gasto (₡)</th>
+		              <th>F. Generada</th>
+		              <th>Aceptar/Rechazar</th>
+		            </tr>
+		        </thead>
+		        <tbody>
+		        </tbody>
+	        </table>
+	        <div class="btn-holder hidden">
+            	<button id="btn-submit-form" type="submit" class="btn btn-primary"></button>
+          </div>
+        </form>
+        
   </div>  
 </div>
 
@@ -61,6 +70,8 @@ $(function() {
       { data: 'accept_iva_acreditable', class: "text-right", name: 'accept_iva_acreditable', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
       { data: 'accept_iva_gasto', class: "text-right", name: 'accept_iva_gasto', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), orderable: false, searchable: false },
       { data: 'generated_date', name: 'generated_date' },
+      { data: 'checkbox', name: 'checkbox' },
+
     ],
     language: {
       url: "/lang/datatables-es_ES.json",

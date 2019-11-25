@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Jobs\ProcessBillsImport;
+use App\Jobs\ProcessAcceptHacienda;
 use Illuminate\Support\Facades\Input;
 
 /**
@@ -1262,7 +1263,13 @@ class BillController extends Controller
                 return view('Bill.ext.accept-actions', [
                     'bill' => $bill
                 ])->render();
-            }) 
+            })
+            ->addColumn('checkbox', function($bill) {
+                return '<div class="form-check">
+                		<input type="text" name="accept['.$bill->id.'][id]" value="'.$bill->id.'" class="hidden">
+                		<input type="checkbox" name="accept['.$bill->id.'][accept]" checked>
+                		</div>'; 
+            })  
             ->editColumn('total', function(Bill $bill) {
                 $total = number_format($bill->total,2);
                 return "$bill->currency $total";
@@ -1285,7 +1292,7 @@ class BillController extends Controller
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');
             })
-            ->rawColumns(['actions'])
+            ->rawColumns(['actions', 'checkbox'])
             ->toJson();
     }
     
@@ -1367,11 +1374,11 @@ class BillController extends Controller
                 Activity::dispatch(
                     $user,
                     $bill,
-                    [
-                        'company_id' => $bill->company_id,
-                        'id' => $bill->id,
-                        'document_key' => $bill->document_key
-                    ],
+		            [
+		                'company_id' => $bill->company_id,
+		                'id' => $bill->id,
+		                'document_key' => $bill->document_key
+		            ],
                     $mensaje
                 )->onConnection(config('etax.queue_connections'))
                 ->onQueue('log_queue');
@@ -1388,6 +1395,45 @@ class BillController extends Controller
                 clearBillCache($bill);
                 return redirect('/facturas-recibidas/aceptaciones')->withMessage('Factura aceptada para cálculo en eTax.');
             }
+        } catch ( Exception $e) {
+            Log::error ("Error al crear aceptacion de factura");
+            return redirect('/facturas-recibidas/aceptaciones')->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');
+        }
+    }
+
+
+    /**
+     *  Metodo para hacer las aceptaciones
+     */
+    public function massiveSendAccept (Request $request)
+    {
+        try {
+        	$user = auth()->user();
+            $company = currentCompanyModel();
+            if( currentCompanyModel()->use_invoicing ) {
+            	foreach($request->accept as $key => $item){
+            		$isAccept = 2;
+            		if(isset($item['accept'])){
+	                    $isAccept = 1;
+    				}
+    				ProcessAcceptHacienda::dispatch($key, $user, $company, $isAccept);
+            	}
+            } else {
+            	foreach($request->accept as $key => $item){
+            		$isAccept = 2;
+            		$bill = Bill::findOrFail($key);
+ 					if (!empty($bill)) {
+	                    if(isset($item['accept'])){
+	                    	$isAccept = 1;
+    					}
+    					$bill->accept_status = $isAccept;
+	                    $bill->save();
+	                }
+	                clearBillCache($bill);
+            	}
+                
+            }
+            return redirect('/facturas-recibidas/aceptacion-masiva')->withMessage('Facturas aceptadas, se le notificara en caso de algun problema.');
         } catch ( Exception $e) {
             Log::error ("Error al crear aceptacion de factura");
             return redirect('/facturas-recibidas/aceptaciones')->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');
