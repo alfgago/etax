@@ -643,6 +643,9 @@ toastr.options = {
 
   window.agregarEditarItem = function() {
 
+
+  	var guardar = $('#form-checkbox').is(":checked");
+
     //Si esta editando, usa lnum y item_id para identificar la fila.
     var lnum = $('#lnum').val() ? $('#lnum').val() : '';
     var item_id = $('#item_id').val() ? $('#item_id').val() : '';
@@ -682,6 +685,39 @@ toastr.options = {
     var montoTotalLinea = $('#montoTotalLinea').val();
     var tariff_heading = $('#tariff_heading').val();
     var docType = $('#document_type').val();
+
+    if(guardar){
+    	$.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        jQuery.ajax({
+            url: "/productos",
+            method: 'post',
+            data: {
+                code: codigo,
+                name: nombre,
+                measure_unit: unidad_medicion,
+                unit_price: precio_unitario,
+                product_category_id: tipo_producto,
+                default_iva_type: tipo_iva
+            },
+            success: function (result) {
+            	Swal.fire({
+		            type: 'success',
+		            title: 'Producto Creado',
+		            text: 'El producto se ha agregado correctamente al catalogo.'
+		        })
+		        console.log(codigo);
+		        console.log(nombre);
+		        $('#codigo-select').append('<option value="'+codigo+'">'+nombre+'</option>');
+		        console.log($('#codigo-select'));
+            }
+
+        });
+	}
+
 
     if( !monto_iva ) {
       monto_iva = 0;
@@ -876,6 +912,11 @@ toastr.options = {
   window.cargarFormItem = function( index ) {
     $('.item-factura-form').addClass('editando');
 
+    $('#codigo-div').show();
+    $('#form-checkbox').prop("checked", false);
+    $('#checkbox-div').hide();
+    $('#codigo-select-div').hide();		
+
     var item = $('.item-index-'+index );
     $('#lnum').val( item.attr('attr-num') );
     $('#item_id').val( item.find('.item_id ').val() );
@@ -1057,7 +1098,18 @@ toastr.options = {
   }
 
   window.buscarProducto = function() {
-        var id = $('#codigo').val();
+        var id = $('#codigo-select').val();
+        if(id == 'nuevoProducto'){
+        	$('#codigo-div').show();
+        	$('#checkbox-div').show();
+        	$('#form-checkbox').prop("checked", true);
+
+        }else{
+        	$('#codigo-div').hide();
+        	$('#checkbox-div').hide();
+        	$('#form-checkbox').prop("checked", false);	
+        }
+
         if(id !== '' && id !== undefined){
             $.ajaxSetup({
                 headers: {
@@ -1072,6 +1124,7 @@ toastr.options = {
                 },
                 success: function (result) {
                     if(result.name) {
+                    	$('#codigo').val(result.code);
                         $('#nombre').val(result.name);
                         $('#unidad_medicion').val(result.measure_unit);
                         $('#precio_unitario').val(result.unit_price);
