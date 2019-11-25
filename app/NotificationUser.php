@@ -11,6 +11,7 @@ class NotificationUser extends Model
 {
     protected $fillable = [
         'user_id',
+        'company_id',
         'notification_id',
         'status'
     ];
@@ -24,8 +25,9 @@ class NotificationUser extends Model
    		try{
             $this->status = 0;
             $this->save();
-            $llave = "notificaciones-".$this->user_id;
-			$items = NotificationUser::with('notification')->where('user_id',$this->user_id)->where('status',1)->get();
+            $company = currentCompany();
+            $llave = "notificaciones-".$this->user_id."-".$company;
+            $items = NotificationUser::with('notification')->where('user_id',$this->user_id)->whereIn('company_id',array($company,0))->where('status',1)->orderby('created_at','desc')->get();
             Cache::put($llave, $items, now()->addDays(10));
 			return true;
 		}catch( \Throwable $e) { 

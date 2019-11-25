@@ -55,7 +55,7 @@
     z-index: 1000;
     display: none;
     float: left;
-    padding: 0.5rem 0;
+    padding: 1rem 0 0;
     margin: 0.125rem 0 0;
     color: #1e0a26;
     text-align: left;
@@ -104,13 +104,15 @@
 .notificacion-warning{
     color: #F89406;
 }
-.ver-mas-notificaciones a {
+.ver-mas-notificaciones {
     text-align: center;
     text-transform: uppercase;
     width: 100%;
     display: block;
     border-top: 2px solid;
     padding-top: 5px;
+    color: #ffffff;
+    background: #15408E;
 }
 .div-notificaciones-left{
     height: calc(100vh - 21rem);
@@ -129,11 +131,32 @@
 }
 .date-notificacion{
     font-size: 10px;
-
 }
 #imprimir-notificaciones{
     overflow-y:auto;
-    max-height:400px;
+    max-height:20rem;
+    transition: ease;
+    transition-duration: 0.8s;
+}
+.todas-notificaciones .ver-mas-notificaciones{
+    display: none;
+}
+.todas-notificaciones #imprimir-notificaciones{
+    overflow-y:auto;
+    max-height:40rem;
+    transition: ease;
+    transition-duration: 0.8s;
+}
+.todas-notificaciones{
+    min-width: 80rem;
+    transition: ease;
+    transition-duration: 0.8s;
+}
+.cerrar-notificaciones{
+    color: #d82f2f;
+    top: 1rem;
+    right: 5px;
+    position: absolute;
 }
         </style>
         @if( !empty( auth()->user()->teams ) )
@@ -162,10 +185,11 @@
                 <span class="notification-count @if(notification_count() != 0) mostrar-count-notificacion @endif ">{{notification_count()}}</span>
             </a>
             <div class="dropdown-notificaciones dropdown-notificaciones-right" >
-                <h3 class="text-center">Notificaciones sin leer</h3>
+                <h3 class="text-center">Notificaciones</h3>
+                <span class="cerrar-notificaciones"><i class="fa fa-times" aria-hidden="true"></i></span>
                 <div id="imprimir-notificaciones" ></div>
-                <div class="ver-mas-notificaciones">
-                    <a href="/usuario/notificaciones/0" >Ver todas</a>
+                <div class="ver-mas-notificaciones" onclick="verNotificacion(0);">
+                    Ver todas
                 </div>
             </div>
         </div>
@@ -196,6 +220,9 @@
 </div>
 <script>
     setInterval('contadorNotificaciones()',1000);
+    $(".cerrar-notificaciones").click(function(){
+        $("#notificacionesDropdown").click();
+    });
     $("#notificacionesDropdown").click(function(){
         var link = "/usuario/notificaciones-nuevas";
         console.log(link);
@@ -203,12 +230,16 @@
            type:'GET',
            url:link,
            success:function(data){
+                $(".dropdown-notificaciones").removeClass("todas-notificaciones");
               $("#imprimir-notificaciones").html(data);
            }
       
         });
         $(".dropdown-notificaciones").slideToggle("slow");
     });
+    function cerrarNotificaciones(){
+        $(".dropdown-notificaciones").removeClass("todas-notificaciones");
+    }
     function notificacionVista(id){
         var link = "/usuario/notificaciones-vista/"+id;
         $.ajax({
@@ -218,6 +249,20 @@
                 if(data == 1){
                     $(".div-notificacion-"+id).removeClass("notificacion-nueva");
                 }
+           }
+      
+        });
+    }
+
+    function verNotificacion(id){
+
+        var link = "/usuario/notificaciones/"+id;
+        $.ajax({
+           type:'GET',
+           url:link,
+           success:function(data){
+                $("#imprimir-notificaciones").html(data);
+                $(".dropdown-notificaciones").addClass("todas-notificaciones");
            }
       
         });
@@ -239,5 +284,6 @@
             }
         });
     }
+
 </script>
 

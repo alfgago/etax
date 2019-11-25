@@ -16,10 +16,10 @@ class Controller extends BaseController
 
 	//$this->notificar(opcion, id, 'titulo', 'detalle', 'tipo', 'funcion','enlace');
 
- 	public function notificar($option, $id, $title, $text = '', $type = 'info', $function = '', $link = '' ){ 
+ 	public function notificar($option, $id, $company, $title, $text = '', $type = 'info', $function = '', $link = '' ){ 
     	$notify = new Notification();
         Log::info($text);
-    	return $notify->enviar($option, $id, $title, $text, $type, $function, $link);
+    	return $notify->enviar($option, $id, $company, $title, $text, $type, $function, $link);
     }
 
 
