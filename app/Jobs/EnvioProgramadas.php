@@ -164,6 +164,7 @@ class EnvioProgramadas implements ShouldQueue
             foreach ($invoices as $invoice) {
                 try{
                     $company = Company::find($invoice->company_id);
+                    if( strtolower($invoice->document_number) == 'programada') {
                         if ($invoice->document_type == '01') {
                             $invoice->reference_number = $company->last_invoice_ref_number + 1;
                         }
@@ -203,6 +204,7 @@ class EnvioProgramadas implements ShouldQueue
                         if ($invoice->document_type == '04') {
                             $company->last_ticket_ref_number = $invoice->reference_number;
                         }
+                    }
                     $invoice->hacienda_status = '01';
                     
                     $company->save();
