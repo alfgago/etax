@@ -656,9 +656,10 @@ $company = currentCompanyModel();
           @include('Bill.form-nuevo-proveedor')
         @endif
         
-            <input type="text" hidden value="{{ $document_type }}" name="document_type" id="document_type">
           <div class="btn-holder hidden">
            
+            <input type="text" hidden value="{{ $document_type }}" name="typeDocument" id="typeDocument">
+            <input type="text" hidden value="{{ $document_type }}" name="document_type" id="document_type">
             <button id="btn-submit" type="submit" class="btn btn-primary">Enviar factura electrónica</button>
           </div>
 
