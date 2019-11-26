@@ -37,9 +37,7 @@ class EnvioProgramadas implements ShouldQueue
      */
     public function handle()
     {
-        Log::info("Handle job de envio de programadas");
-        //$this->crearRecurrentes();
-        //$this->enviar();
+
     }
 
 
@@ -161,6 +159,7 @@ class EnvioProgramadas implements ShouldQueue
         try{
             $start_date = Carbon::parse(now('America/Costa_Rica'));
             $today = $start_date->year."-".$start_date->month."-".$start_date->day." 23:59:59";
+            log::info('Facturas enviadas el '.$today);
             $invoices = Invoice::where("hacienda_status",'99')
                                 ->where('generated_date', '<=',$today)
                                 ->get();
