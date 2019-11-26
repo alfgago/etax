@@ -685,6 +685,22 @@
             $('#divMontoTotalLinea').attr('hidden', false);
             $('#divImpuestoNeto').attr('hidden', false);
             $('#exoneradalinea').val(1);
+            
+            $('.input-fecha').datetimepicker({
+              format: 'DD/MM/Y',
+              allowInputToggle: true,
+              icons : {
+                    time: 'fa fa-clock-o',
+                    date: 'fa fa-calendar',
+                    up: 'fa fa-chevron-up',
+                    down: 'fa fa-chevron-down',
+                    previous: 'fa fa-chevron-left',
+                    next: 'fa fa-chevron-right',
+                    today: 'fa fa-calendar-check-o',
+                    clear: 'fa fa-times',
+                    close: 'fa fa-calendar-times-o'
+              }
+            });
         }else{
             $(".exoneracion-cont").hide();
             $('#etiqTotal').text('');
