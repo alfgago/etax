@@ -112,8 +112,8 @@ class InvoiceController extends Controller
         $company = currentCompanyModel();
         $categoriaProductos = ProductCategory::get();
         $unidades = InvoiceItem::select('invoice_items.measure_unit')->where('invoice_items.company_id', '=', $company->id)->groupBy('invoice_items.measure_unit')->get();
-        $años = InvoiceItem::select('invoice_items.year')->where('invoice_items.company_id', '=', $company->id)->groupBy('invoice_items.year')->get();
-        return view('Invoice/index-masivo', compact('company', 'categoriaProductos', 'unidades', 'años'));
+        $years = Invoice::select('invoices.year')->where('invoices.company_id', '=', $company->id)->groupBy('invoices.year')->get();
+        return view('Invoice/index-masivo', compact('company', 'categoriaProductos', 'unidades', 'years'));
     }
 
      /**

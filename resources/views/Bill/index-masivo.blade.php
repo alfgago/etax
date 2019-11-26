@@ -53,8 +53,8 @@
           <div class="periodo-selects">
             <select id="filtro-select-ano" name="filtro-validado" onchange="reloadDataTable();">
             	<option value="" selected>Todas los años</option>
-                @foreach($años as $año)
-                	<option value="{{$año->year}}">{{$año->year}}</option>
+                @foreach($years as $year)
+                	<option value="{{$year->year}}">{{$year->year}}</option>
                 @endforeach
                 
             </select>
