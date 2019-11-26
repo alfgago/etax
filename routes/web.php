@@ -135,6 +135,8 @@ Route::prefix('facturas-emitidas')->group(function() {
 // Rutas de facturacion recibida
 Route::prefix('facturas-recibidas')->group(function() {
     Route::get('aceptaciones', 'BillController@indexAccepts')->name('Bill.accepts');
+    Route::get('aceptacion-masiva', 'BillController@indexAcceptsMasivo')->name('Bill.index.massive.accepts');
+    Route::post('aceptacion-masiva', 'BillController@massiveSendAccept')->name('Bill.massive.accepts');
     Route::post('respondStatus', 'BillController@respondStatus')->name('Bill.respond');
     Route::patch('respuesta-aceptacion/{id}', 'BillController@sendAcceptMessage')->name('Bill.sendAcceptMessage');
     Route::get('validaciones', 'BillController@indexValidaciones')->name('Bill.validaciones');

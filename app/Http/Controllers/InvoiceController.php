@@ -112,7 +112,8 @@ class InvoiceController extends Controller
         $company = currentCompanyModel();
         $categoriaProductos = ProductCategory::get();
         $unidades = InvoiceItem::select('invoice_items.measure_unit')->where('invoice_items.company_id', '=', $company->id)->groupBy('invoice_items.measure_unit')->get();
-        return view('Invoice/index-masivo', compact('company', 'categoriaProductos', 'unidades'));
+        $years = Invoice::select('invoices.year')->where('invoices.company_id', '=', $company->id)->groupBy('invoices.year')->get();
+        return view('Invoice/index-masivo', compact('company', 'categoriaProductos', 'unidades', 'years'));
     }
 
      /**
@@ -184,6 +185,11 @@ class InvoiceController extends Controller
        $filtroMes = $request->get('filtroMes');
        if($filtroMes > 0){
             $query = $query->where('invoice_items.month', $filtroMes);
+       }
+
+       $filtroAno = $request->get('filtroAno');
+       if($filtroAno > 0){
+            $query = $query->where('invoice_items.year', $filtroAno);
        }
 
        $filtroValidado = $request->get('filtroValidado');
