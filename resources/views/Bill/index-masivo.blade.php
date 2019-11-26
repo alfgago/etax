@@ -34,21 +34,32 @@
           </div>
           <div class="periodo-selects">
             <select id="filtro-select-mes" name="filtro-validado" onchange="reloadDataTable();">
-                <option style="display:none;" value="0" >Todos los meses</option>
-                <option value="1" {{date('n') == 1 ? 'selected' : ''}}>Enero</option>
-                <option value="2" {{date('n') == 2 ? 'selected' : ''}}>Febrero</option>
-                <option value="3" {{date('n') == 3 ? 'selected' : ''}}>Marzo</option>
-                <option value="4" {{date('n') == 4 ? 'selected' : ''}}>Abril</option>
-                <option value="5" {{date('n') == 5 ? 'selected' : ''}}>Mayo</option>
-                <option value="6" {{date('n') == 6 ? 'selected' : ''}}>Junio</option>
-                <option value="7" {{date('n') == 7 ? 'selected' : ''}}>Julio</option>
-                <option value="8" {{date('n') == 8 ? 'selected' : ''}}>Agosto</option>
-                <option value="9" {{date('n') == 9 ? 'selected' : ''}}>Setiembre</option>
-                <option value="10" {{date('n') == 10 ? 'selected' : ''}}>Octubre</option>
-                <option value="11" {{date('n') == 11 ? 'selected' : ''}}>Noviembre</option>
-                <option value="12" {{date('n') == 12 ? 'selected' : ''}}>Diciembre</option>
+            	<!--{{date('n') == 1 ? 'selected' : ''}} -->
+                <option value="0" selected>Todos los meses</option>
+                <option value="1">Enero</option>
+                <option value="2">Febrero</option>
+                <option value="3">Marzo</option>
+                <option value="4">Abril</option>
+                <option value="5">Mayo</option>
+                <option value="6">Junio</option>
+                <option value="7">Julio</option>
+                <option value="8">Agosto</option>
+                <option value="9">Setiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
             </select>
           </div>
+          <div class="periodo-selects">
+            <select id="filtro-select-ano" name="filtro-validado" onchange="reloadDataTable();">
+            	<option value="" selected>Todas los años</option>
+                @foreach($años as $año)
+                	<option value="{{$año->year}}">{{$año->year}}</option>
+                @endforeach
+                
+            </select>
+          </div>
+
           <div class="periodo-selects">
             <select id="filtro-select-unidad" name="filtro-validado" onchange="reloadDataTable();">
                 <option value="" selected>Todas las unidades</option>
@@ -166,7 +177,8 @@ $(function() {
           d.filtroTarifa = $( '#filtro-select-tarifa' ).val();
           d.filtroValidado = $( '#filtro-select-codificadas' ).val();
           d.filtroUnidad = $( '#filtro-select-unidad' ).val();
-          d.filtroMes = $( '#filtro-select-mes' ).val();          
+          d.filtroMes = $( '#filtro-select-mes' ).val();
+          d.filtroAno = $( '#filtro-select-ano' ).val();             
       },
       type: 'GET'
     },

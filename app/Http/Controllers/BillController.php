@@ -71,7 +71,8 @@ class BillController extends Controller
         $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
         $categoriaProductos = ProductCategory::get();
         $unidades = BillItem::select('bill_items.measure_unit')->where('bill_items.company_id', '=', $company->id)->groupBy('bill_items.measure_unit')->get();
-        return view('Bill/index-masivo', compact('company', 'categoriaProductos', 'unidades', 'commercial_activities'));
+        $años = BillItem::select('bill_items.year')->where('bill_items.company_id', '=', $company->id)->groupBy('bill_items.year')->get();
+        return view('Bill/index-masivo', compact('company', 'categoriaProductos', 'unidades', 'commercial_activities', 'años'));
     }
 
     public function indexOne($id){
@@ -172,6 +173,11 @@ class BillController extends Controller
        $filtroMes = $request->get('filtroMes');
        if($filtroMes > 0){
             $query = $query->where('bill_items.month', $filtroMes);
+       }
+
+       $filtroAno = $request->get('filtroAno');
+       if($filtroAno > 0){
+            $query = $query->where('bill_items.year', $filtroAno);
        }
 
        $filtroValidado = $request->get('filtroValidado');
@@ -1265,8 +1271,13 @@ class BillController extends Controller
                 ])->render();
             })
             ->addColumn('checkbox', function($bill) {
+            	if($bill->is_code_validated < 1){
+            		return '<div class="form-check">
+                		<input type="checkbox" name="accept['.$bill->id.'][accept]" disabled>
+                		<a style="color: red;" href="/facturas-recibidas/lista-validar-masivo">Requiere validacion</a>
+                		</div>'; 
+            	}
                 return '<div class="form-check">
-                		<input type="text" name="accept['.$bill->id.'][id]" value="'.$bill->id.'" class="hidden">
                 		<input type="checkbox" name="accept['.$bill->id.'][accept]" checked>
                 		</div>'; 
             })  
@@ -1312,13 +1323,18 @@ class BillController extends Controller
     
     public function markAsNotAccepted ( $id )
     {
-        $bill = Bill::findOrFail($id);
+        $bill = Bill::with('items')->findOrFail($id);
         if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
         
             $this->authorize('update', $bill);
             
             $bill->accept_status = 0;
             $bill->is_code_validated = false;
+            $items = $bill->items;
+            foreach($items as $item){
+            	$item->is_code_validated = 0;
+            	$item->save();
+            }
             $bill->save();
             clearBillCache($bill);
 
@@ -1410,30 +1426,28 @@ class BillController extends Controller
         try {
         	$user = auth()->user();
             $company = currentCompanyModel();
-            if( currentCompanyModel()->use_invoicing ) {
-            	foreach($request->accept as $key => $item){
-            		$isAccept = 2;
-            		if(isset($item['accept'])){
-	                    $isAccept = 1;
-    				}
-    				ProcessAcceptHacienda::dispatch($key, $user, $company, $isAccept);
-            	}
-            } else {
-            	foreach($request->accept as $key => $item){
-            		$isAccept = 2;
-            		$bill = Bill::findOrFail($key);
- 					if (!empty($bill)) {
-	                    if(isset($item['accept'])){
-	                    	$isAccept = 1;
-    					}
-    					$bill->accept_status = $isAccept;
-	                    $bill->save();
-	                }
-	                clearBillCache($bill);
-            	}
-                
+            if(isset($request->accept)){
+	            if( currentCompanyModel()->use_invoicing ) {
+	            	foreach($request->accept as $key => $item){
+	    				ProcessAcceptHacienda::dispatch($key, $user, $company, 1);
+	            	}
+	            } else {
+	            	foreach($request->accept as $key => $item){
+	            		$bill = Bill::findOrFail($key);
+	 					if (!empty($bill)) {
+	    					$bill->accept_status = 1;
+		                    $bill->save();
+		                }
+		                clearBillCache($bill);
+	            	}
+	                
+	            }
+	            return redirect('/facturas-recibidas/aceptacion-masiva')->withMessage('Facturas aceptadas, se le notificara en caso de algun problema.');	
+            }else{
+            	return redirect('/facturas-recibidas/aceptacion-masiva')->withError('No hay ninguna factura seleccionada.');
             }
-            return redirect('/facturas-recibidas/aceptacion-masiva')->withMessage('Facturas aceptadas, se le notificara en caso de algun problema.');
+            
+            
         } catch ( Exception $e) {
             Log::error ("Error al crear aceptacion de factura");
             return redirect('/facturas-recibidas/aceptaciones')->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');

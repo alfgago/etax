@@ -11,7 +11,7 @@
 <div class="row">
   <div class="col-md-12">
         <div class="descripcion mb-2">
-          Este proceso genera la aceptación o rechazo ante Hacienda. Cualquier factura que este chequeada se aceptara ante hacienda y las que no lo esten se rechazaran ante hacienda.
+          Este proceso genera la aceptación o rechazo ante Hacienda. Cualquier factura que este chequeada se aceptara ante hacienda.
         </div>
         
         @if( currentCompanyModel()->use_invoicing )
