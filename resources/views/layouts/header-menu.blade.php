@@ -17,148 +17,6 @@
     <div style="margin: auto"></div>
 
     <div class="header-part-right">
-        <style>
-.notificaciones-header > a {
-    position: relative;
-    display: inline-block;
-    color: #000;
-    margin: 0 1rem;
-}
-
-.notificaciones-header .fa {
-    position: relative;
-    font-size: 1.8rem !important;
-    line-height: 2rem;
-}
-
-.notificaciones-header .notification-count {
-    position: absolute;
-    font-size: 8px;
-    background: #e00000;
-    color: #fff;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
-    border-radius: 50%;
-    top: -10px;
-    right: -7.5px;
-    font-weight: bold;
-    text-align: center;
-    display: none;
-}
-.notificaciones-header .mostrar-count-notificacion {
-    display: block;
-}
-.dropdown-notificaciones {
-    top: 100%;
-    right: 1rem;
-    z-index: 1000;
-    display: none;
-    float: left;
-    padding: 1rem 0 0;
-    margin: 0.125rem 0 0;
-    color: #1e0a26;
-    text-align: left;
-    list-style: none;
-    background-color: #ffffff;
-    background-clip: padding-box;
-    border-radius: 0.25rem;
-    position: absolute;
-    min-width: 25rem;   
-    border: 0;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
-}
-.notificacion-nueva{
-    background: #c2c2c2;
-}
-.notificacion-seleccionado{
-    background: #e6e6e6;
-}
-.dropdown-notificaciones h3{
-    font-size: 1.2rem;
-    margin-bottom: 1.25rem;
-    margin-left: 20px;
-    border-bottom: 0.45rem solid #F0C962;
-    display: inline-block;
-}
-.divicion-notificaciones{
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-    border: 0;
-    border-top: 0.1rem dashed #e5e5e5;
-    height: 0;
-    border-top-style: dashed;
-}
-.date-notificaciones{
-    font-size: 10px;
-}
-.notificacion-info{
-    color: #2F96B4;
-}
-.notificacion-success{
-    color: #51A351;
-}
-.notificacion-error{
-    color: #BD362F;
-}
-.notificacion-warning{
-    color: #F89406;
-}
-.ver-mas-notificaciones {
-    text-align: center;
-    text-transform: uppercase;
-    width: 100%;
-    display: block;
-    border-top: 2px solid;
-    padding-top: 5px;
-    color: #ffffff;
-    background: #15408E;
-}
-.div-notificaciones-left{
-    height: calc(100vh - 21rem);
-    overflow-y: auto;
-}
-.div-notificaciones-rigth{
-    height: calc(100vh - 21rem);
-    overflow-y: auto;
-}
-.icono-notificaciones i {
-    padding-right: 5px;
-}
-.titulo-notificacion .icono-notificaciones i {
-    padding-right: 5px;
-    font-size: 2rem !important;
-}
-.date-notificacion{
-    font-size: 10px;
-}
-#imprimir-notificaciones{
-    overflow-y:auto;
-    max-height:20rem;
-    transition: ease;
-    transition-duration: 0.8s;
-}
-.todas-notificaciones .ver-mas-notificaciones{
-    display: none;
-}
-.todas-notificaciones #imprimir-notificaciones{
-    overflow-y:auto;
-    max-height:40rem;
-    transition: ease;
-    transition-duration: 0.8s;
-}
-.todas-notificaciones{
-    min-width: 80rem;
-    transition: ease;
-    transition-duration: 0.8s;
-}
-.cerrar-notificaciones{
-    color: #d82f2f;
-    top: 1rem;
-    right: 5px;
-    position: absolute;
-}
-        </style>
         @if( !empty( auth()->user()->teams ) )
             <div class="companyParent">
                 <label for="country">Empresa actual:</label>
@@ -186,7 +44,8 @@
             </a>
             <div class="dropdown-notificaciones dropdown-notificaciones-right" >
                 <h3 class="text-center">Notificaciones</h3>
-                <span class="cerrar-notificaciones"><i class="fa fa-times" aria-hidden="true"></i></span>
+                <span class="cerrar-notificaciones" title="Cerrar notificaciones"><i class="fa fa-times" aria-hidden="true"></i></span>
+                <span class="limpiar-notificaciones" title="Marcas como leidos"><i class="fa fa-envelope-open-o" aria-hidden="true"></i></span>
                 <div id="imprimir-notificaciones" ></div>
                 <div class="ver-mas-notificaciones" onclick="verNotificacion(0);">
                     Ver todas
@@ -219,13 +78,26 @@
 
 </div>
 <script>
-    setInterval('contadorNotificaciones()',1000);
+    setInterval('contadorNotificaciones()',30000);
     $(".cerrar-notificaciones").click(function(){
         $("#notificacionesDropdown").click();
     });
+    
+    $(".limpiar-notificaciones").click(function(){
+        var link = "/usuario/limpiar-notificaciones";
+        $.ajax({
+           type:'GET',
+           url:link,
+           success:function(data){
+                $(".div-notificaciones").removeClass("notificacion-nueva");
+                contadorNotificaciones();
+                $("#notificacionesDropdown").click();
+           }
+      
+        });
+    });
     $("#notificacionesDropdown").click(function(){
         var link = "/usuario/notificaciones-nuevas";
-        console.log(link);
         $.ajax({
            type:'GET',
            url:link,
@@ -274,7 +146,6 @@
            type:'GET',
            url:link,
            success:function(data){
-                console.log(data );
                 $(".notification-count").html(data);
                 if(data == 0){
                     $(".notification-count").removeClass("mostrar-count-notificacion");
