@@ -15558,8 +15558,8 @@ h6,
 .sidebar-left {
   left: calc(-10rem - 1.33rem);
   z-index: 90;
-  -webkit-transition: all .24s ease-in-out;
-  transition: all .24s ease-in-out;
+  -webkit-transition: .5s ease opacity;
+  transition: .5s ease opacity;
 }
 
 .sidebar-left.open {
@@ -15960,6 +15960,20 @@ h6,
 
   .sidebar-left .navigation-left .nav-item.small-nav a.nav-item-hold {
     text-align: center;
+  }
+
+  .logo-container {
+    position: relative;
+    max-width: 100%;
+  }
+
+  input#input_logo {
+    position: absolute;
+    top: 1rem;
+    right: 0;
+    width: 13rem;
+    text-align: right;
+    overflow: hidden;
   }
 }
 
@@ -20055,6 +20069,21 @@ div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-ar
     margin-right: 15px;
     width: auto !important;
   }
+
+  button.callnow {
+    bottom: 4.5rem;
+    z-index: 1;
+  }
+
+  .main-header .header-part-right {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+  }
+
+  .notificaciones-header {
+    display: none;
+  }
 }
 
 @media (max-width: 360px) {
@@ -21140,6 +21169,9 @@ label#logo-name {
   position: absolute;
   top: 0;
   right: 0;
+  max-width: 17rem;
+  padding: 5px;
+  border: 2px #ddd dotted;
 }
 
 .callnow {

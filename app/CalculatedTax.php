@@ -575,7 +575,7 @@ class CalculatedTax extends Model
       $bookData = json_decode( $this->book_data ) ?? new \stdClass();
       $arrayActividades = explode( ',', $this->currentCompany->commercial_activities );
 
-      $query->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$ivaData, &$singleBill, $arrayActividades,
+      $query->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$ivaData, &$singleBill, &$basesConIvaDevuelto, $arrayActividades,
        &$billsTotal, &$billsSubtotal, &$totalBillIva, &$basesIdentificacionPlena, &$basesNoDeducibles, &$ivaAcreditableIdentificacionPlena, 
        &$ivaNoAcreditableIdentificacionPlena, &$totalProveedoresContado, &$totalProveedoresCredito
       ) {
@@ -775,6 +775,7 @@ class CalculatedTax extends Model
               $ivaData->$typeVarPorc += $subtotal;
               $ivaData->$typeVarActividad += $subtotal;
               $ivaData->$typeVarPorcActividad += $subtotal;
+              
             }  
             
           }catch( \Throwable $ex ){
@@ -784,7 +785,7 @@ class CalculatedTax extends Model
         }
         
       });
-              
+      
       $this->iva_data = json_encode( $ivaData );
       $this->count_bills = $countBills;
       $this->bills_total = $billsTotal;

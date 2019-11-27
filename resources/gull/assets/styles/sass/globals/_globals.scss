@@ -364,6 +364,9 @@ label#logo-name {
     position: absolute;
     top: 0;
     right: 0;
+    max-width: 17rem;
+    padding: 5px;
+    border: 2px #ddd dotted;
 }
 
 .callnow {
