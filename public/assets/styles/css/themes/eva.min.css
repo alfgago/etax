@@ -14354,7 +14354,8 @@ h6,
 .sidebar-left {
   left: calc(-10rem - 1.33rem);
   z-index: 90;
-  transition: all 0.24s ease-in-out;
+  -webkit-transition: .5s ease opacity;
+  transition: .5s ease opacity;
 }
 
 .sidebar-left.open {
@@ -14739,6 +14740,20 @@ h6,
 
   .sidebar-left .navigation-left .nav-item.small-nav a.nav-item-hold {
     text-align: center;
+  }
+
+  .logo-container {
+    position: relative;
+    max-width: 100%;
+  }
+
+  input#input_logo {
+    position: absolute;
+    top: 1rem;
+    right: 0;
+    width: 13rem;
+    text-align: right;
+    overflow: hidden;
   }
 }
 
@@ -16319,45 +16334,6 @@ table#invoice-table td {
 .checkbox-div::-webkit-input-placeholder {
   color: #501a68;
 }
-
-.checkbox-div::-moz-placeholder {
-  color: #501a68;
-}
-
-.checkbox-div:-ms-input-placeholder {
-  color: #501a68;
-}
-
-.checkbox-div::-ms-input-placeholder {
-  color: #501a68;
-}
-
-.checkbox-div::placeholder {
-  color: #501a68;
-}
-
-.checkbox-div.rounded,
-.checkbox-div.form-control-rounded {
-  border-radius: 1.33rem;
-}
-
-.form-control {
-  border: 0.0666rem solid #999;
-  outline: initial !important;
-  background: #fff;
-  color: #050505;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.8rem;
-}
-
-.form-control::-webkit-input-placeholder {
-  color: #501a68;
-}
-
-.form-control::-moz-placeholder {
-  color: #501a68;
-}
-
 .form-control:-ms-input-placeholder {
   color: #501a68;
 }
@@ -18601,6 +18577,21 @@ div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-ar
     margin-right: 15px;
     width: auto !important;
   }
+
+  button.callnow {
+    bottom: 4.5rem;
+    z-index: 1;
+  }
+
+  .main-header .header-part-right {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+  }
+
+  .notificaciones-header {
+    display: none;
+  }
 }
 
 @media (max-width: 360px) {
@@ -19625,6 +19616,9 @@ label#logo-name {
   position: absolute;
   top: 0;
   right: 0;
+  max-width: 17rem;
+  padding: 5px;
+  border: 2px #ddd dotted;
 }
 
 .callnow {
@@ -19782,7 +19776,8 @@ body:after {
   position: absolute;
   min-width: 25rem;
   border: 0;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+  -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+          box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
 }
 
 .notificacion-nueva {
@@ -19867,8 +19862,10 @@ body:after {
 #imprimir-notificaciones {
   overflow-y: auto;
   max-height: 20rem;
+  -webkit-transition: ease;
   transition: ease;
-  transition-duration: 0.8s;
+  -webkit-transition-duration: 0.8s;
+          transition-duration: 0.8s;
 }
 
 .todas-notificaciones .ver-mas-notificaciones {
@@ -19878,14 +19875,18 @@ body:after {
 .todas-notificaciones #imprimir-notificaciones {
   overflow-y: auto;
   max-height: 40rem;
+  -webkit-transition: ease;
   transition: ease;
-  transition-duration: 0.8s;
+  -webkit-transition-duration: 0.8s;
+          transition-duration: 0.8s;
 }
 
 .todas-notificaciones {
   min-width: 80rem;
+  -webkit-transition: ease;
   transition: ease;
-  transition-duration: 0.8s;
+  -webkit-transition-duration: 0.8s;
+          transition-duration: 0.8s;
 }
 
 .cerrar-notificaciones {

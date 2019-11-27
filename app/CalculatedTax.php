@@ -570,11 +570,12 @@ class CalculatedTax extends Model
       $ivaNoAcreditableIdentificacionPlena = 0;
       $totalProveedoresContado = 0;
       $totalProveedoresCredito = 0;
+      $basesConIvaDevuelto = 0;
       $ivaData = json_decode( $this->iva_data ) ?? new \stdClass();
       $bookData = json_decode( $this->book_data ) ?? new \stdClass();
       $arrayActividades = explode( ',', $this->currentCompany->commercial_activities );
 
-      $query->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$ivaData, &$singleBill, $arrayActividades,
+      $query->chunk( 2500,  function($billItems) use ($year, $month, &$company, &$ivaData, &$singleBill, &$basesConIvaDevuelto, $arrayActividades,
        &$billsTotal, &$billsSubtotal, &$totalBillIva, &$basesIdentificacionPlena, &$basesNoDeducibles, &$ivaAcreditableIdentificacionPlena, 
        &$ivaNoAcreditableIdentificacionPlena, &$totalProveedoresContado, &$totalProveedoresCredito
       ) {
@@ -611,6 +612,7 @@ class CalculatedTax extends Model
               
               if( $currBill->total_iva_devuelto > 0 ){
                 $billIva = 0;
+                $basesConIvaDevuelto += $subtotal;
               }
               
               //Redondea todo a 2 decimales
@@ -773,6 +775,7 @@ class CalculatedTax extends Model
               $ivaData->$typeVarPorc += $subtotal;
               $ivaData->$typeVarActividad += $subtotal;
               $ivaData->$typeVarPorcActividad += $subtotal;
+              
             }  
             
           }catch( \Throwable $ex ){
@@ -782,7 +785,7 @@ class CalculatedTax extends Model
         }
         
       });
-              
+      
       $this->iva_data = json_encode( $ivaData );
       $this->count_bills = $countBills;
       $this->bills_total = $billsTotal;
@@ -803,14 +806,13 @@ class CalculatedTax extends Model
       $this->bills_subtotal3 = $ivaData->bB003 + $ivaData->bB013 + $ivaData->bB023 + $ivaData->bB033 + $ivaData->bB016 + $ivaData->bB036 +
                                $ivaData->bS003 + $ivaData->bS023;
       $this->bills_subtotal4 = $ivaData->bB004 + $ivaData->bB014 + $ivaData->bB024 + $ivaData->bB034 +
-                               $ivaData->bS004 + $ivaData->bS024;
+                               $ivaData->bS004 + $ivaData->bS024 - $basesConIvaDevuelto;
       
       //Canasta cuenta como acreditaccion plena. 
       $acredPorCanasta = $ivaData->iB001 + $ivaData->iB011 + $ivaData->iB021 + $ivaData->iB031 + $ivaData->iB015 + $ivaData->iB035 +
                          $ivaData->iS001 + $ivaData->iS021;
       $this->iva_acreditable_identificacion_plena = $ivaAcreditableIdentificacionPlena + $acredPorCanasta;
       $this->bills_subtotal1 = 0; //Lo deja en 0 de una vez. Todas deberian contar como base no acreditable.
-
       
       return $this;
     }
@@ -842,7 +844,6 @@ class CalculatedTax extends Model
       $fakeRatioExentoConCredito = 0;
       $subtotalParaCFDP = 0;
       $cfdp = 0;
-      
       
       //Primero revisa si la sumatoria de pro
       if( $numeradorProrrata > 0 ){
