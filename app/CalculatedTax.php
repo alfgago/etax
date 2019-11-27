@@ -609,6 +609,10 @@ class CalculatedTax extends Model
                 //$currBill->save();
               }
               
+              if( $currBill->total_iva_devuelto > 0 ){
+                $billIva = 0;
+              }
+              
               //Redondea todo a 2 decimales
               $subtotal = round($subtotal, 2);
               $billIva = round($billIva, 2);
