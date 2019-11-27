@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Jobs\ProcessBillsImport;
+use App\Jobs\ProcessAcceptHacienda;
 use Illuminate\Support\Facades\Input;
 
 /**
@@ -70,7 +71,8 @@ class BillController extends Controller
         $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
         $categoriaProductos = ProductCategory::get();
         $unidades = BillItem::select('bill_items.measure_unit')->where('bill_items.company_id', '=', $company->id)->groupBy('bill_items.measure_unit')->get();
-        return view('Bill/index-masivo', compact('company', 'categoriaProductos', 'unidades', 'commercial_activities'));
+        $years = Bill::select('bills.year')->where('bills.company_id', '=', $company->id)->groupBy('bills.year')->get();
+        return view('Bill/index-masivo', compact('company', 'categoriaProductos', 'unidades', 'commercial_activities', 'years'));
     }
 
     public function indexOne($id){
@@ -173,6 +175,11 @@ class BillController extends Controller
             $query = $query->where('bill_items.month', $filtroMes);
        }
 
+       $filtroAno = $request->get('filtroAno');
+       if($filtroAno > 0){
+            $query = $query->where('bill_items.year', $filtroAno);
+       }
+
        $filtroValidado = $request->get('filtroValidado');
        switch($filtroValidado){
             case 1:
@@ -199,7 +206,7 @@ class BillController extends Controller
                 return $billItem->bill->document_number;
             })
             ->addColumn('client', function(BillItem $billItem) {
-                return !empty($billItem->bill->provider_first_name) ? $billItem->bill->provider_first_name.' '.$billItem->bill->provider_last_name : $billItem->bill->clientName();
+                return !empty($billItem->bill->provider_first_name) ? $billItem->bill->provider_first_name.' '.$billItem->bill->provider_last_name : $billItem->bill->providerName();
             })
             ->editColumn('unidad', function(BillItem $billItem) {
                 return $billItem->measure_unit ?? 'Unid';
@@ -561,6 +568,29 @@ class BillController extends Controller
     }
     
     public function exportLibroCompras( $year, $month ) {
+        $current_company = currentCompany();
+        
+        //Busca todos los que aun no tienen el IVA calculado, lo calcula y lo guarda
+        $billItems = BillItem::query()
+        ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
+        ->where('year', $year)
+        ->where('month', $month)
+        ->where('iva_amount', '>', 0)
+        ->where('iva_acreditable', 0)
+        ->where('iva_gasto', 0)
+        ->whereHas('bill', function ($query) use ($current_company){
+            $query->where('company_id', $current_company)
+            ->where('is_void', false)
+            ->where('is_authorized', true)
+            ->where('is_code_validated', true)
+            ->where('accept_status', 1)
+            ->where('hide_from_taxes', false);
+        })->get();
+        
+        foreach($billItems as $item){
+              $item->calcularAcreditablePorLinea();
+        }
+        
         return Excel::download(new LibroComprasExport($year, $month), 'libro-compras.xlsx');
     }
     
@@ -754,20 +784,18 @@ class BillController extends Controller
             $file = Input::file('file');
             $xml = simplexml_load_string( file_get_contents($file) );
             $json = json_encode( $xml ); // convert the XML string to JSON
-            $arr = json_decode( $json, TRUE );                
-            //if(substr($arr['NumeroConsecutivo'],8,2) != "04"){
+            $arr = json_decode( $json, TRUE ); 
                 $FechaEmision = explode("T", $arr['FechaEmision']);
                 $FechaEmision = explode("-", $FechaEmision[0]);
                 $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
 
                 if(CalculatedTax::validarMes($FechaEmision)){
-                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
-                    $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : $company->id_number;
+                    $identificacionEmisor = array_key_exists('Emisor', $arr) ? $arr['Emisor']['Identificacion']['Numero'] : 0;
                     $consecutivoComprobante = $arr['NumeroConsecutivo'];
                     $clave = $arr['Clave'];
-                    
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
+                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor )  || substr($arr['NumeroConsecutivo'],8,2) == "04" ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3
                         $bill = Bill::saveBillXML( $arr, 'XML' );
                         if( $bill ) {
@@ -787,14 +815,12 @@ class BillController extends Controller
                             ->onQueue('log_queue');
                         }
                     }else{
-                        return Response()->json("El documento $consecutivoComprobante no le pertenece a su empresa actual", 400);
+                        return Response()->json("El documento no le pertenece a su empresa actual.", 400);
                     }
                 }else{
-                    return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
+                    return Response()->json('Error: El mes de la factura ya fue cerrado.', 400);
                 }
-            /*}else{
-                return Response()->json('Error: No se puede importar un tiquete electrónico.', 400);
-            }*/
+            
 
              
             $company->save();
@@ -807,8 +833,10 @@ class BillController extends Controller
             Log::error('Error importando XML ' . $ex->getMessage());
             return Response()->json('Se ha detectado un error en el tipo de archivo subido.', 400);
         }
-
-        return Response()->json('Facturas importados exitosamente en '.$time.'s', 200);
+        if( substr($arr['NumeroConsecutivo'],8,2) == "04" ) {
+            return Response()->json('Se importo un tiquete sin cedula de receptor.', 206 );
+        }
+        return Response()->json('Factura importada exitosamente.', 200);
 
     }
     
@@ -837,13 +865,13 @@ class BillController extends Controller
     public function validar($id){
         $company = currentCompanyModel();
         $bill = Bill::find($id);
-            $companyAct = Company::select('commercial_activities')->where('id', $company->id)->first();
-            $activities_company = explode(", ", $companyAct->commercial_activities);
-            $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
-            $codigos_etax = CodigoIvaSoportado::where('hidden', false)->get();
-            $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
+        $companyAct = Company::select('commercial_activities')->where('id', $company->id)->first();
+        $activities_company = explode(", ", $companyAct->commercial_activities);
+        $commercial_activities = Actividades::whereIn('codigo', $activities_company)->get();
+        $codigos_etax = CodigoIvaSoportado::where('hidden', false)->get();
+        $categoria_productos = ProductCategory::whereNotNull('bill_iva_code')->get();
 
-            return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos', 'company'));
+        return view('Bill/validar', compact('bill', 'commercial_activities', 'codigos_etax', 'categoria_productos', 'company'));
         
     }
 
@@ -876,6 +904,7 @@ class BillController extends Controller
                         if(!$company->use_invoicing){
                             $bill->accept_status = 1;
                         }
+                        $billItem->calcularAcreditablePorLinea();
                         $bill->save();
                     }
                     
@@ -922,7 +951,7 @@ class BillController extends Controller
     public function guardarValidar(Request $request)
     {
         $company = currentCompanyModel();
-        $bill = Bill::findOrFail($request->bill);
+        $bill = Bill::with('items')->findOrFail($request->bill);
         if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/Y') )){ 
             $bill->activity_company_verification = $request->actividad_comercial;
             $bill->is_code_validated = true;
@@ -939,6 +968,10 @@ class BillController extends Controller
                 $bill->accept_status = 1;
             }
             $bill->save();
+            
+            foreach($bill->items as $item){
+                $item->calcularAcreditablePorLinea();
+            }
             
             clearBillCache($bill);
 
@@ -1133,6 +1166,62 @@ class BillController extends Controller
             return redirect('/facturas-recibidas/autorizaciones')->withError('Mes seleccionado ya fue cerrado');
         }
     }
+
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexAcceptsMasivo()
+    {
+        $query = Bill::where('bills.company_id', currentCompany())
+        ->where('is_void', false)
+        ->where('accept_status', '0')
+        ->where('is_totales', false)
+        ->where('is_authorized', true)
+        ->with('provider')->get();
+        
+        foreach ($query as $bill) {
+            $bill->calculateAcceptFields();
+        }
+        
+        $current_company = currentCompanyModel();
+
+        if( $current_company->use_invoicing ) {
+            if ($current_company->atv_validation == false) {
+                $apiHacienda = new BridgeHaciendaApi();
+                $token = $apiHacienda->login(false);
+                $validateAtv = $apiHacienda->validateAtv($token, $current_company);
+    
+                if($validateAtv) {
+                    if ($validateAtv['status'] == 400) {
+                        Log::info('Atv Not Validated Company: '. $current_company->id_number);
+                        if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                            $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                        }
+                        return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
+    
+                    } else {
+                        Log::info('Atv Validated Company: '. $current_company->id_number);
+                        $current_company->atv_validation = true;
+                        $current_company->save();
+                    }
+                }else {
+                    return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
+                }
+            }
+        }else{
+            return view('Bill/index-aceptaciones-hacienda')->withMessage('Usted no tiene un facturación con eTax activada, por lo que esta pantalla únicamente validará los códigos eTax para cálculo y no realizará aceptaciones con Hacienda.');
+        }
+
+        if ($current_company->last_rec_ref_number === null) {
+            return redirect('/empresas/configuracion')->withError( "No ha ingresado ultimo consecutivo de recepcion");
+        }
+        
+        return view('Bill/index-aceptacion-masiva-hacienda');
+    }
+
     
     /**
      * Display a listing of the resource.
@@ -1206,7 +1295,18 @@ class BillController extends Controller
                 return view('Bill.ext.accept-actions', [
                     'bill' => $bill
                 ])->render();
-            }) 
+            })
+            ->addColumn('checkbox', function($bill) {
+            	if($bill->is_code_validated < 1){
+            		return '<div class="form-check">
+                		<input type="checkbox" name="accept['.$bill->id.'][accept]" disabled>
+                		<a style="color: red;" href="/facturas-recibidas/lista-validar-masivo">Requiere validacion</a>
+                		</div>'; 
+            	}
+                return '<div class="form-check">
+                		<input type="checkbox" name="accept['.$bill->id.'][accept]" checked>
+                		</div>'; 
+            })  
             ->editColumn('total', function(Bill $bill) {
                 $total = number_format($bill->total,2);
                 return "$bill->currency $total";
@@ -1229,7 +1329,7 @@ class BillController extends Controller
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');
             })
-            ->rawColumns(['actions'])
+            ->rawColumns(['actions', 'checkbox'])
             ->toJson();
     }
     
@@ -1249,13 +1349,18 @@ class BillController extends Controller
     
     public function markAsNotAccepted ( $id )
     {
-        $bill = Bill::findOrFail($id);
+        $bill = Bill::with('items')->findOrFail($id);
         if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
         
             $this->authorize('update', $bill);
             
             $bill->accept_status = 0;
             $bill->is_code_validated = false;
+            $items = $bill->items;
+            foreach($items as $item){
+            	$item->is_code_validated = 0;
+            	$item->save();
+            }
             $bill->save();
             clearBillCache($bill);
 
@@ -1311,11 +1416,11 @@ class BillController extends Controller
                 Activity::dispatch(
                     $user,
                     $bill,
-                    [
-                        'company_id' => $bill->company_id,
-                        'id' => $bill->id,
-                        'document_key' => $bill->document_key
-                    ],
+		            [
+		                'company_id' => $bill->company_id,
+		                'id' => $bill->id,
+		                'document_key' => $bill->document_key
+		            ],
                     $mensaje
                 )->onConnection(config('etax.queue_connections'))
                 ->onQueue('log_queue');
@@ -1332,6 +1437,43 @@ class BillController extends Controller
                 clearBillCache($bill);
                 return redirect('/facturas-recibidas/aceptaciones')->withMessage('Factura aceptada para cálculo en eTax.');
             }
+        } catch ( Exception $e) {
+            Log::error ("Error al crear aceptacion de factura");
+            return redirect('/facturas-recibidas/aceptaciones')->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');
+        }
+    }
+
+
+    /**
+     *  Metodo para hacer las aceptaciones
+     */
+    public function massiveSendAccept (Request $request)
+    {
+        try {
+        	$user = auth()->user();
+            $company = currentCompanyModel();
+            if(isset($request->accept)){
+	            if( currentCompanyModel()->use_invoicing ) {
+	            	foreach($request->accept as $key => $item){
+	    				ProcessAcceptHacienda::dispatch($key, $user, $company, 1);
+	            	}
+	            } else {
+	            	foreach($request->accept as $key => $item){
+	            		$bill = Bill::findOrFail($key);
+	 					if (!empty($bill)) {
+	    					$bill->accept_status = 1;
+		                    $bill->save();
+		                }
+		                clearBillCache($bill);
+	            	}
+	                
+	            }
+	            return redirect('/facturas-recibidas/aceptacion-masiva')->withMessage('Facturas aceptadas, se le notificara en caso de algun problema.');	
+            }else{
+            	return redirect('/facturas-recibidas/aceptacion-masiva')->withError('No hay ninguna factura seleccionada.');
+            }
+            
+            
         } catch ( Exception $e) {
             Log::error ("Error al crear aceptacion de factura");
             return redirect('/facturas-recibidas/aceptaciones')->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');

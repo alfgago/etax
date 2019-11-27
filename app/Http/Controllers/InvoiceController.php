@@ -112,7 +112,8 @@ class InvoiceController extends Controller
         $company = currentCompanyModel();
         $categoriaProductos = ProductCategory::get();
         $unidades = InvoiceItem::select('invoice_items.measure_unit')->where('invoice_items.company_id', '=', $company->id)->groupBy('invoice_items.measure_unit')->get();
-        return view('Invoice/index-masivo', compact('company', 'categoriaProductos', 'unidades'));
+        $years = Invoice::select('invoices.year')->where('invoices.company_id', '=', $company->id)->groupBy('invoices.year')->get();
+        return view('Invoice/index-masivo', compact('company', 'categoriaProductos', 'unidades', 'years'));
     }
 
      /**
@@ -184,6 +185,11 @@ class InvoiceController extends Controller
        $filtroMes = $request->get('filtroMes');
        if($filtroMes > 0){
             $query = $query->where('invoice_items.month', $filtroMes);
+       }
+
+       $filtroAno = $request->get('filtroAno');
+       if($filtroAno > 0){
+            $query = $query->where('invoice_items.year', $filtroAno);
        }
 
        $filtroValidado = $request->get('filtroValidado');
@@ -340,7 +346,9 @@ class InvoiceController extends Controller
                             <i class="fa fa-refresh" aria-hidden="true"></i>
                         </a>';
                 }
-
+                if ($invoice->hacienda_status == '99') {
+                      return '<div class="blue"><span class="tooltiptext">Programada...</span></div>';
+                }
                 return '<div class="yellow"><span class="tooltiptext">Procesando...</span></div>
                     <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 
                         <i class="fa fa-refresh" aria-hidden="true"></i>
@@ -535,6 +543,7 @@ class InvoiceController extends Controller
      */
     public function sendHacienda(Request $request)
     {
+        //dd($request);
         //revision de branch para segmentacion de funcionalidades por tipo de documento
         try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
@@ -544,10 +553,24 @@ class InvoiceController extends Controller
             ]);
             if(CalculatedTax::validarMes($request->generated_date)){
                 $apiHacienda = new BridgeHaciendaApi();
-                $tokenApi = $apiHacienda->login(false);
+                //$tokenApi = $apiHacienda->login(false);
+                $tokenApi = true;
 
                 if ($tokenApi !== false) {
-                    $invoice = new Invoice();
+                    $editar = false;
+                    if(isset($request->invoice_id)){
+                        if($request->invoice_id != 0){
+                            $invoice = Invoice::find($request->invoice_id); 
+                            if($invoice){
+                                if($invoice->hacienda_status == 99 ){
+                                    $editar = true;
+                                }
+                            }
+                        }
+                    }
+                    if(!$editar){
+                        $invoice = new Invoice();
+                    }
                     $company = currentCompanyModel(false);
                     $invoice->company_id = $company->id;
 
@@ -559,52 +582,62 @@ class InvoiceController extends Controller
                     $invoice->payment_receipt = "";
                     $invoice->generation_method = "etax";
                     $invoice->xml_schema = 43;
-                    if ($request->document_type == '01') {
-                        $invoice->reference_number = $company->last_invoice_ref_number + 1;
-                        $company->last_invoice_ref_number = $invoice->reference_number;
-                        $company->save();
-                        $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
-                        $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
-                        $company->last_document = $invoice->document_number;
-                        $company->save();
-                        $invoice->save();
+                    $today = Carbon::parse(now('America/Costa_Rica'));
+                    $generated_date = Carbon::createFromFormat('d/m/Y', $request->generated_date);
+                    if($today->format("Y-m-d") <  $generated_date->format("Y-m-d")){
+                        $invoice->hacienda_status = '99';
+                        $invoice->generation_method = "etax-programada";
+                        $invoice->document_key = "Key Programada";
+                        $invoice->document_number = "Programada";
                     }
-                    if ($request->document_type == '08') {
-                        $invoice->reference_number = $company->last_invoice_pur_ref_number + 1;
-                        $company->last_invoice_pur_ref_number = $invoice->reference_number;
-                        $company->save();
-                        $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
-                        $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
-                        $company->last_document_invoice_pur = $invoice->document_number;
-                        $company->save();
-                        $invoice->save();
-                    }
-                    if ($request->document_type == '09') {
-                        $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
-                        $company->last_invoice_exp_ref_number = $invoice->reference_number;
-                        $company->save();
-                        $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
-                        $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
-                        $company->last_document_invoice_exp = $invoice->document_number;
-                        $company->save();
-                        $invoice->save();
-                    }
-                    if ($request->document_type == '04') {
-                        $invoice->reference_number = $company->last_ticket_ref_number + 1;
-                        $company->last_ticket_ref_number = $invoice->reference_number;
-                        $company->save();
-                        $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
-                        $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
-                        $company->last_document_ticket = $invoice->document_number;
-                        $company->save();
-                        $invoice->save();
+
+                    if($invoice->hacienda_status != '99'){
+                        if ($request->document_type == '01') {
+                            $invoice->reference_number = $company->last_invoice_ref_number + 1;
+                            $company->last_invoice_ref_number = $invoice->reference_number;
+                            $company->save();
+                            $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
+                            $company->last_document = $invoice->document_number;
+                            $company->save();
+                            $invoice->save();
+                        }
+                        if ($request->document_type == '08') {
+                            $invoice->reference_number = $company->last_invoice_pur_ref_number + 1;
+                            $company->last_invoice_pur_ref_number = $invoice->reference_number;
+                            $company->save();
+                            $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
+                            $company->last_document_invoice_pur = $invoice->document_number;
+                            $company->save();
+                            $invoice->save();
+                        }
+                        if ($request->document_type == '09') {
+                            $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
+                            $company->last_invoice_exp_ref_number = $invoice->reference_number;
+                            $company->save();
+                            $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
+                            $company->last_document_invoice_exp = $invoice->document_number;
+                            $company->save();
+                            $invoice->save();
+                        }
+                        if ($request->document_type == '04') {
+                            $invoice->reference_number = $company->last_ticket_ref_number + 1;
+                            $company->last_ticket_ref_number = $invoice->reference_number;
+                            $company->save();
+                            $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
+                            $company->last_document_ticket = $invoice->document_number;
+                            $company->save();
+                            $invoice->save();
+                        }
                     }
 
                     $invoice->save();
 
                     $request->document_key = $invoice->document_key;
                     $request->document_number = $invoice->document_number;
-
                     $invoiceData = $invoice->setInvoiceData($request);
 
                     if ($request->document_type == '08' ) {
@@ -614,18 +647,17 @@ class InvoiceController extends Controller
                         }
                     }
 
-                    $start_date = Carbon::parse(now('America/Costa_Rica'));
-                    $today = $start_date->day."/".$start_date->month."/".$start_date->year;
-
-                    /*if($today != $request->generated_date){
-                        $invoice->hacienda_status = '99';
-                        $invoice->generation_method = "etax-programada";
-                        $invoice->document_key = $invoice->document_key."programada";
-                        $invoice->document_number = "programada";
-                    }*/
-                    $invoice->save();
-                    /*if($request->recurrencia != "0"){
-                        $recurrencia = new RecurringInvoice();
+                    
+                    $invoice->save();                    
+                    if($request->recurrencia != "0" ){
+                        if($request->cantidad_dias == null || $request->cantidad_dias == ''){
+                             $request->cantidad_dias = 0;
+                        }
+                       if($request->id_recurrente == 0){
+                            $recurrencia = new RecurringInvoice();
+                        }else{
+                            $recurrencia = RecurringInvoice::find($request->id_recurrente);
+                        }
                         $recurrencia->company_id = $company->id;
                         $recurrencia->invoice_id = $invoice->id;
                         $recurrencia->frecuency = $request->recurrencia;
@@ -646,37 +678,20 @@ class InvoiceController extends Controller
                             $options = $request->cantidad_dias;
                         }
                         $recurrencia->options = $options;
-                        $recurrencia->next_send = $recurrencia->proximo_envio($today,$request->generated_date);
-                        $recurrencia->save();
-
+                        $recurrencia->next_send = $recurrencia->proximo_envio($today,$generated_date);
+                        $recurrencia->save();   
+                        
                         $invoice->recurring_id = $recurrencia->id;
-                        $invoice->save();
-                    }*/
+                        $invoice->save();     
+                    }
                     if($invoice->hacienda_status != '99'){
                         if (!empty($invoiceData)) {
-                            $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
+                            //$invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
                         }
-//
-//                        if ($request->document_type == '01') {
-//                            $company->last_invoice_ref_number = $invoice->reference_number;
-//                            $company->last_document = $invoice->document_number;
-//
-//                        } elseif ($request->document_type == '08') {
-//                            $company->last_invoice_pur_ref_number = $invoice->reference_number;
-//                            $company->last_document_invoice_pur = $invoice->document_number;
-//
-//                        } elseif ($request->document_type == '09') {
-//                            $company->last_invoice_exp_ref_number = $invoice->reference_number;
-//                            $company->last_document_invoice_exp = $invoice->document_number;
-
-//                        } elseif ($request->document_type == '04') {
-//                            $company->last_ticket_ref_number = $invoice->reference_number;
-//                            $company->last_document_ticket = $invoice->document_number;
-//                        }
                     }
 
                     $company->save();
-                    clearInvoiceCache($invoice);
+                    //clearInvoiceCache($invoice);
                     $user = auth()->user();
                     Activity::dispatch(
                         $user,
@@ -699,7 +714,7 @@ class InvoiceController extends Controller
         } catch( \Exception $ex ) {
             Log::error("ERROR Envio de factura a hacienda -> ".$ex);
             return back()->withError( 'Ha ocurrido un error al enviar factura.' );
-        }
+        } 
     }
 
     private function storeBillFEC($request) {
@@ -844,9 +859,6 @@ class InvoiceController extends Controller
     public function notaCredito($id)
     {
         $company = currentCompanyModel(false);
-
-
-
         if ( !$company->atv_validation && $company->use_invoicing ) {
             $apiHacienda = new BridgeHaciendaApi();
             $token = $apiHacienda->login(false);
@@ -2036,64 +2048,7 @@ class InvoiceController extends Controller
 
         Log::info("disparo de job envio programada");
         EnvioProgramadas::dispatch()->onQueue('sendbulk');
-
-           /* $start_date = Carbon::parse(now('America/Costa_Rica'));
-            $today = $start_date->year."-".$start_date->month."-".$start_date->day." 23:59:59";
-            $invoices = Invoice::where("hacienda_status",'99')->where('generated_date', '<=',$today)->get();
-            foreach ($invoices as $invoice) {
-                try{
-                    $company = Company::where('id',$invoice->company_id)->first();
-                    if ($invoice->document_type == '01') {
-                        $invoice->reference_number = $company->last_invoice_ref_number + 1;
-                    }
-                    if ($invoice->document_type == '08') {
-                        $invoice->reference_number = $company->last_invoice_pur_ref_number + 1;
-                    }
-                    if ($invoice->document_type == '09') {
-                        $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
-                    }
-                    if ($invoice->document_type == '04') {
-                        $invoice->reference_number = $company->last_ticket_ref_number + 1;
-                    }
-                    if ($invoice->document_type== '02') {
-                        $invoice->reference_number = $company->last_debit_note_ref_number + 1;
-                    }
-                    if ($invoice->document_type == '03') {
-                        $invoice->reference_number= $company->last_note_ref_number + 1;
-                    }
-                    $invoice->document_key = $this->getDocumentKey($invoice->document_type,$company);
-                    $invoice->document_number = $this->getDocReference($invoice->document_type,$company);
-                    $invoice->hacienda_status = '01';
-                    $invoice->company->addSentInvoice( $invoice->year, $invoice->month );
-
-                    if ($invoice->document_type == '01') {
-                         $company->last_invoice_ref_number = $invoice->reference_number;
-                    }
-                    if ($invoice->document_type == '08') {
-                        $company->last_invoice_pur_ref_number = $invoice->reference_number;
-                    }
-                    if ($invoice->document_type== '02') {
-                        $company->last_debit_note_ref_number = $invoice->reference_number;
-                    }
-                    if ($invoice->document_type == '03') {
-                       $company->last_note_ref_number = $invoice->reference_number;
-                    }
-                    if ($invoice->document_type == '09') {
-                        $company->last_invoice_exp_ref_number = $invoice->reference_number;
-                    }
-                    if ($invoice->document_type == '04') {
-                        $company->last_ticket_ref_number = $invoice->reference_number;
-                    }
-
-                    $company->save();
-                    $invoice->save();
-                    Log::info("Factura  programada enviada de la compañia".$company->id." con la llave" . $invoice->document_key);
-                    dd("Factura  programada enviada de la compañia".$company->id." con la llave" . $invoice->document_key);
-                }catch( \Throwable $ex ){
-                    Log::error("error en envio de programada ".$invoice->id." error :" . $ex);
-                    dd("error en envio de programada ".$invoice->id." error :" . $ex);
-                }
-            }*/
+        dd("aaaa");
 
     }
 
@@ -2250,6 +2205,7 @@ class InvoiceController extends Controller
 
     }
 
+
     public function validarEnvioExcel(Request $request){
         try{
             $companyId = currentCompany();
@@ -2273,6 +2229,164 @@ class InvoiceController extends Controller
             Log::error("Error en factura ENVIO MASIVO EXCEL:" . $e);
             return redirect('/facturas-emitidas')->withError('Error en factura ENVIO MASIVO EXCEL.');
         }
+
+    } 
+
+
+    public function verRecurrentes($id){
+
+        $companyId = currentCompany();
+        $recurringInvoice = RecurringInvoice::find($id);
+        return view("Invoice/detalle-recurrentes")->with('recurringInvoice', $recurringInvoice);
+        
+    }
+    
+    public function editarFactura($id)
+    {
+        $company = currentCompanyModel(false);
+        if ( !$company->atv_validation && $company->use_invoicing ) {
+            $apiHacienda = new BridgeHaciendaApi();
+            $token = $apiHacienda->login(false);
+            $validateAtv = $apiHacienda->validateAtv($token, $company);
+            if( $validateAtv ) {
+                if ($validateAtv['status'] == 400) {
+                    Log::info('Atv Not Validated Company: '. $company->id_number);
+                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                    }
+                    return redirect('/empresas/certificado')->withError( "Error al validar el certificado: " . $validateAtv['message']);
+
+                } else {
+                    Log::info('Atv Validated Company: '. $company->id_number);
+                    $company->atv_validation = true;
+                    $company->save();
+
+                    $user = auth()->user();
+                    Cache::forget("cache-currentcompany-$user->id");
+                }
+            }else {
+                return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
+            }
+        }
+
+        
+        $invoice = Invoice::findOrFail($id);
+        $recurringInvoice = RecurringInvoice::find($invoice->recurring_id);
+        $this->authorize('update', $invoice);
+        $company = currentCompanyModel();
+        $arrayActividades = $company->getActivities();
+        $countries  = CodigosPaises::all()->toArray();
+
+        $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
+        $codigos = CodigoIvaRepercutido::where('hidden', false)->get();
+        $units = UnidadMedicion::all()->toArray();
+        $document_type = $invoice->document_type;
+        $rate = $this->get_rates();
+        $document_number = $this->getDocReference($document_type);
+        $document_key = $this->getDocumentKey($document_type);
+        return view('Invoice/editar-recurrente', compact('invoice','units','arrayActividades','countries','product_categories','codigos', 'company','recurringInvoice','document_type','rate','document_number','document_key') );
     }
 
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Client  $client
+     * @return \Illuminate\Http\Response
+     */
+    public function eliminarRecurrentes($id)
+    {
+        try{
+            $recurrencia = RecurringInvoice::findOrFail($id);
+            $recurrencia->delete();
+        
+          $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $recurrencia,
+                [
+                    'company_id' => $recurrencia->company_id,
+                    'id' => $recurrencia->id
+                ],
+                "Recurrencia eliminada."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
+            return redirect()->back()->withMessage('Recurrencia eliminada');
+        } catch ( \Exception $e) {
+            Log::error("Error en eliminar recurrencia:" . $e);
+
+            return redirect()->back()->withError('Error en eliminar recurrencia.');
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Client  $client
+     * @return \Illuminate\Http\Response
+     */
+    public function eliminarProgramada($id)
+    {
+        try{
+            $invoice = Invoice::findOrFail($id);
+            $invoice->delete();
+        
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $invoice,
+                [
+                    'company_id' => $invoice->company_id,
+                    'id' => $invoice->id
+                ],
+                "Factura eliminada."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
+            return redirect()->back()->withMessage('Factura eliminada.');
+        } catch ( \Exception $e) {
+            Log::error("Error en eliminar factura:" . $e);
+            return redirect()->back()->withError('Error en eliminar factura.');
+        }
+    }
+    public function guardarRecurrentes (Request $request)
+    {
+        try{
+            if($request->recurrencia != "0" ){
+                if($request->cantidad_dias == null || $request->cantidad_dias == ''){
+                    $request->cantidad_dias = 0;
+                }
+                $recurrencia = RecurringInvoice::find($request->id_recurrente);
+                $recurrencia->frecuency = $request->recurrencia;
+                $options = null;
+                if($request->recurrencia == "1"){
+                    $options = $request->dia;
+                }
+                if($request->recurrencia == "2"){
+                    $options = $request->primer_quincena.",".$request->segunda_quincena;
+                }
+                if($request->recurrencia == "3"){
+                    $options = $request->mensual;
+                }
+                if($request->recurrencia == "4"){
+                    $options = $request->dia_recurrencia."/".$request->mes_recurrencia;
+                }
+                if($request->recurrencia == "5"){
+                    $options = $request->cantidad_dias;
+                }
+                $recurrencia->options = $options;
+
+                $today = Carbon::parse(now('America/Costa_Rica'));
+                $generated_date = Carbon::createFromFormat('Y-m-d H:i:s', $recurrencia->invoice->generated_date);
+                $recurrencia->next_send = $recurrencia->proximo_envio($today,$generated_date);
+                $recurrencia->save();
+                return redirect()->back()->withMessage('Recurrencia actualizada.');
+            }else{
+                return  $this->eliminarProgramada($request->id_recurrente);
+            }
+
+        }catch ( \Exception $e) {
+            Log::error("Error en actualizar recurrencia:" . $e);
+            return redirect()->back()->withError('Error en actualizar recurrencia.');
+        }
+    }
+        
 }

@@ -229,7 +229,7 @@ class WizardController extends Controller
                 
             $company->wizard_finished = true;
             $company->save();
-
+            
             //Update Team name based on company
             $team->name = $company->id . ": " . $request->id_number . " - " . $request->name;
             $team->save();

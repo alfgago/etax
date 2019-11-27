@@ -112,11 +112,26 @@
                 method : "post",
                 dictDefaultMessage: "Arrastre sus archivos XML aquí o presione para seleccionarlos.",
                 clickable: true,
-                removedfile: function(file) {
-                    // @TODO : Make your own implementation to delete a file
+                error: function (file, response) {
+		            $(file.previewElement).find('.dz-error-message').text(response);
+		            $(file.previewElement).addClass('dz-error');
+                	if(response == 'El documento no le pertenece a su empresa actual.' ){
+                    	toastr.error(response+' Archivo: '+file['name']);
+                	}
+                	if(response == 'Error: El mes de la factura ya fue cerrado.'){
+                    	toastr.error(response+' Archivo: '+file['name']);
+                	}
+                	if(response == 'Se ha detectado un error en el tipo de archivo subido.' ){
+                    	toastr.error(response+' Archivo: '+file['name']);
+                	}
                 },
-                queuecomplete: function() {
-                    // @TODO : Ajax call to load your uploaded files right away if required
+                success: function(file, response) {
+		            $(file.previewElement).addClass('dz-complete');
+		            $(file.previewElement).addClass('dz-success ');
+                	if(response == 'Se importo un tiquete sin cedula de receptor.'){
+		            	$(file.previewElement).addClass('dz-warning');
+                    	toastr.warning('Se importo un tiquete sin cédula de receptor. Archivo: '+file['name']);
+                	}
                 }
             });
         });

@@ -141,6 +141,9 @@
 
   window.agregarEditarItem = function() {
 
+
+  	var guardar = $('#form-checkbox').is(":checked");
+
     //Si esta editando, usa lnum y item_id para identificar la fila.
     var lnum = $('#lnum').val() ? $('#lnum').val() : '';
     var item_id = $('#item_id').val() ? $('#item_id').val() : '';
@@ -180,6 +183,39 @@
     var montoTotalLinea = $('#montoTotalLinea').val();
     var tariff_heading = $('#tariff_heading').val();
     var docType = $('#document_type').val();
+
+    if(guardar){
+    	$.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        jQuery.ajax({
+            url: "/productos",
+            method: 'post',
+            data: {
+                code: codigo,
+                name: nombre,
+                measure_unit: unidad_medicion,
+                unit_price: precio_unitario,
+                product_category_id: tipo_producto,
+                default_iva_type: tipo_iva
+            },
+            success: function (result) {
+            	Swal.fire({
+		            type: 'success',
+		            title: 'Producto Creado',
+		            text: 'El producto se ha agregado correctamente al catalogo.'
+		        })
+		        console.log(codigo);
+		        console.log(nombre);
+		        $('#codigo-select').append('<option value="'+codigo+'">'+nombre+'</option>');
+		        console.log($('#codigo-select'));
+            }
+
+        });
+	}
+
 
     if( !monto_iva ) {
       monto_iva = 0;
@@ -374,6 +410,11 @@
   window.cargarFormItem = function( index ) {
     $('.item-factura-form').addClass('editando');
 
+    $('#codigo-div').show();
+    $('#form-checkbox').prop("checked", false);
+    $('#checkbox-div').hide();
+    $('#codigo-select-div').hide();		
+
     var item = $('.item-index-'+index );
     $('#lnum').val( item.attr('attr-num') );
     $('#item_id').val( item.find('.item_id ').val() );
@@ -555,7 +596,18 @@
   }
 
   window.buscarProducto = function() {
-        var id = $('#codigo').val();
+        var id = $('#codigo-select').val();
+        if(id == 'nuevoProducto'){
+        	$('#codigo-div').show();
+        	$('#checkbox-div').show();
+        	$('#form-checkbox').prop("checked", true);
+
+        }else{
+        	$('#codigo-div').hide();
+        	$('#checkbox-div').hide();
+        	$('#form-checkbox').prop("checked", false);	
+        }
+
         if(id !== '' && id !== undefined){
             $.ajaxSetup({
                 headers: {
@@ -570,6 +622,7 @@
                 },
                 success: function (result) {
                     if(result.name) {
+                    	$('#codigo').val(result.code);
                         $('#nombre').val(result.name);
                         $('#unidad_medicion').val(result.measure_unit);
                         $('#precio_unitario').val(result.unit_price);
@@ -632,6 +685,22 @@
             $('#divMontoTotalLinea').attr('hidden', false);
             $('#divImpuestoNeto').attr('hidden', false);
             $('#exoneradalinea').val(1);
+            
+            $('.input-fecha').datetimepicker({
+              format: 'DD/MM/Y',
+              allowInputToggle: true,
+              icons : {
+                    time: 'fa fa-clock-o',
+                    date: 'fa fa-calendar',
+                    up: 'fa fa-chevron-up',
+                    down: 'fa fa-chevron-down',
+                    previous: 'fa fa-chevron-left',
+                    next: 'fa fa-chevron-right',
+                    today: 'fa fa-calendar-check-o',
+                    clear: 'fa fa-times',
+                    close: 'fa fa-calendar-times-o'
+              }
+            });
         }else{
             $(".exoneracion-cont").hide();
             $('#etiqTotal').text('');

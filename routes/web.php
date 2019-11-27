@@ -123,9 +123,11 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::post('guardar-validar', 'InvoiceController@guardarValidar')->name('Invoice.GuardarValidar');
     Route::get('envioProgramada', 'InvoiceController@envioProgramada')->name('Invoice.envioProgramada');
     Route::get('recurrentes', 'InvoiceController@recurrentes')->name('Invoice.recurrentes');
-    Route::get('ver-recurrente/{id}', 'InvoiceController@editarRecurrentes')->name('Invoice.editarRecurrentes');
-    Route::get('eliminar-recurrente/{id}', 'InvoiceController@editarRecurrentes')->name('Invoice.editarRecurrentes');
-    Route::get('editar-recurrente/{id}', 'InvoiceController@editarRecurrentes')->name('Invoice.editarRecurrentes');
+    Route::get('ver-recurrente/{id}', 'InvoiceController@verRecurrentes')->name('Invoice.editarRecurrentes');
+    Route::post('guardar-recurrencia', 'InvoiceController@guardarRecurrentes')->name('Invoice.guardarRecurrentes');
+    Route::delete('eliminar-recurrente/{id}', 'InvoiceController@eliminarRecurrentes')->name('Invoice.eliminarRecurrentes');
+    Route::delete('eliminar-programada/{id}', 'InvoiceController@eliminarProgramada')->name('Invoice.eliminarProgramada');
+    Route::get('editar-factura/{id}', 'InvoiceController@editarFactura')->name('Invoice.editarFactura');
     Route::get('lista-validar-masivo', 'InvoiceController@indexValidarMasivo')->name('Invoice.indexValidarMasivo');
     Route::post('validacion-masiva', 'InvoiceController@validarMasivo')->name('Invoice.validacion-masiva');
 });
@@ -133,6 +135,8 @@ Route::prefix('facturas-emitidas')->group(function() {
 // Rutas de facturacion recibida
 Route::prefix('facturas-recibidas')->group(function() {
     Route::get('aceptaciones', 'BillController@indexAccepts')->name('Bill.accepts');
+    Route::get('aceptacion-masiva', 'BillController@indexAcceptsMasivo')->name('Bill.index.massive.accepts');
+    Route::post('aceptacion-masiva', 'BillController@massiveSendAccept')->name('Bill.massive.accepts');
     Route::post('respondStatus', 'BillController@respondStatus')->name('Bill.respond');
     Route::patch('respuesta-aceptacion/{id}', 'BillController@sendAcceptMessage')->name('Bill.sendAcceptMessage');
     Route::get('validaciones', 'BillController@indexValidaciones')->name('Bill.validaciones');
@@ -173,6 +177,11 @@ Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}', 'SubscriptionPlanContr
 
 // Rutas de usuario
 Route::prefix('usuario')->group(function() {
+    Route::get('notificaciones-nuevas', 'UserController@notificationNew')->name('User.notificationNew');
+    Route::get('notificaciones/{id}', 'UserController@notification')->name('User.notification');
+    Route::get('notificaciones-vista/{id}', 'UserController@notificationVista')->name('User.notificationVista');
+    Route::get('limpiar-notificaciones', 'UserController@limpiarNotificaciones')->name('User.limpiarNotificaciones');
+    Route::get('notificaciones-contador', 'UserController@notificationCount')->name('User.notificationCount');
     Route::get('perfil', 'UserController@edit')->name('User.edit');
     Route::patch('update-perfil', 'UserController@update')->name('User.update');
     Route::get('admin-edit/{email}', 'UserController@adminEdit')->name('User.admin_edit');

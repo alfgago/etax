@@ -36,9 +36,9 @@
 .sidebar-left {
     left: calc(-#{$sidebar-left-width} - #{$side-clearance});
     z-index: 90;
-    -webkit-transition: all .24s ease-in-out;
-    -o-transition: all .24s ease-in-out;
-    transition: all .24s ease-in-out;
+    -webkit-transition: .5s ease opacity;
+    -o-transition: .5s ease opacity;
+    transition: .5s ease opacity;
     &.open {
         left: 0
     }
@@ -423,5 +423,18 @@
         text-align: center;
     }
 
+    .logo-container {
+        position: relative;
+        max-width: 100%;
+    }
+
+    input#input_logo {
+        position: absolute;
+        top: 1rem;
+        right: 0;
+        width: 13rem;
+        text-align: right;
+        overflow: hidden;
+    }
 
 }

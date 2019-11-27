@@ -319,9 +319,10 @@ class Bill extends Model
     
     public static function saveBillXML( $arr, $metodoGeneracion ) {
         
-        $identificacionReceptor = $arr['Receptor']['Identificacion']['Numero'];
+        $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
         if($metodoGeneracion != "Email" && $metodoGeneracion != 'GS' ){
           $company = currentCompanyModel();
+          $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : $company->id_number;
         }else{
           //Si es email, busca por ID del receptor para encontrar la compañia
           $company = Company::where('id_number', $identificacionReceptor)->first();
@@ -676,6 +677,26 @@ class Bill extends Model
         return $path;
         
     }
+
+    public static function storeXMLError($cedulaEmpresa, $file) {
+        
+        try{
+          
+          if ( Storage::exists("empresa-$cedulaEmpresa/facturas_compras/error/email/$file->getClientOriginalName()")) {
+              Storage::delete("empresa-$cedulaEmpresa/facturas_compras/error/email/$file->getClientOriginalName()");
+          }
+          
+          $path = \Storage::putFileAs(
+              "empresa-$cedulaEmpresa/facturas_compras", $file, "error/email/$file->getClientOriginalName()"
+          );
+        }catch( \Throwable $e ){
+          Log::error( 'Error al guardar xml de error: ' . $e->getMessage() );
+        }
+        
+        return $path;
+        
+    }
+    
     
     public static function importBillRow ( $data, $billList, $company = false ) {
       if(!$company){

@@ -13,7 +13,10 @@ use App\User;
 use App\Company;
 use App\Team;
 use App\Invoice;
+use App\InvoiceItem;
+use App\RecurringInvoice;
 use App\Bill;
+use \Carbon\Carbon;
 use App\UserCompanyPermission;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +27,12 @@ class GoSocketController extends Controller
 
 
     public function gosocketValidate(Request $request) {
+        $company = currentCompany();
+        //$this->notificar(opcion, id, 'titulo', 'detalle', 'tipo', 'funcion','enlace');
+        $this->notificar(1, auth()->user()->id, 0, 'prueba', 'hola prueba', 'danger', 'prueba','');
+
         try{
+
         	$token = $request->token;
         	if (!empty($token)) {
                 $apiGoSocket = new BridgeGoSocketApi();
