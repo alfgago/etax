@@ -553,8 +553,7 @@ class InvoiceController extends Controller
             ]);
             if(CalculatedTax::validarMes($request->generated_date)){
                 $apiHacienda = new BridgeHaciendaApi();
-                //$tokenApi = $apiHacienda->login(false);
-                $tokenApi = true;
+                $tokenApi = $apiHacienda->login(false);
 
                 if ($tokenApi !== false) {
                     $editar = false;
@@ -686,12 +685,12 @@ class InvoiceController extends Controller
                     }
                     if($invoice->hacienda_status != '99'){
                         if (!empty($invoiceData)) {
-                            //$invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
+                            $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
                         }
                     }
 
                     $company->save();
-                    //clearInvoiceCache($invoice);
+                    clearInvoiceCache($invoice);
                     $user = auth()->user();
                     Activity::dispatch(
                         $user,
