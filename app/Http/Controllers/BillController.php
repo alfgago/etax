@@ -923,12 +923,14 @@ class BillController extends Controller
                     
                     clearBillCache($bill);
                 }catch(\Exception $e){
+                	$this->notificar(2, $company->id, $company->id, "Error validando factura", "Hubo un error validando la factura: $bill->document_number.", 'error', 'bills\validacion masiva', '/facturas-recibidas/lista-validar-masivo');
                     Log::error('Error ' . $e->getMessage());
                     $errors = true;
                     $resultBills[$bill->document_number] = ['status' => 1];
                 } 
                 
             }else{
+            	$this->notificar(2, $company->id, $company->id, "Error validando factura", "No se pudo validar la factura: $bill->document_number ya que el mes ya fue cerrado.", 'error', 'bills\validacion masiva', '/facturas-recibidas/lista-validar-masivo');
                 $errors = true;
                 $resultBills[$bill->document_number] = ['status' => 0];
 

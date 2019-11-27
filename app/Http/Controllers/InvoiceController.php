@@ -1080,6 +1080,7 @@ class InvoiceController extends Controller
             $invoiceItem = InvoiceItem::with('invoice')->findOrFail($key);
             $invoice = $invoiceItem->invoice;
             if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/Y') )){
+            	try{
                 InvoiceItem::where('id', $key)
                 ->update([
                   'iva_type' =>  $item['iva_type'],
@@ -1111,7 +1112,14 @@ class InvoiceController extends Controller
                 ->onQueue('log_queue');
 
                 clearInvoiceCache($invoice);
+                }catch(\Exception $e){
+                	$this->notificar(2, $company->id, $company->id, "Error validando factura", "Hubo un error validando la factura: $invoice->document_number.", 'error', 'invoice\validacion masiva', '/facturas-emitidas/lista-validar-masivo');
+                    Log::error('Error ' . $e->getMessage());
+                    $errors = true;
+                    $resultBills[$bill->document_number] = ['status' => 1];
+                } 
             }else{
+            	$this->notificar(2, $company->id, $company->id, "Error validando factura", "No se pudo validar la factura: $invoice->document_number ya que el mes ya fue cerrado.", 'error', 'invoice\validacion masiva', '/facturas-emitidas/lista-validar-masivo');
                 $errors = true;
                 $resultInvoices[$invoice->document_number] = ['status' => 0];
 
