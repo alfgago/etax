@@ -20,7 +20,7 @@
                         <span class="date-notificacion">{{$notificacionAbierta->notification->date}}</span><br>
                         <span class="text-notificacion">{!!$notificacionAbierta->notification->text!!}</span><br>
                         @if($notificacionAbierta->notification->link != '')
-                            <span class="link-notificacion"><a target="_blank" href="{{$notificacionAbierta->notification->link}}">Ver enlace</a></span>
+                            <span class="link-notificacion"><a class="btn btn-primary" style="color: #ffffff;" target="_blank" href="{{$notificacionAbierta->notification->link}}">Ver enlace</a></span>
                         @endif
                     @endif
                 </div>
