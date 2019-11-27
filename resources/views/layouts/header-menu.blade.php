@@ -44,7 +44,8 @@
             </a>
             <div class="dropdown-notificaciones dropdown-notificaciones-right" >
                 <h3 class="text-center">Notificaciones</h3>
-                <span class="cerrar-notificaciones"><i class="fa fa-times" aria-hidden="true"></i></span>
+                <span class="cerrar-notificaciones" title="Cerrar notificaciones"><i class="fa fa-times" aria-hidden="true"></i></span>
+                <span class="limpiar-notificaciones" title="Marcas como leidos"><i class="fa fa-envelope-open-o" aria-hidden="true"></i></span>
                 <div id="imprimir-notificaciones" ></div>
                 <div class="ver-mas-notificaciones" onclick="verNotificacion(0);">
                     Ver todas
@@ -81,9 +82,22 @@
     $(".cerrar-notificaciones").click(function(){
         $("#notificacionesDropdown").click();
     });
+    
+    $(".limpiar-notificaciones").click(function(){
+        var link = "/usuario/limpiar-notificaciones";
+        $.ajax({
+           type:'GET',
+           url:link,
+           success:function(data){
+                $(".div-notificaciones").removeClass("notificacion-nueva");
+                contadorNotificaciones();
+                $("#notificacionesDropdown").click();
+           }
+      
+        });
+    });
     $("#notificacionesDropdown").click(function(){
         var link = "/usuario/notificaciones-nuevas";
-        console.log(link);
         $.ajax({
            type:'GET',
            url:link,

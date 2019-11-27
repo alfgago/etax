@@ -19896,3 +19896,10 @@ body:after {
   cursor: pointer;
 }
 
+.limpiar-notificaciones {
+  top: 1rem;
+  right: 35px;
+  position: absolute;
+  cursor: pointer;
+}
+

@@ -176,6 +176,7 @@ Route::prefix('usuario')->group(function() {
     Route::get('notificaciones-nuevas', 'UserController@notificationNew')->name('User.notificationNew');
     Route::get('notificaciones/{id}', 'UserController@notification')->name('User.notification');
     Route::get('notificaciones-vista/{id}', 'UserController@notificationVista')->name('User.notificationVista');
+    Route::get('limpiar-notificaciones', 'UserController@limpiarNotificaciones')->name('User.limpiarNotificaciones');
     Route::get('notificaciones-contador', 'UserController@notificationCount')->name('User.notificationCount');
     Route::get('perfil', 'UserController@edit')->name('User.edit');
     Route::patch('update-perfil', 'UserController@update')->name('User.update');

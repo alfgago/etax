@@ -484,6 +484,16 @@ class UserController extends Controller {
         }
         return 1;
     }
+    public function limpiarNotificaciones(){
+        $user_id = auth()->user()->id;
+        NotificationUser::where('user_id',$user_id)
+            ->update(['status' => 0]);
+        $notificacion = NotificationUser::with('notification')->where('user_id',$user_id)->first();
+        if($notificacion){
+            $notificacion->vista();
+        }
+        return 1;
+    }
     
     public function notificationCount(){
         try{
