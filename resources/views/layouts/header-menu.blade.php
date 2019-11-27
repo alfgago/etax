@@ -157,6 +157,7 @@
     top: 1rem;
     right: 5px;
     position: absolute;
+    cursor: pointer;
 }
         </style>
         @if( !empty( auth()->user()->teams ) )
@@ -219,7 +220,7 @@
 
 </div>
 <script>
-    setInterval('contadorNotificaciones()',1000);
+    setInterval('contadorNotificaciones()',30000);
     $(".cerrar-notificaciones").click(function(){
         $("#notificacionesDropdown").click();
     });
@@ -274,7 +275,6 @@
            type:'GET',
            url:link,
            success:function(data){
-                console.log(data );
                 $(".notification-count").html(data);
                 if(data == 0){
                     $(".notification-count").removeClass("mostrar-count-notificacion");
