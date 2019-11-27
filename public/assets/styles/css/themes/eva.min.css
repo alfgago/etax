@@ -21336,6 +21336,7 @@ body:after {
   border: 0;
   -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
           box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+  padding: 1rem;
 }
 
 .notificacion-nueva {
@@ -21349,7 +21350,6 @@ body:after {
 .dropdown-notificaciones h3 {
   font-size: 1.2rem;
   margin-bottom: 1.25rem;
-  margin-left: 20px;
   border-bottom: 0.45rem solid #F0C962;
   display: inline-block;
 }
@@ -21389,9 +21389,11 @@ body:after {
   width: 100%;
   display: block;
   border-top: 2px solid;
-  padding-top: 5px;
+  padding: .5rem;
   color: #ffffff;
   background: #15408E;
+  border-radius: 25px;
+  cursor: pointer;
 }
 
 .div-notificaciones-left {
@@ -21450,15 +21452,19 @@ body:after {
 .cerrar-notificaciones {
   color: #d82f2f;
   top: 1rem;
-  right: 5px;
+  right: 1rem;
   position: absolute;
   cursor: pointer;
 }
 
 .limpiar-notificaciones {
   top: 1rem;
-  right: 35px;
+  right: 3.5rem;
   position: absolute;
   cursor: pointer;
+}
+
+.link-notificacion .btn-primary {
+  font-size: 0.7rem;
 }
 

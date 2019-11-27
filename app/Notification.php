@@ -14,6 +14,22 @@ use App\User;
 class Notification extends Model
 {
    public function enviar($option, $id, $company , $title, $text, $type, $function, $link){
+   		//$opcion: los tipos de notificaciones que hay de momento.
+   			//1: Solo un usuario
+   			//2: Todos los usuarios de una compañia
+   			//3: Dueño de la compañia
+   		//$id: Se pasa el Id de la persona o compañia a la que se quiere notificar.
+   		//$company: La compañia involucrada en la notificacion
+   		//$title: El titulo de la notificacion
+   		//$text: El texto de la notificacion.
+   		//$tpye: El tipo de notificacion que se esta usando.
+   			//Info
+   			//Error
+   			//Success
+   			//Warning
+   		//$function: en cual funcion/metodo es que paso el problema
+   		//$link: algun link al que quiera enviar su notificacion.
+
    		try{
 	   		$today = Carbon::parse(now('America/Costa_Rica'));
 	    	$this->type = $type;

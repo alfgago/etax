@@ -126,6 +126,7 @@ class CybersourcePaymentProcessor extends PaymentProcessor
             $billTo->country = $request->country;
             $billTo->email = $request->email;
             $billTo->ipAddress = $request->IpAddress;
+            $billTo->phoneNumber = $request->phone;
             $requestClient->billTo = $billTo;
 
             $card = new stdClass();
@@ -328,7 +329,8 @@ class CybersourcePaymentProcessor extends PaymentProcessor
 
             $ccCaptureService = new stdClass();
             $ccCaptureService->run = 'true';
-            $requestClient->CreatePaymentService = $ccCaptureService;
+            //$requestClient->CreatePaymentService = $ccCaptureService;
+            $requestClient->ccCaptureService = $ccCaptureService;
 
             $recurringSubscriptionInfo = new stdClass();
             $recurringSubscriptionInfo->subscriptionID = $request->token_bn;

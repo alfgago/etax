@@ -24,16 +24,14 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css" />
     <link href="https://unpkg.com/dropzone/dist/dropzone.css" rel="stylesheet"/>
 
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=6.26">
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=6.28">
     
-    <script src="/assets/js/cybs_devicefingerprint.js"></script>
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=6.26"></script>
+    <script src="/assets/js/cybs_devicefingerprint.js?v=1.01"></script>
+    <script src="{{asset('assets/js/common-bundle.js')}}?v=6.28"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
 
     @yield('header-scripts')
-
-   
 
 </head>
 
