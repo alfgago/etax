@@ -25,7 +25,7 @@ Información general del perfil
                             </li>
                         <?php } ?>
                         @if( auth()->user()->isContador() )
-                            <li style="display:none;">
+                            <li>
                                 <a class="nav-link active" aria-selected="true" href="/usuario/empresas">Empresas</a>
                             </li>
                         @endif
