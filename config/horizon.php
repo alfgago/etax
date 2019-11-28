@@ -167,6 +167,15 @@ return [
                 'maxProcesses' => 2,
                 'tries' => 1,
             ],
+            'smbulk-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['smbulk'],
+                'balance' => 'auto',
+                'processes' => 2,
+                'minProcesses' => 2,
+                'maxProcesses' => 2,
+                'tries' => 1,
+            ],
             'imports-supervisor' => [
                 'connection' => 'redis',
                 'queue' => ['imports', 'gosocket'],
@@ -227,6 +236,15 @@ return [
             'sendbulk-supervisor' => [
                 'connection' => 'redis',
                 'queue' => ['sendbulk'],
+                'balance' => 'auto',
+                'processes' => 2,
+                'minProcesses' => 2,
+                'maxProcesses' => 2,
+                'tries' => 1,
+            ],
+            'smbulk-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['smbulk'],
                 'balance' => 'auto',
                 'processes' => 2,
                 'minProcesses' => 2,
