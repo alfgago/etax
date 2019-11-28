@@ -172,7 +172,13 @@
             location.href = "mailto:soporte@etaxcr.com?subject=Solicitud de Soporte&body=Agradezco la ayuda con el siguiente requerimiento:";
         }
     </script>
+    <script>
+      
 
+      Echo.channel('home').listen('NewMessage',(e) => {
+          console.log(e.message)
+      })
+    </script>
 </body>
 
 </html>

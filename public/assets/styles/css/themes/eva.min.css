@@ -14354,8 +14354,7 @@ h6,
 .sidebar-left {
   left: calc(-10rem - 1.33rem);
   z-index: 90;
-  -webkit-transition: .5s ease opacity;
-  transition: .5s ease opacity;
+  transition: 0.5s ease opacity;
 }
 
 .sidebar-left.open {
@@ -16334,6 +16333,45 @@ table#invoice-table td {
 .checkbox-div::-webkit-input-placeholder {
   color: #501a68;
 }
+
+.checkbox-div::-moz-placeholder {
+  color: #501a68;
+}
+
+.checkbox-div:-ms-input-placeholder {
+  color: #501a68;
+}
+
+.checkbox-div::-ms-input-placeholder {
+  color: #501a68;
+}
+
+.checkbox-div::placeholder {
+  color: #501a68;
+}
+
+.checkbox-div.rounded,
+.checkbox-div.form-control-rounded {
+  border-radius: 1.33rem;
+}
+
+.form-control {
+  border: 0.0666rem solid #999;
+  outline: initial !important;
+  background: #fff;
+  color: #050505;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+.form-control::-webkit-input-placeholder {
+  color: #501a68;
+}
+
+.form-control::-moz-placeholder {
+  color: #501a68;
+}
+
 .form-control:-ms-input-placeholder {
   color: #501a68;
 }
@@ -18584,8 +18622,6 @@ div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-ar
   }
 
   .main-header .header-part-right {
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
   }
 
@@ -19776,8 +19812,7 @@ body:after {
   position: absolute;
   min-width: 25rem;
   border: 0;
-  -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
-          box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
 }
 
 .notificacion-nueva {
@@ -19862,10 +19897,8 @@ body:after {
 #imprimir-notificaciones {
   overflow-y: auto;
   max-height: 20rem;
-  -webkit-transition: ease;
   transition: ease;
-  -webkit-transition-duration: 0.8s;
-          transition-duration: 0.8s;
+  transition-duration: 0.8s;
 }
 
 .todas-notificaciones .ver-mas-notificaciones {
@@ -19875,18 +19908,14 @@ body:after {
 .todas-notificaciones #imprimir-notificaciones {
   overflow-y: auto;
   max-height: 40rem;
-  -webkit-transition: ease;
   transition: ease;
-  -webkit-transition-duration: 0.8s;
-          transition-duration: 0.8s;
+  transition-duration: 0.8s;
 }
 
 .todas-notificaciones {
   min-width: 80rem;
-  -webkit-transition: ease;
   transition: ease;
-  -webkit-transition-duration: 0.8s;
-          transition-duration: 0.8s;
+  transition-duration: 0.8s;
 }
 
 .cerrar-notificaciones {

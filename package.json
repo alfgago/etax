@@ -25,6 +25,8 @@
     },
     "dependencies": {
         "card": "^2.4.0",
-        "cross-env": "^6.0.0"
+        "cross-env": "^6.0.0",
+        "laravel-echo": "^1.6.1",
+        "pusher-js": "^5.0.3"
     }
 }
