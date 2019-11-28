@@ -146,3 +146,32 @@ table#bill-table td,
 table#invoice-table td {
     vertical-align: middle !important;
 }
+
+div.blue {
+    background: #3184BF;
+    border-radius: 0.8em;
+    -moz-border-radius: 0.8em;
+    -webkit-border-radius: 0.8em;
+    color: #FFFFFF;
+    display: inline-block;
+    font-weight: bold;
+    line-height: 1em;
+    margin-right: 15px;
+    text-align: center;
+    width: 1em;
+    height: 1em;
+}
+div.blue .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: white !important;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+}
+div.blue:hover .tooltiptext {
+    visibility: visible;
+}
