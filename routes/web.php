@@ -212,6 +212,7 @@ Route::prefix('payment')->group(function(){
     Route::post('comprar-contabilidades', 'PaymentController@comprarContabilidades')->name('Payment.comprarContabilidades');
     Route::post('seleccion-empresas', 'PaymentController@seleccionEmpresas')->name('Payment.seleccionEmpresas');
     Route::patch('pagar-cargo/{id}', 'PaymentController@pagarCargo')->name('Payment.pagar-cargo');
+    Route::get('process-liquidaciones', 'PaymentController@processLiquidaciones')->name('Payment.processLiquidaciones');
 });
 
 

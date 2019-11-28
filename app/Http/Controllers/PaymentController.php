@@ -204,6 +204,18 @@ class PaymentController extends Controller
         return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
 
     }
+    
+    public function processLiquidaciones() {
+        $paymentGateway = new CybersourcePaymentProcessor();
+        $payments = Payment::where('payment_gateway', 'cybersource')->get();
+        Log::info("Corriendo liquidaciones pendientes en Cybersource");
+        foreach($payments as $payment){
+            if($payment->charge_token){
+                $paymentGateway->liquidar($payment->charge_token, $payment->id, $payment->amount);
+            }
+        }
+    }
+    
     /**
      * facturasDisponibles
      *
