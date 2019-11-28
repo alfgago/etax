@@ -20,7 +20,7 @@
                     <select class="form-control select-search" id="codigo-select" name="code-select" onchange="buscarProducto();">
                     	<option value="seleccionar">-- Seleccione --</option>
                     	@foreach ( \App\Product::where('company_id', $company->id)->get() as $tipo )
-			              <option value="{{ $tipo->code }}">{{ $tipo->name }}</option>
+			              <option value="{{ $tipo->code }}">{{ $tipo->code }} - {{ $tipo->name }}</option>
 			            @endforeach
 			            <option value="nuevoProducto">Nuevo Producto</option>
                     </select>
