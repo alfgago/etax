@@ -19,10 +19,10 @@
                 	<!--input type="text" class="form-control" id="codigo" name="code" maxlength="13"-->
                     <select class="form-control select-search" id="codigo-select" name="code-select" onchange="buscarProducto();">
                     	<option value="seleccionar">-- Seleccione --</option>
+                      <option value="nuevoProducto">Nuevo Producto</option>
                     	@foreach ( \App\Product::where('company_id', $company->id)->get() as $tipo )
-			              <option value="{{ $tipo->code }}">{{ $tipo->name }}</option>
-			            @endforeach
-			            <option value="nuevoProducto">Nuevo Producto</option>
+    			              <option value="{{ $tipo->code }}">{{ $tipo->code }} - {{ $tipo->name }}</option>
+    			            @endforeach
                     </select>
                 </div>
                 <div class="col-md pull-right-1"  id="codigo-div" style="display: none;">
