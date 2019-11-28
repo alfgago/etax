@@ -230,17 +230,13 @@ class CybersourcePaymentProcessor extends PaymentProcessor
         }
     }
     
-    public function liquidar($requestID, $cedulaCliente, $amount) {
+    public function liquidar($requestID, $paymentID, $amount) {
         try {
-            $referenceCode = $requestID . "-" . $cedulaCliente;
+            $referenceCode = $paymentID;
             Log::info("Liquidacion $referenceCode");
             $merchantId = 'tc_cr_011007172';
             $client = new CybsSoapClient();
             $requestClient = $client->createRequest($referenceCode);
-
-            $ccAuthService = new stdClass();
-            $ccAuthService->run = 'true';
-            $requestClient->ccAuthService = $ccAuthService;
 
             $ccCaptureService = new stdClass();
             $ccCaptureService->run = 'true';
