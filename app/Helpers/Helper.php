@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use App\Notification;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -668,4 +669,26 @@ if (!function_exists('get_rates')) {
         }
 
     }
+}
+
+
+/* Get notificatios of user */
+if (!function_exists('notifications')) {
+
+    function notifications() {
+        $notify = new Notification();
+        return $notify->notificaciones();
+    }
+
+}
+
+
+/* Get count notifications of user */
+if (!function_exists('notification_count')) {
+
+     function notification_count(){ 
+        $notify = new Notification();
+        return $notify->cantidad();
+    }
+
 }

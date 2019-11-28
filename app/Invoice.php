@@ -372,7 +372,7 @@ class Invoice extends Model
               }
               $this->total_otros_cargos = $totalOtrosCargos;
             }catch(\Exception $e){
-                Log::error("Error al guardar otros cargos " . $e);
+                Log::warning("Error al guardar otros cargos " . $e);
             }
 
             //Guarda nuevamente el invoice
@@ -458,7 +458,7 @@ class Invoice extends Model
                 }
                 $exoneradalinea = $data['exoneradalinea'] ?? 1;
                 if ($exonerationDate && isset($data['typeDocument']) && isset($data['numeroDocumento']) && $data['porcentajeExoneracion'] > 0 && $exoneradalinea == 1) {
-
+                    $exonerationDate->hour(0)->minute(0)->second(0);
                     $item->exoneration_document_type = $data['typeDocument'] ?? null;
                     $item->exoneration_document_number = $data['numeroDocumento'] ?? null;
                     $item->exoneration_company_name = $data['nombreInstitucion'] ?? null;
@@ -1110,6 +1110,21 @@ class Invoice extends Model
         }catch( \Throwable $e ){
           Log::error( 'Error al sumar en AvailableInvoices ' . $e->getMessage() );
         }
+
+        return $path;
+
+    }
+
+    public static function storeXMLError($cedulaEmpresa, $file) {
+        //$cedulaCliente = $invoice->client->id_number;
+
+        if ( Storage::exists("empresa-$cedulaEmpresa/facturas_ventas/error/email/$file->getClientOriginalName()")) {
+             Storage::delete("empresa-$cedulaEmpresa/facturas_ventas/error/email/$file->getClientOriginalName()");
+        }
+
+        $path = \Storage::putFileAs(
+            "empresa-$cedulaEmpresa/facturas_ventas", $file, "error/email/$file->getClientOriginalName()"
+        );
 
         return $path;
 

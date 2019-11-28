@@ -135,6 +135,8 @@ Route::prefix('facturas-emitidas')->group(function() {
 // Rutas de facturacion recibida
 Route::prefix('facturas-recibidas')->group(function() {
     Route::get('aceptaciones', 'BillController@indexAccepts')->name('Bill.accepts');
+    Route::get('aceptacion-masiva', 'BillController@indexAcceptsMasivo')->name('Bill.index.massive.accepts');
+    Route::post('aceptacion-masiva', 'BillController@massiveSendAccept')->name('Bill.massive.accepts');
     Route::post('respondStatus', 'BillController@respondStatus')->name('Bill.respond');
     Route::patch('respuesta-aceptacion/{id}', 'BillController@sendAcceptMessage')->name('Bill.sendAcceptMessage');
     Route::get('validaciones', 'BillController@indexValidaciones')->name('Bill.validaciones');
@@ -175,6 +177,11 @@ Route::get('/confirmar-codigo/{codigo}/{precio}/{banco}', 'SubscriptionPlanContr
 
 // Rutas de usuario
 Route::prefix('usuario')->group(function() {
+    Route::get('notificaciones-nuevas', 'UserController@notificationNew')->name('User.notificationNew');
+    Route::get('notificaciones/{id}', 'UserController@notification')->name('User.notification');
+    Route::get('notificaciones-vista/{id}', 'UserController@notificationVista')->name('User.notificationVista');
+    Route::get('limpiar-notificaciones', 'UserController@limpiarNotificaciones')->name('User.limpiarNotificaciones');
+    Route::get('notificaciones-contador', 'UserController@notificationCount')->name('User.notificationCount');
     Route::get('perfil', 'UserController@edit')->name('User.edit');
     Route::patch('update-perfil', 'UserController@update')->name('User.update');
     Route::get('admin-edit/{email}', 'UserController@adminEdit')->name('User.admin_edit');
@@ -186,7 +193,7 @@ Route::prefix('usuario')->group(function() {
     Route::get('zendesk-jwt', 'UserController@zendeskJwt')->name('User.zendesk_jwt');
     Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
     Route::post('update-user-tutorial', 'UserController@updateUserTutorial')->name('User.update_user_tutorial');
-    Route::get('wallet', 'InfluencersController@wallet')->name('Influencers.wallet');
+    //Route::get('wallet', 'InfluencersController@wallet')->name('Influencers.wallet');
     Route::post('add-retiro', 'InfluencersController@retiro')->name('Influencers.retiro');
     Route::get('cancelar', 'UserController@cancelar')->name('User.cancelar');
     Route::patch('update-cancelar', 'UserController@updatecancelar')->name('User.updatecancelar');
@@ -205,6 +212,7 @@ Route::prefix('payment')->group(function(){
     Route::post('comprar-contabilidades', 'PaymentController@comprarContabilidades')->name('Payment.comprarContabilidades');
     Route::post('seleccion-empresas', 'PaymentController@seleccionEmpresas')->name('Payment.seleccionEmpresas');
     Route::patch('pagar-cargo/{id}', 'PaymentController@pagarCargo')->name('Payment.pagar-cargo');
+    Route::get('process-liquidaciones', 'PaymentController@processLiquidaciones')->name('Payment.processLiquidaciones');
 });
 
 

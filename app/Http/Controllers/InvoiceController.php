@@ -112,7 +112,8 @@ class InvoiceController extends Controller
         $company = currentCompanyModel();
         $categoriaProductos = ProductCategory::get();
         $unidades = InvoiceItem::select('invoice_items.measure_unit')->where('invoice_items.company_id', '=', $company->id)->groupBy('invoice_items.measure_unit')->get();
-        return view('Invoice/index-masivo', compact('company', 'categoriaProductos', 'unidades'));
+        $years = Invoice::select('invoices.year')->where('invoices.company_id', '=', $company->id)->groupBy('invoices.year')->get();
+        return view('Invoice/index-masivo', compact('company', 'categoriaProductos', 'unidades', 'years'));
     }
 
      /**
@@ -184,6 +185,11 @@ class InvoiceController extends Controller
        $filtroMes = $request->get('filtroMes');
        if($filtroMes > 0){
             $query = $query->where('invoice_items.month', $filtroMes);
+       }
+
+       $filtroAno = $request->get('filtroAno');
+       if($filtroAno > 0){
+            $query = $query->where('invoice_items.year', $filtroAno);
        }
 
        $filtroValidado = $request->get('filtroValidado');
@@ -547,8 +553,7 @@ class InvoiceController extends Controller
             ]);
             if(CalculatedTax::validarMes($request->generated_date)){
                 $apiHacienda = new BridgeHaciendaApi();
-                //$tokenApi = $apiHacienda->login(false);
-                $tokenApi = true;
+                $tokenApi = $apiHacienda->login(false);
 
                 if ($tokenApi !== false) {
                     $editar = false;
@@ -680,12 +685,12 @@ class InvoiceController extends Controller
                     }
                     if($invoice->hacienda_status != '99'){
                         if (!empty($invoiceData)) {
-                            //$invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
+                            $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
                         }
                     }
 
                     $company->save();
-                    //clearInvoiceCache($invoice);
+                    clearInvoiceCache($invoice);
                     $user = auth()->user();
                     Activity::dispatch(
                         $user,
@@ -1074,6 +1079,7 @@ class InvoiceController extends Controller
             $invoiceItem = InvoiceItem::with('invoice')->findOrFail($key);
             $invoice = $invoiceItem->invoice;
             if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/Y') )){
+            	try{
                 InvoiceItem::where('id', $key)
                 ->update([
                   'iva_type' =>  $item['iva_type'],
@@ -1105,7 +1111,14 @@ class InvoiceController extends Controller
                 ->onQueue('log_queue');
 
                 clearInvoiceCache($invoice);
+                }catch(\Exception $e){
+                	$this->notificar(2, $company->id, $company->id, "Error validando factura", "Hubo un error validando la factura: $invoice->document_number.", 'error', 'invoice\validacion masiva', '/facturas-emitidas/lista-validar-masivo');
+                    Log::error('Error ' . $e->getMessage());
+                    $errors = true;
+                    $resultBills[$bill->document_number] = ['status' => 1];
+                } 
             }else{
+            	$this->notificar(2, $company->id, $company->id, "Error validando factura", "No se pudo validar la factura: $invoice->document_number ya que el mes ya fue cerrado.", 'error', 'invoice\validacion masiva', '/facturas-emitidas/lista-validar-masivo');
                 $errors = true;
                 $resultInvoices[$invoice->document_number] = ['status' => 0];
 
@@ -1921,7 +1934,7 @@ class InvoiceController extends Controller
             $ref = $company->last_invoice_exp_ref_number + 1;
         }
         if ($docType == '03') {
-            $lastSale = $company->last_note_ref_number + 1;
+            $ref = $company->last_note_ref_number + 1;
         }
         if ($docType == '04') {
             $ref = $company->last_ticket_ref_number + 1;
@@ -2091,8 +2104,6 @@ class InvoiceController extends Controller
         $invoiceList = array();
         foreach ($facturas as $row){
             try{
-
-
                 if( isset($row['identificacionreceptor']) ){
                     if($row['cedulaempresa'] == $company->id_number){
                         $xls_invoice = XlsInvoice::updateOrCreate([

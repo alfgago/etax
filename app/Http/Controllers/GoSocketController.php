@@ -27,6 +27,10 @@ class GoSocketController extends Controller
 
 
     public function gosocketValidate(Request $request) {
+        $company = currentCompany();
+        //$this->notificar(opcion, id, 'titulo', 'detalle', 'tipo', 'funcion','enlace');
+        $this->notificar(1, auth()->user()->id, 0, 'prueba', 'hola prueba', 'danger', 'prueba','');
+
         try{
 
         	$token = $request->token;

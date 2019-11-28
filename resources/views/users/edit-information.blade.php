@@ -32,9 +32,9 @@
                         </li>
                         @endif
                         @if( auth()->user()->isInfluencers())
-                         <li>
+                         <li style="display:none;">
                                 <a class="nav-link" aria-selected="false" href="/usuario/wallet">Billetera</a>
-                           </li>
+                         </li>
                         @endif
                         
                     </ul>

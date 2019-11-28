@@ -233,10 +233,10 @@
             <div class="form-group col-md-6">
                 <label for="exoneration_date">Fecha</label>
                 <div class='input-group date inputs-fecha'>
-                    <input id="exoneration_date" class="form-control input-fecha" placeholder="dd/mm/yyyy"  value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
+                    <input id="exoneration_date" class="form-control input-fecha" placeholder="dd/mm/yyyy" value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
                     <span class="input-group-addon">
-                          <i class="icon-regular i-Calendar-4"></i>
-                        </span>
+                      <i class="icon-regular i-Calendar-4"></i>
+                    </span>
                 </div>
             </div>
 
