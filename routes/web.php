@@ -193,7 +193,7 @@ Route::prefix('usuario')->group(function() {
     Route::get('zendesk-jwt', 'UserController@zendeskJwt')->name('User.zendesk_jwt');
     Route::patch('update-password/{id}', 'UserController@updatePassword')->name('User.update_password');
     Route::post('update-user-tutorial', 'UserController@updateUserTutorial')->name('User.update_user_tutorial');
-    Route::get('wallet', 'InfluencersController@wallet')->name('Influencers.wallet');
+    //Route::get('wallet', 'InfluencersController@wallet')->name('Influencers.wallet');
     Route::post('add-retiro', 'InfluencersController@retiro')->name('Influencers.retiro');
     Route::get('cancelar', 'UserController@cancelar')->name('User.cancelar');
     Route::patch('update-cancelar', 'UserController@updatecancelar')->name('User.updatecancelar');
@@ -212,6 +212,7 @@ Route::prefix('payment')->group(function(){
     Route::post('comprar-contabilidades', 'PaymentController@comprarContabilidades')->name('Payment.comprarContabilidades');
     Route::post('seleccion-empresas', 'PaymentController@seleccionEmpresas')->name('Payment.seleccionEmpresas');
     Route::patch('pagar-cargo/{id}', 'PaymentController@pagarCargo')->name('Payment.pagar-cargo');
+    Route::get('process-liquidaciones', 'PaymentController@processLiquidaciones')->name('Payment.processLiquidaciones');
 });
 
 
