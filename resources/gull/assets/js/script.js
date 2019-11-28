@@ -163,9 +163,10 @@ function toggleFullscreen() {
 }
 $('[data-fullscreen]').on('click', toggleFullscreen);
 
-
+console.log("holis");
 import Echo from 'laravel-echo'
 
+console.log("adios");
     window.Pusher = require('pusher-js');
 
     window.Echo = new Echo({
