@@ -1934,7 +1934,7 @@ class InvoiceController extends Controller
             $ref = $company->last_invoice_exp_ref_number + 1;
         }
         if ($docType == '03') {
-            $lastSale = $company->last_note_ref_number + 1;
+            $ref = $company->last_note_ref_number + 1;
         }
         if ($docType == '04') {
             $ref = $company->last_ticket_ref_number + 1;
@@ -2104,8 +2104,6 @@ class InvoiceController extends Controller
         $invoiceList = array();
         foreach ($facturas as $row){
             try{
-
-
                 if( isset($row['identificacionreceptor']) ){
                     if($row['cedulaempresa'] == $company->id_number){
                         $xls_invoice = XlsInvoice::updateOrCreate([

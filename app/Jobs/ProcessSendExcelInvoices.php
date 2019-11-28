@@ -216,6 +216,9 @@ class ProcessSendExcelInvoices implements ShouldQueue
         if ($docType == '01') {
             $lastSale = $company->last_invoice_ref_number + 1;
         }
+        if ($docType == '03') {
+            $lastSale = $company->last_note_ref_number + 1;
+        }
         if ($docType == '08') {
             $lastSale = $company->last_invoice_pur_ref_number + 1;
         }
@@ -237,6 +240,9 @@ class ProcessSendExcelInvoices implements ShouldQueue
         $invoice = new Invoice();
         if ($docType == '01') {
             $ref = $company->last_invoice_ref_number + 1;
+        }
+        if ($docType == '03') {
+            $ref = $company->last_note_ref_number + 1;
         }
         if ($docType == '08') {
             $ref = $company->last_invoice_pur_ref_number + 1;

@@ -25,7 +25,7 @@ Mis Planes Suscritos
                             </li>
                         <?php } ?>
                         @if( auth()->user()->isContador() )
-                            <li style="display:none;">
+                            <li>
                                 <a class="nav-link" aria-selected="false" href="/usuario/empresas">Empresas</a>
                             </li>
                         @endif
