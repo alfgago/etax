@@ -18,18 +18,61 @@
 <div class="row">
   <div class="col-md-12">
       <div class="filters mb-4 pb-4">
-          <label>Filtrar documentos</label>
-          <div class="periodo-selects">
-            <select id="filtro-select" name="filtro" onchange="reloadDataTable();">
-                <option value="99" selected>Todos los documentos</option>
-                <option value="1">Facturas electrónicas</option>
-                <option value="4">Tiquete electrónico</option>
-                <option value="3">Notas de crédito</option>
-                <option value="2">Notas de debito</option>
-                <option value="8">Factura de compra</option>
-                <option value="9">Factura de exportación</option>
-                <option value="0">Documentos eliminados</option>
-            </select>
+          <div class="div-filtro">
+            <label>Filtrar documentos</label>
+            <div class="periodo-selects">
+              <select class="form-control" id="filtro-select" name="filtro" onchange="reloadDataTable();">
+                  <option value="99" selected>Todos los documentos</option>
+                  <option value="1">Facturas electrónicas</option>
+                  <option value="4">Tiquete electrónico</option>
+                  <option value="3">Notas de crédito</option>
+                  <option value="2">Notas de debito</option>
+                  <option value="8">Factura de compra</option>
+                  <option value="9">Factura de exportación</option>
+                  <option value="0">Documentos eliminados</option>
+              </select>
+            </div>
+          </div>
+          <div class="div-filtro">
+            <label>Moneda</label>
+            <div class="periodo-selects">
+              <select class="form-control" id="moneda-select" name="moneda" onchange="reloadDataTable();">
+                  <option value="0" selected>Todas las monedas</option>
+                  <option value="CRC">CRC</option>
+                  <option value="USD">USD</option>
+              </select>
+            </div>
+          </div>
+          <div class="div-filtro">
+            <label>Desde</label>
+            <div class="input-group date inputs-fecha">
+              <input id="fecha_desde" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="fecha_desde" value=""  onchange="reloadDataTable();">
+              <span class="input-group-addon">
+                <i class="icon-regular i-Calendar-4"></i>
+              </span>
+            </div>
+          </div>
+          <div class="div-filtro">
+            <label>Hasta</label>
+            <div class="input-group date inputs-fecha">
+              <input id="fecha_hasta" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="fecha_hasta" value=""  onchange="reloadDataTable();">
+              <span class="input-group-addon">
+                <i class="icon-regular i-Calendar-4"></i>
+              </span>
+            </div>
+          </div>
+          <div class="div-filtro">
+            <label>Estado</label>
+            <div class="periodo-selects">
+              <select class="form-control" id="estado-select" name="estado" onchange="reloadDataTable();">
+                  <option value="0" selected>Todas los estados</option>
+                  <option value="03">Aceptada</option>
+                  <option value="04">Rechazada</option>
+                  <option value="01">Pendiente</option>
+                  <option value="05">Esperando Hacienda</option>
+                  <option value="99">Programada</option>
+              </select>
+            </div>
           </div>
       </div>
 
@@ -71,6 +114,10 @@ $(function() {
       url: "/api/invoices",
       data: function(d){
           d.filtro = $( '#filtro-select' ).val();
+          d.moneda = $( '#moneda-select' ).val();
+          d.fecha_desde = $( '#fecha_desde' ).val();
+          d.fecha_hasta = $( '#fecha_hasta' ).val();
+          d.estado = $( '#estado-select' ).val();
       },
       type: 'GET'
     },
@@ -175,12 +222,36 @@ function confirmHideFromTaxes( id ) {
   })
   
 }
-  
+      $('.inputs-fecha').datetimepicker({
+          format: 'DD/MM/Y',
+          allowInputToggle: true,
+          icons : {
+                time: 'fa fa-clock-o',
+                date: 'fa fa-calendar',
+                up: 'fa fa-chevron-up',
+                down: 'fa fa-chevron-down',
+                previous: 'fa fa-chevron-left',
+                next: 'fa fa-chevron-right',
+                today: 'fa fa-calendar-check-o',
+                clear: 'fa fa-times',
+                close: 'fa fa-calendar-times-o'
+          }
+    }).on('dp.change',function(e){
+      reloadDataTable()
+    });
 </script>
 
 <style>
   tr.tax-hidden td {
     text-decoration: line-through !important;
+  }
+  .div-filtro{
+    float: left;
+    margin: 5px;
+  }
+  .filters{
+    position: relative;
+    margin-bottom: 3.5rem !important;
   }
 </style>
 
