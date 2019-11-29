@@ -146,20 +146,7 @@
 }("function" == typeof define && define.amd ? define : function(e, t) { "undefined" != typeof module && module.exports ? module.exports = t(require("jquery")) : window.toastr = t(window.jQuery) });
 //# sourceMappingURL=toastr.js.map
 
-console.log("holis");
-import Echo from 'laravel-echo'
 
-console.log("adios");
-    window.Pusher = require('pusher-js');
-
-    window.Echo = new Echo({
-      broadcaster: 'pusher',
-      key: process.env.MIX_PUSCHER_APP_KEY,
-      cluster: process.env.MIX_PUSHER_APP_CLUSTER,
-      wsHost: window.location.hostname,
-      wsPort: 6001
-    });
-    
 
 window.abrirPopup = function(id) {
   $('.popup').removeClass('is-active');
