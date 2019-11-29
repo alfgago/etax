@@ -293,6 +293,10 @@ class InvoiceController extends Controller
                 ->with('client');
 
         $filtro = $request->get('filtro');
+        $moneda = $request->get('moneda');
+        $estado = $request->get('estado');
+        $fecha_desde = $request->get('fecha_desde');
+        $fecha_hasta = $request->get('fecha_hasta');
         if( $filtro == 0 ) {
             $query = $query->onlyTrashed();
         }else if( $filtro == 1 ) {
@@ -307,6 +311,20 @@ class InvoiceController extends Controller
             $query = $query->where('document_type', '08');
         }else if( $filtro == 9 ) {
             $query = $query->where('document_type', '09');
+        }
+        if( $estado != 0) {
+            $query = $query->where('hacienda_status', $estado);
+        }
+        if($moneda != '0'){
+            $query = $query->where('currency', $moneda);
+        }
+        if($fecha_desde){
+            $fecha_desde =  $fecha_desde." 00:00:00";
+            $query = $query->where('generated_date','>=',$fecha_desde);
+        }
+        if($fecha_hasta){
+            $fecha_hasta =  $fecha_hasta." 23:59:59";
+            $query = $query->where('generated_date','<=',$fecha_hasta);
         }
 
         return datatables()->eloquent( $query )
@@ -347,7 +365,7 @@ class InvoiceController extends Controller
                         </a>';
                 }
                 if ($invoice->hacienda_status == '99') {
-                      return '<div class="blue"><span class="tooltiptext">Programada...</span></div>';
+                      return '<div class="blue"><span class="tooltiptext">Programada</span></div>';
                 }
                 return '<div class="yellow"><span class="tooltiptext">Procesando...</span></div>
                     <a href="/facturas-emitidas/query-invoice/'.$invoice->id.'". title="Consultar factura en hacienda" class="text-dark mr-2"> 

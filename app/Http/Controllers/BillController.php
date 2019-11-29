@@ -292,6 +292,10 @@ class BillController extends Controller
                 ->with('provider');
         
         $filtro = $request->get('filtro');
+        $moneda = $request->get('moneda');
+        $estado = $request->get('estado');
+        $fecha_desde = $request->get('fecha_desde');
+        $fecha_hasta = $request->get('fecha_hasta');
         if( $filtro == 0 ) {
             $query = $query->onlyTrashed();
         }else if( $filtro == 1 ) {
