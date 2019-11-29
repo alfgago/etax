@@ -315,12 +315,10 @@ class BillController extends Controller
         }
         if($fecha_desde){
             $fecha_desde =  $fecha_desde." 00:00:00";
-            log::info($fecha_desde);
             $query = $query->where('generated_date','>=',$fecha_desde);
         }
         if($fecha_hasta){
             $fecha_hasta =  $fecha_hasta." 23:59:59";
-            log::info($fecha_hasta);
             $query = $query->where('generated_date','<=',$fecha_hasta);
         }        
         return datatables()->eloquent( $query )
