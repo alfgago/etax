@@ -11,6 +11,7 @@ use App\User;
 use App\Sales;
 use App\EtaxProducts;
 use App\PaymentMethod;
+use App\NotificationUser;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Mail;
@@ -462,5 +463,51 @@ class UserController extends Controller {
 
     }
 
+
+    public function notificationNew(){
+    
+        return view('users.notificaciones-header');
+    }
+
+    public function notification($id = 0){
+        $user_id = auth()->user()->id;
+        $notificacionAbierta = NotificationUser::with('notification')->where('id',$id)->first();
+        if($notificacionAbierta){
+            $notificacionAbierta->vista();
+        }
+        $company = currentCompany();
+        $llave = "notificaciones-".$user_id."-".$company;
+        $notificaciones = NotificationUser::with('notification')->where('user_id',$user_id)->whereIn('company_id',array($company,0))->orderby('created_at','desc')->get();
+        return view('users.notificaciones')->with('notificaciones',$notificaciones)->with('notificacionAbierta',$notificacionAbierta)->with('id',$id);
+    }
+
+    public function notificationVista($id = 0){
+        $user_id = auth()->user()->id;
+        $notificacionAbierta = NotificationUser::with('notification')->where('id',$id)->first();
+        if($notificacionAbierta){
+            $notificacionAbierta->vista();
+        }
+        return 1;
+    }
+    public function limpiarNotificaciones(){
+        $user_id = auth()->user()->id;
+        NotificationUser::where('user_id',$user_id)
+            ->update(['status' => 0]);
+        $notificacion = NotificationUser::with('notification')->where('user_id',$user_id)->first();
+        if($notificacion){
+            $notificacion->vista();
+        }
+        return 1;
+    }
+    
+    public function notificationCount(){
+        try{
+            return notification_count();
+        }catch( \Throwable $e) { 
+            Log::error('Error leer cantidad de notificaciones'. $e);
+            return 0; 
+        }
+        
+    }
 
 }

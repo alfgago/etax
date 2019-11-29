@@ -124,7 +124,7 @@ class ReportsController extends Controller
                         ->orderBy('created_at', 'ASC')
                         ->orderBy('item_number', 'ASC')
                         ->get();
-      
+                        
       $nombreMes = Variables::getMonthName($mes);
       
       return view('/Reports/reporte-libro-compras', compact('data', 'ano', 'nombreMes') );

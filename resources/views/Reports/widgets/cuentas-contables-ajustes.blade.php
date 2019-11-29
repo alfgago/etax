@@ -96,7 +96,7 @@
               
               <tr>
                 <th>IVA por ajustar de bienes y servicios:</td>
-                <td>  ₡{{ number_format( $data->book->cc_ajuste_bs, 0 ) }} </td>
+                <td>  ₡{{ number_format( $data->book->cc_ajuste_bs, 0 ) }}</td>
                 <td>-</td>
               </tr>
               

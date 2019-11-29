@@ -13,13 +13,22 @@
     
     <div class="form-group col-md-6">
         
-            <label for="codigo">Código de producto</label>
-            <div class="form-row">
-                <div class="col-md-8">
-                    <input type="text" class="form-control" id="codigo" name="code" maxlength="13">
+            <div class="form-row" id="nuevoCodigo">
+                <div class="col-md" id="codigo-select-div">
+                	<label for="select">Seleccionar producto</label>
+                	<!--input type="text" class="form-control" id="codigo" name="code" maxlength="13"-->
+                    <select class="form-control select-search" id="codigo-select" name="code-select" onchange="buscarProducto();">
+                    	<option value="seleccionar">-- Seleccione --</option>
+                      <option value="nuevoProducto">Nuevo Producto</option>
+                    	@foreach ( \App\Product::where('company_id', $company->id)->get() as $tipo )
+    			              <option value="{{ $tipo->code }}">{{ $tipo->code }} - {{ $tipo->name }}</option>
+    			            @endforeach
+                    </select>
                 </div>
-                <div class="col-md-3 pull-left-1" style="margin-left: -1em !important;">
-                    <div class="btn btn-agregar btn-agregar-cliente" onclick="buscarProducto();">Buscar</div>
+                <div class="col-md pull-right-1"  id="codigo-div" style="display: none;">
+                	<label for="codigo-input">Codigo</label>
+                	<input type="text" class="form-control" id="codigo" value="" name="code" maxlength="13">
+                    <!--div class="btn btn-agregar btn-agregar-cliente" onclick="buscarProducto();">Nuevo</div-->
                 </div>
             </div>
         
@@ -110,6 +119,7 @@
     <div class="form-group col-md-1">
       <label for="porc_iva">% IVA</label>
       <input type="number" min="0" class="form-control pr-0" id="porc_iva" placeholder="13" value="13" readonly>
+      <input type="text"  class="hidden" id="exoneradalinea"  value="0" >
     </div>
     
     <div class="form-group col-md-12 inline-form inline-checkbox hidden">
@@ -223,16 +233,16 @@
             <div class="form-group col-md-6">
                 <label for="exoneration_date">Fecha</label>
                 <div class='input-group date inputs-fecha'>
-                    <input id="exoneration_date" class="form-control input-fecha" placeholder="dd/mm/yyyy"  value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
+                    <input id="exoneration_date" class="form-control input-fecha" placeholder="dd/mm/yyyy" value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->format('d/m/Y') }}">
                     <span class="input-group-addon">
-                          <i class="icon-regular i-Calendar-4"></i>
-                        </span>
+                      <i class="icon-regular i-Calendar-4"></i>
+                    </span>
                 </div>
             </div>
 
             <div class="form-group col-md-2">
                 <label for="porcentajeExoneracion">% *</label>
-                <input type="number" class="form-control" max="100" min="0" maxlength="3" id="porcentajeExoneracion" placeholder="100%" value="100" onchange="calcularMontoExoneracion();">
+                <input type="number" class="form-control" max="100" min="0" maxlength="3" id="porcentajeExoneracion" value="100" onchange="calcularMontoExoneracion();">
             </div>
             <div class="form-group col-md-3">
                 <label for="montoExoneracion">Monto Exonerado *</label>
@@ -248,10 +258,14 @@
             </div>
         </div>
     </div>
-
-    <div class="form-group col-md-12">
+	<div class="col-md-12" id="checkbox-div" style="display: none;">
+    	<div class="form-group col-md-6 checkbox-div">
+    		<input type="checkbox" id="form-checkbox" name="guardar"><label style="position:absolute">Guardar en catalogo</label>
+    	</div>
+    </div>    
+<div class="form-group col-md-12">
       <div class="botones-agregar">
-        <div onclick="agregarEditarItem();" class="btn btn-dark m-1 ml-0">Confirmar linea</div>
+        <div onclick="agregarEditarItem();" class="btn btn-dark m-1 ml-0">Confirmar línea</div>
         <div onclick="cerrarPopup('linea-popup');cancelarEdicion();" class="btn btn-danger m-1">Cancelar</div>
       </div>
       <div class="botones-editar">
@@ -259,8 +273,8 @@
         <div onclick="cerrarPopup('linea-popup');cancelarEdicion();" class="btn btn-danger m-1">Cancelar</div>
       </div>
     </div>
-
   </div>
+
 </div>
 <script>
     /*$(function () {

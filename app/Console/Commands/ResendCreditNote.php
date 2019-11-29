@@ -46,7 +46,7 @@ class ResendCreditNote extends Command
     {
         try {
             $this->info('Sending Credit Note to Hacienda....');
-            $invoices = Invoice::where('hacienda_status', '01')->where('generation_method', 'etax')
+            $invoices = Invoice::where('hacienda_status', '01')->where('generation_method', 'like', '%etax%')
                 ->where('resend_attempts', '<', 6)->where('in_queue', false)
                 ->where('document_type', '03')->get();
             $this->info('Sending Credit Note ....'. count($invoices));
@@ -60,7 +60,7 @@ class ResendCreditNote extends Command
                 $invoice->in_queue = true;
                 $invoice->save();
                 $this->info('Sending Credit Note ....'. $invoice->document_key);
-                sleep(4);
+                sleep(3);
                 ProcessCreditNote::dispatch($invoice->id, $company->id, $tokenApi)
                     ->onConnection(config('etax.queue_connections'))->onQueue('invoices');
             }

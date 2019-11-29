@@ -71,7 +71,8 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
                 'alfgago@gmail.com',
                 'xavierperna@gmail.com',
                 '611digital@gmail.com',
-                'aligguillen@gmail.com',
+                'juan@5e.cr',
+                'enrique@5e.cr',
                 'quiquelang@gmail.com',
                 'alfredo@5e.cr'
             ]);

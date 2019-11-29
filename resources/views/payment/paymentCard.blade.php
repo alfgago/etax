@@ -369,7 +369,7 @@
 @section('footer-scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.css" />
-    <script src="../assets/js/cybs_devicefingerprint.js"></script>
+    
     <script>
         <script type="text/javascript">
         var card = new Card({

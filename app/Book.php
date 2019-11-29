@@ -15,13 +15,13 @@ class Book extends Model
     //Relacion con la empresa
     public function company()
     {
-        return $ivaData->belongsTo(Company::class);
+        return $this->belongsTo(Company::class);
     }
 
     
     public function calculos()
     {
-        return $ivaData->belongsTo(CalculatedTax::class, 'calculated_tax_id');
+        return $this->belongsTo(CalculatedTax::class, 'calculated_tax_id');
     }
     public function calculo_tax()
     {
@@ -279,7 +279,6 @@ class Book extends Model
         
         $this->cc_gasto_no_acreditable = $calculos->iva_no_acreditable_identificacion_plena;
         
-        
         //Sumatoria de Haber
         $this->cc_sum2 = $this->cc_ppp_1 + $this->cc_ppp_2 + $this->cc_ppp_3 + $this->cc_ppp_4 + $this->cc_iva_restaurantes
                          + $this->cc_bs_1 + $this->cc_bs_2 + $this->cc_bs_3 + $this->cc_bs_4 + $calculos->saldo_favor_anterior;
@@ -287,11 +286,11 @@ class Book extends Model
         $this->cc_sum1 = $this->cc_iva_emitido_1 + $this->cc_iva_emitido_2 + $this->cc_iva_emitido_3 
                          + $this->cc_iva_emitido_4 + $this->cc_ajuste_ppp + $this->cc_ajuste_bs + $this->cc_gasto_no_acreditable;
             
-        /*if( $this->cc_por_pagar > 0 ) {
+        if( $this->cc_por_pagar > 0 ) {
             $this->cc_sum2 += $this->cc_por_pagar;
         }else {
             $this->cc_sum1 += abs($this->cc_por_pagar);
-        }*/
+        }
 
     }
     
