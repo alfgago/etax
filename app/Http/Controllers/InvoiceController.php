@@ -68,10 +68,7 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-
-
         $company = currentCompanyModel(false);
-
         if ( !$company->atv_validation && $company->use_invoicing ) {
             $apiHacienda = new BridgeHaciendaApi();
             $token = $apiHacienda->login(false);
@@ -96,7 +93,7 @@ class InvoiceController extends Controller
                 return view('Invoice/index')->withErrors('Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto.');
             }
         }
-        if($company->last_note_ref_number === null) {
+        if($company->last_note_ref_number === null && $company->use_invoicing == 1) {
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
         }
         return view('Invoice/index');
