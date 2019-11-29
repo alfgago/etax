@@ -307,7 +307,22 @@ class BillController extends Controller
         }else if( $filtro == 4 ) {
             $query = $query->where('document_type', '04');
         }             
-                
+        if( $estado != 0) {
+            $query = $query->where('hacienda_status', $estado);
+        }
+        if($moneda != '0'){
+            $query = $query->where('currency', $moneda);
+        }
+        if($fecha_desde){
+            $fecha_desde =  $fecha_desde." 00:00:00";
+            log::info($fecha_desde);
+            $query = $query->where('generated_date','>=',$fecha_desde);
+        }
+        if($fecha_hasta){
+            $fecha_hasta =  $fecha_hasta." 23:59:59";
+            log::info($fecha_hasta);
+            $query = $query->where('generated_date','<=',$fecha_hasta);
+        }        
         return datatables()->eloquent( $query )
             ->addColumn('actions', function($bill) {
                 $oficialHacienda = false;
