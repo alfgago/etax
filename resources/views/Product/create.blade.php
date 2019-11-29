@@ -6,7 +6,7 @@
 
 @section('content') 
 <div class="row">
-  <div class="col-md-12">
+  <div class="col-xl-9 col-lg-12 col-md-12">
         
       <form method="POST" action="/productos">
 
@@ -64,7 +64,7 @@
           
           <div class="form-group col-md-6">
             <label for="unit_price">Precio unitario por defecto</label>
-            <input type="number" numeric class="form-control" name="unit_price" id="precio_unitario" value="" required placeholder="0" onblur="validateUnitPrice();">
+            <input type="number" class="form-control" name="unit_price" step="0.01" id="precio_unitario" value="" required placeholder="0" onblur="validateUnitPrice();">
           </div>
           
           <div class="form-group col-md-12">
