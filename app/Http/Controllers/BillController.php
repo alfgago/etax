@@ -292,6 +292,10 @@ class BillController extends Controller
                 ->with('provider');
         
         $filtro = $request->get('filtro');
+        $moneda = $request->get('moneda');
+        $estado = $request->get('estado');
+        $fecha_desde = $request->get('fecha_desde');
+        $fecha_hasta = $request->get('fecha_hasta');
         if( $filtro == 0 ) {
             $query = $query->onlyTrashed();
         }else if( $filtro == 1 ) {
@@ -303,7 +307,20 @@ class BillController extends Controller
         }else if( $filtro == 4 ) {
             $query = $query->where('document_type', '04');
         }             
-                
+        if( $estado != 0) {
+            $query = $query->where('hacienda_status', $estado);
+        }
+        if($moneda != '0'){
+            $query = $query->where('currency', $moneda);
+        }
+        if($fecha_desde){
+            $fecha_desde =  $fecha_desde." 00:00:00";
+            $query = $query->where('generated_date','>=',$fecha_desde);
+        }
+        if($fecha_hasta){
+            $fecha_hasta =  $fecha_hasta." 23:59:59";
+            $query = $query->where('generated_date','<=',$fecha_hasta);
+        }        
         return datatables()->eloquent( $query )
             ->addColumn('actions', function($bill) {
                 $oficialHacienda = false;

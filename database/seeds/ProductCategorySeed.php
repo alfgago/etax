@@ -70,7 +70,9 @@ class ProductCategorySeed extends Seeder
           ['grupo'=>'VNS','nombre'=>'Bienes y servicios a las corporaciones municipales', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184,B170,S170'],
           ['grupo'=>'VNS','nombre'=>'Otras ventas no sujetas', 'invoice_iva_code'=>'B173', 'open_codes'=>'B260,S260,S300,B300,B170'],
           //Usado para notas de débito.
-          ['grupo'=>'DP','nombre'=>'Devoluciones a proveedores', 'invoice_iva_code'=>'B065', 'open_codes'=>'B065,B066,B067']
+          ['grupo'=>'DP','nombre'=>'Devoluciones a proveedores', 'invoice_iva_code'=>'B065', 'open_codes'=>'B065,B066,B067'],
+          //Categoria de Hacienda para el codigo 999
+          ['grupo'=>'999','nombre'=>'Cargos no incluidos en la declaración del IVA', 'invoice_iva_code'=>'999', 'open_codes'=>'999']
         ];
         
         $listaCompras = [
