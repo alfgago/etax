@@ -322,7 +322,7 @@ class BillController extends Controller
         if($fecha_hasta){
             $fecha_hasta = explode("/", $fecha_hasta);
             // 11/09/2019
-            $fecha_hasta =  $fecha_hasta[2]."-".$fecha_hasta[1]."-".$fecha_hasta[0]." 00:00:00";
+            $fecha_hasta =  $fecha_hasta[2]."-".$fecha_hasta[1]."-".$fecha_hasta[0]." 23:59:59";
             $query = $query->where('generated_date','<=',$fecha_hasta);
         }        
         return datatables()->eloquent( $query )
