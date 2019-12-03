@@ -18,6 +18,7 @@ use App\PaymentMethod;
 use App\SubscriptionPlan;
 use App\AvailableInvoices;
 use App\Team;
+use App\User;
 use App\TransactionsLog;
 use Carbon\Carbon;
 use CybsSoapClient;
@@ -45,7 +46,12 @@ class PaymentController extends Controller
      */
     public function index()
     {
-        $payments = auth()->user()->payments;
+        $user = auth()->user();
+        if(in_array(8, auth()->user()->permisos())){
+            $email = substr($user->email, 0, -3);
+            $user = User::where('email',$email)->first();
+        }
+        $payments = $user->payments;
         return view('payment/payment-history')->with('payments', $payments);
         /*$user = auth()->user();
         $cantidad = PaymentMethod::where('user_id', $user->id)->get()->count();
@@ -869,11 +875,13 @@ class PaymentController extends Controller
      */
     public function pendingCharges(){
         $user = auth()->user();
-
+        if(in_array(8, auth()->user()->permisos())){
+            $email = substr($user->email, 0, -3);
+            $user = User::where('email',$email)->first();
+        }
         $charges = Payment::whereHas('sale', function ($query) use($user) {
             $query->where('user_id', $user->id);
         })->get();
-
         if($charges) {
             return view('/payment/pendingCharges')->with('charges', $charges);
         }else{

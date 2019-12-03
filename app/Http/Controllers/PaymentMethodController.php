@@ -30,10 +30,15 @@ class PaymentMethodController extends Controller
     public function index()
     {
         $team = Team::where('company_id', currentCompany())->first();
-        if(auth()->user()->id != $team->owner_id){
+        if(auth()->user()->id != $team->owner_id  && !in_array(8, auth()->user()->permisos())){
             return redirect()->back()->withErrors('Su usuario no tiene acceso a esta vista' );
         }
-        $cantidad = PaymentMethod::where('user_id', auth()->user()->id)->get()->count();
+        $user  = auth()->user();
+        if(in_array(8, auth()->user()->permisos())){
+                $email = substr($user->email, 0, -3);
+                $user = User::where('email',$email)->first();
+            }
+        $cantidad = PaymentMethod::where('user_id', $user->id)->get()->count();
         return view('payment_methods/index')->with('cantidad', $cantidad);
     }
     /**
@@ -43,6 +48,11 @@ class PaymentMethodController extends Controller
      */
     public function indexData(){
         $user = auth()->user();
+        
+        if(in_array(8, auth()->user()->permisos())){
+                $email = substr($user->email, 0, -3);
+                $user = User::where('email',$email)->first();
+            }
         $query = PaymentMethod::where('user_id', $user->id);
         return datatables()->eloquent( $query )
             ->addColumn('actions', function($paymentMethod) {
@@ -78,6 +88,10 @@ class PaymentMethodController extends Controller
     public function create(Request $request) {
         try {
             $user = auth()->user();
+            if(in_array(8, auth()->user()->permisos())){
+                $email = substr($user->email, 0, -3);
+                $user = User::where('email',$email)->first();
+            }
             Log::info("Creating new paymethod user id: $user->id");
             $request->number = preg_replace('/\s+/', '',  $request->number);
             $paymentProcessor = new PaymentProcessor();
