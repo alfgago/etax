@@ -134,6 +134,9 @@ class SubscriptionPlanController extends Controller
         //dd($request->product_id);
         $sale = Sales::startTrial( $request->product_id, $request->recurrency );
         Log::info('Nuevo suscriptor ha iniciado periodo de pruebas: ' . $user->email);
+        if(in_array(8, $user->permisos()) ){
+          return redirect('/gosocket/configuracion')->withMessage('¡Felicidades! Ha iniciado su prueba en eTax.');
+        }
         return redirect('/wizard')->withMessage('¡Felicidades! Ha iniciado su prueba en eTax.');
     }
     

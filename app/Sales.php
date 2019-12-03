@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
+use App\SubscriptionPlan;
 
 class Sales extends Model
 {
@@ -31,7 +32,6 @@ class Sales extends Model
     
     public function plan()
     {
-
         if($this->is_subscription) {
             return $this->belongsTo(SubscriptionPlan::class, 'etax_product_id');
         } else {
@@ -60,26 +60,45 @@ class Sales extends Model
     
     public static function createUpdateSubscriptionSale ( $productId, $recurrency ) {
         $company = currentCompanyModel();
-        $user = auth()->user();
+        $user = $company->user_id;
         
         $startDate = Carbon::parse( now('America/Costa_Rica') );
         $nextPaymentDate = Carbon::parse( now('America/Costa_Rica') )->addMonths(1);
-        
-        $sale = Sales::updateOrCreate (
-            [ 
-                'user_id' => $user->id ,
-                'is_subscription' => true,
-            ],
-            [ 
-                'company_id' => $company->id,
-                'status'  => 3,
-                'recurrency' => $recurrency,
-                'start_date' => $startDate, 
-                'next_payment_date' => $nextPaymentDate, 
-                'etax_product_id' => $productId,
-                'subscription_plan_id' => $productId
-            ]
-        );
+        $plan = SubscriptionPlan::find($productId);
+        $plan_tier = "Pro ($user)";
+        if($plan_tier == $plan->plan_tier){
+            $sale = Sales::updateOrCreate (
+                [ 
+                    'user_id' => $user ,
+                    'is_subscription' => true,
+                ],
+                [ 
+                    'company_id' => $company->id,
+                    'status'  => 3,
+                    'recurrency' => $recurrency,
+                    'start_date' => $startDate, 
+                    'next_payment_date' => $nextPaymentDate, 
+                    'etax_product_id' => $productId,
+                    'subscription_plan_id' => $productId
+                ]
+            );
+        }else{
+            $sale = Sales::updateOrCreate (
+                [ 
+                    'user_id' => $user ,
+                    'company_id' => $company->id,
+                    'is_subscription' => true,
+                ],
+                [ 
+                    'status'  => 3,
+                    'recurrency' => $recurrency,
+                    'start_date' => $startDate, 
+                    'next_payment_date' => $nextPaymentDate, 
+                    'etax_product_id' => $productId,
+                    'subscription_plan_id' => $productId
+                ]
+            );
+        }
         
         return $sale;
     }

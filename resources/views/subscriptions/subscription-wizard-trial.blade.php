@@ -33,7 +33,9 @@
               <select class="form-control " name="plan_sel" id="plan-sel" onchange="togglePlan();">
               	<option value="p" >Profesional</option>
               	<option value="e" selected>Empresarial</option>
-              	<option value="c">Contador</option>
+                @if(!in_array(8, auth()->user()->permisos()) )
+              	   <option value="c">Contador</option>
+                @endif
               </select>
             </div>
             
@@ -73,7 +75,7 @@
               <button onclick="trackClickEvent( 'ConfirmarPago' );" type="submit" id="btn-submit-tc" class="btn btn-primary btn-next has-spinner" >Iniciar periodo de pruebas</button>
             </div>
             
-             @if( !empty( auth()->user()->teams ) )
+             @if( !empty( auth()->user()->teams ) && !in_array(8, auth()->user()->permisos()) )
                 @if( sizeof(auth()->user()->teams) > 1 )
                   <div class="companyParent suscripciones">
                       <label for="">Saltar suscripción y entrar como:</label>
@@ -101,13 +103,14 @@
       </form>
     </div>  
   </div>
-  
+  @if(!in_array(8, auth()->user()->permisos()))
   <a class="btn btn-cerrarsesion" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('frm-logout').submit();">
     Cerrar sesión
   </a>
   <form id="frm-logout" action="{{ route('logout') }}" method="POST" style="display: none;">
     {{ csrf_field() }}
   </form>
+  @endif
 </div>  
 @endsection
 

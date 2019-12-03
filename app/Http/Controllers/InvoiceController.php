@@ -68,10 +68,7 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-
-
         $company = currentCompanyModel(false);
-
         if ( !$company->atv_validation && $company->use_invoicing ) {
             $apiHacienda = new BridgeHaciendaApi();
             $token = $apiHacienda->login(false);
@@ -96,7 +93,7 @@ class InvoiceController extends Controller
                 return view('Invoice/index')->withErrors('Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto.');
             }
         }
-        if($company->last_note_ref_number === null) {
+        if($company->last_note_ref_number === null && $company->use_invoicing == 1) {
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota credito');
         }
         return view('Invoice/index');
@@ -319,11 +316,15 @@ class InvoiceController extends Controller
             $query = $query->where('currency', $moneda);
         }
         if($fecha_desde){
-            $fecha_desde =  $fecha_desde." 00:00:00";
+            $fecha_desde = explode("/", $fecha_desde);
+            // 11/09/2019
+            $fecha_desde =  $fecha_desde[2]."-".$fecha_desde[1]."-".$fecha_desde[0]." 00:00:00";
             $query = $query->where('generated_date','>=',$fecha_desde);
         }
         if($fecha_hasta){
-            $fecha_hasta =  $fecha_hasta." 23:59:59";
+            $fecha_hasta = explode("/", $fecha_hasta);
+            // 11/09/2019
+            $fecha_hasta =  $fecha_hasta[2]."-".$fecha_hasta[1]."-".$fecha_hasta[0]." 23:59:59";
             $query = $query->where('generated_date','<=',$fecha_hasta);
         }
 

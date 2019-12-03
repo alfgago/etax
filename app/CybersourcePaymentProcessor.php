@@ -25,7 +25,10 @@ class CybersourcePaymentProcessor extends PaymentProcessor
     public function createCardToken($request) {
         try {
             $user = auth()->user();
-
+            if(in_array(8, auth()->user()->permisos())){
+                $email = substr($user->email, 0, -3);
+                $user = User::where('email',$email)->first();
+            }
             $paymentProcessor = new PaymentProcessor();
             $cardData = $paymentProcessor->getCardNameType($request->number);
 

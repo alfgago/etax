@@ -314,11 +314,15 @@ class BillController extends Controller
             $query = $query->where('currency', $moneda);
         }
         if($fecha_desde){
-            $fecha_desde =  $fecha_desde." 00:00:00";
+            $fecha_desde = explode("/", $fecha_desde);
+            // 11/09/2019
+            $fecha_desde =  $fecha_desde[2]."-".$fecha_desde[1]."-".$fecha_desde[0]." 00:00:00";
             $query = $query->where('generated_date','>=',$fecha_desde);
         }
         if($fecha_hasta){
-            $fecha_hasta =  $fecha_hasta." 23:59:59";
+            $fecha_hasta = explode("/", $fecha_hasta);
+            // 11/09/2019
+            $fecha_hasta =  $fecha_hasta[2]."-".$fecha_hasta[1]."-".$fecha_hasta[0]." 23:59:59";
             $query = $query->where('generated_date','<=',$fecha_hasta);
         }        
         return datatables()->eloquent( $query )
