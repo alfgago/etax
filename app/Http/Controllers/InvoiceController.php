@@ -758,11 +758,11 @@ class InvoiceController extends Controller
         $bill->description = "FEC" . ($request->description ?? '');
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $today = $start_date->day."/".$start_date->month."/".$start_date->year;
-        if($today != $request->generated_date){
+        if($today < $request->generated_date){
             $bill->hacienda_status = '99';
             $bill->generation_method = "etax-programada";
-            $bill->document_key = $invoice->document_key."pr";
-            $bill->document_number = $invoice->document_number."pr";
+            $bill->document_key = $bill->document_key."pr";
+            $bill->document_number = $bill->document_number."pr";
         }
         $bill->save();
         if($bill->hacienda_status = '99'){
