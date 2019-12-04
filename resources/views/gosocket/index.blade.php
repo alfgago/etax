@@ -40,123 +40,26 @@
 			<form>
 			  <div class="form-group">
 			    <label for="facturas-emitidas">Cantidad de facturas emitidas al mes que debemos procesar: </label><span id="text-facturas-emitidas"><b>5</b></span>
-			    <input type="range" class="form-control-range mt-4" id="facturas-emitidas" name="facturas-emitidas" value="5" min="0" max="5005" step="5">
+			    <input type="range" class="form-control-range mt-4" id="facturas-emitidas" name="facturas-emitidas" value="5" min="0" max="2005" step="5">
 			  </div>
 			  <div class="form-group">
 			    <label for="facturas-recibidas">Cantidad de facturas recibidas al mes que debemos procesar: </label><span id="text-facturas-recibidas"><b>40</b></span>
-			    <input type="range" class="form-control-range mt-4" id="facturas-recibidas" name="facturas-recibidas" value="40" min="0" max="5005" step="5">
+			    <input type="range" class="form-control-range mt-4" id="facturas-recibidas" name="facturas-recibidas" value="40" min="0" max="2005" step="5">
 			  </div>
 			</form>
 		</div>
 		<div class="col-md-6">			
 			<div class="slider">
+
 			    <div class="item">
 			    	<div class="plan-column" id="">
 			    		<div class="transparencia"></div>
                         <div class="plan-header text-center n-h">
-    						<span class="titulo">Profesional Básico</span>
+    						<span class="titulo">eTax Gosocket</span>
 						    <div class="precio">
-						        <small>Desde</small>$9.99 <small>+ IVA / mes (pago anual)</small>
+						        <small>Desde</small> $4.75 <small>+ IVA / mes (pago anual)</small>
 						    </div>
-						    <div class="precio-mensual">$11.99 + IVA / mes (pago mensual)</div>
-						</div>
-						<div class="plan-detail">
-					        <div class="plan-feature title">Funcionalidades</div>
-					        <div class="plan-feature si">
-					            <i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
-					        </div>
-						    <div class="plan-feature si">
-						        <i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
-						    </div>
-					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)
-					        </div>
-					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual
-					        </div>
-					        <div class="plan-feature si">
-					                <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
-					        </div>
-					        <div class="plan-feature title">Procesamiento de</div>
-					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>5</span> facturas emitidas    
-					        </div>
-					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>40</span> facturas recibidas    
-					        </div>
-					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturación electrónica incluida    
-					        </div>
-					    </div>                                        
-                        <div id="prueba" class="texto-promocion">
-                            <p>¡Disfrute de sus 15 días gratis!</p>
-                        </div>
-		                <div class="plan-button">
-		                	<a href="/gosocket/ingresar?token={{$token}}">Comprar ya</a>
-		                </div>
-		            </div>
-			    </div>
-			    <div class="item">
-			    	<div class="plan-column" id="">
-			    		<div class="transparencia"></div>
-                        <div class="plan-header text-center n-h">
-						    <div class="titulo">
-						        Profesional Intermedio    
-						    </div>
-						    <div class="precio">
-						        <small>Desde</small> $12.99 <small>+ IVA / mes (pagoanual)</small>
-						    </div>
-						    <div class="precio-mensual">$15.99 + IVA / mes (pago mensual)</div>
-						</div>                                        
-						<div class="plan-detail">
-			        		<div class="plan-feature title">Funcionalidades</div>
-			            	<div class="plan-feature si">
-			                	<i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
-			            	</div>
-			        		<div class="plan-feature si">
-			                	<i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
-			            	</div>
-			        		<div class="plan-feature si">
-			                	<i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)    
-			            	</div>
-			        		<div class="plan-feature si">
-			                	<i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual    
-			            	</div>
-			        		<div class="plan-feature si">
-			                	<i class="fa fa-check" aria-hidden="true"></i>1 usuario    
-			            	</div>
-			        		<div class="plan-feature si">
-			        			<i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
-			        		</div>
-			            
-			           		<div class="plan-feature title">Procesamiento de</div>
-			            	<div class="plan-feature">
-			            		<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>25</span> facturas emitidas    
-			            	</div>
-			        		<div class="plan-feature">
-			        			<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>200</span> facturas recibidas    
-			        		</div>
-			        		<div class="plan-feature">
-			        			<i class="fa fa-caret-right" aria-hidden="true"></i>Facturación electrónica incluida    
-			        		</div>
-			        	</div>                                        
-	                    <div id="prueba" class="texto-promocion">
-	                        <p>¡Disfrute de sus 15 días gratis!</p>
-	                    </div>
-	                    <div class="plan-button">
-	                    	<a href="/gosocket/ingresar?token={{$token}}">Comprar ya</a>
-	                    </div>
-	                </div>
-                </div>
-			    <div class="item">
-			    	<div class="plan-column" id="">
-			    		<div class="transparencia"></div>
-                        <div class="plan-header text-center n-h">
-    						<span class="titulo">Profesional Pro</span>
-						    <div class="precio">
-						        <small>Desde</small> $19.99 <small>+ IVA / mes (pago anual)</small>
-						    </div>
-						    <div class="precio-mensual">$24.99 + IVA / mes (pago mensual)</div>
+						    <div class="precio-mensual">$4.75 + IVA / mes (pago mensual)</div>
 						</div>
 						<div class="plan-detail">
 					        <div class="plan-feature title">Funcionalidades</div>
@@ -177,7 +80,7 @@
 					        </div>
 					        <div class="plan-feature title">Procesamiento de</div>
 					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>50</span> facturas emitidas    
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>30</span> facturas emitidas    
 					        </div>
 					        <div class="plan-feature">
 					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>400</span> facturas recibidas    
@@ -194,6 +97,53 @@
 		                </div>
 		            </div>
 			    </div>
+			    <div class="item">
+			    	<div class="plan-column" id="">
+			    		<div class="transparencia"></div>
+                        <div class="plan-header text-center n-h">
+    						<span class="titulo">eTax Profesional</span>
+						    <div class="precio">
+						        <small>Desde</small>$19.99 <small>+ IVA / mes (pago anual)</small>
+						    </div>
+						    <div class="precio-mensual">$24.99 + IVA / mes (pago mensual)</div>
+						</div>
+						<div class="plan-detail">
+					        <div class="plan-feature title">Funcionalidades</div>
+					        <div class="plan-feature si">
+					            <i class="fa fa-check" aria-hidden="true"></i>Cálculo de IVA por pagar mensual    
+					        </div>
+						    <div class="plan-feature si">
+						        <i class="fa fa-check" aria-hidden="true"></i>Borrador de declaración de IVA    
+						    </div>
+					        <div class="plan-feature si">
+					                <i class="fa fa-check" aria-hidden="true"></i>Derechos de acreditación (operativos y reales)
+					        </div>
+					        <div class="plan-feature si">
+					                <i class="fa fa-check" aria-hidden="true"></i>Proyección de liquidación anual
+					        </div>
+					        <div class="plan-feature si">
+					                <i class="fa fa-check" aria-hidden="true"></i>Reportes del IVA y del negocio    
+					        </div>
+					        <div class="plan-feature title">Procesamiento de</div>
+					        <div class="plan-feature">
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>50</span> facturas emitidas    
+					        </div>
+					        <div class="plan-feature">
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>400</span> facturas recibidas    
+					        </div>
+					        <div class="plan-feature">
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturación electrónica incluida    
+					        </div>
+					    </div>                                        
+                        <div id="prueba" class="texto-promocion">
+                            <p>¡Disfrute de sus 15 días gratis!</p>
+                        </div>
+		                <div class="plan-button">
+		                	<a href="/gosocket/ingresar?token={{$token}}">Comprar ya</a>
+		                </div>
+		            </div>
+			    </div>
+			    
 			    <div class="item">
 			    	<div class="plan-column" id="">
 			    		<div class="transparencia"></div>
@@ -269,7 +219,7 @@
 					        </div>
 					        <div class="plan-feature title">Procesamiento de</div>
 					        <div class="plan-feature">
-					            <i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>2000</span> facturas emitidas    
+					            <i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>1000</span> facturas emitidas    
 					        </div>
 					        <div class="plan-feature">
 					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturas recibidas ilimitadas    
@@ -315,7 +265,7 @@
 					        </div>
 					        <div class="plan-feature title">Procesamiento de</div>
 					        <div class="plan-feature">
-					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>5000</span> facturas emitidas    
+					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Hasta <span>2000</span> facturas emitidas    
 					        </div>
 					        <div class="plan-feature">
 					        	<i class="fa fa-caret-right" aria-hidden="true"></i>Facturas recibidas ilimitadas    
