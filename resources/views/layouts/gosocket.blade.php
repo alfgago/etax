@@ -321,8 +321,26 @@
     input[type=range]:focus::-ms-fill-upper {
       background: #d94079;
     }
-
-
+    #footer-planes{
+      margin-top: 3.5rem;
+    }
+    .manual-usuario {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        display: block;
+        padding: 0.5rem 2rem;
+        background: #fff;
+        color: #fff;
+        font-weight: bold;
+        font-size: 18px;
+        border-radius: 25px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        background: -webkit-linear-gradient(right, #274eab 0%, #2f006d 100%);
+        z-index: 999999999;
+        text-decoration: none !important;
+        border: 0;
+    }
   </style>
 
 </head>
@@ -391,16 +409,16 @@
         
         jQuery("#facturas-emitidas").change(function(){
           var emitidas = jQuery("#facturas-emitidas").val();
-          if(emitidas > 5000){
-              emitidas = "+5000";
+          if(emitidas > 2000){
+              emitidas = "+2000";
           }
           jQuery("#text-facturas-emitidas").html("<b>"+emitidas+"</b>");
           select_plan();
         });
         jQuery("#facturas-recibidas").change(function(){
           var recibidas = jQuery("#facturas-recibidas").val();
-          if(recibidas > 5000){
-              recibidas = "+5000";
+          if(recibidas > 2000){
+              recibidas = "+2000";
           }
           jQuery("#text-facturas-recibidas").html("<b>"+recibidas+"</b>");
           select_plan();
@@ -409,23 +427,20 @@
         function select_plan(){
           var recibidas = jQuery("#facturas-recibidas").val();
           var emitidas = jQuery("#facturas-emitidas").val();
-          var plan = 7;
-          if(emitidas <= 5000 ){
-            plan = 6;
-          }
+          var plan = 6;
           if(emitidas <= 2000 ){
             plan = 5;
           }
-          if(emitidas <= 250 ){
+          if(emitidas <= 1000 ){
             plan = 4;
           }
-          if(emitidas <= 50 && recibidas <= 400 ){
+          if(emitidas <= 250 ){
             plan = 3;
           }
-          if(emitidas <= 25 && recibidas <= 200 ){
+          if(emitidas <= 50 && recibidas <= 400 ){
             plan = 2;
           }
-          if(emitidas <= 5 && recibidas <= 40 ){
+          if(emitidas <= 30 && recibidas <= 400 ){
             plan = 1;
           }
           jQuery('ul.dots-gs li:nth-of-type('+plan+')').click();

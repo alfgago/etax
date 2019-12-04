@@ -7,10 +7,10 @@
 <div class="form-group col-md-6">
   <label for="plan-sel">Plan </label>
   <select class="form-control " name="plan_sel" id="plan-sel" onchange="togglePlan();">
-  	<option value="p" selected>Profesional</option>
-  	<option value="e">Empresarial</option>
-    @if(!in_array(8, auth()->user()->permisos()))
-    	<option value="c">Contador</option>
+    <option value="Profesional" selected>Profesional</option>
+    <option value="Empresarial" >Empresarial</option>
+    @if(!in_array(8, auth()->user()->permisos()) )
+        <option value="Contador">Contador</option>
     @endif
   </select>
 </div>
@@ -18,13 +18,16 @@
 <div class="form-group col-md-6 hide-contador">
   <label for="product_id">Tipo </label>
   <select class="form-control " name="product_id" id="product_id" onchange="togglePrice();">
-  	<option class="p" value="1" monthly="${{ $plans[0]->monthly_price }}" six="${{ $plans[0]->six_price * 6 }}" annual="${{ $plans[0]->annual_price * 12 }}">Básico</option>
-  	<option class="p" value="2" monthly="${{ $plans[1]->monthly_price }}" six="${{ $plans[1]->six_price * 6 }}" annual="${{ $plans[1]->annual_price * 12 }}" >Intermedio</option>
-  	<option class="p" value="3" monthly="${{ $plans[2]->monthly_price }}" six="${{ $plans[2]->six_price * 6 }}" annual="${{ $plans[2]->annual_price * 12 }}" >Pro</option>
-  	<option class="e" value="4" monthly="${{ $plans[3]->monthly_price }}" six="${{ $plans[3]->six_price * 6 }}" annual="${{ $plans[3]->annual_price * 12 }}" >Básico</option>
-  	<option class="e" value="5" monthly="${{ $plans[4]->monthly_price }}" six="${{ $plans[4]->six_price * 6 }}" annual="${{ $plans[4]->annual_price * 12 }}" >Intermedio</option>
-  	<option class="e" value="6" monthly="${{ $plans[5]->monthly_price }}" six="${{ $plans[5]->six_price * 6 }}" annual="${{ $plans[5]->annual_price * 12 }}" >Pro</option>
-  	<option class="c" value="7" monthly="${{ $plans[6]->monthly_price }}" six="${{ $plans[6]->six_price * 6 }}" annual="${{ $plans[6]->annual_price * 12 }}" >Pro</option>
+      @foreach($plans as $plan)
+        @if($plan->plan_tier != 'Gosocket')
+        <option class="{{ $plan->plan_type }}" facturas="{{ $plan->num_invoices }}" value="{{ $plan->id }}" monthly="${{ $plan->monthly_price }}" six="${{ $plan->six_price * 6 }}" annual="${{ $plan->annual_price * 12 }}" >{{ $plan->plan_tier }}</option>
+        @else
+          @if(in_array(8, auth()->user()->permisos()))
+            <option class="{{ $plan->plan_type }}" facturas="{{ $plan->num_invoices }}" value="{{ $plan->id }}" monthly="${{ $plan->monthly_price }}" six="${{ $plan->six_price * 6 }}" annual="${{ $plan->annual_price * 12 }}" selected>{{ $plan->plan_tier }}</option>
+          @endif
+        @endif
+                  
+      @endforeach
   </select>
 </div>
 <div class="form-group col-md-6" id="cantidadContabilidades">
@@ -40,9 +43,13 @@
   </select>
 </div>
 
+<div class="form-group col-md-6">
+    <label for="recurrency">Cantidad de Facturas Emitidas</label>
+    <input type="text" class="form-control text-right" readonly disabled value="30" id="cantidad_facturas">
+</div>
 <div class="form-group col-md-12 mt-4">
 	<span class="precio-container">
-		Precio de <span class="precio-text precio-inicial">9.99</span> <span class="recurrencia-text">/ mes</span> + IVA
+    Precio de <span class="precio-text precio-inicial">4.75</span> <span class="recurrencia-text">/ mes</span> + IVA
 	</span>
 </div>
 <input hidden id="amount" name="amount">

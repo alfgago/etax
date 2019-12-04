@@ -111,7 +111,7 @@
     $("#product_id ."+planId).show();
     $("#product_id").val( $("#product_id ."+planId).first().val() );
     togglePrice();
-    if(planId == 'c'){
+    if(planId == 'Contador'){
           $('#cantidadContabilidades').show();
           $('#copunContador').show();
           $('.hide-contador').hide();
@@ -123,7 +123,7 @@
   }
   function togglePrice() {
       var planId = $("#plan-sel").val();
-      if(planId != 'c'){
+      if(planId != 'Contador'){
         var recurrency = $('#recurrency :selected').val();
         if( recurrency == 1 ) {
             var precio = $('#product_id :selected').attr('monthly');
@@ -142,6 +142,8 @@
       }else{
         calcularPrecioContabilidades();
       }
+      var facturas = $('#product_id :selected').attr('facturas');
+      $("#cantidad_facturas").val(facturas);
   }
   $.getJSON('https://api.ipify.org?format=json', function(data){
       $("#IpAddress").val(data.ip);
