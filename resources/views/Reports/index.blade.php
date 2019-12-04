@@ -36,13 +36,13 @@
           <option value="/exportar-libro-compras" type="download" hideClass=".opt-acumulado" >Libro de compras</option>
           <option value="/exportar-libro-ventas" type="download" hideClass=".opt-acumulado" >Libro de ventas</option>
           <option value="/reportes/resumen-ejecutivo" hideClass=".opt-acumulado" type="iframe" >Resumen ejecutivo</option>
+          <option style="" value="/reportes/borrador-iva" hideClass=".opt-acumulado" type="iframe">Borrador de declaración de IVA</option>
           <option type="post">Reporte de proveedores (Muy pronto)</option>
           <option type="post">Reporte de clientes (Muy pronto)</option>
-          @if( getCurrentSubscription()->status == 4 )
+          <!--@if( getCurrentSubscription()->status == 4 )
             <option style="" value="" hideClass=".opt-acumulado" type="iframe">Declaración de IVA (No disponible en periodo gratis)</option>
-          @else
-            <option style="" value="/reportes/borrador-iva" hideClass=".opt-acumulado" type="iframe">Borrador de declaración de IVA</option>
-          @endif
+          @else-->
+          <!--@endif-->
         </select>
       </div>
       
@@ -81,7 +81,7 @@
       <div id="reporte-container" class="col-md-12 mb-4 reporte" style="padding: 3rem 15px;">
         
       </div>
-		  
+		  <!--
 		  @if( getCurrentSubscription()->status == 4 )
 		  <div class=" ml-4 mb-4 pb-4" style="background: #eee; padding: 1rem 2rem; width: auto; display: inline-block; box-shadow: 0 0 15px rgba(0,0,0,0.3);">
         
@@ -101,7 +101,7 @@
 		  </div>
 		  <div class="col-md-12"></div>
 		  @endif
-      
+      -->
       <div class="col-md-12" hidden id="export-btn-container" style="margin-top:-2em;">
         <a id="btnExport" download='reporteEtax' href='javascript:exportarTablas()' class="btn btn-primary form-btn">Descargar</a>
       </div>  
