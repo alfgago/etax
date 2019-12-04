@@ -321,8 +321,26 @@
     input[type=range]:focus::-ms-fill-upper {
       background: #d94079;
     }
-
-
+    #footer-planes{
+      margin-top: 3.5rem;
+    }
+    .manual-usuario {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        display: block;
+        padding: 0.5rem 2rem;
+        background: #fff;
+        color: #fff;
+        font-weight: bold;
+        font-size: 18px;
+        border-radius: 25px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        background: -webkit-linear-gradient(right, #274eab 0%, #2f006d 100%);
+        z-index: 999999999;
+        text-decoration: none !important;
+        border: 0;
+    }
   </style>
 
 </head>

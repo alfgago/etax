@@ -350,4 +350,20 @@
 		</div>
 	</div>
 
+
+	<div class="footer row" id="footer-planes">
+	  <div class="container">
+	    <div class="row">
+	      <div class="col-sm-12"> ©2019 un proyecto con el respaldo de <a href="http://grupocamacho.com" target="_blank" title="Grupo Camacho">Grupo Camacho Internacional</a>. <br> Desarrollado por <a href="https://www.facebook.com/phormocolectivo" target="_blank" title="phormo Comunicación">phormo
+	          Comunicación</a> y <a title="5e Creative Labs" href="https://5e.cr" target="_blank">5e Creative Labs</a>.
+	      </div>
+
+	      <div class="col-sm-12 pt-0"> Lea nuestros términos y condiciones <a href="https://etaxcr.com/terminos-y-condiciones" target="_blank">aquí.</a></div>
+	    </div>
+	  </div>
+	</div>
+	<a class="manual-usuario"  target="_blank" href="https://etaxcr.com/manual-de-usuario/">
+	  <span>Manuales</span>
+	</a>
+
 @endsection
