@@ -27,6 +27,6 @@ return [
     'cybersource_transaction_key' => env('CYBERSOURCE_TRANSACTION_KEY'),
     'cybersource_url_wsdl' => env('CYBERSOURCE_URL_WSDL'),
     'cybersource_url_nvp_wsdl' => env('CYBERSOURCE_URL_NVP_WSDL'),
-    'gosocket_url' => env('GOSOCKETURL', 'http://api.sandbox.gosocket.net/'),
+    'gosocket_url' => env('GOSOCKETURL', 'http://api.gosocket.net/'),
     'queue_connections' => env('QUEUE_CONNECTION', 'redis')
 ];
