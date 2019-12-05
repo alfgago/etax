@@ -18,15 +18,16 @@ class Notification extends Model
    			//1: Solo un usuario
    			//2: Todos los usuarios de una compañia
    			//3: Dueño de la compañia
+   			//4: Todos los usuarios
    		//$id: Se pasa el Id de la persona o compañia a la que se quiere notificar.
    		//$company: La compañia involucrada en la notificacion
    		//$title: El titulo de la notificacion
    		//$text: El texto de la notificacion.
    		//$tpye: El tipo de notificacion que se esta usando.
-   			//Info
-   			//Error
-   			//Success
-   			//Warning
+   			//info
+   			//error
+   			//success
+   			//warning
    		//$function: en cual funcion/metodo es que paso el problema
    		//$link: algun link al que quiera enviar su notificacion.
 
@@ -59,6 +60,13 @@ class Notification extends Model
 	   			$teams = Team::where('company_id' ,$id)->get();
 		   		foreach ($teams as $team) {
 	   				array_push($users, $team->owner_id);
+		   		}
+	   		}
+	   		/************ todos los usuarios *************************/
+	   		if($option == 4){
+	   			$usuarios = User::get();
+		   		foreach ($usuarios as $usuario) {
+	   				array_push($users, $usuario->id);
 		   		}
 	   		}
 	   		
