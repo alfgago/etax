@@ -799,7 +799,7 @@ class BillController extends Controller
     }
     
     public function importXML(Request $request) {
-        //try {
+        try {
             $time_start = getMicrotime();
             $company = currentCompanyModel();
             $file = Input::file('file');
@@ -847,14 +847,14 @@ class BillController extends Controller
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
-        /*}catch( \Exception $ex ){
+        }catch( \Exception $ex ){
             Log::error('Error importando XML ' . $ex->getMessage());
             return Response()->json('Se ha detectado un error en el tipo de archivo subido.', 400);
         }catch( \Throwable $ex ){
             Log::error('Error importando XML ' . $ex->getMessage());
             return Response()->json('Se ha detectado un error en el tipo de archivo subido.', 400);
 
-        }*/
+        }
         if( substr($arr['NumeroConsecutivo'],8,2) == "04" ) {
             return Response()->json('Se importo un tiquete sin cedula de receptor.', 206 );
         }
