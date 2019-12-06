@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Mpociot\Teamwork\Traits\UserHasTeams;
 use Lab404\Impersonate\Models\Impersonate;
@@ -17,7 +18,7 @@ use App\UserCompanyPermission;
 
 class User extends Authenticatable {
 
-    use Notifiable, HasRoles, UserHasTeams, Impersonate, SoftDeletes;
+    use Notifiable, HasRoles, UserHasTeams, Impersonate, SoftDeletes, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.

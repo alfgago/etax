@@ -1676,5 +1676,6 @@ class BillController extends Controller
             return redirect()->back()->withErrors('Error al consultar comprobante en hacienda');
         }
     }
-    
+
+ 
 }
