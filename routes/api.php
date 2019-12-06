@@ -25,7 +25,7 @@ Route::prefix('v1')->group(function() {
         Route::get('test', 'AuthController@test');
         //Facturas de Venta
         Route::prefix('facturas-venta')->group(function() {
-            Route::post('emitir', 'InvoiceController@emitirApi')->name('InvoiceController.emitir'); // Recibe JSON con todos los datos de un XML de Hacienda para registro, envia a Hacienda
+            Route::post('emitir', 'InvoiceController@sendHaciendaApi')->name('InvoiceController.emitir'); // Recibe JSON con todos los datos de un XML de Hacienda para registro, envia a Hacienda
             Route::post('anular/{clave}', 'InvoiceController@')->name('FacturaVenta.anular'); //Recibe la clave de factura y crea nota de credito
             Route::post('registrar', 'InvoiceController@')->name('FacturaVenta.registrar'); // Recibe JSON con todos los datos de un XML de Hacienda para registro, no envia a Hacienda
             Route::post('validar', 'InvoiceController@')->name('FacturaVenta.validar'); // Recibe JSON con clave, lineas, codigo eTAX y categoría de declaración

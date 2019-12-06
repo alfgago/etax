@@ -14,6 +14,7 @@ use App\CalculatedTax;
 use App\XlsInvoice;
 use App\Utils\BridgeHaciendaApi;
 use App\Utils\InvoiceUtils;
+use App\Utils\InvoiceApiUtils;
 use \Carbon\Carbon;
 use App\Invoice;
 use App\InvoiceItem;
@@ -41,6 +42,7 @@ use App\Jobs\ProcessSendExcelInvoices;
 use App\Jobs\ProcessInvoicesExcel;
 use App\Jobs\EnvioProgramadas;
 use Illuminate\Support\Facades\Input;
+use App\Http\Resources\InvoiceResource;
 
 /**
  * @group Controller - Facturas de venta
@@ -562,6 +564,7 @@ class InvoiceController extends Controller
      */
     public function sendHacienda(Request $request)
     {
+        dd($request);
         //revision de branch para segmentacion de funcionalidades por tipo de documento
         try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
@@ -583,6 +586,38 @@ class InvoiceController extends Controller
         } catch( \Exception $ex ) {
             Log::error("ERROR Envio de factura a hacienda -> ".$ex);
             return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+        }
+    }
+
+    /**
+     * Envía la factura electrónica a Hacienda
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function sendHaciendaApi(Request $request)
+    {
+        //revision de branch para segmentacion de funcionalidades por tipo de documento
+        try {
+            Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
+            
+            $company = Company::where('id_number',$request->emisor['identificacion']['numero'])->first();
+            if(CalculatedTax::validarMes($request->fechaEmision,$company)){
+                $requestInvoice = new InvoiceApiUtils();
+                $request = $requestInvoice->sendHacienda($request);
+                $invoice = new Invoice();
+                $invoice = $invoice->sendHacienda($request, $company);
+                if($invoice){
+                    return $this->createResponse('200', 'OK' , 'Factura registrada con éxito.', new InvoiceResource($invoice));
+                } else {
+                    return $this->createResponse('400', 'ERROR' , 'Ha ocurrido un error al enviar factura.');
+                }
+            }else{
+                return $this->createResponse('400', 'ERROR' , 'Mes seleccionado ya fue cerrado.');
+            }
+        } catch( \Exception $ex ) {
+            Log::error("ERROR Envio de factura a hacienda -> ".$ex);
+                return $this->createResponse('400', 'ERROR' , 'Ha ocurrido un error al enviar factura.');
         }
     }
 

@@ -182,7 +182,7 @@ class Invoice extends Model
           $invoice->generation_method = "etax";
           $invoice->xml_schema = 43;
           $today = Carbon::parse(now('America/Costa_Rica'));
-          $generated_date = Carbon::createFromFormat('d/m/Y', $request->generated_date);
+          $generated_date = Carbon::parse( $request->generated_date);
           if($today->format("Y-m-d") <  $generated_date->format("Y-m-d")){
               $invoice->hacienda_status = '99';
               $invoice->generation_method = "etax-programada";
@@ -243,9 +243,10 @@ class Invoice extends Model
                   $invoice->is_void = true;
               }
           }
-
+  
                     
-          $invoice->save();           
+          $invoice->save();      
+
           if($request->recurrencia != "0" ){
               if($request->cantidad_dias == null || $request->cantidad_dias == ''){
                    $request->cantidad_dias = 0;
@@ -288,7 +289,7 @@ class Invoice extends Model
           }
 
           $company->save();
-          clearInvoiceCache($invoice);
+          //clearInvoiceCache($invoice);
           $user = auth()->user();
           Activity::dispatch(
               $user,
@@ -585,7 +586,6 @@ class Invoice extends Model
     public function addEditItem(array $data)
     {
         try {
-
             if (isset($data['item_number'])) {
                 $item = InvoiceItem::updateOrCreate([
                     'item_number' => $data['item_number'],

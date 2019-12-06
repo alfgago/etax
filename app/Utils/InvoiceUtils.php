@@ -465,10 +465,10 @@ class InvoiceUtils
                 'emisor_address' => $emisorAddress,
                 'emisor_phone' => $emisorPhone,
                 'emisor_cedula' => $emisorCedula,
-                'usuarioAtv' => $company->atv->user ? trim($company->atv->user) :  '',
-                'passwordAtv' => $company->atv->password ? trim($company->atv->password) : '',
+                'usuarioAtv' => $company->atv ? trim($company->atv->user) :  '',
+                'passwordAtv' => $company->atv ? trim($company->atv->password) : '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
-                'atvcertPin' => $company->atv->pin ? trim($company->atv->pin) : '',
+                'atvcertPin' => $company->atv ? trim($company->atv->pin) : '',
                 //'atvcertFile' => Storage::get($company->atv->key_url),
                 'servgravados' => $totalServiciosGravados - $totalServiciosExonerados,
                 'servexentos' => $totalServiciosExentos,
@@ -488,7 +488,6 @@ class InvoiceUtils
                 'totcomprobante' => $totalComprobante + $data['total_otros_cargos'] - $totalIvaDevuelto,
                 'detalle' => $details,
             );
-
             if ($otherCharges !== false) {
                 $invoiceData['otroscargos'] = $otherCharges;
             }
@@ -502,8 +501,9 @@ class InvoiceUtils
             }
 
             Log::info("Request Data from invoices id: $data->id  --> ".json_encode($invoiceData));
-            $invoiceData['atvcertFile'] = Storage::get($company->atv->key_url);
-            
+            if($company->atv){
+                $invoiceData['atvcertFile'] = Storage::get($company->atv->key_url);           
+            }
             //Para el PDF, retorna el invoiceData completo. Si es para emitir, retorna el request.
             if( !$returnRequest ){
                 return $invoiceData;
