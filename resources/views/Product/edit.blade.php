@@ -6,7 +6,7 @@
 
 @section('content') 
 <div class="row">
-  <div class="col-md-12">
+  <div class="col-xl-9 col-lg-12 col-md-12">
         
       <form method="POST" action="/productos/{{ $product->id }}">
         @method('patch')
@@ -33,7 +33,7 @@
             <label for="default_iva_type">Tipo de IVA</label>
             <select class="form-control select-search" name="default_iva_type" id="tipo_iva" >
               @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
-                <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
+                <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }}"  {{ $product->default_iva_type == $tipo->code ? 'selected' : '' }}>{{ $tipo['name'] }}</option>
               @endforeach
             </select>
           </div>
@@ -42,7 +42,7 @@
             <label for="product_category_id">Categoría de declaración</label>
             <select class="form-control" name="product_category_id" id="tipo_producto" >
               @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
-                <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
+                <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" {{ $product->product_category_id == $tipo->id ? 'selected' : '' }}>{{ $tipo['name'] }}</option>
               @endforeach
             </select>
           </div>
@@ -58,7 +58,7 @@
           
           <div class="form-group col-md-6">
             <label for="unit_price">Precio unitario por defecto</label>
-            <input type="text" class="form-control" name="unit_price" id="precio_unitario" value="{{ $product->unit_price }}" required>
+            <input type="number" class="form-control" name="unit_price" step="0.01" id="precio_unitario" value="{{ $product->unit_price }}" required placeholder="0" onblur="validateUnitPrice();">
           </div>
           
           <div class="form-group col-md-12">

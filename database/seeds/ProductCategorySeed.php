@@ -45,10 +45,10 @@ class ProductCategorySeed extends Seeder
           ['grupo'=>'VEX','nombre'=>'Venta local de bienes exentos', 'invoice_iva_code'=>'B200', 'open_codes'=>'B200,B155'],
           ['grupo'=>'VEX','nombre'=>'Venta local de servicios exentos', 'invoice_iva_code'=>'S200', 'open_codes'=>'S200'],
           ['grupo'=>'VEX','nombre'=>'Créditos para descuentos de facturas y arrendamientos financieros', 'invoice_iva_code'=>'S200', 'open_codes'=>'S200'],
-          ['grupo'=>'VEX','nombre'=>'Arrendamientos destinados a viviendas y accesorios, así como los lugares de culto religioso', 'invoice_iva_code'=>'S201', 'open_codes'=>'S201'],
-          ['grupo'=>'VEX','nombre'=>'Arrendamientos utilizados por micro y pequeñas empresas', 'invoice_iva_code'=>'S201', 'open_codes'=>'S201'],
-          ['grupo'=>'VEX','nombre'=>'Suministro de energía eléctrica residencial no mayor a 280 KW/H', 'invoice_iva_code'=>'S201', 'open_codes'=>'S201'],
-          ['grupo'=>'VEX','nombre'=>'Venta o entrega de agua residencial no mayor a 30 M3', 'invoice_iva_code'=>'S201', 'open_codes'=>'S201'],
+          ['grupo'=>'VEX','nombre'=>'Arrendamientos destinados a viviendas y accesorios, así como los lugares de culto religioso', 'invoice_iva_code'=>'S201', 'open_codes'=>'S201,S200'],
+          ['grupo'=>'VEX','nombre'=>'Arrendamientos utilizados por micro y pequeñas empresas', 'invoice_iva_code'=>'S201', 'open_codes'=>'S201,S200'],
+          ['grupo'=>'VEX','nombre'=>'Suministro de energía eléctrica residencial no mayor a 280 KW/H', 'invoice_iva_code'=>'S201', 'open_codes'=>'S201,S200'],
+          ['grupo'=>'VEX','nombre'=>'Venta o entrega de agua residencial no mayor a 30 M3', 'invoice_iva_code'=>'S201', 'open_codes'=>'S201,S200'],
           ['grupo'=>'VEX','nombre'=>'Autoconsumo de bienes y servicios sin aplicación de créditos total o parcial', 'invoice_iva_code'=>'B240', 'open_codes'=>'B240,S240'],
           ['grupo'=>'VEX','nombre'=>'Venta de sillas de ruedas y similares, equipo ortopédico, prótesis y equipo', 'invoice_iva_code'=>'B200', 'open_codes'=>'B200,S200'],
           ['grupo'=>'VEX','nombre'=>'Venta de bienes y servicios a instituciones públicas y privadas exentas', 'invoice_iva_code'=>'B260', 'open_codes'=>'S160,B160,B181,B182,B183,B184,S181,S182,S183,S184'],
@@ -70,7 +70,9 @@ class ProductCategorySeed extends Seeder
           ['grupo'=>'VNS','nombre'=>'Bienes y servicios a las corporaciones municipales', 'invoice_iva_code'=>'B183', 'open_codes'=>'B181,S181,B182,S182,B183,S183,B184,S184,B170,S170'],
           ['grupo'=>'VNS','nombre'=>'Otras ventas no sujetas', 'invoice_iva_code'=>'B173', 'open_codes'=>'B260,S260,S300,B300,B170'],
           //Usado para notas de débito.
-          ['grupo'=>'DP','nombre'=>'Devoluciones a proveedores', 'invoice_iva_code'=>'B065', 'open_codes'=>'B065,B066,B067']
+          ['grupo'=>'DP','nombre'=>'Devoluciones a proveedores', 'invoice_iva_code'=>'B065', 'open_codes'=>'B065,B066,B067'],
+          //Categoria de Hacienda para el codigo 999
+          ['grupo'=>'999','nombre'=>'Cargos no incluidos en la declaración del IVA', 'invoice_iva_code'=>'999', 'open_codes'=>'999']
         ];
         
         $listaCompras = [

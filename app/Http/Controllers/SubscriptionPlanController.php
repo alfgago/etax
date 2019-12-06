@@ -33,30 +33,25 @@ class SubscriptionPlanController extends Controller
     } 
         
     public function changePlan() {
-        $plans = SubscriptionPlan::get();
+        $plans = SubscriptionPlan::where('public',1)->orderby('annual_price')->get();
         //$plans = EtaxProducts::where('is_subscription', true)->with('plan')->get();
         return view( 'subscriptions/change-plan', compact('plans') );
-        
     }
     
     public function selectPlan() {
-        
-        $plans = SubscriptionPlan::get();
+        $plans = SubscriptionPlan::where('public',1)->orderby('annual_price')->get();
         return view( 'subscriptions/subscription-wizard', compact('plans') );
-        
     }
     
     public function startTrial() {
-        
-        $plans = SubscriptionPlan::get();
+        $plans = SubscriptionPlan::where('public',1)->orderby('annual_price')->get();
         return view( 'subscriptions/subscription-wizard-trial', compact('plans') );
-        
     }
     
     public function confirmStartTrial(Request $request) {
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $user = auth()->user();
-        if($request->plan_sel == "c"){
+        if($request->plan_sel == "Contador"){
             $plan_tier = "Pro ($user->id)";
             $valido = 0;
             $precio_25 = 8;
@@ -134,13 +129,16 @@ class SubscriptionPlanController extends Controller
         //dd($request->product_id);
         $sale = Sales::startTrial( $request->product_id, $request->recurrency );
         Log::info('Nuevo suscriptor ha iniciado periodo de pruebas: ' . $user->email);
+        if(in_array(8, $user->permisos()) ){
+          return redirect('/gosocket/configuracion')->withMessage('¡Felicidades! Ha iniciado su prueba en eTax.');
+        }
         return redirect('/wizard')->withMessage('¡Felicidades! Ha iniciado su prueba en eTax.');
     }
     
     public function confirmPlanChange(Request $request) {
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $user = auth()->user();
-        if($request->plan_sel == "c"){
+        if($request->plan_sel == "Contador"){
             $plan_tier = "Pro ($user->id)";
 
             $valido = 0;
@@ -316,8 +314,7 @@ class SubscriptionPlanController extends Controller
     private function getDocumentKey($docType) {
         $company = currentCompanyModel();
         $invoice = new Invoice();
-        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
-            '1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
+        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).'1'.$invoice->getHashFromRef(currentCompanyModel()->last_invoice_ref_number + 1);
 
 
         return $key;

@@ -3,6 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Company;
+use App\User;
 
 class IntegracionEmpresa extends Model
 {
@@ -14,4 +16,14 @@ class IntegracionEmpresa extends Model
         "company_id",
         "status"
     ];
+
+    //Relación con Company
+    public function company() {
+        return $this->belongsTo(Company::class, 'company_id');
+    }
+
+    //Relación con User
+    public function user() {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

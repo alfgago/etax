@@ -14,7 +14,6 @@
         $company = $old;
     }
 ?>
-
 <div class="wizard-container">
 
   <div class="wizard-popup">
@@ -109,7 +108,7 @@
     $("#product_id").val( $("#product_id ."+planId).first().val() );
 
     togglePrice();
-    if(planId == 'c'){
+    if(planId == 'Contador'){
         $('#cantidadContabilidades').show();
         $('.hide-contador').hide();
     }else{
@@ -120,7 +119,7 @@
   }
   function togglePrice() {
       var planId = $("#plan-sel").val();
-      if(planId != 'c'){
+      if(planId != 'Contador'){
         var recurrency = $('#recurrency :selected').val();
         if( recurrency == 1 ) {
             var precio = $('#product_id :selected').attr('monthly');
@@ -134,11 +133,15 @@
             var precio = $('#product_id :selected').attr('annual');
             var rtext = '/ año';
         }
+        var facturas = $('#product_id :selected').attr('facturas');
+          $("#cantidad_facturas").val(facturas);
         $(".precio-text").text(precio);
         $(".recurrencia-text").text(rtext);
       }else{
         calcularPrecioContabilidades();
       }
+      var facturas = $('#product_id :selected').attr('facturas');
+      $("#cantidad_facturas").val(facturas);
   }
   $.getJSON('https://api.ipify.org?format=json', function(data){
       $("#IpAddress").val(data.ip);
@@ -257,9 +260,9 @@
   }
 
   $( document ).ready(function() {
-	    fillProvincias();
 	    togglePlan();
 
+      fillProvincias();
 		  var card = new Card({
 		      form: 'form.tarjeta',
 		      container: '.card-wrapper',
@@ -268,14 +271,14 @@
 		      }
 		  });
 
-		  @if( @$company->state )
-	    	$('#state').val( {{ $company->state }} );
+		  @if($company->state)
+	    	$('#state').val({{ $company->state }});
 	    	fillCantones();
-	    	@if( @$company->city )
-		    	$('#city').val( {{ $company->city }} );
+	    	@if($company->city)
+		    	$('#city').val({{ $company->city }});
 		    	fillDistritos();
-		    	@if( @$company->district )
-			    	$('#district').val( {{ $company->district }} );
+		    	@if($company->district)
+			    	$('#district').val({{ $company->district }});
 			    	fillZip();
 			    @endif
 		    @endif

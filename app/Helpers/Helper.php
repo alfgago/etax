@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use App\Notification;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -197,7 +198,7 @@ if (!function_exists('currentCompanyModel')) {
             //$company->codigos = $codigos->codigosRepercutidos();
             Illuminate\Support\Facades\Cache::put($cacheKey, $company, now()->addMinutes(15));
         }
-        return Illuminate\Support\Facades\Cache::get($cacheKey);;
+        return Illuminate\Support\Facades\Cache::get($cacheKey);
     }
 
 }
@@ -349,28 +350,34 @@ if (!function_exists('getCurrentSubscription')) {
     function getCurrentSubscription() {
         
         $company = currentCompanyModel();
+
         $sale = $company->subscription;
         
         if( ! isset($sale) ) {
-            $sale = \App\Sales::where('company_id', $company->id)
+            $sale = \App\Sales::with('plan')->where('company_id', $company->id)
                 ->where('is_subscription', true)
                 ->first();
         }
         
         if( ! isset($sale) ) {
             $owner_id = $company->user_id;
-            $sale = \App\Sales::where('user_id', $owner_id)
+            $plan_tier = "Pro ($owner_id)";
+            $SubscriptionPlan = \App\SubscriptionPlan::where('plan_tier',$plan_tier)->first();
+            if($SubscriptionPlan){
+                $sale = \App\Sales::where('user_id', $owner_id)
                 ->where('is_subscription', true)
                 ->first();
+
+            }
         }
         
         if( ! isset($sale) ) {
             $user_id = auth()->user()->id;
             $sale = \App\Sales::where('user_id', $user_id)
+                ->where('company_id', $company->id)
                 ->where('is_subscription', true)
-                ->first();
+                 ->first();
         }
-        
         return $sale;
         
     }
@@ -668,4 +675,26 @@ if (!function_exists('get_rates')) {
         }
 
     }
+}
+
+
+/* Get notificatios of user */
+if (!function_exists('notifications')) {
+
+    function notifications() {
+        $notify = new Notification();
+        return $notify->notificaciones();
+    }
+
+}
+
+
+/* Get count notifications of user */
+if (!function_exists('notification_count')) {
+
+     function notification_count(){ 
+        $notify = new Notification();
+        return $notify->cantidad();
+    }
+
 }

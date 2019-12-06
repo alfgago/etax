@@ -298,6 +298,18 @@
         margin-right: 15px;
         width: auto !important;
     }
+    
+    button.callnow {
+        bottom: 4.5rem;
+        z-index: 1;
+    }
+    
+    .main-header .header-part-right {
+        display: flex;
+    }
+    .notificaciones-header {
+        display: none;
+    }
 
 }
 @media (max-width: 360px) {

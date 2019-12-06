@@ -56,32 +56,30 @@
     <div class="form-group col-md-12 text-center">
       <button type="submit" class="btn btn-primary" onclick="trackClickEvent( 'IniciarSesion' );">{{ __('Iniciar sesión') }}</button>
     </div>
+      <div class="form-group col-md-12 button-container text-center">
 
-    <div class="form-group col-md-12 button-container text-center">
-
-      <div class="inline-block text-center">
-        
-        <div class="login-secondary-btn-cont">
-            <span class="loginbtn-label">¿No tiene cuenta?</span>
-            @if (Route::has('register'))
-                <a class="btn btn-link" onclick="trackClickEvent( 'EnlaceRegister' );" href="{{ route('register') }}">
-                    Regístrese aquí
+        <div class="inline-block text-center">
+          
+          <div class="login-secondary-btn-cont">
+              <span class="loginbtn-label">¿No tiene cuenta?</span>
+              @if (Route::has('register'))
+                  <a class="btn btn-link" onclick="trackClickEvent( 'EnlaceRegister' );" href="{{ route('register') }}">
+                      Regístrese aquí
+                  </a>
+              @endif
+          </div>
+          <div class="login-secondary-btn-cont">
+            <span class="loginbtn-label">¿Se le olvidó la contraseña? </span>
+            @if (Route::has('password.request'))
+                <a class="btn btn-link" onclick="trackClickEvent( 'EnlacePassword' );" href="{{ route('password.request') }}">
+                    Recupérela
                 </a>
             @endif
+           </div>
+           
         </div>
-        <div class="login-secondary-btn-cont">
-          <span class="loginbtn-label">¿Se le olvidó la contraseña? </span>
-          @if (Route::has('password.request'))
-              <a class="btn btn-link" onclick="trackClickEvent( 'EnlacePassword' );" href="{{ route('password.request') }}">
-                  Recupérela
-              </a>
-          @endif
-         </div>
-         
+
       </div>
-
-    </div>
-
   </div>
 
 </form>

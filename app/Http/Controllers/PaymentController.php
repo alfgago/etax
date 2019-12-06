@@ -18,6 +18,7 @@ use App\PaymentMethod;
 use App\SubscriptionPlan;
 use App\AvailableInvoices;
 use App\Team;
+use App\User;
 use App\TransactionsLog;
 use Carbon\Carbon;
 use CybsSoapClient;
@@ -45,7 +46,12 @@ class PaymentController extends Controller
      */
     public function index()
     {
-        $payments = auth()->user()->payments;
+        $user = auth()->user();
+        if(in_array(8, auth()->user()->permisos())){
+            $email = substr($user->email, 0, -3);
+            $user = User::where('email',$email)->first();
+        }
+        $payments = $user->payments;
         return view('payment/payment-history')->with('payments', $payments);
         /*$user = auth()->user();
         $cantidad = PaymentMethod::where('user_id', $user->id)->get()->count();
@@ -204,6 +210,18 @@ class PaymentController extends Controller
         return redirect('/')->withMessage('¡Gracias por su confianza! El pago ha sido recibido con éxito. Recibirá su factura al correo electrónico muy pronto.');
 
     }
+    
+    public function processLiquidaciones() {
+        $paymentGateway = new CybersourcePaymentProcessor();
+        $payments = Payment::where('payment_gateway', 'cybersource')->get();
+        Log::info("Corriendo liquidaciones pendientes en Cybersource");
+        foreach($payments as $payment){
+            if($payment->charge_token){
+                $paymentGateway->liquidar($payment->charge_token, $payment->id, $payment->amount);
+            }
+        }
+    }
+    
     /**
      * facturasDisponibles
      *
@@ -309,8 +327,10 @@ class PaymentController extends Controller
             //El descuento por defecto es cero.
             $descuento = 0;
             //Aplica descuento del Banco Nacional
-            if( $request->bncupon ) {
+            $descuentoBN = 0;
+            if($request->bncupon) {
                 $descuento = 0.1;
+                $descuentoBN = 10;
                 $razonDescuento = "Cupón BN";
             }
 
@@ -444,8 +464,8 @@ class PaymentController extends Controller
 
                 $request->request->add(['item_code' => $subscriptionPlan->id]);
                 $request->request->add(['item_name' => $sale->plan->getName() . " / $recurrency meses"]);
-
-                $request->montoDescontado = $cuponConsultado->discount_percentage ?? 0;
+                $discountPercent = $cuponConsultado->discount_percentage ?? 0;
+                $request->montoDescontado = $descuentoBN + $discountPercent;
                 $request->unit_price = $costo;
                 $invoiceData = $paymentGateway->setInvoiceInfo($request);
                 $factura = $paymentGateway->crearFacturaClienteEtax($invoiceData);
@@ -855,11 +875,13 @@ class PaymentController extends Controller
      */
     public function pendingCharges(){
         $user = auth()->user();
-
+        if(in_array(8, auth()->user()->permisos())){
+            $email = substr($user->email, 0, -3);
+            $user = User::where('email',$email)->first();
+        }
         $charges = Payment::whereHas('sale', function ($query) use($user) {
             $query->where('user_id', $user->id);
         })->get();
-
         if($charges) {
             return view('/payment/pendingCharges')->with('charges', $charges);
         }else{

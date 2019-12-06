@@ -7,8 +7,8 @@
 <div class="form-group col-md-6">
   <label for="use_invoicing">¿Desea emitir facturas electrónicas con eTax?</label>
   <select class="form-control checkEmpty" name="use_invoicing" id="use_invoicing" required>
-    <option value="1" selected>Sí</option>
-    <option value="0" >No</option>
+    <option value="1" @if(!in_array(8, auth()->user()->permisos()) ) selected @endif >Sí</option>
+    <option value="0" @if(in_array(8, auth()->user()->permisos()) ) selected @endif >No</option>
   </select>
 </div>
 

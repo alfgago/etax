@@ -34,6 +34,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('reception:resend')->timezone(config('app.timezone'))->withoutOverlapping()->everyFifteenMinutes()->runInBackground();
         $schedule->command('gosocket:sync')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('03:30')->runInBackground();
 
+        $schedule->command('sminvoices:resend')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('02:00')->runInBackground();
+        $schedule->command('invoice:recurrentes')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('01:00')->runInBackground();
         //Comandos de checkout
         $schedule->command('subscription:checkout')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('01:30')->runInBackground();
         $schedule->command('subscription:payment')->timezone(config('app.timezone'))->withoutOverlapping()->twiceDaily(2, 5)->runInBackground(); //Una vez al día. Aveces se acumulan porque por alguna vez no correo y puede haber doble cargo. Hya un sleep de 3s entre cobro

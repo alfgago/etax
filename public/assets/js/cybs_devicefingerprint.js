@@ -1,11 +1,12 @@
 function cybs_dfprofiler(merchantID,environment) 
  {  
   
-	if (environment.toLowerCase() == 'live') {
+	/*if (environment.toLowerCase() == 'live') {
 		var org_id = 'k8vif92e';
 	} else {
 	    var org_id = '1snn5n9w';
-	}
+	}*/
+	var org_id = 'k8vif92e';
 	
 	var sessionID = new Date().getTime();
 	

@@ -38,6 +38,9 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
                 $event->sheet->getDelegate()->getColumnDimension('L')->setAutoSize(true);
                 $event->sheet->getDelegate()->getColumnDimension('M')->setAutoSize(true);
                 $event->sheet->getDelegate()->getColumnDimension('N')->setAutoSize(true);
+                $event->sheet->getDelegate()->getColumnDimension('O')->setAutoSize(true);
+                $event->sheet->getDelegate()->getColumnDimension('P')->setAutoSize(true);
+                $event->sheet->getDelegate()->getColumnDimension('Q')->setAutoSize(true);
             },
         ];
     }
@@ -83,6 +86,8 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
             $map->iva_percentage . '%',
             round( $map->iva_amount * $factor, 2),
             round( $map->total * $factor , 2),
+            round( $map->iva_acreditable * $factor, 2),
+            round( $map->iva_gasto * $factor, 2),
         ];
     }						
 
@@ -104,7 +109,9 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
                 'Subtotal',
                 'Tarifa IVA',
                 'Monto IVA',
-                'Total'
+                'Total',
+                'IVA acreditable',
+                'IVA al gasto'
             ]
         ];
     }

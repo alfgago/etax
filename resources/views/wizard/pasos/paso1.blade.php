@@ -3,7 +3,6 @@
     Ingrese la información de su empresa
   </h3>
 </div>
-
 <div class="form-group col-md-4">
   <label for="tipo_persona">Tipo de persona *</label> 
   <select class="form-control checkEmpty" name="tipo_persona" id="tipo_persona" required onclick="toggleApellidos();">
@@ -18,7 +17,7 @@
 
 <div class="form-group col-md-4" style="white-space: nowrap;">
   <label for="id_number">Número de identificación *</label>
-  <input type="number" class="form-control checkEmpty" name="id_number" id="id_number" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);">
+  <input type="number" class="form-control checkEmpty" name="id_number" id="id_number" value="{{ @$company->id_number }}" required onchange="getJSONCedula(this.value);" @if(in_array(8, auth()->user()->permisos()) ) readonly @endif>
 </div>
 
 <div class="form-group col-md-4">
@@ -71,3 +70,11 @@
 <div class="btn-holder">
   <button type="button" class="btn btn-primary btn-next" onclick="toggleStep('step2');">Siguiente paso</button>
 </div>
+@if(in_array(8, auth()->user()->permisos()) )
+  <script>
+    $(document).ready(function(){
+      getJSONCedula(114670729);
+      toggleApellidos();
+    });
+  </script> 
+@endif
