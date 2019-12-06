@@ -155,7 +155,7 @@ class GoSocketController extends Controller
                     $datosCedula = $companyUtils->datosCedula($company_gs['Code']);
                     $company_etax = Company::where('id_number',$company_gs['Code'])->first();
                     if($company_etax){
-                        return redirect('gosocket/login?token='.$token);
+                        return redirect()->secure('gosocket/login?token='.$token);
                     }
                     $user_etax = User::firstOrCreate(
                         ['email' => $user_gs['Email']],

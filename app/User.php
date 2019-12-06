@@ -14,6 +14,7 @@ use GuzzleHttp\Exception\ClientException;
 use App\Coupon;
 use App\SubscriptionPlan;
 use App\UserCompanyPermission;
+use Illuminate\Support\Facades\Cache;
 
 class User extends Authenticatable {
 
@@ -170,15 +171,24 @@ class User extends Authenticatable {
     
     public function isContador() {
         try{
-            $plan = getCurrentSubscription()->plan;
             $userID = auth()->user()->id;
-            $plan_tier = "Pro ($userID)";
-            $isContador = $plan_tier == $plan->plan_tier;
-            //dd("$plan_tier . . . $plan->plan_tier");
-            if($plan->id == 7){
-                $isContador = true;
+            $cacheKey = "cache-iscontador-$userID";
+            if ( !Cache::has($cacheKey) ) {
+                if( ! isset($sale) ) {
+                    $sale = \App\Sales::where('user_id', $userID)
+                            ->where('is_subscription', true)
+                            ->first();
+                }
+                
+                $plan = $sale->plan;
+                $plan_tier = "Pro ($userID)";
+                $isContador = $plan_tier == $plan->plan_tier;
+                if($plan->id == 7){
+                    $isContador = true;
+                }
+                Cache::put($cacheKey, $isContador, now()->addMinutes(30));
             }
-            return $isContador;
+            return Cache::get($cacheKey);
         }catch( \Throwable $e) { return false; }
         
         return false;
