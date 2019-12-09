@@ -371,6 +371,13 @@ if (!function_exists('getCurrentSubscription')) {
             }
         }
         
+
+        if( ! isset($sale) ) {
+            $sale = \App\Sales::with('plan')->where('id', $company->subscription_id)
+                ->where('is_subscription', true)
+                ->first();
+        }
+        
         if( ! isset($sale) ) {
             $user_id = auth()->user()->id;
             $sale = \App\Sales::where('user_id', $user_id)
