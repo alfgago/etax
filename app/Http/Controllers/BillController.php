@@ -432,49 +432,54 @@ class BillController extends Controller
      */
     public function store(Request $request)
     {
-      
-        $company = currentCompanyModel();
-        $request->validate([
-            'subtotal' => 'required',
-            'items' => 'required',
-        ]);
-        if(CalculatedTax::validarMes($request->generated_date)){
-            $bill = new Bill();
-            $bill->company_id = $company->id;
-            //Datos generales y para Hacienda
-            $bill->document_type = "01";
-            $bill->hacienda_status = "03";
-            $bill->status = "02";
-            $bill->payment_status = "01";
-            $bill->payment_receipt = "";
-            $bill->generation_method = "M";
-            $bill->reference_number = $company->last_bill_ref_number + 1;
-            $bill->accept_status = 1;
-            
-            $bill->setBillData($request);
-            
-            $company->last_bill_ref_number = $bill->reference_number;
-            $company->save();
-            
-            clearBillCache($bill);
-            $user = auth()->user();
-            Activity::dispatch(
-                $user,
-                $bill,
-                [
-                    'company_id' => $bill->company_id,
-                    'id' => $bill->id,
-                    'document_key' => $bill->document_key
-                ],
-                "Crear factura de compra."
-            )->onConnection(config('etax.queue_connections'))
-            ->onQueue('log_queue');
-            return redirect('/facturas-recibidas');
-            
-        }else{
-            return redirect('/facturas-recibidas')->withError('Mes seleccionado ya fue cerrado');
+        try{     
+            $company = currentCompanyModel();
+            $request->validate([
+                'subtotal' => 'required',
+                'items' => 'required',
+            ]);
+            if(CalculatedTax::validarMes($request->generated_date)){
+                $bill = new Bill();
+                if($bill->setBillData($request,$company)){
+                    return redirect('/facturas-recibidas');
+                }else{
+                    return redirect('/facturas-recibidas')->withError('Error en registrar factura de compra.');
+                }
+            }else{
+                return redirect('/facturas-recibidas')->withError('Mes seleccionado ya fue cerrado');
+            }
+        } catch( \Exception $ex ) {
+            Log::error("ERROR Envio de factura a hacienda -> ".$ex);
+            return redirect('/facturas-recibidas')->withError('Error en registrar factura de compra.');
         }
     }
+
+
+
+    public function storeApi(Request $request)
+    {
+      
+        try{
+            $company = Company::where('id_number',$request->emisor['identificacion']['numero'])->first();
+            if(CalculatedTax::validarMes($request->fechaEmision,$company)){
+                $requestInvoice = new BillApiUtils();
+                $request = $requestInvoice->store($request);
+                $bill = new Bill();
+                $billApi = $bill->setBillData($request);
+                if($billApi){
+                    return $this->createResponse('200', 'OK' , 'Factura registrada con éxito.', new BillResource($billApi));
+                } else {
+                    return $this->createResponse('400', 'ERROR' , 'Ha ocurrido un error al registrar factura.');
+                }
+            }else{
+                return $this->createResponse('400', 'ERROR' , 'Mes seleccionado ya fue cerrado.');
+            }
+        } catch( \Exception $ex ) {
+            Log::error("ERROR Envio de factura a hacienda -> ".$ex);
+                return $this->createResponse('400', 'ERROR' , 'Ha ocurrido un error al registrar factura.');
+        }
+    }
+
 
     /**
      * Mostrar factura existente

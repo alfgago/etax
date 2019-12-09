@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Jobs\LogActivityHandler as Activity;
 use \Carbon\Carbon;
 use App\Company;
 use App\BillItem;
@@ -131,8 +132,17 @@ class Bill extends Model
     /**
     * Asigna los datos de la factura segun el request recibido
     **/
-    public function setBillData($request) {
-      
+    public function setBillData($request,$company) {
+      $this->company_id = $company->id;
+      //Datos generales y para Hacienda
+      $this->document_type = "01";
+      $this->hacienda_status = "03";
+      $this->status = "02";
+      $this->payment_status = "01";
+      $this->payment_receipt = "";
+      $this->generation_method = "M";
+      $this->reference_number = $company->last_bill_ref_number + 1;
+      $this->accept_status = 1;
       $this->document_key = $request->document_key;
       $this->document_number = $request->document_number;
       $this->sale_condition = $request->sale_condition;
@@ -253,7 +263,22 @@ class Bill extends Model
           $item->delete();
         }
       }
-      
+       $company->last_bill_ref_number = $bill->reference_number;
+            $company->save();
+            
+            clearBillCache($bill);
+            $user = auth()->user();
+            Activity::dispatch(
+                $user,
+                $bill,
+                [
+                    'company_id' => $bill->company_id,
+                    'id' => $bill->id,
+                    'document_key' => $bill->document_key
+                ],
+                "Crear factura de compra."
+            )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
       return $this;
       
     }
