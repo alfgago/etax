@@ -42,7 +42,7 @@ Route::prefix('v1')->group(function() {
         //Facturas de Compra
         Route::prefix('facturas-compra')->group(function() {
             Route::post('aceptar', 'BillController@sendAcceptMessage')->name('FacturaCompra.aceptar'); //Recibe la clave de la factura y acepta la factura
-            Route::post('registrar', 'BillController@store')->name('FacturaCompra.registrar'); // Recibe JSON con todos los datos de un XML de Hacienda para registro, no envia a Hacienda
+            Route::post('registrar', 'BillController@storeApi')->name('FacturaCompra.registrar'); // Recibe JSON con todos los datos de un XML de Hacienda para registro, no envia a Hacienda
             Route::post('validar', 'BillController@validateBill')->name('FacturaCompra.validar'); // Recibe JSON con clave, lineas, codigo eTAX y categoría de declaración
             Route::post('autorizar-correo/{clave}', 'BillController@')->name('FacturaCompra.autorizarCorreo'); // Recibe clave y autoriza la enviada por correo
             Route::post('consultar', 'BillController@getBill')->name('FacturaCompra.consultar'); // Consulta existencia de una factura por clave

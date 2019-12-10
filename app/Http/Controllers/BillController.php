@@ -7,6 +7,7 @@ use App\Invoice;
 use App\UnidadMedicion;
 use App\Utils\BridgeHaciendaApi;
 use App\Utils\BillUtils;
+use App\Utils\BillApiUtils;
 use \Carbon\Carbon;
 use App\Bill;
 use App\BillItem;
@@ -432,6 +433,7 @@ class BillController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request);
         try{     
             $company = currentCompanyModel();
             $request->validate([
@@ -459,7 +461,7 @@ class BillController extends Controller
     public function storeApi(Request $request)
     {
       
-        try{
+        //try{
             $company = Company::where('id_number',$request->emisor['identificacion']['numero'])->first();
             if(CalculatedTax::validarMes($request->fechaEmision,$company)){
                 $requestInvoice = new BillApiUtils();
@@ -474,10 +476,10 @@ class BillController extends Controller
             }else{
                 return $this->createResponse('400', 'ERROR' , 'Mes seleccionado ya fue cerrado.');
             }
-        } catch( \Exception $ex ) {
+       /* } catch( \Exception $ex ) {
             Log::error("ERROR Envio de factura a hacienda -> ".$ex);
                 return $this->createResponse('400', 'ERROR' , 'Ha ocurrido un error al registrar factura.');
-        }
+        }*/
     }
 
 
