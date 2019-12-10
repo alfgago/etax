@@ -94,7 +94,7 @@ Route::prefix('v1')->group(function() {
             Route::post('desactivar-usuario', 'UsuarioController@')->name('Usuario.borrar'); //desactivar un usuario con los datos enviados por el cliente.
             Route::post('login', '@login')->name('Login'); //login into the API
             Route::get('actividad-comerciales', 'ActividadesController@getAllActivities')->name('ActividadesController.getAllActivities'); //Retorna las actividades comerciales
-            Route::post('actividad-comercial', 'ActividadesController@getActivities')->name('ActividadesController.getActivities'); //Retorna las actividades comerciales
+            Route::get('actividad-comercial/{empresa}', 'ActividadesController@getActivities')->name('ActividadesController.getActivities'); //Retorna las actividades comerciales
         });
 	});
 });

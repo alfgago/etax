@@ -597,7 +597,7 @@ class InvoiceController extends Controller
     public function sendHaciendaApi(Request $request)
     {
         //revision de branch para segmentacion de funcionalidades por tipo de documento
-        try {
+        //try {
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
             
             $company = Company::where('id_number',$request->emisor['identificacion']['numero'])->first();
@@ -614,10 +614,10 @@ class InvoiceController extends Controller
             }else{
                 return $this->createResponse('400', 'ERROR' , 'Mes seleccionado ya fue cerrado.');
             }
-        } catch( \Exception $ex ) {
+        /*} catch( \Exception $ex ) {
             Log::error("ERROR Envio de factura a hacienda -> ".$ex);
                 return $this->createResponse('400', 'ERROR' , 'Ha ocurrido un error al enviar factura.');
-        }
+        }*/
     }
 
     private function storeBillFEC($request) {

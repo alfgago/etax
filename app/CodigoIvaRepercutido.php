@@ -17,4 +17,8 @@ class CodigoIvaRepercutido extends Model
         return $this->belongsToMany('App\Company');
     }
     
+     public function getCode(){
+        $codes = CodigoIvaRepercutido::select("id", "name as nombre")->get();
+        return $codes;
+    }
 }

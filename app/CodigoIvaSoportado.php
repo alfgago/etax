@@ -11,4 +11,8 @@ class CodigoIvaSoportado extends Model
     public $incrementing = false;
     protected $keyType = 'string';
     
+ 	public function getCode(){
+        $codes = CodigoIvaSoportado::select("id", "name as nombre")->get();
+        return $codes;
+    }
 }

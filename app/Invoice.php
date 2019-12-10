@@ -182,7 +182,7 @@ class Invoice extends Model
           $invoice->generation_method = "etax";
           $invoice->xml_schema = 43;
           $today = Carbon::parse(now('America/Costa_Rica'));
-          $generated_date = Carbon::parse( $request->generated_date);
+          $generated_date = Carbon::parse($request->generated_date);
           if($today->format("Y-m-d") <  $generated_date->format("Y-m-d")){
               $invoice->hacienda_status = '99';
               $invoice->generation_method = "etax-programada";
