@@ -99,16 +99,7 @@
       </div>
     </div>
 
-    <div class="col-lg-12 mb-4">
-      <div class="sidebar-dashboard">
-        <div class="card-title">Notificaciones</div>
-        <div class="notificaciones-container">
-            <p>El proceso de importación por XMLs ha cambiado. Impórtelos de manera masiva y eTax le indica si hubo algún error en la importación. Luego clasifíquelos según sea necesario.</p>
-
-        </div>
-
-      </div>
-    </div>
+   
 
 
   </div>
