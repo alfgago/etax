@@ -135,6 +135,8 @@ class ProcessSendExcelInvoices implements ShouldQueue
                         
                         $direccion = $row['des_direccion'] ?? null;
                         $zip = $row['codigo_postal'] ?? '10101';
+                    
+                        $otherReference = $row['refer_factura'] ?? null;
                         
                         $arrayInsert = array(
                             'metodoGeneracion' => trim($metodoGeneracion),
@@ -185,7 +187,8 @@ class ProcessSendExcelInvoices implements ShouldQueue
                             'acceptStatus' => trim($acceptStatus),
                             'isAuthorized' => true,
                             'codeValidated' => true,
-                            'ordenCompra' => $ordenCompra
+                            'ordenCompra' => $ordenCompra,
+                            'otherReference' => $otherReference
                         );
                         
                         $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
