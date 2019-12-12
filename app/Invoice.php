@@ -392,7 +392,7 @@ class Invoice extends Model
     {
       return InvoiceItem::create([
         'invoice_id' => $this->id,
-        'company_id' => $this->company_id,
+        'company_id' => $this->company_id,f
         'year' => $this->year,
         'month' => $this->month,
         'item_number' => $item_number,
@@ -657,6 +657,23 @@ class Invoice extends Model
 
           $invoiceList[$arrayKey]['lineas'] = array();
           $invoiceList[$arrayKey]['factura'] = $invoice;
+          
+          try{
+            $otherReference = $data['otherReference'] ?? null;
+            if ( isset($otherReference) ) {
+                $ref = Invoice::where('company_id', $company->id)
+                  ->where('buy_order', 'otherReference')
+                  ->first();
+                $invoice->code_note = '01';
+                $invoice->reason = 'Factura anulada';
+                $invoice->other_reference = $ref->reference_number;
+                $invoice->reference_generated_date = $ref->generated_date;
+                $invoice->reference_document_key = $ref->document_key;
+                $invoice->reference_doc_type = $ref->document_type;
+            }
+          }catch(\Exception $e){
+            Log::error("Error en import NC SM: " . $e);
+          }
       }
 
       /*if( !CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/Y'), $company )){

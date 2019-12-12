@@ -1094,6 +1094,8 @@ class InvoiceController extends Controller
     public function validarMasivo(Request $request){
         $failInvoices = [];
         $errors = false;
+        $company = currentCompanyModel();
+        
         foreach( $request->items as $key => $item ) {
             $invoiceItem = InvoiceItem::with('invoice')->findOrFail($key);
             $invoice = $invoiceItem->invoice;
