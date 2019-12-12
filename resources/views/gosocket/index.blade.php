@@ -367,3 +367,50 @@
 	</a>
 
 @endsection
+
+@section('footer-scripts')
+
+
+<!-- Facebook Pixel Code -->
+	<script>
+	! function (f, b, e, v, n, t, s) {
+	if (f.fbq) return;
+	n = f.fbq = function () {
+	n.callMethod ?
+	n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+	};
+	if (!f._fbq) f._fbq = n;
+	n.push = n;
+	n.loaded = !0;
+	n.version = '2.0';
+	n.queue = [];
+	t = b.createElement(e);
+	t.async = !0;
+	t.src = v;
+	s = b.getElementsByTagName(e)[0];
+	s.parentNode.insertBefore(t, s)
+	}(window, document, 'script',
+	'https://connect.facebook.net/en_US/fbevents.js');;
+	fbq('init', '2079941852310831');
+	fbq('track', 'PageView');
+	</script>
+	<script type="text/javascript">
+	function popupReproductor() {
+	window.open(
+	'https://www.callmyway.com/Welcome/SupportChatInfo/171479/?chat_type_id=5&contact_name=&contact_email=&contact_phone=&contact_request=&autoSubmit=0',
+	'Soporte eTax', 'height=350,width=350,resizable=0,marginwidth=0,marginheight=0,frameborder=0');
+	};
+	</script>
+	<noscript>
+	<img height="1" width="1" src="https://www.facebook.com/tr?id=2079941852310831&ev=PageView
+	&noscript=1" />
+	</noscript>
+<!-- End Facebook Pixel Code -->
+<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})
+	(window,document,'script','https://etaxcr.com/wp-content/cache/busting/google-tracking/ga-b66b3b5d54e154c81a50880cdcd7e5f8.js','ga');
+	ga('create', 'UA-134999499-1', 'auto');ga('send', 'pageview'); </script>
+@endsection
