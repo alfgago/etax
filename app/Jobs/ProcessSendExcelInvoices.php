@@ -194,7 +194,27 @@ class ProcessSendExcelInvoices implements ShouldQueue
                         $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
                       
                     }else {
-                        //Log::warning('Factura repetida en envio masivo '.$identificacionCliente);
+                        if($fileType == '03'){
+                            try{
+                                $invoice = Invoice::where("description", $descripcion)->where('total', $totalDocumento)->where('hacienda_status', '01')->first();
+                                if( isset($invoice) ){
+                                    $otherReference = $data['otherReference'] ?? null;
+                                    if ( isset($otherReference) ) {
+                                        $ref = Invoice::where('company_id', $company->id)
+                                          ->where('buy_order', 'otherReference')
+                                          ->first();
+                                        $invoice->code_note = '01';
+                                        $invoice->reason = 'Factura anulada';
+                                        $invoice->other_reference = $ref->reference_number;
+                                        $invoice->reference_generated_date = $ref->generated_date;
+                                        $invoice->reference_document_key = $ref->document_key;
+                                        $invoice->reference_doc_type = $ref->document_type;
+                                    }
+                                }
+                            }catch(\Exception $e){
+                                Log::error("Error en import NC SM: " . $e);
+                            }
+                        }
                     }
                 }
             }catch( \Throwable $ex ){
