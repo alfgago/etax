@@ -205,6 +205,8 @@ class ProcessSendExcelInvoices implements ShouldQueue
                                           ->where('buy_order', $otherReference)
                                           ->first();
                                         $invoice->code_note = '01';
+                                        $invoice->resend_attempts = 0;
+                                        $invoice->in_queue = false;
                                         $invoice->reason = 'Factura anulada';
                                         $invoice->other_reference = $ref->reference_number;
                                         $invoice->reference_generated_date = $ref->generated_date;
