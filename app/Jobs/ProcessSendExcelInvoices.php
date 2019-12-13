@@ -209,6 +209,7 @@ class ProcessSendExcelInvoices implements ShouldQueue
                                         $invoice->reference_generated_date = $ref->generated_date;
                                         $invoice->reference_document_key = $ref->document_key;
                                         $invoice->reference_doc_type = $ref->document_type;
+                                        $invoice->save();
                                     }
                                 }
                             }catch(\Exception $e){
