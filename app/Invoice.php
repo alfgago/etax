@@ -662,7 +662,7 @@ class Invoice extends Model
             $otherReference = $data['otherReference'] ?? null;
             if ( isset($otherReference) ) {
                 $ref = Invoice::where('company_id', $company->id)
-                  ->where('buy_order', 'otherReference')
+                  ->where('buy_order', $otherReference)
                   ->first();
                 $invoice->code_note = '01';
                 $invoice->reason = 'Factura anulada';
