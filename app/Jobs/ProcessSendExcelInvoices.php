@@ -198,10 +198,11 @@ class ProcessSendExcelInvoices implements ShouldQueue
                             try{
                                 $invoice = Invoice::where("description", $descripcion)->where('total', $totalDocumento)->where('hacienda_status', '01')->first();
                                 if( isset($invoice) ){
-                                    $otherReference = $data['otherReference'] ?? null;
+                                    $otherReference = $row['refer_factura'] ?? null;
+                                    Log::info("Actualizando data de NC: $otherReference");
                                     if ( isset($otherReference) ) {
                                         $ref = Invoice::where('company_id', $company->id)
-                                          ->where('buy_order', 'otherReference')
+                                          ->where('buy_order', $otherReference)
                                           ->first();
                                         $invoice->code_note = '01';
                                         $invoice->reason = 'Factura anulada';
