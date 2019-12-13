@@ -8,6 +8,7 @@ use App\UnidadMedicion;
 use App\Utils\BridgeHaciendaApi;
 use App\Utils\BillUtils;
 use App\Utils\BillApiUtils;
+use App\Http\Resources\BillResource;
 use \Carbon\Carbon;
 use App\Bill;
 use App\BillItem;
@@ -433,7 +434,6 @@ class BillController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request);
         try{     
             $company = currentCompanyModel();
             $request->validate([
@@ -460,26 +460,25 @@ class BillController extends Controller
 
     public function storeApi(Request $request)
     {
-      
-        //try{
-            $company = Company::where('id_number',$request->emisor['identificacion']['numero'])->first();
+        try{
+            $company = Company::where('id_number',$request->receptor['identificacion']['numero'])->first();
             if(CalculatedTax::validarMes($request->fechaEmision,$company)){
                 $requestInvoice = new BillApiUtils();
                 $request = $requestInvoice->store($request);
                 $bill = new Bill();
-                $billApi = $bill->setBillData($request);
+                $billApi = $bill->setBillData($request,$company);
                 if($billApi){
                     return $this->createResponse('200', 'OK' , 'Factura registrada con éxito.', new BillResource($billApi));
                 } else {
                     return $this->createResponse('400', 'ERROR' , 'Ha ocurrido un error al registrar factura.');
-                }
+                } 
             }else{
                 return $this->createResponse('400', 'ERROR' , 'Mes seleccionado ya fue cerrado.');
             }
-       /* } catch( \Exception $ex ) {
+        } catch( \Exception $ex ) {
             Log::error("ERROR Envio de factura a hacienda -> ".$ex);
                 return $this->createResponse('400', 'ERROR' , 'Ha ocurrido un error al registrar factura.');
-        }*/
+        }
     }
 
 
@@ -1148,52 +1147,41 @@ class BillController extends Controller
     
     public function authorizeBill ( Request $request, $id )
     {
-        $bill = Bill::findOrFail($id);
-        if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
-        
-            $this->authorize('update', $bill);
+        try{
+            $bill = Bill::findOrFail($id);
+            if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
             
-            if ( $request->autorizar ) {
-                $bill->is_authorized = true;
-                $bill->save();
-                clearBillCache($bill);
-
-                $user = auth()->user();
-                Activity::dispatch(
-                    $user,
-                    $bill,
-                    [
-                        'company_id' => $bill->company_id,
-                        'id' => $bill->id,
-                        'document_key' => $bill->document_key
-                    ],
-                    "La factura ". $bill->document_number . " ha sido autorizada. Recuerde validar el código."
-                )->onConnection(config('etax.queue_connections'))
-                ->onQueue('log_queue');
-                return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido autorizada. Recuerde validar el código');
-            }else {
-                $bill->is_authorized = false;
-                $bill->is_void = true;
-                BillItem::where('bill_id', $bill->id)->delete();
-                $bill->delete();
-                clearBillCache($bill);
-                $user = auth()->user();
-                Activity::dispatch(
-                    $user,
-                    $bill,
-                    [
-                        'company_id' => $bill->company_id,
-                        'id' => $bill->id,
-                        'document_key' => $bill->document_key
-                    ],
-                    "La factura ". $bill->document_number . " ha sido rechazada."
-                )->onConnection(config('etax.queue_connections'))
-                ->onQueue('log_queue');
-                return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido rechazada');
+                $this->authorize('update', $bill);
+                $mensaje = $bill->authorizeBill($bill, $request->autorizar);
+                    return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido rechazada');
+            }else{
+                return redirect('/facturas-recibidas/autorizaciones')->withError('Mes seleccionado ya fue cerrado');
             }
+        }catch ( Exception $e) {
+            Log::error ("Error al autorizar la factura ".$e);
+            return redirect('/facturas-recibidas/autorizaciones')->withError('Error al autorizar la factura');
+        }
+    }
 
-        }else{
-            return redirect('/facturas-recibidas/autorizaciones')->withError('Mes seleccionado ya fue cerrado');
+
+    public function authorizeBillApi(Request $request)
+    {
+        try{
+            $bill = Bill::where('document_key',$request->claveDocumento)->first();
+            if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/y') )){ 
+                $this->authorize('update', $bill);
+                $mensaje = $bill->authorizeBill($bill, $request->autorizar);
+                if($mensaje){
+                    return $this->createResponse('200', 'OK' , $mensaje);
+                } else {
+                    return $this->createResponse('400', 'ERROR' , 'Ha ocurrido un error al autorizar factura.');
+                } 
+            }else{
+                return $this->createResponse('400', 'ERROR' , 'Mes seleccionado ya fue cerrado.');
+            }
+        }catch ( Exception $e) {
+            Log::error ("Error al autorizar la factura ".$e);
+            return $this->createResponse('400', 'ERROR' , 'Ha ocurrido un error al autorizar factura.');
         }
     }
 
@@ -1418,54 +1406,35 @@ class BillController extends Controller
     /**
      *  Metodo para hacer las aceptaciones
      */
+    public function sendAcceptMessageApi (Request $request){
+        try {
+
+            $company = Company::where('id_number',$request->empresa)->first();
+            $bill = Bill::where('document_key',$request->claveDocumento)->first();
+            $mensaje = $bill->sendAcceptMessage($bill,$request->aceptacion,$company);
+            if($mensaje){
+                return $this->createResponse('200', 'OK' , $mensaje);
+            } else {
+                return $this->createResponse('400', 'ERROR' , 'Ha ocurrido un error al aceptar factura.');
+            } 
+            
+        } catch ( Exception $e) {
+            Log::error ("Error al crear aceptacion de factura".$e);
+                return $this->createResponse('400', 'ERROR' , 'Ha ocurrido un error al aceptar factura.');
+        }
+    }
+
+
     public function sendAcceptMessage (Request $request, $id)
     {
         try {
             $company = currentCompanyModel();
             $bill = Bill::findOrFail($id);
-            if( currentCompanyModel()->use_invoicing ) {
-                $apiHacienda = new BridgeHaciendaApi();
-                $tokenApi = $apiHacienda->login(false);
-                if ($tokenApi !== false) {
-                    if (!empty($bill)) {
-                        $bill->accept_status = $request->respuesta;
-                        $bill->save();
-                        $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
-                        $company->save();
-                        $company->last_document_rec = getDocReference('05',$company->last_rec_ref_number);
-                        $company->save();
-                        $apiHacienda->acceptInvoice($bill, $tokenApi);
-                    }
-                    $mensaje = 'Aceptación enviada.';
-                    if($request->respuesta == 2){
-                        $mensaje = 'Rechazo de factura enviado';
-                    }
-                    clearBillCache($bill);
-
-                $user = auth()->user();
-                Activity::dispatch(
-                    $user,
-                    $bill,
-		            [
-		                'company_id' => $bill->company_id,
-		                'id' => $bill->id,
-		                'document_key' => $bill->document_key
-		            ],
-                    $mensaje
-                )->onConnection(config('etax.queue_connections'))
-                ->onQueue('log_queue');
-                    return redirect('/facturas-recibidas/aceptaciones')->withMessage( $mensaje );
-    
-                } else {
-                    return back()->withError( 'Ha ocurrido un error al enviar factura.' );
-                }
-            } else {
-                if (!empty($bill)) {
-                    $bill->accept_status = $request->respuesta;
-                    $bill->save();
-                }
-                clearBillCache($bill);
-                return redirect('/facturas-recibidas/aceptaciones')->withMessage('Factura aceptada para cálculo en eTax.');
+            $mensaje = $bill->sendAcceptMessage($bill,$request->respuesta,$company);
+            if($mensaje){
+                return redirect('/facturas-recibidas/aceptaciones')->with($mensaje);
+            }else{
+                return redirect('/facturas-recibidas/aceptaciones')->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');
             }
         } catch ( Exception $e) {
             Log::error ("Error al crear aceptacion de factura");

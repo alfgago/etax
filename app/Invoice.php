@@ -233,6 +233,7 @@ class Invoice extends Model
           }
 
           $invoice->save();
+
           $request->document_key = $invoice->document_key;
           $request->document_number = $invoice->document_number;
           $invoiceData = $invoice->setInvoiceData($request);
@@ -281,9 +282,11 @@ class Invoice extends Model
               
               $invoice->recurring_id = $recurrencia->id;
               $invoice->save();     
+                  //dd($invoice);
           }
           if($invoice->hacienda_status != '99'){
               if (!empty($invoiceData)) {
+                  //dd($invoiceData, $tokenApi);
                   $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
               }
           }
@@ -466,6 +469,7 @@ class Invoice extends Model
 
                 }
             }
+
             //Revisa si la factura es nueva. Si no tiene ID, es nueva y suma al contador.
             if (!$this->id) {
               $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
@@ -474,10 +478,9 @@ class Invoice extends Model
 
             $this->save();
             //Fechas
-            $fecha = Carbon::createFromFormat('d/m/Y g:i A',
-                $request->generated_date . ' ' . $request->hora);
+            $fecha = Carbon::parse($request->generated_date . ' ' . $request->hora);
             $this->generated_date = $fecha;
-            $fechaV = Carbon::createFromFormat('d/m/Y', $request->due_date );
+            $fechaV = Carbon::parse($request->due_date );
             $this->due_date = $fechaV;
             $this->year = $fecha->year;
             $this->month = $fecha->month;

@@ -41,10 +41,10 @@ Route::prefix('v1')->group(function() {
 
         //Facturas de Compra
         Route::prefix('facturas-compra')->group(function() {
-            Route::post('aceptar', 'BillController@sendAcceptMessage')->name('FacturaCompra.aceptar'); //Recibe la clave de la factura y acepta la factura
+            Route::post('aceptar', 'BillController@sendAcceptMessageApi')->name('FacturaCompra.aceptar'); //Recibe la clave de la factura y acepta la factura
             Route::post('registrar', 'BillController@storeApi')->name('FacturaCompra.registrar'); // Recibe JSON con todos los datos de un XML de Hacienda para registro, no envia a Hacienda
             Route::post('validar', 'BillController@validateBill')->name('FacturaCompra.validar'); // Recibe JSON con clave, lineas, codigo eTAX y categoría de declaración
-            Route::post('autorizar-correo/{clave}', 'BillController@')->name('FacturaCompra.autorizarCorreo'); // Recibe clave y autoriza la enviada por correo
+            Route::post('autorizar-correo', 'BillController@authorizeBillApi')->name('FacturaCompra.autorizarCorreo'); // Recibe clave y autoriza la enviada por correo
             Route::post('consultar', 'BillController@getBill')->name('FacturaCompra.consultar'); // Consulta existencia de una factura por clave
             Route::get('consultar-hacienda{clave}', 'FacturaCompraController@')->name('FacturaCompra.consultarHacienda'); //Recibe clave de factura y retorna estado con hacienda.
             Route::get('descargar-xml/{clave}', 'BillController@')->name('FacturaCompra.descargarXml'); // Descarga XML firmado. Si no existe, eTax devuelve mensaje indicando que fue emitida por otro sistema. Devuele URL temporal de S3 si nosotros lo guardamos

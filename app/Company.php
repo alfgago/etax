@@ -501,4 +501,23 @@ class Company extends Model {
         
     }
 
+    public function getTipoPersonaXML(){
+        $tipo_persona = '';
+        if( $this->type  == 1 || $this->type == 'F' || $this->type == '01') {
+          $tipo_persona = '01';
+        }else if( $this->type == 2 || $this->type == 'J' || $this->type == '02' ) {
+          $tipo_persona = '02';
+        }else if( $this->type == 3 || $this->type == 'D' || $this->type == '03' ) {
+          $tipo_persona = '03';
+        }else if( $this->type == 4 || $this->type == 'E' || $this->type == '04' ) {
+          $tipo_persona = '04';
+        }else if( $this->type == 5 || $this->type == 'N' || $this->type == '05' ) {
+          $tipo_persona = '05';
+        }else if( $this->type == 6 || $this->type == 'O' || $this->type == '06') {
+          $tipo_persona = '06';
+        }
+        return $tipo_persona;
+    }
+
+
 }
