@@ -362,8 +362,8 @@ if (!function_exists('getCurrentSubscription')) {
         if( ! isset($sale) ) {
             $owner_id = $company->user_id;
             $plan_tier = "Pro ($owner_id)";
-            $SubscriptionPlan = \App\SubscriptionPlan::where('plan_tier',$plan_tier)->first();
-            if($SubscriptionPlan){
+            $subscriptionPlan = \App\SubscriptionPlan::where('plan_tier',$plan_tier)->first();
+            if($subscriptionPlan){
                 $sale = \App\Sales::where('user_id', $owner_id)
                 ->where('is_subscription', true)
                 ->first();
