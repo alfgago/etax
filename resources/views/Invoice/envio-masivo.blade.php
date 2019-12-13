@@ -5,7 +5,7 @@
 		
 		<div class="form-group col-md-12">
 	    <h3>
-	      Envio masivo por Excel
+	      Envío masivo por Excel
 	    </h3>
 	  </div>
 		
@@ -17,7 +17,7 @@
 			  <div class="descripcion">
 			  	Las columnas requeridas para importación de facturas son: <br>
 			  	
-			  	<ul class="columnas-excel">
+			  	<ul class="cols-excel">
 			  		<li>cedula empresa*</li>
 					 <li>tipo documento*</li>
 					 <li>consecutivo*</li>
