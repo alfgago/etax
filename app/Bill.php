@@ -8,6 +8,7 @@ use App\Company;
 use App\BillItem;
 use App\Provider;
 use App\XmlHacienda;
+use App\Utils\BridgeHaciendaApi;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class Bill extends Model
-{
+{ 
     use Sortable, SoftDeletes;
     
     protected $guarded = [];
@@ -112,7 +113,6 @@ class Bill extends Model
     }
     
     public function getMetodoPago() {
-      
       $str = "Efectivo";
       if( $this->payment_type == '02' ) {
         $str = "Tarjeta";
@@ -217,9 +217,9 @@ class Bill extends Model
       $this->provider_id_number = $provider->id_number;
 
       //Fechas
-      $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
+      $fecha = Carbon::parse( $request->generated_date . ' ' . $request->hora);
       $this->generated_date = $fecha;
-      $fechaV = Carbon::createFromFormat('d/m/Y', $request->due_date );
+      $fechaV = Carbon::parse( $request->due_date );
       $this->due_date = $fechaV;
       
       $this->year = $fecha->year;
@@ -263,18 +263,18 @@ class Bill extends Model
           $item->delete();
         }
       }
-       $company->last_bill_ref_number = $bill->reference_number;
+       $company->last_bill_ref_number = $this->reference_number;
             $company->save();
             
-            clearBillCache($bill);
+            clearBillCache($this);
             $user = auth()->user();
             Activity::dispatch(
                 $user,
-                $bill,
+                $this,
                 [
-                    'company_id' => $bill->company_id,
-                    'id' => $bill->id,
-                    'document_key' => $bill->document_key
+                    'company_id' => $this->company_id,
+                    'id' => $this->id,
+                    'document_key' => $this->document_key
                 ],
                 "Crear factura de compra."
             )->onConnection(config('etax.queue_connections'))
@@ -998,4 +998,101 @@ class Bill extends Model
       
     
     
+  public function sendAcceptMessage($bill,$respuesta,$company){
+    try{
+      if( $company->use_invoicing ) {
+        $apiHacienda = new BridgeHaciendaApi();
+        $tokenApi = $apiHacienda->login(false);
+        if ($tokenApi !== false) {
+          if (!empty($bill)) {
+            $bill->accept_status = $respuesta;
+            $bill->save();
+            $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
+            $company->save();
+            $company->last_document_rec = getDocReference('05',$company->last_rec_ref_number);
+            $company->save();
+            $apiHacienda->acceptInvoice($bill, $tokenApi);
+          }
+          $mensaje = 'Aceptación enviada.';
+          if($respuesta == 2){
+            $mensaje = 'Rechazo de factura enviado';
+          }
+          clearBillCache($bill);
+          $user = auth()->user();
+          Activity::dispatch(
+            $user,
+            $bill,
+            [
+              'company_id' => $bill->company_id,
+             'id' => $bill->id,
+              'document_key' => $bill->document_key
+            ],
+            $mensaje
+          )->onConnection(config('etax.queue_connections'))
+            ->onQueue('log_queue');
+          return $mensaje ;
+        } else {
+          return false;
+        }
+      } else {
+        if (!empty($bill)) {
+          $bill->accept_status = $respuesta;
+          $bill->save();
+        }
+        clearBillCache($bill);
+        return 'Factura aceptada para cálculo en eTax.';
+      }
+    } catch ( Exception $e) {
+      Log::error ("Error al crear aceptacion de factura ".$e);
+      return false;
+    }
+  }
+
+  public function authorizeBill($bill, $autorizar){
+    try{
+      if($autorizar ) {
+        $bill->is_authorized = true;
+        $bill->save();
+        clearBillCache($bill);
+
+        $user = auth()->user();
+        Activity::dispatch(
+          $user,
+          $bill,
+          [
+            'company_id' => $bill->company_id,
+            'id' => $bill->id,
+            'document_key' => $bill->document_key
+          ],
+          "La factura ". $bill->document_number . " ha sido autorizada. Recuerde validar el código."
+        )->onConnection(config('etax.queue_connections'))
+         ->onQueue('log_queue');
+        return 'La factura '. $bill->document_number . ' ha sido autorizada. Recuerde validar el código';
+      }else {
+        $bill->is_authorized = false;
+        $bill->is_void = true;
+        BillItem::where('bill_id', $bill->id)->delete();
+        $bill->delete();
+        clearBillCache($bill);
+        $user = auth()->user();
+        Activity::dispatch(
+          $user,
+          $bill,
+          [ 
+            'company_id' => $bill->company_id,
+            'id' => $bill->id,
+            'document_key' => $bill->document_key
+          ],
+          "La factura ". $bill->document_number . " ha sido rechazada."
+        )->onConnection(config('etax.queue_connections'))
+        ->onQueue('log_queue');
+        return 'La factura '. $bill->document_number .' ha sido rechazada';
+      }
+
+    }catch ( Exception $e) {
+      Log::error ("Error al crear aceptacion de factura ".$e);
+      return false;
+    }
+  }
+
 }
