@@ -34,7 +34,7 @@
                   <td>{{ @$data->provider->fullname }}</td>
                   <td>{{ $data->currency }}</td>
                   <td class="text-right">{{ number_format( $data->subtotal, 2 ) }}</td>
-                  <td class="text-right">{{ number_format( $data->iva_amount, 2 ) }}</td>
+                  <td class="text-right">{{ number_format( $data->iva_amount - $data->total_iva_devuelto, 2 ) }} <small>{{ $data->total_iva_devuelto ? "($data->total_iva_devuelto devuelto)" : "" }}</small></td>
                   <td class="text-right">{{ number_format( $data->total, 2 ) }}</td>
                   <td>{{ @$data->generatedDate()->format('d/m/Y') }}</td>
                   <td>
@@ -66,6 +66,10 @@
 	form.inline-form.validaciones button {
 	    border: 1px solid;
 	    margin-top: 0.5rem !important;
+	}
+	
+	#invoice-table td small {
+	  font-size: .75em !important;
 	}
 
 </style>

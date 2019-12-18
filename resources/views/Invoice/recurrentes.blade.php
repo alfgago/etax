@@ -13,9 +13,9 @@
             <tr>
               <th data-priority="2">Cliente</th>
               <th>Recurrencia</th>
-              <th>Opcion</th>
+              <th>Día / Frecuencia</th>
               <th data-priority="3">Total</th>
-              <th data-priority="4">Proxima fecha</th>
+              <th data-priority="4">Próxima fecha</th>
               <th data-priority="1">Acciones</th>
             </tr>
           </thead>

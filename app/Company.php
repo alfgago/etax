@@ -160,7 +160,6 @@ class Company extends Model {
     public function getProrrataOperativa( $ano ){
       
       $anoAnterior = $ano > 2018 ? $ano-1 : 2018;
-      
       if($anoAnterior == 2018) {
         if( $this->first_prorrata_type == 1 ){
           $prorrataOperativa = $this->first_prorrata ? $this->first_prorrata / 100 : 1;

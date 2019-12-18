@@ -117,7 +117,7 @@
                               <option selected value="01">Factura electronica</option>
                               <option value="08">Factura de compra</option>
                               <option value="09">Factura de exportaci&oacute;n</option>
-                              <option value="04">Apartado</option>
+                              <option value="04">Tiquete electrónico</option>
                           </select>
                       </div>
                   </div>

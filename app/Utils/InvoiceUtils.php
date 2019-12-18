@@ -421,7 +421,7 @@ class InvoiceUtils
             }
             
             $emisorName = $isCompanyEmisor ? $company->business_name  ? trim($company->business_name) : '' : $provider->first_name ?? trim($provider->first_name);
-            $emisorEmail = $isCompanyEmisor ? $company->email ? trim($company->email) : '' : $provider->email ?? trim($provider->email);
+            $emisorEmail = $isCompanyEmisor ? $company->email ? replaceAccents($company->email) : '' : $provider->email ?? replaceAccents($provider->email);
             $emisorCompany = $isCompanyEmisor && $company->business_name ? trim($company->business_name) : trim($provider->first_name);
             $emisorCity = $isCompanyEmisor && $company->city ? trim($company->city) : trim($provider->city);
             $emisorState = $isCompanyEmisor && $company->state ?  trim($company->state) : trim($provider->state);

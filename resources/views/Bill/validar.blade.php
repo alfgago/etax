@@ -9,6 +9,9 @@
       <div class="col-md-6">
         <b>Subtotal: </b>{{ number_format( $bill->subtotal, 2 ) }} <br>
         <b>Monto IVA: </b>{{ number_format( $bill->iva_amount, 2 ) }} <br>
+        @if(isset($bill->total_iva_devuelto))
+            <b>IVA Devuelto: </b>{{ number_format( $bill->total_iva_devuelto, 2 ) }} <br>
+        @endif
         <b>Total: </b>{{ number_format( $bill->total, 2 ) }} 
       </div>
     </div>
