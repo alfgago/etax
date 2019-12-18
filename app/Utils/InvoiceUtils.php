@@ -444,7 +444,7 @@ class InvoiceUtils
                 'receptor_ubicacion_distrito' => substr($receptorPostalCode,3),
                 'receptor_ubicacion_otras_senas' => $data['client_address'] ? trim($data['client_address']) : '',
                 'receptor_otras_senas_extranjero' => $data['client_address'] ? trim($data['client_address']) : '',
-                'receptor_email' => $data['client_email'] ? trim($data['client_email']) :  '',
+                'receptor_email' => $data['client_email'] ? replaceAccents($data['client_email']) :  '',
                 'receptor_phone' => !empty($data['client_phone']) ? preg_replace('/[^0-9]/', '', $data['client_phone']) : '00000000',
                 'receptor_cedula_numero' => $data['client_id_number'] ? str_pad(preg_replace("/[^0-9]/", "",
                     $data['client_id_number']), 9, '0', STR_PAD_LEFT) : '',
