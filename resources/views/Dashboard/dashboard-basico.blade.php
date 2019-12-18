@@ -99,7 +99,6 @@
       </div>
     </div>
 
-
   </div>
 
  <input type="text" hidden value="{{$hide_tutorial}}" id="hide_tutorial">
