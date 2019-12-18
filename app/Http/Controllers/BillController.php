@@ -221,7 +221,7 @@ class BillController extends Controller
                     $billItem->tarifa_iva = !empty($billItem->iva_amount) ? ($billItem->iva_amount / $billItem->subtotal * 100) : 0;
                     $billItem->tarifa_iva = round($billItem->tarifa_iva * 100) / 100;    
                 }
-                return $billItem->tarifa_iva;
+                return $billItem->tarifa_iva . "%";
             })
             ->editColumn('generated_date', function(BillItem $billItem) {
                 return $billItem->bill->generatedDate()->format('d/m/Y');
@@ -262,11 +262,18 @@ class BillController extends Controller
                 return view('Bill.ext.select-identificacion', [
                     'item' => $billItem])->render();
             })
+            ->addColumn('monto_iva', function($billItem) {
+                $ivaAmount = number_format($billItem->iva_amount ,2);
+                if($billItem->bill->total_iva_devuelto){
+                    return "0 <br><small style='font-size:.8em !important;'>($ivaAmount devuelto)</small>";
+                }
+                return $ivaAmount;
+            })
             ->addColumn('actions', function($billItem) {
                 return view('Bill.ext.deny-action', [
                     'bill' => $billItem->bill,])->render();
             })
-            ->rawColumns(['categoria_hacienda', 'codigo_etax', 'actions', 'identificacion_especifica'])
+            ->rawColumns(['categoria_hacienda', 'codigo_etax', 'actions', 'identificacion_especifica', 'monto_iva'])
             ->toJson();
             return $return;
 
