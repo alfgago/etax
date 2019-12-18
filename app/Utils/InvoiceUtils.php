@@ -204,7 +204,7 @@ class InvoiceUtils
                                     ]));
             } else {
 
-                Mail::to($invoice->client_email)->send(new \App\Mail\InvoiceNotification([	
+                Mail::to(replaceAccents($invoice->client_email))->send(new \App\Mail\InvoiceNotification([	
                                         'xml' => $xmlPath,	
                                         'data_invoice' => $invoice, 
                                         'data_company' => $company,
