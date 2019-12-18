@@ -44,7 +44,7 @@ class ResendSMInvoices extends Command
     {
         try {
             $this->info('Sending SM invoices to Hacienda....');
-            $invoices = Invoice::where('hacienda_status', '01')->where('generation_method','like', '%etax%')
+            $invoices = Invoice::whereIn('hacienda_status', ['98', '01'])->where('generation_method','like', '%etax%')
                 ->where('company_id','=', '1110')
                 ->where('resend_attempts', '<', 6)->where('in_queue', false)
                 ->whereIn('document_type', ['01', '04', '08', '09'])->get();
