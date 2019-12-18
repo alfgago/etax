@@ -172,7 +172,7 @@ class Invoice extends Model
                 $identificacion_cliente = preg_replace("/[^0-9]/", "", $request->id_number );
                 $codigo_cliente = $request->code;
 
-                $billing_emails = isset($request->billing_emails) ? trim($request->billing_emails) : $request->email;
+                $billing_emails = isset($request->billing_emails) ? replaceAccents($request->billing_emails) : $request->email;
 
                 $client = Client::updateOrCreate(
                     [
@@ -199,7 +199,7 @@ class Invoice extends Model
                         'foreign_address' => trim($request->address),
                         'phone' => trim($request->phone),
                         'es_exento' => $request->es_exento,
-                        'email' => trim($request->email),
+                        'email' => replaceAccents($request->email),
                         'billing_emails' => $billing_emails
                     ]
                 );

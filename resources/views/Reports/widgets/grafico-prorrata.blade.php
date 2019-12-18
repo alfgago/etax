@@ -19,7 +19,6 @@
 </style>
 
 <?php
-
   $posNeg = ( $acumulado->prorrata - $acumulado->prorrata_operativa ) < 0 ? -1 : 1;
   $texto = ( $acumulado->prorrata - $acumulado->prorrata_operativa ) < 0 ? 'por pagar' : 'por cobrar';
   $signo = ( $acumulado->prorrata - $acumulado->prorrata_operativa ) < 0 ? '-' : '';
@@ -60,13 +59,13 @@
           
           <tr>
             <th>Prorrata</td>
-            <td> <span>{{ number_format( $acumulado->company->operative_prorrata, 2) }}%</span> </td>
+            <td> <span>{{ number_format( $acumulado->prorrata_operativa*100, 2) }}%</span> </td>
             <td> {{ number_format( $acumulado->prorrata*100, 2) }}% </td>
           </tr>
           
           <tr>
             <th>Ventas 1%</td>
-            <td> <span>{{ number_format( $acumulado->company->operative_ratio1, 2) }}%</span> </td>
+            <td> <span>{{ number_format( $acumulado->ratio1_, 2) }}%</span> </td>
             <td> {{ number_format( $acumulado->ratio1*100, 2) }}% </td>
           </tr>
           

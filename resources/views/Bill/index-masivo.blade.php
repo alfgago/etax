@@ -188,7 +188,7 @@ $(function() {
       { data: 'client', name: 'bills.provider_first_name' },
       { data: 'unidad', name: 'bill_items.measure_unit'},
       { data: 'subtotal', name: 'bill_items.subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
-      { data: 'iva_amount', name: 'bill_items.iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
+      { data: 'monto_iva', name: 'bill_items.iva_amount', class: "text-right" },
       { data: 'total', name: 'bill_items.total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
       { data: 'tarifa_iva', name: 'bill_items.tarifa_iva', orderable: false, searchable: false },
       { data: 'codigo_etax', name: 'codigo_etax', orderable: false, searchable: false },

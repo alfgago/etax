@@ -26,7 +26,7 @@
     </div>
 
     <div class="col-lg-6 mb-4">
-      @include('Reports.widgets.resumen-periodo', ['titulo' => "Acumulado Jul. 2019 - Dic. 2019", 'data' => $acumulado])
+      @include('Reports.widgets.resumen-periodo', ['titulo' => ($ano == 2019 ? "Acumulado Jul. 2019 - Dic. 2019" : "Acumulado anual $ano"), 'data' => $acumulado])
     </div>
 
     <div class="col-lg-6 mb-4" id="proporcion">
@@ -98,9 +98,6 @@
 
       </div>
     </div>
-
-   
-
 
   </div>
 
