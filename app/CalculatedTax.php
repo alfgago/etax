@@ -209,7 +209,6 @@ class CalculatedTax extends Model
           Cache::put($cacheKey, $data, now()->addDays(120));
           
       }
-
       $data = Cache::get($cacheKey);
       return $data;
       
@@ -251,17 +250,25 @@ class CalculatedTax extends Model
     }
     
         
-    public function calcularFacturacionAcumulado( $year, $prorrataOperativa ) {
+    public function calcularFacturacionAcumulado( $year, $prorrataOperativa) {
       
       $this->sumAcumulados( $year, true );
       $this->setCalculosIVA( $prorrataOperativa, 0 );
       $prorrata_operativa = $this->prorrata_operativa;
       $prorrata_estimada = $this->prorrata;
+      $ratio1 = $this->ratio1;
+      $ratio2 = $this->ratio2;
+      $ratio3 = $this->ratio3;
+      $ratio4 = $this->ratio4;
       
       $this->sumAcumulados( $year, false );
       $this->setCalculosIVA( $prorrataOperativa, 0 );
       $this->prorrata_operativa = $prorrata_operativa;
       $this->prorrata = $prorrata_estimada;
+      $this->ratio1 = $ratio1;
+      $this->ratio2 = $ratio2;
+      $this->ratio3 = $ratio3;
+      $this->ratio4 = $ratio4;
       
       return $this;
       
@@ -940,7 +947,6 @@ class CalculatedTax extends Model
       $this->denumerador_prorrata = $denumeradorProrrata;
       $this->prorrata = $prorrata;
       $this->prorrata_operativa = $prorrataOperativa;
-        
       //$this->subtotal_para_cfdp = $subtotalParaCFDP;
       $this->cfdp = $cfdp;
         
@@ -966,7 +972,6 @@ class CalculatedTax extends Model
       
       $this->saldo_favor = $saldoFavor;
       $this->saldo_favor_anterior = $lastBalance;
-      
       $this->setValoresPeriodoSinIva();
     }
     

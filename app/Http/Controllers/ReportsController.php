@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use App\Exports\ReportsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * @group Controller - Reportes
@@ -136,6 +137,9 @@ class ReportsController extends Controller
         $ano = $request->ano ? $request->ano : 2019;
         $mes = $request->mes ? $request->mes : 1;
         
+        $userId = auth()->user()->id;
+        Cache::forget("cache-currentcompany-$userId");
+        
         $company = currentCompanyModel();
         $prorrataOperativa = $company->getProrrataOperativa($ano);
         
@@ -165,7 +169,6 @@ class ReportsController extends Controller
       }
       
       if( !$request->vista || $request->vista == 'basica' ){
-        
         return view('/Dashboard/dashboard-basico', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes'));
       } else {
         return view('/Dashboard/dashboard-gerencial', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes'));
@@ -240,6 +243,10 @@ class ReportsController extends Controller
 
         $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
         $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
+        if($mes == 12){
+          $acumulado->sumAcumulados( $ano, true );
+          $acumulado->setCalculosIVA( $prorrataOperativa, 0 );
+        }
         
         if( !$data->book ) {
           return view('/Reports/no-data', compact('nombreMes') );

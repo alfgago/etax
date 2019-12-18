@@ -26,7 +26,7 @@
     </div>
 
     <div class="col-lg-6 mb-4">
-      @include('Reports.widgets.resumen-periodo', ['titulo' => "Acumulado Jul. 2019 - Dic. 2019", 'data' => $acumulado])
+      @include('Reports.widgets.resumen-periodo', ['titulo' => ($ano == 2019 ? "Acumulado Jul. 2019 - Dic. 2019" : "Acumulado anual $ano"), 'data' => $acumulado])
     </div>
 
     <div class="col-lg-6 mb-4" id="proporcion">
@@ -95,17 +95,6 @@
     				<a href="https://etaxcr.com/soporte/">Base de conocimiento</a>
     			</li>
     		</ul>
-
-      </div>
-    </div>
-
-    <div class="col-lg-12 mb-4">
-      <div class="sidebar-dashboard">
-        <div class="card-title">Notificaciones</div>
-        <div class="notificaciones-container">
-            <p>El proceso de importación por XMLs ha cambiado. Impórtelos de manera masiva y eTax le indica si hubo algún error en la importación. Luego clasifíquelos según sea necesario.</p>
-
-        </div>
 
       </div>
     </div>

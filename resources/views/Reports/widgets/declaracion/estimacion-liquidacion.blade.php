@@ -5,7 +5,7 @@
 	$det = $dataDeclaracion['determinacion'];
 	$montoAnualVentasConDerechoCredito = number_format( $det['montoAnualVentasConDerechoCredito'], 0);
 	$montoAnualVentasSinDerechoCredito = number_format( $det['montoAnualVentasSinDerechoCredito'], 0);
-	$porcentajeProrrataFinal = number_format( $det['porcentajeProrrataFinal'], 0);
+	$porcentajeProrrataFinal = number_format( $det['porcentajeProrrataFinal'], 2);
 	$creditoFiscalAnualTotal = number_format( $det['creditoFiscalAnualTotal'], 0);
 	$creditoFiscalAnualDeducible = number_format( $det['creditoFiscalAnualDeducible'], 0);
 	$creditoAnualFinal = number_format( $det['creditoAnualFinal'], 0);
