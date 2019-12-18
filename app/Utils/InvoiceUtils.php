@@ -166,7 +166,7 @@ class InvoiceUtils
             $cc = [];
             //Primero revisa si el invoice tiene un client_id
             if (isset($invoice->client_id)) {
-                $client_billing_emails = $invoice->client->billing_emails;
+                $client_billing_emails = replaceAccents($invoice->client->billing_emails);
                 if ( isset($client_billing_emails) ){
                     //Si existen, empieza con eso.
                     $arr = explode(",", $client_billing_emails);
@@ -186,11 +186,11 @@ class InvoiceUtils
             
             //Si ademas de los billing emails se tiene send_emails, tambien los agrega.
             if( isset($invoice->send_emails) ) {
-                array_push( $cc,  $invoice->send_emails );
+                array_push( $cc,  replaceAccents($invoice->send_emails) );
             }
             
             if( isset($invoice->client_email) ) {
-                array_push( $cc, $invoice->client_email );
+                array_push( $cc, replaceAccents($invoice->client_email) );
             }
             
             if (!empty($cc)) {
