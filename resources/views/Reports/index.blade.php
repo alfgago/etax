@@ -50,15 +50,16 @@
         <div class="periodo-actual inline-form">
           <?php 
             $mes = \Carbon\Carbon::now()->month;
+            $ano = \Carbon\Carbon::now()->year;
           ?>
           <label>Filtrar por fecha</label>
           <div class="periodo-selects">
             <select class="form-control" id="input-ano" name="input-ano">
                 <option selected value="2019">2019</option>
-                <option selected value="2020">2020</option>
+                <option value="2020">2020</option>
             </select>
             <select class="form-control" id="input-mes" name="input-mes">
-                <option class="opt-acumulado" value="0" selected>Acumulado Jul. 2019 - Dic. 2019</option>
+                <option class="opt-acumulado" value="0" selected>Acumulado</option>
                 <option value="1">Enero</option>
                 <option value="2">Febrero</option>
                 <option value="3">Marzo</option>
