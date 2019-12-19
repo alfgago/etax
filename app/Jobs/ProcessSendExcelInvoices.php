@@ -62,7 +62,7 @@ class ProcessSendExcelInvoices implements ShouldQueue
         $invoiceList = array();
         foreach ($excelCollection as $row){
             try{
-
+                sleep (1);
                 $metodoGeneracion = "etax-bulk";
                     
                 if( isset($row['doc_identificacion']) ){
