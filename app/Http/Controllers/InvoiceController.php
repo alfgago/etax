@@ -700,7 +700,9 @@ class InvoiceController extends Controller
                         $recurrencia->save();   
                         
                         $invoice->recurring_id = $recurrencia->id;
-                        $invoice->is_void = true;
+                        if($invoice->hacienda_status == '99'){
+                            $invoice->is_void = true;
+                        }
                         $invoice->save();     
                     }
                     if($invoice->hacienda_status != '99'){
