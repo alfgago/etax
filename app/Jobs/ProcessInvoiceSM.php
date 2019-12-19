@@ -58,8 +58,14 @@ class ProcessInvoiceSM implements ShouldQueue
                 //if (strpos($invoice->generation_method, 'bulk') !== FALSE) {  // Procese el bulk de SM Seguros aqui
                     Log::info('send job invoice id: '.$this->invoiceId);
                     $invoice->in_queue = false;
-                    if( !$invoice->client_zip ){
-                        $invoice->client_zip = "11111";
+                    if( !$invoice->client_zip || $invoice->client_zip == "0" ){
+                        try{
+                          $invoice->client_zip = "10101";
+                          $invoice->client_country = 'CR';
+                          $invoice->client_state = $data['zip'][0];
+                          $invoice->client_city = $data['zip'][1] . $data['zip'][2];
+                          $invoice->client_district = $data['zip'];
+                        }catch( \Throwable $e ){ }
                     }
                     $invoice->save();
                     if ($company->atv_validation ) {
