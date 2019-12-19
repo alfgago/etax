@@ -58,6 +58,9 @@ class ProcessInvoiceSM implements ShouldQueue
                 //if (strpos($invoice->generation_method, 'bulk') !== FALSE) {  // Procese el bulk de SM Seguros aqui
                     Log::info('send job invoice id: '.$this->invoiceId);
                     $invoice->in_queue = false;
+                    if( !$invoice->client_zip ){
+                        $invoice->client_zip = "11111";
+                    }
                     $invoice->save();
                     if ($company->atv_validation ) {
                         sleep(15);
