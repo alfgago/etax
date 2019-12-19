@@ -2062,7 +2062,7 @@ class InvoiceController extends Controller
 
         try {
             Log::debug('Creando job de registro de facturas.');
-            foreach (array_chunk ( $invoiceList, 100 ) as $facturas) {
+            foreach (array_chunk ( $invoiceList, 50 ) as $facturas) {
                 ProcessSendExcelInvoices::dispatch($facturas, $companyId, $fileType)->onQueue('bulk');
             }
         }catch( \Throwable $ex ){
