@@ -34,6 +34,14 @@ class BillItem extends Model
       return $this->belongsTo(ProductCategory::class, 'product_type');
     }
     
+    public function getRealIVAPercentage(){
+      if( $this->iva_amount ){
+        return round($this->iva_amount/$this->subtotal * 100, 0);
+      }else{
+        return 0;
+      }
+    }
+    
     public function fixIvaType() {
       try{
         if( $this->bill->document_type != '04' ){
