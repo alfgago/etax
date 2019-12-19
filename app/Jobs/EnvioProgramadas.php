@@ -161,6 +161,7 @@ class EnvioProgramadas implements ShouldQueue
             $today = $start_date->year."-".$start_date->month."-".$start_date->day." 23:59:59";
             log::info('Facturas enviadas el '.$today);
             $invoices = Invoice::where("hacienda_status",'99')
+                                ->where('is_void', false)
                                 ->where('generated_date', '<=',$today)
                                 ->get();
             foreach ($invoices as $invoice) {

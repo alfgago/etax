@@ -166,7 +166,7 @@ class InvoiceUtils
             $cc = [];
             //Primero revisa si el invoice tiene un client_id
             if (isset($invoice->client_id)) {
-                $client_billing_emails = $invoice->client->billing_emails;
+                $client_billing_emails = replaceAccents($invoice->client->billing_emails);
                 if ( isset($client_billing_emails) ){
                     //Si existen, empieza con eso.
                     $arr = explode(",", $client_billing_emails);
@@ -186,11 +186,11 @@ class InvoiceUtils
             
             //Si ademas de los billing emails se tiene send_emails, tambien los agrega.
             if( isset($invoice->send_emails) ) {
-                array_push( $cc,  $invoice->send_emails );
+                array_push( $cc,  replaceAccents($invoice->send_emails) );
             }
             
             if( isset($invoice->client_email) ) {
-                array_push( $cc, $invoice->client_email );
+                array_push( $cc, replaceAccents($invoice->client_email) );
             }
             
             if (!empty($cc)) {
@@ -204,7 +204,7 @@ class InvoiceUtils
                                     ]));
             } else {
 
-                Mail::to($invoice->client_email)->send(new \App\Mail\InvoiceNotification([	
+                Mail::to(replaceAccents($invoice->client_email))->send(new \App\Mail\InvoiceNotification([	
                                         'xml' => $xmlPath,	
                                         'data_invoice' => $invoice, 
                                         'data_company' => $company,
@@ -444,7 +444,7 @@ class InvoiceUtils
                 'receptor_ubicacion_distrito' => substr($receptorPostalCode,3),
                 'receptor_ubicacion_otras_senas' => $data['client_address'] ? trim($data['client_address']) : '',
                 'receptor_otras_senas_extranjero' => $data['client_address'] ? trim($data['client_address']) : '',
-                'receptor_email' => $data['client_email'] ? trim($data['client_email']) :  '',
+                'receptor_email' => $data['client_email'] ? replaceAccents($data['client_email']) :  '',
                 'receptor_phone' => !empty($data['client_phone']) ? preg_replace('/[^0-9]/', '', $data['client_phone']) : '00000000',
                 'receptor_cedula_numero' => $data['client_id_number'] ? str_pad(preg_replace("/[^0-9]/", "",
                     $data['client_id_number']), 9, '0', STR_PAD_LEFT) : '',

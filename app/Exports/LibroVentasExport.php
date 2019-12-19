@@ -81,7 +81,7 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
             $map->invoice->currency,
             $map->invoice->currency_rate ?? '',
             round( $map->subtotal * $factor, 2),
-            $map->iva_percentage . '%',
+            (isset($map->ivaType) ? $map->ivaType->percentage : $map->iva_percentage) . '%',
             round( $map->iva_amount * $factor, 2),
             round( $map->total * $factor , 2),
             
