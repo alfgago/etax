@@ -169,7 +169,7 @@ class ProcessInvoice implements ShouldQueue
                 'receptor_ubicacion_canton' => substr($receptorPostalCode,1,2),
                 'receptor_ubicacion_distrito' => substr($receptorPostalCode,3),
                 'receptor_ubicacion_otras_senas' => $data['client_address'] ?? '',
-                'receptor_email' => $data['client_email'] ? trim($data['client_email']) : '',
+                'receptor_email' => $data['client_email'] ? replaceAccents($data['client_email']) : '',
                 'receptor_cedula_numero' => $data['client_id_number'] ? trim($data['client_id_number']) : '',
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',

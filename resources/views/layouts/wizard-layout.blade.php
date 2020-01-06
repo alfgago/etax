@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
+<?php $version = "6.33"; ?>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -20,11 +20,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css" />
-    <script src="/assets/js/cybs_devicefingerprint.js"></script>
-    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v=6.4">
+    <script src="/assets/js/cybs_devicefingerprint.js?v={{$version}}"></script>
+    <link rel="stylesheet" href="{{asset('assets/styles/css/themes/eva.min.css')}}?v={{$version}}">
     
     <link href="https://unpkg.com/dropzone/dist/dropzone.css" rel="stylesheet"/>
-    <script src="{{asset('assets/js/common-bundle.js')}}?v=6.4"></script>
+    <script src="{{asset('assets/js/common-bundle.js')}}?v={{$version}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
   
     @yield('header-scripts')

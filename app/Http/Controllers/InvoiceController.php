@@ -1604,9 +1604,8 @@ class InvoiceController extends Controller
             )->onConnection(config('etax.queue_connections'))
             ->onQueue('log_queue');
 
-            if( $invoice->year == 2018 ) {
-                clearLastTaxesCache($invoice->company->id, 2018);
-            }
+            clearLastTaxesCache($invoice->company->id, $invoice->year);
+            
             clearInvoiceCache($invoice);
 
             return redirect('/facturas-emitidas/validaciones')->withMessage( 'La factura '. $invoice->document_number . 'ha sido validada');
@@ -2079,7 +2078,7 @@ class InvoiceController extends Controller
 
         Log::info("disparo de job envio programada");
         EnvioProgramadas::dispatch()->onQueue('sendbulk');
-        dd("aaaa");
+        dd("Programadas enviadas");
 
     }
 
@@ -2103,15 +2102,17 @@ class InvoiceController extends Controller
         $invoiceList = $collection->toArray()[0];
         try {
             //Log::debug('Creando job de registro de facturas.');
-            foreach (array_chunk ( $invoiceList, 200 ) as $facturas) {
-                $this->guardarMasivoExcel($facturas, $companyId);
-                //ProcessSendExcelInvoices::dispatch($facturas, $companyId)->onQueue('bulk');
+            foreach (array_chunk ( $invoiceList, 50 ) as $facturas) {
+                $success = $this->guardarMasivoExcel($facturas, $companyId);
+                if(!$success){
+                    return back()->withError('La cédula de la empresa no coincide con la del Excel.');
+                }
             }
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
         }
-        $xlsInvoices = XlsInvoice::select('consecutivo', 'codigoActividad', 'nombreReceptor', 'tipoIdentificacionReceptor', 'IdentificacionReceptor', 'correoReceptor', 'condicionVenta', 'plazoCredito', 'medioPago', 'codigoMoneda', 'tipoCambio','autorizado')
-            ->where('company_id',$companyId)->distinct('consecutivo')->get();
+        $xlsInvoices = XlsInvoice::where('company_id',$companyId)->get();
+        
         return view("Invoice/confirmacion-envio")->with('facturas', $xlsInvoices);
 
     }
@@ -2129,7 +2130,7 @@ class InvoiceController extends Controller
         foreach ($facturas as $row){
             try{
                 if( isset($row['identificacionreceptor']) ){
-                    if($row['cedulaempresa'] == $company->id_number){
+                    if(strval($row['cedulaempresa']) == $company->id_number){
                         $xls_invoice = XlsInvoice::updateOrCreate([
                             'consecutivo' => $row['identificador'],
                             'company_id' => $company->id,
@@ -2138,7 +2139,7 @@ class InvoiceController extends Controller
                         [
                             'cantidad' => $row['cantidad']
                         ]);
-                        $xls_invoice->consecutivo = $row['identificador'];
+                        $xls_invoice->consecutivo = strval($row['identificador']);
                         $xls_invoice->tipoDocumento = $row['tipodocumento'];
                         $xls_invoice->fechaEmision = $row['fechaemision'];
                         $xls_invoice->fechaVencimiento = $row['fechavencimiento'];
@@ -2148,7 +2149,7 @@ class InvoiceController extends Controller
                         $xls_invoice->codigoActividad = $row['codigoactividad'];
                         $xls_invoice->nombreEmisor = $row['nombreemisor'];
                         $xls_invoice->tipoIdentificacionEmisor = $row['tipoidentificacionemisor'];
-                        $xls_invoice->identificacionEmisor = $row['identificacionemisor'];
+                        $xls_invoice->identificacionEmisor = strval($row['identificacionemisor']);
                         $xls_invoice->provinciaEmisor = $row['provinciaemisor'];
                         $xls_invoice->cantonEmisor = $row['cantonemisor'];
                         $xls_invoice->distritoEmisor = $row['distritoemisor'];
@@ -2215,6 +2216,7 @@ class InvoiceController extends Controller
                         $xls_invoice->save();
                     }else {
                         Log::warning('Error en factura ENVIO MASIVO EXCEL no coinciden las cedulas');
+                        return false;
                     }
                 }
 
@@ -2223,6 +2225,7 @@ class InvoiceController extends Controller
             }
         }
         $company->save();
+        return true;
     }
 
 

@@ -642,8 +642,6 @@ toastr.options = {
   }
 
   window.agregarEditarItem = function() {
-
-
   	var guardar = $('#form-checkbox').is(":checked");
 
     //Si esta editando, usa lnum y item_id para identificar la fila.
@@ -906,6 +904,13 @@ toastr.options = {
       $('#discount_type').val('01');
       $('#discount').val(0);
       $('#tipo_producto').change();
+  }
+  
+  window.agregarNuevaLinea = function() {
+      $('#codigo-select').val('seleccionar').change();
+      $('#codigo-select-div').show();
+      limpiarFormItem();
+      abrirPopup('linea-popup');
   }
 
   //Carga la item para ser editada

@@ -19,23 +19,24 @@
 </div>
 
 <div class="form-group col-md-12">
+  <label for="default_vat_code">Tipo de IVA por defecto</label>
+  <select class="form-control select-search" id="default_vat_code" name="default_vat_code">
+    @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+      <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" {{ $tipo['code'] == 'B103' ? 'selected' : ''}} >{{ $tipo['name'] }}</option>
+    @endforeach
+  </select>
+  <div class="description">Seleccione el tipo de venta y tarifa por defecto que desea utilizar en su facturación.</div>
+</div>  
+
+<div class="form-group col-md-12">
   <label for="default_category_producto_code">Categoría de declaración por defecto</label>
   <select class="form-control" id="default_category_producto_code" name="default_category_producto_code">
     @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $category )
       <option value="{{ $category['id'] }}" posibles="{{ $category['open_codes'] }}" >{{ $category['name'] }}</option>
     @endforeach
   </select>
+  <div class="description">Seleccione la categoría de declaración por defecto donde irán sus ventas, y facilite el proceso de automatización de su declaración.</div>
 </div>  
-
-<div class="form-group col-md-12">
-  <label for="default_vat_code">Tipo de IVA por defecto</label>
-  <select class="form-control" id="default_vat_code" name="default_vat_code">
-    @foreach ( \App\CodigoIvaRepercutido::all() as $tipo )
-      <option value="{{ $tipo['code'] }}" attr-iva="{{ $tipo['percentage'] }}" porcentaje="{{ $tipo['percentage'] }}" class="{{ @$tipo['hidden'] ? 'hidden' : '' }} {{ @$tipo['hideMasiva'] ? 'hidden' : '' }}">{{ $tipo['name'] }}</option>
-    @endforeach
-  </select>
-</div>  
-
 
 <div class="form-group col-md-6">
   <label for="card_retention">% Retención Tarjetas</label>
@@ -69,17 +70,34 @@
   
 $(document).ready(function(){
 
-    $("#default_category_producto_code").change(function(){
-      var posibles = $('#default_category_producto_code :selected').attr('posibles');
-      var arrPosibles = posibles.split(",");
-      var tipo;
-      $('#default_vat_code option').hide();
-      for( tipo of arrPosibles ) {
-        $('#default_vat_code option[value='+tipo+']').show();
-      }
+    $("#default_vat_code").change(function(){
+      filterCategoriasHacienda();
     });
 
+    function filterCategoriasHacienda(){
+        var codigoIVA = $('#default_vat_code :selected').val();
+        $('#default_category_producto_code option').hide();
+        var tipoProducto = 0;
+        $("#default_category_producto_code option").each(function(){
+          var posibles = $(this).attr('posibles').split(",");
+        	if(posibles.includes(codigoIVA)){
+            	$(this).show();
+            	if( !tipoProducto ){
+                tipoProducto = $(this).val();
+              }
+            }
+        });
+        $('#default_category_producto_code').val( tipoProducto ).change();
+    }
+  
+    filterCategoriasHacienda();
 
 });
       
 </script>
+
+<style>
+.wizard-popup .select2-container {
+    z-index: 999999;
+}
+</style>

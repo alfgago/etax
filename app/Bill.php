@@ -797,6 +797,7 @@ class Bill extends Model
             if( $data['acceptStatus'] ){
               $bill->accept_status = 1;
               $bill->hacienda_status = "03";
+              $bill->is_authorized = 1;
             }
           }
 

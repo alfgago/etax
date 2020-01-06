@@ -260,7 +260,7 @@ $company = currentCompanyModel();
                 </div>
                 
                 <div class="form-group col-md-12">
-                  <div onclick="abrirPopup('linea-popup');" class="btn btn-dark btn-agregar">Agregar línea</div>
+                  <div onclick="agregarNuevaLinea();" class="btn btn-dark btn-agregar">Agregar línea</div>
                   <div onclick="abrirPopup('otros-popup');" class="btn btn-dark btn-agregar btn-otroscargos">Agregar otros cargos</div>
                 </div>
     

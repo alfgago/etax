@@ -11,7 +11,38 @@
 @endsection
 
 @section('content')
+<style>
+	.operative-data-tabs {
+    display: flex;
+}
 
+.data-tab {
+    margin-right: .25rem;
+    padding: .25rem .5rem;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    cursor: pointer;
+    transition: .5s ease all;
+}
+
+.data-tab:hover {
+    background: #f5f5f5;
+}
+
+.data-tab.is-active {
+    background: #e5e5e5;
+}
+
+.form-row.data-fields {
+    margin: 0;
+    border: 2px solid #e5e5e5;
+    padding: .25rem;
+}
+
+.form-row.data-fields:not(.is-active) {
+    display: none !important;
+}
+</style>
 <div class="row">
   <div class="col-md-12">
   	<div class="tabbable verticalForm">
@@ -46,58 +77,80 @@
 						      </h3>
 						    </div>
 						    
-						    <div class="form-group col-md-6">
-						      <label for="first_prorrata_type">Método de cálculo de prorrata operativa inicial</label>
-						      <select class="form-control" name="first_prorrata_type" id="first_prorrata_type" onchange="toggleTipoProrrata();" required>
-						        <option value="1" {{ @$company->first_prorrata_type == 1 ? 'selected' : '' }}>Registro manual</option>
-						        <option value="2" {{ @$company->first_prorrata_type == 2 ? 'selected' : '' }}>Ingreso de totales por código</option>
-						        <option value="3" {{ @$company->first_prorrata_type == 3 ? 'selected' : '' }}>Ingreso de facturas del 2018</option>
-						      </select>
-						    </div>
+						    <?php 
+						    	$today = Carbon\Carbon::now();
+            					$anoActual = $today->year;
+						    ?>
 						    
-						    <div class="form-group col-md-6 hidden toggle-types type-1">
-						      <label for="first_prorrata">Digite su prorrata operativa</label>
-						      <input type="number" class="form-control" name="first_prorrata" id="first_prorrata" step="0.01" min="0" max="99.99" value="{{ @$company->first_prorrata ? $company->first_prorrata : 0 }}" required>
-						    </div>
-						    
-						    <div class="form-group col-md-6 hidden toggle-types type-1 proporciones">
-						      <label for="operative_ratio1">Digite su proporción de ventas al 1%</label>
-						      <input type="number" class="form-control" name="operative_ratio1" id="operative_ratio1" step="0.01" min="0" max="100" value="{{ @$company->operative_ratio1 ? $company->operative_ratio1 : 0 }}" required>
-						    </div>
-						    
-						    <div class="form-group col-md-6 hidden toggle-types type-1 proporciones">
-						      <label for="operative_ratio2">Digite su proporción de ventas al 2%</label>
-						      <input type="number" class="form-control" name="operative_ratio2" id="operative_ratio2" step="0.01" min="0" max="100" value="{{ @$company->operative_ratio2 ? $company->operative_ratio2 : 0 }}" required>
-						    </div>
-						    
-						    <div class="form-group col-md-6 hidden toggle-types type-1 proporciones">
-						      <label for="operative_ratio3">Digite su proporción de ventas al 13%</label>
-						      <input type="number" class="form-control" name="operative_ratio3" id="operative_ratio3" step="0.01" min="0" max="100" value="{{ @$company->operative_ratio3 ? $company->operative_ratio3 : 0 }}" required>
-						    </div>
-						    
-						    <div class="form-group col-md-6 hidden toggle-types type-1 proporciones">
-						      <label for="operative_ratio4">Digite su proporción de ventas al 4%</label>
-						      <input type="number" class="form-control" name="operative_ratio4" id="operative_ratio4" step="0.01" min="0" max="100" value="{{ @$company->operative_ratio4 ? $company->operative_ratio4 : 0 }}" required>
-						    </div>
-						    
-						    <div class="form-group col-md-12 hidden toggle-types type-1">
-						    	<div id="validate-ratios-text" class="text-danger hidden" >La sumatoria de proporciones debe ser igual a 100.</div>
-						    </div>
-						    
-						    <div class="form-group col-md-6 hidden toggle-types type-2">
-						      <label for="">&nbsp;</label>
-						     	<a class="btn btn-primary form-button" href="/editar-totales-2018">Ingrese sus totales por código</a>
-						    </div>
-						    
-						    <div class="form-group col-md-6 hidden toggle-types type-3">
-						      <label for="">&nbsp;</label>
-						      <a class="btn btn-primary form-button" href="/empresas/set-prorrata-2018-facturas">Ingrese sus facturas 2018</a>
-						    </div>
-						    
-						    <div class="form-group col-md-6">
-						      <label for="saldo_favor_2018">Ingrese su saldo a favor acumulado de periodos anteriores</label>
-						      <input type="numeric" class="form-control" name="saldo_favor_2018" id="saldo_favor_2018" step="0.01" value="{{ @$company->saldo_favor_2018 ? round($company->saldo_favor_2018, 2) : 0 }}">
-						    </div>
+						    <div class="form-group col-md-12">
+							    <div class="operative-data-tabs">
+							    @for ($i = 2019; $i <= $anoActual; $i++)
+							    	<div class="data-tab data-tab-{{$i}} {{ $i == $anoActual ? 'is-active' : '' }}" onclick="toggleDatafields({{$i}});">
+							    		{{$i}}
+							    	</div>
+							    @endfor
+							    </div>
+							    
+							    @for ($i = 2019; $i <= $anoActual; $i++)
+							    	<?php
+							    		$operativeData = $company->getOperativeData($i);
+							    	?>
+								    <div class="form-row data-fields data-{{$i}} {{ $i == $anoActual ? 'is-active' : '' }}">
+									    <div class="form-group col-md-6">
+									      <label for="method">Método de cálculo de prorrata operativa inicial</label>
+									      <select class="form-control" name="operative[{{ $i }}][method]" id="method" onchange="toggleTipoProrrata({{$i}});" required>
+									        <option value="1" {{ @$operativeData->method == 1 ? 'selected' : '' }}>Registro manual</option>
+									        @if($i == 2019)<option value="2" {{ @$operativeData->method == 2 ? 'selected' : '' }}>Ingreso de totales por código</option>@endif
+									        <option value="3" {{ @$operativeData->method == 3 ? 'selected' : '' }}>Ingreso de facturas periodo anterior</option>
+									      </select>
+									    </div>
+									    
+									    <div class="form-group col-md-6 hidden toggle-types type-1">
+									      <label for="prorrata_operativa">Digite su prorrata operativa</label>
+									      <input type="number" class="form-control" name="operative[{{ $i }}][prorrata_operativa]"  step="0.01" min="0" max="99.99" value="{{ (@$operativeData->prorrata_operativa ?? 0.99)*100}}" required>
+									    </div>
+									    
+									    <div class="form-group col-md-6 hidden toggle-types type-1 proporciones">
+									      <label for="operative_ratio1">Digite su proporción de ventas al 1%</label>
+									      <input type="number" class="form-control" name="operative[{{ $i }}][operative_ratio1]"  step="0.01" min="0" max="100" value="{{ (@$operativeData->operative_ratio1 ?? 0)*100 }}" required>
+									    </div>
+									    
+									    <div class="form-group col-md-6 hidden toggle-types type-1 proporciones">
+									      <label for="operative_ratio2">Digite su proporción de ventas al 2%</label>
+									      <input type="number" class="form-control" name="operative[{{ $i }}][operative_ratio2]"  step="0.01" min="0" max="100" value="{{ (@$operativeData->operative_ratio2 ?? 0)*100 }}" required>
+									    </div>
+									    
+									    <div class="form-group col-md-6 hidden toggle-types type-1 proporciones">
+									      <label for="operative_ratio3">Digite su proporción de ventas al 13%</label>
+									      <input type="number" class="form-control" name="operative[{{ $i }}][operative_ratio3]"  step="0.01" min="0" max="100" value="{{ (@$operativeData->operative_ratio3 ?? 1)*100 }}" required>
+									    </div>
+									    
+									    <div class="form-group col-md-6 hidden toggle-types type-1 proporciones">
+									      <label for="operative_ratio4">Digite su proporción de ventas al 4%</label>
+									      <input type="number" class="form-control" name="operative[{{ $i }}][operative_ratio4]"  step="0.01" min="0" max="100" value="{{ (@$operativeData->operative_ratio4 ?? 0)*100 }}" required>
+									    </div>
+									    
+									    <div class="form-group col-md-12 hidden toggle-types type-1">
+									    	<div id="validate-ratios-text" class="text-danger hidden" >La sumatoria de proporciones debe ser igual a 100.</div>
+									    </div>
+									    
+									    <div class="form-group col-md-6 hidden toggle-types type-2">
+									      <label for="">&nbsp;</label>
+									     	<a class="btn btn-primary form-button" href="/editar-totales-2018">Ingrese sus totales por código</a>
+									    </div>
+									    
+									    <div class="form-group col-md-6 hidden toggle-types type-3">
+									      <label for="">&nbsp;</label>
+									      <a class="btn btn-primary form-button" href="/facturas-emitidas">Ingrese sus facturas {{ $i-1 }}</a>
+									    </div>
+									    
+									    <div class="form-group col-md-6">
+									      <label for="previous_balance">Ingrese su saldo a favor acumulado de periodos anteriores</label>
+									      <input type="numeric" class="form-control" name="operative[{{ $i }}][previous_balance]"  step="0.01" value="{{ @$operativeData->previous_balance ?? 0 }}">
+									    </div>
+									</div>
+								@endfor
+							</div>
 						    
 						    <div class="form-group col-md-12">
 						      <h3>
@@ -205,8 +258,8 @@
 	                            </div>
 
 						    <div class="form-group col-md-6">
-						      <label for="default_currency">Aceptar facturas por correo automáticamente</label>
-						      <select class="form-control" name="auto_accept_email" id="default_currency" required>
+						      <label for="auto_accept_email">Aceptar facturas por correo automáticamente</label>
+						      <select class="form-control" name="auto_accept_email" id="auto_accept_email" required>
                                 <option value="1" {{ @$company->auto_accept_email == 1 ? 'selected' : '' }}>Sí</option>
                                 <option value="0" {{ @$company->auto_accept_email == 0 ? 'selected' : '' }}>No</option>
                               </select>
@@ -276,52 +329,21 @@
 
 @section('footer-scripts')
     <script>
-
-        /*$(document).ready(function(){
-            $('#saldo_favor_2018').on('keyup',function(){
-                $(this).manageCommas();
-            });
-            //then sanatize on leave
-            // if sanitizing needed on form submission time,
-            //then comment beloc function here and call in in form submit function.
-            $('#saldo_favor_2018').on('focus',function(){
-                $(this).santizeCommas();
-            });
-        });
-
-        String.prototype.addComma = function() {
-            return this.replace(/(.)(?=(.{3})+$)/g,"$1,").replace(',.', '.');
-        }
-        //Jquery global extension method
-        $.fn.manageCommas = function () {
-            return this.each(function () {
-                $(this).val($(this).val().replace(/(,|)/g,'').addComma());
-            });
-        }
-
-        $.fn.santizeCommas = function() {
-            return $(this).val($(this).val().replace(/(,| )/g,''));
-        }*/
-    </script>
-
-	<script>
-
-		//seleccinar los codigos seleccionados.
-
-
-
-
-
-
-		function toggleTipoProrrata() {
-		  var metodo = $("#first_prorrata_type").val();
-		  $( ".toggle-types" ).hide();
-		  $( ".type-"+metodo ).show();
+		function toggleTipoProrrata(ano = null) {
+		  var metodo = $(".data-"+ano+" #method").val();
+		  $( ".data-"+ano+" .toggle-types" ).hide();
+		  $( ".data-"+ano+" .type-"+metodo ).show();
+		}
+		
+		function toggleDatafields(ano){
+			jQuery(".data-fields").removeClass('is-active');
+			jQuery(".data-" + ano).addClass('is-active');
+			toggleTipoProrrata(ano);
 		}
 		
 		$(document).ready(function(){
-		  
-		  toggleTipoProrrata();
+		  var anoActual = "{{$anoActual}}";
+		  toggleTipoProrrata(anoActual);
 		  
 	    $("#default_category_producto_code").change(function(){
 	      var posibles = $('#default_category_producto_code :selected').attr('posibles');

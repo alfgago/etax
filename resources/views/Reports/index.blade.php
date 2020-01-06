@@ -55,8 +55,8 @@
           <label>Filtrar por fecha</label>
           <div class="periodo-selects">
             <select class="form-control" id="input-ano" name="input-ano">
-                <option selected value="2019">2019</option>
-                <option value="2020">2020</option>
+                <option value="2019">2019</option>
+                <option selected value="2020">2020</option>
             </select>
             <select class="form-control" id="input-mes" name="input-mes">
                 <option class="opt-acumulado" value="0" selected>Acumulado</option>

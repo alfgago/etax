@@ -8,6 +8,7 @@ use App\Utils\BridgeHaciendaApi;
 use App\Subscription;
 use App\SubscriptionPlan;
 use App\CalculatedTax;
+use App\OperativeYearData;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
@@ -28,6 +29,11 @@ class Company extends Model {
     //Relación con facturas recibidas
     public function bills() {
         return $this->hasMany(Bill::class);
+    }
+    
+    //Relación con facturas recibidas
+    public function operativeYearData() {
+        return $this->hasMany(OperativeYearData::class);
     }
 
     //Relación con clientes
@@ -157,31 +163,33 @@ class Company extends Model {
         }
     }
     
-    public function getProrrataOperativa( $ano ){
-      
-      $anoAnterior = $ano > 2018 ? $ano-1 : 2018;
-      if($anoAnterior == 2018) {
-        if( $this->first_prorrata_type == 1 ){
-          $prorrataOperativa = $this->first_prorrata ? $this->first_prorrata / 100 : 1;
-              
-          if( $prorrataOperativa == 1 ) {
-              $prorrataOperativa = 0.9999;
-              $this->first_prorrata = 99.99;
-              $this->operative_prorrata = 99.99;
-              $this->save();
-              $userId = auth()->user()->id;
-              Cache::forget("cache-currentcompany-$userId");
-          }
-        }else {
-          $anterior = CalculatedTax::getProrrataPeriodoAnterior( $anoAnterior );
-          $prorrataOperativa = $anterior->prorrata;
+    public function getOperativeData( $ano ){
+        $anoAnterior = $ano-1;
+        if($anoAnterior < 2018){
+            //Si es menor a 2018, devuelve uno falso. Esto evita que se quede en un ciclo, porque para calcular el operativo necesita llamar al anterior.
+            $fake = new OperativeYearData();
+            return $fake; 
         }
-      }else{
-        $anterior = CalculatedTax::getProrrataPeriodoAnterior( $anoAnterior );
-        $prorrataOperativa = $anterior->prorrata;
-      }
-
-      return $prorrataOperativa;
+        $operativeData = OperativeYearData::firstOrCreate(
+            [
+                'company_id' => $this->id,
+                'year' => $anoAnterior
+            ]
+        );
+        if( $operativeData->method > 1 ){
+            $operativeData->getDataPeriodo();
+        }
+        return $operativeData;
+    }
+    
+    
+    public function getProrrataOperativa( $ano ){
+        try{
+            $prorrataOperativa = $this->getOperativeData( $ano )->prorrata_operativa;
+            return $prorrataOperativa;
+        }catch(\Exception $e){
+            Log::error($e);
+        }
     }
     
     public function getLastBalance($month, $year) {

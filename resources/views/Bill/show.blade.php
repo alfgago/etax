@@ -134,9 +134,9 @@
                   <input type="text" class="form-control" name="iva_amount" id="monto_iva" placeholder="" readonly="true" required>
                 </div>
 
-                <div class="form-group col-md-4 hidden" id="total_iva_devuelto-cont">
+                <div class="form-group col-md-4 {{ $bill->total_iva_devuelto ?? 'hidden' }}" id="total_iva_devuelto-cont">
                   <label for="total">IVA Devuelto</label>
-                  <input type="text" class="form-control total" name="total_iva_devuelto" id="total_iva_devuelto" placeholder="" readonly="true" required>
+                  <input type="text" class="form-control total" name="total_iva_devuelto" id="total_iva_devuelto" value="{{ $bill->total_iva_devuelto }}" placeholder="" readonly="true" required>
                 </div>
 
                 <div class="form-group col-md-4 hidden" id="total_iva_exonerado-cont">
@@ -351,6 +351,8 @@ $(document).ready(function(){
 
   $('#subtotal').val( fixComas(subtotal) );
   $('#monto_iva').val( fixComas(monto_iva) );
+  var devuelto = parseFloat( $('#total_iva_devuelto').val() );
+  total = total - devuelto;
   $('#total').val( fixComas(total) );
   
   toggleRetencion();
