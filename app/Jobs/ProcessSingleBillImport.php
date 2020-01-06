@@ -62,14 +62,6 @@ class ProcessSingleBillImport implements ShouldQueue
             );
             
             if( !$bill->id ){
-                /*$available_bills = AvailableBills::where('company_id', $bill->company_id)
-                                      ->where('year', $bill->year)
-                                      ->where('month', $bill->month)
-                                      ->first();
-                if( isset($available_bills) ) {
-                  $available_bills->current_month_sent = $available_bills->current_month_sent + 1;
-                  $available_bills->save();
-                }*/
                 $bill->save();
             }
             

@@ -373,7 +373,14 @@ class BillController extends Controller
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');
             })
-            ->rawColumns(['actions', 'hacienda_status'])
+            ->addColumn('monto_iva', function(Bill $bill) {
+                $ivaAmount = number_format($bill->iva_amount ,2);
+                if($bill->total_iva_devuelto){
+                    return "0 <br><small style='font-size:.8em !important;'>($ivaAmount devuelto)</small>";
+                }
+                return $ivaAmount;
+            })
+            ->rawColumns(['actions', 'hacienda_status', 'monto_iva'])
             ->toJson();
     }
 

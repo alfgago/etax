@@ -49,33 +49,33 @@
             <th>Real estimado</th>
           </tr>
           
-          <tr>
+         <tr>
             <th>Prorrata</td>
-            <td> <span>{{ number_format( $acumulado->company->operative_prorrata, 2) }}%</span> </td>
+            <td> <span>{{ number_format( $operativeData->prorrata_operativa*100, 2) }}%</span> </td>
             <td> {{ number_format( $acumulado->prorrata*100, 2) }}% </td>
           </tr>
           
           <tr>
             <th>Ventas 1%</td>
-            <td> <span>{{ number_format( $acumulado->company->operative_ratio1, 2) }}%</span> </td>
+            <td> <span>{{ number_format( $operativeData->operative_ratio1*100, 2) }}%</span> </td>
             <td> {{ number_format( $acumulado->ratio1*100, 2) }}% </td>
           </tr>
           
           <tr>
             <th>Ventas 2%</td>
-            <td> <span>{{ number_format( $acumulado->company->operative_ratio2, 2) }}%</span> </td>
+            <td> <span>{{ number_format( $operativeData->operative_ratio2*100, 2) }}%</span> </td>
             <td> {{ number_format( $acumulado->ratio2*100, 2) }}% </td>
           </tr>
           
           <tr>
             <th>Ventas 13%</td>
-            <td> <span>{{ number_format( $acumulado->company->operative_ratio3, 2) }}%</span> </td>
+            <td> <span>{{ number_format( $operativeData->operative_ratio3*100, 2) }}%</span> </td>
             <td> {{ number_format( $acumulado->ratio3*100, 2) }}% </td>
           </tr>
           
           <tr>
             <th>Ventas 4%</td>
-            <td> <span>{{ number_format( $acumulado->company->operative_ratio4, 2) }}%</span> </td>
+            <td> <span>{{ number_format( $operativeData->operative_ratio4*100, 2) }}%</span> </td>
             <td> {{ number_format( $acumulado->ratio4*100, 2) }}% </td>
           </tr>
           

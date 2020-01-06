@@ -277,47 +277,6 @@
 
 </div>
 <script>
-    /*$(function () {
-        $('#cantidad').on('keyup',function(){
-            $(this).manageCommas();
-        });
-        $('#cantidad').on('focus',function(){
-            $(this).santizeCommas();
-        });
-        
-        $('#precio_unitario').on('keyup',function(){
-            $(this).manageCommas();
-        });
-        $('#precio_unitario').on('focus',function(){
-            $(this).santizeCommas();
-        });
-       
-        $('#item_iva_amount').on('change',function(){
-            $(this).manageCommas();
-        });
-        $('#item_iva_amount').on('change',function(){
-            $(this).santizeCommas();
-        });
-        
-        $('#discount').on('keyup',function(){
-            $(this).manageCommas();
-        });
-        $('#discount').on('focus',function(){
-            $(this).santizeCommas();
-        });
-       
-        String.prototype.addComma = function() {
-            return this.replace(/(.)(?=(.{3})+$)/g,"$1,").replace(',.', '.');
-        }
-        $.fn.manageCommas = function () {
-            return this.each(function () {
-                $(this).val($(this).val().replace(/(,|)/g,'').addComma());
-            });
-        }
-        $.fn.santizeCommas = function() {
-            return $(this).val($(this).val().replace(/(,| )/g,''));
-        }
-    });*/
     $( document ).ready(function() {
       $('#tipo_iva').on('select2:selecting', function(e){
         var selectBox = document.getElementById("tipo_iva");

@@ -141,7 +141,8 @@ class ReportsController extends Controller
         Cache::forget("cache-currentcompany-$userId");
         
         $company = currentCompanyModel();
-        $prorrataOperativa = $company->getProrrataOperativa($ano);
+        $operativeData = $company->getOperativeData($ano);
+        $prorrataOperativa = $operativeData->prorrata_operativa;
         
         $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
         $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
@@ -165,13 +166,13 @@ class ReportsController extends Controller
 
       }catch( \Throwable $ex ){
         $this->forceRecalc($ano);
-        Log::error('Error al cargar dashboard' . $ex->getMessage());
+        Log::error( $ex );
       }
       
       if( !$request->vista || $request->vista == 'basica' ){
-        return view('/Dashboard/dashboard-basico', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes'));
+        return view('/Dashboard/dashboard-basico', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes', 'operativeData'));
       } else {
-        return view('/Dashboard/dashboard-gerencial', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes'));
+        return view('/Dashboard/dashboard-gerencial', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes', 'operativeData'));
       }
       
     }
@@ -201,7 +202,12 @@ class ReportsController extends Controller
       $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
       $nombreMes = Variables::getMonthName($mes);
       
-      return view('/Reports/reporte-cuentas', compact('data', 'ano', 'nombreMes') );
+      $acumulado = null;
+      if($mes == 12 || $mes == 0){
+        $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
+      }
+      
+      return view('/Reports/reporte-cuentas', compact('data', 'ano', 'nombreMes', 'acumulado') );
 
     }
     

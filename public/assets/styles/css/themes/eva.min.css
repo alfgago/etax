@@ -19376,6 +19376,7 @@ ngb-tabset.p-0 .tab-content {
   position: relative;
 }
 
+.wizard-popup .select2-results__option,
 .wizard-popup .select2-container--open .select2-dropdown--above {
   font-size: 10px;
 }
@@ -19647,6 +19648,10 @@ ngb-tabset.p-0 .tab-content {
 
 .companyParent.suscripciones .form-group {
   margin: 0;
+}
+
+.wizard-container form h3 {
+  margin-top: 0;
 }
 
 @media (max-width: 580px) {
@@ -40589,6 +40594,7 @@ ngb-tabset.p-0 .tab-content {
   position: relative;
 }
 
+.wizard-popup .select2-results__option,
 .wizard-popup .select2-container--open .select2-dropdown--above {
   font-size: 10px;
 }
@@ -40860,6 +40866,10 @@ ngb-tabset.p-0 .tab-content {
 
 .companyParent.suscripciones .form-group {
   margin: 0;
+}
+
+.wizard-container form h3 {
+  margin-top: 0;
 }
 
 @media (max-width: 580px) {

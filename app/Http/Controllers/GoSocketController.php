@@ -58,6 +58,12 @@ class GoSocketController extends Controller
                     'year' => 2018
                 ]
             );
+            
+            $ano = $request->year;
+            if( !isset($ano)){
+                $today = Carbon::now();
+                $ano = $today->year;
+            }
 
             $team = Team::where('company_id', $company->id)->first();
             /* Only owner of company or user invited as admin for that company can edit company details */
@@ -71,19 +77,20 @@ class GoSocketController extends Controller
             $company->first_prorrata = $request->first_prorrata;
             $company->first_prorrata_type = $request->first_prorrata_type;
             $company->use_invoicing = false;
-            
-            if( $company->first_prorrata_type == 1 ) {
-                $company->operative_prorrata = $request->first_prorrata;
-                $company->operative_ratio1 = $request->operative_ratio1;
-                $company->operative_ratio2 = $request->operative_ratio2;
-                $company->operative_ratio3 = $request->operative_ratio3;
-                $company->operative_ratio4 = $request->operative_ratio4;
+
+            $operativeData = $company->getOperativeData($ano);
+            $operativeData->method = $request->first_prorrata_type;
+            if( $operativeData->method == 1 ) {
+                $operativeData->prorrata_operativa = $request->first_prorrata/100;
+                $operativeData->operative_ratio1 = $request->operative_ratio1/100;
+                $operativeData->operative_ratio2 = $request->operative_ratio2/100;
+                $operativeData->operative_ratio3 = $request->operative_ratio3/100;
+                $operativeData->operative_ratio4 = $request->operative_ratio4/100;
+                $operativeData->save();
             }
-            
                 
             $company->wizard_finished = true;
             $company->save();
-
 
             clearLastTaxesCache($company->id, 2018);
             

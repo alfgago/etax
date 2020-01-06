@@ -118,11 +118,12 @@ class CalculatedTax extends Model
     public function applyRatios( $porc, $value ) {
       
       $company = $this->currentCompany;
+      $operativeData = $company->getOperativeData($this->year);
      
-      $ratio1_operativo = $company->operative_ratio1 / 100;
-      $ratio2_operativo = $company->operative_ratio2 / 100;
-      $ratio3_operativo = $company->operative_ratio3 / 100;
-      $ratio4_operativo = $company->operative_ratio4 / 100;
+      $ratio1_operativo = $operativeData->operative_ratio1;
+      $ratio2_operativo = $operativeData->operative_ratio2;
+      $ratio3_operativo = $operativeData->operative_ratio3;
+      $ratio4_operativo = $operativeData->operative_ratio4;
       
       //Redondea ratios a 4 decimales (Al multiplicar por 100, queda en 2)
       $ratio1_operativo = round($ratio1_operativo, 4);
@@ -914,10 +915,12 @@ class CalculatedTax extends Model
       $ivaDeducibleEstimado = ($cfdpEstimado * $prorrata) + $this->iva_acreditable_identificacion_plena;
       $balanceEstimado = -$lastBalance + $this->total_invoice_iva - $ivaDeducibleEstimado - $this->iva_devuelto;
 
-      $ratio1_operativo = $company->operative_ratio1 / 100;
-      $ratio2_operativo = $company->operative_ratio2 / 100;
-      $ratio3_operativo = $company->operative_ratio3 / 100;
-      $ratio4_operativo = $company->operative_ratio4 / 100;
+      $operativeData = $company->getOperativeData($this->year);
+     
+      $ratio1_operativo = $operativeData->operative_ratio1;
+      $ratio2_operativo = $operativeData->operative_ratio2;
+      $ratio3_operativo = $operativeData->operative_ratio3;
+      $ratio4_operativo = $operativeData->operative_ratio4;
       
       //Redondea ratios a 4 decimales (Al multiplicar por 100, queda en 2)
       $ratio1_operativo = round($ratio1_operativo, 4);
@@ -982,10 +985,12 @@ class CalculatedTax extends Model
       $ivaNoDeducible = 0;
       $ivaDeducibleOperativo = 0;
      
-      $ratio1_operativo = $company->operative_ratio1 / 100;
-      $ratio2_operativo = $company->operative_ratio2 / 100;
-      $ratio3_operativo = $company->operative_ratio3 / 100;
-      $ratio4_operativo = $company->operative_ratio4 / 100;
+      $operativeData = $company->getOperativeData($this->year);
+     
+      $ratio1_operativo = $operativeData->operative_ratio1;
+      $ratio2_operativo = $operativeData->operative_ratio2;
+      $ratio3_operativo = $operativeData->operative_ratio3;
+      $ratio4_operativo = $operativeData->operative_ratio4;
       //Redondea ratios a 4 decimales (Al multiplicar por 100, queda en 2)
       $ratio1_operativo = round($ratio1_operativo, 4);
       $ratio2_operativo = round($ratio2_operativo, 4);
@@ -1011,79 +1016,6 @@ class CalculatedTax extends Model
       $this->iva_deducible_operativo = $ivaDeducibleOperativo;
       $this->iva_no_deducible = $ivaNoDeducible;
 
-    }
-    
-    public static function getProrrataPeriodoAnterior($anoAnterior) {
-      
-      $currentCompany = currentCompanyModel();
-      $currentCompanyId = $currentCompany->id;
-      
-      $cacheKey = "cache-lasttaxes-$currentCompanyId-0-$anoAnterior";
-      if ( !Cache::has($cacheKey) ) {
-        $data = CalculatedTax::firstOrNew(
-            [
-                'company_id' => $currentCompanyId,
-                'month' => 0,
-                'year' => $anoAnterior,
-                'is_final' => true,
-            ]
-        );
-        
-        $data->currentCompany = $currentCompany;
-
-        if($anoAnterior == 2018 && $currentCompany->first_prorrata_type == 2 ){
-          
-          if( !$data->is_closed ) {
-              
-              $data->resetVars();
-              $data->calcularFacturacion( 0, $anoAnterior, 0, 1 );
-              
-              if( $data->count_invoices || $data->count_bills || $data->id ) {
-                $data->save();
-                $book = Book::calcularAsientos( $data );
-                $book->save();
-                $data->book = $book;
-              }
-              
-          }
-            
-        }else {
-          if( !$data->is_closed ) {
-              $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $anoAnterior, 0, 100 );
-              $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $anoAnterior, 0, 100 );
-              $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $anoAnterior, 0, 100 );
-              $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $anoAnterior, 0, 100 );
-              $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $anoAnterior, 0, 100 );
-              $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $anoAnterior, 0, 100 );
-              $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $anoAnterior, 0, 100 );
-              $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $anoAnterior, 0, 100 );
-              $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $anoAnterior, 0, 100 );
-              $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $anoAnterior, 0, 100 );
-              $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $anoAnterior, 0, 100 );
-              $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $anoAnterior, 0, 100 );
-              $data->resetVars();
-              $data->calcularFacturacionAcumulado( $anoAnterior, 1 );
-              if( $data->count_invoices || $data->count_bills ) {
-                $data->save();
-                $book = Book::calcularAsientos( $data );
-                $book->save();
-                $data->book = $book;
-              }
-          }
-          $data->prorrata = ($data->prorrata == 1) ? 0.9999 : $data->prorrata;
-          $currentCompany->operative_prorrata = number_format( $data->prorrata*100, 2);
-          $currentCompany->first_prorrata   = number_format( $data->prorrata*100, 2);
-          $currentCompany->operative_ratio1 = number_format( $data->ratio1*100, 2);
-          $currentCompany->operative_ratio2 = number_format( $data->ratio2*100, 2);
-          $currentCompany->operative_ratio3 = number_format( $data->ratio3*100, 2);
-          $currentCompany->operative_ratio4 = number_format( $data->ratio4*100, 2);
-          $currentCompany->save();
-        }
-        Cache::put($cacheKey, $data, now()->addDays(365));
-      }
-      
-      return Cache::get($cacheKey);
-      
     }
     
     function sumAcumulados( $year, $allMonths = true ) {
