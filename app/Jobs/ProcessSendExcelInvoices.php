@@ -56,13 +56,13 @@ class ProcessSendExcelInvoices implements ShouldQueue
         $excelCollection = $this->excelCollection;
         $fileType = $this->fileType;
         
+        sleep (1);
         Log::notice("$company->id_number importando ".count($excelCollection)." lineas... Last Invoice: $company->last_invoice_ref_number");
         $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
         $i = 0;
         $invoiceList = array();
         foreach ($excelCollection as $row){
             try{
-
                 $metodoGeneracion = "etax-bulk";
                     
                 if( isset($row['doc_identificacion']) ){

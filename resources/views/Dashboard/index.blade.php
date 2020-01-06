@@ -17,12 +17,13 @@
     <form class="periodo-form">
       <?php 
         $mes = \Carbon\Carbon::now()->month;
+        $ano = \Carbon\Carbon::now()->year;
       ?>
       <label>Filtrar por fecha</label>
       <div class="periodo-selects">
         <select id="input-ano" name="input-ano" onchange="loadReportes();">
-            <option selected value="2019">2019</option>
-            <option value="2020">2020</option>
+            <option value="2019">2019</option>
+            <option selected value="2020">2020</option>
         </select>
         <select id="input-mes" name="input-mes" onchange="loadReportes();">
             <option value="1" {{ $mes == 1 ? 'selected' : ''  }}>Enero</option>

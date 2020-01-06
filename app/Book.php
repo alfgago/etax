@@ -189,12 +189,12 @@ class Book extends Model
       $ivaData = json_decode( $calculos->iva_data ) ?? new \stdClass();
       
       $company = currentCompanyModel();
-      
-      $prorrataOperativa = $company->operative_prorrata / 100;
-      $ratio1_operativo = $company->operative_ratio1 / 100;
-      $ratio2_operativo = $company->operative_ratio2 / 100;
-      $ratio3_operativo = $company->operative_ratio3 / 100;
-      $ratio4_operativo = $company->operative_ratio4 / 100;
+      $operativeData = $company->getOperativeData($this->year);
+      $prorrataOperativa = $operativeData->prorrata_operativa;
+      $ratio1_operativo = $operativeData->operative_ratio1;
+      $ratio2_operativo = $operativeData->operative_ratio2;
+      $ratio3_operativo = $operativeData->operative_ratio3;
+      $ratio4_operativo = $operativeData->operative_ratio4;
       
       //Haber 3
         $iva_no_acreditables = $ivaData->iB080 + $ivaData->iB090 + $ivaData->iB097 + $ivaData->i098 + $ivaData->i099 +

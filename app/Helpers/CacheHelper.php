@@ -49,8 +49,8 @@ if (!function_exists('clearCierreCache')) {
 if (!function_exists('clearLastTaxesCache')) {  
 	
     function clearLastTaxesCache($current_company, $anoAnterior) {
-      	$cacheKey = "cache-lasttaxes-$current_company-0-$anoAnterior";
-      	Cache::forget($cacheKey);
+      	Cache::forget("cache-lasttaxes-$current_company-0-$anoAnterior");
+      	Cache::forget("cache-prorrata-$current_company-$anoAnterior");
       	
       	$year = $anoAnterior+1;
       	

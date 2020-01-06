@@ -69,7 +69,7 @@
 
             <div class="form-group col-md-6">
               <label for="recurrency">Cantidad de Facturas Emitidas</label>
-              <input type="text" class="form-control text-right" readonly disabled value="30" id="cantidad_facturas">
+              <input type="text" class="form-control cantidad_facturas" readonly disabled value="30" id="cantidad_facturas">
             </div>
             <div class="form-group col-md-12 mt-4">
             	<span class="precio-container">
@@ -131,6 +131,11 @@
       font-size: 1.5rem;
       line-height: 1.1;
       height: 38px;
+  }
+  #cantidad_facturas {
+    border: 0;
+    background: transparent;
+    font-weight: bold;
   }
 </style>
 

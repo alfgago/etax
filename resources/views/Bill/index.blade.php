@@ -124,7 +124,7 @@ $(function() {
       { data: 'document_type', name: 'document_type' },
       { data: 'moneda', name: 'currency', orderable: false, searchable: false },
       { data: 'subtotal', name: 'subtotal', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
-      { data: 'iva_amount', name: 'iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
+      { data: 'monto_iva', name: 'iva_amount', class: "text-right" },
       { data: 'total', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
       { data: 'generated_date', name: 'generated_date' },
       { data: 'hacienda_status', name: 'hacienda_status' },
