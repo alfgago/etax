@@ -13,7 +13,7 @@ class RecurringInvoice extends Model
 
     use Sortable, SoftDeletes;
 
-    public function proximo_envio($today,$generated_date){
+    public function proximo_envio($today, $generated_date){
     	$next_send = $generated_date;
 	    if($this->frecuency == "1"){
 			$options = $this->options;

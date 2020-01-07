@@ -43,7 +43,7 @@ class EnvioProgramadas implements ShouldQueue
 
     private function crearRecurrentes(){
         $start_date = Carbon::parse(now('America/Costa_Rica'));
-        $today = $start_date->year."-".$start_date->month."-".$start_date->day." 23:59:59";
+        $today = $start_date->year."-".$start_date->month."-".$start_date->day." 23:00:00";
         //dd($today);
         $recurrentes = RecurringInvoice::where('next_send', '<=',$today)->with('invoice')->with('invoice.items')->get();
         foreach ($recurrentes as $recurrente) {
