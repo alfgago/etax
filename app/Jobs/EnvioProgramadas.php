@@ -48,6 +48,7 @@ class EnvioProgramadas implements ShouldQueue
         $recurrentes = RecurringInvoice::where('next_send', '<=',$today)->with('invoice')->with('invoice.items')->get();
         foreach ($recurrentes as $recurrente) {
             try{
+                Log::info('Registrando factura recurrente');
                 $invoice_old = $recurrente->invoice;
                 $invoice = new Invoice();
                 $invoice->company_id = $invoice_old->company_id;
@@ -149,6 +150,7 @@ class EnvioProgramadas implements ShouldQueue
                 }
                 $recurrente->invoice_id = $invoice->id;
                 $recurrente->next_send = $recurrente->proximo_envio($start_date);
+                Log::info("Proxima fecha: $recurrente->next_send.");
                 $recurrente->save();
             }catch(\Exception $e){
                 Log::error('Falló al crear recurrente: ' . $e);
@@ -158,7 +160,7 @@ class EnvioProgramadas implements ShouldQueue
     private function enviar(){
         try{
             $start_date = Carbon::parse(now('America/Costa_Rica'));
-            $today = $start_date->year."-".$start_date->month."-".$start_date->day." 23:59:59";
+            $today = Carbon::now()->endOfDay()->subHours(1);
             log::info('Facturas enviadas el '.$today);
             $invoices = Invoice::where("hacienda_status",'99')
                                 ->where('is_void', false)
