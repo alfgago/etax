@@ -43,7 +43,7 @@ class EnvioProgramadas implements ShouldQueue
 
     private function crearRecurrentes(){
         $start_date = Carbon::parse(now('America/Costa_Rica'));
-        $today = $start_date->year."-".$start_date->month."-".$start_date->day." 23:00:00";
+        $today = Carbon::now()->endOfDay()->subHours(1);
         //dd($today);
         $recurrentes = RecurringInvoice::where('next_send', '<=',$today)->with('invoice')->with('invoice.items')->get();
         foreach ($recurrentes as $recurrente) {
@@ -148,7 +148,7 @@ class EnvioProgramadas implements ShouldQueue
                     $item->save();
                 }
                 $recurrente->invoice_id = $invoice->id;
-                $recurrente->next_send = $recurrente->proximo_envio($start_date,$start_date);
+                $recurrente->next_send = $recurrente->proximo_envio($start_date);
                 $recurrente->save();
             }catch(\Exception $e){
                 Log::error('Falló al crear recurrente: ' . $e);
