@@ -749,6 +749,7 @@ class CalculatedTax extends Model
               }
               $bVar = "b".$ivaType;
               $iVar = "i".$ivaType;
+              $bVarSD = "b".$ivaType."sd"; //Suma subtotale sin el IVA Devuelto, es el que usa para applyRatios
               $iVarPleno = "pleno".$ivaType;
               
               if(!isset($ivaData->$bVar)) {
@@ -772,6 +773,10 @@ class CalculatedTax extends Model
               $typeVarActividad = $currActivity."-".$typeVar;
               $typeVarPorcActividad = $currActivity."-".$typeVarPorc;
               
+              if( $currBill->total_iva_devuelto <= 0 ){
+                $ivaData->$bVarSD += $subtotal;
+              }
+              
               if(!isset($ivaData->$typeVar)) {
                 $ivaData->$typeVar = 0;
                 $ivaData->$typeVarPorc = 0;
@@ -782,6 +787,7 @@ class CalculatedTax extends Model
               $ivaData->$typeVarPorc += $subtotal;
               $ivaData->$typeVarActividad += $subtotal;
               $ivaData->$typeVarPorcActividad += $subtotal;
+              
               
             }  
             
@@ -1079,9 +1085,11 @@ class CalculatedTax extends Model
     			  $bVar = "b$codigo->id";
     			  $iVar = "i$codigo->id";
             $iVarPleno = "pleno$codigo->id";
+			      $bVarSD = "b$codigo->id"."sd";
     			  $ivaData->$bVar += $ivaDataAnterior->$bVar;
     			  $ivaData->$iVar += $ivaDataAnterior->$iVar;
     			  $ivaData->$iVarPleno += $ivaDataAnterior->$iVarPleno;
+    			  $ivaData->$bVarSD += ($ivaDataAnterior->$bVarSD ?? 0);
     			}
     			
     			foreach( ProductCategory::all() as $codigo ) {
@@ -1180,9 +1188,11 @@ class CalculatedTax extends Model
 			  $bVar = "b$codigo->id";
 			  $iVar = "i$codigo->id";
 			  $iVarPleno = "pleno$codigo->id";
+			  $bVarSD = "b$codigo->id"."sd";
 			  $ivaData->$bVar = 0;
 			  $ivaData->$iVar = 0;
 			  $ivaData->$iVarPleno = 0;
+			  $ivaData->$bVarSD = 0;
 			}
 			
 			if( !isset($this->currentCompany) ){
@@ -1334,11 +1344,11 @@ class CalculatedTax extends Model
           $impuestos['iva_compras_S1'] = $this->applyRatios(1, $ivaData->bS001); 
           $impuestos['iva_compras_S2'] = $this->applyRatios(2, $ivaData->bS002); 
           $impuestos['iva_compras_S3'] = $this->applyRatios(13, $ivaData->bS003); 
-          $impuestos['iva_compras_S4'] = $this->applyRatios(4, $ivaData->bS004); 
+          $impuestos['iva_compras_S4'] = $this->applyRatios(4, $ivaData->bS004sd ?? $ivaData->bS004); 
           $impuestos['iva_importaciones_S1'] = $this->applyRatios(1, $ivaData->bS021);
           $impuestos['iva_importaciones_S2'] = $this->applyRatios(2, $ivaData->bS022);
           $impuestos['iva_importaciones_S3'] = $this->applyRatios(13, $ivaData->bS023);
-          $impuestos['iva_importaciones_S4'] = $this->applyRatios(4, $ivaData->bS024);
+          $impuestos['iva_importaciones_S4'] = $this->applyRatios(4, $ivaData->bS024sd ?? $ivaData->bS024);
           
           $impuestos['iva_compras_S1e'] = $ivaData->plenoS061; 
           $impuestos['iva_compras_S2e'] = $ivaData->plenoS062; 
@@ -1353,11 +1363,11 @@ class CalculatedTax extends Model
           $impuestos['iva_compras_B1'] = $this->applyRatios(1, $ivaData->bB001); 
           $impuestos['iva_compras_B2'] = $this->applyRatios(2, $ivaData->bB002); 
           $impuestos['iva_compras_B3'] = $this->applyRatios(13, $ivaData->bB003); 
-          $impuestos['iva_compras_B4'] = $this->applyRatios(4, $ivaData->bB004); 
+          $impuestos['iva_compras_B4'] = $this->applyRatios(4, $ivaData->bB004sd ?? $ivaData->bB004); 
           $impuestos['iva_importaciones_B1'] = $this->applyRatios(1, $ivaData->bB021 + $ivaData->bB015);
           $impuestos['iva_importaciones_B2'] = $this->applyRatios(2, $ivaData->bB022);
           $impuestos['iva_importaciones_B3'] = $this->applyRatios(13, $ivaData->bB023 + $ivaData->bB016);
-          $impuestos['iva_importaciones_B4'] = $this->applyRatios(4, $ivaData->bB024);
+          $impuestos['iva_importaciones_B4'] = $this->applyRatios(4, $ivaData->bB024sd ?? $ivaData->bB014);
           
           $impuestos['iva_compras_B1e'] = $ivaData->plenoB061; 
           $impuestos['iva_compras_B2e'] = $ivaData->plenoB062; 

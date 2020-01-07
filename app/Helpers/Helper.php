@@ -169,33 +169,27 @@ if (!function_exists('currentCompanyModel')) {
         $user = auth()->user();
 
         if ($cache == false) {
-            if (!$user->companies->count()) {
+            if (!$user->teams->count()) {
                 auth()->user()->addCompany();
             }
 
             $company = $user->currentTeam->company;
             if (!$company) {
-                $companyId = auth()->user()->companies->first()->id;
-                session(['current_company' => $companyId]);
-                $company = App\Company::find($companyId);
+                $company = auth()->user()->teams->first()->company;
             }
             return $company;
         }
 
         $cacheKey = "cache-currentcompany-$user->id";
         if ( !Illuminate\Support\Facades\Cache::has($cacheKey) ) {
-                
-            if ( !$user->companies->count() ) {
+            if ( !$user->teams->count() ) {
                 auth()->user()->addCompany();
             }
             
             $company = $user->currentTeam->company;
             if ( !$company ) {
-                $companyId = auth()->user()->companies->first()->id;
-                session( ['current_company' => $companyId] );
-                $company = App\Company::find($companyId);
+                $company = auth()->user()->teams->first()->company;
             }
-            //$company->codigos = $codigos->codigosRepercutidos();
             Illuminate\Support\Facades\Cache::put($cacheKey, $company, now()->addMinutes(15));
         }
         return Illuminate\Support\Facades\Cache::get($cacheKey);

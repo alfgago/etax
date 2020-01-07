@@ -269,7 +269,6 @@ class Company extends Model {
 
     /* Returns count of total available invoices. Current plan invoices + bought add-on invoices */
     public function getAvailableInvoices( $year, $month ) {
-
         try{
             if( !$month || !$year ) {
                 $today = Carbon::parse(now('America/Costa_Rica'));

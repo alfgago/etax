@@ -601,8 +601,8 @@ class InvoiceController extends Controller
                     $invoice->generation_method = "etax";
                     $invoice->xml_schema = 43;
                     $today = Carbon::parse(now('America/Costa_Rica'));
-                    $generated_date = Carbon::createFromFormat('d/m/Y', $request->generated_date);
-                    if($today->format("Y-m-d") <  $generated_date->format("Y-m-d")){
+                    $generatedDate = Carbon::createFromFormat('d/m/Y', $request->generated_date);
+                    if($today->format("Y-m-d") <  $generatedDate->format("Y-m-d")){
                         $invoice->hacienda_status = '99';
                         $invoice->generation_method = "etax-programada";
                         $invoice->document_key = "Key Programada";
@@ -696,7 +696,7 @@ class InvoiceController extends Controller
                             $options = $request->cantidad_dias;
                         }
                         $recurrencia->options = $options;
-                        $recurrencia->next_send = $recurrencia->proximo_envio($today,$generated_date);
+                        $recurrencia->next_send = $recurrencia->proximo_envio($generatedDate);
                         $recurrencia->save();   
                         
                         $invoice->recurring_id = $recurrencia->id;
@@ -2407,8 +2407,8 @@ class InvoiceController extends Controller
                 $recurrencia->options = $options;
 
                 $today = Carbon::parse(now('America/Costa_Rica'));
-                $generated_date = Carbon::createFromFormat('Y-m-d H:i:s', $recurrencia->invoice->generated_date);
-                $recurrencia->next_send = $recurrencia->proximo_envio($today,$generated_date);
+                $generatedDate = Carbon::createFromFormat('Y-m-d H:i:s', $recurrencia->invoice->generated_date);
+                $recurrencia->next_send = $recurrencia->proximo_envio($generatedDate);
                 $recurrencia->save();
                 return redirect()->back()->withMessage('Recurrencia actualizada.');
             }else{
