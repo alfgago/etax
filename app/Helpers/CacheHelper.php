@@ -25,11 +25,27 @@ if (!function_exists('clearBillCache')) {
 if (!function_exists('clearTaxesCache')) {  
 	
     function clearTaxesCache($current_company, $month, $year){
-      	$cacheKey = "cache-taxes-$current_company-$month-$year";
-      	Cache::forget($cacheKey);
       	try{
+          	$cacheKey = "cache-taxes-$current_company-$month-$year";
+          	Cache::forget($cacheKey);
             $userId = auth()->user()->id;
             Cache::forget("cache-currentcompany-$userId");
+            
+            $taxkey = "calc-$cacheKey"; 
+            if ( !Cache::has($taxkey) ) {
+                $taxes = \App\CalculatedTax::where('company_id', $current_company)
+                                            ->where('month', $month)
+                                            ->where('year', $year)
+                                            ->where('is_final', true)
+                                            ->where('calculated', true)
+                                            ->first();
+                if( isset($taxes) ){
+                    $taxes->calculated = false;
+                    $taxes->save();
+                }
+                Cache::put($taxkey, $taxes, 15);
+            }
+            
       	}catch(\Throwable $e){}
     }
     
