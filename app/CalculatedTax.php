@@ -159,8 +159,10 @@ class CalculatedTax extends Model
      * @bodyParam prorrataOperativa required
      * @return App\CalculatedTax
      */
-    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $prorrataOperativa, $forceRecalc = false ) {
-      $currentCompanyId = currentCompany();
+    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $forceRecalc = false ) {
+      $company = currentCompanyModel();
+      $currentCompanyId = $company->id;
+      $prorrataOperativa = $company->getProrrataOperativa( $year );
       
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
       
@@ -212,6 +214,7 @@ class CalculatedTax extends Model
           
       }
       $data = Cache::get($cacheKey);
+      
       return $data;
       
     }
