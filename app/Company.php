@@ -189,7 +189,7 @@ class Company extends Model {
             return 1;
         }
         
-        $cacheKey = "prorrata-$this->id-$ano"; 
+        $cacheKey = "prorrata-" . $this->id . "-$ano"; 
         if ( !Cache::has($cacheKey) ) {
             $prorrataOperativa = $this->getOperativeData( $ano )->prorrata_operativa;
             Cache::put($cacheKey, $prorrataOperativa, 30);

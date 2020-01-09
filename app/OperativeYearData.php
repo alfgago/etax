@@ -91,6 +91,7 @@ class OperativeYearData extends Model
             return true;
         }
         
+        $this->company_id = $currentCompanyId;
         $this->prorrata_operativa = number_format( $data->prorrata, 4);
         $this->operative_ratio1 = number_format( $data->ratio1, 4);
         $this->operative_ratio2 = number_format( $data->ratio2, 4);

@@ -203,17 +203,6 @@ class WizardController extends Controller
         $company->use_invoicing = $request->use_invoicing;
         $company->card_retention = $request->card_retention;
         $company->default_product_category = $request->default_category_producto_code;
-
-        $operativeData = $company->getOperativeData($ano);
-        $operativeData->method = $request->first_prorrata_type;
-        if( $operativeData->method == 1 ) {
-            $operativeData->prorrata_operativa = $request->first_prorrata/100;
-            $operativeData->operative_ratio1 = $request->operative_ratio1/100;
-            $operativeData->operative_ratio2 = $request->operative_ratio2/100;
-            $operativeData->operative_ratio3 = $request->operative_ratio3/100;
-            $operativeData->operative_ratio4 = $request->operative_ratio4/100;
-            $operativeData->save();
-        }
         
         $id_number = $company->id_number;
         $id_company = $company->id;
@@ -229,6 +218,17 @@ class WizardController extends Controller
             
         $company->wizard_finished = true;
         $company->save();
+
+        $operativeData = $company->getOperativeData($ano);
+        $operativeData->method = $request->first_prorrata_type;
+        if( $operativeData->method == 1 ) {
+            $operativeData->prorrata_operativa = $request->first_prorrata/100;
+            $operativeData->operative_ratio1 = $request->operative_ratio1/100;
+            $operativeData->operative_ratio2 = $request->operative_ratio2/100;
+            $operativeData->operative_ratio3 = $request->operative_ratio3/100;
+            $operativeData->operative_ratio4 = $request->operative_ratio4/100;
+            $operativeData->save();
+        }
         
         //Update Team name based on company
         $team->name = $company->id . ": " . $request->id_number . " - " . $request->name;
@@ -354,16 +354,6 @@ class WizardController extends Controller
             $company->first_prorrata = $request->first_prorrata;
             $company->first_prorrata_type = $request->first_prorrata_type;
             $company->use_invoicing = $request->use_invoicing;
-            
-            $operativeData = $company->getOperativeData($ano);
-            $operativeData->method = $request->first_prorrata_type;
-            if( $operativeData->method == 1 ) {
-                $company->prorrata_operativa = $request->first_prorrata/100;
-                $company->operative_ratio1 = $request->operative_ratio1/100;
-                $company->operative_ratio2 = $request->operative_ratio2/100;
-                $company->operative_ratio3 = $request->operative_ratio3/100;
-                $company->operative_ratio4 = $request->operative_ratio4/100;
-            }
 
             $id_number = $company->id_number;
             $id_company = $company->id;
@@ -379,6 +369,16 @@ class WizardController extends Controller
             
             $company->wizard_finished = true;
             $company->save();
+            
+            $operativeData = $company->getOperativeData($ano);
+            $operativeData->method = $request->first_prorrata_type;
+            if( $operativeData->method == 1 ) {
+                $company->prorrata_operativa = $request->first_prorrata/100;
+                $company->operative_ratio1 = $request->operative_ratio1/100;
+                $company->operative_ratio2 = $request->operative_ratio2/100;
+                $company->operative_ratio3 = $request->operative_ratio3/100;
+                $company->operative_ratio4 = $request->operative_ratio4/100;
+            }
             
             $invoice = Invoice::firstOrNew(
                 [
@@ -463,8 +463,8 @@ class WizardController extends Controller
                 ->onQueue('log_queue');
             return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento.');
         } catch( \Exception $ex ) {
-            Log::error('Error al crear compania: '.$ex->getMessage());
-            return back()->withError('Ha ocurrido un error al registrar la compañía' . $ex->getMessage());
+            Log::error('Error al crear compania: '. $ex);
+            return back()->withError('Ha ocurrido un error al registrar la compañía');
         }
     }
     

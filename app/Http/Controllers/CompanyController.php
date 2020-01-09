@@ -399,6 +399,11 @@ class CompanyController extends Controller {
         //$company->saldo_favor_2018 = $request->saldo_favor_2018;
         $company->auto_accept_email = $request->auto_accept_email;
 
+        $company->preselectVatCodes($request->preselected_vat_code);
+        $company->preselectSoportados($request->preselected_sop_code);
+        
+        $company->save();
+
         foreach ($request['operative'] as $key => $value){
             $operativeData = $company->getOperativeData($key);
             $operativeData->method = $value['method'];
@@ -411,11 +416,6 @@ class CompanyController extends Controller {
             }
             $operativeData->save();
         }
-
-        $company->preselectVatCodes($request->preselected_vat_code);
-        $company->preselectSoportados($request->preselected_sop_code);
-        
-        $company->save();
         
         clearLastTaxesCache( $company->id, 2018);
         $userId = auth()->user()->id;
