@@ -184,12 +184,17 @@ class Company extends Model {
     
     
     public function getProrrataOperativa( $ano ){
-        try{
-            $prorrataOperativa = $this->getOperativeData( $ano )->prorrata_operativa;
-            return $prorrataOperativa;
-        }catch(\Exception $e){
-            Log::error($e);
+        $anoAnterior = $ano-1;
+        if($anoAnterior < 2018){
+            return 1;
         }
+        
+        $cacheKey = "prorrata-" . $this->id . "-$ano"; 
+        if ( !Cache::has($cacheKey) ) {
+            $prorrataOperativa = $this->getOperativeData( $ano )->prorrata_operativa;
+            Cache::put($cacheKey, $prorrataOperativa, 30);
+        }
+        return (double)Cache::get($cacheKey);
     }
     
     public function getLastBalance($month, $year) {
