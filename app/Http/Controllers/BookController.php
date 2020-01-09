@@ -51,7 +51,7 @@ class BookController extends Controller
         foreach ( $books as $book ) {
             if( ! $book->is_closed ) {
                 $prorrataOperativa = $currentCompany->getProrrataOperativa($book->year);
-                $book = CalculatedTax::calcularFacturacionPorMesAno( $book->month, $book->year, $book->saldo_favor_anterior, $prorrataOperativa );
+                $book = CalculatedTax::calcularFacturacionPorMesAno( $book->month, $book->year, $book->saldo_favor_anterior );
             }
         }
         

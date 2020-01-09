@@ -142,25 +142,24 @@ class ReportsController extends Controller
         
         $company = currentCompanyModel();
         $operativeData = $company->getOperativeData($ano);
-        $prorrataOperativa = $operativeData->prorrata_operativa;
         
-        $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
-        $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
-        $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0, $prorrataOperativa );
-        $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0, $prorrataOperativa );
-        $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0, $prorrataOperativa );
-        $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0, $prorrataOperativa );
-        $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0, $prorrataOperativa );
-        $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0, $prorrataOperativa );
-        $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0, $prorrataOperativa );
-        $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0, $prorrataOperativa );
-        $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0, $prorrataOperativa );
-        $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, $prorrataOperativa );
+        $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0 );
+        $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0 );
+        $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0 );
+        $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0 );
+        $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0 );
+        $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0 );
+        $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0 );
+        $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0 );
+        $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0 );
+        $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0 );
+        $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0 );
+        $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0 );
         
-        $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
+        $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0 );
 
         $nombreMes = Variables::getMonthName($mes);
-        $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
+        $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0 );
         
         currentCompanyModel()->setFirstAvailableInvoices( $ano, $mes, $dataMes->count_invoices );
 
@@ -186,25 +185,25 @@ class ReportsController extends Controller
       $company = currentCompanyModel();
       $prorrataOperativa = $company->getProrrataOperativa($ano);
 
-      $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
-      $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
-      $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0, $prorrataOperativa );
-      $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0, $prorrataOperativa );
-      $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0, $prorrataOperativa );
-      $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0, $prorrataOperativa );
-      $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0, $prorrataOperativa );
-      $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0, $prorrataOperativa );
-      $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0, $prorrataOperativa );
-      $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0, $prorrataOperativa );
-      $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0, $prorrataOperativa );
-      $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, $prorrataOperativa );
+      $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0 );
+      $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0 );
+      $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0 );
+      $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0 );
+      $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0 );
+      $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0 );
+      $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0 );
+      $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0 );
+      $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0 );
+      $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0 );
+      $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0 );
+      $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0 );
       
-      $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
+      $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0 );
       $nombreMes = Variables::getMonthName($mes);
       
       $acumulado = null;
       if($mes == 12 || $mes == 0){
-        $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
+        $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0 );
       }
       
       return view('/Reports/reporte-cuentas', compact('data', 'ano', 'nombreMes', 'acumulado') );
@@ -220,22 +219,22 @@ class ReportsController extends Controller
       $operativeData = $company->getOperativeData($ano);
       $prorrataOperativa = $company->getProrrataOperativa($ano);
       
-      $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
-      $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
-      $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0, $prorrataOperativa );
-      $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0, $prorrataOperativa );
-      $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0, $prorrataOperativa );
-      $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0, $prorrataOperativa );
-      $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0, $prorrataOperativa );
-      $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0, $prorrataOperativa );
-      $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0, $prorrataOperativa );
-      $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0, $prorrataOperativa );
-      $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0, $prorrataOperativa );
-      $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, $prorrataOperativa );
+      $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0 );
+      $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0 );
+      $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0 );
+      $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0 );
+      $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0 );
+      $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0 );
+      $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0 );
+      $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0 );
+      $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0 );
+      $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0 );
+      $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0 );
+      $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0 );
 
-      $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
+      $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0 );
       $nombreMes = Variables::getMonthName($mes);
-      $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
+      $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0 );
       
       return view('/Reports/reporte-resumen-ejecutivo', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes', 'operativeData'));
 
@@ -248,8 +247,8 @@ class ReportsController extends Controller
         $company = currentCompanyModel();
         $prorrataOperativa = $company->getProrrataOperativa($ano);
 
-        $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
-        $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
+        $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0 );
+        $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0 );
         if($mes == 12){
           $acumulado->sumAcumulados( $ano, true );
           $acumulado->setCalculosIVA( $prorrataOperativa, 0 );
@@ -277,20 +276,20 @@ class ReportsController extends Controller
       $company = currentCompanyModel();
       $prorrataOperativa = $company->getProrrataOperativa($ano);
       
-      $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
-      $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
-      $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0, $prorrataOperativa );
-      $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0, $prorrataOperativa );
-      $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0, $prorrataOperativa );
-      $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0, $prorrataOperativa );
-      $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0, $prorrataOperativa );
-      $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0, $prorrataOperativa );
-      $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0, $prorrataOperativa );
-      $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0, $prorrataOperativa );
-      $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0, $prorrataOperativa );
-      $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, $prorrataOperativa );
+      $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0 );
+      $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0 );
+      $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0 );
+      $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0 );
+      $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0 );
+      $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0 );
+      $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0 );
+      $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0 );
+      $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0 );
+      $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0 );
+      $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0 );
+      $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0 );
 
-      $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
+      $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0 );
       
       return view('/Reports/reporte-detalle-debito-fiscal', compact( 'acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'ano' ));
 
@@ -304,20 +303,20 @@ class ReportsController extends Controller
       $company = currentCompanyModel();
       $prorrataOperativa = $company->getProrrataOperativa($ano);
       
-      $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
-      $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa );
-      $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0, $prorrataOperativa );
-      $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0, $prorrataOperativa );
-      $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0, $prorrataOperativa );
-      $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0, $prorrataOperativa );
-      $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0, $prorrataOperativa );
-      $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0, $prorrataOperativa );
-      $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0, $prorrataOperativa );
-      $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0, $prorrataOperativa );
-      $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0, $prorrataOperativa );
-      $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, $prorrataOperativa );
+      $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0 );
+      $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0 );
+      $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0 );
+      $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0 );
+      $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0 );
+      $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0 );
+      $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0 );
+      $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0 );
+      $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0 );
+      $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0 );
+      $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0 );
+      $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0 );
 
-      $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa );
+      $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0 );
       
       return view('/Reports/reporte-detalle-credito-fiscal', compact( 'acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'ano' ));
 
@@ -354,19 +353,19 @@ class ReportsController extends Controller
     public function forceRecalc($ano){
       $company = currentCompanyModel();
       $prorrataOperativa = $company->getProrrataOperativa($ano);
-      $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa, true );
-      $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, $prorrataOperativa, true );
-      $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0, $prorrataOperativa, true );
-      $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0, $prorrataOperativa, true );
-      $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0, $prorrataOperativa, true );
-      $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0, $prorrataOperativa, true );
-      $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0, $prorrataOperativa, true );
-      $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0, $prorrataOperativa, true );
-      $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0, $prorrataOperativa, true );
-      $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0, $prorrataOperativa, true );
-      $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0, $prorrataOperativa, true );
-      $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, $prorrataOperativa, true );
-      $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, $prorrataOperativa, true );
+      $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, true );
+      $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $ano, 0, true );
+      $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $ano, 0, true );
+      $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $ano, 0, true );
+      $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $ano, 0, true );
+      $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $ano, 0, true );
+      $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $ano, 0, true );
+      $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $ano, 0, true );
+      $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $ano, 0, true );
+      $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $ano, 0, true );
+      $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0, true );
+      $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, true );
+      $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, true );
     }
 
 }
