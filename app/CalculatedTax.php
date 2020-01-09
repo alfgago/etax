@@ -179,13 +179,15 @@ class CalculatedTax extends Model
           $data->currentCompany = currentCompanyModel();
             
           if ( $month > 0 ) { //El 0 significa que es acumulado anual
-            
-            if( !$data->is_closed || $forceRecalc ) {
+            $pass = !$data->is_closed && !$data->calculated;
+            //dd(json_encode($pass) . " / " . json_encode($forceRecalc) ." / ". $data->month);
+            if( $pass || $forceRecalc ) {
               $data->resetVars();
 
               $data->calcularFacturacion( $month, $year, $lastBalance, $prorrataOperativa );
 
               if( $data->count_invoices || $data->count_bills || $data->id ) {
+                $data->calculated = true;
                 $data->save();
                 $book = Book::calcularAsientos( $data );
                 $book->save();

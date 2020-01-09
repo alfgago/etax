@@ -172,7 +172,7 @@ class User extends Authenticatable {
     public function isContador() {
         try{
             $userID = auth()->user()->id;
-            $cacheKey = "cache-iscontador-$userID";
+            $cacheKey = "aacache-iscontador-$userID";
             if ( !Cache::has($cacheKey) ) {
                 if( ! isset($sale) ) {
                     $sale = \App\Sales::where('user_id', $userID)
@@ -186,7 +186,7 @@ class User extends Authenticatable {
                 if($plan->id == 7){
                     $isContador = true;
                 }
-                Cache::put($cacheKey, $isContador, now()->addMinutes(30));
+                Cache::put($cacheKey, $isContador, now()->addMinutes(5));
             }
             return Cache::get($cacheKey);
         }catch( \Throwable $e) { return false; }
