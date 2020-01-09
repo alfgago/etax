@@ -115,6 +115,7 @@ class WizardController extends Controller
         
         $invoice->save();
         
+        $ano = $invoice->year;
         clearLastTaxesCache($company->id, 2018);
         clearLastTaxesCache($company->id, $ano-1);
         clearLastTaxesCache($company->id, $ano);
