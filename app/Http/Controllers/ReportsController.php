@@ -217,6 +217,7 @@ class ReportsController extends Controller
       $mes = $request->mes ? $request->mes : 1;
       
       $company = currentCompanyModel();
+      $operativeData = $company->getOperativeData($ano);
       $prorrataOperativa = $company->getProrrataOperativa($ano);
       
       $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $ano, 0, $prorrataOperativa );
@@ -236,7 +237,7 @@ class ReportsController extends Controller
       $nombreMes = Variables::getMonthName($mes);
       $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0, $prorrataOperativa );
       
-      return view('/Reports/reporte-resumen-ejecutivo', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes'));
+      return view('/Reports/reporte-resumen-ejecutivo', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes', 'operativeData'));
 
     }
     

@@ -1604,7 +1604,7 @@ class InvoiceController extends Controller
             )->onConnection(config('etax.queue_connections'))
             ->onQueue('log_queue');
 
-            clearLastTaxesCache($invoice->company->id, $invoice->year);
+            //clearLastTaxesCache($invoice->company->id, $invoice->year);
             
             clearInvoiceCache($invoice);
 

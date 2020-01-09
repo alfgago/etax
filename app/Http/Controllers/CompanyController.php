@@ -207,6 +207,9 @@ class CompanyController extends Controller {
         if (!$company) {
             return redirect('/');
         }
+        if( !allowTo('admin') ){
+            return back()->withError('Usted no tiene permisos para acceder a esa página.');
+        }
         
         return view('Company.edit-advanced', compact('company'));
     }
@@ -223,6 +226,9 @@ class CompanyController extends Controller {
 
         if (!$company) {
             return redirect('/');
+        }
+        if( !allowTo('admin') ){
+            return back()->withError('Usted no tiene permisos para acceder a esa página.');
         }
 
         $certificate = AtvCertificate::where('company_id', $company->id)->first();

@@ -1,4 +1,5 @@
 <?php
+  $company = currentCompanyModel();
   $ano = \Carbon\Carbon::now()->year;
 	$operativeData = $company->getOperativeData($ano);
 ?>
