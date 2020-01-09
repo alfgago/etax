@@ -119,7 +119,7 @@ class WizardController extends Controller
         clearLastTaxesCache($company->id, 2018);
         clearLastTaxesCache($company->id, $ano-1);
         clearLastTaxesCache($company->id, $ano);
-        getOperativeData( $company );
+        $company->getOperativeData( $ano );
         
         $user = auth()->user();
 	    Cache::forget("cache-currentcompany-$user->id");
