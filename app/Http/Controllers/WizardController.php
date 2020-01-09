@@ -116,10 +116,13 @@ class WizardController extends Controller
         $invoice->save();
         
         $ano = $invoice->year;
+        
+        $operativeData = $company->getOperativeData(2019);
+        $operativeData->method = 2;
+        $operativeData->save();
         clearLastTaxesCache($company->id, 2018);
         clearLastTaxesCache($company->id, $ano-1);
         clearLastTaxesCache($company->id, $ano);
-        $company->getOperativeData( $ano );
         
         $user = auth()->user();
 	    Cache::forget("cache-currentcompany-$user->id");
@@ -130,10 +133,10 @@ class WizardController extends Controller
             [
                 'company_id' => $company->id
             ],
-            "Su prorrata operativa 2018 es de: ". number_format( $calc->prorrata*100, 2) ."%"
+            "Su prorrata operativa 2018 es de: ". number_format( $operativeData->prorrata_operativa*100, 2) ."%"
         )->onConnection(config('etax.queue_connections'))
         ->onQueue('log_queue');
-        return redirect('/empresas/configuracion')->withMessage( 'Su prorrata operativa 2018 es de: '. number_format( $calc->prorrata*100, 2) . '%' );
+        return redirect('/empresas/configuracion')->withMessage( 'Su prorrata operativa 2018 es de: '. number_format( $operativeData->prorrata_operativa*100, 2) . '%' );
     }
     
     
