@@ -31,6 +31,15 @@ class Invoice extends Mailable
     public function build()
     {
         $invoiceUtils = new InvoiceUtils();
+        
+        $customImg = null;
+        $sendFrom = 'info@etaxcr.com';
+        $cedula = $this->content['data_company']->id_number;
+        if( $cedula == '3101693964' ){
+            $customImg = "logo-$cedula.jpg";
+            $sendFrom = $this->content['data_company']->email;
+        }
+        
         if ($this->content['data_invoice']->document_type == '08') {
             $title = 'compra';
         } elseif ($this->content['data_invoice']->document_type == '09') {
@@ -40,17 +49,22 @@ class Invoice extends Mailable
         }
         $fromEmail = $this->content['data_company']->email;
         $fromName = $this->content['data_company']->business_name;
+        
         $message = $this->subject('Factura electrónica '.$title.' #' . $this->content['data_invoice']->document_number.
             ' De: '.$this->content['data_company']->business_name)
                     ->markdown('emails.invoice.paid')
-                    ->with(['data_invoice' => $this->content['data_invoice'], 'company' => $this->content['data_company']])
+                    ->with([
+                        'data_invoice' => $this->content['data_invoice'],
+                        'company' => $this->content['data_company'], 
+                        'customImg' =>$customImg
+                    ])
                     ->replyTo($fromEmail, $fromName)
-                    ->from('info@etaxcr.com', "$fromName");
+                    ->from($sendFrom, "$fromName");
         
-        $message->attachFromStorage($this->content['xml']);
+        /*$message->attachFromStorage($this->content['xml']);
         $message->attachData( $invoiceUtils->streamPdf( $this->content['data_invoice'], $this->content['data_company'] ), $this->content['data_invoice']->document_key.'.pdf', [
              'mime' => 'application/pdf',
-         ]);
+         ]);*/
         return $message;
     }
 

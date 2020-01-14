@@ -673,6 +673,12 @@ class BillController extends Controller
                     $metodoGeneracion = "XLSX";
                     
                     if( isset($row['consecutivocomprobante']) ){
+                        
+                        $cedulaEmpresa = isset($row['cedulaempresa']) ? strval($row['cedulaempresa']) : null;
+                        if( $company->id_number != $cedulaEmpresa ){
+                          return back()->withError( "Error en validación: Asegúrese de agregar la columna CedulaEmpresa a su archivo de excel, con la cédula de su empresa en cada línea. La línea $i le pertenece a la empresa actual. ($company->id_number)" );
+                        }
+                        
                         //Datos de proveedor
                         $nombreProveedor = $row['nombreproveedor'];
                         $codigoProveedor = $row['codigoproveedor'] ? $row['codigoproveedor'] : '';
