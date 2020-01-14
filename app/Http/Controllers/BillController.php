@@ -729,11 +729,11 @@ class BillController extends Controller
                         
     
                          //verificar si fue validada
-                        if($numeroLinea == 1){
+                        /*if($numeroLinea == 1){*/
                             $codeValidated = isset($categoriaHacienda) ? (isset($codigoEtax) ? true : false) : false;
-                        }else{
+                        /*}else{
                             $codeValidated = isset($categoriaHacienda) ? (isset($codigoEtax) ? null : false) : false;    
-                        }
+                        }*/
     
     
                         //Datos de exoneracion

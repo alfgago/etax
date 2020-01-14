@@ -1433,16 +1433,19 @@ class CalculatedTax extends Model
         	$determinacion['montoAnualVentasConDerechoCredito'] = $acumulado->numerador_prorrata;
         	$determinacion['montoAnualVentasSinDerechoCredito'] = $acumulado->denumerador_prorrata;
         	$determinacion['porcentajeProrrataFinal'] = $acumulado->prorrata*100;
-        	$determinacion['creditoFiscalAnualTotal'] = $acumulado->total_bill_iva;
-        	$determinacion['creditoFiscalAnualDeducible'] = $acumulado->iva_deducible_estimado;
-        	$determinacion['creditoAnualFinal'] = $acumulado->iva_deducible_operativo;
+        	$determinacion['creditoFiscalAnualTotal'] = $acumulado->cfdp;
+        	$ivaEst = $acumulado->iva_deducible_estimado - $this->iva_acreditable_identificacion_plena;
+        	$ivaOpe = $acumulado->iva_deducible_operativo - $this->iva_acreditable_identificacion_plena;
         	
-        	if($acumulado->iva_deducible_operativo > $acumulado->iva_deducible_estimado) {
-        	  $saldoDeudorAnual = $acumulado->iva_deducible_operativo - $acumulado->iva_deducible_estimado;
+        	$determinacion['creditoFiscalAnualDeducible'] = $ivaEst;
+        	$determinacion['creditoAnualFinal'] = $ivaOpe;
+        	
+        	if($ivaOpe > $ivaEst) {
+        	  $saldoDeudorAnual = $ivaOpe - $ivaEst;
         	  $saldoFavorAnual = 0;
         	}else{
         	  $saldoDeudorAnual = 0;
-        	  $saldoFavorAnual = $acumulado->iva_deducible_estimado - $acumulado->iva_deducible_operativo;
+        	  $saldoFavorAnual = $ivaEst - $ivaOpe;
         	}
         	
         	$determinacion['saldoFavorAnual'] = $saldoFavorAnual;
