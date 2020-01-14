@@ -961,7 +961,8 @@ class CalculatedTax extends Model
       $this->prorrata = $prorrata;
       $this->prorrata_operativa = $prorrataOperativa;
       //$this->subtotal_para_cfdp = $subtotalParaCFDP;
-      $this->cfdp = $cfdpEstimado;
+      $this->cfdp = $cfdp;
+      $this->cfdp_estimado = $cfdpEstimado;
         
       $this->iva_deducible_estimado = $ivaDeducibleEstimado;
       $this->balance_estimado = $balanceEstimado;
@@ -1433,8 +1434,9 @@ class CalculatedTax extends Model
         	$determinacion['montoAnualVentasConDerechoCredito'] = $acumulado->numerador_prorrata;
         	$determinacion['montoAnualVentasSinDerechoCredito'] = $acumulado->denumerador_prorrata;
         	$determinacion['porcentajeProrrataFinal'] = $acumulado->prorrata*100;
-        	$determinacion['creditoFiscalAnualTotal'] = $acumulado->cfdp;
-        	$ivaEst = $acumulado->cfdp * $acumulado->prorrata;
+        	$determinacion['creditoFiscalAnualTotal'] = $acumulado->cfdp_estimado;
+        	//dd($acumulado->cfdp_estimado, $acumulado->prorrata, $acumulado->cfdp, $acumulado->prorrata_operativa);
+        	$ivaEst = $acumulado->cfdp_estimado * $acumulado->prorrata;
         	$ivaOpe = $acumulado->cfdp * $acumulado->prorrata_operativa;
         	
         	$determinacion['creditoFiscalAnualDeducible'] = $ivaEst;
