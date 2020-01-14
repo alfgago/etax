@@ -990,14 +990,11 @@ class CalculatedTax extends Model
     }
     
     public function setCalculosPorFactura( $prorrataOperativa, $lastBalance ) {
-      $prorrataOperativa = ($prorrataOperativa == 1) ? 0.9999 : $prorrataOperativa;
-      
       $company = currentCompanyModel();
-      
+      $operativeData = $company->getOperativeData($this->year);
+      $prorrataOperativa = $operativeData->prorrata_operativa;
       $ivaNoDeducible = 0;
       $ivaDeducibleOperativo = 0;
-     
-      $operativeData = $company->getOperativeData($this->year);
      
       $ratio1_operativo = $operativeData->operative_ratio1;
       $ratio2_operativo = $operativeData->operative_ratio2;
