@@ -1,4 +1,4 @@
-@component('mail::message')
+@component('mail::message', ['customImg' => @$customImg])
     <p>Estimado Cliente: <b>{{$data_invoice->client_first_name .' '.$data_invoice->client_last_name}}</b><br><br>
 
         A continuación, se le notifica que la Nota de {{ $type }} <b>{{$data_invoice->document_key}}</b>,

@@ -251,7 +251,11 @@ class ReportsController extends Controller
         $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0 );
         if($mes == 12){
           $acumulado->sumAcumulados( $ano, true );
+          $iva_deducible_estimado = $acumulado->iva_deducible_estimado;
+          $iva_deducible_operativo = $acumulado->iva_deducible_operativo;
           $acumulado->setCalculosIVA( $prorrataOperativa, 0 );
+          $acumulado->iva_deducible_estimado = $iva_deducible_estimado;
+          $acumulado->iva_deducible_operativo = $iva_deducible_operativo;
         }
         
         if( !$data->book ) {

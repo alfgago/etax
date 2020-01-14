@@ -1,4 +1,4 @@
-@component('mail::message')
+@component('mail::message', ['customImg' => @$customImg])
     <p>Estimado Cliente: <b>{{$data_invoice->provider_first_name .' '.$data_invoice->last_last_name}}</b><br><br>
 
         Se ha recibido el documento eletrónico emitido por  <b>{{$data_invoice->provider_first_name}}</b>,
