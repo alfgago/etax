@@ -961,7 +961,7 @@ class CalculatedTax extends Model
       $this->prorrata = $prorrata;
       $this->prorrata_operativa = $prorrataOperativa;
       //$this->subtotal_para_cfdp = $subtotalParaCFDP;
-      $this->cfdp = $cfdp;
+      $this->cfdp = $cfdpEstimado;
         
       $this->iva_deducible_estimado = $ivaDeducibleEstimado;
       $this->balance_estimado = $balanceEstimado;
