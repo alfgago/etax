@@ -112,6 +112,8 @@ class BillItem extends Model
         $company = $this->company;
         $prorrataOperativa = $company->getProrrataOperativa( $this->year );
         $calc = new CalculatedTax();
+        $calc->year = $this->year;
+        $calc->month = $this->month;
         $calc->resetVars();
         $query = BillItem::with('bill')->where('id', $this->id);
         $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query, true );
