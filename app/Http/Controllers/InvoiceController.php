@@ -1236,14 +1236,14 @@ class InvoiceController extends Controller
             $i = 0;
             $invoiceList = array();
 
-            if(count($collection) < 7500){
+            if(count($collection) < 2500){
                 foreach ($collection as $row){
                     $metodoGeneracion = "XLSX";
 
                     if( isset($row['consecutivocomprobante']) ){
                         $i++;
 
-                        $cedulaEmpresa = isset($row['cedulaempresa']) ? $row['cedulaempresa'] : null;
+                        $cedulaEmpresa = isset($row['cedulaempresa']) ? strval($row['cedulaempresa']) : null;
                         if( $company->id_number != $cedulaEmpresa ){
                           return back()->withError( "Error en validación: Asegúrese de agregar la columna CedulaEmpresa a su archivo de excel, con la cédula de su empresa en cada línea. La línea $i le pertenece a la empresa actual. ($company->id_number)" );
                         }

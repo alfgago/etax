@@ -1431,7 +1431,7 @@ class CalculatedTax extends Model
           
           $determinacion = array();
         	$determinacion['montoAnualVentasConDerechoCredito'] = $acumulado->numerador_prorrata;
-        	$determinacion['montoAnualVentasSinDerechoCredito'] = $acumulado->invoices_subtotal;
+        	$determinacion['montoAnualVentasSinDerechoCredito'] = $acumulado->denumerador_prorrata;
         	$determinacion['porcentajeProrrataFinal'] = $acumulado->prorrata*100;
         	$determinacion['creditoFiscalAnualTotal'] = $acumulado->total_bill_iva;
         	$determinacion['creditoFiscalAnualDeducible'] = $acumulado->iva_deducible_estimado;
@@ -1480,7 +1480,7 @@ class CalculatedTax extends Model
           $dataDeclaracion['determinacion'] = $determinacion;
 
           return $dataDeclaracion;
-      }catch(\Throwable $e){
+      }catch(\Exception $e){
         Log::error($e->getMessage());
         return false;
       }
