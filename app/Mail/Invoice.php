@@ -61,10 +61,10 @@ class Invoice extends Mailable
                     ->replyTo($fromEmail, $fromName)
                     ->from($sendFrom, "$fromName");
         
-        /*$message->attachFromStorage($this->content['xml']);
+        $message->attachFromStorage($this->content['xml']);
         $message->attachData( $invoiceUtils->streamPdf( $this->content['data_invoice'], $this->content['data_company'] ), $this->content['data_invoice']->document_key.'.pdf', [
              'mime' => 'application/pdf',
-         ]);*/
+         ]);
         return $message;
     }
 
