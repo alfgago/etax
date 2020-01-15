@@ -41,7 +41,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('subscription:payment')->timezone(config('app.timezone'))->withoutOverlapping()->twiceDaily(2, 5)->runInBackground(); //Una vez al día. Aveces se acumulan porque por alguna vez no correo y puede haber doble cargo. Hya un sleep de 3s entre cobro
         //$schedule->command('subscription:payment')->timezone(config('app.timezone'))->dailyAt('09:00');
         //Comandos generales
-        $schedule->command('telescope:prune')->daily()->runInBackground();
+        $schedule->command('telescope:prune --hours=48')->timezone(config('app.timezone'))->withoutOverlapping()->daily()->runInBackground();
         $schedule->command('queue:restart')->timezone(config('app.timezone'))->daily();
     }
 
