@@ -283,7 +283,7 @@ class Book extends Model
         $this->cc_sum2 = $this->cc_ppp_1 + $this->cc_ppp_2 + $this->cc_ppp_3 + $this->cc_ppp_4 + $this->cc_iva_restaurantes
                          + $this->cc_bs_1 + $this->cc_bs_2 + $this->cc_bs_3 + $this->cc_bs_4 + $calculos->saldo_favor_anterior;
         //Sumatoria de Debe
-        $this->cc_sum1 = $this->cc_iva_emitido_1 + $this->cc_iva_emitido_2 + $this->cc_iva_emitido_3 
+        $this->cc_sum1 = $this->cc_iva_emitido_1 + $this->cc_iva_emitido_2 + $this->cc_iva_emitido_3 - $calculos->iva_devuelto
                          + $this->cc_iva_emitido_4 + $this->cc_ajuste_ppp + $this->cc_ajuste_bs + $this->cc_gasto_no_acreditable;
             
         if( $this->cc_por_pagar > 0 ) {
@@ -291,7 +291,6 @@ class Book extends Model
         }else {
             $this->cc_sum1 += abs($this->cc_por_pagar);
         }
-
     }
     
 }
