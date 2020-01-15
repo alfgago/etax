@@ -41,6 +41,12 @@
               </tr>
               
               <tr>
+                <th>IVA Devuelto:</td>
+                <td> -</td>
+                <td> ₡{{ number_format( $data->book->calculos->iva_devuelto, 0 ) }}</td>
+              </tr>
+              
+              <tr>
                 <th>IVA por fact. recibidas al 1% de bienes y servicios</td>
                 <td>-</td>
                 <td>  ₡{{ number_format( $data->book->cc_bs_1, 0 ) }} </td>
