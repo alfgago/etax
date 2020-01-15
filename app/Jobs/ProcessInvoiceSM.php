@@ -69,7 +69,7 @@ class ProcessInvoiceSM implements ShouldQueue
                     }
                     $invoice->save();
                     if ($company->atv_validation ) {
-                        sleep(15);
+                        sleep(13);
                         if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09')) && $invoice->resend_attempts < 6) {
                             if ($invoice->xml_schema == 43) {
                                 $requestDetails = $invoiceUtils->setDetails43($invoice->items);
@@ -165,7 +165,10 @@ class ProcessInvoiceSM implements ShouldQueue
             $response = json_decode($result->getBody()->getContents(), true);
             $date = Carbon::now();
             Log::info("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
-            ApiResponse::create(['invoice_id' => $invoice->id, 'document_key' => $invoice->document_key,
+            ApiResponse::create([
+                'invoice_id' => $invoice->id, 
+                'company_id' => $company->id,
+                'document_key' => $invoice->document_key,
                 'doc_type' => $invoice->document_type,
                 'json_response' => json_encode($response)
             ]);

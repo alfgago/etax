@@ -90,7 +90,10 @@ class ProcessReception implements ShouldQueue
                             ]);
                             $response = json_decode($result->getBody()->getContents(), true);
                             Log::info('Response Reception Api Hacienda '. json_encode($response));
-                            ApiResponse::create(['bill_id' => $bill->id, 'document_key' => $bill->document_key,
+                            ApiResponse::create([
+                                'bill_id' => $bill->id, 
+                                'company_id' => $company->id,
+                                'document_key' => $bill->document_key,
                                 'doc_type' => $bill->document_type,
                                 'json_response' => json_encode($response)
                             ]);
