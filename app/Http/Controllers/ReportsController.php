@@ -157,21 +157,28 @@ class ReportsController extends Controller
         $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0 );
         
         $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0 );
+        if($ano == 2019){
+          $acumulado->sumAcumulados( $ano, true );
+          $iva_deducible_estimado = $acumulado->iva_deducible_estimado;
+          $iva_deducible_operativo = $acumulado->iva_deducible_operativo;
+          $acumulado->setCalculosIVA( $operativeData->prorrata_operativa, 0 );
+          $acumulado->iva_deducible_estimado = $iva_deducible_estimado;
+        }
 
         $nombreMes = Variables::getMonthName($mes);
         $dataMes = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0 );
         
         currentCompanyModel()->setFirstAvailableInvoices( $ano, $mes, $dataMes->count_invoices );
+      
+        if( !$request->vista || $request->vista == 'basica' ){
+          return view('/Dashboard/dashboard-basico', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes', 'operativeData'));
+        } else {
+          return view('/Dashboard/dashboard-gerencial', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes', 'operativeData'));
+        }
 
       }catch( \Throwable $ex ){
+        Log::error( $ex->getMessage() );
         $this->forceRecalc($ano);
-        Log::error( $ex );
-      }
-      
-      if( !$request->vista || $request->vista == 'basica' ){
-        return view('/Dashboard/dashboard-basico', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes', 'operativeData'));
-      } else {
-        return view('/Dashboard/dashboard-gerencial', compact('acumulado', 'e', 'f', 'm', 'a', 'y', 'j', 'l', 'g', 's', 'c', 'n', 'd', 'dataMes', 'ano', 'nombreMes', 'operativeData'));
       }
       
     }

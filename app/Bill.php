@@ -921,6 +921,8 @@ class Bill extends Model
           $company = currentCompanyModel();
           $prorrataOperativa = $company->getProrrataOperativa( $this->year );
           $calc = new CalculatedTax();
+          $calc->year = $this->year;
+          $calc->month = $this->month;
           $calc->resetVars();
           $lastBalance = 0;
           $query = BillItem::with('bill')->where('bill_id', $this->id);
