@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Jobs\ProcessBillsImport;
+use App\Jobs\MassValidateBills;
 use App\Jobs\ProcessAcceptHacienda;
 use Illuminate\Support\Facades\Input;
 
@@ -918,77 +919,26 @@ class BillController extends Controller
 
 
     public function validarMasivo(Request $request){
-        $resultBills = [];
-        $errors = false;
         $company = currentCompanyModel();
-        foreach( $request->items as $key => $item ) {
-            $billItem = BillItem::with('bill')->findOrFail($key);
-            $bill = $billItem->bill;
-            if(CalculatedTax::validarMes( $bill->generatedDate()->format('d/m/Y') )){
-                try{
-                	$bill->activity_company_verification = $request->actividad_comercial;
-                    BillItem::where('id', $key)
-                    ->update([
-                      'iva_type' =>  $item['iva_type'],
-                      'product_type' =>  $item['product_type'],
-                      'porc_identificacion_plena' =>  $item['porc_identificacion_plena'],
-                      'is_code_validated' =>  true
-                    ]);
-                    $validated = true;
-                    foreach($bill->items as $item){
-                        if(!$item->is_code_validated){
-                            $validated = false;
-                        }
-                    }
-                    if($validated){
-                        $bill->is_code_validated = true;
-                        if(!$company->use_invoicing){
-                            $bill->accept_status = 1;
-                        }
-                        $billItem->calcularAcreditablePorLinea();
-                        $bill->save();
-                    }
-                    
-                    $user = auth()->user();
-                    Activity::dispatch(
-                        $user,
-                        $bill,
-                        [
-                            'company_id' => $bill->company_id,
-                            'id' => $bill->id,
-                            'document_key' => $bill->document_key
-                        ],
-                        "La factura ". $bill->document_number . " ha sido validada."
-                    )->onConnection(config('etax.queue_connections'))
-                    ->onQueue('log_queue');
-                    
-                    clearBillCache($bill);
-                }catch(\Exception $e){
-                	$this->notificar(2, $company->id, $company->id, "Error validando factura", "Hubo un error validando la factura: $bill->document_number.", 'error', 'bills\validacion masiva', '/facturas-recibidas/lista-validar-masivo');
-                    Log::error('Error ' . $e->getMessage());
-                    $errors = true;
-                    $resultBills[$bill->document_number] = ['status' => 1];
-                } 
-                
-            }else{
-            	$this->notificar(2, $company->id, $company->id, "Error validando factura", "No se pudo validar la factura: $bill->document_number ya que el mes ya fue cerrado.", 'error', 'bills\validacion masiva', '/facturas-recibidas/lista-validar-masivo');
-                $errors = true;
-                $resultBills[$bill->document_number] = ['status' => 0];
-
-            }
+        
+        if( !$request->items ){
+            return back()->withError('Debe enviar al menos una linea.'); 
         }
-        if($errors){
-            $result = 'Las líneas de las facturas: ';
-            foreach($resultBills as $key => $bill){
-                $result = $result . $key . " ";              
+        
+        if( count($request->items) > 100 ) {
+            foreach( $request->items as $key => $itemData ) {
+                $oldItem = BillItem::with('bill')->findOrFail($key);
+                MassValidateBills::dispatch($oldItem, $itemData, $company, $request->actividad_comercial);
             }
-            $result = $result . 'fallaron durante la validacion.';
-            return back()->withError($result);
+            sleep(5);
         }else{
-            return back()->withMessage('Todas las facturas fueron validadas correctamente.'); 
+            foreach( $request->items as $key => $itemData ) {
+                $oldItem = BillItem::with('bill')->findOrFail($key);
+                MassValidateBills::dispatchNow($oldItem, $itemData, $company, $request->actividad_comercial);
+            }
         }
         
-        
+        return back()->withMessage('Las facturas fueron validadas. Puede tardar unos minutos en ver todos los resultados reflejados.'); 
     }
 
     public function guardarValidar(Request $request)

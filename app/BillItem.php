@@ -114,10 +114,10 @@ class BillItem extends Model
         $calc = new CalculatedTax();
         $calc->year = $this->year;
         $calc->month = $this->month;
-        $calc->resetVars();
+        $calc->resetVars($company);
         $query = BillItem::with('bill')->where('id', $this->id);
         $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query, true );
-        $calc->setCalculosPorFactura( $prorrataOperativa, 0 );
+        $calc->setCalculosPorFactura( $prorrataOperativa, 0, $company );
   
         $this->iva_acreditable = round($calc->iva_deducible_operativo,2);
         $this->iva_gasto = round($calc->iva_no_deducible,2);
