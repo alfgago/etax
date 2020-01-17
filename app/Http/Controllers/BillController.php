@@ -925,7 +925,7 @@ class BillController extends Controller
             return back()->withError('Debe enviar al menos una linea.'); 
         }
         
-        if( count($request->items) > 100 ) {
+        if( count($request->items) > 250 ) {
             foreach( $request->items as $key => $itemData ) {
                 $oldItem = BillItem::with('bill')->findOrFail($key);
                 MassValidateBills::dispatch($oldItem, $itemData, $company, $request->actividad_comercial);
