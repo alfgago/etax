@@ -989,8 +989,11 @@ class CalculatedTax extends Model
       $this->setValoresPeriodoSinIva();
     }
     
-    public function setCalculosPorFactura( $prorrataOperativa, $lastBalance ) {
-      $company = currentCompanyModel();
+    public function setCalculosPorFactura( $prorrataOperativa, $lastBalance, $company = null ) {
+      if( !isset($company) ) {
+        $company = currentCompanyModel();
+      }
+      
       $operativeData = $company->getOperativeData($this->year);
       $prorrataOperativa = $operativeData->prorrata_operativa;
       $ivaNoDeducible = 0;
@@ -1142,7 +1145,14 @@ class CalculatedTax extends Model
     /**
     * Reinicia todas las variables de sumatoria cuando se va a volver a calcular desde el inicio
     **/
-    function resetVars() {
+    function resetVars($company = null) {
+			if( !isset($company) ){
+  			if( !isset($this->currentCompany) ){
+          $this->currentCompany = currentCompanyModel();
+  			}
+			}else{
+          $this->currentCompany = $company;
+			}
       
       $this->count_invoices = 0;
 			$this->invoices_total = 0;
@@ -1196,10 +1206,6 @@ class CalculatedTax extends Model
 			  $ivaData->$iVar = 0;
 			  $ivaData->$iVarPleno = 0;
 			  $ivaData->$bVarSD = 0;
-			}
-			
-			if( !isset($this->currentCompany) ){
-        $this->currentCompany = currentCompanyModel();
 			}
 			$arrayActividades = $this->currentCompany->getActivities();
       
