@@ -38,7 +38,7 @@ class BridgeHaciendaApi
             });
             return $value;
         } catch (ClientException $error) {
-            Log::info('Error al iniciar session en API HACIENDA -->>'. $error);
+            Log::info('Func Login: Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         }
     }
@@ -50,6 +50,7 @@ class BridgeHaciendaApi
             $requestOtherCharges = $invoiceUtils->setOtherCharges($invoice->otherCharges);
             $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails, $requestOtherCharges);
             $company = $invoice->company;
+
             if ($requestData !== false) {
                 $client = new Client();
                 Log::info("Enviando parametros  API HACIENDA -->> InvoiceID: $invoice->id, CompanyID: $company->id, CompanyName: $company->business_name" );
@@ -148,7 +149,7 @@ class BridgeHaciendaApi
             }
             return json_encode($details, true);
         } catch (ClientException $error) {
-            Log::error('Error al iniciar session en API HACIENDA -->>'. $error);
+            Log::error('Func setDetails: Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         }
     }
@@ -215,7 +216,7 @@ class BridgeHaciendaApi
             
             return $request;
         } catch (ClientException $error) {
-            Log::error('Error al iniciar session en API HACIENDA -->>'. $error);
+            Log::error('Func InvoiceData: Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         } catch ( \Throwable $error ) {
             Log::error('Error en facturacion -->>'. $error);
@@ -353,7 +354,7 @@ class BridgeHaciendaApi
             }
             return $request;
         } catch (ClientException $error) {
-            Log::info('Error al iniciar session en API HACIENDA -->>'. $error);
+            Log::info('Func setHacienda: Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         }
     }
@@ -387,7 +388,7 @@ class BridgeHaciendaApi
             }
             return $request;
         } catch (ClientException $error) {
-            Log::info('Error al iniciar session en API HACIENDA -->>'. $error);
+            Log::info('Func InvoiceInfo: Error al iniciar session en API HACIENDA -->>'. $error);
             return false;
         }
     }

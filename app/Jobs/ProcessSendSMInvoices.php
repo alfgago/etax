@@ -60,18 +60,20 @@ class ProcessSendSMInvoices implements ShouldQueue
         $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
         $i = 0;
         $invoiceList = array();
+        $descripciones = $excelCollection->pluck('descricpion');
         $numFacturas = $excelCollection->pluck('num_factura');
-        $descripciones = $excelCollection->pluck('descripcion');
-        $existingInvoices = Invoice::select('id', 'description', 'total', 'document_key')->where('company_id', $this->companyId)->whereIn('description', $descripciones)->get();
+        $existingInvoices = Invoice::select('id', 'description', 'total', 'document_key', 'buy_order')->where('company_id', $this->companyId)->whereIn('description', $descripciones)->whereIn('buy_order', $numFacturas)->get();
         
         foreach ($excelCollection as $row){
             try{
                 $metodoGeneracion = "etax-bulk";
                 if( isset($row['doc_identificacion']) ){
                     $descripcion = isset($row['descripcion']) ? $row['descripcion'] : ($row['descricpion'] ?? null);
+                    $ordenCompra = $row['num_factura'] ?? 'No indica';
                     $totalDocumento = $row['total'];
                     $fileType = $row['document_type'];
-                    if( ! $existingInvoices->pluck('description')->contains($descripcion) ){
+                    $existingInvoice = $existingInvoices->where('description', $descripcion)->where('buy_order', $ordenCompra)->first();
+                    if( ! isset($existingInvoice) ){
                         $i++;
     
                         //Datos de proveedor
@@ -89,7 +91,6 @@ class ProcessSendSMInvoices implements ShouldQueue
                         $company->last_invoice_ref_number = $company->last_invoice_ref_number+1;
                         $company->last_document = $consecutivoComprobante;
                         $refNumber = $company->last_invoice_ref_number;
-                        $ordenCompra = $row['num_factura'] ?? 'No indica';
                         
                         $condicionVenta = '02';
                         $metodoPago = str_pad((int)$row['medio_pago'], 2, '0', STR_PAD_LEFT);
@@ -196,9 +197,9 @@ class ProcessSendSMInvoices implements ShouldQueue
                         
                         $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
                     }else {
-                        if($fileType == '03'){
+                        /*if($fileType == '03'){
                             try{
-                                $invoice = Invoice::where("description", $descripcion)->where('total', $totalDocumento)->where('hacienda_status', '01')->first();
+                                $invoice = Invoice::where('company_id', $company->id)->where("description", $descripcion)->where('buy_order', $ordenCompra)->where('hacienda_status', '01')->first();
                                 if( isset($invoice) ){
                                     $otherReference = $row['refer_factura'] ?? null;
                                     Log::info("Actualizando data de NC: $otherReference");
@@ -220,7 +221,7 @@ class ProcessSendSMInvoices implements ShouldQueue
                             }catch(\Exception $e){
                                 Log::error("Error en import NC SM: " . $e);
                             }
-                        }
+                        }*/
                     }
                 }
             }catch( \Throwable $ex ){
