@@ -14,7 +14,6 @@
 	    <select class="form-control" name="tipo_archivo" id="tipo_archivo" onchange="toggleTiposImportacion()" required>
 	      <option value="xlsx">Excel</option>
 	      <option value="xml">XML de Hacienda</option>
-	      @if(currentCompanyModel()->id==1110 || currentCompanyModel()->id==437) <option value="sm">Envio masivo SM Seguros</option> @endif 
 	    </select>
 	  </div>
 	  
@@ -26,7 +25,7 @@
 		      </h3>
 		    </div>
 		    
-				<form method="POST" action="/facturas-emitidas/importarExcelSM" enctype="multipart/form-data" class="toggle-sm mt-3">
+				<form method="POST" action="/sm/importar-excel" enctype="multipart/form-data" class="toggle-sm mt-3">
 											
 				  @csrf
 		    	  <div class="form-group col-md-12">

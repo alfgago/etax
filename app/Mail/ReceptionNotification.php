@@ -34,7 +34,7 @@ class ReceptionNotification extends Mailable
         $cedula = $this->content['data_company']->id_number;
         if( $cedula == '3101693964' ){
             $customImg = "logo-$cedula.jpg";
-            $sendFrom = $this->content['data_company']->email;
+            $sendFrom = "facturacion@triquimas.cr";
         }
         
         $fromEmail = $this->content['data_company']->email;

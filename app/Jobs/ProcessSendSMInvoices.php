@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\ApiResponse;
 use App\Company;
 use App\Invoice;
+use App\SMInvoice;
 use App\Mail\CreditNoteNotificacion;
 use App\Utils\BridgeHaciendaApi;
 use App\Utils\InvoiceUtils;
@@ -24,7 +25,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cache;
 
-class ProcessSendExcelInvoices implements ShouldQueue
+class ProcessSendSMInvoices implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -38,11 +39,10 @@ class ProcessSendExcelInvoices implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($excelCollection, $companyId, $fileType)
+    public function __construct($excelCollection, $companyId)
     {
         $this->excelCollection = $excelCollection;
         $this->companyId = $companyId;
-        $this->fileType = $fileType;
     }
 
     /**
@@ -54,21 +54,24 @@ class ProcessSendExcelInvoices implements ShouldQueue
     {
         $company = Company::find($this->companyId);
         $excelCollection = $this->excelCollection;
-        $fileType = $this->fileType;
         
         sleep (1);
         Log::notice("$company->id_number importando ".count($excelCollection)." lineas... Last Invoice: $company->last_invoice_ref_number");
         $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
         $i = 0;
         $invoiceList = array();
+        $numFacturas = $excelCollection->pluck('num_factura');
+        $descripciones = $excelCollection->pluck('descripcion');
+        $existingInvoices = Invoice::select('id', 'description', 'total', 'document_key')->where('company_id', $this->companyId)->whereIn('description', $descripciones)->get();
+        
         foreach ($excelCollection as $row){
             try{
                 $metodoGeneracion = "etax-bulk";
-                    
                 if( isset($row['doc_identificacion']) ){
                     $descripcion = isset($row['descripcion']) ? $row['descripcion'] : ($row['descricpion'] ?? null);
                     $totalDocumento = $row['total'];
-                    if( ! Invoice::where("description", $descripcion)->where('total', $totalDocumento)->count() ){
+                    $fileType = $row['document_type'];
+                    if( ! $existingInvoices->pluck('description')->contains($descripcion) ){
                         $i++;
     
                         //Datos de proveedor
@@ -86,6 +89,7 @@ class ProcessSendExcelInvoices implements ShouldQueue
                         $company->last_invoice_ref_number = $company->last_invoice_ref_number+1;
                         $company->last_document = $consecutivoComprobante;
                         $refNumber = $company->last_invoice_ref_number;
+                        $ordenCompra = $row['num_factura'] ?? 'No indica';
                         
                         $condicionVenta = '02';
                         $metodoPago = str_pad((int)$row['medio_pago'], 2, '0', STR_PAD_LEFT);
@@ -106,7 +110,6 @@ class ProcessSendExcelInvoices implements ShouldQueue
                         
                         //Datos de linea
                         $codigoProducto = $row['num_objeto'] ?? 'N/A';
-                        $ordenCompra = $row['num_factura'] ?? 'No indica';
                         $detalleProducto = isset($descripcion)  ? $descripcion : $codigoProducto;
                         $unidadMedicion = 'Os';
                         $cantidad = isset($row['cantidad']) ? $row['cantidad'] : 1;
@@ -192,7 +195,6 @@ class ProcessSendExcelInvoices implements ShouldQueue
                         );
                         
                         $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
-                      
                     }else {
                         if($fileType == '03'){
                             try{

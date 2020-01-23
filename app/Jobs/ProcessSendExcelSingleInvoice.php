@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\ApiResponse;
 use App\Company;
 use App\Invoice;
+use App\SMInvoice;
 use App\InvoiceItem;
 use App\AvailableInvoices;
 use App\Mail\CreditNoteNotificacion;
@@ -97,6 +98,11 @@ class ProcessSendExcelSingleInvoice implements ShouldQueue
                 }
           
                 $invoice->save();
+                
+                $smInvoice = SMInvoice::where('descripcion', $invoice->description)->first();
+                $smInvoice->document_key = $invoice->document_key;
+                $smInvoice->save();
+                
                 if( $invoice->year == 2018 ) {
                  clearLastTaxesCache($invoice->company_id, 2018);
                 }

@@ -288,8 +288,8 @@ class Company extends Model {
                        
             // Si no encontró nada, tiene que crearla.
             if( ! $available_invoices ) {
-                $subscriptionPlan = getCurrentSubscription()->plan;
-
+                $subscription = getCurrentSubscription();
+                $subscriptionPlan = $subscription->plan;
                 $available_invoices = AvailableInvoices::create(
                     [
                         'company_id' => $this->id,

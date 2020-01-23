@@ -41,6 +41,13 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
                 $event->sheet->getDelegate()->getColumnDimension('O')->setAutoSize(true);
                 $event->sheet->getDelegate()->getColumnDimension('P')->setAutoSize(true);
                 $event->sheet->getDelegate()->getColumnDimension('Q')->setAutoSize(true);
+                $event->sheet->getDelegate()->getColumnDimension('R')->setAutoSize(true);
+                $event->sheet->getDelegate()->getColumnDimension('S')->setAutoSize(true);
+                $event->sheet->getDelegate()->getColumnDimension('T')->setAutoSize(true);
+                $cellRangeHeaders = 'A1:T1'; // All headers
+                $event->sheet->getDelegate()->getStyle($cellRangeHeaders)->getFont()->setSize(12);
+                $event->sheet->getDelegate()->getStyle($cellRangeHeaders)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                      ->getStartColor()->setARGB('FF4472C4');
             },
         ];
     }
@@ -70,6 +77,7 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
     public function map($map): array
     {
         $factor = $map->bill->document_type != '03' ? 1 : -1;
+        $tipoCambio = $map->bill->currency_rate;
         return [
             $map->bill->documentTypeName(),
             $map->bill->generatedDate()->format('d/m/Y'),
@@ -82,10 +90,13 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
             isset($map->productCategory) ? $map->productCategory->id . " - " . $map->productCategory->name : 'No indica',
             $map->bill->currency,
             $map->bill->currency_rate ?? '',
-            round( $map->subtotal * $factor, 2),
             (isset($map->ivaType) ? $map->ivaType->percentage : $map->iva_percentage) . '%',
+            round( $map->subtotal * $factor, 2),
             round( $map->iva_amount * $factor, 2),
             round( $map->total * $factor , 2),
+            round( $map->subtotal * $tipoCambio * $factor, 2),
+            round( $map->iva_amount * $tipoCambio * $factor, 2),
+            round( $map->total * $tipoCambio * $factor , 2),
             round( $map->iva_acreditable, 2),
             round( $map->iva_gasto, 2),
         ];
@@ -106,10 +117,13 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
                 'Cat. Declaración',
                 'Moneda',
                 'Tipo Cambio',
-                'Subtotal',
                 'Tarifa IVA',
+                'Subtotal',
                 'Monto IVA',
                 'Total',
+                'Subtotal CRC',
+                'Monto IVA CRC',
+                'Total CRC',
                 'IVA acreditable',
                 'IVA al gasto'
             ]
