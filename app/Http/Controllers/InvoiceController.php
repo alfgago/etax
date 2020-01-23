@@ -41,6 +41,7 @@ use App\Jobs\ProcessSendExcelInvoices;
 use App\Jobs\ProcessInvoicesExcel;
 use App\Jobs\EnvioProgramadas;
 use Illuminate\Support\Facades\Input;
+use App\SMInvoice;
 
 /**
  * @group Controller - Facturas de venta
@@ -379,7 +380,14 @@ class InvoiceController extends Controller
             ->editColumn('generated_date', function(Invoice $invoice) {
                 return $invoice->generatedDate()->format('d/m/Y');
             })
-            ->rawColumns(['actions', 'hacienda_status'])
+            ->addColumn('total_real', function(Invoice $invoice) {
+                $total = number_format($invoice->total ,2);
+                if($invoice->total_exonerados){
+                    return "$total <br><small style='font-size:.8em !important;'>($invoice->total_exonerados exonerados)</small>";
+                }
+                return $total;
+            })
+            ->rawColumns(['actions', 'hacienda_status', 'total_real'])
             ->toJson();
     }
 
@@ -656,6 +664,7 @@ class InvoiceController extends Controller
 
                     $request->document_key = $invoice->document_key;
                     $request->document_number = $invoice->document_number;
+
                     $invoiceData = $invoice->setInvoiceData($request);
 
                     if ($request->document_type == '08' ) {
@@ -664,7 +673,6 @@ class InvoiceController extends Controller
                             $invoice->is_void = true;
                         }
                     }
-
                     
                     $invoice->save();                    
                     if($request->recurrencia != "0" ){
@@ -709,6 +717,10 @@ class InvoiceController extends Controller
                         if (!empty($invoiceData)) {
                             $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
                         }
+                    }
+                    
+                    if( !isset($invoice) ){
+                        return back()->withError( 'Error en comunicación con Hacienda. Revise su llave criptográfica o reintente en unos minutos.' );
                     }
 
                     $company->save();
@@ -2044,34 +2056,6 @@ class InvoiceController extends Controller
             Log::error("Error consultado factura -->" .$e);
             return redirect()->back()->withErrors('Error al consultar comprobante en hacienda');
         }
-
-    }
-
-
-    public function importExcelSM() {
-        request()->validate([
-          'archivo' => 'required',
-        ]);
-
-        $fileType = request()->fileType ?? '01';
-
-        $collection = Excel::toCollection( new InvoiceImportSM(), request()->file('archivo') );
-        $companyId = currentCompany();
-        $invoiceList = $collection->toArray()[0];
-
-        try {
-            Log::debug('Creando job de registro de facturas.');
-            foreach (array_chunk ( $invoiceList, 50 ) as $facturas) {
-                ProcessSendExcelInvoices::dispatch($facturas, $companyId, $fileType)->onQueue('bulk');
-            }
-        }catch( \Throwable $ex ){
-            Log::error("Error importando excel archivo:" . $ex);
-        }
-
-
-        return redirect('/facturas-emitidas')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
-
-
     }
 
     public function envioProgramada(){

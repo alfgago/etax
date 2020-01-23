@@ -139,6 +139,7 @@ class Book extends Model
                            $ivaData->bB174;
       $this->cc_ventas_exp = $ivaData->bB150 + $ivaData->bS150;
       $this->cc_ventas_estado = $ivaData->bB160 + $ivaData->bS160;
+      
       try{ //Hace un tryCatch porque hay cierres donde aun no existian los codigos 180s;
       $this->cc_ventas_exentas = $ivaData->bB170 + $ivaData->bS170 + 
                                  $ivaData->bB181 + $ivaData->bS181 +
@@ -163,11 +164,16 @@ class Book extends Model
                                $ivaData->iS104 + $ivaData->iS124 + + $ivaData->iS114 + 
                                 $ivaData->iB174;
       try{ //Hace un tryCatch porque hay cierres donde aun no existia el codigo 300
-      $this->cc_ventas_sin_derecho = $ivaData->bB200 + $ivaData->bB201 + $ivaData->bB240 + $ivaData->bB245 + $ivaData->bB250 + $ivaData->bB260 + $ivaData->iB200 + $ivaData->iB201 + $ivaData->iB240 + $ivaData->iB245 + $ivaData->iB250 + $ivaData->iB260 +
-                                     $ivaData->bS200 + $ivaData->bS201 + $ivaData->bS240 + $ivaData->bS245 + $ivaData->bS250 + $ivaData->bS260 + $ivaData->iS200 + $ivaData->iS201 + $ivaData->iS240 + $ivaData->iS245 + $ivaData->iS250 + $ivaData->iS260 +
+      $this->cc_ventas_sin_derecho = $ivaData->bB200 + $ivaData->bB201 + $ivaData->bB240 + $ivaData->bB245 + $ivaData->bB250 + $ivaData->bB260 + 
+                                     $ivaData->iB200 + $ivaData->iB201 + $ivaData->iB240 + $ivaData->iB245 + $ivaData->iB250 + $ivaData->iB260 +
+                                     $ivaData->bS200 + $ivaData->bS201 + $ivaData->bS240 + $ivaData->bS245 + $ivaData->bS250 + $ivaData->bS260 + 
+                                     $ivaData->iS200 + $ivaData->iS201 + $ivaData->iS240 + $ivaData->iS245 + $ivaData->iS250 + $ivaData->iS260 +
                                      $ivaData->bS300 + $ivaData->iS300;
-      }catch(\Exception $e){ $this->cc_ventas_sin_derecho = $ivaData->bB200 + $ivaData->bB201 + $ivaData->bB240 + $ivaData->bB245 + $ivaData->bB250 + $ivaData->bB260 + $ivaData->iB200 + $ivaData->iB201 + $ivaData->iB240 + $ivaData->iB245 + $ivaData->iB250 + $ivaData->iB260 +
-        $ivaData->bS200 + $ivaData->bS201 + $ivaData->bS240 + $ivaData->bS245 + $ivaData->bS250 + $ivaData->bS260 + $ivaData->iS200 + $ivaData->iS201 + $ivaData->iS240 + $ivaData->iS245 + $ivaData->iS250 + $ivaData->iS260; 
+      }catch(\Exception $e){ 
+          $this->cc_ventas_sin_derecho = $ivaData->bB200 + $ivaData->bB201 + $ivaData->bB240 + $ivaData->bB245 + $ivaData->bB250 + $ivaData->bB260 + 
+                                         $ivaData->iB200 + $ivaData->iB201 + $ivaData->iB240 + $ivaData->iB245 + $ivaData->iB250 + $ivaData->iB260 +
+                                         $ivaData->bS200 + $ivaData->bS201 + $ivaData->bS240 + $ivaData->bS245 + $ivaData->bS250 + $ivaData->bS260 + 
+                                         $ivaData->iS200 + $ivaData->iS201 + $ivaData->iS240 + $ivaData->iS245 + $ivaData->iS250 + $ivaData->iS260; 
       }
       
       $this->cc_ventas_sum = $this->cc_ventas_1 + $this->cc_ventas_2 + $this->cc_ventas_13 + $this->cc_ventas_4 + 
@@ -189,7 +195,7 @@ class Book extends Model
       $ivaData = json_decode( $calculos->iva_data ) ?? new \stdClass();
       
       $company = currentCompanyModel();
-      $operativeData = $company->getOperativeData($this->year);
+      $operativeData = $company->getOperativeData($calculos->year);
       $prorrataOperativa = $operativeData->prorrata_operativa;
       $ratio1_operativo = $operativeData->operative_ratio1;
       $ratio2_operativo = $operativeData->operative_ratio2;
@@ -206,12 +212,12 @@ class Book extends Model
         $this->cc_ppp_2 = $ivaData->iB012 + $ivaData->iB032 + $ivaData->iB052 + $ivaData->iB072;
         $this->cc_ppp_3 = $ivaData->iB013 + $ivaData->iB033 + $ivaData->iB053 + $ivaData->iB073;
         $this->cc_ppp_4 = $ivaData->iB014 + $ivaData->iB034 + $ivaData->iB054 + $ivaData->iB074;
-        
+
         $this->cc_bs_1 = $ivaData->iB001 + $ivaData->iB021 + $ivaData->iB041 + $ivaData->iB061 +
                          $ivaData->iS001 + $ivaData->iS021 + $ivaData->iS041 + $ivaData->iS061;
         $this->cc_bs_2 = $ivaData->iB002 + $ivaData->iB022 + $ivaData->iB042 + $ivaData->iB062 +
                          $ivaData->iS002 + $ivaData->iS022 + $ivaData->iS042 + $ivaData->iS062;
-        $this->cc_bs_3 = $ivaData->iB003 + $ivaData->iB023 + $ivaData->iB043 + $ivaData->iB063 + $iva_no_acreditables +
+        $this->cc_bs_3 = $ivaData->iB003 + $ivaData->iB023 + $ivaData->iB043 + $ivaData->iB063 + $iva_no_acreditables + 
                          $ivaData->iS003 + $ivaData->iS023 + $ivaData->iS043 + $ivaData->iS063;
         $this->cc_bs_4 = $ivaData->iB004 + $ivaData->iB024 + $ivaData->iB044 + $ivaData->iB064 +
                          $ivaData->iS004 + $ivaData->iS024 + $ivaData->iS044 + $ivaData->iS064;
@@ -260,6 +266,9 @@ class Book extends Model
                             $ivaData->iS003 + $ivaData->iS023;
         $this->cc_aj_bs_4 = $ivaData->iB004 + $ivaData->iB024 +
                             $ivaData->iS004 + $ivaData->iS024;
+                            
+        //$deducibleS140 =  ( ($ivaData->bS140 * $ratio1_operativo * 0.13) + ($ivaData->bS140 * $ratio2_operativo * 0.02) + ($ivaData->bS140 * $ratio3_operativo * 0.13) + ($ivaData->bS140 * $ratio4_operativo * 0.04) ) * $prorrataOperativa;
+        $deducibleS140 = 0;
         
         $acreditable_bs1  = ( ($bases_bs1 * $ratio1_operativo * 0.01) + ($bases_bs1 * $ratio2_operativo * 0.02) + ($bases_bs1 * $ratio3_operativo * 0.13) + ($bases_bs1 * $ratio4_operativo * 0.04) ) * $prorrataOperativa;
         $acreditable_bs2  = ( ($bases_bs2 * $ratio1_operativo * 0.02) + ($bases_bs2 * $ratio2_operativo * 0.02) + ($bases_bs2 * $ratio3_operativo * 0.02) + ($bases_bs2 * $ratio4_operativo * 0.02) ) * $prorrataOperativa;
@@ -273,9 +282,8 @@ class Book extends Model
 
         $acreditable_ppp = 0 + $acreditable_ppp2 + $acreditable_ppp3 + $acreditable_ppp4;
         $acreditable_bs = 0 + $acreditable_bs2 + $acreditable_bs3 + $acreditable_bs4;
-        
         $this->cc_ajuste_ppp =  - $acreditable_ppp + 0 + $this->cc_aj_ppp_2 + + $this->cc_aj_ppp_3 + + $this->cc_aj_ppp_4; 
-        $this->cc_ajuste_bs =  - $acreditable_bs + 0 + $this->cc_aj_bs_2 + $this->cc_aj_bs_3 + $this->cc_aj_bs_4;
+        $this->cc_ajuste_bs =  - $acreditable_bs + 0 + $this->cc_aj_bs_2 + $this->cc_aj_bs_3 + $this->cc_aj_bs_4 - $deducibleS140;
         
         $this->cc_gasto_no_acreditable = $calculos->iva_no_acreditable_identificacion_plena;
         

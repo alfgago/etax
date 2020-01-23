@@ -33,7 +33,7 @@ class CreditNoteNotificacion extends Mailable
         $cedula = $this->content['data_company']->id_number;
         if( $cedula == '3101693964' ){
             $customImg = "logo-$cedula.jpg";
-            $sendFrom = $this->content['data_company']->email;
+            $sendFrom = "facturacion@triquimas.cr";
         }
         
         $type = $this->content['data_invoice']->document_type == '03' ? 'Crédito': 'Debito';

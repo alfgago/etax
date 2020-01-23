@@ -403,9 +403,9 @@ class CalculatedTax extends Model
               }
               
               //sum los del 13%
-              if( $ivaType == '103' || $ivaType == '123' || $ivaType == '143' || $ivaType == '130' || $ivaType == '140' ||
-                  $ivaType == 'B103' || $ivaType == 'B123' || $ivaType == 'B143' || $ivaType == 'B130' || $ivaType == 'B140' ||
-                  $ivaType == 'S103' || $ivaType == 'S123' || $ivaType == 'S143' || $ivaType == 'S130' || $ivaType == 'S140' || $ivaType == 'B173' ){
+              if( $ivaType == '103' || $ivaType == '123' || $ivaType == '143' || $ivaType == '130' ||
+                  $ivaType == 'B103' || $ivaType == 'B123' || $ivaType == 'B143' || $ivaType == 'B130' ||
+                  $ivaType == 'S103' || $ivaType == 'S123' || $ivaType == 'S143' || $ivaType == 'S130' || $ivaType == 'B173' ){
                 $sumRepercutido3 += $subtotal;
               }
               
@@ -415,6 +415,12 @@ class CalculatedTax extends Model
                   $ivaType == 'S104' || $ivaType == 'S124' || $ivaType == 'S144' || $ivaType == 'S114' || $ivaType == 'B174' ){
                 $sumRepercutido4 += $subtotal;
               }
+              
+              //sum los de sujeto pasivo
+              if( $ivaType == 'B140' || $ivaType == 'S140' ){
+                $sumIvaSinAplicar += $subtotal;
+              }
+              
               //sum los del exentos. Estos se suman como si fueran 13 para efectos del cálculo.
               if( $ivaType == '150' || $ivaType == '160' ||  $ivaType == '170' || $ivaType == '199' || $ivaType == '155' ||
                   $ivaType == 'B150' || $ivaType == 'B160' ||  $ivaType == 'B170' || $ivaType == 'B199' || $ivaType == 'B155' ||
@@ -450,7 +456,7 @@ class CalculatedTax extends Model
                 $sumRepercutidoExentoConCredito += $subtotal;
               }
               //No cuenta los que no llevan IVA
-              if(  $ivaType == 'S300' || $ivaType == 'B300' 
+              if(  $ivaType == 'S300' || $ivaType == 'B300'
                 || $ivaType == 'S260' || $ivaType == 'B260' 
               ){
                 $subtotal = $subtotal;
@@ -989,8 +995,11 @@ class CalculatedTax extends Model
       $this->setValoresPeriodoSinIva();
     }
     
-    public function setCalculosPorFactura( $prorrataOperativa, $lastBalance ) {
-      $company = currentCompanyModel();
+    public function setCalculosPorFactura( $prorrataOperativa, $lastBalance, $company = null ) {
+      if( !isset($company) ) {
+        $company = currentCompanyModel();
+      }
+      
       $operativeData = $company->getOperativeData($this->year);
       $prorrataOperativa = $operativeData->prorrata_operativa;
       $ivaNoDeducible = 0;
@@ -1142,7 +1151,14 @@ class CalculatedTax extends Model
     /**
     * Reinicia todas las variables de sumatoria cuando se va a volver a calcular desde el inicio
     **/
-    function resetVars() {
+    function resetVars($company = null) {
+			if( !isset($company) ){
+  			if( !isset($this->currentCompany) ){
+          $this->currentCompany = currentCompanyModel();
+  			}
+			}else{
+          $this->currentCompany = $company;
+			}
       
       $this->count_invoices = 0;
 			$this->invoices_total = 0;
@@ -1196,10 +1212,6 @@ class CalculatedTax extends Model
 			  $ivaData->$iVar = 0;
 			  $ivaData->$iVarPleno = 0;
 			  $ivaData->$bVarSD = 0;
-			}
-			
-			if( !isset($this->currentCompany) ){
-        $this->currentCompany = currentCompanyModel();
 			}
 			$arrayActividades = $this->currentCompany->getActivities();
       

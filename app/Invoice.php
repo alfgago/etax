@@ -1045,7 +1045,7 @@ class Invoice extends Model
               }
 
             }
-
+            
             $invoice->subtotal = $invoice->subtotal + $subtotalLinea;
             $invoice->iva_amount = $invoice->iva_amount + $montoIva;
 

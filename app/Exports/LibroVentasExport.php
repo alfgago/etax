@@ -38,6 +38,15 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
                 $event->sheet->getDelegate()->getColumnDimension('L')->setAutoSize(true);
                 $event->sheet->getDelegate()->getColumnDimension('M')->setAutoSize(true);
                 $event->sheet->getDelegate()->getColumnDimension('N')->setAutoSize(true);
+                $event->sheet->getDelegate()->getColumnDimension('O')->setAutoSize(true);
+                $event->sheet->getDelegate()->getColumnDimension('P')->setAutoSize(true);
+                $event->sheet->getDelegate()->getColumnDimension('Q')->setAutoSize(true);
+                $event->sheet->getDelegate()->getColumnDimension('R')->setAutoSize(true);
+                $event->sheet->getDelegate()->getColumnDimension('S')->setAutoSize(true);
+                $cellRangeHeaders = 'A1:S1'; // All headers
+                $event->sheet->getDelegate()->getStyle($cellRangeHeaders)->getFont()->setSize(12);
+                $event->sheet->getDelegate()->getStyle($cellRangeHeaders)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                      ->getStartColor()->setARGB('FF4472C4');
             },
         ];
     }
@@ -67,6 +76,7 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
     public function map($map): array
     {
         $factor = $map->invoice->document_type != '03' ? 1 : -1;
+        $tipoCambio = $map->invoice->currency_rate;
         $array = [
             $map->invoice->documentTypeName(),
             $map->invoice->generatedDate()->format('d/m/Y'),
@@ -80,10 +90,13 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
             isset($map->productCategory) ? ($map->productCategory->id . " - " . $map->productCategory->name) : 'No indica categoria',
             $map->invoice->currency,
             $map->invoice->currency_rate ?? '',
-            round( $map->subtotal * $factor, 2),
             (isset($map->ivaType) ? $map->ivaType->percentage : $map->iva_percentage) . '%',
+            round( $map->subtotal * $factor, 2),
             round( $map->iva_amount * $factor, 2),
             round( $map->total * $factor , 2),
+            round( $map->subtotal * $tipoCambio * $factor, 2),
+            round( $map->iva_amount * $tipoCambio * $factor, 2),
+            round( $map->total * $tipoCambio * $factor , 2),
             
         ];
         return $array;
@@ -105,10 +118,13 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
                 'Cat. Declaración',
                 'Moneda',
                 'Tipo Cambio',
-                'Subtotal',
                 'Tarifa IVA',
+                'Subtotal',
                 'Monto IVA',
-                'Total'
+                'Total',
+                'Subtotal CRC',
+                'Monto IVA CRC',
+                'Total CRC'
             ]
         ];
         return $array;

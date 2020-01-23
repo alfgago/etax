@@ -49,10 +49,14 @@ Route::post('facturas-emitidas/importarExcel', 'InvoiceController@importExcel');
 Route::post('facturas-emitidas/enviarExcel', 'InvoiceController@envioMasivoExcel');
 Route::get('facturas-emitidas/detalleXlsInvoice/{consecutivo}', 'InvoiceController@detalleXlsInvoice');
 Route::post('facturas-emitidas/validarEnvioExcel', 'InvoiceController@validarEnvioExcel');
-Route::post('facturas-emitidas/importarExcelSM', 'InvoiceController@importExcelSM');
 Route::post('facturas-emitidas/importarXML', 'InvoiceController@importXML');
 Route::post('facturas-recibidas/importarExcel', 'BillController@importExcel');
 Route::post('facturas-recibidas/importarXML', 'BillController@importXML');
+
+//Rutas SM
+Route::post('sm/importar-excel', 'SMInvoiceController@importExcelSM');
+Route::post('sm/confirmar-envio', 'SMInvoiceController@confirmarEnvioExcelSM');
+Route::get('sm', 'SMInvoiceController@index');
 
 // Rutas de reportes
 Route::get('/', 'ReportsController@dashboard');
@@ -254,6 +258,7 @@ Route::get('/api/books', 'BookController@indexData')->name('Book.data');
 Route::get('/api/payments', 'PaymentController@indexData')->name('Payment.data');
 Route::get('/api/paymentsMethods', 'PaymentMethodController@indexData')->name('PaymentMethod.data');
 Route::get('/api/oneBill/{id}', 'BillController@indexOne')->name('Bill.indexOne');
+Route::get('/api/sm', 'SMInvoiceController@indexData')->name('SMInvoice.data');
 
 
 

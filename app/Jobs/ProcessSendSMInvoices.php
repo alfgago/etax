@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\ApiResponse;
 use App\Company;
 use App\Invoice;
+use App\SMInvoice;
 use App\Mail\CreditNoteNotificacion;
 use App\Utils\BridgeHaciendaApi;
 use App\Utils\InvoiceUtils;
@@ -24,7 +25,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cache;
 
-class ProcessSendExcelInvoices implements ShouldQueue
+class ProcessSendSMInvoices implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -38,11 +39,10 @@ class ProcessSendExcelInvoices implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($excelCollection, $companyId, $fileType)
+    public function __construct($excelCollection, $companyId)
     {
         $this->excelCollection = $excelCollection;
         $this->companyId = $companyId;
-        $this->fileType = $fileType;
     }
 
     /**
@@ -54,21 +54,26 @@ class ProcessSendExcelInvoices implements ShouldQueue
     {
         $company = Company::find($this->companyId);
         $excelCollection = $this->excelCollection;
-        $fileType = $this->fileType;
         
         sleep (1);
         Log::notice("$company->id_number importando ".count($excelCollection)." lineas... Last Invoice: $company->last_invoice_ref_number");
         $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
         $i = 0;
         $invoiceList = array();
+        $descripciones = $excelCollection->pluck('descricpion');
+        $numFacturas = $excelCollection->pluck('num_factura');
+        $existingInvoices = Invoice::select('id', 'description', 'total', 'document_key', 'buy_order')->where('company_id', $this->companyId)->whereIn('description', $descripciones)->whereIn('buy_order', $numFacturas)->get();
+        
         foreach ($excelCollection as $row){
             try{
                 $metodoGeneracion = "etax-bulk";
-                    
                 if( isset($row['doc_identificacion']) ){
                     $descripcion = isset($row['descripcion']) ? $row['descripcion'] : ($row['descricpion'] ?? null);
+                    $ordenCompra = $row['num_factura'] ?? 'No indica';
                     $totalDocumento = $row['total'];
-                    if( ! Invoice::where("description", $descripcion)->where('total', $totalDocumento)->count() ){
+                    $fileType = $row['document_type'];
+                    $existingInvoice = $existingInvoices->where('description', $descripcion)->where('buy_order', $ordenCompra)->first();
+                    if( ! isset($existingInvoice) ){
                         $i++;
     
                         //Datos de proveedor
@@ -106,7 +111,6 @@ class ProcessSendExcelInvoices implements ShouldQueue
                         
                         //Datos de linea
                         $codigoProducto = $row['num_objeto'] ?? 'N/A';
-                        $ordenCompra = $row['num_factura'] ?? 'No indica';
                         $detalleProducto = isset($descripcion)  ? $descripcion : $codigoProducto;
                         $unidadMedicion = 'Os';
                         $cantidad = isset($row['cantidad']) ? $row['cantidad'] : 1;
@@ -192,11 +196,10 @@ class ProcessSendExcelInvoices implements ShouldQueue
                         );
                         
                         $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
-                      
                     }else {
-                        if($fileType == '03'){
+                        /*if($fileType == '03'){
                             try{
-                                $invoice = Invoice::where("description", $descripcion)->where('total', $totalDocumento)->where('hacienda_status', '01')->first();
+                                $invoice = Invoice::where('company_id', $company->id)->where("description", $descripcion)->where('buy_order', $ordenCompra)->where('hacienda_status', '01')->first();
                                 if( isset($invoice) ){
                                     $otherReference = $row['refer_factura'] ?? null;
                                     Log::info("Actualizando data de NC: $otherReference");
@@ -218,7 +221,7 @@ class ProcessSendExcelInvoices implements ShouldQueue
                             }catch(\Exception $e){
                                 Log::error("Error en import NC SM: " . $e);
                             }
-                        }
+                        }*/
                     }
                 }
             }catch( \Throwable $ex ){

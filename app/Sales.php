@@ -32,16 +32,15 @@ class Sales extends Model
     
     public function plan()
     {
-        if($this->is_subscription) {
+        //dd($this);
+        //if($this->is_subscription) {
             return $this->belongsTo(SubscriptionPlan::class, 'etax_product_id');
-        } else {
-            return $this->belongsTo(EtaxProducts::class, 'etax_product_id');
-        }
+        
     }
     
     public function saleDescription()
     {
-        if($this->is_subscription){
+        if( isset($this->is_subscription) ){
             return $this->plan->plan_type . " " . $this->plan->plan_tier;
         }else{
             return $this->product->name; 
