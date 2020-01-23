@@ -136,7 +136,7 @@ class ProcessRegisterSMInvoices implements ShouldQueue
                             'batch_repeated' => $batchRepeated,
                         ]);
                     }
-                }
+                } 
             }catch( \Throwable $ex ){
                 Log::error("Error en factura SM:" . $ex);
             }
