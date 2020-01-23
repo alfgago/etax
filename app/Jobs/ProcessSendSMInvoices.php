@@ -60,7 +60,7 @@ class ProcessSendSMInvoices implements ShouldQueue
         $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
         $i = 0;
         $invoiceList = array();
-        $descripciones = $excelCollection->pluck('descricpion');
+        $descripciones = $excelCollection->pluck('descripcion');
         $numFacturas = $excelCollection->pluck('num_factura');
         $existingInvoices = Invoice::select('id', 'description', 'total', 'document_key', 'buy_order')->where('company_id', $this->companyId)->whereIn('description', $descripciones)->whereIn('buy_order', $numFacturas)->get();
         
@@ -197,31 +197,10 @@ class ProcessSendSMInvoices implements ShouldQueue
                         
                         $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
                     }else {
-                        /*if($fileType == '03'){
-                            try{
-                                $invoice = Invoice::where('company_id', $company->id)->where("description", $descripcion)->where('buy_order', $ordenCompra)->where('hacienda_status', '01')->first();
-                                if( isset($invoice) ){
-                                    $otherReference = $row['refer_factura'] ?? null;
-                                    Log::info("Actualizando data de NC: $otherReference");
-                                    if ( isset($otherReference) ) {
-                                        $ref = Invoice::where('company_id', $company->id)
-                                          ->where('buy_order', $otherReference)
-                                          ->first();
-                                        $invoice->code_note = '01';
-                                        $invoice->resend_attempts = 0;
-                                        $invoice->in_queue = false;
-                                        $invoice->reason = 'Factura anulada';
-                                        $invoice->other_reference = $ref->reference_number;
-                                        $invoice->reference_generated_date = $ref->generated_date;
-                                        $invoice->reference_document_key = $ref->document_key;
-                                        $invoice->reference_doc_type = $ref->document_type;
-                                        $invoice->save();
-                                    }
-                                }
-                            }catch(\Exception $e){
-                                Log::error("Error en import NC SM: " . $e);
-                            }
-                        }*/ 
+                        $smInvoice = SMInvoice::where('descripcion', $invoice->description)->where('num_factura', $invoice->buy_order)->first();
+                        $smInvoice->document_key = $invoice->document_key;
+                        $smInvoice->invoice_id = $invoice->id;
+                        $smInvoice->save();
                     }
                 }
             }catch( \Throwable $ex ){

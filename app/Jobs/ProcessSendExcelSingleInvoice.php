@@ -99,8 +99,9 @@ class ProcessSendExcelSingleInvoice implements ShouldQueue
           
                 $invoice->save();
                 
-                $smInvoice = SMInvoice::where('descripcion', $invoice->description)->first();
+                $smInvoice = SMInvoice::where('descripcion', $invoice->description)->where('num_factura', $invoice->buy_order)->first();
                 $smInvoice->document_key = $invoice->document_key;
+                $smInvoice->invoice_id = $invoice->id;
                 $smInvoice->save();
                 
                 if( $invoice->year == 2018 ) {
