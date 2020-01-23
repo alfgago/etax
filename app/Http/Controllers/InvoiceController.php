@@ -664,6 +664,7 @@ class InvoiceController extends Controller
 
                     $request->document_key = $invoice->document_key;
                     $request->document_number = $invoice->document_number;
+
                     $invoiceData = $invoice->setInvoiceData($request);
 
                     if ($request->document_type == '08' ) {
@@ -672,7 +673,6 @@ class InvoiceController extends Controller
                             $invoice->is_void = true;
                         }
                     }
-
                     
                     $invoice->save();                    
                     if($request->recurrencia != "0" ){
@@ -717,6 +717,10 @@ class InvoiceController extends Controller
                         if (!empty($invoiceData)) {
                             $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
                         }
+                    }
+                    
+                    if( !isset($invoice) ){
+                        return back()->withError( 'Error en comunicación con Hacienda. Revise su llave criptográfica o reintente en unos minutos.' );
                     }
 
                     $company->save();

@@ -67,27 +67,29 @@ class ProcessRegisterSMInvoices implements ShouldQueue
         $i = 0;
         $invoiceList = array();
         $descripciones = $excelCollection->pluck('descricpion');
-        $existingSMInvoices = SMInvoice::select('descripcion', 'total', 'document_key', 'batch')->whereIn('descripcion', $descripciones)->get();
-        $existingInvoices = Invoice::select('id', 'description', 'total', 'document_key')->where('company_id', $this->companyId)->whereIn('description', $descripciones)->get();
+        $numFacturas = $excelCollection->pluck('num_factura');
+        $existingSMInvoices = SMInvoice::select('descripcion', 'total', 'document_key', 'batch', 'num_factura')->whereIn('descripcion', $descripciones)->whereIn('num_factura', $numFacturas)->get();
+        $existingInvoices = Invoice::select('id', 'description', 'total', 'document_key', 'buy_order')->where('company_id', $this->companyId)->whereIn('description', $descripciones)->whereIn('buy_order', $numFacturas)->get();
         $today = Carbon::parse( now('America/Costa_Rica') );
         
         foreach ($excelCollection as $row){
             try{
                 $registerSMInvoice = false;    
                 if( isset($row['doc_identificacion']) ){
-                    $descripcion = isset($row['descripcion']) ? $row['descripcion'] : ($row['descricpion'] ?? null);
-                    if( ! $existingSMInvoices->pluck('descripcion')->contains($descripcion) ){
+                    $descripcion = isset($row['descripcion']) ?  trim($row['descripcion']) : ($row['descricpion'] ? trim($row['descricpion']) : null);
+                    $numFactura =  trim($row['num_factura']);
+                    $smInvoice = $existingSMInvoices->where('description', $descripcion)->where('num_factura', $numFactura)->first();
+                    $existingInvoice = $existingInvoices->where('description', $descripcion)->where('buy_order', $numFactura)->first();
+                    if( ! isset($smInvoice) ){
                         $documentKey = null;
                         $batchRepeated = null;
                         $invoiceId = null;
-                        if( $existingInvoices->pluck('description')->contains($descripcion) ){
-                            $existingInvoice = $existingInvoices->where('description', $descripcion)->first();
+                        if( isset($existingInvoice) ){
                             $documentKey = $existingInvoice->document_key;
                             $invoiceId = $existingInvoice->invoice_id;
                         }
                         $registerSMInvoice = true;
                     }else{
-                        $smInvoice = $existingSMInvoices->where('descripcion', $descripcion)->first();
                         if($smInvoice->batch != $batchName){
                             $documentKey = $smInvoice->document_key;
                             $invoiceId = $smInvoice->invoice_id;
@@ -102,7 +104,7 @@ class ProcessRegisterSMInvoices implements ShouldQueue
                             'document_type' => $fileType,
                             'document_key' => $documentKey,
                             'invoice_id' => $invoiceId,
-                            'num_factura' => trim($row['num_factura']),
+                            'num_factura' => $numFactura,
                             'num_objeto' => trim($row['num_objeto']),
                             'fecha_emision' => trim($row['fecha_emision']),
                             'fecha_pago' => trim($row['fecha_pago']),
