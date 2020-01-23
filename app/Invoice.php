@@ -664,12 +664,16 @@ class Invoice extends Model
                 $ref = Invoice::where('company_id', $company->id)
                   ->where('buy_order', $otherReference)
                   ->first();
-                $invoice->code_note = '01';
-                $invoice->reason = 'Factura anulada';
-                $invoice->other_reference = $ref->reference_number;
-                $invoice->reference_generated_date = $ref->generated_date;
-                $invoice->reference_document_key = $ref->document_key;
-                $invoice->reference_doc_type = $ref->document_type;
+                if( !isset($ref) ) {
+                  $invoice->code_note = '01';
+                  $invoice->reason = 'Factura anulada';
+                  $invoice->other_reference = $ref->reference_number;
+                  $invoice->reference_generated_date = $ref->generated_date;
+                  $invoice->reference_document_key = $ref->document_key;
+                  $invoice->reference_doc_type = $ref->document_type;
+                }else{
+                  Log::warning("No encuentra referencia: " . $otherReference);
+                }
             }
           }catch(\Exception $e){
             Log::error("Error en import NC SM: " . $e);
