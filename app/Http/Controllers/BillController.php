@@ -824,9 +824,11 @@ class BillController extends Controller
             $time_start = getMicrotime();
             $company = currentCompanyModel();
             $file = Input::file('file');
-            $xml = simplexml_load_string( file_get_contents($file) );
-            $json = json_encode( $xml ); // convert the XML string to JSON
-            $arr = json_decode( $json, TRUE ); 
+            
+            $xml = simplexml_load_string( file_get_contents($file), null, LIBXML_NOCDATA );
+            $json = json_encode( $xml ); // convert the XML string to json
+            $arr = json_decode( $json, TRUE );
+            
                 $FechaEmision = explode("T", $arr['FechaEmision']);
                 $FechaEmision = explode("-", $FechaEmision[0]);
                 $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
