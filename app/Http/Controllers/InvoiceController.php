@@ -1509,7 +1509,7 @@ class InvoiceController extends Controller
             $company = currentCompanyModel();
             $file = Input::file('file');
 
-            $xml = simplexml_load_string( file_get_contents($file) );
+            $xml = simplexml_load_string( file_get_contents($file), null, LIBXML_NOCDATA );
             $json = json_encode( $xml ); // convert the XML string to json
             $arr = json_decode( $json, TRUE );
 
@@ -1529,7 +1529,6 @@ class InvoiceController extends Controller
                         //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla.
                         if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                             //Registra el XML. Si todo sale bien, lo guarda en S3.
-
                             $invoice = Invoice::saveInvoiceXML( $arr, 'XML' );
 
                             if( $invoice ) {
@@ -1560,7 +1559,7 @@ class InvoiceController extends Controller
 
 
         }catch( \Exception $ex ){
-            Log::error('Error importando con archivo inválido' . $ex->getMessage());
+            Log::error('Error importando con archivo inválido: ' . $ex);
             return Response()->json('Error importando con archivo inválido', 400);
         }catch( \Throwable $ex ){
             Log::error('Error importando con archivo inválido' . $ex->getMessage());
