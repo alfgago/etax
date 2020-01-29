@@ -131,7 +131,7 @@ class SMInvoiceController extends Controller
 
         try {
             Log::debug('Creando job de revisar Notas de Credito para SM.');
-            foreach ($invoiceList->chunk(50) as $facturas) {
+            foreach ($invoiceList->chunk(20) as $facturas) {
                 CheckSMExcel::dispatch($facturas, $companyId)->onQueue('bulk');
             }
         }catch( \Throwable $ex ){
