@@ -65,6 +65,14 @@ class CheckSMExcel implements ShouldQueue
                         $ref = Invoice::where('company_id', $company->id)
                           ->where('buy_order', $otherReference)
                           ->first();
+                          
+                        if( !isset($nota) && isset($smInvoice->document_key) ){
+                            $nota = Invoice::where('company_id', $company->id)
+                              ->where('document_key', $smInvoice->document_key)
+                              ->first();
+                            $smInvoice->id = $nota->id;
+                            $smInvoice->save();
+                        }
                         if( isset($ref) && isset($nota) ) {
                             if( !isset($nota->other_reference) ){
                                   $nota->code_note = '01';
