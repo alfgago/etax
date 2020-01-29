@@ -94,7 +94,7 @@ class CheckSMExcel implements ShouldQueue
                           Log::warning("No encuentra referencia: " . $otherReference);
                         }
                         
-                        $checkRepetidas = Invoice::where('buy_order', $otherReference)->count();
+                        $checkRepetidas = Invoice::where('buy_order', $smInvoice->num_factura)->count();
                         if($checkRepetidas > 1){
                             $smInvoice->status = $checkRepetidas;
                             $smInvoice->save();
