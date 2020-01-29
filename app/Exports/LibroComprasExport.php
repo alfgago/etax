@@ -78,6 +78,9 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
     {
         $factor = $map->bill->document_type != '03' ? 1 : -1;
         $tipoCambio = $map->bill->currency_rate;
+        if( $map->bill->currency == 'CRC' ) {
+            $tipoCambio = 1;
+        }
         return [
             $map->bill->documentTypeName(),
             $map->bill->generatedDate()->format('d/m/Y'),
