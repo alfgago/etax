@@ -88,6 +88,7 @@ class CheckSMExcel implements ShouldQueue
                                   $ref->other_reference = $nota->reference_number;
                                   $ref->reason = 'Factura anulada por NC ' . $nota->reference_number;
                                   $ref->save();
+                                  Log::info("Ligo la factura: " . $otherReference);
                             }
                         }else{
                           Log::warning("No encuentra referencia: " . $otherReference);
