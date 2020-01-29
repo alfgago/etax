@@ -77,6 +77,9 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
     {
         $factor = $map->invoice->document_type != '03' ? 1 : -1;
         $tipoCambio = $map->invoice->currency_rate;
+        if( $map->invoice->currency == 'CRC' ) {
+            $tipoCambio = 1;
+        }
         $array = [
             $map->invoice->documentTypeName(),
             $map->invoice->generatedDate()->format('d/m/Y'),

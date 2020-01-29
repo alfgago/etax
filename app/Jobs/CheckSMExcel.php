@@ -96,6 +96,8 @@ class CheckSMExcel implements ShouldQueue
                         
                         $checkRepetidas = Invoice::where('buy_order', $otherReference)->count();
                         if($checkRepetidas > 1){
+                            $smInvoice->status = $checkRepetidas;
+                            $smInvoice->save();
                             Log::warning("Factura SM $otherReference se encuentra mas de una vez.");
                         }
                     }
