@@ -56,6 +56,7 @@ Route::post('facturas-recibidas/importarXML', 'BillController@importXML');
 //Rutas SM
 Route::post('sm/importar-excel', 'SMInvoiceController@importExcelSM');
 Route::post('sm/confirmar-envio', 'SMInvoiceController@confirmarEnvioExcelSM');
+Route::post('sm/revisar-nc', 'SMInvoiceController@revisarNotasCredito');
 Route::get('sm', 'SMInvoiceController@index');
 
 // Rutas de reportes
@@ -259,8 +260,6 @@ Route::get('/api/payments', 'PaymentController@indexData')->name('Payment.data')
 Route::get('/api/paymentsMethods', 'PaymentMethodController@indexData')->name('PaymentMethod.data');
 Route::get('/api/oneBill/{id}', 'BillController@indexOne')->name('Bill.indexOne');
 Route::get('/api/sm', 'SMInvoiceController@indexData')->name('SMInvoice.data');
-
-
 
 //Rutas de recover
 Route::patch('/facturas-recibidas/{id}/restore', 'BillController@restore')->name('Bill.restore');
