@@ -8,6 +8,7 @@ use App\InvoiceItem;
 use App\Imports\InvoiceImportSM;
 use App\Jobs\ProcessSendSMInvoices;
 use App\Jobs\ProcessRegisterSMInvoices;
+use App\Jobs\CheckSMExcel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
@@ -46,11 +47,11 @@ class SMInvoiceController extends Controller
         
         return datatables()->eloquent( $query )
             ->orderColumn('created_date', '-created_date $1')
-            ->addColumn('clave_col', function(SMInvoice $inv) {
-                if( isset($inv->batch_repeated) ) {
-                    return "Duplicada en $inv->batch_repeated";
+            ->addColumn('clave_col', function(SMInvoice $smInvoice) {
+                if( isset($smInvoice->batch_repeated) ) {
+                    return "Duplicada en $smInvoice->batch_repeated";
                 }
-                return isset($inv->document_key) ? substr($inv->document_key, -24) : "No registrada";
+                return isset($smInvoice->document_key) ? substr($smInvoice->document_key, 21, 20) : "No registrada";
             })
             ->toJson();
     }
@@ -112,6 +113,34 @@ class SMInvoiceController extends Controller
 
 
         return redirect('/sm')->withMessage('Facturas importados exitosamente, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
+    }
+    
+    public function revisarNotasCredito() {
+        request()->validate([
+          'batch' => 'required',
+        ]);
+        
+        $companyId = currentCompany();
+        if($companyId != '1110'){
+            //return 404;
+        }
+
+        $companyId = currentCompany();
+        $batch =  request()->batch;
+        $invoiceList = SMInvoice::where('batch', $batch)->where('document_type', '03')->with('invoice')->get();
+
+        try {
+            Log::debug('Creando job de revisar Notas de Credito para SM.');
+            foreach ($invoiceList->chunk(50) as $facturas) {
+                CheckSMExcel::dispatch($facturas, $companyId)->onQueue('bulk');
+            }
+        }catch( \Throwable $ex ){
+            Log::error("Error en NC SM: " . $ex);
+            return redirect('/sm')->withError('Se detectó un error en el archivo. Por favor contacte a soporte.');
+        }
+
+
+        return redirect('/sm')->withMessage('NC revisadas, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
     }
 
 

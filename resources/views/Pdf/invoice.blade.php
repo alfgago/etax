@@ -249,6 +249,12 @@
                 <b>Fecha de Emisión: </b> {{ $data_invoice->generated_date }}<br>
                 <b>Condición Venta: </b> {{ $data_invoice->getCondicionVenta() }}<br>
                 <b>Medio de Pago: </b> {{ $data_invoice->getMetodoPago() }}<br>
+                @if( isset($data_invoice->buy_order) )
+                    <b>Orden de compra: </b> {{ $data_invoice->buy_order }}<br>
+                @endif
+                @if( isset($data_invoice->other_reference) )
+                    <b>Consecutivo referencia: </b> {{ $data_invoice->other_reference }}<br>
+                @endif
             </td>
         </tr>
     </table>
