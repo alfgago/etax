@@ -60,29 +60,29 @@ class ProcessSendSMInvoices implements ShouldQueue
         $mainAct = $company->getActivities() ? $company->getActivities()[0]->code : 0;
         $i = 0;
         $invoiceList = array();
-        $descripciones = $excelCollection->pluck('descricpion');
+        $descripciones = $excelCollection->pluck('descripcion');
         $numFacturas = $excelCollection->pluck('num_factura');
         $existingInvoices = Invoice::select('id', 'description', 'total', 'document_key', 'buy_order')->where('company_id', $this->companyId)->whereIn('description', $descripciones)->whereIn('buy_order', $numFacturas)->get();
         
-        foreach ($excelCollection as $row){
+        foreach ($excelCollection as $smInvoice){
             try{
                 $metodoGeneracion = "etax-bulk";
-                if( isset($row['doc_identificacion']) ){
-                    $descripcion = isset($row['descripcion']) ? $row['descripcion'] : ($row['descricpion'] ?? null);
-                    $ordenCompra = $row['num_factura'] ?? 'No indica';
-                    $totalDocumento = $row['total'];
-                    $fileType = $row['document_type'];
+                if( isset($smInvoice['doc_identificacion']) ){
+                    $descripcion = isset($smInvoice['descripcion']) ? $smInvoice['descripcion'] : ($smInvoice['descricpion'] ?? null);
+                    $ordenCompra = $smInvoice['num_factura'] ?? 'No indica';
+                    $totalDocumento = $smInvoice['total'];
+                    $fileType = $smInvoice['document_type'];
                     $existingInvoice = $existingInvoices->where('description', $descripcion)->where('buy_order', $ordenCompra)->first();
                     if( ! isset($existingInvoice) ){
                         $i++;
     
                         //Datos de proveedor
-                        $nombreCliente = $row['nombre_tomador'];
-                        $identificacionCliente = ltrim($row['doc_identificacion'], '0') ?? null;
+                        $nombreCliente = $smInvoice['nombre_tomador'];
+                        $identificacionCliente = ltrim($smInvoice['doc_identificacion'], '0') ?? null;
                         $codigoCliente = $identificacionCliente;
-                        $tipoPersona = $row['tipo_id'][0];
-                        $correoCliente = $row['correo'] ?? null;
-                        $telefonoCliente = $row['telefono_celular'] ? $row['telefono_celular'] : ( $row['telefono_habitacion'] ?? null );
+                        $tipoPersona = $smInvoice['tipo_id'][0];
+                        $correoCliente = $smInvoice['correo'] ?? null;
+                        $telefonoCliente = $smInvoice['telefono_celular'] ? $smInvoice['telefono_celular'] : ( $smInvoice['telefono_habitacion'] ?? null );
                         $today = Carbon::parse( now('America/Costa_Rica') );
                     
                         //Datos de factura
@@ -93,11 +93,11 @@ class ProcessSendSMInvoices implements ShouldQueue
                         $refNumber = $company->last_invoice_ref_number;
                         
                         $condicionVenta = '02';
-                        $metodoPago = str_pad((int)$row['medio_pago'], 2, '0', STR_PAD_LEFT);
+                        $metodoPago = str_pad((int)$smInvoice['medio_pago'], 2, '0', STR_PAD_LEFT);
                         //$metodoPago = '99';
-                        $numeroLinea = isset($row['numerolinea']) ? $row['numerolinea'] : 1;
+                        $numeroLinea = isset($smInvoice['numerolinea']) ? $smInvoice['numerolinea'] : 1;
                         $fechaEmision = $today->format('d/m/Y');
-                        $fechaVencimiento = isset($row['fecha_pago']) ? $row['fecha_pago']."" : $fechaEmision; 
+                        $fechaVencimiento = isset($smInvoice['fecha_pago']) ? $smInvoice['fecha_pago']."" : $fechaEmision; 
                         if (!isset($fechaVencimiento) || $fechaVencimiento == "" ){
                             $fechaVencimiento = $fechaEmision;
                         }else{
@@ -105,42 +105,42 @@ class ProcessSendSMInvoices implements ShouldQueue
                         }
                         
                         $idMoneda = 'CRC';
-                        $tipoCambio = $row['tipocambio'] ?? 1;
-                        $totalDocumento = $row['total'];
+                        $tipoCambio = $smInvoice['tipocambio'] ?? 1;
+                        $totalDocumento = $smInvoice['total'];
                         $tipoDocumento = $fileType ?? '01';
                         
                         //Datos de linea
-                        $codigoProducto = $row['num_objeto'] ?? 'N/A';
+                        $codigoProducto = $smInvoice['num_objeto'] ?? 'N/A';
                         $detalleProducto = isset($descripcion)  ? $descripcion : $codigoProducto;
                         $unidadMedicion = 'Os';
-                        $cantidad = isset($row['cantidad']) ? $row['cantidad'] : 1;
-                        $precioUnitario = $row['precio_unitario'];
-                        $subtotalLinea = (float)$row['precio_unitario'];
-                        $totalLinea = $row['total'];
-                        $montoDescuento = isset($row['montodescuento']) ? $row['montodescuento'] : 0;
-                        $codigoEtax = $row['codigoivaetax'] ?? 'S102';
+                        $cantidad = isset($smInvoice['cantidad']) ? $smInvoice['cantidad'] : 1;
+                        $precioUnitario = $smInvoice['precio_unitario'];
+                        $subtotalLinea = (float)$smInvoice['precio_unitario'];
+                        $totalLinea = $smInvoice['total'];
+                        $montoDescuento = isset($smInvoice['montodescuento']) ? $smInvoice['montodescuento'] : 0;
+                        $codigoEtax = $smInvoice['codigoivaetax'] ?? 'S102';
                         $categoriaHacienda = 7;
-                        $montoIva = (float)$row['impuesto'];
-                        $acceptStatus = isset($row['aceptada']) ? $row['aceptada'] : 1;
+                        $montoIva = (float)$smInvoice['impuesto'];
+                        $acceptStatus = isset($smInvoice['aceptada']) ? $smInvoice['aceptada'] : 1;
                         
-                        //$codigoActividad = $row['actividad_comercial'] ?? $mainAct;
+                        //$codigoActividad = $smInvoice['actividad_comercial'] ?? $mainAct;
                         $codigoActividad = 660101; //No viene en el Excel del todo.
                         $xmlSchema = 43;
                         
                         //Exoneraciones
                         $totalNeto = 0;
-                        $tipoDocumentoExoneracion = $row['tipodocumentoexoneracion'] ?? null;
-                        $documentoExoneracion = $row['documentoexoneracion'] ?? null;
-                        $companiaExoneracion = $row['companiaexoneracion'] ?? null;
-                        $porcentajeExoneracion = $row['porcentajeexoneracion'] ?? 0;
-                        $montoExoneracion = $row['montoexoneracion'] ?? 0;
-                        $impuestoNeto = $row['impuestoneto'] ?? 0;
-                        $totalMontoLinea = $row['totalmontolinea'] ?? 0;
+                        $tipoDocumentoExoneracion = $smInvoice['tipodocumentoexoneracion'] ?? null;
+                        $documentoExoneracion = $smInvoice['documentoexoneracion'] ?? null;
+                        $companiaExoneracion = $smInvoice['companiaexoneracion'] ?? null;
+                        $porcentajeExoneracion = $smInvoice['porcentajeexoneracion'] ?? 0;
+                        $montoExoneracion = $smInvoice['montoexoneracion'] ?? 0;
+                        $impuestoNeto = $smInvoice['impuestoneto'] ?? 0;
+                        $totalMontoLinea = $smInvoice['totalmontolinea'] ?? 0;
                         
-                        $direccion = $row['des_direccion'] ?? null;
-                        $zip = $row['codigo_postal'] ?? '10101';
+                        $direccion = $smInvoice['des_direccion'] ?? null;
+                        $zip = $smInvoice['codigo_postal'] ?? '10101';
                     
-                        $otherReference = $row['refer_factura'] ?? null;
+                        $otherReference = $smInvoice['refer_factura'] ?? null;
                         
                         $arrayInsert = array(
                             'metodoGeneracion' => trim($metodoGeneracion),
@@ -197,31 +197,12 @@ class ProcessSendSMInvoices implements ShouldQueue
                         
                         $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
                     }else {
-                        /*if($fileType == '03'){
-                            try{
-                                $invoice = Invoice::where('company_id', $company->id)->where("description", $descripcion)->where('buy_order', $ordenCompra)->where('hacienda_status', '01')->first();
-                                if( isset($invoice) ){
-                                    $otherReference = $row['refer_factura'] ?? null;
-                                    Log::info("Actualizando data de NC: $otherReference");
-                                    if ( isset($otherReference) ) {
-                                        $ref = Invoice::where('company_id', $company->id)
-                                          ->where('buy_order', $otherReference)
-                                          ->first();
-                                        $invoice->code_note = '01';
-                                        $invoice->resend_attempts = 0;
-                                        $invoice->in_queue = false;
-                                        $invoice->reason = 'Factura anulada';
-                                        $invoice->other_reference = $ref->reference_number;
-                                        $invoice->reference_generated_date = $ref->generated_date;
-                                        $invoice->reference_document_key = $ref->document_key;
-                                        $invoice->reference_doc_type = $ref->document_type;
-                                        $invoice->save();
-                                    }
-                                }
-                            }catch(\Exception $e){
-                                Log::error("Error en import NC SM: " . $e);
-                            }
-                        }*/
+                        $smInvoice = SMInvoice::where('descripcion', $existingInvoice->description)->where('num_factura', $existingInvoice->buy_order)->first();
+                        if( isset($smInvoice) ){
+                            $smInvoice->document_key = $existingInvoice->document_key;
+                            $smInvoice->invoice_id = $existingInvoice->id;
+                            $smInvoice->save();
+                        }
                     }
                 }
             }catch( \Throwable $ex ){

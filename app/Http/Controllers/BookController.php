@@ -169,11 +169,13 @@ class BookController extends Controller
                 $calcClone = $calc->replicate();
                 $calcClone->is_rectification = true;
                 $calcClone->is_closed = false;
+                $calcClone->calculated = false;
                 $calcClone->save();
                 
                 $calc->is_final = false;
                 $calc->save();
             }else{
+                $calc->calculated = false;
                 $calc->is_closed = false;
                 $calc->save();
             }
@@ -254,6 +256,7 @@ class BookController extends Controller
         $calc = CalculatedTax::find($request->cierre);
         if($calc->company_id == $company->id) {
             $calc->retention_by_card = (float)$request->total_retenido;
+            $calc->calculated = false;
             $calc->save();
             clearCierreCache($company->id, $calc->month, $calc->year);
         }

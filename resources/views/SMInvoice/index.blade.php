@@ -12,7 +12,7 @@
 @section('content') 
 <div class="row">
   <div class="col-md-12">
-      <form class="filters mb-4 pb-4" id="send-form"  method="POST" action="/sm/confirmar-envio">
+      <form class="filters mb-4 pb-4" id="send-form"  method="POST" action="">
         @csrf
         <div class="div-filtro">
           <label>Archivo subido</label>
@@ -70,6 +70,9 @@
       
       <div style="text-align: center;">
         <a class="btn btn-primary" style="color: #ffffff; font-size: 1.25rem; margin-top: 1.5rem;" onclick="confirmEnviarSM();">Confirmar y enviar archivo</a>
+      </div>
+      <div style="text-align: center;">
+        <a class="btn btn-primary" style="color: #15408E; background: none; font-size: 1.25rem; margin-top: 1.5rem;" onclick="revisarNotasCredito();">Verificar Notas</a>
       </div>
   </div>  
 </div>
@@ -142,8 +145,8 @@ function reloadDataTable() {
 }
 
 function confirmEnviarSM() {
-  
   var formId = "#send-form";
+  jQuery(formId).attr('action', '/sm/confirmar-envio');
   Swal.fire({
     title: '¿Está seguro que desea enviar las facturas del archivo?',
     text: "Las facturas serán enviadas a Hacienda. El proceso puede tardar unas horas en terminar dependiendo de la cantidad de facturas. Solamente se envian las que no estan duplicadas y aun no tienen clave.",
@@ -152,6 +155,27 @@ function confirmEnviarSM() {
     showCloseButton: true,
     showCancelButton: true,
     confirmButtonText: 'Sí, quiero enviar todas las facturas del archivo seleccionado',
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
+
+
+
+function revisarNotasCredito() {
+  var formId = "#send-form";
+  jQuery(formId).attr('action', '/sm/revisar-nc');
+  Swal.fire({
+    title: '¿Está seguro que desea revisar las notas?',
+    text: "Este proceso va a verificar que todas las Notas de crédito estén asociadas correctamente con una factura. De no estarlo, estas no se van a enviar.",
+    type: 'success',
+    customContainerClass: 'container-success',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero verificar las notas',
   }).then((result) => {
     if (result.value) {
       $(formId).submit();

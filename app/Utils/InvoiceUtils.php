@@ -430,6 +430,11 @@ class InvoiceUtils
             $emisorAddress = $isCompanyEmisor ? $company->address ? trim($company->address) : '' : $provider->address ?? trim($provider->address);
             $emisorPhone = $isCompanyEmisor ? $company->phone ? trim($company->phone) : '' : $provider->phone ?? trim($provider->phone);
             $emisorCedula = $isCompanyEmisor && $company->id_number ? str_pad(preg_replace("/[^0-9]/", "", $company->id_number), 9, '0', STR_PAD_LEFT) :str_pad(preg_replace("/[^0-9]/", "", $provider->id_number), 9, '0', STR_PAD_LEFT);
+            
+            $receptorCedulaType = $data['client_id_type'] ?? 'F';
+            if($receptorCedulaType == 'F'){
+                $receptorCedulaType = 1;
+            }
 
             $invoiceData = array(
                 'consecutivo' => $ref ?? '',
@@ -448,7 +453,7 @@ class InvoiceUtils
                 'receptor_phone' => !empty($data['client_phone']) ? preg_replace('/[^0-9]/', '', $data['client_phone']) : '00000000',
                 'receptor_cedula_numero' => $data['client_id_number'] ? str_pad(preg_replace("/[^0-9]/", "",
                     $data['client_id_number']), 9, '0', STR_PAD_LEFT) : '',
-                'receptor_cedula_tipo' => $data['client_id_type'] ?? 'F',
+                'receptor_cedula_tipo' => $receptorCedulaType,
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',
                 'tipocambio' => $data['currency_rate'] ?? '',

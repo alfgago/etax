@@ -17,4 +17,10 @@ class SMInvoice extends Model
     use SoftDeletes;
 
     protected $guarded = [];
+    
+    //Relacion con la factura
+    public function invoice()
+    {
+        return $this->belongsTo(Invoice::class, 'invoice_id');
+    }
 }
