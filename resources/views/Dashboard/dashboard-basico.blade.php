@@ -28,6 +28,19 @@
     <div class="col-lg-6 mb-4">
       @include('Reports.widgets.resumen-periodo', ['titulo' => ($ano == 2019 ? "Acumulado Jul. 2019 - Dic. 2019" : "Acumulado anual $ano"), 'data' => $acumulado])
     </div>
+    
+    @if( currentCompany() == '1110' )
+      <div class="col-lg-12 mb-4" id="smwidget">
+        
+      </div>
+      <script>
+        $(document).ready(function(){
+          var ano = $("#input-ano").val();
+          var mes = $("#input-mes").val();
+          $('#smwidget').load("/sm/widget/"+ano+"/"+mes);
+        });
+      </script>
+    @endif
 
     <div class="col-lg-6 mb-4" id="proporcion">
       @include('Reports.widgets.proporcion-porcentajes', ['titulo' => "Proporción anual de ventas por tipo de IVA", 'data' => $acumulado])

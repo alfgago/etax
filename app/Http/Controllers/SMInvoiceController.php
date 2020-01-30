@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Cache;
+use DB;
 
 class SMInvoiceController extends Controller
 {
@@ -141,6 +142,56 @@ class SMInvoiceController extends Controller
 
 
         return redirect('/sm')->withMessage('NC revisadas, puede tardar unos minutos en ver los resultados reflejados. De lo contrario, contacte a soporte.');
+    }
+    
+    public function SMDashboardWidget( $year, $month ) {
+        
+        $companyId = currentCompany();
+        if($companyId != '1110'){
+            //return 404;
+        }
+        
+        $facturasExcel = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
+        COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
+        COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
+        COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
+        FROM invoices inv, invoice_items it
+        WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
+        AND it.year = $year AND it.month = $month AND document_type != '03'
+        AND generation_method = 'etax-bulk'
+        AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
+        
+        $facturasEtax = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
+        COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
+        COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
+        COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
+        FROM invoices inv, invoice_items it
+        WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
+        AND it.year = $year AND it.month = $month AND document_type != '03'
+        AND generation_method != 'etax-bulk'
+        AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
+        
+        $notasExcel = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
+        COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
+        COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
+        COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
+        FROM invoices inv, invoice_items it
+        WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
+        AND it.year = $year AND it.month = $month AND document_type = '03'
+        AND generation_method = 'etax-bulk'
+        AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
+        
+        $notasEtax = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
+        COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
+        COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
+        COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
+        FROM invoices inv, invoice_items it
+        WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
+        AND it.year = $year AND it.month = $month AND document_type = '03'
+        AND generation_method != 'etax-bulk'
+        AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
+
+        return view('SMInvoice/smwidget', compact('facturasExcel', 'facturasEtax', 'notasExcel', 'notasEtax'));
     }
 
 
