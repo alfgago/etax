@@ -57,6 +57,7 @@ Route::post('facturas-recibidas/importarXML', 'BillController@importXML');
 Route::post('sm/importar-excel', 'SMInvoiceController@importExcelSM');
 Route::post('sm/confirmar-envio', 'SMInvoiceController@confirmarEnvioExcelSM');
 Route::post('sm/revisar-nc', 'SMInvoiceController@revisarNotasCredito');
+Route::get('sm/widget/{year}/{month}', 'SMInvoiceController@SMDashboardWidget');
 Route::get('sm', 'SMInvoiceController@index');
 
 // Rutas de reportes

@@ -9,7 +9,7 @@
      <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Resumen ejecutivo | eTax </title>
   
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/3.4.1/tippy.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/3.4.1/tippy.css" />
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/select2.min.css')}}">
     <link rel="stylesheet" href="{{mix('assets/styles/css/themes/eva.min.css')}}?v=6">
     <link rel="stylesheet" href="{{asset('assets/styles/vendor/perfect-scrollbar.css')}}">
