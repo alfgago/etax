@@ -127,6 +127,7 @@ class InvoiceController extends Controller
                 where('invoice_items.company_id', $company->id)
                 ->join('invoices', 'invoice_items.invoice_id', '=', 'invoices.id' )
                 ->where('invoices.is_authorized', 1)
+                ->whereNull('invoices.deleted_at')
                 //->join('clients', 'invoices.client_id', '=', 'clients.id' )
                 ;
 
