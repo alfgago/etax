@@ -15,6 +15,7 @@
 					<th>Cliente</th>
 					<th>Identificación</th>
 					<th>Correo</th>
+					<th>Monto Total</th>
 					<th>Autorizada</th>
 					<th></th>
 				</thead>
@@ -25,8 +26,9 @@
 						<tr>
 							<td>{{$factura->consecutivo}}</td>
 							<td>{{$factura->nombreReceptor}}</td>
-							<td>{{$factura->IdentificacionReceptor}}</td>
+							<td>{{$factura->identificacionReceptor}}</td>
 							<td>{{$factura->correoReceptor}}</td>
+							<td>{{$factura->montoTotal}}</td>
 							<td>
 									<input type="text" value="{{$factura->consecutivo}}" id="consecutivo-{{$factura->consecutivo}}" name="facturas[{{$i}}][consecutivo]" class="hidden" />
 								<div class="form-check">

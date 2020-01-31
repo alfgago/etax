@@ -2062,7 +2062,6 @@ class InvoiceController extends Controller
 
         Log::info("disparo de job envio programada");
         EnvioProgramadas::dispatch()->onQueue('sendbulk');
-        dd("Programadas enviadas");
 
     }
 
@@ -2189,7 +2188,6 @@ class InvoiceController extends Controller
                             $xls_invoice->fechaEmisionReferencia = Carbon::createFromFormat('d/m/Y g:i A',$row['fechaemisionreferencia']) ?? null;
                         }
                         $xls_invoice->codigoNota = $row['codigonota'] ?? null;
-                        $xls_invoice->razonNota = $row['razonnota'] ?? null;
                         if($row['identificador'] != $consecutivo){
                             $facturas_disponibles--;
                         }
