@@ -3,7 +3,7 @@
 		<h3>Cliente</h3><br>
 		<label>nombre Receptor</label>: {{$factura[0]->nombreReceptor}}<br>
 		<label>tipo Identificacion</label>: {{$factura[0]->tipoIdentificacionReceptor}}<br>
-		<label>Identificacion</label>: {{$factura[0]->IdentificacionReceptor}}<br>
+		<label>Identificacion</label>: {{$factura[0]->identificacionReceptor}}<br>
 		<label>correo</label>: {{$factura[0]->correoReceptor}}<br>
 		<!--
 		<label>provincia</label>: {{$factura[0]->provincia}}<br>

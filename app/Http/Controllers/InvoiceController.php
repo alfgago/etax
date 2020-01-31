@@ -2236,7 +2236,7 @@ class InvoiceController extends Controller
                 }
             }
             Log::info("Enviando facturas al job ProcessInvoicesExcel");
-            ProcessInvoicesExcel::dispatch($company)->onConnection(config('etax.queue_connections'))->onQueue('createinvoice');
+            ProcessInvoicesExcel::dispatch($company)->onQueue('createinvoice');
             //$this->guardarEnvioExcel($xlsInvoices);
             return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
         } catch ( \Exception $e) {
