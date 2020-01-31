@@ -117,6 +117,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                             'tipo_persona' => $tipo_persona,
                             'id_number' => trim($identificacion_cliente),
                             'fullname' => $factura[0]->nombreReceptor,
+                            'first_name' => $factura[0]->nombreReceptor,
                             'emisor_receptor' => 'ambos',
                             'state' => $factura[0]->provinciaReceptor,
                             'city' => $factura[0]->cantonReceptor,
@@ -148,8 +149,6 @@ class ProcessInvoicesExcel implements ShouldQueue
                       $invoice->client_phone = preg_replace('/[^0-9]/', '', $client->phone);
                       $invoice->client_id_number = $client->id_number;
                       $invoice->client_id_type = $client->tipo_persona;
-
-                    
 
                     //Fechas
                     $fecha = Carbon::createFromFormat('d/m/Y g:i A',
@@ -268,7 +267,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                         $bill->status = "02";
                         $bill->payment_status = "01";
                         $bill->payment_receipt = "";
-                        $bill->generation_method = "Masivo-Excel";
+                        $bill->generation_method = "xls-masivo";
                         $bill->reference_number = $company->last_bill_ref_number + 1;
 
                         
@@ -292,20 +291,20 @@ class ProcessInvoicesExcel implements ShouldQueue
                                       'id_number' => $identificacion_provider
                                   ]
                               );
-                              $provider->first_name = $invoice->first_name ?? null;
-                              $provider->last_name = $invoice->last_name ?? null;
-                              $provider->last_name2 = $invoice->last_name2 ?? null;
-                              $provider->country = $invoice->country ?? null;
-                              $provider->state = $invoice->state ?? null;
-                              $provider->city = $invoice->city ?? null;
-                              $provider->district = $invoice->district ?? null;
-                              $provider->neighborhood = $invoice->neighborhood ?? null;
-                              $provider->zip = $invoice->zip ?? null;
-                              $provider->address = $invoice->address ?? null;
-                              $provider->foreign_address = $invoice->foreign_address ?? null;
-                              $provider->phone = $invoice->phone ?? null;
-                              $provider->es_exento = $invoice->es_exento ?? 0;
-                              $provider->email = $invoice->email ?? null;
+                              $provider->first_name = $invoice->client_first_name ?? null;
+                              $provider->last_name = $invoice->client_last_name ?? null;
+                              $provider->last_name2 = $invoice->client_last_name2 ?? null;
+                              $provider->country = $invoice->client_country ?? null;
+                              $provider->state = $invoice->client_state ?? null;
+                              $provider->city = $invoice->client_city ?? null;
+                              $provider->district = $invoice->client_district ?? null;
+                              $provider->neighborhood = $invoice->client_neighborhood ?? null;
+                              $provider->zip = $invoice->client_zip ?? null;
+                              $provider->address = $invoice->client_address ?? null;
+                              $provider->foreign_address = $invoice->client_foreign_address ?? null;
+                              $provider->phone = $invoice->client_phone ?? null;
+                              $provider->es_exento = $invoice->client_es_exento ?? 0;
+                              $provider->email = $invoice->client_email ?? null;
                               $provider->save();
                                   
                               $bill->provider_id = $provider->id;
@@ -374,6 +373,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                         }
 
                     }
+                    
                     if($invoice->hacienda_status != "99"){
                         $invoice->company->addSentInvoice( $invoice->year, $invoice->month );
 
