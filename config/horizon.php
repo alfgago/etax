@@ -235,7 +235,7 @@ return [
             ],
             'sendbulk-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['sendbulk'],
+                'queue' => ['sendbulk', 'createinvoice'],
                 'balance' => 'auto',
                 'processes' => 2,
                 'minProcesses' => 2,
