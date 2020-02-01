@@ -278,7 +278,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                           $bill->credit_time = $invoice->credit_time;
                         
                           $bill->xml_schema =  43;
-
+    
                               $identificacion_provider = preg_replace("/[^0-9]/", "", $invoice->id_number );
                               
                               $provider = Provider::firstOrCreate(
