@@ -50,7 +50,7 @@ class EnvioRecurrentes implements ShouldQueue
                             ->with('invoice.items')->firstOrFail();
         $today = Carbon::now('America/Costa_Rica')->endOfDay()->subHours(1);
         
-        if($recurrente->company_id != '208'){ return false; }
+        //if($recurrente->company_id != '208'){ return false; }
         
         try{
             Log::info('Registrando factura recurrente');

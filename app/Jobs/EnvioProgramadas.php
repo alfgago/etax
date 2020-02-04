@@ -49,7 +49,7 @@ class EnvioProgramadas implements ShouldQueue
                             ->with('items')->firstOrFail();
             $company = $invoice->company;
             
-            if($company->id != '208'){ return false; }
+            //if($company->id != '208'){ return false; }
             
             if( strtolower($invoice->document_number) == 'programada') {
                 $invoice->document_key = getDocumentKey($invoice->document_type, $company);
