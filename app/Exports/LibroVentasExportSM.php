@@ -71,6 +71,10 @@ class LibroVentasExportSM implements WithHeadings, WithMapping, FromQuery, WithE
     public function map($map): array
     {
         $factor = $map->invoice->document_type != '03' ? 1 : -1;
+        $tipoCambio = $map->invoice->currency_rate;
+        if( $map->invoice->currency == 'CRC' ) {
+            $tipoCambio = 1;
+        }
         $array = [
             $map->invoice->documentTypeName(),
             $map->invoice->generatedDate()->format('d/m/Y'),
@@ -85,10 +89,13 @@ class LibroVentasExportSM implements WithHeadings, WithMapping, FromQuery, WithE
             isset($map->productCategory) ? ($map->productCategory->id . " - " . $map->productCategory->name) : 'No indica categoria',
             $map->invoice->currency,
             $map->invoice->currency_rate ?? '',
-            round( $map->subtotal * $factor, 2),
             $map->iva_percentage . '%',
+            round( $map->subtotal * $factor, 2),
             round( $map->iva_amount * $factor, 2),
             round( $map->total * $factor , 2),
+            round( $map->subtotal * $tipoCambio * $factor, 2),
+            round( $map->iva_amount * $tipoCambio * $factor, 2),
+            round( $map->total * $tipoCambio * $factor , 2),
             
         ];
         return $array;
@@ -111,10 +118,13 @@ class LibroVentasExportSM implements WithHeadings, WithMapping, FromQuery, WithE
                 'Cat. Declaración',
                 'Moneda',
                 'Tipo Cambio',
-                'Subtotal',
                 'Tarifa IVA',
+                'Subtotal',
                 'Monto IVA',
-                'Total'
+                'Total',
+                'Subtotal CRC',
+                'Monto IVA CRC',
+                'Total CRC'
             ]
         ];
         return $array;

@@ -829,11 +829,11 @@ class BillController extends Controller
             $json = json_encode( $xml ); // convert the XML string to json
             $arr = json_decode( $json, TRUE );
             
-                $FechaEmision = explode("T", $arr['FechaEmision']);
-                $FechaEmision = explode("-", $FechaEmision[0]);
-                $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
+                $fechaEmision = explode("T", $arr['FechaEmision']);
+                $fechaEmision = explode("-", $fechaEmision[0]);
+                $fechaEmision = $fechaEmision[2]."/".$fechaEmision[1]."/".$fechaEmision[0];
 
-                if(CalculatedTax::validarMes($FechaEmision)){
+                if(CalculatedTax::validarMes($fechaEmision)){
                     $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : $company->id_number;
                     $identificacionEmisor = array_key_exists('Emisor', $arr) ? $arr['Emisor']['Identificacion']['Numero'] : 0;
                     $consecutivoComprobante = $arr['NumeroConsecutivo'];

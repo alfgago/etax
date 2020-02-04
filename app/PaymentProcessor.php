@@ -187,39 +187,7 @@ class PaymentProcessor extends Model
     public function sendInvoice(){
         return true;
     }
-    /**
-     * getDocReference
-     *
-     *
-     */
-    public function getDocReference($docType, $companyId = null) {
-        if( $companyId ){
-            $company = Company::find($companyId);
-        }else{
-            $company = currentCompanyModel();
-        }
-        $lastSale = $company->last_invoice_ref_number + 1;
-        $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
-
-        return $consecutive;
-    }
-    /**
-     * getDocumentKey
-     *
-     *
-     */
-    public function getDocumentKey($docType, $companyId = null) {
-        if( $companyId ){
-            $company = Company::find($companyId);
-        }else{
-            $company = currentCompanyModel();
-        }
-        $invoice = new Invoice();
-        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType, 1).
-            '1'.$invoice->getHashFromRef($company->last_invoice_ref_number + 1);
-
-        return $key;
-    }
+    
     /**
      *
      *
@@ -252,8 +220,8 @@ class PaymentProcessor extends Model
             $invoice = new Invoice();
             $company = Company::find(1);
             $invoice->company_id = 1;
-            $document_key = $this->getDocumentKey('01', 1);
-            $document_number = $this->getDocReference('01', 1);
+            $document_key = getDocumentKey('01', $company);
+            $document_number = getDocReference('01', $company);
 
             //Datos generales y para Hacienda
             $invoice->document_type = "01";

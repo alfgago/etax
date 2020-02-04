@@ -80,30 +80,7 @@ class PaymentController extends Controller
         $sale = getCurrentSubscription();
         return view('payment/create')->with('sale', $sale);
     }
-    /**
-     *getDocReference
-     *
-     *
-     */
-    private function getDocReference($docType) {
-        $lastSale = Company::find(1)->last_invoice_ref_number + 1;
-        $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
 
-        return $consecutive;
-    }
-    /**
-     *getDocumentKey
-     *
-     *
-     */
-    private function getDocumentKey($docType) {
-        $company = Company::find(1);
-        $invoice = new Invoice();
-        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType).
-            '1'.$invoice->getHashFromRef($company->last_invoice_ref_number + 1);
-
-        return $key;
-    }
     /**
      * paymentCheckout
      *

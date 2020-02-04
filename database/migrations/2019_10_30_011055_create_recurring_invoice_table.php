@@ -21,7 +21,7 @@ class CreateRecurringInvoiceTable extends Migration
              $table->foreign('invoice_id')->references('id')->on('invoices')->onDelete('cascade');
              $table->integer('frecuency')->default(0);
              $table->string('options')->nullable();
-             $table->datetime('next_send')->nullable();
+             $table->timestamp('next_send')->nullable();
              $table->timestamps();
              $table->softDeletes();
          });
