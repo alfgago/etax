@@ -439,8 +439,8 @@ class CybersourcePaymentProcessor extends PaymentProcessor
             $invoice = new Invoice();
             $company = Company::find(1);
             $invoice->company_id = 1;
-            $document_key = $this->getDocumentKey('01', 1);
-            $document_number = $this->getDocReference('01', 1);
+            $document_key = getDocumentKey('01', $company);
+            $document_number = getDocReference('01', $company);
 
             //Datos generales y para Hacienda
             $invoice->document_type = "01";

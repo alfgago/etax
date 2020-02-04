@@ -610,24 +610,92 @@ if (!function_exists('get_microtime')) {
 
 /* Get Document Key */
 if (!function_exists('getDocumentKey')) {
-    function getDocumentKey($docType, $ref = null, $company = '') {
-        $invoice = new \App\Invoice();
-        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company).getDocReference($docType, $ref).
-            '1'.$invoice->getHashFromRef($ref);
+    function getDocumentKey($docType, $company = false, $ref = false) {
+
+        if(!$company) {
+            $company = currentCompanyModel(false);
+        }
+        if ($ref) {
+            return $key = '506'.shortDate().getIdFormat($company->id_number).getDocReference($docType, $company, $ref). '1'.getHashFromRef($ref);
+        }
+        if ($docType == '01') {
+            $ref = $company->last_invoice_ref_number + 1;
+        }
+        if ($docType == '08') {
+            $ref = $company->last_invoice_pur_ref_number + 1;
+        }
+        if ($docType == '09') {
+            $ref = $company->last_invoice_exp_ref_number + 1;
+        }
+        if ($docType == '03') {
+            $ref = $company->last_note_ref_number + 1;
+        }
+        if ($docType == '04') {
+            $ref = $company->last_ticket_ref_number + 1;
+        }
+        $key = '506'.shortDate().getIdFormat($company->id_number).getDocReference($docType, $company).'1'.getHashFromRef($ref);
+
         return $key;
     }
 }
 
 /* Get Document Reference */
 if (!function_exists('getDocReference')) {
-    function getDocReference($docType, $ref = null)
-    {
-        $lastSale = $ref;
-        $consecutive = "001" . "00001" . $docType . substr("0000000000" . $lastSale, -10);
+    function getDocReference($docType, $company = false, $ref = false) {
+
+        if($ref) {
+            return $consecutive = "001"."00001".$docType.substr("0000000000".$ref, -10);
+        }
+
+        if(!$company){
+            $company = currentCompanyModel(false);
+        }
+        if ($docType == '01') {
+            $lastSale = $company->last_invoice_ref_number + 1;
+        }
+        if ($docType == '08') {
+            $lastSale = $company->last_invoice_pur_ref_number + 1;
+        }
+        if ($docType == '09') {
+            $lastSale = $company->last_invoice_exp_ref_number + 1;
+        }
+        if ($docType == '03') {
+            $lastSale = $company->last_note_ref_number + 1;
+        }
+        if ($docType == '04') {
+            $lastSale = $company->last_ticket_ref_number + 1;
+        }
+        $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
 
         return $consecutive;
     }
 }
+
+
+if (!function_exists('shortDate')) {
+    function shortDate() {
+        date_default_timezone_set("America/Costa_Rica");
+        $date = date_create();
+        return date_format($date,'dmy');
+    }
+}
+
+if (!function_exists('getIdFormat')) {
+    function getIdFormat($id){
+        $clean="000000".trim(str_replace("-","",$id));
+        return substr($clean, -12);
+    }
+}
+
+if (!function_exists('getHashFromRef')) {
+    function getHashFromRef($ref) {
+        $salesId = $ref;
+        if ($salesId === null) {
+            return '';
+        }
+        return substr('0000'.hexdec(substr(sha1($ref.'Factel'.$salesId.'Facthor'), 0, 15)) % 999999999, -8);
+    }
+}    
 
 /* Get Invoice Reference */
 if (!function_exists('getInvoiceReference')) {

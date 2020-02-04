@@ -734,26 +734,6 @@ class Invoice extends Model
       return $invoiceList;
     }
 
-
-    public function shortDate() {
-        date_default_timezone_set("America/Costa_Rica");
-        $date = date_create();
-        return date_format($date,'dmy');
-    }
-
-    public function getIdFormat($id){
-        $clean="000000".trim(str_replace("-","",$id));
-        return substr($clean, -12);
-    }
-
-    public function getHashFromRef($ref) {
-        $salesId = $ref;
-        if ($salesId === null) {
-            return '';
-        }
-        return substr('0000'.hexdec(substr(sha1($ref.'Factel'.$salesId.'Facthor'), 0, 15)) % 999999999, -8);
-    }
-
     public static function saveInvoiceXML( $arr, $metodoGeneracion ) {
 
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
@@ -1154,8 +1134,8 @@ class Invoice extends Model
     public function setNoteData($invoiceReference, $requestItems = null, $noteType = null, $request = []) {
         try {
             $noteType = $noteType ?? '03';
-            $this->document_key = getDocumentKey($noteType, $this->reference_number, $invoiceReference->company->id_number);
-            $this->document_number = getDocReference($noteType, $this->reference_number);
+            $this->document_key = getDocumentKey($noteType, false, $this->reference_number);
+            $this->document_number = getDocReference($noteType, false, $this->reference_number);
             $this->sale_condition = $invoiceReference->sale_condition;
             $this->payment_type = $invoiceReference->payment_type;
             $this->retention_percent = $invoiceReference->retention_percent;
