@@ -270,13 +270,13 @@ class InvoiceUtils
                 $isGravado = isset($cod) ? $cod->is_gravado : true;
                 $iva_amount = 0;
                 if( $isGravado ) {
-                    $iva_amount = $value['iva_amount'] ? round($value['iva_amount'], 2) : 0;
+                    $iva_amount = $value['iva_amount'] ? round($value['iva_amount'], 5) : 0;
                 }else {
                     $iva_amount = 'false';
                 }
                 
-                $itemCount = $value['item_count'] ? round($value['item_count'], 3) : 1;
-                $montoSinIva = ($value['unit_price'] && $itemCount) ? round($itemCount * $value['unit_price'], 2) : 0;
+                $itemCount = $value['item_count'] ? round($value['item_count'], 5) : 1;
+                $montoSinIva = ($value['unit_price'] && $itemCount) ? round($itemCount * $value['unit_price'], 5) : 0;
                 $montoDescuento = $value['discount'] ? $this->discountCalculator($value['discount_type'], $value['discount'], $montoSinIva ) : 0;
 
                 $details[$key] = array(
@@ -548,7 +548,7 @@ class InvoiceUtils
         } else {
             $discount= $value;
         }
-        return round($discount,2);
+        return round($discount,5);
     }
     
 }

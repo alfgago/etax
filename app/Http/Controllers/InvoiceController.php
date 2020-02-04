@@ -447,8 +447,8 @@ class InvoiceController extends Controller
         return view("Invoice/create-factura",
             [
                 'document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
-                'document_number' => $this->getDocReference($tipoDocumento),
-                'document_key' => $this->getDocumentKey($tipoDocumento),
+                'document_number' => getDocReference($tipoDocumento),
+                'document_key' => getDocumentKey($tipoDocumento),
                 'units' => $units, 'countries' => $countries,
                 'default_currency' => $company->default_currency,
                 'default_vat_code' => $company->default_vat_code
@@ -483,8 +483,8 @@ class InvoiceController extends Controller
 
         return view("Invoice/create-fec-sujetopasivo", [
             'document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
-            'document_number' => $this->getDocReference($tipoDocumento),
-            'document_key' => $this->getDocumentKey($tipoDocumento),
+            'document_number' => getDocReference($tipoDocumento),
+            'document_key' => getDocumentKey($tipoDocumento),
             'units' => $units, 'countries' => $countries,
             'default_currency' => $company->default_currency,
             'default_vat_code' => $company->default_vat_code
@@ -623,8 +623,8 @@ class InvoiceController extends Controller
                             $invoice->reference_number = $company->last_invoice_ref_number + 1;
                             $company->last_invoice_ref_number = $invoice->reference_number;
                             $company->save();
-                            $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
-                            $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_key = getDocumentKey($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_number = getDocReference($request->document_type, false, $invoice->reference_number);
                             $company->last_document = $invoice->document_number;
                             $company->save();
                             $invoice->save();
@@ -633,8 +633,8 @@ class InvoiceController extends Controller
                             $invoice->reference_number = $company->last_invoice_pur_ref_number + 1;
                             $company->last_invoice_pur_ref_number = $invoice->reference_number;
                             $company->save();
-                            $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
-                            $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_key = getDocumentKey($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_number = getDocReference($request->document_type, false, $invoice->reference_number);
                             $company->last_document_invoice_pur = $invoice->document_number;
                             $company->save();
                             $invoice->save();
@@ -643,8 +643,8 @@ class InvoiceController extends Controller
                             $invoice->reference_number = $company->last_invoice_exp_ref_number + 1;
                             $company->last_invoice_exp_ref_number = $invoice->reference_number;
                             $company->save();
-                            $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
-                            $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_key = getDocumentKey($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_number = getDocReference($request->document_type, false, $invoice->reference_number);
                             $company->last_document_invoice_exp = $invoice->document_number;
                             $company->save();
                             $invoice->save();
@@ -653,8 +653,8 @@ class InvoiceController extends Controller
                             $invoice->reference_number = $company->last_ticket_ref_number + 1;
                             $company->last_ticket_ref_number = $invoice->reference_number;
                             $company->save();
-                            $invoice->document_key = $this->getDocumentKey($request->document_type, false, $invoice->reference_number);
-                            $invoice->document_number = $this->getDocReference($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_key = getDocumentKey($request->document_type, false, $invoice->reference_number);
+                            $invoice->document_number = getDocReference($request->document_type, false, $invoice->reference_number);
                             $company->last_document_ticket = $invoice->document_number;
                             $company->save();
                             $invoice->save();
@@ -1514,46 +1514,47 @@ class InvoiceController extends Controller
             $json = json_encode( $xml ); // convert the XML string to json
             $arr = json_decode( $json, TRUE );
 
-                    $FechaEmision = explode("T", $arr['FechaEmision']);
-                    $FechaEmision = explode("-", $FechaEmision[0]);
-                    $FechaEmision = $FechaEmision[2]."/".$FechaEmision[1]."/".$FechaEmision[0];
-                    if(CalculatedTax::validarMes($FechaEmision)){
-                        //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                        try {
-                            $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0 ;
-                        }catch(\Exception $e){ $identificacionReceptor = 0; };
+                $fechaEmision = explode("T", $arr['FechaEmision']);
+                $fechaEmision = explode("-", $fechaEmision[0]);
+                $fechaEmision = $fechaEmision[2]."/".$fechaEmision[1]."/".$fechaEmision[0];
+                if(CalculatedTax::validarMes($fechaEmision)){
+                    //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                    try {
+                        $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0 ;
+                    }catch(\Exception $e){ $identificacionReceptor = 0; };
 
-                        $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-                        $consecutivoComprobante = $arr['NumeroConsecutivo'];
-                        $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-                        $consecutivoComprobante = $arr['NumeroConsecutivo'];
-                        //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla.
-                        if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
-                            //Registra el XML. Si todo sale bien, lo guarda en S3.
-                            $invoice = Invoice::saveInvoiceXML( $arr, 'XML' );
+                    $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+                    $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                    $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+                    $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                    //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla.
+                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
+                        //Registra el XML. Si todo sale bien, lo guarda en S3.
+                        $invoice = Invoice::saveInvoiceXML( $arr, 'XML' );
 
-                            if( $invoice ) {
-                                $user = auth()->user();
-                                Activity::dispatch(
-                                    $user,
-                                    $invoice,
-                                    [
-                                        'company_id' => $invoice->company_id,
-                                        'id' => $invoice->id,
-                                        'document_key' => $invoice->document_key
-                                    ],
-                                    "Factura de compra importada por xml."
-                                )->onConnection(config('etax.queue_connections'))
-                                ->onQueue('log_queue');
-                                Invoice::storeXML( $invoice, $file );
-                            }
-                        }else{
-                            return Response()->json("El documento $consecutivoComprobante no le pertenece a su empresa actual", 400);
+                        if( $invoice ) {
+                            $user = auth()->user();
+                            Activity::dispatch(
+                                $user,
+                                $invoice,
+                                [
+                                    'company_id' => $invoice->company_id,
+                                    'id' => $invoice->id,
+                                    'document_key' => $invoice->document_key
+                                ],
+                                "Factura de compra importada por xml."
+                            )->onConnection(config('etax.queue_connections'))
+                            ->onQueue('log_queue');
+                            Invoice::storeXML( $invoice, $file );
                         }
                     }else{
-                        return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
-                        //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
+                        return Response()->json("El documento $consecutivoComprobante no le pertenece a su empresa actual", 400);
                     }
+                }else{
+                    return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
+                    //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
+                }
+                
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
@@ -1920,66 +1921,6 @@ class InvoiceController extends Controller
         return back()->withMessage( 'Se han reenviado los correos exitosamente.');
     }
 
-    private function getDocReference($docType, $company = false, $ref = false) {
-
-        if($ref) {
-            return $consecutive = "001"."00001".$docType.substr("0000000000".$ref, -10);
-        }
-
-        if(!$company){
-            $company = currentCompanyModel(false);
-        }
-        if ($docType == '01') {
-            $lastSale = $company->last_invoice_ref_number + 1;
-        }
-        if ($docType == '08') {
-            $lastSale = $company->last_invoice_pur_ref_number + 1;
-        }
-        if ($docType == '09') {
-            $lastSale = $company->last_invoice_exp_ref_number + 1;
-        }
-        if ($docType == '03') {
-            $lastSale = $company->last_note_ref_number + 1;
-        }
-        if ($docType == '04') {
-            $lastSale = $company->last_ticket_ref_number + 1;
-        }
-        $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
-
-        return $consecutive;
-    }
-
-    private function getDocumentKey($docType, $company = false, $ref = false) {
-
-        $invoice = new Invoice();
-        if(!$company) {
-            $company = currentCompanyModel(false);
-        }
-        if ($ref) {
-            return $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType, $company, $ref).
-                '1'.$invoice->getHashFromRef($ref);
-        }
-        if ($docType == '01') {
-            $ref = $company->last_invoice_ref_number + 1;
-        }
-        if ($docType == '08') {
-            $ref = $company->last_invoice_pur_ref_number + 1;
-        }
-        if ($docType == '09') {
-            $ref = $company->last_invoice_exp_ref_number + 1;
-        }
-        if ($docType == '03') {
-            $ref = $company->last_note_ref_number + 1;
-        }
-        if ($docType == '04') {
-            $ref = $company->last_ticket_ref_number + 1;
-        }
-        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType, $company).
-            '1'.$invoice->getHashFromRef($ref);
-
-        return $key;
-    }
-
     public function fixImports() {
         $invoiceUtils = new InvoiceUtils();
         $invoices = Invoice::where('generation_method', 'Email')->orWhere('generation_method', 'XML')->get();
@@ -2296,8 +2237,8 @@ class InvoiceController extends Controller
         $units = UnidadMedicion::all()->toArray();
         $document_type = $invoice->document_type;
         $rate = $this->get_rates();
-        $document_number = $this->getDocReference($document_type);
-        $document_key = $this->getDocumentKey($document_type);
+        $document_number = getDocReference($document_type);
+        $document_key = getDocumentKey($document_type);
         return view('Invoice/editar-recurrente', compact('invoice','units','arrayActividades','countries','product_categories','codigos', 'company','recurringInvoice','document_type','rate','document_number','document_key') );
     }
 

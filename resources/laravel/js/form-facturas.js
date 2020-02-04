@@ -349,7 +349,7 @@
       if( $('#is-compra').length || docType == '08' ){
         $('#tipo_producto').val('B003').change();
       }else {
-        if( $('#default_product_category').length ){
+        if( $('#default_vat_code').length ){
           $('#tipo_iva').val( $('#default_vat_code').val() ).change();
         }else{
           $('#tipo_iva').val( 'B103' ).change();
@@ -390,12 +390,18 @@
       $('#porcentajeExoneracion').val(porcentajeExoneracion);
       $('#montoTotalLinea').val(montoTotalLinea);
       $('#nombreInstitucion').val(nombreInstitucion);
+      
       var docType = $('#document_type').val();
       if( ($('#is-compra').length || docType == '08') && !$('#is-manual').length ){
         $('#tipo_iva').val('B003').change();
       }else {
-        $('#tipo_iva').val('B103').change();
+        if( $('#default_vat_code').length ){
+          $('#tipo_iva').val( $('#default_vat_code').val() ).change();
+        }else{
+          $('#tipo_iva').val( 'B103' ).change();
+        }
       }
+      
       $('#unidad_medicion').val('Unid');
       $('#cantidad').val(1);
       $('#porc_identificacion_plena').val(13);

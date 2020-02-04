@@ -13,7 +13,24 @@ class RecurringInvoice extends Model
 
     use Sortable, SoftDeletes;
 
+	
+    //Relacion con la empresa
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }  
+
+    public function invoice(){
+        return $this->belongsTo(Invoice::class);
+    }
+
+    public function enviadas(){
+    	$invoices = Invoice::where('recurring_id', $this->id)->get();
+        return $invoices;
+    }
+
     public function proximo_envio($generatedDate){
+    	$generatedDate = Carbon::parse($generatedDate);
     	$next_send = $generatedDate;
 	    if($this->frecuency == "1"){
 			$options = $this->options;
@@ -63,15 +80,6 @@ class RecurringInvoice extends Model
     		$next_send = $generatedDate->addDays($this->options);
 	    }
         return $next_send;
-    }
-
-    public function invoice(){
-        return $this->belongsTo(Invoice::class);
-    }
-
-    public function enviadas(){
-    	$invoices = Invoice::where('recurring_id',$this->id)->get();
-        return $invoices;
     }
 
     public function tipo(){

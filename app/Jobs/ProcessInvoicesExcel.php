@@ -65,8 +65,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                     
                     try{
     
-                        $factura = XlsInvoice::where('company_id',$xlsInvoice->company_id)
-                                ->where('consecutivo',$xlsInvoice->consecutivo)->get();
+                        $factura = XlsInvoice::where('company_id',$xlsInvoice->company_id)->where('consecutivo',$xlsInvoice->consecutivo)->get();
                         
                         $invoice = new Invoice();
     
@@ -75,7 +74,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                         $invoice->hacienda_status = '01';
                         $invoice->payment_status = "01";
                         $invoice->payment_receipt = "";
-                        $invoice->generation_method = "xls-masivo";
+                        $invoice->generation_method = "etax-masivo";
                         $invoice->xml_schema = 43;
                         if ($invoice->document_type == '01') {
                             $invoice->reference_number = $company->last_invoice_ref_number + 1;
@@ -166,8 +165,8 @@ class ProcessInvoicesExcel implements ShouldQueue
                         $invoice->code_note = $factura[0]->codigoNota;
                         $invoice->reason = $factura[0]->razonNota;
     
-                        $invoice->document_key = $this->getDocumentKey($invoice->document_type, $company);
-                        $invoice->document_number = $this->getDocReference($invoice->document_type,$company);
+                        $invoice->document_key = getDocumentKey($invoice->document_type, $company);
+                        $invoice->document_number = getDocReference($invoice->document_type,$company);
                         $start_date = Carbon::parse(now('America/Costa_Rica'));
                         $today = $start_date->year."-".$start_date->month."-".$start_date->day;
                         $fechaComparacion = $fecha->year."-".$fecha->month."-".$fecha->day;
@@ -268,7 +267,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                             $bill->status = "02";
                             $bill->payment_status = "01";
                             $bill->payment_receipt = "";
-                            $bill->generation_method = "xls-masivo";
+                            $bill->generation_method = "etax-masivo";
                             $bill->reference_number = $company->last_bill_ref_number + 1;
     
                             
@@ -381,7 +380,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                             if ($invoice->document_type == '01') {
                                 $company->last_invoice_ref_number = $invoice->reference_number;
                                 try{
-                                    $company->last_document = $this->getDocumentKey('01', $company);
+                                    $company->last_document = getDocumentKey('01', $company);
                                 }catch(\Exception $e){}
                             }
                             if ($invoice->document_type == '08') {
@@ -418,59 +417,4 @@ class ProcessInvoicesExcel implements ShouldQueue
     
     }
 
-    private function getDocReference($docType, $company = false) {
-        if(!$company){
-            $company = currentCompanyModel();
-        }
-        if ($docType == '01') {
-            $lastSale = $company->last_invoice_ref_number + 1;
-        }
-        if ($docType == '08') {
-            $lastSale = $company->last_invoice_pur_ref_number + 1;
-        }
-        if ($docType == '09') {
-            $lastSale = $company->last_invoice_exp_ref_number + 1;
-        }
-        if ($docType == '02') {
-            $lastSale = $company->last_debit_note_ref_number + 1;
-        }
-        if ($docType == '03') {
-            $lastSale = $company->last_note_ref_number + 1;
-        }
-        if ($docType == '04') {
-            $lastSale = $company->last_ticket_ref_number + 1;
-        }
-        $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
-
-        return $consecutive;
-    }
-
-    private function getDocumentKey($docType, $company = false) {
-        if(!$company){
-            $company = currentCompanyModel();
-        }
-        $invoice = new Invoice();
-        if ($docType == '01') {
-            $ref = $company->last_invoice_ref_number + 1;
-        }
-        if ($docType == '08') {
-            $ref = $company->last_invoice_pur_ref_number + 1;
-        }
-        if ($docType == '09') {
-            $ref = $company->last_invoice_exp_ref_number + 1;
-        }
-        if ($docType == '02') {
-            $ref = $company->last_debit_note_ref_number + 1;
-        }
-        if ($docType == '03') {
-            $ref = $company->last_note_ref_number + 1;
-        }
-        if ($docType == '04') {
-            $ref = $company->last_ticket_ref_number + 1;
-        }
-        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType, $company).
-            '1'.$invoice->getHashFromRef($ref);
-
-        return $key;
-    }
 }

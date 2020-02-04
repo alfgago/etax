@@ -3,13 +3,15 @@
 namespace App\Console\Commands;
 
 use App\Invoice;
+use App\RecurringInvoice;
 use App\Jobs\ProcessInvoice;
-use App\Jobs\EnvioProgramadas;
+use App\Jobs\EnvioRecurrentes;
 use App\Utils\BridgeHaciendaApi;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use \Carbon\Carbon;
 
-class SendRecurrentes extends Command
+class RegisterRecurrentes extends Command
 {
     /**
      * The name and signature of the console command.
@@ -23,7 +25,7 @@ class SendRecurrentes extends Command
      *
      * @var string
      */
-    protected $description = 'Envia facturas recurrenes';
+    protected $description = 'Envia facturas recurrentes';
 
     /**
      * Create a new command instance.
@@ -43,8 +45,16 @@ class SendRecurrentes extends Command
     public function handle()
     {
         try {
-            Log::info("disparo de job envio programada");
-            EnvioProgramadas::dispatch()->onQueue('sendbulk');
+            $today = Carbon::now('America/Costa_Rica')->addDays(1)->endOfDay();
+            
+            $recurrentes = RecurringInvoice::select('id')->where('next_send', '<=',$today)->get();
+            $this->info('Sending recurring invoices ....'. count($recurrentes));
+
+            foreach ($recurrentes as $rec) {
+                $this->info('Enviando recurrentes ....'. $rec->id);
+                //sleep(1);
+                EnvioRecurrentes::dispatch($rec->id)->onQueue('sendbulk');
+            }
         } catch ( \Exception $e) {
             Log::error('Error recurrentes command '.$e);
         }
