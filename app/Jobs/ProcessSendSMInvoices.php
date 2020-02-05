@@ -86,8 +86,8 @@ class ProcessSendSMInvoices implements ShouldQueue
                         $today = Carbon::parse( now('America/Costa_Rica') );
                     
                         //Datos de factura
-                        $consecutivoComprobante = $this->getDocReference('01', $company);
-                        $claveFactura = $this->getDocumentKey('01', $company);
+                        $consecutivoComprobante = getDocReference('01', $company);
+                        $claveFactura = getDocumentKey('01', $company);
                         $company->last_invoice_ref_number = $company->last_invoice_ref_number+1;
                         $company->last_document = $consecutivoComprobante;
                         $refNumber = $company->last_invoice_ref_number;
@@ -219,55 +219,6 @@ class ProcessSendSMInvoices implements ShouldQueue
         }
         Log::debug($i." facturas importadas por excel");
     }
-    
-    private function getDocReference($docType, $company = false) {
-        if(!$company){
-            $company = currentCompanyModel();
-        }
-        if ($docType == '01') {
-            $lastSale = $company->last_invoice_ref_number + 1;
-        }
-        if ($docType == '03') {
-            $lastSale = $company->last_note_ref_number + 1;
-        }
-        if ($docType == '08') {
-            $lastSale = $company->last_invoice_pur_ref_number + 1;
-        }
-        if ($docType == '09') {
-            $lastSale = $company->last_invoice_exp_ref_number + 1;
-        }
-        if ($docType == '04') {
-            $lastSale = $company->last_ticket_ref_number + 1;
-        }
-        $consecutive = "001"."00001".$docType.substr("0000000000".$lastSale, -10);
 
-        return $consecutive;
-    }
-
-    private function getDocumentKey($docType, $company = false) {
-        if(!$company){
-            $company = currentCompanyModel();
-        }
-        $invoice = new Invoice();
-        if ($docType == '01') {
-            $ref = $company->last_invoice_ref_number + 1;
-        }
-        if ($docType == '03') {
-            $ref = $company->last_note_ref_number + 1;
-        }
-        if ($docType == '08') {
-            $ref = $company->last_invoice_pur_ref_number + 1;
-        }
-        if ($docType == '09') {
-            $ref = $company->last_invoice_exp_ref_number + 1;
-        }
-        if ($docType == '04') {
-            $ref = $company->last_ticket_ref_number + 1;
-        }
-        $key = '506'.$invoice->shortDate().$invoice->getIdFormat($company->id_number).self::getDocReference($docType, $company).
-            '1'.$invoice->getHashFromRef($ref);
-
-        return $key;
-    }
 
 }
