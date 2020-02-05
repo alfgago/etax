@@ -271,7 +271,7 @@ class BridgeHaciendaApi
         try {
             $client = new Client();
             $file = null;
-            Log::info('Consultando Mensaje Hacienda XML  API HACIENDA -->>' . $invoice->id);
+            Log::info("Consultando Mensaje Hacienda XML API HACIENDA -->> Empresa: $company->id / Factura: $invoice->id");
             $query = $this->setInvoiceInfo($invoice->document_key, $company);
             $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice43/consult', [
                 'headers' => [
