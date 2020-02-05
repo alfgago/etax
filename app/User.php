@@ -179,13 +179,12 @@ class User extends Authenticatable {
                             ->where('is_subscription', true)
                             ->first();
                 }
-                
                 $plan = $sale->plan;
                 $plan_tier = "Pro ($userID)";
-                $isContador = $plan_tier == $plan->plan_tier;
-                if($plan->id == 7){
+                if($plan->id == 7 || $plan_tier == $plan->plan_tier || $plan->plan_type == 'Contador'){
                     $isContador = true;
                 }
+                
                 Cache::put($cacheKey, $isContador, now()->addMinutes(5));
             }
             return Cache::get($cacheKey);
