@@ -1975,7 +1975,7 @@ class InvoiceController extends Controller
             $tokenApi = $apiHacienda->login(false);
 
             if ($tokenApi !== false) {
-                $company = currentCompanyModel();
+                $company = $invoice->company;
                 $result = $apiHacienda->queryHacienda($invoice, $tokenApi, $company);
                 if ($result == false) {
                     return redirect()->back()->withErrors('El servidor de Hacienda es inaccesible en este momento, o el comprobante no ha sido recibido. Por favor intente de nuevo más tarde o contacte a soporte.');
