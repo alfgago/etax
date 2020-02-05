@@ -200,10 +200,11 @@ class ProcessInvoicesExcel implements ShouldQueue
                                     'discount_type' => $linea->naturalezaDescuento ?? null,
                                     'discount' => $linea->montoDescuento ?? 0,
                                     'iva_type' => $linea->codigoImpuesto ?? null,
-                                    'iva_percentage' => $linea->codigoTarifa ?? 0,
+                                    'product_type' => $linea->codigoTarifa ?? null,
+                                    'iva_percentage' => $linea->tarifaImpuesto ?? 0,
                                     'iva_amount' => $linea->montoImpuesto ?? 0,
-                                    'tariff_heading' => $linea->tarifaImpuesto ?? null,
-                                     'is_exempt' => $linea->exento
+                                    'tariff_heading' => null,
+                                    'is_exempt' => $linea->exento
                                     ]
                                 );
     
