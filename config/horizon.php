@@ -189,9 +189,9 @@ return [
                 'connection' => 'redis',
                 'queue' => ['log_queue'],
                 'balance' => 'auto',
-                'processes' => 1,
-                'minProcesses' => 1,
-                'maxProcesses' => 1,
+                'processes' => 2,
+                'minProcesses' => 2,
+                'maxProcesses' => 2,
                 'tries' => 1,
             ],
             'bulk-supervisor' => [
