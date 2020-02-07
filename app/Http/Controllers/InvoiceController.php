@@ -1372,7 +1372,7 @@ class InvoiceController extends Controller
             }
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
-            return back()->withError('Error importando. Archivo excede el tamaño mínimo.');
+            return back()->withError('Error importando. Archivo excede el tamaño máximo.');
         }
 
         $company->save();

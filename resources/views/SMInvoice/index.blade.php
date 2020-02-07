@@ -59,6 +59,7 @@
               <th data-priority="5">codigo_etax</th>
               <th data-priority="5">categoria</th>
               <th data-priority="5">refer_factura</th>
+              <th data-priority="1">Mes</th>
               <th data-priority="2">Fecha subida</th>
             </tr>
           </thead>
@@ -126,6 +127,7 @@ $(function() {
       { data: 'codigo_etax', name: 'codigo_etax' },
       { data: 'categoria', name: 'categoria' },
       { data: 'refer_factura', name: 'refer_factura' },
+      { data: 'mes_col', name: 'mes_col' },
       { data: 'created_at', name: 'created_at' },
       
     ],
