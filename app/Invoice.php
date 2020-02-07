@@ -449,6 +449,7 @@ class Invoice extends Model
                     'iva_amount' => $data['iva_amount'] ?? 0,
                     'tariff_heading' => $data['tariff_heading'] ?? null,
                     'is_exempt' => $data['is_exempt'] ?? false,
+                    'is_code_validated' => true,
                     ]
                 );
                 try {
@@ -717,6 +718,7 @@ class Invoice extends Model
           'iva_percentage' => $porcentajeIva,
           'iva_type' => $data['codigoEtax'],
           'iva_amount' => $montoIvaLinea,
+          'is_code_validated' => true,
           'exoneration_document_type' => $data['tipoDocumentoExoneracion'],
           'exoneration_document_number' => $data['documentoExoneracion'],
           'exoneration_company_name' => $data['companiaExoneracion'],

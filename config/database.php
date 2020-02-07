@@ -64,6 +64,18 @@ return array(
                         'prefix'    => '',
                         'strict' => true
                 ),
+                
+                'log_db' => array(
+                        'driver'    => env('LOGDB_CONNECTION', 'mysql'),
+                        'host'      => env('LOGDB_HOST', 'localhost'),
+                        'database'  => env('LOGDB_DATABASE', 'ducfpkkugc'),
+                        'username'  => env('LOGDB_USERNAME', 'ducfpkkugc'),
+                        'password'  => env('LOGDB_PASSWORD', 'mht3qS6Vr9'),
+                        'charset'   => 'utf8mb4',
+                        'collation' => 'utf8mb4_unicode_ci',
+                        'prefix'    => '',
+                        'strict' => true
+                ),
 
                 'pgsql' => array(
                         'driver'   => 'pgsql',

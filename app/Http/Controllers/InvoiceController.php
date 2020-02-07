@@ -1599,6 +1599,7 @@ class InvoiceController extends Controller
             $tipoIva = $request->tipo_iva;
             foreach( $invoice->items as $item ) {
                 $item->iva_type = $request->tipo_iva;
+                $item->is_code_validated = true;
                 $item->save();
             }
 

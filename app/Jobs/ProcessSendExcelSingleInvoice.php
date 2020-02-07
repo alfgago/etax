@@ -110,7 +110,7 @@ class ProcessSendExcelSingleInvoice implements ShouldQueue
                 clearInvoiceCache($invoice);
                     
             }catch( \Throwable $ex ){
-                Log::error("Error importando lineas de factura " . $ex);
+                Log::error("Error al guardar factura SM " . $ex);
             }
         //}
     }
