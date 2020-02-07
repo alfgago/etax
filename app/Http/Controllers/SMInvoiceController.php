@@ -44,7 +44,7 @@ class SMInvoiceController extends Controller
             //return 404;
         }
         $batch = request()->get('batch');
-        $query = SMInvoice::where('batch', $batch);
+        $query = SMInvoice::where('batch', $batch)->with('invoice');
         
         return datatables()->eloquent( $query )
             ->orderColumn('created_date', '-created_date $1')
@@ -52,8 +52,44 @@ class SMInvoiceController extends Controller
                 if( isset($smInvoice->batch_repeated) ) {
                     return "Duplicada en $smInvoice->batch_repeated";
                 }
-                return isset($smInvoice->document_key) ? substr($smInvoice->document_key, 21, 20) : "No registrada";
+                if(isset($smInvoice->document_key)){
+                    $invoice = $smInvoice->invoice;
+                    if( !isset($invoice) ){
+                        $invoice = Invoice::where('document_key', $smInvoice->document_key)->first();
+                        $smInvoice->invoice_id = $invoice->id;
+                        $smInvoice->save();
+                    }
+                    $estado = "";
+                    if ($invoice->hacienda_status == '01') {
+                        $estado = '<div class="yellow"><span class="tooltiptext">Procesando...</span></div>';
+                    }
+                    if ($invoice->hacienda_status == '03' || $invoice->hacienda_status == '30') {
+                        $estado = '<div class="green">  <span class="tooltiptext">Aceptada</span></div>';
+                    }
+                    if ($invoice->hacienda_status == '04') {
+                        $estado = '<div class="red"> <span class="tooltiptext">Rechazada</span></div>';
+                    }
+                    if ($invoice->hacienda_status == '05') {
+                        $estado = '<div class="orange"> <span class="tooltiptext">Esperando respuesta de hacienda</span></div>';
+                    }
+                    if ($invoice->hacienda_status == '99') {
+                         $estado = '<div class="blue"><span class="tooltiptext">Programada</span></div>';
+                    }
+                    
+                    return "<a style='margin-right: 1rem;' href='/facturas-emitidas/$invoice->id' target='_blank'>$invoice->reference_number</a> $estado";
+                }else{
+                    return "No registrada";
+                }
             })
+            ->addColumn('mes_col', function(SMInvoice $smInvoice) {
+                $invoice = $smInvoice->invoice;
+                if( !isset($invoice) ){
+                    return "";
+                }else {
+                    return "$invoice->year/".str_pad($invoice->month, 2, '0', STR_PAD_LEFT);
+                }
+            })
+            ->rawColumns(['clave_col'])
             ->toJson();
     }
 
@@ -72,12 +108,14 @@ class SMInvoiceController extends Controller
         $fileName = request()->file('archivo')->getClientOriginalName();
         $collection = Excel::toCollection( new InvoiceImportSM(), request()->file('archivo') );
         $companyId = currentCompany();
-        
         try {
             Log::debug('Creando job de registro de facturas. Excel tiene: ' . $collection[0]->count() . ' lineas.');
-
-            foreach ($collection[0]->chunk(50) as $facturas) {
-                ProcessRegisterSMInvoices::dispatch($facturas, $companyId, $fileType, $fileName)->onQueue('bulk');
+            
+            $i = 0;
+            $chunkSize = 50;
+            foreach ($collection[0]->chunk($chunkSize) as $facturas) {
+                ProcessRegisterSMInvoices::dispatch($facturas, $companyId, $fileType, $fileName, $chunkSize, $i)->onQueue('bulk');
+                $i++;
             }
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo: " . $ex);
