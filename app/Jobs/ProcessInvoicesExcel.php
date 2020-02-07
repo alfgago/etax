@@ -204,6 +204,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                                     'iva_percentage' => $linea->tarifaImpuesto ?? 0,
                                     'iva_amount' => $linea->montoImpuesto ?? 0,
                                     'tariff_heading' => null,
+                                    'is_code_validated' => true,
                                     'is_exempt' => $linea->exento
                                     ]
                                 );

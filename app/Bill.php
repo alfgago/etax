@@ -885,6 +885,7 @@ class Bill extends Model
           'discount' => $montoDescuentoLinea,
           'iva_type' => $data['codigoEtax'],
           'iva_amount' => $montoIvaLinea,
+          'is_code_validated' => true,
           'exoneration_document_type' => $data['tipoDocumentoExoneracion'],
           'exoneration_document_number' => $data['documentoExoneracion'],
           'exoneration_company_name' => $data['companiaExoneracion'],
