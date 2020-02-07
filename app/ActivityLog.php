@@ -9,7 +9,7 @@ class ActivityLog extends \Spatie\Activitylog\Models\Activity
 {
     protected $guarded = [];
     protected $connection= 'log_db';
-    protected $table = 'activity_log';
+    protected $table = 'log_actividad';
 
     use SoftDeletes;
 }
