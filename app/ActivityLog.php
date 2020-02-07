@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class ActivityLog extends Spatie\Activitylog\Models\Activity
+class ActivityLog extends \Spatie\Activitylog\Models\Activity
 {
     protected $guarded = [];
     protected $connection= 'log_db';
