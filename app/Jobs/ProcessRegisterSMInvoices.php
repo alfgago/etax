@@ -33,6 +33,8 @@ class ProcessRegisterSMInvoices implements ShouldQueue
     private $companyId = null;
     private $fileType = null;
     private $batchName = null;
+    private $initCount = null;
+    private $chunkSize = null;
 
 
     /**
@@ -40,12 +42,13 @@ class ProcessRegisterSMInvoices implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($excelCollection, $companyId, $fileType, $batchName)
+    public function __construct($excelCollection, $companyId, $fileType, $batchName, $chunkSize, $loop)
     {
         $this->excelCollection = $excelCollection;
         $this->companyId = $companyId;
         $this->fileType = $fileType;
         $this->batchName = $batchName;
+        $this->initCount = $loop*$chunkSize;
     }
 
     /**
@@ -59,6 +62,7 @@ class ProcessRegisterSMInvoices implements ShouldQueue
         $excelCollection = $this->excelCollection;
         $batchName = $this->batchName;
         $fileType = $this->fileType;
+        $initCount = $this->initCount;
         
         sleep (1);
         Log::notice("SM Seguros importando ". $excelCollection->count() ." lineas...");
@@ -73,6 +77,9 @@ class ProcessRegisterSMInvoices implements ShouldQueue
         $today = Carbon::parse( now('America/Costa_Rica') );
         
         foreach ($excelCollection as $row){
+            $i++;
+            $excelRow = $initCount + $i;
+
             try{
                 $registerSMInvoice = false;    
                 if( isset($row['doc_identificacion']) ){
@@ -134,6 +141,7 @@ class ProcessRegisterSMInvoices implements ShouldQueue
                             'month' => $today->month,
                             'year' => $today->year,
                             'batch_repeated' => $batchRepeated,
+                            'linea_excel' => $excelRow
                         ]);
                     }
                 } 

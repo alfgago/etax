@@ -108,12 +108,14 @@ class SMInvoiceController extends Controller
         $fileName = request()->file('archivo')->getClientOriginalName();
         $collection = Excel::toCollection( new InvoiceImportSM(), request()->file('archivo') );
         $companyId = currentCompany();
-        
         try {
             Log::debug('Creando job de registro de facturas. Excel tiene: ' . $collection[0]->count() . ' lineas.');
-
-            foreach ($collection[0]->chunk(50) as $facturas) {
-                ProcessRegisterSMInvoices::dispatch($facturas, $companyId, $fileType, $fileName)->onQueue('bulk');
+            
+            $i = 0;
+            $chunkSize = 50;
+            foreach ($collection[0]->chunk($chunkSize) as $facturas) {
+                ProcessRegisterSMInvoices::dispatch($facturas, $companyId, $fileType, $fileName, $chunkSize, $i)->onQueue('bulk');
+                $i++;
             }
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo: " . $ex);

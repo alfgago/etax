@@ -1347,7 +1347,14 @@ $( document ).ready(function() {
       presetPorcentaje();
       calcularSubtotalItem();
       togglePorcentajeIdentificacionPlena();
-      if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
+      if( $('#tipo_iva').val() ){
+        if( $('#tipo_iva').val().charAt(0) == 'S' ) {  
+          $('#unidad_medicion').val('Sp');
+        } else{ 
+          $('#unidad_medicion').val('Unid'); 
+        }
+      }
+      
     });
 
     $('#tipo_producto').on('change', function(){
