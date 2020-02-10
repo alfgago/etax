@@ -169,11 +169,11 @@ return [
             ],
             'smbulk-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['smbulk', 'smbulksend'],
+                'queue' => ['smbulk'],
                 'balance' => 'auto',
-                'processes' => 1,
-                'minProcesses' => 1,
-                'maxProcesses' => 1,
+                'processes' => 2,
+                'minProcesses' => 2,
+                'maxProcesses' => 2,
                 'tries' => 1,
             ],
             'imports-supervisor' => [
@@ -244,7 +244,7 @@ return [
             ],
             'smbulk-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['smbulk', 'smbulksend'],
+                'queue' => ['smbulk'],
                 'balance' => 'auto',
                 'processes' => 2,
                 'minProcesses' => 2,
