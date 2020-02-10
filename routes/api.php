@@ -20,4 +20,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::prefix('v1')->group(function() {
 	Route::post('notificaciones', 'NotificationController@create');
 });
-Route::post('email-facturas', 'EmailController@receiveEmailXML');
+
+Route::post('corbana-envio', 'CorbanaController@sendInvoice');

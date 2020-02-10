@@ -176,6 +176,15 @@ return [
                 'maxProcesses' => 1,
                 'tries' => 1,
             ],
+            'smbulksend-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['smbulksend'],
+                'balance' => 'auto',
+                'processes' => 2,
+                'minProcesses' => 2,
+                'maxProcesses' => 2,
+                'tries' => 1,
+            ],
             'imports-supervisor' => [
                 'connection' => 'redis',
                 'queue' => ['imports', 'gosocket'],
