@@ -49,7 +49,7 @@ class EnvioRecurrentes implements ShouldQueue
                             ->with('invoice')
                             ->with('invoice.items')->firstOrFail();
                 
-        if($recurrente->company_id != '208'){ return false; }
+        //if($recurrente->company_id != '208'){ return false; }
         
         try{
             Log::info("Recurrente ID: $recurrente->id, copia de Invoice: $recurrente->invoice_id, fecha: $recurrente->next_send");
