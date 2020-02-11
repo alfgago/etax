@@ -43,7 +43,7 @@ class BridgeHaciendaApi
         }
     }
 
-    public function createInvoice(Invoice $invoice, $token) {
+    public function createInvoice(Invoice $invoice, $token, $sendEmail = true) {
         try {
             $invoiceUtils = new InvoiceUtils();
             $requestDetails = $invoiceUtils->setDetails43($invoice->items);
@@ -86,7 +86,9 @@ class BridgeHaciendaApi
                         $xml->save();
                         Log::info('XML Guardado -->> ' . 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml");
 
-                        $file = $invoiceUtils->sendInvoiceEmail($invoice, $company, $path);
+                        if($sendEmail){ //Define si se quiere mandar el correo inicial, o esperar a que se apruebe con hacienda. True lo manda siempre
+                            $file = $invoiceUtils->sendInvoiceEmail($invoice, $company, $path);
+                        }
                         
                         ProcessInvoice::dispatch($invoice->id, $company->id, $token)
                             ->onConnection(config('etax.queue_connections'))->onQueue('invoicing');

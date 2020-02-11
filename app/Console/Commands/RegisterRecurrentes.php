@@ -45,13 +45,13 @@ class RegisterRecurrentes extends Command
     public function handle()
     {
         try {
-            $today = Carbon::now('America/Costa_Rica')->addDays(1)->endOfDay();
+            $recurringDate = Carbon::now('America/Costa_Rica')->addDays(3)->endOfDay();
             
-            $recurrentes = RecurringInvoice::select('id')->where('next_send', '<=',$today)->get();
-            $this->info('Sending recurring invoices ....'. count($recurrentes));
+            $recurrentes = RecurringInvoice::select('id', 'company_id')->where('next_send', '<=', $recurringDate)->get();
+            $this->info("Sending recurring invoices $recurringDate .... Encontradas: ". count($recurrentes));
 
             foreach ($recurrentes as $rec) {
-                $this->info('Enviando recurrentes ....'. $rec->id);
+                $this->info("Enviando recurrentes $rec->company_id .... $rec->id");
                 //sleep(1);
                 EnvioRecurrentes::dispatch($rec->id)->onQueue('sendbulk');
             }

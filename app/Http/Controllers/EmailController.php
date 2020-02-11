@@ -91,10 +91,9 @@ class EmailController extends Controller
         try {
             $bill = Bill::saveBillXML( $arr, 'Email' );
             if( $bill ) {
+                Log::info( "CORREO: Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor");
                 Bill::storeXML( $bill, $file );
                 $this->notificar(2, $bill->company_id,  $bill->company_id, 'Recibio una factura de compra por correo', 'Se registró la factura de venta $consecutivoComprobante para la empresa $identificacionReceptor','success','EmailController/processAttachment -> saveInvoice','/facturas_ventas/'.$bill->id);
-                Log::info( "CORREO: Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor");
-                
             }
         }catch( \Throwable $ex ){
             Log::warning( "CORREO: No se pudo guardar la factura de compra via Email. Mensaje: $file->getClientOriginalName()" . $ex->getMessage());
@@ -107,10 +106,10 @@ class EmailController extends Controller
         try {
             $invoice = Invoice::saveInvoiceXML( $arr, 'Email' );
             if( $invoice ) {
-                Invoice::storeXML( $invoice, $file );
-                 Log::info($invoice);
-                $this->notificar(2, $invoice->company_id, $invoice->company_id, 'Recibio una factura de venta por correo', 'Se registró la factura de venta '. $consecutivoComprobante.' para la empresa '.$identificacionEmisor.'','success','EmailController/processAttachment -> saveInvoice','/facturas_ventas/'.$invoice->id);
                 Log::info( "CORREO: Se registró la factura de venta $consecutivoComprobante para la empresa $identificacionEmisor");
+                Invoice::storeXML( $invoice, $file );
+                $this->notificar(2, $invoice->company_id, $invoice->company_id, 'Recibio una factura de venta por correo', 'Se registró la factura de venta '. $consecutivoComprobante.' para la empresa '.$identificacionEmisor.'','success','EmailController/processAttachment -> saveInvoice','/facturas_ventas/'.$invoice->id);
+                
                 
             }
         }catch( \Throwable $ex ){
