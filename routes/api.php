@@ -23,3 +23,6 @@ Route::prefix('v1')->group(function() {
 
 Route::post('email-facturas', 'EmailController@receiveEmailXML');
 Route::post('corbana-envio', 'CorbanaController@sendInvoice');
+Route::post('corbana-query-invoice', 'CorbanaController@queryInvoice');
+Route::get('corbana-query-bills/{pCia}', 'CorbanaController@queryBills');
+Route::get('corbana-query-bills', 'CorbanaController@queryBills');

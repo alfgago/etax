@@ -165,18 +165,18 @@ class CalculatedTax extends Model
       $prorrataOperativa = $company->getProrrataOperativa( $year );
       
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
-      
-      if ( !Cache::has($cacheKey) || $forceRecalc ) {
           
-          //Busca el calculo del mes en Base de Datos.
-          $data = CalculatedTax::firstOrNew(
-              [
-                  'company_id' => $currentCompanyId,
-                  'month' => $month,
-                  'year' => $year,
-                  'is_final' => true,
-              ]
-          );
+      //Busca el calculo del mes en Base de Datos.
+      $data = CalculatedTax::firstOrNew(
+          [
+              'company_id' => $currentCompanyId,
+              'month' => $month,
+              'year' => $year,
+              'is_final' => true,
+          ]
+      );
+      
+      if ( !Cache::has($cacheKey) || $forceRecalc || !$data->calculated) {
           
           $data->currentCompany = currentCompanyModel();
             
@@ -211,9 +211,8 @@ class CalculatedTax extends Model
           }
             
           Cache::put($cacheKey, $data, now()->addDays(120));
-          
+          $data = Cache::get($cacheKey);
       }
-      $data = Cache::get($cacheKey);
       
       return $data;
       
@@ -1466,16 +1465,17 @@ class CalculatedTax extends Model
         	$determinacion['totalCreditosPeriodo'] = $this->iva_deducible_operativo;
         	$determinacion['devolucionIva'] = $this->iva_devuelto;
         	
-        	$balanceOperativo = $this->balance_operativo < 0 ? ($this->balance_operativo + $this->saldo_favor_anterior) : ($this->balance_operativo - $this->saldo_favor_anterior);
+        	//$balanceOperativo = $this->balance_operativo < 0 ? ($this->balance_operativo + $this->saldo_favor_anterior) : ($this->balance_operativo - $this->saldo_favor_anterior);
+        	$balanceOperativo = $this->balance_operativo < 0 ? ($this->balance_operativo - $this->saldo_favor_anterior) : ($this->balance_operativo + $this->saldo_favor_anterior);
         	$this->iva_por_cobrar = $balanceOperativo < 0 ? abs($balanceOperativo) : 0;
           $this->iva_por_pagar = $balanceOperativo > 0 ? $balanceOperativo : 0;
         	
         	$determinacion['saldoFavorPeriodo'] = $this->iva_por_cobrar;
         	$determinacion['saldoDeudorPeriodo'] = $this->iva_por_pagar;
-        	$saldoFavorFinal = $this->iva_por_cobrar;
-        	$impuestoFinal = $this->iva_por_pagar;
         	
         	if( $this->month != 12 ) {
+        	  $saldoFavorFinal = $this->iva_por_cobrar;
+        	  $impuestoFinal = $this->iva_por_pagar;
           	$determinacion['saldoFavorProrrataReal'] = 0;
           	$determinacion['saldoDeudorProrrataReal'] = 0;
         	}else{

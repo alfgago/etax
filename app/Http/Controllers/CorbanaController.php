@@ -25,8 +25,98 @@ class CorbanaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth', ['except' => ['sendInvoice']] );
-        $this->middleware('CheckSubscription', ['except' => ['sendInvoice']] );
+        $this->middleware('auth', ['except' => ['sendInvoice','queryBills','queryInvoice']] );
+        $this->middleware('CheckSubscription', ['except' => ['sendInvoice','queryBills','queryInvoice']] );
+    }
+    
+    public function queryBills(Request $request) {
+        try{
+            $request->factura[0];
+            $cedulaEmpresa = '3101702429'; 
+            $company = Company::where('id_number', $cedulaEmpresa)->first();
+            
+            /* 
+            * Status 03: En el sistema de ellos.
+            * Status 01: Aún no ha sido ingresado al sistema.
+            */
+            $bills = Bill::where('company_id', $company->id)
+                    ->where('is_authorized', true)
+                    ->where('is_code_validated', true)
+                    ->where('status', '01')
+                    ->limit(2)
+                    ->with('items')->get();
+            Log::debug( json_encode($bills) );   
+            foreach($bills as $bill){
+                //$bill->status = '03'; 
+                //$bill->save();
+            }           
+            if(isset($bills)){
+                return response()->json([
+                    'mensaje' => $bills->count() . ' facturas',
+                    'facturas' => $bills
+                ], 200);
+            }
+        
+        }catch(\Exception $e){
+            Log::error("Error en Corbana" . $e);
+            return response()->json([
+                'mensaje' => 'Error ' . $e->getMessage()
+            ], 200);
+        }
+    }
+    
+    public function queryInvoice(Request $request) {
+        try{
+            $request->factura[0];
+            $cedulaEmpresa = '3101702429'; 
+            $company = Company::where('id_number', $cedulaEmpresa)->first();
+            $TIPO_DOC = $factura['TIPO_DOC'] ?? '01';
+            $tipoDocumento = '01';
+            if($TIPO_DOC == 'FA'){
+                $tipoDocumento = '01';
+                if($identificacionCliente == "000000000000000"){
+                    $tipoDocumento = "04";
+                }
+            }else if($TIPO_DOC == 'NC'){
+                $tipoDocumento = '03';
+            }else if($TIPO_DOC == 'ND'){
+                $tipoDocumento = '02';
+            }
+            
+            $partidaArancelaria = $factura['NO_DUA'] ?? null;
+            if( isset($partidaArancelaria) ){
+                $tipoDocumento = '09';
+            }
+            
+            //Define el numero de factura
+            $numeroReferencia = $factura['NO_DOCU'];
+            $numeroReferencia = floatval( mb_substr( $numeroReferencia, -8, null, 'UTF-8') );
+            $numeroReferencia = '95003';
+            $consecutivoComprobante = getDocReference($tipoDocumento, $company, $numeroReferencia);
+            $claveFactura = getDocumentKey($tipoDocumento, $company, $numeroReferencia);
+            
+            $invoice = Invoice::where('document_key', $claveFactura)
+                                ->where('company_id', $company->id)
+                                ->with('items')
+                                ->first();
+            if(isset($invoice)){
+                return response()->json([
+                    'mensaje' => 'Factura existente',
+                    'factura' => $invoice
+                ], 200);
+            }
+        
+        }catch(\Exception $e){
+            Log::error("Error en Corbana" . $e);
+            return response()->json([
+                'mensaje' => 'Error ' . $e->getMessage()
+            ], 200);
+        }
+        
+        //Nunca deberia llegar a este return.
+        return response()->json([
+            'mensaje' => 'Factura no encontrada en eTax'
+        ], 200);
     }
     
     public function sendInvoice(Request $request) {
@@ -52,6 +142,11 @@ class CorbanaController extends Controller
             $identificacionCliente = $factura['IDENTIFICACION'] ?? null;
             $correoCliente = isset($factura['EMAIL_FAC_ELEC']) ? $factura['EMAIL_FAC_ELEC'] : ($factura['CORREO_CLIENTE'] ?? null);
             $telefonoCliente = null;
+            $direccion = $factura['DIRECCION_CON'] ?? "No indica";
+            $codProvincia = $factura['COD_PROVINCIA'] ?? "7";
+            $codCanton = $factura['COD_CANTON'] ?? "7";
+            $codCanton = str_pad($codCanton, 2, '0', STR_PAD_LEFT);
+            $zip = $codProvincia.$codCanton."01";
             
             //Define el tipo de documento
             $TIPO_DOC = $factura['TIPO_DOC'] ?? '01';
@@ -67,10 +162,17 @@ class CorbanaController extends Controller
                 $tipoDocumento = '02';
             }
             
+            $partidaArancelaria = $factura['NO_DUA'] ?? null;
+            if( isset($partidaArancelaria) ){
+                $tipoDocumento = '09';
+                $tipoPersona = "E";
+                $partidaArancelaria = mb_substr( $partidaArancelaria, -12, null, 'UTF-8') ;
+            }
+            
             //Define el numero de factura
             $numeroReferencia = $factura['NO_DOCU'];
-            $numeroReferencia = floatval( mb_substr( $numeroReferencia, -7, null, 'UTF-8') );
-            $numeroReferencia = '95003';
+            $numeroReferencia = floatval( mb_substr( $numeroReferencia, -8, null, 'UTF-8') );
+            $numeroReferencia = '95013';
             $consecutivoComprobante = getDocReference($tipoDocumento, $company, $numeroReferencia);
             $claveFactura = getDocumentKey($tipoDocumento, $company, $numeroReferencia);
             
@@ -81,11 +183,11 @@ class CorbanaController extends Controller
             if(isset($invoice)){
                 return response()->json([
                     'mensaje' => 'Factura existente',
-                    'jsonResponse' => json_encode($invoice)
+                    'factura' => $invoice
                 ], 200);
             }
             
-            $TIPO_SERV = $factura['TIPO_SERV'] ?? 'S';
+            $TIPO_SERV = $factura['TIPO_SERV'] ?? 'B';
             
             $TIPO_PAGO = $factura['TIPO_PAGO'] ?? 'D'; //Usan E, T, D, Q, etc
             $metodoPago = "04"; //Default transferencia
@@ -114,8 +216,9 @@ class CorbanaController extends Controller
             
             $porcentajeIVA = $factura['PORCIV'] ?? 0;
             $totalDocumento = 0;
-            $descripcion = isset($factura['NOTA1'])  ? $factura['NOTA1'] : '';
-            $descripcion .= isset($factura['NOTA2'])  ? $factura['NOTA2'] : '';
+            $descripcion = isset($factura['OBSERVACION']) ? $factura['OBSERVACION'] : '';
+            $descripcion .= isset($factura['NOTA1']) ? $factura['NOTA1'] : '';
+            $descripcion .= isset($factura['NOTA2']) ? $factura['NOTA2'] : '';
     
             //Exoneraciones
             $totalNeto = 0;
@@ -125,16 +228,24 @@ class CorbanaController extends Controller
             $companiaExoneracion = $nombreCliente;
             $fechaExoneracion = $factura['FEC_DOCU_EXO'] ?? null;
             $porcentajeExoneracion = 0;
-            $codigoEtax = 'S103';
+            
+            $prefijoCodigo= "B";
+            if($TIPO_SERV == "S"){
+                $prefijoCodigo = "S";
+            }
+            $codigoEtax = $prefijoCodigo.'103';
             if( !isset($porcentajeIVA) ){
-                $codigoEtax = 'S170';
+                $codigoEtax = $prefijoCodigo.'170';
             }
             if( isset($documentoExoneracion) ){
                 $porcentajeIVA = !isset($porcentajeIVA) ? $porcentajeIVA : 13;
                 $porcentajeExoneracion = 100;
-                $codigoEtax = 'S183';
+                $codigoEtax = $prefijoCodigo.'183';
             }
             $impuestoNeto = 0;
+            if($tipoDocumento == '09'){
+                $codigoEtax = "B150";
+            }
             
             //Datos de lineas
             $i = 0;
@@ -145,8 +256,8 @@ class CorbanaController extends Controller
                 //Revisa que no sean las lineas de diferencial cambiario ni tarifa general
                 if ( $detalleProducto != "DIFERENCIAL CAMBIARIO" && !strpos($detalleProducto, "RIFA GENERAL") ) {
                     $numeroLinea = $item['LINEA'];
-                    $codigoProducto = $item['CODIGO'];
-                    $unidadMedicion = $TIPO_SERV == "S" ? "Sp" : $item['UM'];
+                    $codigoProducto = $item['CODIGO'] ?? "0";
+                    $unidadMedicion = $TIPO_SERV == "S" ? "Sp" : 'Unid';
                     $cantidad = $item['CANTIDAD'];
                     $precioUnitario = $item['PRECIO_UNITARIO'];
                     $subtotalLinea = $cantidad*$precioUnitario;
@@ -156,10 +267,19 @@ class CorbanaController extends Controller
                     $categoriaHacienda = null;
                     $montoExoneracion = isset($documentoExoneracion) ? $montoIva : 0;
                     $totalMontoLinea = $subtotalLinea + $montoIva - $montoExoneracion;
+                    
+                    $cantidad = round($cantidad, 5);
+                    $precioUnitario = round($precioUnitario, 5);
+                    $subtotalLinea = round($subtotalLinea, 5);
+                    $montoIva = round($montoIva, 5);
+                    $totalLinea = round($totalLinea, 5);
+                    $montoDescuento = round($montoDescuento, 5);
+                    $totalMontoLinea = round($totalMontoLinea, 5);
                 
                     $arrayInsert = array(
                         'metodoGeneracion' => $metodoGeneracion,
-                        'idEmisor' => 0,
+                        'idEmisor' => $cedulaEmpresa,
+                        /****Empiezan datos cliente***/
                         'nombreCliente' => $nombreCliente,
                         'descripcion' => $descripcion,
                         'codigoCliente' => $codigoCliente,
@@ -167,6 +287,9 @@ class CorbanaController extends Controller
                         'identificacionCliente' => $identificacionCliente,
                         'correoCliente' => $correoCliente,
                         'telefonoCliente' => $telefonoCliente,
+                        'direccion'     => $direccion,
+                        'zip'     => $zip,
+                        /****Empiezan datos factura***/
                         'claveFactura' => $claveFactura,
                         'consecutivoComprobante' => $consecutivoComprobante,
                         'numeroReferencia' => $numeroReferencia,
@@ -179,7 +302,7 @@ class CorbanaController extends Controller
                         'tipoCambio' => $tipoCambio,
                         'totalDocumento' => $totalDocumento,
                         'totalNeto' => $totalNeto,
-                        /**** Empiezan lineas ****/
+                        /**** Empiezan datos lineas ****/
                         'cantidad' => $cantidad,
                         'precioUnitario' => $precioUnitario,
                         'porcentajeIva' => $porcentajeIVA,
@@ -202,6 +325,7 @@ class CorbanaController extends Controller
                         'xmlSchema' => $xmlSchema,
                         'codigoActividad' => $codigoActividad,
                         'categoriaHacienda' => $categoriaHacienda,
+                        'partidaArancelaria' => $partidaArancelaria,
                         'acceptStatus' => true,
                         'isAuthorized' => true,
                         'codeValidated' => true
@@ -211,13 +335,14 @@ class CorbanaController extends Controller
                 }
                 
             }
+            Log::debug($invoiceList);
             foreach($invoiceList as $fac){
                $invoice = $this->saveCorbanaInvoice($fac);
             }
-            
+            $invoice->load('items');
             return response()->json([
                 'mensaje' => 'Exito',
-                'jsonResponse' => json_encode($invoice)
+                'factura' => $invoice
             ], 200);
         }catch(\Exception $e){
             Log::error("Error en Corbana" . $e);
