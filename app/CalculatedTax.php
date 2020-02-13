@@ -116,8 +116,11 @@ class CalculatedTax extends Model
      * @return \Illuminate\Http\Response
      */
     public function applyRatios( $porc, $value ) {
-      
+      if( !isset($this->currentCompany) ){
+        $this->currentCompany = currentCompanyModel();
+      }
       $company = $this->currentCompany;
+      
       $operativeData = $company->getOperativeData($this->year);
      
       $ratio1_operativo = $operativeData->operative_ratio1;
@@ -236,6 +239,10 @@ class CalculatedTax extends Model
     public function calcularFacturacion( $month, $year, $lastBalance, $prorrataOperativa ) {
       
       $currentCompany = $this->currentCompany;
+      if(!isset($currentCompany)){
+        $currentCompany = currentCompanyModel();
+        $this->currentCompany = $currentCompany;
+      }
       
       //Si recibe el balance anterior en 0, intenta buscarlo.
       if( !$lastBalance ) {
@@ -287,6 +294,9 @@ class CalculatedTax extends Model
     * Recorre todas las facturas emitidas y aumenta los montos correspondientes.
     **/
     public function setDatosEmitidos ( $month, $year, $company ) {
+      if(!isset($this->currentCompany)){
+        $this->currentCompany = currentCompanyModel();
+      }
       
       $countInvoices = Invoice::where('company_id', $company)->where('year', $year)->where('month', $month)->count();
       $invoicesTotal = 0;
@@ -580,6 +590,10 @@ class CalculatedTax extends Model
     *   Recorre todas las facturas recibidas y aumenta los montos correspondientes.
     **/
     public function setDatosSoportados ( $month, $year, $company, $query, $singleBill = false ) {
+      if( !isset($this->currentCompany) ){
+        $this->currentCompany = currentCompanyModel();
+      }
+      
       $countBills = Bill::where('company_id', $company)->where('year', $year)->where('month', $month)->count();
   
       $billsTotal = 0;
@@ -845,6 +859,10 @@ class CalculatedTax extends Model
     }
     
     public function setCalculosIVA( $prorrataOperativa, $lastBalance ) {
+      if( !isset($this->currentCompany) ){
+        $this->currentCompany = currentCompanyModel();
+      }
+      
       $company = $this->currentCompany;
       $subtotalAplicado =  $this->invoices_subtotal - $this->sum_iva_sin_aplicar;
       
@@ -1040,8 +1058,11 @@ class CalculatedTax extends Model
     }
     
     function sumAcumulados( $year, $allMonths = true ) {
-      
+      if( !isset($this->currentCompany) ){
+        $this->currentCompany = currentCompanyModel();
+      }
       $currentCompany = $this->currentCompany;
+      
       $currentCompanyId = $currentCompany->id;
       $calculosAnteriores = CalculatedTax::where('company_id', $currentCompanyId)->where('is_final', true)->where('year', $year)->where('month', '!=', 0)->get();
       $countAnteriores = count( $calculosAnteriores );
@@ -1284,11 +1305,11 @@ class CalculatedTax extends Model
     
     public function calcularDeclaracion($acumulado){
       try{
+        if( !isset($this->currentCompany) ){
+          $this->currentCompany = currentCompanyModel();
+        }
           $company = $this->currentCompany;
-          if(!isset($company)){
-            $company = currentCompanyModel();
-            $this->currentCompany = $company;
-          }
+          
     			$ivaData = json_decode($this->iva_data);
 	      	$book = $this->book;
           $arrayActividades = $company->getActivities();
