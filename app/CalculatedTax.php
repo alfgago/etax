@@ -167,10 +167,10 @@ class CalculatedTax extends Model
       $currentCompanyId = $company->id;
       $prorrataOperativa = $company->getProrrataOperativa( $year );
       
-      $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
+      /*$cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
       if ( Cache::has($cacheKey) ) {
         return Cache::get($cacheKey);
-      }
+      }*/
       
       //Busca el calculo del mes en Base de Datos.
       $data = CalculatedTax::firstOrNew(
@@ -181,7 +181,7 @@ class CalculatedTax extends Model
               'is_final' => true,
           ]
       );
-      Cache::put($cacheKey, $data, now()->addMinutes(3));
+      //Cache::put($cacheKey, $data, now()->addMinutes(3));
       
       
       if ( $forceRecalc || !$data->calculated ) {
@@ -218,7 +218,7 @@ class CalculatedTax extends Model
             }
           }
           
-        Cache::put($cacheKey, $data, now()->addMinutes(3));
+        //Cache::put($cacheKey, $data, now()->addMinutes(3));
       }
       
       return $data;
