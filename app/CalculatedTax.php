@@ -165,24 +165,26 @@ class CalculatedTax extends Model
       $prorrataOperativa = $company->getProrrataOperativa( $year );
       
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
-          
-      //Busca el calculo del mes en Base de Datos.
-      $data = CalculatedTax::firstOrNew(
-          [
-              'company_id' => $currentCompanyId,
-              'month' => $month,
-              'year' => $year,
-              'is_final' => true,
-          ]
-      );
+      if ( !Cache::has($cacheKey) ) {
+        //Busca el calculo del mes en Base de Datos.
+        $data = CalculatedTax::firstOrNew(
+            [
+                'company_id' => $currentCompanyId,
+                'month' => $month,
+                'year' => $year,
+                'is_final' => true,
+            ]
+        );
+        Cache::put($cacheKey, $data, now()->addHours(4));
+      }
       
-      if ( !Cache::has($cacheKey) || $forceRecalc || !$data->calculated) {
+      $data = Cache::get($cacheKey);
+      if ( $forceRecalc || !$data->calculated) {
           
           $data->currentCompany = currentCompanyModel();
             
           if ( $month > 0 ) { //El 0 significa que es acumulado anual
             $pass = !$data->is_closed && !$data->calculated;
-            //dd(json_encode($pass) . " / " . json_encode($forceRecalc) ." / ". $data->month);
             if( $pass || $forceRecalc ) {
               $data->resetVars();
 
@@ -209,9 +211,8 @@ class CalculatedTax extends Model
               $data->book = $book;
             }
           }
-            
-          Cache::put($cacheKey, $data, now()->addDays(120));
-          $data = Cache::get($cacheKey);
+          
+          Cache::put($cacheKey, $data, now()->addHours(4));
       }
       
       return $data;
