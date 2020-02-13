@@ -159,27 +159,29 @@ class CalculatedTax extends Model
      * @bodyParam prorrataOperativa required
      * @return App\CalculatedTax
      */
-    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $forceRecalc = false ) {
+    public static function calcularFacturacionPorMesAno( $month, $year, $lastBalance, $forceRecalc = true ) {
       $company = currentCompanyModel();
       $currentCompanyId = $company->id;
       $prorrataOperativa = $company->getProrrataOperativa( $year );
       
       $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
-      if ( !Cache::has($cacheKey) ) {
-        //Busca el calculo del mes en Base de Datos.
-        $data = CalculatedTax::firstOrNew(
-            [
-                'company_id' => $currentCompanyId,
-                'month' => $month,
-                'year' => $year,
-                'is_final' => true,
-            ]
-        );
-        Cache::put($cacheKey, $data, now()->addHours(4));
+      if ( Cache::has($cacheKey) ) {
+        return Cache::get($cacheKey);
       }
       
-      $data = Cache::get($cacheKey);
-      if ( $forceRecalc || !$data->calculated) {
+      //Busca el calculo del mes en Base de Datos.
+      $data = CalculatedTax::firstOrNew(
+          [
+              'company_id' => $currentCompanyId,
+              'month' => $month,
+              'year' => $year,
+              'is_final' => true,
+          ]
+      );
+      Cache::put($cacheKey, $data, now()->addMinutes(3));
+      
+      
+      if ( $forceRecalc || !$data->calculated ) {
           
           $data->currentCompany = currentCompanyModel();
             
@@ -205,6 +207,7 @@ class CalculatedTax extends Model
             $data->calcularFacturacionAcumulado( $year, $prorrataOperativa );
             
             if( $data->count_invoices || $data->count_bills || $data->id ) {
+              $data->calculated = true;
               $data->save();
               $book = Book::calcularAsientos( $data );
               $book->save();
@@ -212,7 +215,7 @@ class CalculatedTax extends Model
             }
           }
           
-          Cache::put($cacheKey, $data, now()->addHours(4));
+        Cache::put($cacheKey, $data, now()->addMinutes(3));
       }
       
       return $data;
