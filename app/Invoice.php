@@ -531,6 +531,8 @@ class Invoice extends Model
           return false;
         }
       }
+      
+      $tipoDocumento = $data['tipoDocumento'];
 
       $idCliente = 0;
       $identificacionCliente = preg_replace("/[^0-9]/", "", $data['identificacionCliente'] );
@@ -545,7 +547,7 @@ class Invoice extends Model
                 [
                     'code' => $data['codigoCliente'] ,
                     'company_id' => $company->id,
-                    'tipo_persona' => str_pad($data['tipoPersona'], 2, '0', STR_PAD_LEFT),
+                    'tipo_persona' => $data['tipoPersona'],
                     'id_number' => $identificacionCliente,
                     'first_name' => $data['nombreCliente'],
                     'phone' => $data['telefonoCliente'],
@@ -555,6 +557,7 @@ class Invoice extends Model
             $correoCliente = $data['correoCliente'] ? $data['correoCliente'] : $clienteCache->email;
             $clienteCache->email = $correoCliente;
             $clienteCache->address = $data['direccion'] ?? null;
+            $clienteCache->foreign_address = $clienteCache->address;
             if( isset($data['zip']) ){
               try{
                 $clienteCache->zip = $data['zip'];
@@ -568,7 +571,6 @@ class Invoice extends Model
         }
         $cliente = Cache::get($clientCacheKey);
         $idCliente = $cliente->id;
-        $tipoDocumento = $data['tipoDocumento'];
       } else {
         $tipoDocumento = '04'; //Si no trae cliente, es un tiquete.
       }
@@ -596,6 +598,7 @@ class Invoice extends Model
 
           $invoice->company_id = $company->id;
           $invoice->client_id = $idCliente;
+          $invoice->client_id_type = $data['tipoPersona'] ?? 'F';
           $invoice->document_key =  $data['claveFactura'];
           $invoice->document_number =  $data['consecutivoComprobante'];
           $invoice->reference_number =  $data['numeroReferencia'] ?? 0;
@@ -604,7 +607,7 @@ class Invoice extends Model
           $invoice->buy_order = isset( $data['ordenCompra'] ) ? $data['ordenCompra'] : null;
 
           //Datos generales y para Hacienda
-          if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04'
+          if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' || $tipoDocumento == '09'
               || $tipoDocumento == '05' || $tipoDocumento == '06' || $tipoDocumento == '07' || $tipoDocumento == '08' || $tipoDocumento == '99' ) {
               $invoice->document_type = $tipoDocumento;
           } else {
@@ -627,6 +630,7 @@ class Invoice extends Model
           $invoice->client_email = $data['correoCliente'] ?? null;
           $invoice->client_phone = $data['telefonoCliente'] ?? null;
           $invoice->client_address = $data['direccion'] ?? null;
+          $invoice->foreign_address = $data['direccion'] ?? null;
           if( isset($data['zip']) ){
             try{
               $invoice->client_zip = $data['zip'];
@@ -726,7 +730,8 @@ class Invoice extends Model
           'exoneration_amount' => $data['montoExoneracion'],
           'exoneration_total_gravado' => $data['montoExoneracion'] ? $subtotalLinea : 0,
           'impuesto_neto' => $data['impuestoNeto'],
-          'exoneration_total_amount' => $data['totalMontoLinea']
+          'exoneration_total_amount' => $data['totalMontoLinea'],
+          'tariff_heading' => ( isset($data['partidaArancelaria']) ? $data['partidaArancelaria'] : null )
       ];
       array_push($invoiceList[$arrayKey]['lineas'], $item);
 

@@ -44,6 +44,8 @@ class Kernel extends ConsoleKernel
         //Comandos generales
         $schedule->command('telescope:prune --hours=48')->timezone(config('app.timezone'))->withoutOverlapping()->daily()->runInBackground();
         $schedule->command('queue:restart')->timezone(config('app.timezone'))->daily();
+        
+        $schedule->command('horizon:snapshot')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
     }
 
     /**

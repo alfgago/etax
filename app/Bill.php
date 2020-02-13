@@ -291,13 +291,12 @@ class Bill extends Model
           
           try {
             $exonerationDate = isset( $data['exoneration_date'] )  ? Carbon::createFromFormat('d/m/Y', $data['exoneration_date']) : null;
-
           }catch( \Exception $e ) {
             $exonerationDate = null;
           }
+          
           if( $exonerationDate && isset($data['exoneration_document_type']) && isset($data['exoneration_document_number']) ) {
             
-          
             $item->exoneration_document_type = $data['exoneration_document_type'] ?? null;
             $item->exoneration_document_number = $data['exoneration_document_number'] ?? null;
             $item->exoneration_company_name = $data['exoneration_company_name'] ?? null;
@@ -612,7 +611,7 @@ class Bill extends Model
               $item_modificado = $bill->addEditItem($item);
               array_push( $lids, $item_modificado->id );
             }catch(\Throwable $e){
-
+              Log::error($e);
             }
         }
         
