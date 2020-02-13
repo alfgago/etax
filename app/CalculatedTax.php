@@ -1285,6 +1285,10 @@ class CalculatedTax extends Model
     public function calcularDeclaracion($acumulado){
       try{
           $company = $this->currentCompany;
+          if(!isset($company)){
+            $company = currentCompanyModel();
+            $this->currentCompany = $company;
+          }
     			$ivaData = json_decode($this->iva_data);
 	      	$book = $this->book;
           $arrayActividades = $company->getActivities();
