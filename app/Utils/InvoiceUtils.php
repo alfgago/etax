@@ -470,10 +470,10 @@ class InvoiceUtils
                 'emisor_address' => $emisorAddress,
                 'emisor_phone' => $emisorPhone,
                 'emisor_cedula' => $emisorCedula,
-                'usuarioAtv' => $company->atv->user ? trim($company->atv->user) :  '',
-                'passwordAtv' => $company->atv->password ? trim($company->atv->password) : '',
+                'usuarioAtv' => $company->atv ? trim($company->atv->user) :  '',
+                'passwordAtv' => $company->atv ? trim($company->atv->password) : '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
-                'atvcertPin' => $company->atv->pin ? trim($company->atv->pin) : '',
+                'atvcertPin' => $company->atv ? trim($company->atv->pin) : '',
                 //'atvcertFile' => Storage::get($company->atv->key_url),
                 'servgravados' => $totalServiciosGravados - $totalServiciosExonerados,
                 'servexentos' => $totalServiciosExentos,
@@ -507,7 +507,11 @@ class InvoiceUtils
             }
 
             Log::info("Request Data from invoices id: $data->id  --> ".json_encode($invoiceData));
-            $invoiceData['atvcertFile'] = Storage::get($company->atv->key_url);
+            if($company->atv){
+                $invoiceData['atvcertFile'] = Storage::get($company->atv->key_url);
+            }else{
+                $invoiceData['atvcertFile'] = null;
+            }
             
             //Para el PDF, retorna el invoiceData completo. Si es para emitir, retorna el request.
             if( !$returnRequest ){
@@ -537,7 +541,14 @@ class InvoiceUtils
 
     public  function validateZip($invoice) {
         if ($invoice->reference_doc_type != '09') {
-            return empty($invoice->client_zip) ? false : true;
+            if( !isset($invoice->client_zip) 
+                && isset($invoice->client_state) 
+                && isset($invoice->client_city) 
+                && isset($invoice->client_district) 
+            ){
+                $invoice->client_zip = $invoice->client_state . str_pad($invoice->client_city, 2, '0', STR_PAD_LEFT) . str_pad($invoice->client_district, 2, '0', STR_PAD_LEFT);
+            }
+            return isset($invoice->client_zip) ? true : false;
         }
         return true;
     }
