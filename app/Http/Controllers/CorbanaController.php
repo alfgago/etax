@@ -31,8 +31,10 @@ class CorbanaController extends Controller
     
     public function queryBills(Request $request) {
         try{
-            $request->factura[0];
-            $cedulaEmpresa = '3101702429'; 
+            $pCia = $request->pCia;
+            $pAct = $request->pAct;
+            $cedulaEmpresa = $this->parseCorbanaIdToCedula($pCia, $pAct);
+            //$cedulaEmpresa = "3101702429";
             $company = Company::where('id_number', $cedulaEmpresa)->first();
             
             /* 
@@ -43,13 +45,19 @@ class CorbanaController extends Controller
                     ->where('is_authorized', true)
                     ->where('is_code_validated', true)
                     ->where('status', '01')
-                    ->limit(2)
+                    ->limit(3)
                     ->with('items')->get();
-            Log::debug( json_encode($bills) );   
+                    
+            $billUtils = new \App\Utils\BillUtils();
             foreach($bills as $bill){
-                //$bill->status = '03'; 
-                //$bill->save();
-            }           
+                $bill->status = '03'; 
+                $bill->save();
+                $pdf = $billUtils->streamPdf($bill, $company);
+                $bill->pdf64 = isset($pdf) ? base64_encode($pdf) : null;
+                
+                $xml = $billUtils->downloadXml($bill, $company);
+                $bill->xml64 = isset($xml) ? base64_encode($xml) : null;
+                }           
             if(isset($bills)){
                 return response()->json([
                     'mensaje' => $bills->count() . ' facturas',
@@ -67,42 +75,37 @@ class CorbanaController extends Controller
     
     public function queryInvoice(Request $request) {
         try{
-            $request->factura[0];
-            $cedulaEmpresa = '3101702429'; 
-            $company = Company::where('id_number', $cedulaEmpresa)->first();
-            $TIPO_DOC = $factura['TIPO_DOC'] ?? '01';
-            $tipoDocumento = '01';
-            if($TIPO_DOC == 'FA'){
-                $tipoDocumento = '01';
-                if($identificacionCliente == "000000000000000"){
-                    $tipoDocumento = "04";
-                }
-            }else if($TIPO_DOC == 'NC'){
-                $tipoDocumento = '03';
-            }else if($TIPO_DOC == 'ND'){
-                $tipoDocumento = '02';
-            }
-            
-            $partidaArancelaria = $factura['NO_DUA'] ?? null;
-            if( isset($partidaArancelaria) ){
-                $tipoDocumento = '09';
-            }
-            
-            //Define el numero de factura
-            $numeroReferencia = $factura['NO_DOCU'];
-            $numeroReferencia = floatval( mb_substr( $numeroReferencia, -8, null, 'UTF-8') );
-            $numeroReferencia = '95003';
-            $consecutivoComprobante = getDocReference($tipoDocumento, $company, $numeroReferencia);
-            $claveFactura = getDocumentKey($tipoDocumento, $company, $numeroReferencia);
-            
-            $invoice = Invoice::where('document_key', $claveFactura)
-                                ->where('company_id', $company->id)
+            $invoice = Invoice::where('id', $request->id)
                                 ->with('items')
+                                ->with('company')
                                 ->first();
+            Log::debug(json_encode($invoice));
+            $cedula = $invoice->company->id_number;
+            if( $cedula != "3101018968" && $cedula != "3101011989" && $cedula != "3101166930" && $cedula != "3007684555" && $cedula != "3130052102" && $cedula != "3101702429" ){
+                Log::warning("Error: ID de factura no le pertenece a Corbana");
+                return response()->json([
+                    'mensaje' => 'Error: ID de factura no le pertenece a Corbana'
+                ], 200);
+            }
+            
+            $invoiceUtils = new \App\Utils\InvoiceUtils();
+            
+            $pdf = $invoiceUtils->streamPdf($invoice, $invoice->company);
+            $basePDF = isset($pdf) ? base64_encode($pdf) : null;
+            
+            $xml = $invoiceUtils->downloadXml($invoice, $invoice->company);
+            $baseXML = isset($xml) ? base64_encode($xml) : null;
+            
+            $xmlH = $file = $invoiceUtils->downloadXml( $invoice, $invoice->company, 'MH' );
+            $baseXMLH = isset($xmlH) ? base64_encode($xmlH) : null;
+                                
             if(isset($invoice)){
                 return response()->json([
-                    'mensaje' => 'Factura existente',
-                    'factura' => $invoice
+                    'id_factura' => $invoice->id,
+                    'hacienda_status' => $invoice->hacienda_status,
+                    'pdf64' => $basePDF,
+                    'xml64' => $baseXML,
+                    'xmlh64' => $baseXMLH
                 ], 200);
             }
         
@@ -128,8 +131,8 @@ class CorbanaController extends Controller
             Log::debug("CORBANA RECIBE: FACTURA" . json_encode($factura) . " LINEAS: " . json_encode($items) );
             $metodoGeneracion = "Corbana";
 
-            //$cedulaEmpresa = '3101707070';
-            $cedulaEmpresa = '3101702429'; 
+            //Busca la cedula de la empresa
+            $cedulaEmpresa = $this->parseCorbanaIdToCedula($factura['NO_CIA'], $factura['ACTIVIDAD']);
             $company = Company::where('id_number', $cedulaEmpresa)->first();
             $mainAct = $company->getActivities() ? $company->getActivities()[0]->codigo : '0';
 
@@ -172,7 +175,6 @@ class CorbanaController extends Controller
             //Define el numero de factura
             $numeroReferencia = $factura['NO_DOCU'];
             $numeroReferencia = floatval( mb_substr( $numeroReferencia, -8, null, 'UTF-8') );
-            $numeroReferencia = '95013';
             $consecutivoComprobante = getDocReference($tipoDocumento, $company, $numeroReferencia);
             $claveFactura = getDocumentKey($tipoDocumento, $company, $numeroReferencia);
             
@@ -358,6 +360,9 @@ class CorbanaController extends Controller
         
     }
     
+    /**
+     * Función utilizada para hacer el envio de Corbana a Hacienda.
+     */
     private function saveCorbanaInvoice($invoiceArray){
 
         $fac = $invoiceArray['factura'];
@@ -418,7 +423,30 @@ class CorbanaController extends Controller
         }
                     
         return $invoice;  
+    }
     
+
+    /*
+    01 = CORPORACION BANANERA NACIONAL SOCIEDAD ANONIMA	3101018968
+    11 = COMPANIA INTERNACIONAL DE BANANO, S.A.	3101011989
+    05 = AGRO FORESTALES DE SIXAOLA S.A.	3101166930
+    02.05 = FONDO ESPECIAL DE PREVENCION E INFRAESTRUCTURA		3007684555
+    02.15 = FONDO CONTINGENCIA DECRETO 16564/P/H/MEC CORP BANANERA NACIONAL SA	3130052102
+    */
+    private function parseCorbanaIdToCedula($pCia, $pAct){
+        if($pCia == "01"){
+            return "3101018968";
+        }else if($pCia == "11"){
+            return "3101011989";
+        }else if($pCia == "05"){
+            return "3101166930";
+        }else if($pCia == "02"){
+            if($pAct == "05"){
+                return "3007684555";
+            }else{
+                return "3130052102";
+            }
+        }
     }
     
 }
