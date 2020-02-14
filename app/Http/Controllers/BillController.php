@@ -1230,7 +1230,7 @@ class BillController extends Controller
         ->where('accept_status', '0')
         ->where('is_totales', false)
         ->where('is_authorized', true)
-        ->limit(100)
+        ->limit(300)
         ->with('provider')->get();
         
         foreach ($query as $bill) {
