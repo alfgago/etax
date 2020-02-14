@@ -34,6 +34,7 @@ class LogActivityHandler implements ShouldQueue
     */
     public function handle() {
         //saves the activity
+        return false;
         activity()
             ->causedBy($this->causedBy)
             ->performedOn($this->performedOn)
