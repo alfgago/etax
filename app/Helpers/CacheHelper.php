@@ -18,6 +18,8 @@ if (!function_exists('clearBillCache')) {
         $year = $bill->year;
         clearTaxesCache($bill->company_id, $month, $year);
         clearTaxesCache($bill->company_id, 0, $year);
+        $cacheKeyBillAccepts = "cache-billaccepts-".$this->id;
+        Cache::forget($cacheKeyBillAccepts);
     }
     
 }

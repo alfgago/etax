@@ -915,8 +915,12 @@ class Bill extends Model
         $this->is_code_validated = false;
       }
       
+      $cacheKey = "cache-billaccepts-".$this->id;
+      if ( Cache::has($cacheKey) ) {
+        return Cache::get($cacheKey);
+      }
+      
       if( $this->is_code_validated ) {
-        
         if( $this->xml_schema == 43 ) {
           $company = currentCompanyModel();
           $prorrataOperativa = $company->getProrrataOperativa( $this->year );
@@ -968,8 +972,9 @@ class Bill extends Model
         $this->accept_total_factura = 0;
         $this->accept_iva_condition = '01';
       }
-      
       $this->save();
+      Cache::put($cacheKey, $this, now()->addDays(90));
+      
       return $this;
         
     }
