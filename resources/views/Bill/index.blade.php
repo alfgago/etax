@@ -85,8 +85,8 @@
               <th data-priority="5">Monto IVA</th>
               <th data-priority="4">Total</th>
               <th data-priority="6">F. Generada</th>
-              <th data-priority="6">Estado</th>
               <th data-priority="1">Acciones</th>
+              <th data-priority="6">Estado</th>
             </tr>
           </thead>
           <tbody>
@@ -127,8 +127,8 @@ $(function() {
       { data: 'monto_iva', name: 'iva_amount', class: "text-right" },
       { data: 'total', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
       { data: 'generated_date', name: 'generated_date' },
-      { data: 'hacienda_status', name: 'hacienda_status' },
       { data: 'actions', name: 'actions', orderable: false, searchable: false },
+      { data: 'hacienda_status', name: 'hacienda_status' },
     ],
     createdRow: function (row, data, index) {
       if(data.hide_from_taxes){
@@ -181,6 +181,24 @@ function confirmEnvioAceptacion( id ) {
   
 }
 
+
+  
+function confirmDecline( id ) {
+  var formId = "#decline-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea rechazar la factura?',
+    text: "Al rechazarla, se enviará el mensaje de rechazo a Hacienda.",
+    type: 'warning',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero eliminarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
 
 function confirmAnular( id ) {
   var formId = "#anular-form-"+id;

@@ -434,8 +434,15 @@ class InvoiceUtils
             $receptorCedulaType = $data['client_id_type'] ?? 'F';
             if($receptorCedulaType == 'F'){
                 $receptorCedulaType = 1;
+            }else if($receptorCedulaType == 'E'){
+                $receptorCedulaType = 5;    
             }
-
+            if($receptorCedulaType == 5){
+                $cedulaReceptor = $data['client_id_number'] ?? '';
+            }else{
+                $cedulaReceptor = $data['client_id_number'] ? str_pad(preg_replace("/[^0-9]/", "", $data['client_id_number']), 9, '0', STR_PAD_LEFT) : '';
+            }
+            
             $invoiceData = array(
                 'consecutivo' => $ref ?? '',
                 'fecha_emision' => $data['generated_date'] ?? '',
@@ -451,8 +458,7 @@ class InvoiceUtils
                 'receptor_otras_senas_extranjero' => $data['client_address'] ? trim($data['client_address']) : '',
                 'receptor_email' => $data['client_email'] ? replaceAccents($data['client_email']) :  '',
                 'receptor_phone' => !empty($data['client_phone']) ? preg_replace('/[^0-9]/', '', $data['client_phone']) : '00000000',
-                'receptor_cedula_numero' => $data['client_id_number'] ? str_pad(preg_replace("/[^0-9]/", "",
-                    $data['client_id_number']), 9, '0', STR_PAD_LEFT) : '',
+                'receptor_cedula_numero' => $cedulaReceptor,
                 'receptor_cedula_tipo' => $receptorCedulaType,
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',

@@ -169,6 +169,7 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::get('lista-validar-masivo', 'BillController@indexValidarMasivo')->name('Bill.indexValidarMasivo');
     Route::post('validacion-masiva', 'BillController@validarMasivo')->name('Bill.validacion-masiva');
     Route::get('download-xml/{id}', 'BillController@downloadXml')->name('Bill.downloadXml');
+    Route::post('rechazar', 'BillController@reject')->name('Bill.rechazar');
 });
 
 // Rutas de Wizard
@@ -332,3 +333,16 @@ Route::get('/private/exportar', 'SubscriptionPlanController@exportar')->name('su
 Route::get('/admin/impersonate/{id}', 'UserController@impersonate');
 Route::get('/admin/leave', 'UserController@leaveImpersonation');
 
+
+//Quickbooks
+Route::prefix('quickbooks')->group(function() {
+    //Gets de las pantallas
+    Route::get('/configuracion', 'QuickbooksController@config');
+    Route::get('/mapeo-variables', 'QuickbooksController@variableMapIndex');
+    Route::get('/comparativo-emitidas', 'QuickbooksController@invoiceSyncIndex');
+    Route::get('/comparativo-recibidas', 'QuickbooksController@billSyncIndex');
+    Route::get('/comparativo-clientes', 'QuickbooksController@clientSyncIndex');
+    Route::get('/comparativo-proveedores', 'QuickbooksController@providerSyncIndex');
+    Route::get('/comparativo-productos', 'QuickbooksController@productSyncIndex');
+    //Post/Patch de acciones
+});

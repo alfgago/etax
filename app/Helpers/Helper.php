@@ -609,6 +609,32 @@ if (!function_exists('get_microtime')) {
 }
 
 /* Get Document Key */
+if (!function_exists('getNextRef')) {
+    function getNextRef($docType, $company = false) {
+
+        if(!$company) {
+            $company = currentCompanyModel(false);
+        }
+        if ($docType == '01') {
+            $ref = $company->last_invoice_ref_number + 1;
+        }
+        if ($docType == '08') {
+            $ref = $company->last_invoice_pur_ref_number + 1;
+        }
+        if ($docType == '09') {
+            $ref = $company->last_invoice_exp_ref_number + 1;
+        }
+        if ($docType == '03') {
+            $ref = $company->last_note_ref_number + 1;
+        }
+        if ($docType == '04') {
+            $ref = $company->last_ticket_ref_number + 1;
+        }
+        return $ref;
+    }
+}
+
+/* Get Document Key */
 if (!function_exists('getDocumentKey')) {
     function getDocumentKey($docType, $company = false, $ref = false) {
 

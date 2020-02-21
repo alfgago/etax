@@ -637,11 +637,16 @@ class BillController extends Controller
         $billUtils = new BillUtils();
         $file = $billUtils->downloadPdf( $bill, currentCompanyModel() );
         $filename = $bill->document_key . '.pdf';
-        if( ! $bill->document_key ) {
-            $filename = $bill->document_number . '-' . $bill->client_id . '.pdf';
-        }
         
-        return $file;
+        $headers = [
+            'Content-Type' => 'application/pdf',
+            'Content-Description' => 'File Transfer',
+            'Content-Disposition' => "attachment; filename={$filename}",
+            'filename'=> $filename
+        ];
+        return response($file, 200, $headers);
+        
+        //return $file;
     }
 
     public function importExcel() {
@@ -1063,9 +1068,9 @@ class BillController extends Controller
                 "La factura ". $bill->document_number . " ha sido validada."
             )->onConnection(config('etax.queue_connections'))
             ->onQueue('log_queue');
-            return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido validada');
+            return redirect('/facturas-recibidas/')->withMessage( 'La factura '. $bill->document_number . 'ha sido validada');
         }else{
-            return redirect('/facturas-recibidas/aceptaciones')->withError('Mes seleccionado ya fue cerrado');
+            return redirect('/facturas-recibidas/')->withError('Mes seleccionado ya fue cerrado');
         }
     }
     
@@ -1097,17 +1102,16 @@ class BillController extends Controller
             ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($bill) {
                 return view('Bill.ext.auth-actions', [
-                    'id' => $bill->id,
-                    'is_code_validated' => $bill->is_code_validated
+                    'bill' => $bill
                 ])->render();
-            }) 
+            })
             ->editColumn('provider', function(Bill $bill) {
                 return $bill->providerName();
             })
             ->editColumn('generated_date', function(Bill $bill) {
                 return $bill->generatedDate()->format('d/m/Y');
             })
-            ->rawColumns(['actions'])
+            ->rawColumns(['actions', 'corbana'])
             ->toJson();
     }
     
@@ -1120,6 +1124,8 @@ class BillController extends Controller
             
             if ( $request->autorizar ) {
                 $bill->is_authorized = true;
+                $bill->accept_status = 1;
+                
                 $bill->save();
                 clearBillCache($bill);
 
@@ -1139,6 +1145,7 @@ class BillController extends Controller
             }else {
                 $bill->is_authorized = false;
                 $bill->is_void = true;
+                $bill->accept_status = 2;
                 BillItem::where('bill_id', $bill->id)->delete();
                 $bill->delete();
                 clearBillCache($bill);
@@ -1373,9 +1380,9 @@ class BillController extends Controller
                 )->onConnection(config('etax.queue_connections'))
                 ->onQueue('log_queue');
 
-            return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . ' ha sido incluida para aceptación');
+            return redirect('/facturas-recibidas/')->withMessage( 'La factura '. $bill->document_number . ' ha sido incluida para aceptación');
         }else{
-            return redirect('/facturas-recibidas/aceptaciones')->withError('Mes seleccionado ya fue cerrado');
+            return redirect('/facturas-recibidas/')->withError('Mes seleccionado ya fue cerrado');
         }
 
     }
@@ -1420,7 +1427,7 @@ class BillController extends Controller
                     $mensaje
                 )->onConnection(config('etax.queue_connections'))
                 ->onQueue('log_queue');
-                    return redirect('/facturas-recibidas/aceptaciones')->withMessage( $mensaje );
+                    return redirect('/facturas-recibidas/')->withMessage( $mensaje );
     
                 } else {
                     return back()->withError( 'Ha ocurrido un error al enviar factura.' );
@@ -1430,12 +1437,16 @@ class BillController extends Controller
                     $bill->accept_status = $request->respuesta;
                     $bill->save();
                 }
+                $mensaje = 'Aceptación enviada.';
+                if($request->respuesta == 2){
+                    $mensaje = 'Rechazo de factura enviado';
+                }
                 clearBillCache($bill);
-                return redirect('/facturas-recibidas/aceptaciones')->withMessage('Factura aceptada para cálculo en eTax.');
+                return redirect('/facturas-recibidas/')->withWarning($mensaje);
             }
         } catch ( Exception $e) {
             Log::error ("Error al crear aceptacion de factura");
-            return redirect('/facturas-recibidas/aceptaciones')->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');
+            return redirect('/facturas-recibidas/')->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');
         }
     }
 
@@ -1472,7 +1483,7 @@ class BillController extends Controller
             
         } catch ( Exception $e) {
             Log::error ("Error al crear aceptacion de factura");
-            return redirect('/facturas-recibidas/aceptaciones')->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');
+            return redirect('/facturas-recibidas/')->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');
         }
     }
     
@@ -1503,12 +1514,47 @@ class BillController extends Controller
                     "La factura ". $bill->document_number . " ha sido aceptada"
                 )->onConnection(config('etax.queue_connections'))
                 ->onQueue('log_queue');
-            return redirect('/facturas-recibidas/aceptaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido aceptada');
+            return redirect('/facturas-recibidas/')->withMessage( 'La factura '. $bill->document_number . 'ha sido aceptada');
         }else{
-            return redirect('/facturas-recibidas/aceptaciones')->withError('Mes seleccionado ya fue cerrado');
+            return redirect('/facturas-recibidas/')->withError('Mes seleccionado ya fue cerrado');
         }
 
     }
+    
+    
+    /**
+     * Rechazar una factura
+     *
+     * @param  \App\Bill  $bill
+     * @return \Illuminate\Http\Response
+     */
+    public function reject($id)
+    {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+        $bill->accept_status = 2;
+        $bill->save();
+        
+        //Deberia mandar RECHAZO a hacienda
+        
+        ///////////////////////////////////
+        
+        clearBillCache($bill);
+        $user = auth()->user();
+                Activity::dispatch(
+                    $user,
+                    $bill,
+                    [
+                        'company_id' => $bill->company_id,
+                        'id' => $bill->id,
+                        'document_key' => $bill->document_key
+                    ],
+                    "La factura ha sido rechazada satisfactoriamente."
+                )->onConnection(config('etax.queue_connections'))
+                ->onQueue('log_queue');
+        
+        return redirect('/facturas-recibidas')->withMessage('La factura ha sido rechazada satisfactoriamente.');
+    } 
 
     /**
      * Remove the specified resource from storage.
