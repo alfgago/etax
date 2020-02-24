@@ -95,6 +95,7 @@ class BillController extends Controller
                 where('bill_items.company_id', $company->id)
                 ->join('bills', 'bill_items.bill_id', '=', 'bills.id' )
                 ->where('bills.is_authorized', 1)
+                ->where('bills.accept_status', '!=' , 2)
                 //->join('providers', 'bills.provider_id', '=', 'providers.id' )
                 ;
 
@@ -296,7 +297,6 @@ class BillController extends Controller
                 ->where('is_authorized', true)
                 ->where('is_code_validated', true)
                 ->where('is_totales', false)
-                ->where('accept_status', 1)
                 ->with('provider');
         
         $filtro = $request->get('filtro');
@@ -314,7 +314,14 @@ class BillController extends Controller
             $query = $query->where('document_type', '03');
         }else if( $filtro == 4 ) {
             $query = $query->where('document_type', '04');
-        }             
+        }
+        
+        if( $filtro == 98 ) {
+            $query = $query->where('accept_status', 2);
+        }else{
+            $query = $query->where('accept_status', '!=' , 2);
+        }
+        
         if( $estado != 0) {
             $query = $query->where('hacienda_status', $estado);
         }

@@ -7,111 +7,199 @@
 @section('content') 
 <div class="row">
   <div class="col-xl-9 col-lg-12 col-md-12">
-        
-      <form method="POST" action="/productos">
+      <?php $company = currentCompanyModel(); ?>
+      <form method="POST" action="/quickbooks/guardar-variables/">
 
         @csrf
 
         <div class="form-row">
           <div class="form-group col-md-12">
             <h3>
-              Mapeo de Variables - QuickBooks
+              Condiciones de venta
             </h3>
           </div>
-
-          <?php $company = currentCompanyModel(); ?>
           
-            <div class="form-group col-md-12">
-                <label>Tipo</label>
-                <select type="text" class="form-control" id="select-tipo">
-                    <option value="1">Condición de venta</option>
-                    <option value="2">Método de pago</option>
-                    <option value="3">Código de impuestos</option>
-                </select>
-            </div>
-            
-            <div class="form-group col-md-12">
-                <label>Variable QuickBooks</label>
-                <select type="text" class="form-control" id="select-tipo">
-                    <option value="0" selected>-- Seleccione una variable de QuickBooks --</option>
-                    <option>Condición de venta</option>
-                    <option>Método de pago</option>
-                    <option>Código de impuestos</option>
-                </select>
-            </div>
-            
-            <div class="form-group col-md-12">
-                <label>Variable eTax</label>
-                <select type="text" class="form-control" id="select-tipo">
-                    <option value="0" selected>-- Seleccione una variable de eTax --</option>
-                    <option>Condición de venta</option>
-                    <option>Método de pago</option>
-                    <option>Código de impuestos</option>
-                </select>
-            </div>
-                
-            <div class="form-group col-md-12">
-              <div onclick="agregarNuevaLinea();" class="btn btn-dark btn-agregar">Agregar variable</div>
-            </div>
-          
-          <div class="form-row" id="tabla-items-factura" style="width: 100%;">  
-            <div class="form-group col-md-12">
-              <h3>
-                Variables mapeadas
-              </h3>
-            </div>
-  
-            <div class="form-group col-md-12">
-              <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
-                <thead class="thead-dark">
-                  <tr>
-                    <th>Tipo</th>
-                    <th>QuickBooks</th>
-                    <th>eTax</th>
-                    <th></th>
+          <div class="form-group col-md-12">
+            <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
+              <thead class="thead-dark">
+                <tr>
+                  <th>QuickBooks</th>
+                  <th>eTax</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="item-tabla item-index-0">
+                  <td>Valor por defecto</td>
+                  <td>
+                    <select id="condicion_venta" name="sale_condition" class="form-control" required>
+                      <option value="01">Contado</option>
+                      <option value="02">Crédito</option>
+                      <option value="03">Consignación</option>
+                      <option value="04">Apartado</option>
+                      <option value="05">Arrendamiento con opción de compra</option>
+                      <option value="06">Arrendamiento en función financiera</option>
+                      <option value="99">Otros</option>
+                    </select>
+                  </td>
+                </tr>
+                @foreach($terms as $term)
+                  <tr class="item-tabla item-index-{{ $loop->index }}">
+                    <td>{{ $term->Name }}</td>
+                    <td>
+                      <select id="condicion_venta" name="sale_condition" class="form-control" required>
+                        <option value="01">Contado</option>
+                        <option value="02">Crédito</option>
+                        <option value="03">Consignación</option>
+                        <option value="04">Apartado</option>
+                        <option value="05">Arrendamiento con opción de compra</option>
+                        <option value="06">Arrendamiento en función financiera</option>
+                        <option value="99">Otros</option>
+                      </select>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                    <tr class="item-tabla item-index-{{ @$loop->index }}" index="{{ @$loop->index }}" attr-num="{{ @$loop->index }}" id="item-tabla-{{ @$loop->index }}">
-                        <td>Condición de venta</td>
-                        <td>Ejemplo Condición QB1</td>
-                        <td>Crédito</td>
-                        <td class='acciones'>
-                            <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ @$loop->index }});' > <i class="fa fa-trash-o" aria-hidden="true"></i> </span> 
-                        </td>
-                    </tr>
-                    <tr class="item-tabla item-index-{{ @$loop->index }}" index="{{ @$loop->index }}" attr-num="{{ @$loop->index }}" id="item-tabla-{{ @$loop->index }}">
-                        <td>Método de pago</td>
-                        <td>Ejemplo Método QB1</td>
-                        <td>Transferencia</td>
-                        <td class='acciones'>
-                            <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ @$loop->index }});' > <i class="fa fa-trash-o" aria-hidden="true"></i> </span> 
-                        </td>
-                    </tr>
-                    <tr class="item-tabla item-index-{{ @$loop->index }}" index="{{ @$loop->index }}" attr-num="{{ @$loop->index }}" id="item-tabla-{{ @$loop->index }}">
-                        <td>Método de pago</td>
-                        <td>Ejemplo Método QB2</td>
-                        <td>Cheque</td>
-                        <td class='acciones'>
-                            <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ @$loop->index }});' > <i class="fa fa-trash-o" aria-hidden="true"></i> </span> 
-                        </td>
-                    </tr>
-                    <tr class="item-tabla item-index-{{ @$loop->index }}" index="{{ @$loop->index }}" attr-num="{{ @$loop->index }}" id="item-tabla-{{ @$loop->index }}">
-                        <td>Código de impuesto</td>
-                        <td>Ejemplo Código QB1</td>
-                        <td>S103 - Ventas locales de servicios con derecho a crédito al 13%</td>
-                        <td class='acciones'>
-                            <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ @$loop->index }});' > <i class="fa fa-trash-o" aria-hidden="true"></i> </span> 
-                        </td>
-                    </tr>
-                </tbody>
-              </table>
-            </div>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+          <div class="form-group col-md-12">
+            <h3>
+              Métodos de pago
+            </h3>
+          </div>
+          
+          <div class="form-group col-md-12">
+            <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
+              <thead class="thead-dark">
+                <tr>
+                  <th>QuickBooks</th>
+                  <th>eTax</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="item-tabla item-index-0">
+                  <td>Valor por defecto</td>
+                  <td>
+                    <select id="medio_pago" name="payment_type" class="form-control" required>
+                      <option value="01" selected>Efectivo</option>
+                      <option value="02">Tarjeta</option>
+                      <option value="03">Cheque</option>
+                      <option value="04">Transferencia-Depósito Bancario</option>
+                      <option value="05">Recaudado por terceros</option>
+                      <option value="99">Otros</option>
+                    </select>
+                  </td>
+                </tr>
+                @foreach($paymentMethods as $method)
+                  <tr class="item-tabla item-index-{{ $loop->index }}">
+                    <td>{{ $method->Name }}</td>
+                    <td>
+                      <select id="medio_pago" name="payment_type" class="form-control" required>
+                        <option value="01" selected>Efectivo</option>
+                        <option value="02">Tarjeta</option>
+                        <option value="03">Cheque</option>
+                        <option value="04">Transferencia-Depósito Bancario</option>
+                        <option value="05">Recaudado por terceros</option>
+                        <option value="99">Otros</option>
+                      </select>
+                    </td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="form-group col-md-12">
+            <h3>
+              Códigos de impuesto
+            </h3>
+          </div>
+          
+          <div class="form-group col-md-12">
+            <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
+              <thead class="thead-dark">
+                <tr>
+                  <th>QuickBooks</th>
+                  <th>Código eTax</th>
+                  <th>Categoría Hacienda</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="item-tabla item-index-0">
+                  <td>Valor por defecto</td>
+                  <td>
+                    <select class="form-control select-search tipo_iva" id="tipo_iva">
+                      <?php
+                        $codigoDefecto = $company->default_vat_code;
+                        $preselectos = array();
+                        foreach($company->repercutidos as $repercutido){
+                          $preselectos[] = $repercutido->id;
+                        }
+                      ?>
+                      @if(@$company->repercutidos[0]->id)
+                        @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+                            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}" 
+                            {{ $tipo['code'] == $codigoDefecto ? 'selected' : '' }}  >{{ $tipo['name'] }}</option>
+                        @endforeach
+                        <option class="mostrarTodos" value="1">Mostrar Todos</option>
+                      @else
+                        @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+                         @if(@$document_type == '09')
+                            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ $tipo['code'] !== 'B150' ? 'hidden' : '' }}"
+                            {{ $tipo['code'] == $codigoDefecto ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
+                         @else
+                            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"
+                            {{ $tipo['code'] == $codigoDefecto ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
+                         @endif
+                        @endforeach
+                      @endif
+                    </select>
+                  </td>
+                  <td>
+                    <select class="form-control" id="tipo_producto" >
+                      @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
+                        <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
+                      @endforeach
+                    </select>
+                  </td>
+                </tr>
+                @foreach($taxRates as $tax)
+                  <tr class="item-tabla item-index-{{ $loop->index }}">
+                    <td>{{ $tax->Name }}</td>
+                    <td>
+                      <select class="form-control select-search tipo_iva" id="tipo_iva">
+                        @if(@$company->repercutidos[0]->id)
+                          @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+                              <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}"  
+                            {{ $tipo['code'] == $codigoDefecto ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
+                          @endforeach
+                          <option class="mostrarTodos" value="1">Mostrar Todos</option>
+                        @else
+                          @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
+                           @if(@$document_type == '09')
+                              <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ $tipo['code'] !== 'B150' ? 'hidden' : '' }}" 
+                              {{ $tipo['code'] == $codigoDefecto ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
+                           @else
+                              <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select" 
+                              {{ $tipo['code'] == $codigoDefecto ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
+                           @endif
+                          @endforeach
+                        @endif
+                      </select>
+                    </td>
+                    <td>
+                      <select class="form-control" id="tipo_producto" >
+                        @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
+                          <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
+                        @endforeach
+                      </select>
+                    </td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
           </div>
 
-        </div>
-
-        <button id="btn-submit" type="submit" class="hidden">Guardar</button>
+        <button id="btn-submit" class="btn btn-primary" type="submit" class="">Guardar variables</button>
         
       </form> 
   </div>  
@@ -123,7 +211,20 @@
 @endsection 
 
 @section('footer-scripts')
-  <script>
-    
-  </script>
+<script>
+    $( document ).ready(function() {
+      $('#tipo_iva').on('select2:selecting', function(e){
+        var selectBox = document.getElementById("tipo_iva");
+        if(e.params.args.data.id == 1){
+           $.each($('.tipo_iva_select'), function (index, value) {
+            $(value).removeClass("hidden");
+          })
+           $('.mostrarTodos').addClass("hidden");
+           e.preventDefault();
+        }
+
+      });
+
+    }); 
+</script>
 @endsection

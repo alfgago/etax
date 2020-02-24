@@ -193,13 +193,13 @@ class CorbanaController extends Controller
             
             $TIPO_SERV = $factura['TIPO_SERV'] ?? 'B';
             
-            $TIPO_PAGO = $factura['TIPO_PAGO'] ?? 'D'; //Usan E, T, D, Q, etc
+            $TIPO_PAGO = $factura['MODO_PAGO'] ?? 'D'; //Usan E, T, D, Q, etc
             $metodoPago = "04"; //Default transferencia
-            if($TIPO_PAGO == 'E'){
+            if($TIPO_PAGO == 'E' || $TIPO_PAGO == 'C'){
                 $metodoPago = '01';
             }else if($TIPO_PAGO == 'T'){
                 $metodoPago = '02';
-            }else if($TIPO_PAGO == 'Q' || $TIPO_PAGO == 'C'){
+            }else if($TIPO_PAGO == 'Q'){
                 $metodoPago = '03';
             }
             

@@ -1,7 +1,7 @@
 @extends('layouts/app')
 
 @section('title')
-    Perfil de empresa: {{ currentCompanyModel()->name }}
+    Integración - QuickBooks
 @endsection
 
 @section('breadcrumb-buttons')
@@ -98,7 +98,7 @@
         <div class="col-sm-9">
           <div class="tab-content">       
 						
-			<form method="POST" action="/quickbooks/guardar-config/{{ currentCompanyModel()->id }}">
+    		<form method="POST" action="/quickbooks/guardar-config/{{ currentCompanyModel()->id }}">
 			
     			  @csrf
     			  
@@ -120,26 +120,49 @@
     			    </div>
     			    
     			    <div class="form-group col-md-12">
-    			      <label for="integration_id">¿Qué versión de QuickBooks utiliza?</label>
-    			      <select class="form-control" name="integration_id" id="integration_id" required>
-    			        <option value="2" selected>Online</option>
-    			        <option value="3" >Escritorio</option>
-    			      </select>
+    			      <h3>
+    			        Autenticación
+    			      </h3>
     			    </div>
     			    
     			    <div class="form-group col-md-12">
-    			      <label for="api_key">Clave API QuickBooks</label>
-    			      <input class="form-control" name="api_key" type="text" placeholder="Clave API">
-    			      <div class="description">
-    			          ¿No sabe cómo obtener su clave de API? <a href="#">Haga clic aquí</a>
-    			      </div>
+    			      <label for="qb_type">¿Qué versión de QuickBooks utiliza?</label>
+    			      <select class="form-control" name="qb_type" id="qb_type" required>
+    			        <option value="qbo" selected>Online</option>
+    			        <option value="qbd" >Escritorio</option>
+    			      </select>
+    			    </div>
+    			    
+    			    <div class="form-group col-md-6">
+    			      <label for="authorization_code">Clave de autenticación</label>
+    			      <input class="form-control" name="" type="text" placeholder="Presione el botón de autenticar" disabled value="{{ $qb->authorization_code }}">
+    			    </div>
+    			    
+    			    <div class="form-group col-md-6">
+    			      <label for="realm_id">Código de instancia QB</label>
+    			      <input class="form-control" name="" type="text" placeholder="Presione el botón de autenticar" disabled value="{{ isset($qb->realm_id) ? decrypt($qb->realm_id) : '' }}">
+    			    </div>
+    			    
+    			    <div class="form-group col-md-12">
+    			     @if( isset($qb->authorization_code) )
+    			          <a style="background: #bbb;  border: 0;" class="btn btn-primary btn-success" href="{{ $authUrl }}">Re-autenticar Quickbooks</a>
+    			          <p style="color: green;">Ya se encuentra autorizado correctamente. No es necesario re-autenticar.</p>
+    			     @else
+    			         <a style="background: #4CAF50;  border: 0;" class="btn btn-primary btn-success" href="{{ $authUrl }}">Autenticar Quickbooks</a>
+    			     @endif
+    			    </div>
+			  
+    			    <div class="form-group col-md-12">
+    			      <h3>
+    			        Funcionalidades
+    			      </h3>
     			    </div>
     			    
     			    <div class="form-group col-md-6">
     			      <label for="invoice_from">¿Desea emitir sus facturas utilizando QuickBooks o eTax?</label>
     			      <select class="form-control" name="invoice_from" id="invoice_from" required>
-    			        <option value="1" selected>eTax</option>
-    			        <option value="2" >QuickBooks</option>
+    			        <option value="etax" selected>eTax</option>
+    			        <option value="qb" >QuickBooks</option>
     			      </select>
     			    </div>
     			    
@@ -174,7 +197,8 @@
     			        <option value="0" >No</option>
     			      </select>
     			    </div>
-    			    
+    			       
+    			        
     			    <button id="btn-submit" type="submit" class="hidden btn btn-primary">Guardar información</button>          
     			    
     			  </div>

@@ -622,7 +622,7 @@ class CalculatedTax extends Model
             
             $currBill = $billItems[$i]->bill;
             if( !$currBill->is_void && $currBill->is_authorized && $currBill->is_code_validated &&
-                ( $singleBill || $currBill->accept_status == 1 ) && $currBill->hide_from_taxes == false ) {
+                ( $singleBill || $currBill->accept_status != 2 ) && $currBill->hide_from_taxes == false ) {
             
               if( $currBill->currency == 'CRC' ) {
                 $currBill->currency_rate = 1;
