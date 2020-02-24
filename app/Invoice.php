@@ -1139,11 +1139,11 @@ class Invoice extends Model
 
     }
 
-    public function setNoteData($invoiceReference, $requestItems = null, $noteType = null, $request = []) {
+    public function setNoteData($invoiceReference, $requestItems = null, $noteType = null, $request = [], $company = false) {
         try {
             $noteType = $noteType ?? '03';
-            $this->document_key = getDocumentKey($noteType, false, $this->reference_number);
-            $this->document_number = getDocReference($noteType, false, $this->reference_number);
+            $this->document_key = getDocumentKey($noteType, $company, $this->reference_number);
+            $this->document_number = getDocReference($noteType, $company, $this->reference_number);
             $this->sale_condition = $invoiceReference->sale_condition;
             $this->payment_type = $invoiceReference->payment_type;
             $this->retention_percent = $invoiceReference->retention_percent;
@@ -1230,7 +1230,8 @@ class Invoice extends Model
 
         } catch (\Exception $e) {
             Log::error('Error al crear factura: '.$e->getMessage());
-            return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
+            return false;
+            //return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
         }
     }
 

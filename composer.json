@@ -26,18 +26,19 @@
         "league/flysystem-aws-s3-v3": "^1.0",
         "lindelea/laravel-aws-elb-support": "^1.4",
         "maatwebsite/excel": "^3.1",
+        "morrislaptop/laravel-queue-clear": "~1.0",
         "mpociot/laravel-apidoc-generator": "^3.10",
         "nunomaduro/collision": "^3.0",
         "oliuz/teamwork": "^5.3",
         "orchestra/parser": "^3.8",
         "potelo/laravel-block-bots": "^0.1.5",
         "predis/predis": "^1.1",
+        "quickbooks/v3-php-sdk": "5.3.4",
+        "spatie/laravel-activitylog": "*",
         "spatie/laravel-honeypot": "^1.3",
         "spatie/laravel-permission": "^2.37",
         "yajra/laravel-datatables-buttons": "^4.6",
-        "yajra/laravel-datatables-oracle": "~9.2",
-        "spatie/laravel-activitylog": "*",
-        "morrislaptop/laravel-queue-clear": "~1.0"
+        "yajra/laravel-datatables-oracle": "~9.2"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",

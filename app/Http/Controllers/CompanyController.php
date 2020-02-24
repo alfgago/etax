@@ -376,6 +376,7 @@ class CompanyController extends Controller {
 
         $company->default_currency = $request->default_currency;
         $company->default_invoice_notes = $request->default_invoice_notes;
+        $company->payment_notes = $request->payment_notes;
         $company->default_vat_code = $request->default_vat_code;
         $company->last_document = $request->last_document;
         $company->last_invoice_ref_number = $request->last_document ? getInvoiceReference($request->last_document) : 0;

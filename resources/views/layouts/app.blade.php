@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<?php $version = "6.41"; ?>
+<?php $version = "6.45"; ?>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -156,9 +156,13 @@
     <script type="text/javascript">
         $(document).keypress(
           function(event){
-            if (event.which == '13') {
-              console.log('Acción de \"Enter\" bloqueada por seguridad.');
-              event.preventDefault();
+            if(document.activeElement.type != 'textarea'){
+              if (event.which == '13') {
+                console.log('Acción de \"Enter\" bloqueada por seguridad.');
+                event.preventDefault();
+              }
+            }else{
+              console.log("Allow enter for line break");
             }
         });
     

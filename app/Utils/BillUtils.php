@@ -19,6 +19,14 @@ class BillUtils
 
     public function streamPdf( $bill, $company )
     {
+        $path = "empresa-$company->id_number/facturas_compras/$bill->year/$bill->month/$bill->document_number.pdf";
+    	if ( Storage::exists($path)) {
+          $pdf = Storage::get($path);
+          if( isset($pdf) ){
+            return $pdf;
+          }
+        }
+        
         $pdf = PDF::loadView('Pdf/bill', [
             'data_bill' => $bill,
             'company' => $company
@@ -30,6 +38,14 @@ class BillUtils
 	
 	public function downloadPdf( $bill, $company )
     {
+        $path = "empresa-$company->id_number/facturas_compras/$bill->year/$bill->month/$bill->document_number.pdf";
+    	if ( Storage::exists($path)) {
+          $pdf = Storage::get($path);
+          if( isset($pdf) ){
+            return $pdf;
+          }
+        }
+        
         $pdf = PDF::loadView('Pdf/bill', [
             'data_bill' => $bill,
             'company' => $company

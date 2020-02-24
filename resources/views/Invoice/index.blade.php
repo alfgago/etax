@@ -88,8 +88,8 @@
               <th data-priority="5">Monto IVA</th>
               <th data-priority="4">Total</th>
               <th data-priority="4">F. Generada</th>
-              <th data-priority="1">Estado</th>
               <th data-priority="1">Acciones</th>
+              <th data-priority="1">Estado</th>
             </tr>
           </thead>
           <tbody>
@@ -132,8 +132,8 @@ $(function() {
       { data: 'iva_amount', name: 'iva_amount', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
       { data: 'total_real', name: 'total', class: "text-right" },
       { data: 'generated_date', name: 'generated_date' },
-      { data: 'hacienda_status', name: 'hacienda_status' },
       { data: 'actions', name: 'actions', orderable: false, searchable: false },
+      { data: 'hacienda_status', name: 'hacienda_status' },
     ],
     createdRow: function (row, data, index) {
       if(data.hide_from_taxes){

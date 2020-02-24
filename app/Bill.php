@@ -391,7 +391,7 @@ class Bill extends Model
             $authorize = false;
         }
         
-        $bill->accept_status = 0;
+        //$bill->accept_status = 1; //17/02/2020. Esto se cambia para que por defecto queden como aceptadas. Usuario debe poder rechazar luego si quisiera
         $bill->hacienda_status = "03";
         $bill->payment_status = "01";
         $bill->generation_method = $metodoGeneracion;
@@ -399,7 +399,7 @@ class Bill extends Model
         $bill->is_code_validated = false;
         
         if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML" ) {
-            $bill->accept_status = 0;
+            //$bill->accept_status = 1; //17/02/2020. Esto se cambia para que por defecto queden como aceptadas
             $bill->hacienda_status = "01";
         }
         
@@ -503,6 +503,14 @@ class Bill extends Model
         $lineas = $arr['DetalleServicio']['LineaDetalle'];
         if( array_key_exists( 'NumeroLinea', $lineas ) ) {
             $lineas = [$arr['DetalleServicio']['LineaDetalle']];
+        }
+        
+        //Si es Corbana, va a poner la sucursal a la que recibe la factura. Varia dependiendo del email de recepcion
+        try{
+          $correoRecepcion = array_key_exists('Receptor', $arr) ? $arr['Receptor']['CorreoElectronico'] : null;
+          $bill->setRegionCorbana($correoRecepcion);
+        }catch(\Exception $e){
+          Log::error($e);
         }
         
         $bill->save();
@@ -676,6 +684,30 @@ class Bill extends Model
         return $path;
         
     }
+    
+    
+    public static function storePDF($bill, $file) {
+        
+        try{
+          $cedulaEmpresa = $bill->company->id_number;
+          //$cedulaProveedor = $bill->provider->id_number;
+          $consecutivoComprobante = $bill->document_number;
+          
+          if ( Storage::exists("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/$consecutivoComprobante.pdf")) {
+              Storage::delete("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/$consecutivoComprobante.pdf");
+          }
+          
+          $path = \Storage::putFileAs(
+              "empresa-$cedulaEmpresa/facturas_compras", $file, "$bill->year/$bill->month/$consecutivoComprobante.pdf"
+          );
+          
+        }catch( \Throwable $e ){
+          Log::error( 'Error al guardar el PDF recibido: ' . $e->getMessage() );
+        }
+        
+        return $path;
+        
+    }
 
     public static function storeXMLError($cedulaEmpresa, $file) {
         
@@ -790,7 +822,7 @@ class Bill extends Model
           $bill->provider_zip = $data['zipProveedor'] ?? null;
           
           if($data['metodoGeneracion'] == 'Email' || $data['metodoGeneracion'] == 'XML') {
-            $bill->accept_status = 0;
+            //$bill->accept_status = 1; //17/02/2020. Esto se cambia para que por defecto queden como aceptadas
             $bill->hacienda_status = "01";
           }else{
             if( $data['acceptStatus'] ){
@@ -979,6 +1011,25 @@ class Bill extends Model
         
     }
       
+      
+    public function setRegionCorbana($email){
+      
+      $this->sucursal = null;
+      if($email ==  "facturaelectronica@corbana.co.cr"){
+        $this->sucursal = "01";  
+      }
+      if($email ==  "corbanaguapiles@corbana.co.cr"){
+        $this->sucursal = "02";  
+      }
+      if($email ==  "fincasanpablo@corbana.co.cr"){
+        $this->sucursal = "04";  
+      }
+      if($email ==  "agroforestales@corbana.co.cr"){
+        $this->sucursal = "05";  
+      }
+      
+    }
+    
     
     
 }

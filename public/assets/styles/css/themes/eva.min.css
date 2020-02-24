@@ -17657,6 +17657,16 @@ table#invoice-table td {
   vertical-align: middle !important;
 }
 
+.toggle-item-text {
+  font-size: 11.5px;
+  padding-left: .5rem;
+  color: #333;
+}
+
+.dropdown-item {
+  display: block !important;
+}
+
 div.blue {
   background: #3184BF;
   border-radius: 0.8em;
@@ -38873,6 +38883,16 @@ table#invoice-table {
 table#bill-table td,
 table#invoice-table td {
   vertical-align: middle !important;
+}
+
+.toggle-item-text {
+  font-size: 11.5px;
+  padding-left: .5rem;
+  color: #333;
+}
+
+.dropdown-item {
+  display: block !important;
 }
 
 div.blue {

@@ -196,6 +196,44 @@
             "time": "2019-08-23T14:30:33+00:00"
         },
         {
+            "name": "quickbooks/v3-php-sdk",
+            "version": "5.3.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/intuit/QuickBooks-V3-PHP-SDK.git",
+                "reference": "3fe63d10b9a655d350526de69c98c9d9f9bc9d44"
+            },
+            "description": "The Official PHP SDK for QuickBooks Online Accounting API",
+            "type": "library",
+            "keywords": ["api", "http", "rest", "quickbooks", "smallbusiness"],
+            "homepage": "http://developer.intuit.com",
+            "require": {
+                "php": ">=5.6.0",
+                "ext-mbstring": "*",
+                "ext-dom": "*"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.0 || ^6.0 || ^7.0"
+            },
+            "autoload": {
+                "psr-4": {
+                    "QuickBooksOnline\\API\\": "src/"
+                }
+            },
+            "license": "Apache-2.0",
+            "authors": [
+                {
+                    "name": "hlu2",
+                    "email": "Hao_Lu@intuit.com"
+                }
+            ],
+            "suggest": {
+                "ext-curl": "Uses Curl to make HTTP Requests",
+                "guzzlehttp/guzzle": "Uses Guzzle to make HTTP Requests"
+            },
+            "time": "2019-08-23T14:30:33+00:00"
+        },
+        {
             "name": "cakephp/chronos",
             "version": "1.2.8",
             "source": {

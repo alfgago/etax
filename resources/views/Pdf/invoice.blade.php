@@ -130,7 +130,7 @@
             height: 40px;
         }
 
-        .currency }}otal {
+        .currency .total {
             background: #3333;
             width: 50%;
             text-align: center;
@@ -228,6 +228,9 @@
             break;
         }
     ?>
+    <table>
+        <h1 style="text-align: center; font-size: 23px; margin: 0 !important; line-height: 1;">{{ $documentType }}</h1>
+    </table>
     <table width="100%">
         <hr class="barra">
     </table>
@@ -358,7 +361,13 @@
         </thead>
         <tbody>
             <td class="espacio-observaciones" style="vertical-align: top; padding-right: 15px; color: #444; width: 50%;">
-                {{ $data_invoice->description }}
+                @if( isset($data_invoice->description) )
+					<p>{!! nl2br(e($data_invoice->description)) !!}</p>
+                @endif
+                @if( isset($company->payment_notes) )
+                    <b style="margin: 1rem 0;color:#000;font-size: 15px;">Información de pago</b>
+					<p>{!! nl2br(e($company->payment_notes)) !!}</p>
+                @endif
             </td>
             <td style="width: 50%;">
                 

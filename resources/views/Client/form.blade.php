@@ -167,7 +167,9 @@
     cambiarDireccion();
 
     $("#id_number").keyup(function() {
+      if( jQuery('#tipo_persona').val()!='E' ){
         $("#id_number").val(this.value.match(/[0-9]*/));
+      }
     });
     function validateEmail() {
         var email = $('#email').val();

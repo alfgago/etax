@@ -123,7 +123,8 @@ class BridgeHaciendaApi
     public function acceptInvoice(Bill $bill, $token) {
         try {
             $provider = $bill->provider;
-            $ref = currentCompanyModel()->last_rec_ref_number;
+            $ref = $bill->company->last_rec_ref_number;
+            Log::debug($bill->provider_id);
             ProcessReception::dispatch($bill->id, $provider->id, $token, $ref)
                 ->onConnection(config('etax.queue_connections'))->onQueue('receptions');
             return $bill;

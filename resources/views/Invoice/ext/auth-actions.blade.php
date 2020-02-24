@@ -1,3 +1,5 @@
+
+
 <form id="accept-form-{{ $id }}" class="inline-form" method="POST" action="/facturas-emitidas/confirmar-autorizacion/{{ $id }}" >
   @csrf
   @method('patch')

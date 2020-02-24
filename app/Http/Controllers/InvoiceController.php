@@ -2178,8 +2178,9 @@ class InvoiceController extends Controller
                 }
             }
             Log::info("Enviando facturas al job ProcessInvoicesExcel");
+            
             ProcessInvoicesExcel::dispatch($company)->onQueue('createinvoice');
-            //$this->guardarEnvioExcel($xlsInvoices);
+            
             return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
         } catch ( \Exception $e) {
             Log::error("Error en factura ENVIO MASIVO EXCEL:" . $e);

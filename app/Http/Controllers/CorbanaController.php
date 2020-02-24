@@ -25,8 +25,8 @@ class CorbanaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth', ['except' => ['sendInvoice','queryBills','queryInvoice']] );
-        $this->middleware('CheckSubscription', ['except' => ['sendInvoice','queryBills','queryInvoice']] );
+        $this->middleware('auth', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar']] );
+        $this->middleware('CheckSubscription', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar']] );
     }
     
     public function queryBills(Request $request) {
@@ -42,8 +42,7 @@ class CorbanaController extends Controller
             * Status 01: Aún no ha sido ingresado al sistema.
             */
             $bills = Bill::where('company_id', $company->id)
-                    ->where('is_authorized', true)
-                    ->where('is_code_validated', true)
+                    ->where('is_void', false)
                     ->where('status', '01')
                     ->limit(3)
                     ->with('items')->get();
@@ -57,7 +56,7 @@ class CorbanaController extends Controller
                 
                 $xml = $billUtils->downloadXml($bill, $company);
                 $bill->xml64 = isset($xml) ? base64_encode($xml) : null;
-                }           
+            }           
             if(isset($bills)){
                 return response()->json([
                     'mensaje' => $bills->count() . ' facturas',
@@ -79,7 +78,7 @@ class CorbanaController extends Controller
                                 ->with('items')
                                 ->with('company')
                                 ->first();
-            Log::debug(json_encode($invoice));
+            
             $cedula = $invoice->company->id_number;
             if( $cedula != "3101018968" && $cedula != "3101011989" && $cedula != "3101166930" && $cedula != "3007684555" && $cedula != "3130052102" && $cedula != "3101702429" ){
                 Log::warning("Error: ID de factura no le pertenece a Corbana");
@@ -164,6 +163,7 @@ class CorbanaController extends Controller
             }else if($TIPO_DOC == 'ND'){
                 $tipoDocumento = '02';
             }
+            $otherReference = $factura['NO_DOCU_REF'] ?? null;
             
             $partidaArancelaria = $factura['NO_DUA'] ?? null;
             if( isset($partidaArancelaria) ){
@@ -173,11 +173,13 @@ class CorbanaController extends Controller
             }
             
             //Define el numero de factura
-            $numeroReferencia = $factura['NO_DOCU'];
-            $numeroReferencia = floatval( mb_substr( $numeroReferencia, -8, null, 'UTF-8') );
+            //$numeroReferencia = $factura['NO_DOCU'];
+            //$numeroReferencia = floatval( mb_substr( $numeroReferencia, -8, null, 'UTF-8') );
+            $numeroReferencia = getNextRef($tipoDocumento, $company);
             $consecutivoComprobante = getDocReference($tipoDocumento, $company, $numeroReferencia);
             $claveFactura = getDocumentKey($tipoDocumento, $company, $numeroReferencia);
-            
+
+
             $invoice = Invoice::where('document_key', $claveFactura)
                                 ->where('company_id', $company->id)
                                 ->with('items')
@@ -191,13 +193,13 @@ class CorbanaController extends Controller
             
             $TIPO_SERV = $factura['TIPO_SERV'] ?? 'B';
             
-            $TIPO_PAGO = $factura['TIPO_PAGO'] ?? 'D'; //Usan E, T, D, Q, etc
+            $TIPO_PAGO = $factura['MODO_PAGO'] ?? 'D'; //Usan E, T, D, Q, etc
             $metodoPago = "04"; //Default transferencia
-            if($TIPO_PAGO == 'E'){
+            if($TIPO_PAGO == 'E' || $TIPO_PAGO == 'C'){
                 $metodoPago = '01';
             }else if($TIPO_PAGO == 'T'){
                 $metodoPago = '02';
-            }else if($TIPO_PAGO == 'Q' || $TIPO_PAGO == 'C'){
+            }else if($TIPO_PAGO == 'Q'){
                 $metodoPago = '03';
             }
             
@@ -304,6 +306,7 @@ class CorbanaController extends Controller
                         'tipoCambio' => $tipoCambio,
                         'totalDocumento' => $totalDocumento,
                         'totalNeto' => $totalNeto,
+                        'otherReference' => $otherReference,
                         /**** Empiezan datos lineas ****/
                         'cantidad' => $cantidad,
                         'precioUnitario' => $precioUnitario,
@@ -340,11 +343,21 @@ class CorbanaController extends Controller
             Log::debug($invoiceList);
             foreach($invoiceList as $fac){
                $invoice = $this->saveCorbanaInvoice($fac);
+               $company->setLastReference($tipoDocumento, $numeroReferencia, $consecutivoComprobante);
             }
             $invoice->load('items');
+            
+            $invoiceUtils = new \App\Utils\InvoiceUtils();
+            $pdf = $invoiceUtils->streamPdf($invoice, $invoice->company);
+            $basePDF = isset($pdf) ? base64_encode($pdf) : null;
+            $xml = $invoiceUtils->downloadXml($invoice, $invoice->company);
+            $baseXML = isset($xml) ? base64_encode($xml) : null;
+            
             return response()->json([
                 'mensaje' => 'Exito',
-                'factura' => $invoice
+                'factura' => $invoice,
+                'pdf64' => $basePDF,
+                'xml64' => $baseXML,
             ], 200);
         }catch(\Exception $e){
             Log::error("Error en Corbana" . $e);
@@ -411,7 +424,7 @@ class CorbanaController extends Controller
         }
         $invoice->total = $invoice->subtotal + $invoice->iva_amount - $descuentos;
         
-        $invoice->client_email = "alfgago@gmail.com";
+        //$invoice->client_email = "alfgago@gmail.com";
         $invoice->save();
         Log::info("CORBANA Enviada: " . $invoice);
         clearInvoiceCache($invoice);
@@ -425,6 +438,146 @@ class CorbanaController extends Controller
         return $invoice;  
     }
     
+    public function anularInvoice(Request $request)
+    {
+        try {
+            $apiHacienda = new BridgeHaciendaApi();
+            $tokenApi = $apiHacienda->login();
+            if ($tokenApi !== false) {
+                $factura = $request->factura[0];
+                $items = $request->lineas;
+    
+                //Busca la cedula de la empresa
+                $cedulaEmpresa = $this->parseCorbanaIdToCedula($factura['NO_CIA'], $factura['ACTIVIDAD']);
+                $company = Company::where('id_number', $cedulaEmpresa)->first();
+                $identificacionCliente = $factura['IDENTIFICACION'] ?? null;
+                
+                //Define el tipo de documento
+                $TIPO_DOC = $factura['TIPO_DOC'] ?? '01';
+                $tipoDocumento = '01';
+                if($TIPO_DOC == 'FA'){
+                    $tipoDocumento = '01';
+                    if($identificacionCliente == "000000000000000"){
+                        $tipoDocumento = "04";
+                    }
+                }else if($TIPO_DOC == 'NC'){
+                    $tipoDocumento = '03';
+                }else if($TIPO_DOC == 'ND'){
+                    $tipoDocumento = '02';
+                }
+                
+                $partidaArancelaria = $factura['NO_DUA'] ?? null;
+                if( isset($partidaArancelaria) ){
+                    $tipoDocumento = '09';
+                    $tipoPersona = "E";
+                    $partidaArancelaria = mb_substr( $partidaArancelaria, -12, null, 'UTF-8') ;
+                }
+                
+                //Define el numero de factura
+                $numeroReferencia = $factura['NO_DOCU'];
+                $numeroReferencia = floatval( mb_substr( $numeroReferencia, -8, null, 'UTF-8') );
+                $consecutivoComprobante = getDocReference($tipoDocumento, $company, $numeroReferencia);
+                $claveFactura = getDocumentKey($tipoDocumento, $company, $numeroReferencia);
+                Log::info("CORBANA: Enviando nota de credito de factura $claveFactura de empresa $company->id_number");
+                
+                $invoice = Invoice::where('document_key', $claveFactura)
+                            ->where('company_id', $company->id)
+                            ->with('items')
+                            ->first();
+               
+                $note = new Invoice();
+                //Datos generales y para Hacienda
+                $note->company_id = $company->id;
+                $note->document_type = "03";
+                $note->hacienda_status = '01';
+                $note->payment_status = "01";
+                $note->payment_receipt = "";
+                $note->generation_method = "Corbana-Anula";
+                $note->reason = "Anular Factura";
+                $note->code_note = "01";
+                $note->reference_number = $company->last_note_ref_number + 1;
+                $note->save();
+                $noteData = $note->setNoteData($invoice, $invoice->items->toArray(), $note->document_type, $invoice, $company);
+                //Log::debug($noteData);
+                if (!empty($noteData)) {
+                    $apiHacienda->createCreditNote($noteData, $tokenApi);
+                }
+                $company->last_note_ref_number = $noteData->reference_number;
+                $company->last_document_note = $noteData->document_number;
+                $company->save();
+
+                clearInvoiceCache($invoice);
+                $user = auth()->user();
+                
+                return response()->json([
+                    'mensaje' => 'Exito',
+                    'factura' => $note
+                ], 200);
+            }
+
+        } catch ( \Exception $e) {
+            Log::error('Error al anular facturar -->'.$e);
+            return response()->json([
+                'mensaje' => 'Error' . $e->getMessage()
+            ], 200);
+        }
+        return response()->json([
+            'mensaje' => 'Error'
+        ], 200);
+
+    }
+    
+    public function aceptarRechazar(Request $request) {
+        try{
+            $apiHacienda = new BridgeHaciendaApi();
+            $tokenApi = $apiHacienda->login(false);
+            if ($tokenApi !== false) {
+                $bill = Bill::where('id', $request->id)
+                            ->with('items')
+                            ->with('company')
+                            ->first();
+                $haciendaStatus = $request->hacienda_status;
+                if( isset($bill) ){
+                    $company = $bill->company;
+                    $cedula = $company->id_number;
+                    if( $cedula != "3101018968" && $cedula != "3101011989" && $cedula != "3101166930" && $cedula != "3007684555" && $cedula != "3130052102" && $cedula != "3101702429" ){
+                        Log::warning("Error: ID de factura no le pertenece a Corbana");
+                        return response()->json([
+                            'mensaje' => 'Error: ID de factura no le pertenece a Corbana'
+                        ], 200);
+                    }
+                    foreach($bill->items as $item){
+                        $item->is_code_validated = true;
+                        $item->fixCategoria();
+                    }
+                    $bill->is_authorized = true;
+                    $bill->accept_status = true;
+                    $bill->is_code_validated = true;
+                    $bill->accept_status = $haciendaStatus;
+                    $bill->save();
+                    $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
+                    $company->save();
+                    $company->last_document_rec = getDocReference('05', $company, $company->last_rec_ref_number);
+                    $company->save();
+                    $apiHacienda->acceptInvoice($bill, $tokenApi);
+                    clearBillCache($bill);
+                    return response()->json([
+                        'mensaje' => 'Factura actualizada exitosamente'
+                    ], 200);  
+                }
+            }
+        }catch(\Exception $e){
+            Log::error("Error en Corbana" . $e);
+            return response()->json([
+                'mensaje' => 'Error ' . $e->getMessage()
+            ], 200);
+        }
+        
+        //Nunca deberia llegar a este return.
+        return response()->json([
+            'mensaje' => 'Factura no encontrada en eTax'
+        ], 200);
+    }
 
     /*
     01 = CORPORACION BANANERA NACIONAL SOCIEDAD ANONIMA	3101018968
