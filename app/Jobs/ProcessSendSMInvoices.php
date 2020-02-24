@@ -89,9 +89,15 @@ class ProcessSendSMInvoices implements ShouldQueue
                         //Datos de factura
                         $consecutivoComprobante = getDocReference($tipoDocumento, $company);
                         $claveFactura = getDocumentKey($tipoDocumento, $company);
-                        $company->last_invoice_ref_number = $company->last_invoice_ref_number+1;
-                        $company->last_document = $consecutivoComprobante;
-                        $refNumber = $company->last_invoice_ref_number;
+                        if ($tipoDocumento == '01') {
+                            $company->last_invoice_ref_number = $company->last_invoice_ref_number+1;
+                            $company->last_document = $consecutivoComprobante;
+                            $refNumber = $company->last_invoice_ref_number;
+                        }else if ($tipoDocumento == '03') {
+                            $company->last_note_ref_number = $company->last_note_ref_number+1;
+                            $company->last_document_note = $consecutivoComprobante;
+                            $refNumber = $company->last_note_ref_number;
+                        }
                         
                         $condicionVenta = '02';
                         $metodoPago = str_pad((int)$smInvoice['medio_pago'], 2, '0', STR_PAD_LEFT);
