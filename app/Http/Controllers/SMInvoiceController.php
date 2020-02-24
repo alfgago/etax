@@ -142,7 +142,7 @@ class SMInvoiceController extends Controller
 
         try {
             Log::debug('Creando job de envio de facturas SM.');
-            foreach ($invoiceList->chunk(50) as $facturas) {
+            foreach ($invoiceList->chunk(25) as $facturas) {
                 ProcessSendSMInvoices::dispatch($facturas, $companyId)->onQueue('bulk');
             }
         }catch( \Throwable $ex ){
