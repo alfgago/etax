@@ -76,6 +76,7 @@ class ProcessSendSMInvoices implements ShouldQueue
                     if( ! isset($existingInvoice) ){
                         $i++;
     
+                        $tipoDocumento = $fileType ?? '01';
                         //Datos de proveedor
                         $nombreCliente = $smInvoice['nombre_tomador'];
                         $identificacionCliente = ltrim($smInvoice['doc_identificacion'], '0') ?? null;
@@ -86,8 +87,8 @@ class ProcessSendSMInvoices implements ShouldQueue
                         $today = Carbon::parse( now('America/Costa_Rica') );
                     
                         //Datos de factura
-                        $consecutivoComprobante = getDocReference('01', $company);
-                        $claveFactura = getDocumentKey('01', $company);
+                        $consecutivoComprobante = getDocReference($tipoDocumento, $company);
+                        $claveFactura = getDocumentKey($tipoDocumento, $company);
                         $company->last_invoice_ref_number = $company->last_invoice_ref_number+1;
                         $company->last_document = $consecutivoComprobante;
                         $refNumber = $company->last_invoice_ref_number;
@@ -107,7 +108,6 @@ class ProcessSendSMInvoices implements ShouldQueue
                         $idMoneda = 'CRC';
                         $tipoCambio = $smInvoice['tipocambio'] ?? 1;
                         $totalDocumento = $smInvoice['total'];
-                        $tipoDocumento = $fileType ?? '01';
                         
                         //Datos de linea
                         $codigoProducto = $smInvoice['num_objeto'] ?? 'N/A';
