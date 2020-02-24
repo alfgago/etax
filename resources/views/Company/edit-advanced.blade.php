@@ -284,9 +284,16 @@
 						      </select>
 						    </div>
 						    
-						     <div class="form-group col-md-12">
+						    <div class="form-group col-md-12">
 						      <label for="default_invoice_notes">Notas por defecto</label>
-						      <textarea class="form-control" name="default_invoice_notes" id="default_invoice_notes"  maxlength="190" >{{ @$company->default_invoice_notes }}</textarea>
+						      <textarea class="form-control" name="default_invoice_notes" id="default_invoice_notes" rows="6"  maxlength="190" >{{ @$company->default_invoice_notes }}</textarea>
+						      <div class="description">Este campo aparecerá tanto en XML como en PDF de las facturas enviadas. Máximo de 190 caracteres.</div>
+						    </div>
+						    
+						    <div class="form-group col-md-12">
+						      <label for="payment_notes">Información de pago</label>
+						      <textarea class="form-control" name="payment_notes" id="payment_notes" rows="6"  maxlength="1024" >{{ @$company->payment_notes }}</textarea>
+						      <div class="description">Este campo aparecerá únicamente en el PDF de las facturas enviadas. Máximo de 1024 caracteres.</div>
 						    </div>
 						    
 						    <button id="btn-submit" type="submit" class="hidden btn btn-primary">Guardar información</button>          

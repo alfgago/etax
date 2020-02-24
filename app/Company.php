@@ -511,5 +511,35 @@ class Company extends Model {
         return $errors = false;
         
     }
+    
+    
+    
+    
+    public function setLastReference($type, $ref, $consecutivo = null){
+        if( !$consecutivo ){
+            $consecutivo = $ref;
+        }
+        if ($type == '01') {
+            $this->last_invoice_ref_number = $ref;
+            $this->last_document = $ref;
+        }
+        if ($type == '02') {
+            $this->last_debit_note_ref_number = $ref;
+        }
+        if ($type == '03') {
+            $this->last_note_ref_number = $ref;
+            $this->last_document_note = $ref;
+        }
+        if ($type == '04') {
+            $this->last_ticket_ref_number = $ref;
+        }
+        if ($type == '08') {
+            $this->last_invoice_pur_ref_number = $ref;
+        }
+        if ($type == '09') {
+            $this->last_invoice_exp_ref_number = $ref;
+        }
+        $this->save();
+    }
 
 }

@@ -103,7 +103,12 @@ class ClientController extends Controller
         $cliente->company_id = $company->id;
       
         $cliente->tipo_persona = $request->tipo_persona;
-        $cliente->id_number = preg_replace("/[^0-9]/", "", $request->id_number );
+        if($cliente->tipo_persona == "E" || $cliente->tipo_persona == "O"){
+            $identificacionCliente = $request->id_number;
+        }else{
+            $identificacionCliente = preg_replace("/[^0-9]/", "", $request->id_number );
+        }
+        $cliente->id_number = $identificacionCliente;
         
         $cliente->code = $request->code;
         $cliente->first_name = $request->first_name;
@@ -201,7 +206,13 @@ class ClientController extends Controller
         $this->authorize('update', $cliente);
       
         $cliente->tipo_persona = $request->tipo_persona;
-        $cliente->id_number = preg_replace("/[^0-9]/", "", $request->id_number );
+        $cliente->tipo_persona = $request->tipo_persona;
+        if($cliente->tipo_persona == "E" || $cliente->tipo_persona == "O"){
+            $identificacionCliente = $request->id_number;
+        }else{
+            $identificacionCliente = preg_replace("/[^0-9]/", "", $request->id_number );
+        }
+        $cliente->id_number = $identificacionCliente;
         $cliente->code = $request->code;
         $cliente->first_name = $request->first_name;
         $cliente->last_name = $request->last_name;
@@ -225,7 +236,7 @@ class ClientController extends Controller
         $cliente->fullname = $cliente->toString();
       
         $cliente->save();
-      $user = auth()->user();
+        $user = auth()->user();
         Activity::dispatch(
             $user,
             $cliente,

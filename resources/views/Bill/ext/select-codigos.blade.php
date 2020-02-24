@@ -12,9 +12,15 @@
         @endforeach
         <option class="mostrarTodos" value="1">Mostrar Todos</option>
       @else
-        @foreach ( $cat as $tipo )
-        <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  {{$item->iva_type == $tipo->code ? 'selected' : ''}}  is_identificacion_plena="{{ $tipo['is_identificacion_plena'] }}">{{ $tipo['name'] }}</option>
-        @endforeach
+        <?php if(currentCompanyModel()->id==1110 || currentCompanyModel()->id==437) { ?>
+          @foreach ( $cat as $tipo )
+            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  {{$item->iva_type == $tipo->code ? 'selected' : ''}}  is_identificacion_plena="{{ $tipo['is_identificacion_plena'] }}">{{ \App\SMInvoice::parseFormatoSM($tipo->code) }}</option>
+          @endforeach
+        <?php }else{ ?>
+          @foreach ( $cat as $tipo )
+            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  {{$item->iva_type == $tipo->code ? 'selected' : ''}}  is_identificacion_plena="{{ $tipo['is_identificacion_plena'] }}">{{ $tipo['name'] }}</option>
+          @endforeach
+        <?php } ?>
       @endif
     </select>
 </div>

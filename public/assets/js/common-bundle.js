@@ -532,11 +532,11 @@ toastr.options = {
           subtotal = subtotal - discount;
       }
 
-      $('#item_subtotal').val( subtotal.toFixed(2) );
+      $('#item_subtotal').val( subtotal.toFixed(5) );
       if( $('#porc_iva').val().length ){
         monto_iva = parseFloat(subtotal * porc_iva / 100);
-        $('#item_iva_amount').val( monto_iva.toFixed(2) );
-        $('#item_total').val( (subtotal + monto_iva).toFixed(2) );
+        $('#item_iva_amount').val( monto_iva.toFixed(5) );
+        $('#item_total').val( (subtotal + monto_iva).toFixed(5) );
       }else{
         $('#item_total').val( subtotal );
       }
@@ -573,11 +573,11 @@ toastr.options = {
         subtotal = subtotal - discount;
       }
 
-      $('#item_subtotal').val( subtotal.toFixed(2));
+      $('#item_subtotal').val( subtotal.toFixed(5));
       if( monto_iva ){
-        $('#item_total').val( (subtotal + monto_iva).toFixed(2) );
+        $('#item_total').val( (subtotal + monto_iva).toFixed(5) );
       }else{
-        $('#item_total').val( subtotal.toFixed(2) );
+        $('#item_total').val( subtotal.toFixed(5) );
       }
     }else{
       $('#item_subtotal').val( 0 );
@@ -1096,7 +1096,7 @@ toastr.options = {
 
   window.fixComas = function( numero ) {
     numero = parseFloat(numero);
-    return numero.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2});
+    return numero.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 5});
   }
 
   window.toggleRetencion = function() {
@@ -1347,7 +1347,14 @@ $( document ).ready(function() {
       presetPorcentaje();
       calcularSubtotalItem();
       togglePorcentajeIdentificacionPlena();
-      if( $('#tipo_iva').val().charAt(0) == 'S' ) {  $('#unidad_medicion').val('Sp') } else{ $('#unidad_medicion').val('Unid') }
+      if( $('#tipo_iva').val() ){
+        if( $('#tipo_iva').val().charAt(0) == 'S' ) {  
+          $('#unidad_medicion').val('Sp');
+        } else{ 
+          $('#unidad_medicion').val('Unid'); 
+        }
+      }
+      
     });
 
     $('#tipo_producto').on('change', function(){

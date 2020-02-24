@@ -27,9 +27,8 @@
                   <option value="4">Tiquete electrónico</option>
                   <option value="3">Notas de crédito</option>
                   <option value="2">Notas de debito</option>
-                  <option value="8">Factura de compra</option>
-                  <option value="9">Factura de exportación</option>
-                  <option value="0">Documentos eliminados</option>
+                  <option value="98">Documentos rechazados</option>
+                  <option class="hidden" value="0">Documentos eliminados</option>
               </select>
             </div>
           </div>
@@ -85,8 +84,8 @@
               <th data-priority="5">Monto IVA</th>
               <th data-priority="4">Total</th>
               <th data-priority="6">F. Generada</th>
-              <th data-priority="6">Estado</th>
               <th data-priority="1">Acciones</th>
+              <th data-priority="6">Estado</th>
             </tr>
           </thead>
           <tbody>
@@ -127,8 +126,8 @@ $(function() {
       { data: 'monto_iva', name: 'iva_amount', class: "text-right" },
       { data: 'total', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
       { data: 'generated_date', name: 'generated_date' },
-      { data: 'hacienda_status', name: 'hacienda_status' },
       { data: 'actions', name: 'actions', orderable: false, searchable: false },
+      { data: 'hacienda_status', name: 'hacienda_status' },
     ],
     createdRow: function (row, data, index) {
       if(data.hide_from_taxes){
@@ -181,6 +180,24 @@ function confirmEnvioAceptacion( id ) {
   
 }
 
+
+  
+function confirmDecline( id ) {
+  var formId = "#decline-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea rechazar la factura?',
+    text: "Al rechazarla, se enviará el mensaje de rechazo a Hacienda.",
+    type: 'warning',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero eliminarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
 
 function confirmAnular( id ) {
   var formId = "#anular-form-"+id;

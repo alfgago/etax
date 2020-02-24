@@ -29,57 +29,57 @@ class RecurringInvoice extends Model
         return $invoices;
     }
 
-    public function proximo_envio($generatedDate){
-    	$generatedDate = Carbon::parse($generatedDate);
-    	$next_send = $generatedDate;
+    public function proximo_envio($dtString){
+    	$generatedDate = Carbon::parse($dtString);
+    	$nextSend = Carbon::parse($dtString)->addMonth(1);
 	    if($this->frecuency == "1"){
-			$options = $this->options;
+			/*$options = $this->options;
 	    	if($generatedDate->dayOfWeek >= $this->options){
 	    		$options = $options + 7;
 	    	}
-	    	$addDay = $options - $generatedDate->dayOfWeek;
-    		$next_send = $generatedDate->addDays($addDay);
+	    	$addDay = $options - $generatedDate->dayOfWeek;*/
+    		$nextSend = $generatedDate->addDays(7);
 	    }
-	    if($this->frecuency == "2"){
+	    else if($this->frecuency == "2"){
 	    	$options = explode(",",$this->options);
 	    	$new_date1 = $options[0]."/".$generatedDate->month."/".$generatedDate->year;
 	    	$new_date2 = $options[1]."/".$generatedDate->month."/".$generatedDate->year;
 			$new_date1 = Carbon::createFromFormat('d/m/Y', $new_date1);
 			$new_date2 = Carbon::createFromFormat('d/m/Y', $new_date2);
+			if($options[1] == "31"){
+				if($new_date2->day == "1"){
+					$nextSend = $generatedDate->addDay(-1);
+				}
+			}
 			if($new_date1 <  $generatedDate){
 				if($new_date2 <  $generatedDate){
 	    			$new_date1 = $new_date1->addMonth(1);
-	    			$next_send = $new_date1;
+	    			$nextSend = $new_date1;
 				}else{
-	    			$next_send = $new_date2;
-				}
-			}
-			if($options[1] == "31"){
-				if($new_date2->day == "1"){
-					$next_send = $next_send->addDay(-1);
+	    			$nextSend = $new_date2;
 				}
 			}
 	    }
-	   	if($this->frecuency == "3"){
-	   		$new_date = $this->options."/".$generatedDate->month."/".$generatedDate->year;
+	   	else if($this->frecuency == "3"){
+	   		/*$new_date = $this->options."/".$generatedDate->month."/".$generatedDate->year;
 			$new_date = Carbon::createFromFormat('d/m/Y', $new_date);
 			if($new_date <  $generatedDate){
 	    		$new_date = $new_date->addMonth(1);
-			}
-			$next_send = $new_date;
-	       }
-	    if($this->frecuency == "4"){
-	    	$new_date = $this->options."/".$generatedDate->year;
+			}*/
+			$nextSend = $generatedDate->addMonth(1);
+	    }
+	    else if($this->frecuency == "4"){
+	    	/*$new_date = $this->options."/".$generatedDate->year;
 			$new_date = Carbon::createFromFormat('d/m/Y', $new_date);
 			if($new_date <  $generatedDate){
 	    		$new_date = $new_date->addYear(1);
-			}
-			$next_send = $new_date;
+			}*/
+			$nextSend = $generatedDate->addYear(1);
 	    }
-	    if($this->frecuency == "5"){
-    		$next_send = $generatedDate->addDays($this->options);
+	    else if($this->frecuency == "5"){
+    		$nextSend = $generatedDate->addDays($this->options);
 	    }
-        return $next_send;
+        return $nextSend;
     }
 
     public function tipo(){

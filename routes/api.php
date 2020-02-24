@@ -20,4 +20,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::prefix('v1')->group(function() {
 	Route::post('notificaciones', 'NotificationController@create');
 });
+
 Route::post('email-facturas', 'EmailController@receiveEmailXML');
+
+Route::post('corbana-envio', 'CorbanaController@sendInvoice');
+Route::post('corbana-anular', 'CorbanaController@anularInvoice');
+Route::get('corbana-aceptar-rechazar/{id}', 'CorbanaController@aceptarRechazar');
+Route::get('corbana-query-invoice/{id}', 'CorbanaController@queryInvoice');
+Route::get('corbana-query-bills/{pCia}/{pAct}', 'CorbanaController@queryBills');

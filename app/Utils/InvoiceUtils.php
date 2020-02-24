@@ -434,8 +434,15 @@ class InvoiceUtils
             $receptorCedulaType = $data['client_id_type'] ?? 'F';
             if($receptorCedulaType == 'F'){
                 $receptorCedulaType = 1;
+            }else if($receptorCedulaType == 'E'){
+                $receptorCedulaType = 5;    
             }
-
+            if($receptorCedulaType == 5){
+                $cedulaReceptor = $data['client_id_number'] ?? '';
+            }else{
+                $cedulaReceptor = $data['client_id_number'] ? str_pad(preg_replace("/[^0-9]/", "", $data['client_id_number']), 9, '0', STR_PAD_LEFT) : '';
+            }
+            
             $invoiceData = array(
                 'consecutivo' => $ref ?? '',
                 'fecha_emision' => $data['generated_date'] ?? '',
@@ -451,8 +458,7 @@ class InvoiceUtils
                 'receptor_otras_senas_extranjero' => $data['client_address'] ? trim($data['client_address']) : '',
                 'receptor_email' => $data['client_email'] ? replaceAccents($data['client_email']) :  '',
                 'receptor_phone' => !empty($data['client_phone']) ? preg_replace('/[^0-9]/', '', $data['client_phone']) : '00000000',
-                'receptor_cedula_numero' => $data['client_id_number'] ? str_pad(preg_replace("/[^0-9]/", "",
-                    $data['client_id_number']), 9, '0', STR_PAD_LEFT) : '',
+                'receptor_cedula_numero' => $cedulaReceptor,
                 'receptor_cedula_tipo' => $receptorCedulaType,
                 'receptor_postal_code' => $receptorPostalCode ?? '',
                 'codigo_moneda' => $data['currency'] ?? '',
@@ -470,10 +476,10 @@ class InvoiceUtils
                 'emisor_address' => $emisorAddress,
                 'emisor_phone' => $emisorPhone,
                 'emisor_cedula' => $emisorCedula,
-                'usuarioAtv' => $company->atv->user ? trim($company->atv->user) :  '',
-                'passwordAtv' => $company->atv->password ? trim($company->atv->password) : '',
+                'usuarioAtv' => $company->atv ? trim($company->atv->user) :  '',
+                'passwordAtv' => $company->atv ? trim($company->atv->password) : '',
                 'tipoAmbiente' => config('etax.hacienda_ambiente') ?? 01,
-                'atvcertPin' => $company->atv->pin ? trim($company->atv->pin) : '',
+                'atvcertPin' => $company->atv ? trim($company->atv->pin) : '',
                 //'atvcertFile' => Storage::get($company->atv->key_url),
                 'servgravados' => $totalServiciosGravados - $totalServiciosExonerados,
                 'servexentos' => $totalServiciosExentos,
@@ -507,7 +513,11 @@ class InvoiceUtils
             }
 
             Log::info("Request Data from invoices id: $data->id  --> ".json_encode($invoiceData));
-            $invoiceData['atvcertFile'] = Storage::get($company->atv->key_url);
+            if($company->atv){
+                $invoiceData['atvcertFile'] = Storage::get($company->atv->key_url);
+            }else{
+                $invoiceData['atvcertFile'] = null;
+            }
             
             //Para el PDF, retorna el invoiceData completo. Si es para emitir, retorna el request.
             if( !$returnRequest ){
@@ -537,7 +547,14 @@ class InvoiceUtils
 
     public  function validateZip($invoice) {
         if ($invoice->reference_doc_type != '09') {
-            return empty($invoice->client_zip) ? false : true;
+            if( !isset($invoice->client_zip) 
+                && isset($invoice->client_state) 
+                && isset($invoice->client_city) 
+                && isset($invoice->client_district) 
+            ){
+                $invoice->client_zip = $invoice->client_state . str_pad($invoice->client_city, 2, '0', STR_PAD_LEFT) . str_pad($invoice->client_district, 2, '0', STR_PAD_LEFT);
+            }
+            return isset($invoice->client_zip) ? true : false;
         }
         return true;
     }

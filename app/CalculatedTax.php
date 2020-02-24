@@ -116,8 +116,11 @@ class CalculatedTax extends Model
      * @return \Illuminate\Http\Response
      */
     public function applyRatios( $porc, $value ) {
-      
+      if( !isset($this->currentCompany) ){
+        $this->currentCompany = currentCompanyModel();
+      }
       $company = $this->currentCompany;
+      
       $operativeData = $company->getOperativeData($this->year);
      
       $ratio1_operativo = $operativeData->operative_ratio1;
@@ -164,25 +167,29 @@ class CalculatedTax extends Model
       $currentCompanyId = $company->id;
       $prorrataOperativa = $company->getProrrataOperativa( $year );
       
-      $cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
+      /*$cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
+      if ( Cache::has($cacheKey) ) {
+        return Cache::get($cacheKey);
+      }*/
       
-      if ( !Cache::has($cacheKey) || $forceRecalc ) {
-          
-          //Busca el calculo del mes en Base de Datos.
-          $data = CalculatedTax::firstOrNew(
-              [
-                  'company_id' => $currentCompanyId,
-                  'month' => $month,
-                  'year' => $year,
-                  'is_final' => true,
-              ]
-          );
+      //Busca el calculo del mes en Base de Datos.
+      $data = CalculatedTax::firstOrNew(
+          [
+              'company_id' => $currentCompanyId,
+              'month' => $month,
+              'year' => $year,
+              'is_final' => true,
+          ]
+      );
+      //Cache::put($cacheKey, $data, now()->addMinutes(3));
+      
+      
+      if ( $forceRecalc || !$data->calculated ) {
           
           $data->currentCompany = currentCompanyModel();
             
           if ( $month > 0 ) { //El 0 significa que es acumulado anual
             $pass = !$data->is_closed && !$data->calculated;
-            //dd(json_encode($pass) . " / " . json_encode($forceRecalc) ." / ". $data->month);
             if( $pass || $forceRecalc ) {
               $data->resetVars();
 
@@ -203,17 +210,16 @@ class CalculatedTax extends Model
             $data->calcularFacturacionAcumulado( $year, $prorrataOperativa );
             
             if( $data->count_invoices || $data->count_bills || $data->id ) {
+              $data->calculated = true;
               $data->save();
               $book = Book::calcularAsientos( $data );
               $book->save();
               $data->book = $book;
             }
           }
-            
-          Cache::put($cacheKey, $data, now()->addDays(120));
           
+        //Cache::put($cacheKey, $data, now()->addMinutes(3));
       }
-      $data = Cache::get($cacheKey);
       
       return $data;
       
@@ -233,6 +239,10 @@ class CalculatedTax extends Model
     public function calcularFacturacion( $month, $year, $lastBalance, $prorrataOperativa ) {
       
       $currentCompany = $this->currentCompany;
+      if(!isset($currentCompany)){
+        $currentCompany = currentCompanyModel();
+        $this->currentCompany = $currentCompany;
+      }
       
       //Si recibe el balance anterior en 0, intenta buscarlo.
       if( !$lastBalance ) {
@@ -284,6 +294,9 @@ class CalculatedTax extends Model
     * Recorre todas las facturas emitidas y aumenta los montos correspondientes.
     **/
     public function setDatosEmitidos ( $month, $year, $company ) {
+      if(!isset($this->currentCompany)){
+        $this->currentCompany = currentCompanyModel();
+      }
       
       $countInvoices = Invoice::where('company_id', $company)->where('year', $year)->where('month', $month)->count();
       $invoicesTotal = 0;
@@ -577,6 +590,10 @@ class CalculatedTax extends Model
     *   Recorre todas las facturas recibidas y aumenta los montos correspondientes.
     **/
     public function setDatosSoportados ( $month, $year, $company, $query, $singleBill = false ) {
+      if( !isset($this->currentCompany) ){
+        $this->currentCompany = currentCompanyModel();
+      }
+      
       $countBills = Bill::where('company_id', $company)->where('year', $year)->where('month', $month)->count();
   
       $billsTotal = 0;
@@ -605,7 +622,7 @@ class CalculatedTax extends Model
             
             $currBill = $billItems[$i]->bill;
             if( !$currBill->is_void && $currBill->is_authorized && $currBill->is_code_validated &&
-                ( $singleBill || $currBill->accept_status == 1 ) && $currBill->hide_from_taxes == false ) {
+                ( $singleBill || $currBill->accept_status != 2 ) && $currBill->hide_from_taxes == false ) {
             
               if( $currBill->currency == 'CRC' ) {
                 $currBill->currency_rate = 1;
@@ -842,6 +859,10 @@ class CalculatedTax extends Model
     }
     
     public function setCalculosIVA( $prorrataOperativa, $lastBalance ) {
+      if( !isset($this->currentCompany) ){
+        $this->currentCompany = currentCompanyModel();
+      }
+      
       $company = $this->currentCompany;
       $subtotalAplicado =  $this->invoices_subtotal - $this->sum_iva_sin_aplicar;
       
@@ -1037,8 +1058,11 @@ class CalculatedTax extends Model
     }
     
     function sumAcumulados( $year, $allMonths = true ) {
-      
+      if( !isset($this->currentCompany) ){
+        $this->currentCompany = currentCompanyModel();
+      }
       $currentCompany = $this->currentCompany;
+      
       $currentCompanyId = $currentCompany->id;
       $calculosAnteriores = CalculatedTax::where('company_id', $currentCompanyId)->where('is_final', true)->where('year', $year)->where('month', '!=', 0)->get();
       $countAnteriores = count( $calculosAnteriores );
@@ -1281,7 +1305,11 @@ class CalculatedTax extends Model
     
     public function calcularDeclaracion($acumulado){
       try{
+        if( !isset($this->currentCompany) ){
+          $this->currentCompany = currentCompanyModel();
+        }
           $company = $this->currentCompany;
+          
     			$ivaData = json_decode($this->iva_data);
 	      	$book = $this->book;
           $arrayActividades = $company->getActivities();
@@ -1466,16 +1494,17 @@ class CalculatedTax extends Model
         	$determinacion['totalCreditosPeriodo'] = $this->iva_deducible_operativo;
         	$determinacion['devolucionIva'] = $this->iva_devuelto;
         	
-        	$balanceOperativo = $this->balance_operativo < 0 ? ($this->balance_operativo + $this->saldo_favor_anterior) : ($this->balance_operativo - $this->saldo_favor_anterior);
+        	//$balanceOperativo = $this->balance_operativo < 0 ? ($this->balance_operativo + $this->saldo_favor_anterior) : ($this->balance_operativo - $this->saldo_favor_anterior);
+        	$balanceOperativo = $this->balance_operativo < 0 ? ($this->balance_operativo - $this->saldo_favor_anterior) : ($this->balance_operativo + $this->saldo_favor_anterior);
         	$this->iva_por_cobrar = $balanceOperativo < 0 ? abs($balanceOperativo) : 0;
           $this->iva_por_pagar = $balanceOperativo > 0 ? $balanceOperativo : 0;
         	
         	$determinacion['saldoFavorPeriodo'] = $this->iva_por_cobrar;
         	$determinacion['saldoDeudorPeriodo'] = $this->iva_por_pagar;
-        	$saldoFavorFinal = $this->iva_por_cobrar;
-        	$impuestoFinal = $this->iva_por_pagar;
         	
         	if( $this->month != 12 ) {
+        	  $saldoFavorFinal = $this->iva_por_cobrar;
+        	  $impuestoFinal = $this->iva_por_pagar;
           	$determinacion['saldoFavorProrrataReal'] = 0;
           	$determinacion['saldoDeudorProrrataReal'] = 0;
         	}else{

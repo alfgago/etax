@@ -23,12 +23,23 @@
                     </li> <?php 
                     $i++;
                 }
-                if(currentCompanyModel()->id==1110 || currentCompanyModel()->id==437) {
+                if(currentCompanyModel()->id==1110) {
                     ?>
                     <li class="nav-item small-nav" >
                         <a class="nav-item-hold" href="/sm">
                             <img src="/assets/images/iconos/facturacion.png" class="sidemenu-icon">
                             <span class="nav-text">Excel SM</span>
+                        </a>
+                        <div class="subitems"></div>
+                    </li> 
+                    <?php 
+                }
+                if(currentCompanyModel()->id==437) {
+                    ?>
+                    <li class="nav-item small-nav" >
+                        <a class="nav-item-hold" href="/sm">
+                            <img src="/assets/images/qb.png" class="sidemenu-icon">
+                            <span class="nav-text">QuickBooks</span>
                         </a>
                         <div class="subitems"></div>
                     </li> 

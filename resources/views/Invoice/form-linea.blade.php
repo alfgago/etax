@@ -153,17 +153,17 @@
     
     <div class="form-group col-md-3">
       <label for="cantidad">Cantidad</label>
-      <input type="number" min="1" class="form-control" id="cantidad" value="1"  >
+      <input type="number" min="1" class="form-control to3" id="cantidad" value="1"  >
     </div>
 
     <div class="form-group col-md-3">
       <label for="precio_unitario">Precio unitario</label>
-      <input type="number" min="0" class="form-control" id="precio_unitario" value="0" number >
+      <input type="number" min="0" class="form-control to5" id="precio_unitario" value="0" number >
     </div>
 
     <div class="form-group col-md-3">
       <label for="item_iva">Monto IVA</label>
-      <input type="number" min="0" class="form-control" id="item_iva_amount" placeholder="" >
+      <input type="number" min="0" class="form-control to5" id="item_iva_amount" placeholder="" >
     </div>
 
     <div class="form-group col-md-3">
@@ -176,12 +176,12 @@
 
     <div class="form-group col-md-3">
       <label for="discount">Descuento</label>
-      <input type="text" min="0" class="form-control" id="discount" placeholder="0" >
+      <input type="text" min="0" class="form-control to5" id="discount" placeholder="0" >
     </div>
 
     <div class="form-group col-md-3">
       <label for="item_subtotal">Subtotal</label>
-      <input type="text" min="0" class="form-control" id="item_subtotal" placeholder="" readonly="true" >
+      <input type="text" min="0" class="form-control to5" id="item_subtotal" placeholder="" readonly="true" >
     </div>
 
     <div class="form-group col-md-3">
@@ -292,5 +292,11 @@
 
     });   
 
+
+    $('.to3').on('keydown', function(){
+      var val = $(this).val()+"";
+      val = (val.indexOf(".") >= 0) ? (val.substr(0, val.indexOf(".")) + val.substr(val.indexOf("."), 3)) : val;
+      $(this).val( val );
+    });
 
 </script>

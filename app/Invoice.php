@@ -449,6 +449,7 @@ class Invoice extends Model
                     'iva_amount' => $data['iva_amount'] ?? 0,
                     'tariff_heading' => $data['tariff_heading'] ?? null,
                     'is_exempt' => $data['is_exempt'] ?? false,
+                    'is_code_validated' => true,
                     ]
                 );
                 try {
@@ -530,6 +531,8 @@ class Invoice extends Model
           return false;
         }
       }
+      
+      $tipoDocumento = $data['tipoDocumento'];
 
       $idCliente = 0;
       $identificacionCliente = preg_replace("/[^0-9]/", "", $data['identificacionCliente'] );
@@ -544,7 +547,7 @@ class Invoice extends Model
                 [
                     'code' => $data['codigoCliente'] ,
                     'company_id' => $company->id,
-                    'tipo_persona' => str_pad($data['tipoPersona'], 2, '0', STR_PAD_LEFT),
+                    'tipo_persona' => $data['tipoPersona'],
                     'id_number' => $identificacionCliente,
                     'first_name' => $data['nombreCliente'],
                     'phone' => $data['telefonoCliente'],
@@ -554,6 +557,7 @@ class Invoice extends Model
             $correoCliente = $data['correoCliente'] ? $data['correoCliente'] : $clienteCache->email;
             $clienteCache->email = $correoCliente;
             $clienteCache->address = $data['direccion'] ?? null;
+            $clienteCache->foreign_address = $clienteCache->address;
             if( isset($data['zip']) ){
               try{
                 $clienteCache->zip = $data['zip'];
@@ -567,7 +571,6 @@ class Invoice extends Model
         }
         $cliente = Cache::get($clientCacheKey);
         $idCliente = $cliente->id;
-        $tipoDocumento = $data['tipoDocumento'];
       } else {
         $tipoDocumento = '04'; //Si no trae cliente, es un tiquete.
       }
@@ -595,6 +598,7 @@ class Invoice extends Model
 
           $invoice->company_id = $company->id;
           $invoice->client_id = $idCliente;
+          $invoice->client_id_type = $data['tipoPersona'] ?? 'F';
           $invoice->document_key =  $data['claveFactura'];
           $invoice->document_number =  $data['consecutivoComprobante'];
           $invoice->reference_number =  $data['numeroReferencia'] ?? 0;
@@ -603,7 +607,7 @@ class Invoice extends Model
           $invoice->buy_order = isset( $data['ordenCompra'] ) ? $data['ordenCompra'] : null;
 
           //Datos generales y para Hacienda
-          if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04'
+          if( $tipoDocumento == '01' || $tipoDocumento == '02' || $tipoDocumento == '03' || $tipoDocumento == '04' || $tipoDocumento == '09'
               || $tipoDocumento == '05' || $tipoDocumento == '06' || $tipoDocumento == '07' || $tipoDocumento == '08' || $tipoDocumento == '99' ) {
               $invoice->document_type = $tipoDocumento;
           } else {
@@ -626,6 +630,7 @@ class Invoice extends Model
           $invoice->client_email = $data['correoCliente'] ?? null;
           $invoice->client_phone = $data['telefonoCliente'] ?? null;
           $invoice->client_address = $data['direccion'] ?? null;
+          $invoice->foreign_address = $data['direccion'] ?? null;
           if( isset($data['zip']) ){
             try{
               $invoice->client_zip = $data['zip'];
@@ -717,13 +722,16 @@ class Invoice extends Model
           'iva_percentage' => $porcentajeIva,
           'iva_type' => $data['codigoEtax'],
           'iva_amount' => $montoIvaLinea,
+          'is_code_validated' => true,
           'exoneration_document_type' => $data['tipoDocumentoExoneracion'],
           'exoneration_document_number' => $data['documentoExoneracion'],
           'exoneration_company_name' => $data['companiaExoneracion'],
           'exoneration_porcent' => $data['porcentajeExoneracion'],
           'exoneration_amount' => $data['montoExoneracion'],
+          'exoneration_total_gravado' => $data['montoExoneracion'] ? $subtotalLinea : 0,
           'impuesto_neto' => $data['impuestoNeto'],
-          'exoneration_total_amount' => $data['totalMontoLinea']
+          'exoneration_total_amount' => $data['totalMontoLinea'],
+          'tariff_heading' => ( isset($data['partidaArancelaria']) ? $data['partidaArancelaria'] : null )
       ];
       array_push($invoiceList[$arrayKey]['lineas'], $item);
 
@@ -1131,11 +1139,11 @@ class Invoice extends Model
 
     }
 
-    public function setNoteData($invoiceReference, $requestItems = null, $noteType = null, $request = []) {
+    public function setNoteData($invoiceReference, $requestItems = null, $noteType = null, $request = [], $company = false) {
         try {
             $noteType = $noteType ?? '03';
-            $this->document_key = getDocumentKey($noteType, false, $this->reference_number);
-            $this->document_number = getDocReference($noteType, false, $this->reference_number);
+            $this->document_key = getDocumentKey($noteType, $company, $this->reference_number);
+            $this->document_number = getDocReference($noteType, $company, $this->reference_number);
             $this->sale_condition = $invoiceReference->sale_condition;
             $this->payment_type = $invoiceReference->payment_type;
             $this->retention_percent = $invoiceReference->retention_percent;
@@ -1222,7 +1230,8 @@ class Invoice extends Model
 
         } catch (\Exception $e) {
             Log::error('Error al crear factura: '.$e->getMessage());
-            return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
+            return false;
+            //return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
         }
     }
 

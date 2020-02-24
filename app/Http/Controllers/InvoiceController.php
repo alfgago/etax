@@ -1372,7 +1372,7 @@ class InvoiceController extends Controller
             }
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
-            return back()->withError('Error importando. Archivo excede el tamaño mínimo.');
+            return back()->withError('Error importando. Archivo excede el tamaño máximo.');
         }
 
         $company->save();
@@ -1599,6 +1599,7 @@ class InvoiceController extends Controller
             $tipoIva = $request->tipo_iva;
             foreach( $invoice->items as $item ) {
                 $item->iva_type = $request->tipo_iva;
+                $item->is_code_validated = true;
                 $item->save();
             }
 
@@ -1975,7 +1976,7 @@ class InvoiceController extends Controller
             $tokenApi = $apiHacienda->login(false);
 
             if ($tokenApi !== false) {
-                $company = currentCompanyModel();
+                $company = $invoice->company;
                 $result = $apiHacienda->queryHacienda($invoice, $tokenApi, $company);
                 if ($result == false) {
                     return redirect()->back()->withErrors('El servidor de Hacienda es inaccesible en este momento, o el comprobante no ha sido recibido. Por favor intente de nuevo más tarde o contacte a soporte.');
@@ -2177,8 +2178,9 @@ class InvoiceController extends Controller
                 }
             }
             Log::info("Enviando facturas al job ProcessInvoicesExcel");
+            
             ProcessInvoicesExcel::dispatch($company)->onQueue('createinvoice');
-            //$this->guardarEnvioExcel($xlsInvoices);
+            
             return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
         } catch ( \Exception $e) {
             Log::error("Error en factura ENVIO MASIVO EXCEL:" . $e);

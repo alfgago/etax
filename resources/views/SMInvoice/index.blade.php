@@ -30,6 +30,7 @@
       <table id="invoice-table" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
           <thead>
             <tr>
+              <th data-priority="1">#</th>
               <th data-priority="1">Tipo</th>
               <th data-priority="1">Consecutivo</th>
               <th data-priority="1">num_factura</th>
@@ -59,6 +60,7 @@
               <th data-priority="5">codigo_etax</th>
               <th data-priority="5">categoria</th>
               <th data-priority="5">refer_factura</th>
+              <th data-priority="1">Mes</th>
               <th data-priority="2">Fecha subida</th>
             </tr>
           </thead>
@@ -97,6 +99,7 @@ $(function() {
     },
     order: [[ 8, 'desc' ]],
     columns: [
+      { data: 'linea_excel', name: 'linea_excel' },
       { data: 'document_type', name: 'document_type' },
       { data: 'clave_col', name: 'document_key' },
       { data: 'num_factura', name: 'num_factura' },
@@ -126,6 +129,7 @@ $(function() {
       { data: 'codigo_etax', name: 'codigo_etax' },
       { data: 'categoria', name: 'categoria' },
       { data: 'refer_factura', name: 'refer_factura' },
+      { data: 'mes_col', name: 'mes_col' },
       { data: 'created_at', name: 'created_at' },
       
     ],

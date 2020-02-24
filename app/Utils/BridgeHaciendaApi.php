@@ -43,7 +43,7 @@ class BridgeHaciendaApi
         }
     }
 
-    public function createInvoice(Invoice $invoice, $token) {
+    public function createInvoice(Invoice $invoice, $token, $sendEmail = true) {
         try {
             $invoiceUtils = new InvoiceUtils();
             $requestDetails = $invoiceUtils->setDetails43($invoice->items);
@@ -86,7 +86,9 @@ class BridgeHaciendaApi
                         $xml->save();
                         Log::info('XML Guardado -->> ' . 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml");
 
-                        $file = $invoiceUtils->sendInvoiceEmail($invoice, $company, $path);
+                        if($sendEmail){ //Define si se quiere mandar el correo inicial, o esperar a que se apruebe con hacienda. True lo manda siempre
+                            $file = $invoiceUtils->sendInvoiceEmail($invoice, $company, $path);
+                        }
                         
                         ProcessInvoice::dispatch($invoice->id, $company->id, $token)
                             ->onConnection(config('etax.queue_connections'))->onQueue('invoicing');
@@ -121,7 +123,8 @@ class BridgeHaciendaApi
     public function acceptInvoice(Bill $bill, $token) {
         try {
             $provider = $bill->provider;
-            $ref = currentCompanyModel()->last_rec_ref_number;
+            $ref = $bill->company->last_rec_ref_number;
+            Log::debug($bill->provider_id);
             ProcessReception::dispatch($bill->id, $provider->id, $token, $ref)
                 ->onConnection(config('etax.queue_connections'))->onQueue('receptions');
             return $bill;
@@ -271,7 +274,7 @@ class BridgeHaciendaApi
         try {
             $client = new Client();
             $file = null;
-            Log::info('Consultando Mensaje Hacienda XML  API HACIENDA -->>' . $invoice->id);
+            Log::info("Consultando Mensaje Hacienda XML API HACIENDA -->> Empresa: $company->id / Factura: $invoice->id");
             $query = $this->setInvoiceInfo($invoice->document_key, $company);
             $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice43/consult', [
                 'headers' => [

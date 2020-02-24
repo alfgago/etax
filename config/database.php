@@ -64,6 +64,18 @@ return array(
                         'prefix'    => '',
                         'strict' => true
                 ),
+                
+                'log_db' => array(
+                        'driver'    => env('LOGDB_CONNECTION', 'mysql'),
+                        'host'      => env('LOGDB_HOST', 'logdb.cqnz5j8sqwq0.us-east-1.rds.amazonaws.com'),
+                        'database'  => env('LOGDB_DATABASE', 'logdb'),
+                        'username'  => env('LOGDB_USERNAME', 'forge2'),
+                        'password'  => env('LOGDB_PASSWORD', 'mht3qS6Vr9'),
+                        'charset'   => 'utf8mb4',
+                        'collation' => 'utf8mb4_unicode_ci',
+                        'prefix'    => '',
+                        'strict' => true
+                ),
 
                 'pgsql' => array(
                         'driver'   => 'pgsql',

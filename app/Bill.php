@@ -291,13 +291,12 @@ class Bill extends Model
           
           try {
             $exonerationDate = isset( $data['exoneration_date'] )  ? Carbon::createFromFormat('d/m/Y', $data['exoneration_date']) : null;
-
           }catch( \Exception $e ) {
             $exonerationDate = null;
           }
+          
           if( $exonerationDate && isset($data['exoneration_document_type']) && isset($data['exoneration_document_number']) ) {
             
-          
             $item->exoneration_document_type = $data['exoneration_document_type'] ?? null;
             $item->exoneration_document_number = $data['exoneration_document_number'] ?? null;
             $item->exoneration_company_name = $data['exoneration_company_name'] ?? null;
@@ -392,7 +391,7 @@ class Bill extends Model
             $authorize = false;
         }
         
-        $bill->accept_status = 0;
+        //$bill->accept_status = 1; //17/02/2020. Esto se cambia para que por defecto queden como aceptadas. Usuario debe poder rechazar luego si quisiera
         $bill->hacienda_status = "03";
         $bill->payment_status = "01";
         $bill->generation_method = $metodoGeneracion;
@@ -400,7 +399,7 @@ class Bill extends Model
         $bill->is_code_validated = false;
         
         if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML" ) {
-            $bill->accept_status = 0;
+            //$bill->accept_status = 1; //17/02/2020. Esto se cambia para que por defecto queden como aceptadas
             $bill->hacienda_status = "01";
         }
         
@@ -504,6 +503,14 @@ class Bill extends Model
         $lineas = $arr['DetalleServicio']['LineaDetalle'];
         if( array_key_exists( 'NumeroLinea', $lineas ) ) {
             $lineas = [$arr['DetalleServicio']['LineaDetalle']];
+        }
+        
+        //Si es Corbana, va a poner la sucursal a la que recibe la factura. Varia dependiendo del email de recepcion
+        try{
+          $correoRecepcion = array_key_exists('Receptor', $arr) ? $arr['Receptor']['CorreoElectronico'] : null;
+          $bill->setRegionCorbana($correoRecepcion);
+        }catch(\Exception $e){
+          Log::error($e);
         }
         
         $bill->save();
@@ -612,7 +619,7 @@ class Bill extends Model
               $item_modificado = $bill->addEditItem($item);
               array_push( $lids, $item_modificado->id );
             }catch(\Throwable $e){
-
+              Log::error($e);
             }
         }
         
@@ -672,6 +679,30 @@ class Bill extends Model
           $xmlHacienda->save();
         }catch( \Throwable $e ){
           Log::error( 'Error al registrar en tabla XMLHacienda: ' . $e->getMessage() );
+        }
+        
+        return $path;
+        
+    }
+    
+    
+    public static function storePDF($bill, $file) {
+        
+        try{
+          $cedulaEmpresa = $bill->company->id_number;
+          //$cedulaProveedor = $bill->provider->id_number;
+          $consecutivoComprobante = $bill->document_number;
+          
+          if ( Storage::exists("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/$consecutivoComprobante.pdf")) {
+              Storage::delete("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/$consecutivoComprobante.pdf");
+          }
+          
+          $path = \Storage::putFileAs(
+              "empresa-$cedulaEmpresa/facturas_compras", $file, "$bill->year/$bill->month/$consecutivoComprobante.pdf"
+          );
+          
+        }catch( \Throwable $e ){
+          Log::error( 'Error al guardar el PDF recibido: ' . $e->getMessage() );
         }
         
         return $path;
@@ -791,7 +822,7 @@ class Bill extends Model
           $bill->provider_zip = $data['zipProveedor'] ?? null;
           
           if($data['metodoGeneracion'] == 'Email' || $data['metodoGeneracion'] == 'XML') {
-            $bill->accept_status = 0;
+            //$bill->accept_status = 1; //17/02/2020. Esto se cambia para que por defecto queden como aceptadas
             $bill->hacienda_status = "01";
           }else{
             if( $data['acceptStatus'] ){
@@ -885,6 +916,7 @@ class Bill extends Model
           'discount' => $montoDescuentoLinea,
           'iva_type' => $data['codigoEtax'],
           'iva_amount' => $montoIvaLinea,
+          'is_code_validated' => true,
           'exoneration_document_type' => $data['tipoDocumentoExoneracion'],
           'exoneration_document_number' => $data['documentoExoneracion'],
           'exoneration_company_name' => $data['companiaExoneracion'],
@@ -915,8 +947,12 @@ class Bill extends Model
         $this->is_code_validated = false;
       }
       
+      $cacheKey = "cache-billaccepts-".$this->id;
+      if ( Cache::has($cacheKey) ) {
+        return Cache::get($cacheKey);
+      }
+      
       if( $this->is_code_validated ) {
-        
         if( $this->xml_schema == 43 ) {
           $company = currentCompanyModel();
           $prorrataOperativa = $company->getProrrataOperativa( $this->year );
@@ -968,12 +1004,32 @@ class Bill extends Model
         $this->accept_total_factura = 0;
         $this->accept_iva_condition = '01';
       }
-      
       $this->save();
+      Cache::put($cacheKey, $this, now()->addDays(90));
+      
       return $this;
         
     }
       
+      
+    public function setRegionCorbana($email){
+      
+      $this->sucursal = null;
+      if($email ==  "facturaelectronica@corbana.co.cr"){
+        $this->sucursal = "01";  
+      }
+      if($email ==  "corbanaguapiles@corbana.co.cr"){
+        $this->sucursal = "02";  
+      }
+      if($email ==  "fincasanpablo@corbana.co.cr"){
+        $this->sucursal = "04";  
+      }
+      if($email ==  "agroforestales@corbana.co.cr"){
+        $this->sucursal = "05";  
+      }
+      
+    }
+    
     
     
 }

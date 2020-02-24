@@ -96,26 +96,33 @@ class ProcessInvoicesExcel implements ShouldQueue
                         }
                         /*$invoice->document_key = $factura[0]->document_key;
                         $invoice->document_number = $factura[0]->document_number;*/
-                       $invoice->sale_condition = $factura[0]->condicionVenta;
-                       $invoice->description = $factura[0]->descripcion;
+                        $invoice->sale_condition = $factura[0]->condicionVenta;
+                        $invoice->description = $factura[0]->descripcion;
                         $invoice->payment_type = $factura[0]->medioPago;
                         $invoice->credit_time = $factura[0]->plazoCredito;
                         if ($factura[0]->codigoActividad) {
                             $invoice->commercial_activity = $factura[0]->codigoActividad;
                         }
                         /******************************************************************************/
-                        $tipo_persona = $factura[0]->tipoIdentificacionReceptor;
-                        $identificacion_cliente = preg_replace("/[^0-9]/", "", $factura[0]->identificacionReceptor );
+                        $tipoPersona = $factura[0]->tipoIdentificacionReceptor;
+                        if($tipoPersona == "5" || $tipoPersona == "05" || $tipoPersona == 5){
+                            $tipoPersona = "E";
+                        }
+                        if($tipoPersona == "E" || $tipoPersona == "O"){
+                            $identificacionCliente = $factura[0]->identificacionReceptor;
+                        }else{
+                            $identificacionCliente = preg_replace("/[^0-9]/", "", $factura[0]->identificacionReceptor );
+                        }
                         
                         $client = Client::updateOrCreate(
                             [
-                                'id_number' => $identificacion_cliente,
+                                'id_number' => $identificacionCliente,
                                 'company_id' => $company->id,
                             ],
                             [
                                 'company_id' => $company->id,
-                                'tipo_persona' => $tipo_persona,
-                                'id_number' => trim($identificacion_cliente),
+                                'tipo_persona' => $tipoPersona,
+                                'id_number' => trim($identificacionCliente),
                                 'fullname' => $factura[0]->nombreReceptor,
                                 'first_name' => $factura[0]->nombreReceptor,
                                 'emisor_receptor' => 'ambos',
@@ -136,19 +143,27 @@ class ProcessInvoicesExcel implements ShouldQueue
                         $invoice->total = floatval( str_replace(",","", $factura[0]->totalComprobante ));
                         $invoice->iva_amount = floatval( str_replace(",","", $factura[0]->totalImpuesto ));
     
-                          $invoice->client_first_name = $client->first_name;
-                          $invoice->client_last_name = $client->last_name;
-                          $invoice->client_last_name2 = $client->last_name2;
-                          $invoice->client_email = $client->email;
-                          $invoice->client_address = $client->address;
-                          $invoice->client_country = $client->country;
-                          $invoice->client_state = $client->state;
-                          $invoice->client_city = $client->city;
-                          $invoice->client_district = $client->district;
-                          $invoice->client_zip = $client->zip;
-                          $invoice->client_phone = preg_replace('/[^0-9]/', '', $client->phone);
-                          $invoice->client_id_number = $client->id_number;
-                          $invoice->client_id_type = $client->tipo_persona;
+                        $invoice->client_first_name = $client->first_name;
+                        $invoice->client_last_name = $client->last_name;
+                        $invoice->client_last_name2 = $client->last_name2;
+                        $invoice->client_email = $client->email;
+                        $invoice->client_address = $client->address;
+                        $invoice->client_country = $client->country;
+                        $invoice->client_state = $client->state;
+                        $invoice->client_city = $client->city;
+                        $invoice->client_district = $client->district;
+                        $invoice->client_zip = $client->zip;
+                        $invoice->client_phone = preg_replace('/[^0-9]/', '', $client->phone);
+                        $invoice->client_id_number = $client->id_number;
+                        $invoice->client_id_type = $client->tipo_persona;
+                        
+                        if( !isset($invoice->client_zip) 
+                            && isset($invoice->client_state) 
+                            && isset($invoice->client_city) 
+                            && isset($invoice->client_district) 
+                        ){
+                            $invoice->client_zip = $invoice->client_state . str_pad($invoice->client_city, 2, '0', STR_PAD_LEFT) . str_pad($invoice->client_district, 2, '0', STR_PAD_LEFT);
+                        }
     
                         //Fechas
                         $fecha = Carbon::createFromFormat('d/m/Y g:i A',  $factura[0]->fechaEmision);
@@ -184,6 +199,11 @@ class ProcessInvoicesExcel implements ShouldQueue
                         $totalComprobante = 0;
                         foreach ($lineas as $linea) {
                             if($linea->tipoLinea == 1){
+                                
+                                $lineaUnitario = $linea->precioUnitario ?? 0;
+                                $lineaCantidad = $linea->cantidad ? trim($linea->cantidad) : 1;
+                                $lineaSubtotal = (isset($linea->subTotal) && $linea->subTotal != 0) ? $linea->subTotal : $lineaUnitario*$lineaCantidad;
+                                
                                 $item = InvoiceItem::updateOrCreate([
                                     'item_number' => $linea->numeroLinea,
                                     'invoice_id' => $invoice->id
@@ -193,21 +213,23 @@ class ProcessInvoicesExcel implements ShouldQueue
                                     'month' => $invoice->month,
                                     'name'  => $linea->detalle ? trim($linea->detalle) : null,
                                     'measure_unit' => $linea->unidadmedida ?? 'Unid',
-                                    'item_count'   => $linea->cantidad ? trim($linea->cantidad) : 1,
-                                    'unit_price'   => $linea->precioUnitario ?? 0,
-                                    'subtotal'     => $linea->subTotal ?? 0,
+                                    'item_count'   => $lineaCantidad,
+                                    'unit_price'   => $lineaUnitario,
+                                    'subtotal'     => $lineaSubtotal,
                                     'total' => $linea->montoTotalLinea ?? 0,
                                     'discount_type' => $linea->naturalezaDescuento ?? null,
                                     'discount' => $linea->montoDescuento ?? 0,
                                     'iva_type' => $linea->codigoImpuesto ?? null,
-                                    'iva_percentage' => $linea->codigoTarifa ?? 0,
+                                    'product_type' => $linea->codigoTarifa ?? null,
+                                    'iva_percentage' => $linea->tarifaImpuesto ?? 0,
                                     'iva_amount' => $linea->montoImpuesto ?? 0,
-                                    'tariff_heading' => $linea->tarifaImpuesto ?? null,
-                                     'is_exempt' => $linea->exento
+                                    'tariff_heading' => null,
+                                    'is_code_validated' => true,
+                                    'is_exempt' => $linea->exento
                                     ]
                                 );
     
-                                $subtotal = $subtotal + $linea->subTotal;
+                                $subtotal = $subtotal + $lineaSubtotal;
                                 $totaliva = $totaliva + $linea->montoImpuesto;
                                 //$totalComprobante = $totalComprobante + $subtotal + $linea->montoImpuesto;
                                 try {
@@ -336,9 +358,9 @@ class ProcessInvoicesExcel implements ShouldQueue
                               
                               $bill->year = $invoice->year;
                               $bill->month = $invoice->month;
-                            $bill->xml_schema = 43;
+                              $bill->xml_schema = 43;
                             
-                            $bill->activity_company_verification = $invoice->commercial_activity;
+                              $bill->activity_company_verification = $invoice->commercial_activity;
                             
                               /*
                               if( $request->accept_iva_condition ){

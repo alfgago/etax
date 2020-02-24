@@ -28,10 +28,10 @@
                             <?php  
                                   $c = $row->company;
                                   if($c) { 
-                                    if($c->status == 1){
+                                    //if($c->status == 1){
                                     $name = isset($c->name) ? $c->name.' '.$c->last_name.' '.$c->last_name2 : '-- Nueva Empresa --';  ?> 
                                     <option value="{{ $c->id }}" {{ $c->id == currentCompany() ? 'selected' : ''  }} > {{ $name }} </option>
-                            <?php   } 
+                            <?php   //} 
                                   } ?>
                         @endforeach
                     </select>
