@@ -212,7 +212,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                                     'year'  => $invoice->year,
                                     'month' => $invoice->month,
                                     'name'  => $linea->detalle ? trim($linea->detalle) : null,
-                                    'measure_unit' => $linea->unidadmedida ?? 'Unid',
+                                    'measure_unit' => $linea->unidadMedida ?? 'Unid',
                                     'item_count'   => $lineaCantidad,
                                     'unit_price'   => $lineaUnitario,
                                     'subtotal'     => $lineaSubtotal,
@@ -221,7 +221,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                                     'discount' => $linea->montoDescuento ?? 0,
                                     'iva_type' => $linea->codigoImpuesto ?? null,
                                     'product_type' => $linea->codigoTarifa ?? null,
-                                    'iva_percentage' => $linea->tarifaImpuesto ?? 0,
+                                    'iva_percentage' => intval($linea->tarifaImpuesto) ?? 0,
                                     'iva_amount' => $linea->montoImpuesto ?? 0,
                                     'tariff_heading' => null,
                                     'is_code_validated' => true,
@@ -293,43 +293,43 @@ class ProcessInvoicesExcel implements ShouldQueue
                             $bill->reference_number = $company->last_bill_ref_number + 1;
     
                             
-                            $bill->document_key = $invoice->document_key;
-                              $bill->document_number = $invoice->document_number;
-                              $bill->sale_condition = $invoice->sale_condition;
-                              $bill->payment_type = $invoice->payment_type;
-                              $bill->credit_time = $invoice->credit_time;
-                            
-                              $bill->xml_schema =  43;
-        
-                                  $identificacion_provider = preg_replace("/[^0-9]/", "", $invoice->id_number );
+                          $bill->document_key = $invoice->document_key;
+                          $bill->document_number = $invoice->document_number;
+                          $bill->sale_condition = $invoice->sale_condition;
+                          $bill->payment_type = $invoice->payment_type;
+                          $bill->credit_time = $invoice->credit_time;
+                        
+                          $bill->xml_schema =  43;
+    
+                              $identificacion_provider = preg_replace("/[^0-9]/", "", $invoice->id_number );
+                              
+                              $provider = Provider::firstOrCreate(
+                                  [
+                                      'id_number' => $identificacion_provider,
+                                      'company_id' => $invoice->company_id,
+                                  ],
+                                  [
+                                      'company_id' => $invoice->company_id,
+                                      'id_number' => $identificacion_provider
+                                  ]
+                              );
+                              $provider->first_name = $invoice->client_first_name ?? null;
+                              $provider->last_name = $invoice->client_last_name ?? null;
+                              $provider->last_name2 = $invoice->client_last_name2 ?? null;
+                              $provider->country = $invoice->client_country ?? null;
+                              $provider->state = $invoice->client_state ?? null;
+                              $provider->city = $invoice->client_city ?? null;
+                              $provider->district = $invoice->client_district ?? null;
+                              $provider->neighborhood = $invoice->client_neighborhood ?? null;
+                              $provider->zip = $invoice->client_zip ?? null;
+                              $provider->address = $invoice->client_address ?? null;
+                              $provider->foreign_address = $invoice->client_foreign_address ?? null;
+                              $provider->phone = $invoice->client_phone ?? null;
+                              $provider->es_exento = $invoice->client_es_exento ?? 0;
+                              $provider->email = $invoice->client_email ?? null;
+                              $provider->save();
                                   
-                                  $provider = Provider::firstOrCreate(
-                                      [
-                                          'id_number' => $identificacion_provider,
-                                          'company_id' => $invoice->company_id,
-                                      ],
-                                      [
-                                          'company_id' => $invoice->company_id,
-                                          'id_number' => $identificacion_provider
-                                      ]
-                                  );
-                                  $provider->first_name = $invoice->client_first_name ?? null;
-                                  $provider->last_name = $invoice->client_last_name ?? null;
-                                  $provider->last_name2 = $invoice->client_last_name2 ?? null;
-                                  $provider->country = $invoice->client_country ?? null;
-                                  $provider->state = $invoice->client_state ?? null;
-                                  $provider->city = $invoice->client_city ?? null;
-                                  $provider->district = $invoice->client_district ?? null;
-                                  $provider->neighborhood = $invoice->client_neighborhood ?? null;
-                                  $provider->zip = $invoice->client_zip ?? null;
-                                  $provider->address = $invoice->client_address ?? null;
-                                  $provider->foreign_address = $invoice->client_foreign_address ?? null;
-                                  $provider->phone = $invoice->client_phone ?? null;
-                                  $provider->es_exento = $invoice->client_es_exento ?? 0;
-                                  $provider->email = $invoice->client_email ?? null;
-                                  $provider->save();
-                                      
-                                  $bill->provider_id = $provider->id;
+                              $bill->provider_id = $provider->id;
                               //Datos de factura
                               $bill->description = $invoice->description;
                               $bill->subtotal = floatval( str_replace(",","", $invoice->subtotal ));
@@ -361,19 +361,6 @@ class ProcessInvoicesExcel implements ShouldQueue
                               $bill->xml_schema = 43;
                             
                               $bill->activity_company_verification = $invoice->commercial_activity;
-                            
-                              /*
-                              if( $request->accept_iva_condition ){
-                                $bill->accept_iva_condition = $request->accept_iva_condition;
-                              }
-                              if( $request->accept_iva_acreditable ){
-                                $bill->accept_iva_acreditable = $request->accept_iva_acreditable;
-                              }
-                              if( $request->accept_iva_gasto ){
-                                $bill->accept_iva_gasto = $request->accept_iva_gasto;
-                              }
-                            */
-    
     
                             
                             $bill->is_code_validated = 1;

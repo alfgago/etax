@@ -13,7 +13,7 @@ use App\User;
 
 class Notification extends Model
 {
-   public function enviar($option, $id, $company , $title, $text, $type, $function, $link){
+   public function enviar($option, $id, $company, $title, $text, $type, $function, $link){
    		//$opcion: los tipos de notificaciones que hay de momento.
    			//1: Solo un usuario
    			//2: Todos los usuarios de una compañia
@@ -33,11 +33,15 @@ class Notification extends Model
 
    		try{
 	   		$today = Carbon::parse(now('America/Costa_Rica'));
-	    	$this->type = $type;
-	    	$this->title = $title;
-	    	$this->text = $text;
-	    	$this->link = $link;
-	    	$this->function = $function;  
+	   		
+	   		if( isset($title) ){
+		    	$this->type = $type;
+		    	$this->title = $title;
+		    	$this->text = $text;
+		    	$this->link = $link;
+		    	$this->function = $function;
+	   		}
+	    	
 	    	$this->date = $today;  
 	    	$this->save();
 	    	$users = [];
@@ -71,7 +75,7 @@ class Notification extends Model
 	   		}
 	   		
 	   		foreach ($users as $user) {
-	   			$NotificationUser  = NotificationUser::updateOrCreate(
+	   			$notificationUser  = NotificationUser::updateOrCreate(
 	                [
 	                    'user_id' => $user,
 	                    'company_id' => $company,
@@ -82,6 +86,7 @@ class Notification extends Model
 	                ]
 	            );
 	            $this->reiniciarNotificaciones($user,$company);
+	            //dd($notificationUser);
 	   		}
 	   		return true;
 	   	}catch( \Exception $ex ) {

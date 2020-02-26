@@ -332,6 +332,7 @@ Route::get('/private/exportar', 'SubscriptionPlanController@exportar')->name('su
 
 Route::get('/admin/impersonate/{id}', 'UserController@impersonate');
 Route::get('/admin/leave', 'UserController@leaveImpersonation');
+Route::get('/admin/notificar/{id}', 'NotificationController@enviarNotificacionesBD');
 
 
 //Quickbooks
