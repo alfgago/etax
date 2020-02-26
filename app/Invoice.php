@@ -386,42 +386,6 @@ class Invoice extends Model
         }
     }
 
-    /*public function addItem( $item_number, $code, $name, $product_type, $measure_unit, $item_count, $unit_price, $subtotal,
-                             $total, $discount_percentage, $discount_reason, $iva_type, $iva_percentage, $iva_amount, $isIdentificacion, $is_exempt, $typeDocument,
-                            $numeroDocumento, $nombreInstitucion, $porcentajeExoneracion, $montoExoneracion, $impuestoNeto, $montoTotalLinea)
-    {
-      return InvoiceItem::create([
-        'invoice_id' => $this->id,
-        'company_id' => $this->company_id,f
-        'year' => $this->year,
-        'month' => $this->month,
-        'item_number' => $item_number,
-        'code' => $code,
-        'name' => $name,
-        'product_type' => $product_type,
-        'measure_unit' => $measure_unit,
-        'item_count' => $item_count,
-        'unit_price' => $unit_price,
-        'subtotal' => $subtotal,
-        'total' => $total,
-        'discount_type' => '01',
-        'discount' => $discount_percentage,
-        'iva_type' => $iva_type,
-        'iva_percentage' => $iva_percentage,
-        'iva_amount' => $iva_amount,
-        'is_exempt' => $is_exempt,
-        'is_identificacion_especifica' => $isIdentificacion,
-        'exoneration_document_type' => $typeDocument ?? null,
-        'exoneration_document_number' => $numeroDocumento ?? null,
-        'exoneration_company_name' => $nombreInstitucion ?? null,
-        'exoneration_porcent' => $porcentajeExoneracion ?? 0,
-        'exoneration_amount' => $montoExoneracion ?? 0,
-        'impuestoNeto' => $impuestoNeto ?? 0,
-        'exoneration_total_amount' => $montoTotalLinea ?? 0
-      ]);
-
-    }*/
-
     public function addEditItem(array $data)
     {
         try {

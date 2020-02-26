@@ -2180,6 +2180,7 @@ class InvoiceController extends Controller
             Log::info("Enviando facturas al job ProcessInvoicesExcel");
             
             ProcessInvoicesExcel::dispatch($company)->onQueue('createinvoice');
+            //ProcessInvoicesExcel::dispatchNow($company);
             
             return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
         } catch ( \Exception $e) {

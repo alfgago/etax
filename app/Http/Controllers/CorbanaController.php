@@ -133,10 +133,14 @@ class CorbanaController extends Controller
             //Busca la cedula de la empresa
             $cedulaEmpresa = $this->parseCorbanaIdToCedula($factura['NO_CIA'], $factura['ACTIVIDAD']);
             $company = Company::where('id_number', $cedulaEmpresa)->first();
-            $mainAct = $company->getActivities() ? $company->getActivities()[0]->codigo : '0';
-
-            $codigoActividad = $mainAct;
             $xmlSchema = 43;
+            
+            $codigoActividad = $factura['CODIGO_ACTIVIDAD'];
+            if( !isset($codigoActividad) ){
+                $mainAct = $company->getActivities() ? $company->getActivities()[0]->codigo : '0';
+                $codigoActividad = $mainAct;
+            }
+            
             //Datos de cliente
             $nombreCliente = $factura['RAZON_SOCIAL'];
             $codigoCliente = $factura['IDENTIFICACION'];
@@ -208,10 +212,12 @@ class CorbanaController extends Controller
                 $condicionVenta = "01";
             }
             
-            $tipoCambio = floatval($factura['TIPO_CAMBIO']);
-            $idMoneda = "CRC";
-            if($tipoCambio > 0){
+            if( $factura['MONEDA'] == '02' ){
                 $idMoneda = "USD";
+                $tipoCambio = floatval($factura['TIPO_CAMBIO']);
+            }else{
+                $idMoneda = "CRC";
+                $tipoCambio = 1;
             }
 
             $FEC_HECHO = $factura['FEC_HECHO'];
@@ -231,7 +237,7 @@ class CorbanaController extends Controller
             $companiaExoneracion = $factura['COD_INST_EXO'] ?? null;
             $companiaExoneracion = $nombreCliente;
             $fechaExoneracion = $factura['FEC_DOCU_EXO'] ?? null;
-            $porcentajeExoneracion = 0;
+            $porcentajeExoneracion = $factura['PORC_EXONERACION'] ?? 0;;
             
             $prefijoCodigo= "B";
             if($TIPO_SERV == "S"){
@@ -263,14 +269,16 @@ class CorbanaController extends Controller
                     $codigoProducto = $item['CODIGO'] ?? "0";
                     $unidadMedicion = $TIPO_SERV == "S" ? "Sp" : 'Unid';
                     $cantidad = $item['CANTIDAD'];
+                    
                     $precioUnitario = $item['PRECIO_UNITARIO'];
-                    $subtotalLinea = $cantidad*$precioUnitario;
+                    $montoDescuento = $item['DESCUENTO'];
+                    
+                    $subtotalLinea = $cantidad*$precioUnitario - $montoDescuento;
                     $montoIva = $subtotalLinea * ($porcentajeIVA/100);
                     $totalLinea = $subtotalLinea+$montoIva;
-                    $montoDescuento = $item['DESCUENTO'];
                     $categoriaHacienda = null;
                     $montoExoneracion = isset($documentoExoneracion) ? $montoIva : 0;
-                    $totalMontoLinea = $subtotalLinea + $montoIva - $montoExoneracion;
+                    $totalMontoLinea = $subtotalLinea + $montoIva - $montoExoneracion - $montoDescuento;
                     
                     $cantidad = round($cantidad, 5);
                     $precioUnitario = round($precioUnitario, 5);
