@@ -135,7 +135,7 @@ class CorbanaController extends Controller
             $company = Company::where('id_number', $cedulaEmpresa)->first();
             $xmlSchema = 43;
             
-            $codigoActividad = $factura['CODIGO_ACTIVIDAD'];
+            $codigoActividad = $factura['CODIGO_ACTIVIDAD'] ?? null;
             if( !isset($codigoActividad) ){
                 $mainAct = $company->getActivities() ? $company->getActivities()[0]->codigo : '0';
                 $codigoActividad = $mainAct;
@@ -147,7 +147,7 @@ class CorbanaController extends Controller
             $tipoPersona = $factura['TIPO_IDEN'];
             $identificacionCliente = $factura['IDENTIFICACION'] ?? null;
             $correoCliente = isset($factura['EMAIL_FAC_ELEC']) ? $factura['EMAIL_FAC_ELEC'] : ($factura['CORREO_CLIENTE'] ?? null);
-            $telefonoCliente = null;
+            $telefonoCliente = $factura['TEL_CLIENTE'] ?? null;
             $direccion = $factura['DIRECCION_CON'] ?? "No indica";
             $codProvincia = $factura['COD_PROVINCIA'] ?? "7";
             $codCanton = $factura['COD_CANTON'] ?? "7";
@@ -169,8 +169,10 @@ class CorbanaController extends Controller
             }
             $otherReference = $factura['NO_DOCU_REF'] ?? null;
             
-            $partidaArancelaria = $factura['NO_DUA'] ?? null;
-            if( isset($partidaArancelaria) ){
+            $sistema = $factura['SISTEMA'] ?? null;
+            $dua = $factura['NO_DUA'] ?? null;
+            $partidaArancelaria = $factura['PARTIDA_ARANCELARIA'] ?? $dua;
+            if( $sistema == 'EXP' ){
                 $tipoDocumento = '09';
                 $tipoPersona = "E";
                 $partidaArancelaria = mb_substr( $partidaArancelaria, -12, null, 'UTF-8') ;
@@ -196,6 +198,9 @@ class CorbanaController extends Controller
             }
             
             $TIPO_SERV = $factura['TIPO_SERV'] ?? 'B';
+            if( $tipoDocumento == '09' ){
+                $TIPO_SERV = 'B';
+            }
             
             $TIPO_PAGO = $factura['MODO_PAGO'] ?? 'D'; //Usan E, T, D, Q, etc
             $metodoPago = "04"; //Default transferencia
@@ -267,7 +272,12 @@ class CorbanaController extends Controller
                 if ( $detalleProducto != "DIFERENCIAL CAMBIARIO" && !strpos($detalleProducto, "RIFA GENERAL") ) {
                     $numeroLinea = $item['LINEA'];
                     $codigoProducto = $item['CODIGO'] ?? "0";
-                    $unidadMedicion = $TIPO_SERV == "S" ? "Sp" : 'Unid';
+                    
+                    $unidadMedicion = $item['UM'] ?? null;
+                    if( $unidadMedicion == 'N' ){
+                        $unidadMedicion = $TIPO_SERV == "S" ? "Sp" : 'Unid';
+                    }
+                    
                     $cantidad = $item['CANTIDAD'];
                     
                     $precioUnitario = $item['PRECIO_UNITARIO'];

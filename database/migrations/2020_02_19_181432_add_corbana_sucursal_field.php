@@ -14,7 +14,10 @@ class AddCorbanaSucursalField extends Migration
     public function up()
     {
          Schema::table('bills', function (Blueprint $table) {
-            $table->text('sucursal')->nullable();
+            if (!Schema::hasColumn('bills', 'sucursal')){
+                $table->text('sucursal')->nullable();
+            }
+            $table->text('email_reception')->nullable();
         });
     }
 
@@ -27,6 +30,7 @@ class AddCorbanaSucursalField extends Migration
     {
          Schema::table('bills', function (Blueprint $table) {
             $table->dropColumn('sucursal');
+            $table->dropColumn('email_reception');
         });
     }
 }
