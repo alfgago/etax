@@ -54,8 +54,8 @@ class SubscriptionPayment extends Command
             $paymentUtils = new PaymentUtils();
             $date = Carbon::parse(now('America/Costa_Rica'));
             
-            $bnStatus = $paymentUtils->statusBNAPI();
-            if($bnStatus['apiStatus'] == 'Successful') {
+            /*$bnStatus = $paymentUtils->statusBNAPI();
+            if($bnStatus['apiStatus'] == 'Successful') {*/
 
                 $unpaidSubscriptions = Sales::where('status', 2)->where('is_subscription', true)->get();
                 foreach($unpaidSubscriptions as $sale){
@@ -65,9 +65,9 @@ class SubscriptionPayment extends Command
                     ProcessSubscriptionPayments::dispatch($sale)->onQueue('payments');
                 }
                 
-            }else{
+            /*}else{
                 Log::error("Error conectando a API Klap: ".$bnStatus['apiStatus']);
-            }
+            }*/
             return true;
         }catch( \Exception $ex ) {
             Log::error("Error " . $ex->getMessage());
