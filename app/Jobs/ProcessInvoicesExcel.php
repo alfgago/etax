@@ -53,7 +53,7 @@ class ProcessInvoicesExcel implements ShouldQueue
     public function handle()
     {
         try{
-            $xlsInvoice = $this->xlsInvoice;
+            $factura = $this->xlsInvoice;
             $company = Company::find($xlsInvoice->company_id);
             /*$xlsInvoices = XlsInvoice::select('consecutivo', 'company_id','autorizado')
                 ->where('company_id',$company->id)->where('autorizado',1)->distinct('consecutivo')->get();*/
@@ -66,7 +66,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                     
                     try{
     
-                        $factura = XlsInvoice::where('company_id',$xlsInvoice->company_id)->where('consecutivo',$xlsInvoice->consecutivo)->get();
+                        //$factura = XlsInvoice::where('company_id',$xlsInvoice->company_id)->where('consecutivo',$xlsInvoice->consecutivo)->get();
                         
                         $invoice = new Invoice();
     
