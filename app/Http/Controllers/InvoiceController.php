@@ -2179,8 +2179,15 @@ class InvoiceController extends Controller
             }
             Log::info("Enviando facturas al job ProcessInvoicesExcel");
             
-            ProcessInvoicesExcel::dispatch($company)->onQueue('createinvoice');
-            //ProcessInvoicesExcel::dispatchNow($company);
+            $xlsInvoices = XlsInvoice::select('consecutivo', 'company_id','autorizado')
+                ->where('company_id',$company->id)
+                ->where('autorizado',1)
+                ->distinct('consecutivo')
+                ->get();
+            foreach ($xlsInvoices as $xlsInvoice) {
+                ProcessInvoicesExcel::dispatch($xlsInvoice)->onQueue('createinvoice');
+                //ProcessInvoicesExcel::dispatchNow($company);
+            }
             
             return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
         } catch ( \Exception $e) {

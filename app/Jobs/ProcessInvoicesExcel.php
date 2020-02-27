@@ -32,7 +32,7 @@ class ProcessInvoicesExcel implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    private $company = "";
+    private $xlsInvoice = "";
 
 
     /**
@@ -40,9 +40,9 @@ class ProcessInvoicesExcel implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($company)
+    public function __construct($xlsInvoice)
     {
-        $this->company = $company;
+        $this->xlsInvoice = $xlsInvoice;
     }
 
     /**
@@ -53,15 +53,16 @@ class ProcessInvoicesExcel implements ShouldQueue
     public function handle()
     {
         try{
-            $company = $this->company;
-            $xlsInvoices = XlsInvoice::select('consecutivo', 'company_id','autorizado')
-                ->where('company_id',$company->id)->where('autorizado',1)->distinct('consecutivo')->get();
+            $xlsInvoice = $this->xlsInvoice;
+            $company = Company::find($xlsInvoice->company_id);
+            /*$xlsInvoices = XlsInvoice::select('consecutivo', 'company_id','autorizado')
+                ->where('company_id',$company->id)->where('autorizado',1)->distinct('consecutivo')->get();*/
 
             $apiHacienda = new BridgeHaciendaApi();
             $tokenApi = $apiHacienda->login(false);
             if ($tokenApi !== false) {
 
-                foreach ($xlsInvoices as $xlsInvoice) {
+                //foreach ($xlsInvoices as $xlsInvoice) {
                     
                     try{
     
@@ -413,13 +414,13 @@ class ProcessInvoicesExcel implements ShouldQueue
                     }catch( \Exception $e ){
                         Log::error("Error en el job ENVIO MASIVO EXCEL:" . $e);
                     }
-                }
+                //}
                 
                 
             }else{
                 Log::info("token falso");
             }
-            XlsInvoice::where('company_id',$company->id)->delete();
+            $xlsInvoice->delete();
         } catch ( \Exception $e) {
             Log::error("Error en el job ENVIO MASIVO EXCEL:" . $e);
         }
