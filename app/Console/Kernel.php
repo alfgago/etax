@@ -36,6 +36,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('sminvoices:resend')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('02:00')->runInBackground();
         $schedule->command('invoice:recurrentes')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('23:00')->runInBackground();
+        $schedule->command('invoice:masivas')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('22:00')->runInBackground();
         $schedule->command('invoice:programadas')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('06:00')->runInBackground();
         //Comandos de checkout
         $schedule->command('subscription:checkout')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('01:30')->runInBackground();

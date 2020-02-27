@@ -8,7 +8,7 @@ use App\Utils\BridgeHaciendaApi;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
-class ResendInvoices extends Command
+class SendMasivas extends Command
 {
     /**
      * The name and signature of the console command.
