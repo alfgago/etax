@@ -350,6 +350,13 @@ class Bill extends Model
         $bill->credit_time = null;
 
         $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '01';
+        
+        try{
+          $correoReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['CorreoElectronico'] : null;
+          $bill->email_reception = $correoReceptor;
+        }catch(\Exception $e){
+          Log::error( "Error al registrar correo receptor: " . $e->getMessage() );
+        }
 
         if ( is_array($medioPago) ) {
           $medioPago = $medioPago[0];

@@ -198,13 +198,11 @@ class ProcessInvoiceSM implements ShouldQueue
                     $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, true);
                 }
                 Log::info('Factura enviada y XML guardado.');
-            } else if (isset($response['status']) && $response['status'] == 400 &&
-                strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
+            } else if (isset($response['status']) && $response['status'] == 400 && strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
                 Log::info('Consecutive repeated -->' . $invoice->document_number);
                 $invoice->hacienda_status = '04';
                 $invoice->save();
-            } else if (isset($response['status']) && $response['status'] == 400 &&
-                strpos($response['message'], 'XML ya existe en nuestras bases de datos') <> false) {
+            } else if (isset($response['status']) && $response['status'] == 400 && strpos($response['message'], 'XML ya existe en nuestras bases de datos') <> false) {
                 Log::info('Consecutive repeated -->' . $invoice->document_number);
                 sleep(2);
                 $this->signXML($invoice, $requestData);
