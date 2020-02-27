@@ -1025,6 +1025,9 @@ class Bill extends Model
       if($email ==  "facturaelectronica@corbana.co.cr"){
         $this->sucursal = "01";  
       }
+      if($email ==  "cajachica@corbana.co.cr"){
+        $this->sucursal = "01";  
+      }
       if($email ==  "corbanaguapiles@corbana.co.cr"){
         $this->sucursal = "02";  
       }
