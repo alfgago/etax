@@ -42,9 +42,14 @@ class EmailController extends Controller
         
         $pdf = null;
         $count = intval($request->attachments);
-        $email = $request->to;
-        $email = str_replace(array('<','>','"'), '',$email);
-        Log::debug($email);
+        
+        try{
+            $email = $request->to;
+            $email = str_replace(array('<','>','"'), '',$email);
+        }catch(\Exception $e){
+            $email = null;
+        }
+        
         //Recorre los archivos buscando el PDF
         for ($i = 1; $i <= $count; $i++) {
            try{
