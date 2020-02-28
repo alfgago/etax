@@ -25,8 +25,8 @@ class CorbanaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar']] );
-        $this->middleware('CheckSubscription', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar']] );
+        $this->middleware('auth', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles']] );
+        $this->middleware('CheckSubscription', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles']] );
     }
     
     public function queryBills(Request $request) {
@@ -56,11 +56,53 @@ class CorbanaController extends Controller
                 
                 $xml = $billUtils->downloadXml($bill, $company);
                 $bill->xml64 = isset($xml) ? base64_encode($xml) : null;
+                
+                $xmlA = $billUtils->downloadXmlAceptacion($bill, $company);
+                $bill->xmlA64 = isset($xmlA) ? base64_encode($xmlA) : null;
             }           
             if(isset($bills)){
                 return response()->json([
                     'mensaje' => $bills->count() . ' facturas',
                     'facturas' => $bills
+                ], 200);
+            }
+        
+        }catch(\Exception $e){
+            Log::error("Error en Corbana" . $e);
+            return response()->json([
+                'mensaje' => 'Error ' . $e->getMessage()
+            ], 200);
+        }
+    }
+    
+    public function queryBillFiles(Request $request) {
+        try{
+            $billId = $request->pId;
+            
+            $bill = Bill::where('id', $billId)->with('company')->first();
+                    
+            $billUtils = new \App\Utils\BillUtils();
+            if( isset($bill) ){
+                $company = $bill->company;
+                $pdf = $billUtils->streamPdf($bill, $company);
+                $bill->pdf64 = empty($pdf) ? base64_encode($pdf) : null;
+                
+                $xml = $billUtils->downloadXml($bill, $company);
+                $bill->xml64 = empty($xml) ? base64_encode($xml) : null;
+                
+                $xmlA = $billUtils->downloadXmlAceptacion($bill, $company);
+                $bill->xmlh64 = empty($xmlA) ? base64_encode($xmlA) : null;
+                
+                $hasFiles = 0;
+                if( empty($xml) && empty($xmlA) && empty($pdf) ){
+                    $hasFiles = 1;
+                }
+              
+            Log::error("exito en Corbana " . $hasFiles);
+                return response()->json([
+                    'mensaje'  => "Enviando archivos. Resp($hasFiles)",
+                    'factura'  => $bill,
+                    'tiene_todos' => $hasFiles
                 ], 200);
             }
         
@@ -280,7 +322,7 @@ class CorbanaController extends Controller
                     
                     $cantidad = $item['CANTIDAD'];
                     
-                    $precioUnitario = $item['PRECIO_UNITARIO'];
+                    $precioUnitario = $item['PRECIO'];
                     $montoDescuento = $item['DESCUENTO'];
                     
                     $subtotalLinea = $cantidad*$precioUnitario - $montoDescuento;

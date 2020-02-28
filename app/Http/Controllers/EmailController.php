@@ -42,6 +42,14 @@ class EmailController extends Controller
         
         $pdf = null;
         $count = intval($request->attachments);
+        
+        try{
+            $email = $request->to;
+            $email = str_replace(array('<','>','"'), '',$email);
+        }catch(\Exception $e){
+            $email = null;
+        }
+        
         //Recorre los archivos buscando el PDF
         for ($i = 1; $i <= $count; $i++) {
            try{
@@ -59,7 +67,15 @@ class EmailController extends Controller
         for ($i = 1; $i <= $count; $i++) {
            try{
                $file = $request->file( "attachment$i" );
-               EmailController::processAttachmentAsXML( $file, $pdf );
+               EmailController::processAttachmentAsXML( $file, $pdf, $email );
+           }catch(\Throwable $e){}
+        }
+        
+        //Recorre los archivos buscando el XML
+        for ($i = 1; $i <= $count; $i++) {
+           try{
+               $file = $request->file( "attachment$i" );
+               Bill::processMessageXML( $file );
            }catch(\Throwable $e){}
         }
         
@@ -70,7 +86,7 @@ class EmailController extends Controller
         
     }
     
-    public static function processAttachmentAsXML( $file, $pdf = null ) {
+    public static function processAttachmentAsXML( $file, $pdf = null, $email = null ) {
         
         $xml = simplexml_load_string( file_get_contents($file) );
         $json = json_encode( $xml ); // convert the XML string to JSON
@@ -82,7 +98,7 @@ class EmailController extends Controller
         $clave = $arr['Clave'];
         
         try {
-            $bill = Bill::saveBillXML( $arr, 'Email' );
+            $bill = Bill::saveBillXML( $arr, 'Email', $email );
             if( $bill ) {
                 Log::info( "CORREO: Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor");
                 Bill::storeXML( $bill, $file );

@@ -7,12 +7,14 @@ use App\Company;
 use App\BillItem;
 use App\Provider;
 use App\XmlHacienda;
+use App\HaciendaResponse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Kyslik\ColumnSortable\Sortable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Orchestra\Parser\Xml\Facade as XmlParser;
 
 class Bill extends Model
 {
@@ -316,7 +318,7 @@ class Bill extends Model
     }
     
     
-    public static function saveBillXML( $arr, $metodoGeneracion ) {
+    public static function saveBillXML( $arr, $metodoGeneracion, $emailRecibido = null ) {
         
         $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
         if($metodoGeneracion != "Email" && $metodoGeneracion != 'GS' ){
@@ -352,8 +354,10 @@ class Bill extends Model
         $medioPago = array_key_exists('MedioPago', $arr) ? $arr['MedioPago'] : '01';
         
         try{
-          $correoReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['CorreoElectronico'] : null;
-          $bill->email_reception = $correoReceptor;
+          if( !isset($emailRecibido) ){
+            $emailRecibido = array_key_exists('Receptor', $arr) ? $arr['Receptor']['CorreoElectronico'] : null;
+          }
+          $bill->email_reception = $emailRecibido;
         }catch(\Exception $e){
           Log::error( "Error al registrar correo receptor: " . $e->getMessage() );
         }
@@ -710,6 +714,93 @@ class Bill extends Model
           
         }catch( \Throwable $e ){
           Log::error( 'Error al guardar el PDF recibido: ' . $e->getMessage() );
+        }
+        
+        return $path;
+        
+    }
+    
+    
+    public static function storeXMLMessage($bill, $file) {
+        
+        try{
+          $cedulaEmpresa = $bill->company->id_number;
+          //$cedulaProveedor = $bill->provider->id_number;
+          $consecutivoComprobante = $bill->document_number;
+          
+          if ( Storage::exists("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/mensaje-$consecutivoComprobante.pdf")) {
+              Storage::delete("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/mensaje-$consecutivoComprobante.pdf");
+          }
+          
+          $path = \Storage::putFileAs(
+              "empresa-$cedulaEmpresa/facturas_compras", $file, "$bill->year/$bill->month/mensaje-$consecutivoComprobante.pdf"
+          );
+          
+          return $path;
+          
+        }catch( \Throwable $e ){
+          Log::error( 'Error al guardar el MENSAJE recibido: ' . $e->getMessage() );
+        }
+        
+        return $path;
+        
+    }
+    
+    public static function processMessageXML($file) {
+        
+        try{
+          $xml = simplexml_load_string( file_get_contents($file) );
+          $json = json_encode( $xml ); // convert the XML string to JSON
+          $xmlData = json_decode( $json, TRUE );
+          
+          $consecutivoComprobante = $xmlData['NumeroConsecutivo'] ?? null; //La respuesta no debe contener el cambo de numero consecutivo
+          $mensaje = $xmlData['Mensaje'] ?? null; //Asegura que existe el mensaje, si no no es un XML correcto de aceptacion
+          Log::debug("Mensaje: $mensaje | xmlData: " . json_encode($xmlData) );
+          if( !isset($consecutivoComprobante) && isset($mensaje) ){
+            $clave = $xmlData['Clave'] ?? null;
+            $nombreEmisor = $xmlData['NombreEmisor'] ?? null;
+            $tipoIdentificacionEmisor = $xmlData['TipoIdentificacionEmisor'] ?? null;
+            $numeroCedulaEmisor = $xmlData['NumeroCedulaEmisor'] ?? null;
+            $nombreReceptor = $xmlData['NombreReceptor'] ?? null;
+            $tipoIdentificacionReceptor = $xmlData['TipoIdentificacionReceptor'] ?? null;
+            $numeroCedulaReceptor = $xmlData['NumeroCedulaReceptor'] ?? null;
+            $detalleMensaje = $xmlData['DetalleMensaje'] ?? null;
+            $montoTotalImpuesto = $xmlData['MontoTotalImpuesto'] ?? null;
+            $totalFactura = $xmlData['TotalFactura'] ?? null;
+
+            $bills = Bill::where('document_key', $clave)->get();
+            //Guarda el haciendaResponse segun lo contenido en el XML
+            foreach($bills as $bill){
+              $path = Bill::storeXMLMessage($bill, $file);
+              $haciendaResponse = HaciendaResponse::updateOrCreate(
+                [
+                  'bill_id' => $bill->id
+                ],
+                [
+                  'clave' => $clave,
+                  'nombre_emisor' => $nombreEmisor,
+                  'tipo_identificacion_emisor' => $tipoIdentificacionEmisor,
+                  'numero_cedula_emisor' => $numeroCedulaEmisor,
+                  'nombre_receptor' => $nombreReceptor,
+                  'tipo_identificacion_receptor' => $tipoIdentificacionReceptor,
+                  'numero_cedula_receptor' => $numeroCedulaReceptor,
+                  'mensaje' => $mensaje,
+                  'detalle_mensaje' => $detalleMensaje,
+                  'monto_total_impuesto' => $montoTotalImpuesto,
+                  'total_factura' => $totalFactura,
+                  's3url' => $path
+                ]
+              );
+              
+              $xmlHacienda = $bill->xmlHacienda;
+              if( isset($xmlHacienda) ){
+                $xmlHacienda->xml_message = $path;
+                $xmlHacienda->save();
+              }
+            }
+          }
+        }catch( \Throwable $e ){
+          Log::error( 'Error al procesar el MENSAJE HACIENDA recibido: ' . $e->getMessage() );
         }
         
         return $path;
