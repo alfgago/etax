@@ -28,3 +28,4 @@ Route::post('corbana-anular', 'CorbanaController@anularInvoice');
 Route::get('corbana-aceptar-rechazar/{id}', 'CorbanaController@aceptarRechazar');
 Route::get('corbana-query-invoice/{id}', 'CorbanaController@queryInvoice');
 Route::get('corbana-query-bills/{pCia}/{pAct}', 'CorbanaController@queryBills');
+Route::get('corbana-query-bill-files/{pId}', 'CorbanaController@queryBillFiles');

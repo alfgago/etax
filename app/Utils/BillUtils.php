@@ -89,6 +89,33 @@ class BillUtils
         return $file;
     }
     
+    public function downloadXmlAceptacion( $bill, $company )
+    {
+        $xml = $bill->xmlHacienda;
+        
+        $file = false;
+        if( isset($xml) ) {
+        	$path = $xml->xml_message;
+        	if ( Storage::exists($path)) {
+	          $file = Storage::get($path);
+	        }
+        }
+        
+        //Si no encontró el archivo, lo busca en 2 posibles rutas.
+        if( !isset($file) ){
+        	$cedulaEmpresa = $company->id_number;
+        	$consecutivoComprobante = $bill->document_number;
+        	
+        	//Lo busca primero dentro de facturas_ventas
+        	$path = "empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/mensaje-$consecutivoComprobante.pdf";
+	        if ( Storage::exists($path)) {
+	          $file = Storage::get($path);
+	        }
+        }
+        
+        return $file;
+    }
+    
     public function getXmlPath( $bill, $company )
     {
         $xml = $bill->xmlHacienda;

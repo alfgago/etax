@@ -196,7 +196,7 @@ class SMInvoiceController extends Controller
         FROM invoices inv, invoice_items it
         WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
         AND it.year = $year AND it.month = $month AND document_type != '03'
-        AND generation_method = 'etax-bulk'
+        AND generation_method = 'etax-bulk' AND is_void = 0
         AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
         
         $facturasEtax = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
@@ -206,7 +206,7 @@ class SMInvoiceController extends Controller
         FROM invoices inv, invoice_items it
         WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
         AND it.year = $year AND it.month = $month AND document_type != '03'
-        AND generation_method != 'etax-bulk'
+        AND generation_method != 'etax-bulk' AND is_void = 0
         AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
         
         $notasExcel = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
@@ -216,7 +216,7 @@ class SMInvoiceController extends Controller
         FROM invoices inv, invoice_items it
         WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
         AND it.year = $year AND it.month = $month AND document_type = '03'
-        AND generation_method = 'etax-bulk'
+        AND generation_method = 'etax-bulk' AND is_void = 0
         AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
         
         $notasEtax = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
@@ -226,7 +226,7 @@ class SMInvoiceController extends Controller
         FROM invoices inv, invoice_items it
         WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
         AND it.year = $year AND it.month = $month AND document_type = '03'
-        AND generation_method != 'etax-bulk'
+        AND generation_method != 'etax-bulk' AND is_void = 0
         AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
 
         return view('SMInvoice/smwidget', compact('facturasExcel', 'facturasEtax', 'notasExcel', 'notasEtax'));
