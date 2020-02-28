@@ -2179,9 +2179,9 @@ class InvoiceController extends Controller
             }
             Log::info("Enviando facturas al job ProcessInvoicesExcel");
             
-            $xlsInvoices = XlsInvoice::select('consecutivo', 'company_id','autorizado')
+            $xlsInvoices = XlsInvoice::select('consecutivo', 'company_id', 'autorizado')
                 ->where('company_id',$company->id)
-                ->where('autorizado',1)
+                ->where('autorizado', 1)
                 ->distinct('consecutivo')
                 ->get();
             foreach ($xlsInvoices as $xlsInvoice) {
