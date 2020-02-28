@@ -32,7 +32,7 @@ class ProcessInvoicesExcel implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    private $xlsInvoice = "";
+    private $xlsInvoice = null;
 
 
     /**
@@ -53,6 +53,7 @@ class ProcessInvoicesExcel implements ShouldQueue
     public function handle()
     {
         try{
+            //Log::debug( 'Log de xlsInvoice: ' . json_encode($this->xlsInvoice) );
             $xlsInvoice = $this->xlsInvoice;
             $company = Company::find($xlsInvoice->company_id);
             /*$xlsInvoices = XlsInvoice::select('consecutivo', 'company_id','autorizado')
@@ -60,6 +61,7 @@ class ProcessInvoicesExcel implements ShouldQueue
             $lineas = XlsInvoice::where('company_id', $xlsInvoice->company_id)->where('consecutivo', $xlsInvoice->consecutivo)->get();
             $factura = $lineas[0];
             Log::debug( 'Log de fac envio masivo: ' . json_encode($lineas) );
+            //dd($factura);
 
             $apiHacienda = new BridgeHaciendaApi();
                     
@@ -413,7 +415,7 @@ class ProcessInvoicesExcel implements ShouldQueue
                     }
                 //}
                 
-            $lineas->delete();
+            XlsInvoice::where('company_id', $xlsInvoice->company_id)->where('consecutivo', $xlsInvoice->consecutivo)->delete();
         } catch ( \Exception $e) {
             Log::error("Error en el job ENVIO MASIVO EXCEL:" . $e);
         }
