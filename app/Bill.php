@@ -755,7 +755,7 @@ class Bill extends Model
           
           $consecutivoComprobante = $xmlData['NumeroConsecutivo'] ?? null; //La respuesta no debe contener el cambo de numero consecutivo
           $mensaje = $xmlData['Mensaje'] ?? null; //Asegura que existe el mensaje, si no no es un XML correcto de aceptacion
-          Log::debug("Mensaje: $mensaje | xmlData: " . json_encode($xmlData) );
+          //Log::debug("Mensaje: $mensaje | xmlData: " . json_encode($xmlData) );
           if( !isset($consecutivoComprobante) && isset($mensaje) ){
             $clave = $xmlData['Clave'] ?? null;
             $nombreEmisor = $xmlData['NombreEmisor'] ?? null;
@@ -800,7 +800,7 @@ class Bill extends Model
             }
           }
         }catch( \Throwable $e ){
-          Log::error( 'Error al procesar el MENSAJE HACIENDA recibido: ' . $e->getMessage() );
+          //Log::error( 'Error al procesar el MENSAJE HACIENDA recibido: ' . $e->getMessage() );
         }
         
         return $path;
