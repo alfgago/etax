@@ -61,7 +61,7 @@ class EmailController extends Controller
                        $pdf = $file;
                     }
                }
-           }catch(\Throwable $e){Log::error($e->getMessage());}
+           }catch(\Throwable $e){}
         }
         //Recorre los archivos buscando el XML
         for ($i = 1; $i <= $count; $i++) {
