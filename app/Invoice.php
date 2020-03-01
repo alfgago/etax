@@ -1198,5 +1198,53 @@ class Invoice extends Model
             //return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
         }
     }
+    
+    public function getLiveCurrencyRate()
+    {
+
+        $cacheKey = "usd_rate";
+        $lastRateKey = "last_usd_rate";
+        try {
+            if ( !Cache::has($cacheKey) ) {
+
+                $today = new Carbon();
+                $client = new \GuzzleHttp\Client();
+                $response = $client->get(config('etax.exchange_url'),
+                    ['query' => [
+                        'Indicador' => '318',
+                        'FechaInicio' => $today::now()->format('d/m/Y'),
+                        'FechaFinal' => $today::now()->format('d/m/Y'),
+                        'Nombre' => config('etax.namebccr'),
+                        'SubNiveles' => 'N',
+                        'CorreoElectronico' => config('etax.emailbccr'),
+                        'Token' => config('etax.tokenbccr')
+                    ]
+                    ]
+                );
+                $body = $response->getBody()->getContents();
+                $xml = new \SimpleXMLElement($body);
+                $xml->registerXPathNamespace('d', 'urn:schemas-microsoft-com:xml-diffgram-v1');
+                $tables = $xml->xpath('//INGC011_CAT_INDICADORECONOMIC[@d:id="INGC011_CAT_INDICADORECONOMIC1"]');
+                $valor =  json_decode($tables[0]->NUM_VALOR);
+
+                Cache::put($cacheKey, $valor, now()->addHours(2));
+                Cache::put($lastRateKey, $valor, now()->addDays(5));
+            }
+
+            $value = Cache::get($cacheKey);
+            return $value;
+
+        } catch( \Exception $e) {
+            Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: ');
+            $value = Cache::get($lastRateKey);
+            return $value;
+        } catch (RequestException $e) {
+            Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: '.
+                $e->getResponse()->getReasonPhrase());
+            $value = Cache::get($lastRateKey);
+            return $value;
+        }
+
+    }
 
 }

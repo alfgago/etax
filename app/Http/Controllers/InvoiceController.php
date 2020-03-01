@@ -1501,9 +1501,6 @@ class InvoiceController extends Controller
 
     }
 
-
-
-
     public function importXML(Request $request) {
         try {
             $time_start = getMicrotime();

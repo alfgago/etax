@@ -49,6 +49,15 @@ class EnvioProgramadas implements ShouldQueue
                             ->with('items')->firstOrFail();
             $company = $invoice->company;
             
+            try{
+                $currRate = $invoice->getLiveCurrencyRate();
+                if($currRate > 1){
+                    $invoice->currency_rate = $currRate;
+                }
+            }catch(\Exception $e){
+                Log::error("error en envio de programada: " . $e->getMessage() );
+            }
+            
             //if($company->id != '208'){ return false; }
             
             if( strtolower($invoice->document_number) == 'programada') {
