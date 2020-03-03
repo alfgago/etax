@@ -34,7 +34,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('reception:resend')->timezone(config('app.timezone'))->withoutOverlapping()->everyFifteenMinutes()->runInBackground();
         $schedule->command('gosocket:sync')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('03:30')->runInBackground();
 
-        $schedule->command('sminvoices:resend')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('02:00')->runInBackground();
+        $schedule->command('sminvoices:resend')->timezone(config('app.timezone'))->withoutOverlapping()->hourly()->runInBackground();
         $schedule->command('invoice:recurrentes')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('23:00')->runInBackground();
         $schedule->command('invoice:masivas')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('22:00')->runInBackground();
         $schedule->command('invoice:programadas')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('06:00')->runInBackground();
