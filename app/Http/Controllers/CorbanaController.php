@@ -80,10 +80,19 @@ class CorbanaController extends Controller
             $billId = $request->pId;
             
             $bill = Bill::where('id', $billId)->with('company')->first();
+            
                     
             $billUtils = new \App\Utils\BillUtils();
             if( isset($bill) ){
                 $company = $bill->company;
+                $cedula = $company->id_number;
+                if( $cedula != "3101018968" && $cedula != "3101011989" && $cedula != "3101166930" && $cedula != "3007684555" && $cedula != "3130052102" && $cedula != "3101702429" ){
+                    Log::warning("Error: ID de factura no le pertenece a Corbana");
+                    return response()->json([
+                        'mensaje' => 'Error: ID de factura no le pertenece a Corbana'
+                    ], 200);
+                }
+            
                 $pdf = $billUtils->streamPdf($bill, $company);
                 $bill->pdf64 = empty($pdf) ? base64_encode($pdf) : null;
                 
