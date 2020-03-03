@@ -25,9 +25,9 @@ class InvoiceUtils
     {
         $pdfRoute = 'Pdf/invoice';
         $provider = null;
-        /*if($company->id_number == '3101015179'){
-            $pdfRoute = 'Pdf/custom/trifami';
-        }*/
+        if( $company->id_number == "3101018968" || $company->id_number == "3101011989" || $company->id_number == "3101166930" || $company->id_number == "3007684555" || $company->id_number == "3130052102" || $company->id_number == "3101702429" ) {
+            $pdfRoute = 'Pdf/custom/corbana';
+        }
         if ($invoice->document_type == '08') {
             $provider = Provider::find($invoice->provider_id);
         }
@@ -45,9 +45,9 @@ class InvoiceUtils
     {
         $pdfRoute = 'Pdf/invoice';
         $provider = null;
-        /*if($company->id_number == '3101015179'){
-            $pdfRoute = 'Pdf/custom/trifami';
-        }*/
+        if( $company->id_number == "3101018968" || $company->id_number == "3101011989" || $company->id_number == "3101166930" || $company->id_number == "3007684555" || $company->id_number == "3130052102" || $company->id_number == "3101702429" ) {
+            $pdfRoute = 'Pdf/custom/corbana';
+        }
         if ($invoice->document_type == '08') {
             $provider = Provider::find($invoice->provider_id);
         }
