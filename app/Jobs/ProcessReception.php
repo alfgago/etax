@@ -103,12 +103,9 @@ class ProcessReception implements ShouldQueue
                                 $bill->hacienda_status = '03';
                                 $bill->save();
                                 $xml = XmlHacienda::where('bill_id',$bill->id)->whereNotNull('xml')->first();
-                                $path = 'empresa-' . $company->id_number .
-                                    "/aceptaciones/$date->year/$date->month/$bill->document_key.xml";
+                                $path = 'empresa-' . $company->id_number . "/aceptaciones/$date->year/$date->month/$bill->document_key.xml";
                                 $pathFE = $xml->xml;
-                                $save = Storage::put(
-                                    $path,
-                                    ltrim($response['data']['xmlFirmado'], '\n'));
+                                $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n') );
                                 if ($save) {
                                     $xml->xml_reception = $path;
                                     $xml->save();

@@ -25,7 +25,7 @@ class InvoiceUtils
     {
         $pdfRoute = 'Pdf/invoice';
         $provider = null;
-        if( $company->id_number == "3101018968" || $company->id_number == "3101011989" || $company->id_number == "3101166930" || $company->id_number == "3007684555" || $company->id_number == "3130052102" || $company->id_number == "3101702429" ) {
+        if( $company->id_number == "3101018968" || $company->id_number == "3101011989" || $company->id_number == "3101166930" || $company->id_number == "3007684555" || $company->id_number == "3130052102" ) {
             $pdfRoute = 'Pdf/custom/corbana';
         }
         if ($invoice->document_type == '08') {
@@ -45,7 +45,7 @@ class InvoiceUtils
     {
         $pdfRoute = 'Pdf/invoice';
         $provider = null;
-        if( $company->id_number == "3101018968" || $company->id_number == "3101011989" || $company->id_number == "3101166930" || $company->id_number == "3007684555" || $company->id_number == "3130052102" || $company->id_number == "3101702429" ) {
+        if( $company->id_number == "3101018968" || $company->id_number == "3101011989" || $company->id_number == "3101166930" || $company->id_number == "3007684555" || $company->id_number == "3130052102" ) {
             $pdfRoute = 'Pdf/custom/corbana';
         }
         if ($invoice->document_type == '08') {

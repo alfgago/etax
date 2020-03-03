@@ -10,7 +10,7 @@
         table {
             width: 100%;
             text-align: left;
-            font-size: 9px;
+            font-size: 8px;
             line-height: 1.1;
         }
 
@@ -62,13 +62,13 @@
         .resumen-totales tr td,
         .resumen-totales span {
             text-align: right;
-            font-size: 11px;
+            font-size: 10px;
         }
         
         .resumen-totales tr td.texto-resumen {
             text-align: left;
             white-space: nowrap;
-            font-size: 9px;
+            font-size: 8px;
         }
         
     </style>
@@ -115,6 +115,8 @@
     $totalVenta = $requestData['totventa'] ?? 0;
     $totalNeta = $requestData['totventaneta'] ?? 0;
     $totalComprobante = $requestData['totcomprobante'] ?? 0;
+    
+    $otherData = \App\OtherInvoiceData::where("invoice_id", $data_invoice->id)->get();
     
 ?>
 <body>
@@ -175,7 +177,11 @@
                             <b>IDENTIFICACION / (ID):</b> <span>{{$data_invoice->client_id_number}}</span><br>
                             <b>CORREO ELECTRONICO / (EMAIL):</b> <span>{{$data_invoice->client_email}}</span><br>
                             <b>TELEFONO / (PHONE NUMBER):</b> <span>{{$data_invoice->client_phone}}</span><br>
-                            <b>REFERENCIA / (REFERENCE):</b> <span>{{$data_invoice->id}}</span><br>
+                            <b>REFERENCIA / (REFERENCE):</b> <span>{{ \App\OtherInvoiceData::findData($otherData, 'REFERENCIA') }}</span><br>
+                            <?php $consignatario = \App\OtherInvoiceData::findData($otherData, 'CONSIG');
+                                if( isset($consignatario) ){  ?>
+                            <b>CONSIGNATARIO/(CONSIGNES):</b> <span>{{ $consignatario }}</span><br>
+                            <?php } ?>
                         </td>
                         <td>
                             <b>FACTURA ELECTRÓNICA / (ELECTRONIC INVOICE):</b> <span>{{$data_invoice->document_number}}</span><br>
@@ -362,6 +368,16 @@
                     <tr>
                         <td class="texto-resumen" style="font-size: 12px; font-weight: bold;"><b>Total</b></td>
                         <td style="font-size: 12px; font-weight: bold;"><span>{{ number_format( ($totalComprobante) , 2)}}</span></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td style="border: 2px solid black; padding: 5px; border-right:0;" colspan="2">
+                <table class="table-usuario">
+                    <tr>
+                        <td><b>HECHO POR/(DONE BY):</b> <span>{{ \App\OtherInvoiceData::findData($otherData, 'HECHO_POR') }}</span></td>
+                        <td><b>APROBADO POR/(APROVED BY): </b> <span>{{ \App\OtherInvoiceData::findData($otherData, 'REVISADO_POR') }}</span></td>
                     </tr>
                 </table>
             </td>

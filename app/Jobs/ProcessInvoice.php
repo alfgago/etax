@@ -99,6 +99,14 @@ class ProcessInvoice implements ShouldQueue
                                     'doc_type' => $invoice->document_type,
                                     'json_response' => json_encode($response)
                                 ]);
+                                
+                                if( isset($response['status']) ){
+                                    $path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
+                                    $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n') );
+                                    $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
+                                    $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );
+                                }
+                                
                                 if (isset($response['status']) && $response['status'] == 200) {
                                     Log::info('API HACIENDA 200 :'. $invoice->document_number);
                                     if (strpos($response['data']['response'],"ESTADO=procesando") !== false) {
@@ -107,16 +115,7 @@ class ProcessInvoice implements ShouldQueue
                                         $invoice->hacienda_status = '03';
                                     }
                                     $invoice->save();
-                                    $path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
-                                    $save = Storage::put(
-                                        $path,
-                                        ltrim($response['data']['xmlFirmado'], '\n')
-                                    );
-                                    $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
-                                    $saveMH = Storage::put(
-                                        $pathMH,
-                                        ltrim($response['data']['mensajeHacienda'], '\n')
-                                    );
+                                    
                                     if ($save) {
                                         $xml = new XmlHacienda();
                                         $xml->invoice_id = $invoice->id;
