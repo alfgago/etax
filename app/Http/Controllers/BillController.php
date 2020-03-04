@@ -302,6 +302,8 @@ class BillController extends Controller
         $filtro = $request->get('filtro');
         $moneda = $request->get('moneda');
         $estado = $request->get('estado');
+        $estadoAceptacion = $request->get('estado_aceptacion');
+        
         $fecha_desde = $request->get('fecha_desde');
         $fecha_hasta = $request->get('fecha_hasta');
         if( $filtro == 0 ) {
@@ -316,10 +318,14 @@ class BillController extends Controller
             $query = $query->where('document_type', '04');
         }
         
-        if( $filtro == 98 ) {
+        if( $estadoAceptacion == 1 ) {
+            $query = $query->where('accept_status', 1);
+        }else if( $estadoAceptacion == 2 ) {
             $query = $query->where('accept_status', 2);
-        }else{
-            $query = $query->where('accept_status', '!=' , 2);
+        }else if( $estadoAceptacion == 0 ) {
+            $query = $query->where('accept_status', 0);
+        }else if( $estadoAceptacion == 99 ) {
+            $query = $query->where('accept_status', '!=', 2);
         }
         
         if( $estado != 0) {

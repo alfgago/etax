@@ -402,7 +402,7 @@ class Bill extends Model
             $authorize = false;
         }
         
-        //$bill->accept_status = 1; //17/02/2020. Esto se cambia para que por defecto queden como aceptadas. Usuario debe poder rechazar luego si quisiera
+        $bill->accept_status = 0; 
         $bill->hacienda_status = "03";
         $bill->payment_status = "01";
         $bill->generation_method = $metodoGeneracion;
@@ -410,7 +410,7 @@ class Bill extends Model
         $bill->is_code_validated = false;
         
         if( $metodoGeneracion == "Email" || $metodoGeneracion == "XML" ) {
-            //$bill->accept_status = 1; //17/02/2020. Esto se cambia para que por defecto queden como aceptadas
+            $bill->accept_status = 0; 
             $bill->hacienda_status = "01";
         }
         
