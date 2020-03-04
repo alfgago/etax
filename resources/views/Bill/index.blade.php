@@ -61,7 +61,18 @@
             </div>
           </div>
           <div class="div-filtro">
-            <label>Estado</label>
+            <label>Estado Aceptación</label>
+            <div class="periodo-selects">
+              <select class="form-control" id="estado_aceptacion-select" name="estado_aceptacion" onchange="reloadDataTable();">
+                  <option value="99" selected>Ocultar rechazadas</option>
+                  <option value="0">Mostrar sin estado</option>
+                  <option value="1">Mostrar aceptadas</option>
+                  <option value="2">Mostrar rechazadas</option>
+              </select>
+            </div>
+          </div>
+          <div class="div-filtro">
+            <label>Estado Hacienda</label>
             <div class="periodo-selects">
               <select class="form-control" id="estado-select" name="estado" onchange="reloadDataTable();">
                   <option value="0" selected>Todas los estados</option>
@@ -110,6 +121,7 @@ $(function() {
       data: function(d){
           d.filtro = $( '#filtro-select' ).val();
           d.moneda = $( '#moneda-select' ).val();
+          d.estado_aceptacion = $( '#estado_aceptacion-select' ).val();
           d.fecha_desde = $( '#fecha_desde' ).val();
           d.fecha_hasta = $( '#fecha_hasta' ).val();
           d.estado = $( '#estado-select' ).val();
@@ -181,6 +193,24 @@ function confirmEnvioAceptacion( id ) {
 }
 
 
+
+  
+function confirmAcceptHacienda( id ) {
+  var formId = "#accepthacienda-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea aceptar la factura?',
+    text: "Al aceptar, se enviará el mensaje a Hacienda.",
+    type: 'info',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero aceptarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
   
 function confirmDecline( id ) {
   var formId = "#decline-form-"+id;

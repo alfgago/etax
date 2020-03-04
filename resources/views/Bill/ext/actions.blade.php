@@ -30,7 +30,7 @@
               </form>
             @endif
             
-            @if( !(@$data->accept_status == 1 && @$data->hacienda_status == '03') )
+            @if( false && !(@$data->accept_status == 1 && @$data->hacienda_status == '03') )
               <form id="envioaceptacion-form-{{  $data->id }}" class="block-form hidden " method="POST" action="/facturas-recibidas/marcar-para-aceptacion/{{ $data->id }}" >
                 @csrf
                 @method('patch')
@@ -40,16 +40,16 @@
               </form>
             @endif
             
+            <a link="/facturas-recibidas/validar/{{ $data->id }}" titulo="Validación Compra" class="text-success mr-2 dropdown-item" onclick="validarPopup(this);" data-toggle="modal" data-target="#modal_estandar">
+              <i class="fa fa-check" aria-hidden="true"></i> <span class="toggle-item-text">Validación de códigos</span>
+            </a>
+            
             <a href="/facturas-recibidas/download-pdf/{{ $data->id }}" title="Descargar PDF" class="text-warning mr-2 dropdown-item" download > 
               <i class="fa fa-file-pdf-o" aria-hidden="true"></i> <span class="toggle-item-text">Descargar PDF</span>
             </a>
             
             <a href="/facturas-recibidas/download-xml/{{ $data->id }}" title="Descargar XML" class="text-info mr-2 dropdown-item"> 
               <i class="fa fa-file-text-o" aria-hidden="true"></i> <span class="toggle-item-text">Descargar XML</span>
-            </a>
-            
-            <a link="/facturas-recibidas/validar/{{ $data->id }}" titulo="Validación Compra" class="text-success mr-2 dropdown-item" onclick="validarPopup(this);" data-toggle="modal" data-target="#modal_estandar">
-              <i class="fa fa-check" aria-hidden="true"></i> <span class="toggle-item-text">Validación de códigos</span>
             </a>
         
             <form id="hidefromtaxes-form-{{  $data->id }}" class="block-form dropdown-item" method="POST" action="/facturas-recibidas/switch-ocultar/{{ $data->id }}" >
@@ -58,6 +58,15 @@
               <input type="hidden" name="hide_from_taxes" value="1">
               <a type="button" class="text-info mr-2" title="Ocultar de cálculo de impuestos" onclick="confirmHideFromTaxes({{  $data->id }});">
                  <i style="color:#999;" class="fa fa-eye-slash" aria-hidden="true"></i> <span class="toggle-item-text">Ocultar de cálculos</span>
+              </a>
+            </form>
+            
+            <form id="accepthacienda-form-{{ $data->id }}" class="block-form dropdown-item" method="POST" action="/facturas-recibidas/respuesta-aceptacion/{{ $data->id }}" >
+              @csrf
+              @method('patch')
+              <input type="hidden" name="respuesta" value="1">
+              <a type="button" title="Rechazar" class="text-success mr-2" onclick="confirmAcceptHacienda({{ $data->id }});">
+                <i class="fa fa-check-square" aria-hidden="true"></i> <span class="toggle-item-text">Aceptar factura</span>
               </a>
             </form>
             
