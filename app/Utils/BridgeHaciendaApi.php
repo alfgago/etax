@@ -270,12 +270,18 @@ class BridgeHaciendaApi
         }
     }
 
-    public function queryHacienda($invoice, $token, $company) {
+    public function queryHacienda($invoice, $token, $company, $findKey = true) {
         try {
+            $invoiceUtils = new InvoiceUtils();
+            if($findKey){
+                $success = $invoiceUtils->setRealDocumentKey($invoice);
+            }
+            $key = $invoice->document_key;
+            Log::info("Consultando Mensaje Hacienda XML API HACIENDA -->> Empresa: $company->id / Factura: $invoice->id");
+
             $client = new Client();
             $file = null;
-            Log::info("Consultando Mensaje Hacienda XML API HACIENDA -->> Empresa: $company->id / Factura: $invoice->id");
-            $query = $this->setInvoiceInfo($invoice->document_key, $company);
+            $query = $this->setInvoiceInfo($key, $company);
             $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice43/consult', [
                 'headers' => [
                     'Auth-Key'  => config('etax.api_hacienda_key'),
@@ -290,16 +296,16 @@ class BridgeHaciendaApi
             ]);
 
             $response = json_decode($result->getBody()->getContents(), true);
-            Log::info('Response Api Hacienda '. json_encode($response));
+            Log::info('QUERY HACIENDA RESPONSE: '. json_encode($response));
             if (isset($response['status']) && $response['status'] == 200) {
                 if ($invoice->document_type == ('01' || '08' || '09' || '04')) {
-                    $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/MH-$invoice->document_key.xml";
+                    $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/MH-$key.xml";
                     $saveMH = Storage::put(
                         $pathMH,
                         ltrim($response['data']['mensajeHacienda'], '\n')
                     );
                 } else {
-                    $pathMH = 'empresa-' . $company->id_number . "/notas_credito_ventas/$invoice->year/$invoice->month/MH-$invoice->document_key.xml";
+                    $pathMH = 'empresa-' . $company->id_number . "/notas_credito_ventas/$invoice->year/$invoice->month/MH-$key.xml";
                     $saveMH = Storage::put(
                         $pathMH,
                         ltrim($response['data']['mensajeHacienda'], '\n')
@@ -324,11 +330,10 @@ class BridgeHaciendaApi
             }
             return $file;
         } catch (\Exception $e) {
-            Log::info('Validate User Atv Response -->>' . $e);
+            Log::error('Validate User Atv Response -->>' . $e);
             return redirect('Invoice/index')->withErrors('Error al  consulta en Hacienda');
         }
     }
-
 
     private function setHaciendaInfo($company) {
         try {
