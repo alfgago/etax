@@ -423,7 +423,7 @@ class CorbanaController extends Controller
             }
             $invoice->load('items');
             
-            $otherData = $this->setOtherInvoiceData($invoice, $factura, $item, $requestOtros);
+            $otherData = $this->setOtherInvoiceData($invoice, $factura, $items, $requestOtros);
             
             $invoiceUtils = new \App\Utils\InvoiceUtils();
             $pdf = $invoiceUtils->streamPdf($invoice, $invoice->company);
@@ -451,7 +451,7 @@ class CorbanaController extends Controller
         
     }
     
-    private function setOtherInvoiceData($invoice, $requestInvoice, $requestItem, $requestOtros){
+    private function setOtherInvoiceData($invoice, $requestInvoice, $requestItems, $requestOtros){
         
         try{
             $requestOtros = $requestOtros[0];
@@ -461,19 +461,27 @@ class CorbanaController extends Controller
             $sistema = $requestInvoice['SISTEMA'] ?? null;
             if( $sistema == 'EXP' ){
                 foreach($invoice->items as $item){
-                    $otherData["PESO_NETO IT-$item->id"] = OtherInvoiceData::registerOtherData(
+                    $pesoNeto = 0;
+                    $pesoBruto = 0;
+                    foreach( $requestItems as $reqItem ){
+                        if($reqItem['LINEA'] == $item->item_number){
+                            $pesoNeto = $reqItem['PESO_NETO'] ?? 0;
+                            $pesoBruto = $reqItem['PESO_BRUTO'] ?? 0;
+                        }
+                    }
+                    $otherData["PESO_NETO-$item->id"] = OtherInvoiceData::registerOtherData(
                         $invoice->id,
-                        $item->it,
+                        $item->id,
                         "PESO_NETO",
-                        $requestItem["PESO_NETO"] ?? 0
+                        $pesoNeto
                     );
                     
                     
-                    $otherData["PESO_BRUTO IT-$item->id"] = OtherInvoiceData::registerOtherData(
+                    $otherData["PESO_BRUTO-$item->id"] = OtherInvoiceData::registerOtherData(
                         $invoice->id,
-                        $item->it,
+                        $item->id,
                         "PESO_BRUTO",
-                        $requestItem["PESO_BRUTO"] ?? 0
+                        $pesoBruto
                     );
                 }
             

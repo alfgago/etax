@@ -10,7 +10,7 @@
         table {
             width: 100%;
             text-align: left;
-            font-size: 8px;
+            font-size: 9px;
             line-height: 1.1;
         }
 
@@ -68,7 +68,7 @@
         .resumen-totales tr td.texto-resumen {
             text-align: left;
             white-space: nowrap;
-            font-size: 8px;
+            font-size: 9px;
         }
         
     </style>
@@ -117,6 +117,8 @@
     $totalComprobante = $requestData['totcomprobante'] ?? 0;
     
     $otherData = \App\OtherInvoiceData::where("invoice_id", $data_invoice->id)->get();
+    
+    $currencySymbol = $data_invoice->currency == 'USD' ? '$' : '₡';
     
 ?>
 <body>
@@ -251,16 +253,22 @@
                                 {{$item->iva_amount ? number_format($item->iva_amount, 2) : '0'}}
                             </td>
                             <td>
-                                
+                                <?php $pneto = \App\OtherInvoiceData::findData($otherData, 'PESO_NETO', $item->id);
+                                if( isset($pneto) ){  ?>
+                                    {{ $pneto }}
+                                <?php } ?>
                             </td>
                             <td>
-                                
+                                <?php $pbruto = \App\OtherInvoiceData::findData($otherData, 'PESO_BRUTO', $item->id);
+                                if( isset($pbruto) ){  ?>
+                                    {{ $pbruto }}
+                                <?php } ?>
                             </td>
                             <td>
-                                {{$item->unit_price ? number_format($item->unit_price, 2) : '0'}}
+                                {{ $currencySymbol }}{{$item->unit_price ? number_format($item->unit_price, 2) : '0'}}
                             </td>
                             <td>
-                                {{$item->total ? number_format($item->total, 2) : '0'}}
+                                {{ $currencySymbol }}{{$item->total ? number_format($item->total, 2) : '0'}}
                             </td>
                         </tr>
                     @endforeach
@@ -294,7 +302,7 @@
                                 
                             </td>
                             <td>
-                                {{$data_invoice->total ? number_format($data_invoice->total, 2) : '0'}}
+                                {{ $currencySymbol }}{{$data_invoice->total ? number_format($data_invoice->total, 2) : '0'}}
                             </td>
                         </tr>
                 </table>
@@ -315,59 +323,59 @@
                 <table class="resumen-totales">
                     <tr>
                         <td class="texto-resumen">Total servicios gravados/(Total taxed services)</td>
-                        <td><span>{{ number_format($totalServiciosGravados, 2) }}</span></td>
+                        <td><span>{{ $currencySymbol }}{{ number_format($totalServiciosGravados, 2) }}</span></td>
                     </tr>
                     <tr>
                         <td class="texto-resumen">Total servicios exentos/(Total exempt services)</td>
-                        <td><span>{{ number_format($totalServiciosExentos, 2)}}</span></td>
+                        <td><span>{{ $currencySymbol }}{{ number_format($totalServiciosExentos, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td class="texto-resumen">Total servicios exonerados/(Total exempt)</td>
-                        <td><span>{{ number_format($totalServiciosExonerados, 2)}}</span></td>
+                        <td><span>{{ $currencySymbol }}{{ number_format($totalServiciosExonerados, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td class="texto-resumen">Total mercancias gravadas/(Total taxed goods)</td>
-                        <td><span>{{ number_format($totalMercaderiasGravadas, 2)}}</span></td>
+                        <td><span>{{ $currencySymbol }}{{ number_format($totalMercaderiasGravadas, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td class="texto-resumen">Total mercancias exentas/(Total exempt goods)</td>
-                        <td><span>{{ number_format($totalMercaderiasExentas, 2)}}</span></td>
+                        <td><span>{{ $currencySymbol }}{{ number_format($totalMercaderiasExentas, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td class="texto-resumen">Total mercancias exoneradas/(Total exempt)</td>
-                        <td><span>{{ number_format($totalMercaderiasExonerados, 2)}}</span></td>
+                        <td><span>{{ $currencySymbol }}{{ number_format($totalMercaderiasExonerados, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td class="texto-resumen">Total gravado/(total taxed)</td>
-                        <td><span>{{ number_format($totalGravado, 2)}}</span></td>
+                        <td><span>{{ $currencySymbol }}{{ number_format($totalGravado, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td class="texto-resumen">Total exento/(Total tax-exempt)</td>
-                        <td><span>{{ number_format($totalExento, 2)}}</span></td>
+                        <td><span>{{ $currencySymbol }}{{ number_format($totalExento, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td class="texto-resumen">Total exonerado/(Total exempt)</td>
-                        <td><span>{{ number_format($totalExonerados, 2)}}</span></td>
+                        <td><span>{{ $currencySymbol }}{{ number_format($totalExonerados, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td class="texto-resumen">Total Venta/(Sale total)</td>
-                        <td><span>{{ number_format($totalVenta, 2)}}</span></td>
+                        <td><span>{{ $currencySymbol }}{{ number_format($totalVenta, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td class="texto-resumen">Descuento/(Discount)</td>
-                        <td><span>{{ number_format($totalDescuentos, 2)}}</span></td>
+                        <td><span>{{ $currencySymbol }}{{ number_format($totalDescuentos, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td class="texto-resumen">Total venta neta/(total net sale)</td>
-                        <td><span>{{ number_format( ($totalNeta), 2)}}</span></td>
+                        <td><span>{{ $currencySymbol }}{{ number_format( ($totalNeta), 2)}}</span></td>
                     </tr>
                     <tr>
                         <td class="texto-resumen">Total impuestos/(total taxes)</td>
-                        <td><span>{{ number_format($totalImpuestos, 2)}}</span></td>
+                        <td><span>{{ $currencySymbol }}{{ number_format($totalImpuestos, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td class="texto-resumen" style="font-size: 12px; font-weight: bold;"><b>Total</b></td>
-                        <td style="font-size: 12px; font-weight: bold;"><span>{{ number_format( ($totalComprobante) , 2)}}</span></td>
+                        <td style="font-size: 12px; font-weight: bold;"><span>{{ $currencySymbol }}{{ number_format( ($totalComprobante) , 2)}}</span></td>
                     </tr>
                 </table>
             </td>

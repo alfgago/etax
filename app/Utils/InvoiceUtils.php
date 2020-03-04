@@ -112,6 +112,27 @@ class InvoiceUtils
         return $file;
     }
     
+    
+    
+    public function setRealDocumentKey($invoice){
+        $file = $this->downloadXml( $invoice, $invoice->company, $type = null);
+        if( isset($file) ){
+            $xml = simplexml_load_string( $file );
+            $json = json_encode( $xml ); // convert the XML string to JSON
+            $arr = json_decode( $json, TRUE );
+            
+            $consecutivoComprobante = $arr['NumeroConsecutivo'];
+            $clave = $arr['Clave'];
+            if( isset($clave) ){
+                $invoice->document_number = $consecutivoComprobante;
+                $invoice->document_key = $clave;
+                $invoice->save();
+                return $clave;
+            }
+        }
+        return false;
+    }
+    
     public function sendInvoiceEmail( $invoice, $company, $xmlPath) {
         
         try{
