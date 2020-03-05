@@ -68,18 +68,15 @@ class BridgeHaciendaApi
                 ]);
                 Log::info('Factura firmada -->>' . $invoice->id);
                 $response = json_decode($result->getBody()->getContents(), true);
-                
-                if( isset($response['status']) ){
-                    $path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
-                    $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n') );
-                    $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
-                    $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );
-                }
-                
                 if (isset($response['status']) && $response['status'] == 200) {
                     $date = Carbon::now();
                     $invoice->hacienda_status = '01';
                     $invoice->save();
+                    $path = 'empresa-'.$company->id_number.
+                        "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
+                    $save = Storage::put(
+                        $path,
+                        ltrim($response['data']['xmlFirmado'], '\n'));
                     
                     if ($save) {
                         $xml = new XmlHacienda();
