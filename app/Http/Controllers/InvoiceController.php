@@ -1501,9 +1501,6 @@ class InvoiceController extends Controller
 
     }
 
-
-
-
     public function importXML(Request $request) {
         try {
             $time_start = getMicrotime();
@@ -2179,7 +2176,17 @@ class InvoiceController extends Controller
             }
             Log::info("Enviando facturas al job ProcessInvoicesExcel");
             
-            ProcessInvoicesExcel::dispatch($company)->onQueue('createinvoice');
+            $xlsInvoices = XlsInvoice::select('id', 'consecutivo', 'company_id', 'autorizado')
+                ->where('company_id',$company->id)
+                ->where('autorizado', 1)
+                ->distinct('consecutivo')
+                ->get();
+            Log::debug( 'Enviando: ' . json_encode($xlsInvoices) );
+            foreach ($xlsInvoices as $xlsInvoice) {
+                //dd($xlsInvoice);
+                ProcessInvoicesExcel::dispatch($xlsInvoice)->onQueue('createinvoice');
+                //ProcessInvoicesExcel::dispatchNow($xlsInvoice);
+            }
             
             return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
         } catch ( \Exception $e) {

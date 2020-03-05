@@ -142,7 +142,7 @@ class SMInvoiceController extends Controller
 
         try {
             Log::debug('Creando job de envio de facturas SM.');
-            foreach ($invoiceList->chunk(50) as $facturas) {
+            foreach ($invoiceList->chunk(25) as $facturas) {
                 ProcessSendSMInvoices::dispatch($facturas, $companyId)->onQueue('bulk');
             }
         }catch( \Throwable $ex ){
@@ -189,45 +189,69 @@ class SMInvoiceController extends Controller
             //return 404;
         }
         
-        $facturasExcel = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
-        COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
-        COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
-        COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
-        FROM invoices inv, invoice_items it
-        WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
-        AND it.year = $year AND it.month = $month AND document_type != '03'
-        AND generation_method = 'etax-bulk'
-        AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
+        $facturasExcelCache = "cachekey-smfacturasexcel-$year-$month";
+        if ( !Cache::has($facturasExcelCache) ) {
+            $facturasExcel = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
+            COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
+            COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
+            COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
+            FROM invoices inv, invoice_items it
+            WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
+            AND it.year = $year AND it.month = $month AND document_type != '03'
+            AND generation_method = 'etax-bulk' AND is_void = 0
+            AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
+            Cache::put($facturasExcelCache, $facturasExcel, now()->addMinutes(2));
+        }else{
+            $facturasExcel = Cache::get($facturasExcelCache);
+        }
         
-        $facturasEtax = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
-        COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
-        COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
-        COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
-        FROM invoices inv, invoice_items it
-        WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
-        AND it.year = $year AND it.month = $month AND document_type != '03'
-        AND generation_method != 'etax-bulk'
-        AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
+        $facturasEtaxCache = "cachekey-smfacturasetax-$year-$month";
+        if ( !Cache::has($facturasEtaxCache) ) {
+            $facturasEtax = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
+            COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
+            COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
+            COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
+            FROM invoices inv, invoice_items it
+            WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
+            AND it.year = $year AND it.month = $month AND document_type != '03'
+            AND generation_method != 'etax-bulk' AND is_void = 0
+            AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
+            Cache::put($facturasEtaxCache, $facturasEtax, now()->addMinutes(2));
+        }else{
+            $facturasEtax = Cache::get($facturasEtaxCache);
+        }
         
-        $notasExcel = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
-        COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
-        COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
-        COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
-        FROM invoices inv, invoice_items it
-        WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
-        AND it.year = $year AND it.month = $month AND document_type = '03'
-        AND generation_method = 'etax-bulk'
-        AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
+        $notasExcelCache = "cachekey-smnotasexcel-$year-$month";
+        if ( !Cache::has($notasExcelCache) ) {    
+            $notasExcel = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
+            COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
+            COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
+            COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
+            FROM invoices inv, invoice_items it
+            WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
+            AND it.year = $year AND it.month = $month AND document_type = '03'
+            AND generation_method = 'etax-bulk' AND is_void = 0
+            AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
+            Cache::put($notasExcelCache, $notasExcel, now()->addMinutes(2));
+        }else{
+            $notasExcel = Cache::get($notasExcelCache);
+        }
         
-        $notasEtax = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
-        COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
-        COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
-        COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
-        FROM invoices inv, invoice_items it
-        WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
-        AND it.year = $year AND it.month = $month AND document_type = '03'
-        AND generation_method != 'etax-bulk'
-        AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
+        $notasEtaxCache = "cachekey-smnotasetax-$year-$month";
+        if ( !Cache::has($notasEtaxCache) ) {    
+            $notasEtax = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
+            COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
+            COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
+            COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
+            FROM invoices inv, invoice_items it
+            WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
+            AND it.year = $year AND it.month = $month AND document_type = '03'
+            AND generation_method != 'etax-bulk' AND is_void = 0
+            AND inv.deleted_at IS NULL AND hide_from_taxes = false;") )[0];
+            Cache::put($notasEtaxCache, $notasEtax, now()->addMinutes(2));
+        }else{
+            $notasEtax = Cache::get($notasEtaxCache);
+        }
 
         return view('SMInvoice/smwidget', compact('facturasExcel', 'facturasEtax', 'notasExcel', 'notasEtax'));
     }

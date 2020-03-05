@@ -42,6 +42,16 @@ class EmailController extends Controller
         
         $pdf = null;
         $count = intval($request->attachments);
+        
+        try{
+            $emailText = $request->to;
+            $emailText = str_replace(array('<','>','"'), '',$emailText);
+            $emailArray = explode(" ", $emailText);
+            $email = implode( array_unique($emailArray) );
+        }catch(\Exception $e){
+            $email = null;
+        }
+        
         //Recorre los archivos buscando el PDF
         for ($i = 1; $i <= $count; $i++) {
            try{
@@ -53,13 +63,21 @@ class EmailController extends Controller
                        $pdf = $file;
                     }
                }
-           }catch(\Throwable $e){Log::error($e->getMessage());}
+           }catch(\Throwable $e){}
         }
         //Recorre los archivos buscando el XML
         for ($i = 1; $i <= $count; $i++) {
            try{
                $file = $request->file( "attachment$i" );
-               EmailController::processAttachmentAsXML( $file, $pdf );
+               EmailController::processAttachmentAsXML( $file, $pdf, $email );
+           }catch(\Throwable $e){}
+        }
+        
+        //Recorre los archivos buscando el XML
+        for ($i = 1; $i <= $count; $i++) {
+           try{
+               $file = $request->file( "attachment$i" );
+               Bill::processMessageXML( $file );
            }catch(\Throwable $e){}
         }
         
@@ -70,7 +88,7 @@ class EmailController extends Controller
         
     }
     
-    public static function processAttachmentAsXML( $file, $pdf = null ) {
+    public static function processAttachmentAsXML( $file, $pdf = null, $email = null ) {
         
         $xml = simplexml_load_string( file_get_contents($file) );
         $json = json_encode( $xml ); // convert the XML string to JSON
@@ -82,9 +100,9 @@ class EmailController extends Controller
         $clave = $arr['Clave'];
         
         try {
-            $bill = Bill::saveBillXML( $arr, 'Email' );
+            $bill = Bill::saveBillXML( $arr, 'Email', $email );
             if( $bill ) {
-                Log::info( "CORREO: Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor");
+                Log::info( "CORREO: Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor, correo $email");
                 Bill::storeXML( $bill, $file );
                 if( isset($pdf) ){
                     Bill::storePDF( $bill, $pdf );

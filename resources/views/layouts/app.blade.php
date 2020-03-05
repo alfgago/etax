@@ -148,7 +148,27 @@
         $user = auth()->user();
         $hoy = getdate();
         if($hoy['hours'] < 21 && $hoy['hours'] > 7){ ?>
-            <button type="button" class="callnow" onclick="popupReproductor();">Ayuda</button>
+          <script>
+            function initFreshChat() {
+              window.fcWidget.init({
+                token: "81da56c1-6534-4834-9847-c40e5b8f077c",
+                host: "https://wchat.freshchat.com"
+              });
+              // To set unique user id in your system when it is available
+              window.fcWidget.setExternalId("{{ $user->id }}");
+              // To set user name
+              window.fcWidget.user.setFirstName("{{ $user->first_name . ' ' . $user->last_name }}");
+              // To set user email
+              window.fcWidget.user.setEmail("{{ $user->email }}");
+              // To set user properties
+              window.fcWidget.user.setProperties({
+                plan: "Estate",                 // meta property 1
+                status: "Active"                // meta property 2
+              });
+              
+            }
+            function initialize(i,t){var e;i.getElementById(t)?initFreshChat():((e=i.createElement("script")).id=t,e.async=!0,e.src="https://wchat.freshchat.com/js/widget.js",e.onload=initFreshChat,i.head.appendChild(e))}function initiateCall(){initialize(document,"freshchat-js-sdk")}window.addEventListener?window.addEventListener("load",initiateCall,!1):window.attachEvent("load",initiateCall,!1);
+          </script>
     <?php }else{ ?>
             <button type="button" class="callnow" onclick="mailSoporte();">Correo</button>
     <?php } ?>
@@ -166,10 +186,11 @@
             }
         });
     
+      /*
         function popupReproductor(){
-            window.open('https://www.callmyway.com/Welcome/SupportChatInfo/171479/?chat_type_id=5&contact_name={{ $user->first_name . " " . $user->last_name }}&contact_email={{ $user->email }}&contact_phone={{ $user->phone ? $user->phone : '' }}&contact_request=Chat de ayuda iniciado..&autoSubmit=1', 'Soporte eTax', 'height=350,width=350,resizable=0,marginwidth=0,marginheight=0,frameborder=0');
+          //window.open('https://www.callmyway.com/Welcome/SupportChatInfo/171479/?chat_type_id=5&contact_name={{ $user->first_name . " " . $user->last_name }}&contact_email={{ $user->email }}&contact_phone={{ $user->phone ? $user->phone : '' }}&contact_request=Chat de ayuda iniciado..&autoSubmit=1', 'Soporte eTax', 'height=350,width=350,resizable=0,marginwidth=0,marginheight=0,frameborder=0');
         };
-
+      */
         function mailSoporte() {
             location.href = "mailto:soporte@etaxcr.com?subject=Solicitud de Soporte&body=Agradezco la ayuda con el siguiente requerimiento:";
         }

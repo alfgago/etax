@@ -25,9 +25,9 @@ class InvoiceUtils
     {
         $pdfRoute = 'Pdf/invoice';
         $provider = null;
-        /*if($company->id_number == '3101015179'){
-            $pdfRoute = 'Pdf/custom/trifami';
-        }*/
+        if( $company->id_number == "3101018968" || $company->id_number == "3101011989" || $company->id_number == "3101166930" || $company->id_number == "3007684555" || $company->id_number == "3130052102" ) {
+            $pdfRoute = 'Pdf/custom/corbana';
+        }
         if ($invoice->document_type == '08') {
             $provider = Provider::find($invoice->provider_id);
         }
@@ -45,9 +45,9 @@ class InvoiceUtils
     {
         $pdfRoute = 'Pdf/invoice';
         $provider = null;
-        /*if($company->id_number == '3101015179'){
-            $pdfRoute = 'Pdf/custom/trifami';
-        }*/
+        if( $company->id_number == "3101018968" || $company->id_number == "3101011989" || $company->id_number == "3101166930" || $company->id_number == "3007684555" || $company->id_number == "3130052102" ) {
+            $pdfRoute = 'Pdf/custom/corbana';
+        }
         if ($invoice->document_type == '08') {
             $provider = Provider::find($invoice->provider_id);
         }
@@ -110,6 +110,27 @@ class InvoiceUtils
         }
         
         return $file;
+    }
+    
+    
+    
+    public function setRealDocumentKey($invoice){
+        $file = $this->downloadXml( $invoice, $invoice->company, $type = null);
+        if( isset($file) ){
+            $xml = simplexml_load_string( $file );
+            $json = json_encode( $xml ); // convert the XML string to JSON
+            $arr = json_decode( $json, TRUE );
+            
+            $consecutivoComprobante = $arr['NumeroConsecutivo'];
+            $clave = $arr['Clave'];
+            if( isset($clave) ){
+                $invoice->document_number = $consecutivoComprobante;
+                $invoice->document_key = $clave;
+                $invoice->save();
+                return $clave;
+            }
+        }
+        return false;
     }
     
     public function sendInvoiceEmail( $invoice, $company, $xmlPath) {
@@ -567,5 +588,7 @@ class InvoiceUtils
         }
         return round($discount,5);
     }
+    
+    
     
 }

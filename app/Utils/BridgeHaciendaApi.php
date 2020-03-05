@@ -43,7 +43,7 @@ class BridgeHaciendaApi
         }
     }
 
-    public function createInvoice(Invoice $invoice, $token, $sendEmail = true) {
+    public function createInvoice(Invoice $invoice, $token, $sendEmail = true, $singNote = false) {
         try {
             $invoiceUtils = new InvoiceUtils();
             $requestDetails = $invoiceUtils->setDetails43($invoice->items);
@@ -72,12 +72,9 @@ class BridgeHaciendaApi
                     $date = Carbon::now();
                     $invoice->hacienda_status = '01';
                     $invoice->save();
-                    $path = 'empresa-'.$company->id_number.
-                        "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
-                    $save = Storage::put(
-                        $path,
-                        ltrim($response['data']['xmlFirmado'], '\n'));
-                    
+                    $path = 'empresa-'.$company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
+                    $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n'));
+
                     if ($save) {
                         $xml = new XmlHacienda();
                         $xml->invoice_id = $invoice->id;
@@ -89,10 +86,11 @@ class BridgeHaciendaApi
                         if($sendEmail){ //Define si se quiere mandar el correo inicial, o esperar a que se apruebe con hacienda. True lo manda siempre
                             $file = $invoiceUtils->sendInvoiceEmail($invoice, $company, $path);
                         }
-                        
-                        ProcessInvoice::dispatch($invoice->id, $company->id, $token)
-                            ->onConnection(config('etax.queue_connections'))->onQueue('invoicing');
-                        return $invoice;
+                        if ($singNote == false) {
+                            ProcessInvoice::dispatch($invoice->id, $company->id, $token)
+                                ->onConnection(config('etax.queue_connections'))->onQueue('invoicing');
+                            return $invoice;
+                        }
                     }
                 }else{
                     Log::warning('Error en respuesta de firma -->>'. json_encode($response) );
@@ -201,7 +199,7 @@ class BridgeHaciendaApi
                 'atvcertFile' => Storage::get($company->atv->key_url),
                 'detalle' => $details
             );
-            
+
             foreach ($invoiceData as $key => $values) {
                 if ($key == 'atvcertFile') {
                     $request[]=array(
@@ -216,7 +214,7 @@ class BridgeHaciendaApi
                     );
                 }
             }
-            
+
             return $request;
         } catch (ClientException $error) {
             Log::error('Func InvoiceData: Error al iniciar session en API HACIENDA -->>'. $error);
@@ -270,12 +268,18 @@ class BridgeHaciendaApi
         }
     }
 
-    public function queryHacienda($invoice, $token, $company) {
+    public function queryHacienda($invoice, $token, $company, $findKey = true) {
         try {
+            $invoiceUtils = new InvoiceUtils();
+            if($findKey){
+                $success = $invoiceUtils->setRealDocumentKey($invoice);
+            }
+            $key = $invoice->document_key;
+            Log::info("Consultando Mensaje Hacienda XML API HACIENDA -->> Empresa: $company->id / Factura: $invoice->id");
+
             $client = new Client();
             $file = null;
-            Log::info("Consultando Mensaje Hacienda XML API HACIENDA -->> Empresa: $company->id / Factura: $invoice->id");
-            $query = $this->setInvoiceInfo($invoice->document_key, $company);
+            $query = $this->setInvoiceInfo($key, $company);
             $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice43/consult', [
                 'headers' => [
                     'Auth-Key'  => config('etax.api_hacienda_key'),
@@ -290,16 +294,16 @@ class BridgeHaciendaApi
             ]);
 
             $response = json_decode($result->getBody()->getContents(), true);
-            Log::info('Response Api Hacienda '. json_encode($response));
+            Log::info('QUERY HACIENDA RESPONSE: '. json_encode($response));
             if (isset($response['status']) && $response['status'] == 200) {
                 if ($invoice->document_type == ('01' || '08' || '09' || '04')) {
-                    $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/MH-$invoice->document_key.xml";
+                    $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/MH-$key.xml";
                     $saveMH = Storage::put(
                         $pathMH,
                         ltrim($response['data']['mensajeHacienda'], '\n')
                     );
                 } else {
-                    $pathMH = 'empresa-' . $company->id_number . "/notas_credito_ventas/$invoice->year/$invoice->month/MH-$invoice->document_key.xml";
+                    $pathMH = 'empresa-' . $company->id_number . "/notas_credito_ventas/$invoice->year/$invoice->month/MH-$key.xml";
                     $saveMH = Storage::put(
                         $pathMH,
                         ltrim($response['data']['mensajeHacienda'], '\n')
@@ -324,11 +328,10 @@ class BridgeHaciendaApi
             }
             return $file;
         } catch (\Exception $e) {
-            Log::info('Validate User Atv Response -->>' . $e);
+            Log::error('Validate User Atv Response -->>' . $e);
             return redirect('Invoice/index')->withErrors('Error al  consulta en Hacienda');
         }
     }
-
 
     private function setHaciendaInfo($company) {
         try {

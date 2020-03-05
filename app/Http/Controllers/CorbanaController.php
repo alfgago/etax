@@ -8,6 +8,7 @@ use App\Bill;
 use App\BillItem;
 use App\Invoice;
 use App\InvoiceItem;
+use App\OtherInvoiceData;
 use App\Company;
 use App\Provider;
 use App\Client;
@@ -25,8 +26,8 @@ class CorbanaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar']] );
-        $this->middleware('CheckSubscription', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar']] );
+        $this->middleware('auth', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles']] );
+        $this->middleware('CheckSubscription', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles']] );
     }
     
     public function queryBills(Request $request) {
@@ -56,11 +57,69 @@ class CorbanaController extends Controller
                 
                 $xml = $billUtils->downloadXml($bill, $company);
                 $bill->xml64 = isset($xml) ? base64_encode($xml) : null;
-            }           
+                
+                $xmlA = $billUtils->downloadXmlAceptacion($bill, $company);
+                $bill->xmlA64 = isset($xmlA) ? base64_encode($xmlA) : null;
+            }         
             if(isset($bills)){
                 return response()->json([
                     'mensaje' => $bills->count() . ' facturas',
                     'facturas' => $bills
+                ], 200);
+            }
+        
+        }catch(\Exception $e){
+            Log::error("Error en Corbana" . $e);
+            return response()->json([
+                'mensaje' => 'Error ' . $e->getMessage(),
+                'facturas' => []
+            ], 200);
+        }
+        
+        return response()->json([
+            'mensaje' => '0 facturas',
+            'facturas' => []
+        ], 200);
+        
+    }
+    
+    public function queryBillFiles(Request $request) {
+        try{
+            $billId = $request->pId;
+            
+            $bill = Bill::where('id', $billId)->with('company')->first();
+            
+                    
+            $billUtils = new \App\Utils\BillUtils();
+            if( isset($bill) ){
+                $company = $bill->company;
+                $cedula = $company->id_number;
+                if( $cedula != "3101018968" && $cedula != "3101011989" && $cedula != "3101166930" && $cedula != "3007684555" && $cedula != "3130052102" && $cedula != "3101702429" ){
+                    Log::warning("Error: ID de factura no le pertenece a Corbana");
+                    return response()->json([
+                        'mensaje' => 'Error: ID de factura no le pertenece a Corbana'
+                    ], 200);
+                }
+            
+                $pdf = $billUtils->streamPdf($bill, $company);
+                $bill->pdf64 = empty($pdf) ? base64_encode($pdf) : null;
+                
+                $xml = $billUtils->downloadXml($bill, $company);
+                $bill->xml64 = empty($xml) ? base64_encode($xml) : null;
+                
+                $xmlA = $billUtils->downloadXmlAceptacion($bill, $company);
+                $bill->xmlh64 = empty($xmlA) ? base64_encode($xmlA) : null;
+                
+                $hasFiles = 0;
+                if( empty($xml) && empty($xmlA) && empty($pdf) ){
+                    $hasFiles = 1;
+                }
+              
+            Log::error("exito en Corbana " . $hasFiles);
+                return response()->json([
+                    'mensaje'  => "Enviando archivos. Resp($hasFiles)",
+                    'factura'  => $bill,
+                    'tiene_todos' => $hasFiles
                 ], 200);
             }
         
@@ -127,23 +186,27 @@ class CorbanaController extends Controller
             $invoice = null;
             $factura = $request->factura[0];
             $items = $request->lineas;
-            Log::debug("CORBANA RECIBE: FACTURA" . json_encode($factura) . " LINEAS: " . json_encode($items) );
+            $requestOtros = $request->otros ?? null;
             $metodoGeneracion = "Corbana";
 
             //Busca la cedula de la empresa
             $cedulaEmpresa = $this->parseCorbanaIdToCedula($factura['NO_CIA'], $factura['ACTIVIDAD']);
             $company = Company::where('id_number', $cedulaEmpresa)->first();
-            $mainAct = $company->getActivities() ? $company->getActivities()[0]->codigo : '0';
-
-            $codigoActividad = $mainAct;
             $xmlSchema = 43;
+            
+            $codigoActividad = $factura['CODIGO_ACTIVIDAD'] ?? null;
+            if( !isset($codigoActividad) ){
+                $mainAct = $company->getActivities() ? $company->getActivities()[0]->codigo : '0';
+                $codigoActividad = $mainAct;
+            }
+            
             //Datos de cliente
             $nombreCliente = $factura['RAZON_SOCIAL'];
             $codigoCliente = $factura['IDENTIFICACION'];
             $tipoPersona = $factura['TIPO_IDEN'];
             $identificacionCliente = $factura['IDENTIFICACION'] ?? null;
             $correoCliente = isset($factura['EMAIL_FAC_ELEC']) ? $factura['EMAIL_FAC_ELEC'] : ($factura['CORREO_CLIENTE'] ?? null);
-            $telefonoCliente = null;
+            $telefonoCliente = $factura['TEL_CLIENTE'] ?? null;
             $direccion = $factura['DIRECCION_CON'] ?? "No indica";
             $codProvincia = $factura['COD_PROVINCIA'] ?? "7";
             $codCanton = $factura['COD_CANTON'] ?? "7";
@@ -165,8 +228,10 @@ class CorbanaController extends Controller
             }
             $otherReference = $factura['NO_DOCU_REF'] ?? null;
             
-            $partidaArancelaria = $factura['NO_DUA'] ?? null;
-            if( isset($partidaArancelaria) ){
+            $sistema = $factura['SISTEMA'] ?? null;
+            $dua = $factura['NO_DUA'] ?? null;
+            $partidaArancelaria = $factura['PARTIDA_ARANCELARIA'] ?? $dua;
+            if( $sistema == 'EXP' ){
                 $tipoDocumento = '09';
                 $tipoPersona = "E";
                 $partidaArancelaria = mb_substr( $partidaArancelaria, -12, null, 'UTF-8') ;
@@ -192,6 +257,9 @@ class CorbanaController extends Controller
             }
             
             $TIPO_SERV = $factura['TIPO_SERV'] ?? 'B';
+            if( $tipoDocumento == '09' ){
+                $TIPO_SERV = 'B';
+            }
             
             $TIPO_PAGO = $factura['MODO_PAGO'] ?? 'D'; //Usan E, T, D, Q, etc
             $metodoPago = "04"; //Default transferencia
@@ -208,10 +276,12 @@ class CorbanaController extends Controller
                 $condicionVenta = "01";
             }
             
-            $tipoCambio = floatval($factura['TIPO_CAMBIO']);
-            $idMoneda = "CRC";
-            if($tipoCambio > 0){
+            if( $factura['MONEDA'] == '02' ){
                 $idMoneda = "USD";
+                $tipoCambio = floatval($factura['TIPO_CAMBIO']);
+            }else{
+                $idMoneda = "CRC";
+                $tipoCambio = 1;
             }
 
             $FEC_HECHO = $factura['FEC_HECHO'];
@@ -231,7 +301,7 @@ class CorbanaController extends Controller
             $companiaExoneracion = $factura['COD_INST_EXO'] ?? null;
             $companiaExoneracion = $nombreCliente;
             $fechaExoneracion = $factura['FEC_DOCU_EXO'] ?? null;
-            $porcentajeExoneracion = 0;
+            $porcentajeExoneracion = $factura['PORC_EXONERACION'] ?? 0;;
             
             $prefijoCodigo= "B";
             if($TIPO_SERV == "S"){
@@ -261,16 +331,23 @@ class CorbanaController extends Controller
                 if ( $detalleProducto != "DIFERENCIAL CAMBIARIO" && !strpos($detalleProducto, "RIFA GENERAL") ) {
                     $numeroLinea = $item['LINEA'];
                     $codigoProducto = $item['CODIGO'] ?? "0";
-                    $unidadMedicion = $TIPO_SERV == "S" ? "Sp" : 'Unid';
+                    
+                    $unidadMedicion = $item['UM'] ?? null;
+                    if( $unidadMedicion == 'N' ){
+                        $unidadMedicion = $TIPO_SERV == "S" ? "Sp" : 'Unid';
+                    }
+                    
                     $cantidad = $item['CANTIDAD'];
-                    $precioUnitario = $item['PRECIO_UNITARIO'];
-                    $subtotalLinea = $cantidad*$precioUnitario;
+                    
+                    $precioUnitario = $item['PRECIO'];
+                    $montoDescuento = $item['DESCUENTO'];
+                    
+                    $subtotalLinea = $cantidad*$precioUnitario - $montoDescuento;
                     $montoIva = $subtotalLinea * ($porcentajeIVA/100);
                     $totalLinea = $subtotalLinea+$montoIva;
-                    $montoDescuento = $item['DESCUENTO'];
                     $categoriaHacienda = null;
                     $montoExoneracion = isset($documentoExoneracion) ? $montoIva : 0;
-                    $totalMontoLinea = $subtotalLinea + $montoIva - $montoExoneracion;
+                    $totalMontoLinea = $subtotalLinea + $montoIva - $montoExoneracion - $montoDescuento;
                     
                     $cantidad = round($cantidad, 5);
                     $precioUnitario = round($precioUnitario, 5);
@@ -340,12 +417,13 @@ class CorbanaController extends Controller
                 }
                 
             }
-            Log::debug($invoiceList);
             foreach($invoiceList as $fac){
                $invoice = $this->saveCorbanaInvoice($fac);
                $company->setLastReference($tipoDocumento, $numeroReferencia, $consecutivoComprobante);
             }
             $invoice->load('items');
+            
+            $otherData = $this->setOtherInvoiceData($invoice, $factura, $items, $requestOtros);
             
             $invoiceUtils = new \App\Utils\InvoiceUtils();
             $pdf = $invoiceUtils->streamPdf($invoice, $invoice->company);
@@ -370,6 +448,123 @@ class CorbanaController extends Controller
         return response()->json([
             'mensaje' => 'Error indefinido'
         ], 200);
+        
+    }
+    
+    private function setOtherInvoiceData($invoice, $requestInvoice, $requestItems, $requestOtros){
+        
+        try{
+            $requestOtros = $requestOtros[0];
+            $otherData = [];
+            
+            //Si es exportacion, agrega los datos de peso por linea
+            $sistema = $requestInvoice['SISTEMA'] ?? null;
+            if( $sistema == 'EXP' ){
+                foreach($invoice->items as $item){
+                    $pesoNeto = 0;
+                    $pesoBruto = 0;
+                    foreach( $requestItems as $reqItem ){
+                        if($reqItem['LINEA'] == $item->item_number){
+                            $pesoNeto = $reqItem['PESO_NETO'] ?? 0;
+                            $pesoBruto = $reqItem['PESO_BRUTO'] ?? 0;
+                        }
+                    }
+                    $otherData["PESO_NETO-$item->id"] = OtherInvoiceData::registerOtherData(
+                        $invoice->id,
+                        $item->id,
+                        "PESO_NETO",
+                        $pesoNeto
+                    );
+                    
+                    
+                    $otherData["PESO_BRUTO-$item->id"] = OtherInvoiceData::registerOtherData(
+                        $invoice->id,
+                        $item->id,
+                        "PESO_BRUTO",
+                        $pesoBruto
+                    );
+                }
+            
+                $otherData["COD_EXP"] = OtherInvoiceData::registerOtherData(
+                    $invoice->id,
+                    null,
+                    "COD_EXP",
+                    $requestOtros["COD_EXP"] ?? ''
+                );
+                $otherData["CONSIG"] = OtherInvoiceData::registerOtherData(
+                    $invoice->id,
+                    null,
+                    "CONSIG",
+                    $requestOtros["CONSIG"] ?? ''
+                );
+                $otherData["DIR_CONSIG"] = OtherInvoiceData::registerOtherData(
+                    $invoice->id,
+                    null,
+                    "DIR_CONSIG",
+                    $requestOtros["DIR_CONSIG"] ?? ''
+                );
+                $otherData["COD_EMB"] = OtherInvoiceData::registerOtherData(
+                    $invoice->id,
+                    null,
+                    "COD_EMB",
+                    $requestOtros["COD_EMB"] ?? ''
+                );
+                $otherData["COD_VAP"] = OtherInvoiceData::registerOtherData(
+                    $invoice->id,
+                    null,
+                    "COD_VAP",
+                    $requestOtros["COD_VAP"] ?? ''
+                );
+                $otherData["PRO_FRU"] = OtherInvoiceData::registerOtherData(
+                    $invoice->id,
+                    null,
+                    "PRO_FRU",
+                    $requestOtros["PRO_FRU"] ?? ''
+                );
+                $otherData["PUE_SAL"] = OtherInvoiceData::registerOtherData(
+                    $invoice->id,
+                    null,
+                    "PUE_SAL",
+                    $requestOtros["PUE_SAL"] ?? ''
+                );
+                $otherData["PUE_DES"] = OtherInvoiceData::registerOtherData(
+                    $invoice->id,
+                    null,
+                    "PUE_DES",
+                    $requestOtros["PUE_DES"] ?? ''
+                );
+                $otherData["NO_DUA"] = OtherInvoiceData::registerOtherData(
+                    $invoice->id,
+                    null,
+                    "NO_DUA",
+                    $requestOtros["NO_DUA"] ?? ''
+                );
+               
+            }
+            $otherData["REFERENCIA"] = OtherInvoiceData::registerOtherData(
+                $invoice->id,
+                null,
+                "REFERENCIA",
+                $requestOtros["REFERENCIA"] ?? ''
+            );
+            $otherData["HECHO_POR"] = OtherInvoiceData::registerOtherData(
+                $invoice->id,
+                null,
+                "HECHO_POR",
+                $requestOtros["HECHO_POR"] ?? ''
+            );
+            $otherData["REVISADO_POR"] = OtherInvoiceData::registerOtherData(
+                $invoice->id,
+                null,
+                "REVISADO_POR",
+                $requestOtros["REVISADO_POR"] ?? ''
+            );
+            
+            return $otherData;
+        }catch(\Exception $e){
+            Log::error( "CORBANA: Error al guardar otra info: " . $e->getMessage() );
+            return array();
+        }
         
     }
     
