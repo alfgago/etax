@@ -43,7 +43,7 @@ class BridgeHaciendaApi
         }
     }
 
-    public function createInvoice(Invoice $invoice, $token, $sendEmail = true) {
+    public function createInvoice(Invoice $invoice, $token, $sendEmail = true, $singNote = false) {
         try {
             $invoiceUtils = new InvoiceUtils();
             $requestDetails = $invoiceUtils->setDetails43($invoice->items);
@@ -74,7 +74,7 @@ class BridgeHaciendaApi
                     $invoice->save();
                     $path = 'empresa-'.$company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
                     $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n'));
-                    
+
                     if ($save) {
                         $xml = new XmlHacienda();
                         $xml->invoice_id = $invoice->id;
@@ -86,10 +86,11 @@ class BridgeHaciendaApi
                         if($sendEmail){ //Define si se quiere mandar el correo inicial, o esperar a que se apruebe con hacienda. True lo manda siempre
                             $file = $invoiceUtils->sendInvoiceEmail($invoice, $company, $path);
                         }
-                        
-                        ProcessInvoice::dispatch($invoice->id, $company->id, $token)
-                            ->onConnection(config('etax.queue_connections'))->onQueue('invoicing');
-                        return $invoice;
+                        if ($singNote == false) {
+                            ProcessInvoice::dispatch($invoice->id, $company->id, $token)
+                                ->onConnection(config('etax.queue_connections'))->onQueue('invoicing');
+                            return $invoice;
+                        }
                     }
                 }else{
                     Log::warning('Error en respuesta de firma -->>'. json_encode($response) );
@@ -198,7 +199,7 @@ class BridgeHaciendaApi
                 'atvcertFile' => Storage::get($company->atv->key_url),
                 'detalle' => $details
             );
-            
+
             foreach ($invoiceData as $key => $values) {
                 if ($key == 'atvcertFile') {
                     $request[]=array(
@@ -213,7 +214,7 @@ class BridgeHaciendaApi
                     );
                 }
             }
-            
+
             return $request;
         } catch (ClientException $error) {
             Log::error('Func InvoiceData: Error al iniciar session en API HACIENDA -->>'. $error);
