@@ -44,8 +44,10 @@ class EmailController extends Controller
         $count = intval($request->attachments);
         
         try{
-            $email = $request->to;
-            $email = str_replace(array('<','>','"'), '',$email);
+            $emailText = $request->to;
+            $emailText = str_replace(array('<','>','"'), '',$emailText);
+            $emailArray = explode(" ", $emailText);
+            $email = implode( array_unique($emailArray) );
         }catch(\Exception $e){
             $email = null;
         }
@@ -100,7 +102,7 @@ class EmailController extends Controller
         try {
             $bill = Bill::saveBillXML( $arr, 'Email', $email );
             if( $bill ) {
-                Log::info( "CORREO: Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor");
+                Log::info( "CORREO: Se registró la factura de compra $consecutivoComprobante para la empresa $identificacionReceptor, correo $email");
                 Bill::storeXML( $bill, $file );
                 if( isset($pdf) ){
                     Bill::storePDF( $bill, $pdf );
