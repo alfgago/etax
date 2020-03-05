@@ -57,11 +57,11 @@ class ProcessCreditNote implements ShouldQueue
                 $invoice = Invoice::find($this->invoiceId);
                 $company = Company::find($this->companyId);
                 if ($company->atv_validation) {
-                    if ($invoice->hacienda_status == '01' 
-                        && $invoice->document_type == ('03' || '02') 
+                    if ($invoice->hacienda_status == '01'
+                        && $invoice->document_type == ('03' || '02')
                         && $invoice->reference_doc_type == '04' ? true : $invoiceUtils->validateZip($invoice)
                         && $invoice->resend_attempts < 6) {
-                            
+
                         if ($invoice->xml_schema == 43) {
                             $requestDetails = $invoiceUtils->setDetails43($invoice->items);
                             $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
@@ -74,6 +74,9 @@ class ProcessCreditNote implements ShouldQueue
                         Log::info('Request data'. json_encode($requestData));
                         $apiHacienda = new BridgeHaciendaApi();
                         $tokenApi = $apiHacienda->login(false);
+
+                        $apiHacienda->createInvoice($invoice, $tokenApi, false, true);
+
                         if ($requestData !== false) {
                             $endpoint = $invoice->xml_schema == 42 ? 'invoice' : 'invoice43';
                             $path = $invoice->document_type == '02' ? 'debit' : 'credit';
@@ -94,14 +97,14 @@ class ProcessCreditNote implements ShouldQueue
                             ]);
                             $response = json_decode($result->getBody()->getContents(), true);
                             ApiResponse::create([
-                                'invoice_id' => $invoice->id, 
+                                'invoice_id' => $invoice->id,
                                 'company_id' => $company->id,
                                 'document_key' => $invoice->document_key,
                                 'doc_type' => $invoice->document_type,
                                 'json_response' => json_encode($response)
                             ]);
                             Log::info('Response Credit Note Api Hacienda '. json_encode($response));
-                            
+
                             $date = Carbon::now();
                             if( isset($response['status']) ){
                                 try{
@@ -122,12 +125,12 @@ class ProcessCreditNote implements ShouldQueue
                                 Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
                                 $invoice->hacienda_status = '03';
                                 $invoice->save();
-                                
+
                                 /*$path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
                                 $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n') );
                                 $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
                                 $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );*/
-                                
+
                                 if ($save) {
                                     $xml = new XmlHacienda();
                                     $xml->invoice_id = $invoice->id;
@@ -162,7 +165,7 @@ class ProcessCreditNote implements ShouldQueue
                                 Log::info('Consecutive repeated -->' . $invoice->document_number);
                                 $invoice->hacienda_status = '04';
                                 $invoice->save();
-    
+
                             } else if (isset($response['status']) && $response['status'] == 400 &&
                                 strpos($response['message'], 'archivo XML ya existe en nuestras bases de datos') <> false) {
                                 Log::info('Consecutive repeated -->' . $invoice->document_number);
