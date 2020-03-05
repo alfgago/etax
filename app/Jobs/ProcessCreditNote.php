@@ -103,9 +103,9 @@ class ProcessCreditNote implements ShouldQueue
                             Log::info('Response Credit Note Api Hacienda '. json_encode($response));
                             
                             $date = Carbon::now();
-                            try{
-                                $path = 'empresa-' . $company->id_number . "/notas_credito_ventas/$date->year/$date->month/$invoice->document_key.xml";
-                                $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n'));
+                            if( isset($response['status']) ){
+                                $path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
+                                $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n') );
                                 $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
                                 $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );
                                 $xml = new XmlHacienda();
@@ -114,10 +114,7 @@ class ProcessCreditNote implements ShouldQueue
                                 $xml->xml = $path;
                                 $xml->xml_message = $pathMH;
                                 $xml->save();
-                            }catch( \Exception $e ){
-                                Log::error( "No pudo guardar el XML. " . $e->getMessage() );
                             }
-                            
                             if (isset($response['status']) && $response['status'] == 200) {
                                 Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
                                 $invoice->hacienda_status = '03';
