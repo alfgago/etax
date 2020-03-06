@@ -19,7 +19,8 @@
                             foreach ($subitems as $subitem) {
                                 ?><a {{$subitem->type}}="{{$subitem->link}}">{{$subitem->name}}</a><?php
                             }
-                    ?>  </div>
+                            ?>  
+                        </div>
                     </li> <?php 
                     $i++;
                 }

@@ -521,23 +521,26 @@ class Company extends Model {
         }
         if ($type == '01') {
             $this->last_invoice_ref_number = $ref;
-            $this->last_document = $ref;
+            $this->last_document = $consecutivo;
         }
         if ($type == '02') {
             $this->last_debit_note_ref_number = $ref;
         }
         if ($type == '03') {
             $this->last_note_ref_number = $ref;
-            $this->last_document_note = $ref;
+            $this->last_document_note = $consecutivo;
         }
         if ($type == '04') {
             $this->last_ticket_ref_number = $ref;
+            $this->last_document_ticket = $consecutivo;
         }
         if ($type == '08') {
             $this->last_invoice_pur_ref_number = $ref;
+            $this->last_document_invoice_pur = $consecutivo;
         }
         if ($type == '09') {
             $this->last_invoice_exp_ref_number = $ref;
+            $this->last_document_invoice_exp = $consecutivo;
         }
         $this->save();
     }

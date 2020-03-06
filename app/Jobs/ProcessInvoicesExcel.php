@@ -385,8 +385,8 @@ class ProcessInvoicesExcel implements ShouldQueue
                         
                         if($invoice->hacienda_status != "99"){
                             $invoice->company->addSentInvoice( $invoice->year, $invoice->month );
-    
-                            if ($invoice->document_type == '01') {
+                            $company->setLastReference($invoice->document_type, $invoice->reference_number);
+                            /*if ($invoice->document_type == '01') {
                                 $company->last_invoice_ref_number = $invoice->reference_number;
                                 try{
                                     $company->last_document = getDocumentKey('01', $company);
@@ -406,9 +406,12 @@ class ProcessInvoicesExcel implements ShouldQueue
                             }
                             if ($invoice->document_type == '04') {
                                $company->last_ticket_ref_number = $invoice->reference_number;
-                            }
+                            }*/
+                        }else{
+                            //En el else guarda. No guarda en el if, porque la funcion setLastReference se encarga de guardar la empresa.
+                            $company->save();
                         }
-                        $company->save();
+                        clearInvoiceCache($invoice);
                     
                     }catch( \Exception $e ){
                         Log::error("Error en el job ENVIO MASIVO EXCEL:" . $e);
