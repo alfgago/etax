@@ -304,6 +304,10 @@ class PaymentController extends Controller
             //El descuento por defecto es cero.
             $descuento = 0;
             //Aplica descuento del Banco Nacional
+            if( $request->product_id == 177 ){
+                $request->bncupon = null;   
+                $request->coupon = null;
+            }
             $descuentoBN = 0;
             if($request->bncupon) {
                 $descuento = 0.1;
@@ -313,7 +317,7 @@ class PaymentController extends Controller
 
             $cuponId = null;
             $cuponConsultado = null;
-            //Si tiene un cupon adicional, este aplica sobre el de la tarjeta del BN.
+            //Si tiene un cupon adicional, este aplica sobre el de la tarjeta del BN.z
             if ( isset($request->coupon) ) {
                 $cuponConsultado = Coupon::where('code', $request->coupon)->first();
                 if ( isset($cuponConsultado) ) {
