@@ -95,6 +95,7 @@ class EnvioProgramadas implements ShouldQueue
             $company->save();
             $invoice->save();
             Log::info("Factura  programada enviada de la empresa ".$company->id." con la llave: " . $invoice->document_key);
+            clearInvoiceCache($invoice);
         }catch( \Throwable $ex ){
             Log::error("error en envio de programada: " . $ex);
         }
