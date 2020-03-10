@@ -315,6 +315,9 @@ class BridgeHaciendaApi
                     $file = Storage::get($pathMH);
                 }
                 if (strpos($response['data']['response'],"ESTADO=rechazado") !== false) {
+                    if($findKey){
+                        return $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                    }
                     $invoice->hacienda_status = '04';
                     $invoice->save();
                 } else if (strpos($response['data']['response'],"ESTADO=aceptado") !== false) {
@@ -325,9 +328,6 @@ class BridgeHaciendaApi
                     $invoice->save();
                 }
             } else {
-                if($findKey){
-                    return $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
-                }
                 return false;
             }
             return $file;
