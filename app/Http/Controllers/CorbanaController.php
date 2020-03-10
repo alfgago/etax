@@ -53,13 +53,13 @@ class CorbanaController extends Controller
                 $bill->status = '03'; 
                 $bill->save();
                 $pdf = $billUtils->streamPdf($bill, $company);
-                $bill->pdf64 = isset($pdf) ? base64_encode($pdf) : null;
+                $bill->pdf64 = !empty($pdf) ? base64_encode($pdf) : null;
                 
                 $xml = $billUtils->downloadXml($bill, $company);
-                $bill->xml64 = isset($xml) ? base64_encode($xml) : null;
+                $bill->xml64 = !empty($xml) ? base64_encode($xml) : null;
                 
                 $xmlA = $billUtils->downloadXmlAceptacion($bill, $company);
-                $bill->xmlA64 = isset($xmlA) ? base64_encode($xmlA) : null;
+                $bill->xmlA64 = !empty($xmlA) ? base64_encode($xmlA) : null;
             }         
             if(isset($bills)){
                 return response()->json([
@@ -89,7 +89,6 @@ class CorbanaController extends Controller
             
             $bill = Bill::where('id', $billId)->with('company')->first();
             
-                    
             $billUtils = new \App\Utils\BillUtils();
             if( isset($bill) ){
                 $company = $bill->company;
@@ -102,23 +101,25 @@ class CorbanaController extends Controller
                 }
             
                 $pdf = $billUtils->streamPdf($bill, $company);
-                $bill->pdf64 = empty($pdf) ? base64_encode($pdf) : null;
+                $basePDF = !empty($pdf) ? base64_encode($pdf) : null;
                 
                 $xml = $billUtils->downloadXml($bill, $company);
-                $bill->xml64 = empty($xml) ? base64_encode($xml) : null;
+                $baseXML = !empty($xml) ? base64_encode($xml) : null;
                 
                 $xmlA = $billUtils->downloadXmlAceptacion($bill, $company);
-                $bill->xmlh64 = empty($xmlA) ? base64_encode($xmlA) : null;
+                $baseXMLH = !empty($xmlA) ? base64_encode($xmlA) : null;
                 
                 $hasFiles = 0;
-                if( empty($xml) && empty($xmlA) && empty($pdf) ){
+                if( !empty($xml) && !empty($xmlA) && !empty($pdf) ){
                     $hasFiles = 1;
                 }
               
-            Log::error("exito en Corbana " . $hasFiles);
+            Log::info("exito en Corbana " . $hasFiles);
                 return response()->json([
                     'mensaje'  => "Enviando archivos. Resp($hasFiles)",
-                    'factura'  => $bill,
+                    'pdf64' => $basePDF,
+                    'xml64' => $baseXML,
+                    'xmlh64' => $baseXMLH,
                     'tiene_todos' => $hasFiles
                 ], 200);
             }
@@ -149,13 +150,18 @@ class CorbanaController extends Controller
             $invoiceUtils = new \App\Utils\InvoiceUtils();
             
             $pdf = $invoiceUtils->streamPdf($invoice, $invoice->company);
-            $basePDF = isset($pdf) ? base64_encode($pdf) : null;
+            $basePDF = !empty($pdf) ? base64_encode($pdf) : null;
             
             $xml = $invoiceUtils->downloadXml($invoice, $invoice->company);
-            $baseXML = isset($xml) ? base64_encode($xml) : null;
+            $baseXML = !empty($xml) ? base64_encode($xml) : null;
             
             $xmlH = $file = $invoiceUtils->downloadXml( $invoice, $invoice->company, 'MH' );
-            $baseXMLH = isset($xmlH) ? base64_encode($xmlH) : null;
+            $baseXMLH = !empty($xmlH) ? base64_encode($xmlH) : null;
+            
+            $hasFiles = 0;
+            if( !empty($xml) && !empty($xmlA) && !empty($pdf) ){
+                $hasFiles = 1;
+            }
                                 
             if(isset($invoice)){
                 return response()->json([
@@ -163,7 +169,8 @@ class CorbanaController extends Controller
                     'hacienda_status' => $invoice->hacienda_status,
                     'pdf64' => $basePDF,
                     'xml64' => $baseXML,
-                    'xmlh64' => $baseXMLH
+                    'xmlh64' => $baseXMLH,
+                    'tiene_todos' => $hasFiles
                 ], 200);
             }
         
@@ -746,7 +753,7 @@ class CorbanaController extends Controller
                         $item->fixCategoria();
                     }
                     $bill->is_authorized = true;
-                    $bill->accept_status = true;
+                    $bill->accept_status = 1;
                     $bill->is_code_validated = true;
                     $bill->accept_status = $haciendaStatus;
                     $bill->save();

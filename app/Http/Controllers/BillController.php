@@ -1137,7 +1137,7 @@ class BillController extends Controller
             
             if ( $request->autorizar ) {
                 $bill->is_authorized = true;
-                $bill->accept_status = 1;
+                $bill->accept_status = 0;
                 
                 $bill->save();
                 clearBillCache($bill);
@@ -1159,8 +1159,8 @@ class BillController extends Controller
                 $bill->is_authorized = false;
                 $bill->is_void = true;
                 $bill->accept_status = 2;
-                BillItem::where('bill_id', $bill->id)->delete();
-                $bill->delete();
+                //BillItem::where('bill_id', $bill->id)->delete();
+                //$bill->delete();
                 clearBillCache($bill);
                 $user = auth()->user();
                 Activity::dispatch(
@@ -1440,7 +1440,7 @@ class BillController extends Controller
                     $mensaje
                 )->onConnection(config('etax.queue_connections'))
                 ->onQueue('log_queue');
-                    return redirect('/facturas-recibidas/')->withMessage( $mensaje );
+                    return back()->withMessage( $mensaje );
     
                 } else {
                     return back()->withError( 'Ha ocurrido un error al enviar factura.' );
@@ -1455,11 +1455,11 @@ class BillController extends Controller
                     $mensaje = 'Rechazo de factura enviado';
                 }
                 clearBillCache($bill);
-                return redirect('/facturas-recibidas/')->withWarning($mensaje);
+                return back()->withWarning($mensaje);
             }
         } catch ( Exception $e) {
             Log::error ("Error al crear aceptacion de factura");
-            return redirect('/facturas-recibidas/')->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');
+            return back()->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');
         }
     }
 
