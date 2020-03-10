@@ -17,6 +17,7 @@ use App\Jobs\ProcessReception;
 use App\Variables;
 use App\XmlHacienda;
 use App\Utils\InvoiceUtils;
+use App\ApiResponse;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -324,13 +325,30 @@ class BridgeHaciendaApi
                     $invoice->save();
                 }
             } else {
+                if($findKey){
+                    return $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                }
                 return false;
             }
             return $file;
         } catch (\Exception $e) {
             Log::error('Validate User Atv Response -->>' . $e);
-            return redirect('Invoice/index')->withErrors('Error al  consulta en Hacienda');
+            return false;
         }
+    }
+    
+    public function setTempKey($invoice){
+        $apiResponse = ApiResponse::select('id','company_id','invoice_id','created_at')
+                                ->where('company_id', $invoice->company_id)
+                                ->where('invoice_id', $invoice->id)
+                                ->orderBy('created_at','asc')
+                                ->first();
+        $apiResponseDate = $apiResponse->created_at;
+        $shortDate = str_pad($apiResponseDate->day, 2, "0", STR_PAD_LEFT) . str_pad($apiResponseDate->month, 2, "0", STR_PAD_LEFT);
+        $documentKey = $invoice->document_key;
+        $newKey = substr_replace($documentKey, $shortDate, 3, 4);
+        $invoice->document_key = $newKey;
+        return $invoice;
     }
 
     private function setHaciendaInfo($company) {

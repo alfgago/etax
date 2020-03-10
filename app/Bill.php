@@ -673,9 +673,18 @@ class Bill extends Model
               Storage::delete("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/$consecutivoComprobante.xml");
           }
           
-          $path = \Storage::putFileAs(
-              "empresa-$cedulaEmpresa/facturas_compras", $file, "$bill->year/$bill->month/$consecutivoComprobante.xml"
-          );
+          try{ //Intenta primero guardar el archivo como tipo File, si viene en content entra al try/catch y lo guarda como tipo stream de contenido
+            $path = \Storage::putFileAs(
+                "empresa-$cedulaEmpresa/facturas_compras", $file, "$bill->year/$bill->month/$consecutivoComprobante.xml"
+            );
+          }catch(\Throwable $e){
+            $put = \Storage::put(
+                "empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/$consecutivoComprobante.xml", $file
+            );
+            if($put){
+              $path = "empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/$consecutivoComprobante.xml";
+            }
+          }
         
           $xmlHacienda = new XmlHacienda();
           $xmlHacienda->xml = $path;
@@ -702,9 +711,18 @@ class Bill extends Model
               Storage::delete("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/$consecutivoComprobante.pdf");
           }
           
-          $path = \Storage::putFileAs(
-              "empresa-$cedulaEmpresa/facturas_compras", $file, "$bill->year/$bill->month/$consecutivoComprobante.pdf"
-          );
+          try{ //Intenta primero guardar el archivo como tipo File, si viene en content entra al try/catch y lo guarda como tipo stream de contenido
+            $path = \Storage::putFileAs(
+                "empresa-$cedulaEmpresa/facturas_compras", $file, "$bill->year/$bill->month/$consecutivoComprobante.pdf"
+            );
+          }catch(\Throwable $e){
+            $put = \Storage::put(
+                "empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/$consecutivoComprobante.pdf", $file
+            );
+            if($put){
+              $path = "empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/$consecutivoComprobante.pdf";
+            }
+          }
           
         }catch( \Throwable $e ){
           Log::error( 'Error al guardar el PDF recibido: ' . $e->getMessage() );
@@ -717,39 +735,53 @@ class Bill extends Model
     
     public static function storeXMLMessage($bill, $file) {
         
+        $path = "";
         try{
           $cedulaEmpresa = $bill->company->id_number;
           //$cedulaProveedor = $bill->provider->id_number;
           $consecutivoComprobante = $bill->document_number;
           
-          if ( Storage::exists("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/mensaje-$consecutivoComprobante.pdf")) {
-              Storage::delete("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/mensaje-$consecutivoComprobante.pdf");
+          if ( Storage::exists("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/mensaje-$consecutivoComprobante.xml")) {
+              Storage::delete("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/mensaje-$consecutivoComprobante.xml");
           }
           
-          $path = \Storage::putFileAs(
-              "empresa-$cedulaEmpresa/facturas_compras", $file, "$bill->year/$bill->month/mensaje-$consecutivoComprobante.pdf"
-          );
           
-          return $path;
+          try{ //Intenta primero guardar el archivo como tipo File, si viene en content entra al try/catch y lo guarda como tipo stream de contenido
+            $path = \Storage::putFileAs(
+                "empresa-$cedulaEmpresa/facturas_compras", $file, "$bill->year/$bill->month/mensaje-$consecutivoComprobante.xml"
+            );
+          }catch(\Throwable $e){
+            $put = \Storage::put(
+                "empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/mensaje-$consecutivoComprobante.xml", $file
+            );
+            if($put){
+              $path = "empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/mensaje-$consecutivoComprobante.xml";
+            }
+          }
           
         }catch( \Throwable $e ){
-          Log::error( 'Error al guardar el MENSAJE recibido: ' . $e->getMessage() );
+          Log::error( 'Error al guardar el MENSAJE recibido: ' . $e );
         }
         
         return $path;
         
     }
     
-    public static function processMessageXML($file) {
+    public static function processMessageXML($file, $isStream = false) {
         
         try{
-          $xml = simplexml_load_string( file_get_contents($file) );
+          if($isStream){
+            $xml = simplexml_load_string( ($file) );
+          }else{
+            $xml = simplexml_load_string( file_get_contents($file) );
+          }
           $json = json_encode( $xml ); // convert the XML string to JSON
           $xmlData = json_decode( $json, TRUE );
           
           $consecutivoComprobante = $xmlData['NumeroConsecutivo'] ?? null; //La respuesta no debe contener el cambo de numero consecutivo
           $mensaje = $xmlData['Mensaje'] ?? null; //Asegura que existe el mensaje, si no no es un XML correcto de aceptacion
-          //Log::debug("Mensaje: $mensaje | xmlData: " . json_encode($xmlData) );
+
+          $path = "";
           if( !isset($consecutivoComprobante) && isset($mensaje) ){
             $clave = $xmlData['Clave'] ?? null;
             $nombreEmisor = $xmlData['NombreEmisor'] ?? null;
@@ -761,6 +793,10 @@ class Bill extends Model
             $detalleMensaje = $xmlData['DetalleMensaje'] ?? null;
             $montoTotalImpuesto = $xmlData['MontoTotalImpuesto'] ?? null;
             $totalFactura = $xmlData['TotalFactura'] ?? null;
+            
+            if(is_array($detalleMensaje)){
+              $detalleMensaje = json_encode($detalleMensaje);
+            }
 
             $bills = Bill::where('document_key', $clave)->get();
             //Guarda el haciendaResponse segun lo contenido en el XML
@@ -793,8 +829,9 @@ class Bill extends Model
               }
             }
           }
+          
         }catch( \Throwable $e ){
-          //Log::error( 'Error al procesar el MENSAJE HACIENDA recibido: ' . $e->getMessage() );
+          Log::error( 'Error al procesar el MENSAJE HACIENDA recibido: ' . $e );
         }
         
         return $path;

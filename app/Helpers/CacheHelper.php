@@ -37,7 +37,7 @@ if (!function_exists('clearTaxesCache')) {
             
             //Fuerza el recalc de Calculated Taxes, pero solamente puede hacerse cada 15 segundos
             $taxkey = "calc-$cacheKey"; 
-            if ( !Cache::has($taxkey) ) {
+            //if ( !Cache::has($taxkey) ) {
                 $taxes = \App\CalculatedTax::where('company_id', $current_company)
                                             ->where('month', $month)
                                             ->where('year', $year)
@@ -50,7 +50,7 @@ if (!function_exists('clearTaxesCache')) {
                     \Log::info("Limpio cache: $current_company : $year/$month");
                 }
                 Cache::put($taxkey, $taxes, 15);
-            }
+            //}
             
       	}catch(\Throwable $e){
       	    \Log::error("Fallo al limpiar cache: " . $e);
