@@ -19,6 +19,7 @@ use App\ProductCategory;
 use App\Http\Controllers\CacheController;
 use App\Exports\BillExport;
 use App\Exports\LibroComprasExport;
+use App\Exports\LibroComprasExportSM;
 use App\Imports\BillImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Orchestra\Parser\Xml\Facade as XmlParser;
@@ -638,6 +639,10 @@ class BillController extends Controller
         
         foreach($billItems as $item){
               $item->calcularAcreditablePorLinea();
+        }
+        
+        if( $current_company == 1110 ){
+            return Excel::download(new LibroComprasExportSM($year, $month), 'libro-compras.xlsx');
         }
         
         return Excel::download(new LibroComprasExport($year, $month), 'libro-compras.xlsx');

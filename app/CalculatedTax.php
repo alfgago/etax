@@ -1111,21 +1111,25 @@ class CalculatedTax extends Model
     			$ivaDataAnterior = json_decode($calculosAnteriores[$i]->iva_data);
 			
     			foreach( CodigoIvaRepercutido::all() as $codigo ) {
-    			  $bVar = "b$codigo->id";
-    			  $iVar = "i$codigo->id";
-    			  $ivaData->$bVar += $ivaDataAnterior->$bVar;
-    			  $ivaData->$iVar += $ivaDataAnterior->$iVar;
+    			  try{
+      			  $bVar = "b$codigo->id";
+      			  $iVar = "i$codigo->id";
+      			  $ivaData->$bVar += $ivaDataAnterior->$bVar;
+      			  $ivaData->$iVar += $ivaDataAnterior->$iVar;
+    			  }catch(\Exception $e){}
     			}
     			
     			foreach( CodigoIvaSoportado::all() as $codigo ) {
-    			  $bVar = "b$codigo->id";
-    			  $iVar = "i$codigo->id";
-            $iVarPleno = "pleno$codigo->id";
-			      $bVarSD = "b$codigo->id"."sd";
-    			  $ivaData->$bVar += $ivaDataAnterior->$bVar;
-    			  $ivaData->$iVar += $ivaDataAnterior->$iVar;
-    			  $ivaData->$iVarPleno += $ivaDataAnterior->$iVarPleno;
-    			  $ivaData->$bVarSD += ($ivaDataAnterior->$bVarSD ?? 0);
+    			  try{
+      			  $bVar = "b$codigo->id";
+      			  $iVar = "i$codigo->id";
+              $iVarPleno = "pleno$codigo->id";
+  			      $bVarSD = "b$codigo->id"."sd";
+      			  $ivaData->$bVar += $ivaDataAnterior->$bVar;
+      			  $ivaData->$iVar += $ivaDataAnterior->$iVar;
+      			  $ivaData->$iVarPleno += $ivaDataAnterior->$iVarPleno;
+      			  $ivaData->$bVarSD += ($ivaDataAnterior->$bVarSD ?? 0);
+    			  }catch(\Exception $e){}
     			}
     			
     			foreach( ProductCategory::all() as $codigo ) {

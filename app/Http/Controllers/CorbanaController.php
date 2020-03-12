@@ -14,6 +14,7 @@ use App\Provider;
 use App\Client;
 use App\AvailableInvoices;
 use App\Jobs\CreateInvoiceJob;
+use App\Jobs\ProcessInvoice;
 use App\Utils\BridgeHaciendaApi;
 use App\Http\Controllers\CacheController;
 use Orchestra\Parser\Xml\Facade as XmlParser;
@@ -26,8 +27,8 @@ class CorbanaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles']] );
-        $this->middleware('CheckSubscription', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles']] );
+        $this->middleware('auth', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles','queryInvoiceFiles']] );
+        $this->middleware('CheckSubscription', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles','queryInvoiceFiles']] );
     }
     
     public function queryBills(Request $request) {
@@ -45,8 +46,11 @@ class CorbanaController extends Controller
             $bills = Bill::where('company_id', $company->id)
                     ->where('is_void', false)
                     ->where('status', '01')
-                    ->limit(3)
-                    ->with('items')->get();
+                    ->whereHas('haciendaResponse', function($q){
+                        $q->where('mensaje', '1');
+                    })
+                    ->limit(10)
+                    ->with('items')->with('haciendaResponse')->get();
                     
             $billUtils = new \App\Utils\BillUtils();
             foreach($bills as $bill){
@@ -59,7 +63,13 @@ class CorbanaController extends Controller
                 $bill->xml64 = !empty($xml) ? base64_encode($xml) : null;
                 
                 $xmlA = $billUtils->downloadXmlAceptacion($bill, $company);
-                $bill->xmlA64 = !empty($xmlA) ? base64_encode($xmlA) : null;
+                $bill->xmlh64 = !empty($xmlA) ? base64_encode($xmlA) : null;
+                
+                $hasFiles = 0;
+                if( !empty($xml) && !empty($xmlA) && !empty($pdf) ){
+                    $hasFiles = 1;
+                }
+                $bill->has_files = $hasFiles;
             }         
             if(isset($bills)){
                 return response()->json([
@@ -114,7 +124,6 @@ class CorbanaController extends Controller
                     $hasFiles = 1;
                 }
               
-            Log::info("exito en Corbana " . $hasFiles);
                 return response()->json([
                     'mensaje'  => "Enviando archivos. Resp($hasFiles)",
                     'pdf64' => $basePDF,
@@ -145,32 +154,11 @@ class CorbanaController extends Controller
                 return response()->json([
                     'mensaje' => 'Error: ID de factura no le pertenece a Corbana'
                 ], 200);
-            }
-            
-            $invoiceUtils = new \App\Utils\InvoiceUtils();
-            
-            $pdf = $invoiceUtils->streamPdf($invoice, $invoice->company);
-            $basePDF = !empty($pdf) ? base64_encode($pdf) : null;
-            
-            $xml = $invoiceUtils->downloadXml($invoice, $invoice->company);
-            $baseXML = !empty($xml) ? base64_encode($xml) : null;
-            
-            $xmlH = $file = $invoiceUtils->downloadXml( $invoice, $invoice->company, 'MH' );
-            $baseXMLH = !empty($xmlH) ? base64_encode($xmlH) : null;
-            
-            $hasFiles = 0;
-            if( !empty($xml) && !empty($xmlA) && !empty($pdf) ){
-                $hasFiles = 1;
-            }
-                                
+            }                 
             if(isset($invoice)){
                 return response()->json([
                     'id_factura' => $invoice->id,
-                    'hacienda_status' => $invoice->hacienda_status,
-                    'pdf64' => $basePDF,
-                    'xml64' => $baseXML,
-                    'xmlh64' => $baseXMLH,
-                    'tiene_todos' => $hasFiles
+                    'hacienda_status' => $invoice->hacienda_status
                 ], 200);
             }
         
@@ -187,6 +175,55 @@ class CorbanaController extends Controller
         ], 200);
     }
     
+    
+    public function queryInvoiceFiles(Request $request) {
+        try{
+            $invoiceId = $request->pId;
+            
+            $invoice = Invoice::where('id', $invoiceId)->with('company')->first();
+            
+            $invoiceUtils = new \App\Utils\InvoiceUtils();
+            if( isset($invoice) ){
+                $company = $invoice->company;
+                $cedula = $company->id_number;
+                if( $cedula != "3101018968" && $cedula != "3101011989" && $cedula != "3101166930" && $cedula != "3007684555" && $cedula != "3130052102" && $cedula != "3101702429" ){
+                    Log::warning("Error: ID de factura no le pertenece a Corbana");
+                    return response()->json([
+                        'mensaje' => 'Error: ID de factura no le pertenece a Corbana'
+                    ], 200);
+                }
+            
+                $pdf = $invoiceUtils->streamPdf($invoice, $company);
+                $basePDF = !empty($pdf) ? base64_encode($pdf) : null;
+                
+                $xml = $invoiceUtils->downloadXml($invoice, $company);
+                $baseXML = !empty($xml) ? base64_encode($xml) : null;
+                
+                $xmlA = $invoiceUtils->downloadXmlAceptacion($invoice, $company);
+                $baseXMLH = !empty($xmlA) ? base64_encode($xmlA) : null;
+                
+                $hasFiles = 0;
+                if( !empty($xml) && !empty($xmlA) && !empty($pdf) ){
+                    $hasFiles = 1;
+                }
+              
+                return response()->json([
+                    'mensaje'  => "Enviando archivos. Resp($hasFiles)",
+                    'pdf64' => $basePDF,
+                    'xml64' => $baseXML,
+                    'xmlh64' => $baseXMLH,
+                    'tiene_todos' => $hasFiles
+                ], 200);
+            }
+        
+        }catch(\Exception $e){
+            Log::error("Error en Corbana" . $e);
+            return response()->json([
+                'mensaje' => 'Error ' . $e->getMessage()
+            ], 200);
+        }
+    }
+    
     public function sendInvoice(Request $request) {
  
         try{
@@ -194,7 +231,7 @@ class CorbanaController extends Controller
             $factura = $request->factura[0];
             $items = $request->lineas;
             $requestOtros = $request->otros ?? null;
-            $metodoGeneracion = "Corbana";
+            $metodoGeneracion = "etax-corbana";
 
             //Busca la cedula de la empresa
             $cedulaEmpresa = $this->parseCorbanaIdToCedula($factura['NO_CIA'], $factura['ACTIVIDAD']);
@@ -343,6 +380,7 @@ class CorbanaController extends Controller
                     if( $unidadMedicion == 'N' ){
                         $unidadMedicion = $TIPO_SERV == "S" ? "Sp" : 'Unid';
                     }
+                    $unidadMedicion = ucfirst(strtolower($unidadMedicion));
                     
                     $cantidad = $item['CANTIDAD'];
                     
@@ -434,9 +472,9 @@ class CorbanaController extends Controller
             
             $invoiceUtils = new \App\Utils\InvoiceUtils();
             $pdf = $invoiceUtils->streamPdf($invoice, $invoice->company);
-            $basePDF = isset($pdf) ? base64_encode($pdf) : null;
+            $basePDF = !empty($pdf) ? base64_encode($pdf) : null;
             $xml = $invoiceUtils->downloadXml($invoice, $invoice->company);
-            $baseXML = isset($xml) ? base64_encode($xml) : null;
+            $baseXML = !empty($xml) ? base64_encode($xml) : null;
             
             return response()->json([
                 'mensaje' => 'Exito',
@@ -610,12 +648,14 @@ class CorbanaController extends Controller
         $invoice->total = 0;
         $invoice->is_code_validated = true;
         $descuentos = 0;
+        $exoneraciones = 0;
         
         foreach( $lineas as $linea ){
             $linea['invoice_id'] = $invoice->id;
             $invoice->subtotal = $invoice->subtotal + $linea['subtotal'];
             $invoice->iva_amount = $invoice->iva_amount + $linea['iva_amount'];
             $descuentos = $descuentos + $linea['discount'];
+            $exoneraciones = $exoneraciones + $linea['exoneration_amount'];
             $item = InvoiceItem::updateOrCreate(
             [
                 'invoice_id' => $linea['invoice_id'],
@@ -624,18 +664,20 @@ class CorbanaController extends Controller
             $item->fixIvaType();
             $item->fixCategoria();
         }
-        $invoice->total = $invoice->subtotal + $invoice->iva_amount - $descuentos;
+        $invoice->total = $invoice->subtotal + $invoice->iva_amount - $descuentos - $exoneraciones;
         
         //$invoice->client_email = "alfgago@gmail.com";
         $invoice->save();
         Log::info("CORBANA Enviada: " . $invoice);
         clearInvoiceCache($invoice);
         
-        if($invoice->hacienda_status){
+        try{
             $apiHacienda = new BridgeHaciendaApi();
             $tokenApi = $apiHacienda->login(false);
-            CreateInvoiceJob::dispatch($invoice, $tokenApi)->onQueue('invoicing');
-        }
+            if($tokenApi){
+                ProcessInvoice::dispatch($invoice, $invoice->company_id, $tokenApi)->onQueue('invoicing');
+            }
+        }catch(\Exception $e){ Log::error($e); }
                     
         return $invoice;  
     }
@@ -694,7 +736,7 @@ class CorbanaController extends Controller
                 $note->hacienda_status = '01';
                 $note->payment_status = "01";
                 $note->payment_receipt = "";
-                $note->generation_method = "Corbana-Anula";
+                $note->generation_method = "etax-corbana-anula";
                 $note->reason = "Anular Factura";
                 $note->code_note = "01";
                 $note->reference_number = $company->last_note_ref_number + 1;
@@ -739,6 +781,7 @@ class CorbanaController extends Controller
                             ->with('company')
                             ->first();
                 $haciendaStatus = $request->hacienda_status;
+                $condicionAceptacion = $request->condicion_aceptacion;
                 if( isset($bill) ){
                     $company = $bill->company;
                     $cedula = $company->id_number;
@@ -749,8 +792,7 @@ class CorbanaController extends Controller
                         ], 200);
                     }
                     foreach($bill->items as $item){
-                        $item->is_code_validated = true;
-                        $item->fixCategoria();
+                        $item->setIvaTypeFromCondition($condicionAceptacion);
                     }
                     $bill->is_authorized = true;
                     $bill->accept_status = 1;

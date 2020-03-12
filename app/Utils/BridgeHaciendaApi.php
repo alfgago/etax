@@ -316,7 +316,8 @@ class BridgeHaciendaApi
                 }
                 if (strpos($response['data']['response'],"ESTADO=rechazado") !== false) {
                     if($findKey){
-                        return $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                        $newInvoice = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                        Log::info("QUERY HACIENDA: Generando otra llave $newInvoice->document_key");
                     }
                     $invoice->hacienda_status = '04';
                     $invoice->save();

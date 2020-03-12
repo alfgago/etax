@@ -39,6 +39,11 @@ class Bill extends Model
     {
         return $this->belongsTo(Actividades::class, 'activity_company_verification');
     }
+    //Relacion con la respuesta de Hacienda
+    public function haciendaResponse()
+    {
+        return $this->hasOne(haciendaResponse::class);
+    }
     
     public function providerName() {
       if( isset($this->provider_first_name)) {
@@ -361,7 +366,7 @@ class Bill extends Model
           //Si es Corbana, va a poner la sucursal a la que recibe la factura. Varia dependiendo del email de recepcion
           $bill->setRegionCorbana($emailRecibido);
         }catch(\Exception $e){
-          Log::error( "Error al registrar correo receptor: " . $e->getMessage() );
+          Log::error( "Error al registrar correo receptor: " . $e );
         }
 
         if ( is_array($medioPago) ) {
@@ -1142,7 +1147,8 @@ class Bill extends Model
       
       
     public function setRegionCorbana($email){
-      
+      $email = strtolower($email);
+      Log::debug("Regiones Corbana: $email");
       $this->sucursal = null;
       if($email == "facturaelectronica@corbana.co.cr" || strpos($email, "facturaelectronica@corbana.co.cr") !== false || strpos($email, "facturaelectronica2@corbana.co.cr") !== false){
         $this->sucursal = "01";
