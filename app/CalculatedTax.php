@@ -1225,21 +1225,25 @@ class CalculatedTax extends Model
 			$ivaData = new \stdClass();
 			
 			foreach( CodigoIvaRepercutido::all() as $codigo ) {
-			  $bVar = "b$codigo->id";
-			  $iVar = "i$codigo->id";
-			  $ivaData->$bVar = 0;
-			  $ivaData->$iVar = 0;
+  			  try{
+      		  $bVar = "b$codigo->id";
+      		  $iVar = "i$codigo->id";
+      		  $ivaData->$bVar = 0;
+      		  $ivaData->$iVar = 0;
+  			  }catch(\Exception $e){}
 			}
 			
 			foreach( CodigoIvaSoportado::all() as $codigo ) {
-			  $bVar = "b$codigo->id";
-			  $iVar = "i$codigo->id";
-			  $iVarPleno = "pleno$codigo->id";
-			  $bVarSD = "b$codigo->id"."sd";
-			  $ivaData->$bVar = 0;
-			  $ivaData->$iVar = 0;
-			  $ivaData->$iVarPleno = 0;
-			  $ivaData->$bVarSD = 0;
+  			  try{
+      		  $bVar = "b$codigo->id";
+      		  $iVar = "i$codigo->id";
+      		  $iVarPleno = "pleno$codigo->id";
+      		  $bVarSD = "b$codigo->id"."sd";
+      		  $ivaData->$bVar = 0;
+      		  $ivaData->$iVar = 0;
+      		  $ivaData->$iVarPleno = 0;
+      		  $ivaData->$bVarSD = 0;
+  			  }catch(\Exception $e){}
 			}
 			$arrayActividades = $this->currentCompany->getActivities();
       
