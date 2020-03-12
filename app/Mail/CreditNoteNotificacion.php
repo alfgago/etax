@@ -28,6 +28,11 @@ class CreditNoteNotificacion extends Mailable
      */
     public function build()
     {
+        $isPrueba = "";
+        if ( app()->isLocal() ) {
+            $isPrueba = "PRUEBAS - ";
+        }
+        
         $customImg = null;
         $sendFrom = 'info@etaxcr.com';
         $cedula = $this->content['data_company']->id_number;
@@ -39,7 +44,7 @@ class CreditNoteNotificacion extends Mailable
         $type = $this->content['data_invoice']->document_type == '03' ? 'Crédito': 'Debito';
         $fromEmail = $this->content['data_company']->email;
         $fromName = $this->content['data_company']->business_name;
-        $message = $this->subject('Confirmación Nota de '. $type .' #' . $this->content['data_invoice']->document_number.
+        $message = $this->subject($isPrueba.'Confirmación Nota de '. $type .' #' . $this->content['data_invoice']->document_number.
             ' De: '.$this->content['data_company']->business_name)->markdown('emails.invoice.creditnote')
             ->with([
                 'data_invoice' => $this->content['data_invoice'], 

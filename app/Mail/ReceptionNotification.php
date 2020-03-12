@@ -29,6 +29,10 @@ class ReceptionNotification extends Mailable
      */
     public function build()
     {
+        $isPrueba = "";
+        if ( app()->isLocal() ) {
+            $isPrueba = "PRUEBAS - ";
+        }
         $customImg = null;
         $sendFrom = 'info@etaxcr.com';
         $cedula = $this->content['data_company']->id_number;
@@ -41,7 +45,7 @@ class ReceptionNotification extends Mailable
         $fromName = $this->content['data_company']->business_name;
         
         $response = substr($this->content['response'], -169);
-        $message = $this->subject('Recepcion factura electrónica #' . $this->content['data_invoice']->document_number.
+        $message = $this->subject($isPrueba.'Recepcion factura electrónica #' . $this->content['data_invoice']->document_number.
             ' De: '.$this->content['data_company']->business_name)->markdown('emails.invoice.recepcion')
             ->with([
                 'data_invoice' => $this->content['data_invoice'], 

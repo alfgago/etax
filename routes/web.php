@@ -347,6 +347,6 @@ Route::prefix('quickbooks')->group(function() {
     Route::get('/comparativo-productos', 'QuickbooksController@productSyncIndex');
     //Post/Patch de acciones
     Route::get('/auth', 'QuickbooksController@auth');
-    Route::post('/guardar-config', 'QuickbooksController@saveConfig');
-    Route::post('/guardar-variables', 'QuickbooksController@saveVariables');
+    Route::post('/guardar-config/{id}', 'QuickbooksController@saveConfig');
+    Route::post('/guardar-variables/{id}', 'QuickbooksController@saveVariables');
 });

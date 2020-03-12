@@ -43,23 +43,25 @@ class ResendInvoices extends Command
     {
         try {
             $this->info('Sending invoices to Hacienda....');
-            $invoices = Invoice::where('hacienda_status', '01')->where('generation_method','like', '%etax%')
+            $invoices = Invoice::where('hacienda_status', '01')
+                ->where('generation_method','like', '%etax%')
                 ->where('generation_method','not like', "%bulk%")
                 ->where('is_void', false)
                 ->where('resend_attempts', '<', 6)->where('in_queue', false)
-                ->whereIn('document_type', ['01', '04', '08', '09'])->get();
+                ->whereIn('document_type', ['01', '04', '08', '09'])
+                ->get();
             $this->info('Sending invoices ....'. count($invoices));
             $this->info('Get Token Api Hacienda ....');
             $apiHacienda = new BridgeHaciendaApi();
             $tokenApi = $apiHacienda->login(false);
 
             foreach ($invoices as $invoice) {
-                $company = $invoice->company;
+                //$company = $invoice->company;
                 $invoice->resend_attempts = $invoice->resend_attempts + 1;
                 $invoice->in_queue = true;
                 $invoice->save();
                 $this->info('Sending invoice ....'. $invoice->document_key);
-                ProcessInvoice::dispatch($invoice->id, $company->id, $tokenApi)
+                ProcessInvoice::dispatch($invoice->id, $invoice->company_id, $tokenApi)
                     ->onConnection(config('etax.queue_connections'))->onQueue('invoicing');
             }
         } catch ( \Exception $e) {

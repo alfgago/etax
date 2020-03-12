@@ -42,6 +42,51 @@ class BillItem extends Model
       }
     }
     
+    public function setIvaTypeFromCondition($condicionAceptacion){
+      $porc = $this->iva_percentage;
+      $lastDigit = '3';
+      if( 4 == $porc ){
+        $lastDigit = '4';  
+      }elseif( 2 == $porc ){
+        $lastDigit = '2';  
+      } elseif( 1 == $porc ){
+        $lastDigit = '1';  
+      }elseif( 0 == $porc ){
+        $lastDigit = '0';  
+      }
+      
+      $firstDigit = 'B';
+      $um = $this->measure_unit;
+      if($um == 'Sp' || $um == 'Spe' || $um == 'St' || $um == 'Al' || $um == 'Alc' || $um == 'Cm' || $um == 'I' || $um == 'Os'){
+        $firstDigit = 'S';
+      }
+      
+      //equivalente a identificación plena, se usa por defecto si es 01 o una no existente
+      $this->iva_type = $firstDigit."06".$lastDigit; 
+      $this->porc_identificacion_plena = 13;
+      if( '02' == $condicionAceptacion ){ 
+        //equivalente a plena con aceptación parcial, (incluido el escenario donde el IVA soportado es 100% gasto)
+        $this->iva_type = $firstDigit."06".$lastDigit;  
+        $this->porc_identificacion_plena = 6;
+      }elseif('03' == $condicionAceptacion) {
+        //bienes de capital
+        $this->iva_type = $firstDigit."07".$lastDigit;
+      }elseif('04' == $condicionAceptacion) {
+        //se utiliza para gastos corrientes no relacionados con la actividad
+        $this->iva_type = "097";
+      }elseif('05' == $condicionAceptacion) {
+        //iria con código S003 o B003 para aplicar la prorrata, y así correspondientemente según la tarifa de IVA soportado.
+        $this->iva_type = $firstDigit."00".$lastDigit;
+        if( 0 == $porc ){
+          $this->iva_type = $firstDigit."060";
+        }
+      }
+      
+      $this->is_code_validated = true;
+      $this->fixCategoria();
+      $this->save();
+    }
+    
     public function fixIvaType() {
       try{
         if( $this->bill->document_type != '04' ){
@@ -78,9 +123,11 @@ class BillItem extends Model
     }
   
     
-    public function fixCategoria() {
+    public function fixCategoria($skipFixType = false) {
       try{
-        $this->fixIvaType();
+        if($skipFixType){
+          $this->fixIvaType();
+        }
         
         $cat = $this->product_type;
         $alt = $this->product_type;

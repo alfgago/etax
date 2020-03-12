@@ -112,10 +112,15 @@ class InvoiceUtils
         return $file;
     }
     
+    public function downloadXmlAceptacion( $invoice, $company )
+    {
+        return $this->downloadXml( $invoice, $company, 'MH');
+    }
+    
     
     
     public function setRealDocumentKey($invoice){
-        $file = $this->downloadXml( $invoice, $invoice->company, $type = null);
+        $file = $this->downloadXml( $invoice, $invoice->company, null);
         if( isset($file) ){
             $xml = simplexml_load_string( $file );
             $json = json_encode( $xml ); // convert the XML string to JSON

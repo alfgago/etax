@@ -81,14 +81,14 @@ class QuickbooksController extends Controller
     {
         $company = currentCompanyModel();
         $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
+        if( !isset($qb) ){
+            return redirect('/quickbooks/configuracion')->withError('Usted no tiene Quickbooks configurado correctamente.');
+        }
         $dataService = $qb->getAuthenticatedDS();
         
         $taxRates = $dataService->Query("SELECT * FROM TaxRate");
         $paymentMethods = $dataService->Query("SELECT * FROM PaymentMethod");
         $terms = $dataService->Query("SELECT * FROM Term");
-        
-        //dd($terms, $taxRates, $paymentMethods);
-        
         
         return view('Quickbooks/variable-map', compact(['qb', 'taxRates', 'paymentMethods', 'terms']));
     }
@@ -98,20 +98,23 @@ class QuickbooksController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function saveVariables($request)
+    public function saveVariables(Request $request)
     {
         $company = currentCompanyModel();
         $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
-        $dataService = $qb->getAuthenticatedDS();
+        if( !isset($qb) ){
+            return redirect('/quickbooks/configuracion')->withError('Usted no tiene Quickbooks configurado correctamente.');
+        }
+        $qb->conditions_json = json_encode($request->sale_condition);
+        $qb->payment_methods_json = json_encode($request->payment_type);
+        $taxesJson = [
+            'tipo_iva' => $request->tipo_iva,
+            'tipo_producto' => $request->tipo_producto
+        ];
+        $qb->taxes_json = json_encode($taxesJson);
         
-        $taxRates = $dataService->Query("SELECT * FROM TaxRate");
-        $paymentMethods = $dataService->Query("SELECT * FROM PaymentMethod");
-        $terms = $dataService->Query("SELECT * FROM Term");
-        
-        //dd($terms, $taxRates, $paymentMethods);
-        
-        
-        return view('Quickbooks/variable-map', compact(['qb', 'taxRates', 'paymentMethods', 'terms']));
+        $qb->save();
+        return back()->withMessage( 'Se guardaron las variables de Quickbooks correctamente.' );
     }
     
     /**
@@ -122,28 +125,40 @@ class QuickbooksController extends Controller
     public function invoiceSyncIndex()
     {
         $company = currentCompanyModel();
+        $year = 2020;
+        $month = 1;
+        
         $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
+        if( !isset($qb) ){
+            return redirect('/quickbooks/configuracion')->withError('Usted no tiene Quickbooks configurado correctamente.');
+        }
         $dataService = $qb->getAuthenticatedDS();
         
-        $qbInvoices   = $dataService->Query("SELECT * FROM Invoice MAXRESULTS 7");
-        $etaxInvoices = Invoice::where("company_id", $company->id)->with('client')->limit(15)->get();
+        $qbInvoices = $this->getMonthlyInvoices($dataService, $year, $month);
+        //dd( $qbInvoices );
+        $etaxInvoices = Invoice::where("company_id", $company->id)
+                        ->where('year', $year)
+                        ->where('month', $month)
+                        ->with('client')
+                        ->limit(15)
+                        ->get();
         $facturas = new \stdClass();
-        
         $cachekey = "qb-invoicelist-$company->id_number"; 
-        if ( !Cache::has($cachekey) ) {
+        //if ( !Cache::has($cachekey) ) {
             foreach($qbInvoices as $invoice){
                 $docNumber = $invoice->DocNumber;
                 $fac = new \stdClass();
                 $fac->numero_qb = $docNumber;
                 $fac->fecha_qb = $invoice->TxnDate;
                 $fac->total_qb = $invoice->TotalAmt;
-                $fac->cliente_qb = $dataService->Query("SELECT FullyQualifiedName FROM Customer WHERE Id='".$invoice->CustomerRef."'")[0]->FullyQualifiedName;
+                $fac->cliente_qb = $invoice->CustomerRef;
+                //$fac->cliente_qb = $dataService->Query("SELECT FullyQualifiedName FROM Customer WHERE Id='".$invoice->CustomerRef."'")[0]->FullyQualifiedName;
                 $facturas->$docNumber = $fac;
             }
             Cache::put($cachekey, $facturas, 120);
-        }else{
+        //}else{
             $facturas = Cache::get($cachekey);
-        }
+        //}
         
         foreach($etaxInvoices as $invoice){
             $docNumber = $invoice->reference_number;
@@ -160,6 +175,14 @@ class QuickbooksController extends Controller
         }
         
         return view('Quickbooks/invoice-sync', compact(['facturas']));
+    }
+    
+    public function getMonthlyInvoices($dataService, $year, $month){
+        
+        $dateFrom = Carbon::createFromDate($year, $month, 1)->firstOfMonth()->toAtomString();
+        $dateTo = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toAtomString();
+        return $dataService->Query("SELECT * FROM Invoice WHERE TxnDate >= '$dateFrom' AND TxnDate <= '$dateTo'");
+        
     }
     
     /**
