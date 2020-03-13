@@ -1257,8 +1257,7 @@ class InvoiceController extends Controller
             return Excel::download(new LibroVentasExport($year, $month), 'libro-ventas.xlsx');
         }else{
             $user = auth()->user();
-            dd($user);
-            GenerateBookReport::dispatch('INVOICE', $itemsQuery->get(), $user, $company, $year, $month)->onQueue('log_queue');
+            GenerateBookReport::dispatch('INVOICE', $itemsQuery->get(), $user, $company, $year, $month)->onQueue('default');
             return back()->withMessage('Su libro de ventas es muy grande, en unos minutos será enviado a su correo electrónico: ' . $user->email );
         }
     }
@@ -1399,7 +1398,7 @@ class InvoiceController extends Controller
                 Log::info("$i procesadas...");
                 foreach (array_chunk ( $invoiceList, 100 ) as $facturas) {
                     Log::info("Mandando 100 a queue...");
-                    ProcessInvoicesImport::dispatch($facturas);
+                    ProcessInvoicesImport::dispatch($facturas)->onQueue('default');;
                 }
                 Log::info("Envios a queue finalizados $company->id_number");
             }else{
