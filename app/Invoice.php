@@ -768,7 +768,7 @@ class Invoice extends Model
         $invoice->month = $month;
         $invoice->year = $year;
         
-        if( hasAvailableInvoices($year, $month, 1, $company) ){
+        if( !hasAvailableInvoices($year, $month, 1, $company) ){
             Log::warning("La empresa $company->id, $company->business_name está intentando subir XMLs con límite vencido.");
             return false;
         }
@@ -1075,22 +1075,7 @@ class Invoice extends Model
         }catch( \Throwable $e ){
           Log::error( 'Error al registrar en tabla XMLHacienda: ' . $e->getMessage() );
         }
-
-        try{
-          $available_invoices = AvailableInvoices::where('company_id', $invoice->company_id)
-                              ->where('year', $invoice->year)
-                              ->where('month', $invoice->month)
-                              ->first();
-          if( isset($available_invoices) ) {
-            $available_invoices->current_month_sent = $available_invoices->current_month_sent + 1;
-            $available_invoices->save();
-          }
-        }catch( \Throwable $e ){
-          Log::error( 'Error al sumar en AvailableInvoices ' . $e->getMessage() );
-        }
-
         return $path;
-
     }
 
     public static function storeXMLError($cedulaEmpresa, $file) {

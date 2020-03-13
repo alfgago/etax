@@ -780,8 +780,8 @@ if (!function_exists('hasAvailableInvoices')) {
             $company = currentCompanyModel();
         }
         $availableInvoices = $company->getAvailableInvoices( $year, $month );
-        $facturasDisponibles = $availableInvoices->monthly_quota -  $availableInvoices->current_month_sent;
-        if( ($facturasDisponibles + $company->additional_invoices) < $amountToCheck){
+        $facturasDisponibles = $availableInvoices->monthly_quota + $company->additional_invoices - $availableInvoices->current_month_sent;
+        if( $facturasDisponibles < $amountToCheck ){
             return false;
         }
         return true;

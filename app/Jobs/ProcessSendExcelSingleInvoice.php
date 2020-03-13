@@ -71,7 +71,7 @@ class ProcessSendExcelSingleInvoice implements ShouldQueue
                 }
                 
                 if( !$invoice->id ){
-                    if( hasAvailableInvoices($invoice->year, $invoice->month, 1, $invoice->company) ){
+                    if( !hasAvailableInvoices($invoice->year, $invoice->month, 1, $invoice->company) ){
                         Log::warning("La empresa $company->id, $company->business_name está intentando subir XMLs con límite vencido.");
                         return false;
                     }

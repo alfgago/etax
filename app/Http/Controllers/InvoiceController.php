@@ -1537,12 +1537,11 @@ class InvoiceController extends Controller
 
             $fechaEmisionTemp = explode("T", $arr['FechaEmision']);
             $fechaEmisionTemp = explode("-", $fechaEmisionTemp[0]);
-            $day = $fechaEmisionTemp[0];
+            $year = $fechaEmisionTemp[0];
             $month = $fechaEmisionTemp[1];
-            $year = $fechaEmisionTemp[2];
-            $fechaEmision = $year."/".$month."/".$day;
-            
-            if( hasAvailableInvoices($year, $month, 1, $company) ){
+            $day = $fechaEmisionTemp[2];
+            $fechaEmision = $day."/".$month."/".$year;
+            if( !hasAvailableInvoices($year, $month, 1, $company) ){
                 return Response()->json("Usted ha sobrepasado el límite de facturas de su plan actual.", 400);
             }
                 
