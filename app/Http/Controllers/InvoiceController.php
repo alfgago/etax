@@ -1237,7 +1237,7 @@ class InvoiceController extends Controller
                 AND hide_from_taxes = 0
                 AND b.company_id = $companyId") )[0]->c;
 
-        if($count < 0){
+        if($count < 25000){
             if( $companyId == 1110 ){
                 return Excel::download(new LibroVentasExportSM($year, $month), 'libro-ventas.xlsx');
             }
