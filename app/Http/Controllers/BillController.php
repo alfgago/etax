@@ -627,9 +627,6 @@ class BillController extends Controller
         ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
         ->where('year', $year)
         ->where('month', $month)
-        ->where('iva_amount', '>', 0)
-        ->where('iva_acreditable', 0)
-        ->where('iva_gasto', 0)
         ->whereHas('bill', function ($query) use ($companyId){
             $query->where('company_id', $companyId)
             ->where('is_void', false)
@@ -641,7 +638,7 @@ class BillController extends Controller
         
         $count = $query->count();
         
-        if($count < 25000){
+        if($count < 24000){
             $billItems = $query->get();
             foreach($billItems as $item){
                   $item->calcularAcreditablePorLinea();

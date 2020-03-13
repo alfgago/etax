@@ -324,7 +324,7 @@ class Bill extends Model
     
     
     public static function saveBillXML( $arr, $metodoGeneracion, $emailRecibido = null ) {
-        Log::debug($arr);
+        //Log::debug($arr);
         //dd($arr);
         $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
         if($metodoGeneracion != "Email" && $metodoGeneracion != 'GS' ){
