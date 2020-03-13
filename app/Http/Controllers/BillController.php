@@ -623,20 +623,6 @@ class BillController extends Controller
         $company = currentCompanyModel();
         $companyId = $company->id;
         
-        //Busca todos los que aun no tienen el IVA calculado, lo calcula y lo guarda
-        $query = BillItem::query()
-        ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
-        ->where('year', $year)
-        ->where('month', $month)
-        ->whereHas('bill', function ($query) use ($companyId){
-            $query->where('company_id', $companyId)
-            ->where('is_void', false)
-            ->where('is_authorized', true)
-            ->where('is_code_validated', true)
-            ->where('accept_status', 1)
-            ->where('hide_from_taxes', false);
-        });
-        
         $count = DB::select( DB::raw("
                 select count(i.id) as c from bill_items i, bills b
                 where i.year = $year
@@ -648,7 +634,20 @@ class BillController extends Controller
                 AND hide_from_taxes = 0
                 AND b.company_id = $companyId") )[0]->c;
         
-        if($count < 10000){
+        if($count < 0){
+            //Busca todos los que aun no tienen el IVA calculado, lo calcula y lo guarda
+            $query = BillItem::query()
+            ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
+            ->where('year', $year)
+            ->where('month', $month)
+            ->whereHas('bill', function ($query) use ($companyId){
+                $query->where('company_id', $companyId)
+                ->where('is_void', false)
+                ->where('is_authorized', true)
+                ->where('is_code_validated', true)
+                ->where('accept_status', 1)
+                ->where('hide_from_taxes', false);
+            });
             $billItems = $query->get();
             foreach($billItems as $item){
                   $item->calcularAcreditablePorLinea();
@@ -659,7 +658,7 @@ class BillController extends Controller
             return Excel::download(new LibroComprasExport($year, $month), 'libro-compras.xlsx');
         }else{
             $user = auth()->user();
-            GenerateBookReport::dispatch('BILL', $query->get(), $user, $company, $year, $month)->onQueue('default');
+            GenerateBookReport::dispatch('BILL', $user, $company, $year, $month)->onQueue('default');
             return back()->withMessage('Su libro de compras es muy grande, en unos minutos será enviado a su correo electrónico: ' . $user->email );
         }
     }
