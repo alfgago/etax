@@ -88,7 +88,7 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
             $map->bill->activity_company_verification ?? ($map->bill->commercial_activity ?? 'No indica'),
             $map->bill->document_number,
             $map->item_number,
-            isset($map->name) ? $map->name : 'No indica',
+            isset($map->name) ?  str_replace("=","", $map->name) : 'No indica',
             isset($map->ivaType) ? $map->ivaType->name : 'No indica',
             isset($map->productCategory) ? $map->productCategory->id . " - " . $map->productCategory->name : 'No indica',
             $map->bill->currency,

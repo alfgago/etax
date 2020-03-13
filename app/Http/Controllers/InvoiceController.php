@@ -41,6 +41,7 @@ use App\Jobs\ProcessSendExcelInvoices;
 use App\Jobs\ProcessInvoicesExcel;
 use App\Jobs\EnvioProgramadas;
 use Illuminate\Support\Facades\Input;
+use App\Jobs\GenerateBookReport;
 use App\SMInvoice;
 
 /**
@@ -404,9 +405,9 @@ class InvoiceController extends Controller
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $month = $start_date->month;
         $year = $start_date->year;
-        $available_invoices = $company->getAvailableInvoices( $year, $month );
+        $availableInvoices = $company->getAvailableInvoices( $year, $month );
 
-        $available_plan_invoices = $available_invoices->monthly_quota - $available_invoices->current_month_sent;
+        $available_plan_invoices = $availableInvoices->monthly_quota - $availableInvoices->current_month_sent;
         if($available_plan_invoices < 1 && $company->additional_invoices < 1){
             return redirect()->back()->withError('Usted ha sobrepasado el límite de facturas mensuales de su plan actual.');
         }
@@ -1222,10 +1223,33 @@ class InvoiceController extends Controller
 
     public function exportLibroVentas( $year, $month ) {
         $company = currentCompanyModel();
-        if( $company->id == 1110 ){
-            return Excel::download(new LibroVentasExportSM($year, $month), 'libro-ventas.xlsx');
+        $companyId = $company->id;
+        
+        $itemsQuery = InvoiceItem::query()
+        ->with(['invoice', 'invoice.client', 'productCategory', 'ivaType'])
+        ->where('year', $year)
+        ->where('month', $month)
+        ->whereHas('invoice', function ($query) use ($companyId){
+            $query
+            ->where('company_id', $companyId)
+            ->where('is_void', false)
+            ->where('is_authorized', true)
+            ->where('is_code_validated', true)
+            ->where('hide_from_taxes', false);
+        });
+        
+        $count = $itemsQuery->count();
+        
+        if($count < 25000){
+            if( $companyId == 1110 ){
+                return Excel::download(new LibroVentasExportSM($year, $month), 'libro-ventas.xlsx');
+            }
+            return Excel::download(new LibroVentasExport($year, $month), 'libro-ventas.xlsx');
+        }else{
+            $user = auth()->user();
+            GenerateBookReport::dispatch('INVOICE', $itemsQuery->get(), $user, $company, $year, $month);
+            return back()->withMessage('Su libro de ventas es muy grande, en unos minutos será enviado a su correo electrónico: ' . $user->email );
         }
-        return Excel::download(new LibroVentasExport($year, $month), 'libro-ventas.xlsx');
     }
 
     public function importExcel() {
@@ -1511,9 +1535,16 @@ class InvoiceController extends Controller
             $json = json_encode( $xml ); // convert the XML string to json
             $arr = json_decode( $json, TRUE );
 
-                $fechaEmision = explode("T", $arr['FechaEmision']);
-                $fechaEmision = explode("-", $fechaEmision[0]);
-                $fechaEmision = $fechaEmision[2]."/".$fechaEmision[1]."/".$fechaEmision[0];
+            $fechaEmisionTemp = explode("T", $arr['FechaEmision']);
+            $fechaEmisionTemp = explode("-", $fechaEmisionTemp[0]);
+            $year = $fechaEmisionTemp[0];
+            $month = $fechaEmisionTemp[1];
+            $day = $fechaEmisionTemp[2];
+            $fechaEmision = $day."/".$month."/".$year;
+            if( !hasAvailableInvoices($year, $month, 1, $company) ){
+                return Response()->json("Usted ha sobrepasado el límite de facturas de su plan actual.", 400);
+            }
+                
                 if(CalculatedTax::validarMes($fechaEmision)){
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                     try {
@@ -2045,8 +2076,8 @@ class InvoiceController extends Controller
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $month = $start_date->month;
         $year = $start_date->year;
-        $available_invoices = $company->getAvailableInvoices( $year, $month );
-        $facturas_disponibles = $available_invoices->monthly_quota;
+        $availableInvoices = $company->getAvailableInvoices( $year, $month );
+        $facturasDisponibles = $availableInvoices->monthly_quota;
         $consecutivo = null;
         $invoiceList = array();
         foreach ($facturas as $row){
@@ -2128,9 +2159,9 @@ class InvoiceController extends Controller
                         }
                         $xls_invoice->codigoNota = $row['codigonota'] ?? null;
                         if($row['identificador'] != $consecutivo){
-                            $facturas_disponibles--;
+                            $facturasDisponibles--;
                         }
-                        if($facturas_disponibles < 0){
+                        if($facturasDisponibles < 0){
                             $xls_invoice->autorizado = 0;
                         }
                         $consecutivo = $row['identificador'];
