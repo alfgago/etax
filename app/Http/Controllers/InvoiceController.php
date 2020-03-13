@@ -1249,7 +1249,7 @@ class InvoiceController extends Controller
                 AND b.is_code_validated = 1
                 AND hide_from_taxes = 0
                 AND b.company_id = $companyId") )[0]->c;
-        dd($count, $year, $month, $companyId);        
+    
         if($count < 25000){
             if( $companyId == 1110 ){
                 return Excel::download(new LibroVentasExportSM($year, $month), 'libro-ventas.xlsx');
@@ -1257,7 +1257,8 @@ class InvoiceController extends Controller
             return Excel::download(new LibroVentasExport($year, $month), 'libro-ventas.xlsx');
         }else{
             $user = auth()->user();
-            GenerateBookReport::dispatch('INVOICE', $itemsQuery->get(), $user, $company, $year, $month);
+            dd($user);
+            GenerateBookReport::dispatch('INVOICE', $itemsQuery->get(), $user, $company, $year, $month)->onQueue('log_queue');
             return back()->withMessage('Su libro de ventas es muy grande, en unos minutos será enviado a su correo electrónico: ' . $user->email );
         }
     }
