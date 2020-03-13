@@ -65,6 +65,9 @@ class GenerateBookReport implements ShouldQueue
             ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
             ->where('year', $year)
             ->where('month', $month)
+            ->where('iva_amount', '>', 0)
+            ->where('iva_acreditable', 0)
+            ->where('iva_gasto', 0)
             ->whereHas('bill', function ($query) use ($company){
                 $query->where('company_id', $company->id)
                 ->where('is_void', false)
@@ -92,18 +95,6 @@ class GenerateBookReport implements ShouldQueue
                 ])
             );
         }else{
-            $items = InvoiceItem::query()
-                ->with(['invoice', 'invoice.client', 'productCategory', 'ivaType'])
-                ->where('year', $year)
-                ->where('month', $month)
-                ->whereHas('invoice', function ($query) use ($company){
-                    $query
-                    ->where('company_id', $company->id)
-                    ->where('is_void', false)
-                    ->where('is_authorized', true)
-                    ->where('is_code_validated', true)
-                    ->where('hide_from_taxes', false);
-                })->get();
             
             $filePath = "/libros/$company->id_number/libro-ventas-".$year.$month.".xlsx";
             if( $company->id == 1110 ){
