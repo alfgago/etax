@@ -315,8 +315,11 @@ class BridgeHaciendaApi
                 }
                 if (strpos($response['data']['response'],"ESTADO=rechazado") !== false) {
                     if($findKey){
-                        $newInvoice = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                        $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
                         Log::info("QUERY HACIENDA: Generando otra llave $newInvoice->document_key");
+                        if($retry){
+                            return $retry;
+                        }
                     }
                     $invoice->hacienda_status = '04';
                     $invoice->save();
@@ -328,6 +331,13 @@ class BridgeHaciendaApi
                     $invoice->save();
                 }
             } else {
+                if($findKey){
+                    $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                    Log::info("QUERY HACIENDA: Generando otra llave $newInvoice->document_key");
+                    if($retry){
+                        return $retry;
+                    }
+                }
                 return false;
             }
             return $file;

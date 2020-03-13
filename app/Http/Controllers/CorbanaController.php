@@ -797,7 +797,7 @@ class CorbanaController extends Controller
                     $bill->is_authorized = true;
                     $bill->accept_status = 1;
                     $bill->is_code_validated = true;
-                    $bill->accept_status = $haciendaStatus;
+                    $bill->hacienda_status = $haciendaStatus;
                     $bill->save();
                     $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
                     $company->save();

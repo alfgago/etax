@@ -324,7 +324,8 @@ class Bill extends Model
     
     
     public static function saveBillXML( $arr, $metodoGeneracion, $emailRecibido = null ) {
-        
+        Log::debug($arr);
+        //dd($arr);
         $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
         if($metodoGeneracion != "Email" && $metodoGeneracion != 'GS' ){
           $company = currentCompanyModel();
@@ -1147,28 +1148,29 @@ class Bill extends Model
       
       
     public function setRegionCorbana($email){
+      
       $email = strtolower($email);
       Log::debug("Regiones Corbana: $email");
       $this->sucursal = null;
       if($email == "facturaelectronica@corbana.co.cr" || strpos($email, "facturaelectronica@corbana.co.cr") !== false || strpos($email, "facturaelectronica2@corbana.co.cr") !== false){
         $this->sucursal = "01";
-        $bill->email_reception = "facturaelectronica@corbana.co.cr" ;
+        $this->email_reception = "facturaelectronica@corbana.co.cr" ;
       }
       if($email == "cajachica@corbana.co.cr" || strpos($email, "cajachica@corbana.co.cr") !== false || strpos($email, "cajachica2@corbana.co.cr") !== false){
         $this->sucursal = "01";  
-        $bill->email_reception = "cajachica@corbana.co.cr";
+        $this->email_reception = "cajachica@corbana.co.cr";
       }
       if($email == "corbanaguapiles@corbana.co.cr" || strpos($email, "corbanaguapiles@corbana.co.cr") !== false || strpos($email, "corbanaguapiles2@corbana.co.cr") !== false){
         $this->sucursal = "02";  
-        $bill->email_reception = "corbanaguapiles@corbana.co.cr";
+        $this->email_reception = "corbanaguapiles@corbana.co.cr";
       }
       if($email == "fincasanpablo@corbana.co.cr" || strpos($email, "fincasanpablo@corbana.co.cr") !== false || strpos($email, "fincasanpablo2@corbana.co.cr") !== false){
         $this->sucursal = "04";  
-        $bill->email_reception = "fincasanpablo@corbana.co.cr";
+        $this->email_reception = "fincasanpablo@corbana.co.cr";
       }
       if($email == "agroforestales@corbana.co.cr" || strpos($email, "agroforestales@corbana.co.cr") !== false || strpos($email, "agroforestales2@corbana.co.cr") !== false){
         $this->sucursal = "05";  
-        $bill->email_reception = "agroforestales@corbana.co.cr";
+        $this->email_reception = "agroforestales@corbana.co.cr";
       }
       
     }
