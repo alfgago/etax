@@ -1239,7 +1239,7 @@ class InvoiceController extends Controller
         });
         
         $count = $itemsQuery->count();
-        
+        Log::debug($count);
         if($count < 25000){
             if( $companyId == 1110 ){
                 return Excel::download(new LibroVentasExportSM($year, $month), 'libro-ventas.xlsx');
