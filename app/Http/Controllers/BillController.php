@@ -32,6 +32,7 @@ use App\Jobs\MassValidateBills;
 use App\Jobs\ProcessAcceptHacienda;
 use App\Jobs\GenerateBookReport;
 use Illuminate\Support\Facades\Input;
+use DB;
 
 /**
  * @group Controller - Facturas de compra
@@ -636,9 +637,18 @@ class BillController extends Controller
             ->where('hide_from_taxes', false);
         });
         
-        $count = $query->count();
+        $count = DB::select( DB::raw("
+                select count(i.id) as c from bill_items i, bills b
+                where i.year = $year
+                AND i.month = $month
+                AND i.bill_id = b.id
+                AND b.is_void = 0
+                AND b.is_authorized = 1
+                AND b.is_code_validated = 1
+                AND hide_from_taxes = 0
+                AND b.company_id = $companyId") )[0]->c;
         
-        if($count < 500){
+        if($count < 10000){
             $billItems = $query->get();
             foreach($billItems as $item){
                   $item->calcularAcreditablePorLinea();

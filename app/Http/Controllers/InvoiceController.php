@@ -43,6 +43,7 @@ use App\Jobs\EnvioProgramadas;
 use Illuminate\Support\Facades\Input;
 use App\Jobs\GenerateBookReport;
 use App\SMInvoice;
+use DB;
 
 /**
  * @group Controller - Facturas de venta
@@ -1238,8 +1239,17 @@ class InvoiceController extends Controller
             ->where('hide_from_taxes', false);
         });
         
-        $count = $itemsQuery->count();
-        Log::debug($count);
+        $count = DB::select( DB::raw("
+                select count(i.id) as c from invoice_items i, invoices b
+                where i.year = $year
+                AND i.month = $month
+                AND i.invoice_id = b.id
+                AND b.is_void = 0
+                AND b.is_authorized = 1
+                AND b.is_code_validated = 1
+                AND hide_from_taxes = 0
+                AND b.company_id = $companyId") )[0]->c;
+                
         if($count < 25000){
             if( $companyId == 1110 ){
                 return Excel::download(new LibroVentasExportSM($year, $month), 'libro-ventas.xlsx');
