@@ -638,7 +638,7 @@ class BillController extends Controller
         
         $count = $query->count();
         
-        if($count < 24000){
+        if($count < 500){
             $billItems = $query->get();
             foreach($billItems as $item){
                   $item->calcularAcreditablePorLinea();
