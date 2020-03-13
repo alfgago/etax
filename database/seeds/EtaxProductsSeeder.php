@@ -12,7 +12,7 @@ class EtaxProductsSeeder extends Seeder
     public function run()
     {
         
-        App\EtaxProducts::create([
+        /*App\EtaxProducts::create([
             'subscription_plan_id' => 1,
             'is_subscription' => true,
             'name' => 'Profesional Básico',
@@ -110,7 +110,7 @@ class EtaxProductsSeeder extends Seeder
             'is_subscription' => false,
             'name' => 'Prorrata 2018',
             'price' => 99.99,
-        ]);   
+        ]);  */ 
         
     }
 }

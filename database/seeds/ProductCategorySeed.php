@@ -92,7 +92,7 @@ class ProductCategorySeed extends Seeder
           ['grupo'=>'COE','nombre'=>'Autorizadas por la Dirección General de Hacienda', 'bill_iva_code'=>'B080', 'open_codes'=>'B080,S080'],
           ['grupo'=>'COE','nombre'=>'Autorizadas por la Dirección General de Tributación', 'bill_iva_code'=>'B080', 'open_codes'=>'B080,S080'],
           ['grupo'=>'COE','nombre'=>'Autorizadas por Ley especial', 'bill_iva_code'=>'B080', 'open_codes'=>'B080,S080'],
-          ['grupo'=>'X099','nombre'=>'Gastos no incluidos en la declaración del IVA', 'invoice_iva_code'=>'X099', 'open_codes'=>'X099']
+          ['grupo'=>'999','nombre'=>'Gastos no incluidos en la declaración del IVA', 'invoice_iva_code'=>'X090', 'open_codes'=>'X090,X091,X092,X093,X094,X099'],
         ];
       
         foreach( $listaVentas as $categoria ) {

@@ -165,7 +165,7 @@ return [
                 'processes' => 3,
                 'minProcesses' => 3,
                 'maxProcesses' => 3,
-                'tries' => 2,
+                'tries' => 1,
             ],
             'sendbulk-supervisor' => [
                 'connection' => 'redis',

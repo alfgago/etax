@@ -772,6 +772,23 @@ if (!function_exists('get_rates')) {
     }
 }
 
+/* Get notificatios of user */
+if (!function_exists('hasAvailableInvoices')) {
+
+    function hasAvailableInvoices($year, $month, $amountToCheck = 1, $company = null) {
+        if( !isset($company) ){
+            $company = currentCompanyModel();
+        }
+        $availableInvoices = $company->getAvailableInvoices( $year, $month );
+        $facturasDisponibles = $availableInvoices->monthly_quota -  $availableInvoices->current_month_sent;
+        if( ($facturasDisponibles + $company->additional_invoices) < $amountToCheck){
+            return false;
+        }
+        return true;
+    }
+
+}
+
 
 /* Get notificatios of user */
 if (!function_exists('notifications')) {

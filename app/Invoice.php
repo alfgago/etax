@@ -767,6 +767,11 @@ class Invoice extends Model
         $year = $fechaEmision->year;
         $invoice->month = $month;
         $invoice->year = $year;
+        
+        if( hasAvailableInvoices($year, $month, 1, $company) ){
+            Log::warning("La empresa $company->id, $company->business_name está intentando subir XMLs con límite vencido.");
+            return false;
+        }
 
         if( array_key_exists( 'CodigoTipoMoneda', $arr['ResumenFactura'] ) ) {
           $idMoneda = $arr['ResumenFactura']['CodigoTipoMoneda']['CodigoMoneda'] ?? '';

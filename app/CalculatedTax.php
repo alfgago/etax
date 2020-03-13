@@ -1111,16 +1111,16 @@ class CalculatedTax extends Model
     			$ivaDataAnterior = json_decode($calculosAnteriores[$i]->iva_data);
 			
     			foreach( CodigoIvaRepercutido::all() as $codigo ) {
-    			  try{
+    			  //try{
       			  $bVar = "b$codigo->id";
       			  $iVar = "i$codigo->id";
       			  $ivaData->$bVar += $ivaDataAnterior->$bVar;
       			  $ivaData->$iVar += $ivaDataAnterior->$iVar;
-    			  }catch(\Exception $e){}
+    			  //}catch(\Exception $e){}
     			}
     			
     			foreach( CodigoIvaSoportado::all() as $codigo ) {
-    			  try{
+    			  //try{
       			  $bVar = "b$codigo->id";
       			  $iVar = "i$codigo->id";
               $iVarPleno = "pleno$codigo->id";
@@ -1129,7 +1129,7 @@ class CalculatedTax extends Model
       			  $ivaData->$iVar += $ivaDataAnterior->$iVar;
       			  $ivaData->$iVarPleno += $ivaDataAnterior->$iVarPleno;
       			  $ivaData->$bVarSD += ($ivaDataAnterior->$bVarSD ?? 0);
-    			  }catch(\Exception $e){}
+    			  //}catch(\Exception $e){}
     			}
     			
     			foreach( ProductCategory::all() as $codigo ) {
@@ -1225,16 +1225,16 @@ class CalculatedTax extends Model
 			$ivaData = new \stdClass();
 			
 			foreach( CodigoIvaRepercutido::all() as $codigo ) {
-  			  try{
+  			  //try{
       		  $bVar = "b$codigo->id";
       		  $iVar = "i$codigo->id";
       		  $ivaData->$bVar = 0;
       		  $ivaData->$iVar = 0;
-  			  }catch(\Exception $e){}
+  			  //}catch(\Exception $e){}
 			}
 			
 			foreach( CodigoIvaSoportado::all() as $codigo ) {
-  			  try{
+  			  //try{
       		  $bVar = "b$codigo->id";
       		  $iVar = "i$codigo->id";
       		  $iVarPleno = "pleno$codigo->id";
@@ -1243,7 +1243,7 @@ class CalculatedTax extends Model
       		  $ivaData->$iVar = 0;
       		  $ivaData->$iVarPleno = 0;
       		  $ivaData->$bVarSD = 0;
-  			  }catch(\Exception $e){}
+  			  //}catch(\Exception $e){}
 			}
 			$arrayActividades = $this->currentCompany->getActivities();
       
