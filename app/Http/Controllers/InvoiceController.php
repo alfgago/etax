@@ -1226,19 +1226,6 @@ class InvoiceController extends Controller
         $company = currentCompanyModel();
         $companyId = $company->id;
         
-        $itemsQuery = InvoiceItem::query()
-        ->with(['invoice', 'invoice.client', 'productCategory', 'ivaType'])
-        ->where('year', $year)
-        ->where('month', $month)
-        ->whereHas('invoice', function ($query) use ($companyId){
-            $query
-            ->where('company_id', $companyId)
-            ->where('is_void', false)
-            ->where('is_authorized', true)
-            ->where('is_code_validated', true)
-            ->where('hide_from_taxes', false);
-        });
-        
         $count = DB::select( DB::raw("
                 select count(i.id) as c from invoice_items i, invoices b
                 where i.year = $year
@@ -1249,7 +1236,7 @@ class InvoiceController extends Controller
                 AND b.is_code_validated = 1
                 AND hide_from_taxes = 0
                 AND b.company_id = $companyId") )[0]->c;
-    
+
         if($count < 25000){
             if( $companyId == 1110 ){
                 return Excel::download(new LibroVentasExportSM($year, $month), 'libro-ventas.xlsx');
@@ -1257,7 +1244,7 @@ class InvoiceController extends Controller
             return Excel::download(new LibroVentasExport($year, $month), 'libro-ventas.xlsx');
         }else{
             $user = auth()->user();
-            GenerateBookReport::dispatch('INVOICE', $itemsQuery->get(), $user, $company, $year, $month)->onQueue('default');
+            GenerateBookReport::dispatch('INVOICE', $user, $company, $year, $month);
             return back()->withMessage('Su libro de ventas es muy grande, en unos minutos será enviado a su correo electrónico: ' . $user->email );
         }
     }
@@ -1398,7 +1385,7 @@ class InvoiceController extends Controller
                 Log::info("$i procesadas...");
                 foreach (array_chunk ( $invoiceList, 100 ) as $facturas) {
                     Log::info("Mandando 100 a queue...");
-                    ProcessInvoicesImport::dispatch($facturas)->onQueue('default');;
+                    ProcessInvoicesImport::dispatch($facturas);
                 }
                 Log::info("Envios a queue finalizados $company->id_number");
             }else{

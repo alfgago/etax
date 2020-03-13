@@ -7,6 +7,8 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use App\InvoiceItem;
+use App\BillItem;
 use App\Exports\LibroComprasExport;
 use App\Exports\LibroComprasExportSM;
 use App\Exports\LibroVentasExport;
@@ -25,7 +27,6 @@ class GenerateBookReport implements ShouldQueue
 
 
     private $type = null;
-    private $items = null;
     private $user = null;
     private $company = null;
     private $year = null;
@@ -36,10 +37,9 @@ class GenerateBookReport implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($type, $items, $user, $company, $year, $month)
+    public function __construct($type, $user, $company, $year, $month)
     {
         $this->type = $type;
-        $this->items = $items;
         $this->user = $user;
         $this->year = $year;
         $this->month = $month;
@@ -54,13 +54,26 @@ class GenerateBookReport implements ShouldQueue
     public function handle()
     {
         $type = $this->type;
-        $items = $this->items;
         $user = $this->user;
         $year = $this->year;
         $month = $this->month;
         $company = $this->company;
         
         if( $type == "BILL" ){
+            //Busca todos los que aun no tienen el IVA calculado, lo calcula y lo guarda
+            $items = BillItem::query()
+            ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
+            ->where('year', $year)
+            ->where('month', $month)
+            ->whereHas('bill', function ($query) use ($company){
+                $query->where('company_id', $company->id)
+                ->where('is_void', false)
+                ->where('is_authorized', true)
+                ->where('is_code_validated', true)
+                ->where('accept_status', 1)
+                ->where('hide_from_taxes', false);
+            })->get();
+            
             foreach($items as $item){
                 $item->calcularAcreditablePorLinea();
             }
@@ -79,6 +92,19 @@ class GenerateBookReport implements ShouldQueue
                 ])
             );
         }else{
+            $items = InvoiceItem::query()
+                ->with(['invoice', 'invoice.client', 'productCategory', 'ivaType'])
+                ->where('year', $year)
+                ->where('month', $month)
+                ->whereHas('invoice', function ($query) use ($company){
+                    $query
+                    ->where('company_id', $company->id)
+                    ->where('is_void', false)
+                    ->where('is_authorized', true)
+                    ->where('is_code_validated', true)
+                    ->where('hide_from_taxes', false);
+                })->get();
+            
             $filePath = "/libros/$company->id_number/libro-ventas-".$year.$month.".xlsx";
             if( $company->id == 1110 ){
                 $file = Excel::store(new LibroVentasExportSM($year, $month), $filePath, 's3');
