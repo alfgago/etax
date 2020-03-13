@@ -634,12 +634,15 @@ class BillController extends Controller
                 AND hide_from_taxes = 0
                 AND b.company_id = $companyId") )[0]->c;
         
-        if($count < 10000){
+        if($count < 0){
             //Busca todos los que aun no tienen el IVA calculado, lo calcula y lo guarda
             $query = BillItem::query()
             ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
             ->where('year', $year)
             ->where('month', $month)
+            ->where('iva_amount', '>', 0)
+            ->where('iva_acreditable', 0)
+            ->where('iva_gasto', 0)
             ->whereHas('bill', function ($query) use ($companyId){
                 $query->where('company_id', $companyId)
                 ->where('is_void', false)
