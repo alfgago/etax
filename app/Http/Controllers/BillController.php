@@ -659,7 +659,7 @@ class BillController extends Controller
             return Excel::download(new LibroComprasExport($year, $month), 'libro-compras.xlsx');
         }else{
             $user = auth()->user();
-            GenerateBookReport::dispatch('BILL', $query->get(), $user, $company, $year, $month);
+            GenerateBookReport::dispatch('BILL', $query->get(), $user, $company, $year, $month)->onQueue('default');
             return back()->withMessage('Su libro de compras es muy grande, en unos minutos será enviado a su correo electrónico: ' . $user->email );
         }
     }
