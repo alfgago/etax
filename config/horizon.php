@@ -125,7 +125,7 @@ return [
     |
     */
 
-    'memory_limit' => 256,
+    'memory_limit' => 384,
 
     /*
     |--------------------------------------------------------------------------
@@ -151,12 +151,21 @@ return [
             ],
             'invoice-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['invoices', 'invoicing', 'receptions'],
+                'queue' => ['invoices', 'receptions'],
                 'balance' => 'auto',
                 'processes' => 2,
                 'minProcesses' => 2,
                 'maxProcesses' => 2,
                 'tries' => 1,
+            ],
+            'invoice-resend-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['invoicing'],
+                'balance' => 'simple',
+                'processes' => 3,
+                'minProcesses' => 3,
+                'maxProcesses' => 3,
+                'tries' => 2,
             ],
             'sendbulk-supervisor' => [
                 'connection' => 'redis',
@@ -226,12 +235,21 @@ return [
             ],
             'invoice-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['invoices', 'invoicing', 'receptions'],
+                'queue' => ['invoices', 'receptions'],
                 'balance' => 'auto',
                 'processes' => 2,
                 'minProcesses' => 2,
                 'maxProcesses' => 2,
                 'tries' => 1,
+            ],
+            'invoice-resend-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['invoicing'],
+                'balance' => 'simple',
+                'processes' => 3,
+                'minProcesses' => 3,
+                'maxProcesses' => 3,
+                'tries' => 2,
             ],
             'sendbulk-supervisor' => [
                 'connection' => 'redis',

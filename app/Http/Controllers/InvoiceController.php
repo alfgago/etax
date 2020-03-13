@@ -41,6 +41,7 @@ use App\Jobs\ProcessSendExcelInvoices;
 use App\Jobs\ProcessInvoicesExcel;
 use App\Jobs\EnvioProgramadas;
 use Illuminate\Support\Facades\Input;
+use App\Jobs\GenerateBookReport;
 use App\SMInvoice;
 
 /**
@@ -1222,10 +1223,33 @@ class InvoiceController extends Controller
 
     public function exportLibroVentas( $year, $month ) {
         $company = currentCompanyModel();
-        if( $company->id == 1110 ){
-            return Excel::download(new LibroVentasExportSM($year, $month), 'libro-ventas.xlsx');
+        $companyId = $company->id;
+        
+        $itemsQuery = InvoiceItem::query()
+        ->with(['invoice', 'invoice.client', 'productCategory', 'ivaType'])
+        ->where('year', $year)
+        ->where('month', $month)
+        ->whereHas('invoice', function ($query) use ($companyId){
+            $query
+            ->where('company_id', $companyId)
+            ->where('is_void', false)
+            ->where('is_authorized', true)
+            ->where('is_code_validated', true)
+            ->where('hide_from_taxes', false);
+        });
+        
+        $count = $itemsQuery->count();
+        
+        if($count < 25000){
+            if( $companyId == 1110 ){
+                return Excel::download(new LibroVentasExportSM($year, $month), 'libro-ventas.xlsx');
+            }
+            return Excel::download(new LibroVentasExport($year, $month), 'libro-ventas.xlsx');
+        }else{
+            $user = auth()->user();
+            GenerateBookReport::dispatch('INVOICE', $itemsQuery->get(), $user, $company, $year, $month);
+            return back()->withMessage('Su libro de ventas es muy grande, en unos minutos será enviado a su correo electrónico: ' . $user->email );
         }
-        return Excel::download(new LibroVentasExport($year, $month), 'libro-ventas.xlsx');
     }
 
     public function importExcel() {

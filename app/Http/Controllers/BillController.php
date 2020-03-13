@@ -30,6 +30,7 @@ use Illuminate\Http\Request;
 use App\Jobs\ProcessBillsImport;
 use App\Jobs\MassValidateBills;
 use App\Jobs\ProcessAcceptHacienda;
+use App\Jobs\GenerateBookReport;
 use Illuminate\Support\Facades\Input;
 
 /**
@@ -618,34 +619,42 @@ class BillController extends Controller
     }
     
     public function exportLibroCompras( $year, $month ) {
-        $current_company = currentCompany();
+        $company = currentCompanyModel();
+        $companyId = $company->id;
         
         //Busca todos los que aun no tienen el IVA calculado, lo calcula y lo guarda
-        $billItems = BillItem::query()
+        $query = BillItem::query()
         ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
         ->where('year', $year)
         ->where('month', $month)
         ->where('iva_amount', '>', 0)
         ->where('iva_acreditable', 0)
         ->where('iva_gasto', 0)
-        ->whereHas('bill', function ($query) use ($current_company){
-            $query->where('company_id', $current_company)
+        ->whereHas('bill', function ($query) use ($companyId){
+            $query->where('company_id', $companyId)
             ->where('is_void', false)
             ->where('is_authorized', true)
             ->where('is_code_validated', true)
             ->where('accept_status', 1)
             ->where('hide_from_taxes', false);
-        })->get();
+        });
         
-        foreach($billItems as $item){
-              $item->calcularAcreditablePorLinea();
+        $count = $query->count();
+        
+        if($count < 25000){
+            $billItems = $query->get();
+            foreach($billItems as $item){
+                  $item->calcularAcreditablePorLinea();
+            }
+            if( $companyId == 1110 ){
+                return Excel::download(new LibroComprasExportSM($year, $month), 'libro-compras.xlsx');
+            }
+            return Excel::download(new LibroComprasExport($year, $month), 'libro-compras.xlsx');
+        }else{
+            $user = auth()->user();
+            GenerateBookReport::dispatch('BILL', $query->get(), $user, $company, $year, $month);
+            return back()->withMessage('Su libro de compras es muy grande, en unos minutos será enviado a su correo electrónico: ' . $user->email );
         }
-        
-        if( $current_company == 1110 ){
-            return Excel::download(new LibroComprasExportSM($year, $month), 'libro-compras.xlsx');
-        }
-        
-        return Excel::download(new LibroComprasExport($year, $month), 'libro-compras.xlsx');
     }
     
     public function downloadPdf($id) {
