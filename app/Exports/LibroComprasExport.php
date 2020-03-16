@@ -14,10 +14,11 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEvents
 {
     
-    public function __construct(int $year, int $month)
+    public function __construct(int $year, int $month, $companyId = null)
     {
         $this->year = $year;
         $this->month = $month;
+        $this->company_id = $companyId;
     }
     
     public function registerEvents(): array
@@ -57,13 +58,16 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
     */
     public function query()
     {
-        $current_company = currentCompany();
+        $companyId = $this->company_id;
+        if( !isset($companyId) ){
+            $companyId = currentCompany();
+        }
         $billItems = BillItem::query()
         ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
         ->where('year', $this->year)
         ->where('month', $this->month)
-        ->whereHas('bill', function ($query) use ($current_company){
-            $query->where('company_id', $current_company)
+        ->whereHas('bill', function ($query) use ($companyId){
+            $query->where('company_id', $companyId)
             ->where('is_void', false)
             ->where('is_authorized', true)
             ->where('is_code_validated', true)

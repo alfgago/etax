@@ -82,9 +82,9 @@ class GenerateBookReport implements ShouldQueue
             }
             $filePath = "/libros/$company->id_number/libro-compras-".$year.$month.".xlsx";
             if( $company->id == 1110 ){
-                $file = Excel::store(new LibroComprasExportSM($year, $month), $filePath, 's3');
+                $file = Excel::store(new LibroComprasExportSM($year, $month, $company->id), $filePath, 's3');
             }else{
-                $file = Excel::store(new LibroComprasExport($year, $month),   $filePath, 's3');
+                $file = Excel::store(new LibroComprasExport($year, $month, $company->id),   $filePath, 's3');
             }
             
             Mail::to( replaceAccents( $user->email) )->send(
@@ -98,9 +98,9 @@ class GenerateBookReport implements ShouldQueue
             
             $filePath = "/libros/$company->id_number/libro-ventas-".$year.$month.".xlsx";
             if( $company->id == 1110 ){
-                $file = Excel::store(new LibroVentasExportSM($year, $month), $filePath, 's3');
+                $file = Excel::store(new LibroVentasExportSM($year, $month, $company->id), $filePath, 's3');
             }else{
-                $file = Excel::store(new LibroVentasExport($year, $month),   $filePath, 's3');
+                $file = Excel::store(new LibroVentasExport($year, $month, $company->id),   $filePath, 's3');
             }
             
             Mail::to( replaceAccents( $user->email) )->send(
