@@ -1239,9 +1239,9 @@ class InvoiceController extends Controller
 
         if($count < 25000){
             if( $companyId == 1110 ){
-                return Excel::download(new LibroVentasExportSM($year, $month), 'libro-ventas.xlsx');
+                return Excel::download(new LibroVentasExportSM($year, $month, $companyId), 'libro-ventas.xlsx');
             }
-            return Excel::download(new LibroVentasExport($year, $month), 'libro-ventas.xlsx');
+            return Excel::download(new LibroVentasExport($year, $month, $companyId), 'libro-ventas.xlsx');
         }else{
             $user = auth()->user();
             GenerateBookReport::dispatch('INVOICE', $user, $company, $year, $month);
