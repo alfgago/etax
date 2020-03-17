@@ -42,8 +42,10 @@ class QueryPendingInvoices extends Command
     public function handle()
     {
         try {
+            $today = Carbon::now()->addMonths(-2);
             $this->info('Sending invoices to Hacienda....');
             $invoices = Invoice::where('hacienda_status', '05')
+                ->where('created_at', '>', $today)
                 ->where('is_void', false)
                 ->where('resend_attempts', '<', 6)->where('in_queue', false)
                 ->whereIn('document_type', ['01', '03', '04', '08', '09'])
