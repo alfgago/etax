@@ -29,12 +29,15 @@ use Log;
 
 class BridgeHaciendaApi
 {
-    public function login($cache = true) {
+    public function login($cache = true, $companyId = false) {
         try {
             if ($cache === false) {
                 return $this->requestLogin();
             }
-            $value = Cache::remember('token-api-'.currentCompany(), '60000', function () {
+            if( !$companyId ){
+                $companyId = currentCompany();
+            }
+            $value = Cache::remember('token-api-'.$companyId, '60000', function () {
                 return $this->requestLogin();
             });
             return $value;
