@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Invoice;
-use App\Jobs\ProcessInvoice;
+use App\Jobs\QueryHaciendaStatus;
 use App\Utils\BridgeHaciendaApi;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -50,21 +50,10 @@ class QueryPendingInvoices extends Command
                 ->get();
             $this->info('Querying pending invoices ....'. count($invoices));
             $this->info('Get Token Api Hacienda ....');
-            $apiHacienda = new BridgeHaciendaApi();
-            $tokenApi = $apiHacienda->login(false);
-
             foreach ($invoices as $invoice) {
-                try {
-        
-                    if ($tokenApi !== false) {
-                        $company = $invoice->company;
-                        $result = $apiHacienda->queryHacienda($invoice, $tokenApi, $company);
-                    }
-        
-                } catch (\Exception $e) {
-                    Log::error("Error consultado factura -->" .$e);
-                }
+                QueryHaciendaStatus::dispatch($invoice)->onQueue('default');
             }
+            
         } catch ( \Exception $e) {
             Log::error('Error in query pending command '.$e);
         }
