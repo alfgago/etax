@@ -7,6 +7,7 @@ use App\Jobs\QueryHaciendaStatus;
 use App\Utils\BridgeHaciendaApi;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class QueryPendingInvoices extends Command
 {
