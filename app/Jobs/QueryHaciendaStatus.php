@@ -38,7 +38,7 @@ class QueryHaciendaStatus implements ShouldQueue
             $invoice = $this->invoice;
             $apiHacienda = new BridgeHaciendaApi();
             $company = $invoice->company;
-            $tokenApi = Cache::remember('token-api-queries', '60000', function ($apiHacienda) {
+            $tokenApi = Cache::remember('token-api-queries', '60000', function () use ($apiHacienda)  {
                 return $apiHacienda->login(false, $company->id);
             });
             Log::debug("Query de $invoice->document_number, empresa $invoice->company_id");
