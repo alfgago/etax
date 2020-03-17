@@ -283,10 +283,10 @@
             Descuento
         </td>
         <td class="tb-header">
-            Tipo de descuento
+            Subtotal
         </td>
         <td class="tb-header">
-            Subtotal
+            % IVA
         </td>
         <td class="tb-header">
             Monto de impuesto
@@ -333,13 +333,13 @@
                 {{$item->unit_price ? number_format($item->unit_price, 2) : '0'}}
             </td>
             <td>
-                {{$item->discount ? number_format($item->discount, 0) : '0'}}
-            </td>
-            <td>
-                {{isset($item->discount_type) ? $item->discount_type == '01' ? '%' : 'monto': ''}}
+                {{$item->discount ? number_format($item->discount, 0) : '0'}}{{isset($item->discount_type) ? $item->discount_type == '01' ? '%' : 'monto': ''}}
             </td>
             <td>
                 {{$item->subtotal ? number_format($item->subtotal, 2) : ''}}
+            </td>
+            <td>
+                {{$item->iva_percentage}}%
             </td>
             <td>
                 {{$item->iva_amount ? number_format($item->iva_amount, 2) : '0'}}

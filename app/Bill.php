@@ -324,7 +324,7 @@ class Bill extends Model
     
     
     public static function saveBillXML( $arr, $metodoGeneracion, $emailRecibido = null ) {
-        //Log::debug($arr);
+        //Log::debug(json_encode($arr['ResumenFactura']['TotalOtrosCargos']));
         //dd($arr);
         $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
         if($metodoGeneracion != "Email" && $metodoGeneracion != 'GS' ){
@@ -367,7 +367,7 @@ class Bill extends Model
           //Si es Corbana, va a poner la sucursal a la que recibe la factura. Varia dependiendo del email de recepcion
           $bill->setRegionCorbana($emailRecibido);
         }catch(\Exception $e){
-          Log::error( "Error al registrar correo receptor: " . $e );
+          Log::warning( "Error al registrar correo receptor: " . $e );
         }
 
         if ( is_array($medioPago) ) {

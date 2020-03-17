@@ -316,7 +316,6 @@ class BridgeHaciendaApi
                 if (strpos($response['data']['response'],"ESTADO=rechazado") !== false) {
                     if($findKey){
                         $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
-                        Log::info("QUERY HACIENDA: Generando otra llave $newInvoice->document_key");
                         if($retry){
                             return $retry;
                         }
@@ -333,7 +332,6 @@ class BridgeHaciendaApi
             } else {
                 if($findKey){
                     $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
-                    Log::info("QUERY HACIENDA: Generando otra llave $newInvoice->document_key");
                     if($retry){
                         return $retry;
                     }
@@ -358,6 +356,7 @@ class BridgeHaciendaApi
         $documentKey = $invoice->document_key;
         $newKey = substr_replace($documentKey, $shortDate, 3, 4);
         $invoice->document_key = $newKey;
+        Log::info("QUERY HACIENDA: Generando otra llave $newKey");
         return $invoice;
     }
 

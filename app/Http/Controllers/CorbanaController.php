@@ -780,7 +780,10 @@ class CorbanaController extends Controller
                             ->with('items')
                             ->with('company')
                             ->first();
-                $haciendaStatus = $request->hacienda_status;
+                $acceptStatus = $request->accept_status;
+                if($acceptStatus == 2){
+                    $acceptStatus = 3; //El 3 es la de rechazo. Parcial no se usa en Corbana
+                }
                 $condicionAceptacion = $request->condicion_aceptacion;
                 if( isset($bill) ){
                     $company = $bill->company;
@@ -795,9 +798,9 @@ class CorbanaController extends Controller
                         $item->setIvaTypeFromCondition($condicionAceptacion);
                     }
                     $bill->is_authorized = true;
-                    $bill->accept_status = 1;
+                    $bill->accept_status = $acceptStatus;
                     $bill->is_code_validated = true;
-                    $bill->hacienda_status = $haciendaStatus;
+                    $bill->hacienda_status = '01';
                     $bill->save();
                     $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
                     $company->save();
