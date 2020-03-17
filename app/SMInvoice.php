@@ -33,6 +33,12 @@ class SMInvoice extends Model
     
     */
     public static function parseFormatoSM($codigo) {
+        
+    $cacheCodigoSM = "cachekey-codigossm-$codigo";
+    if ( Cache::has($cacheCodigoSM) ) {    
+        return Cache::get($cacheCodigoSM);
+    }
+        
     $lista = [
         //Sin identificación específica
         ['descripcion'=>'1.1 Compras ByS Locales                  : B : No Identificable  - - - - -  B001 -  Compras locales de bienes con IVA al 1% sin identificación específica', 'codigo'=>'B001', 'porcentaje'=>'1', 'is_bienes'=>true],
@@ -136,10 +142,12 @@ class SMInvoice extends Model
       
     foreach($lista as $it){
         if($it['codigo'] == $codigo){
-            return $it['descripcion'];
+            $descr = trim(preg_replace('/\s+/', ' ', $it['descripcion']));
+            Cache::put($cacheCodigoSM, $descr, now()->addHours(24));
+            return $descr;
         }
     }
-      
+    return $codigo;
   }
     
 }

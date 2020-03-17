@@ -31,6 +31,11 @@ class InvoiceNotification extends Mailable
      */
     public function build()
     {
+        $isPrueba = "";
+        if ( app()->isLocal() ) {
+            $isPrueba = "PRUEBAS - ";
+        }
+        
         $invoiceUtils = new InvoiceUtils();
         $string = substr($this->content['xml'], -169);
         
@@ -44,7 +49,7 @@ class InvoiceNotification extends Mailable
         
         $fromEmail = $this->content['data_company']->email;
         $fromName = $this->content['data_company']->business_name;
-        $message = $this->subject('Confirmación Factura electrónica #' . $this->content['data_invoice']->document_number.
+        $message = $this->subject($isPrueba.'Confirmación Factura electrónica #' . $this->content['data_invoice']->document_number.
             ' De: '.$this->content['data_company']->business_name)->markdown('emails.invoice.confirmation')
             ->with([
                 'data_invoice' => $this->content['data_invoice'], 

@@ -114,7 +114,11 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'R006 - Impuesto específico sobre Destilados (licores Fanal)', 'codigo'=>'R006', 'porcentaje'=>'12.433', 'is_bienes'=>true, 'is_gravado'=>true],
           
           ['nombre'=>'098 - Inversion del sujeto pasivo base', 'codigo'=>'098', 'porcentaje'=>'0', 'is_gravado'=>false, 'hide'=>true, 'hidden2018'=>true],
-          ['nombre'=>'099 - Inversion del sujeto pasivo base no acreditable', 'codigo'=>'099', 'porcentaje'=>'0', 'is_gravado'=>false, 'hide'=>true, 'hidden2018'=>true]
+          ['nombre'=>'X090 - Otros gastos que no corresponden a la actividad', 'codigo'=>'X090', 'porcentaje'=>'0', 'is_gravado'=>false, 'hide'=>false, 'hidden2018'=>true],
+          ['nombre'=>'X091 - Otros gastos que no corresponden a la actividad', 'codigo'=>'X091', 'porcentaje'=>'1', 'is_gravado'=>false, 'hide'=>false, 'hidden2018'=>true],
+          ['nombre'=>'X092 - Otros gastos que no corresponden a la actividad', 'codigo'=>'X092', 'porcentaje'=>'2', 'is_gravado'=>false, 'hide'=>false, 'hidden2018'=>true],
+          ['nombre'=>'X093 - Otros gastos que no corresponden a la actividad', 'codigo'=>'X093', 'porcentaje'=>'13', 'is_gravado'=>false, 'hide'=>false, 'hidden2018'=>true],
+          ['nombre'=>'X094 - Otros gastos que no corresponden a la actividad', 'codigo'=>'X094', 'porcentaje'=>'4', 'is_gravado'=>false, 'hide'=>false, 'hidden2018'=>true]
         ];
         
         foreach( $lista as $codigo ) {

@@ -7,9 +7,14 @@
 @section('content') 
 <div class="row">
   <div class="col-xl-9 col-lg-12 col-md-12">
-      <?php $company = currentCompanyModel(); ?>
-      <form method="POST" action="/quickbooks/guardar-variables/">
-
+      <?php 
+        $company = $qb->company; 
+        $qbConditions = json_decode($qb->conditions_json);
+        $qbMethods = json_decode($qb->payment_methods_json);
+        $qbTipoIva = json_decode($qb->taxes_json)->tipo_iva;
+        $qbTipoProducto = json_decode($qb->taxes_json)->tipo_producto;
+      ?>
+      <form method="POST" action="/quickbooks/guardar-variables/{{$qb->id}}">
         @csrf
 
         <div class="form-row">
@@ -29,31 +34,38 @@
               </thead>
               <tbody>
                 <tr class="item-tabla item-index-0">
+                  <?php 
+                    $selectedCondition = @$qbConditions->default;
+                  ?>
                   <td>Valor por defecto</td>
                   <td>
-                    <select id="condicion_venta" name="sale_condition" class="form-control" required>
-                      <option value="01">Contado</option>
-                      <option value="02">Crédito</option>
-                      <option value="03">Consignación</option>
-                      <option value="04">Apartado</option>
-                      <option value="05">Arrendamiento con opción de compra</option>
-                      <option value="06">Arrendamiento en función financiera</option>
-                      <option value="99">Otros</option>
+                    <select id="condicion_venta" name="sale_condition[default]" class="form-control" required>
+                        <option value="01" {{ $selectedCondition == "01" ? 'selected' : '' }}>Contado</option>
+                        <option value="02" {{ $selectedCondition == "02" ? 'selected' : '' }}>Crédito</option>
+                        <option value="03" {{ $selectedCondition == "03" ? 'selected' : '' }}>Consignación</option>
+                        <option value="04" {{ $selectedCondition == "04" ? 'selected' : '' }}>Apartado</option>
+                        <option value="05" {{ $selectedCondition == "05" ? 'selected' : '' }}>Arrendamiento con opción de compra</option>
+                        <option value="06" {{ $selectedCondition == "06" ? 'selected' : '' }}>Arrendamiento en función financiera</option>
+                        <option value="99" {{ $selectedCondition == "99" ? 'selected' : '' }}>Otros</option>
                     </select>
                   </td>
                 </tr>
                 @foreach($terms as $term)
                   <tr class="item-tabla item-index-{{ $loop->index }}">
+                    <?php 
+                      $condId = $term->Id;
+                      $selectedCondition = @$qbConditions->$condId;
+                    ?>
                     <td>{{ $term->Name }}</td>
                     <td>
-                      <select id="condicion_venta" name="sale_condition" class="form-control" required>
-                        <option value="01">Contado</option>
-                        <option value="02">Crédito</option>
-                        <option value="03">Consignación</option>
-                        <option value="04">Apartado</option>
-                        <option value="05">Arrendamiento con opción de compra</option>
-                        <option value="06">Arrendamiento en función financiera</option>
-                        <option value="99">Otros</option>
+                      <select id="condicion_venta" name="sale_condition[{{$term->Id}}]" class="form-control" required> 
+                        <option value="01" {{ $selectedCondition == "01" ? 'selected' : '' }}>Contado</option>
+                        <option value="02" {{ $selectedCondition == "02" ? 'selected' : '' }}>Crédito</option>
+                        <option value="03" {{ $selectedCondition == "03" ? 'selected' : '' }}>Consignación</option>
+                        <option value="04" {{ $selectedCondition == "04" ? 'selected' : '' }}>Apartado</option>
+                        <option value="05" {{ $selectedCondition == "05" ? 'selected' : '' }}>Arrendamiento con opción de compra</option>
+                        <option value="06" {{ $selectedCondition == "06" ? 'selected' : '' }}>Arrendamiento en función financiera</option>
+                        <option value="99" {{ $selectedCondition == "99" ? 'selected' : '' }}>Otros</option>
                       </select>
                     </td>
                   </tr>
@@ -78,28 +90,35 @@
               <tbody>
                 <tr class="item-tabla item-index-0">
                   <td>Valor por defecto</td>
+                  <?php 
+                    $selectedCondition = @$qbMethods->default;
+                  ?>
                   <td>
-                    <select id="medio_pago" name="payment_type" class="form-control" required>
-                      <option value="01" selected>Efectivo</option>
-                      <option value="02">Tarjeta</option>
-                      <option value="03">Cheque</option>
-                      <option value="04">Transferencia-Depósito Bancario</option>
-                      <option value="05">Recaudado por terceros</option>
-                      <option value="99">Otros</option>
+                    <select id="medio_pago" name="payment_type[default]" class="form-control" required>
+                      <option value="01" {{ $selectedCondition == "01" ? 'selected' : '' }}>Efectivo</option>
+                      <option value="02" {{ $selectedCondition == "02" ? 'selected' : '' }}>Tarjeta</option>
+                      <option value="03" {{ $selectedCondition == "03" ? 'selected' : '' }}>Cheque</option>
+                      <option value="04" {{ $selectedCondition == "04" ? 'selected' : '' }}>Transferencia-Depósito Bancario</option>
+                      <option value="05" {{ $selectedCondition == "05" ? 'selected' : '' }}>Recaudado por terceros</option>
+                      <option value="99" {{ $selectedCondition == "99" ? 'selected' : '' }}>Otros</option>
                     </select>
                   </td>
                 </tr>
                 @foreach($paymentMethods as $method)
                   <tr class="item-tabla item-index-{{ $loop->index }}">
+                    <?php 
+                      $condId = $method->Id;
+                      $selectedCondition = @$qbMethods->$condId;
+                    ?>
                     <td>{{ $method->Name }}</td>
                     <td>
-                      <select id="medio_pago" name="payment_type" class="form-control" required>
-                        <option value="01" selected>Efectivo</option>
-                        <option value="02">Tarjeta</option>
-                        <option value="03">Cheque</option>
-                        <option value="04">Transferencia-Depósito Bancario</option>
-                        <option value="05">Recaudado por terceros</option>
-                        <option value="99">Otros</option>
+                      <select id="medio_pago" name="payment_type[{{$method->Id}}]" class="form-control" required>
+                        <option value="01" {{ $selectedCondition == "01" ? 'selected' : '' }}>Efectivo</option>
+                        <option value="02" {{ $selectedCondition == "02" ? 'selected' : '' }}>Tarjeta</option>
+                        <option value="03" {{ $selectedCondition == "03" ? 'selected' : '' }}>Cheque</option>
+                        <option value="04" {{ $selectedCondition == "04" ? 'selected' : '' }}>Transferencia-Depósito Bancario</option>
+                        <option value="05" {{ $selectedCondition == "05" ? 'selected' : '' }}>Recaudado por terceros</option>
+                        <option value="99" {{ $selectedCondition == "99" ? 'selected' : '' }}>Otros</option>
                       </select>
                     </td>
                   </tr>
@@ -127,69 +146,71 @@
                 <tr class="item-tabla item-index-0">
                   <td>Valor por defecto</td>
                   <td>
-                    <select class="form-control select-search tipo_iva" id="tipo_iva">
+                    <select class="form-control select-search tipo_iva" name="tipo_iva[default]" id="tipo_iva">
                       <?php
-                        $codigoDefecto = $company->default_vat_code;
-                        $preselectos = array();
-                        foreach($company->repercutidos as $repercutido){
-                          $preselectos[] = $repercutido->id;
-                        }
+                        $selectedTipoIva = @$qbTipoIva->default;
+                        $selectedProdType = @$qbTipoProducto->default;
                       ?>
                       @if(@$company->repercutidos[0]->id)
                         @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
-                            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}" 
-                            {{ $tipo['code'] == $codigoDefecto ? 'selected' : '' }}  >{{ $tipo['name'] }}</option>
+                            <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select" 
+                             {{ $selectedTipoIva == $tipo['code'] ? 'selected' : '' }}>{{ $tipo['name'] }}</option>
                         @endforeach
-                        <option class="mostrarTodos" value="1">Mostrar Todos</option>
                       @else
                         @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
                          @if(@$document_type == '09')
                             <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ $tipo['code'] !== 'B150' ? 'hidden' : '' }}"
-                            {{ $tipo['code'] == $codigoDefecto ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
+                            {{ $tipo['code'] == $selectedTipoIva ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
                          @else
                             <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"
-                            {{ $tipo['code'] == $codigoDefecto ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
+                            {{ $tipo['code'] == $selectedTipoIva ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
                          @endif
                         @endforeach
                       @endif
                     </select>
                   </td>
                   <td>
-                    <select class="form-control" id="tipo_producto" >
+                    <select class="form-control" id="tipo_producto" name="tipo_producto[default]" >
                       @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
-                        <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
+                        <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" 
+                        {{ $selectedProdType == $tipo['id'] ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
                       @endforeach
                     </select>
                   </td>
                 </tr>
                 @foreach($taxRates as $tax)
                   <tr class="item-tabla item-index-{{ $loop->index }}">
+                      <?php
+                        $condId = $tax->Id;
+                        $selectedTipoIva = @$qbTipoIva->$condId;
+                        $selectedProdType = @$qbTipoProducto->$condId;
+                      ?>
                     <td>{{ $tax->Name }}</td>
                     <td>
-                      <select class="form-control select-search tipo_iva" id="tipo_iva">
+                      <select class="form-control select-search tipo_iva" id="tipo_iva" name="tipo_iva[{{$tax->Id}}]">
                         @if(@$company->repercutidos[0]->id)
                           @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
-                              <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ (in_array($tipo['id'], $preselectos) == false) ? 'hidden' : '' }}"  
-                            {{ $tipo['code'] == $codigoDefecto ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
+                              <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  
+                              {{ $selectedTipoIva == $tipo['code'] ? 'selected' : '' }}>{{ $tipo['name'] }}</option>
                           @endforeach
-                          <option class="mostrarTodos" value="1">Mostrar Todos</option>
                         @else
                           @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
                            @if(@$document_type == '09')
                               <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select {{ $tipo['code'] !== 'B150' ? 'hidden' : '' }}" 
-                              {{ $tipo['code'] == $codigoDefecto ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
+                              {{ $tipo['code'] == $selectedTipoIva ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
                            @else
                               <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select" 
-                              {{ $tipo['code'] == $codigoDefecto ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
+                              {{ $tipo['code'] == $selectedTipoIva ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
                            @endif
                           @endforeach
                         @endif
                       </select>
                     </td>
                     <td>
-                      <select class="form-control" id="tipo_producto" >
+                      <select class="form-control" id="tipo_producto" name="tipo_producto[{{$tax->Id}}]" >
                         @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
-                          <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" >{{ $tipo['name'] }}</option>
+                          <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" 
+                          {{ $selectedProdType == $tipo['id'] ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
                         @endforeach
                       </select>
                     </td>

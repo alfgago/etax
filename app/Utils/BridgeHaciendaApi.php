@@ -17,23 +17,27 @@ use App\Jobs\ProcessReception;
 use App\Variables;
 use App\XmlHacienda;
 use App\Utils\InvoiceUtils;
+use App\ApiResponse;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use Log;
+use Illuminate\Support\Facades\Log;
 
 
 class BridgeHaciendaApi
 {
-    public function login($cache = true) {
+    public function login($cache = true, $companyId = false) {
         try {
             if ($cache === false) {
                 return $this->requestLogin();
             }
-            $value = Cache::remember('token-api-'.currentCompany(), '60000', function () {
+            if( !$companyId ){
+                $companyId = currentCompany();
+            }
+            $value = Cache::remember('token-api-'.$companyId, '60000', function () {
                 return $this->requestLogin();
             });
             return $value;
@@ -87,8 +91,7 @@ class BridgeHaciendaApi
                             $file = $invoiceUtils->sendInvoiceEmail($invoice, $company, $path);
                         }
                         if ($singNote == false) {
-                            ProcessInvoice::dispatch($invoice->id, $company->id, $token)
-                                ->onConnection(config('etax.queue_connections'))->onQueue('invoicing');
+                            ProcessInvoice::dispatch($invoice->id, $company->id, $token)->onQueue('invoicing');
                             return $invoice;
                         }
                     }
@@ -314,6 +317,12 @@ class BridgeHaciendaApi
                     $file = Storage::get($pathMH);
                 }
                 if (strpos($response['data']['response'],"ESTADO=rechazado") !== false) {
+                    if($findKey){
+                        $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                        if($retry){
+                            return $retry;
+                        }
+                    }
                     $invoice->hacienda_status = '04';
                     $invoice->save();
                 } else if (strpos($response['data']['response'],"ESTADO=aceptado") !== false) {
@@ -324,13 +333,34 @@ class BridgeHaciendaApi
                     $invoice->save();
                 }
             } else {
+                if($findKey){
+                    $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                    if($retry){
+                        return $retry;
+                    }
+                }
                 return false;
             }
             return $file;
         } catch (\Exception $e) {
             Log::error('Validate User Atv Response -->>' . $e);
-            return redirect('Invoice/index')->withErrors('Error al  consulta en Hacienda');
+            return false;
         }
+    }
+    
+    public function setTempKey($invoice){
+        $apiResponse = ApiResponse::select('id','company_id','invoice_id','created_at')
+                                ->where('company_id', $invoice->company_id)
+                                ->where('invoice_id', $invoice->id)
+                                ->orderBy('created_at','asc')
+                                ->first();
+        $apiResponseDate = $apiResponse->created_at;
+        $shortDate = str_pad($apiResponseDate->day, 2, "0", STR_PAD_LEFT) . str_pad($apiResponseDate->month, 2, "0", STR_PAD_LEFT);
+        $documentKey = $invoice->document_key;
+        $newKey = substr_replace($documentKey, $shortDate, 3, 4);
+        $invoice->document_key = $newKey;
+        Log::info("QUERY HACIENDA: Generando otra llave $newKey");
+        return $invoice;
     }
 
     private function setHaciendaInfo($company) {

@@ -59,15 +59,25 @@
                 <td> {{ $notasEtax->pendientes }}</td>
                 <td> {{ $notasEtax->rechazadas }}</td>
               </tr>
+                
+              <tr>
+                <th>Facturas Sujeto Pasivo:</td>
+                <td> ₡{{ number_format( $facturas08Etax->subtotal, 0 ) }} </td>
+                <td> ₡{{ number_format( $facturas08Etax->iva, 0 ) }} </td>
+                <td> ₡{{ number_format( $facturas08Etax->total, 0 ) }} </td>
+                <td> {{ $facturas08Etax->aceptadas }}</td>
+                <td> {{ $facturas08Etax->pendientes }}</td>
+                <td> {{ $facturas08Etax->rechazadas }}</td>
+              </tr>
               
               <tr>
                 <th>Totales:</td>
-                <td> ₡{{ number_format( $facturasExcel->subtotal + $facturasEtax->subtotal - $notasExcel->subtotal - $notasEtax->subtotal, 0 ) }} </td>
-                <td> ₡{{ number_format( $facturasExcel->iva + $facturasEtax->iva - $notasExcel->iva - $notasEtax->iva, 0 ) }} </td>
-                <td> ₡{{ number_format( $facturasExcel->total + $facturasEtax->total - $notasExcel->total - $notasEtax->total, 0 ) }} </td>
-                <td> {{ $facturasExcel->aceptadas + $facturasEtax->aceptadas + $notasExcel->aceptadas + $notasEtax->aceptadas }} </td>
-                <td> {{ $facturasExcel->pendientes + $facturasEtax->pendientes + $notasExcel->pendientes + $notasEtax->pendientes }} </td>
-                <td> {{ $facturasExcel->rechazadas + $facturasEtax->rechazadas + $notasExcel->rechazadas + $notasEtax->rechazadas }} </td>
+                <td> ₡{{ number_format( $facturasExcel->subtotal + $facturasEtax->subtotal + $facturas08Etax->subtotal - $notasExcel->subtotal - $notasEtax->subtotal, 0 ) }} </td>
+                <td> ₡{{ number_format( $facturasExcel->iva + $facturasEtax->iva + $facturas08Etax->iva - $notasExcel->iva - $notasEtax->iva, 0 ) }} </td>
+                <td> ₡{{ number_format( $facturasExcel->total + $facturasEtax->total + $facturas08Etax->total - $notasExcel->total - $notasEtax->total, 0 ) }} </td>
+                <td> {{ $facturasExcel->aceptadas + $facturasEtax->aceptadas + $facturas08Etax->aceptadas + $notasExcel->aceptadas + $notasEtax->aceptadas }} </td>
+                <td> {{ $facturasExcel->pendientes + $facturasEtax->pendientes + $facturas08Etax->pendientes + $notasExcel->pendientes + $notasEtax->pendientes }} </td>
+                <td> {{ $facturasExcel->rechazadas + $facturasEtax->rechazadas + $facturas08Etax->rechazadas + $notasExcel->rechazadas + $notasEtax->rechazadas }} </td>
               </tr>
               
             </tbody>

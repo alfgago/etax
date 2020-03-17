@@ -119,11 +119,8 @@ class ProcessInvoiceSM implements ShouldQueue
                 $date = Carbon::now();
                 $invoice->hacienda_status = '01';
                 $invoice->save();
-                $path = 'empresa-'.$company->id_number.
-                    "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
-                $save = Storage::put(
-                    $path,
-                    ltrim($response['data']['xmlFirmado'], '\n'));
+                $path = 'empresa-'.$company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
+                $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n'));
                 
                 if ($save) {
                     $xml = new XmlHacienda();
@@ -208,6 +205,8 @@ class ProcessInvoiceSM implements ShouldQueue
                 Log::info('Factura enviada y XML guardado.');
             } else if (isset($response['status']) && $response['status'] == 400 && strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
                 Log::info('Consecutive repeated -->' . $invoice->document_number);
+                sleep(2);
+                $this->signXML($invoice, $requestData);
                 $invoice->hacienda_status = '04';
                 $invoice->save();
             } else if (isset($response['status']) && $response['status'] == 400 && strpos($response['message'], 'XML ya existe en nuestras bases de datos') <> false) {

@@ -206,20 +206,23 @@ class User extends Authenticatable {
 
     public function permisos(){
         try{
-            $current_company = currentCompanyModel();
-            if( auth()->user()->isOwnerOfTeam($current_company->team)) {
-
-                return [1];
-            }else{
-                $user_id = auth()->user()->id;
-                $permisos = UserCompanyPermission::where('company_id',$current_company->id)
-                            ->where('user_id',$user_id)->get();
-                $retorno = [];
-                foreach($permisos as $permiso){
-                    array_push($retorno,$permiso->permission_id);
-                }
-                return $retorno;
+            $subscription = getCurrentSubscription();
+            if($subscription->etax_product_id == 177){
+                return [8];
             }
+            $currentCompany = currentCompanyModel();
+            if( auth()->user()->isOwnerOfTeam($currentCompany->team) ) {
+                return [1];
+            }
+            $userId = auth()->user()->id;
+            $permisos = UserCompanyPermission::where('company_id',$currentCompany->id)
+                        ->where('user_id',$userId)->get();
+            $retorno = [];
+            foreach($permisos as $permiso){
+                array_push($retorno,$permiso->permission_id);
+            }
+            return $retorno;
+            
         }catch( \Throwable $e) { 
             
             \Illuminate\Support\Facades\Log::error('Error items menu'. $e);

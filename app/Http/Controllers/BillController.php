@@ -19,6 +19,7 @@ use App\ProductCategory;
 use App\Http\Controllers\CacheController;
 use App\Exports\BillExport;
 use App\Exports\LibroComprasExport;
+use App\Exports\LibroComprasExportSM;
 use App\Imports\BillImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Orchestra\Parser\Xml\Facade as XmlParser;
@@ -29,7 +30,9 @@ use Illuminate\Http\Request;
 use App\Jobs\ProcessBillsImport;
 use App\Jobs\MassValidateBills;
 use App\Jobs\ProcessAcceptHacienda;
+use App\Jobs\GenerateBookReport;
 use Illuminate\Support\Facades\Input;
+use DB;
 
 /**
  * @group Controller - Facturas de compra
@@ -617,30 +620,50 @@ class BillController extends Controller
     }
     
     public function exportLibroCompras( $year, $month ) {
-        $current_company = currentCompany();
+        $company = currentCompanyModel();
+        $companyId = $company->id;
         
-        //Busca todos los que aun no tienen el IVA calculado, lo calcula y lo guarda
-        $billItems = BillItem::query()
-        ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
-        ->where('year', $year)
-        ->where('month', $month)
-        ->where('iva_amount', '>', 0)
-        ->where('iva_acreditable', 0)
-        ->where('iva_gasto', 0)
-        ->whereHas('bill', function ($query) use ($current_company){
-            $query->where('company_id', $current_company)
-            ->where('is_void', false)
-            ->where('is_authorized', true)
-            ->where('is_code_validated', true)
-            ->where('accept_status', 1)
-            ->where('hide_from_taxes', false);
-        })->get();
+        $count = DB::select( DB::raw("
+                select count(i.id) as c from bill_items i, bills b
+                where i.year = $year
+                AND i.month = $month
+                AND i.bill_id = b.id
+                AND b.is_void = 0
+                AND b.is_authorized = 1
+                AND b.is_code_validated = 1
+                AND hide_from_taxes = 0
+                AND b.company_id = $companyId") )[0]->c;
         
-        foreach($billItems as $item){
-              $item->calcularAcreditablePorLinea();
+        if($count < 10000){
+            //Busca todos los que aun no tienen el IVA calculado, lo calcula y lo guarda
+            $query = BillItem::query()
+            ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
+            ->where('year', $year)
+            ->where('month', $month)
+            ->where('iva_amount', '>', 0)
+            ->where('iva_acreditable', 0)
+            ->where('iva_gasto', 0)
+            ->whereHas('bill', function ($query) use ($companyId){
+                $query->where('company_id', $companyId)
+                ->where('is_void', false)
+                ->where('is_authorized', true)
+                ->where('is_code_validated', true)
+                ->where('accept_status', 1)
+                ->where('hide_from_taxes', false);
+            });
+            $billItems = $query->get();
+            foreach($billItems as $item){
+                  $item->calcularAcreditablePorLinea();
+            }
+            if( $companyId == 1110 ){
+                return Excel::download(new LibroComprasExportSM($year, $month, $companyId), 'libro-compras.xlsx');
+            }
+            return Excel::download(new LibroComprasExport($year, $month, $companyId), 'libro-compras.xlsx');
+        }else{
+            $user = auth()->user();
+            GenerateBookReport::dispatch('BILL', $user, $company, $year, $month)->onQueue('default');
+            return back()->withMessage('Su libro de compras es muy grande, en unos minutos será enviado a su correo electrónico: ' . $user->email );
         }
-        
-        return Excel::download(new LibroComprasExport($year, $month), 'libro-compras.xlsx');
     }
     
     public function downloadPdf($id) {
@@ -1137,7 +1160,7 @@ class BillController extends Controller
             
             if ( $request->autorizar ) {
                 $bill->is_authorized = true;
-                $bill->accept_status = 1;
+                $bill->accept_status = 0;
                 
                 $bill->save();
                 clearBillCache($bill);
@@ -1159,8 +1182,8 @@ class BillController extends Controller
                 $bill->is_authorized = false;
                 $bill->is_void = true;
                 $bill->accept_status = 2;
-                BillItem::where('bill_id', $bill->id)->delete();
-                $bill->delete();
+                //BillItem::where('bill_id', $bill->id)->delete();
+                //$bill->delete();
                 clearBillCache($bill);
                 $user = auth()->user();
                 Activity::dispatch(
@@ -1440,7 +1463,7 @@ class BillController extends Controller
                     $mensaje
                 )->onConnection(config('etax.queue_connections'))
                 ->onQueue('log_queue');
-                    return redirect('/facturas-recibidas/')->withMessage( $mensaje );
+                    return back()->withMessage( $mensaje );
     
                 } else {
                     return back()->withError( 'Ha ocurrido un error al enviar factura.' );
@@ -1455,11 +1478,11 @@ class BillController extends Controller
                     $mensaje = 'Rechazo de factura enviado';
                 }
                 clearBillCache($bill);
-                return redirect('/facturas-recibidas/')->withWarning($mensaje);
+                return back()->withWarning($mensaje);
             }
         } catch ( Exception $e) {
             Log::error ("Error al crear aceptacion de factura");
-            return redirect('/facturas-recibidas/')->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');
+            return back()->withError( 'La factura no pudo ser aceptada. Por favor contáctenos.');
         }
     }
 

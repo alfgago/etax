@@ -2,8 +2,9 @@
 
 namespace App\Exports;
 
-use App\Invoice;
-use App\InvoiceItem;
+use App\Bill;
+use App\BillItem;
+use App\SMInvoice;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\FromQuery;
@@ -11,7 +12,7 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
-class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEvents
+class LibroComprasExportSM implements WithHeadings, WithMapping, FromQuery, WithEvents
 {
     
     public function __construct(int $year, int $month, $companyId = null)
@@ -44,7 +45,9 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
                 $event->sheet->getDelegate()->getColumnDimension('Q')->setAutoSize(true);
                 $event->sheet->getDelegate()->getColumnDimension('R')->setAutoSize(true);
                 $event->sheet->getDelegate()->getColumnDimension('S')->setAutoSize(true);
-                $cellRangeHeaders = 'A1:S1'; // All headers
+                $event->sheet->getDelegate()->getColumnDimension('T')->setAutoSize(true);
+                $event->sheet->getDelegate()->getColumnDimension('U')->setAutoSize(true);
+                $cellRangeHeaders = 'A1:U1'; // All headers
                 $event->sheet->getDelegate()->getStyle($cellRangeHeaders)->getFont()->setSize(12);
                 $event->sheet->getDelegate()->getStyle($cellRangeHeaders)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                       ->getStartColor()->setARGB('FF4472C4');
@@ -61,42 +64,42 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
         if( !isset($companyId) ){
             $companyId = currentCompany();
         }
-        $invoiceItems = InvoiceItem::query()
-        ->with(['invoice', 'invoice.client', 'productCategory', 'ivaType'])
+        $billItems = BillItem::query()
+        ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
         ->where('year', $this->year)
         ->where('month', $this->month)
-        ->whereHas('invoice', function ($query) use ($companyId){
-            $query
-            ->where('company_id', $companyId)
+        ->whereHas('bill', function ($query) use ($companyId){
+            $query->where('company_id', $companyId)
             ->where('is_void', false)
             ->where('is_authorized', true)
             ->where('is_code_validated', true)
+            ->where('accept_status', 1)
             ->where('hide_from_taxes', false);
         });
         
-        return $invoiceItems;
+        return $billItems;
     }
      
     public function map($map): array
     {
-        $factor = $map->invoice->document_type != '03' ? 1 : -1;
-        $tipoCambio = $map->invoice->currency_rate;
-        if( $map->invoice->currency == 'CRC' ) {
+        $factor = $map->bill->document_type != '03' ? 1 : -1;
+        $tipoCambio = $map->bill->currency_rate;
+        if( $map->bill->currency == 'CRC' ) {
             $tipoCambio = 1;
         }
-        $array = [
-            $map->invoice->documentTypeName(),
-            $map->invoice->generatedDate()->format('d/m/Y'),
-            $map->invoice->clientName(),
-            $map->invoice->commercial_activity ?? 'No indica',
-            $map->invoice->document_number,
+        return [
+            $map->bill->documentTypeName(),
+            $map->bill->generatedDate()->format('d/m/Y'),
+            $map->bill->providerName(),
+            $map->bill->activity_company_verification ?? ($map->bill->commercial_activity ?? 'No indica'),
+            $map->bill->document_number,
             $map->item_number,
-            $map->code ?? 'N/A',
-            $map->name,
-            $map->ivaType ? $map->ivaType->name : 'No indica',
-            isset($map->productCategory) ? ($map->productCategory->id . " - " . $map->productCategory->name) : 'No indica categoria',
-            $map->invoice->currency,
-            $map->invoice->currency_rate ?? '',
+            isset($map->name) ? $map->name : 'No indica',
+            isset($map->ivaType) ? $map->ivaType->name : 'No indica',
+            isset($map->productCategory) ? $map->productCategory->id . " - " . $map->productCategory->name : 'No indica',
+            isset($map->ivaType) ? SMInvoice::parseFormatoSM($map->ivaType->code) : 'No indica',
+            $map->bill->currency,
+            $map->bill->currency_rate ?? '',
             (isset($map->ivaType) ? $map->ivaType->percentage : $map->iva_percentage) . '%',
             round( $map->subtotal * $factor, 2),
             round( $map->iva_amount * $factor, 2),
@@ -104,25 +107,25 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
             round( $map->subtotal * $tipoCambio * $factor, 2),
             round( $map->iva_amount * $tipoCambio * $factor, 2),
             round( $map->total * $tipoCambio * $factor , 2),
-            
+            round( $map->iva_acreditable, 2),
+            round( $map->iva_gasto, 2),
         ];
-        return $array;
     }						
 
      public function headings(): array 
      {
-        $array = [
+        return [
             [
                 'Tipo Doc.',
                 'Fecha',
-                'Cliente',
+                'Proveedor',
                 'Actividad',
                 'Consecutivo',
                 '# Línea',
-                'Cód. Referencia',
                 'Producto',
                 'Tipo IVA',
                 'Cat. Declaración',
+                'Clasificación interna SM',
                 'Moneda',
                 'Tipo Cambio',
                 'Tarifa IVA',
@@ -131,10 +134,11 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
                 'Total',
                 'Subtotal CRC',
                 'Monto IVA CRC',
-                'Total CRC'
+                'Total CRC',
+                'IVA acreditable',
+                'IVA al gasto'
             ]
         ];
-        return $array;
     }
     
     

@@ -38,12 +38,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('invoice:recurrentes')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('23:00')->runInBackground();
         $schedule->command('invoice:masivas')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('22:00')->runInBackground();
         $schedule->command('invoice:programadas')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('06:00')->runInBackground();
+        $schedule->command('invoice:pending')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('05:30')->runInBackground();
         //Comandos de checkout
         $schedule->command('subscription:checkout')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('01:30')->runInBackground();
         $schedule->command('subscription:payment')->timezone(config('app.timezone'))->withoutOverlapping()->twiceDaily(2, 5)->runInBackground(); //Una vez al día. Aveces se acumulan porque por alguna vez no correo y puede haber doble cargo. Hya un sleep de 3s entre cobro
         //$schedule->command('subscription:payment')->timezone(config('app.timezone'))->dailyAt('09:00');
         //Comandos generales
-        $schedule->command('telescope:prune --hours=48')->timezone(config('app.timezone'))->withoutOverlapping()->daily()->runInBackground();
+        $schedule->command('telescope:prune --hours=48')->timezone(config('app.timezone'))->withoutOverlapping()->dailyAt('11:59')->runInBackground();
         $schedule->command('queue:restart')->timezone(config('app.timezone'))->daily();
         
         $schedule->command('horizon:snapshot')->withoutOverlapping()->everyFiveMinutes()->runInBackground();

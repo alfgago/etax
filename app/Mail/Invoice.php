@@ -30,6 +30,10 @@ class Invoice extends Mailable
      */
     public function build()
     {
+        $isPrueba = "";
+        if ( app()->isLocal() ) {
+            $isPrueba = "PRUEBAS - ";
+        }
         $invoiceUtils = new InvoiceUtils();
         
         $customImg = null;
@@ -50,7 +54,7 @@ class Invoice extends Mailable
         $fromEmail = $this->content['data_company']->email;
         $fromName = $this->content['data_company']->business_name;
         
-        $message = $this->subject('Factura electrónica '.$title.' #' . $this->content['data_invoice']->document_number.
+        $message = $this->subject($isPrueba.'Factura electrónica '.$title.' #' . $this->content['data_invoice']->document_number.
             ' De: '.$this->content['data_company']->business_name)
                     ->markdown('emails.invoice.paid')
                     ->with([

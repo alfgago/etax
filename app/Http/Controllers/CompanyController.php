@@ -27,6 +27,7 @@ use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use ZipArchive;
 use stdClass;
 
 /**
