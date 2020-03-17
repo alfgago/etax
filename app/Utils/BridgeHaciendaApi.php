@@ -31,12 +31,11 @@ class BridgeHaciendaApi
 {
     public function login($cache = true, $companyId = false) {
         try {
-            if( !$companyId ){
-                $companyId = currentCompany();
-            }
-            
             if ($cache === false) {
                 return $this->requestLogin();
+            }
+            if( !$companyId ){
+                $companyId = currentCompany();
             }
             $value = Cache::remember('token-api-'.$companyId, '60000', function () {
                 return $this->requestLogin();
