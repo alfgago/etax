@@ -196,7 +196,7 @@ return [
             ],
             'log-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['log_queue'],
+                'queue' => ['log_queue', 'query_pending'],
                 'balance' => 'auto',
                 'processes' => 2,
                 'minProcesses' => 2,
@@ -280,7 +280,7 @@ return [
             ],
             'log-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['log_queue'],
+                'queue' => ['log_queue', 'query_pending'],
                 'balance' => 'auto',
                 'processes' => 2,
                 'minProcesses' => 2,
