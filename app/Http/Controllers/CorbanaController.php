@@ -305,19 +305,20 @@ class CorbanaController extends Controller
                 $TIPO_SERV = 'B';
             }
             
-            $TIPO_PAGO = $factura['MODO_PAGO'] ?? 'D'; //Usan E, T, D, Q, etc
-            $metodoPago = "04"; //Default transferencia
-            if($TIPO_PAGO == 'E' || $TIPO_PAGO == 'C'){
-                $metodoPago = '01';
-            }else if($TIPO_PAGO == 'T'){
-                $metodoPago = '02';
-            }else if($TIPO_PAGO == 'Q'){
-                $metodoPago = '03';
+            $TIPO_PAGO = $factura['TIPO_PAGO'] ?? 'D'; //Usan E, T, D, Q, etc
+            $condicionVenta = "02";
+            if($TIPO_PAGO == "E"){
+                $condicionVenta = "01";
             }
             
-            $condicionVenta = "02";
-            if($metodoPago == "E"){
-                $condicionVenta = "01";
+            $MODO_PAGO = $factura['MODO_PAGO'] ?? 'D'; //Usan E, T, D, Q, etc
+            $metodoPago = "04"; //Default transferencia
+            if($MODO_PAGO == 'E' || $MODO_PAGO == 'C'){
+                $metodoPago = '01';
+            }else if($MODO_PAGO == 'T'){
+                $metodoPago = '02';
+            }else if($MODO_PAGO == 'Q'){
+                $metodoPago = '03';
             }
             
             if( $factura['MONEDA'] == '02' ){

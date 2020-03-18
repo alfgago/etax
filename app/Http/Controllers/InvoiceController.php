@@ -445,7 +445,7 @@ class InvoiceController extends Controller
         if(count($arrayActividades) == 0){
             return redirect('/empresas/editar')->withError('No ha definido una actividad comercial para esta empresa');
         }
-
+        
         return view("Invoice/create-factura",
             [
                 'document_type' => $tipoDocumento, 'rate' => $this->get_rates(),
@@ -1484,18 +1484,23 @@ class InvoiceController extends Controller
 
                 $today = new Carbon();
                 $client = new \GuzzleHttp\Client();
-                $response = $client->get(config('etax.exchange_url'),
-                    ['query' => [
-                        'Indicador' => '318',
-                        'FechaInicio' => $today::now()->format('d/m/Y'),
-                        'FechaFinal' => $today::now()->format('d/m/Y'),
-                        'Nombre' => config('etax.namebccr'),
-                        'SubNiveles' => 'N',
-                        'CorreoElectronico' => config('etax.emailbccr'),
-                        'Token' => config('etax.tokenbccr')
-                    ]
+                $response = $client->get( config('etax.exchange_url'),
+                    [
+                        'query' => [
+                            'Indicador' => '318',
+                            'FechaInicio' => $today::now()->format('d/m/Y'),
+                            'FechaFinal' => $today::now()->format('d/m/Y'),
+                            'Nombre' => config('etax.namebccr'),
+                            'SubNiveles' => 'N',
+                            'CorreoElectronico' => config('etax.emailbccr'),
+                            'Token' => config('etax.tokenbccr'),
+                        ],
+                        'timeout' => 15,
+                        'connect_timeout' => 15,
+                        'read_timeout' => 15,
                     ]
                 );
+                
                 $body = $response->getBody()->getContents();
                 $xml = new \SimpleXMLElement($body);
                 $xml->registerXPathNamespace('d', 'urn:schemas-microsoft-com:xml-diffgram-v1');
@@ -1503,7 +1508,7 @@ class InvoiceController extends Controller
                 $valor =  json_decode($tables[0]->NUM_VALOR);
 
                 Cache::put($cacheKey, $valor, now()->addHours(2));
-                Cache::put($lastRateKey, $valor, now()->addDays(5));
+                Cache::put($lastRateKey, $valor, now()->addDays(3));
             }
 
             $value = Cache::get($cacheKey);
