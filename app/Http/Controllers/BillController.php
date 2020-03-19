@@ -184,6 +184,10 @@ class BillController extends Controller
        if($filtroAno > 0){
             $query = $query->where('bill_items.year', $filtroAno);
        }
+       $filtroActividad = $request->get('filtroActividad');
+       if( isset($filtroActividad) ){
+            $query = $query->where('bills.commercial_activity', $filtroActividad);
+       }
 
        $filtroValidado = $request->get('filtroValidado');
        switch($filtroValidado){
@@ -298,10 +302,9 @@ class BillController extends Controller
         $query = Bill::where('bills.company_id', $current_company)
                 ->where('is_void', false)
                 ->where('is_authorized', true)
-                ->where('is_code_validated', true)
                 ->where('is_totales', false)
                 ->with('provider');
-        
+ 
         $filtro = $request->get('filtro');
         $moneda = $request->get('moneda');
         $estado = $request->get('estado');
@@ -323,12 +326,15 @@ class BillController extends Controller
         
         if( $estadoAceptacion == 1 ) {
             $query = $query->where('accept_status', 1);
-        }else if( $estadoAceptacion == 2 ) {
-            $query = $query->where('accept_status', 2);
+            $query = $query ->where('is_code_validated', true);
+        }else if( $estadoAceptacion == 2 || $estadoAceptacion == 3 ) {
+            $query = $query->whereIn('accept_status', [2,3]);
         }else if( $estadoAceptacion == 0 ) {
             $query = $query->where('accept_status', 0);
+            $query = $query ->where('is_code_validated', true);
         }else if( $estadoAceptacion == 99 ) {
-            $query = $query->where('accept_status', '!=', 2);
+            $query = $query->whereNotIn('accept_status', [2,3]);
+            $query = $query ->where('is_code_validated', true);
         }
         
         if( $estado != 0) {
@@ -1179,11 +1185,10 @@ class BillController extends Controller
                 ->onQueue('log_queue');
                 return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido autorizada. Recuerde validar el código');
             }else {
-                $bill->is_authorized = false;
-                $bill->is_void = true;
+                $bill->is_authorized = true;
                 $bill->accept_status = 2;
-                //BillItem::where('bill_id', $bill->id)->delete();
-                //$bill->delete();
+                $bill->save();
+                
                 clearBillCache($bill);
                 $user = auth()->user();
                 Activity::dispatch(

@@ -10,7 +10,14 @@
 @endsection
 
 @section('content')
-<?php $ratios = currentCompanyModel()->operative_ratio1 + currentCompanyModel()->operative_ratio2 + currentCompanyModel()->operative_ratio3 + currentCompanyModel()->operative_ratio4;?>
+<?php 
+
+  $mes = \Carbon\Carbon::now()->month;
+  $ano = \Carbon\Carbon::now()->year;
+  $operativeData = currentCompanyModel()->getOperativeData($ano);
+  $ratios = $operativeData->operative_ratio1 + $operativeData->operative_ratio2 + $operativeData->operative_ratio3 + $operativeData->operative_ratio4;
+
+?>
     
 <div class="row">
   <div class="col-md-12">
@@ -48,10 +55,6 @@
       
       <div class="form-group col-md-3">
         <div class="periodo-actual inline-form">
-          <?php 
-            $mes = \Carbon\Carbon::now()->month;
-            $ano = \Carbon\Carbon::now()->year;
-          ?>
           <label>Filtrar por fecha</label>
           <div class="periodo-selects">
             <select class="form-control" id="input-ano" name="input-ano">
