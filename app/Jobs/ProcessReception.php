@@ -203,11 +203,16 @@ class ProcessReception implements ShouldQueue
             $provider = $data->provider;
             $invoiceData = null;
             $request = null;
+            $mensajeAceptacion = $data['accept_status'] ?? 1;
+            if($mensajeAceptacion == 2){
+                $mensajeAceptacion = 3; //El 3 es el rechazo. eTax no usa parciales
+            }
+            
             $invoiceData = [
                 'clave' => $data['document_key'],
                 'cedula_emisor' => !empty($data['provider_id_number']) ? trim($data['provider_id_number']) : trim($provider->id_number),
                 'fecha_emision' => $data['generated_date'] ?? '',
-                'cod_mensaje' => $data['accept_status'] ?? 1,
+                'cod_mensaje' => $mensajeAceptacion,
                 'detalle' => 'Detalle',
                 'total' => $data['accept_total_factura'],
                 'cedula_receptor' => trim($company->id_number),

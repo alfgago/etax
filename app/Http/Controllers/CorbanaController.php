@@ -782,8 +782,8 @@ class CorbanaController extends Controller
                             ->with('company')
                             ->first();
                 $acceptStatus = $request->accept_status;
-                if($acceptStatus == 2){
-                    $acceptStatus = 3; //El 3 es la de rechazo. Parcial no se usa en Corbana
+                if($acceptStatus == 3){
+                    $acceptStatus = 2; //El 2 es la de rechazo. Parcial no se usa en Corbana
                 }
                 $condicionAceptacion = $request->condicion_aceptacion;
                 if( isset($bill) ){

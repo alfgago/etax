@@ -69,6 +69,15 @@
                 @endforeach
             </select>
           </div>
+
+          <div class="periodo-selects">
+            <select id="filtro-actividad" name="filtro-actividad" onchange="reloadDataTable();">
+                <option value="" selected>Todas las actividades</option>
+               	@foreach($commercial_activities as $commercial)
+                    <option value="{{@$commercial->codigo}}">{{@$commercial->actividad}}</option>
+                @endforeach
+            </select>
+          </div>
       </div>
     <form method="POST" action="/facturas-recibidas/validacion-masiva" class="show-form btn-submit-form">
       @csrf
@@ -93,10 +102,11 @@
             <tr>
                <th colspan="1">Actividad Comercial: </th>
                <th colspan="2">
-               <select name="actividad_comercial" class="form-control"  placeholder="Seleccione actividad comercial">
-               	@foreach($commercial_activities as $commercial)
-                    <option value="{{@$commercial->codigo}}">{{@$commercial->actividad}}</option>
-                @endforeach
+                  <select name="actividad_comercial" class="form-control"  placeholder="Seleccione actividad comercial">
+                 	@foreach($commercial_activities as $commercial)
+                      <option value="{{@$commercial->codigo}}">{{@$commercial->actividad}}</option>
+                  @endforeach
+                  </select>
                </th>
                <th colspan="4">Selección masiva: </th>
                <td>
@@ -178,7 +188,8 @@ $(function() {
           d.filtroValidado = $( '#filtro-select-codificadas' ).val();
           d.filtroUnidad = $( '#filtro-select-unidad' ).val();
           d.filtroMes = $( '#filtro-select-mes' ).val();
-          d.filtroAno = $( '#filtro-select-ano' ).val();             
+          d.filtroAno = $( '#filtro-select-ano' ).val();       
+          d.filtroActividad = $( '#filtro-actividad' ).val();             
       },
       type: 'GET'
     },
