@@ -116,8 +116,9 @@
                    <select class="form-control product_type_all"  placeholder="Seleccione una categoría de hacienda" >
                       <option value="0" posibles="">-- Seleccione --</option>
                       @foreach($categoriaProductos as $cat)
-                         <option value="{{@$cat->id}}" codigo="{{ @$cat->invoice_iva_code }}" posibles="{{@$cat->open_codes}}" >{{@$cat->name}}</option>
+                         <option style="display: none;" value="{{@$cat->id}}" codigo="{{ @$cat->invoice_iva_code }}" posibles="{{@$cat->open_codes}}" >{{@$cat->name}}</option>
                       @endforeach
+                      <option value="0" posibles="" style="bakground: #eee"> -- Seleccionar código antes de elegir categoría  --</option>
                     </select>
                   </div>
                </td>

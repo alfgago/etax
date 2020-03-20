@@ -365,7 +365,7 @@
 @endsection
 
 @section('breadcrumb-buttons')
-  <button onclick="$('#btn-submit').click();" class="btn btn-primary">Guardar factura</button>
+  <button id='btn-submit-fe' onclick="jQuery('#btn-submit-fe').prop('disabled', true); $('#btn-submit').click(); setTimeout(function(){ jQuery('#btn-submit-fe').prop('disabled', false); }, 1000);" class="btn btn-primary">Guardar factura</button>
 @endsection 
 
 @section('footer-scripts')

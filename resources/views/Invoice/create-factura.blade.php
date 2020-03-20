@@ -669,9 +669,9 @@ $company = currentCompanyModel();
 @endsection
 
 @section('breadcrumb-buttons')
-  <button id='btn-submit-fe' onclick="$('#btn-submit').click();" class="btn btn-primary">Enviar factura electrónica</button>
+  <button id='btn-submit-fe' onclick="jQuery('#btn-submit-fe').prop('disabled', true); $('#btn-submit').click(); setTimeout(function(){ jQuery('#btn-submit-fe').prop('disabled', false); }, 1000);" class="btn btn-primary">Enviar factura electrónica</button>
 @endsection
-
+ 
 @section('footer-scripts')
 
 <script>
