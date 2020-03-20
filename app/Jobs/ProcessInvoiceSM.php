@@ -200,7 +200,9 @@ class ProcessInvoiceSM implements ShouldQueue
                     $xml->invoice_id = $invoice->id;
                     $xml->bill_id = 0;
                     $xml->xml = $path;
-                    $xml->xml_message = $pathMH;
+                    if( isset($pathMH) ){
+                        $xml->xml_message = $pathMH;
+                    }
                     $xml->save();
                     
                     $sendPdf = $invoice->generation_method == "etax-bulk";
