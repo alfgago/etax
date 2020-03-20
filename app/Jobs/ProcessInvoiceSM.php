@@ -196,14 +196,12 @@ class ProcessInvoiceSM implements ShouldQueue
                 
                 $invoice->hacienda_status = '03';
                 $invoice->save();
-                if ($save) {
+                if ($save && $pathMH) {
                     $xml = new XmlHacienda();
                     $xml->invoice_id = $invoice->id;
                     $xml->bill_id = 0;
                     $xml->xml = $path;
-                    if( isset($pathMH) ){
-                        $xml->xml_message = $pathMH;
-                    }
+                    $xml->xml_message = $pathMH;
                     $xml->save();
                     
                     $sendPdf = $invoice->generation_method == "etax-bulk";
