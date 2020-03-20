@@ -110,6 +110,7 @@ class ProcessInvoice implements ShouldQueue
                                     }catch(\Exception $e){}
                                     try{ //Intenta guardar la respuesta siempre
                                         if(isset($response['data']['mensajeHacienda'])){
+                                            Log::debug( $response['data']['response'] . "GUARDA: " . !(strpos($response['data']['response'],"ESTADO=procesando") !== false) );
                                             if ( ! (strpos($response['data']['response'],"ESTADO=procesando") !== false) ) {
                                                 $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
                                                 $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );
@@ -127,14 +128,12 @@ class ProcessInvoice implements ShouldQueue
                                     }
                                     $invoice->save();
                                     
-                                    if ($save) {
+                                    if ($save && $pathMH) {
                                         $xml = new XmlHacienda();
                                         $xml->invoice_id = $invoice->id;
                                         $xml->bill_id = 0;
                                         $xml->xml = $path;
-                                        if( isset($pathMH) ){
-                                            $xml->xml_message = $pathMH;
-                                        }
+                                        $xml->xml_message = $pathMH;
                                         $xml->save();
                                         
                                         $sendPdf = true;
