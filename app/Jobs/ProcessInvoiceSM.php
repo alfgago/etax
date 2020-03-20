@@ -179,16 +179,20 @@ class ProcessInvoiceSM implements ShouldQueue
                         $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n') );
                     }
                 }catch(\Exception $e){}
+                
                 try{ //Intenta guardar la respuesta siempre
                     if(isset($response['data']['mensajeHacienda'])){
-                        $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
-                        $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );
+                        if ( ! (strpos($response['data']['response'],"ESTADO=procesando") !== false) ) {
+                            $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
+                            $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );
+                        }
                     }
                 }catch(\Exception $e){}
             }
             
             if (isset($response['status']) && $response['status'] == 200) {
                 Log::info('API HACIENDA 200 :'. $invoice->document_number);
+                
                 $invoice->hacienda_status = '03';
                 $invoice->save();
                 if ($save) {

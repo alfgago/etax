@@ -7,7 +7,7 @@
 @section('content')
     <div class="row form-container">
         <div class="col-md-12">
-      <form method="POST" action="/facturas-emitidas/send">
+      <form method="POST" action="/facturas-emitidas/guardar-recurrente">
 
           @csrf
           
@@ -118,12 +118,12 @@
 
                             <div class="form-group col-md-6">
                                 <label for="document_number">Número de documento</label>
-                                <input type="text" class="form-control"  name="document_number" id="document_number" value="{{ $document_number }}" readonly required>
+                                <input type="text" class="form-control"  name="document_number" id="document_number" value="Autogenerado" readonly required>
                             </div>
 
                             <div class="form-group col-md-6">
                                 <label for="document_key">Clave de factura</label>
-                                <input type="text" class="form-control" readonly name="document_key" id="document_key" value="{{ $document_key }}" >
+                                <input type="text" class="form-control" readonly name="document_key" id="document_key" value="Autogenerado" >
                             </div>
 
                             <div class="form-group col-md-6">
@@ -159,7 +159,6 @@
       <label>Tipo de recurrencia:</label>
       <div class='input-group'>
         <select class="form-control" id="recurrencia" name="recurrencia">
-          <option value="0" @if($recurringInvoice) @if($recurringInvoice->frecuency == "0" )  selected @endif @endif >Ninguna</option>
           <option value="1" @if($recurringInvoice)  @if($recurringInvoice->frecuency == "1" ) selected @endif @endif >Semanal</option>
           <option value="2" @if($recurringInvoice)  @if($recurringInvoice->frecuency == "2" ) selected @endif @endif >Quincenal</option>
           <option value="3" @if($recurringInvoice)  @if($recurringInvoice->frecuency == "3" ) selected @endif @endif >Mensual</option>
