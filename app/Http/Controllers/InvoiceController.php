@@ -2047,6 +2047,118 @@ class InvoiceController extends Controller
             return redirect()->back()->withError("Error en visualizar recurrentes");
         }
     }
+    
+    public function updateRecurrente(Request $request)
+    {
+        try {
+            
+            $request->validate([
+                'subtotal' => 'required',
+                'items' => 'required',
+            ]);
+            
+            if($request->recurrencia == "0" ){
+                return back()->withError( 'Debe elegir un tipo de recurrencia.' );
+            }
+            
+            if(CalculatedTax::validarMes($request->generated_date)){
+                $apiHacienda = new BridgeHaciendaApi();
+                $tokenApi = $apiHacienda->login(false);
+
+                if ($tokenApi !== false) {
+                    $editar = false;
+                    $oldInvoice = Invoice::find($request->invoice_id); 
+                    $recurrencia = RecurringInvoice::find($request->id_recurrente);
+                    if($oldInvoice->hacienda_status != '99'){
+                        $invoice = $oldInvoice->replicate();
+                    }else{
+                        $invoice = $oldInvoice;
+                    }
+                    $invoice->hacienda_status = '99';
+                    
+                    $company = currentCompanyModel(false);
+                    $invoice->company_id = $company->id;
+
+                    //Datos generales y para Hacienda
+                    $invoice->document_type = $request->document_type;
+                    $invoice->payment_status = "01";
+                    $invoice->payment_receipt = "";
+                    $invoice->generation_method = "etax";
+                    $invoice->xml_schema = 43;
+                    $invoice->is_void = true;    
+                    
+                    $today = Carbon::parse(now('America/Costa_Rica'));
+                    $generatedDate = Carbon::createFromFormat('d/m/Y', $request->generated_date);
+                    if($today->format("Y-m-d") <  $generatedDate->format("Y-m-d")){
+                        $invoice->hacienda_status = '99';
+                        $invoice->generation_method = "etax-programada";
+                        $invoice->document_key = "Key Programada";
+                        $invoice->document_number = "Programada";
+                    }else{
+                        return back()->withError( 'No puede programar facturas para fechas anteriores.' );
+                    }
+
+                    $invoice->save();
+                    $invoiceData = $invoice->setInvoiceData($request);
+
+                    if ($request->document_type == '08' ) {
+                        $this->storeBillFEC($request);
+                        if( $request->tipo_compra == 'local' ){
+                            $invoice->is_void = true;
+                        }
+                    }
+                    
+                    $invoice->save();                    
+                    
+                    if($request->cantidad_dias == null || $request->cantidad_dias == ''){
+                         $request->cantidad_dias = 0;
+                    }
+                    $recurrencia->company_id = $company->id;
+                    $recurrencia->invoice_id = $invoice->id;
+                    $recurrencia->frecuency = $request->recurrencia;
+                    $options = null;
+                    if($request->recurrencia == "1"){
+                        $options = $request->dia;
+                    }
+                    if($request->recurrencia == "2"){
+                        $options = $request->primer_quincena.",".$request->segunda_quincena;
+                    }
+                    if($request->recurrencia == "3"){
+                        $options = $request->mensual;
+                    }
+                    if($request->recurrencia == "4"){
+                        $options = $request->dia_recurrencia."/".$request->mes_recurrencia;
+                    }
+                    if($request->recurrencia == "5"){
+                        $options = $request->cantidad_dias;
+                    }
+                    $recurrencia->options = $options;
+                    $recurrencia->next_send = $recurrencia->proximo_envio($generatedDate);
+                    $recurrencia->save();   
+                    
+                    $invoice->recurring_id = $recurrencia->id;
+                    $invoice->save();     
+                    
+                    
+                    if( !isset($invoice) ){
+                        return back()->withError( 'Error en comunicación con Hacienda. Revise su llave criptográfica o reintente en unos minutos.' );
+                    }
+
+                    $company->save();
+                    clearInvoiceCache($invoice);
+                    
+                    return redirect('/facturas-emitidas/recurrentes')->withMessage('Factura recurrente editada con éxito');
+                } else {
+                    return back()->withError( 'Ha ocurrido un error al editar la factura.' );
+                }
+            }else{
+                return back()->withError('Mes seleccionado ya fue cerrado');
+            }
+        } catch( \Exception $ex ) {
+            Log::error("ERROR Envio de factura a hacienda -> ".$ex);
+            return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+        } 
+    }
 
     public function envioMasivoExcel(){
         request()->validate([
@@ -2238,7 +2350,7 @@ class InvoiceController extends Controller
         
     }
     
-    public function editarFactura($id)
+    public function editarFacturaRecurrrente($id)
     {
         $company = currentCompanyModel(false);
         if ( !$company->atv_validation && $company->use_invoicing ) {
@@ -2344,7 +2456,8 @@ class InvoiceController extends Controller
             return redirect()->back()->withError('Error en eliminar factura.');
         }
     }
-    public function guardarRecurrentes (Request $request)
+    
+    /*public function guardarRecurrentes (Request $request)
     {
         try{
             if($request->recurrencia != "0" ){
@@ -2384,6 +2497,6 @@ class InvoiceController extends Controller
             Log::error("Error en actualizar recurrencia:" . $e);
             return redirect()->back()->withError('Error en actualizar recurrencia.');
         }
-    }
+    }*/
         
 }

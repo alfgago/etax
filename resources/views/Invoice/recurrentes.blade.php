@@ -30,19 +30,29 @@
                     <td>{{ number_format( $data->invoice->total, 2 ) }}</td>
                     <td>{{date('d/m/Y', strtotime($data->next_send))}}</td>
                     <td>
-  
-                      <a href="/facturas-emitidas/ver-recurrente/{{ $data->id }}" alt="Editar recurrencia" class="btn btn-warning m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-clock-o" aria-hidden="true"></i></a>
-                      <a href="/facturas-emitidas/{{ $data->invoice->id }}" alt="Ver factura" class="btn btn-info m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-eye" aria-hidden="true"></i></i></a>
-                      <a href="/facturas-emitidas/editar-factura/{{ $data->invoice->id }}" alt="Cambiar factura" class="btn btn-success m-0" style="color:#fff; font-size: 0.85em;"><i class="fa fa-file" aria-hidden="true"></i></a>
-                      <form id="delete-form-{{ $data->id }}" class="inline-form" method="POST" action="/facturas-emitidas/eliminar-recurrente/{{ $data->id }}" >
-                        @csrf
-                        @method('delete')
-                        <a type="button" class="btn btn-danger m-0" title="Eliminar recurrente"
-                           style="color:#fff; font-size: 0.85em;" onclick="confirmDelete({{ $data->id }});">
-                          <i class="fa fa-trash" aria-hidden="true"></i>
-                        </a>
-                      </form>
-  
+                      <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          Acciones
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">      
+                          <a href="/facturas-emitidas/ver-recurrente/{{ $data->id }}" alt="Ver histórico de recurrencia" class="dropdown-item" >
+                            <i class="fa fa-clock-o" aria-hidden="true"></i> Ver histórico
+                          </a>
+                          <a href="/facturas-emitidas/{{ $data->invoice->id }}" alt="Ver factura" class="text-info dropdown-item" >
+                            <i class="fa fa-eye" aria-hidden="true"></i> Ver detalle
+                          </a>
+                          <a href="/facturas-emitidas/editar-factura-recurrente/{{ $data->invoice->id }}" alt="Cambiar factura" class="text-success dropdown-item" >
+                            <i class="fa fa-file" aria-hidden="true"></i> Editar factura
+                          </a>
+                          <form id="delete-form-{{ $data->id }}" class="inline-form" method="POST" action="/facturas-emitidas/eliminar-recurrente/{{ $data->id }}" >
+                            @csrf
+                            @method('delete')
+                            <a type="button" class="text-danger dropdown-item" title="Eliminar recurrente" onclick="confirmDelete({{ $data->id }});">
+                              <i class="fa fa-trash" aria-hidden="true"></i> Eliminar recurrente
+                            </a>
+                          </form>
+                        </div>
+                      </div>
                     </td>
                   </tr>
                 @endif

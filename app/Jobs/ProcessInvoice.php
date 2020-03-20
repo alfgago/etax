@@ -110,8 +110,10 @@ class ProcessInvoice implements ShouldQueue
                                     }catch(\Exception $e){}
                                     try{ //Intenta guardar la respuesta siempre
                                         if(isset($response['data']['mensajeHacienda'])){
-                                            $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
-                                            $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );
+                                            if ( ! (strpos($response['data']['response'],"ESTADO=procesando") !== false) ) {
+                                                $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
+                                                $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );
+                                            }
                                         }
                                     }catch(\Exception $e){}
                                 }
