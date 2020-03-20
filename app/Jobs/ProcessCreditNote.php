@@ -116,8 +116,11 @@ class ProcessCreditNote implements ShouldQueue
                                 }catch(\Exception $e){}
                                 try{ //Intenta guardar la respuesta siempre
                                     if(isset($response['data']['mensajeHacienda'])){
-                                        $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
-                                        $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );
+                                        Log::debug($response['data']['response'] . "GUARDA: " . !(strpos($response['data']['response'],"ESTADO=procesando") !== false) );
+                                        if ( ! (strpos($response['data']['response'],"ESTADO=procesando") !== false) ) {
+                                            $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
+                                            $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );
+                                        }
                                     }
                                 }catch(\Exception $e){}
                             }
@@ -131,7 +134,7 @@ class ProcessCreditNote implements ShouldQueue
                                 $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
                                 $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );*/
 
-                                if ($save) {
+                                if ($save && $pathMH) {
                                     $xml = new XmlHacienda();
                                     $xml->invoice_id = $invoice->id;
                                     $xml->bill_id = 0;
