@@ -191,9 +191,11 @@
                 $documentType = 'Factura de exportación';
             break;
         }
-        $numExoneracion = "";
+        $numExoneracion = null;
         foreach($data_invoice->items as $item){
-            $numExoneracion .= "$item->exoneration_document_number ";
+            if( isset($item->exoneration_document_number) ){ 
+                $numExoneracion = $item->exoneration_document_number;
+            }
         }
     ?>
     <table width="100%" cellpadding="0" cellspacing="0">
@@ -259,7 +261,7 @@
                 @if( isset($data_invoice->buy_order) )
                     <b>Orden de compra: </b> {{ $data_invoice->buy_order }}<br>
                 @endif
-                @if( isset($data_invoice->other_reference) )
+                @if( !empty($data_invoice->other_reference) )
                     <b>Consecutivo referencia: </b> {{ $data_invoice->other_reference }}<br>
                 @endif
                 @if( isset($numExoneracion) )
