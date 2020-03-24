@@ -35,14 +35,24 @@
                     </li> 
                     <?php 
                 }
-                if(currentCompanyModel()->id==437) {
+                if(currentCompanyModel()->id_number==3101707070 ) {
                     ?>
                     <li class="nav-item small-nav" >
                         <a class="nav-item-hold" href="/sm">
                             <img src="/assets/images/qb.png" class="sidemenu-icon">
                             <span class="nav-text">QuickBooks</span>
                         </a>
-                        <div class="subitems"></div>
+                         <div class="subitems" style="
+                                bottom: 0;
+                                top: auto;
+                            ">
+                            <a href="/quickbooks/mapeo-variables">Mapeo de variables</a>
+                            <a href="/quickbooks/comparativo-emitidas">Sincronización de ventas</a>
+                            <a href="/quickbooks/comparativo-recibidas">Sincronización de compras</a>
+                            <a href="/quickbooks/comparativo-clientes">Sincronización de clientes</a>
+                            <a href="/quickbooks/comparativo-proveedores">Sincronización de proveedores</a>
+                            <a href="/quickbooks/comparativo-productos">Sincronización de productos</a>
+                        </div>
                     </li> 
                     <?php 
                 }

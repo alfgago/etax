@@ -32,12 +32,12 @@ class AddQuickbooksTable extends Migration
             $table->boolean('sync_clients')->default(true); 
             $table->boolean('sync_products')->default(true);  
             
-            $table->text('conditions_json')->nullable(); 
-            $table->text('payment_methods_json')->nullable(); 
-            $table->text('taxes_json')->nullable(); 
-            $table->text('clients_json')->nullable(); 
-            $table->text('providers_json')->nullable(); 
-            $table->text('products_json')->nullable(); 
+            $table->json('conditions_json')->nullable(); 
+            $table->json('payment_methods_json')->nullable(); 
+            $table->json('taxes_json')->nullable(); 
+            $table->json('clients_json')->nullable(); 
+            $table->json('providers_json')->nullable(); 
+            $table->json('products_json')->nullable(); 
 
             $table->timestamps();
 			$table->softDeletes();

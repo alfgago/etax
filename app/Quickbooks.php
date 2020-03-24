@@ -10,12 +10,23 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Quickbooks;
+use App\Client;
+use App\Provider;
 
 class Quickbooks extends Model
 {
     use SoftDeletes;
     protected $guarded = [];
     protected $table = "quickbooks";
+
+    protected $casts = [
+        'conditions_json' => 'array',
+        'payment_methods_json' => 'array',
+        'taxes_json' => 'array',
+        'clients_json' => 'array',
+        'providers_json' => 'array',
+        'products_json' => 'array',
+    ];
     
     //Relacion con la empresa
     public function company()
@@ -29,6 +40,7 @@ class Quickbooks extends Model
         
         $OAuth2LoginHelper = $dataService->getOAuth2LoginHelper();
         $authorizationCodeUrl = $OAuth2LoginHelper->getAuthorizationCodeURL();
+        //dd($authorizationCodeUrl);
         return $authorizationCodeUrl;
     }
     
@@ -75,16 +87,16 @@ class Quickbooks extends Model
             // Prep Data Services
             $dataService = DataService::Configure(array(
                  'auth_mode' => 'oauth2',
-                 'ClientID' => config('etax.qb_client_id'),
-                 'ClientSecret' => config('etax.qb_client_secret'),
+                  'ClientID' => config('etax.qb_client_id'),
+                  'ClientSecret' => config('etax.qb_client_secret'),
                  'scope' => "com.intuit.quickbooks.accounting, openID, profile, email, phone, address",
                  'baseUrl' => "https://sandbox-quickbooks.api.intuit.com/",
                  'QBORealmID' => $realmId,
                  'accessTokenKey' => $accessTokenValue,
                  'refreshTokenKey' => $refreshTokenValue
             ));
-            
-            Cache::put($cachekey, $dataService, 3000);
+            return $dataService;
+            Cache::put($cachekey, $dataService, 3600);
         }
         
         return Cache::get($cachekey);
@@ -97,11 +109,85 @@ class Quickbooks extends Model
               'ClientID' => config('etax.qb_client_id'),
               'ClientSecret' => config('etax.qb_client_secret'),
               'RedirectURI' => config('etax.qb_redirect_uri'),
-              'scope' => "com.intuit.quickbooks.accounting, openID, profile, email, phone, address",
+              'scope' => "com.intuit.quickbooks.accounting",
               'baseUrl' => "https://sandbox-quickbooks.api.intuit.com/"
         ));
         
         return $dataService;
+    }
+    
+    public static function getClientName($company, $customerRef){
+        $cachekey = "qb-clientsjson-$company->id_number";
+        if ( !Cache::has($cachekey) ) {
+            $qbclients = Quickbooks::select('clients_json')->where('company_id', $company->id)->with('company')->first();
+            $customers = $qbclients->clients_json;
+            Cache::put($cachekey, $customers, 30); //Cache por 15 segundos.
+        }else{
+            $customers = Cache::get($cachekey);
+        }
+        
+        $cust = $customers[$customerRef];
+        if(isset($cust)){
+            return $cust['full_name'];
+        }else{
+            return $customerRef;
+        }
+    }
+    
+    public static function getClientInfo($company, $customerRef){
+        $cachekey = "qb-clientsjson-$company->id_number";
+        if ( !Cache::has($cachekey) ) {
+            $qbclients = Quickbooks::select('clients_json')->where('company_id', $company->id)->with('company')->first();
+            $customers = $qbclients->clients_json;
+            Cache::put($cachekey, $customers, 30); //Cache por 15 segundos.
+        }else{
+            $customers = Cache::get($cachekey);
+        }
+        
+        $clientInfo = [];
+        $cust = $customers[$customerRef];
+        if(isset($cust)){
+            $client = Client::find($cust['client_id']); 
+            if( isset($client) ){
+                $clientInfo['nombreCliente'] = $client->fullname;
+                $clientInfo['codigoCliente'] = $client->code;
+                $clientInfo['tipoPersona'] = $client->tipo_persona;
+                if($client->tipo_persona){
+                    Log::error("Enviando factura de cliente no mapeado");
+                    return false;  
+                }
+                $clientInfo['identificacionCliente'] = $client->id_number ?? null;
+                $clientInfo['correoCliente'] = $client->email ?? null;
+                $clientInfo['telefonoCliente'] = $client->phone ?? null;
+                $clientInfo['direccion'] = $client->address ?? "No indica";
+                $clientInfo['codProvincia'] = $client->state ?? "1";
+                $clientInfo['codCanton'] = $client->city ?? "01";
+                $clientInfo['codDistrito'] = $client->district ?? "01";
+                $clientInfo['zip'] = $clientInfo['codProvincia'].$clientInfo['codCanton'].$clientInfo['codDistrito'];
+            }else{
+                Log::error("Enviando factura de cliente no mapeado");
+                return false;
+            }
+        }else{
+            return false;
+        }
+        
+        return $clientInfo;
+    }
+    
+    public function getAccounts($company = false){
+        if(!$company){
+            $company = currentCompanyModel();
+        }
+        
+        $cachekey = "qb-clientsjson-$company->id_number";
+        if ( !Cache::has($cachekey) ) {
+            $qbAccounts = $this->getAuthenticatedDS()->Query("SELECT * FROM Account");
+            Cache::put($cachekey, $qbAccounts, 600); //Cache por 10 minutos.
+        }else{
+            $qbAccounts = Cache::get($cachekey);
+        }
+        return $qbAccounts;
     }
     
 }

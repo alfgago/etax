@@ -130,6 +130,7 @@ class InvoiceController extends Controller
                 ->join('invoices', 'invoice_items.invoice_id', '=', 'invoices.id' )
                 ->where('invoices.is_authorized', 1)
                 ->whereNull('invoices.deleted_at')
+                ->with('invoice')
                 //->join('clients', 'invoices.client_id', '=', 'clients.id' )
                 ;
 
@@ -402,6 +403,12 @@ class InvoiceController extends Controller
     public function create()
     {
         $company = currentCompanyModel();
+        
+        /*$qb = \App\Quickbooks::where('company_id', $company->id)->with('company')->first();
+        if( isset($qb) ){
+            $cuentasContables = $qb->getAccounts();
+            dd($cuentasContables);
+        }*/
         //Revisa límite de facturas emitidas en el mes actual1
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $month = $start_date->month;

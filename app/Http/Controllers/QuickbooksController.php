@@ -11,6 +11,8 @@ use App\Client;
 use App\Product;
 use App\Invoice;
 use App\Bill;
+use App\QuickbooksInvoice;
+use App\QuickbooksBill;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -89,7 +91,7 @@ class QuickbooksController extends Controller
         $taxRates = $dataService->Query("SELECT * FROM TaxRate");
         $paymentMethods = $dataService->Query("SELECT * FROM PaymentMethod");
         $terms = $dataService->Query("SELECT * FROM Term");
-        
+
         return view('Quickbooks/variable-map', compact(['qb', 'taxRates', 'paymentMethods', 'terms']));
     }
     
@@ -105,14 +107,13 @@ class QuickbooksController extends Controller
         if( !isset($qb) ){
             return redirect('/quickbooks/configuracion')->withError('Usted no tiene Quickbooks configurado correctamente.');
         }
-        $qb->conditions_json = json_encode($request->sale_condition);
-        $qb->payment_methods_json = json_encode($request->payment_type);
+        $qb->conditions_json = $request->sale_condition;
+        $qb->payment_methods_json = $request->payment_type;
         $taxesJson = [
             'tipo_iva' => $request->tipo_iva,
             'tipo_producto' => $request->tipo_producto
         ];
-        $qb->taxes_json = json_encode($taxesJson);
-        
+        $qb->taxes_json = $taxesJson;
         $qb->save();
         return back()->withMessage( 'Se guardaron las variables de Quickbooks correctamente.' );
     }
@@ -125,64 +126,56 @@ class QuickbooksController extends Controller
     public function invoiceSyncIndex()
     {
         $company = currentCompanyModel();
-        $year = 2020;
-        $month = 1;
+        $year = request()->year;
+        $month = request()->month;
+        if( !$year || !$month ){
+            $year = \Carbon\Carbon::now()->year;
+            $month = \Carbon\Carbon::now()->month;
+        }
         
         $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
         if( !isset($qb) ){
             return redirect('/quickbooks/configuracion')->withError('Usted no tiene Quickbooks configurado correctamente.');
         }
         $dataService = $qb->getAuthenticatedDS();
+        $facturas = QuickBooksInvoice::syncMonthlyInvoices($dataService, $year, $month, $company);
         
-        $qbInvoices = $this->getMonthlyInvoices($dataService, $year, $month);
-        //dd( $qbInvoices );
-        $etaxInvoices = Invoice::where("company_id", $company->id)
-                        ->where('year', $year)
-                        ->where('month', $month)
-                        ->with('client')
-                        ->limit(15)
-                        ->get();
-        $facturas = new \stdClass();
-        $cachekey = "qb-invoicelist-$company->id_number"; 
-        //if ( !Cache::has($cachekey) ) {
-            foreach($qbInvoices as $invoice){
-                $docNumber = $invoice->DocNumber;
-                $fac = new \stdClass();
-                $fac->numero_qb = $docNumber;
-                $fac->fecha_qb = $invoice->TxnDate;
-                $fac->total_qb = $invoice->TotalAmt;
-                $fac->cliente_qb = $invoice->CustomerRef;
-                //$fac->cliente_qb = $dataService->Query("SELECT FullyQualifiedName FROM Customer WHERE Id='".$invoice->CustomerRef."'")[0]->FullyQualifiedName;
-                $facturas->$docNumber = $fac;
-            }
-            Cache::put($cachekey, $facturas, 120);
-        //}else{
-            $facturas = Cache::get($cachekey);
-        //}
-        
-        foreach($etaxInvoices as $invoice){
-            $docNumber = $invoice->reference_number;
-            if( isset($facturas->$docNumber) ){
-                $fac = $facturas->$docNumber;
-            }else{
-                $fac = new \stdClass();
-            }
-            $fac->numero_etax = $docNumber;
-            $fac->fecha_etax = $invoice->generatedDate()->format('d/m/Y');
-            $fac->total_etax = $invoice->total;
-            $fac->cliente_etax = "$invoice->client_first_name $invoice->client_last_name $invoice->client_last_name2";
-            $facturas->$docNumber = $fac;
-        }
-        
-        return view('Quickbooks/invoice-sync', compact(['facturas']));
+        return view('Quickbooks/invoice-sync', compact(['facturas', 'year', 'month']));
     }
     
-    public function getMonthlyInvoices($dataService, $year, $month){
+    public function loadMonthlyInvoices()
+    {
+        $company = currentCompanyModel();
+        $year = request()->year;
+        $month = request()->month;
         
-        $dateFrom = Carbon::createFromDate($year, $month, 1)->firstOfMonth()->toAtomString();
-        $dateTo = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toAtomString();
-        return $dataService->Query("SELECT * FROM Invoice WHERE TxnDate >= '$dateFrom' AND TxnDate <= '$dateTo'");
+        $cachekey = "qb-resync-$company->id_number-$year-$month"; 
+        if ( !Cache::has($cachekey) ) {
+            $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
+            if( !isset($qb) ){
+                return redirect('/quickbooks/configuracion')->withError('Usted no tiene Quickbooks configurado correctamente.');
+            }
+            $dataService = $qb->getAuthenticatedDS();
+            QuickbooksInvoice::loadQuickbooksInvoices($dataService, $year, $month, $company);
         
+            Cache::put($cachekey, true, 15); //Se usa cache para evitar que el usuario haga muchos requests al API de QB innecesariamente
+        }
+        
+        return redirect("/quickbooks/comparativo-emitidas/$year/$month")->withMessage('Se re-sincronizaron las facturas correctamente');
+    }
+    
+    public function saveInvoiceFromQuickbooks(){
+        $company = currentCompanyModel();
+        $qbInvoice = QuickbooksInvoice::where( 'qb_id', request()->invoiceId )
+                    ->where('company_id', $company->id)
+                    ->first();
+        if( !isset($qbInvoice) ){
+            return redirect("/quickbooks/comparativo-emitidas")->withError('Está intentando guardar una factura inexistente o que no le pertenece a su empresa.');
+        }
+        
+        $invoice = $qbInvoice->saveInvoiceFromQuickbooks();
+        dd($invoice);
+        return redirect("/quickbooks/comparativo-emitidas/$invoice->year/$invoice->month")->withMessage('La factura ha sido guardada correctamente en eTax');
     }
     
     /**
