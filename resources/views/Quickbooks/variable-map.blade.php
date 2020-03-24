@@ -9,10 +9,12 @@
   <div class="col-xl-9 col-lg-12 col-md-12">
       <?php 
         $company = $qb->company; 
-        $qbConditions = json_decode($qb->conditions_json);
-        $qbMethods = json_decode($qb->payment_methods_json);
-        $qbTipoIva = json_decode($qb->taxes_json)->tipo_iva;
-        $qbTipoProducto = json_decode($qb->taxes_json)->tipo_producto;
+        $qbConditions = $qb->conditions_json;
+        $qbMethods = $qb->payment_methods_json;
+        if( isset($qb->taxes_json) ) {
+          $qbTipoIva = $qb->taxes_json['tipo_iva'];
+          $qbTipoProducto = $qb->taxes_json['tipo_producto'];
+        }
       ?>
       <form method="POST" action="/quickbooks/guardar-variables/{{$qb->id}}">
         @csrf
@@ -35,7 +37,7 @@
               <tbody>
                 <tr class="item-tabla item-index-0">
                   <?php 
-                    $selectedCondition = @$qbConditions->default;
+                    $selectedCondition = @$qbConditions['default'];
                   ?>
                   <td>Valor por defecto</td>
                   <td>
@@ -54,7 +56,7 @@
                   <tr class="item-tabla item-index-{{ $loop->index }}">
                     <?php 
                       $condId = $term->Id;
-                      $selectedCondition = @$qbConditions->$condId;
+                      $selectedCondition = @$qbConditions[$condId];
                     ?>
                     <td>{{ $term->Name }}</td>
                     <td>
@@ -91,7 +93,7 @@
                 <tr class="item-tabla item-index-0">
                   <td>Valor por defecto</td>
                   <?php 
-                    $selectedCondition = @$qbMethods->default;
+                    $selectedCondition = @$qbMethods['default'];
                   ?>
                   <td>
                     <select id="medio_pago" name="payment_type[default]" class="form-control" required>
@@ -108,7 +110,7 @@
                   <tr class="item-tabla item-index-{{ $loop->index }}">
                     <?php 
                       $condId = $method->Id;
-                      $selectedCondition = @$qbMethods->$condId;
+                      $selectedCondition = @$qbMethods[$condId];
                     ?>
                     <td>{{ $method->Name }}</td>
                     <td>
@@ -148,8 +150,8 @@
                   <td>
                     <select class="form-control select-search tipo_iva" name="tipo_iva[default]" id="tipo_iva">
                       <?php
-                        $selectedTipoIva = @$qbTipoIva->default;
-                        $selectedProdType = @$qbTipoProducto->default;
+                        $selectedTipoIva = @$qbTipoIva['default'];
+                        $selectedProdType = @$qbTipoProducto['default'];
                       ?>
                       @if(@$company->repercutidos[0]->id)
                         @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
@@ -182,8 +184,8 @@
                   <tr class="item-tabla item-index-{{ $loop->index }}">
                       <?php
                         $condId = $tax->Id;
-                        $selectedTipoIva = @$qbTipoIva->$condId;
-                        $selectedProdType = @$qbTipoProducto->$condId;
+                        $selectedTipoIva = @$qbTipoIva[$condId];
+                        $selectedProdType = @$qbTipoProducto[$condId];
                       ?>
                     <td>{{ $tax->Name }}</td>
                     <td>

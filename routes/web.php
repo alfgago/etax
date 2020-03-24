@@ -340,13 +340,19 @@ Route::prefix('quickbooks')->group(function() {
     //Gets de las pantallas
     Route::get('/configuracion', 'QuickbooksController@config');
     Route::get('/mapeo-variables', 'QuickbooksController@variableMapIndex');
-    Route::get('/comparativo-emitidas', 'QuickbooksController@invoiceSyncIndex');
-    Route::get('/comparativo-recibidas', 'QuickbooksController@billSyncIndex');
-    Route::get('/comparativo-clientes', 'QuickbooksController@clientSyncIndex');
-    Route::get('/comparativo-proveedores', 'QuickbooksController@providerSyncIndex');
-    Route::get('/comparativo-productos', 'QuickbooksController@productSyncIndex');
+    Route::get('/comparativo-emitidas/{year?}/{month?}', 'QuickbooksController@invoiceSyncIndex');
+    Route::get('/comparativo-recibidas/{year?}/{month?}', 'QuickbooksController@billSyncIndex');
+    Route::get('/comparativo-clientes/{year?}/{month?}', 'QuickbooksController@clientSyncIndex');
+    Route::get('/comparativo-proveedores/{year?}/{month?}', 'QuickbooksController@providerSyncIndex');
+    Route::get('/comparativo-productos/{year?}/{month?}', 'QuickbooksController@productSyncIndex');
+    
+    //Reload de QB
+    Route::get('/resync-invoices/{year}/{month}', 'QuickbooksController@loadMonthlyInvoices');
+    
     //Post/Patch de acciones
     Route::get('/auth', 'QuickbooksController@auth');
     Route::post('/guardar-config/{id}', 'QuickbooksController@saveConfig');
     Route::post('/guardar-variables/{id}', 'QuickbooksController@saveVariables');
+    Route::post('/emitida-qbaetax', 'QuickbooksController@saveInvoiceFromQuickbooks');
+    Route::post('/emitida-etaxaqb', 'QuickbooksController@saveInvoiceFromEtax');
 });

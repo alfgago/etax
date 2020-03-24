@@ -170,6 +170,34 @@
     </style>
 </head>
 <body>
+    <?php
+        switch ($data_invoice->document_type){
+            case '01':
+                $documentType = 'Factura electrónica';
+            break;
+            case '02':
+                $documentType = 'Nota de débito electrónica';
+            break;
+            case '03':
+                $documentType = 'Nota de crédito electrónica';
+            break;
+            case '04':
+                $documentType = 'Tiquete electrónico';
+                break;
+            case '08':
+                $documentType = 'Factura de compra';
+            break;
+            case '09':
+                $documentType = 'Factura de exportación';
+            break;
+        }
+        $numExoneracion = null;
+        foreach($data_invoice->items as $item){
+            if( isset($item->exoneration_document_number) ){ 
+                $numExoneracion = $item->exoneration_document_number;
+            }
+        }
+    ?>
     <table width="100%" cellpadding="0" cellspacing="0">
         <tr class="top">
             <td colspan="2">
@@ -206,28 +234,6 @@
         </td>
         </tr>
     </table>
-    <?php
-        switch ($data_invoice->document_type){
-            case '01':
-                $documentType = 'Factura electrónica';
-            break;
-            case '02':
-                $documentType = 'Nota de débito electrónica';
-            break;
-            case '03':
-                $documentType = 'Nota de crédito electrónica';
-            break;
-            case '04':
-                $documentType = 'Tiquete electrónico';
-                break;
-            case '08':
-                $documentType = 'Factura de compra';
-            break;
-            case '09':
-                $documentType = 'Factura de exportación';
-            break;
-        }
-    ?>
     <table>
         <h1 style="text-align: center; font-size: 23px; margin: 0 !important; line-height: 1;">{{ $documentType }}</h1>
     </table>
@@ -255,8 +261,11 @@
                 @if( isset($data_invoice->buy_order) )
                     <b>Orden de compra: </b> {{ $data_invoice->buy_order }}<br>
                 @endif
-                @if( isset($data_invoice->other_reference) )
+                @if( !empty($data_invoice->other_reference) )
                     <b>Consecutivo referencia: </b> {{ $data_invoice->other_reference }}<br>
+                @endif
+                @if( isset($numExoneracion) )
+                    <b>Exoneración: </b> {{ $numExoneracion }}<br>
                 @endif
             </td>
         </tr>

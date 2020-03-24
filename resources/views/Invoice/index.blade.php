@@ -89,7 +89,7 @@
               <th data-priority="4">Total</th>
               <th data-priority="4">F. Generada</th>
               <th data-priority="1">Acciones</th>
-              <th data-priority="1">Estado</th>
+              <?php if( currentCompanyModel()->use_invoicing ){ ?><th data-priority="1">Estado</th> <?php } ?>
             </tr>
           </thead>
           <tbody>
@@ -133,7 +133,7 @@ $(function() {
       { data: 'total_real', name: 'total', class: "text-right" },
       { data: 'generated_date', name: 'generated_date' },
       { data: 'actions', name: 'actions', orderable: false, searchable: false },
-      { data: 'hacienda_status', name: 'hacienda_status' },
+      <?php if( currentCompanyModel()->use_invoicing ){ ?> { data: 'hacienda_status', name: 'hacienda_status' },<?php } ?>
     ],
     createdRow: function (row, data, index) {
       if(data.hide_from_taxes){
@@ -244,6 +244,9 @@ function confirmHideFromTaxes( id ) {
 <style>
   tr.tax-hidden td {
     text-decoration: line-through !important;
+  }
+  tr.tax-hidden td .btn {
+    text-decoration: none !important;
   }
   .div-filtro{
     float: left;

@@ -96,7 +96,7 @@
               <th data-priority="4">Total</th>
               <th data-priority="6">F. Generada</th>
               <th data-priority="1">Acciones</th>
-              <th data-priority="6">Estado</th>
+              <?php if( currentCompanyModel()->use_invoicing ){ ?> <th data-priority="6">Estado</th> <?php } ?>
             </tr>
           </thead>
           <tbody>
@@ -139,7 +139,7 @@ $(function() {
       { data: 'total', name: 'total', 'render': $.fn.dataTable.render.number( ',', '.', 2 ), class: "text-right" },
       { data: 'generated_date', name: 'generated_date' },
       { data: 'actions', name: 'actions', orderable: false, searchable: false },
-      { data: 'hacienda_status', name: 'hacienda_status' },
+      <?php if( currentCompanyModel()->use_invoicing ){ ?> { data: 'hacienda_status', name: 'hacienda_status' }, <?php } ?>
     ],
     createdRow: function (row, data, index) {
       if(data.hide_from_taxes){

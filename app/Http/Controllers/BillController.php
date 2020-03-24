@@ -99,6 +99,7 @@ class BillController extends Controller
                 ->join('bills', 'bill_items.bill_id', '=', 'bills.id' )
                 ->where('bills.is_authorized', 1)
                 ->where('bills.accept_status', '!=' , 2)
+                ->with('bill')
                 //->join('providers', 'bills.provider_id', '=', 'providers.id' )
                 ;
 
@@ -186,7 +187,7 @@ class BillController extends Controller
        }
        $filtroActividad = $request->get('filtroActividad');
        if( isset($filtroActividad) ){
-            $query = $query->where('bills.commercial_activity', $filtroActividad);
+            $query = $query->where('bills.activity_company_verification', $filtroActividad);
        }
 
        $filtroValidado = $request->get('filtroValidado');
