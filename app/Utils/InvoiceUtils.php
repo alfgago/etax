@@ -375,7 +375,14 @@ class InvoiceUtils
             $data->save();*/
             $ref = $data->reference_number;
             Log::info("Set request parameters Company: $company->business_name, invoice id: $data->id, consutivo: $ref, Clave: $data->document_key");
-            $receptorPostalCode = $data['client_zip'] ?? '10101';
+            $receptorPostalCode =  trim($data['client_zip']);
+            if( !isset($receptorPostalCode) ){
+                $receptorPostalCode = trim($data['client_state'].$data['client_city'].$data['client_district']);
+                if( !isset($receptorPostalCode) ){
+                    $receptorPostalCode = '10101';
+                }
+            }
+            
             $invoiceData = null;
             $request = null;
             $totalServiciosGravados = 0;
@@ -468,6 +475,14 @@ class InvoiceUtils
             }else{
                 $cedulaReceptor = $data['client_id_number'] ? str_pad(preg_replace("/[^0-9]/", "", $data['client_id_number']), 9, '0', STR_PAD_LEFT) : '';
             }
+            
+            try{
+                $emailArray = explode(',',$emisorEmail);
+                if( sizeof( $emailArray ) > 1 ){
+                    $emisorEmail = $emailArray[0];
+                }
+                Log::debug(json_encode($emailArray) ."(".sizeof( $emailArray ).")" . " to " . $emisorEmail);
+            }catch(\Exception $e){ Log::error($e->getMessage()); }
             
             $invoiceData = array(
                 'consecutivo' => $ref ?? '',

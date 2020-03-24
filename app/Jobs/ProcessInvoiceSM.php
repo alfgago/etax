@@ -183,6 +183,7 @@ class ProcessInvoiceSM implements ShouldQueue
                 try{ //Intenta guardar la respuesta siempre
                     if(isset($response['data']['mensajeHacienda'])){
                         Log::debug($response['data']['response'] . "GUARDA: " . !(strpos($response['data']['response'],"ESTADO=procesando") !== false) );
+                        $pathMH = false;
                         if ( ! (strpos($response['data']['response'],"ESTADO=procesando") !== false) ) {
                             $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
                             $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );
@@ -209,8 +210,8 @@ class ProcessInvoiceSM implements ShouldQueue
                     
                     $sendPdf = $invoice->generation_method == "etax-bulk";
                     $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, true);
+                    Log::info('Factura enviada y XML guardado.');
                 }
-                Log::info('Factura enviada y XML guardado.');
             } else if (isset($response['status']) && $response['status'] == 400 && strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
                 Log::info('Consecutive repeated -->' . $invoice->document_number);
                 sleep(2);
