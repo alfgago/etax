@@ -27,7 +27,12 @@ class Bill extends Model
     public function company()
     {
         return $this->belongsTo(Company::class);
-    }  
+    } 
+    
+    public function quickbooksBill()
+    {
+        return $this->hasOne(QuickbooksBill::class);
+    }
     
     //Relacion con el proveedor
     public function provider()

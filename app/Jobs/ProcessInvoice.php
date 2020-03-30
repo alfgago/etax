@@ -91,7 +91,6 @@ class ProcessInvoice implements ShouldQueue
                                 ]);
                                 $response = json_decode($result->getBody()->getContents(), true);
                                 $date = Carbon::now();
-                                Log::info("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
                                 ApiResponse::create([
                                     'invoice_id' => $invoice->id, 
                                     'company_id' => $company->id,
@@ -121,7 +120,8 @@ class ProcessInvoice implements ShouldQueue
                                 }
                                 
                                 if (isset($response['status']) && $response['status'] == 200) {
-                                    Log::info('API HACIENDA 200 :'. $invoice->document_number);
+                                    Log::success("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
+                                    Log::success('API HACIENDA 200 :'. $invoice->document_number);
                                     if (strpos($response['data']['response'],"ESTADO=procesando") !== false) {
                                         $invoice->hacienda_status = '05';
                                     } else {
@@ -138,22 +138,17 @@ class ProcessInvoice implements ShouldQueue
                                         $xml->save();
                                         
                                         $sendPdf = true;
-                                        $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, $sendPdf);
-                                        Log::info('Factura enviada y XML guardado.');
+                                        //$file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, $sendPdf);
+                                        Log::success('Factura enviada y XML guardado.');
                                     }
                                 } else if (isset($response['status']) && $response['status'] == 400 &&
-                                    strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
-                                    Log::info('Consecutive repeated -->' . $invoice->document_number);
+                                    (strpos($response['message'], 'ya fue recibido anteriormente') <> false || strpos($response['message'], 'XML ya existe en nuestras bases de datos') <> false) ) {
+                                    Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
+                                    Log::warning('Consecutive repeated -->' . $invoice->document_number);
                                     $invoice->hacienda_status = '04';
                                     $invoice->save();
-                                } else if (isset($response['status']) && $response['status'] == 400 &&
-                                    strpos($response['message'], 'XML ya existe en nuestras bases de datos') <> false) {
-                                    Log::info('Consecutive repeated -->' . $invoice->document_number);
-                                    $invoice->hacienda_status = '04';
-                                    $invoice->save();
-                                }else if (isset($response['status']) && $response['status'] == 400 &&
-                                    strpos($response['message'], 'archivo XML ya existe en nuestras bases de datos') <> false) {
-                                    Log::info('Consecutive repeated -->' . $invoice->document_number);
+                                } else if (isset($response['status']) && $response['status'] == 400) {
+                                    Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
                                     $invoice->hacienda_status = '04';
                                     $invoice->save();
                                 }

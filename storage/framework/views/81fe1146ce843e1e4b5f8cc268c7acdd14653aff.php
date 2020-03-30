@@ -1,0 +1,199 @@
+<div class="popup" id="linea-popup">
+  <div class="popup-container item-factura-form form-row">
+  	<div title="Cerrar ventana" class="close-popup" onclick="cerrarPopup('linea-popup');cancelarEdicion();"> <i class="fa fa-times" aria-hidden="true"></i> </div>
+
+    <div class="form-group col-md-12">
+      <h3>
+        Línea de factura
+      </h3>
+    </div>
+                
+    <input type="hidden" class="form-control" id="lnum" value="">
+    <input type="hidden" class="form-control" id="item_id" value="">
+    
+    <div class="form-group col-md-6">
+      <label for="codigo">Código</label>
+      <input type="text" class="form-control" id="codigo" value="" maxlength="20">
+    </div>
+
+    <div class="form-group col-md-6">
+      <label for="nombre">Nombre / Descripción</label>
+      <input type="text" class="form-control" id="nombre" value="" maxlength="200">
+    </div>
+    
+    <div class="form-group col-md-12">
+      <label for="tipo_iva">Tipo de IVA</label>
+      <select class="form-control select-search" id="tipo_iva" >
+        <?php
+            $preselectos = array();
+            foreach($company->soportados as $soportado){
+              $preselectos[] = $soportado->id;
+            }
+          ?>
+          <?php if(@$company->soportados[0]->id): ?>
+            <?php $__currentLoopData = \App\CodigoIvaSoportado::where('hidden', false)->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tipo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+              <option value="<?php echo e($tipo['code']); ?>" porcentaje="<?php echo e($tipo['percentage']); ?>" class="tipo_iva_select <?php echo e((in_array($tipo['id'], $preselectos) == false) ? 'hidden' : ''); ?>"  is_identificacion_plena="<?php echo e($tipo['is_identificacion_plena']); ?>"><?php echo e($tipo['name']); ?></option>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            <option class="mostrarTodos" value="1">Mostrar Todos</option>
+          <?php else: ?>
+            <?php $__currentLoopData = \App\CodigoIvaSoportado::where('hidden', false)->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tipo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+              <option value="<?php echo e($tipo['code']); ?>" porcentaje="<?php echo e($tipo['percentage']); ?>" class="tipo_iva_select"  is_identificacion_plena="<?php echo e($tipo['is_identificacion_plena']); ?>"><?php echo e($tipo['name']); ?></option>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+          <?php endif; ?>
+      </select>
+    </div>
+    
+    <div class="form-group col-md-11">
+      <label for="tipo_producto">Categoría de declaración</label>
+      <select class="form-control" id="tipo_producto" >
+        <?php $__currentLoopData = \App\ProductCategory::whereNotNull('bill_iva_code')->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tipo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+          <option value="<?php echo e($tipo['id']); ?>" codigo="<?php echo e($tipo['bill_iva_code']); ?>" posibles="<?php echo e($tipo['open_codes']); ?>" ><?php echo e($tipo['name']); ?></option>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+      </select>
+    </div>
+
+    <div class="form-group col-md-1">
+      <label for="nombre_cliente">% IVA</label>
+      <input type="number" min="0" class="form-control pr-0" id="porc_iva" placeholder="13" value="13" readonly>
+    </div>
+    
+    <div class="form-group col-md-12 inline-form inline-checkbox hidden">
+      <label for="p1">
+        <span>¿Requiere ayuda adicional para elegir el tipo de IVA?</span>
+        <input type="checkbox" class="form-control" id="p1" placeholder="" readonly="true" onchange="toggleAyudaTipoIVa();" >
+      </label>
+    </div>
+    
+    <?php echo $__env->make( 'Bill.preguntas-ayuda' , \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    
+    <div class="form-group col-md-12 hidden" id="field_porc_identificacion_plena">
+      <label for="porc_identificacion_plena">Porcentaje al que saldrá la venta</label>
+      <select class="form-control" id="porc_identificacion_plena" >
+        <option value="1" >1%</option>
+        <option value="2" >2%</option>
+        <option value="13" selected>13%</option>
+        <option value="4" >4%</option>
+        <option value="5" >0% con derecho a crédito</option>
+      </select>
+    </div>
+
+    <div class="form-group col-md-3">
+      <label for="unidad_medicion">Unidad de medición</label>
+      <select class="form-control" id="unidad_medicion" value="" >
+        <?php $__currentLoopData = $units; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $unit): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+          <option value="<?php echo e($unit['code']); ?>" ><?php echo e($unit['name']); ?></option>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+      </select>
+    </div>
+    
+    <div class="form-group col-md-3">
+      <label for="precio_unitario">Cantidad</label>
+      <input type="number" min="1" class="form-control" id="cantidad" value="1" >
+    </div>
+
+    <div class="form-group col-md-3">
+      <label for="precio_unitario">Precio unitario</label>
+      <input type="number" min="0" class="form-control" id="precio_unitario" value="" >
+    </div>
+
+    <div class="form-group col-md-3">
+      <label for="item_iva">Monto IVA</label>
+      <input type="number" min="0" class="form-control" id="item_iva_amount" placeholder="" >
+    </div>
+
+    <div class="form-group col-md-3">
+      <label for="discount_type">Tipo de descuento</label>
+      <select class="form-control" id="discount_type" value="" >
+        <option value="01" >Porcentual</option>
+        <option value="02" >Monto fijo</option>
+      </select>
+    </div>
+
+    <div class="form-group col-md-3">
+      <label for="discount">Descuento</label>
+      <input type="number" min="0" max="100" class="form-control" id="discount" value="0" >
+    </div>
+
+    <div class="form-group col-md-3">
+      <label for="nombre_proveedor">Subtotal</label>
+      <input type="text" class="form-control" id="item_subtotal" placeholder="" readonly="true" >
+    </div>
+
+    <div class="form-group col-md-3">
+      <label for="nombre_proveedor">Total item</label>
+      <input type="text" class="form-control" id="item_total" placeholder="" readonly="true" >
+    </div>
+    
+    <div class="form-group col-md-12 inline-form inline-checkbox hidden">
+      <label for="is_identificacion_especifica">
+        <span>¿Gastos corresponden a compras con identificación específica?</span>
+        <input type="checkbox" class="form-control" id="is_identificacion_especifica" placeholder="" readonly="true" >
+      </label>
+    </div>
+
+    <div class="form-group col-md-12">
+      <div class="botones-agregar">
+        <div onclick="agregarEditarItem();" class="btn btn-dark m-1 ml-0">Confirmar linea</div>
+        <div onclick="cerrarPopup('linea-popup');cancelarEdicion();" class="btn btn-danger m-1">Cancelar</div>
+      </div>
+      <div class="botones-editar">
+        <div onclick="cerrarPopup('linea-popup');agregarEditarItem();" class="btn btn-dark m-1 ml-0">Confirmar edición</div>
+        <div onclick="cerrarPopup('linea-popup');cancelarEdicion();" class="btn btn-danger m-1">Cancelar</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script>
+    /*$(function () {
+        $("#cantidad").keydown(function () {
+            // Save old value.
+            if (!$(this).val() || parseInt($(this).val()) >= 0)
+                $(this).data("old", $(this).val());
+        });
+        $("#cantidad").keyup(function () {
+            // Check correct, else revert back to old value.
+            if (!$(this).val() ||  parseInt($(this).val()) >= 0)
+                ;
+            else
+                $(this).val($(this).data("old"));
+        });
+        $("#precio_unitario").keydown(function () {
+            // Save old value.
+            if (!$(this).val() || parseInt($(this).val()) >= 0)
+                $(this).data("old1", $(this).val());
+        });
+        $("#precio_unitario").keyup(function () {
+            // Check correct, else revert back to old value.
+            if (!$(this).val() ||  parseInt($(this).val()) >= 0)
+                ;
+            else
+                $(this).val($(this).data("old1"));
+        });
+        $('#item_iva_amount').change(function () {
+            if (!$(this).val() || parseInt($(this).val()) >= 0)
+                $(this).data("old2", $(this).val());
+            else if (!$(this).val() ||  parseInt($(this).val()) >= 0)
+                ;
+            else
+                $(this).val($(this).data("old2"));
+        })
+    });*/
+
+
+    $( document ).ready(function() {
+      $('#tipo_iva').on('select2:selecting', function(e){
+        var selectBox = document.getElementById("tipo_iva");
+        if(e.params.args.data.id == 1){
+           $.each($('.tipo_iva_select'), function (index, value) {
+            $(value).removeClass("hidden");
+          })
+           $('.mostrarTodos').addClass("hidden");
+           e.preventDefault();
+        }
+
+      });
+
+    });  
+</script>
+<?php /**PATH /home/237808.cloudwaysapps.com/ducfpkkugc/public_html/resources/views/Bill/form-linea.blade.php ENDPATH**/ ?>

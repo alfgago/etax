@@ -24,6 +24,11 @@ class Invoice extends Model
     {
         return $this->belongsTo(Company::class);
     }
+    
+    public function quickbooksInvoice()
+    {
+        return $this->hasOne(QuickbooksInvoice::class);
+    }
 
     //Relacion con el cliente
     public function client()

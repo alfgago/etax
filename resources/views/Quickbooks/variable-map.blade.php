@@ -189,7 +189,7 @@
                       ?>
                     <td>{{ $tax->Name }}</td>
                     <td>
-                      <select class="form-control select-search tipo_iva" id="tipo_iva" name="tipo_iva[{{$tax->Id}}]">
+                      <select class="form-control select-search tipo_iva" id="tipo_iva" name="tipo_iva[{{ $condId }}]">
                         @if(@$company->repercutidos[0]->id)
                           @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
                               <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  

@@ -537,7 +537,6 @@ class InvoiceController extends Controller
             $invoice->generation_method = "M";
             $invoice->setInvoiceData($request);
 
-
             try{
                 if ($request->document_type == '08' ) {
                     $this->storeBillFEC($request);

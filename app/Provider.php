@@ -18,6 +18,11 @@ class Provider extends Model
   {
       return $this->belongsTo(Company::class);
   }
+  
+  public function quickbooksProvider()
+  {
+      return $this->hasOne(QuickbooksProvider::class);
+  }
     
   public function getFullName() {
     return $this->first_name . " " . $this->last_name . " " . $this->last_name2;

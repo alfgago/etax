@@ -374,14 +374,14 @@ class InvoiceUtils
             $data->reference_number = $ref;
             $data->save();*/
             $ref = $data->reference_number;
-            Log::info("Set request parameters Company: $company->business_name, invoice id: $data->id, consutivo: $ref, Clave: $data->document_key");
-            $receptorPostalCode =  trim($data['client_zip']);
-            if( !isset($receptorPostalCode) ){
+            $receptorPostalCode = trim($data['client_zip']);
+            if( empty($receptorPostalCode) ){
                 $receptorPostalCode = trim($data['client_state'].$data['client_city'].$data['client_district']);
-                if( !isset($receptorPostalCode) ){
+                if( empty($receptorPostalCode) ){
                     $receptorPostalCode = '10101';
                 }
             }
+            Log::info("Set request parameters Company: $company->business_name, invoice id: $data->id, consutivo: $ref, Clave: $data->document_key . . . . ZIP: $receptorPostalCode");
             
             $invoiceData = null;
             $request = null;
@@ -472,6 +472,7 @@ class InvoiceUtils
             }
             if($receptorCedulaType == 5){
                 $cedulaReceptor = $data['client_id_number'] ?? '';
+                $cedulaReceptor = str_pad($cedulaReceptor, 6, '0', STR_PAD_LEFT);
             }else{
                 $cedulaReceptor = $data['client_id_number'] ? str_pad(preg_replace("/[^0-9]/", "", $data['client_id_number']), 9, '0', STR_PAD_LEFT) : '';
             }
@@ -481,7 +482,15 @@ class InvoiceUtils
                 if( sizeof( $emailArray ) > 1 ){
                     $emisorEmail = $emailArray[0];
                 }
-                Log::debug(json_encode($emailArray) ."(".sizeof( $emailArray ).")" . " to " . $emisorEmail);
+            }catch(\Exception $e){ Log::error($e->getMessage()); }
+            
+            $receptorEmail = $data['client_email'] ? replaceAccents($data['client_email']) : '';
+            try{
+                $receptorEmailArray = explode(',',$receptorEmail);
+                if( sizeof( $receptorEmailArray ) > 1 ){
+                    $receptorEmail = $receptorEmailArray[0];
+                }
+                Log::debug(json_encode($receptorEmailArray) ."(".sizeof( $receptorEmailArray ).")" . " to " . $receptorEmail);
             }catch(\Exception $e){ Log::error($e->getMessage()); }
             
             $invoiceData = array(
@@ -497,7 +506,7 @@ class InvoiceUtils
                 'receptor_ubicacion_distrito' => substr($receptorPostalCode,3),
                 'receptor_ubicacion_otras_senas' => $data['client_address'] ? trim($data['client_address']) : '',
                 'receptor_otras_senas_extranjero' => $data['client_address'] ? trim($data['client_address']) : '',
-                'receptor_email' => $data['client_email'] ? replaceAccents($data['client_email']) :  '',
+                'receptor_email' => $receptorEmail,
                 'receptor_phone' => !empty($data['client_phone']) ? preg_replace('/[^0-9]/', '', $data['client_phone']) : '00000000',
                 'receptor_cedula_numero' => $cedulaReceptor,
                 'receptor_cedula_tipo' => $receptorCedulaType,
