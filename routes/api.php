@@ -18,6 +18,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::prefix('v1')->group(function() {
+    Route::post('login', 'AuthController@login');
+    Route::post('refresh-token', 'AuthController@refreshToken');
 	Route::post('notificaciones', 'NotificationController@create');
 });
 
