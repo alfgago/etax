@@ -21,6 +21,9 @@ Route::prefix('v1')->group(function() {
     Route::post('login', 'AuthController@login');
     Route::post('refresh-token', 'AuthController@refreshToken');
 	Route::post('notificaciones', 'NotificationController@create');
+    Route::group(['middleware' => 'auth:api'], function() {
+        Route::post('emitir-factura', 'InvoiceAPIController@emitir')->name('InvoiceAPIController.emitirFactura');
+    });
 });
 
 Route::post('email-facturas', 'EmailController@receiveEmailXML');

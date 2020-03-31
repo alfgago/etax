@@ -76,33 +76,6 @@ trait ParametersValidator {
         return Validator::make($request->all(), $rulesToValidate);
     }
 
-    private function validatorInvoiceEmitir($request) {
-        $validator = Validator::make($request->all(), [
-            'codigoActividad' => 'required',
-            'medioPago' => 'required',
-            'fechaEmision' => 'required|date_format:d-m-Y H:i:s',
-            'moneda' => 'required',
-            'condicionVenta' => 'required',
-            'tipo_documento' => 'required',
-            'emisor.identificacion.numero' => 'required',
-            'receptor.identificacion.numero' => 'required',
-            'detalleServicio.*.lineaDetalle' => 'required',
-            'detalleServicio.*.lineaDetalle.numeroLinea' => 'required|integer|min:1|max:999',
-            'detalleServicio.*.lineaDetalle.cantidad' => 'required',
-            'detalleServicio.*.lineaDetalle.unidadMedida' => 'required',
-            'detalleServicio.*.lineaDetalle.precioUnitario' => 'required',
-            'detalleServicio.*.lineaDetalle.subTotal' => 'required',
-            //'detalleServicio.*.lineaDetalle.impuesto' => 'required|array', No es requerido por hacienda.
-            'detalleServicio.*.lineaDetalle.codigoEtax'  => 'required|String|max:4|min:4',
-            //'detalleServicio.*.lineaDetalle.impuesto.*.exento' => 'required|boolean',
-            //'detalleServicio.*.lineaDetalle.impuesto.*.exoneracion.tipoDocumentoExoneracion' => 'required_if:lineaDetalle.*.impuesto.*.exento,==,1', Estaba fallando un poco 
-            'resumenFactura.totalVentaNeta' => 'required',
-            'resumenFactura.totalComprobante' => 'required'
-
-        ]);
-        return $validator;
-    }
-
     private function validatorBillStore($request) {
         $validator = Validator::make($request->all(), [
             'resumenFactura.totalComprobante' => 'required',
@@ -198,6 +171,33 @@ trait ParametersValidator {
         $validator = Validator::make($request->all(), [
             'empresa' => 'required',
             'clave' => 'required|numeric'
+        ]);
+        return $validator;
+    }
+
+    private function validatorInvoiceEmitir($request) {
+        $validator = Validator::make($request->all(), [
+            'codigoActividad' => 'required',
+            'medioPago' => 'required',
+            'fechaEmision' => 'required|date_format:d-m-Y H:i:s',
+            'moneda' => 'required',
+            'condicionVenta' => 'required',
+            'tipo_documento' => 'required',
+            'emisor.identificacion.numero' => 'required',
+            'receptor.identificacion.numero' => 'required',
+            'detalleServicio.*.lineaDetalle' => 'required',
+            'detalleServicio.*.lineaDetalle.numeroLinea' => 'required|integer|min:1|max:999',
+            'detalleServicio.*.lineaDetalle.cantidad' => 'required',
+            'detalleServicio.*.lineaDetalle.unidadMedida' => 'required',
+            'detalleServicio.*.lineaDetalle.precioUnitario' => 'required',
+            'detalleServicio.*.lineaDetalle.subTotal' => 'required',
+            //'detalleServicio.*.lineaDetalle.impuesto' => 'required|array', No es requerido por hacienda.
+            'detalleServicio.*.lineaDetalle.codigoEtax'  => 'required|String|max:4|min:4',
+            //'detalleServicio.*.lineaDetalle.impuesto.*.exento' => 'required|boolean',
+            //'detalleServicio.*.lineaDetalle.impuesto.*.exoneracion.tipoDocumentoExoneracion' => 'required_if:lineaDetalle.*.impuesto.*.exento,==,1', Estaba fallando un poco
+            'resumenFactura.totalVentaNeta' => 'required',
+            'resumenFactura.totalComprobante' => 'required'
+
         ]);
         return $validator;
     }
