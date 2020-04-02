@@ -587,7 +587,6 @@ class InvoiceController extends Controller
      */
     public function sendHacienda(Request $request)
     {
-        //dd($request);
         //revision de branch para segmentacion de funcionalidades por tipo de documento
         try {
             $company = currentCompanyModel(false);

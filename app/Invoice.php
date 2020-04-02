@@ -391,6 +391,322 @@ class Invoice extends Model
         }
     }
 
+    /**
+     * Asigna los datos de la factura segun el request recibido
+     **/
+    public function setInvoiceDataApi($request)
+    {
+        try {
+
+            $this->document_key = $request->clave;
+            $this->document_number = $request->numeroConsecutivo;
+            $this->sale_condition = $request->condicionVenta;
+            $this->payment_type = $request->medioPago;
+            $this->retention_percent = $request->porcentajeRetencion ?? 0;
+            $this->credit_time = $request->tiempoCredito;
+            $this->buy_order = $request->ordenCompra;
+            $this->other_reference = trim($request->other_reference);
+            $this->send_emails = isset($request->correo_adicional) ? trim($request->correo_adicional) : null;
+
+            if ($request->codigoActividad) {
+                $this->commercial_activity = $request->codigoActividad;
+            }
+
+
+            $tipo_persona = $request->receptor['identificacion']['tipo'];
+            $identificacion_cliente = preg_replace("/[^0-9]/", "", $request->receptor['identificacion']['numero']);
+            $codigo_cliente = $request->receptor['identificacion']['codigo'] ?? $identificacion_cliente;
+
+            $billing_emails = isset($request->receptor['correoElectronico']) ? trim($request->receptor['correoElectronico']) : '';
+            $name = explode(" ", $request->receptor['nombre']);
+
+            $client = Client::firstOrCreate(
+                [
+                    'id_number' => $identificacion_cliente,
+                    'company_id' => $this->company_id,
+                ],
+                [
+                    'code' => $codigo_cliente ,
+                    'company_id' => $this->company_id,
+                    'tipo_persona' => $tipo_persona,
+                    'id_number' => trim($identificacion_cliente),
+                ]
+            );
+
+            $client->first_name = trim($name[0]);
+            $client->last_name = trim($name[1]);
+            $client->last_name2 = trim($name[2]?? '');
+            $client->fullname = trim($request->name);
+            $client->emisor_receptor = 'ambos';
+            $client->country = $request->receptor['ubicacion']['pais'];
+            $client->state = $request->receptor['ubicacion']['provincia'];
+            $client->city = $request->receptor['ubicacion']['canton'];
+            $client->district = $request->receptor['ubicacion']['distrito'];
+            $client->neighborhood = trim($request->receptor['ubicacion']['barrio']);
+            $client->zip = trim($request->receptor['ubicacion']['codigoPostal']) ?? $client->district;
+            $client->address = trim($request->receptor['ubicacion']['otrasSenas']);
+            $client->foreign_address = trim($request->receptor['ubicacion']['direccionExtranjero']);
+            $client->phone = trim($request->receptor['telefono']['codigoPais'].$request->receptor['telefono']['numTelefono']);
+            $client->es_exento = $request->receptor['es_exento'] ?? false;
+            $client->email = trim($request->receptor['correoElectronico']);
+            $client->billing_emails = $billing_emails;
+            $client->save();
+
+            $this->client_id = $client->id;
+
+            //Datos de factura
+            $this->description = $request->notas ?? null;
+            $this->currency = $request->moneda ?? 'CRC';
+            $this->currency_rate = floatval( str_replace(",","", $request->tipoCambio ?? 1 ));
+            $this->total = floatval( str_replace(",","", $request->resumenFactura['totalComprobante'] ));
+            $this->iva_amount = floatval(str_replace(",","", $request->resumenFactura['totalImpuesto']));
+
+            if (isset($client)) {
+                $this->client_first_name = $client->first_name;
+                $this->client_last_name = $client->last_name;
+                $this->client_last_name2 = $client->last_name2;
+                $this->client_email = $client->email;
+                $this->client_address = $client->address;
+                $this->client_country = $client->country;
+                $this->client_state = $client->state;
+                $this->client_city = $client->city;
+                $this->client_district = $client->district;
+                $this->client_zip = $client->zip;
+                $this->client_phone = preg_replace('/[^0-9]/', '', $client->phone);
+                $this->client_id_number = $client->id_number;
+            } else {
+                $this->client_first_name = 'N/A';
+            }
+
+            if ($this->document_type == '08' && isset($request->provider_id)) {
+
+                $this->client_first_name = trim($this->company->name);
+                $this->client_last_name = trim($this->company->last_name);
+                $this->client_last_name2 = trim($this->company->last_name2);
+                $this->client_email = trim($this->company->email);
+                $this->client_address = trim($this->company->address);
+                $this->client_country = $this->company->country;
+                $this->client_state = $this->company->state;
+                $this->client_city = $this->company->city;
+                $this->client_district = $this->company->district;
+                $this->client_zip = $this->company->zip;
+                $this->client_phone = preg_replace('/[^0-9]/', '', $this->company->phone);
+                $this->client_id_number = trim($this->company->id_number);
+
+                //Datos de proveedor
+                if ($request->provider_id == '-1') {
+                    $tipo_persona = $request->tipo_persona;
+                    $identificacion_provider = preg_replace("/[^0-9]/", "", $request->id_number );
+                    $codigo_provider = $request->code;
+
+                    $provider = Provider::firstOrCreate(
+                        [
+                            'id_number' => $identificacion_provider,
+                            'company_id' => $this->company_id,
+                        ],
+                        [
+                            'code' => $codigo_provider ,
+                            'company_id' => $this->company_id,
+                            'tipo_persona' => $tipo_persona,
+                            'id_number' => $identificacion_provider
+                        ]
+                    );
+                    $provider->first_name = $request->first_name;
+                    $provider->last_name = $request->last_name;
+                    $provider->last_name2 = $request->last_name2;
+                    $provider->fullname = $request->last_name2;
+                    $provider->country = $request->country;
+                    $provider->state = $request->state;
+                    $provider->city = $request->city;
+                    $provider->district = $request->district;
+                    $provider->neighborhood = $request->neighborhood;
+                    $provider->zip = $request->zip;
+                    $provider->address = $request->address;
+                    $provider->foreign_address = $request->foreign_address ?? null;
+                    $provider->phone = $request->phone;
+                    $provider->es_exento = $request->es_exento;
+                    $provider->email = $request->email;
+                    $provider->save();
+
+                    $this->provider_id = $provider->id;
+                } else {
+                    $this->provider_id = $request->provider_id;
+
+                }
+            }
+            $this->save();
+
+
+
+            $fecha = Carbon::parse($request->fechaEmision);
+            $fechaV = Carbon::parse($request->fechaVencimiento);
+            $this->generated_date = $fecha;
+            $this->due_date = $fechaV;
+            $this->year = $fecha->year;
+            $this->month = $fecha->month;
+
+
+            if( $request->tipoXml ){
+                $this->xml_schema = $request->tipoXml;
+            }
+
+            $this->commercial_activity = $request->codigoActividad;
+
+            $this->total_serv_gravados = $request->resumenFactura['totalServGravados'] ?? 0;
+
+            $this->total_serv_exentos = $request->resumenFactura['totalServExentos'] ?? 0;
+
+            $this->total_serv_exonerados = $request->resumenFactura['totalServExonerados'] ?? 0;
+
+            $this->total_merc_gravados = $request->resumenFactura['totalMercanciaGravadas'] ?? 0;
+
+            $this->total_merc_exentas = $request->resumenFactura['totalMercanciaExentas'] ?? 0;
+
+            $this->total_merc_exonerados = $request->resumenFactura['totalMercanciaExonerados'] ?? 0;
+
+            $this->total_gravado = $request->resumenFactura['totalGravado'] ?? 0;
+
+            $this->total_exento = $request->resumenFactura['totalExento'] ?? 0;
+
+            $this->total_exonerados = $request->resumenFactura['totalExonerado'] ?? 0;
+
+            $this->total_venta = $request->resumenFactura['totalVenta'] ?? 0;
+
+            $this->total_descuento = $request->resumenFactura['totalDescuentos'] ?? 0;
+
+            $this->total_iva_devuelto = $request->resumenFactura['totalIvaDevuelto'] ?? 0;
+
+            $this->total_otros_cargos = $request->resumenFactura['totalOtrosCargos'] ?? 0;
+
+            $this->total_venta_neta = $request->resumenFactura['totalVentaNeta'] ?? 0;
+            $this->subtotal = $request->resumenFactura['totalVentaNeta'] ?? 0;
+
+            $this->total_iva = $request->resumenFactura['totalImpuesto'] ?? 0;
+            $this->iva_amount = $request->resumenFactura['totalImpuesto'] ?? 0;
+
+            $this->total_comprobante = $request->resumenFactura['totalComprobante'] ?? 0;
+
+            $this->save();
+
+            $lids = array();
+            $totalIvaDevuelto = 0;
+
+            if (!$this->id) {
+                $this->company->addSentInvoice( $this->year, $this->month );
+            }
+            $this->save();
+
+            foreach($request->detalleServicio as $item) {
+                $item['lineaDetalle']['numeroLinea'] = "NaN" != $item['lineaDetalle']['numeroLinea'] ? $item['lineaDetalle']['numeroLinea'] : 1;
+                $item_modificado = $this->addEditItemApi($item['lineaDetalle']);
+
+                array_push( $lids, $item_modificado->id );
+            }
+
+            foreach ( $this->items as $item ) {
+                if( !in_array( $item->id, $lids ) ) {
+                    $item->delete();
+                }
+            }
+
+            foreach ($this->items as $item) {
+                if ($this->payment_type == '02' && $item->product_type == 12) {
+                    $totalIvaDevuelto += $item->iva_amount;
+                }
+            }
+            $this->total_iva_devuelto = $totalIvaDevuelto;
+
+            try{
+                //Recorrer OtrosCargos
+                $oids = array();
+                $i = 1;
+                $totalOtrosCargos = 0;
+                foreach ($request->otroscargos as $item) {
+                    $item['item_number'] = $i;
+                    $item['item_id'] = $item['id'] ? $item['id'] : 0;
+                    $cargo_modificado = $this->addEditOtherCharges($item);
+                    array_push( $oids, $cargo_modificado->id );
+                    $totalOtrosCargos += $cargo_modificado->amount;
+                    $i++;
+                }
+                foreach ($this->otherCharges as $item) {
+                    if (!in_array( $item->id, $oids )) {
+                        $item->delete();
+                    }
+                }
+                $this->total_otros_cargos = $totalOtrosCargos;
+            }catch(\Exception $e){
+                Log::error("Error al guardar otros cargos");
+            }
+
+            //Guarda nuevamente el invoice
+            $this->save();
+
+            return $this;
+
+        } catch (\Exception $e) {
+            Log::error('Error al crear factura: '.$e);
+        }
+    }
+
+    public function addEditItemApi(array $data)
+    {
+        try {
+
+            if(isset($data['numeroLinea'])) {
+                $item = InvoiceItem::updateOrCreate([
+                    'item_number' => $data['numeroLinea'],
+                    'invoice_id' => $this->id,
+                    'code'=> $data['codigo'] ?? null
+                ], [
+                        'company_id' => $this->company_id,
+                        'year'  => $this->year,
+                        'month' => $this->month,
+                        'name'  => $data['detalle'] ?? null,
+                        'product_type' => $data['codigoComercial']['tipo'] ?? null,
+                        'measure_unit' => $data['unidadMedida'] ?? 'Unid',
+                        'item_count'   => $data['cantidad'] ?? 1,
+                        'unit_price'   => $data['precioUnitario'] ?? 0,
+                        'subtotal'     => $data['subTotal'] ?? 0,
+                        'total' => $data['montoTotal'] ?? 0,
+                        'discount_type' => $data['tipoDescuento'] ?? null,
+                        'discount' => $data['descuento'] ?? 0,
+                        'iva_type' => $data['codigoEtax'] ?? null,
+                        'iva_percentage' => $data['impuesto']['tarifa'] ?? 0,
+                        'iva_amount' => $data['impuesto']['monto'] ?? 0,
+                        'tariff_heading' => $data['impuesto']['exoneracion']['porcentajeExoneracion'] ?? 0,
+                        'is_exempt' => $data['impuesto']['exento'] ?? false,
+                    ]
+                );
+
+                try {
+                    $exonerationDate = isset( $data['impuesto']['exoneracion']['fechaEmision'] )  ? Carbon::createFromFormat('d/m/Y', $data['impuesto']['exoneracion']['fechaEmision']) : null;
+                }catch( \Exception $e ) {
+                    $exonerationDate = null;
+                }
+                if( $exonerationDate && $data['impuesto']['exoneracion']['tipoDocumentoExoneracion'] && $data['impuesto']['exoneracion']['numeroDocumentoExoneracion'] ) {
+                    $item->exoneration_document_type = $data['impuesto']['exoneracion']['tipoDocumento'] ?? null;
+                    $item->exoneration_document_number = $data['impuesto']['exoneracion']['numeroDocumento'] ?? null;
+                    $item->exoneration_company_name = $data['impuesto']['exoneracion']['nombreInstitucion'] ?? null;
+                    $item->exoneration_porcent = $data['impuesto']['exoneracion']['porcentajeExoneracion'] ?? 0;
+                    $item->exoneration_amount = $data['impuesto']['exoneracion']['montoExoneracion'] ?? 0;
+                    $item->exoneration_date = $exonerationDate;
+                    $item->exoneration_total_amount = $data['impuesto']['exoneracion']['montoExoneracion'] ?? 0;
+                    $item->impuesto_neto = isset($data['impuestoNeto']) ? $data['impuesto']['monto'] - $data['impuesto']['exoneracion']['montoExoneracion'] : $data['impuesto']['monto'];
+                    $item->save();
+                }
+
+                return $item;
+            } else {
+                return false;
+            }
+        } catch ( \Exception $e) {
+            Log::error("Error en lineas de factura-->> $e");
+            return false;
+        }
+
+    }
+
     public function addEditItem(array $data)
     {
         try {
@@ -1242,6 +1558,25 @@ class Invoice extends Model
             return $value;
         }
 
+    }
+
+    public function shortDate() {
+        date_default_timezone_set("America/Costa_Rica");
+        $date = date_create();
+        return date_format($date,'dmy');
+    }
+
+    public function getIdFormat($id) {
+        $clean="000000".trim(str_replace("-","",$id));
+        return substr($clean, -12);
+    }
+
+    public function getHashFromRef($ref) {
+        $salesId = $ref;
+        if ($salesId === null) {
+            return '';
+        }
+        return substr('0000'.hexdec(substr(sha1($ref.'Factel'.$salesId.'Facthor'), 0, 15)) % 999999999, -8);
     }
 
 }

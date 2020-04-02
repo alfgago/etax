@@ -4,21 +4,17 @@ namespace App;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
 use Mpociot\Teamwork\Traits\UserHasTeams;
 use Lab404\Impersonate\Models\Impersonate;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
-use App\Coupon;
-use App\SubscriptionPlan;
-use App\UserCompanyPermission;
 use Illuminate\Support\Facades\Cache;
+use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable {
 
-    use Notifiable, HasRoles, UserHasTeams, Impersonate, SoftDeletes;
+    use Notifiable, HasRoles, UserHasTeams, Impersonate, SoftDeletes, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
