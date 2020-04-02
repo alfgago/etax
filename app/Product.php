@@ -20,6 +20,11 @@ class Product extends Model
     {
         return $this->belongsTo(Company::class);
     }
+    
+    public function quickbooksProduct()
+  {
+      return $this->hasOne(QuickbooksProduct::class);
+  }
 
     public function getName() {
         return $this->name . " - " . $this->measure_unit . " - " . $this->unit_price;

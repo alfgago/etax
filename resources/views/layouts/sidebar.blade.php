@@ -38,7 +38,7 @@
                 if(currentCompanyModel()->id_number==3101707070 ) {
                     ?>
                     <li class="nav-item small-nav" >
-                        <a class="nav-item-hold" href="/sm">
+                        <a class="nav-item-hold" href="/quickbooks/mapeo-variables">
                             <img src="/assets/images/qb.png" class="sidemenu-icon">
                             <span class="nav-text">QuickBooks</span>
                         </a>
@@ -47,11 +47,11 @@
                                 top: auto;
                             ">
                             <a href="/quickbooks/mapeo-variables">Mapeo de variables</a>
-                            <a href="/quickbooks/comparativo-emitidas">Sincronización de ventas</a>
-                            <a href="/quickbooks/comparativo-recibidas">Sincronización de compras</a>
-                            <a href="/quickbooks/comparativo-clientes">Sincronización de clientes</a>
-                            <a href="/quickbooks/comparativo-proveedores">Sincronización de proveedores</a>
-                            <a href="/quickbooks/comparativo-productos">Sincronización de productos</a>
+                            <a href="/quickbooks/emitidas/comparativo">Sincronización de ventas</a>
+                            <a href="/quickbooks/recibidas/comparativo">Sincronización de compras</a>
+                            <a href="/quickbooks/clientes/comparativo">Sincronización de clientes</a>
+                            <a href="/quickbooks/proveedores/comparativo">Sincronización de proveedores</a>
+                            <a href="/quickbooks/productos/comparativo">Sincronización de productos</a>
                         </div>
                     </li> 
                     <?php 

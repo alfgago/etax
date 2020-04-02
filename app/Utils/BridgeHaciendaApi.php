@@ -125,7 +125,7 @@ class BridgeHaciendaApi
         try {
             $provider = $bill->provider;
             $ref = $bill->company->last_rec_ref_number;
-            Log::debug($bill->provider_id);
+            Log::debug("Se recibe para aceptacion la factura $bill->document_key.");
             ProcessReception::dispatch($bill->id, $provider->id, $token, $ref)
                 ->onConnection(config('etax.queue_connections'))->onQueue('receptions');
             return $bill;

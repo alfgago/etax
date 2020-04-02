@@ -24,6 +24,11 @@ class Invoice extends Model
     {
         return $this->belongsTo(Company::class);
     }
+    
+    public function quickbooksInvoice()
+    {
+        return $this->hasOne(QuickbooksInvoice::class);
+    }
 
     //Relacion con el cliente
     public function client()
@@ -622,7 +627,6 @@ class Invoice extends Model
           $invoice->currency_rate = $data['tipoCambio'];
           $invoice->subtotal = 0;
           $invoice->iva_amount = 0;
-          $invoice->total = $data['totalDocumento'] ?? 0;
 
           $invoiceList[$arrayKey]['lineas'] = array();
           $invoiceList[$arrayKey]['factura'] = $invoice;
@@ -653,11 +657,13 @@ class Invoice extends Model
         return false;
       }*/
 
+      
       $invoice = $invoiceList[$arrayKey]['factura'];
       $year = $invoice->generatedDate()->year;
       $month = $invoice->generatedDate()->month;
 
       /**LINEA DE FACTURA**/
+      $invoice->total = $data['totalDocumento'] ?? 0;
       $subtotalLinea = $data['subtotalLinea'] ?? 0;
       $montoIvaLinea = $data['montoIva'] ?? 0;
       $totalLinea = $data['totalLinea'] ?? 0;
@@ -692,6 +698,7 @@ class Invoice extends Model
           'exoneration_company_name' => $data['companiaExoneracion'],
           'exoneration_porcent' => $data['porcentajeExoneracion'],
           'exoneration_amount' => $data['montoExoneracion'],
+          'exoneration_date' => $data['fechaExoneracion'] ?? null,
           'exoneration_total_gravado' => $data['montoExoneracion'] ? $subtotalLinea : 0,
           'impuesto_neto' => $data['impuestoNeto'],
           'exoneration_total_amount' => $data['totalMontoLinea'],

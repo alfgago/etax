@@ -1,5 +1,5 @@
 <?php
-
+use Spatie\Honeypot\ProtectAgainstSpam;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -18,7 +18,9 @@ Route::get('login', function () {
 
 Route::get('login-sync-gosocket', 'AuthController@loginSyncGoSocket')->name('User.LoginSyncGoSocket');
 
-Auth::routes();
+Route::middleware(ProtectAgainstSpam::class)->group(function() {
+    Auth::routes();
+});
 
 //gosocket de mes
 Route::prefix('gosocket')->group(function() {
@@ -338,21 +340,67 @@ Route::get('/admin/notificar/{id}', 'NotificationController@enviarNotificaciones
 //Quickbooks
 Route::prefix('quickbooks')->group(function() {
     //Gets de las pantallas
+    Route::get('/auth', 'QuickbooksController@auth');
     Route::get('/configuracion', 'QuickbooksController@config');
     Route::get('/mapeo-variables', 'QuickbooksController@variableMapIndex');
-    Route::get('/comparativo-emitidas/{year?}/{month?}', 'QuickbooksController@invoiceSyncIndex');
-    Route::get('/comparativo-recibidas/{year?}/{month?}', 'QuickbooksController@billSyncIndex');
-    Route::get('/comparativo-clientes/{year?}/{month?}', 'QuickbooksController@clientSyncIndex');
-    Route::get('/comparativo-proveedores/{year?}/{month?}', 'QuickbooksController@providerSyncIndex');
-    Route::get('/comparativo-productos/{year?}/{month?}', 'QuickbooksController@productSyncIndex');
+    
+    
+    Route::get('/emitidas/comparativo/{year?}/{month?}', 'QuickbooksController@invoiceSyncIndex');
+    Route::get('/recibidas/comparativo/{year?}/{month?}', 'QuickbooksController@billSyncIndex');
+    Route::get('/clientes/comparativo', 'QuickbooksController@clientSyncIndex');
+    Route::get('/proveedores/comparativo', 'QuickbooksController@providerSyncIndex');
+    Route::get('/productos/comparativo', 'QuickbooksController@productSyncIndex');
+    Route::get('/emitidas/comparativo-etaxaqb/{year?}/{month?}', 'QuickbooksController@invoiceSyncIndexEtaxaqb');
+    Route::get('/recibidas/comparativo-etaxaqb/{year?}/{month?}', 'QuickbooksController@billSyncIndexEtaxaqb');
+    Route::get('/clientes/comparativo-etaxaqb', 'QuickbooksController@clientSyncIndexEtaxaqb');
+    Route::get('/proveedores/comparativo-etaxaqb', 'QuickbooksController@providerSyncIndexEtaxaqb');
+    Route::get('/productos/comparativo-etaxaqb', 'QuickbooksController@productSyncIndexEtaxaqb');
     
     //Reload de QB
-    Route::get('/resync-invoices/{year}/{month}', 'QuickbooksController@loadMonthlyInvoices');
+    Route::get('/emitidas/resync/{year}/{month}', 'QuickbooksController@loadMonthlyInvoices');
+    Route::get('/recibidas/resync/{year}/{month}', 'QuickbooksController@loadMonthlyBills');
+    Route::get('/clientes/resync/', 'QuickbooksController@loadMonthlyClients');
+    Route::get('/proveedores/resync/', 'QuickbooksController@loadMonthlyProviders');
+    Route::get('/productos/resync/', 'QuickbooksController@loadMonthlyProducts');
     
     //Post/Patch de acciones
-    Route::get('/auth', 'QuickbooksController@auth');
     Route::post('/guardar-config/{id}', 'QuickbooksController@saveConfig');
     Route::post('/guardar-variables/{id}', 'QuickbooksController@saveVariables');
-    Route::post('/emitida-qbaetax', 'QuickbooksController@saveInvoiceFromQuickbooks');
-    Route::post('/emitida-etaxaqb', 'QuickbooksController@saveInvoiceFromEtax');
+    
+    Route::post('/emitidas/sync-qbaetax', 'QuickbooksController@syncInvoicesQBaetax');
+    Route::post('/emitidas/sync-etaxaqb', 'QuickbooksController@syncInvoicesEtaxaqb');
+    Route::post('/emitidas/qbaetax', 'QuickbooksController@saveInvoiceFromQuickbooks');
+    Route::post('/emitidas/etaxaqb', 'QuickbooksController@saveInvoiceFromEtax');
+    
+    Route::post('/recibidas/sync-qbaetax', 'QuickbooksController@syncBillsQBaetax');
+    Route::post('/recibidas/sync-etaxaqb', 'QuickbooksController@syncBillsEtaxaqb');
+    Route::post('/recibidas/qbaetax', 'QuickbooksController@saveBillFromQuickbooks');
+    Route::post('/recibidas/etaxaqb', 'QuickbooksController@saveBillFromEtax');
+    
+    Route::post('/clientes/sync-qbaetax', 'QuickbooksController@syncClientsQBaetax');
+    Route::post('/clientes/sync-etaxaqb', 'QuickbooksController@syncClientsEtaxaqb');
+    Route::post('/clientes/qbaetax', 'QuickbooksController@saveClientFromQuickbooks');
+    Route::post('/clientes/etaxaqb', 'QuickbooksController@saveClientFromEtax');
+    
+    Route::post('/proveedores/sync-qbaetax', 'QuickbooksController@syncProvidersQBaetax');
+    Route::post('/proveedores/sync-etaxaqb', 'QuickbooksController@syncProvidersEtaxaqb');
+    Route::post('/proveedores/qbaetax', 'QuickbooksController@saveProviderFromQuickbooks');
+    Route::post('/proveedores/etaxaqb', 'QuickbooksController@saveProviderFromEtax');
+    
+    Route::post('/productos/sync-qbaetax', 'QuickbooksController@syncProductsQBaetax');
+    Route::post('/productos/sync-etaxaqb', 'QuickbooksController@syncProductsEtaxaqb');
+    Route::post('/productos/qbaetax', 'QuickbooksController@saveProductsFromQuickbooks');
+    Route::post('/productos/etaxaqb', 'QuickbooksController@saveProductsFromEtax');
+    
+    //Gets de data para tablas
+    Route::get('/emitidas/data-qbaetax', 'QuickbooksController@indexDataInvoicesQbaetax');
+    Route::get('/emitidas/data-etaxaqb', 'QuickbooksController@indexDataInvoicesEtaxaqb');
+    Route::get('/recibidas/data-qbaetax', 'QuickbooksController@indexDataBillsQbaetax');
+    Route::get('/recibidas/data-etaxaqb', 'QuickbooksController@indexDataBillsEtaxaqb');
+    Route::get('/clientes/data-qbaetax', 'QuickbooksController@indexDataClientsQbaetax');
+    Route::get('/clientes/data-etaxaqb', 'QuickbooksController@indexDataClientsEtaxaqb');
+    Route::get('/proveedores/data-qbaetax', 'QuickbooksController@indexDataProvidersQbaetax');
+    Route::get('/proveedores/data-etaxaqb', 'QuickbooksController@indexDataProvidersEtaxaqb');
+    Route::get('/productos/data-qbaetax', 'QuickbooksController@indexDataProductsQbaetax');
+    Route::get('/productos/data-etaxaqb', 'QuickbooksController@indexDataProductsEtaxaqb');
 });

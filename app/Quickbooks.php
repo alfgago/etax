@@ -87,16 +87,16 @@ class Quickbooks extends Model
             // Prep Data Services
             $dataService = DataService::Configure(array(
                  'auth_mode' => 'oauth2',
-                  'ClientID' => config('etax.qb_client_id'),
-                  'ClientSecret' => config('etax.qb_client_secret'),
-                 'scope' => "com.intuit.quickbooks.accounting, openID, profile, email, phone, address",
+                 'ClientID' => config('etax.qb_client_id'),
+                 'ClientSecret' => config('etax.qb_client_secret')."FFSDF",
+                 'scope' => "com.intuit.quickbooks.accounting",
                  'baseUrl' => "https://sandbox-quickbooks.api.intuit.com/",
                  'QBORealmID' => $realmId,
                  'accessTokenKey' => $accessTokenValue,
                  'refreshTokenKey' => $refreshTokenValue
             ));
             return $dataService;
-            Cache::put($cachekey, $dataService, 3600);
+            Cache::put($cachekey, $dataService, 2400);
         }
         
         return Cache::get($cachekey);
@@ -116,78 +116,42 @@ class Quickbooks extends Model
         return $dataService;
     }
     
-    public static function getClientName($company, $customerRef){
-        $cachekey = "qb-clientsjson-$company->id_number";
-        if ( !Cache::has($cachekey) ) {
-            $qbclients = Quickbooks::select('clients_json')->where('company_id', $company->id)->with('company')->first();
-            $customers = $qbclients->clients_json;
-            Cache::put($cachekey, $customers, 30); //Cache por 15 segundos.
-        }else{
-            $customers = Cache::get($cachekey);
-        }
-        
-        $cust = $customers[$customerRef];
-        if(isset($cust)){
-            return $cust['full_name'];
-        }else{
-            return $customerRef;
-        }
-    }
-    
-    public static function getClientInfo($company, $customerRef){
-        $cachekey = "qb-clientsjson-$company->id_number";
-        if ( !Cache::has($cachekey) ) {
-            $qbclients = Quickbooks::select('clients_json')->where('company_id', $company->id)->with('company')->first();
-            $customers = $qbclients->clients_json;
-            Cache::put($cachekey, $customers, 30); //Cache por 15 segundos.
-        }else{
-            $customers = Cache::get($cachekey);
-        }
-        
-        $clientInfo = [];
-        $cust = $customers[$customerRef];
-        if(isset($cust)){
-            $client = Client::find($cust['client_id']); 
-            if( isset($client) ){
-                $clientInfo['nombreCliente'] = $client->fullname;
-                $clientInfo['codigoCliente'] = $client->code;
-                $clientInfo['tipoPersona'] = $client->tipo_persona;
-                if($client->tipo_persona){
-                    Log::error("Enviando factura de cliente no mapeado");
-                    return false;  
-                }
-                $clientInfo['identificacionCliente'] = $client->id_number ?? null;
-                $clientInfo['correoCliente'] = $client->email ?? null;
-                $clientInfo['telefonoCliente'] = $client->phone ?? null;
-                $clientInfo['direccion'] = $client->address ?? "No indica";
-                $clientInfo['codProvincia'] = $client->state ?? "1";
-                $clientInfo['codCanton'] = $client->city ?? "01";
-                $clientInfo['codDistrito'] = $client->district ?? "01";
-                $clientInfo['zip'] = $clientInfo['codProvincia'].$clientInfo['codCanton'].$clientInfo['codDistrito'];
-            }else{
-                Log::error("Enviando factura de cliente no mapeado");
-                return false;
-            }
-        }else{
-            return false;
-        }
-        
-        return $clientInfo;
-    }
-    
     public function getAccounts($company = false){
         if(!$company){
             $company = currentCompanyModel();
         }
         
-        $cachekey = "qb-clientsjson-$company->id_number";
+        $cachekey = "qb-accountsjson-$company->id_number";
         if ( !Cache::has($cachekey) ) {
             $qbAccounts = $this->getAuthenticatedDS()->Query("SELECT * FROM Account");
-            Cache::put($cachekey, $qbAccounts, 600); //Cache por 10 minutos.
+            Cache::put($cachekey, $qbAccounts, 300); //Cache por 5 minutos.
         }else{
             $qbAccounts = Cache::get($cachekey);
         }
         return $qbAccounts;
+    }
+    
+    public function getAccountByRef($accountRef){
+        try{
+            $company = $this->company;
+            $accounts = $this->getAccounts($company);
+            $cachekey = "qb-accountsbyref-$company->id_number-$accountRef";
+            if ( !Cache::has($cachekey) ) {
+                foreach($accounts as $account){
+                    if( $account->Id == $accountRef ){
+                        $accountName = $account->Name;
+                        Cache::put($cachekey, $accountName, 600); //Cache por 10 minutos.
+                        return $accountName;
+                    }
+                }
+            }else{
+                $accountName = Cache::get($cachekey);
+            }
+            return $accountName;
+        }catch(\Exception $e){
+            Log::error("Quickbooks error: ". $e);
+            return null;
+        }
     }
     
 }
