@@ -34,7 +34,7 @@
         
         .details-table td span{
             display: inline-block;
-            width: 200px;
+            width: 175px;
             vertical-align: top;
             padding-top: 3px;
         }
@@ -153,17 +153,17 @@
                     <tr>
                         @if($documentType == '08' && $provider !== null)
                         <td>
-                            <b>Cedula:</b> {{$provider->id_number}}<br>
+                            <b>Cédula:</b> {{$provider->id_number}}<br>
                             <b>Tel:</b> {{$provider->phone}}<br>
                             <b>Correo:</b> {{$provider->email}} <br>
                         </td>
                         <td style="padding: 40px 0px 0px 30px; text-align: right;">
-                            <b>Direccion:</b>
+                            <b>Dirección:</b>
                             {{$provider->address. " ".$provider->zip}}<br>
                         </td>
                         @else
                         <td>
-                            <b>Cedula:</b> <span>{{$company->id_number}}</span><br>
+                            <b>Cédula:</b> <span>{{$company->id_number}}</span><br>
                             <b>Correo electrónico:</b> <span>{{$company->email}}</span><br>
                             <b>Tel:</b> <span>{{$company->phone}}</span><br>
                             <b>APDO:</b> <span>6504-1000 San José, Costa Rica</span><br>

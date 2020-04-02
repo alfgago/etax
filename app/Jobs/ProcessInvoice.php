@@ -131,7 +131,7 @@ class ProcessInvoice implements ShouldQueue
                                     $xml->xml = $path;
                                     $xml->xml_message = $pathMH;
                                     $xml->save();
-                                        Log::info('XML guardado.');
+                                    Log::info('XML guardado.');
                                 }
                                 
                                 if (isset($response['status']) && $response['status'] == 200) {

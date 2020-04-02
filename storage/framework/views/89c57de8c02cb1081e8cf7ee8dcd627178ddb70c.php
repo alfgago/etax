@@ -34,7 +34,7 @@
         
         .details-table td span{
             display: inline-block;
-            width: 200px;
+            width: 175px;
             vertical-align: top;
             padding-top: 3px;
         }
@@ -153,17 +153,17 @@
                     <tr>
                         <?php if($documentType == '08' && $provider !== null): ?>
                         <td>
-                            <b>Cedula:</b> <?php echo e($provider->id_number); ?><br>
+                            <b>Cédula:</b> <?php echo e($provider->id_number); ?><br>
                             <b>Tel:</b> <?php echo e($provider->phone); ?><br>
                             <b>Correo:</b> <?php echo e($provider->email); ?> <br>
                         </td>
                         <td style="padding: 40px 0px 0px 30px; text-align: right;">
-                            <b>Direccion:</b>
+                            <b>Dirección:</b>
                             <?php echo e($provider->address. " ".$provider->zip); ?><br>
                         </td>
                         <?php else: ?>
                         <td>
-                            <b>Cedula:</b> <span><?php echo e($company->id_number); ?></span><br>
+                            <b>Cédula:</b> <span><?php echo e($company->id_number); ?></span><br>
                             <b>Correo electrónico:</b> <span><?php echo e($company->email); ?></span><br>
                             <b>Tel:</b> <span><?php echo e($company->phone); ?></span><br>
                             <b>APDO:</b> <span>6504-1000 San José, Costa Rica</span><br>

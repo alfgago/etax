@@ -698,6 +698,7 @@ class Invoice extends Model
           'exoneration_company_name' => $data['companiaExoneracion'],
           'exoneration_porcent' => $data['porcentajeExoneracion'],
           'exoneration_amount' => $data['montoExoneracion'],
+          'exoneration_date' => $data['fechaExoneracion'] ?? null,
           'exoneration_total_gravado' => $data['montoExoneracion'] ? $subtotalLinea : 0,
           'impuesto_neto' => $data['impuestoNeto'],
           'exoneration_total_amount' => $data['totalMontoLinea'],

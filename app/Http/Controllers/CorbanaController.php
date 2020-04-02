@@ -340,13 +340,19 @@ class CorbanaController extends Controller
             $descripcion .= isset($factura['NOTA2']) ? $factura['NOTA2'] : '';
     
             //Exoneraciones
-            $totalNeto = 0;
-            $tipoDocumentoExoneracion = $factura['CODIGOTIPOEXO'] ?? null;
-            $documentoExoneracion = $factura['DOCUMENTO_EXO'] ?? null;
-            $companiaExoneracion = $factura['COD_INST_EXO'] ?? null;
-            $companiaExoneracion = "Dirección General de Hacienda";
-            $fechaExoneracion = $factura['FEC_DOCU_EXO'] ?? null;
-            $porcentajeExoneracion = $factura['PORC_EXONERACION'] ?? 0;;
+            try{
+                $totalNeto = 0;
+                $tipoDocumentoExoneracion = $factura['CODIGOTIPOEXO'] ?? null;
+                $documentoExoneracion = $factura['DOCUMENTO_EXO'] ?? null;
+                $companiaExoneracion = $factura['COD_INST_EXO'] ?? null;
+                $companiaExoneracion = "Dirección General de Hacienda";
+                $fechaExoneracion = $factura['FEC_DOCU_EXO'] ? Carbon::parse($factura['FEC_DOCU_EXO']) : null;
+                $porcentajeExoneracion = $factura['PORC_EXONERACION'] ?? 0;;
+            }catch(\Exception $e){
+                Log::error( "Se registra el error en exoneracion: " . $e->getMessage() );
+                $fechaExoneracion = Carbon::now();
+                $porcentajeExoneracion = 0;
+            }
             
             $prefijoCodigo= "B";
             if($TIPO_SERV == "S"){
@@ -444,6 +450,7 @@ class CorbanaController extends Controller
                         'detalleProducto' => $detalleProducto,
                         'unidadMedicion' => $unidadMedicion,
                         'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
+                        'fechaExoneracion' => $fechaExoneracion,
                         'documentoExoneracion' => $documentoExoneracion,
                         'companiaExoneracion' => $companiaExoneracion,
                         'porcentajeExoneracion' => $porcentajeExoneracion,
