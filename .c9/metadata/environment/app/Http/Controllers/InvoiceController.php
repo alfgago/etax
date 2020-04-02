@@ -1,1 +1,2 @@
+
 {"filter":false,"title":"InvoiceController.php","tooltip":"/app/Http/Controllers/InvoiceController.php","undoManager":{"mark":-1,"position":-1,"stack":[]},"ace":{"folds":[],"scrolltop":33005,"scrollleft":0,"selection":{"start":{"row":2387,"column":20},"end":{"row":2387,"column":25},"isBackwards":false},"options":{"guessTabSize":true,"useWrapMode":false,"wrapToView":true},"firstLineState":{"row":2356,"state":"php-start","mode":"ace/mode/php"}},"timestamp":1585693678853,"hash":"5b16b45e88f67268a23241d85e054b8135b1f375"}
