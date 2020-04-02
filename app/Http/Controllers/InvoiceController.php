@@ -523,10 +523,16 @@ class InvoiceController extends Controller
             'subtotal' => 'required',
             'items' => 'required',
         ]);
+        
+        $company = currentCompanyModel();
+        $cachekey = "avoid-duplicate-$company->id_number";
+        if ( Cache::has($cachekey) ) {
+            Cache::put($cachekey, true, 12);
+            return redirect('/facturas-emitidas')->withMessage('Se detectó un problema de conexión, por favor verifique que se haya registrado correctamente su factura.');
+        }
 
         if(CalculatedTax::validarMes($request->generated_date)){
             $invoice = new Invoice();
-            $company = currentCompanyModel();
             $invoice->company_id = $company->id;
 
             //Datos generales y para Hacienda
@@ -536,7 +542,6 @@ class InvoiceController extends Controller
             $invoice->payment_receipt = "";
             $invoice->generation_method = "M";
             $invoice->setInvoiceData($request);
-
 
             try{
                 if ($request->document_type == '08' ) {
@@ -550,6 +555,10 @@ class InvoiceController extends Controller
 
 
             $company->save();
+            
+            try{
+                \App\QuickbooksInvoice::saveEtaxaqb(null, $invoice, $accountRef = null);
+            }catch(\Throwable $e){}
 
             clearInvoiceCache($invoice);
             $user = auth()->user();
@@ -568,8 +577,6 @@ class InvoiceController extends Controller
         }else{
             return redirect('/facturas-emitidas')->withError('Mes seleccionado ya fue cerrado');
         }
-
-
     }
 
     /**
@@ -583,6 +590,13 @@ class InvoiceController extends Controller
         //dd($request);
         //revision de branch para segmentacion de funcionalidades por tipo de documento
         try {
+            $company = currentCompanyModel(false);
+            $cachekey = "avoid-duplicate-$company->id_number";
+            if ( Cache::has($cachekey) ) {
+                Cache::put($cachekey, true, 12);
+                return redirect('/facturas-emitidas')->withMessage('Se detectó un problema de conexión, por favor verifique que se haya registrado correctamente su factura.');
+            }
+                    
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
             $request->validate([
                 'subtotal' => 'required',
@@ -607,9 +621,7 @@ class InvoiceController extends Controller
                     if(!$editar){
                         $invoice = new Invoice();
                     }
-                    $company = currentCompanyModel(false);
                     $invoice->company_id = $company->id;
-
 
                     //Datos generales y para Hacienda
                     $invoice->document_type = $request->document_type;
@@ -2078,6 +2090,7 @@ class InvoiceController extends Controller
                     $recurrencia = RecurringInvoice::find($request->id_recurrente);
                     if($oldInvoice->hacienda_status != '99'){
                         $invoice = $oldInvoice->replicate();
+                        $invoice->is_void = true;    
                     }else{
                         $invoice = $oldInvoice;
                     }
@@ -2090,23 +2103,22 @@ class InvoiceController extends Controller
                     $invoice->document_type = $request->document_type;
                     $invoice->payment_status = "01";
                     $invoice->payment_receipt = "";
-                    $invoice->generation_method = "etax";
+                    $invoice->generation_method = "etax-programada";
                     $invoice->xml_schema = 43;
-                    $invoice->is_void = true;    
                     
                     $today = Carbon::parse(now('America/Costa_Rica'));
                     $generatedDate = Carbon::createFromFormat('d/m/Y', $request->generated_date);
-                    if($today->format("Y-m-d") <  $generatedDate->format("Y-m-d")){
-                        $invoice->hacienda_status = '99';
-                        $invoice->generation_method = "etax-programada";
-                        $invoice->document_key = "Key Programada";
-                        $invoice->document_number = "Programada";
-                    }else{
+                    if($today->format("Y-m-d") >  $generatedDate->format("Y-m-d")){
                         return back()->withError( 'No puede programar facturas para fechas anteriores.' );
                     }
 
                     $invoice->save();
                     $invoiceData = $invoice->setInvoiceData($request);
+                    
+                    $invoice->hacienda_status = '99';
+                    $invoice->generation_method = "etax-programada";
+                    $invoice->document_key = "Key Programada";
+                    $invoice->document_number = "Programada";
 
                     if ($request->document_type == '08' ) {
                         $this->storeBillFEC($request);

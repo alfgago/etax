@@ -11,8 +11,9 @@ use \Carbon\Carbon;
 use App\Invoice;
 use App\Client;
 use App\Quickbooks;
+use App\QuickbooksCustomer;
 use App\Company;
-use QuickBooksOnline\API\Facades\Invoice as qboInvoice;
+use QuickBooksOnline\API\Facades\Invoice as qbInvoice;
 
 class QuickbooksInvoice extends Model
 {
@@ -41,261 +42,338 @@ class QuickbooksInvoice extends Model
         return Carbon::parse($this->qb_date);
     }
     
-    public static function syncMonthlyInvoices($dataService, $year, $month, $company = false){
-        if(!$company){
-            $company = currentCompanyModel();
-        }
-        
-        $facturas = new \stdClass();
-        
-        $etaxInvoices = Invoice::where("company_id", $company->id)
-                        ->where('year', $year)
-                        ->where('month', $month)
-                        ->with('client')
-                        ->get();
-        foreach($etaxInvoices as $invoice){
-            $docNumber = $invoice->document_number;
-            $fac = new \stdClass();
-            $fac->numero_etax = $docNumber;
-            $fac->fecha_etax = $invoice->generatedDate()->format('d/m/Y');
-            $fac->total_etax = $invoice->total;
-            $fac->cliente_etax = "$invoice->client_first_name $invoice->client_last_name $invoice->client_last_name2";
-            $fac->etax_id = $invoice->id;
-            $facturas->$docNumber = $fac;
-        }
-        
-        $qbInvoices = QuickBooksInvoice::select('qb_id', 'qb_doc_number', 'qb_date', 'qb_total', 'qb_client')
-                         ->where('year', $year)
-                         ->where('month', $month)
-                         ->with('invoice')
-                         ->get();
-        foreach($qbInvoices as $invoice){
-            $docNumber = $invoice->qb_doc_number;
-            if( !isset($facturas->$docNumber) ){
-                $fac = new \stdClass();
+    public static function getMonthlyInvoices($dataService, $year, $month, $company) {
+        $cachekey = "qb-invoices-$company->id_number-$year-$month"; 
+        if ( !Cache::has($cachekey) ) {
+            $count = QuickbooksInvoice::where('company_id', $company->id)->count();
+            if( $count > 0 ){
+                $dateFrom = Carbon::createFromDate($year, $month, 1)->firstOfMonth()->toAtomString();
+                $dateTo = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toAtomString();
+                $invoices = $dataService->Query("SELECT * FROM Invoice WHERE MetaData.LastUpdatedTime >= '$dateFrom' AND MetaData.LastUpdatedTime <= '$dateTo'");
             }else{
-                $fac = $facturas->$docNumber;
+                $invoices = $dataService->Query("SELECT * FROM Invoice");
             }
-            $fac->numero_qb = $docNumber;
-            $fac->fecha_qb = $invoice->generatedDate()->format('d/m/Y');
-            $fac->total_qb = $invoice->qb_total;
-            $fac->cliente_qb = $invoice->qb_client;
-            $fac->qb_id = $invoice->qb_id;
-            $facturas->$docNumber = $fac;
+            Cache::put($cachekey, $invoices, 30); //Cache por 15 segundos.
+        }else{
+            $invoices = Cache::get($cachekey);
         }
-        
-        return $facturas;
+        return $invoices;
     }
     
-    public static function loadQuickbooksInvoices($dataService, $year, $month, $company){
-        
-        $qbInvoices = QuickbooksInvoice::getMonthlyInvoices($dataService, $year, $month);
-        QuickbooksInvoice::syncMonthlyClients($dataService, $year, $month, $company);
+    public static function syncMonthlyInvoices($dataService, $year, $month, $company){
+        QuickbooksCustomer::syncMonthlyClients($dataService, $year, $month, $company);
+        $qbInvoices = QuickbooksInvoice::getMonthlyInvoices($dataService, $year, $month, $company);
         $qbInvoices = $qbInvoices ?? [];
+        $facturas = [];
 
-        foreach($qbInvoices as $invoice){
-            $date = Carbon::createFromFormat("Y-m-d", $invoice->TxnDate);
+        foreach($qbInvoices as $qbInvoice){
+            $date = Carbon::createFromFormat("Y-m-d", $qbInvoice->TxnDate);
+            $clientName = QuickbooksCustomer::getClientName($company, $qbInvoice->CustomerRef);
+            $qbInvoice = QuickBooksInvoice::updateOrCreate(
+              [
+                "qb_id" => $qbInvoice->Id
+              ],
+              [
+                "qb_doc_number" => $qbInvoice->DocNumber,
+                "qb_date" => $date,
+                "qb_total" => $qbInvoice->TotalAmt,
+                "qb_client" => $clientName,
+                "qb_data" => $qbInvoice,
+                "generated_at" => 'quickbooks',
+                "month" => $date->month,
+                "year" => $date->year,
+                "company_id" => $company->id
+              ]
+            );
+        }
+    }
+    
+    public static function saveEtaxaqb($dataService, $invoice, $accountRef = null){   
+        try{
+            $company = $invoice->company;
+            $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
             
-            $cachekey = "qb-invoice-$company->id_number-$invoice->Id"; 
-            if ( !Cache::has($cachekey) ) {
-                $clientName = Quickbooks::getClientName($company, $invoice->CustomerRef);
-                $qbInvoice = QuickBooksInvoice::updateOrCreate(
+            $dataService = $qb->getAuthenticatedDS();
+            
+            $lines = [];
+            $taxCode = "S103"; //Por defecto usa este.
+            foreach($invoice->items as $item){
+                $itemRef = null;
+                $itemName = null;
+                $product = Product::find($item->product_id);
+                if( !isset($product) ){
+                    $product = Product::updateOrCreate(
+                        [
+                            'company_id' => $invoice->company_id,
+                            'name' => $item->name
+                        ],
+                        [
+                            'unit_price' => $item->unit_price,
+                            'code' => $item->code,
+                            'description' => $item->name ?? null,
+                            'default_iva_type'  => $item->iva_type,
+                            'product_category_id'  => $item->product_type,
+                            'is_catalogue' => true,
+                            'measure_unit' => $item->measure_unit
+                        ]
+                    );
+                }
+                $qbItem = QuickbooksProduct::where('product_id', $product->id)->first();
+                if( !isset($qbItem) ){
+                    $qbItem = QuickbooksProduct::saveEtaxaqb($dataService, $product, $accountRef);
+                }
+                $itemRef = $qbItem->qb_id;
+                
+                $qty = round($item->item_count, 5);
+                $unitPrice = round($item->unit_price, 5);
+                $Amount = $qty*$unitPrice;
+
+                $taxCode = $item->iva_type;
+                
+                $lines[] = [
+                     "Amount" => $Amount,
+                     "DetailType" => "SalesItemLineDetail",
+                     "SalesItemLineDetail" => [
+                        "UnitPrice" => $unitPrice,
+                        "Qty" => $qty,
+                        "ItemRef" => [
+                          "value" => $itemRef,
+                          "name" => $itemName
+                        ],
+                        "TaxCodeRef" => "TAX"
+                     ]
+                ];
+            }
+            
+            $qbCustomer = QuickbooksCustomer::where('company_id', $invoice->company_id)
+                                            ->where('client_id', $invoice->client_id)->first();
+            if(!isset($qbCustomer)){
+                $qbCustomer = QuickbooksCustomer::saveEtaxaqb($dataService, $invoice->client);
+            }
+            if( !isset($qbCustomer->qb_id) ){
+                return back()->withError( "Error al guardar cliente ". $invoice->client_first_name ." en QuickBooks, por favor contacte a soporte o intente hacer la sincronización del cliente. Mensaje: ".$qbCustomer->getIntuitErrorMessage() );
+            }
+            
+            //Define el tax reference para enviar de la factura.
+            $taxRef = null;
+            foreach($qb->taxes_json['tipo_iva'] as $key => $value){
+                if( $key != 'default' ){
+                    if($taxCode == $value){
+                        $taxRef = $key;
+                    }
+                }
+            }
+            $TxnTaxDetail = [
+                "TxnTaxCodeRef" => $taxRef
+            ];
+            
+            $params = [
+                "DocNumber" => $invoice->document_number,
+                "Line" => $lines,
+                "CustomerRef" => [
+                      "value" => $qbCustomer->qb_id,
+                      "name" => $qbCustomer->full_name
+                ],
+                "BillEmail" => [
+                      "Address" => $invoice->email
+                ],
+                "CustomerMemo" => $invoice->description ?? "",
+                "TxnTaxDetail" => $TxnTaxDetail
+            ];
+            
+            //Define el metodo de pago
+            foreach($qb->conditions_json as $key => $value){
+                if( $key != 'default' ){
+                    if($invoice->sale_condition == $value){
+                        $params["SalesTermRef"] = [
+                            "value" => $key
+                        ];
+                    }
+                }
+            }
+            
+            
+            //Define el metodo de pago
+            foreach($qb->payment_methods_json as $key => $value){
+                if( $key != 'default' ){
+                    if($invoice->payment_type == $value){
+                        $params["PaymentMethodRef"] = [
+                            "value" => $key
+                        ];
+                    }
+                }
+            }
+            
+            $theResourceObj = qbInvoice::create($params);
+
+            $qbInvoice = $dataService->Add($theResourceObj);
+            $error = $dataService->getLastError();
+            if ($error) {
+                Log::error("The Status code is: " . $error->getHttpStatusCode() . "\n".
+                            "The Helper message is: " . $error->getOAuthHelperError() . "\n".
+                            "The Response message is: " . $error->getResponseBody() . "\n");
+                $qbInvoices = $dataService->Query("SELECT * FROM Invoice WHERE DocNumber = '$invoice->document_number'");
+                $qbInvoice = $qbInvoices[0] ?? null;
+            }
+            
+            if( isset($qbInvoice) ){
+                $date = Carbon::createFromFormat("Y-m-d", $qbInvoice->TxnDate);
+                $clientName = QuickbooksCustomer::getClientName($company, $qbInvoice->CustomerRef);
+                $inv = QuickBooksInvoice::updateOrCreate(
                   [
-                    "qb_id" => $invoice->Id
+                    "qb_id" => $qbInvoice->Id
                   ],
                   [
-                    "qb_doc_number" => $invoice->DocNumber,
+                    "qb_doc_number" => $qbInvoice->DocNumber,
                     "qb_date" => $date,
-                    "qb_total" => $invoice->TotalAmt,
+                    "qb_total" => $qbInvoice->TotalAmt,
                     "qb_client" => $clientName,
-                    "qb_data" => $invoice,
+                    "qb_data" => $qbInvoice,
                     "generated_at" => 'quickbooks',
-                    "month" => $month,
-                    "year" => $year,
-                    "company_id" => $company->id
+                    "month" => $invoice->month,
+                    "year" => $invoice->year,
+                    "company_id" => $company->id,
+                    "invoice_id" => $invoice->id
                   ]
                 );
-                Cache::put($cachekey, $qbInvoice, 86400); //Cache por 24 horas.
+                return $inv;
             }
+            return $error;
+        }catch(\Exception $e){
+            return back()->withError( "Error al sincronizar factura: $invoice->document_number. Por favor contacte a soporte." );
+            Log::error($e);
+            return $e;
         }
     }
     
-    public static function getMonthlyInvoices($dataService, $year, $month){
-        $dateFrom = Carbon::createFromDate($year, $month, 1)->firstOfMonth()->toAtomString();
-        $dateTo = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toAtomString();
-        $qbInvoices = $dataService->Query("SELECT * FROM Invoice WHERE TxnDate >= '$dateFrom' AND TxnDate <= '$dateTo'");
-        return $qbInvoices;
-    }
     
-    public static function getMonthlyClients($dataService, $year, $month, $company) {
-        $cachekey = "qb-clients-$company->id_number-$year-$month"; 
-        if ( !Cache::has($cachekey) ) {
-            $dateFrom = Carbon::createFromDate($year, $month, 1)->firstOfMonth()->toAtomString();
-            $dateTo = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toAtomString();
-            $clients = $dataService->Query("SELECT * FROM Customer WHERE MetaData.LastUpdatedTime >= '$dateFrom' AND MetaData.LastUpdatedTime <= '$dateTo'");
-            Cache::put($cachekey, $clients, 15); //Cache por 15 segundos.
-        }else{
-            $clients = Cache::get($cachekey);
-        }
-        return $clients;
-    }
     
-    public static function saveInvoiceFromEtax($dataService, $invoice) {
-        
-    }
-    
-    public function saveInvoiceFromQuickbooks() {
+    public function saveQbaetax(){
         try{
-            $invoice = null;
+            $company = $this->company;
             $invoiceData = $this->qb_data;
             $items = $invoiceData["Line"];
             
-
-            //Datos generales
-            $company = $this->company;
             $metodoGeneracion = "quickbooks";
             $xmlSchema = 43;
+            $codigoActividad = $company->getActivities() ? $company->getActivities()[0]->codigo : '0';
             
-            dd($invoiceData);
-            
-            // POR RESOLVER: Quickbooks no indica el código de actividad.
-            /*$codigoActividad = $invoiceData['CODIGO_ACTIVIDAD'] ?? null;
-            if( !isset($codigoActividad) ){
-                $mainAct = $company->getActivities() ? $company->getActivities()[0]->codigo : '0';
-                $codigoActividad = $mainAct;
-            }*/ 
-            
-            //Datos de cliente
-            $customer = Quickbooks::getClientInfo($company, $invoiceData["CustomerRef"]);
-            if( !$customer ){
-                return [
-                    'status'  => '400',
-                    'mensaje' => 'Verifique que el cliente se encuentre correctamente sincronizado e indique el tipo de persona y código postal.'
-                ];
+            try{
+                $customer = QuickbooksCustomer::getClientInfo($company, $invoiceData['CustomerRef']);
+                $cliente = $customer->client;
+            if( !$cliente ){
+                return back()->withError("No se encontró el cliente de la factura $this->qb_id. Verifique que el proveedor se encuentre correctamente sincronizado e indique el tipo de persona y código postal.");
             }
-            //dd($invoiceData, $customer);
-            $nombreCliente = $customer['nombreCliente'];
-            $codigoCliente = $customer['codigoCliente'];
-            $tipoPersona = $customer['tipoPersona'];
-            $identificacionCliente = $customer['identificacionCliente'];
-            $correoCliente = $customer['correoCliente'];
-            $telefonoCliente = $customer['telefonoCliente'];
-            $direccion = $customer['direccion'];
-            $codProvincia = $customer['codProvincia'];
-            $codCanton = $customer['codCanton'];
-            $codDistrito = $customer['zip'];
-            $zip = $customer['zip'];
+            }catch(\Exception $e){
+                return back()->withError("No se encontró el cliente de la factura $this->qb_id. Verifique que el proveedor se encuentre correctamente sincronizado e indique el tipo de persona y código postal.");
+            }
+            
+            if( isset($data['BillAddr']) ){
+                  try{
+                    $zip = $invoiceData['BillAddr']['PostalCode'] ?? '10101';
+                    $state = $zip[0];
+                    $city = $zip[1] . $zip[2];
+                    $district = $zip;
+                  }catch( \Throwable $e ){ }  
+                  $countryCode = $invoiceData['BillAddr']['CountryCode'] ?? 'CR';
+                  $address = $invoiceData['BillAddr']['City'] ?? "" . " " . $invoiceData['BillAddr']['Line1'] ?? "" . " " . $invoiceData['BillAddr']['Line2'] ?? "";
+            }
+            
+            if( isset($data['PrimaryPhone']) ){
+                $phone = $data['PrimaryPhone']["FreeFormNumber"];
+            }
+            
+            if( isset($data['BillEmail']) ){
+                $email = $data['BillEmail']["Address"];
+            }
+            
+            $nombreCliente = $cliente->fullname;
+            $codigoCliente = $cliente->codigo;
+            $tipoPersona = $cliente->tipo_persona ?? '01'; //SOLUCIONAR - QB no incluye tipo de persona
+            $identificacionCliente = $cliente->id_number ?? '0000'; //SOLUCIONAR - QB no incluye cédula
+            $correoCliente = $email ?? $cliente->email;
+            $telefonoCliente = $phone ?? $cliente->phone;
+            $direccion = $address ?? $cliente->address;
+            $codProvincia = $state ?? $cliente->state;
+            $codCanton = $city ?? $cliente->city;
+            $codDistrito = $district ?? $cliente->district;
+            $zip = $zip ?? $cliente->zip;
             
             //Define el tipo de documento
             $tipoDocumento = $tipoPersona == "F" || $tipoPersona == '1' || $tipoPersona == '01' ? '01' : '04';
             $tipoDocumento = '01';
-            if( !$codDistrito || $zip ){
+            if( !$codDistrito || !$zip ){
                 $tipoDocumento = "04";
             }
             
             $numeroReferencia = $invoiceData['DocNumber'];
             $consecutivoComprobante = $invoiceData['DocNumber'];
-            $claveFactura = getDocumentKey($tipoDocumento, $company, $numeroReferencia);
-
-
+            $claveFactura = "QB-".getDocumentKey($tipoDocumento, $company, $numeroReferencia);
+    
             $invoice = Invoice::where('document_number', $consecutivoComprobante)
                                 ->where('company_id', $company->id)
                                 ->with('items')
                                 ->first();
             if(isset($invoice)){
+                $this->invoice_id = $invoice->id;
+                $this->save();
                 return [
                     'status'  => '400',
                     'mensaje' => 'Factura existente.'
                 ];
             }
+    
+            $fechaEmision = Carbon::createFromFormat("Y-m-d", $invoiceData['TxnDate']);
+            $fechaVencimiento = Carbon::createFromFormat("Y-m-d", $invoiceData['DueDate']);
             
-            $TIPO_SERV = $invoiceData['TIPO_SERV'] ?? 'B';
-            if( $tipoDocumento == '09' ){
-                $TIPO_SERV = 'B';
-            }
+            $condicionVenta = "01";
+            $metodoPago = '01';
+            $idMoneda = $invoiceData['CurrencyRef'] ?? 'CRC';
             
-            $TIPO_PAGO = $invoiceData['TIPO_PAGO'] ?? 'D'; //Usan E, T, D, Q, etc
-            $condicionVenta = "02";
-            if($TIPO_PAGO == "E"){
-                $condicionVenta = "01";
-            }
-            
-            $MODO_PAGO = $invoiceData['MODO_PAGO'] ?? 'D'; //Usan E, T, D, Q, etc
-            $metodoPago = "04"; //Default transferencia
-            if($MODO_PAGO == 'E' || $MODO_PAGO == 'C'){
-                $metodoPago = '01';
-            }else if($MODO_PAGO == 'T'){
-                $metodoPago = '02';
-            }else if($MODO_PAGO == 'Q'){
-                $metodoPago = '03';
-            }
-            
-            if( $invoiceData['MONEDA'] == '02' ){
-                $idMoneda = "USD";
-                $tipoCambio = floatval($invoiceData['TIPO_CAMBIO']);
+            if( $idMoneda == 'USD' ){
+                $tipoCambio = QuickbooksInvoice::getExchangeRate($fechaEmision);
             }else{
                 $idMoneda = "CRC";
                 $tipoCambio = 1;
             }
-
-            $FEC_HECHO = $invoiceData['FEC_HECHO'];
-            $fechaEmision = Carbon::parse($FEC_HECHO);
-            $fechaVencimiento = Carbon::parse($FEC_HECHO)->addMonths(1);
             
-            $porcentajeIVA = $invoiceData['PORCIV'] ?? 0;
-            $totalDocumento = 0;
-            $descripcion = isset($invoiceData['OBSERVACION']) ? $invoiceData['OBSERVACION'] : '';
-            $descripcion .= isset($invoiceData['NOTA1']) ? $invoiceData['NOTA1'] : '';
-            $descripcion .= isset($invoiceData['NOTA2']) ? $invoiceData['NOTA2'] : '';
-    
-            //Exoneraciones
-            $totalNeto = 0;
-            $tipoDocumentoExoneracion = $invoiceData['CODIGOTIPOEXO'] ?? null;
-            $documentoExoneracion = $invoiceData['DOCUMENTO_EXO'] ?? null;
-            $companiaExoneracion = $invoiceData['COD_INST_EXO'] ?? null;
-            $companiaExoneracion = $nombreCliente;
-            $fechaExoneracion = $invoiceData['FEC_DOCU_EXO'] ?? null;
-            $porcentajeExoneracion = $invoiceData['PORC_EXONERACION'] ?? 0;;
             
-            $prefijoCodigo= "B";
-            if($TIPO_SERV == "S"){
-                $prefijoCodigo = "S";
-            }
-            $codigoEtax = $prefijoCodigo.'103';
-            if( !isset($porcentajeIVA) ){
-                $codigoEtax = $prefijoCodigo.'170';
-            }
-            if( isset($documentoExoneracion) ){
-                $porcentajeIVA = !isset($porcentajeIVA) ? $porcentajeIVA : 13;
-                $porcentajeExoneracion = 100;
-                $codigoEtax = $prefijoCodigo.'183';
-            }
-            $impuestoNeto = 0;
-            if($tipoDocumento == '09'){
-                $codigoEtax = "B150";
+            $descripcion = isset($invoiceData['CustomerMemo']) ? $invoiceData['CustomerMemo'] : '';
+            $porcentajeIVA = 13;
+            if( isset($invoiceData['TxnTaxDetail']) ){
+                $taxCode = $invoiceData['TxnTaxDetail']['TxnTaxCodeRef'];
+                if( !$taxCode ){
+                    $taxCode = 'default';
+                }
+                $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
+                $codigoEtax = $qb->taxes_json['tipo_iva'][$taxCode];
+                $categoriaHacienda = $qb->taxes_json['tipo_producto'][$taxCode];
+                try{
+                    $porcentajeIVA = $invoiceData['TxnTaxDetail']['TaxLine']['TaxLineDetail']['TaxPercent'];
+                }catch(\Exception $e){}
             }
             
             //Datos de lineas
             $i = 0;
+            $totalDocumento = 0;
             $invoiceList = array();
             foreach($items as $item){
                 $i++;
-                $detalleProducto = $item['DESCRIPCION'];   
+                $detail = $item['SalesItemLineDetail'];   
+                $product = null;
+                if( $detail ){
+                    $product = QuickbooksProduct::getProductByRef($company, $detail['ItemRef']);
+                }
                 //Revisa que no sean las lineas de diferencial cambiario ni tarifa general
-                if ( $detalleProducto != "DIFERENCIAL CAMBIARIO" && !strpos($detalleProducto, "RIFA GENERAL") ) {
-                    $numeroLinea = $item['LINEA'];
-                    $codigoProducto = $item['CODIGO'] ?? "0";
+                if ( $product ) {
+                    $numeroLinea = $i;
+                    $codigoProducto = $product->code;
+                    $detalleProducto = $product->description;
+                    $unidadMedicion = $product->measure_unit;
                     
-                    $unidadMedicion = $item['UM'] ?? null;
-                    if( $unidadMedicion == 'N' ){
-                        $unidadMedicion = $TIPO_SERV == "S" ? "Sp" : 'Unid';
-                    }
-                    $unidadMedicion = ucfirst(strtolower($unidadMedicion));
-                    
-                    $cantidad = $item['CANTIDAD'];
-                    
-                    $precioUnitario = $item['PRECIO'];
-                    $montoDescuento = $item['DESCUENTO'];
+                    $cantidad = $detail['Qty'];
+                    $precioUnitario = $detail['UnitPrice'];
+                    $montoDescuento = $detail['DiscountAmt'];
                     
                     $subtotalLinea = $cantidad*$precioUnitario - $montoDescuento;
                     $montoIva = $subtotalLinea * ($porcentajeIVA/100);
@@ -311,10 +389,12 @@ class QuickbooksInvoice extends Model
                     $totalLinea = round($totalLinea, 5);
                     $montoDescuento = round($montoDescuento, 5);
                     $totalMontoLinea = round($totalMontoLinea, 5);
-                
+                    $totalDocumento += $totalMontoLinea;
+                    
                     $arrayInsert = array(
                         'metodoGeneracion' => $metodoGeneracion,
-                        'idEmisor' => $cedulaEmpresa,
+                        'idEmisor' => $company->id_number,
+                        'haciendaStatus' => '03',
                         /****Empiezan datos cliente***/
                         'nombreCliente' => $nombreCliente,
                         'descripcion' => $descripcion,
@@ -337,8 +417,8 @@ class QuickbooksInvoice extends Model
                         'moneda' => $idMoneda,
                         'tipoCambio' => $tipoCambio,
                         'totalDocumento' => $totalDocumento,
-                        'totalNeto' => $totalNeto,
-                        'otherReference' => $otherReference,
+                        'totalNeto' => 0,
+                        'otherReference' => null,
                         /**** Empiezan datos lineas ****/
                         'cantidad' => $cantidad,
                         'precioUnitario' => $precioUnitario,
@@ -352,64 +432,96 @@ class QuickbooksInvoice extends Model
                         'codigoProducto' => $codigoProducto,
                         'detalleProducto' => $detalleProducto,
                         'unidadMedicion' => $unidadMedicion,
-                        'tipoDocumentoExoneracion' => $tipoDocumentoExoneracion,
-                        'documentoExoneracion' => $documentoExoneracion,
-                        'companiaExoneracion' => $companiaExoneracion,
-                        'porcentajeExoneracion' => $porcentajeExoneracion,
-                        'montoExoneracion' => $montoExoneracion,
-                        'impuestoNeto' => $impuestoNeto,
+                        'tipoDocumentoExoneracion' => null,
+                        'documentoExoneracion' => null,
+                        'companiaExoneracion' => null,
+                        'porcentajeExoneracion' => 0,
+                        'montoExoneracion' => 0,
+                        'impuestoNeto' => 0,
                         'totalMontoLinea' => $totalMontoLinea,
                         'xmlSchema' => $xmlSchema,
                         'codigoActividad' => $codigoActividad,
                         'categoriaHacienda' => $categoriaHacienda,
-                        'partidaArancelaria' => $partidaArancelaria,
+                        'partidaArancelaria' => null,
                         'acceptStatus' => true,
                         'isAuthorized' => true,
                         'codeValidated' => true
                     );
-                    
                     $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
                 }
                 
             }
             foreach($invoiceList as $fac){
-               $invoice = $this->saveCorbanaInvoice($fac);
-               $company->setLastReference($tipoDocumento, $numeroReferencia, $consecutivoComprobante);
+               \App\Jobs\ProcessSingleInvoiceImport::dispatchNow($fac);
+               $newInvoice = Invoice::where('company_id', $company->id)
+                                ->where('document_number', $fac['factura']['document_number'])
+                                ->where('document_key', $fac['factura']['document_key'])
+                                ->where('client_id_number', $fac['factura']['client_id_number'])
+                                ->first();
+                if($newInvoice){
+                    $this->invoice_id = $newInvoice->id;
+                    $this->save();
+                }
             }
-            $invoice->load('items');
-            
-            $otherData = $this->setOtherInvoiceData($invoice, $invoiceData, $items, $requestOtros);
-            
-            $invoiceUtils = new \App\Utils\InvoiceUtils();
-            $pdf = $invoiceUtils->streamPdf($invoice, $invoice->company);
-            $basePDF = !empty($pdf) ? base64_encode($pdf) : null;
-            $xml = $invoiceUtils->downloadXml($invoice, $invoice->company);
-            $baseXML = !empty($xml) ? base64_encode($xml) : null;
-            
-            return response()->json([
-                'mensaje' => 'Exito',
-                'factura' => $invoice,
-                'pdf64' => $basePDF,
-                'xml64' => $baseXML,
-            ], 200);
         }catch(\Exception $e){
-            dd($e);
+            Log::error($e);
+            return back()->withError( "Error al sincronizar factura QB a eTax. Por favor contacte a soporte. " . $e->getMessage() );
         }
     }
     
-    public static function syncMonthlyClients($dataService, $year, $month, $company){
-        $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
-        $qbCustomers = QuickbooksInvoice::getMonthlyClients($dataService, $year, $month, $company);
-        $qbCustomers = $qbCustomers ?? [];
-        $clientes = [];
-        foreach($qbCustomers as $customer){
-            $cliente = new \stdClass();
-            $cliente->full_name = $customer->FullyQualifiedName;
-            $cliente->client_id = 0;
-            $clientes[$customer->Id] = $cliente;
+    
+    
+    
+    public static function getExchangeRate($date)
+    {
+        
+        $cacheKey = "usd_rate-".$date->format('d/m/Y');
+        $lastRateKey = "last_usd_rate";
+        try {
+            if ( !Cache::has($cacheKey) ) {
+
+                $client = new \GuzzleHttp\Client();
+                $response = $client->get( config('etax.exchange_url'),
+                    [
+                        'query' => [
+                            'Indicador' => '318',
+                            'FechaInicio' => $date->format('d/m/Y'),
+                            'FechaFinal' => $date->format('d/m/Y'),
+                            'Nombre' => config('etax.namebccr'),
+                            'SubNiveles' => 'N',
+                            'CorreoElectronico' => config('etax.emailbccr'),
+                            'Token' => config('etax.tokenbccr'),
+                        ],
+                        'timeout' => 15,
+                        'connect_timeout' => 15,
+                        'read_timeout' => 15,
+                    ]
+                );
+                
+                $body = $response->getBody()->getContents();
+                $xml = new \SimpleXMLElement($body);
+                $xml->registerXPathNamespace('d', 'urn:schemas-microsoft-com:xml-diffgram-v1');
+                $tables = $xml->xpath('//INGC011_CAT_INDICADORECONOMIC[@d:id="INGC011_CAT_INDICADORECONOMIC1"]');
+                $valor =  json_decode($tables[0]->NUM_VALOR);
+
+                Cache::put($cacheKey, $valor, now()->addHours(2));
+                Cache::put($lastRateKey, $valor, now()->addDays(3));
+            }
+
+            $value = Cache::get($cacheKey);
+            return $value;
+
+        } catch( \Exception $e) {
+            Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: ');
+            $value = Cache::get($lastRateKey);
+            return $value;
+        } catch (RequestException $e) {
+            Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: '.
+                $e->getResponse()->getReasonPhrase());
+            $value = Cache::get($lastRateKey);
+            return $value;
         }
-        $qb->clients_json = $clientes;
-        $qb->save();
+
     }
     
 }

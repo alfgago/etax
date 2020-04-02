@@ -133,16 +133,37 @@
 @section('footer-scripts')
 
 <script>
+    
     function reloadComparativo() {
         var mes = $("#input-mes").val();
         var ano = $("#input-ano").val();
-        window.location.replace("/quickbooks/comparativo-emitidas/"+ano+"/"+mes);
+        var tipo = $("#input-tipo").val();
+        if(tipo == 'etaxaqb'){
+          window.location.replace("/quickbooks/emitidas/comparativo-etaxaqb");
+        }else{
+          window.location.replace("/quickbooks/emitidas/comparativo");
+        }
     }
+    
     function resyncQuickbooks() {
-        var mes = $("#input-mes").val();
-        var ano = $("#input-ano").val();
-        window.location.replace("/quickbooks/resync-invoices/"+ano+"/"+mes);
+        Swal.fire({
+            title: '¿Está seguro que desea re-sincronizar con Quickbooks?',
+            text: "Este cargará todos los clientes de Quickbooks nuevamente. Puede tardar unos minutos. No es necesario hacerlo si no ha agregado clientes recientemente desde el panel de Quickbooks.",
+            type: 'info',
+            customContainerClass: 'container-success',
+            showCloseButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Sí, quiero sincronizar',
+          }).then((result) => {
+            if (result.value) {
+                var mes = $("#input-mes").val();
+                var ano = $("#input-ano").val();
+                window.location.replace("/quickbooks/invoices/resync/"+ano+"/"+mes);
+            }
+        })
+        
     }
+    
     function sendQbaetax( id ) {
       
       var formId = "#qbaetax-form-"+id;
