@@ -344,7 +344,7 @@ class CorbanaController extends Controller
             $tipoDocumentoExoneracion = $factura['CODIGOTIPOEXO'] ?? null;
             $documentoExoneracion = $factura['DOCUMENTO_EXO'] ?? null;
             $companiaExoneracion = $factura['COD_INST_EXO'] ?? null;
-            $companiaExoneracion = $nombreCliente;
+            $companiaExoneracion = "Dirección General de Hacienda";
             $fechaExoneracion = $factura['FEC_DOCU_EXO'] ?? null;
             $porcentajeExoneracion = $factura['PORC_EXONERACION'] ?? 0;;
             

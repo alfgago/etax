@@ -5,7 +5,7 @@
     </button>
     <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
       <?php if($data->hacienda_status == '99'): ?>
-        <a href="/facturas-emitidas/editar-factura/<?php echo e($data->id); ?>" title="Ver detalle de factura" class="text-info mr-2 dropdown-item">
+        <a href="/facturas-emitidas/<?php echo e($data->id); ?>" title="Ver detalle de factura" class="text-info mr-2 dropdown-item">
           <i class="fa fa-pencil" aria-hidden="true"></i> <span class="toggle-item-text">Ver detalle de factura</span>
         </a>
         <a href="/facturas-emitidas/download-pdf/<?php echo e($data->id); ?>" title="Descargar PDF" class="text-warning mr-2 dropdown-item" download > 

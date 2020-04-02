@@ -87,16 +87,16 @@ class Quickbooks extends Model
             // Prep Data Services
             $dataService = DataService::Configure(array(
                  'auth_mode' => 'oauth2',
-                  'ClientID' => config('etax.qb_client_id'),
-                  'ClientSecret' => config('etax.qb_client_secret'),
-                 'scope' => "com.intuit.quickbooks.accounting, openID, profile, email, phone, address",
+                 'ClientID' => config('etax.qb_client_id'),
+                 'ClientSecret' => config('etax.qb_client_secret')."FFSDF",
+                 'scope' => "com.intuit.quickbooks.accounting",
                  'baseUrl' => "https://sandbox-quickbooks.api.intuit.com/",
                  'QBORealmID' => $realmId,
                  'accessTokenKey' => $accessTokenValue,
                  'refreshTokenKey' => $refreshTokenValue
             ));
             return $dataService;
-            Cache::put($cachekey, $dataService, 3600);
+            Cache::put($cachekey, $dataService, 2400);
         }
         
         return Cache::get($cachekey);
@@ -121,7 +121,7 @@ class Quickbooks extends Model
             $company = currentCompanyModel();
         }
         
-        $cachekey = "qb-clientsjson-$company->id_number";
+        $cachekey = "qb-accountsjson-$company->id_number";
         if ( !Cache::has($cachekey) ) {
             $qbAccounts = $this->getAuthenticatedDS()->Query("SELECT * FROM Account");
             Cache::put($cachekey, $qbAccounts, 300); //Cache por 5 minutos.

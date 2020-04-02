@@ -44,8 +44,8 @@ class QuickbooksBill extends Model
     
     public static function getMonthlyBills($dataService, $year, $month, $company) {
         $cachekey = "qb-bills-$company->id_number-$year-$month"; 
-        if ( !Cache::has($cachekey) ) {
-            $count = QuickbooksBill::where('company_id', $company->id)->count();
+        //if ( !Cache::has($cachekey) ) {
+            $count = QuickbooksBill::where('company_id', $company->id)->count(); $count = 0;
             if( $count > 0 ){
                 $dateFrom = Carbon::createFromDate($year, $month, 1)->firstOfMonth()->toAtomString();
                 $dateTo = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toAtomString();
@@ -54,9 +54,9 @@ class QuickbooksBill extends Model
                 $bills = $dataService->Query("SELECT * FROM Bill");
             }
             Cache::put($cachekey, $bills, 30); //Cache por 15 segundos.
-        }else{
+        /*}else{
             $bills = Cache::get($cachekey);
-        }
+        }*/
         return $bills;
     }
     
@@ -68,30 +68,35 @@ class QuickbooksBill extends Model
 
         foreach($qbBills as $qbBill){
             $date = Carbon::createFromFormat("Y-m-d", $qbBill->TxnDate);
-            $clientName = QuickbooksProvider::getProviderName($company, $qbBill->VendorRef);
+            $providerName = QuickbooksProvider::getProviderName($company, $qbBill->VendorRef);
+
             $qbBill = QuickBooksBill::updateOrCreate(
               [
                 "qb_id" => $qbBill->Id
               ],
               [
-                "qb_doc_number" => $qbBill->DocNumber,
+                "qb_doc_number" => $qbBill->DocNumber ?? "QB".$qbBill->Id,
                 "qb_date" => $date,
                 "qb_total" => $qbBill->TotalAmt,
-                "qb_client" => $clientName,
+                "qb_provider" => $providerName,
                 "qb_data" => $qbBill,
                 "generated_at" => 'quickbooks',
-                "month" => $month,
-                "year" => $year,
+                "month" => $date->month,
+                "year" => $date->year,
                 "company_id" => $company->id
               ]
             );
         }
     }
     
-    public static function saveEtaxaqb($dataService, $bill, $accountRef = null){   
+    public static function saveEtaxaqb($dataService = false, $bill, $accountRef = null){   
         try{
             $company = $bill->company;
+            $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
+            $dataService = $qb->getAuthenticatedDS();
+            
             $lines = [];
+            $taxCode = "S003"; //Por defecto usa este.
             foreach($bill->items as $item){
                 $itemRef = null;
                 $itemName = null;
@@ -100,7 +105,8 @@ class QuickbooksBill extends Model
                     $product = Product::updateOrCreate(
                         [
                             'company_id' => $bill->company_id,
-                            'name' => $item->name
+                            'name' => $item->name,
+                            'is_catalogue' => false
                         ],
                         [
                             'unit_price' => $item->unit_price,
@@ -108,7 +114,6 @@ class QuickbooksBill extends Model
                             'description' => $item->name ?? null,
                             'default_iva_type'  => $item->iva_type,
                             'product_category_id'  => $item->product_type,
-                            'is_catalogue' => true,
                             'measure_unit' => $item->measure_unit
                         ]
                     );
@@ -120,41 +125,70 @@ class QuickbooksBill extends Model
                 $itemRef = $qbItem->qb_id;
                 
                 $qty = round($item->item_count, 5);
-                $unitPrice = round($item->unit_price + ($item->iva_amount/$item->item_count), 5);
+                $unitPrice = round($item->unit_price, 5);
                 $Amount = $qty*$unitPrice;
+                $ivaAmount = $qty * $item->iva_amount;
+
+                $taxCode = $item->iva_type;
+                
                 $lines[] = [
-                     "Amount" => $Amount,
-                     "DetailType" => "SalesItemLineDetail",
-                     "SalesItemLineDetail" => [
-                        "UnitPrice" => $unitPrice,
-                        "Qty" => $qty,
-                        "ItemRef" => [
-                          "value" => $itemRef,
-                          "name" => $itemName
-                        ]
+                     "Amount" => $item->total,
+                     "DetailType" => "AccountBasedExpenseLineDetail",
+                     "AccountBasedExpenseLineDetail" => [
+                        "AccountRef" =>
+                        [
+                            "value" => "$accountRef"
+                        ],
+                        "TaxCodeRef" => "TAX"
                      ]
                 ];
             }
             
             $qbVendor = QuickbooksProvider::where('company_id', $bill->company_id)
-                                            ->where('client_id', $bill->client_id)->first();
+                                            ->where('provider_id', $bill->provider_id)->first();
             if(!isset($qbVendor)){
-                $qbVendor = QuickbooksProvider::saveEtaxaqb($dataService, $bill->client);
+                $qbVendor = QuickbooksProvider::saveEtaxaqb($dataService, $bill->provider);
             }
             if( !isset($qbVendor->qb_id) ){
-                return back()->withError( "Error al guardar proveedor ". $bill->client_first_name ." en QuickBooks, por favor contacte a soporte o intente hacer la sincronización del proveedor. Mensaje: ".$qbVendor->getIntuitErrorMessage() );
+                return back()->withError( "Error al guardar proveedor ". $bill->provider_first_name ." en QuickBooks, por favor contacte a soporte o intente hacer la sincronización del proveedor. Mensaje: ".$qbVendor->getIntuitErrorMessage() );
             }
             
+            $taxRef = null;
+            foreach($qb->taxes_json['tipo_iva'] as $key => $value){
+                if( $key != 'default' ){
+                    if($taxCode == $value){
+                        $taxRef = $key;
+                    }
+                }
+            }
+            $TxnTaxDetail = [
+                "TxnTaxCodeRef" => 4
+            ];
+            
             $params = [
+                "DocNumber" => $bill->document_number,
                 "Line" => $lines,
                 "VendorRef" => [
                       "value" => $qbVendor->qb_id,
                       "name" => $qbVendor->full_name
                 ],
                 "BillEmail" => [
-                      "Address" => $bill->email
-                ]
+                      "Address" => $bill->provider_email
+                ],
+                "PrivateNote" => $bill->description ?? "",
+                "TxnTaxDetail" => $TxnTaxDetail
             ];
+            
+            //Define la condicion de venta
+            foreach($qb->conditions_json as $key => $value){
+                if( $key != 'default' ){
+                    if($bill->sale_condition == $value){
+                        $params["SalesTermRef"] = [
+                            "value" => $key
+                        ];
+                    }
+                }
+            }
             
             $theResourceObj = qbBill::create($params);
 
@@ -164,12 +198,13 @@ class QuickbooksBill extends Model
                 Log::error("The Status code is: " . $error->getHttpStatusCode() . "\n".
                             "The Helper message is: " . $error->getOAuthHelperError() . "\n".
                             "The Response message is: " . $error->getResponseBody() . "\n");
-                $qbBills = $dataService->Query("SELECT * FROM Bill WHERE CompanyName = '$fullname'");
+                $qbBills = $dataService->Query("SELECT * FROM Bill WHERE DocNumber = '$bill->document_number'");
                 $qbBill = $qbBills[0] ?? null;
             }
+            
             if( isset($qbBill) ){
                 $date = Carbon::createFromFormat("Y-m-d", $qbBill->TxnDate);
-                $clientName = QuickbooksProvider::getProviderName($company, $qbBill->VendorRef);
+                $providerName = QuickbooksProvider::getProviderName($company, $qbBill->VendorRef);
                 $inv = QuickBooksBill::updateOrCreate(
                   [
                     "qb_id" => $qbBill->Id
@@ -178,8 +213,9 @@ class QuickbooksBill extends Model
                     "qb_doc_number" => $qbBill->DocNumber,
                     "qb_date" => $date,
                     "qb_total" => $qbBill->TotalAmt,
-                    "qb_client" => $clientName,
+                    "qb_provider" => $providerName,
                     "qb_data" => $qbBill,
+                    "qb_account" => $accountRef,
                     "generated_at" => 'quickbooks',
                     "month" => $bill->month,
                     "year" => $bill->year,
@@ -197,11 +233,10 @@ class QuickbooksBill extends Model
         }
     }
     
-    
-    
     public function saveQbaetax(){
         try{
             $company = $this->company;
+            $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
             $billData = $this->qb_data;
             $items = $billData["Line"];
             
@@ -209,14 +244,15 @@ class QuickbooksBill extends Model
             $xmlSchema = 43;
             $codigoActividad = $company->getActivities() ? $company->getActivities()[0]->codigo : '0';
             
-            $vendor = QuickbooksProvider::getProviderInfo($company, $billData['VendorRef']);
-            if( !$vendor ){
-                return [
-                    'status'  => '400',
-                    'mensaje' => 'No se encontró el proveedor. Verifique que el proveedor se encuentre correctamente sincronizado e indique el tipo de persona y código postal.'
-                ];
+            try{
+                $vendor = QuickbooksProvider::getProviderInfo($company, $billData['VendorRef']);
+                $proveedor = $vendor->provider;
+            if( !$proveedor ){
+                return back()->withError("No se encontró el proveedor de la factura $this->qb_id. Verifique que el proveedor se encuentre correctamente sincronizado e indique el tipo de persona y código postal.");
             }
-            $proveedor = $vendor->client;
+            }catch(\Exception $e){
+                return back()->withError("No se encontró el proveedor de la factura $this->qb_id. Verifique que el proveedor se encuentre correctamente sincronizado e indique el tipo de persona y código postal.");
+            }
             
             if( isset($data['BillAddr']) ){
                   try{
@@ -237,12 +273,12 @@ class QuickbooksBill extends Model
                 $email = $data['BillEmail']["Address"];
             }
             
-            $nombreProvidere = $proveedor->fullname;
-            $codigoProvidere = $proveedor->codigo;
+            $nombreProveedor = $proveedor->fullname;
+            $codigoProveedor = $proveedor->codigo;
             $tipoPersona = $proveedor->tipo_persona ?? '01'; //SOLUCIONAR - QB no incluye tipo de persona
-            $identificacionProvidere = $proveedor->id_number ?? '0000'; //SOLUCIONAR - QB no incluye cédula
-            $correoProvidere = $email ?? $proveedor->email;
-            $telefonoProvidere = $phone ?? $proveedor->phone;
+            $identificacionProveedor = $proveedor->id_number ?? '0000'; //SOLUCIONAR - QB no incluye cédula
+            $correoProveedor = $email ?? $proveedor->email;
+            $telefonoProveedor = $phone ?? $proveedor->phone;
             $direccion = $address ?? $proveedor->address;
             $codProvincia = $state ?? $proveedor->state;
             $codCanton = $city ?? $proveedor->city;
@@ -257,8 +293,11 @@ class QuickbooksBill extends Model
             }
             
             $numeroReferencia = $billData['DocNumber'];
-            $consecutivoComprobante = $billData['DocNumber'];
-            $claveFactura = "QB-".getDocumentKey($tipoDocumento, $company, $numeroReferencia);
+            if( !isset($numeroReferencia) ){
+                $numeroReferencia = "QB".$billData['Id'];
+            }
+            $consecutivoComprobante = $numeroReferencia;
+            $claveFactura = $numeroReferencia;
     
             $bill = Bill::where('document_number', $consecutivoComprobante)
                                 ->where('company_id', $company->id)
@@ -278,8 +317,26 @@ class QuickbooksBill extends Model
             
             $condicionVenta = "01";
             $metodoPago = '01';
-            $idMoneda = $billData['CurrencyRef'] ?? 'CRC';
+            //Define la condicion de venta
+            if( isset($billData['SalesTermRef']) ){
+                foreach($qb->conditions_json as $key => $value){
+                    if($billData['SalesTermRef'] == $key){
+                        $condicionVenta = $value;
+                    }
+                }
+            }
             
+            
+            //Define el metodo de pago
+            if( isset($billData['PaymentMethodRef']) ){
+                foreach($qb->payment_methods_json as $key => $value){
+                    if($billData['PaymentMethodRef'] == $key){
+                        $metodoPago = $value;
+                    }
+                }
+            }
+            
+            $idMoneda = $billData['CurrencyRef'] ?? 'CRC';
             if( $idMoneda == 'USD' ){
                 $tipoCambio = QuickbooksBill::getExchangeRate($fechaEmision);
             }else{
@@ -287,9 +344,9 @@ class QuickbooksBill extends Model
                 $tipoCambio = 1;
             }
             
-            
-            $descripcion = isset($billData['VendorMemo']) ? $billData['VendorMemo'] : '';
+            $descripcion = isset($billData['PrivateNote']) ? $billData['PrivateNote'] : '';
             $porcentajeIVA = 13;
+            $codigoEtax = 'S003';
             if( isset($billData['TxnTaxDetail']) ){
                 $taxCode = $billData['TxnTaxDetail']['TxnTaxCodeRef'];
                 if( !$taxCode ){
@@ -307,13 +364,43 @@ class QuickbooksBill extends Model
             $i = 0;
             $totalDocumento = 0;
             $billList = array();
-            foreach($items as $item){
+            
+            $descriptionOnly = false;
+            if( isset($items['Id']) ){
+                $itemsArray = [];
+                $itemsArray[] = $items;
+                $descriptionOnly = true;
+            }else{
+                $itemsArray = $items;
+            }
+            foreach($itemsArray as $item){
                 $i++;
-                $detail = $item['SalesItemLineDetail'];   
-                $product = null;
-                if( $detail ){
-                    $product = QuickbooksProduct::getProductByRef($company, $detail['ItemRef']);
+                
+                if( $descriptionOnly ){
+                    $detail = [];
+                    $detail['UnitPrice'] = $item['Amount'];
+                    $detail['Qty'] = 1;
+                    $detail['DiscountAmt'] = 0;
+                    $product = new \stdClass();
+                    $product->measure_unit = 'Sp';
+                    $product->code = $item['Id'];
+                    $product->description = $item['Description'] ?? "";
+                }else{
+                    $detail = $item['ItemBasedExpenseLineDetail'] ?? $item['AccountBasedExpenseLineDetail'];   
+                    $product = null;
+                    if( $detail ){
+                        $productRef = $detail['ItemRef'];
+                        $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
+                        $dataService = $qb->getAuthenticatedDS();
+                        $qbProducts = $dataService->Query("SELECT * FROM Item WHERE Id = '$productRef'");
+                        $qbProduct = $qbProducts[0];
+                        $product = new \stdClass();
+                        $product->measure_unit = 'Sp';
+                        $product->code = $qbProduct->Id ?? $qbProduct->Name;
+                        $product->description = $qbProduct->Description;
+                    }
                 }
+            
                 //Revisa que no sean las lineas de diferencial cambiario ni tarifa general
                 if ( $product ) {
                     $numeroLinea = $i;
@@ -321,9 +408,9 @@ class QuickbooksBill extends Model
                     $detalleProducto = $product->description;
                     $unidadMedicion = $product->measure_unit;
                     
-                    $cantidad = $detail['Qty'];
+                    $cantidad = $detail['Qty'] ?? 1;
                     $precioUnitario = $detail['UnitPrice'];
-                    $montoDescuento = $detail['DiscountAmt'];
+                    $montoDescuento = $detail['DiscountAmt'] ?? 0;
                     
                     $subtotalLinea = $cantidad*$precioUnitario - $montoDescuento;
                     $montoIva = $subtotalLinea * ($porcentajeIVA/100);
@@ -346,13 +433,13 @@ class QuickbooksBill extends Model
                         'idEmisor' => $company->id_number,
                         'haciendaStatus' => '03',
                         /****Empiezan datos proveedor***/
-                        'nombreProvidere' => $nombreProvidere,
+                        'nombreProveedor' => $nombreProveedor,
                         'descripcion' => $descripcion,
-                        'codigoProvidere' => $codigoProvidere,
+                        'codigoProveedor' => $codigoProveedor,
                         'tipoPersona' => $tipoPersona,
-                        'identificacionProvidere' => $identificacionProvidere,
-                        'correoProvidere' => $correoProvidere,
-                        'telefonoProvidere' => $telefonoProvidere,
+                        'identificacionProveedor' => $identificacionProveedor,
+                        'correoProveedor' => $correoProveedor,
+                        'telefonoProveedor' => $telefonoProveedor,
                         'direccion'     => $direccion,
                         'zip'     => $zip,
                         /****Empiezan datos factura***/
@@ -406,7 +493,7 @@ class QuickbooksBill extends Model
                $newBill = Bill::where('company_id', $company->id)
                                 ->where('document_number', $fac['factura']['document_number'])
                                 ->where('document_key', $fac['factura']['document_key'])
-                                ->where('client_id_number', $fac['factura']['client_id_number'])
+                                ->where('provider_id_number', $fac['factura']['provider_id_number'])
                                 ->first();
                 if($newBill){
                     $this->bill_id = $newBill->id;
@@ -430,8 +517,8 @@ class QuickbooksBill extends Model
         try {
             if ( !Cache::has($cacheKey) ) {
 
-                $client = new \GuzzleHttp\Provider();
-                $response = $client->get( config('etax.exchange_url'),
+                $provider = new \GuzzleHttp\Client();
+                $response = $provider->get( config('etax.exchange_url'),
                     [
                         'query' => [
                             'Indicador' => '318',

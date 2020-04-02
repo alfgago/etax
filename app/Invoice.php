@@ -627,7 +627,6 @@ class Invoice extends Model
           $invoice->currency_rate = $data['tipoCambio'];
           $invoice->subtotal = 0;
           $invoice->iva_amount = 0;
-          $invoice->total = $data['totalDocumento'] ?? 0;
 
           $invoiceList[$arrayKey]['lineas'] = array();
           $invoiceList[$arrayKey]['factura'] = $invoice;
@@ -658,11 +657,13 @@ class Invoice extends Model
         return false;
       }*/
 
+      
       $invoice = $invoiceList[$arrayKey]['factura'];
       $year = $invoice->generatedDate()->year;
       $month = $invoice->generatedDate()->month;
 
       /**LINEA DE FACTURA**/
+      $invoice->total = $data['totalDocumento'] ?? 0;
       $subtotalLinea = $data['subtotalLinea'] ?? 0;
       $montoIvaLinea = $data['montoIva'] ?? 0;
       $totalLinea = $data['totalLinea'] ?? 0;

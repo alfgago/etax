@@ -78,64 +78,31 @@ class QuickbooksProvider extends Model
         }
     }
     
-    public static function getProviderName($company, $providerRef){
-        $cachekey = "qb-provider-$company->id_number-$providerRef";
-        if ( !Cache::has($cachekey) ) {
-            $qbProvider = QuickbooksProvider::where('company_id', $company->id)
-                        ->where('qb_id', $providerRef)
-                        ->with('provider')
-                        ->first();
-            Cache::put($cachekey, $qbProvider, 15); //Cache por 15 segundos.
-        }else{
-            $qbProvider = Cache::get($cachekey);
-        }
+    public static function getProviderName($company, $vendorRef){
+        $qbVendor = QuickbooksProvider::getProviderInfo($company, $vendorRef);
         
-        if(isset($qbProvider)){
-            return $qbProvider->full_name;
+        if(isset($qbVendor)){
+            return $qbVendor->full_name;
         }else{
-            return $providerRef;
+            return $vendorRef;
         }
     }
     
-    public static function getProviderInfo($company, $providerRef){
-        $cachekey = "qb-provider-$company->id_number-$providerRef";
+    public static function getProviderInfo($company, $vendorRef){
+        $cachekey = "qb-vendor-$company->id_number-$vendorRef";
         if ( !Cache::has($cachekey) ) {
-            $qbProvider = QuickbooksProvider::where('company_id', $company->id)
-                        ->where('qb_id', $providerRef)
+            $qbVendor = QuickbooksProvider::where('company_id', $company->id)
+                        ->where('qb_id', $vendorRef)
                         ->with('provider')
                         ->first();
-            Cache::put($cachekey, $qbProvider, 15); //Cache por 15 segundos.
-        }else{
-            $qbProvider = Cache::get($cachekey);
-        }
-        
-        if(isset($qbProvider)){
-            $provider = $qbProvider->provider; 
-            if( isset($provider) ){
-                if( empty($provider->tipo_persona) ){
-                    Log::error("Enviando factura de providere no mapeado");
-                    return false;  
-                }
-                $providerInfo['nombreProvidere'] = $provider->fullname;
-                $providerInfo['codigoProvidere'] = $provider->code;
-                $providerInfo['tipoPersona'] = $provider->tipo_persona;
-                $providerInfo['identificacionProvidere'] = $provider->id_number ?? null;
-                $providerInfo['correoProvidere'] = $provider->email ?? null;
-                $providerInfo['telefonoProvidere'] = $provider->phone ?? null;
-                $providerInfo['direccion'] = $provider->address ?? "No indica";
-                $providerInfo['codProvincia'] = $provider->state ?? "1";
-                $providerInfo['codCanton'] = $provider->city ?? "01";
-                $providerInfo['codDistrito'] = $provider->district ?? "01";
-                $providerInfo['zip'] = $providerInfo['codProvincia'].$providerInfo['codCanton'].$providerInfo['codDistrito'];
-            }else{
-                Log::error("Enviando factura de providere no mapeado");
+            if( !isset($qbVendor) ){
                 return false;
             }
+            Cache::put($cachekey, $qbVendor, 30); //Cache por 15 segundos.
         }else{
-            return false;
+            $qbVendor = Cache::get($cachekey);
         }
-        
-        return $providerInfo;
+        return $qbVendor;
     }
     
     public function saveQbaetax(){   

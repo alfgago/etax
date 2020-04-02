@@ -472,11 +472,17 @@ class QuickbooksController extends Controller
                 ->where('month', $month)
                 ->with('provider')
                 ->with('quickbooksBill');
-
         $facturasQb = QuickbooksBill::where('company_id', $company->id)
                         ->where('year', $year)
                         ->where('month', $month)
                         ->get();
+                        
+                        
+        $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
+        if( !isset($qb) ){
+            return redirect('/quickbooks/configuracion')->withError('Usted no tiene Quickbooks configurado correctamente.');
+        }
+        $cuentasQb = $qb->getAccounts($company);
 
         return datatables()->eloquent( $query )
             ->editColumn('provider', function($bill) {
@@ -498,6 +504,16 @@ class QuickbooksController extends Controller
                 }else{
                     return "No asociado";
                 }
+            })->addColumn('accounts', function($bill) use($cuentasQb){
+                if( isset($product->quickbooksProduct) ){
+                    $product->accId = $bill->quickbooksBill->qb_account;
+                }else{
+                    $product->accId = 0;
+                }
+                return view('Quickbooks.Bills.cuentas-contables', [
+                    'cuentasQb' => $cuentasQb,
+                    'facturaEtax' => $bill
+                ])->render();
             })
             ->addColumn('actions', function($bill) use($facturasQb){
                 if( isset($bill->quickbooksBill) ){
@@ -510,7 +526,7 @@ class QuickbooksController extends Controller
                     'facturaEtax' => $bill
                 ])->render();
             })
-            ->rawColumns(['actions', 'link'])
+            ->rawColumns(['actions', 'link', 'accounts'])
             ->toJson();
     }
     
@@ -558,6 +574,7 @@ class QuickbooksController extends Controller
     public function syncBillsEtaxaqb(){
         $company = currentCompanyModel();
         $bills = request()->bills;
+        $billAccounts = request()->bills_accounts;
         $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
         if( !isset($qb) ){
             return redirect('/quickbooks/configuracion')->withError('Usted no tiene Quickbooks configurado correctamente.');
@@ -566,8 +583,10 @@ class QuickbooksController extends Controller
         foreach($bills as $key => $value){
             if($value == 'N'){
                 $etaxBill = Bill::find($key);
+                $accountRef = $billAccounts[$key];
+                
                 if( isset($etaxBill) ){
-                    QuickbooksBill::saveEtaxaqb($dataService, $etaxBill);
+                    QuickbooksBill::saveEtaxaqb($dataService, $etaxBill, $accountRef);
                 }
             }else{
                 $qbBill = QuickbooksBill::where('company_id', $company->id)->where('qb_id', $value)->first();

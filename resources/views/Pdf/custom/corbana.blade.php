@@ -29,16 +29,19 @@
             width: 170px;
             display: inline-block;
             vertical-align: top;
+            padding-top: 3px;
+        }
+        
+        .details-table td span{
+            display: inline-block;
+            width: 200px;
+            vertical-align: top;
+            padding-top: 3px;
         }
         
         .details3 td b{
             display: inline-block;
             width: 200px;
-        }
-        
-        .details-table td span{
-            display: inline-block;
-            vertical-align: top;
         }
         
         .table-lines-cont {
@@ -80,10 +83,10 @@
             $documentType = 'Factura electrónica';
         break;
         case '02':
-            $documentType = 'Nota de débito electrónica';
+            $documentType = 'Nota de débito';
         break;
         case '03':
-            $documentType = 'Nota de crédito electrónica';
+            $documentType = 'Nota de crédito';
         break;
         case '04':
             $documentType = 'Tiquete electrónico';
@@ -119,6 +122,13 @@
     $otherData = \App\OtherInvoiceData::where("invoice_id", $data_invoice->id)->get();
     
     $currencySymbol = $data_invoice->currency == 'USD' ? '$' : '<span style="font-family: arial;">&cent;</span>';
+
+    $numExoneracion = null;
+    foreach($data_invoice->items as $item){
+        if( isset($item->exoneration_document_number) ){ 
+            $numExoneracion = $item->exoneration_document_number;
+        }
+    }
     
 ?>
 <body>
@@ -175,10 +185,10 @@
                 <table class="details-table details2">
                     <tr>
                         <td>
-                            <b>VENDIDO A / (SOLD TO):</b> <span>{{$data_invoice->client_first_name.' '.$data_invoice->client_last_name}}</span><br>
-                            <b>IDENTIFICACION / (ID):</b> <span>{{$data_invoice->client_id_number}}</span><br>
-                            <b>CORREO ELECTRONICO / (EMAIL):</b> <span>{{$data_invoice->client_email}}</span><br>
-                            <b>TELEFONO / (PHONE NUMBER):</b> <span>{{$data_invoice->client_phone}}</span><br>
+                            <b>VENDIDO A / (SOLD TO):</b> <span style='text-wrap: wrap;'>{{$data_invoice->client_first_name.' '.$data_invoice->client_last_name}}</span><br>
+                            <b>IDENTIFICACIÓN / (ID):</b> <span>{{$data_invoice->client_id_number}}</span><br>
+                            <b>CORREO ELECTRÓNICO / (EMAIL):</b> <span>{{$data_invoice->client_email}}</span><br>
+                            <b>TELÉFONO / (PHONE NUMBER):</b> <span>{{$data_invoice->client_phone}}</span><br>
                             <b>REFERENCIA / (REFERENCE):</b> <span>{{ \App\OtherInvoiceData::findData($otherData, 'REFERENCIA') }}</span><br>
                             <?php $consignatario = \App\OtherInvoiceData::findData($otherData, 'CONSIG');
                                 if( isset($consignatario) ){  ?>
@@ -186,9 +196,9 @@
                             <?php } ?>
                         </td>
                         <td>
-                            <b>FACTURA ELECTRÓNICA / (ELECTRONIC INVOICE):</b> <span>{{$data_invoice->document_number}}</span><br>
-                            <b style="width:100%;">CLAVE NUMERICA / (DOCUMENT KEY):</b> <br><b style="width:100%;">{{$data_invoice->document_key}}</b><br>
-                            <b>TIPO / (TYPE): </b> <span>{{ $documentType }}</span><br>
+                            <b>TIPO DOC. / (DOC. TYPE): </b> <span>{{ $documentType }}</span><br>
+                            <b>NÚMERO DOC. / (DOC. NUMBER):</b> <span>{{$data_invoice->document_number}}</span><br>
+                            <b style="width:100%;">CLAVE NUMÉRICA / (DOCUMENT KEY):</b> <br><span style="width:100%; padding-top:0;">{{$data_invoice->document_key}}</span><br>
                             <b>FECHA / (DATE)</b> <span>{{ $data_invoice->generated_date }}</span><br>
                             <b>MONEDA / (CURRENCY)</b> <span>{{ $data_invoice->currency }}</span><br>
                             <b>TIPO DE CAMBIO / (EXCHANGE RATE)</b> <span>{{ $data_invoice->currency_rate }}</span>
@@ -196,7 +206,7 @@
                     </tr>
                     <tr class="details3">
                         <td>
-                            <b>TERMINOS DE PAGO/(TERMS PAYMENT):</b> <span>{{ $data_invoice->getCondicionVenta() }}</span><br>
+                            <b>TÉRMINOS DE PAGO/(TERMS PAYMENT):</b> <span>{{ $data_invoice->getCondicionVenta() }}</span><br>
                             <b>PLAZO CREDITO / (CREDIT TERM):</b> <span>{{ $data_invoice->credit_time }}</span><br>
                             <b>MEDIO DE PAGO / (MEANS OF PAYMENT):</b> <span>{{ $data_invoice->getMetodoPago() }}</span><br>
                         </td>
@@ -237,39 +247,47 @@
                         $cantidadCount = 0;
                     ?>
                     @foreach($data_invoice->items as $item)
+                        <?php 
+                        $totalLinea = $item->total;
+                        $ivaAmountLinea = $item->iva_amount;
+                        if( isset($numExoneracion) ){
+                            $totalLinea = $item->total - $item->iva_amount;
+                            $ivaAmountLinea = 0;
+                        }
+                        ?>
                         <tr class="item">
-                            <td>
+                            <td style="text-align: left;">
                                 {{$item->item_count ?? ''}}
                                 <?php 
                                     $cantidadCount = $cantidadCount + $item->item_count ?? 0;
                                 ?>
                             </td>
-                            <td>
-                                {{$item->measure_unit ?? ''}}
+                            <td style="text-align: center;">
+                                {{$item->measure_unit ? ($item->measure_unit == '0' ? 'Unid' : $item->measure_unit) : 'Unid'}}
                             </td>
                             <td>
                                 {{$item->name ?? ''}}
                             </td>
-                            <td>
-                                {{$item->iva_amount ? number_format($item->iva_amount, 2) : '0'}}
+                            <td style="text-align: left;">
+                                {!! $currencySymbol !!}{{$ivaAmountLinea ? number_format($ivaAmountLinea, 2) : '0'}}
                             </td>
-                            <td>
+                            <td style="text-align: left;">
                                 <?php $pneto = \App\OtherInvoiceData::findData($otherData, 'PESO_NETO', $item->id);
                                 if( isset($pneto) ){  ?>
                                     {{ $pneto }}
                                 <?php } ?>
                             </td>
-                            <td>
+                            <td style="text-align: left;">
                                 <?php $pbruto = \App\OtherInvoiceData::findData($otherData, 'PESO_BRUTO', $item->id);
                                 if( isset($pbruto) ){  ?>
                                     {{ $pbruto }}
                                 <?php } ?>
                             </td>
-                            <td>
+                            <td style="text-align: left;">
                                 {!! $currencySymbol !!}{{$item->unit_price ? number_format($item->unit_price, 2) : '0'}}
                             </td>
-                            <td>
-                                {!! $currencySymbol !!}{{$item->total ? number_format($item->total, 2) : '0'}}
+                            <td style="text-align: left;">
+                                {!! $currencySymbol !!}{{$totalLinea ? number_format($totalLinea, 2) : '0'}}
                             </td>
                         </tr>
                     @endforeach
@@ -318,6 +336,9 @@
                 @if( isset($company->payment_notes) )
                     <b style="margin: 1rem 0;">OBSERVACIONES/(OBSERVATIONS):</b>
 					<p>{!! nl2br(e($company->payment_notes)) !!}</p>
+                @endif
+                @if( isset($numExoneracion) )
+                    <b>Número de exoneración: </b> {{ $numExoneracion }}<br>
                 @endif
             </td>
             <td style="border: 2px solid black; padding: 5px; width: 35%;" colspan="1">

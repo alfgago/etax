@@ -1012,7 +1012,6 @@ class Bill extends Model
           
           $bill->subtotal = 0;
           $bill->iva_amount = 0;
-          $bill->total = $data['totalDocumento'] ?? 0;
 
           /*if(!$bill->id){
             $bill->save();
@@ -1028,6 +1027,7 @@ class Bill extends Model
       $month = $bill->generatedDate()->month;
 
       /**LINEA DE FACTURA**/
+      $bill->total = $data['totalDocumento'] ?? 0;
       $subtotalLinea = $data['subtotalLinea'] ?? 0;
       $montoIvaLinea = $data['montoIva'] ?? 0;
       $totalLinea = $data['totalLinea'] ?? 0;

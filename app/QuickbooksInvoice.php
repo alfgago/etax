@@ -80,8 +80,8 @@ class QuickbooksInvoice extends Model
                 "qb_client" => $clientName,
                 "qb_data" => $qbInvoice,
                 "generated_at" => 'quickbooks',
-                "month" => $month,
-                "year" => $year,
+                "month" => $date->month,
+                "year" => $date->year,
                 "company_id" => $company->id
               ]
             );
@@ -92,6 +92,8 @@ class QuickbooksInvoice extends Model
         try{
             $company = $invoice->company;
             $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
+            
+            $dataService = $qb->getAuthenticatedDS();
             
             $lines = [];
             $taxCode = "S103"; //Por defecto usa este.
@@ -165,10 +167,8 @@ class QuickbooksInvoice extends Model
                 "TxnTaxCodeRef" => $taxRef
             ];
             
-            //Define el 
-            
             $params = [
-                //"DocNumber" => $invoice->document_number,
+                "DocNumber" => $invoice->document_number,
                 "Line" => $lines,
                 "CustomerRef" => [
                       "value" => $qbCustomer->qb_id,
@@ -181,6 +181,29 @@ class QuickbooksInvoice extends Model
                 "TxnTaxDetail" => $TxnTaxDetail
             ];
             
+            //Define el metodo de pago
+            foreach($qb->conditions_json as $key => $value){
+                if( $key != 'default' ){
+                    if($invoice->sale_condition == $value){
+                        $params["SalesTermRef"] = [
+                            "value" => $key
+                        ];
+                    }
+                }
+            }
+            
+            
+            //Define el metodo de pago
+            foreach($qb->payment_methods_json as $key => $value){
+                if( $key != 'default' ){
+                    if($invoice->payment_type == $value){
+                        $params["PaymentMethodRef"] = [
+                            "value" => $key
+                        ];
+                    }
+                }
+            }
+            
             $theResourceObj = qbInvoice::create($params);
 
             $qbInvoice = $dataService->Add($theResourceObj);
@@ -192,7 +215,7 @@ class QuickbooksInvoice extends Model
                 $qbInvoices = $dataService->Query("SELECT * FROM Invoice WHERE DocNumber = '$invoice->document_number'");
                 $qbInvoice = $qbInvoices[0] ?? null;
             }
-            dd($error, $qbInvoice, $invoice);
+            
             if( isset($qbInvoice) ){
                 $date = Carbon::createFromFormat("Y-m-d", $qbInvoice->TxnDate);
                 $clientName = QuickbooksCustomer::getClientName($company, $qbInvoice->CustomerRef);
@@ -217,7 +240,6 @@ class QuickbooksInvoice extends Model
             }
             return $error;
         }catch(\Exception $e){
-            dd($e);
             return back()->withError( "Error al sincronizar factura: $invoice->document_number. Por favor contacte a soporte." );
             Log::error($e);
             return $e;
@@ -236,14 +258,15 @@ class QuickbooksInvoice extends Model
             $xmlSchema = 43;
             $codigoActividad = $company->getActivities() ? $company->getActivities()[0]->codigo : '0';
             
-            $customer = QuickbooksCustomer::getClientInfo($company, $invoiceData['CustomerRef']);
-            if( !$customer ){
-                return [
-                    'status'  => '400',
-                    'mensaje' => 'No se encontró el cliente. Verifique que el cliente se encuentre correctamente sincronizado e indique el tipo de persona y código postal.'
-                ];
+            try{
+                $customer = QuickbooksCustomer::getClientInfo($company, $invoiceData['CustomerRef']);
+                $cliente = $customer->client;
+            if( !$cliente ){
+                return back()->withError("No se encontró el cliente de la factura $this->qb_id. Verifique que el proveedor se encuentre correctamente sincronizado e indique el tipo de persona y código postal.");
             }
-            $cliente = $customer->client;
+            }catch(\Exception $e){
+                return back()->withError("No se encontró el cliente de la factura $this->qb_id. Verifique que el proveedor se encuentre correctamente sincronizado e indique el tipo de persona y código postal.");
+            }
             
             if( isset($data['BillAddr']) ){
                   try{
@@ -441,8 +464,8 @@ class QuickbooksInvoice extends Model
                 }
             }
         }catch(\Exception $e){
-            dd($e);
             Log::error($e);
+            return back()->withError( "Error al sincronizar factura QB a eTax. Por favor contacte a soporte. " . $e->getMessage() );
         }
     }
     
