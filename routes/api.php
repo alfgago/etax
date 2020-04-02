@@ -18,7 +18,13 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::prefix('v1')->group(function() {
+    Route::post('login', 'AuthController@login');
+    Route::post('refresh-token', 'AuthController@refreshToken');
 	Route::post('notificaciones', 'NotificationController@create');
+    Route::group(['middleware' => 'auth:api'], function() {
+        Route::get('actividades-economicas', 'CompanyAPIController@getActivities')->name('CompanyAPIController.getActivities');
+        Route::post('emitir-factura', 'InvoiceAPIController@emitir')->name('InvoiceAPIController.emitirFactura');
+    });
 });
 
 Route::post('email-facturas', 'EmailController@receiveEmailXML');

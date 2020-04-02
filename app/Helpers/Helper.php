@@ -825,3 +825,32 @@ if (!function_exists('replaceAccents')) {
     }
 
 }
+
+if (!function_exists('userHasCompany')) {
+    function userHasCompany($companyId) {
+        $user = auth()->user();
+        $cacheKey = "cache-has-company-$companyId-$user->id";
+        if (!Illuminate\Support\Facades\Cache::has($cacheKey)) {
+            try{
+                $company = App\Company::where('id_number', $companyId)->with('team')->first();
+                $companyKey = "cache-api-company-$companyId-$user->id";
+                $hasPermisoAdmin = App\UserCompanyPermission::where(  [
+                    'company_id' => $company->id,
+                    'user_id' => $user->id,
+                    'permission_id' => 1
+                ])->count();
+                $hasPermission = false;
+                if( $hasPermisoAdmin || $user->isOwnerOfTeam($company->team) ) {
+                    $hasPermission = true;
+                }
+            }catch(Exception $e){
+                $hasPermission = false;
+            }
+
+            Illuminate\Support\Facades\Cache::put($companyKey, $company, now()->addMinutes(15));
+            Illuminate\Support\Facades\Cache::put($cacheKey, $hasPermission, now()->addMinutes(15));
+        }
+
+        return Illuminate\Support\Facades\Cache::get($cacheKey);
+    }
+}
