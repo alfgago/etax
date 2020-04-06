@@ -73,6 +73,7 @@
                         <a class="dropdown-item" onclick="event.preventDefault(); document.getElementById(&quot;frm-logout&quot;).submit();">Cerrar sesión</a>
                     <form id="frm-logout" action="{{ route('logout') }}" method="POST" style="display: none;">
                         {{ csrf_field() }} 
+                        @honeypot
                     </form>
                     <?php /* @endif */ ?>
                 </div>
@@ -82,7 +83,6 @@
 
 </div>
 <script>
-    setInterval('contadorNotificaciones()',30000);
     $(".cerrar-notificaciones").click(function(){
         $("#notificacionesDropdown").click();
     });
@@ -159,6 +159,8 @@
             }
         });
     }
+    
+    contadorNotificaciones();
 
 </script>
 

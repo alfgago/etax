@@ -18,6 +18,11 @@ class Client extends Model
   {
       return $this->belongsTo(Company::class);
   }
+  
+  public function quickbooksCustomer()
+  {
+      return $this->hasOne(QuickbooksCustomer::class);
+  }
     
   public function getFullName() {
     return $this->first_name . " " . $this->last_name . " " . $this->last_name2;

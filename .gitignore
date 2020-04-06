@@ -6,6 +6,7 @@
 /.idea
 /.vscode
 /.c9
+/.c9/.*
 /nbproject
 /.vagrant
 Homestead.json
@@ -18,3 +19,6 @@ bk.env
 .DS_Store
 /docker/.DS_Store
 .c9/
+.c9/.*
+
+/storage/framework/*

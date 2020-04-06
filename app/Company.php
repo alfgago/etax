@@ -545,4 +545,71 @@ class Company extends Model {
         $this->save();
     }
 
+    /*
+    * Checks various validations to make sure that company is able to emit new invoices.
+    *
+    *
+    */
+    public function validateCompany($isInvoice){
+
+        //Revisa límite de facturas en el mes actual, ya sean de compra o de venta.
+        $start_date = Carbon::parse(now('America/Costa_Rica'));
+        $month = $start_date->month;
+        $year = $start_date->year;
+
+        $facturasPlan = $this->getAvailableInvoices( $year, $month);
+
+        if($isInvoice){
+            $facturasDisponibles = $facturasPlan->monthly_quota - $facturasPlan->current_month_sent;
+            if($facturasDisponibles < 1 && $this->additional_invoices < 1){
+                return $errors = ['codigo' => 400, 'mensaje' => 'Usted ha sobrepasado el límite de facturas mensuales de su plan actual.'];
+            }
+        }else{
+            $facturasDisponibles = $facturasPlan->bill_monthly_quota - $facturasPlan->bill_month_sent;
+            if($facturasDisponibles < 1 && $this->additional_invoices < 1){
+                return $errors = ['codigo' => 400, 'mensaje' => 'Usted ha sobrepasado el límite de facturas mensuales de su plan actual.'];
+            }
+        }
+        //Termina de revisar limite de facturas.
+
+
+        //Revisa si el ATV ya fue validado por hacienda
+        if ($this->atv_validation == false) {
+
+            $apiHacienda = new BridgeHaciendaApi();
+            $token = $apiHacienda->login(false);
+            $validateAtv = $apiHacienda->validateAtv($token, $this);
+
+            if( $validateAtv ) {
+                if ($validateAtv['status'] == 400) {
+                    Log::info('Atv Not Validated Company: '. $this->id_number);
+                    if (strpos($validateAtv['message'], 'ATV no son válidos') !== false) {
+                        $validateAtv['message'] = "Los parámetros actuales de acceso a ATV no son válidos";
+                    }
+                    return $errors = ['codigo' => 400, 'mensaje' => "Error al validar el certificado: " . $validateAtv['message']];
+
+                } else {
+                    Log::info('Atv Validated Company: '. $this->id_number);
+                    $this->atv_validation = true;
+                    $this->save();
+
+                    $user = auth()->user();
+                    Cache::forget("cache-currentcompany-$user->id");
+                }
+            }else {
+                return $errors = ['codigo' => 400, 'mensaje' => 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente.'];
+            }
+        }
+
+        if($this->last_note_ref_number === null) {
+            return $errors = ['codigo' => 400, 'mensaje' => 'No ha ingresado ultimo consecutivo de nota credito'];
+        }
+        if($this->last_ticket_ref_number === null) {
+            return $errors = ['codigo' => 400 , 'mensaje' => 'No ha ingresado ultimo consecutivo de tiquetes'];
+        }
+
+        return $errors = false;
+
+    }
+
 }

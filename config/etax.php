@@ -32,6 +32,6 @@ return [
     
     'qb_base_url' => env('QB_BASE_URL', 'https://staging.etaxcr.com'),
     'qb_client_id' => env('QB_CLIENT_ID', 'ABi5yH7zHJnIspD9dBonKYoz8AnMRlh8e1HCQKdAOGICaJrksv'),
-    'qb_client_secret' => env('QB_CLIENT_SECRET', 'CTBJLQWaF65FkZsEGY1K31VMBeFKIXL8zXhGf1P1'),
+    'qb_client_secret' => env('QB_CLIENT_SECRET', 'EfhCogrkHE9q2Cin6bjDThq7AMpCGbbjICbC9LJJ'),
     'qb_redirect_uri' => env('QB_REDIRECT_URI', 'https://staging.etaxcr.com/quickbooks/auth')
 ];
