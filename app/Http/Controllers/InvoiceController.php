@@ -2347,8 +2347,8 @@ class InvoiceController extends Controller
             Log::debug( 'Enviando: ' . json_encode($xlsInvoices) );
             
             foreach ($xlsInvoices as $xlsInvoice) {
-                //ProcessInvoicesExcel::dispatch($xlsInvoice)->onQueue('createinvoice');
-                ProcessInvoicesExcel::dispatchNow($xlsInvoice);
+                ProcessInvoicesExcel::dispatch($xlsInvoice)->onQueue('createinvoice');
+                //ProcessInvoicesExcel::dispatchNow($xlsInvoice);
             }
             
             return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
