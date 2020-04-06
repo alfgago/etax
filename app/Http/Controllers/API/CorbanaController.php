@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\Controller;
 use App\Jobs\LogActivityHandler as Activity;
 use \Carbon\Carbon;
 use App\Bill;
@@ -227,6 +228,16 @@ class CorbanaController extends Controller
     public function sendInvoice(Request $request) {
  
         try{
+            $numDocuInterno = $factura['NO_DOCU'] ?? "";
+            $cachekey = "avoid-duplicate-CORBANA-$numDocuInterno";
+            if ( Cache::has($cachekey) ) {
+                Cache::put($cachekey, true, 15);
+                sleep(15);
+                return response()->json([
+                    'mensaje' => 'Error: Factura duplicada.',
+                ], 200);
+            }
+            
             $invoice = null;
             $factura = $request->factura[0];
             $items = $request->lineas;
@@ -333,21 +344,32 @@ class CorbanaController extends Controller
             $fechaEmision = Carbon::parse($FEC_HECHO);
             $fechaVencimiento = Carbon::parse($FEC_HECHO)->addMonths(1);
             
+            $creditTime = $factura['PLAZO'] ?? null;
+            
             $porcentajeIVA = $factura['PORCIV'] ?? 0;
             $totalDocumento = 0;
-            $descripcion = isset($factura['OBSERVACION']) ? $factura['OBSERVACION'] : '';
-            $descripcion .= isset($factura['NOTA1']) ? $factura['NOTA1'] : '';
-            $descripcion .= isset($factura['NOTA2']) ? $factura['NOTA2'] : '';
+            $descripcion = isset($factura['OBSERVACION']) ? $factura['OBSERVACION']." " : '';
+            $descripcion .= isset($factura['NOTA1']) ? $factura['NOTA1']." " : '';
+            $descripcion .= isset($factura['NOTA2']) ? $factura['NOTA2']." " : '';
     
             //Exoneraciones
             try{
-                $totalNeto = 0;
-                $tipoDocumentoExoneracion = $factura['CODIGOTIPOEXO'] ?? null;
-                $documentoExoneracion = $factura['DOCUMENTO_EXO'] ?? null;
-                $companiaExoneracion = $factura['COD_INST_EXO'] ?? null;
-                $companiaExoneracion = "Dirección General de Hacienda";
-                $fechaExoneracion = $factura['FEC_DOCU_EXO'] ? Carbon::parse($factura['FEC_DOCU_EXO']) : null;
-                $porcentajeExoneracion = $factura['PORC_EXONERACION'] ?? 0;;
+                $indExon = $factura['IND_EXONERA_IV'] ?? 'N';
+                if($indExon == 'N'){
+                    $totalNeto = 0;
+                    $tipoDocumentoExoneracion = $factura['CODIGOTIPOEXO'] ?? null;
+                    $documentoExoneracion = $factura['DOCUMENTO_EXO'] ?? null;
+                    $companiaExoneracion = $factura['COD_INST_EXO'] ?? null;
+                    $companiaExoneracion = "Dirección General de Hacienda";
+                    $porcentajeExoneracion = $factura['PORC_EXONERACION'] ?? 0;
+                    $fechaExoneracion = $factura['FEC_DOCU_EXO'] ? Carbon::parse($factura['FEC_DOCU_EXO']) : null;
+                }else{
+                    $tipoDocumentoExoneracion = null;
+                    $documentoExoneracion = null;
+                    $companiaExoneracion = null;
+                    $fechaExoneracion = null;
+                    $porcentajeExoneracion = 0;
+                }
             }catch(\Exception $e){
                 Log::error( "Se registra el error en exoneracion: " . $e->getMessage() );
                 $fechaExoneracion = Carbon::now();
@@ -463,7 +485,8 @@ class CorbanaController extends Controller
                         'partidaArancelaria' => $partidaArancelaria,
                         'acceptStatus' => true,
                         'isAuthorized' => true,
-                        'codeValidated' => true
+                        'codeValidated' => true,
+                        'creditTime' => $creditTime
                     );
                     
                     $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
@@ -613,6 +636,17 @@ class CorbanaController extends Controller
                 $requestOtros["REVISADO_POR"] ?? ''
             );
             
+            try{
+                OtherInvoiceData::registerOtherData(
+                    $invoice->id,
+                    null,
+                    "DEBUG",
+                    json_encode($requestInvoice) ?? ''
+                );
+            }catch(\Exception $e){
+                Log::error($e);
+            }
+            
             return $otherData;
         }catch(\Exception $e){
             Log::error( "CORBANA: Error al guardar otra info: " . $e->getMessage() );
@@ -696,13 +730,10 @@ class CorbanaController extends Controller
             $apiHacienda = new BridgeHaciendaApi();
             $tokenApi = $apiHacienda->login();
             if ($tokenApi !== false) {
-                $factura = $request->factura[0];
-                $items = $request->lineas;
-    
                 //Busca la cedula de la empresa
-                $cedulaEmpresa = $this->parseCorbanaIdToCedula($factura['NO_CIA'], $factura['ACTIVIDAD']);
+                $cedulaEmpresa = $this->parseCorbanaIdToCedula($request['NO_CIA'], $request['ACTIVIDAD']);
                 $company = Company::where('id_number', $cedulaEmpresa)->first();
-                $identificacionCliente = $factura['IDENTIFICACION'] ?? null;
+                /*$identificacionCliente = $factura['IDENTIFICACION'] ?? null;
                 
                 //Define el tipo de documento
                 $TIPO_DOC = $factura['TIPO_DOC'] ?? '01';
@@ -730,12 +761,18 @@ class CorbanaController extends Controller
                 $numeroReferencia = floatval( mb_substr( $numeroReferencia, -8, null, 'UTF-8') );
                 $consecutivoComprobante = getDocReference($tipoDocumento, $company, $numeroReferencia);
                 $claveFactura = getDocumentKey($tipoDocumento, $company, $numeroReferencia);
-                Log::info("CORBANA: Enviando nota de credito de factura $claveFactura de empresa $company->id_number");
+                Log::info("CORBANA: Enviando nota de credito de factura $claveFactura de empresa $company->id_number");*/
                 
-                $invoice = Invoice::where('document_key', $claveFactura)
-                            ->where('company_id', $company->id)
-                            ->with('items')
-                            ->first();
+                /*$invoice = Invoice::where('document_key', $claveFactura)
+                        ->where('company_id', $company->id)
+                        ->with('items')
+                        ->first();*/
+                            
+                $idAnular = $request['ID_ANULAR'];
+                $invoice = Invoice::where('id', $idAnular)
+                        ->where('company_id', $company->id)
+                        ->with('items')
+                        ->first();
                
                 $note = new Invoice();
                 //Datos generales y para Hacienda
@@ -747,6 +784,7 @@ class CorbanaController extends Controller
                 $note->generation_method = "etax-corbana-anula";
                 $note->reason = "Anular Factura";
                 $note->code_note = "01";
+                $note->other_reference = $invoice->reference_number;
                 $note->reference_number = $company->last_note_ref_number + 1;
                 $note->save();
                 $noteData = $note->setNoteData($invoice, $invoice->items->toArray(), $note->document_type, $invoice, $company);

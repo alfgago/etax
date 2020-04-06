@@ -2183,12 +2183,12 @@ class InvoiceController extends Controller
           'archivo' => 'required',
         ]);
         $collection = Excel::toCollection( new InvoiceImport(), request()->file('archivo') );
-        $companyId = currentCompany();
+        $company = currentCompanyModel();
         $invoiceList = $collection->toArray()[0];
         try {
             //Log::debug('Creando job de registro de facturas.');
             foreach (array_chunk ( $invoiceList, 50 ) as $facturas) {
-                $success = $this->guardarMasivoExcel($facturas, $companyId);
+                $success = $this->guardarMasivoExcel($facturas, $company);
                 if(!$success){
                     return back()->withError('La cédula de la empresa no coincide con la del Excel.');
                 }
@@ -2196,14 +2196,13 @@ class InvoiceController extends Controller
         }catch( \Throwable $ex ){
             Log::error("Error importando excel archivo:" . $ex);
         }
-        $xlsInvoices = XlsInvoice::where('company_id',$companyId)->get();
+        $xlsInvoices = XlsInvoice::where('company_id',$company->id)->get();
         
         return view("Invoice/confirmacion-envio")->with('facturas', $xlsInvoices);
 
     }
 
-    public function guardarMasivoExcel($facturas, $companyId){
-        $company = Company::find($companyId);
+    public function guardarMasivoExcel($facturas, $company){
         //Revisa límite de facturas emitidas en el mes actual1
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $month = $start_date->month;
@@ -2215,7 +2214,8 @@ class InvoiceController extends Controller
         foreach ($facturas as $row){
             try{
                 if( isset($row['identificacionreceptor']) ){
-                    if(strval($row['cedulaempresa']) == $company->id_number){
+                    $cedula = trim( strval($row['cedulaempresa']) );
+                    if( $cedula == $company->id_number){
                         $xls_invoice = XlsInvoice::updateOrCreate([
                             'consecutivo' => $row['identificador'],
                             'company_id' => $company->id,
@@ -2287,7 +2287,7 @@ class InvoiceController extends Controller
                         $xls_invoice->numeroDocumentoReferencia = $row['numerodocumentoreferencia'] ?? null;
                         //dd($row);
                         if($row['fechaemisionreferencia']){
-                            $xls_invoice->fechaEmisionReferencia = Carbon::createFromFormat('d/m/Y g:i A',$row['fechaemisionreferencia']) ?? null;
+                            $xls_invoice->fechaEmisionReferencia = Carbon::createFromFormat('d/m/Y',$row['fechaemisionreferencia']) ?? null;
                         }
                         $xls_invoice->codigoNota = $row['codigonota'] ?? null;
                         if($row['identificador'] != $consecutivo){
@@ -2345,10 +2345,10 @@ class InvoiceController extends Controller
                 ->distinct('consecutivo')
                 ->get();
             Log::debug( 'Enviando: ' . json_encode($xlsInvoices) );
+            
             foreach ($xlsInvoices as $xlsInvoice) {
-                //dd($xlsInvoice);
-                ProcessInvoicesExcel::dispatch($xlsInvoice)->onQueue('createinvoice');
-                //ProcessInvoicesExcel::dispatchNow($xlsInvoice);
+                //ProcessInvoicesExcel::dispatch($xlsInvoice)->onQueue('createinvoice');
+                ProcessInvoicesExcel::dispatchNow($xlsInvoice);
             }
             
             return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
