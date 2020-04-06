@@ -31,7 +31,6 @@ use App\Jobs\ProcessBillsImport;
 use App\Jobs\MassValidateBills;
 use App\Jobs\ProcessAcceptHacienda;
 use App\Jobs\GenerateBookReport;
-use Illuminate\Support\Facades\Input;
 use DB;
 
 /**
@@ -655,7 +654,7 @@ class BillController extends Controller
                 ->where('is_void', false)
                 ->where('is_authorized', true)
                 ->where('is_code_validated', true)
-                ->where('accept_status', 1)
+                ->where('accept_status', '!=', 2)
                 ->where('hide_from_taxes', false);
             });
             $billItems = $query->get();
@@ -871,7 +870,7 @@ class BillController extends Controller
         try {
             $time_start = getMicrotime();
             $company = currentCompanyModel();
-            $file = Input::file('file');
+            $file = $request->file('file');
             
             $xml = simplexml_load_string( file_get_contents($file), null, LIBXML_NOCDATA );
             $json = json_encode( $xml ); // convert the XML string to json

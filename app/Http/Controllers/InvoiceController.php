@@ -40,7 +40,6 @@ use App\Jobs\ProcessInvoicesImport;
 use App\Jobs\ProcessSendExcelInvoices;
 use App\Jobs\ProcessInvoicesExcel;
 use App\Jobs\EnvioProgramadas;
-use Illuminate\Support\Facades\Input;
 use App\Jobs\GenerateBookReport;
 use App\SMInvoice;
 use DB;
@@ -1549,7 +1548,7 @@ class InvoiceController extends Controller
         try {
             $time_start = getMicrotime();
             $company = currentCompanyModel();
-            $file = Input::file('file');
+            $file = $request->file('file');
 
             $xml = simplexml_load_string( file_get_contents($file), null, LIBXML_NOCDATA );
             $json = json_encode( $xml ); // convert the XML string to json

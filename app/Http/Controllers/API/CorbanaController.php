@@ -230,6 +230,7 @@ class CorbanaController extends Controller
         try{
             $numDocuInterno = $factura['NO_DOCU'] ?? "";
             $cachekey = "avoid-duplicate-CORBANA-$numDocuInterno";
+            sleep(1);
             if ( Cache::has($cachekey) ) {
                 Cache::put($cachekey, true, 15);
                 sleep(15);
@@ -355,8 +356,8 @@ class CorbanaController extends Controller
             //Exoneraciones
             try{
                 $indExon = $factura['IND_EXONERA_IV'] ?? 'N';
+                $totalNeto = 0;
                 if($indExon == 'N'){
-                    $totalNeto = 0;
                     $tipoDocumentoExoneracion = $factura['CODIGOTIPOEXO'] ?? null;
                     $documentoExoneracion = $factura['DOCUMENTO_EXO'] ?? null;
                     $companiaExoneracion = $factura['COD_INST_EXO'] ?? null;
