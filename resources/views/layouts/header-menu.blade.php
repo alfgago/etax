@@ -83,7 +83,6 @@
 
 </div>
 <script>
-    setInterval('contadorNotificaciones()',30000);
     $(".cerrar-notificaciones").click(function(){
         $("#notificacionesDropdown").click();
     });
@@ -160,6 +159,8 @@
             }
         });
     }
+    
+    contadorNotificaciones();
 
 </script>
 

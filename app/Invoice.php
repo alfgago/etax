@@ -902,7 +902,7 @@ class Invoice extends Model
           //Datos generales
           $invoice->sale_condition = $data['condicionVenta'];
           $invoice->payment_type = $data['metodoPago'];
-          $invoice->credit_time = isset( $invoice->due_date ) ? $invoice->due_date->format('d/m/Y') : null;
+          $invoice->credit_time = $data['creditTime'] ?? ( isset( $invoice->due_date ) ? $invoice->due_date->format('d/m/Y') : null );
           $invoice->description = $data['descripcion'];
 
           $invoice->generation_method = $data['metodoGeneracion'];

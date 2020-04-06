@@ -10,8 +10,8 @@
         table {
             width: 100%;
             text-align: left;
-            font-size: 9px;
-            line-height: 1.1;
+            font-size: 9.5px;
+            line-height: 1.2;
         }
 
         table td,
@@ -65,13 +65,13 @@
         .resumen-totales tr td,
         .resumen-totales span {
             text-align: right;
-            font-size: 10px;
+            font-size: 10.5px;
         }
         
         .resumen-totales tr td.texto-resumen {
             text-align: left;
             white-space: nowrap;
-            font-size: 9px;
+            font-size: 9.5px;
         }
         
     </style>
@@ -123,11 +123,30 @@
     
     $currencySymbol = $data_invoice->currency == 'USD' ? '$' : '<span style="font-family: arial;">&cent;</span>';
 
+    $fechaExoneracion = null;
+    $porcExoneracion = 100;
     $numExoneracion = null;
     foreach($data_invoice->items as $item){
         if( isset($item->exoneration_document_number) ){ 
             $numExoneracion = $item->exoneration_document_number;
+            $fechaExoneracion = \Carbon\Carbon::parse($item->exoneration_date)->format('d/m/y');
+            $porcExoneracion = $item->exoneration_porcent;
         }
+    }
+    
+    $tipoPersonaStr = 'Física';
+    if( $data_invoice->client_id_type == 1 || $data_invoice->client_id_type == 'F' ) {
+      $tipoPersonaStr = 'Física';
+    }else if( $data_invoice->client_id_type == 2 || $data_invoice->client_id_type == 'J' ) {
+      $tipoPersonaStr = 'Jurídica';
+    }else if( $data_invoice->client_id_type == 3 || $data_invoice->client_id_type == 'D' ) {
+      $tipoPersonaStr = 'DIMEX';
+    }else if( $data_invoice->client_id_type == 4 || $data_invoice->client_id_type == 'E' ) {
+      $tipoPersonaStr = 'Extranjero';
+    }else if( $data_invoice->client_id_type == 5 || $data_invoice->client_id_type == 'N' ) {
+      $tipoPersonaStr = 'NITE';
+    }else if( $data_invoice->client_id_type == 6 || $data_invoice->client_id_type == 'O') {
+      $tipoPersonaStr = 'Otro';
     }
     
 ?>
@@ -135,7 +154,13 @@
     <table class="main-table" cellpadding="0" cellspacing="0">
         <tr>
             <td colspan="2" >
-                <img style="width: 400px; height: 80px margin-bottom: 3px;" src="https://staging.etaxcr.com/assets/images/corbana-logo-factura.png" >
+                <?php
+                    $logoSrc = "https://staging.etaxcr.com/assets/images/corbana-logo-factura.png";
+                    if( '3101011989' == $company->id_number){
+                        $logoSrc = "https://staging.etaxcr.com/assets/images/fincasanpablo.jpg";
+                    }
+                ?>
+                <img style="width: auto; height: 80px margin-bottom: 3px;" src="{{ $logoSrc }}" >
             </td>
         </tr>
         <tr>
@@ -169,11 +194,11 @@
                             <b>APDO:</b> <span>6504-1000 San José, Costa Rica</span><br>
                         </td>
                         <td>
-                            <b>Direccion:</b><br>
-                            Provincia(Province): <span>San José</span><br>
-                            Cantón(City): <span>San José</span><br>
-                            Distrito(District): <span>ZAPOTE</span><br>
-                            Otras señas: <span>{{$company->address. " ".$company->zip}}</span>
+                            <b>Dirección:</b><br>
+                            <b>Provincia(Province):</b> <span>San José</span><br>
+                            <b>Cantón(City):</b> <span>San José</span><br>
+                            <b>Distrito(District):</b> <span>ZAPOTE</span><br>
+                            <b>Otras señas:</b> <span>{{$company->address. " ".$company->zip}}</span>
                         </td>
                         @endif
                     </tr>
@@ -186,29 +211,37 @@
                     <tr>
                         <td>
                             <b>VENDIDO A / (SOLD TO):</b> <span style='text-wrap: wrap;'>{{$data_invoice->client_first_name.' '.$data_invoice->client_last_name}}</span><br>
-                            <b>IDENTIFICACIÓN / (ID):</b> <span>{{$data_invoice->client_id_number}}</span><br>
+                            <b>TIPO ID. / (ID. TYPE):</b> <span>{{ $tipoPersonaStr }}</span><br>
+                            <b>IDENTIFICACIÓN / (ID.):</b> <span>{{$data_invoice->client_id_number}}</span><br>
                             <b>CORREO ELECTRÓNICO / (EMAIL):</b> <span>{{$data_invoice->client_email}}</span><br>
                             <b>TELÉFONO / (PHONE NUMBER):</b> <span>{{$data_invoice->client_phone}}</span><br>
                             <b>REFERENCIA / (REFERENCE):</b> <span>{{ \App\OtherInvoiceData::findData($otherData, 'REFERENCIA') }}</span><br>
                             <?php $consignatario = \App\OtherInvoiceData::findData($otherData, 'CONSIG');
                                 if( isset($consignatario) ){  ?>
-                            <b>CONSIGNATARIO/(CONSIGNES):</b> <span>{{ $consignatario }}</span><br>
+                                <b>CONSIGNATARIO/(CONSIGNES):</b> <span>{{ $consignatario }}</span><br>
                             <?php } ?>
                         </td>
                         <td>
                             <b>TIPO DOC. / (DOC. TYPE): </b> <span>{{ $documentType }}</span><br>
                             <b>NÚMERO DOC. / (DOC. NUMBER):</b> <span>{{$data_invoice->document_number}}</span><br>
                             <b style="width:100%;">CLAVE NUMÉRICA / (DOCUMENT KEY):</b> <br><span style="width:100%; padding-top:0;">{{$data_invoice->document_key}}</span><br>
-                            <b>FECHA / (DATE)</b> <span>{{ $data_invoice->generated_date }}</span><br>
-                            <b>MONEDA / (CURRENCY)</b> <span>{{ $data_invoice->currency }}</span><br>
-                            <b>TIPO DE CAMBIO / (EXCHANGE RATE)</b> <span>{{ $data_invoice->currency_rate }}</span>
+                            <b>FECHA / (DATE)</b> <span>{{ $data_invoice->generatedDate()->format('d/m/Y') }}</span><br>
+                            @if( !empty($data_invoice->other_reference) )
+                                <b>DOC. REFERENCIA / REFERENCED DOC.: </b> {{ $data_invoice->other_reference }}<br>
+                            @endif
                         </td>
                     </tr>
                     <tr class="details3">
                         <td>
                             <b>TÉRMINOS DE PAGO/(TERMS PAYMENT):</b> <span>{{ $data_invoice->getCondicionVenta() }}</span><br>
-                            <b>PLAZO CREDITO / (CREDIT TERM):</b> <span>{{ $data_invoice->credit_time }}</span><br>
+                            @if( $data_invoice->sale_condition == '02') )
+                                <b>PLAZO CREDITO / (CREDIT TERM):</b> <span>{{ $data_invoice->credit_time }}</span><br>
+                            @endif
                             <b>MEDIO DE PAGO / (MEANS OF PAYMENT):</b> <span>{{ $data_invoice->getMetodoPago() }}</span><br>
+                        </td>
+                        <td>
+                            <b>MONEDA / (CURRENCY)</b> <span>{{ $data_invoice->currency }}</span><br>
+                            <b>TIPO DE CAMBIO / (EXCHANGE RATE)</b> <span>{{ $data_invoice->currency_rate }}</span>
                         </td>
                     </tr>
                 </table>
@@ -269,7 +302,7 @@
                                 {{$item->name ?? ''}}
                             </td>
                             <td style="text-align: left;">
-                                {!! $currencySymbol !!}{{$ivaAmountLinea ? number_format($ivaAmountLinea, 2) : '0'}}
+                                {!! $currencySymbol !!}{{$ivaAmountLinea ? number_format($ivaAmountLinea, 2) : '0'}} ({{$item->iva_percentage}}%)
                             </td>
                             <td style="text-align: left;">
                                 <?php $pneto = \App\OtherInvoiceData::findData($otherData, 'PESO_NETO', $item->id);
@@ -338,7 +371,9 @@
 					<p>{!! nl2br(e($company->payment_notes)) !!}</p>
                 @endif
                 @if( isset($numExoneracion) )
-                    <b>Número de exoneración: </b> {{ $numExoneracion }}<br>
+                    </br>
+                    Se aplica un porcentaje de exoneración del {{ $porcExoneracion }}%, 
+                    según lo autorizado por la Dirección General de Hacienda, mediante el documento {{ $numExoneracion }} del {{ $fechaExoneracion }}.
                 @endif
             </td>
             <td style="border: 2px solid black; padding: 5px; width: 35%;" colspan="1">

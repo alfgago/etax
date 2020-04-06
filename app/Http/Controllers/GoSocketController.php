@@ -147,7 +147,6 @@ class GoSocketController extends Controller
     public function gosocketValidate(Request $request) {
         $company = currentCompany();
         try{
-
         	$token = $request->token;
         	Log::info("Iniciando validacion de token gosocket: " . $token);
         	if (!empty($token)) {
@@ -239,21 +238,18 @@ class GoSocketController extends Controller
                     Log::info("El usuario existe y se inicio sesion enviando job del sync gosocket");
                     GoSocketInvoicesSync::dispatch($user, $companyId)->onConnection(config('etax.queue_connections'))->onQueue('gosocket');
 
-                    return redirect('/');
+                    return redirect()->secure('gosocket/login?token='.$token);
                 } else {
                     Log::info("El usuario Gosocket no se puedo loguear");
-                    return redirect('/login');
+                    return redirect()->secure('gosocket/login?token='.$token);
                 }
             } else {
                 Log::info("El usuario Gosocket no se puedo loguear no tiene token");
-                return redirect('/login');
+                return redirect()->secure('/login');
             }
-        }catch( \Exception $ex ) {
-            Log::error("Error en login gosocket ".$ex);
-            return redirect('/login');
         }catch( \Throwable $ex ) {
-            Log::error("Error en login gosocket ".$ex);
-            return redirect('/login');
+            Log::error("Error en login gosocket.");
+            return redirect()->secure('gosocket/login?token='.$token);
         }
 	    
     }
