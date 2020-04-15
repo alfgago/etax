@@ -45,7 +45,8 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
                 $event->sheet->getDelegate()->getColumnDimension('R')->setAutoSize(true);
                 $event->sheet->getDelegate()->getColumnDimension('S')->setAutoSize(true);
                 $event->sheet->getDelegate()->getColumnDimension('T')->setAutoSize(true);
-                $cellRangeHeaders = 'A1:T1'; // All headers
+                $event->sheet->getDelegate()->getColumnDimension('U')->setAutoSize(true);
+                $cellRangeHeaders = 'A1:U1'; // All headers
                 $event->sheet->getDelegate()->getStyle($cellRangeHeaders)->getFont()->setSize(12);
                 $event->sheet->getDelegate()->getStyle($cellRangeHeaders)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                       ->getStartColor()->setARGB('FF4472C4');
@@ -71,7 +72,7 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
             ->where('is_void', false)
             ->where('is_authorized', true)
             ->where('is_code_validated', true)
-            ->where('accept_status', 1)
+            ->where('accept_status', '!=', 2)
             ->where('hide_from_taxes', false);
         });
         
@@ -106,6 +107,7 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
             round( $map->total * $tipoCambio * $factor , 2),
             round( $map->iva_acreditable, 2),
             round( $map->iva_gasto, 2),
+            $map->bill->accept_status == 1 ? "Aceptada" : "Sin respuesta"
         ];
     }						
 
@@ -132,7 +134,8 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
                 'Monto IVA CRC',
                 'Total CRC',
                 'IVA acreditable',
-                'IVA al gasto'
+                'IVA al gasto',
+                'Estado de aceptación'
             ]
         ];
     }

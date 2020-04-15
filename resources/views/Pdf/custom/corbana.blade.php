@@ -195,10 +195,11 @@
                         </td>
                         <td>
                             <b>Dirección:</b><br>
-                            <b>Provincia(Province):</b> <span>San José</span><br>
-                            <b>Cantón(City):</b> <span>San José</span><br>
-                            <b>Distrito(District):</b> <span>ZAPOTE</span><br>
-                            <b>Otras señas:</b> <span>{{$company->address. " ".$company->zip}}</span>
+                            <b>Provincia(Province):</b> <span>{{ \App\Variables::getProvinciaFromID( $company->state ) }}</span><br>
+                            <b>Cantón(City):</b> <span>{{ \App\Variables::getCantonFromID( $company->city ) }}</span><br>
+                            <b>Distrito(District):</b> <span>{{ \App\Variables::getDistritoFromID( $company->district ) }}</span><br>
+                            <b>Otras señas:</b> <span>{{ $company->address }}</span><br>
+                            <b>Código postal:</b> <span>{{ $company->zip }}</span>
                         </td>
                         @endif
                     </tr>

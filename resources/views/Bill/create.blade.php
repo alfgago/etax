@@ -137,6 +137,19 @@
                     Detalle
                   </h3>
                 </div>
+                  
+                @if( !empty($cuentas_contables) )
+                <div class="form-group col-md-12" id="cuenta_qb">
+                  <label for="cuenta_qb">Cuenta QuickBooks</label>
+                  <div class="input-group">
+                    <select id="cuenta_qb" name="cuenta_qb" class="form-control select-search" required>
+                      @foreach($cuentas_contables as $cc)
+                        <option value="{{ $cc->Id }}">{{ $cc->Name }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                </div>
+                @endif
                 
                  <div class="form-group col-md-4">
                   <label for="subtotal">Subtotal </label>

@@ -151,6 +151,8 @@ class QuickbooksCustomer extends Model
     
     public static function saveEtaxaqb($dataService, $client){   
         $fullname = ($client->first_name ?? '') . ' ' . ($client->last_name ?? '') . ' ' . ($client->last_name2 ?? '');
+        $fullname = trim($fullname);
+        
         $theResourceObj = qbCustomer::create([
             "BillAddr" => [
                 "Line1" => $client->address ?? "",

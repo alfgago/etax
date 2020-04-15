@@ -152,6 +152,7 @@
     			     @endif
     			    </div>
 			  
+			  <div class="hidden">
     			    <div class="form-group col-md-12">
     			      <h3>
     			        Funcionalidades
@@ -197,7 +198,7 @@
     			        <option value="0" >No</option>
     			      </select>
     			    </div>
-    			       
+    		</div>	       
     			        
     			    <button id="btn-submit" type="submit" class="hidden btn btn-primary">Guardar información</button>          
     			    

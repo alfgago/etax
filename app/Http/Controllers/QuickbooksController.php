@@ -505,10 +505,10 @@ class QuickbooksController extends Controller
                     return "No asociado";
                 }
             })->addColumn('accounts', function($bill) use($cuentasQb){
-                if( isset($product->quickbooksProduct) ){
-                    $product->accId = $bill->quickbooksBill->qb_account;
+                if( isset($bill->quickbooksBill) ){
+                    $bill->accId = $bill->quickbooksBill->qb_account;
                 }else{
-                    $product->accId = 0;
+                    $bill->accId = 0;
                 }
                 return view('Quickbooks.Bills.cuentas-contables', [
                     'cuentasQb' => $cuentasQb,
@@ -1020,7 +1020,7 @@ class QuickbooksController extends Controller
 
         $productsQb = QuickbooksProduct::where('company_id', $company->id)->get();
         $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
-        $cuentasQb = $qb->getAccounts($company);
+        $cuentasQb = $qb->getAccounts($company, 'Income');
 
         return datatables()->eloquent( $query )
             ->addColumn('link', function($product) {

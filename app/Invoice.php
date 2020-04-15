@@ -985,6 +985,7 @@ class Invoice extends Model
       $totalLinea = $data['totalLinea'] ?? 0;
       $precioUnitarioLinea = $data['precioUnitario'] ?? 0;
       $montoDescuentoLinea = $data['montoDescuento'] ?? 0;
+      $tipoDescuento = $data['tipoDescuento'] ?? '01';
       $cantidadLinea = $data['cantidad'] ?? 0;
       $porcentajeIva = $data['porcentajeIva'] ?? 13;
 
@@ -1003,7 +1004,7 @@ class Invoice extends Model
           'unit_price' => $precioUnitarioLinea,
           'subtotal' => $subtotalLinea,
           'total' => $totalLinea,
-          'discount_type' => '01',
+          'discount_type' => $tipoDescuento,
           'discount' => $montoDescuentoLinea,
           'iva_percentage' => $porcentajeIva,
           'iva_type' => $data['codigoEtax'],

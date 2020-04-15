@@ -153,6 +153,9 @@ class QuickbooksProvider extends Model
     
     public static function saveEtaxaqb($dataService, $provider){   
         $fullname = ($provider->first_name ?? '') . ' ' . ($provider->last_name ?? '') . ' ' . ($provider->last_name2 ?? '');
+        $email = 'No indica correo' != $provider->email ? $provider->email : null;
+        $fullname = trim($fullname);
+        
         $theResourceObj = qbProvider::create([
             "BillAddr" => [
                 "Line1" => $provider->address ?? "",
@@ -171,7 +174,7 @@ class QuickbooksProvider extends Model
                 "FreeFormNumber" => $provider->phone
             ],
             "PrimaryEmailAddr" => [
-                "Address" => $provider->email
+                "Address" => $email
             ]
         ]);
         

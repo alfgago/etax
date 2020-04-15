@@ -1155,7 +1155,7 @@ class Bill extends Model
     public function setRegionCorbana($email){
       
       $email = strtolower($email);
-      Log::debug("Regiones Corbana: $email");
+      //Log::debug("Regiones Corbana: $email");
       $this->sucursal = null;
       if($email == "facturaelectronica@corbana.co.cr" || strpos($email, "facturaelectronica@corbana.co.cr") !== false || strpos($email, "facturaelectronica2@corbana.co.cr") !== false){
         $this->sucursal = "01";

@@ -40,7 +40,6 @@ use App\Jobs\ProcessInvoicesImport;
 use App\Jobs\ProcessSendExcelInvoices;
 use App\Jobs\ProcessInvoicesExcel;
 use App\Jobs\EnvioProgramadas;
-use Illuminate\Support\Facades\Input;
 use App\Jobs\GenerateBookReport;
 use App\SMInvoice;
 use DB;
@@ -404,11 +403,12 @@ class InvoiceController extends Controller
     {
         $company = currentCompanyModel();
         
-        /*$qb = \App\Quickbooks::where('company_id', $company->id)->with('company')->first();
+        $cuentasContables = null;
+        $qb = \App\Quickbooks::where('company_id', $company->id)->with('company')->first();
         if( isset($qb) ){
-            $cuentasContables = $qb->getAccounts();
-            dd($cuentasContables);
-        }*/
+            $cuentasContables = $qb->getAccounts($company, 'Income');
+        }
+        
         //Revisa límite de facturas emitidas en el mes actual1
         $start_date = Carbon::parse(now('America/Costa_Rica'));
         $month = $start_date->month;
@@ -428,7 +428,11 @@ class InvoiceController extends Controller
         if( count($arrayActividades) == 0 ){
             return redirect('/empresas/editar')->withErrors('No ha definido una actividad comercial para esta empresa');
         }
-        return view("Invoice/create-factura-manual", ['units' => $units, 'countries' => $countries])->with('arrayActividades', $arrayActividades);
+        return view("Invoice/create-factura-manual", [
+            'units' => $units, 
+            'countries' => $countries,
+            'cuentas_contables' => $cuentasContables
+        ])->with('arrayActividades', $arrayActividades);
     }
 
     /**
@@ -443,6 +447,12 @@ class InvoiceController extends Controller
         $errors = $company->validateEmit();
         if( $errors ) {
             return redirect($errors['url'])->withError($errors['mensaje']);
+        }
+        
+        $cuentasContables = null;
+        $qb = \App\Quickbooks::where('company_id', $company->id)->with('company')->first();
+        if( isset($qb) ){
+            $cuentasContables = $qb->getAccounts($company, 'Income');
         }
 
         $units = UnidadMedicion::all()->toArray();
@@ -460,7 +470,8 @@ class InvoiceController extends Controller
                 'document_key' => getDocumentKey($tipoDocumento),
                 'units' => $units, 'countries' => $countries,
                 'default_currency' => $company->default_currency,
-                'default_vat_code' => $company->default_vat_code
+                'default_vat_code' => $company->default_vat_code,
+                'cuentas_contables' => $cuentasContables
             ])
             ->with('arrayActividades', $arrayActividades);
     }
@@ -557,7 +568,8 @@ class InvoiceController extends Controller
             $company->save();
             
             try{
-                \App\QuickbooksInvoice::saveEtaxaqb(null, $invoice, $accountRef = null);
+                $accountRef = $request->cuenta_qb ?? null;
+                \App\QuickbooksInvoice::saveEtaxaqb(null, $invoice, $accountRef);
             }catch(\Throwable $e){}
 
             clearInvoiceCache($invoice);
@@ -593,6 +605,7 @@ class InvoiceController extends Controller
             $cachekey = "avoid-duplicate-$company->id_number";
             if ( Cache::has($cachekey) ) {
                 Cache::put($cachekey, true, 12);
+                Log::error('Se detectó un problema de conexión, por favor verifique que se haya registrado correctamente su factura.');
                 return redirect('/facturas-emitidas')->withMessage('Se detectó un problema de conexión, por favor verifique que se haya registrado correctamente su factura.');
             }
                     
@@ -1549,7 +1562,7 @@ class InvoiceController extends Controller
         try {
             $time_start = getMicrotime();
             $company = currentCompanyModel();
-            $file = Input::file('file');
+            $file = $request->file('file');
 
             $xml = simplexml_load_string( file_get_contents($file), null, LIBXML_NOCDATA );
             $json = json_encode( $xml ); // convert the XML string to json
@@ -2347,8 +2360,8 @@ class InvoiceController extends Controller
             Log::debug( 'Enviando: ' . json_encode($xlsInvoices) );
             
             foreach ($xlsInvoices as $xlsInvoice) {
-                //ProcessInvoicesExcel::dispatch($xlsInvoice)->onQueue('createinvoice');
-                ProcessInvoicesExcel::dispatchNow($xlsInvoice);
+                ProcessInvoicesExcel::dispatch($xlsInvoice)->onQueue('createinvoice');
+                //ProcessInvoicesExcel::dispatchNow($xlsInvoice);
             }
             
             return redirect('/facturas-emitidas')->withMessage('Facturas enviadas puede tomar algunos minutos en verse.');
