@@ -107,7 +107,7 @@ class GoSocketInvoicesSync implements ShouldQueue
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3
-                        Bill::saveBillXML( $arr, 'XML' );
+                        Bill::saveBillXML( $arr, 'GS' );
                     }
                     $company->save();
                 }

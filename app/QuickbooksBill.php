@@ -60,6 +60,18 @@ class QuickbooksBill extends Model
         return $bills;
     }
     
+    public static function getLineAccountRef($lines){
+        foreach($lines as $line){
+            try{
+                $qbAccount = $line->AccountBasedExpenseLineDetail->AccountRef;
+                if($qbAccount){
+                    return $qbAccount;
+                }
+            }catch(\Exception $e){}
+        }
+        return null;
+    }
+    
     public static function syncMonthlyBills($dataService, $year, $month, $company){
         QuickbooksProvider::syncMonthlyProviders($dataService, $year, $month, $company);
         $qbBills = QuickbooksBill::getMonthlyBills($dataService, $year, $month, $company);
@@ -69,7 +81,9 @@ class QuickbooksBill extends Model
         foreach($qbBills as $qbBill){
             $date = Carbon::createFromFormat("Y-m-d", $qbBill->TxnDate);
             $providerName = QuickbooksProvider::getProviderName($company, $qbBill->VendorRef);
-
+            $qbAccount = $qbBill->APAccountRef ?? null;
+            $qbAccount = QuickbooksBill::getLineAccountRef($qbBill->Line) ?? $qbAccount;
+            
             $qbBill = QuickBooksBill::updateOrCreate(
               [
                 "qb_id" => $qbBill->Id
@@ -83,7 +97,8 @@ class QuickbooksBill extends Model
                 "generated_at" => 'quickbooks',
                 "month" => $date->month,
                 "year" => $date->year,
-                "company_id" => $company->id
+                "company_id" => $company->id,
+                'qb_account' => $qbAccount
               ]
             );
         }
@@ -130,9 +145,9 @@ class QuickbooksBill extends Model
                 $ivaAmount = $qty * $item->iva_amount;
 
                 $taxCode = $item->iva_type;
-                
                 $lines[] = [
                      "Amount" => $item->total,
+                     "Description" => $item->name,
                      "DetailType" => "AccountBasedExpenseLineDetail",
                      "AccountBasedExpenseLineDetail" => [
                         "AccountRef" =>
@@ -501,7 +516,6 @@ class QuickbooksBill extends Model
                 }
             }
         }catch(\Exception $e){
-            dd($e);
             Log::error($e);
         }
     }

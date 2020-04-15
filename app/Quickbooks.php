@@ -116,14 +116,18 @@ class Quickbooks extends Model
         return $dataService;
     }
     
-    public function getAccounts($company = false){
+    public function getAccounts($company = false, $accountType = null){
         if(!$company){
             $company = currentCompanyModel();
         }
         
-        $cachekey = "qb-accountsjson-$company->id_number";
+        $cachekey = "qb-accountsjson-$company->id_number-".$accountType;
         if ( !Cache::has($cachekey) ) {
-            $qbAccounts = $this->getAuthenticatedDS()->Query("SELECT * FROM Account");
+            if(!$accountType){
+                $qbAccounts = $this->getAuthenticatedDS()->Query("SELECT * FROM Account");
+            }else{
+                $qbAccounts = $this->getAuthenticatedDS()->Query("SELECT * FROM Account WHERE AccountType = '$accountType'");
+            }
             Cache::put($cachekey, $qbAccounts, 300); //Cache por 5 minutos.
         }else{
             $qbAccounts = Cache::get($cachekey);

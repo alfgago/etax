@@ -132,6 +132,7 @@ class QuickbooksInvoice extends Model
                 
                 $lines[] = [
                      "Amount" => $Amount,
+                     "Description" => $item->name,
                      "DetailType" => "SalesItemLineDetail",
                      "SalesItemLineDetail" => [
                         "UnitPrice" => $unitPrice,

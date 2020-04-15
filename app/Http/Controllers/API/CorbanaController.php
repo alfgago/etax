@@ -232,7 +232,7 @@ class CorbanaController extends Controller
             $cachekey = "avoid-duplicate-CORBANA-$numDocuInterno";
             sleep(1);
             if ( Cache::has($cachekey) ) {
-                Cache::put($cachekey, true, 15);
+                Cache::put($cachekey, true, 30);
                 sleep(15);
                 return response()->json([
                     'mensaje' => 'Error: Factura duplicada.',
@@ -342,8 +342,8 @@ class CorbanaController extends Controller
             }
 
             $FEC_HECHO = $factura['FEC_HECHO'];
-            $fechaEmision = Carbon::parse($FEC_HECHO);
-            $fechaVencimiento = Carbon::parse($FEC_HECHO)->addMonths(1);
+            $fechaEmision = Carbon::now();
+            $fechaVencimiento = Carbon::now()->addMonths(1);
             
             $creditTime = $factura['PLAZO'] ?? null;
             
@@ -466,6 +466,7 @@ class CorbanaController extends Controller
                         'totalLinea' => $totalLinea,
                         'montoIva' => $montoIva,
                         'codigoEtax' => $codigoEtax,
+                        'tipoDescuento' => '02',
                         'montoDescuento' => $montoDescuento,
                         'subtotalLinea' => $subtotalLinea,
                         'tipoDocumento' => $tipoDocumento,
