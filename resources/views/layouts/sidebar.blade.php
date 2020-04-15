@@ -35,7 +35,7 @@
                     </li> 
                     <?php 
                 }
-                if(currentCompanyModel()->id_number==3101707070 ) {
+                if(currentCompanyModel()->id_number==3101707070 || currentCompanyModel()->id_number==3101702499  ) {
                     ?>
                     <li class="nav-item small-nav" >
                         <a class="nav-item-hold" href="/quickbooks/mapeo-variables">

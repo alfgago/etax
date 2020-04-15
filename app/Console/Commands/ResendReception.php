@@ -55,7 +55,7 @@ class ResendReception extends Command
             foreach ($bills as $bill) {
                 $provider = $bill->provider;
                 $company = $bill->company;
-                if (isset($company->atv_validation) && $company) {
+                if (isset($company->atv_validation) && $company && $provider) {
                     $bill->resend_attempts = $bill->resend_attempts + 1;
                     $bill->in_queue = true;
                     $bill->save();

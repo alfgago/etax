@@ -12,8 +12,23 @@
 @endsection 
 
 @section('content') 
+
 <div class="row">
   <div class="col-md-12">
+      <?php
+      $allow = true;
+      $companyId = currentCompanyModel()->id;
+      if(
+        $companyId == 3965 ||
+        $companyId == 3966 ||
+        $companyId == 3967 ||
+        $companyId == 3968 ||
+        $companyId == 3969
+      ){
+        $allow = false; 
+      }
+      ?>
+      @if($allow)
         <div class="descripcion mb-2">
           Este proceso genera la aceptación o rechazo ante Hacienda.
         </div>
@@ -42,6 +57,11 @@
           <tbody>
           </tbody>
         </table>
+      @else
+        <div style="font-size: 2rem; max-width: 600px; width: 100%;" class="descripcion mb-2">
+          La aceptación desde eTax no está disponible. Debe realizarlas desde el sistema interno de Corbana.
+        </div>
+      @endif
   </div>  
 </div>
 

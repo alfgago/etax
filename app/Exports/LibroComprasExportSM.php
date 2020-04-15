@@ -73,7 +73,7 @@ class LibroComprasExportSM implements WithHeadings, WithMapping, FromQuery, With
             ->where('is_void', false)
             ->where('is_authorized', true)
             ->where('is_code_validated', true)
-            ->where('accept_status', 1)
+            ->where('accept_status', '!=', 2)
             ->where('hide_from_taxes', false);
         });
         

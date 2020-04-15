@@ -420,7 +420,13 @@ class BillController extends Controller
         $units = UnidadMedicion::all()->toArray();
         $arrayActividades = $company->getActivities();
         
-        return view("Bill/create", compact('units', 'arrayActividades') );
+        $cuentas_contables = null;
+        $qb = \App\Quickbooks::where('company_id', $company->id)->with('company')->first();
+        if( isset($qb) ){
+            $cuentas_contables = $qb->getAccounts($company, 'Expense');
+        }
+        
+        return view("Bill/create", compact('units', 'arrayActividades', 'cuentas_contables') );
     }
 
     /**
@@ -492,6 +498,11 @@ class BillController extends Controller
             
             $company->last_bill_ref_number = $bill->reference_number;
             $company->save();
+            
+            try{
+                $accountRef = $request->cuenta_qb ?? null;
+                \App\QuickbooksBill::saveEtaxaqb(null, $bill, $accountRef);
+            }catch(\Throwable $e){}
             
             clearBillCache($bill);
             $user = auth()->user();

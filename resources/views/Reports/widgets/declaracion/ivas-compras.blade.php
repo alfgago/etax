@@ -479,7 +479,7 @@
 	
 	
 	<tr class="true-blocked">
-	  <th>Crédito de por compra de servicios</th>
+	  <th>Crédito por compra de servicios</th>
 	  <td>
 	  	<input readonly value="{{ number_format( $iva_compras_S3+$iva_importaciones_S3, 0 ) }}"/>
 	  </td>

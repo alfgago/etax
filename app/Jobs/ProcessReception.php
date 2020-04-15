@@ -54,7 +54,8 @@ class ProcessReception implements ShouldQueue
     public function handle()
     {
         try {
-            if ( app()->environment('production') ) {
+            if(true) {
+            //if ( app()->environment('production') ) {
                 Log::info('send job reception id: '.$this->billId);
                 $client = new Client();
                 $bill = Bill::find($this->billId);
@@ -110,25 +111,27 @@ class ProcessReception implements ShouldQueue
                                     $xml->xml_reception = $path;
                                     $xml->save();
                                     $xmlExtract = ltrim($response['data']['response'], '\n');
-                                    Mail::to($bill->provider_email)->cc($company->email)->send(new ReceptionNotification([
-                                        'xml' => $path, 'xmlFE' => $pathFE,  'data_invoice' => $bill,
-                                        'data_company' => $company, 'response' => $xmlExtract
-                                    ]));
+                                    if ( app()->environment('production') ) {
+                                        Mail::to($bill->provider_email)->cc($company->email)->send(new ReceptionNotification([
+                                            'xml' => $path, 'xmlFE' => $pathFE,  'data_invoice' => $bill,
+                                            'data_company' => $company, 'response' => $xmlExtract
+                                        ]));
+                                    }
                                 }
                                 Log::info('Reception enviada y XML guardado.');
                             } else if (isset($response['status']) && $response['status'] == 400 &&
                                 strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
-                                //$bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
-                                //$bill->save();
+                                $bill->hacienda_status = '03';
+                                $bill->save();
                                 Log::info('Failed Job');
                             } else if (isset($response['status']) && $response['status'] == 400 &&
                                 strpos($response['message'], 'archivo XML ya existe en nuestras bases de datos') <> false) {
-                                //$bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
-                                //$bill->save();
+                                $bill->hacienda_status = '03';
+                                $bill->save();
                                 Log::info('Failed Job');
                             } else {
-                                //$bill->accept_status = $bill->accept_status == 2 ? 2 : 0;
-                                //$bill->save();
+                                $bill->hacienda_status = '03';
+                                $bill->save();
                                 Log::error('ERROR Enviando parametros API HACIENDA Reception Empresa '.$company->business_name.' Bill: '.$this->billId);
                             }
                             Log::info('Proceso de Reception finalizado con éxito. Empresa '.$company->business_name.' Bill: '.$this->billId);
