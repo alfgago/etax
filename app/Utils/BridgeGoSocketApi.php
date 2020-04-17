@@ -16,7 +16,7 @@ use \Carbon\Carbon;
 
 class BridgeGoSocketApi
 {
-    protected $link = 'http://api.gosocket.net/';
+    protected $link = 'http://api.sandbox.gosocket.net/';
 
     public function getUser($token) {
         try {

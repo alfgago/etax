@@ -273,26 +273,27 @@ class Company extends Model {
     }
 
     /* Returns count of total available invoices. Current plan invoices + bought add-on invoices */
-    public function getAvailableInvoices( $year, $month ) {
+    public function getAvailableInvoices( $year, $month, $company = false ) {
         try{
+            $companyId = $company !== false ? $company->id : $this->id;
             if( !$month || !$year ) {
                 $today = Carbon::parse(now('America/Costa_Rica'));
                 $month = $today->month;
                 $year = $today->year;
             }
             
-            $available_invoices = AvailableInvoices::where('company_id', $this->id)
+            $available_invoices = AvailableInvoices::where('company_id', $companyId)
                                 ->where('month', $month)
                                 ->where('year', $year)
                                 ->first();
                        
             // Si no encontró nada, tiene que crearla.
             if( ! $available_invoices ) {
-                $subscription = getCurrentSubscription();
+                $subscription = getCurrentSubscription($companyId);
                 $subscriptionPlan = $subscription->plan;
                 $available_invoices = AvailableInvoices::create(
                     [
-                        'company_id' => $this->id,
+                        'company_id' => $companyId,
                         'monthly_quota' => $subscriptionPlan->num_invoices,
                         'month' => $month,
                         'year' => $year,
@@ -304,7 +305,7 @@ class Company extends Model {
             return $available_invoices;
         
         }catch( \Exception $ex ){
-            Log::error('Error en getAvailableInvoices: ' . $ex->getMessage() );
+            Log::error('Error en getAvailableInvoices: ' . $ex);
             return null;
         }
     }

@@ -221,13 +221,16 @@ class GoSocketController extends Controller
                             "integration_id"=> 1,
                            "user_id"=> $new_user_gs->id,
                             "company_id"=> $company_etax->id,
-                            "status"=> 1
+                            "status"=> 1,
+                            "session_token" => $token,
+                            "first_sync_gs" => true
                         ]
                     );
                 }
                 if ($user !== null && Auth::loginUsingId($user->user_id)) {
 
                     $user->session_token = $token;
+                    $user->first_sync_gs = false;
                     $user->save();
                     $companyId = $user->company_id;
                     $user_login = auth()->user();
@@ -373,4 +376,3 @@ class GoSocketController extends Controller
    
 
 }
-    
