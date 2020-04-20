@@ -38,6 +38,8 @@ class GoSocketInvoicesSync implements ShouldQueue
     {
         $this->getInvoices($this->user, $this->companyId);
         $this->getBills($this->user, $this->companyId);
+        $this->user->first_sync_gs = false;
+        $this->user->save();
     }
 
      private function getInvoices($user, $companyId) {

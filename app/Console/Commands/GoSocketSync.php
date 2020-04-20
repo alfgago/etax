@@ -54,7 +54,7 @@ class GoSocketSync extends Command
                 $this->info('Sincronizando documentos');
                 foreach ($tipos_facturas as $tipo_factura) {
 
-                    $facturas = $apiGoSocket->getSentDocuments($token, $user->company_token, $tipo_factura);
+                    $facturas = $apiGoSocket->getSentDocuments($token, $user->company_token, $tipo_factura, $user);
 
                     foreach ($facturas as $factura) {
                         $this->info('Sincronizando Enviados');
@@ -82,7 +82,7 @@ class GoSocketSync extends Command
                         $company->save();
                     }
 
-                    $facturas = $apiGoSocket->getReceivedDocuments($token, $user->company_token, $tipo_factura);
+                    $facturas = $apiGoSocket->getReceivedDocuments($token, $user->company_token, $tipo_factura, $user);
 
                     foreach ($facturas as $factura) {
                         $this->info('Sincronizando Recibidos');
