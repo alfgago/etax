@@ -104,6 +104,8 @@ class GoSocketSync extends Command
                         $company->save();
                     }
                 }
+                $user->first_sync_gs = false;
+                $user->save();
             }
 
         }

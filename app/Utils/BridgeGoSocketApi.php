@@ -65,10 +65,23 @@ class BridgeGoSocketApi
 
     public function getSentDocuments($token, $companyToken, $tipo_factura, $dataIntegracion = false) {
         try {
-
             $today = Carbon::parse(now('America/Costa_Rica'));
-            $first_date = $dataIntegracion == false ? $today->year."-01-01" : $today->year."-01-01";
-            $second_date = $dataIntegracion == false ? $today->year."-12-31" : $today->year."-12-31";
+            if(isset($dataIntegracion->first_sync_gs) == true && $dataIntegracion->first_sync_gs == false) {
+                Log::info("Ya tiene primer sync enviados con gosocket, generando mes anterior ");
+                $first_date = Carbon::createFromFormat('Y-m-d H:i:s',
+                    $dataIntegracion->updated_at,
+                    'America/Costa_Rica'
+                )->subDay(31)->toDateString();
+                $second_date = Carbon::createFromFormat('Y-m-d H:i:s',
+                    $dataIntegracion->updated_at,
+                    'America/Costa_Rica'
+                )->toDateString();
+            } else {
+                Log::info("Es el primer sync");
+                $first_date = $today->year."-01-01";
+                $second_date = $today->year."-12-31";
+            }
+            Log::info("Sync con gosocket fechas: ".$first_date." ".$second_date);
             $ApplicationIdGS = config('etax.applicationidgs');
             $base64 = base64_encode($ApplicationIdGS . ":" . $token);
             $GoSocket = new Client();
@@ -92,8 +105,22 @@ class BridgeGoSocketApi
     public function getReceivedDocuments($token, $companyToken, $tipo_factura, $dataIntegracion = false) {
         try {
             $today = Carbon::parse(now('America/Costa_Rica'));
-            $first_date = $dataIntegracion == false ? $today->year."-01-01" : $today->year."-01-01";
-            $second_date = $dataIntegracion == false ? $today->year."-12-31" : $today->year."-12-31";
+            if(isset($dataIntegracion->first_sync_gs) == true && $dataIntegracion->first_sync_gs == false) {
+                Log::info("Ya tiene primer sync de recibidos con gosocket, generando mes anterior ");
+                $first_date = Carbon::createFromFormat('Y-m-d H:i:s',
+                    $dataIntegracion->updated_at,
+                    'America/Costa_Rica'
+                )->subDay(31)->toDateString();
+                $second_date = Carbon::createFromFormat('Y-m-d H:i:s',
+                    $dataIntegracion->updated_at,
+                    'America/Costa_Rica'
+                )->toDateString();
+            } else {
+                Log::info("Es el primer sync");
+                $first_date = $today->year."-01-01";
+                $second_date = $today->year."-12-31";
+            }
+            Log::info("Sync con gosocket fechas: ".$first_date." ".$second_date);
             $ApplicationIdGS = config('etax.applicationidgs');
             $base64 = base64_encode($ApplicationIdGS.":".$token);
             $GoSocket = new Client();

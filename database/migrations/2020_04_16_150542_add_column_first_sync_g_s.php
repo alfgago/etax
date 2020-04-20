@@ -15,7 +15,7 @@ class AddColumnFirstSyncGS extends Migration
     {
         Schema::table('integracion_empresas', function (Blueprint $table) {
             if (!Schema::hasColumn('integracion_empresas', 'first_sync_gs')) {
-                $table->boolean('first_sync_gs')->nullable();
+                $table->boolean('first_sync_gs')->default(true);
             }
         });
     }
