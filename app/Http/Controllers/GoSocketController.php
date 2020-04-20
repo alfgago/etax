@@ -265,21 +265,24 @@ class GoSocketController extends Controller
         return view('gosocket.index')->with('token',$token);
     }
 
-    public function validarCuenta(Request $request){
+    public function validarCuenta(Request $request) {
         try{
+            Log::info("Validar cuenta etax gosocket");
             if( Auth::attempt(['email' => $request->email, 'password' => $request->password])){
                 $user = User::where('email',$request->email)->first();
                 $token = $request->token;
                 $apiGoSocket = new BridgeGoSocketApi();
                 $user_gs = $apiGoSocket->getUser($token);
                 $company_gs = $apiGoSocket->getAccount($token, $user_gs['CurrentAccountId']);
+                $intEmpresa = IntegracionEmpresa::where("user_token",$user_gs['UserId'])->where("company_token",$user_gs['CurrentAccountId'])->first();
                 $permiso = false;
-                foreach($user->companies as $company){
-                    if($company->id_number ==  $company_gs['Code']){
+                foreach($user->companies as $company) {
+                    if($company->id_number ==  $company_gs['Code']) {
                         $permiso = true;
                     }
                 }
-                if($permiso){
+                if($permiso) {
+                    Log::info("Validando y creando user gosocket");
                     $user_etax = User::firstOrCreate(
                         ['email' => $user_gs['Email']],
                         ['user_name' => $user_gs['Email'],
@@ -331,17 +334,20 @@ class GoSocketController extends Controller
                         [    'permission_id' => 8
                         ]
                     );
-                    $user = IntegracionEmpresa::Create(
+                    Log::info("Se crea integracion empresa");
+                    $user = IntegracionEmpresa::updateOrCreate(
                         [  "user_token"=> $user_gs['UserId'],
                             "company_token"=> $user_gs['CurrentAccountId'],
                             "integration_id"=> 1,
                            "user_id"=> $new_user_gs->id,
                             "company_id"=> $company_etax->id,
-                            "status"=> 1
+                            "session_token" => $token,
+                            "status"=> 1,
+                            "first_sync_gs" => isset($intEmpresa->id) ? false : true
                         ]
                     );
                     if ($user !== null && Auth::loginUsingId($user->user_id)) {
-
+                        Log::info("Request login");
                         $user->session_token = $token;
                         $user->save();
                         $companyId = $user->company_id;
@@ -364,7 +370,7 @@ class GoSocketController extends Controller
             } else {
                 return redirect()->back()->withError('Usuario y contraseña invalido');
             }
-        }catch( \Exception $ex ) {
+        } catch ( \Exception $ex ) {
             Log::error("Error en login gosocket ".$ex);
             return redirect('/login');
         }catch( \Throwable $ex ) {
@@ -372,7 +378,4 @@ class GoSocketController extends Controller
             return redirect('/login');
         }
     }
-
-   
-
 }
