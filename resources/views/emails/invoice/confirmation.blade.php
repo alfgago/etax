@@ -3,9 +3,9 @@
         Estimado Cliente: <b>{{$data_invoice->client_first_name .' '.$data_invoice->client_last_name}}</b>
     </p>
     <p>
-        A continuación, se le notifica que la Factura electrónica número <b>{{$data_invoice->document_number}}</b>
-        la clave <b>{{$data_invoice->document_key}}</b> fue recibida por el Ministerio de Hacienda y se encuentra en
-        condición de aceptado.
+        A continuación se le notifica que la Factura electrónica número <b>{{$data_invoice->document_number}}</b>, con 
+        la clave <b>{{$data_invoice->document_key}}</b>, fue recibida por el Ministerio de Hacienda y se encuentra en
+        condición de aceptada.
     </p>
     <p>
         ¡Muchas Gracias!
