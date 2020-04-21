@@ -538,9 +538,9 @@ class InvoiceController extends Controller
         $company = currentCompanyModel();
         $cachekey = "avoid-duplicate-$company->id_number";
         if ( Cache::has($cachekey) ) {
-            Cache::put($cachekey, true, 12);
             return redirect('/facturas-emitidas')->withMessage('Se detectó un problema de conexión, por favor verifique que se haya registrado correctamente su factura.');
         }
+        Cache::put($cachekey, true, 12);
 
         if(CalculatedTax::validarMes($request->generated_date)){
             $invoice = new Invoice();
@@ -603,11 +603,12 @@ class InvoiceController extends Controller
         try {
             $company = currentCompanyModel(false);
             $cachekey = "avoid-duplicate-$company->id_number";
+            
             if ( Cache::has($cachekey) ) {
-                Cache::put($cachekey, true, 12);
                 Log::error('Se detectó un problema de conexión, por favor verifique que se haya registrado correctamente su factura.');
                 return redirect('/facturas-emitidas')->withMessage('Se detectó un problema de conexión, por favor verifique que se haya registrado correctamente su factura.');
             }
+            Cache::put($cachekey, true, 12);
                     
             Log::info("Envio de factura a hacienda -> ".json_encode($request->all()));
             $request->validate([

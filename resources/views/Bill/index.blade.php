@@ -27,7 +27,7 @@
                   <option value="4">Tiquete electrónico</option>
                   <option value="3">Notas de crédito</option>
                   <option value="2">Notas de debito</option>
-                  <option value="98">Documentos rechazados</option>
+                  <option class="hidden" value="98">Documentos rechazados</option>
                   <option class="hidden" value="0">Documentos eliminados</option>
               </select>
             </div>

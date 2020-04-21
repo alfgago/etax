@@ -1,4 +1,18 @@
-
+<?php
+      $allow = true;
+      $companyId = currentCompanyModel()->id;
+      if(
+        $companyId == 3965 ||
+        $companyId == 3966 ||
+        $companyId == 3967 ||
+        $companyId == 3968 ||
+        $companyId == 3969
+      ){
+        $allow = false; 
+      }
+?>
+      @if($allow)
+      
     <form id="accept-form-{{ $bill->id }}" class="inline-form" method="POST" action="/facturas-recibidas/confirmar-autorizacion/{{ $bill->id }}" >
       @csrf
       @method('patch')
@@ -29,3 +43,10 @@
     <a href="/facturas-recibidas/download-pdf/{{ $bill->id }}" title="Descargar PDF"class="btn btn-primary btn-agregar m-0" style="background: #d28923; border-color: #d28923; font-size: 0.85em;" download > 
       <i class="fa fa-file-pdf-o" aria-hidden="true"></i> Descargar PDF
     </a>
+    
+    
+@else
+  <div style="font-size: 0.9rem;" class="descripcion mb-2">
+    Aceptación no disponible.
+  </div>
+@endif

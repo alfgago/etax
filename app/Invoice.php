@@ -953,6 +953,13 @@ class Invoice extends Model
                 $ref = Invoice::where('company_id', $company->id)
                   ->where('buy_order', $otherReference)
                   ->first();
+                  
+                if( !isset($ref) ) {
+                   Invoice::where('company_id', $company->id)
+                  ->where('document_number', $otherReference)
+                  ->first();
+                }
+                  
                 if( isset($ref) ) {
                   $invoice->code_note = '01';
                   $invoice->reason = 'Factura anulada';
@@ -965,7 +972,7 @@ class Invoice extends Model
                 }
             }
           }catch(\Exception $e){
-            Log::error("Error en import NC SM: " . $e);
+            
           }
       }
 
@@ -1033,6 +1040,7 @@ class Invoice extends Model
     public static function saveInvoiceXML( $arr, $metodoGeneracion ) {
 
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
+        Log::info("Guardando Xml" . $identificacionProveedor);
         if( $metodoGeneracion != "Email" && $metodoGeneracion != 'GS' ){
           $company = currentCompanyModel();
         }else{
