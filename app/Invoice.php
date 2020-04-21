@@ -1040,6 +1040,7 @@ class Invoice extends Model
     public static function saveInvoiceXML( $arr, $metodoGeneracion ) {
 
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
+        Log::info("Guardando Xml" . $identificacionProveedor);
         if( $metodoGeneracion != "Email" && $metodoGeneracion != 'GS' ){
           $company = currentCompanyModel();
         }else{

@@ -341,9 +341,10 @@ if (!function_exists('get_current_user_permissions')) {
 /* Get current user active subscriptions */
 if (!function_exists('getCurrentSubscription')) {
 
-    function getCurrentSubscription() {
-        
-        $company = currentCompanyModel();
+    function getCurrentSubscription($companyId = false) {
+
+
+        $company = $companyId != false ? \App\Company::find($companyId) : currentCompanyModel();
 
         $sale = $company->subscription;
         
@@ -779,7 +780,8 @@ if (!function_exists('hasAvailableInvoices')) {
         if( !isset($company) ){
             $company = currentCompanyModel();
         }
-        $availableInvoices = $company->getAvailableInvoices( $year, $month );
+        $availableInvoices = $company->getAvailableInvoices( $year, $month , $company);
+        Log::info("Facturas disponibles". $availableInvoices);
         $facturasDisponibles = $availableInvoices->monthly_quota + $company->additional_invoices - $availableInvoices->current_month_sent;
         if( $facturasDisponibles < $amountToCheck ){
             return false;

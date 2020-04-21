@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Bill;
+use App\Company;
 use App\IntegracionEmpresa;
 use App\Invoice;
 use App\Utils\BridgeGoSocketApi;
@@ -49,55 +50,62 @@ class GoSocketSync extends Command
         foreach ($users as $user) {
             $token = $user->session_token;
             $tipos_facturas = $apiGoSocket->getDocumentTypes($token);
+            if (is_array($tipos_facturas)) {
+                $this->info('Sincronizando documentos');
+                foreach ($tipos_facturas as $tipo_factura) {
 
-            foreach ($tipos_facturas as $tipo_factura) {
+                    $facturas = $apiGoSocket->getSentDocuments($token, $user->company_token, $tipo_factura, $user);
 
-                $facturas = $apiGoSocket->getSentDocuments($token, $user->company_token, $tipo_factura);
+                    foreach ($facturas as $factura) {
+                        $this->info('Sincronizando Enviados');
+                        $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
+                        $company = Company::find($user->company_id);
+                        $xml  = base64_decode($APIStatus);
+                        $xml = simplexml_load_string( $xml);
+                        $json = json_encode( $xml );
+                        $arr = json_decode( $json, TRUE );
+                        try {
+                            $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0 ;
+                        } catch(\Exception $e) {
+                            $identificacionReceptor = 0;
+                        };
 
-                foreach ($facturas as $factura) {
-                    $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
-                    $company = currentCompanyModel();
-                    $xml  = base64_decode($APIStatus);
-                    $xml = simplexml_load_string( $xml);
-                    $json = json_encode( $xml );
-                    $arr = json_decode( $json, TRUE );
-                    try {
-                        $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0 ;
-                    } catch(\Exception $e) {
-                        $identificacionReceptor = 0;
-                    };
+                        $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+                        $consecutivoComprobante = $arr['NumeroConsecutivo'];
 
-                    $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-                    $consecutivoComprobante = $arr['NumeroConsecutivo'];
-
-                    //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
-                        //Registra el XML. Si todo sale bien, lo guarda en S3.
-                        Invoice::saveInvoiceXML( $arr, 'GS' );
+                        //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                        if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
+                            //Registra el XML. Si todo sale bien, lo guarda en S3.
+                            $this->info('Guardando XML Company'. $company->id_number);
+                            Invoice::saveInvoiceXML( $arr, 'GS' );
+                        }
+                        $company->save();
                     }
-                    $company->save();
-                }
 
-                $facturas = $apiGoSocket->getReceivedDocuments($token, $user->company_token, $tipo_factura);
+                    $facturas = $apiGoSocket->getReceivedDocuments($token, $user->company_token, $tipo_factura, $user);
 
-                foreach ($facturas as $factura) {
-                    $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
-                    $company = currentCompanyModel();
-                    $xml  = base64_decode($APIStatus);
-                    $xml = simplexml_load_string( $xml);
-                    $json = json_encode( $xml );
-                    $arr = json_decode( $json, TRUE );
-                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
-                    $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-                    $consecutivoComprobante = $arr['NumeroConsecutivo'];
-                    $clave = $arr['Clave'];
-                    //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
-                        //Registra el XML. Si todo sale bien, lo guarda en S3
-                        Bill::saveBillXML( $arr, 'XML' );
+                    foreach ($facturas as $factura) {
+                        $this->info('Sincronizando Recibidos');
+                        $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
+                        $company = Company::find($user->company_id);
+                        $xml  = base64_decode($APIStatus);
+                        $xml = simplexml_load_string( $xml);
+                        $json = json_encode( $xml );
+                        $arr = json_decode( $json, TRUE );
+                        $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
+                        $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+                        $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                        $clave = $arr['Clave'];
+                        //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                        if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
+                            //Registra el XML. Si todo sale bien, lo guarda en S3
+                            Bill::saveBillXML( $arr, 'GS' );
+                        }
+                        $company->save();
                     }
-                    $company->save();
                 }
+                $user->first_sync_gs = false;
+                $user->save();
             }
 
         }
