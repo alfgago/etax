@@ -229,15 +229,6 @@ class CorbanaController extends Controller
  
         try{
             $numDocuInterno = $factura['NO_DOCU'] ?? "";
-            $cachekey = "avoid-duplicate-CORBANA-$numDocuInterno";
-            sleep(1);
-            if ( Cache::has($cachekey) ) {
-                Cache::put($cachekey, true, 30);
-                sleep(15);
-                return response()->json([
-                    'mensaje' => 'Error: Factura duplicada.',
-                ], 200);
-            }
             
             $invoice = null;
             $factura = $request->factura[0];
@@ -300,7 +291,7 @@ class CorbanaController extends Controller
             $consecutivoComprobante = getDocReference($tipoDocumento, $company, $numeroReferencia);
             $claveFactura = getDocumentKey($tipoDocumento, $company, $numeroReferencia);
 
-
+            sleep(2);
             $invoice = Invoice::where('document_key', $claveFactura)
                                 ->where('company_id', $company->id)
                                 ->with('items')
@@ -311,6 +302,15 @@ class CorbanaController extends Controller
                     'factura' => $invoice
                 ], 200);
             }
+            
+            $cachekey = "avoid-duplicate-CORBANA-$numDocuInterno";
+            if ( Cache::has($cachekey) ) {
+                sleep(15);
+                return response()->json([
+                    'mensaje' => 'Error: Factura duplicada. Se reintentó varias veces en los mismos 30 segundos. Favor revisar, o intentar de nuevo en 30s.',
+                ], 200);
+            }
+            Cache::put($cachekey, true, 30);
             
             $TIPO_SERV = $factura['TIPO_SERV'] ?? 'B';
             if( $tipoDocumento == '09' ){
@@ -357,7 +357,7 @@ class CorbanaController extends Controller
             try{
                 $indExon = $factura['IND_EXONERA_IV'] ?? 'N';
                 $totalNeto = 0;
-                if($indExon == 'N'){
+                if($indExon == 'S'){
                     $tipoDocumentoExoneracion = $factura['CODIGOTIPOEXO'] ?? null;
                     $documentoExoneracion = $factura['DOCUMENTO_EXO'] ?? null;
                     $companiaExoneracion = $factura['COD_INST_EXO'] ?? null;
@@ -719,7 +719,7 @@ class CorbanaController extends Controller
             $apiHacienda = new BridgeHaciendaApi();
             $tokenApi = $apiHacienda->login(false);
             if($tokenApi){
-                ProcessInvoice::dispatch($invoice, $invoice->company_id, $tokenApi)->onQueue('invoicing');
+                ProcessInvoice::dispatch($invoice->id, $invoice->company_id, $tokenApi)->onQueue('invoicing');
             }
         }catch(\Exception $e){ Log::error($e); }
                     

@@ -129,11 +129,11 @@
     foreach($data_invoice->items as $item){
         if( isset($item->exoneration_document_number) ){ 
             $numExoneracion = $item->exoneration_document_number;
-            $fechaExoneracion = \Carbon\Carbon::parse($item->exoneration_date)->format('d/m/y');
+            $fechaExoneracion = \Carbon\Carbon::parse($item->exoneration_date)->format('d-m-Y');
             $porcExoneracion = $item->exoneration_porcent;
         }
     }
-    
+    $tipoPersonaInterno = "Nacional";
     $tipoPersonaStr = 'Física';
     if( $data_invoice->client_id_type == 1 || $data_invoice->client_id_type == 'F' ) {
       $tipoPersonaStr = 'Física';
@@ -143,6 +143,7 @@
       $tipoPersonaStr = 'DIMEX';
     }else if( $data_invoice->client_id_type == 4 || $data_invoice->client_id_type == 'E' ) {
       $tipoPersonaStr = 'Extranjero';
+      $tipoPersonaInterno = 'Extranjero';
     }else if( $data_invoice->client_id_type == 5 || $data_invoice->client_id_type == 'N' ) {
       $tipoPersonaStr = 'NITE';
     }else if( $data_invoice->client_id_type == 6 || $data_invoice->client_id_type == 'O') {
@@ -167,11 +168,11 @@
             <td style="border: 2px solid black; padding: 3px;" colspan="2">
                 <table class="details-table details1">
                     <tr>
-                        <td style="min-width: 100%;" colspan="2" >
+                        <td style="min-width: 100%; " colspan="2" >
                             @if($documentType == '08' && $provider !== null)
-                                <b style="width: 100%; font-size: 12px;">{{$provider->first_name }} {{ $provider->last_name }}}</b>
+                                <b style="width: 100%; font-size: 14px;">{{$provider->first_name }} {{ $provider->last_name }}}</b>
                             @else
-                                <b style="width: 100%; font-size: 12px;">{{$company->business_name}}</b> 
+                                <b style="width: 100%; font-size: 14px;">{{$company->business_name}}</b> 
                             @endif
                         </td>
                     </tr>
@@ -192,14 +193,13 @@
                             <b>Correo electrónico:</b> <span>{{$company->email}}</span><br>
                             <b>Tel:</b> <span>{{$company->phone}}</span><br>
                             <b>APDO:</b> <span>6504-1000 San José, Costa Rica</span><br>
+                            <b>Código postal:</b> <span>{{ $company->zip }}</span>
                         </td>
                         <td>
-                            <b>Dirección:</b><br>
                             <b>Provincia(Province):</b> <span>{{ \App\Variables::getProvinciaFromID( $company->state ) }}</span><br>
                             <b>Cantón(City):</b> <span>{{ \App\Variables::getCantonFromID( $company->city ) }}</span><br>
                             <b>Distrito(District):</b> <span>{{ \App\Variables::getDistritoFromID( $company->district ) }}</span><br>
-                            <b>Otras señas:</b> <span>{{ $company->address }}</span><br>
-                            <b>Código postal:</b> <span>{{ $company->zip }}</span>
+                            <b>Dirección:</b> <span>{{ $company->address }}</span>
                         </td>
                         @endif
                     </tr>
@@ -216,9 +216,12 @@
                             <b>IDENTIFICACIÓN / (ID.):</b> <span>{{$data_invoice->client_id_number}}</span><br>
                             <b>CORREO ELECTRÓNICO / (EMAIL):</b> <span>{{$data_invoice->client_email}}</span><br>
                             <b>TELÉFONO / (PHONE NUMBER):</b> <span>{{$data_invoice->client_phone}}</span><br>
-                            <b>REFERENCIA / (REFERENCE):</b> <span>{{ \App\OtherInvoiceData::findData($otherData, 'REFERENCIA') }}</span><br>
+                            <?php $referenciaFactura = \App\OtherInvoiceData::findData($otherData, 'REFERENCIA');
+                                if( !empty($referenciaFactura) ){  ?>
+                                    <b>REFERENCIA / (REFERENCE):</b> <span>{{ $referenciaFactura }}</span><br>
+                            <?php } ?>
                             <?php $consignatario = \App\OtherInvoiceData::findData($otherData, 'CONSIG');
-                                if( isset($consignatario) ){  ?>
+                                if( !empty($consignatario) ){  ?>
                                 <b>CONSIGNATARIO/(CONSIGNES):</b> <span>{{ $consignatario }}</span><br>
                             <?php } ?>
                         </td>
@@ -226,16 +229,17 @@
                             <b>TIPO DOC. / (DOC. TYPE): </b> <span>{{ $documentType }}</span><br>
                             <b>NÚMERO DOC. / (DOC. NUMBER):</b> <span>{{$data_invoice->document_number}}</span><br>
                             <b style="width:100%;">CLAVE NUMÉRICA / (DOCUMENT KEY):</b> <br><span style="width:100%; padding-top:0;">{{$data_invoice->document_key}}</span><br>
-                            <b>FECHA / (DATE)</b> <span>{{ $data_invoice->generatedDate()->format('d/m/Y') }}</span><br>
+                            <b>FECHA / (DATE)</b> <span>{{ $data_invoice->generatedDate()->format('d-m-Y') }}</span><br>
                             @if( !empty($data_invoice->other_reference) )
                                 <b>DOC. REFERENCIA / REFERENCED DOC.: </b> {{ $data_invoice->other_reference }}<br>
                             @endif
+                            <b>TIPO CLIENTE / (CLIENT TYPE): </b> <span>{{ $tipoPersonaInterno }}</span><br>
                         </td>
                     </tr>
                     <tr class="details3">
                         <td>
                             <b>TÉRMINOS DE PAGO/(TERMS PAYMENT):</b> <span>{{ $data_invoice->getCondicionVenta() }}</span><br>
-                            @if( $data_invoice->sale_condition == '02') )
+                            @if( $data_invoice->sale_condition == '02')
                                 <b>PLAZO CREDITO / (CREDIT TERM):</b> <span>{{ $data_invoice->credit_time }}</span><br>
                             @endif
                             <b>MEDIO DE PAGO / (MEANS OF PAYMENT):</b> <span>{{ $data_invoice->getMetodoPago() }}</span><br>
@@ -439,7 +443,7 @@
             </td>
         </tr>
         <tr>
-            <td style="border: 2px solid black; padding: 5px; border-right:0;" colspan="2">
+            <td style="border: 2px solid black; padding: 5px;" colspan="2">
                 <table class="table-usuario">
                     <tr>
                         <td><b>HECHO POR/(DONE BY):</b> <span>{{ \App\OtherInvoiceData::findData($otherData, 'HECHO_POR') }}</span></td>
