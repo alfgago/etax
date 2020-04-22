@@ -524,9 +524,14 @@ class Bill extends Model
         $bill->iva_amount = 0;
         
         //Revisa si es una sola linea. Si solo es una linea, lo hace un array para poder entrar en el foreach.
-        $lineas = $arr['DetalleServicio']['LineaDetalle'];
-        if( array_key_exists( 'NumeroLinea', $lineas ) ) {
-            $lineas = [$arr['DetalleServicio']['LineaDetalle']];
+        try{
+          $lineas = $arr['DetalleServicio']['LineaDetalle'];
+          if( array_key_exists( 'NumeroLinea', $lineas ) ) {
+              $lineas = [$arr['DetalleServicio']['LineaDetalle']];
+          }
+        }catch(\Exception $e){
+          Log::error($e);
+          
         }
         
         $bill->save();
