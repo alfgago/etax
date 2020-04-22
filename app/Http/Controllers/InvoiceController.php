@@ -1505,7 +1505,6 @@ class InvoiceController extends Controller
 
     }
 
-
     private function get_rates()
     {
 

@@ -28,8 +28,8 @@ class CorbanaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles','queryInvoiceFiles']] );
-        $this->middleware('CheckSubscription', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles','queryInvoiceFiles']] );
+        $this->middleware('auth', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles','queryInvoiceFiles','getUSDRate']] );
+        $this->middleware('CheckSubscription', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles','queryInvoiceFiles','getUSDRate']] );
     }
     
     public function queryBills(Request $request) {
@@ -382,7 +382,7 @@ class CorbanaController extends Controller
                 $prefijoCodigo = "S";
             }
             $codigoEtax = $prefijoCodigo.'103';
-            if( !isset($porcentajeIVA) ){
+            if( !isset($porcentajeIVA) || $porcentajeIVA == 0 || $porcentajeIVA == '0' ){
                 $codigoEtax = $prefijoCodigo.'170';
             }
             if( isset($documentoExoneracion) ){
@@ -394,6 +394,7 @@ class CorbanaController extends Controller
             if($tipoDocumento == '09'){
                 $codigoEtax = "B150";
             }
+            Log::debug("Codigo IVA puesto: $codigoEtax");
             
             //Datos de lineas
             $i = 0;
@@ -895,6 +896,13 @@ class CorbanaController extends Controller
                 return "3130052102";
             }
         }
+    }
+    
+    public function getUSDRate(){
+        $rate = get_rates();
+        return response()->json([
+            'rate' => $rate
+        ], 200);
     }
     
 }

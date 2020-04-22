@@ -658,7 +658,7 @@ class Bill extends Model
         $bill->total_exento = $arr['ResumenFactura']['TotalExento'] ?? 0;
         $bill->total_descuento = $arr['ResumenFactura']['TotalDescuentos'] ?? 0;
         $bill->total_venta_neta = $arr['ResumenFactura']['TotalVentaNeta'] ?? 0;
-        $bill->total_iva = $arr['ResumenFactura']['TotalExento'] ?? 0;
+        $bill->total_iva = $arr['ResumenFactura']['TotalImpuesto'] ?? 0;
         $bill->total_venta = $arr['ResumenFactura']['TotalVenta'] ?? 0;
         $bill->total_comprobante = $arr['ResumenFactura']['TotalComprobante'] ?? 0;
         $bill->total_otros_cargos = $arr['ResumenFactura']['TotalOtrosCargos'] ?? 0;

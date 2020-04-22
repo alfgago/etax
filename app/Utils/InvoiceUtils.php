@@ -238,7 +238,7 @@ class InvoiceUtils
                                         'sendPdf' => $sendPdf
                                     ]));
             }
-            Log::info('Se enviaron correos de notififación de factura aprobada: ' .$invoice->id );
+            Log::info('Se enviaron correos de notificación de factura aprobada: ' .$invoice->id );
         }catch( \Exception $e ){
             Log::error('Fallo el envío de correos de notififación de factura aprobada: ' .$invoice->id." Error: $e" );
         }
@@ -490,7 +490,7 @@ class InvoiceUtils
                 if( sizeof( $receptorEmailArray ) > 1 ){
                     $receptorEmail = $receptorEmailArray[0];
                 }
-                Log::debug(json_encode($receptorEmailArray) ."(".sizeof( $receptorEmailArray ).")" . " to " . $receptorEmail);
+                //Log::debug(json_encode($receptorEmailArray) ."(".sizeof( $receptorEmailArray ).")" . " to " . $receptorEmail);
             }catch(\Exception $e){ Log::error($e->getMessage()); }
             
             $invoiceData = array(

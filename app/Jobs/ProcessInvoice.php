@@ -51,123 +51,133 @@ class ProcessInvoice implements ShouldQueue
     {
 
         try {
-            //if ( app()->environment('production') ) {
-                $invoiceUtils = new InvoiceUtils();
-                $client = new Client();
-                $invoice = Invoice::find($this->invoiceId);
-                $company = Company::find($this->companyId);
-                //if (strpos($invoice->generation_method, 'bulk') === FALSE) { 
-                    Log::info('send job invoice id: '.$this->invoiceId);
-                    if ($company->atv_validation ) {
-                        if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09')) && $invoice->resend_attempts < 6) {
-                            if ($invoice->xml_schema == 43) {
-                                $requestDetails = $invoiceUtils->setDetails43($invoice->items);
-                                $requestOtherCharges = $invoiceUtils->setOtherCharges($invoice->otherCharges);
-                                $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails, $requestOtherCharges);
-                            } else {
-                                $requestDetails = $this->setDetails($invoice->items);
-                                $requestData = $this->setInvoiceData($invoice, $requestDetails);
+            $invoiceUtils = new InvoiceUtils();
+            $client = new Client();
+            $invoice = Invoice::find($this->invoiceId);
+            $company = Company::find($this->companyId);
+            Log::info('send job invoice id: '.$this->invoiceId);
+            if ($company->atv_validation ) {
+                if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09')) && $invoice->resend_attempts < 6) {
+                    
+                    //Revisa primero si la factura está en 4.2 o 4.3. Dependiendo de como esté, guarda los datos con setDetails
+                    if ($invoice->xml_schema == 43) {
+                        $requestDetails = $invoiceUtils->setDetails43($invoice->items);
+                        $requestOtherCharges = $invoiceUtils->setOtherCharges($invoice->otherCharges);
+                        $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails, $requestOtherCharges);
+                    } else {
+                        $requestDetails = $this->setDetails($invoice->items);
+                        $requestData = $this->setInvoiceData($invoice, $requestDetails);
+                    }
+                    
+                    $invoice->in_queue = false;
+                    $invoice->save();
+                    
+                    //Asegura que no se mande mas de una factura cada 8 segundos.
+                    sleep(8);
+                    
+                    //Revisa el API de hacienda y hace login.
+                    $apiHacienda = new BridgeHaciendaApi();
+                    $tokenApi = $apiHacienda->login(false);
+                    
+                    if ($requestData !== false) {
+                        $endpoint = $invoice->xml_schema == 42 ? 'invoice' : 'invoice43';
+                        Log::info('Enviando Request  API HACIENDA -->>' . $this->invoiceId);
+                        $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/create', [
+                            'headers' => [
+                                'Auth-Key' => config('etax.api_hacienda_key'),
+                                'Client-Service' => config('etax.api_hacienda_client'),
+                                'Authorization' => $tokenApi,
+                                'User-ID' => config('etax.api_hacienda_user_id'),
+                                'Connection' => 'Close'
+                            ],
+                            'multipart' => $requestData,
+                            'verify' => false,
+                            'http_errors' => false,
+                            'connect_timeout' => 20
+                        ]);
+                        $response = json_decode($result->getBody()->getContents(), true);
+                        $date = Carbon::now();
+                        ApiResponse::create([
+                            'invoice_id' => $invoice->id, 
+                            'company_id' => $company->id,
+                            'document_key' => $invoice->document_key,
+                            'doc_type' => $invoice->document_type,
+                            'json_response' => json_encode($response)
+                        ]);
+                        
+                        if( isset($response['status']) ){
+                            try{
+                                //Intenta guardar el original firmado siempre
+                                $save = 0;
+                                if(isset($response['data']['xmlFirmado'])){
+                                    $path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
+                                    $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n') );
+                                }
+                            }catch(\Exception $e){
+                                Log::error($e);
                             }
-                            $invoice->in_queue = false;
-                            $invoice->save();
-                            sleep(10);
-                            $apiHacienda = new BridgeHaciendaApi();
-                            $tokenApi = $apiHacienda->login(false);
-                            if ($requestData !== false) {
-                                $endpoint = $invoice->xml_schema == 42 ? 'invoice' : 'invoice43';
-                                Log::info('Enviando Request  API HACIENDA -->>' . $this->invoiceId);
-                                $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/create', [
-                                    'headers' => [
-                                        'Auth-Key' => config('etax.api_hacienda_key'),
-                                        'Client-Service' => config('etax.api_hacienda_client'),
-                                        'Authorization' => $tokenApi,
-                                        'User-ID' => config('etax.api_hacienda_user_id'),
-                                        'Connection' => 'Close'
-                                    ],
-                                    'multipart' => $requestData,
-                                    'verify' => false,
-                                    'http_errors' => false,
-                                    'connect_timeout' => 20
-                                ]);
-                                $response = json_decode($result->getBody()->getContents(), true);
-                                $date = Carbon::now();
-                                ApiResponse::create([
-                                    'invoice_id' => $invoice->id, 
-                                    'company_id' => $company->id,
-                                    'document_key' => $invoice->document_key,
-                                    'doc_type' => $invoice->document_type,
-                                    'json_response' => json_encode($response)
-                                ]);
-                                
-                                if( isset($response['status']) ){
-                                    try{
-                                        //Intenta guardar el original firmado siempre
-                                        $save = false;
-                                        if(isset($response['data']['xmlFirmado'])){
-                                            $path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
-                                            $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n') );
-                                        }
-                                    }catch(\Exception $e){
-                                        Log::error($e);
-                                    }
-                                    try{ //Intenta guardar la respuesta siempre
-                                        if(isset($response['data']['mensajeHacienda'])){
-                                            Log::debug( $response['data']['response'] . "GUARDA: " . !(strpos($response['data']['response'],"ESTADO=procesando") !== false) );
-                                            $saveMH = false;
-                                            if ( ! (strpos($response['data']['response'],"ESTADO=procesando") !== false) ) {
-                                                $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
-                                                $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );
-                                            }
-                                        }
-                                    }catch(\Exception $e){
-                                        Log::error($e);
+                            try{ //Intenta guardar la respuesta siempre
+                                if(isset($response['data']['mensajeHacienda'])){
+                                    Log::debug( $response['data']['response'] . "GUARDA: " . !(strpos($response['data']['response'],"ESTADO=procesando") !== false) );
+                                    $pathMH = 0;
+                                    if ( ! (strpos($response['data']['response'],"ESTADO=procesando") !== false) ) {
+                                        $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
+                                        $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );
                                     }
                                 }
-                                
-                                if ($save && $saveMH) {
-                                    $xml = new XmlHacienda();
-                                    $xml->invoice_id = $invoice->id;
-                                    $xml->bill_id = 0;
-                                    $xml->xml = $path;
-                                    $xml->xml_message = $pathMH;
-                                    $xml->save();
-                                    Log::info('XML guardado.');
-                                }
-                                
-                                if (isset($response['status']) && $response['status'] == 200) {
-                                    Log::info("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
-                                    Log::info('API HACIENDA 200 :'. $invoice->document_number);
-                                    if (strpos($response['data']['response'],"ESTADO=procesando") !== false) {
-                                        $invoice->hacienda_status = '05';
-                                    } else {
-                                        $invoice->hacienda_status = '03';
-                                    }
-                                    $invoice->save();
-                                    
-                                    if ($save && $saveMH) {
-                                        $sendPdf = true;
-                                        $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, $sendPdf);
-                                        Log::info('Factura enviada.');
-                                    }
-                                } else if (isset($response['status']) && $response['status'] == 400 &&
-                                    (strpos($response['message'], 'ya fue recibido anteriormente') <> false || strpos($response['message'], 'XML ya existe en nuestras bases de datos') <> false) ) {
-                                    Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
-                                    Log::warning('Consecutive repeated -->' . $invoice->document_number);
-                                    $invoice->hacienda_status = '04';
-                                    $invoice->save();
-                                } else if (isset($response['status']) && $response['status'] == 400) {
-                                    Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
-                                    $invoice->hacienda_status = '04';
-                                    $invoice->save();
-                                }
-                                Log::info('Proceso de facturación finalizado con éxito.');
+                            }catch(\Exception $e){
+                                Log::error($e);
                             }
                         }
-                    }else {
-                        Log::warning('El job Invoices no se procesó, porque la empresa no tiene un certificado válido.'.$company->id_number);
+                        
+                        if ($save && $pathMH) {
+                            $xml = XMLHacienda::updateOrCreate(
+                                [
+                                  'invoice_id' => $invoice->id
+                                ],
+                                [
+                                    'bill_id' => 0,
+                                    'xml' => $path,
+                                    'xml_message' => $pathMH
+                                ]
+                            );
+                            Log::info('XML guardado.');
+                        }
+                        
+                        if (isset($response['status']) && $response['status'] == 200) {
+                            Log::info("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
+                            Log::info('API HACIENDA 200 :'. $invoice->document_number);
+                            if (strpos($response['data']['response'],"ESTADO=procesando") !== false) {
+                                $invoice->hacienda_status = '05';
+                            } else {
+                                $invoice->hacienda_status = '03';
+                            }
+                            $invoice->save();
+                            
+                            if ($save && $pathMH) {
+                                $sendPdf = true;
+                                $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, $sendPdf);
+                                Log::info('Factura enviada.');
+                            }else{
+                                Log::warning("No se mando la notificacion de $invoice->id. Respuesta: $pathMH, Original: $save. Quedo en naranja.");
+                            }
+                        } else if (isset($response['status']) && $response['status'] == 400 &&
+                            (strpos($response['message'], 'ya fue recibido anteriormente') <> false || strpos($response['message'], 'XML ya existe en nuestras bases de datos') <> false) ) {
+                            Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
+                            Log::warning('Consecutive repeated -->' . $invoice->document_number);
+                            $invoice->hacienda_status = '04';
+                            $invoice->save();
+                        } else if (isset($response['status']) && $response['status'] == 400) {
+                            Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
+                            $invoice->hacienda_status = '04';
+                            $invoice->save();
+                        }
+                        Log::info('Proceso de facturación finalizado con éxito.');
                     }
-                //}
-            //}
+                }
+            }else {
+                Log::warning('El job Invoices no se procesó, porque la empresa no tiene un certificado válido.'.$company->id_number);
+            }
         } catch ( \Exception $e) {
             Log::error('ERROR Enviando parametros  API HACIENDA Invoice: '.$this->invoiceId.'-->>'.$e);
         }

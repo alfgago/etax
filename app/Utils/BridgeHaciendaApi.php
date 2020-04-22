@@ -273,6 +273,9 @@ class BridgeHaciendaApi
 
     public function queryHacienda($invoice, $token, $company, $findKey = true) {
         try {
+            //Se usa para saber si debe enviar notificacion al cliente o no.
+            $initialStatus = $invoice->hacienda_status;
+            
             $invoiceUtils = new InvoiceUtils();
             if($findKey){
                 $success = $invoiceUtils->setRealDocumentKey($invoice);
@@ -312,10 +315,16 @@ class BridgeHaciendaApi
                         ltrim($response['data']['mensajeHacienda'], '\n')
                     );
                 }
+                $xmlHacienda = null;
                 if ($saveMH) {
-                    XmlHacienda::where('invoice_id', $invoice->id)->update(['xml_message' => $pathMH]);
+                    $xmlHacienda = XmlHacienda::where(
+                        'invoice_id', $invoice->id
+                    )->first();
+                    $xmlHacienda->xml_message = $pathMH;
+                    $xmlHacienda->save();
                     $file = Storage::get($pathMH);
                 }
+                
                 if (strpos($response['data']['response'],"ESTADO=rechazado") !== false) {
                     if($findKey){
                         $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
@@ -328,6 +337,11 @@ class BridgeHaciendaApi
                 } else if (strpos($response['data']['response'],"ESTADO=aceptado") !== false) {
                     $invoice->hacienda_status = '03';
                     $invoice->save();
+                    
+                    if($initialStatus == '05' && $saveMH && isset($xmlHacienda) ){
+                        $path = $xmlHacienda->xml;
+                        $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, true);
+                    }
                 } else if (strpos($response['data']['response'],"ESTADO=procesando") !== false) {
                     $invoice->hacienda_status = '05';
                     $invoice->save();
