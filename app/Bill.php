@@ -530,8 +530,9 @@ class Bill extends Model
               $lineas = [$arr['DetalleServicio']['LineaDetalle']];
           }
         }catch(\Exception $e){
-          Log::error($e);
-          
+          Log::error("Error en XML, no contiene lineas." . $e);
+          Log::error("Error en XML, detalle: " . json_encode($arr));
+          $lineas = [];
         }
         
         $bill->save();
