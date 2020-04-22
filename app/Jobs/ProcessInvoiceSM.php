@@ -69,7 +69,7 @@ class ProcessInvoiceSM implements ShouldQueue
                     }
                     $invoice->save();
                     if ($company->atv_validation ) {
-                        sleep(5);
+                        sleep(4);
                         if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09')) && $invoice->resend_attempts < 6) {
                             if ($invoice->xml_schema == 43) {
                                 $requestDetails = $invoiceUtils->setDetails43($invoice->items);
@@ -212,15 +212,17 @@ class ProcessInvoiceSM implements ShouldQueue
                     $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, true);
                     Log::info('Factura enviada y XML guardado.');
                 }
-            } else if (isset($response['status']) && $response['status'] == 400 && strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
-                Log::info('Consecutive repeated -->' . $invoice->document_number);
-                sleep(2);
+            }else if (isset($response['status']) && $response['status'] == 400 &&
+                (strpos($response['message'], 'ya fue recibido anteriormente') <> false || strpos($response['message'], 'XML ya existe en nuestras bases de datos') <> false) ) {
+                Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
+                Log::warning('Consecutive repeated -->' . $invoice->document_number);
+                sleep(1);
                 $this->signXML($invoice, $requestData);
-                $invoice->hacienda_status = '04';
+                $invoice->hacienda_status = '05';
                 $invoice->save();
-            } else if (isset($response['status']) && $response['status'] == 400 && strpos($response['message'], 'XML ya existe en nuestras bases de datos') <> false) {
-                Log::info('Consecutive repeated -->' . $invoice->document_number);
-                sleep(2);
+            } else if (isset($response['status']) && $response['status'] == 400) {
+                Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
+                sleep(1);
                 $this->signXML($invoice, $requestData);
                 $invoice->hacienda_status = '04';
                 $invoice->save();
