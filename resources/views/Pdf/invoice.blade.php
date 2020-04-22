@@ -258,6 +258,7 @@
                 <b>Fecha de Emisión: </b> {{ $data_invoice->generatedDate()->format('d/m/Y') }}<br>
                 <b>Condición Venta: </b> {{ $data_invoice->getCondicionVenta() }}<br>
                 <b>Medio de Pago: </b> {{ $data_invoice->getMetodoPago() }}<br>
+                <b>Fecha de Vencimiento: </b> {{ $data_invoice->dueDate()->format('d/m/Y') }}<br>
                 @if( isset($data_invoice->buy_order) )
                     <b>Orden de compra: </b> {{ $data_invoice->buy_order }}<br>
                 @endif
