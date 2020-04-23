@@ -174,6 +174,8 @@ class ProcessInvoiceSM implements ShouldQueue
             if( isset($response['status']) ){
                 try{
                     //Intenta guardar el original firmado siempre
+                    $save = 0;
+                    $path = null;
                     if(isset($response['data']['xmlFirmado'])){
                         $path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
                         $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n') );
@@ -183,7 +185,8 @@ class ProcessInvoiceSM implements ShouldQueue
                 try{ //Intenta guardar la respuesta siempre
                     if(isset($response['data']['mensajeHacienda'])){
                         Log::debug($response['data']['response'] . "GUARDA: " . !(strpos($response['data']['response'],"ESTADO=procesando") !== false) );
-                        $pathMH = false;
+                        $saveMH = 0;
+                        $pathMH = null;
                         if ( ! (strpos($response['data']['response'],"ESTADO=procesando") !== false) ) {
                             $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
                             $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );
@@ -191,6 +194,23 @@ class ProcessInvoiceSM implements ShouldQueue
                     }
                 }catch(\Exception $e){}
             }
+            
+            Log::debug( json_encode($response) );
+                        
+            if ($save) {
+                $xml = XMLHacienda::updateOrCreate(
+                    [
+                      'invoice_id' => $invoice->id
+                    ],
+                    [
+                        'bill_id' => 0,
+                        'xml' => $path,
+                        'xml_message' => $pathMH
+                    ]
+                );
+                Log::info('XML guardado.');
+            }
+                        
             
             if (isset($response['status']) && $response['status'] == 200) {
                 Log::info('API HACIENDA 200 :'. $invoice->document_number);
@@ -200,30 +220,23 @@ class ProcessInvoiceSM implements ShouldQueue
                     $invoice->hacienda_status = '03';
                 }
                 $invoice->save();
-                if ($save && $pathMH) {
-                    $xml = new XmlHacienda();
-                    $xml->invoice_id = $invoice->id;
-                    $xml->bill_id = 0;
-                    $xml->xml = $path;
-                    $xml->xml_message = $pathMH;
-                    $xml->save();
-                    
-                    $sendPdf = $invoice->generation_method == "etax-bulk";
+                if ($save && $saveMH) {
+                    $sendPdf = true;
                     $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, true);
-                    Log::info('Factura enviada y XML guardado.');
+                    Log::info('Factura enviada.');
                 }
             }else if (isset($response['status']) && $response['status'] == 400 &&
                 (strpos($response['message'], 'ya fue recibido anteriormente') <> false || strpos($response['message'], 'XML ya existe en nuestras bases de datos') <> false) ) {
                 Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
                 Log::warning('Consecutive repeated -->' . $invoice->document_number);
                 sleep(1);
-                $this->signXML($invoice, $requestData);
+                //$this->signXML($invoice, $requestData);
                 $invoice->hacienda_status = '05';
                 $invoice->save();
             } else if (isset($response['status']) && $response['status'] == 400) {
                 Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
                 sleep(1);
-                $this->signXML($invoice, $requestData);
+                //$this->signXML($invoice, $requestData);
                 $invoice->hacienda_status = '04';
                 $invoice->save();
             }
