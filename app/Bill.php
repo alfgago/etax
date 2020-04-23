@@ -530,7 +530,7 @@ class Bill extends Model
               $lineas = [$arr['DetalleServicio']['LineaDetalle']];
           }
         }catch(\Exception $e){
-          Log::error("Error en XML, no contiene lineas." . $e);
+          Log::error("Error en XML: " . $e->getMessage());
           Log::error("Error en XML, detalle: " . json_encode($arr));
           $lineas = [];
         }
@@ -656,6 +656,7 @@ class Bill extends Model
                 $totalIvaDevuelto += $item->iva_amount;
             }
         }
+        
         $bill->total_iva_devuelto = $arr['ResumenFactura']['TotalIVADevuelto'] ?? 0;
         $bill->total_serv_gravados = $arr['ResumenFactura']['TotalServGravados'] ?? 0;
         $bill->total_serv_exentos = $arr['ResumenFactura']['TotalServExentos'] ?? 0;

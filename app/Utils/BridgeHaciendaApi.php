@@ -317,11 +317,14 @@ class BridgeHaciendaApi
                 }
                 $xmlHacienda = null;
                 if ($saveMH) {
-                    $xmlHacienda = XmlHacienda::where(
-                        'invoice_id', $invoice->id
-                    )->first();
-                    $xmlHacienda->xml_message = $pathMH;
-                    $xmlHacienda->save();
+                    $xmlHacienda = XMLHacienda::updateOrCreate(
+                        [
+                          'invoice_id' => $invoice->id
+                        ],
+                        [
+                            'xml_message' => $pathMH
+                        ]
+                    );
                     $file = Storage::get($pathMH);
                 }
                 

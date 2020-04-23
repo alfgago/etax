@@ -9,6 +9,7 @@ use App\Bill;
 use App\BillItem;
 use App\Invoice;
 use App\InvoiceItem;
+use App\CorbanaResponse;
 use App\OtherInvoiceData;
 use App\Company;
 use App\Provider;
@@ -23,13 +24,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use Zttp\Zttp;
 
 class CorbanaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles','queryInvoiceFiles','getUSDRate']] );
-        $this->middleware('CheckSubscription', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles','queryInvoiceFiles','getUSDRate']] );
+        $this->middleware('auth', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles','queryInvoiceFiles','getUSDRate','pruebaZttp']] );
+        $this->middleware('CheckSubscription', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles','queryInvoiceFiles','getUSDRate','pruebaZttp']] );
     }
     
     public function queryBills(Request $request) {
@@ -228,13 +230,14 @@ class CorbanaController extends Controller
     public function sendInvoice(Request $request) {
  
         try{
-            $numDocuInterno = $factura['NO_DOCU'] ?? "";
+            $invoiceUtils = new \App\Utils\InvoiceUtils();
             
             $invoice = null;
             $factura = $request->factura[0];
             $items = $request->lineas;
             $requestOtros = $request->otros ?? null;
             $metodoGeneracion = "etax-corbana";
+            $numDocuInterno = $factura['NO_DOCU'] ?? "";
 
             //Busca la cedula de la empresa
             $cedulaEmpresa = $this->parseCorbanaIdToCedula($factura['NO_CIA'], $factura['ACTIVIDAD']);
@@ -284,6 +287,33 @@ class CorbanaController extends Controller
                 $partidaArancelaria = mb_substr( $partidaArancelaria, -12, null, 'UTF-8') ;
             }
             
+            $corbanaResponse = CorbanaResponse::firstOrCreate(
+                [
+                    'num_interno' =>  $numDocuInterno
+                ]
+            );
+            $cachekey = "avoid-duplicate-CORBANA-$numDocuInterno";
+            if ( Cache::has($cachekey) ) {
+                sleep(15);
+            }
+            Cache::put($cachekey, true, 30);
+            
+            if( $corbanaResponse->invoice ){
+                Log::debug('Se encontro duplicada');
+                $invoice = $corbanaResponse->invoice;
+                $pdf = $invoiceUtils->streamPdf($invoice, $invoice->company);
+                $basePDF = !empty($pdf) ? base64_encode($pdf) : null;
+                $xml = $invoiceUtils->downloadXml($invoice, $invoice->company);
+                $baseXML = !empty($xml) ? base64_encode($xml) : null;
+                
+                return response()->json([
+                    'mensaje' => 'Repetida',
+                    'factura' => $invoice,
+                    'pdf64' => $basePDF,
+                    'xml64' => $baseXML,
+                ], 200);
+            }
+            
             //Define el numero de factura
             //$numeroReferencia = $factura['NO_DOCU'];
             //$numeroReferencia = floatval( mb_substr( $numeroReferencia, -8, null, 'UTF-8') );
@@ -302,15 +332,6 @@ class CorbanaController extends Controller
                     'factura' => $invoice
                 ], 200);
             }
-            
-            $cachekey = "avoid-duplicate-CORBANA-$numDocuInterno";
-            if ( Cache::has($cachekey) ) {
-                sleep(15);
-                return response()->json([
-                    'mensaje' => 'Error: Factura duplicada. Se reintentó varias veces en los mismos 30 segundos. Favor revisar, o intentar de nuevo en 30s.',
-                ], 200);
-            }
-            Cache::put($cachekey, true, 30);
             
             $TIPO_SERV = $factura['TIPO_SERV'] ?? 'B';
             if( $tipoDocumento == '09' ){
@@ -504,11 +525,13 @@ class CorbanaController extends Controller
             
             $otherData = $this->setOtherInvoiceData($invoice, $factura, $items, $requestOtros);
             
-            $invoiceUtils = new \App\Utils\InvoiceUtils();
             $pdf = $invoiceUtils->streamPdf($invoice, $invoice->company);
             $basePDF = !empty($pdf) ? base64_encode($pdf) : null;
             $xml = $invoiceUtils->downloadXml($invoice, $invoice->company);
             $baseXML = !empty($xml) ? base64_encode($xml) : null;
+            
+            $corbanaResponse->invoice_id = $invoice->id;
+            $corbanaResponse->save();
             
             return response()->json([
                 'mensaje' => 'Exito',
@@ -563,12 +586,24 @@ class CorbanaController extends Controller
                         $pesoBruto
                     );
                 }
-            
+                
+                $otherData["PROCEDENCIA"] = OtherInvoiceData::registerOtherData(
+                    $invoice->id,
+                    null,
+                    "PROCEDENCIA",
+                    $requestInvoice["PROCEDENCIA"] ?? ''
+                );
                 $otherData["COD_EXP"] = OtherInvoiceData::registerOtherData(
                     $invoice->id,
                     null,
                     "COD_EXP",
                     $requestOtros["COD_EXP"] ?? ''
+                );
+                $otherData["FECHA_EMB"] = OtherInvoiceData::registerOtherData(
+                    $invoice->id,
+                    null,
+                    "FECHA_EMB",
+                    $requestOtros["FECHA_EMB"] ?? ''
                 );
                 $otherData["CONSIG"] = OtherInvoiceData::registerOtherData(
                     $invoice->id,
@@ -587,6 +622,12 @@ class CorbanaController extends Controller
                     null,
                     "COD_EMB",
                     $requestOtros["COD_EMB"] ?? ''
+                );
+                $otherData["PAIS_DES"] = OtherInvoiceData::registerOtherData(
+                    $invoice->id,
+                    null,
+                    "PAIS_DES",
+                    $requestOtros["PAIS_DES"] ?? ''
                 );
                 $otherData["COD_VAP"] = OtherInvoiceData::registerOtherData(
                     $invoice->id,
@@ -699,7 +740,7 @@ class CorbanaController extends Controller
             $linea['invoice_id'] = $invoice->id;
             $invoice->subtotal = $invoice->subtotal + $linea['subtotal'];
             $invoice->iva_amount = $invoice->iva_amount + $linea['iva_amount'];
-            $descuentos = $descuentos + $linea['discount'];
+            //$descuentos = $descuentos + $linea['discount'];
             $exoneraciones = $exoneraciones + $linea['exoneration_amount'];
             $item = InvoiceItem::updateOrCreate(
             [
@@ -790,7 +831,7 @@ class CorbanaController extends Controller
                 $note->other_reference = $invoice->reference_number;
                 $note->reference_number = $company->last_note_ref_number + 1;
                 $note->save();
-                $noteData = $note->setNoteData($invoice, $invoice->items->toArray(), $note->document_type, $invoice, $company);
+                $noteData = $note->setNoteData($invoice, $invoice->items->toArray(), $note->document_type, $invoice, $company, true);
                 //Log::debug($noteData);
                 if (!empty($noteData)) {
                     $apiHacienda->createCreditNote($noteData, $tokenApi);
@@ -903,6 +944,38 @@ class CorbanaController extends Controller
         return response()->json([
             'rate' => $rate
         ], 200);
+    }
+    
+    //Test de Zttp
+    public function pruebaZttp(){
+        $scurl = request()->scurl;
+        $cachekey = "test-soundcloud-$scurl";
+        if( $scurl ){
+            if ( !Cache::has($cachekey) ) {
+                sleep(1);
+                $client = new \GuzzleHttp\Client();
+                $response = $client->get( "https://api.soundcloud.com/resolve",
+                    [
+                        'query' => [
+                            'url' => $scurl,
+                            'client_id' => 'e5c9530c74fa396f8528397a2fa17fcc'
+                        ],
+                        'timeout' => 15,
+                        'connect_timeout' => 15,
+                        'read_timeout' => 15,
+                    ]
+                );
+                $json = json_decode($response->getBody()->getContents(), true);
+                Cache::put($cachekey, $json, 43200);
+            }else{
+                $json = Cache::get($cachekey);
+            }
+            return response()->json([
+                'mensaje' => 'Prueba API SoundCloud con Laravel Zttp',
+                'grabaciones' => $json
+            ], 200);
+            return $json;
+        }
     }
     
 }
