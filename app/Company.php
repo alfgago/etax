@@ -526,6 +526,7 @@ class Company extends Model {
         }
         if ($type == '02') {
             $this->last_debit_note_ref_number = $ref;
+            $this->last_document_debit_note = $consecutivo;
         }
         if ($type == '03') {
             $this->last_note_ref_number = $ref;

@@ -276,6 +276,7 @@ class CorbanaController extends Controller
             }else if($TIPO_DOC == 'ND'){
                 $tipoDocumento = '02';
             }
+            
             $otherReference = $factura['NO_DOCU_REF'] ?? null;
             
             $sistema = $factura['SISTEMA'] ?? null;
@@ -287,6 +288,15 @@ class CorbanaController extends Controller
                 $partidaArancelaria = mb_substr( $partidaArancelaria, -12, null, 'UTF-8') ;
             }
             
+            $procedencia = $factura["PROCEDENCIA"] ?? 'N';
+            if($procedencia == 'E'){
+                $tipoPersona = 'E';
+            }
+            
+            if($tipoPersona=='E'&&$tipoDocumento=='01'){
+                $tipoDocumento = '04';
+            }
+            
             $corbanaResponse = CorbanaResponse::firstOrCreate(
                 [
                     'num_interno' =>  $numDocuInterno
@@ -294,7 +304,7 @@ class CorbanaController extends Controller
             );
             $cachekey = "avoid-duplicate-CORBANA-$numDocuInterno";
             if ( Cache::has($cachekey) ) {
-                sleep(15);
+                sleep(8);
             }
             Cache::put($cachekey, true, 30);
             
@@ -586,13 +596,6 @@ class CorbanaController extends Controller
                         $pesoBruto
                     );
                 }
-                
-                $otherData["PROCEDENCIA"] = OtherInvoiceData::registerOtherData(
-                    $invoice->id,
-                    null,
-                    "PROCEDENCIA",
-                    $requestInvoice["PROCEDENCIA"] ?? ''
-                );
                 $otherData["COD_EXP"] = OtherInvoiceData::registerOtherData(
                     $invoice->id,
                     null,
@@ -661,6 +664,12 @@ class CorbanaController extends Controller
                 );
                
             }
+            $otherData["PROCEDENCIA"] = OtherInvoiceData::registerOtherData(
+                $invoice->id,
+                null,
+                "PROCEDENCIA",
+                $requestInvoice["PROCEDENCIA"] ?? ''
+            );
             $otherData["REFERENCIA"] = OtherInvoiceData::registerOtherData(
                 $invoice->id,
                 null,
