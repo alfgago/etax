@@ -208,7 +208,7 @@ class CompanyController extends Controller {
         if (!$company) {
             return redirect('/');
         }
-        if( !allowTo('admin') ){
+        if( !allowTo('admin') && !allowTo('GoSocket') ){
             return back()->withError('Usted no tiene permisos para acceder a esa página.');
         }
         
@@ -258,7 +258,7 @@ class CompanyController extends Controller {
         $team = Team::where('company_id', $company->id)->first();
 
         /* Only owner of company can edit that company */
-        if ( !auth()->user()->isOwnerOfTeam($team) ) {
+        if ( !auth()->user()->isOwnerOfTeam($team) && !allowTo('GoSocket')  ) {
             redirect()->back()->withError('Usted no tiene permisos para editar el equipo.');
         }
         
