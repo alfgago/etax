@@ -143,11 +143,27 @@
       $tipoPersonaStr = 'DIMEX';
     }else if( $data_invoice->client_id_type == 4 || $data_invoice->client_id_type == 'E' ) {
       $tipoPersonaStr = 'Extranjero';
-      $tipoPersonaInterno = 'Extranjero';
     }else if( $data_invoice->client_id_type == 5 || $data_invoice->client_id_type == 'N' ) {
       $tipoPersonaStr = 'NITE';
     }else if( $data_invoice->client_id_type == 6 || $data_invoice->client_id_type == 'O') {
       $tipoPersonaStr = 'Otro';
+    }
+    
+    $procedencia = \App\OtherInvoiceData::findData($otherData, 'PROCEDENCIA');
+    if($procedencia == "E"){
+        $tipoPersonaInterno = "Extranjero";
+    }
+    
+    if( $documentType == '09' ){
+        $codigoExportador = \App\OtherInvoiceData::findData($otherData, 'COD_EXP');
+        $fechaEmbarque = \App\OtherInvoiceData::findData($otherData, 'FECHA_EMB');
+        $numeroEmbarque = \App\OtherInvoiceData::findData($otherData, 'COD_EMB');
+        $nombreEmbarque = \App\OtherInvoiceData::findData($otherData, 'COD_VAP');
+        $procedenciaEmbarque = \App\OtherInvoiceData::findData($otherData, 'PRO_FRU');
+        $puertoSalida = \App\OtherInvoiceData::findData($otherData, 'PUE_SAL');
+        $puertoDestino = \App\OtherInvoiceData::findData($otherData, 'PUE_DES');
+        $paisDestino = \App\OtherInvoiceData::findData($otherData, 'PAIS_DES');
+        $declaracionAduanera = \App\OtherInvoiceData::findData($otherData, 'NO_DUA');
     }
     
 ?>
@@ -247,6 +263,33 @@
                         <td>
                             <b>MONEDA / (CURRENCY)</b> <span>{{ $data_invoice->currency }}</span><br>
                             <b>TIPO DE CAMBIO / (EXCHANGE RATE)</b> <span>{{ $data_invoice->currency_rate }}</span>
+                            <?php if( !empty($codigoExportador) ){  ?>
+                                <b>CÓDIGO EXPORTADOR:</b> <span>{{ $codigoExportador }}</span><br>
+                            <?php } ?>
+                            <?php if( !empty($fechaEmbarque) ){  ?>
+                                <b>FECHA EMBARQUE / LOAD DATE:</b> <span>-</span><br>
+                            <?php } ?>
+                            <?php if( !empty($numeroEmbarque) ){  ?>
+                                <b>NUM EMBARQUE / SHIPPING NUM:</b> <span>{{ $numeroEmbarque }}</span><br>
+                            <?php } ?>
+                            <?php if( !empty($nombreEmbarque) ){  ?>
+                                <b>VAPOR / VESSEL:</b> <span>{{ $nombreEmbarque }}</span><br>
+                            <?php } ?>
+                            <?php if( !empty($procedenciaEmbarque) ){  ?>
+                                <b>PROCEDENCIA DE FRUTA:</b> <span>{{ $procedenciaEmbarque }}</span><br>
+                            <?php } ?>
+                            <?php if( !empty($puertoSalida) ){  ?>
+                                <b>PUERTO SALIDA / DELIVERY PORT:</b> <span>{{ $puertoSalida }}</span><br>
+                            <?php } ?>
+                            <?php if( !empty($puertoDestino) ){  ?>
+                                <b>PUERTO DESTINO / DESTINATION PORT:</b> <span>{{ $puertoDestino }}</span><br>
+                            <?php } ?>
+                            <?php if( !empty($paisDestino) ){  ?>
+                                <b>PAIS DESTINO / DESTINATION COUNTRY:</b> <span>{{ $paisDestino }}</span><br>
+                            <?php } ?>
+                            <?php if( !empty($declaracionAduanera) ){  ?>
+                                <b>DUA:</b> <span>{{ $declaracionAduanera }}</span><br>
+                            <?php } ?>
                         </td>
                     </tr>
                 </table>

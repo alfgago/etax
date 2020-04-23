@@ -37,3 +37,4 @@ Route::get('corbana-query-bills/{pCia}/{pAct}', 'CorbanaController@queryBills');
 Route::get('corbana-query-bill-files/{pId}', 'CorbanaController@queryBillFiles');
 Route::get('corbana-query-invoice-files/{pId}', 'CorbanaController@queryInvoiceFiles');
 Route::get('corbana-usd', 'CorbanaController@getUSDRate');
+Route::get('prueba-zttp', 'CorbanaController@pruebaZttp');

@@ -50,16 +50,17 @@ class GoSocketSync extends Command
         foreach ($users as $user) {
             $token = $user->session_token;
             $tipos_facturas = $apiGoSocket->getDocumentTypes($token);
+            $company = Company::find($user->company_id);
+            
             if (is_array($tipos_facturas)) {
-                $this->info('Sincronizando documentos');
+                $this->info('Sincronizando documentos GS: '. $company->id_number);
                 foreach ($tipos_facturas as $tipo_factura) {
 
                     $facturas = $apiGoSocket->getSentDocuments($token, $user->company_token, $tipo_factura, $user);
 
+                    $this->info('Sincronizando Enviados');
                     foreach ($facturas as $factura) {
-                        $this->info('Sincronizando Enviados');
                         $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
-                        $company = Company::find($user->company_id);
                         $xml  = base64_decode($APIStatus);
                         $xml = simplexml_load_string( $xml);
                         $json = json_encode( $xml );
@@ -76,7 +77,6 @@ class GoSocketSync extends Command
                         //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                         if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                             //Registra el XML. Si todo sale bien, lo guarda en S3.
-                            $this->info('Guardando XML Company'. $company->id_number);
                             Invoice::saveInvoiceXML( $arr, 'GS' );
                         }
                         $company->save();
@@ -84,10 +84,9 @@ class GoSocketSync extends Command
 
                     $facturas = $apiGoSocket->getReceivedDocuments($token, $user->company_token, $tipo_factura, $user);
 
+                    $this->info('Sincronizando Recibidos');
                     foreach ($facturas as $factura) {
-                        $this->info('Sincronizando Recibidos');
                         $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
-                        $company = Company::find($user->company_id);
                         $xml  = base64_decode($APIStatus);
                         $xml = simplexml_load_string( $xml);
                         $json = json_encode( $xml );
