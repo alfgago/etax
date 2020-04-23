@@ -237,6 +237,8 @@ if (!function_exists('allowTo')) {
                 $permisoId = 6;
             }else if( $permiso == 'catalogue') {
                 $permisoId = 7;
+            }else if( $permiso == 'GoSocket') {
+                $permisoId = 8;
             }
             
             $hasPermiso = App\UserCompanyPermission::where(  [    
@@ -619,6 +621,9 @@ if (!function_exists('getNextRef')) {
         if ($docType == '01') {
             $ref = $company->last_invoice_ref_number + 1;
         }
+        if ($docType == '02') {
+            $ref = $company->last_debit_note_ref_number + 1;
+        }
         if ($docType == '08') {
             $ref = $company->last_invoice_pur_ref_number + 1;
         }
@@ -647,6 +652,9 @@ if (!function_exists('getDocumentKey')) {
         }
         if ($docType == '01') {
             $ref = $company->last_invoice_ref_number + 1;
+        }
+        if ($docType == '02') {
+            $ref = $company->last_debit_note_ref_number + 1;
         }
         if ($docType == '08') {
             $ref = $company->last_invoice_pur_ref_number + 1;
@@ -679,6 +687,9 @@ if (!function_exists('getDocReference')) {
         }
         if ($docType == '01') {
             $lastSale = $company->last_invoice_ref_number + 1;
+        }
+        if ($docType == '02') {
+            $lastSale = $company->last_debit_note_ref_number + 1;
         }
         if ($docType == '08') {
             $lastSale = $company->last_invoice_pur_ref_number + 1;
