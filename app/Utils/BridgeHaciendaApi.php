@@ -344,7 +344,7 @@ class BridgeHaciendaApi
                     $invoice->hacienda_status = '03';
                     $invoice->save();
                     
-                    if($initialStatus == '05' && $saveMH && isset($xmlHacienda) ){
+                    if($initialStatus == '05' && $fileMH && isset($xmlHacienda) ){
                         $path = $invoiceUtils->getXmlPath( $invoice, $company );
                         $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, true);
                     }
