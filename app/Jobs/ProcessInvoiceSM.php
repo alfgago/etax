@@ -123,12 +123,15 @@ class ProcessInvoiceSM implements ShouldQueue
                 $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n'));
                 
                 if ($save) {
-                    $xml = new XmlHacienda();
-                    $xml->invoice_id = $invoice->id;
+                    $xmlHacienda = XMLHacienda::firstOrNew(
+                        [
+                          'invoice_id' => $invoice->id
+                        ]
+                    );
                     $xml->bill_id = 0;
                     $xml->xml = $path;
                     $xml->save();
-                    Log::info('XML Guardado -->> ' . 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml");
+                    Log::info('SM: XML Guardado --> ' . $path);
                 }
             }else{
                 Log::warning('Error en respuesta de firma -->>'. json_encode($response) );
@@ -184,7 +187,6 @@ class ProcessInvoiceSM implements ShouldQueue
                 
                 try{ //Intenta guardar la respuesta siempre
                     if(isset($response['data']['mensajeHacienda'])){
-                        Log::debug($response['data']['response'] . "GUARDA: " . !(strpos($response['data']['response'],"ESTADO=procesando") !== false) );
                         $saveMH = 0;
                         $pathMH = null;
                         if ( ! (strpos($response['data']['response'],"ESTADO=procesando") !== false) ) {
@@ -194,8 +196,6 @@ class ProcessInvoiceSM implements ShouldQueue
                     }
                 }catch(\Exception $e){}
             }
-            
-            Log::debug( json_encode($response) );
                         
             if ($save) {
                 $xml = XMLHacienda::updateOrCreate(
@@ -225,19 +225,10 @@ class ProcessInvoiceSM implements ShouldQueue
                     $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, true);
                     Log::info('Factura enviada.');
                 }
-            }else if (isset($response['status']) && $response['status'] == 400 &&
-                (strpos($response['message'], 'ya fue recibido anteriormente') <> false || strpos($response['message'], 'XML ya existe en nuestras bases de datos') <> false) ) {
+            }else if (isset($response['status']) && $response['status'] == 400) {
                 Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
-                Log::warning('Consecutive repeated -->' . $invoice->document_number);
                 sleep(1);
-                //$this->signXML($invoice, $requestData);
                 $invoice->hacienda_status = '05';
-                $invoice->save();
-            } else if (isset($response['status']) && $response['status'] == 400) {
-                Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
-                sleep(1);
-                //$this->signXML($invoice, $requestData);
-                $invoice->hacienda_status = '04';
                 $invoice->save();
             }
             Log::info('Proceso de facturación finalizado con éxito.');
