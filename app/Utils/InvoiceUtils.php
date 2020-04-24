@@ -74,19 +74,18 @@ class InvoiceUtils
         }
         if (Storage::exists($path)) {
             $file = Storage::get($path);
-            
             return $returnPath ? $path : $file;
         }
         
         if (!$file) {
             if($type == "MH"){
                 $path = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/MH-$invoice->document_key.xml";
-            }
-            if($type == "03"){
+            }else if($type == "03"){
                 $path = 'empresa-' . $company->id_number . "/notas_credito_ventas/$invoice->year/$invoice->month/$invoice->document_key.xml";
             }else{
                 $path = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/$invoice->document_key.xml";
             }
+            
             if ( Storage::exists($path)) {
                 $file = Storage::get($path);
             }
