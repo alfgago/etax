@@ -261,8 +261,7 @@ class InvoiceUtils
         if( !$type ){
             $type = $invoice->document_type;
         }
-        $this->downloadXml($invoice, $company, $type, true);
-        
+        $path = $this->downloadXml($invoice, $company, $type, true);
         return $path;
     }
     
