@@ -119,7 +119,6 @@ class ProcessInvoice implements ShouldQueue
                             }
                             try{ //Intenta guardar la respuesta siempre
                                 if(isset($response['data']['mensajeHacienda'])){
-                                    Log::debug( $response['data']['response'] . "GUARDA: " . !(strpos($response['data']['response'],"ESTADO=procesando") !== false) );
                                     $saveMH = 0;
                                     $pathMH = null;
                                     if ( ! (strpos($response['data']['response'],"ESTADO=procesando") !== false) ) {
@@ -169,7 +168,7 @@ class ProcessInvoice implements ShouldQueue
                             (strpos($response['message'], 'ya fue recibido anteriormente') <> false || strpos($response['message'], 'XML ya existe en nuestras bases de datos') <> false) ) {
                             Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
                             Log::warning('Consecutive repeated -->' . $invoice->document_number);
-                            $invoice->hacienda_status = '04';
+                            $invoice->hacienda_status = '05';
                             $invoice->save();
                         } else if (isset($response['status']) && $response['status'] == 400) {
                             Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));

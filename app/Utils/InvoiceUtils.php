@@ -60,37 +60,40 @@ class InvoiceUtils
         return $pdf->download("$invoice->document_key.pdf");
     }
     
-    public function downloadXml( $invoice, $company, $type = null)
+    public function downloadXml( $invoice, $company, $type = '01', $returnPath = false)
     {
-
-        $xml = $invoice->xmlHacienda;
         $file = false;
-        if ($type !== null && !empty($xml)) {
+        $xml = XMLHacienda::firstOrCreate([
+            "invoice_id" => $invoice->id    
+        ]);
+        
+        if($type == "MH"){
             $path = $xml->xml_message;
-            if (Storage::exists($path)) {
+        }else{
+            $path = $xml->xml;
+        }
+        if (Storage::exists($path)) {
+            $file = Storage::get($path);
+            
+            return $returnPath ? $path : $file;
+        }
+        
+        if (!$file) {
+            if($type == "MH"){
+                $path = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/MH-$invoice->document_key.xml";
+            }
+            if($type == "03"){
+                $path = 'empresa-' . $company->id_number . "/notas_credito_ventas/$invoice->year/$invoice->month/$invoice->document_key.xml";
+            }else{
+                $path = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/$invoice->document_key.xml";
+            }
+            if ( Storage::exists($path)) {
                 $file = Storage::get($path);
             }
-
-            if (!$file) {
-                $path = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/MH-$invoice->document_key.xml";
-                if ( Storage::exists($path)) {
-                    $file = Storage::get($path);
-                    $xml = XmlHacienda::where('invoice_id', $invoice->id)->update(['xml_message' => $path]);
-
-                }
-            }
-            return $file;
-        }
-
-        if(isset($xml)) {
-        	$path = $xml->xml;
-        	if (Storage::exists($path)) {
-	          $file = Storage::get($path);
-	        }
         }
         
         //Si no encontró el archivo, lo busca en 2 posibles rutas.
-        if (!isset($file)) {
+        if (!$file) {
         	$cedulaEmpresa = $company->id_number;
         	$cedulaCliente = $invoice->client_id_number;
         	$consecutivoComprobante = $invoice->document_number;
@@ -109,7 +112,16 @@ class InvoiceUtils
 	        }
         }
         
-        return $file;
+        //Si llego hasta aqui es porque el XML no estaba en BD, por esto lo debe guardar.
+        if($file){
+            if($type == "MH"){
+                $xml->xml_message = $path;
+            }else{
+                $xml->xml = $path;
+            }
+            $xml->save();
+        }
+        return $returnPath ? $path : $file;
     }
     
     public function downloadXmlAceptacion( $invoice, $company )
@@ -120,7 +132,7 @@ class InvoiceUtils
     
     
     public function setRealDocumentKey($invoice){
-        $file = $this->downloadXml( $invoice, $invoice->company, null);
+        $file = $this->downloadXml( $invoice, $invoice->company, $invoice->document_key);
         if( isset($file) ){
             $xml = simplexml_load_string( $file );
             $json = json_encode( $xml ); // convert the XML string to JSON
@@ -132,10 +144,9 @@ class InvoiceUtils
                 $invoice->document_number = $consecutivoComprobante;
                 $invoice->document_key = $clave;
                 $invoice->save();
-                return $clave;
             }
         }
-        return false;
+        return $invoice;
     }
     
     public function sendInvoiceEmail( $invoice, $company, $xmlPath) {
@@ -240,48 +251,18 @@ class InvoiceUtils
             }
             Log::info('Se enviaron correos de notificación de factura aprobada: ' .$invoice->id );
         }catch( \Exception $e ){
-            Log::error('Fallo el envío de correos de notififación de factura aprobada: ' .$invoice->id." Error: $e" );
+            Log::error('Fallo el envío de correos de notificación de factura aprobada: ' .$invoice->id." Error: $e" );
         }
     }
     
     
-    public function getXmlPath( $invoice, $company )
+    public function getXmlPath( $invoice, $company, $type = null)
     {
-        $xml = $invoice->xmlHacienda;
-        
-        $file = false;
-        if( isset($xml) ) {
-        	$path = $xml->xml;
-        	if ( Storage::exists($path)) {
-	          $file = Storage::get($path);
-	        }
+        //Pide el tipo, porque puede ser MH. En ese caso descarga la respuesta
+        if( !$type ){
+            $type = $invoice->document_type;
         }
-        
-        //Si no encontró el archivo, lo busca en 2 posibles rutas.
-        if( !isset($file) ){
-        	$cedulaEmpresa = $company->id_number;
-        	$cedulaCliente = $invoice->client_id_number;
-        	$consecutivoComprobante = $invoice->document_number;
-        	
-        	//Lo busca primero dentro de facturas_ventas
-        	$path = "empresa-$cedulaEmpresa/facturas_ventas/$cedulaCliente-$consecutivoComprobante.xml";
-	        if ( Storage::exists($path)) {
-	          $file = Storage::get($path);
-	        }
-	        if( !isset($file) ){
-	        	//Lo busca en el root de la empresa
-        		$path = "empresa-$cedulaEmpresa/$cedulaCliente-$consecutivoComprobante.xml";
-		        if ( Storage::exists($path)) {
-		          $file = Storage::get($path);
-		        }
-	        }
-	        if( !isset($file) ){
-        		$path = "empresa-$cedulaEmpresa/facturas_ventas/$invoice->year/$invoice->month/$consecutivoComprobante.xml";
-		        if ( Storage::exists($path)) {
-		          $file = Storage::get($path);
-		        }
-	        }
-        }
+        $this->downloadXml($invoice, $company, $type, true);
         
         return $path;
     }

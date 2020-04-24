@@ -1935,7 +1935,7 @@ class InvoiceController extends Controller
         $this->authorize('update', $invoice);
 
         $invoiceUtils = new InvoiceUtils();
-        $file = $invoiceUtils->downloadXml( $invoice, currentCompanyModel() );
+        $file = $invoiceUtils->downloadXml( $invoice, currentCompanyModel(), $invoice->document_type );
         $filename = $invoice->document_key . '.xml';
         if( ! $invoice->document_key ) {
             $filename = $invoice->document_number . '-' . $invoice->client_id . '.xml';
