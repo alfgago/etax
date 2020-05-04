@@ -106,18 +106,16 @@ class BridgeHaciendaApi
         }
     }
 
-    public function createCreditNote(Invoice $invoice, $token) {
+    public function createCreditNote($invoice, $token) {
         try {
-
             $company = $invoice->company;
             //Send to queue invoice
-            ProcessCreditNote::dispatch($invoice->id, $company->id, $token)
-                ->onConnection(config('etax.queue_connections'))->onQueue('invoicing');
+            Log::debug( 'debug: ' . json_encode($invoice) );
+            //ProcessCreditNote::dispatch($invoice->id, $company->id, $token)->onQueue('invoicing');
             return $invoice;
 
-        } catch (ClientException $error) {
-            Log::error('Error al crear factura en API HACIENDA -->>'. $error->getMessage() );
-            return $invoice;
+        }catch( \Exception $e ){
+            Log::error("Error en NC: " . $e);
         }
     }
 

@@ -757,7 +757,7 @@ class Bill extends Model
         try{
           $cedulaEmpresa = $bill->company->id_number;
           //$cedulaProveedor = $bill->provider->id_number;
-          $consecutivoComprobante = $bill->document_number;
+          $consecutivoComprobante = $bill->document_key;
           
           if ( Storage::exists("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/mensaje-$consecutivoComprobante.xml")) {
               Storage::delete("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/mensaje-$consecutivoComprobante.xml");
@@ -1087,7 +1087,7 @@ class Bill extends Model
       
     }
     
-    public function calculateAcceptFields() {
+    public function calculateAcceptFields($company = false) {
         
       if( !$this->xml_schema ){
         $this->xml_schema = $this->commercial_activity ? 43 : 42;
@@ -1101,7 +1101,9 @@ class Bill extends Model
       
       if( $this->is_code_validated ) {
         if( $this->xml_schema == 43 ) {
-          $company = currentCompanyModel();
+          if(!$company){
+            $company = currentCompanyModel();
+          }
           $prorrataOperativa = $company->getProrrataOperativa( $this->year );
           $calc = new CalculatedTax();
           $calc->year = $this->year;
@@ -1113,10 +1115,10 @@ class Bill extends Model
           $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query, true );
           $calc->setCalculosPorFactura( $prorrataOperativa, $lastBalance );
 
-          $this->accept_iva_acreditable = $calc->iva_deducible_operativo;
-          $this->accept_iva_gasto = $calc->iva_no_deducible;
-          $this->accept_iva_total = $calc->total_bill_iva;
-          $this->accept_total_factura = $calc->bills_total;
+          $this->accept_iva_acreditable = round($calc->iva_deducible_operativo, 5);
+          $this->accept_iva_gasto = round($calc->iva_no_deducible, 5);
+          $this->accept_iva_total = round($calc->total_bill_iva, 5);
+          $this->accept_total_factura = round($calc->bills_total, 5);
           $this->accept_id_number = $company->id_number;
           
           if( $calc->iva_acreditable_identificacion_plena > 0) {

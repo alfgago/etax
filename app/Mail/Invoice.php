@@ -44,17 +44,24 @@ class Invoice extends Mailable
             $sendFrom = "facturacion@triquimas.cr";
         }
         
-        if ($this->content['data_invoice']->document_type == '08') {
-            $title = 'compra';
-        } elseif ($this->content['data_invoice']->document_type == '09') {
-            $title = 'exportacion';
-        } else {
-            $title = '';
+        $docType = $this->content['data_invoice']->document_type;
+        
+        $title = 'Factura electrónica';
+        if( $docType == '08') {
+            $title = 'Factura electrónica de compra';
+        }elseif ($docType == '09') {
+            $title = 'Factura electrónica de exportacion';
+        }elseif ($docType == '02') {
+            $title = 'Nota de débito';
+        }elseif ($docType == '03') {
+            $title = 'Nota de crédito';
+        }elseif ($docType == '04') {
+            $title = 'Tiquete electrónico';
         }
         $fromEmail = $this->content['data_company']->email;
         $fromName = $this->content['data_company']->business_name;
         
-        $message = $this->subject($isPrueba.'Factura electrónica '.$title.' #' . $this->content['data_invoice']->document_number.
+        $message = $this->subject($isPrueba.$title.' #' . $this->content['data_invoice']->document_number.
             ' De: '.$this->content['data_company']->business_name)
                     ->markdown('emails.invoice.paid')
                     ->with([
@@ -66,9 +73,19 @@ class Invoice extends Mailable
                     ->from($sendFrom, "$fromName");
         
         $message->attachFromStorage($this->content['xml']);
-        $message->attachData( $invoiceUtils->streamPdf( $this->content['data_invoice'], $this->content['data_company'] ), $this->content['data_invoice']->document_key.'.pdf', [
-             'mime' => 'application/pdf',
-         ]);
+        
+        if($this->content['xmlMH']){
+            $message->attachFromStorage($this->content['xmlMH']);
+        }
+        
+        try{
+            $message->attachData( 
+             $invoiceUtils->streamPdf( $this->content['data_invoice'], $this->content['data_company'] ), 
+             $this->content['data_invoice']->document_key.'.pdf',
+             [ 'mime' => 'application/pdf' ]
+            );
+        }catch(\Throwable $e){ Log::error($e->getMessage()); }
+        
         return $message;
     }
 

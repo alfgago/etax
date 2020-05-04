@@ -77,9 +77,14 @@ class BillItem extends Model
       }elseif('05' == $condicionAceptacion) {
         //iria con código S003 o B003 para aplicar la prorrata, y así correspondientemente según la tarifa de IVA soportado.
         $this->iva_type = $firstDigit."00".$lastDigit;
-        if( 0 == $porc ){
-          $this->iva_type = $firstDigit."060";
-        }
+      }
+      
+      if( 0 == $porc ){
+        $this->iva_type = $firstDigit."060";
+      }
+      if( $this->exoneration_amount > 0){
+        $this->iva_type = $firstDigit."080";
+        $this->product_type = 62;
       }
       
       $this->is_code_validated = true;
@@ -165,7 +170,7 @@ class BillItem extends Model
         $query = BillItem::with('bill')->where('id', $this->id);
         $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query, true );
         $calc->setCalculosPorFactura( $prorrataOperativa, 0, $company );
-  
+
         $this->iva_acreditable = round($calc->iva_deducible_operativo,2);
         $this->iva_gasto = round($calc->iva_no_deducible,2);
         $this->iva_devuelto = round($calc->iva_devuelto,2);

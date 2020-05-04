@@ -10,7 +10,7 @@
         table {
             width: 100%;
             text-align: left;
-            font-size: 9.5px;
+            font-size: 9px;
             line-height: 1.2;
         }
 
@@ -29,14 +29,14 @@
             width: 170px;
             display: inline-block;
             vertical-align: top;
-            padding-top: 3px;
+            padding-top: 1px;
         }
         
         .details-table td span{
             display: inline-block;
             width: 175px;
             vertical-align: top;
-            padding-top: 3px;
+            padding-top: 1px;
         }
         
         .details3 td b{
@@ -50,28 +50,41 @@
         
         .table-lines .heading td {
             border-bottom: 2px solid black;
-            padding: 5px;
+            padding: 3px;
+            font-size: 8.5px;
         }
         
         .totalizado td {
             border-top: 2px solid black;
-            padding: 5px;
+            padding: 3px;
         }
         
         .table-lines .item td {
-            padding: 5px;
+            padding: 3px;
+            width: 60px;
+            max-width: none;
+            font-size: 8.5px;
         }
         
         .resumen-totales tr td,
         .resumen-totales span {
             text-align: right;
-            font-size: 10.5px;
+            font-size: 8.5px;
         }
         
         .resumen-totales tr td.texto-resumen {
             text-align: left;
             white-space: nowrap;
-            font-size: 9.5px;
+            font-size: 8.5px;
+        }
+        
+        .table-lines .item td.maslarga {
+            width: 225px;
+            text-align: left !important;
+        }
+        
+        .tb-header {
+            text-align: center;
         }
         
     </style>
@@ -154,11 +167,12 @@
         $tipoPersonaInterno = "Extranjero";
     }
     
-    if( $documentType == '09' ){
+    if( $data_invoice->document_type == '09' ){
         $codigoExportador = \App\OtherInvoiceData::findData($otherData, 'COD_EXP');
         $fechaEmbarque = \App\OtherInvoiceData::findData($otherData, 'FECHA_EMB');
         $numeroEmbarque = \App\OtherInvoiceData::findData($otherData, 'COD_EMB');
-        $nombreEmbarque = \App\OtherInvoiceData::findData($otherData, 'COD_VAP');
+        $nombreEmbarque = \App\OtherInvoiceData::findData($otherData, 'NOM_VAP');
+        $codVap = \App\OtherInvoiceData::findData($otherData, 'COD_VAP');
         $procedenciaEmbarque = \App\OtherInvoiceData::findData($otherData, 'PRO_FRU');
         $puertoSalida = \App\OtherInvoiceData::findData($otherData, 'PUE_SAL');
         $puertoDestino = \App\OtherInvoiceData::findData($otherData, 'PUE_DES');
@@ -208,7 +222,7 @@
                             <b>Cédula:</b> <span>{{$company->id_number}}</span><br>
                             <b>Correo electrónico:</b> <span>{{$company->email}}</span><br>
                             <b>Tel:</b> <span>{{$company->phone}}</span><br>
-                            <b>APDO:</b> <span>6504-1000 San José, Costa Rica</span><br>
+                            <b>Apdo:</b> <span>6504-1000 San José, Costa Rica</span><br>
                             <b>Código postal:</b> <span>{{ $company->zip }}</span>
                         </td>
                         <td>
@@ -227,6 +241,9 @@
                 <table class="details-table details2">
                     <tr>
                         <td>
+                            @if($data_invoice->buy_order)
+                            <b>ORDEN DE COMPRA / BUY ORDER:</b> <span style='text-wrap: wrap;'>{{ $data_invoice->buy_order }}</span><br>
+                            @endif
                             <b>VENDIDO A / (SOLD TO):</b> <span style='text-wrap: wrap;'>{{$data_invoice->client_first_name.' '.$data_invoice->client_last_name}}</span><br>
                             <b>TIPO ID. / (ID. TYPE):</b> <span>{{ $tipoPersonaStr }}</span><br>
                             <b>IDENTIFICACIÓN / (ID.):</b> <span>{{$data_invoice->client_id_number}}</span><br>
@@ -239,6 +256,10 @@
                             <?php $consignatario = \App\OtherInvoiceData::findData($otherData, 'CONSIG');
                                 if( !empty($consignatario) ){  ?>
                                 <b>CONSIGNATARIO/(CONSIGNES):</b> <span>{{ $consignatario }}</span><br>
+                            <?php } ?>
+                            <?php $dirConsignatario = \App\OtherInvoiceData::findData($otherData, 'DIR_CONSIG');
+                                if( !empty($dirConsignatario) ){  ?>
+                                <b>DIR. CONSIG:</b> <span>{{ $dirConsignatario }}</span><br>
                             <?php } ?>
                         </td>
                         <td>
@@ -256,27 +277,37 @@
                         <td>
                             <b>TÉRMINOS DE PAGO/(TERMS PAYMENT):</b> <span>{{ $data_invoice->getCondicionVenta() }}</span><br>
                             @if( $data_invoice->sale_condition == '02')
-                                <b>PLAZO CREDITO / (CREDIT TERM):</b> <span>{{ $data_invoice->credit_time }}</span><br>
+                                <b>PLAZO CRÉDITO / (CREDIT TERM):</b> <span>{{ $data_invoice->credit_time }}</span><br>
                             @endif
                             <b>MEDIO DE PAGO / (MEANS OF PAYMENT):</b> <span>{{ $data_invoice->getMetodoPago() }}</span><br>
                         </td>
                         <td>
                             <b>MONEDA / (CURRENCY)</b> <span>{{ $data_invoice->currency }}</span><br>
                             <b>TIPO DE CAMBIO / (EXCHANGE RATE)</b> <span>{{ $data_invoice->currency_rate }}</span>
-                            <?php if( !empty($codigoExportador) ){  ?>
-                                <b>CÓDIGO EXPORTADOR:</b> <span>{{ $codigoExportador }}</span><br>
-                            <?php } ?>
+                        </td>
+                    </tr>
+                    @if($data_invoice->document_type == '09' )
+                    <tr>
+                        <td><b>Datos de exportación</b></td>
+                    </tr>
+                    <tr class="details4">
+                        <td>
                             <?php if( !empty($fechaEmbarque) ){  ?>
-                                <b>FECHA EMBARQUE / LOAD DATE:</b> <span>-</span><br>
+                                <b>FECHA EMBARQUE / LOAD DATE:</b> <span>{{ \Carbon\Carbon::parse($fechaEmbarque)->format('d-m-Y') }}</span><br>
                             <?php } ?>
                             <?php if( !empty($numeroEmbarque) ){  ?>
                                 <b>NUM EMBARQUE / SHIPPING NUM:</b> <span>{{ $numeroEmbarque }}</span><br>
                             <?php } ?>
                             <?php if( !empty($nombreEmbarque) ){  ?>
-                                <b>VAPOR / VESSEL:</b> <span>{{ $nombreEmbarque }}</span><br>
+                                <b>VAPOR / VESSEL:</b> <span>{{ $codVap . " - " . $nombreEmbarque }}</span><br>
                             <?php } ?>
                             <?php if( !empty($procedenciaEmbarque) ){  ?>
                                 <b>PROCEDENCIA DE FRUTA:</b> <span>{{ $procedenciaEmbarque }}</span><br>
+                            <?php } ?>
+                        </td>
+                        <td>
+                            <?php if( !empty($codigoExportador) ){  ?>
+                                <b>CÓDIGO EXPORTADOR:</b> <span>{{ $codigoExportador }}</span><br>
                             <?php } ?>
                             <?php if( !empty($puertoSalida) ){  ?>
                                 <b>PUERTO SALIDA / DELIVERY PORT:</b> <span>{{ $puertoSalida }}</span><br>
@@ -292,20 +323,21 @@
                             <?php } ?>
                         </td>
                     </tr>
+                    @endif
                 </table>
             </td>
         </tr>
         <tr style=" min-height: 300px;">
             <td style="border: 2px solid black;" colspan="2">
-                <table class="table-lines" cellpadding="0" cellspacing="0" >
-                    <tr class="heading">
+                <table style="width: 100%;" class="table-lines" cellpadding="0" cellspacing="0" >
+                    <tr style="width: 100%;" class="heading">
                         <td class="tb-header">
                             CANTIDAD (QUANTITY)
                         </td>
                         <td class="tb-header">
                             UNIDAD MEDIDA (MEASURE UNIT)
                         </td>
-                        <td class="tb-header">
+                        <td  style="text-align: left;"  class="tb-header maslarga">
                             DETALLE (DESCRIPTION)
                         </td>
                         <td class="tb-header">
@@ -326,6 +358,8 @@
                     </tr>
                     <?php
                         $cantidadCount = 0;
+                        $pesoNetoTotal = 0;
+                        $pesoBrutoTotal = 0;
                     ?>
                     @foreach($data_invoice->items as $item)
                         <?php 
@@ -336,8 +370,8 @@
                             $ivaAmountLinea = 0;
                         }
                         ?>
-                        <tr class="item">
-                            <td style="text-align: left;">
+                        <tr style="width: 100%;" class="item">
+                            <td style="text-align: right;">
                                 {{$item->item_count ?? ''}}
                                 <?php 
                                     $cantidadCount = $cantidadCount + $item->item_count ?? 0;
@@ -346,28 +380,32 @@
                             <td style="text-align: center;">
                                 {{$item->measure_unit ? ($item->measure_unit == '0' ? 'Unid' : $item->measure_unit) : 'Unid'}}
                             </td>
-                            <td>
+                            <td  style="text-align: left;" class="maslarga" >
                                 {{$item->name ?? ''}}
                             </td>
-                            <td style="text-align: left;">
+                            <td style="text-align: right;">
                                 {!! $currencySymbol !!}{{$ivaAmountLinea ? number_format($ivaAmountLinea, 2) : '0'}} ({{$item->iva_percentage}}%)
                             </td>
-                            <td style="text-align: left;">
+                            <td style="text-align: right;">
                                 <?php $pneto = \App\OtherInvoiceData::findData($otherData, 'PESO_NETO', $item->id);
-                                if( isset($pneto) ){  ?>
+                                if( isset($pneto) ){  
+                                    $pesoNetoTotal = $pesoNetoTotal + $pneto;
+                                ?>
                                     {{ $pneto }}
                                 <?php } ?>
                             </td>
-                            <td style="text-align: left;">
+                            <td style="text-align: right;">
                                 <?php $pbruto = \App\OtherInvoiceData::findData($otherData, 'PESO_BRUTO', $item->id);
-                                if( isset($pbruto) ){  ?>
+                                if( isset($pbruto) ){  
+                                    $pesoBrutoTotal = $pesoBrutoTotal + $pbruto;
+                                ?>
                                     {{ $pbruto }}
                                 <?php } ?>
                             </td>
-                            <td style="text-align: left;">
+                            <td style="text-align: right;">
                                 {!! $currencySymbol !!}{{$item->unit_price ? number_format($item->unit_price, 2) : '0'}}
                             </td>
-                            <td style="text-align: left;">
+                            <td style="text-align: right;">
                                 {!! $currencySymbol !!}{{$totalLinea ? number_format($totalLinea, 2) : '0'}}
                             </td>
                         </tr>
@@ -385,23 +423,25 @@
                             <td colspan="8">&nbsp;</td>
                         </tr>
                         <tr class="totalizado">
-                           <td colspan="3">
+                            <td style="text-align: right;">
                                 {{ $cantidadCount }}
                             </td>
+                            <td style="text-align: center; font-size: 0.9em" colspan="3">
+                                <?php $letras = \App\OtherInvoiceData::findData($otherData, 'LETRAS');
+                                    if( !empty($letras) ){  ?>
+                                    <span>{{ $letras }}</span>
+                                <?php } ?>
+                            </td>
+                            <td style="text-align: right;">
+                                {{ $pesoNetoTotal }}
+                            </td>
+                            <td style="text-align: right;">
+                                {{ $pesoBrutoTotal }}
                             </td>
                             <td>
                                 TOTAL
                             </td>
-                            <td>
-                                
-                            </td>
-                            <td>
-                                
-                            </td>
-                            <td>
-                                
-                            </td>
-                            <td>
+                            <td style="text-align: right;">
                                 {!! $currencySymbol !!}{{$data_invoice->total ? number_format($data_invoice->total, 2) : '0'}}
                             </td>
                         </tr>
@@ -500,9 +540,9 @@
     <table width="100%" class="footer">
         <tr class="item">
             <td class="currency total">
-                Documento emitido conforme lo establecido en la resolución de Facturación Electrónica, N°DGT-R-48-2016 siete de
-                octubre de dos mildieciséis de la Dirección General de Tributación v.4.3 <br><br>
-                eTax - La herramienta para resolver el IVA. | Ofiplaza del Este. 200m al oeste de la Rotonda de la Bandera,
+                Documento emitido conforme lo establecido en la resolución de Facturación Electrónica, N°DGT-R-48-2016 del siete de
+                octubre de dos mil dieciséis de la Dirección General de Tributación v.4.3 <br><br>
+                eTax - La herramienta para resolver el IVA. | Ofiplaza del Este, 200m al oeste de la Rotonda de la Bandera,
                 San Pedro de Montes de Oca, San José 6897-1000 Costa Rica +506 22802130
             </td>
         </tr>

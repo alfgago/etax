@@ -8,7 +8,7 @@
         especificaciones del Ministerio de Hacienda. 
     </p>
     <p>
-        Recibirá una notificación  cuando la factura sea recibida por hacienda.
+        Si no viene adjunto el XML de respuesta, recibirá una notificación cuando la factura sea procesada por hacienda.
     </p>
     <p>
         ¡Muchas Gracias!
