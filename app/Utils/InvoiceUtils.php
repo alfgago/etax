@@ -80,35 +80,43 @@ class InvoiceUtils
         if (!$file) {
             if($type == "MH"){
                 $path = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/MH-$invoice->document_key.xml";
-            }else if($type == "03"){
-                $path = 'empresa-' . $company->id_number . "/notas_credito_ventas/$invoice->year/$invoice->month/$invoice->document_key.xml";
-            }else{
+            }else {
                 $path = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/$invoice->document_key.xml";
             }
             
             if ( Storage::exists($path)) {
-                $file = Storage::get($path);
+                $file = Storage::get($path); 
             }
         }
         
-        //Si no encontró el archivo, lo busca en 2 posibles rutas.
+        //Si no encontró el archivo, lo busca en rutas que se usaban antes.
         if (!$file) {
         	$cedulaEmpresa = $company->id_number;
         	$cedulaCliente = $invoice->client_id_number;
         	$consecutivoComprobante = $invoice->document_number;
         	
-        	//Lo busca primero dentro de facturas_ventas
-        	$path = "empresa-$cedulaEmpresa/facturas_ventas/$cedulaCliente-$consecutivoComprobante.xml";
-	        if (Storage::exists($path)) {
-	          $file = Storage::get($path);
-	        }
-	        if (!isset($file)) {
+        	
+            if($type == "03"){
+                $path = 'empresa-' . $company->id_number . "/notas_credito_ventas/$invoice->year/$invoice->month/$invoice->document_key.xml";
+                if ( Storage::exists($path)) {
+		          $file = Storage::get($path);
+		        }
+            }
+        	if (!$file) {
+            	//Lo busca primero dentro de facturas_ventas
+            	$path = "empresa-$cedulaEmpresa/facturas_ventas/$cedulaCliente-$consecutivoComprobante.xml";
+    	        if (Storage::exists($path)) {
+    	          $file = Storage::get($path);
+    	        }
+        	}
+	        if (!$file) {
 	        	//Lo busca en el root de la empresa
         		$path = "empresa-$cedulaEmpresa/$cedulaCliente-$consecutivoComprobante.xml";
 		        if ( Storage::exists($path)) {
 		          $file = Storage::get($path);
 		        }
 	        }
+	        //Lo busca en la ruta de NC
         }
         
         //Si llego hasta aqui es porque el XML no estaba en BD, por esto lo debe guardar.
@@ -148,7 +156,7 @@ class InvoiceUtils
         return $invoice;
     }
     
-    public function sendInvoiceEmail( $invoice, $company, $xmlPath) {
+    public function sendInvoiceEmail( $invoice, $company, $xmlPath, $pathMh = null) {
         
         try{
             $cc = [];
@@ -170,24 +178,41 @@ class InvoiceUtils
                 }
             }
             
+            try{
+                if( isset($invoice->client_email) ) {
+                    $emailsArray = explode(',',$invoice->client_email);
+                    if( sizeof( $emailsArray ) > 1 ){
+                        foreach($emailsArray as $email){
+                            $email = replaceAccents($email);
+                            $email = filter_var($email, FILTER_SANITIZE_EMAIL);
+                            array_push( $cc,  $email );
+                        }
+                    }else{
+                        array_push( $cc, $invoice->client_email );
+                    }
+                }
+            }catch(\Exception $e){ Log::error($e->getMessage()); }
+            
             //Si ademas de los billing emails se tiene send_emails, tambien los agrega.
             if( isset($invoice->send_emails) ) {
                 array_push( $cc,  $invoice->send_emails );
             }
             
-            if( isset($invoice->client_email) ) {
-                array_push( $cc, $invoice->client_email );
-            }
-            
+                
             if ( !empty($cc) ) {
                 Mail::to($cc)->send(new \App\Mail\Invoice([
                     'xml' => $xmlPath,
+                    'xmlMH' => $pathMh,
                     'data_invoice' => $invoice, 
                     'data_company' =>$company
                 ]));
             } else {
-                Mail::to(!empty($invoice->client_email) ? trim($invoice->client_email) : trim($company->email))->send(new \App\Mail\Invoice(['xml' => $xmlPath,
-                    'data_invoice' => $invoice, 'data_company' =>$company]));
+                Mail::to(!empty($invoice->client_email) ? trim($invoice->client_email) : trim($company->email))->send(new \App\Mail\Invoice([
+                    'xml' => $xmlPath,
+                    'xmlMH' => $pathMh,
+                    'data_invoice' => $invoice, 
+                    'data_company' =>$company
+                ]));
             }
             Log::info('Se enviaron correos con PDF y XML: ' .$invoice->id );
         }catch( \Exception $e ){
@@ -220,33 +245,57 @@ class InvoiceUtils
                 array_push( $cc,  $company->email);
             }
             
+            try{
+                if( isset($invoice->client_email) ) {
+                    $emailsArray = explode(',',$invoice->client_email);
+                    if( sizeof( $emailsArray ) > 1 ){
+                        foreach($emailsArray as $email){
+                            $email = replaceAccents($email);
+                            $email = filter_var($email, FILTER_SANITIZE_EMAIL);
+                            array_push( $cc,  $email );
+                        }
+                    }else{
+                        array_push( $cc, $invoice->client_email );
+                    }
+                }
+            }catch(\Exception $e){ Log::error($e->getMessage()); }
+            
             //Si ademas de los billing emails se tiene send_emails, tambien los agrega.
             if( isset($invoice->send_emails) ) {
                 array_push( $cc,  replaceAccents($invoice->send_emails) );
             }
             
-            if( isset($invoice->client_email) ) {
-                array_push( $cc, replaceAccents($invoice->client_email) );
-            }
-            
-            if (!empty($cc)) {
-
-                Mail::to($cc)->send(new \App\Mail\InvoiceNotification([	
-                                        'xml' => $xmlPath,	
-                                        'data_invoice' => $invoice, 
-                                        'data_company' => $company,
-                                        'xmlMH' => $xmlMH,
-                                        'sendPdf' => $sendPdf
-                                    ]));
-            } else {
-
-                Mail::to(replaceAccents($invoice->client_email))->send(new \App\Mail\InvoiceNotification([	
-                                        'xml' => $xmlPath,	
-                                        'data_invoice' => $invoice, 
-                                        'data_company' => $company,
-                                        'xmlMH' => $xmlMH,
-                                        'sendPdf' => $sendPdf
-                                    ]));
+            if( $invoice->document_type != '02' && $invoice->document_type != '03' ){
+                //Envia notificaciones de factura
+                if (!empty($cc)) {
+                    Mail::to($cc)->send(
+                        new \App\Mail\InvoiceNotification([	
+                            'xml' => $xmlPath,	
+                            'data_invoice' => $invoice, 
+                            'data_company' => $company,
+                            'xmlMH' => $xmlMH,
+                            'sendPdf' => $sendPdf
+                        ]));
+                } else {
+                    Mail::to(replaceAccents($invoice->client_email))->send(
+                        new \App\Mail\InvoiceNotification([	
+                            'xml' => $xmlPath,	
+                            'data_invoice' => $invoice, 
+                            'data_company' => $company,
+                            'xmlMH' => $xmlMH,
+                            'sendPdf' => $sendPdf
+                        ]));
+                }
+            }else{
+                Mail::to(replaceAccents($invoice->client_email))->send(
+                    new \App\Mail\CreditNoteNotificacion([
+                        'xml' => $xmlPath,
+                        'xml_hacienda' => $xmlMH,
+                        'data_invoice' => $invoice, 
+                        'data_company' => $company,
+                        'sendPdf' => $sendPdf
+                    ])
+                );
             }
             Log::info('Se enviaron correos de notificación de factura aprobada: ' .$invoice->id );
         }catch( \Exception $e ){
@@ -454,6 +503,7 @@ class InvoiceUtils
                 $cedulaReceptor = str_pad($cedulaReceptor, 6, '0', STR_PAD_LEFT);
             }else{
                 $cedulaReceptor = $data['client_id_number'] ? str_pad(preg_replace("/[^0-9]/", "", $data['client_id_number']), 9, '0', STR_PAD_LEFT) : '';
+                $cedulaReceptor = ltrim($cedulaReceptor, '0');
             }
             
             try{

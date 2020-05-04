@@ -927,7 +927,7 @@ class Invoice extends Model
               $invoice->client_zip = $data['zip'];
               $invoice->client_country = 'CR';
               $invoice->client_state = $data['zip'][0];
-              $invoice->client_city = $data['zip'][1] . $data['zip'][2];
+              $invoice->client_city = $data['zip'][0].$data['zip'][1] . $data['zip'][2];
               $invoice->client_district = $data['zip'];
             }catch( \Throwable $e ){ }
           }
@@ -1029,7 +1029,7 @@ class Invoice extends Model
           'exoneration_porcent' => $data['porcentajeExoneracion'],
           'exoneration_amount' => $data['montoExoneracion'],
           'exoneration_date' => $data['fechaExoneracion'] ?? null,
-          'exoneration_total_gravado' => $data['montoExoneracion'] ? $subtotalLinea : 0,
+          'exoneration_total_gravado' => $data['totalMontoExonerado'] ?? ($data['montoExoneracion'] ? $subtotalLinea : 0),
           'impuesto_neto' => $data['impuestoNeto'],
           'exoneration_total_amount' => $data['totalMontoLinea'],
           'tariff_heading' => ( isset($data['partidaArancelaria']) ? $data['partidaArancelaria'] : null )
@@ -1529,7 +1529,7 @@ class Invoice extends Model
                     $newOther->save();
                 }
             }catch(\Exception $e){
-                Log::error($e->getMessage());
+                Log::error($e);
             }
             
             $totalIvaDevuelto = 0;

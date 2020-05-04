@@ -75,6 +75,7 @@ class BillController extends Controller
         $categoriaProductos = ProductCategory::get();
         $unidades = BillItem::select('bill_items.measure_unit')->where('bill_items.company_id', '=', $company->id)->groupBy('bill_items.measure_unit')->get();
         $years = Bill::select('bills.year')->where('bills.company_id', '=', $company->id)->groupBy('bills.year')->get();
+        
         return view('Bill/index-masivo', compact('company', 'categoriaProductos', 'unidades', 'commercial_activities', 'years'));
     }
 
@@ -98,10 +99,11 @@ class BillController extends Controller
                 ->join('bills', 'bill_items.bill_id', '=', 'bills.id' )
                 ->where('bills.is_authorized', 1)
                 ->where('bills.accept_status', '!=' , 2)
+                ->has('bill')
                 ->with('bill')
                 //->join('providers', 'bills.provider_id', '=', 'providers.id' )
                 ;
-
+            
         $cat = [];
         $cat['todo'] = CodigoIvaSoportado::where('hidden', false)->get();
 
@@ -1680,6 +1682,30 @@ class BillController extends Controller
 
         if(!$file) {
             return redirect()->back()->withError('No se encontró el XML de la factura. Por favor contacte a soporte.');
+        }
+
+        $headers = [
+            'Content-Type' => 'application/xml',
+            'Content-Description' => 'File Transfer',
+            'Content-Disposition' => "attachment; filename={$filename}",
+            'filename'=> $filename
+        ];
+        return response($file, 200, $headers);
+    }
+    
+    public function downloadXmlRespuesta($id) {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+
+        $billUtils = new BillUtils();
+        $file = $billUtils->downloadXml( $bill, currentCompanyModel(), true );
+        $filename = $bill->document_key . '.xml';
+        if( ! $bill->document_key ) {
+            $filename = "MH-respuesta"-$bill->document_key . '.xml';
+        }
+
+        if(!$file) {
+            return redirect()->back()->withError('No se encontró el XML de respuesta. Por favor solicítela a su cliente o contacte a soporte si cree que esto es un error.');
         }
 
         $headers = [

@@ -105,6 +105,7 @@ class ProcessInvoice implements ShouldQueue
                             'json_response' => json_encode($response)
                         ]);
                         
+                        Log::debug("RESPONSE -> " . json_encode($response));
                         if( isset($response['status']) ){
                             try{
                                 //Intenta guardar el original firmado siempre
@@ -130,8 +131,6 @@ class ProcessInvoice implements ShouldQueue
                                 Log::error($e);
                             }
                         }
-                        
-                        Log::debug( json_encode($response) );
                         
                         if ($save) {
                             $xml = XMLHacienda::updateOrCreate(

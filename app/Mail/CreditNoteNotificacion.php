@@ -41,7 +41,7 @@ class CreditNoteNotificacion extends Mailable
             $sendFrom = "facturacion@triquimas.cr";
         }
         
-        $type = $this->content['data_invoice']->document_type == '03' ? 'Crédito': 'Debito';
+        $type = $this->content['data_invoice']->document_type == '03' ? 'Crédito': 'Débito';
         $fromEmail = $this->content['data_company']->email;
         $fromName = $this->content['data_company']->business_name;
         $message = $this->subject($isPrueba.'Confirmación Nota de '. $type .' #' . $this->content['data_invoice']->document_number.
@@ -56,6 +56,19 @@ class CreditNoteNotificacion extends Mailable
 
         $message->attachFromStorage($this->content['xml']);
         $message->attachFromStorage($this->content['xml_hacienda']);
+        try{
+            
+                $message->attachData( 
+                 $invoiceUtils->streamPdf( 
+                    $this->content['data_invoice'], 
+                    $this->content['data_company'] 
+                 ), 
+                 $this->content['data_invoice']->document_key.'.pdf',
+                 [ 'mime' => 'application/pdf' ]
+                );
+            
+        }catch(\Throwable $e){ Log::error($e->getMessage()); }
+        
         return $message;
     }
 }
