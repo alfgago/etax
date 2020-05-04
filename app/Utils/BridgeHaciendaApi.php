@@ -106,18 +106,16 @@ class BridgeHaciendaApi
         }
     }
 
-    public function createCreditNote(Invoice $invoice, $token) {
+    public function createCreditNote($invoice, $token) {
         try {
-
             $company = $invoice->company;
             //Send to queue invoice
-            ProcessCreditNote::dispatch($invoice->id, $company->id, $token)
-                ->onConnection(config('etax.queue_connections'))->onQueue('invoicing');
+            Log::debug( 'debug: ' . json_encode($invoice) );
+            //ProcessCreditNote::dispatch($invoice->id, $company->id, $token)->onQueue('invoicing');
             return $invoice;
 
-        } catch (ClientException $error) {
-            Log::error('Error al crear factura en API HACIENDA -->>'. $error->getMessage() );
-            return $invoice;
+        }catch( \Exception $e ){
+            Log::error("Error en NC: " . $e);
         }
     }
 
@@ -278,7 +276,8 @@ class BridgeHaciendaApi
             
             $invoiceUtils = new InvoiceUtils();
             if($findKey){
-                $success = $invoiceUtils->setRealDocumentKey($invoice);
+                //Si encuentra un XML firmmado, devuelve el invoice actualizado
+                $invoice = $invoiceUtils->setRealDocumentKey($invoice);
             }
             $key = $invoice->document_key;
             Log::info("Consultando Mensaje Hacienda XML API HACIENDA -->> Empresa: $company->id / Factura: $invoice->id");
@@ -302,26 +301,31 @@ class BridgeHaciendaApi
             $response = json_decode($result->getBody()->getContents(), true);
             Log::info('QUERY HACIENDA RESPONSE: '. json_encode($response));
             if (isset($response['status']) && $response['status'] == 200) {
-                if ($invoice->document_type == ('01' || '08' || '09' || '04')) {
-                    $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/MH-$key.xml";
-                    $saveMH = Storage::put(
+                $fileMH = false;
+                if( $invoice->document_type == "03" ){
+                    $pathMH = 'empresa-' . $company->id_number . "/notas_credito_ventas/$invoice->year/$invoice->month/MH-$key.xml";
+                    $fileMH = Storage::put(
                         $pathMH,
                         ltrim($response['data']['mensajeHacienda'], '\n')
                     );
                 } else {
-                    $pathMH = 'empresa-' . $company->id_number . "/notas_credito_ventas/$invoice->year/$invoice->month/MH-$key.xml";
-                    $saveMH = Storage::put(
+                    $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/MH-$key.xml";
+                    $fileMH = Storage::put(
                         $pathMH,
                         ltrim($response['data']['mensajeHacienda'], '\n')
                     );
                 }
+                
                 $xmlHacienda = null;
-                if ($saveMH) {
-                    $xmlHacienda = XmlHacienda::where(
-                        'invoice_id', $invoice->id
-                    )->first();
-                    $xmlHacienda->xml_message = $pathMH;
-                    $xmlHacienda->save();
+                if ($fileMH) {
+                    $xmlHacienda = XMLHacienda::updateOrCreate(
+                        [
+                          'invoice_id' => $invoice->id
+                        ],
+                        [
+                            'xml_message' => $pathMH
+                        ]
+                    );
                     $file = Storage::get($pathMH);
                 }
                 
@@ -338,9 +342,9 @@ class BridgeHaciendaApi
                     $invoice->hacienda_status = '03';
                     $invoice->save();
                     
-                    if($initialStatus == '05' && $saveMH && isset($xmlHacienda) ){
-                        $path = $xmlHacienda->xml;
-                        $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, true);
+                    if($initialStatus == '05' && $fileMH && isset($xmlHacienda) ){
+                        $path = $invoiceUtils->getXmlPath( $invoice, $company );
+                        $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, true);
                     }
                 } else if (strpos($response['data']['response'],"ESTADO=procesando") !== false) {
                     $invoice->hacienda_status = '05';

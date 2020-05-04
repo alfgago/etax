@@ -50,7 +50,7 @@ class ProcessCreditNote implements ShouldQueue
     public function handle()
     {
         try {
-            if ( app()->environment('production') ) {
+            //if ( app()->environment('production') ) {
                 Log::info('send job credit note id: '.$this->invoiceId);
                 $invoiceUtils = new InvoiceUtils();
                 $client = new Client();
@@ -103,8 +103,7 @@ class ProcessCreditNote implements ShouldQueue
                                 'doc_type' => $invoice->document_type,
                                 'json_response' => json_encode($response)
                             ]);
-                            Log::info('Response Credit Note Api Hacienda '. json_encode($response));
-
+                            Log::debug('Response Credit Note Api Hacienda '. json_encode($response));
                             $date = Carbon::now();
                             if( isset($response['status']) ){
                                 try{
@@ -138,7 +137,11 @@ class ProcessCreditNote implements ShouldQueue
                             
                             if (isset($response['status']) && $response['status'] == 200) {
                                 Log::info('API HACIENDA 200 -->>' . $result->getBody()->getContents());
-                                $invoice->hacienda_status = '03';
+                                if (strpos($response['data']['response'],"ESTADO=procesando") !== false) {
+                                    $invoice->hacienda_status = '05';
+                                } else {
+                                    $invoice->hacienda_status = '03';
+                                }
                                 $invoice->save();
 
                                 /*$path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
@@ -147,7 +150,7 @@ class ProcessCreditNote implements ShouldQueue
                                 $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );*/
 
                                 if ($save && $saveMH) {
-                                    if (isset($invoice->client_id)) {
+                                    /*if (isset($invoice->client_id)) {
                                         if (!empty($invoice->send_emails)) {
                                             Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new CreditNoteNotificacion([
                                                 'xml' => $path,
@@ -166,9 +169,10 @@ class ProcessCreditNote implements ShouldQueue
                                             'xml' => $path,
                                             'data_invoice' => $invoice, 'data_company' => $company
                                         ]));
-                                    }
+                                    }*/
+                                    $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, true);
+                                    Log::info('Factura enviada y XML guardado.');
                                 }
-                                Log::info('Factura enviada y XML guardado.');
                             } else if (isset($response['status']) && $response['status'] == 400 &&
                                 strpos($response['message'], 'ya fue recibido anteriormente') <> false) {
                                 Log::info('Consecutive repeated -->' . $invoice->document_number);
@@ -189,7 +193,7 @@ class ProcessCreditNote implements ShouldQueue
                 }else {
                     Log::warning('El job no se procesó, porque la empresa no tiene un certificado válido: '.$this->invoiceId.'-->>');
                 }
-            }
+            //}
         } catch ( \Exception $e) {
             Log::error('ERROR Enviando parametros  API HACIENDA Nota de credito: '.$this->invoiceId.'-->>'.$e);
         }
@@ -234,6 +238,7 @@ class ProcessCreditNote implements ShouldQueue
                 'referencia_razon' => 'Anulacion de factura',
                 'fecha_emision_factura' => $data['reference_generated_date'],
                 'clave_factura' => $data['reference_document_key'],
+                //'clave_factura' => $data['document_key'],
                 'atvcertPin' => $company->atv->pin ? trim($company->atv->pin) : '',
                 'atvcertFile' => Storage::get($company->atv->key_url),
                 'detalle' => $details

@@ -524,9 +524,15 @@ class Bill extends Model
         $bill->iva_amount = 0;
         
         //Revisa si es una sola linea. Si solo es una linea, lo hace un array para poder entrar en el foreach.
-        $lineas = $arr['DetalleServicio']['LineaDetalle'];
-        if( array_key_exists( 'NumeroLinea', $lineas ) ) {
-            $lineas = [$arr['DetalleServicio']['LineaDetalle']];
+        try{
+          $lineas = $arr['DetalleServicio']['LineaDetalle'];
+          if( array_key_exists( 'NumeroLinea', $lineas ) ) {
+              $lineas = [$arr['DetalleServicio']['LineaDetalle']];
+          }
+        }catch(\Exception $e){
+          Log::error("Error en XML: " . $e->getMessage());
+          Log::error("Error en XML, detalle: " . json_encode($arr));
+          $lineas = [];
         }
         
         $bill->save();
@@ -650,6 +656,7 @@ class Bill extends Model
                 $totalIvaDevuelto += $item->iva_amount;
             }
         }
+        
         $bill->total_iva_devuelto = $arr['ResumenFactura']['TotalIVADevuelto'] ?? 0;
         $bill->total_serv_gravados = $arr['ResumenFactura']['TotalServGravados'] ?? 0;
         $bill->total_serv_exentos = $arr['ResumenFactura']['TotalServExentos'] ?? 0;
@@ -750,7 +757,7 @@ class Bill extends Model
         try{
           $cedulaEmpresa = $bill->company->id_number;
           //$cedulaProveedor = $bill->provider->id_number;
-          $consecutivoComprobante = $bill->document_number;
+          $consecutivoComprobante = $bill->document_key;
           
           if ( Storage::exists("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/mensaje-$consecutivoComprobante.xml")) {
               Storage::delete("empresa-$cedulaEmpresa/facturas_compras/$bill->year/$bill->month/mensaje-$consecutivoComprobante.xml");
@@ -1080,7 +1087,7 @@ class Bill extends Model
       
     }
     
-    public function calculateAcceptFields() {
+    public function calculateAcceptFields($company = false) {
         
       if( !$this->xml_schema ){
         $this->xml_schema = $this->commercial_activity ? 43 : 42;
@@ -1094,7 +1101,9 @@ class Bill extends Model
       
       if( $this->is_code_validated ) {
         if( $this->xml_schema == 43 ) {
-          $company = currentCompanyModel();
+          if(!$company){
+            $company = currentCompanyModel();
+          }
           $prorrataOperativa = $company->getProrrataOperativa( $this->year );
           $calc = new CalculatedTax();
           $calc->year = $this->year;
@@ -1106,10 +1115,10 @@ class Bill extends Model
           $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query, true );
           $calc->setCalculosPorFactura( $prorrataOperativa, $lastBalance );
 
-          $this->accept_iva_acreditable = $calc->iva_deducible_operativo;
-          $this->accept_iva_gasto = $calc->iva_no_deducible;
-          $this->accept_iva_total = $calc->total_bill_iva;
-          $this->accept_total_factura = $calc->bills_total;
+          $this->accept_iva_acreditable = round($calc->iva_deducible_operativo, 5);
+          $this->accept_iva_gasto = round($calc->iva_no_deducible, 5);
+          $this->accept_iva_total = round($calc->total_bill_iva, 5);
+          $this->accept_total_factura = round($calc->bills_total, 5);
           $this->accept_id_number = $company->id_number;
           
           if( $calc->iva_acreditable_identificacion_plena > 0) {

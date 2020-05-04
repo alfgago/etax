@@ -129,6 +129,7 @@ class InvoiceController extends Controller
                 ->join('invoices', 'invoice_items.invoice_id', '=', 'invoices.id' )
                 ->where('invoices.is_authorized', 1)
                 ->whereNull('invoices.deleted_at')
+                ->has('invoice')
                 ->with('invoice')
                 //->join('clients', 'invoices.client_id', '=', 'clients.id' )
                 ;
@@ -1935,7 +1936,7 @@ class InvoiceController extends Controller
         $this->authorize('update', $invoice);
 
         $invoiceUtils = new InvoiceUtils();
-        $file = $invoiceUtils->downloadXml( $invoice, currentCompanyModel() );
+        $file = $invoiceUtils->downloadXml( $invoice, currentCompanyModel(), $invoice->document_type );
         $filename = $invoice->document_key . '.xml';
         if( ! $invoice->document_key ) {
             $filename = $invoice->document_number . '-' . $invoice->client_id . '.xml';
@@ -1962,8 +1963,9 @@ class InvoiceController extends Controller
 
         try{
             $invoiceUtils = new InvoiceUtils();
-            $path = $invoiceUtils->getXmlPath( $invoice, $company );
-            $invoiceUtils->sendInvoiceEmail( $invoice, $company, $path );
+            $path = $invoiceUtils->getXmlPath( $invoice, $company, $invoice->document_type );
+            $pathH = $invoiceUtils->getXmlPath( $invoice, $company, 'MH' );
+            $invoiceUtils->sendInvoiceEmail( $invoice, $company, $path, $pathH );
         }catch( \Exception $e ){
             return back()->withError( 'El correo electrónico no pudo ser reenviado.');
         }

@@ -48,12 +48,13 @@ class QueryPendingInvoices extends Command
             $invoices = Invoice::where('hacienda_status', '05')
                 ->where('created_at', '>', $dateLimit)
                 ->where('is_void', false)
-                ->where('resend_attempts', '<', 6)->where('in_queue', false)
+                ->where('query_attempts', '<', 6)->where('in_queue', false)
                 ->whereIn('document_type', ['01', '03', '04', '08', '09'])
                 ->get();
             $this->info('Querying pending invoices ....'. count($invoices));
             $this->info('Get Token Api Hacienda ....');
             foreach ($invoices as $invoice) {
+                $invoice->query_attempts++;
                 QueryHaciendaStatus::dispatch($invoice)->onQueue('invoices');
             }
             

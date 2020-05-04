@@ -105,10 +105,12 @@ class ProcessInvoice implements ShouldQueue
                             'json_response' => json_encode($response)
                         ]);
                         
+                        Log::debug("RESPONSE -> " . json_encode($response));
                         if( isset($response['status']) ){
                             try{
                                 //Intenta guardar el original firmado siempre
                                 $save = 0;
+                                $path = null;
                                 if(isset($response['data']['xmlFirmado'])){
                                     $path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
                                     $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n') );
@@ -118,8 +120,8 @@ class ProcessInvoice implements ShouldQueue
                             }
                             try{ //Intenta guardar la respuesta siempre
                                 if(isset($response['data']['mensajeHacienda'])){
-                                    Log::debug( $response['data']['response'] . "GUARDA: " . !(strpos($response['data']['response'],"ESTADO=procesando") !== false) );
-                                    $pathMH = 0;
+                                    $saveMH = 0;
+                                    $pathMH = null;
                                     if ( ! (strpos($response['data']['response'],"ESTADO=procesando") !== false) ) {
                                         $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
                                         $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );
@@ -130,7 +132,7 @@ class ProcessInvoice implements ShouldQueue
                             }
                         }
                         
-                        if ($save && $pathMH) {
+                        if ($save) {
                             $xml = XMLHacienda::updateOrCreate(
                                 [
                                   'invoice_id' => $invoice->id
@@ -154,7 +156,7 @@ class ProcessInvoice implements ShouldQueue
                             }
                             $invoice->save();
                             
-                            if ($save && $pathMH) {
+                            if ($save && $saveMH) {
                                 $sendPdf = true;
                                 $file = $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, $sendPdf);
                                 Log::info('Factura enviada.');
@@ -165,7 +167,7 @@ class ProcessInvoice implements ShouldQueue
                             (strpos($response['message'], 'ya fue recibido anteriormente') <> false || strpos($response['message'], 'XML ya existe en nuestras bases de datos') <> false) ) {
                             Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
                             Log::warning('Consecutive repeated -->' . $invoice->document_number);
-                            $invoice->hacienda_status = '04';
+                            $invoice->hacienda_status = '05';
                             $invoice->save();
                         } else if (isset($response['status']) && $response['status'] == 400) {
                             Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));

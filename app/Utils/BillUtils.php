@@ -5,6 +5,7 @@ namespace App\Utils;
 
 use App\Company;
 use App\Bill;
+use App\HaciendaResponse;
 use App\Variables;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -54,10 +55,22 @@ class BillUtils
         return $pdf->download("$bill->document_key.pdf");
     }
     
-    public function downloadXml( $bill, $company )
+    public function downloadXml( $bill, $company, $isResponse = false)
     {
-        $xml = $bill->xmlHacienda;
+        if($isResponse){
+            $response = HaciendaResponse::where('bill_id', $bill->id)->first();
+                if($response){
+                $path = $response->s3url;
+                if ( Storage::exists($path)) {
+    	          $file = Storage::get($path);
+    	          return $file;
+    	        }
+            }else{
+                return false;
+            }
+        }
         
+        $xml = $bill->xmlHacienda;
         $file = false;
         if( isset($xml) ) {
         	$path = $xml->xml;

@@ -44,9 +44,18 @@
       <i class="fa fa-file-pdf-o" aria-hidden="true"></i> Descargar PDF
     </a>
     
-    
 @else
   <div style="font-size: 0.9rem;" class="descripcion mb-2">
     Aceptación no disponible.
+    <br>
+    
+    <a href="/facturas-recibidas/download-pdf/{{ $bill->id }}" title="Descargar PDF"class="btn btn-primary btn-agregar m-0" style="background: #d28923; border-color: #d28923; font-size: 0.75em;margin-top: .25rem !important;" download > 
+      <i class="fa fa-file-pdf-o" aria-hidden="true"></i> Descargar PDF
+    </a>
+    <br>
+    <a href="/facturas-recibidas/download-mh/{{ $bill->id }}" title="Descargar MH"class="btn btn-primary btn-agregar m-0" style="background: #2379d2; border-color: #2379d2; font-size: 0.75em; margin-top: .25rem !important;"  > 
+      <i class="fa fa-file-text-o" aria-hidden="true"></i> Descargar Respuesta
+    </a>
+    
   </div>
 @endif

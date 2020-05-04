@@ -54,36 +54,38 @@ class EnvioRecurrentes implements ShouldQueue
         try{
             Log::info("Recurrente ID: $recurrente->id, copia de Invoice: $recurrente->invoice_id, fecha: $recurrente->next_send");
             $oldInvoice = $recurrente->invoice;
-            if($oldInvoice->hacienda_status != '99' || $oldInvoice->is_void){
-                $invoice = new Invoice();
-                $generatedDate = Carbon::parse($recurrente->next_send);
-                $invoice = $oldInvoice->replicate();
-                $invoice->document_key = 'Key programada';
-                $invoice->document_number = 'Programada';
-                $invoice->hacienda_status = '99';
-                $invoice->hide_from_taxes = false;
-                $invoice->is_void = false;
-                $invoice->generated_date = $recurrente->next_send;
-                $invoice->due_date = $recurrente->proximoVencimiento();
-                $invoice->month = $generatedDate->month;
-                $invoice->year = $generatedDate->year;
-                $invoice->save();
-                
-                foreach ($oldInvoice->items as $oldItem) {
-                    $item = $oldItem->replicate();
-                    $item->invoice_id = $invoice->id;
-                    $item->month = $invoice->month;
-                    $item->year = $invoice->year;
-                    $item->save();
+            if($oldInvoice){
+                if($oldInvoice->hacienda_status != '99' || $oldInvoice->is_void){
+                    $invoice = new Invoice();
+                    $generatedDate = Carbon::parse($recurrente->next_send);
+                    $invoice = $oldInvoice->replicate();
+                    $invoice->document_key = 'Key programada';
+                    $invoice->document_number = 'Programada';
+                    $invoice->hacienda_status = '99';
+                    $invoice->hide_from_taxes = false;
+                    $invoice->is_void = false;
+                    $invoice->generated_date = $recurrente->next_send;
+                    $invoice->due_date = $recurrente->proximoVencimiento();
+                    $invoice->month = $generatedDate->month;
+                    $invoice->year = $generatedDate->year;
+                    $invoice->save();
+                    
+                    foreach ($oldInvoice->items as $oldItem) {
+                        $item = $oldItem->replicate();
+                        $item->invoice_id = $invoice->id;
+                        $item->month = $invoice->month;
+                        $item->year = $invoice->year;
+                        $item->save();
+                    }
+                    
+                    $recurrente->invoice_id = $invoice->id;
+                    $recurrente->next_send = $recurrente->proximo_envio($recurrente->next_send);
+                    
+                    Log::info("Proxima fecha: $recurrente->next_send.");
+                    $recurrente->save();
+                }else{
+                    Log::warning("Hubiera repetido esta");
                 }
-                
-                $recurrente->invoice_id = $invoice->id;
-                $recurrente->next_send = $recurrente->proximo_envio($recurrente->next_send);
-                
-                Log::info("Proxima fecha: $recurrente->next_send.");
-                $recurrente->save();
-            }else{
-                Log::warning("Hubiera repetido esta");
             }
             
         }catch(\Exception $e){

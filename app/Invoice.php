@@ -89,6 +89,12 @@ class Invoice extends Model
         return $this->hasMany(OtherCharges::class);
     }
 
+    //Relación con OtherInvoiceData
+    public function otherInvoiceData()
+    {
+        return $this->hasMany(OtherInvoiceData::class);
+    }
+
     //Devuelve la fecha de generación en formato Carbon
     public function generatedDate()
     {
@@ -377,7 +383,7 @@ class Invoice extends Model
               }
               $this->total_otros_cargos = $totalOtrosCargos;
             }catch(\Exception $e){
-                Log::warning("Error al guardar otros cargos " . $e);
+                //Log::warning("Error al guardar otros cargos " . $e);
             }
 
             //Guarda nuevamente el invoice
@@ -921,7 +927,7 @@ class Invoice extends Model
               $invoice->client_zip = $data['zip'];
               $invoice->client_country = 'CR';
               $invoice->client_state = $data['zip'][0];
-              $invoice->client_city = $data['zip'][1] . $data['zip'][2];
+              $invoice->client_city = $data['zip'][0].$data['zip'][1] . $data['zip'][2];
               $invoice->client_district = $data['zip'];
             }catch( \Throwable $e ){ }
           }
@@ -950,14 +956,14 @@ class Invoice extends Model
           try{
             $otherReference = $data['otherReference'] ?? null;
             if ( isset($otherReference) ) {
-                $ref = Invoice::where('company_id', $company->id)
-                  ->where('buy_order', $otherReference)
-                  ->first();
+                  $ref = Invoice::where('company_id', $company->id)
+                          ->where('buy_order', $otherReference)
+                          ->first();
                   
                 if( !isset($ref) ) {
-                   Invoice::where('company_id', $company->id)
-                  ->where('document_number', $otherReference)
-                  ->first();
+                  $ref = Invoice::where('company_id', $company->id)
+                          ->where('document_number', $otherReference)
+                          ->first();
                 }
                   
                 if( isset($ref) ) {
@@ -1023,7 +1029,7 @@ class Invoice extends Model
           'exoneration_porcent' => $data['porcentajeExoneracion'],
           'exoneration_amount' => $data['montoExoneracion'],
           'exoneration_date' => $data['fechaExoneracion'] ?? null,
-          'exoneration_total_gravado' => $data['montoExoneracion'] ? $subtotalLinea : 0,
+          'exoneration_total_gravado' => $data['totalMontoExonerado'] ?? ($data['montoExoneracion'] ? $subtotalLinea : 0),
           'impuesto_neto' => $data['impuestoNeto'],
           'exoneration_total_amount' => $data['totalMontoLinea'],
           'tariff_heading' => ( isset($data['partidaArancelaria']) ? $data['partidaArancelaria'] : null )
@@ -1425,8 +1431,9 @@ class Invoice extends Model
 
     }
 
-    public function setNoteData($invoiceReference, $requestItems = null, $noteType = null, $request = [], $company = false) {
+    public function setNoteData($invoiceReference, $requestItems = null, $noteType = null, $request = [], $company = false, $anularCompleta = false) {
         try {
+            //dd($requestItems);
             $noteType = $noteType ?? '03';
             $this->document_key = getDocumentKey($noteType, $company, $this->reference_number);
             $this->document_number = getDocReference($noteType, $company, $this->reference_number);
@@ -1489,21 +1496,42 @@ class Invoice extends Model
                 $this->company->addSentInvoice( $this->year, $this->month );
             }
 
-            $lids = array();
-            $dataItems = $requestItems ?? $invoiceReference->items->toArray();
-            foreach($dataItems as $item) {
-                $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
-                $item['item_id'] = $item['id'] ? $item['id'] : 0;
-                $item_modificado = $this->addEditItem($item);
-
-                array_push( $lids, $item_modificado->id );
-            }
-
-            foreach ( $this->items as $item ) {
-                if( !in_array( $item->id, $lids ) ) {
-                    $item->delete();
+            //
+            if(!$anularCompleta){
+                $lids = array();
+                $dataItems = $requestItems ?? $invoiceReference->items->toArray();
+                foreach($dataItems as $item) {
+                    $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
+                    $item['item_id'] = $item['id'] ? $item['id'] : 0;
+                    $item_modificado = $this->addEditItem($item);
+                    array_push( $lids, $item_modificado->id );
+                }
+    
+                foreach ( $this->items as $item ) {
+                    if( !in_array( $item->id, $lids ) ) {
+                        $item->delete();
+                    }
+                }
+            }else{
+                $dataItems = $invoiceReference->items;
+                foreach($dataItems as $item) {
+                    $newItem = $item->replicate();
+                    $newItem->invoice_id = $this->id;
+                    $newItem->save();
                 }
             }
+            
+            try{
+                $dataOthers = $invoiceReference->otherInvoiceData;
+                foreach($dataOthers as $ot) {
+                    $newOther = $ot->replicate();
+                    $newOther->invoice_id = $this->id;
+                    $newOther->save();
+                }
+            }catch(\Exception $e){
+                Log::error($e);
+            }
+            
             $totalIvaDevuelto = 0;
             foreach ($this->items as $item) {
                 if ($this->payment_type == '02' && $item->product_type == 12) {
