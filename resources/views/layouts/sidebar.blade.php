@@ -47,11 +47,11 @@
                                 top: auto;
                             ">
                             <a href="/quickbooks/mapeo-variables">Mapeo de variables</a>
-                            <a href="/quickbooks/emitidas/comparativo">Sincronización de ventas</a>
-                            <a href="/quickbooks/recibidas/comparativo">Sincronización de compras</a>
-                            <a href="/quickbooks/clientes/comparativo">Sincronización de clientes</a>
-                            <a href="/quickbooks/proveedores/comparativo">Sincronización de proveedores</a>
-                            <a href="/quickbooks/productos/comparativo">Sincronización de productos</a>
+                            <a href="/quickbooks/emitidas/comparativo-etaxaqb">Sincronización de ventas</a>
+                            <a href="/quickbooks/recibidas/comparativo-etaxaqb">Sincronización de compras</a>
+                            <a href="/quickbooks/clientes/comparativo-etaxaqb">Sincronización de clientes</a>
+                            <a href="/quickbooks/proveedores/comparativo-etaxaqb">Sincronización de proveedores</a>
+                            <a href="/quickbooks/productos/comparativo-etaxaqb">Sincronización de productos</a>
                         </div>
                     </li> 
                     <?php 

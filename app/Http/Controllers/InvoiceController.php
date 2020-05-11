@@ -866,6 +866,7 @@ class InvoiceController extends Controller
         $product_categories = ProductCategory::whereNotNull('invoice_iva_code')->get();
         $codigos = CodigoIvaRepercutido::where('hidden', false)->get();
         $units = UnidadMedicion::all()->toArray();
+        
         return view('Invoice/show', compact('invoice','units','arrayActividades','countries','product_categories','codigos', 'company') );
     }
 
@@ -1029,7 +1030,7 @@ class InvoiceController extends Controller
 
     }
 
-    public function actualizar_categorias(Request $request){
+    public function actualizarCategorias(Request $request){
         $invoice = Invoice::where('id',$request->invoice_id)->first();
 
         if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){
@@ -1042,6 +1043,7 @@ class InvoiceController extends Controller
                 }
             }catch(\Throwable $e){}
             $user = auth()->user();
+            clearInvoiceCache($invoice);
             Activity::dispatch(
                 $user,
                 $invoice,
@@ -1965,7 +1967,7 @@ class InvoiceController extends Controller
             $invoiceUtils = new InvoiceUtils();
             $path = $invoiceUtils->getXmlPath( $invoice, $company, $invoice->document_type );
             $pathH = $invoiceUtils->getXmlPath( $invoice, $company, 'MH' );
-            $invoiceUtils->sendInvoiceEmail( $invoice, $company, $path, $pathH );
+            $invoiceUtils->sendInvoiceNotificationEmail($invoice, $company, $path, $pathH, true );
         }catch( \Exception $e ){
             return back()->withError( 'El correo electrónico no pudo ser reenviado.');
         }

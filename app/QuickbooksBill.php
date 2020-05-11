@@ -86,7 +86,8 @@ class QuickbooksBill extends Model
             
             $qbBill = QuickBooksBill::updateOrCreate(
               [
-                "qb_id" => $qbBill->Id
+                "qb_id" => $qbBill->Id,
+                "company_id" => $company->id
               ],
               [
                 "qb_doc_number" => $qbBill->DocNumber ?? "QB".$qbBill->Id,
@@ -97,7 +98,6 @@ class QuickbooksBill extends Model
                 "generated_at" => 'quickbooks',
                 "month" => $date->month,
                 "year" => $date->year,
-                "company_id" => $company->id,
                 'qb_account' => $qbAccount
               ]
             );
@@ -222,7 +222,8 @@ class QuickbooksBill extends Model
                 $providerName = QuickbooksProvider::getProviderName($company, $qbBill->VendorRef);
                 $inv = QuickBooksBill::updateOrCreate(
                   [
-                    "qb_id" => $qbBill->Id
+                    "qb_id" => $qbBill->Id,
+                    "company_id" => $company->id
                   ],
                   [
                     "qb_doc_number" => $qbBill->DocNumber,
@@ -234,7 +235,6 @@ class QuickbooksBill extends Model
                     "generated_at" => 'quickbooks',
                     "month" => $bill->month,
                     "year" => $bill->year,
-                    "company_id" => $company->id,
                     "bill_id" => $bill->id
                   ]
                 );

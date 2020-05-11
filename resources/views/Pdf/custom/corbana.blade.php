@@ -277,7 +277,7 @@
                         <td>
                             <b>TÉRMINOS DE PAGO/(TERMS PAYMENT):</b> <span>{{ $data_invoice->getCondicionVenta() }}</span><br>
                             @if( $data_invoice->sale_condition == '02')
-                                <b>PLAZO CRÉDITO / (CREDIT TERM):</b> <span>{{ $data_invoice->credit_time }}</span><br>
+                                <b>PLAZO CRÉDITO / (CREDIT TERM):</b> <span>{{ $data_invoice->credit_time }} días</span><br>
                             @endif
                             <b>MEDIO DE PAGO / (MEANS OF PAYMENT):</b> <span>{{ $data_invoice->getMetodoPago() }}</span><br>
                         </td>
@@ -424,7 +424,7 @@
                         </tr>
                         <tr class="totalizado">
                             <td style="text-align: right;">
-                                {{ $cantidadCount }}
+                                {{ $cantidadCount < 1 ? $cantidadCount : '' }}
                             </td>
                             <td style="text-align: center; font-size: 0.9em" colspan="3">
                                 <?php $letras = \App\OtherInvoiceData::findData($otherData, 'LETRAS');
@@ -433,10 +433,10 @@
                                 <?php } ?>
                             </td>
                             <td style="text-align: right;">
-                                {{ $pesoNetoTotal }}
+                                {{ $pesoNetoTotal < 0 ? $pesoNetoTotal : '' }}
                             </td>
                             <td style="text-align: right;">
-                                {{ $pesoBrutoTotal }}
+                                {{ $pesoBrutoTotal < 0 ? $pesoBrutoTotal : '' }}
                             </td>
                             <td>
                                 TOTAL

@@ -645,7 +645,7 @@ class QuickbooksController extends Controller
 
         return datatables()->eloquent( $query )
             ->addColumn('link', function($client) use($clientesEtax){
-                if( $client->client_id ){
+                if( isset($client->client_id) ){
                     if( empty($client->client->id_number) ){
                         return "Datos faltantes - <a href='/clients/clients-update-view/$client->client_id'>Editar</a>";
                     }
@@ -750,14 +750,17 @@ class QuickbooksController extends Controller
         }
         $dataService = $qb->getAuthenticatedDS();
         foreach($clients as $key => $value){
+            $etaxClient = Client::find($key);
             if($value == 'N'){
-                $etaxClient = Client::find($key);
                 if( isset($etaxClient) ){
                     QuickbooksCustomer::saveEtaxaqb($dataService, $etaxClient);
                 }
             }else{
                 $qbCustomer = QuickbooksCustomer::where('company_id', $company->id)->where('qb_id', $value)->first();
-                if( isset($qbCustomer) ){
+                if( isset($qbCustomer) && isset($etaxClient) ){
+                    if( $etaxClient->updated_at > $qbCustomer->updated_at){
+                        QuickbooksCustomer::saveEtaxaqb($dataService, $etaxClient, $value);
+                    }
                     $qbCustomer->client_id = $key;
                     $qbCustomer->save();
                 }
@@ -921,14 +924,17 @@ class QuickbooksController extends Controller
         }
         $dataService = $qb->getAuthenticatedDS();
         foreach($providers as $key => $value){
+            $etaxProvider = Provider::find($key);
             if($value == 'N'){
-                $etaxProvider = Provider::find($key);
                 if( isset($etaxProvider) ){
                     QuickbooksProvider::saveEtaxaqb($dataService, $etaxProvider);
                 }
             }else{
                 $qbProvider = QuickbooksProvider::where('company_id', $company->id)->where('qb_id', $value)->first();
-                if( isset($qbProvider) ){
+                if( isset($etaxProvider) && isset($qbProvider) ){
+                    if( $etaxProvider->updated_at > $qbProvider->updated_at){
+                        QuickbooksProvider::saveEtaxaqb($dataService, $etaxProvider, $value);
+                    }
                     $qbProvider->provider_id = $key;
                     $qbProvider->save();
                 }

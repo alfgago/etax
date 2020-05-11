@@ -3,11 +3,11 @@
 	<?php
 		$impuestos = $dataDeclaracion['impuestos'];
 		
-		$ventas1 = $impuestos['ventas1'];	
-		$ventas2 = $impuestos['ventas2'];	
-		$ventas4 = $impuestos['ventas4'];	
-		$ventas13 = $impuestos['ventas13'];	
-		$ventasTotal = $impuestos['ventasTotal'];	
+		$ventas1 = $impuestos['ventas1']['val'];	
+		$ventas2 = $impuestos['ventas2']['val'];	
+		$ventas4 = $impuestos['ventas4']['val'];	
+		$ventas13 = $impuestos['ventas13']['val'];	
+		$ventasTotal = $impuestos['ventasTotal']['val'];	
 	
 	?>
 	<tr class="macro-title">

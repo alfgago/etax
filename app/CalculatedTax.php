@@ -1421,87 +1421,154 @@ class CalculatedTax extends Model
             $dataDeclaracion["dataActividades"] = $actividadDataArray;
 
             $impuestos = array();
+            
+                    $impuestos['iva_compras_S1']['name'] = 'Crédito por servicios locales al 1% no identificable';
+                    $impuestos['iva_compras_S2']['name'] = 'Crédito por servicios locales al 2% no identificable';
+                    $impuestos['iva_compras_S3']['name'] = 'Crédito por servicios locales al 13% no identificable';
+                    $impuestos['iva_compras_S4']['name'] = 'Crédito por servicios locales al 4% no identificable';
+                    $impuestos['iva_importaciones_S1']['name'] = 'Crédito por servicios importados al 1% no identificable';
+                    $impuestos['iva_importaciones_S2']['name'] = 'Crédito por servicios importados al 2% no identificable';
+                    $impuestos['iva_importaciones_S3']['name'] = 'Crédito por servicios importados al 13% no identificable';
+                    $impuestos['iva_importaciones_S4']['name'] = 'Crédito por servicios importados al 4% no identificable';
+                    $impuestos['iva_compras_S1e']['name'] = 'Crédito pleno por servicios locales al 1%';
+                    $impuestos['iva_compras_S2e']['name'] = 'Crédito pleno por servicios locales al 2%';
+                    $impuestos['iva_compras_S3e']['name'] = 'Crédito pleno por servicios locales al 13%';
+                    $impuestos['iva_compras_S4e']['name'] = 'Crédito pleno por servicios locales al 4%';
+                    $impuestos['iva_importaciones_S1e']['name'] = 'Crédito pleno por servicios importados al 1%';
+                    $impuestos['iva_importaciones_S2e']['name'] = 'Crédito pleno por servicios importados al 2%';
+                    $impuestos['iva_importaciones_S3e']['name'] = 'Crédito pleno por servicios importados al 13%';
+                    $impuestos['iva_importaciones_S4e']['name'] = 'Crédito pleno por servicios importados al 4%';
+                    $impuestos['iva_compras_B1']['name'] = 'Crédito por bienes locales al 1% no identificable';
+                    $impuestos['iva_compras_B2']['name'] = 'Crédito por bienes locales al 2% no identificable';
+                    $impuestos['iva_compras_B3']['name'] = 'Crédito por bienes locales al 13% no identificable';
+                    $impuestos['iva_compras_B4']['name'] = 'Crédito por bienes locales al 4% no identificable';
+                    $impuestos['iva_importaciones_B1']['name'] = 'Crédito por bienes importados al 1% no identificable';
+                    $impuestos['iva_importaciones_B2']['name'] = 'Crédito por bienes importados al 2% no identificable';
+                    $impuestos['iva_importaciones_B3']['name'] = 'Crédito por bienes importados al 13% no identificable';
+                    $impuestos['iva_importaciones_B4']['name'] = 'Crédito por bienes importados al 4% no identificable';
+                    $impuestos['iva_compras_B1e']['name']  = 'Crédito pleno por bienes locales al 1%';
+                    $impuestos['iva_compras_B2e']['name']  = 'Crédito pleno por bienes locales al 2%';
+                    $impuestos['iva_compras_B3e']['name']  = 'Crédito pleno por bienes locales al 13%';
+                    $impuestos['iva_compras_B4e']['name']  = 'Crédito pleno por bienes locales al 4%';
+                    $impuestos['iva_importaciones_B1e']['name']  = 'Crédito pleno por bienes importados al 1%';
+                    $impuestos['iva_importaciones_B2e']['name']  = 'Crédito pleno por bienes importados al 2%';
+                    $impuestos['iva_importaciones_B3e']['name']  = 'Crédito pleno por bienes importados al 3%';
+                    $impuestos['iva_importaciones_B4e']['name']  = 'Crédito pleno por bienes importados al 4%';
+                    $impuestos['iva_bc_L1']['name']  = 'Crédito por bienes de capital locales al 1% no identificable';
+                    $impuestos['iva_bc_L2']['name']  = 'Crédito por bienes de capital locales al 2% no identificable';
+                    $impuestos['iva_bc_L3']['name']  = 'Crédito por bienes de capital locales al 13% no identificable';
+                    $impuestos['iva_bc_L4']['name']  = 'Crédito por bienes de capital locales al 4% no identificable';
+                    $impuestos['iva_bc_I1']['name']  = 'Crédito por bienes de capital importados al 1% no identificable';
+                    $impuestos['iva_bc_I2']['name']  = 'Crédito por bienes de capital importados al 2% no identificable';
+                    $impuestos['iva_bc_I3']['name']  = 'Crédito por bienes de capital importados al 13% no identificable';
+                    $impuestos['iva_bc_I4']['name']  = 'Crédito por bienes de capital importados al 4% no identificable';
+                    $impuestos['iva_bc_L1e']['name']  = 'Crédito pleno por bienes de capital locales al 1%';
+                    $impuestos['iva_bc_L2e']['name']  = 'Crédito pleno por bienes de capital locales al 2%';
+                    $impuestos['iva_bc_L3e']['name']  = 'Crédito pleno por bienes de capital locales al 3%';
+                    $impuestos['iva_bc_L4e']['name']  = 'Crédito pleno por bienes de capital locales al 4%';
+                    $impuestos['iva_bc_I1e']['name']  = 'Crédito pleno por bienes de capital importados al 1%';
+                    $impuestos['iva_bc_I2e']['name']  = 'Crédito pleno por bienes de capital importados al 2%';
+                    $impuestos['iva_bc_I3e']['name']  = 'Crédito pleno por bienes de capital importados al 13%';
+                    $impuestos['iva_bc_I4e']['name']  = 'Crédito pleno por bienes de capital importados al 4%';
+                    $impuestos['totales1']['name'] = 'Total de créditos al 1% no identificable';
+                    $impuestos['totales2']['name'] = 'Total de créditos al 2% no identificable';
+                    $impuestos['totales3']['name'] = 'Total de créditos al 13% no identificable';
+                    $impuestos['totales4']['name'] = 'Total de créditos al 4% no identificable';
+                    $impuestos['totalesSum']['name'] = 'Total de créditos no identificables';
+                    $impuestos['totales1e']['name'] = 'Total de créditos plenos al 1%';
+                    $impuestos['totales2e']['name'] = 'Total de créditos plenos al 2%';
+                    $impuestos['totales3e']['name'] = 'Total de créditos plenos al 13%';
+                    $impuestos['totales4e']['name'] = 'Total de créditos plenos al 4%';
+                    $impuestos['totalesSume']['name'] = 'Total de créditos plenos';
+                    $impuestos['ventas1']['name'] = 'Impuesto por ventas 1%';
+                    $impuestos['ventas2']['name'] = 'Impuesto por ventas 2%';
+                    $impuestos['ventas13']['name'] = 'Impuesto por ventas 13%';
+                    $impuestos['ventas4']['name'] = 'Impuesto por ventas 4%';
+                    $impuestos['ventasTotal']['name'] = 'Total de impuesto por ventas';
+                    $impuestos['totalCreditosPeriodo']['name'] = 'Total de créditos del periodo';
+                    $impuestos['creditosAcreditablesPorTarifas']['name'] = 'Total de créditos identificables por tarifa';
+            
             //Compra de servicios
-            $impuestos['iva_compras_S1'] = $this->applyRatios(1, $ivaData->bS001);
-            $impuestos['iva_compras_S2'] = $this->applyRatios(2, $ivaData->bS002);
-            $impuestos['iva_compras_S3'] = $this->applyRatios(13, $ivaData->bS003);
-            $impuestos['iva_compras_S4'] = $this->applyRatios(4, $ivaData->bS004sd ?? $ivaData->bS004);
-            $impuestos['iva_importaciones_S1'] = $this->applyRatios(1, $ivaData->bS021);
-            $impuestos['iva_importaciones_S2'] = $this->applyRatios(2, $ivaData->bS022);
-            $impuestos['iva_importaciones_S3'] = $this->applyRatios(13, $ivaData->bS023);
-            $impuestos['iva_importaciones_S4'] = $this->applyRatios(4, $ivaData->bS024sd ?? $ivaData->bS024);
+            $impuestos['iva_compras_S1']['val'] = $this->applyRatios(1, $ivaData->bS001);
+            $impuestos['iva_compras_S2']['val'] = $this->applyRatios(2, $ivaData->bS002);
+            $impuestos['iva_compras_S3']['val'] = $this->applyRatios(13, $ivaData->bS003);
+            $impuestos['iva_compras_S4']['val'] = $this->applyRatios(4, $ivaData->bS004sd ?? $ivaData->bS004);
+            $impuestos['iva_importaciones_S1']['val'] = $this->applyRatios(1, $ivaData->bS021);
+            $impuestos['iva_importaciones_S2']['val'] = $this->applyRatios(2, $ivaData->bS022);
+            $impuestos['iva_importaciones_S3']['val'] = $this->applyRatios(13, $ivaData->bS023);
+            $impuestos['iva_importaciones_S4']['val'] = $this->applyRatios(4, $ivaData->bS024sd ?? $ivaData->bS024);
 
-            $impuestos['iva_compras_S1e'] = $ivaData->plenoS061;
-            $impuestos['iva_compras_S2e'] = $ivaData->plenoS062;
-            $impuestos['iva_compras_S3e'] = $ivaData->plenoS063;
-            $impuestos['iva_compras_S4e'] = $ivaData->plenoS064;
-            $impuestos['iva_importaciones_S1e'] = $ivaData->plenoS041;
-            $impuestos['iva_importaciones_S2e'] = $ivaData->plenoS042;
-            $impuestos['iva_importaciones_S3e'] = $ivaData->plenoS043;
-            $impuestos['iva_importaciones_S4e'] = $ivaData->plenoS044;
+            $impuestos['iva_compras_S1e']['val'] = $ivaData->plenoS061;
+            $impuestos['iva_compras_S2e']['val'] = $ivaData->plenoS062;
+            $impuestos['iva_compras_S3e']['val'] = $ivaData->plenoS063;
+            $impuestos['iva_compras_S4e']['val'] = $ivaData->plenoS064;
+            $impuestos['iva_importaciones_S1e']['val'] = $ivaData->plenoS041;
+            $impuestos['iva_importaciones_S2e']['val'] = $ivaData->plenoS042;
+            $impuestos['iva_importaciones_S3e']['val'] = $ivaData->plenoS043;
+            $impuestos['iva_importaciones_S4e']['val'] = $ivaData->plenoS044;
 
             //Compra de bienes
-            $impuestos['iva_compras_B1'] = $this->applyRatios(1, $ivaData->bB001);
-            $impuestos['iva_compras_B2'] = $this->applyRatios(2, $ivaData->bB002);
-            $impuestos['iva_compras_B3'] = $this->applyRatios(13, $ivaData->bB003);
-            $impuestos['iva_compras_B4'] = $this->applyRatios(4, $ivaData->bB004sd ?? $ivaData->bB004);
-            $impuestos['iva_importaciones_B1'] = $this->applyRatios(1, $ivaData->bB021 + $ivaData->bB015);
-            $impuestos['iva_importaciones_B2'] = $this->applyRatios(2, $ivaData->bB022);
-            $impuestos['iva_importaciones_B3'] = $this->applyRatios(13, $ivaData->bB023 + $ivaData->bB016);
-            $impuestos['iva_importaciones_B4'] = $this->applyRatios(4, $ivaData->bB024sd ?? $ivaData->bB014);
+            $impuestos['iva_compras_B1']['val'] = $this->applyRatios(1, $ivaData->bB001);
+            $impuestos['iva_compras_B2']['val'] = $this->applyRatios(2, $ivaData->bB002);
+            $impuestos['iva_compras_B3']['val'] = $this->applyRatios(13, $ivaData->bB003);
+            $impuestos['iva_compras_B4']['val'] = $this->applyRatios(4, $ivaData->bB004sd ?? $ivaData->bB004);
+            $impuestos['iva_importaciones_B1']['val'] = $this->applyRatios(1, $ivaData->bB021 + $ivaData->bB015);
+            $impuestos['iva_importaciones_B2']['val'] = $this->applyRatios(2, $ivaData->bB022);
+            $impuestos['iva_importaciones_B3']['val'] = $this->applyRatios(13, $ivaData->bB023 + $ivaData->bB016);
+            $impuestos['iva_importaciones_B4']['val'] = $this->applyRatios(4, $ivaData->bB024sd ?? $ivaData->bB014);
 
-            $impuestos['iva_compras_B1e'] = $ivaData->plenoB061;
-            $impuestos['iva_compras_B2e'] = $ivaData->plenoB062;
-            $impuestos['iva_compras_B3e'] = $ivaData->plenoB063 + $ivaData->plenoR001 + $ivaData->plenoR002 + $ivaData->plenoR003 + $ivaData->plenoR004 + $ivaData->plenoR005 + $ivaData->plenoR006;
-            $impuestos['iva_compras_B4e'] = $ivaData->plenoB064;
-            $impuestos['iva_importaciones_B1e'] = $ivaData->plenoB041 + $ivaData->plenoB035;
-            $impuestos['iva_importaciones_B2e'] = $ivaData->plenoB042;
-            $impuestos['iva_importaciones_B3e'] = $ivaData->plenoB043 + $ivaData->plenoB036;
-            $impuestos['iva_importaciones_B4e'] = $ivaData->plenoB044;
+            $impuestos['iva_compras_B1e']['val']  = $ivaData->plenoB061;
+            $impuestos['iva_compras_B2e']['val']  = $ivaData->plenoB062;
+            $impuestos['iva_compras_B3e']['val']  = $ivaData->plenoB063 + $ivaData->plenoR001 + $ivaData->plenoR002 + $ivaData->plenoR003 + $ivaData->plenoR004 + $ivaData->plenoR005 + $ivaData->plenoR006;
+            $impuestos['iva_compras_B4e']['val']  = $ivaData->plenoB064;
+            $impuestos['iva_importaciones_B1e']['val']  = $ivaData->plenoB041 + $ivaData->plenoB035;
+            $impuestos['iva_importaciones_B2e']['val']  = $ivaData->plenoB042;
+            $impuestos['iva_importaciones_B3e']['val']  = $ivaData->plenoB043 + $ivaData->plenoB036;
+            $impuestos['iva_importaciones_B4e']['val']  = $ivaData->plenoB044;
 
             //Bienes de capital
-            $impuestos['iva_bc_L1'] = $this->applyRatios(1, $ivaData->bB011);
-            $impuestos['iva_bc_L2'] = $this->applyRatios(2, $ivaData->bB012);
-            $impuestos['iva_bc_L3'] = $this->applyRatios(13, $ivaData->bB013);
-            $impuestos['iva_bc_L4'] = $this->applyRatios(4, $ivaData->bB014);
+            $impuestos['iva_bc_L1']['val']  = $this->applyRatios(1, $ivaData->bB011);
+            $impuestos['iva_bc_L2']['val']  = $this->applyRatios(2, $ivaData->bB012);
+            $impuestos['iva_bc_L3']['val']  = $this->applyRatios(13, $ivaData->bB013);
+            $impuestos['iva_bc_L4']['val']  = $this->applyRatios(4, $ivaData->bB014);
 
-            $impuestos['iva_bc_I1'] = $this->applyRatios(1, $ivaData->bB031);
-            $impuestos['iva_bc_I2'] = $this->applyRatios(2, $ivaData->bB032);
-            $impuestos['iva_bc_I3'] = $this->applyRatios(13, $ivaData->bB033);
-            $impuestos['iva_bc_I4'] = $this->applyRatios(4, $ivaData->bB034);
+            $impuestos['iva_bc_I1']['val']  = $this->applyRatios(1, $ivaData->bB031);
+            $impuestos['iva_bc_I2']['val']  = $this->applyRatios(2, $ivaData->bB032);
+            $impuestos['iva_bc_I3']['val']  = $this->applyRatios(13, $ivaData->bB033);
+            $impuestos['iva_bc_I4']['val']  = $this->applyRatios(4, $ivaData->bB034);
 
-            $impuestos['iva_bc_L1e'] = $ivaData->plenoB051;
-            $impuestos['iva_bc_L2e'] = $ivaData->plenoB052;
-            $impuestos['iva_bc_L3e'] = $ivaData->plenoB053;
-            $impuestos['iva_bc_L4e'] = $ivaData->plenoB054;
+            $impuestos['iva_bc_L1e']['val']  = $ivaData->plenoB051;
+            $impuestos['iva_bc_L2e']['val']  = $ivaData->plenoB052;
+            $impuestos['iva_bc_L3e']['val']  = $ivaData->plenoB053;
+            $impuestos['iva_bc_L4e']['val']  = $ivaData->plenoB054;
 
-            $impuestos['iva_bc_I1e'] = $ivaData->plenoB071;
-            $impuestos['iva_bc_I2e'] = $ivaData->plenoB072;
-            $impuestos['iva_bc_I3e'] = $ivaData->plenoB073;
-            $impuestos['iva_bc_I4e'] = $ivaData->plenoB074;
+            $impuestos['iva_bc_I1e']['val']  = $ivaData->plenoB071;
+            $impuestos['iva_bc_I2e']['val']  = $ivaData->plenoB072;
+            $impuestos['iva_bc_I3e']['val']  = $ivaData->plenoB073;
+            $impuestos['iva_bc_I4e']['val']  = $ivaData->plenoB074;
 
             //Totales
-            $impuestos['totales1'] = $impuestos['iva_bc_L1'] + $impuestos['iva_bc_I1'] + $impuestos['iva_importaciones_B1'] + $impuestos['iva_importaciones_S1'] + $impuestos['iva_compras_B1'] + $impuestos['iva_compras_S1'];
-            $impuestos['totales2'] = $impuestos['iva_bc_L2'] + $impuestos['iva_bc_I2'] + $impuestos['iva_importaciones_B2'] + $impuestos['iva_importaciones_S2'] + $impuestos['iva_compras_B2'] + $impuestos['iva_compras_S2'];
-            $impuestos['totales3'] = $impuestos['iva_bc_L3'] + $impuestos['iva_bc_I3'] + $impuestos['iva_importaciones_B3'] + $impuestos['iva_importaciones_S3'] + $impuestos['iva_compras_B3'] + $impuestos['iva_compras_S3'];
-            $impuestos['totales4'] = $impuestos['iva_bc_L4'] + $impuestos['iva_bc_I4'] + $impuestos['iva_importaciones_B4'] + $impuestos['iva_importaciones_S4'] + $impuestos['iva_compras_B4'] + $impuestos['iva_compras_S4'];
-            $impuestos['totalesSum'] = $impuestos['totales1'] + $impuestos['totales2'] + $impuestos['totales3'] + $impuestos['totales4'];
+            $impuestos['totales1']['val'] = $impuestos['iva_bc_L1']['val'] + $impuestos['iva_bc_I1']['val'] + $impuestos['iva_importaciones_B1']['val'] + $impuestos['iva_importaciones_S1']['val'] + $impuestos['iva_compras_B1']['val'] + $impuestos['iva_compras_S1']['val'];
+            $impuestos['totales2']['val'] = $impuestos['iva_bc_L2']['val'] + $impuestos['iva_bc_I2']['val'] + $impuestos['iva_importaciones_B2']['val'] + $impuestos['iva_importaciones_S2']['val'] + $impuestos['iva_compras_B2']['val'] + $impuestos['iva_compras_S2']['val'];
+            $impuestos['totales3']['val'] = $impuestos['iva_bc_L3']['val'] + $impuestos['iva_bc_I3']['val'] + $impuestos['iva_importaciones_B3']['val'] + $impuestos['iva_importaciones_S3']['val'] + $impuestos['iva_compras_B3']['val'] + $impuestos['iva_compras_S3']['val'];
+            $impuestos['totales4']['val'] = $impuestos['iva_bc_L4']['val'] + $impuestos['iva_bc_I4']['val'] + $impuestos['iva_importaciones_B4']['val'] + $impuestos['iva_importaciones_S4']['val'] + $impuestos['iva_compras_B4']['val'] + $impuestos['iva_compras_S4']['val'];
+            $impuestos['totalesSum']['val'] = $impuestos['totales1']['val'] + $impuestos['totales2']['val'] + $impuestos['totales3']['val'] + $impuestos['totales4']['val'];
 
             //Totales con identificacion especifica
-            $impuestos['totales1e'] = $impuestos['iva_bc_L1e'] + $impuestos['iva_bc_I1e'] + $impuestos['iva_importaciones_B1e'] + $impuestos['iva_importaciones_S1e'] + $impuestos['iva_compras_B1e'] + $impuestos['iva_compras_S1e'];
-            $impuestos['totales2e'] = $impuestos['iva_bc_L2e'] + $impuestos['iva_bc_I2e'] + $impuestos['iva_importaciones_B2e'] + $impuestos['iva_importaciones_S2e'] + $impuestos['iva_compras_B2e'] + $impuestos['iva_compras_S2e'];
-            $impuestos['totales3e'] = $impuestos['iva_bc_L3e'] + $impuestos['iva_bc_I3e'] + $impuestos['iva_importaciones_B3e'] + $impuestos['iva_importaciones_S3e'] + $impuestos['iva_compras_B3e'] + $impuestos['iva_compras_S3e'];
-            $impuestos['totales4e'] = $impuestos['iva_bc_L4e'] + $impuestos['iva_bc_I4e'] + $impuestos['iva_importaciones_B4e'] + $impuestos['iva_importaciones_S4e'] + $impuestos['iva_compras_B4e'] + $impuestos['iva_compras_S4e'];
-            $impuestos['totalesSume'] = $impuestos['totales1e'] + $impuestos['totales2e'] + $impuestos['totales3e'] + $impuestos['totales4e'];
+            $impuestos['totales1e']['val'] = $impuestos['iva_bc_L1e']['val'] + $impuestos['iva_bc_I1e']['val'] + $impuestos['iva_importaciones_B1e']['val'] + $impuestos['iva_importaciones_S1e']['val'] + $impuestos['iva_compras_B1e']['val'] + $impuestos['iva_compras_S1e']['val'];
+            $impuestos['totales2e']['val'] = $impuestos['iva_bc_L2e']['val'] + $impuestos['iva_bc_I2e']['val'] + $impuestos['iva_importaciones_B2e']['val'] + $impuestos['iva_importaciones_S2e']['val'] + $impuestos['iva_compras_B2e']['val'] + $impuestos['iva_compras_S2e']['val'];
+            $impuestos['totales3e']['val'] = $impuestos['iva_bc_L3e']['val'] + $impuestos['iva_bc_I3e']['val'] + $impuestos['iva_importaciones_B3e']['val'] + $impuestos['iva_importaciones_S3e']['val'] + $impuestos['iva_compras_B3e']['val'] + $impuestos['iva_compras_S3e']['val'];
+            $impuestos['totales4e']['val'] = $impuestos['iva_bc_L4e']['val'] + $impuestos['iva_bc_I4e']['val'] + $impuestos['iva_importaciones_B4e']['val'] + $impuestos['iva_importaciones_S4e']['val'] + $impuestos['iva_compras_B4e']['val'] + $impuestos['iva_compras_S4e']['val'];
+            $impuestos['totalesSume']['val'] = $impuestos['totales1e']['val'] + $impuestos['totales2e']['val'] + $impuestos['totales3e']['val'] + $impuestos['totales4e']['val'];
 
-            $impuestos['ventas1'] = $book->cc_ventas_1_iva;
-            $impuestos['ventas2'] = $book->cc_ventas_2_iva;
-            $impuestos['ventas13'] = $book->cc_ventas_13_iva;
-            $impuestos['ventas4'] = $book->cc_ventas_4_iva;
-            $impuestos['ventasTotal'] = $impuestos['ventas1'] + $impuestos['ventas2'] + $impuestos['ventas13'] + $impuestos['ventas4'];
+            $impuestos['ventas1']['val'] = $book->cc_ventas_1_iva;
+            $impuestos['ventas2']['val'] = $book->cc_ventas_2_iva;
+            $impuestos['ventas13']['val'] = $book->cc_ventas_13_iva;
+            $impuestos['ventas4']['val'] = $book->cc_ventas_4_iva;
+            $impuestos['ventasTotal']['val'] = $impuestos['ventas1']['val'] + $impuestos['ventas2']['val'] + $impuestos['ventas13']['val'] + $impuestos['ventas4']['val'];
 
-            $impuestos['totalCreditosPeriodo'] = ($impuestos['totalesSum'] * $prorrataOperativa) + $impuestos['totalesSume'];
-            $impuestos['creditosAcreditablesPorTarifas'] = $impuestos['totalesSum'] * $prorrataOperativa;
+            $impuestos['totalCreditosPeriodo']['val'] = ($impuestos['totalesSum']['val'] * $prorrataOperativa) + $impuestos['totalesSume']['val'];
+            $impuestos['creditosAcreditablesPorTarifas']['val'] = $impuestos['totalesSum']['val'] * $prorrataOperativa;
 
             $dataDeclaracion['impuestos'] = $impuestos;
 

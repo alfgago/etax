@@ -64,16 +64,22 @@ class BillItem extends Model
       //equivalente a identificación plena, se usa por defecto si es 01 o una no existente
       $this->iva_type = $firstDigit."06".$lastDigit; 
       $this->porc_identificacion_plena = 13;
+      $this->product_type = 50;
+      if( $firstDigit == "B" ){
+        $this->product_type = 49;
+      }
       if( '02' == $condicionAceptacion ){ 
         //equivalente a plena con aceptación parcial, (incluido el escenario donde el IVA soportado es 100% gasto)
         $this->iva_type = $firstDigit."06".$lastDigit;  
-        $this->porc_identificacion_plena = 6;
+        $this->porc_identificacion_plena = 0;
       }elseif('03' == $condicionAceptacion) {
         //bienes de capital
         $this->iva_type = $firstDigit."07".$lastDigit;
+        $this->product_type = 51;
       }elseif('04' == $condicionAceptacion) {
         //se utiliza para gastos corrientes no relacionados con la actividad
-        $this->iva_type = "097";
+        $this->iva_type = $firstDigit."097";
+        $this->product_type = 57;
       }elseif('05' == $condicionAceptacion) {
         //iria con código S003 o B003 para aplicar la prorrata, y así correspondientemente según la tarifa de IVA soportado.
         $this->iva_type = $firstDigit."00".$lastDigit;
@@ -86,9 +92,20 @@ class BillItem extends Model
         $this->iva_type = $firstDigit."080";
         $this->product_type = 62;
       }
+      $this->iva_type = trim($this->iva_type);
       
       $this->is_code_validated = true;
-      $this->fixCategoria();
+      $this->fixCategoria(true);
+      
+      //Condicion especial para CORBANA. Normalmente esto no se puede hacer
+      if('04' == $condicionAceptacion){
+        if( $firstDigit == "B" ){
+          $this->product_type = 49;
+        }else{
+          $this->product_type = 50;
+        }
+      }
+      
       $this->save();
     }
     
@@ -128,9 +145,9 @@ class BillItem extends Model
     }
   
     
-    public function fixCategoria($skipFixType = false) {
+    public function fixCategoria($skipFixType = true) {
       try{
-        if($skipFixType){
+        if(!$skipFixType){
           $this->fixIvaType();
         }
         
@@ -149,7 +166,10 @@ class BillItem extends Model
             }
           }
         }
+        
+        Log::debug('Antes: ' . $this->product_type);
         if( !$categoriaCorrecta ){
+          Log::debug('Asignando nueva categoria. ' . $alt);
           $this->product_type = $alt;
           $this->save();
         }

@@ -237,11 +237,6 @@
                     <input type="text" disabled class="form-control" name="buy_order" id="orden_compra" value="{{ $invoice->buy_order }}" >
                   </div>
 
-                  <div class="form-group col-md-12">
-                    <label for="description">Notas</label>
-                    <input type="text" disabled class="form-control" name="description" id="notas" placeholder="" value="{{ $invoice->description }}">
-                  </div>
-
               </div>
             </div>
           </div>
@@ -308,11 +303,44 @@
                         </select>
                       </td>
                       <td>{{ number_format($item->subtotal, 2) }}</td>
-                      <td>{{ number_format($item->iva_amount, 2) }}</td>
-                      <td>{{ number_format($item->total, 2) }}</td>
+                      <td>{{ number_format($item->iva_amount, 2) }} <br><small style="font-size: 9px !important;line-height: 1.2 !important;display: inline-block;">{{ $item->exoneration_amount ? "(-$item->exoneration_amount exonerado)" : '' }}</small></td>
+                      <td>{{ number_format(($item->subtotal+$item->iva_amount-$item->exoneration_amount), 2) }}</td>
                       <td class='acciones'>
                         <span title='Editar linea' class='btn-editar-item text-success mr-2' onclick="abrirPopup('linea-popup'); cargarFormItem({{ $loop->index }});"><i class='nav-icon i-Pen-2'></i> </span> 
                         <span title='Eliminar linea' class='btn-eliminar-item text-danger mr-2' onclick='eliminarItem({{ $loop->index }});' ><i class='nav-icon i-Close-Window'></i> </span> 
+                      </td>
+                      <td class="hidden">
+                        <input type="hidden" class='numero' name="items[{{ $loop->index }}][item_number]" itemname="item_number" value="{{ $loop->index+1 }}">
+                        <input type="hidden" class="item_id" name="items[{{ $loop->index }}][id]" itemname="id" value="{{ $item->id }}"> 
+                        <input type="hidden" class='codigo' name="items[{{ $loop->index }}][code]" itemname="code" value="{{ $item->code }}">
+                        <input type="hidden" class='nombre' name="items[{{ $loop->index }}][name]" itemname="name" value="{{ $item->name }}">
+                        <input type="hidden" class='tipo_producto' name="items[{{ $loop->index }}][product_type]" itemname="product_type" value="{{ $item->product_type }}">
+                        <input type="hidden" class='cantidad' name="items[{{ $loop->index }}][item_count]" itemname="item_count" value="{{ $item->item_count }}">
+                        <input type="hidden" class='unidad_medicion' name="items[{{ $loop->index }}][measure_unit]" itemname="measure_unit" value="{{ $item->measure_unit }}">
+                        <input type="hidden" class='precio_unitario' name="items[{{ $loop->index }}][unit_price]" itemname="unit_price" value="{{ $item->unit_price }}">
+                        <input type="hidden" class='tipo_iva' name="items[{{ $loop->index }}][iva_type]" itemname="iva_type" value="{{ $item->iva_type }}">
+                        <input type="hidden" class='tipo_producto' name="items[{{ $loop->index }}][product_type]" itemname="product_type" value="{{ $item->product_type }}">
+                        <input type='hidden' class='porc_identificacion_plena' itemname="porc_identificacion_plena" value='0'>
+                        <input type='hidden' class='discount_type' name='items[{{ $loop->index }}][discount_type]' itemname="discount_type" value='{{ $item->discount_type }}'>
+                        <input type='hidden' class='discount' name='items[{{ $loop->index }}][discount]' itemname="discount" value='{{ $item->discount }}'>
+                        <input class="subtotal" type="hidden" name="items[{{ $loop->index }}][subtotal]" itemname="subtotal" value="{{ $item->subtotal }}">
+                        <input class="porc_iva" type="hidden" name="items[{{ $loop->index }}][iva_percentage]" itemname="iva_percentage" value="{{ $item->iva_percentage }}">
+                        <input class="monto_iva" type="hidden" name="items[{{ $loop->index }}][iva_amount]" itemname="iva_amount" value="{{ $item->iva_amount }}">
+                        <input class="total" type="hidden" name="items[{{ $loop->index }}][total]" itemname="total" value="{{ $item->total }}">
+                        <input class="is_identificacion_especifica" type="hidden" name="items[{{ $loop->index }}][is_identificacion_especifica]" itemname="is_identificacion_especifica" value="{{ $item->is_identificacion_especifica }}">
+
+
+                        <input class="typeDocument" type="hidden" name="items[{{ $loop->index }}][typeDocument]" itemname="typeDocument" value="{{ $item->exoneration_document_type }}">
+                        <input class="nombreInstitucion" type="hidden" name="items[{{ $loop->index }}][nombreInstitucion]" itemname="nombreInstitucion" value="{{ $item->exoneration_document_number }}">
+                        <input class="nombreInstitucion" type="hidden" name="items[{{ $loop->index }}][nombreInstitucion]" itemname="nombreInstitucion" value="{{ $item->exoneration_company_name }}">
+                        <input class="porcentajeExoneracion" type="hidden" name="items[{{ $loop->index }}][porcentajeExoneracion]" itemname="porcentajeExoneracion" value="{{ $item->exoneration_porcent }}">
+                        <input class="montoExoneracion" type="hidden" name="items[{{ $loop->index }}][montoExoneracion]" itemname="montoExoneracion" value="{{ $item->exoneration_amount }}">
+                        <input class="impuestoNeto" type="hidden" name="items[{{ $loop->index }}][impuestoNeto]" itemname="impuestoNeto" value="{{ $item->impuesto_neto }}">
+                        <input class="exoneration_total_amount montoExoneracion" type="hidden" name="items[{{ $loop->index }}][montoExoneracion]" itemname="exoneration_total_amount" value="{{ $item->exoneration_total_amount }}">
+                        <input class="exoneration_date" type="hidden" name="items[{{ $loop->index }}][exoneration_date]" itemname="exoneration_date" value="{{date('d/m/Y', strtotime($item->exoneration_date))}}">
+                        <input class="tariff_heading" type="hidden" name="items[{{ $loop->index }}][tariff_heading]" itemname="tariff_heading" value="{{ $item->tariff_heading }}">
+                        <input class="exoneration_total_gravado" type="hidden" name="items[{{ $loop->index }}][exoneration_total_gravado]" itemname="exoneration_total_gravado" value="{{ $item->exoneration_total_gravado }}">
+
                       </td>
                   </tr>
                   @endforeach
@@ -368,8 +396,16 @@
                 </tbody>
               </table>
             </div>
+            
           </div>
-        
+          <div class="form-row" >  
+            <div class="form-group col-md-12">
+              <label for="description">Notas</label>
+              <textarea type="text" disabled class="form-control" name="description" id="notas" placeholder="" style="height: 100px; " >
+                {{ preg_replace('/\s+/', ' ', $invoice->description) }}  
+              </textarea>
+            </div>
+          </div>
           <div class="btn-holder hidden">
             <button id="btn-submit-form" type="submit" class="btn btn-primary">Guardar factura</button>
           </div>
@@ -405,7 +441,7 @@
 
 
 $(document).ready(function(){
-  
+
   $(".tipo_iva").change(function(){
       var codigoIVA = $(this).find(':selected').val();
       var parent = $(this).parents('tr');
@@ -424,6 +460,7 @@ $(document).ready(function(){
   });
   
   toggleRetencion();
+  calcularTotalFactura();
   
   $('.tipo_iva').change();
   $(".tipo_producto").each(function(){
@@ -440,6 +477,61 @@ function toggleRetencion() {
     $("#field-retencion").hide();
   }
 }
+
+window.calcularTotalFactura = function() {
+    var subtotal = 0;
+    var monto_iva = 0;
+    var total = 0;
+    var iva_devuelto = 0;
+    var iva_exonerado = 0;
+    var otros_cargos = 0;
+
+    $('.item-tabla').each(function(){
+      var s = parseFloat($(this).find('.subtotal').val());
+      var m = parseFloat($(this).find('.monto_iva').val());
+      var t = parseFloat($(this).find('.total').val());
+      var tp = parseFloat($(this).find('.tipo_producto').val());
+      var ex = parseFloat($(this).find('.montoExoneracion').val());
+      if(!ex){ ex = 0; }
+      if ($('#medio_pago').val() === '02' && tp === 12) {
+          iva_devuelto += m;
+      }
+      subtotal += s;
+      monto_iva += m;
+      total += t;
+      iva_exonerado += ex;
+    });
+
+    $('.otros-tabla').each(function(){
+      var ot = parseFloat($(this).find('.otros-amount').val());
+
+      if(!ot){ ot = 0; }
+      otros_cargos += ot;
+    });
+
+    $('#subtotal').val(subtotal);
+    $('#monto_iva').val(monto_iva);
+    $('#total').val(total - iva_devuelto - iva_exonerado + otros_cargos);
+
+    $('#total_iva_devuelto').val(iva_devuelto);
+    $('#total_iva_exonerado').val(iva_exonerado);
+    $('#total_otros_cargos').val(otros_cargos);
+
+    $('#total_iva_devuelto-cont').hide();
+    if(iva_devuelto > 0){
+      $('#total_iva_devuelto-cont').show();
+    }
+
+    $('#total_iva_exonerado-cont').hide();
+    if(iva_exonerado > 0){
+      $('#total_iva_exonerado-cont').show();
+    }
+
+    $('#total_otros_cargos-cont').hide();
+    if(otros_cargos > 0){
+      $('#total_otros_cargos-cont').show();
+    }
+  }
 </script>
 
 <style>
