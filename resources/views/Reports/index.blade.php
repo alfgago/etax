@@ -43,13 +43,7 @@
           <option value="/exportar-libro-compras" type="download" hideClass=".opt-acumulado" >Libro de compras</option>
           <option value="/exportar-libro-ventas" type="download" hideClass=".opt-acumulado" >Libro de ventas</option>
           <option value="/reportes/resumen-ejecutivo" hideClass=".opt-acumulado" type="iframe" >Resumen ejecutivo</option>
-          <option style="" value="/reportes/borrador-iva" hideClass=".opt-acumulado" type="iframe">Borrador de declaración de IVA</option>
-          <option type="post">Reporte de proveedores (Muy pronto)</option>
-          <option type="post">Reporte de clientes (Muy pronto)</option>
-          <!--@if( getCurrentSubscription()->status == 4 )
-            <option style="" value="" hideClass=".opt-acumulado" type="iframe">Declaración de IVA (No disponible en periodo gratis)</option>
-          @else-->
-          <!--@endif-->
+          <option value="/reportes/borrador-iva" dlval="/reportes/descargar-borrador" hideClass=".opt-acumulado" type="iframe">Borrador de declaración de IVA</option>
         </select>
       </div>
       
@@ -81,6 +75,7 @@
       </div>
       <div class="col-md-12">
         <button onclick="verReporte();" class="btn btn-primary form-btn">Ver reporte</button>
+        <button id="btn-descargar-reporte" onclick="descargarReporte();" class="btn btn-primary form-btn hidden">Descargar reporte</button>
       </div>
 
       <div id="reporte-container" class="col-md-12 mb-4 reporte" style="padding: 3rem 15px;">
@@ -132,6 +127,12 @@
     $(hideClass).hide();
     $("#input-mes").val(dayNumber);
     
+    if( $("#reportes-select :selected").attr('dlval') ){
+      $('#btn-descargar-reporte').show();
+    }else{
+      $('#btn-descargar-reporte').hide();
+    }
+    
   }
 
  function exportarTablas(){
@@ -154,8 +155,17 @@
       //window.location.href = uri + base64(format(template, ctx));
   }
   
-  function verReporte() {
+  function verReporte(reporteView) {
     var reporteView = $("#reportes-select").val();
+    doReporte(reporteView);
+  }
+  
+  function descargarReporte(reporteView) {
+    var reporteView = $("#reportes-select :selected").attr('dlval')
+    doReporte(reporteView);
+  }
+  
+  function doReporte(reporteView){
     var formType = $("#reportes-select :selected").attr("type");
     
     if(reporteView){

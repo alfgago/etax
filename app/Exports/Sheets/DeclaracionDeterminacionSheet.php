@@ -57,30 +57,32 @@ class DeclaracionDeterminacionSheet implements WithHeadings, FromArray, WithEven
         $valueMap = [];
         
         foreach($data as $monthlyData){
-            $values = [];
-            $dataDeterminacion = $monthlyData['determinacion'];
-            $nombreMes = $monthlyData['nombreMes'];
-            $values[] = $nombreMes;
-            $values[] = $dataDeterminacion['impuestoOperacionesGravadas'] != 0 ? $dataDeterminacion['impuestoOperacionesGravadas'] : '0';
-            $values[] = $dataDeterminacion['totalCreditosPeriodo'] != 0 ? $dataDeterminacion['totalCreditosPeriodo'] : '0';
-            $values[] = $dataDeterminacion['devolucionIva'] != 0 ? $dataDeterminacion['devolucionIva'] : '0';
-            $values[] = $dataDeterminacion['saldoFavorPeriodo'] != 0 ? $dataDeterminacion['saldoFavorPeriodo'] : '0';
-            $values[] = $dataDeterminacion['saldoDeudorPeriodo'] != 0 ? $dataDeterminacion['saldoDeudorPeriodo'] : '0';
-            $values[] = $dataDeterminacion['saldoFavorProrrataReal'] != 0 ? $dataDeterminacion['saldoFavorProrrataReal'] : '0';
-            $values[] = $dataDeterminacion['saldoDeudorProrrataReal'] != 0 ? $dataDeterminacion['saldoDeudorProrrataReal'] : '0';
-            $values[] = $dataDeterminacion['saldoFavorFinalPeriodo'] != 0 ? $dataDeterminacion['saldoFavorFinalPeriodo'] : '0';
-            $values[] = $dataDeterminacion['impuestoFinalPeriodo'] != 0 ? $dataDeterminacion['impuestoFinalPeriodo'] : '0';
-            $values[] = $dataDeterminacion['retencionImpuestos'] != 0 ? $dataDeterminacion['retencionImpuestos'] : '0';
-            $values[] = $dataDeterminacion['saldoFavorAnterior'] != 0 ? $dataDeterminacion['saldoFavorAnterior'] : '0';
-            
-            $valueMap[] = $values;
+            try{
+                $values = [];
+                $dataDeterminacion = $monthlyData['determinacion'];
+                $nombreMes = $monthlyData['nombreMes'];
+                $values[] = $nombreMes;
+                $values[] = $dataDeterminacion['impuestoOperacionesGravadas'] != 0 ? $dataDeterminacion['impuestoOperacionesGravadas'] : '0';
+                $values[] = $dataDeterminacion['totalCreditosPeriodo'] != 0 ? $dataDeterminacion['totalCreditosPeriodo'] : '0';
+                $values[] = $dataDeterminacion['devolucionIva'] != 0 ? $dataDeterminacion['devolucionIva'] : '0';
+                $values[] = $dataDeterminacion['saldoFavorPeriodo'] != 0 ? $dataDeterminacion['saldoFavorPeriodo'] : '0';
+                $values[] = $dataDeterminacion['saldoDeudorPeriodo'] != 0 ? $dataDeterminacion['saldoDeudorPeriodo'] : '0';
+                $values[] = $dataDeterminacion['saldoFavorProrrataReal'] != 0 ? $dataDeterminacion['saldoFavorProrrataReal'] : '0';
+                $values[] = $dataDeterminacion['saldoDeudorProrrataReal'] != 0 ? $dataDeterminacion['saldoDeudorProrrataReal'] : '0';
+                $values[] = $dataDeterminacion['saldoFavorFinalPeriodo'] != 0 ? $dataDeterminacion['saldoFavorFinalPeriodo'] : '0';
+                $values[] = $dataDeterminacion['impuestoFinalPeriodo'] != 0 ? $dataDeterminacion['impuestoFinalPeriodo'] : '0';
+                $values[] = $dataDeterminacion['retencionImpuestos'] != 0 ? $dataDeterminacion['retencionImpuestos'] : '0';
+                $values[] = $dataDeterminacion['saldoFavorAnterior'] != 0 ? $dataDeterminacion['saldoFavorAnterior'] : '0';
+                
+                $valueMap[] = $values;
+            }catch(\Exception $e){}
         }
         return $valueMap;
     }					
 
      public function headings(): array 
      {
-        $data = $this->data[9];
+        $data = $this->data[0];
         $year = $this->year;
         $empresa = $data['empresa'];
         

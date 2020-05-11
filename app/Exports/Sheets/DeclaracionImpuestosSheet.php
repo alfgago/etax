@@ -59,21 +59,23 @@ class DeclaracionImpuestosSheet implements WithHeadings, FromArray, WithEvents, 
         $valueMap = [];
         
         foreach($data as $monthlyData){
-            $values = [];
-            $dataImpuestos = $monthlyData['impuestos'];
-            $nombreMes = $monthlyData['nombreMes'];
-            $values[] = $nombreMes;
-            foreach($dataImpuestos as $imp){
-                $values[] = $imp['val'] != 0  ? $imp['val'] : '0';
-            }
-            $valueMap[] = $values;
+            try{
+                $values = [];
+                $dataImpuestos = $monthlyData['impuestos'];
+                $nombreMes = $monthlyData['nombreMes'];
+                $values[] = $nombreMes;
+                foreach($dataImpuestos as $imp){
+                    $values[] = $imp['val'] != 0  ? $imp['val'] : '0';
+                }
+                $valueMap[] = $values;
+            }catch(\Exception $e){}
         }
         return $valueMap;
     }					
 
      public function headings(): array 
      {
-        $data = $this->data[9];
+        $data = $this->data[0];
         $year = $this->year;
         $empresa = $data['empresa'];
         $headings = [];
