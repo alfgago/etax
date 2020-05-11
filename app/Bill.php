@@ -1108,12 +1108,12 @@ class Bill extends Model
           $calc = new CalculatedTax();
           $calc->year = $this->year;
           $calc->month = $this->month;
-          $calc->resetVars();
+          $calc->resetVars($company);
           $lastBalance = 0;
           $query = BillItem::with('bill')->where('bill_id', $this->id);
           //$calc->setDatosEmitidos( $this->month, $this->year, $company->id );
           $calc->setDatosSoportados( $this->month, $this->year, $company->id, $query, true );
-          $calc->setCalculosPorFactura( $prorrataOperativa, $lastBalance );
+          $calc->setCalculosPorFactura( $prorrataOperativa, $lastBalance, $company );
 
           $this->accept_iva_acreditable = round($calc->iva_deducible_operativo, 5);
           $this->accept_iva_gasto = round($calc->iva_no_deducible, 5);

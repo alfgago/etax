@@ -58,23 +58,26 @@ class QuickbooksProduct extends Model
         $qbProducts = QuickbooksProduct::getMonthlyProducts($dataService, $year, $month, $company);
         $qbProducts = $qbProducts ?? [];
         $products = [];
+        
         foreach($qbProducts as $product){
-            $subtotal = $product->UnitPrice;
-            $fullname = $product->Name;
-            $accountRef = $product->IncomeAccountRef;
-            QuickbooksProduct::updateOrCreate(
-                [
-                    "qb_id" => $product->Id
-                  ],
-                  [
-                    "name" => $fullname ?? null,
-                    "subtotal" => $subtotal,
-                    "qb_data" => $product,
-                    "account_ref" => $accountRef,
-                    "generated_at" => 'quickbooks',
-                    "company_id" => $company->id
-                  ]
-            );
+            if($product->Type != 'Category'){
+                $subtotal = $product->UnitPrice;
+                $fullname = $product->Name;
+                $accountRef = $product->IncomeAccountRef;
+                QuickbooksProduct::updateOrCreate(
+                    [
+                        "qb_id" => $product->Id,
+                        "company_id" => $company->id
+                      ],
+                      [
+                        "name" => $fullname ?? null,
+                        "subtotal" => $subtotal,
+                        "qb_data" => $product,
+                        "account_ref" => $accountRef,
+                        "generated_at" => 'quickbooks'
+                      ]
+                );
+            }
         }
     }
     
@@ -148,7 +151,8 @@ class QuickbooksProduct extends Model
         if( isset($item) ){
             $qbProd = QuickbooksProduct::updateOrCreate(
                 [
-                    "qb_id" => $item->Id
+                    "qb_id" => $item->Id,
+                    "company_id" => $product->company_id
                   ],
                   [
                     "name" => $product->name ?? null,
@@ -156,8 +160,7 @@ class QuickbooksProduct extends Model
                     "qb_data" => $item,
                     "account_ref" => $accountRefArray['value'],
                     "generated_at" => 'quickbooks',
-                    "product_id" => $product->id,
-                    "company_id" => $product->company_id
+                    "product_id" => $product->id
                   ]
             );
             return $qbProd;
@@ -203,15 +206,15 @@ class QuickbooksProduct extends Model
             $accountRef = $product->IncomeAccountRef;
             $qbProduct = QuickbooksProduct::updateOrCreate(
                 [
-                    "qb_id" => $product->Id
+                    "qb_id" => $product->Id,
+                    "company_id" => $company->id
                   ],
                   [
                     "name" => $fullname ?? null,
                     "subtotal" => $subtotal,
                     "qb_data" => $product,
                     "account_ref" => $accountRef,
-                    "generated_at" => 'quickbooks',
-                    "company_id" => $company->id
+                    "generated_at" => 'quickbooks'
                   ]
             );
             $qbProduct->save();

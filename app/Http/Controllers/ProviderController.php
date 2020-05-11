@@ -52,13 +52,8 @@ class ProviderController extends Controller
         return datatables()->eloquent( $query )
             ->orderColumn('reference_number', '-reference_number $1')
             ->addColumn('actions', function($proveedor) {
-                return view('datatables.actions', [
-                    'routeName' => 'proveedores',
-                    'deleteTitle' => 'Eliminar proveedor',
-                    'hideDelete' => true,
-                    'editTitle' => 'Editar proveedor',
-                    'deleteIcon' => 'fa fa-trash-o',
-                    'id' => $proveedor->id
+                return view('Provider.actions', [
+                    'data' => $proveedor
                 ])->render();
             })
             ->editColumn('es_exento', function(Provider $proveedor) {
@@ -228,7 +223,7 @@ class ProviderController extends Controller
     {
         $provider = Provider::findOrFail($id);
         $this->authorize('update', $provider);
-        //$provider->delete();
+        $provider->delete();
         
         return redirect('/proveedores');
     }

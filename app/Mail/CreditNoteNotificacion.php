@@ -6,6 +6,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Log;
+use App\Utils\InvoiceUtils;
 
 class CreditNoteNotificacion extends Mailable
 {
@@ -28,6 +30,7 @@ class CreditNoteNotificacion extends Mailable
      */
     public function build()
     {
+        $invoiceUtils = new InvoiceUtils();
         $isPrueba = "";
         if ( app()->isLocal() ) {
             $isPrueba = "PRUEBAS - ";

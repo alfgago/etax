@@ -108,7 +108,7 @@
         order: [[ 1, 'asc' ]],
         columns: [
           { data: 'link', name: 'link' },
-          { data: 'nombre', name: 'nombre' },
+          { data: 'nombre', name: 'name' },
           { data: 'subtotal', name: 'subtotal' },
           { data: 'account', name: 'account' },
           { data: 'actions', name: 'actions', orderable: false, searchable: false }

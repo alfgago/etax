@@ -287,15 +287,26 @@ class InvoiceUtils
                         ]));
                 }
             }else{
-                Mail::to(replaceAccents($invoice->client_email))->send(
-                    new \App\Mail\CreditNoteNotificacion([
-                        'xml' => $xmlPath,
-                        'xml_hacienda' => $xmlMH,
-                        'data_invoice' => $invoice, 
-                        'data_company' => $company,
-                        'sendPdf' => $sendPdf
-                    ])
-                );
+                if (!empty($cc)) {
+                    Mail::to($cc)->send(
+                        new \App\Mail\CreditNoteNotificacion([	
+                            'xml' => $xmlPath,
+                            'xml_hacienda' => $xmlMH,
+                            'data_invoice' => $invoice, 
+                            'data_company' => $company,
+                            'sendPdf' => $sendPdf
+                        ]));
+                } else {
+                    Mail::to(replaceAccents($invoice->client_email))->send(
+                        new \App\Mail\CreditNoteNotificacion([
+                            'xml' => $xmlPath,
+                            'xml_hacienda' => $xmlMH,
+                            'data_invoice' => $invoice, 
+                            'data_company' => $company,
+                            'sendPdf' => $sendPdf
+                        ])
+                    );
+                }
             }
             Log::info('Se enviaron correos de notificación de factura aprobada: ' .$invoice->id );
         }catch( \Exception $e ){

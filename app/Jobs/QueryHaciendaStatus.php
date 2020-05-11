@@ -49,6 +49,8 @@ class QueryHaciendaStatus implements ShouldQueue
                     $result = $apiHacienda->queryHacienda($invoice, $tokenApi, $company);
                 }
             }
+            $invoice->query_attempts = $invoice->query_attempts+1;
+            $invoice->save();
         } catch (\Exception $e) {
             Log::error("Error en job query hacienda: " .$e);
         }

@@ -285,12 +285,16 @@ class CorbanaController extends Controller
             $otherReference = $factura['NO_DOCU_REF'] ?? null;
             
             $sistema = $factura['SISTEMA'] ?? null;
+            $tipoFacSec = $factura['TIPO_FAC'] ?? null;
             $dua = $factura['NO_DUA'] ?? null;
             $partidaArancelaria = $factura['PARTIDA_ARANCELARIA'] ?? $dua;
-            if( $sistema == 'EXP' ){
+            if( $sistema == 'EXP' || $tipoFacSec == 'E' ){
                 $tipoDocumento = '09';
                 $tipoPersona = "E";
                 $partidaArancelaria = mb_substr( $partidaArancelaria, -12, null, 'UTF-8') ;
+                if( !isset($partidaArancelaria) ){
+                    $partidaArancelaria = '000000000000';
+                }
             }
             
             $procedencia = $factura["PROCEDENCIA"] ?? 'N';
@@ -387,6 +391,10 @@ class CorbanaController extends Controller
             $fechaVencimiento = Carbon::now()->addMonths(1);
             
             $creditTime = $factura['PLAZO'] ?? null;
+            $plazoInt = intval($creditTime);
+            if( $plazoInt ){
+                $fechaVencimiento = Carbon::now()->addDays($plazoInt);
+            }
             
             $porcentajeIVA = $factura['PORCIV'] ?? 0;
             $porcentajeIVA = intval($porcentajeIVA);
@@ -422,6 +430,7 @@ class CorbanaController extends Controller
                 $porcentajeExoneracion = 0;
             }
             
+            $categoriaHacienda = null;
             $prefijoCodigo= "B";
             if($TIPO_SERV == "S"){
                 $prefijoCodigo = "S";
@@ -432,22 +441,25 @@ class CorbanaController extends Controller
             }
             if($porcentajeIVA == 2){
                 $codigoEtax = $prefijoCodigo.'102';
+                $categoriaHacienda = 9;
             }
             if($porcentajeIVA == 4){
                 $codigoEtax = $prefijoCodigo.'104';
             }
             if( !isset($porcentajeIVA) || $porcentajeIVA == 0 || $porcentajeIVA == '0' ){
-                $codigoEtax = $prefijoCodigo.'170';
+                $codigoEtax = $prefijoCodigo.'260';
             }
             if( isset($documentoExoneracion) ){
                 $porcentajeIVA = !isset($porcentajeIVA) ? $porcentajeIVA : 13;
                 $porcentajeExoneracion = 100;
                 $codigoEtax = $prefijoCodigo.'183';
+                $categoriaHacienda = 39;
             }
             $impuestoNeto = 0;
             if($tipoDocumento == '09'){
                 $codigoEtax = "B150";
             }
+            
             Log::debug("Codigo IVA puesto: $codigoEtax");
             
             //Datos de lineas
@@ -495,10 +507,18 @@ class CorbanaController extends Controller
                         Log::error('CORBANA: Error al poner el porcentajeExoneracion. ' . $e->getMessage());
                     }
                     
+                    //Busca si la palabra desechos existe en el detalle, en cuyo caso asigna el codigo 200  
+                    if( (strpos( strtolower($detalleProducto),"desecho") !== false)  ){
+                        $codigoEtax = $prefijoCodigo.'200';
+                        $categoriaHacienda = 24;
+                        if($prefijoCodigo == 'S'){
+                            $categoriaHacienda = 25;
+                        }
+                    }
+                    
                     $subtotalLinea = $cantidad*$precioUnitario - $montoDescuento;
                     $montoIva = $subtotalLinea * ($porcentajeIVA/100);
                     $totalLinea = $subtotalLinea+$montoIva;
-                    $categoriaHacienda = null;
                     $montoExoneracion = isset($documentoExoneracion) ? $montoIva : 0;
                     $totalMontoExonerado = $cantidad*$precioUnitario;
                     $totalMontoLinea = $subtotalLinea + $montoIva - $montoExoneracion;
@@ -914,6 +934,8 @@ class CorbanaController extends Controller
                 if($acceptStatus == 3){
                     $acceptStatus = 2; //El 2 es la de rechazo. Parcial no se usa en Corbana
                 }
+                $actividad = $request->codigo_actividad;
+                $bill->activity_company_verification = $actividad;
                 $condicionAceptacion = $request->condicion_aceptacion;
                 if( isset($bill) ){
                     $company = $bill->company;
@@ -924,14 +946,12 @@ class CorbanaController extends Controller
                             'mensaje' => 'Error: ID de factura no le pertenece a Corbana'
                         ], 200);
                     }
-                    foreach($bill->items as $item){
-                        $item->setIvaTypeFromCondition($condicionAceptacion);
-                    }
                     $bill->is_authorized = true;
                     $bill->accept_status = $acceptStatus;
                     $bill->is_code_validated = true;
                     $bill->hacienda_status = '01';
                     foreach($bill->items as $item){
+                        $item->setIvaTypeFromCondition($condicionAceptacion);
                         $item->calcularAcreditablePorLinea();
                     }
                     $bill->calculateAcceptFields($company);

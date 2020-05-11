@@ -150,26 +150,6 @@ class ProcessCreditNote implements ShouldQueue
                                 $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );*/
 
                                 if ($save && $saveMH) {
-                                    /*if (isset($invoice->client_id)) {
-                                        if (!empty($invoice->send_emails)) {
-                                            Mail::to($invoice->client_email)->cc($invoice->send_emails)->send(new CreditNoteNotificacion([
-                                                'xml' => $path,
-                                                'xml_hacienda' => $pathMH,
-                                                'data_invoice' => $invoice, 'data_company' => $company
-                                            ]));
-                                        } else {
-                                            Mail::to($invoice->client_email)->send(new CreditNoteNotificacion([
-                                                'xml' => $path,
-                                                'xml_hacienda' => $pathMH,
-                                                'data_invoice' => $invoice, 'data_company' => $company
-                                            ]));
-                                        }
-                                    } else {
-                                        Mail::to($company->email)->send(new CreditNoteNotificacion([
-                                            'xml' => $path,
-                                            'data_invoice' => $invoice, 'data_company' => $company
-                                        ]));
-                                    }*/
                                     $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, true);
                                     Log::info('Factura enviada y XML guardado.');
                                 }
