@@ -59,33 +59,36 @@ class DeclaracionPorActividadSheet implements WithHeadings, FromArray, WithEvent
         $data = $this->data;
         $year = $this->year;
         $valueMap = [];
+        dd($data);
         foreach($data as $monthlyData){
-            $dataActividades = $monthlyData['dataActividades'];
-            $nombreMes = $monthlyData['nombreMes'];
-            foreach($dataActividades as $dataActividad){
-                $values = [];
-                $values[] = $nombreMes;
-                $values[] = $dataActividad['codigo'] . " " . $dataActividad['titulo'];
-                $dataActividad = array_values($dataActividad);
-                
-                for($i = 2; $i <= 16; $i++){
-                    $cat = $dataActividad[$i];
-                    $values[] = $cat['totales'] != 0  ? $cat['totales'] : '0';;
-                    $dataCats = $cat['cats'];
-                    foreach($dataCats as $dataCat){
-                        $sum = $dataCat['monto0'] + $dataCat['monto1'] + $dataCat['monto2'] + $dataCat['monto3'] + $dataCat['monto4'];
-                        $values[] = $sum != 0  ? $sum : '0';
+            try{
+                $dataActividades = $monthlyData['dataActividades'];
+                $nombreMes = $monthlyData['nombreMes'];
+                foreach($dataActividades as $dataActividad){
+                    $values = [];
+                    $values[] = $nombreMes;
+                    $values[] = $dataActividad['codigo'] . " " . $dataActividad['titulo'];
+                    $dataActividad = array_values($dataActividad);
+                    
+                    for($i = 2; $i <= 16; $i++){
+                        $cat = $dataActividad[$i];
+                        $values[] = $cat['totales'] != 0  ? $cat['totales'] : '0';;
+                        $dataCats = $cat['cats'];
+                        foreach($dataCats as $dataCat){
+                            $sum = $dataCat['monto0'] + $dataCat['monto1'] + $dataCat['monto2'] + $dataCat['monto3'] + $dataCat['monto4'];
+                            $values[] = $sum != 0  ? $sum : '0';
+                        }
                     }
+                    $valueMap[] = $values;
                 }
-                $valueMap[] = $values;
-            }
+            }catch(\Exception $e){}
         }
         return $valueMap;
     }					
 
      public function headings(): array 
      {
-        $data = $this->data[9];
+        $data = $this->data[0];
         $year = $this->year;
         $empresa = $data['empresa'];
         $headings = [];
