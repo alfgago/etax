@@ -63,14 +63,14 @@ class QuickbooksCustomer extends Model
             $fullname = (($customer->DisplayName ?? $customer->FullyQualifiedName) ?? $customer->CompanyName) ?? null;
             QuickbooksCustomer::updateOrCreate(
                 [
-                    "qb_id" => $customer->Id
+                    "qb_id" => $customer->Id,
+                    "company_id" => $company->id
                   ],
                   [
                     "full_name" => $fullname ?? null,
                     "email" => $email,
                     "qb_data" => $customer,
                     "generated_at" => 'quickbooks',
-                    "company_id" => $company->id
                   ]
             );
         }
@@ -149,11 +149,11 @@ class QuickbooksCustomer extends Model
         $this->save();
     }
     
-    public static function saveEtaxaqb($dataService, $client){   
+    public static function saveEtaxaqb($dataService, $client, $update = null){   
         $fullname = ($client->first_name ?? '') . ' ' . ($client->last_name ?? '') . ' ' . ($client->last_name2 ?? '');
         $fullname = trim($fullname);
         
-        $theResourceObj = qbCustomer::create([
+        $resourceObjectArray = [
             "BillAddr" => [
                 "Line1" => $client->address ?? "",
                 "City" => $client->city ?? "",
@@ -173,9 +173,21 @@ class QuickbooksCustomer extends Model
             "PrimaryEmailAddr" => [
                 "Address" => $client->email
             ]
-        ]);
+        ];
         
-        $customer = $dataService->Add($theResourceObj);
+        if($update){
+            $existingCustomer = $dataService->FindbyId('customer', $update);
+            $theResourceObj = qbCustomer::update( $existingCustomer,
+                $resourceObjectArray
+            );
+            $customer = $dataService->Update($theResourceObj);
+        }else{
+            $theResourceObj = qbCustomer::create(
+                $resourceObjectArray
+            );
+            $customer = $dataService->Add($theResourceObj);
+        }
+        
         $error = $dataService->getLastError();
         if ($error) {
             Log::error("The Status code is: " . $error->getHttpStatusCode() . "\n".
@@ -187,14 +199,14 @@ class QuickbooksCustomer extends Model
         if( isset($customer) ){
             $qbCustomer = QuickbooksCustomer::updateOrCreate(
                 [
-                    "qb_id" => $customer->Id
+                    "qb_id" => $customer->Id,
+                    "company_id" => $client->company_id
                   ],
                   [
                     "full_name" => $customer->FullyQualifiedName,
                     "email" => $client->email,
                     "qb_data" => $customer,
                     "generated_at" => 'etax',
-                    "company_id" => $client->company_id,
                     "client_id" => $client->id
                   ]
             );

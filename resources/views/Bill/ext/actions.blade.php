@@ -1,3 +1,17 @@
+<?php
+      $allow = true;
+      $companyId = currentCompanyModel()->id;
+      if(
+        $companyId == 3965 ||
+        $companyId == 3966 ||
+        $companyId == 3967 ||
+        $companyId == 3968 ||
+        $companyId == 3969
+      ){
+        $allow = false; 
+      }
+?>
+
 @if( !$data->trashed()  ) 
  
   @if( @$data->accept_status != 2 )
@@ -65,6 +79,7 @@
               </a>
             </form>
             
+            @if($allow)
             <form id="accepthacienda-form-{{ $data->id }}" class="block-form dropdown-item" method="POST" action="/facturas-recibidas/respuesta-aceptacion/{{ $data->id }}" >
               @csrf
               @method('patch')
@@ -82,7 +97,7 @@
                 <i class="fa fa-ban" aria-hidden="true"></i> <span class="toggle-item-text">Rechazar factura</span>
               </a>
             </form>
-        
+            @endif
       @else
         <form id="hidefromtaxes-form-{{  $data->id }}" class="block-form dropdown-item" method="POST" action="/facturas-recibidas/switch-ocultar/{{ $data->id }}" >
           @csrf

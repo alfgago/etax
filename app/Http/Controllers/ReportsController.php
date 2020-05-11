@@ -18,6 +18,7 @@ use App\Exports\ReportsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
+use App\Exports\DeclaracionExport;
 
 /**
  * @group Controller - Reportes
@@ -277,6 +278,32 @@ class ReportsController extends Controller
         }
         
         return view('/Reports/reporte-borrador-iva', compact('dataDeclaracion') );
+    }
+    
+    public function descargarDatosDeclaracion(Request $request){
+      $ano = $request->ano ? $request->ano : 2019;
+      $company = currentCompanyModel();
+      $prorrataOperativa = $company->getProrrataOperativa($ano);
+      
+      $dataDeclaraciones = [];
+      for($mes = 1; $mes <= 12; $mes++){
+        $nombreMes = Variables::getMonthName($mes);
+        $data = CalculatedTax::calcularFacturacionPorMesAno( $mes, $ano, 0 );
+        $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0 );
+        if($mes == 12){
+          $acumulado->sumAcumulados( $ano, true );
+          $iva_deducible_estimado = $acumulado->iva_deducible_estimado;
+          $iva_deducible_operativo = $acumulado->iva_deducible_operativo;
+          $acumulado->setCalculosIVA( $prorrataOperativa, 0 );
+          $acumulado->iva_deducible_estimado = $iva_deducible_estimado;
+          $acumulado->iva_deducible_operativo = $iva_deducible_operativo;
+        }
+        $dataDeclaracion = $data->calcularDeclaracion($acumulado);
+        $dataDeclaracion['nombreMes'] = $nombreMes;
+        $dataDeclaraciones[] = $dataDeclaracion;
+      }
+
+      return Excel::download(new DeclaracionExport($ano, $dataDeclaraciones), 'datos-declaracion.xlsx');
     }
     
     public function reporteDetalleDebitoFiscal( Request $request ) {

@@ -71,7 +71,8 @@ class QuickbooksInvoice extends Model
             $clientName = QuickbooksCustomer::getClientName($company, $qbInvoice->CustomerRef);
             $qbInvoice = QuickBooksInvoice::updateOrCreate(
               [
-                "qb_id" => $qbInvoice->Id
+                "qb_id" => $qbInvoice->Id,
+                "company_id" => $company->id
               ],
               [
                 "qb_doc_number" => $qbInvoice->DocNumber,
@@ -81,8 +82,7 @@ class QuickbooksInvoice extends Model
                 "qb_data" => $qbInvoice,
                 "generated_at" => 'quickbooks',
                 "month" => $date->month,
-                "year" => $date->year,
-                "company_id" => $company->id
+                "year" => $date->year
               ]
             );
         }
@@ -222,7 +222,8 @@ class QuickbooksInvoice extends Model
                 $clientName = QuickbooksCustomer::getClientName($company, $qbInvoice->CustomerRef);
                 $inv = QuickBooksInvoice::updateOrCreate(
                   [
-                    "qb_id" => $qbInvoice->Id
+                    "qb_id" => $qbInvoice->Id,
+                    "company_id" => $company->id
                   ],
                   [
                     "qb_doc_number" => $qbInvoice->DocNumber,
@@ -233,7 +234,6 @@ class QuickbooksInvoice extends Model
                     "generated_at" => 'quickbooks',
                     "month" => $invoice->month,
                     "year" => $invoice->year,
-                    "company_id" => $company->id,
                     "invoice_id" => $invoice->id
                   ]
                 );

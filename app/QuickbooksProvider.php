@@ -65,14 +65,14 @@ class QuickbooksProvider extends Model
 
             QuickbooksProvider::updateOrCreate(
                 [
-                    "qb_id" => $provider->Id
+                    "qb_id" => $provider->Id,
+                    "company_id" => $company->id
                   ],
                   [
                     "full_name" => $fullname ?? null,
                     "email" => $email,
                     "qb_data" => $provider,
-                    "generated_at" => 'quickbooks',
-                    "company_id" => $company->id
+                    "generated_at" => 'quickbooks'
                   ]
             );
         }
@@ -151,12 +151,12 @@ class QuickbooksProvider extends Model
         $this->save();
     }
     
-    public static function saveEtaxaqb($dataService, $provider){   
+    public static function saveEtaxaqb($dataService, $provider, $update = null){   
         $fullname = ($provider->first_name ?? '') . ' ' . ($provider->last_name ?? '') . ' ' . ($provider->last_name2 ?? '');
         $email = 'No indica correo' != $provider->email ? $provider->email : null;
         $fullname = trim($fullname);
         
-        $theResourceObj = qbProvider::create([
+        $resourceObjectArray = [
             "BillAddr" => [
                 "Line1" => $provider->address ?? "",
                 "City" => $provider->city ?? "",
@@ -176,9 +176,21 @@ class QuickbooksProvider extends Model
             "PrimaryEmailAddr" => [
                 "Address" => $email
             ]
-        ]);
+        ];
         
-        $vendor = $dataService->Add($theResourceObj);
+        if($update){
+            $existingVendor = $dataService->FindbyId('vendor', $update);
+            $theResourceObj = qbProvider::update( $existingVendor,
+                $resourceObjectArray
+            );
+            $vendor = $dataService->Update($theResourceObj);
+        }else{
+            $theResourceObj = qbProvider::create(
+                $resourceObjectArray    
+            );
+            $vendor = $dataService->Add($theResourceObj);
+        }
+        
         $error = $dataService->getLastError();
         if ($error) {
             Log::error("The Status code is: " . $error->getHttpStatusCode() . "\n".
@@ -190,14 +202,14 @@ class QuickbooksProvider extends Model
         if( isset($vendor) ){
             $qbProvider = QuickbooksProvider::updateOrCreate(
                 [
-                    "qb_id" => $vendor->Id
+                    "qb_id" => $vendor->Id,
+                    "company_id" => $provider->company_id
                   ],
                   [
                     "full_name" => $fullname,
                     "email" => $provider->email,
                     "qb_data" => $vendor,
                     "generated_at" => 'etax',
-                    "company_id" => $provider->company_id,
                     "provider_id" => $provider->id
                   ]
             );

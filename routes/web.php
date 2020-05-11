@@ -74,6 +74,7 @@ Route::post('/reportes/detalle-credito', 'ReportsController@reporteDetalleCredit
 Route::post('/reportes/libro-ventas', 'ReportsController@reporteLibroVentas');
 Route::post('/reportes/libro-compras', 'ReportsController@reporteLibroCompras');
 Route::get('/reportes/borrador-iva', 'ReportsController@reporteBorradorIVA');
+Route::get('/reportes/descargar-borrador', 'ReportsController@descargarDatosDeclaracion');
 
 /*Exportar XML DEPRECADOS*/
 Route::post('/reportes/export-cuentas-contables', 'ReportsController@exportCuentasContables');
@@ -133,7 +134,7 @@ Route::prefix('facturas-emitidas')->group(function() {
     Route::get('reenviar-email/{id}', 'InvoiceController@resendInvoiceEmail')->name('Invoice.resendInvoiceEmail');
     Route::get('consult/{id}', 'InvoiceController@consultInvoice')->name('Invoice.consultInvoice');
     Route::get('query-invoice/{id}', 'InvoiceController@queryInvoice')->name('Invoice.queryInvoice');
-    Route::post('actualizar-categorias', 'InvoiceController@actualizar_categorias')->name('Invoice.actualizar_categorias');
+    Route::post('actualizar-categorias', 'InvoiceController@actualizarCategorias')->name('Invoice.actualizarCategorias');
     Route::patch('switch-ocultar/{id}', 'InvoiceController@hideInvoice')->name('Invoice.hideInvoice');
     Route::get('validar/{id}', 'InvoiceController@validar')->name('Invoice.validar');
     Route::post('guardar-validar', 'InvoiceController@guardarValidar')->name('Invoice.GuardarValidar');
