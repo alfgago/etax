@@ -7,6 +7,7 @@ use App\InvoiceItem;
 use App\XmlHacienda;
 use \Carbon\Carbon;
 use App\Client;
+use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Storage;
 
 class Invoice extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Filterable;
 
     protected $guarded = [];
 

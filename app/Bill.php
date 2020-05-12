@@ -8,6 +8,7 @@ use App\BillItem;
 use App\Provider;
 use App\XmlHacienda;
 use App\HaciendaResponse;
+use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
@@ -18,7 +19,7 @@ use Orchestra\Parser\Xml\Facade as XmlParser;
 
 class Bill extends Model
 {
-    use Sortable, SoftDeletes;
+    use Sortable, SoftDeletes, Filterable;
     
     protected $guarded = [];
     public $sortable = ['reference_number', 'generated_date'];
