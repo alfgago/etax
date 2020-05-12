@@ -11,12 +11,14 @@ namespace App\Http\Controllers\API;
 
 use App\CalculatedTax;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\InvoiceResource;
 use App\Invoice;
 use App\Utils\BridgeHaciendaApi;
 use App\Utils\ParametersValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class InvoiceAPIController extends Controller
 {
@@ -137,6 +139,205 @@ class InvoiceAPIController extends Controller
 
     }
 
+    /**
+     * Envía nota de credito electrónica a Hacienda
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function anularInvoice($key, Request $request) {
+        //revisar si el usuario tiene permisos sobre esa compania
+        $user = auth()->user();
+        if(!userHasCompany($request->emisor['identificacion']['numero'])) {
+            return $this->createResponse(403, 'ERROR', "Empresa no autorizada", []);
+        }
+
+        $validator = $this->validatorInvoiceEmitir($request);
+        if ($validator->fails()) {
+            return $this->createResponse('400', 'ERROR' ,  $validator->messages(),[]);
+        }
+
+        try {
+
+            Log::info('Enviando nota de credito de facturar -->'.$key);
+            //validar si la compania tiene facturas disponibles.
+            $company = Cache::get("cache-api-company-".$request->emisor['identificacion']['numero']."-$user->id");
+            $invoice = Invoice::where('document_key', $key)->where('company_id', $company->id)->first();
+            $errors = $company->validateCompany(true);
+
+            if($errors) {
+                return $this->createResponse($errors['codigo'], 'ERROR', $errors['mensaje'], []);
+            }
+
+            if(CalculatedTax::validarMes($request->fechaEmision, $company)) {
+                $apiHacienda = new BridgeHaciendaApi();
+                $tokenApi = $apiHacienda->login(false);
+                if ($tokenApi !== false) {
+
+                    $note = new Invoice();
+                    //Datos generales y para Hacienda
+                    $note->company_id = $company->id;
+                    $note->document_type = "03";
+                    $note->hacienda_status = '01';
+                    $note->payment_status = "01";
+                    $note->payment_receipt = "";
+                    $note->generation_method = "etax";
+                    $note->reason = $request->razon ?? "Anular Factura";
+                    $note->code_note = $request->codigo_nota ?? "01";
+                    $note->reference_number = $company->last_note_ref_number + 1;
+                    $note->save();
+                    $noteData = $note->setNoteData($invoice, $note->document_type, $request);
+
+                    if (!empty($noteData)) {
+                        $apiHacienda->createCreditNote($noteData, $tokenApi);
+                    }
+                    $company->last_note_ref_number = $noteData->reference_number;
+                    $company->last_document_note = $noteData->document_number;
+                    $company->save();
+
+                    clearInvoiceCache($invoice);
+
+                    $response['clave_documento'] = $invoice->document_key;
+
+                    return $this->createResponse(201, 'SUCCESS', 'Nota de Credito registrada y enviada con éxito', $response);
+                } else {
+                    return $this->createResponse(400, 'ERROR', "Ha ocurrido un error al enviar nota de debito.", []);
+                }
+            } else {
+                return $this->createResponse(400, 'ERROR', "El mes ya fue cerrado", []);
+            }
+
+        } catch ( \Exception $e) {
+            Log::error("ERROR Envio de notaa de credito a hacienda -> ".$e);
+            return $this->createResponse(400, 'ERROR', 'Ha ocurrido un error al enviar nota de debito.'.$e->getMessage(), []);
+        }
+
+    }
+
+    public function sendNotaDebito($key, Request $request)
+    {
+        //revisar si el usuario tiene permisos sobre esa compania
+        $user = auth()->user();
+        if(!userHasCompany($request->emisor['identificacion']['numero'])) {
+            return $this->createResponse(403, 'ERROR', "Empresa no autorizada", []);
+        }
+
+        $validator = $this->validatorInvoiceEmitir($request);
+        if ($validator->fails()) {
+            return $this->createResponse('400', 'ERROR' ,  $validator->messages(),[]);
+        }
+        try {
+            Log::info('Enviando nota de credito de facturar -->'.$key);
+            //validar si la compania tiene facturas disponibles.
+            $company = Cache::get("cache-api-company-".$request->emisor['identificacion']['numero']."-$user->id");
+            $invoice = Invoice::where('document_key', $key)->where('company_id', $company->id)->first();
+            $errors = $company->validateCompany(true);
+
+            if($errors) {
+                return $this->createResponse($errors['codigo'], 'ERROR', $errors['mensaje'], []);
+            }
+
+            if(CalculatedTax::validarMes($request->fechaEmision, $company)) {
+                $apiHacienda = new BridgeHaciendaApi();
+                $tokenApi = $apiHacienda->login(false);
+                if ($tokenApi !== false) {
+                    $note = new Invoice();
+
+                    //Datos generales y para Hacienda
+                    $note->company_id = $company->id;
+                    $note->document_type = "02";
+                    $note->hacienda_status = '01';
+                    $note->payment_status = "01";
+                    $note->payment_receipt = "";
+                    $note->generation_method = "etax";
+                    $note->reason = $request->razon ?? "Debito Factura";
+                    $note->code_note = $request->codigo_nota ?? "01";
+                    $note->reference_number = $company->last_debit_note_ref_number + 1;
+                    $note->save();
+                    $noteData = $note->setNoteData($invoice, $note->document_type, $request);
+                    if (!empty($noteData)) {
+                        $apiHacienda->createCreditNote($noteData, $tokenApi);
+                    }
+                    $company->last_debit_note_ref_number = $noteData->reference_number;
+                    $company->last_document_debit_note = $noteData->document_number;
+                    $company->save();
+
+                    clearInvoiceCache($invoice);
+                    $response['clave_documento'] = $invoice->document_key;
+
+                    return $this->createResponse(201, 'SUCCESS', 'Nota de Debito registrada y enviada con éxito', $response);
+
+                } else {
+                    return $this->createResponse(400, 'ERROR', "Ha ocurrido un error al enviar nota de debito.", []);
+                }
+            }else{
+                return $this->createResponse(400, 'ERROR', "El mes ya fue cerrado", []);
+            }
+
+        } catch ( \Exception $e) {
+            Log::error("ERROR Envio de notaa de credito a hacienda -> ".$e);
+            return $this->createResponse(400, 'ERROR', 'Ha ocurrido un error al enviar nota de debito.'.$e->getMessage(), []);
+        }
+
+    }
+
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/facturas-venta/consultar-hacienda",
+     *     summary="Consulta de una factura de compra",
+     *     tags={"Facturas de compra"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Devuelve una factura de compra."
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="ERROR"
+     *     )
+     * )
+     */
+    public function consultarHacienda(Request $request) {
+        try {
+            //revisar si el usuario tiene permisos sobre esa compania
+            $user = auth()->user();
+            Log::info("Consultando factura");
+            if(!userHasCompany($request->empresa)) {
+                return $this->createResponse(403, 'ERROR', "Empresa no autorizada", []);
+            }
+            $validator = $this->validatorConsultarFactura($request);
+            if ($validator->fails()) {
+                return $this->createResponse('400', 'ERROR' ,  $validator->messages(),[]);
+            }
+            //validar si la compania tiene facturas disponibles.
+            $company = Cache::get("cache-api-company-$request->empresa-$user->id");
+            $apiHacienda = new BridgeHaciendaApi();
+            $tokenApi = $apiHacienda->login(false);
+            $invoice = Invoice::where('document_key', $request->clave)->first();
+
+            if ($tokenApi !== false && !empty($invoice->xmlHacienda->xml) && !empty($invoice)) {
+                $result = $apiHacienda->queryHacienda($invoice, $tokenApi, $company);
+                if ($result == false) {
+                    $response['xml_mensaje_hacienda'] = 'El servidor de Hacienda es inaccesible en este momento, o el
+                        comprobante no ha sido recibido. Por favor intente de nuevo más tarde o contacte a soporte.';
+                } else {
+                    $response['xml_mensaje_hacienda'] = $result;
+                }
+                $response['xml_factura'] = Storage::get($invoice->xmlHacienda->xml);
+                $response['estado_hacienda'] = $invoice->hacienda_status;
+                return $this->createResponse(200, 'SUCCESS', 'Factura encontrada', $response);
+            } else {
+                return $this->createResponse(400, 'ERROR', 'Factura no encontrada', []);
+            }
+
+        } catch (\Exception $e) {
+            Log::error("Error al consultar factura $e");
+            return $this->createResponse(400, 'ERROR', 'Ha ocurrido un error al consultar
+                factura.'.$e->getMessage(), []);
+        }
+
+    }
+
     private function getDocumentKey($docType) {
         $company = currentCompanyModel();
         $invoice = new Invoice();
@@ -175,4 +376,28 @@ class InvoiceAPIController extends Controller
 
         return $consecutive;
     }
+
+    public function getInvoice(Request $request) {
+
+        if (!userHasCompany($request->empresa)) {
+            return $this->createResponse('400', 'ERROR' , 'Empresa no autorizada.');
+        }
+
+        $invoice = Invoice::where('document_key',$request->claveDocumento)->first();
+        if (!$invoice) {
+            return $this->createResponse('400', 'ERROR' , 'Factura no encontrada.');
+        }
+        return $this->createResponse('200', 'OK' , 'La factura '. $invoice->document_number . '.', new InvoiceResource($invoice));
+    }
+
+//    public function listInvoice(Request $request){
+//        if(!userHasCompany($request->empresa)){
+//            return $this->createResponse('400', 'ERROR' , 'Empresa no autorizada.');
+//        }
+//
+//        $invoice_filter = InvoiceFilter::class;
+//        $invoices = Invoice::filter($request->all(), $invoice_filter)->paginate($request->cantidad);
+//        return $this->createResponse('200', 'OK' , 'Todas las facturas.', InvoiceResource::collection($invoices), $invoices);
+//    }
+
 }
