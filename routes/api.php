@@ -27,19 +27,19 @@ Route::prefix('v1')->group(function() {
         //Facturas de Venta
         Route::prefix('facturas-venta')->group(function() {
             Route::post('emitir', 'InvoiceController@emitir')->name('InvoiceController.emitir'); // Recibe JSON con todos los datos de un XML de Hacienda para registro, envia a Hacienda
-            Route::post('emitir/n-credito/{key}', 'InvoiceController@anularInvoice')->name('FacturaVenta.notaCredito'); //Recibe la clave de factura y crea nota de credito
-            Route::post('emitir/n-debito/{key}', 'InvoiceController@sendNotaDebito')->name('FacturaVenta.notaDebito'); //Recibe la clave de factura y crea nota de credito
-            Route::post('registrar', 'InvoiceController@')->name('FacturaVenta.registrar'); // Recibe JSON con todos los datos de un XML de Hacienda para registro, no envia a Hacienda
-            Route::post('validar', 'InvoiceController@validateInvoice')->name('FacturaVenta.validar'); // Recibe JSON con clave, lineas, codigo eTAX y categoría de declaración
-            Route::post('autorizar-correo', 'InvoiceController@authorizeInvoice')->name('FacturaVenta.autorizarCorreo'); // Recibe clave y autoriza la enviada por correo
-            Route::get('consultar', 'InvoiceController@getInvoice')->name('FacturaVenta.consultar'); // Consulta existencia de una factura por clave
+            Route::post('emitir/n-credito/{key}', 'InvoiceAPIController@anularInvoice')->name('FacturaVenta.notaCredito'); //Recibe la clave de factura y crea nota de credito
+            Route::post('emitir/n-debito/{key}', 'InvoiceAPIController@sendNotaDebito')->name('FacturaVenta.notaDebito'); //Recibe la clave de factura y crea nota de credito
+            Route::post('registrar', 'InvoiceAPIController@')->name('FacturaVenta.registrar'); // Recibe JSON con todos los datos de un XML de Hacienda para registro, no envia a Hacienda
+            Route::post('validar', 'InvoiceAPIController@validateInvoice')->name('FacturaVenta.validar'); // Recibe JSON con clave, lineas, codigo eTAX y categoría de declaración
+            Route::post('autorizar-correo', 'InvoiceAPIController@authorizeInvoice')->name('FacturaVenta.autorizarCorreo'); // Recibe clave y autoriza la enviada por correo
+            Route::get('consultar', 'InvoiceAPIController@getInvoice')->name('FacturaVenta.consultar'); // Consulta existencia de una factura por clave
             //Route::get('consultar-hacienda{clave}', 'InvoiceController@')->name('FacturaVenta.consultarHacienda'); //Recibe clave de factura y retorna estado con hacienda.
-            Route::get('descargar-xml/{clave}', 'InvoiceController@')->name('FacturaVenta.descargarXml'); // Descarga XML firmado. Si no existe, eTax devuelve mensaje indicando que fue emitida por otro sistema. Devuele URL temporal de S3 si nosotros lo guardamos
-            Route::get('descargar-xml-respuesta/{clave}', 'InvoiceController@')->name('FacturaVenta.descargarXmlRespuesta'); // Descargar XML de respuesta. eTax lo consulta a Hacienda, si no existe indica el problema
-            Route::post('lista', 'InvoiceController@listInvoice')->name('FacturaVenta.lista'); // Retorna JSON paginado de 50 en 50. Con todas las facturas, sus lineas, pagina actual y cantidad total de paginas.
-            Route::get('lista-correo', 'InvoiceController@')->name('FacturaVenta.listaCorreo'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no autorizadas, sus lineas, pagina actual y cantidad total de paginas.
-            Route::get('lista-no-validadas', 'InvoiceController@')->name('FacturaVenta.listaNoValidadas'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no validadas, sus lineas, pagina actual y cantidad total de paginas.
-            Route::get('consultar-hacienda', 'InvoiceController@consultarHacienda')->name('FacturaVenta.consultarHacienda'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no validadas, sus lineas, pagina actual y cantidad total de paginas.
+            Route::get('descargar-xml/{clave}', 'InvoiceAPIController@')->name('FacturaVenta.descargarXml'); // Descarga XML firmado. Si no existe, eTax devuelve mensaje indicando que fue emitida por otro sistema. Devuele URL temporal de S3 si nosotros lo guardamos
+            Route::get('descargar-xml-respuesta/{clave}', 'InvoiceAPIController@')->name('FacturaVenta.descargarXmlRespuesta'); // Descargar XML de respuesta. eTax lo consulta a Hacienda, si no existe indica el problema
+            Route::post('lista', 'InvoiceAPIController@listInvoice')->name('FacturaVenta.lista'); // Retorna JSON paginado de 50 en 50. Con todas las facturas, sus lineas, pagina actual y cantidad total de paginas.
+            Route::get('lista-correo', 'InvoiceAPIController@')->name('FacturaVenta.listaCorreo'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no autorizadas, sus lineas, pagina actual y cantidad total de paginas.
+            Route::get('lista-no-validadas', 'InvoiceAPIController@')->name('FacturaVenta.listaNoValidadas'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no validadas, sus lineas, pagina actual y cantidad total de paginas.
+            Route::get('consultar-hacienda', 'InvoiceAPIController@consultarHacienda')->name('FacturaVenta.consultarHacienda'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no validadas, sus lineas, pagina actual y cantidad total de paginas.
 
         });
 
