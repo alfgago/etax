@@ -13,6 +13,7 @@ use App\CalculatedTax;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InvoiceResource;
 use App\Invoice;
+use App\ModelFilters\InvoiceFilter;
 use App\Utils\BridgeHaciendaApi;
 use App\Utils\ParametersValidator;
 use Illuminate\Http\Request;
@@ -186,7 +187,7 @@ class InvoiceAPIController extends Controller
                     $note->code_note = $request->codigo_nota ?? "01";
                     $note->reference_number = $company->last_note_ref_number + 1;
                     $note->save();
-                    $noteData = $note->setNoteData($invoice, $note->document_type, $request);
+                    $noteData = $note->setNoteDataApi($invoice, $note->document_type, $request);
 
                     if (!empty($noteData)) {
                         $apiHacienda->createCreditNote($noteData, $tokenApi);
@@ -254,7 +255,7 @@ class InvoiceAPIController extends Controller
                     $note->code_note = $request->codigo_nota ?? "01";
                     $note->reference_number = $company->last_debit_note_ref_number + 1;
                     $note->save();
-                    $noteData = $note->setNoteData($invoice, $note->document_type, $request);
+                    $noteData = $note->setNoteDataApi($invoice, $note->document_type, $request);
                     if (!empty($noteData)) {
                         $apiHacienda->createCreditNote($noteData, $tokenApi);
                     }
@@ -390,14 +391,14 @@ class InvoiceAPIController extends Controller
         return $this->createResponse('200', 'OK' , 'La factura '. $invoice->document_number . '.', new InvoiceResource($invoice));
     }
 
-//    public function listInvoice(Request $request){
-//        if(!userHasCompany($request->empresa)){
-//            return $this->createResponse('400', 'ERROR' , 'Empresa no autorizada.');
-//        }
-//
-//        $invoice_filter = InvoiceFilter::class;
-//        $invoices = Invoice::filter($request->all(), $invoice_filter)->paginate($request->cantidad);
-//        return $this->createResponse('200', 'OK' , 'Todas las facturas.', InvoiceResource::collection($invoices), $invoices);
-//    }
+    public function listInvoice(Request $request){
+        if(!userHasCompany($request->empresa)){
+            return $this->createResponse('400', 'ERROR' , 'Empresa no autorizada.');
+        }
+
+        $invoice_filter = InvoiceFilter::class;
+        $invoices = Invoice::filter($request->all(), $invoice_filter)->paginate($request->cantidad);
+        return $this->createResponse('200', 'OK' , 'Todas las facturas.', InvoiceResource::collection($invoices), $invoices);
+    }
 
 }
