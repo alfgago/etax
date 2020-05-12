@@ -187,7 +187,7 @@ class InvoiceAPIController extends Controller
                     $note->code_note = $request->codigo_nota ?? "01";
                     $note->reference_number = $company->last_note_ref_number + 1;
                     $note->save();
-                    $noteData = $note->setNoteData($invoice, $note->document_type, $request);
+                    $noteData = $note->setNoteDataApi($invoice, $note->document_type, $request);
 
                     if (!empty($noteData)) {
                         $apiHacienda->createCreditNote($noteData, $tokenApi);
@@ -255,7 +255,7 @@ class InvoiceAPIController extends Controller
                     $note->code_note = $request->codigo_nota ?? "01";
                     $note->reference_number = $company->last_debit_note_ref_number + 1;
                     $note->save();
-                    $noteData = $note->setNoteData($invoice, $note->document_type, $request);
+                    $noteData = $note->setNoteDataApi($invoice, $note->document_type, $request);
                     if (!empty($noteData)) {
                         $apiHacienda->createCreditNote($noteData, $tokenApi);
                     }
