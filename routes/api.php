@@ -45,19 +45,18 @@ Route::prefix('v1')->group(function() {
 
         //Facturas de Compra
         Route::prefix('facturas-compra')->group(function() {
-            Route::post('aceptar', 'BillController@sendAcceptMessage')->name('FacturaCompra.aceptar'); //Recibe la clave de la factura y acepta la factura
-            Route::post('registrar', 'BillController@store')->name('FacturaCompra.registrar'); // Recibe JSON con todos los datos de un XML de Hacienda para registro, no envia a Hacienda
-            Route::post('validar', 'BillController@validateBill')->name('FacturaCompra.validar'); // Recibe JSON con clave, lineas, codigo eTAX y categoría de declaración
-            Route::post('autorizar-correo', 'BillController@authorizeBill')->name('FacturaCompra.autorizarCorreo'); // Recibe clave y autoriza la enviada por correo
-            Route::get('consultar', 'BillController@getBill')->name('FacturaCompra.consultar'); // Consulta existencia de una factura por clave
-            Route::get('consultar-hacienda{clave}', 'FacturaCompraController@')->name('FacturaCompra.consultarHacienda'); //Recibe clave de factura y retorna estado con hacienda.
-            Route::get('descargar-xml/{clave}', 'BillController@')->name('FacturaCompra.descargarXml'); // Descarga XML firmado. Si no existe, eTax devuelve mensaje indicando que fue emitida por otro sistema. Devuele URL temporal de S3 si nosotros lo guardamos
-            Route::get('descargar-xml-respuesta/{clave}', 'BillController@')->name('FacturaCompra.descargarXmlRespuesta'); // Descargar XML de respuesta. eTax lo consulta a Hacienda, si no existe indica el problema
-            Route::get('lista', 'BillController@listBill')->name('FacturaCompra.lista'); // Retorna JSON paginado de 50 en 50. Con todas las facturas, sus lineas, pagina actual y cantidad total de paginas.
-            Route::get('lista-correo', 'BillController@')->name('FacturaCompra.listaCorreo'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no autorizadas, sus lineas, pagina actual y cantidad total de paginas.
-            Route::get('lista-no-validadas', 'BillController@')->name('FacturaCompra.listaNoValidadas'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no validadas, sus lineas, pagina actual y cantidad total de paginas.
-            Route::get('lista-no-aceptadas', 'BillController@')->name('FacturaCompra.listaNoAceptadas'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no aceptadas, sus lineas, pagina actual y cantidad total de paginas.
-            Route::get('consultar-hacienda', 'BillController@consultarHacienda')->name('FacturaCompra.consultarHacienda'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no validadas, sus lineas, pagina actual y cantidad total de paginas.
+            Route::post('aceptar', 'BillAPIController@sendAcceptMessage')->name('FacturaCompra.aceptar'); //Recibe la clave de la factura y acepta la factura
+            Route::post('registrar', 'BillAPIController@store')->name('FacturaCompra.registrar'); // Recibe JSON con todos los datos de un XML de Hacienda para registro, no envia a Hacienda
+            Route::post('validar', 'BillAPIController@validateBill')->name('FacturaCompra.validar'); // Recibe JSON con clave, lineas, codigo eTAX y categoría de declaración
+            Route::post('autorizar-correo', 'BillAPIController@authorizeBill')->name('FacturaCompra.autorizarCorreo'); // Recibe clave y autoriza la enviada por correo
+            Route::get('consultar', 'BillAPIController@getBill')->name('FacturaCompra.consultar'); // Consulta existencia de una factura por clave
+            Route::get('descargar-xml/{clave}', 'BillAPIController@')->name('FacturaCompra.descargarXml'); // Descarga XML firmado. Si no existe, eTax devuelve mensaje indicando que fue emitida por otro sistema. Devuele URL temporal de S3 si nosotros lo guardamos
+            Route::get('descargar-xml-respuesta/{clave}', 'BillAPIController@')->name('FacturaCompra.descargarXmlRespuesta'); // Descargar XML de respuesta. eTax lo consulta a Hacienda, si no existe indica el problema
+            Route::get('lista', 'BillAPIController@listBill')->name('FacturaCompra.lista'); // Retorna JSON paginado de 50 en 50. Con todas las facturas, sus lineas, pagina actual y cantidad total de paginas.
+            Route::get('lista-correo', 'BillAPIController@')->name('FacturaCompra.listaCorreo'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no autorizadas, sus lineas, pagina actual y cantidad total de paginas.
+            Route::get('lista-no-validadas', 'BillAPIController@')->name('FacturaCompra.listaNoValidadas'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no validadas, sus lineas, pagina actual y cantidad total de paginas.
+            Route::get('lista-no-aceptadas', 'BillAPIController@')->name('FacturaCompra.listaNoAceptadas'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no aceptadas, sus lineas, pagina actual y cantidad total de paginas.
+            Route::get('consultar-hacienda', 'BillAPIController@consultarHacienda')->name('FacturaCompra.consultarHacienda'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no validadas, sus lineas, pagina actual y cantidad total de paginas.
         });
         //Cierres de mes
         Route::prefix('cierres')->group(function() {
