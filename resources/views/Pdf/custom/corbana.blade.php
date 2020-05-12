@@ -424,19 +424,16 @@
                         </tr>
                         <tr class="totalizado">
                             <td style="text-align: right;">
-                                {{ $cantidadCount < 1 ? $cantidadCount : '' }}
+                                {{ $cantidadCount > 1 ? $cantidadCount : '' }}
                             </td>
                             <td style="text-align: center; font-size: 0.9em" colspan="3">
-                                <?php $letras = \App\OtherInvoiceData::findData($otherData, 'LETRAS');
-                                    if( !empty($letras) ){  ?>
-                                    <span>{{ $letras }}</span>
-                                <?php } ?>
+                                TOTAL (TOTAL)
                             </td>
                             <td style="text-align: right;">
-                                {{ $pesoNetoTotal < 0 ? $pesoNetoTotal : '' }}
+                                {{ $pesoNetoTotal > 0 ? $pesoNetoTotal : '' }}
                             </td>
                             <td style="text-align: right;">
-                                {{ $pesoBrutoTotal < 0 ? $pesoBrutoTotal : '' }}
+                                {{ $pesoBrutoTotal > 0 ? $pesoBrutoTotal : '' }}
                             </td>
                             <td>
                                 TOTAL
@@ -528,6 +525,16 @@
         <tr>
             <td style="border: 2px solid black; padding: 5px;" colspan="2">
                 <table class="table-usuario">
+                    <tr>
+                        <td colspan="2" style="text-align: center;">
+                            <?php 
+                                //$letras = \App\OtherInvoiceData::findData($otherData, 'LETRAS');
+                                $letras = \App\Utils\NumeroALetras::convertir($totalComprobante, $data_invoice->currency, 'CENTAVOS');
+                                if( !empty($letras) ){  ?>
+                                <span>{{ $letras }}</span>
+                            <?php } ?>
+                        </td>
+                    </tr>
                     <tr>
                         <td><b>HECHO POR/(DONE BY):</b> <span>{{ \App\OtherInvoiceData::findData($otherData, 'HECHO_POR') }}</span></td>
                         <td><b>APROBADO POR/(APROVED BY): </b> <span>{{ \App\OtherInvoiceData::findData($otherData, 'REVISADO_POR') }}</span></td>

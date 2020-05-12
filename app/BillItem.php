@@ -42,7 +42,10 @@ class BillItem extends Model
       }
     }
     
-    public function setIvaTypeFromCondition($condicionAceptacion){
+    /**
+     * Condiciones de Corbana para automatización de códigos y categorias
+     */
+    public function setIvaTypeCorbana($condicionAceptacion, $actividad){
       $porc = $this->iva_percentage;
       $lastDigit = '3';
       if( 4 == $porc ){
@@ -78,15 +81,11 @@ class BillItem extends Model
         $this->product_type = 51;
       }elseif('04' == $condicionAceptacion) {
         //se utiliza para gastos corrientes no relacionados con la actividad
-        $this->iva_type = $firstDigit."097";
+        $this->iva_type = $firstDigit."09".$lastDigit;
         $this->product_type = 57;
       }elseif('05' == $condicionAceptacion) {
         //iria con código S003 o B003 para aplicar la prorrata, y así correspondientemente según la tarifa de IVA soportado.
         $this->iva_type = $firstDigit."00".$lastDigit;
-      }
-      
-      if( 0 == $porc ){
-        $this->iva_type = $firstDigit."060";
       }
       if( $this->exoneration_amount > 0){
         $this->iva_type = $firstDigit."080";
@@ -104,6 +103,19 @@ class BillItem extends Model
         }else{
           $this->product_type = 50;
         }
+        if( $actividad == '751302' || $actividad == '654901' ){
+          $this->product_type = 50;
+        }
+      }
+      
+      if( 0 == $porc ){
+        $this->iva_type = $firstDigit."060";
+        if( (strpos( strtolower($this->name),"diesel") !== false) ){
+          $this->product_type = 59;
+        }else{
+          $this->product_type = 55;
+        }
+        
       }
       
       $this->save();
