@@ -26,7 +26,7 @@ Route::prefix('v1')->group(function() {
         Route::post('emitir-factura', 'InvoiceAPIController@emitir')->name('InvoiceAPIController.emitirFactura');
         //Facturas de Venta
         Route::prefix('facturas-venta')->group(function() {
-            Route::post('emitir', 'InvoiceController@emitir')->name('InvoiceController.emitir'); // Recibe JSON con todos los datos de un XML de Hacienda para registro, envia a Hacienda
+            Route::post('emitir', 'InvoiceAPIController@emitir')->name('InvoiceAPIController.emitir'); // Recibe JSON con todos los datos de un XML de Hacienda para registro, envia a Hacienda
             Route::post('emitir/n-credito/{key}', 'InvoiceAPIController@anularInvoice')->name('FacturaVenta.notaCredito'); //Recibe la clave de factura y crea nota de credito
             Route::post('emitir/n-debito/{key}', 'InvoiceAPIController@sendNotaDebito')->name('FacturaVenta.notaDebito'); //Recibe la clave de factura y crea nota de credito
             Route::post('registrar', 'InvoiceAPIController@')->name('FacturaVenta.registrar'); // Recibe JSON con todos los datos de un XML de Hacienda para registro, no envia a Hacienda
