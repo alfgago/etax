@@ -59,7 +59,6 @@ class DeclaracionPorActividadSheet implements WithHeadings, FromArray, WithEvent
         $data = $this->data;
         $year = $this->year;
         $valueMap = [];
-        dd($data);
         foreach($data as $monthlyData){
             try{
                 $dataActividades = $monthlyData['dataActividades'];
