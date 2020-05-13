@@ -534,6 +534,7 @@ class InvoiceUtils
             }catch(\Exception $e){ Log::error($e->getMessage()); }
             
             $invoiceData = array(
+                'key' => $data['generation_method'] ==  'etax-api' ? $data['document_key'] : '',
                 'consecutivo' => $ref ?? '',
                 'fecha_emision' => $data['generated_date'] ?? '',
                 'metodo_pago' => $data['payment_type'] ?? '01',

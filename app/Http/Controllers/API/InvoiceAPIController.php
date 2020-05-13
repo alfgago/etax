@@ -95,6 +95,7 @@ class InvoiceAPIController extends Controller
                         $invoice->document_key = $this->getDocumentKey($request->tipo_documento);
                         $invoice->document_number = $this->getDocReference($request->tipo_documento);
                     } else {
+                        $invoice->reference_number = ltrim(substr($request->numeroConsecutivo,-10), '0');
                         $invoice->document_key = $request->clave;
                         $invoice->document_number = $request->numeroConsecutivo;
                     }
