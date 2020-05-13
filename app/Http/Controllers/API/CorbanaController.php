@@ -516,7 +516,7 @@ class CorbanaController extends Controller
                         }
                     }
                     //Busca si la palabra desechos existe en el detalle, en cuyo caso asigna el codigo 200  
-                    if( (strpos( strtolower($detalleProducto),"iglesia") !== false)  ){
+                    if( (strpos( strtolower($detalleProducto),"iglesia") !== false) || (strpos( strtolower($detalleProducto),"casa") !== false)  ){
                         $codigoEtax = $prefijoCodigo.'200';
                         $categoriaHacienda = 27;
                     }

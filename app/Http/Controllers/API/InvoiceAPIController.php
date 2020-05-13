@@ -317,7 +317,7 @@ class InvoiceAPIController extends Controller
             $invoice = Invoice::where('document_key', $request->clave)->first();
 
             if ($tokenApi !== false && !empty($invoice->xmlHacienda->xml) && !empty($invoice)) {
-                $result = $apiHacienda->queryHacienda($invoice, $tokenApi, $company);
+                $result = $apiHacienda->queryHacienda($invoice, $tokenApi, $company, false);
                 if ($result == false) {
                     $response['xml_mensaje_hacienda'] = 'El servidor de Hacienda es inaccesible en este momento, o el
                         comprobante no ha sido recibido. Por favor intente de nuevo más tarde o contacte a soporte.';

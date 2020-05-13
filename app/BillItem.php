@@ -74,14 +74,15 @@ class BillItem extends Model
       if( '02' == $condicionAceptacion ){ 
         //equivalente a plena con aceptación parcial, (incluido el escenario donde el IVA soportado es 100% gasto)
         $this->iva_type = $firstDigit."06".$lastDigit;  
-        $this->porc_identificacion_plena = 0;
+        $this->porc_identificacion_plena = 99;
       }elseif('03' == $condicionAceptacion) {
         //bienes de capital
         $this->iva_type = $firstDigit."07".$lastDigit;
         $this->product_type = 51;
       }elseif('04' == $condicionAceptacion) {
         //se utiliza para gastos corrientes no relacionados con la actividad
-        $this->iva_type = $firstDigit."09".$lastDigit;
+        $this->iva_type = $firstDigit."06".$lastDigit; 
+        $this->porc_identificacion_plena = 99; 
         $this->product_type = 57;
       }elseif('05' == $condicionAceptacion) {
         //iria con código S003 o B003 para aplicar la prorrata, y así correspondientemente según la tarifa de IVA soportado.
@@ -110,7 +111,10 @@ class BillItem extends Model
       
       if( 0 == $porc ){
         $this->iva_type = $firstDigit."060";
-        if( (strpos( strtolower($this->name),"diesel") !== false) ){
+        if( (strpos( strtolower($this->name),"diesel") !== false) || 
+            (strpos( strtolower($this->name),"gasolina") !== false) ||
+            (strpos( strtolower($this->name),"vehiculo") !== false)
+        ){
           $this->product_type = 59;
         }else{
           $this->product_type = 55;
