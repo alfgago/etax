@@ -157,7 +157,7 @@ return [
                 'minProcesses' => 1,
                 'maxProcesses' => 1,
                 'tries' => 1,
-                'retry_after' => 1200, // Run for max 10 minutes
+                'timeout' => 2000, // Run for max 10 minutes
             ],
             'invoice-supervisor' => [
                 'connection' => 'redis',
