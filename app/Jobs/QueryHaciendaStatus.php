@@ -36,7 +36,6 @@ class QueryHaciendaStatus implements ShouldQueue
     public function handle()
     {
         try {
-            return false;
             $invoice = $this->invoice;
             $invoice->query_attempts = $invoice->query_attempts+1;
             $invoice->in_queue = true;
