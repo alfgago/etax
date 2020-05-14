@@ -35,11 +35,9 @@ class QueryHaciendaStatus implements ShouldQueue
      */
     public function handle()
     {
+        return false;
         try {
             $invoice = $this->invoice;
-            $invoice->query_attempts = $invoice->query_attempts+1;
-            $invoice->in_queue = true;
-            $invoice->save();
             $dateLimit = Carbon::now()->addMonths(-2);
             if( $invoice->created_at > $dateLimit){
                 $apiHacienda = new BridgeHaciendaApi();

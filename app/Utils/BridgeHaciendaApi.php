@@ -274,6 +274,8 @@ class BridgeHaciendaApi
             //Se usa para saber si debe enviar notificacion al cliente o no.
             $initialStatus = $invoice->hacienda_status;
             
+            $invoice->in_queue = false;
+            
             $invoiceUtils = new InvoiceUtils();
             if($findKey){
                 //Si encuentra un XML firmmado, devuelve el invoice actualizado
