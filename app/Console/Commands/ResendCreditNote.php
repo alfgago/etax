@@ -51,6 +51,7 @@ class ResendCreditNote extends Command
                 ->where('in_queue', false)
                 ->whereIn('document_type', ['02', '03'])
                 ->get();
+
             $this->info('Sending Credit Note ....'. count($invoices));
             $this->info('Get Token Api Hacienda ....');
             $apiHacienda = new BridgeHaciendaApi();

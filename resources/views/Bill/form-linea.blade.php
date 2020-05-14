@@ -74,6 +74,7 @@
         <option value="13" selected>13%</option>
         <option value="4" >4%</option>
         <option value="5" >0% con derecho a crédito</option>
+        <option value="99" >0% sin derecho a crédito</option>
       </select>
     </div>
 

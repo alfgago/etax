@@ -48,5 +48,24 @@ class Controller extends BaseController
         return response()->json($json, $response_code)->header('Content-Lenght', mb_strlen(json_encode($json), '8bit') );
    }
 
+    protected function validatePersonType($tipo_persona){
+        if( $tipo_persona == 1 || $tipo_persona == 'F' || $tipo_persona == '01') {
+            $tipo_persona = '01';
+        }else if( $tipo_persona == 2 || $tipo_persona == 'J' || $tipo_persona == '02' ) {
+            $tipo_persona = '02';
+        }else if( $tipo_persona == 3 || $tipo_persona == 'D' || $tipo_persona == '03' ) {
+            $tipo_persona = '03';
+        }else if( $tipo_persona == 4 || $tipo_persona == 'E' || $tipo_persona == '04' ) {
+            $tipo_persona = '04';
+        }else if( $tipo_persona == 5 || $tipo_persona == 'N' || $tipo_persona == '05' ) {
+            $tipo_persona = '05';
+        }else if( $tipo_persona == 6 || $tipo_persona == 'O' || $tipo_persona == '06') {
+            $tipo_persona = '06';
+        }else{
+            $tipo_persona = false;
+        }
+        return $tipo_persona;
+    }
+
 
 }
