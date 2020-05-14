@@ -55,6 +55,9 @@ class QueryPendingInvoices extends Command
             $this->info('Get Token Api Hacienda ....');
             foreach ($invoices as $invoice) {
                 QueryHaciendaStatus::dispatch($invoice)->onQueue('invoices');
+                $invoice->query_attempts = $invoice->query_attempts+1;
+                $invoice->in_queue = true;
+                $invoice->save();
             }
             
         } catch ( \Exception $e) {

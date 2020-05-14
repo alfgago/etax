@@ -1326,7 +1326,7 @@ class Invoice extends Model
             $fechaExoneracion = null;
             $porcentajeExoneracion = 0;
             $montoExoneracion = 0;
-            if( array_key_exists('Impuesto', $linea) ) {
+            /*if( array_key_exists('Impuesto', $linea) ) {
               //$codigoEtax = $linea['Impuesto']['CodigoTarifa'];
               $montoIva = trim($linea['Impuesto']['Monto']);
               $porcentajeIva = trim($linea['Impuesto']['Tarifa']);
@@ -1343,7 +1343,43 @@ class Invoice extends Model
                 $porcentajeExoneracion = $linea['Impuesto']['Exoneracion']['PorcentajeExoneracion'] ?? 0;
                 $montoExoneracion = $linea['Impuesto']['Exoneracion']['MontoExoneracion'] ?? 0;
               }
+            }*/
+            if( array_key_exists('Impuesto', $linea) ) {
+              //$codigoEtax = $linea['Impuesto']['CodigoTarifa'];
+              try{
+                $montoIva = trim($linea['Impuesto']['Monto'] );
+                $porcentajeIva = trim($linea['Impuesto']['Tarifa'] );
+  
+                if( isset( $linea['Impuesto']['Exoneracion'] ) ) {
+                  $tipoDocumentoExoneracion = $linea['Impuesto']['Exoneracion']['TipoDocumento'] ?? null;
+                  $documentoExoneracion = $linea['Impuesto']['Exoneracion']['NumeroDocumento']  ?? null;
+                  $companiaExoneracion = $linea['Impuesto']['Exoneracion']['NombreInstitucion'] ?? null;
+                  $fechaExoneracion = $linea['Impuesto']['Exoneracion']['FechaEmision'] ?? null;
+                  if($fechaExoneracion){
+                    $fechaExoneracion = Carbon::createFromFormat('Y-m-d', substr($fechaExoneracion, 0, 10));
+                    $fechaExoneracion = $fechaExoneracion->day."/".$fechaExoneracion->month."/".$fechaExoneracion->year;
+                  }
+                  $porcentajeExoneracion = $linea['Impuesto']['Exoneracion']['PorcentajeExoneracion'] ?? 0;
+                  $montoExoneracion = $linea['Impuesto']['Exoneracion']['MontoExoneracion'] ?? 0;
+                  if( $montoExoneracion ){
+                    $montoIva = $montoIva - $montoExoneracion;
+                  }
+                }
+              }catch(\Exception $e){
+                if( is_array($linea['Impuesto'])){
+                  $montoIva = 0;
+                  $porcentajeIva = 0;
 
+                  foreach ($linea['Impuesto'] as $imp){
+                    if( trim($imp['Codigo']) == '01' || trim($imp['Codigo']) == 1 ){
+                      $montoIva += (float)trim($imp['Monto'] );
+                      $porcentajeIva += (float)trim($imp['Tarifa'] );
+                    }else{
+                      $subtotalLinea = $subtotalLinea + (float)trim($imp['Monto'] );
+                    }
+                  }
+                }
+              }
             }
             
             $invoice->subtotal = $invoice->subtotal + $subtotalLinea;
