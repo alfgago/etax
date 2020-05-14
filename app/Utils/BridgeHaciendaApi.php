@@ -111,7 +111,7 @@ class BridgeHaciendaApi
             $company = $invoice->company;
             //Send to queue invoice
             Log::debug( 'debug: ' . json_encode($invoice) );
-            //ProcessCreditNote::dispatch($invoice->id, $company->id, $token)->onQueue('invoicing');
+            ProcessCreditNote::dispatch($invoice->id, $company->id, $token)->onQueue('invoicing');
             return $invoice;
 
         }catch( \Exception $e ){
