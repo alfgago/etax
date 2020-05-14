@@ -149,6 +149,16 @@ return [
                 'maxProcesses' => 2,
                 'tries' => 2,
             ],
+            'long-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['long'],
+                'balance' => 'simple',
+                'processes' => 1,
+                'minProcesses' => 1,
+                'maxProcesses' => 1,
+                'tries' => 1,
+                'retry_after' => 1200, // Run for max 10 minutes
+            ],
             'invoice-supervisor' => [
                 'connection' => 'redis',
                 'queue' => ['invoices', 'receptions'],
@@ -232,6 +242,16 @@ return [
                 'minProcesses' => 3,
                 'maxProcesses' => 3,
                 'tries' => 2,
+            ],
+            'long-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['long'],
+                'balance' => 'simple',
+                'processes' => 1,
+                'minProcesses' => 1,
+                'maxProcesses' => 1,
+                'tries' => 1,
+                'retry_after' => 1200, // Run for max 10 minutes
             ],
             'invoice-supervisor' => [
                 'connection' => 'redis',
