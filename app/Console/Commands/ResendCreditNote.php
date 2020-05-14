@@ -47,8 +47,11 @@ class ResendCreditNote extends Command
         try {
             $this->info('Sending Credit Note to Hacienda....');
             $invoices = Invoice::where('hacienda_status', '01')->where('generation_method', 'like', '%etax%')
-                ->where('resend_attempts', '<', 6)->where('in_queue', false)
-                ->where('document_type', '03')->get();
+                ->where('resend_attempts', '<', 6)
+                ->where('in_queue', false)
+                ->whereIn('document_type', ['02', '03'])
+                ->get();
+
             $this->info('Sending Credit Note ....'. count($invoices));
             $this->info('Get Token Api Hacienda ....');
             $apiHacienda = new BridgeHaciendaApi();
