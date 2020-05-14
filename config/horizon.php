@@ -150,7 +150,7 @@ return [
                 'tries' => 2,
             ],
             'long-supervisor' => [
-                'connection' => 'redis',
+                'connection' => 'redis-long',
                 'queue' => ['long'],
                 'balance' => 'simple',
                 'processes' => 1,
@@ -244,7 +244,7 @@ return [
                 'tries' => 2,
             ],
             'long-supervisor' => [
-                'connection' => 'redis',
+                'connection' => 'redis-long',
                 'queue' => ['long'],
                 'balance' => 'simple',
                 'processes' => 1,
