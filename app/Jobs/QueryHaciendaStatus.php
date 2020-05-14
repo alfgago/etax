@@ -36,7 +36,11 @@ class QueryHaciendaStatus implements ShouldQueue
     public function handle()
     {
         try {
+            return false;
             $invoice = $this->invoice;
+            $invoice->query_attempts = $invoice->query_attempts+1;
+            $invoice->in_queue = true;
+            $invoice->save();
             $dateLimit = Carbon::now()->addMonths(-2);
             if( $invoice->created_at > $dateLimit){
                 $apiHacienda = new BridgeHaciendaApi();
@@ -49,7 +53,7 @@ class QueryHaciendaStatus implements ShouldQueue
                     $result = $apiHacienda->queryHacienda($invoice, $tokenApi, $company);
                 }
             }
-            $invoice->query_attempts = $invoice->query_attempts+1;
+            $invoice->in_queue = false;
             $invoice->save();
         } catch (\Exception $e) {
             Log::error("Error en job query hacienda: " .$e);
