@@ -508,12 +508,17 @@ class CorbanaController extends Controller
                     }
                     
                     //Busca si la palabra desechos existe en el detalle, en cuyo caso asigna el codigo 200  
-                    if( (strpos( strtolower($detalleProducto),"desecho") !== false)  ){
+                    if( (strpos( strtolower($detalleProducto),"desecho") !== false) || (strpos( strtolower($detalleProducto),"banano no exportable") !== false) ){
                         $codigoEtax = $prefijoCodigo.'200';
                         $categoriaHacienda = 24;
                         if($prefijoCodigo == 'S'){
                             $categoriaHacienda = 25;
                         }
+                    }
+                    //Busca si la palabra desechos existe en el detalle, en cuyo caso asigna el codigo 200  
+                    if( (strpos( strtolower($detalleProducto),"iglesia") !== false) || (strpos( strtolower($detalleProducto),"casa") !== false)  ){
+                        $codigoEtax = $prefijoCodigo.'200';
+                        $categoriaHacienda = 27;
                     }
                     
                     $subtotalLinea = $cantidad*$precioUnitario - $montoDescuento;
@@ -936,7 +941,7 @@ class CorbanaController extends Controller
                 }
                 $actividad = $request->codigo_actividad;
                 $bill->activity_company_verification = $actividad;
-                $condicionAceptacion = $request->condicion_aceptacion;
+                $condicionAceptacion = $request->condicion_aceptacion ?? '04';
                 if( isset($bill) ){
                     $company = $bill->company;
                     $cedula = $company->id_number;
@@ -951,7 +956,7 @@ class CorbanaController extends Controller
                     $bill->is_code_validated = true;
                     $bill->hacienda_status = '01';
                     foreach($bill->items as $item){
-                        $item->setIvaTypeFromCondition($condicionAceptacion);
+                        $item->setIvaTypeCorbana($condicionAceptacion, $actividad);
                         $item->calcularAcreditablePorLinea();
                     }
                     $bill->calculateAcceptFields($company);

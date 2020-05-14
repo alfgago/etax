@@ -7,6 +7,7 @@ use App\InvoiceItem;
 use App\XmlHacienda;
 use \Carbon\Carbon;
 use App\Client;
+use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Storage;
 
 class Invoice extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Filterable;
 
     protected $guarded = [];
 
@@ -1293,7 +1294,7 @@ class Invoice extends Model
         $invoice->total_gravado = $arr['ResumenFactura']['TotalGravado'] ?? 0;
 
         $invoice->save();
-/****************************************/
+
         $invoice->company->addSentInvoice($invoice->year, $invoice->month);
 
         $lids = array();
@@ -1614,6 +1615,168 @@ class Invoice extends Model
             return '';
         }
         return substr('0000'.hexdec(substr(sha1($ref.'Factel'.$salesId.'Facthor'), 0, 15)) % 999999999, -8);
+    }
+
+    public function setNoteDataApi($invoiceReference, $noteType = null, $request = []) {
+        try {
+
+            $noteType = $noteType ?? '03';
+            $this->document_key = getDocumentKey($noteType, $invoiceReference->company, $this->reference_number);
+            $this->document_number = getDocReference($noteType, $invoiceReference->company, $this->reference_number);
+            $this->sale_condition = $invoiceReference->sale_condition;
+            $this->payment_type = $invoiceReference->payment_type;
+            $this->retention_percent = $invoiceReference->retention_percent;
+            $this->commercial_activity = $invoiceReference->commercial_activity;
+            $this->credit_time = $invoiceReference->credit_time;
+            $this->buy_order = $invoiceReference->buy_order;
+            $this->other_reference = $invoiceReference->reference_number;
+            $this->reference_document_key = $invoiceReference->document_key;
+            $this->reference_generated_date = $invoiceReference->generated_date;
+            $this->reference_doc_type = $invoiceReference->document_type;
+            $this->send_emails = $invoiceReference->send_email ?? null;
+            $this->xml_schema = $invoiceReference->xml_schema;
+            $invoiceReference->reference_document_key = $this->document_key;
+            $invoiceReference->save();
+            $this->save();
+            $this->client_id = $invoiceReference->client_id;
+
+            //Reference data
+            $reference = new DocumentReference();
+            $reference->invoice_id = $invoiceReference->id;
+            $reference->ref_invoice_id = $this->id;
+            $reference->invoice_document_key = $invoiceReference->document_key;
+            $reference->reference_document_key = $this->document_key;
+            $reference->save();
+
+            //Datos de factura
+            $this->description = $invoiceReference->description;
+            $this->subtotal = floatval( str_replace(",","", $request->subtotal ));
+            $this->currency = $invoiceReference->currency;
+            $this->currency_rate = floatval( str_replace(",","", $invoiceReference->currency_rate ));
+
+            $this->commercial_activity = $request->codigoActividad;
+
+            $this->total_serv_gravados = $request->resumenFactura['totalServGravados'] ?? 0;
+
+            $this->total_serv_exentos = $request->resumenFactura['totalServExentos'] ?? 0;
+
+            $this->total_serv_exonerados = $request->resumenFactura['totalServExonerados'] ?? 0;
+
+            $this->total_merc_gravados = $request->resumenFactura['totalMercanciaGravadas'] ?? 0;
+
+            $this->total_merc_exentas = $request->resumenFactura['totalMercanciaExentas'] ?? 0;
+
+            $this->total_merc_exonerados = $request->resumenFactura['totalMercanciaExonerados'] ?? 0;
+
+            $this->total_gravado = $request->resumenFactura['totalGravado'] ?? 0;
+
+            $this->total_exento = $request->resumenFactura['totalExento'] ?? 0;
+
+            $this->total_exonerados = $request->resumenFactura['totalExonerado'] ?? 0;
+
+            $this->total_venta = $request->resumenFactura['totalVenta'] ?? 0;
+
+            $this->total_descuento = $request->resumenFactura['totalDescuentos'] ?? 0;
+
+            $this->total_iva_devuelto = $request->resumenFactura['totalIvaDevuelto'] ?? 0;
+
+            $this->total_otros_cargos = $request->resumenFactura['totalOtrosCargos'] ?? 0;
+
+            $this->total_venta_neta = $request->resumenFactura['totalVentaNeta'] ?? 0;
+            $this->subtotal = $request->resumenFactura['totalVentaNeta'] ?? 0;
+
+            $this->total_iva = $request->resumenFactura['totalImpuesto'] ?? 0;
+            $this->iva_amount = $request->resumenFactura['totalImpuesto'] ?? 0;
+
+            $this->total_comprobante = $request->resumenFactura['totalComprobante'] ?? 0;
+
+            $this->save();
+
+            $this->client_first_name = $invoiceReference->client_first_name;
+            $this->client_last_name = $invoiceReference->client_last_name;
+            $this->client_last_name2 = $invoiceReference->client_last_name2;
+            $this->client_email = $invoiceReference->client_email;
+            $this->client_address = $invoiceReference->client_address;
+            $this->client_country = $invoiceReference->client_country;
+            $this->client_state = $invoiceReference->client_state;
+            $this->client_city = $invoiceReference->client_city;
+            $this->client_district = $invoiceReference->client_district;
+            $this->client_zip = $invoiceReference->client_zip;
+            $this->client_phone = $invoiceReference->client_phone;
+            $this->client_id_number = $invoiceReference->client_id_number;
+            $this->client_id_type = $invoiceReference->client_id_type;
+
+            $fecha = Carbon::parse(now('America/Costa_Rica'));
+            $this->generated_date = $fecha;
+            $fechaV = $fecha;
+            $this->due_date = $fechaV;
+            $this->year = Carbon::now()->year;
+            $this->month = Carbon::now()->month;
+            $this->save();
+
+
+            $lids = array();
+            $totalIvaDevuelto = 0;
+
+            if ($this->id) {
+                $this->company->addSentInvoice($this->year, $this->month);
+            }
+
+
+            $this->save();
+
+            foreach($request->detalleServicio as $item) {
+                $item['lineaDetalle']['numeroLinea'] = "NaN" != $item['lineaDetalle']['numeroLinea'] ? $item['lineaDetalle']['numeroLinea'] : 1;
+                $item_modificado = $this->addEditItem($item['lineaDetalle']);
+
+                array_push( $lids, $item_modificado->id );
+            }
+
+            foreach ( $this->items as $item ) {
+                if( !in_array( $item->id, $lids ) ) {
+                    $item->delete();
+                }
+            }
+
+            foreach ($this->items as $item) {
+                if ($this->payment_type == '02' && $item->product_type == 12) {
+                    $totalIvaDevuelto += $item->iva_amount;
+                }
+            }
+            $this->total_iva_devuelto = $totalIvaDevuelto;
+
+            try{
+                //Recorrer OtrosCargos
+                $oids = array();
+                $i = 1;
+                $totalOtrosCargos = 0;
+                foreach ($request->otroscargos as $item) {
+                    $item['item_number'] = $i;
+                    $item['item_id'] = $item['id'] ? $item['id'] : 0;
+                    $cargo_modificado = $this->addEditOtherCharges($item);
+                    array_push( $oids, $cargo_modificado->id );
+                    $totalOtrosCargos += $cargo_modificado->amount;
+                    $i++;
+                }
+                foreach ($this->otherCharges as $item) {
+                    if (!in_array( $item->id, $oids )) {
+                        $item->delete();
+                    }
+                }
+                $this->total_otros_cargos = $totalOtrosCargos;
+            }catch(\Exception $e){
+                Log::error("Error al guardar otros cargos");
+            }
+
+            //Guarda nuevamente el invoice
+            $this->save();
+
+            return $this;
+
+        } catch (\Exception $e) {
+            Log::error('Error al crear factura: '.$e);
+            return back()->withError('Ha ocurrido un error al registrar la factura' . $e->getMessage());
+        }
     }
 
 }

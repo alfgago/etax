@@ -710,9 +710,13 @@ class CalculatedTax extends Model
                         $porc_plena = $billItems[$i]->porc_identificacion_plena ? $billItems[$i]->porc_identificacion_plena : 0;
                         $currAcreditablePleno = 0;
 
-                        //Asigna 13%, porque para efectos de algoritmo. Me puedo acreditar la totaliddad para canasta basica y para compras al 0% acreditable
+                        //Asigna 13%, porque para efectos de algoritmo. Me puedo acreditar la totalidad para canasta basica y para compras al 0% acreditable
                         if ($porc_plena == 1 || $porc_plena == 5) {
                             $porc_plena = 13;
+                        }
+                        
+                        if ($porc_plena == 99) {
+                            $porc_plena = 0;
                         }
 
                         if ($ivaType == 'B041' || $ivaType == 'B051' || $ivaType == 'B061' || $ivaType == 'B071' ||

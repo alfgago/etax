@@ -148,7 +148,8 @@
                   <div class="">
                    <select class="form-control identificacion_especifica_all"  placeholder="Seleccione una categoría de hacienda" >
                       <option value="0" posibles="">-- Seleccione --</option>
-                      <option value="10" posibles="">0%</option>
+                      <option value="5" posibles="">0% acreditable</option>
+                      <option value="99" posibles="">0% no acreditable</option>
                       <option value="1" posibles="">1%</option>
                       <option value="2" posibles="">2%</option>
                       <option value="4" posibles="">4%</option>
@@ -334,8 +335,8 @@ $(document).ready(function(){
     $(".identificacion_especifica_all").change(function(){
         var identificacion  = $(this).val(); 
         if(identificacion != 0){
-        $(".porc_identificacion_plena").val(identificacion);
-      }
+          $(".porc_identificacion_plena").val(identificacion);
+        }
     });
     $(".iva_type_all").change(function(){
         var iva_type  = $(this).val(); 
