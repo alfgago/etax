@@ -1294,7 +1294,7 @@ class Invoice extends Model
         $invoice->total_gravado = $arr['ResumenFactura']['TotalGravado'] ?? 0;
 
         $invoice->save();
-/****************************************/
+
         $invoice->company->addSentInvoice($invoice->year, $invoice->month);
 
         $lids = array();
@@ -1621,8 +1621,8 @@ class Invoice extends Model
         try {
 
             $noteType = $noteType ?? '03';
-            $this->document_key = getDocumentKey($noteType, $this->reference_number, $invoiceReference->company->id_number);
-            $this->document_number = getDocReference($noteType, $this->reference_number);
+            $this->document_key = getDocumentKey($noteType, $invoiceReference->company, $this->reference_number);
+            $this->document_number = getDocReference($noteType, $invoiceReference->company, $this->reference_number);
             $this->sale_condition = $invoiceReference->sale_condition;
             $this->payment_type = $invoiceReference->payment_type;
             $this->retention_percent = $invoiceReference->retention_percent;
