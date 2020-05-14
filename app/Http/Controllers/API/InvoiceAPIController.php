@@ -190,6 +190,17 @@ class InvoiceAPIController extends Controller
                     $note->save();
                     $noteData = $note->setNoteDataApi($invoice, $note->document_type, $request);
 
+                    if (!$request->clave && !$request->numeroConsecutivo) {
+                        $note->document_key = $this->getDocumentKey($request->tipo_documento);
+                        $note->document_number = $this->getDocReference($request->tipo_documento);
+                    } else {
+                        $note->reference_number = ltrim(substr($request->numeroConsecutivo,-10), '0');
+                        $note->document_key = $request->clave;
+                        $note->document_number = $request->numeroConsecutivo;
+                    }
+
+                    $note->save();
+
                     if (!empty($noteData)) {
                         $apiHacienda->createCreditNote($noteData, $tokenApi);
                     }
