@@ -941,7 +941,7 @@ class CorbanaController extends Controller
                 }
                 $actividad = $request->codigo_actividad;
                 $bill->activity_company_verification = $actividad;
-                $condicionAceptacion = $request->condicion_aceptacion;
+                $condicionAceptacion = $request->condicion_aceptacion ?? '04';
                 if( isset($bill) ){
                     $company = $bill->company;
                     $cedula = $company->id_number;

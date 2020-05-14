@@ -43,7 +43,7 @@ class QueryPendingInvoices extends Command
     public function handle()
     {
         try {
-            $dateLimit = Carbon::now()->addMonths(-2);
+            $dateLimit = Carbon::now()->addMonths(-1);
             $this->info('Sending invoices to Hacienda....');
             $invoices = Invoice::where('hacienda_status', '05')
                 ->where('created_at', '>', $dateLimit)
