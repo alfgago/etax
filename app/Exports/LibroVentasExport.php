@@ -65,9 +65,9 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
         ->with(['invoice', 'invoice.client', 'productCategory', 'ivaType'])
         ->where('year', $this->year)
         ->where('month', $this->month)
-        ->whereHas('invoice', function ($query) use ($companyId){
+        ->where('company_id', $companyId)
+        ->whereHas('invoice', function ($query) {
             $query
-            ->where('company_id', $companyId)
             ->where('is_void', false)
             ->where('is_authorized', true)
             ->where('is_code_validated', true)
