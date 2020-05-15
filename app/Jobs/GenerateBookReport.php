@@ -37,13 +37,14 @@ class GenerateBookReport implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($type, $user, $company, $year, $month)
+    public function __construct($type, $user, $company, $year, $month, $limit = 35000)
     {
         $this->type = $type;
         $this->user = $user;
         $this->year = $year;
         $this->month = $month;
         $this->company = $company;
+        $this->limit = $limit;
     }
 
     /**
@@ -95,21 +96,35 @@ class GenerateBookReport implements ShouldQueue
                 ])
             );
         }else{
-            
-            $filePath = "/libros/$company->id_number/libro-ventas-".$year.$month.".xlsx";
-            if( $company->id == 1110 ){
-                $file = Excel::store(new LibroVentasExportSM($year, $month, $company->id), $filePath, 's3');
+            $limit = $this->limit;
+            if($limit < 35000){
+                $filePath = "/libros/$company->id_number/libro-ventas-".$year.$month.".xlsx";
+                if( $company->id == 1110 ){
+                    $file = Excel::store(new LibroVentasExportSM($year, $month, $company->id), $filePath, 's3');
+                }else{
+                    $file = Excel::store(new LibroVentasExport($year, $month, $company->id),   $filePath, 's3');
+                }
+                
+                Mail::to( replaceAccents( $user->email) )->send(
+                    new BookReportEmail([
+                        "title" => "Libro de Ventas $month/$year - $company->id_number",
+                        "message" => "Adjunto a este correo encontrará el libro de ventas correspondiente al periodo $month/$year, con corte de fecha el día ".Carbon::now()->format('d/m/Y').".",
+                        "filePath" => $filePath
+                    ])
+                );
             }else{
-                $file = Excel::store(new LibroVentasExport($year, $month, $company->id),   $filePath, 's3');
+                $from = 0;
+                $to = 0;
+                while($from < $limit){
+                    $to = $from + 35000;
+                    if($to >= $limit){
+                        $to = $limit;
+                    }
+                    GenerateBookReportBatch::dispatch('INVOICE', $user, $company, $year, $month, $to, $from)->onQueue('default_long');
+                    $from = $to;
+                }
             }
             
-            Mail::to( replaceAccents( $user->email) )->send(
-                new BookReportEmail([
-                    "title" => "Libro de Ventas $month/$year - $company->id_number",
-                    "message" => "Adjunto a este correo encontrará el libro de compras correspondiente al periodo $month/$year, con corte de fecha el día ".Carbon::now()->format('d/m/Y').".",
-                    "filePath" => $filePath
-                ])
-            );
         }
         
     }
