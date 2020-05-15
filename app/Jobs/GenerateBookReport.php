@@ -98,6 +98,7 @@ class GenerateBookReport implements ShouldQueue
                 ])
             );
         }else{
+            Log::debug("Tiene un limite de $limit " . json_encode($limit < 35000));
             if($limit < 35000){
                 $filePath = "/libros/$company->id_number/libro-ventas-".$year.$month.".xlsx";
                 if( $company->id == 1110 ){
