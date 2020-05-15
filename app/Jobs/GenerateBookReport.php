@@ -99,7 +99,7 @@ class GenerateBookReport implements ShouldQueue
             );
         }else{
             Log::debug("Tiene un limite de $limit " . json_encode($limit < 27000));
-            if($limit <= 27000){
+            if($limit <= 27001){
                 $filePath = "/libros/$company->id_number/libro-ventas-".$year.$month.".xlsx";
                 if( $company->id == 1110 ){
                     $file = Excel::store(new LibroVentasExportSM($year, $month, $company->id), $filePath, 's3');
