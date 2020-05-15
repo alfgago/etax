@@ -31,6 +31,7 @@ class GenerateBookReport implements ShouldQueue
     private $company = null;
     private $year = null;
     private $month = null;
+    private $limit = null;
     
     /**
      * Create a new job instance.
@@ -59,6 +60,7 @@ class GenerateBookReport implements ShouldQueue
         $year = $this->year;
         $month = $this->month;
         $company = $this->company;
+        $limit = $this->limit;
         
         if( $type == "BILL" ){
             //Busca todos los que aun no tienen el IVA calculado, lo calcula y lo guarda
@@ -96,7 +98,6 @@ class GenerateBookReport implements ShouldQueue
                 ])
             );
         }else{
-            $limit = $this->limit;
             if($limit < 35000){
                 $filePath = "/libros/$company->id_number/libro-ventas-".$year.$month.".xlsx";
                 if( $company->id == 1110 ){
