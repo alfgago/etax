@@ -68,7 +68,6 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
         ->where('year', $this->year)
         ->where('month', $this->month)
         ->where('company_id', $companyId)
-        ->offset($this->offset)->limit($this->limit)
         ->whereHas('invoice', function ($query) {
             $query
             ->where('is_void', false)
