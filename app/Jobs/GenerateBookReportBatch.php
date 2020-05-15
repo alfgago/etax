@@ -31,6 +31,8 @@ class GenerateBookReportBatch implements ShouldQueue
     private $company = null;
     private $year = null;
     private $month = null;
+    private $from = null;
+    private $to = null;
     
     /**
      * Create a new job instance.
