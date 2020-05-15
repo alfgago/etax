@@ -546,7 +546,7 @@ class CalculatedTax extends Model
                             $typeVarActividad = $currActivity . "-" . $typeVar; //Ej. 706903-type17
                             $typeVarPorcActividad = $currActivity . "-" . $typeVarPorc; //Ej. 706903-type17-4
                             
-                            if( $typeVarPorc == 'type1-13' ){
+                            if( $typeVar == 'type1' ){
                                 dd($currInvoice);
                             }
 
