@@ -35,7 +35,6 @@ class QueryHaciendaStatus implements ShouldQueue
      */
     public function handle()
     {
-        return false;
         try {
             $invoice = $this->invoice;
             $dateLimit = Carbon::now()->addMonths(-2);
