@@ -38,7 +38,7 @@ class GenerateBookReport implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($type, $user, $company, $year, $month, $limit = 35000)
+    public function __construct($type, $user, $company, $year, $month, $limit = 27000)
     {
         $this->type = $type;
         $this->user = $user;
@@ -98,8 +98,8 @@ class GenerateBookReport implements ShouldQueue
                 ])
             );
         }else{
-            Log::debug("Tiene un limite de $limit " . json_encode($limit < 35000));
-            if($limit < 35000){
+            Log::debug("Tiene un limite de $limit " . json_encode($limit < 27000));
+            if($limit <= 27000){
                 $filePath = "/libros/$company->id_number/libro-ventas-".$year.$month.".xlsx";
                 if( $company->id == 1110 ){
                     $file = Excel::store(new LibroVentasExportSM($year, $month, $company->id), $filePath, 's3');
@@ -118,7 +118,7 @@ class GenerateBookReport implements ShouldQueue
                 $from = 0;
                 $to = 0;
                 while($from < $limit){
-                    $to = $from + 35000;
+                    $to = $from + 27000;
                     if($to >= $limit){
                         $to = $limit;
                     }
