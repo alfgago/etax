@@ -151,7 +151,7 @@ return [
             ],
             'long-supervisor' => [
                 'connection' => 'redis-long',
-                'queue' => ['long'],
+                'queue' => ['default_long'],
                 'balance' => 'simple',
                 'processes' => 1,
                 'minProcesses' => 1,
