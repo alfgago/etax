@@ -62,6 +62,8 @@ class GenerateBookReportBatch implements ShouldQueue
         $year = $this->year;
         $month = $this->month;
         $company = $this->company;
+        $from = $this->from;
+        $to = $this->to;
         
         if( $type == "BILL" ){
             
