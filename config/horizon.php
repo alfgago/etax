@@ -152,13 +152,13 @@ return [
             ],
             'long-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['default_long'],
-                'balance' => 'simple',
+                'queue' => ['default'],
+                'balance' => 'auto',
                 'processes' => 1,
                 'minProcesses' => 1,
                 'maxProcesses' => 1,
-                'tries' => 1,
-                'timeout' => 2000, // Run for max 10 minutes
+                'tries' => 2,
+                'timeout' => 2100,
             ],
             'invoice-supervisor' => [
                 'connection' => 'redis',
