@@ -148,9 +148,10 @@ return [
                 'minProcesses' => 2,
                 'maxProcesses' => 2,
                 'tries' => 2,
+                'timeout' => 120,
             ],
             'long-supervisor' => [
-                'connection' => 'redis-long',
+                'connection' => 'redis',
                 'queue' => ['default_long'],
                 'balance' => 'simple',
                 'processes' => 1,
@@ -167,6 +168,7 @@ return [
                 'minProcesses' => 2,
                 'maxProcesses' => 2,
                 'tries' => 1,
+                'timeout' => 120,
             ],
             'invoice-resend-supervisor' => [
                 'connection' => 'redis',
@@ -176,6 +178,7 @@ return [
                 'minProcesses' => 3,
                 'maxProcesses' => 3,
                 'tries' => 1,
+                'timeout' => 120,
             ],
             'sendbulk-supervisor' => [
                 'connection' => 'redis',
@@ -185,6 +188,7 @@ return [
                 'minProcesses' => 1,
                 'maxProcesses' => 1,
                 'tries' => 1,
+                'timeout' => 120,
             ],
             'smbulk-supervisor' => [
                 'connection' => 'redis',
@@ -194,6 +198,7 @@ return [
                 'minProcesses' => 2,
                 'maxProcesses' => 2,
                 'tries' => 1,
+                'timeout' => 120,
             ],
             'imports-supervisor' => [
                 'connection' => 'redis',
@@ -203,6 +208,7 @@ return [
                 'minProcesses' => 2,
                 'maxProcesses' => 2,
                 'tries' => 2,
+                'timeout' => 120,
             ],
             'log-supervisor' => [
                 'connection' => 'redis',
@@ -212,6 +218,7 @@ return [
                 'minProcesses' => 2,
                 'maxProcesses' => 2,
                 'tries' => 1,
+                'timeout' => 120,
             ],
             'bulk-supervisor' => [
                 'connection' => 'redis',
@@ -221,6 +228,7 @@ return [
                 'minProcesses' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
                 'maxProcesses' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
                 'tries' => 1,
+                'timeout' => 120,
             ],
             'subscriptions-supervisor' => [
                 'connection' => 'redis',
@@ -230,6 +238,7 @@ return [
                 'minProcesses' => 1,
                 'maxProcesses' => 1,
                 'tries' => 1,
+                'timeout' => 120,
             ],
         ],
 
@@ -242,6 +251,7 @@ return [
                 'minProcesses' => 3,
                 'maxProcesses' => 3,
                 'tries' => 2,
+                'timeout' => 120,
             ],
             'long-supervisor' => [
                 'connection' => 'redis-long',
@@ -261,6 +271,7 @@ return [
                 'minProcesses' => 2,
                 'maxProcesses' => 2,
                 'tries' => 1,
+                'timeout' => 120,
             ],
             'invoice-resend-supervisor' => [
                 'connection' => 'redis',
@@ -270,6 +281,7 @@ return [
                 'minProcesses' => 3,
                 'maxProcesses' => 3,
                 'tries' => 2,
+                'timeout' => 120,
             ],
             'sendbulk-supervisor' => [
                 'connection' => 'redis',
@@ -279,6 +291,7 @@ return [
                 'minProcesses' => 2,
                 'maxProcesses' => 2,
                 'tries' => 1,
+                'timeout' => 120,
             ],
             'smbulk-supervisor' => [
                 'connection' => 'redis',
@@ -288,6 +301,7 @@ return [
                 'minProcesses' => 2,
                 'maxProcesses' => 2,
                 'tries' => 1,
+                'timeout' => 120,
             ],
             'imports-supervisor' => [
                 'connection' => 'redis',
@@ -297,6 +311,7 @@ return [
                 'minProcesses' => 3,
                 'maxProcesses' => 3,
                 'tries' => 2,
+                'timeout' => 120,
             ],
             'log-supervisor' => [
                 'connection' => 'redis',
@@ -306,6 +321,7 @@ return [
                 'minProcesses' => 2,
                 'maxProcesses' => 2,
                 'tries' => 1,
+                'timeout' => 120,
             ],
             'bulk-supervisor' => [
                 'connection' => 'redis',
@@ -315,6 +331,7 @@ return [
                 'minProcesses' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
                 'maxProcesses' => 1, //Solo 1 proceso a la vez para los cobros recurrentes.
                 'tries' => 1,
+                'timeout' => 120,
             ],
             'subscriptions-supervisor' => [
                 'connection' => 'redis',
@@ -324,6 +341,7 @@ return [
                 'minProcesses' => 1,
                 'maxProcesses' => 1,
                 'tries' => 1,
+                'timeout' => 120,
             ],
         ],
     ],
