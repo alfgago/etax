@@ -152,7 +152,7 @@ return [
             ],
             'long-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['default'],
+                'queue' => ['default_long'],
                 'balance' => 'auto',
                 'processes' => 1,
                 'minProcesses' => 1,
