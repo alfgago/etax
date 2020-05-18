@@ -375,10 +375,11 @@ class BridgeHaciendaApi
                                 ->where('invoice_id', $invoice->id)
                                 ->orderBy('created_at','asc')
                                 ->first();
-        $apiResponseDate = $apiResponse->created_at;
-        $shortDate = str_pad($apiResponseDate->day, 2, "0", STR_PAD_LEFT) . str_pad($apiResponseDate->month, 2, "0", STR_PAD_LEFT);
+        /*$apiResponseDate = $apiResponse->created_at;
+        $shortDate = str_pad($apiResponseDate->day, 2, "0", STR_PAD_LEFT) . str_pad($apiResponseDate->month, 2, "0", STR_PAD_LEFT);setTempKey
         $documentKey = $invoice->document_key;
-        $newKey = substr_replace($documentKey, $shortDate, 3, 4);
+        $newKey = substr_replace($documentKey, $shortDate, 3, 4);*/
+        $newKey = $apiResponse->document_key;
         $invoice->document_key = $newKey;
         Log::info("QUERY HACIENDA: Generando otra llave $newKey");
         return $invoice;
