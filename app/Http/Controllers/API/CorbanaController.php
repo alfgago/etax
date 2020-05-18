@@ -936,9 +936,9 @@ class CorbanaController extends Controller
                             ->with('company')
                             ->first();
                 $acceptStatus = $request->accept_status;
-                if($acceptStatus == 3){
+                /*if($acceptStatus == 3){
                     $acceptStatus = 2; //El 2 es la de rechazo. Parcial no se usa en Corbana
-                }
+                }*/
                 $actividad = $request->codigo_actividad;
                 $bill->activity_company_verification = $actividad;
                 $condicionAceptacion = $request->condicion_aceptacion ?? '04';

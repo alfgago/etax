@@ -1763,7 +1763,7 @@ class Invoice extends Model
 
             foreach($request->detalleServicio as $item) {
                 $item['lineaDetalle']['numeroLinea'] = "NaN" != $item['lineaDetalle']['numeroLinea'] ? $item['lineaDetalle']['numeroLinea'] : 1;
-                $item_modificado = $this->addEditItem($item['lineaDetalle']);
+                $item_modificado = $this->addEditItemApi($item['lineaDetalle']);
 
                 array_push( $lids, $item_modificado->id );
             }

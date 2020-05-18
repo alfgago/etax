@@ -55,10 +55,10 @@ class ResendReception extends Command
             foreach ($bills as $bill) {
                 $provider = $bill->provider;
                 $company = $bill->company;
+                $bill->resend_attempts = $bill->resend_attempts + 1;
+                $bill->in_queue = true;
+                $bill->save();
                 if (isset($company->atv_validation) && $company && $provider) {
-                    $bill->resend_attempts = $bill->resend_attempts + 1;
-                    $bill->in_queue = true;
-                    $bill->save();
                     $ref = $company->last_rec_ref_number;
                     Log::info("Sending Reception ID:$bill->id, Empresa: $company->business_name, Doc: $bill->document_key" );
                     sleep(4);

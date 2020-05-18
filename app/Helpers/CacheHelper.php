@@ -2,22 +2,22 @@
 
 if (!function_exists('clearInvoiceCache')) {
 
-    function clearInvoiceCache($invoice){
+    function clearInvoiceCache($invoice, $force = false){
         $month = $invoice->month;
         $year = $invoice->year;
-        clearTaxesCache($invoice->company_id, $month, $year);
-        clearTaxesCache($invoice->company_id, 0, $year);
+        clearTaxesCache($invoice->company_id, $month, $year, $force);
+        clearTaxesCache($invoice->company_id, 0, $year, $force);
     }
     
 }
 
 if (!function_exists('clearBillCache')) {
 	
-    function clearBillCache($bill){
+    function clearBillCache($bill, $force = false){
         $month = $bill->month;
         $year = $bill->year;
-        clearTaxesCache($bill->company_id, $month, $year);
-        clearTaxesCache($bill->company_id, 0, $year);
+        clearTaxesCache($bill->company_id, $month, $year, $force);
+        clearTaxesCache($bill->company_id, 0, $year, $force);
         $cacheKeyBillAccepts = "cache-billaccepts-".$bill->id;
         Cache::forget($cacheKeyBillAccepts);
     }
@@ -26,7 +26,7 @@ if (!function_exists('clearBillCache')) {
 
 if (!function_exists('clearTaxesCache')) {  
 	
-    function clearTaxesCache($current_company, $month, $year){
+    function clearTaxesCache($current_company, $month, $year, $force = false){
       	try{
           	$cacheKey = "cache-taxes-$current_company-$month-$year";
           	Cache::forget($cacheKey);

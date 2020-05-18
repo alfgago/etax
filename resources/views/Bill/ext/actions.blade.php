@@ -92,7 +92,7 @@
             <form id="decline-form-{{ $data->id }}" class="block-form dropdown-item" method="POST" action="/facturas-recibidas/respuesta-aceptacion/{{ $data->id }}" >
               @csrf
               @method('patch')
-              <input type="hidden" name="respuesta" value="2">
+              <input type="hidden" name="respuesta" value="3">
               <a type="button" title="Rechazar" class="text-danger mr-2" onclick="confirmDecline({{ $data->id }});">
                 <i class="fa fa-ban" aria-hidden="true"></i> <span class="toggle-item-text">Rechazar factura</span>
               </a>

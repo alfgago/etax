@@ -243,7 +243,7 @@ return [
                 'tries' => 2,
             ],
             'long-supervisor' => [
-                'connection' => 'redis-long',
+                'connection' => 'redis',
                 'queue' => ['long'],
                 'balance' => 'simple',
                 'processes' => 1,

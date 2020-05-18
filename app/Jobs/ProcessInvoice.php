@@ -93,7 +93,7 @@ class ProcessInvoice implements ShouldQueue
                             'multipart' => $requestData,
                             'verify' => false,
                             'http_errors' => false,
-                            'connect_timeout' => 20
+                            'connect_timeout' => 25
                         ]);
                         $response = json_decode($result->getBody()->getContents(), true);
                         $date = Carbon::now();

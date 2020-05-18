@@ -98,7 +98,7 @@ class BillController extends Controller
                 where('bill_items.company_id', $company->id)
                 ->join('bills', 'bill_items.bill_id', '=', 'bills.id' )
                 ->where('bills.is_authorized', 1)
-                ->where('bills.accept_status', '!=' , 2)
+                ->whereNotIn('bills.accept_status', [2,3])
                 ->has('bill')
                 ->with('bill')
                 //->join('providers', 'bills.provider_id', '=', 'providers.id' )
@@ -667,7 +667,7 @@ class BillController extends Controller
                 ->where('is_void', false)
                 ->where('is_authorized', true)
                 ->where('is_code_validated', true)
-                ->where('accept_status', '!=', 2)
+                ->whereNotIn('accept_status', [2,3])
                 ->where('hide_from_taxes', false);
             });
             $billItems = $query->get();
@@ -1199,7 +1199,7 @@ class BillController extends Controller
                 return redirect('/facturas-recibidas/autorizaciones')->withMessage( 'La factura '. $bill->document_number . 'ha sido autorizada. Recuerde validar el código');
             }else {
                 $bill->is_authorized = true;
-                $bill->accept_status = 2;
+                $bill->accept_status = 3;
                 $bill->save();
                 
                 clearBillCache($bill);
@@ -1465,6 +1465,9 @@ class BillController extends Controller
                     }
                     $mensaje = 'Aceptación enviada.';
                     if($request->respuesta == 2){
+                        $mensaje = 'Aceptación parcial enviada';
+                    }
+                    if($request->respuesta == 3){
                         $mensaje = 'Rechazo de factura enviado';
                     }
                     clearBillCache($bill);
