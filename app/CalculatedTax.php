@@ -545,7 +545,7 @@ class CalculatedTax extends Model
                             $typeVarPorc = "type$prodType-$prodPorc"; //Ej. type17-4
                             $typeVarActividad = $currActivity . "-" . $typeVar; //Ej. 706903-type17
                             $typeVarPorcActividad = $currActivity . "-" . $typeVarPorc; //Ej. 706903-type17-4
-
+                            
                             if (!isset($ivaData->$typeVar)) {
                                 $ivaData->$typeVar = 0;
                             }

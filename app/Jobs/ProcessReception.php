@@ -74,7 +74,7 @@ class ProcessReception implements ShouldQueue
                             $bill->in_queue = false;
                             $bill->save();
                             $endpoint = $bill->xml_schema == 42 ? 'invoice' : 'invoice43';
-                            sleep(15);
+                            sleep(9);
                             Log::info('Enviando Request Reception  API HACIENDA -->>' . $this->billId);
                             $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/'.$endpoint.'/aceptacionxml', [
                                 'headers' => [
@@ -87,7 +87,7 @@ class ProcessReception implements ShouldQueue
                                 'multipart' => $requestData,
                                 'verify' => false,
                                 'http_errors' => false,
-                                'connect_timeout' => 20
+                                'connect_timeout' => 25
                             ]);
                             $response = json_decode($result->getBody()->getContents(), true);
                             Log::info('Response Reception Api Hacienda '. json_encode($response));

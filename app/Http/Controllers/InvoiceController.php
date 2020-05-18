@@ -1279,7 +1279,7 @@ class InvoiceController extends Controller
             return Excel::download(new LibroVentasExport($year, $month, $companyId), 'libro-ventas.xlsx');
         }else{
             $user = auth()->user();
-            GenerateBookReport::dispatch('INVOICE', $user, $company, $year, $month)->onQueue('long');;
+            GenerateBookReport::dispatch('INVOICE', $user, $company, $year, $month, $count);
             return back()->withMessage('Su libro de ventas es muy grande, en unos minutos será enviado a su correo electrónico: ' . $user->email );
         }
     }

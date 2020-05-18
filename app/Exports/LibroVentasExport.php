@@ -14,11 +14,13 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEvents
 {
     
-    public function __construct(int $year, int $month, $companyId = null)
+    public function __construct(int $year, int $month, $companyId = null, $offset = 0, $limit = 35000)
     {
         $this->year = $year;
         $this->month = $month;
         $this->company_id = $companyId;
+        $this->offset = $offset;
+        $this->limit = $limit;
     }
     
     public function registerEvents(): array

@@ -528,12 +528,12 @@
                     <tr>
                         <td colspan="2" style="text-align: center;">
                             <?php 
-                                if($data_invoice->currency == 'USD'){
+                                /*if($data_invoice->currency == 'USD'){
                                     $monedaLetras = 'DOLARES';
                                 }else{
                                     $monedaLetras = 'COLONES';
-                                }
-                                $letras = \App\Utils\NumeroALetras::convertir($totalComprobante, '', 'CENTAVOS') . " $monedaLetras";
+                                }*/
+                                $letras = \App\Utils\NumeroALetras::convertir($totalComprobante, '', '');
                                 if( !empty($letras) ){  ?>
                                 <span>{{ $letras }}</span>
                             <?php } ?>

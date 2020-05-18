@@ -125,7 +125,7 @@ return [
     |
     */
 
-    'memory_limit' => 384,
+    'memory_limit' => 512,
 
     /*
     |--------------------------------------------------------------------------
@@ -151,13 +151,12 @@ return [
             ],
             'long-supervisor' => [
                 'connection' => 'redis',
-                'queue' => ['long'],
+                'queue' => ['default_long'],
                 'balance' => 'simple',
                 'processes' => 1,
                 'minProcesses' => 1,
                 'maxProcesses' => 1,
                 'tries' => 1,
-                'retry_after' => 1200, // Run for max 10 minutes
             ],
             'invoice-supervisor' => [
                 'connection' => 'redis',
@@ -244,7 +243,7 @@ return [
                 'tries' => 2,
             ],
             'long-supervisor' => [
-                'connection' => 'redis',
+                'connection' => 'redis-long',
                 'queue' => ['long'],
                 'balance' => 'simple',
                 'processes' => 1,
