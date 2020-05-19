@@ -370,7 +370,7 @@ class BridgeHaciendaApi
     }
     
     public function setTempKey($invoice){
-        $apiResponse = ApiResponse::select('id','company_id','invoice_id','created_at')
+        $apiResponse = ApiResponse::select('id','company_id','invoice_id','created_at','document_key')
                                 ->where('company_id', $invoice->company_id)
                                 ->where('invoice_id', $invoice->id)
                                 ->orderBy('created_at','asc')
