@@ -380,7 +380,11 @@ class BridgeHaciendaApi
         $documentKey = $invoice->document_key;
         $newKey = substr_replace($documentKey, $shortDate, 3, 4);*/
         $newKey = $apiResponse->document_key;
+        if($invoice->company_id == '1110'){
+            $newKey = str_replace('506080520003', '506090520003', $newKey);
+        }
         $invoice->document_key = $newKey;
+        
         Log::info("QUERY HACIENDA: Generando otra llave $newKey");
         return $invoice;
     }

@@ -339,23 +339,11 @@ class CorbanaController extends Controller
             }
             
             //Define el numero de factura
-            //$numeroReferencia = $factura['NO_DOCU'];
-            //$numeroReferencia = floatval( mb_substr( $numeroReferencia, -8, null, 'UTF-8') );
             $numeroReferencia = getNextRef($tipoDocumento, $company);
             $consecutivoComprobante = getDocReference($tipoDocumento, $company, $numeroReferencia);
             $claveFactura = getDocumentKey($tipoDocumento, $company, $numeroReferencia);
             $company->setLastReference($tipoDocumento, $numeroReferencia, $consecutivoComprobante);
             sleep(2);
-            /*$invoice = Invoice::where('document_key', $claveFactura)
-                                ->where('company_id', $company->id)
-                                ->with('items')
-                                ->first();
-            if(isset($invoice)){
-                return response()->json([
-                    'mensaje' => 'Factura existente',
-                    'factura' => $invoice
-                ], 200);
-            }*/
             
             $TIPO_SERV = $factura['TIPO_SERV'] ?? 'B';
             if( $tipoDocumento == '09' ){
@@ -430,10 +418,11 @@ class CorbanaController extends Controller
                 $porcentajeExoneracion = 0;
             }
             
-            $categoriaHacienda = null;
+            $categoriaHacienda = 15;
             $prefijoCodigo= "B";
             if($TIPO_SERV == "S"){
                 $prefijoCodigo = "S";
+                $categoriaHacienda = 17;
             }
             $codigoEtax = $prefijoCodigo.'103';
             if($porcentajeIVA == 1){
@@ -457,7 +446,13 @@ class CorbanaController extends Controller
             }
             $impuestoNeto = 0;
             if($tipoDocumento == '09'){
-                $codigoEtax = "B150";
+                $codigoEtax = $prefijoCodigo."150";
+            }
+            
+            //Condicion especial para la actividad 802201
+            if( $codigoActividad == '802201' && ($porcentajeIVA == 0 || $porcentajeIVA == '0') ){
+                $codigoEtax = 'S150';
+                $categoriaHacienda = 23;
             }
             
             Log::debug("Codigo IVA puesto: $codigoEtax");
@@ -508,7 +503,10 @@ class CorbanaController extends Controller
                     }
                     
                     //Busca si la palabra desechos existe en el detalle, en cuyo caso asigna el codigo 200  
-                    if( (strpos( strtolower($detalleProducto),"desecho") !== false) || (strpos( strtolower($detalleProducto),"banano no exportable") !== false) ){
+                    if( (strpos( strtolower($detalleProducto),"libro") !== false) || 
+                        (strpos( strtolower($detalleProducto),"diccionario") !== false) || 
+                        (strpos( strtolower($detalleProducto),"desecho") !== false) || 
+                        (strpos( strtolower($detalleProducto),"banano no exportable") !== false) ){
                         $codigoEtax = $prefijoCodigo.'200';
                         $categoriaHacienda = 24;
                         if($prefijoCodigo == 'S'){
@@ -516,7 +514,9 @@ class CorbanaController extends Controller
                         }
                     }
                     //Busca si la palabra desechos existe en el detalle, en cuyo caso asigna el codigo 200  
-                    if( (strpos( strtolower($detalleProducto),"iglesia") !== false) || (strpos( strtolower($detalleProducto),"casa") !== false)  ){
+                    if( (strpos( strtolower($detalleProducto),"iglesia") !== false) || 
+                        (strpos( strtolower($detalleProducto),"casa") !== false)  
+                    ){
                         $codigoEtax = $prefijoCodigo.'200';
                         $categoriaHacienda = 27;
                     }

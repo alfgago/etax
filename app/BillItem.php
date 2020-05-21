@@ -64,6 +64,11 @@ class BillItem extends Model
         $firstDigit = 'S';
       }
       
+      if( (strpos( strtolower($this->name),"agua") !== false) ){
+        $this->measure_unit = 'Os';
+        $firstDigit = 'S';
+      }
+      
       //equivalente a identificación plena, se usa por defecto si es 01 o una no existente
       $this->iva_type = $firstDigit."06".$lastDigit; 
       $this->porc_identificacion_plena = 13;
@@ -88,10 +93,6 @@ class BillItem extends Model
         //iria con código S003 o B003 para aplicar la prorrata, y así correspondientemente según la tarifa de IVA soportado.
         $this->iva_type = $firstDigit."00".$lastDigit;
       }
-      if( $this->exoneration_amount > 0){
-        $this->iva_type = $firstDigit."080";
-        $this->product_type = 62;
-      }
       $this->iva_type = trim($this->iva_type);
       
       $this->is_code_validated = true;
@@ -104,9 +105,11 @@ class BillItem extends Model
         }else{
           $this->product_type = 50;
         }
-        if( $actividad == '751302' || $actividad == '654901' ){
-          $this->product_type = 50;
-        }
+      }
+      
+      if( $this->exoneration_amount > 0){
+        $this->iva_type = $firstDigit."080";
+        $this->product_type = 62;
       }
       
       if( 0 == $porc ){
