@@ -326,16 +326,16 @@ class BillController extends Controller
             $query = $query->where('document_type', '04');
         }
         
-        if( $estadoAceptacion == 1 ) {
-            $query = $query->where('accept_status', 1);
+        if( $estadoAceptacion == 1 || $estadoAceptacion == 2) {
+            $query = $query->whereIn('accept_status', [1,2]);
             $query = $query ->where('is_code_validated', true);
-        }else if( $estadoAceptacion == 2 || $estadoAceptacion == 3 ) {
-            $query = $query->whereIn('accept_status', [2,3]);
+        }else if( $estadoAceptacion == 3 ) {
+            $query = $query->where('accept_status', 3);
         }else if( $estadoAceptacion == 0 ) {
             $query = $query->where('accept_status', 0);
             $query = $query ->where('is_code_validated', true);
         }else if( $estadoAceptacion == 99 ) {
-            $query = $query->whereNotIn('accept_status', [2,3]);
+            $query = $query->where('accept_status', '!=', 3);
             $query = $query ->where('is_code_validated', true);
         }
         
@@ -667,7 +667,7 @@ class BillController extends Controller
                 ->where('is_void', false)
                 ->where('is_authorized', true)
                 ->where('is_code_validated', true)
-                ->whereNotIn('accept_status', [2,3])
+                ->where('accept_status', '!=', 3)
                 ->where('hide_from_taxes', false);
             });
             $billItems = $query->get();
@@ -1589,7 +1589,7 @@ class BillController extends Controller
     {
         $bill = Bill::findOrFail($id);
         $this->authorize('update', $bill);
-        $bill->accept_status = 2;
+        $bill->accept_status = 3;
         $bill->save();
         
         //Deberia mandar RECHAZO a hacienda

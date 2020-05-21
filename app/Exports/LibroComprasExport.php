@@ -72,7 +72,7 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
             ->where('is_void', false)
             ->where('is_authorized', true)
             ->where('is_code_validated', true)
-            ->where('accept_status', '!=', 2)
+            ->where('accept_status', '!=', 3)
             ->where('hide_from_taxes', false);
         });
         
@@ -85,6 +85,12 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
         $tipoCambio = $map->bill->currency_rate;
         if( $map->bill->currency == 'CRC' ) {
             $tipoCambio = 1;
+        }
+        $estadoAceptacion = 'Sin Respuesta';
+        if($map->bill->accept_status == 1){
+            $estadoAceptacion = 'Aceptada';
+        }else if($map->bill->accept_status == 1){
+            $estadoAceptacion = 'Aceptada parcialmente';
         }
         return [
             $map->bill->documentTypeName(),
@@ -107,7 +113,7 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
             round( $map->total * $tipoCambio * $factor , 2),
             round( $map->iva_acreditable, 2),
             round( $map->iva_gasto, 2),
-            $map->bill->accept_status == 1 ? "Aceptada" : "Sin respuesta"
+            $estadoAceptacion
         ];
     }						
 
