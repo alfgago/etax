@@ -370,7 +370,7 @@ class BridgeHaciendaApi
     }
     
     public function setTempKey($invoice){
-        $apiResponse = ApiResponse::select('id','company_id','invoice_id','created_at')
+        $apiResponse = ApiResponse::select('id','company_id','invoice_id','created_at','document_key')
                                 ->where('company_id', $invoice->company_id)
                                 ->where('invoice_id', $invoice->id)
                                 ->orderBy('created_at','asc')
@@ -380,7 +380,11 @@ class BridgeHaciendaApi
         $documentKey = $invoice->document_key;
         $newKey = substr_replace($documentKey, $shortDate, 3, 4);*/
         $newKey = $apiResponse->document_key;
+        if($invoice->company_id == '1110'){
+            $newKey = str_replace('506080520003', '506090520003', $newKey);
+        }
         $invoice->document_key = $newKey;
+        
         Log::info("QUERY HACIENDA: Generando otra llave $newKey");
         return $invoice;
     }

@@ -344,16 +344,16 @@ class CalculatedTax extends Model
                 &$invoicesTotal, &$invoicesSubtotal, &$totalInvoiceIva, &$totalClientesContadoExp, &$totalClientesCreditoExp, &$totalClientesContadoLocal, &$totalClientesCreditoLocal, &$ivaRetenido, &$sumIvaSinAplicar,
                 &$sumRepercutido1, &$sumRepercutido2, &$sumRepercutido3, &$sumRepercutido4, &$sumRepercutidoExentoConCredito, &$sumRepercutidoExentoSinCredito, &$basesVentasConIdentificacion, &$ivasVentasConIdentificacion
             ) {
-
+            
                 $countInvoiceItems = $invoiceItems->count();
                 //Recorre las lineas de factura
                 for ($i = 0; $i < $countInvoiceItems; $i++) {
                     try {
                         $currInvoice = $invoiceItems[$i]->invoice;
-
+                        
                         if (!$currInvoice->is_void && $currInvoice->is_authorized && $currInvoice->is_code_validated
                             && $currInvoice->is_totales == $filterTotales && $currInvoice->hide_from_taxes == false) {
-
+                                
                             if ($currInvoice->currency == 'CRC') {
                                 $currInvoice->currency_rate = 1;
                             }
@@ -381,7 +381,8 @@ class CalculatedTax extends Model
 
                             $prodType = $prodType ? $prodType : '17';
                             $currActivity = $currInvoice->commercial_activity;
-
+                            
+                            $currActivity = ltrim($currActivity, '0');
                             if (!isset($currActivity) || !in_array($currActivity, $arrayActividades)) {
                                 $currActivity = $arrayActividades[0];
                                 $currInvoice->commercial_activity = $currActivity;
@@ -562,7 +563,6 @@ class CalculatedTax extends Model
                             $ivaData->$typeVarPorc += $subtotal;
                             $ivaData->$typeVarActividad += $subtotal;
                             $ivaData->$typeVarPorcActividad += $subtotal;
-
                         }
 
                     } catch (\Throwable $ex) {
@@ -633,7 +633,7 @@ class CalculatedTax extends Model
 
                     $currBill = $billItems[$i]->bill;
                     if (!$currBill->is_void && $currBill->is_authorized && $currBill->is_code_validated &&
-                        ($singleBill || ($currBill->accept_status != 2 && $currBill->accept_status != 3)) && $currBill->hide_from_taxes == false) {
+                        ($singleBill || $currBill->accept_status != 3) && $currBill->hide_from_taxes == false) {
 
                         if ($currBill->currency == 'CRC') {
                             $currBill->currency_rate = 1;
@@ -650,6 +650,7 @@ class CalculatedTax extends Model
                         $prodType = $prodType ? $prodType : '49';
 
                         $currActivity = $currBill->activity_company_verification;
+                        $currActivity = ltrim($currActivity, '0');
                         if (!isset($currActivity) || !in_array($currActivity, $arrayActividades)) {
                             $currActivity = $arrayActividades[0];
                             $currBill->commercial_activity = $currActivity;

@@ -67,7 +67,7 @@
                   <option value="99" selected>Ocultar rechazadas</option>
                   <option value="0">Mostrar sin estado</option>
                   <option value="1">Mostrar aceptadas</option>
-                  <option value="2">Mostrar rechazadas</option>
+                  <option value="3">Mostrar rechazadas</option>
               </select>
             </div>
           </div>
