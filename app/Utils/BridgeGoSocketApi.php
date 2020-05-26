@@ -22,8 +22,8 @@ class BridgeGoSocketApi
         try {
             $applicationIdGS = config('etax.applicationidgs');
             $base64 = base64_encode($applicationIdGS.":".$token);
-            $GoSocket = new Client();
-            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetUser", [
+            $goSocket = new Client();
+            $APIStatus = $goSocket->request('GET', $this->link."api/Gadget/GetUser", [
                 'headers' => [
                     'Content-Type' => "application/json",
                     'Accept' => "application/json",
@@ -44,8 +44,8 @@ class BridgeGoSocketApi
         try {
             $applicationIdGS = config('etax.applicationidgs');
             $base64 = base64_encode($applicationIdGS.":".$token);
-            $GoSocket = new Client();
-            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetAccount?accountId=".$user, [
+            $goSocket = new Client();
+            $APIStatus = $goSocket->request('GET', $this->link."api/Gadget/GetAccount?accountId=".$user, [
                 'headers' => [
                     'Content-Type' => "application/json",
                     'Accept' => "application/json",
@@ -78,14 +78,14 @@ class BridgeGoSocketApi
                 )->toDateString();
             } else {
                 Log::info("Es el primer sync");
-                $first_date = $today->year."-01-01";
+                $first_date = "2019-07-01";
                 $second_date = $today->year."-12-31";
             }
             Log::info("Sync con gosocket fechas: ".$first_date." ".$second_date);
             $ApplicationIdGS = config('etax.applicationidgs');
             $base64 = base64_encode($ApplicationIdGS . ":" . $token);
-            $GoSocket = new Client();
-            $APIStatus = $GoSocket->request('GET', $this->link . "api/Gadget/GetSentDocuments?MyAccountId=" . $companyToken . "&fromDate=".$first_date."&toDate=".$second_date."&DocumentTypeId=".$tipo_factura['DocumentTypeId']."&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json", [
+            $goSocket = new Client();
+            $APIStatus = $goSocket->request('GET', $this->link . "api/Gadget/GetSentDocuments?MyAccountId=" . $companyToken . "&fromDate=".$first_date."&toDate=".$second_date."&DocumentTypeId=".$tipo_factura['DocumentTypeId']."&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json", [
                 'headers' => [
                     'Content-Type' => "application/json",
                     'Accept' => "application/json",
@@ -117,14 +117,14 @@ class BridgeGoSocketApi
                 )->toDateString();
             } else {
                 Log::info("Es el primer sync");
-                $first_date = $today->year."-01-01";
+                $first_date = "2019-07-01";
                 $second_date = $today->year."-12-31";
             }
             Log::info("Sync con gosocket fechas: ".$first_date." ".$second_date);
             $ApplicationIdGS = config('etax.applicationidgs');
             $base64 = base64_encode($ApplicationIdGS.":".$token);
-            $GoSocket = new Client();
-            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetReceivedDocuments?MyAccountId=".$companyToken."&fromDate=".$first_date."&toDate=".$second_date."&DocumentTypeId=".$tipo_factura['DocumentTypeId']."&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
+            $goSocket = new Client();
+            $APIStatus = $goSocket->request('GET', $this->link."api/Gadget/GetReceivedDocuments?MyAccountId=".$companyToken."&fromDate=".$first_date."&toDate=".$second_date."&DocumentTypeId=".$tipo_factura['DocumentTypeId']."&ReceiverCode=-1&Number=-1&Page=1&ReadMode=json ", [
                 'headers' => [
                     'Content-Type' => "application/json",
                     'Accept' => "application/json",
@@ -145,8 +145,8 @@ class BridgeGoSocketApi
         try {
             $ApplicationIdGS = config('etax.applicationidgs');
             $base64 = base64_encode($ApplicationIdGS . ":" . $token);
-            $GoSocket = new Client();
-            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetXml?DocumentId=".$factura."", [
+            $goSocket = new Client();
+            $APIStatus = $goSocket->request('GET', $this->link."api/Gadget/GetXml?DocumentId=".$factura."", [
                 'headers' => [
                     'Content-Type' => "application/json",
                     'Accept' => "application/json",
@@ -168,8 +168,8 @@ class BridgeGoSocketApi
         try {
             $ApplicationIdGS = config('etax.applicationidgs');
             $base64 = base64_encode($ApplicationIdGS . ":" . $token);
-            $GoSocket = new Client();
-            $APIStatus = $GoSocket->request('GET', $this->link."api/Gadget/GetDocumentTypes", [
+            $goSocket = new Client();
+            $APIStatus = $goSocket->request('GET', $this->link."api/Gadget/GetDocumentTypes", [
                 'headers' => [
                     'Content-Type' => "application/json",
                     'Accept' => "application/json",

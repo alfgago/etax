@@ -61,7 +61,7 @@ class ProcessReception implements ShouldQueue
                 $bill = Bill::find($this->billId);
                 $company = Company::find($bill->company_id);
                 if ( $company->atv_validation ) {
-                    if ($bill->hacienda_status == '01' && $bill->document_type == '01' && $bill->resend_attempts < 6) {
+                    if ($bill->hacienda_status == '01' && $bill->resend_attempts < 6) {
                         if($bill->xml_schema == 42) {
                             $requestData = $this->setReceptionData($bill, $this->ref);
                         } else {

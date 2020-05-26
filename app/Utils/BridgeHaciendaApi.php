@@ -375,13 +375,20 @@ class BridgeHaciendaApi
                                 ->where('invoice_id', $invoice->id)
                                 ->orderBy('created_at','asc')
                                 ->first();
-        /*$apiResponseDate = $apiResponse->created_at;
-        $shortDate = str_pad($apiResponseDate->day, 2, "0", STR_PAD_LEFT) . str_pad($apiResponseDate->month, 2, "0", STR_PAD_LEFT);setTempKey
-        $documentKey = $invoice->document_key;
-        $newKey = substr_replace($documentKey, $shortDate, 3, 4);*/
         $newKey = $apiResponse->document_key;
         if($invoice->company_id == '1110'){
-            $newKey = str_replace('506080520003', '506090520003', $newKey);
+            $nullApiResponse = ApiResponse::select('id','company_id','invoice_id','created_at','document_key')
+                ->where('company_id', $invoice->company_id)
+                ->where('invoice_id', $invoice->id)
+                ->where('json_response', 'null')
+                ->orderBy('created_at','asc')
+                ->first();
+            if($nullApiResponse){
+                $apiResponseDate = $nullApiResponse->created_at;
+                $shortDate = str_pad($apiResponseDate->day, 2, "0", STR_PAD_LEFT) . str_pad($apiResponseDate->month, 2, "0", STR_PAD_LEFT);
+                $documentKey = $invoice->document_key;
+                $newKey = substr_replace($documentKey, $shortDate, 3, 4);
+            }
         }
         $invoice->document_key = $newKey;
         

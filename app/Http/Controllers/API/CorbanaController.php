@@ -346,7 +346,7 @@ class CorbanaController extends Controller
             sleep(2);
             
             $TIPO_SERV = $factura['TIPO_SERV'] ?? 'B';
-            if( $tipoDocumento == '09' ){
+            if( $tipoDocumento == '09' && $sistema == 'EXP' ){
                 $TIPO_SERV = 'B';
             }
             
@@ -447,12 +447,19 @@ class CorbanaController extends Controller
             $impuestoNeto = 0;
             if($tipoDocumento == '09'){
                 $codigoEtax = $prefijoCodigo."150";
+                $categoriaHacienda = 22;
+                if($TIPO_SERV == "S"){
+                    $categoriaHacienda = 23;
+                }
             }
             
             //Condicion especial para la actividad 802201
             if( $codigoActividad == '802201' && ($porcentajeIVA == 0 || $porcentajeIVA == '0') ){
                 $codigoEtax = 'S150';
-                $categoriaHacienda = 23;
+                $categoriaHacienda = 22;
+                if($TIPO_SERV == "S"){
+                    $categoriaHacienda = 23;
+                }
             }
             
             Log::debug("Codigo IVA puesto: $codigoEtax");
@@ -945,7 +952,7 @@ class CorbanaController extends Controller
                 if( isset($bill) ){
                     $company = $bill->company;
                     $cedula = $company->id_number;
-                    if( $cedula != "3101018968" && $cedula != "3101011989" && $cedula != "3101166930" && $cedula != "3007684555" && $cedula != "3130052102" && $cedula != "3101702429" ){
+                    if( $cedula != "3101018968" && $cedula != "3007791551" && $cedula != "3101011989" && $cedula != "3101166930" && $cedula != "3007684555" && $cedula != "3130052102" && $cedula != "3101702429" ){
                         Log::warning("Error: ID de factura no le pertenece a Corbana");
                         return response()->json([
                             'mensaje' => 'Error: ID de factura no le pertenece a Corbana'
