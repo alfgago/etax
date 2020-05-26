@@ -244,7 +244,7 @@
         </td>
     </table>
     <div class="footer">
-        Autorizada mediante resolución N° DGT-R-48-2016 del 7 de octubre de 2016. <br>
+        Autorizada mediante resolución N° DGT‐R‐033‐2019 del 20 de junio del 2019 <br>
         <div style="font-size: 11px;">
         Clave: {{ $data_invoice->document_key }} <br>
         Versión del Documento Electrónico: 4.3

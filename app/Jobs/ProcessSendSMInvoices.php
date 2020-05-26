@@ -104,12 +104,14 @@ class ProcessSendSMInvoices implements ShouldQueue
                         //$metodoPago = '99';
                         $numeroLinea = isset($smInvoice['numerolinea']) ? $smInvoice['numerolinea'] : 1;
                         $fechaEmision = $today->format('d/m/Y');
-                        $fechaVencimiento = isset($smInvoice['fecha_pago']) ? $smInvoice['fecha_pago']."" : $fechaEmision; 
+                        /*$fechaVencimiento = isset($smInvoice['fecha_pago']) ? $smInvoice['fecha_pago']."" : $fechaEmision; 
                         if (!isset($fechaVencimiento) || $fechaVencimiento == "" ){
                             $fechaVencimiento = $fechaEmision;
                         }else{
-                            $fechaVencimiento = "30/".$fechaVencimiento[4].$fechaVencimiento[5]."/".$fechaVencimiento[0].$fechaVencimiento[1].$fechaVencimiento[2].$fechaVencimiento[3];
-                        }
+                            $fechaVencimiento =  Carbon::parse( now('America/Costa_Rica') )->addDays(30);
+                        }*/
+                        $fv =  Carbon::parse( now('America/Costa_Rica') )->addDays(30);
+                        $fechaVencimiento = $fv->format('d/m/Y');
                         
                         $idMoneda = 'CRC';
                         $tipoCambio = $smInvoice['tipocambio'] ?? 1;
@@ -198,7 +200,8 @@ class ProcessSendSMInvoices implements ShouldQueue
                             'isAuthorized' => true,
                             'codeValidated' => true,
                             'ordenCompra' => $ordenCompra,
-                            'otherReference' => $otherReference
+                            'otherReference' => $otherReference,
+                            'creditTime' => '30 días'
                         );
                         
                         $invoiceList = Invoice::importInvoiceRow($arrayInsert, $invoiceList, $company);
