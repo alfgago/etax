@@ -37,7 +37,7 @@ class BridgeHaciendaApi
             if( !$companyId ){
                 $companyId = currentCompany();
             }
-            $value = Cache::remember('token-api-'.$companyId, '60000', function () {
+                $value = Cache::remember('token-api-'.$companyId, '60000', function () {
                 return $this->requestLogin();
             });
             return $value;
@@ -377,7 +377,7 @@ class BridgeHaciendaApi
                                 ->first();
         $newKey = $apiResponse->document_key;
         if($invoice->company_id == '1110'){
-            $nullApiResponse = ApiResponse::select('id','company_id','invoice_id','created_at','document_key')
+            /*$nullApiResponse = ApiResponse::select('id','company_id','invoice_id','created_at','document_key')
                 ->where('company_id', $invoice->company_id)
                 ->where('invoice_id', $invoice->id)
                 ->where('json_response', 'null')
@@ -387,9 +387,9 @@ class BridgeHaciendaApi
                 $apiResponse = $nullApiResponse;
             }
             $apiResponseDate = $apiResponse->created_at;
-            $shortDate = str_pad($apiResponseDate->day, 2, "0", STR_PAD_LEFT) . str_pad($apiResponseDate->month, 2, "0", STR_PAD_LEFT);
+            $shortDate = str_pad($apiResponseDate->day, 2, "0", STR_PAD_LEFT) . str_pad($apiResponseDate->month, 2, "0", STR_PAD_LEFT);*/
             $documentKey = $invoice->document_key;
-            $newKey = substr_replace($documentKey, $shortDate, 3, 4);
+            $newKey = substr_replace($documentKey, '1205', 3, 4);
         }
         $invoice->document_key = $newKey;
         

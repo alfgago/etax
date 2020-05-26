@@ -113,6 +113,7 @@ class BillItem extends Model
       }
       
       if( 0 == $porc ){
+        
         $this->iva_type = $firstDigit."060";
         if( (strpos( strtolower($this->name),"diesel") !== false) || 
             (strpos( strtolower($this->name),"gasolina") !== false) ||
