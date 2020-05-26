@@ -386,10 +386,10 @@ class BridgeHaciendaApi
             if($nullApiResponse){
                 $apiResponse = $nullApiResponse;
             }
-            $apiResponseDate = $apiResponse->created_at;*/
-            $shortDate = str_pad('12', 2, "0", STR_PAD_LEFT) . str_pad('05', 2, "0", STR_PAD_LEFT);
+            $apiResponseDate = $apiResponse->created_at;
+            $shortDate = str_pad($apiResponseDate->day, 2, "0", STR_PAD_LEFT) . str_pad($apiResponseDate->month, 2, "0", STR_PAD_LEFT);*/
             $documentKey = $invoice->document_key;
-            $newKey = substr_replace($documentKey, $shortDate, 3, 4);
+            $newKey = substr_replace($documentKey, '1205', 3, 4);
         }
         $invoice->document_key = $newKey;
         
