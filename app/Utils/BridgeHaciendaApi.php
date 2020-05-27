@@ -396,7 +396,7 @@ class BridgeHaciendaApi
                 ->where('invoice_id', $invoice->id)
                 ->orderBy('created_at','asc')->get();
         //Recorre las veces que ha intentado en SM
-        foreach($apiResponses as $response){
+        foreach($apiResponses as $apiResponse){
             $responseDate = $apiResponse->created_at;
             $shortDate = str_pad($apiResponseDate->day, 2, "0", STR_PAD_LEFT) . str_pad($apiResponseDate->month, 2, "0", STR_PAD_LEFT);
             $documentKey = $invoice->document_key;
