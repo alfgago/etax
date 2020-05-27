@@ -450,8 +450,7 @@
     <table width="100%" class="footer">
         <tr class="item">
             <td class="currency total">
-                Emitida conforme lo establecido en la resolución de Facturación Electrónica, N°DGT-R-48-2016 siete de
-                octubre de dos mildieciséis de la Dirección General de Tributación v.4.3 <br>
+                Emitida conforme lo establecido en la resolución de Facturación Electrónica, N° DGT‐R‐033‐2019 del 20 de junio del 2019 de la Dirección General de Tributación v.4.3 <br>
                 eTax - La herramienta para resolver el IVA. | Ofiplaza del Este. 200m al oeste de la Rotonda de la Bandera,
                 San Pedro de Montes de Oca, San José 6897-1000 Costa Rica +506 22802130
             </td>

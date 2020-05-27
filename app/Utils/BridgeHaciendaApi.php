@@ -37,7 +37,7 @@ class BridgeHaciendaApi
             if( !$companyId ){
                 $companyId = currentCompany();
             }
-            $value = Cache::remember('token-api-'.$companyId, '60000', function () {
+                $value = Cache::remember('token-api-'.$companyId, '60000', function () {
                 return $this->requestLogin();
             });
             return $value;
@@ -333,7 +333,11 @@ class BridgeHaciendaApi
                 
                 if (strpos($response['data']['response'],"ESTADO=rechazado") !== false) {
                     if($findKey){
-                        $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                        if($invoice->company_id == '1110'){
+                            $retry = $this->retryForSM($invoice, $token, $company);
+                        }else{
+                            $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                        }
                         if($retry){
                             return $retry;
                         }
@@ -355,7 +359,11 @@ class BridgeHaciendaApi
                 }
             } else {
                 if($findKey){
-                    $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                    if($invoice->company_id == '1110'){
+                        $retry = $this->retryForSM($invoice, $token, $company);
+                    }else{
+                        $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                    }
                     if($retry){
                         return $retry;
                     }
@@ -375,18 +383,32 @@ class BridgeHaciendaApi
                                 ->where('invoice_id', $invoice->id)
                                 ->orderBy('created_at','asc')
                                 ->first();
-        /*$apiResponseDate = $apiResponse->created_at;
-        $shortDate = str_pad($apiResponseDate->day, 2, "0", STR_PAD_LEFT) . str_pad($apiResponseDate->month, 2, "0", STR_PAD_LEFT);setTempKey
-        $documentKey = $invoice->document_key;
-        $newKey = substr_replace($documentKey, $shortDate, 3, 4);*/
         $newKey = $apiResponse->document_key;
-        if($invoice->company_id == '1110'){
-            $newKey = str_replace('506080520003', '506090520003', $newKey);
-        }
         $invoice->document_key = $newKey;
         
         Log::info("QUERY HACIENDA: Generando otra llave $newKey");
         return $invoice;
+    }
+    
+    public function retryForSM($invoice, $token, $company){
+        $apiResponses = ApiResponse::select('id','company_id','invoice_id','created_at','document_key')
+                ->where('company_id', $invoice->company_id)
+                ->where('invoice_id', $invoice->id)
+                ->orderBy('created_at','asc')->get();
+        //Recorre las veces que ha intentado en SM
+        foreach($apiResponses as $apiResponse){
+            $apiResponseDate = $apiResponse->created_at;
+            $shortDate = str_pad($apiResponseDate->day, 2, "0", STR_PAD_LEFT) . str_pad($apiResponseDate->month, 2, "0", STR_PAD_LEFT);
+            $documentKey = $invoice->document_key;
+            $newKey = substr_replace($documentKey, $shortDate, 3, 4);
+            $invoice->document_key = $newKey;
+            //El primero en devolver un archivo, lo devuelve
+            $retry = $this->queryHacienda($invoice, $token, $company, false);
+            if($retry){
+                return $retry;
+            }
+        }
+        return false;
     }
 
     private function setHaciendaInfo($company) {

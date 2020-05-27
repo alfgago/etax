@@ -346,7 +346,7 @@ class CorbanaController extends Controller
             sleep(2);
             
             $TIPO_SERV = $factura['TIPO_SERV'] ?? 'B';
-            if( $tipoDocumento == '09' ){
+            if( $tipoDocumento == '09' && $sistema == 'EXP' ){
                 $TIPO_SERV = 'B';
             }
             
@@ -447,12 +447,19 @@ class CorbanaController extends Controller
             $impuestoNeto = 0;
             if($tipoDocumento == '09'){
                 $codigoEtax = $prefijoCodigo."150";
+                $categoriaHacienda = 22;
+                if($TIPO_SERV == "S"){
+                    $categoriaHacienda = 23;
+                }
             }
             
             //Condicion especial para la actividad 802201
             if( $codigoActividad == '802201' && ($porcentajeIVA == 0 || $porcentajeIVA == '0') ){
                 $codigoEtax = 'S150';
-                $categoriaHacienda = 23;
+                $categoriaHacienda = 22;
+                if($TIPO_SERV == "S"){
+                    $categoriaHacienda = 23;
+                }
             }
             
             Log::debug("Codigo IVA puesto: $codigoEtax");
@@ -830,19 +837,51 @@ class CorbanaController extends Controller
         $descuentos = 0;
         $exoneraciones = 0;
         
+        //Busca la referencia para asignar el mismo codigo eTax en las lineas
+        $refFirstItem = false;
+        if($invoice->document_type == '03' || $invoice->document_type == '02'){
+            $ref = Invoice::where('document_key', $invoice->reference_document_key)
+                    ->with('items')
+                    ->first();
+            if( isset($ref) ){
+                $refFirstItem = $ref->items[0];
+            }
+        }
+        
         foreach( $lineas as $linea ){
             $linea['invoice_id'] = $invoice->id;
             $invoice->subtotal = $invoice->subtotal + $linea['subtotal'];
             $invoice->iva_amount = $invoice->iva_amount + $linea['iva_amount'];
             //$descuentos = $descuentos + $linea['discount'];
+            
+            try{
+                if($refFirstItem){
+                    Log::debug( json_encode($refFirstItem) );
+                    if( isset($refFirstItem->exoneration_company_name) && isset($refFirstItem->exoneration_document_number)){
+                        $item->exoneration_document_type = $refFirstItem->exoneration_document_type;
+                        $item->exoneration_document_number = $refFirstItem->exoneration_document_number;
+                        $item->exoneration_company_name = $refFirstItem->exoneration_company_name;
+                        $item->exoneration_porcent = $refFirstItem->exoneration_porcent;
+                        $item->exoneration_amount = $item->iva_amount;
+                        $item->exoneration_total_amount = $item->subtotal;
+                        $item->exoneration_total_gravado = $item->subtotal;
+                    }
+                    $item->iva_type = $refFirstItem->iva_type;
+                    $item->product_type = $refFirstItem->product_type;
+                }
+            }catch(\Exception $e){
+                Log::error($e);
+            }
             $exoneraciones = $exoneraciones + ($linea['exoneration_amount']);
             $item = InvoiceItem::updateOrCreate(
             [
                 'invoice_id' => $linea['invoice_id'],
                 'item_number' => $linea['item_number'],
             ], $linea);
+            
             $item->fixIvaType();
             $item->fixCategoria();
+            
         }
         $invoice->total = $invoice->subtotal + $invoice->iva_amount - $descuentos - $exoneraciones;
         
@@ -945,7 +984,7 @@ class CorbanaController extends Controller
                 if( isset($bill) ){
                     $company = $bill->company;
                     $cedula = $company->id_number;
-                    if( $cedula != "3101018968" && $cedula != "3101011989" && $cedula != "3101166930" && $cedula != "3007684555" && $cedula != "3130052102" && $cedula != "3101702429" ){
+                    if( $cedula != "3101018968" && $cedula != "3007791551" && $cedula != "3101011989" && $cedula != "3101166930" && $cedula != "3007684555" && $cedula != "3130052102" && $cedula != "3101702429" ){
                         Log::warning("Error: ID de factura no le pertenece a Corbana");
                         return response()->json([
                             'mensaje' => 'Error: ID de factura no le pertenece a Corbana'
@@ -1004,6 +1043,8 @@ class CorbanaController extends Controller
         }else if($pCia == "02"){
             if($pAct == "05"){
                 return "3007684555";
+            }else if($pAct == "16"){
+                return "3007791551";
             }else{
                 return "3130052102";
             }

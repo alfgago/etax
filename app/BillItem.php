@@ -113,9 +113,12 @@ class BillItem extends Model
       }
       
       if( 0 == $porc ){
+        
         $this->iva_type = $firstDigit."060";
         if( (strpos( strtolower($this->name),"diesel") !== false) || 
             (strpos( strtolower($this->name),"gasolina") !== false) ||
+            (strpos( strtolower($this->name),"plus 91") !== false) ||
+            (strpos( strtolower($this->name),"plus91") !== false) ||
             (strpos( strtolower($this->name),"vehiculo") !== false)
         ){
           $this->product_type = 59;
@@ -186,9 +189,7 @@ class BillItem extends Model
           }
         }
         
-        Log::debug('Antes: ' . $this->product_type);
         if( !$categoriaCorrecta ){
-          Log::debug('Asignando nueva categoria. ' . $alt);
           $this->product_type = $alt;
           $this->save();
         }

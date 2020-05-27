@@ -17,14 +17,16 @@
   <div class="col-md-12">
       <?php
       $allow = true;
-      $companyId = currentCompanyModel()->id;
-      if(
-        $companyId == 3965 ||
-        $companyId == 3966 ||
-        $companyId == 3967 ||
-        $companyId == 3968 ||
-        $companyId == 3969
-      ){
+      $cedula = currentCompanyModel()->id_number;
+      if( 
+        $cedula == "3101018968" ||
+        $cedula == "3101011989" ||
+        $cedula == "3101166930" ||
+        $cedula == "3007684555" ||
+        $cedula == "3130052102" ||
+        $cedula == "3007791551" ||
+        $cedula == "3101702429" )
+      {
         $allow = false; 
       }
       ?>
