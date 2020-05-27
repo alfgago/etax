@@ -334,7 +334,7 @@ class BridgeHaciendaApi
                 if (strpos($response['data']['response'],"ESTADO=rechazado") !== false) {
                     if($findKey){
                         if($invoice->company_id == '1110'){
-                            $retry = $this->queryForSM($invoice, $token, $company);
+                            $retry = $this->retryForSM($invoice, $token, $company);
                         }else{
                             $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
                         }
@@ -360,7 +360,7 @@ class BridgeHaciendaApi
             } else {
                 if($findKey){
                     if($invoice->company_id == '1110'){
-                        $retry = $this->queryForSM($invoice, $token, $company);
+                        $retry = $this->retryForSM($invoice, $token, $company);
                     }else{
                         $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
                     }
