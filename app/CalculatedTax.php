@@ -165,7 +165,7 @@ class CalculatedTax extends Model
      * @bodyParam prorrataOperativa required
      * @return App\CalculatedTax
      */
-    public static function calcularFacturacionPorMesAno($month, $year, $lastBalance, $forceRecalc = false)
+    public static function calcularFacturacionPorMesAno($month, $year, $lastBalance, $forceRecalc = true)
     {
         $company = currentCompanyModel();
         $currentCompanyId = $company->id;

@@ -974,6 +974,7 @@ class Invoice extends Model
                   $invoice->reference_generated_date = $ref->generated_date;
                   $invoice->reference_document_key = $ref->document_key;
                   $invoice->reference_doc_type = $ref->document_type;
+                  $invoice->reference_id = $ref->id;
                 }else{
                   Log::warning("No encuentra referencia: " . $otherReference);
                 }

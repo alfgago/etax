@@ -837,19 +837,46 @@ class CorbanaController extends Controller
         $descuentos = 0;
         $exoneraciones = 0;
         
+        //Busca la referencia para asignar el mismo codigo eTax en las lineas
+        $refFirstItem = false;
+        if($invoice->document_type == '03' || $invoice->document_type == '02'){
+            $ref = Invoice::where('document_key', $invoice->reference_document_key)
+                    ->with('items')
+                    ->first();
+            if( isset($ref) ){
+                $refFirstItem = $ref->items[0];
+            }
+        }
+        
         foreach( $lineas as $linea ){
             $linea['invoice_id'] = $invoice->id;
             $invoice->subtotal = $invoice->subtotal + $linea['subtotal'];
             $invoice->iva_amount = $invoice->iva_amount + $linea['iva_amount'];
             //$descuentos = $descuentos + $linea['discount'];
+            
+            if($refFirstItem){
+                if( isset($refFirstItem->exoneration_company_name) && isset($refFirstItem->exoneration_document_number)){
+                    $item->exoneration_document_type = $refFirstItem->exoneration_document_type;
+                    $item->exoneration_document_number = $refFirstItem->exoneration_document_number;
+                    $item->exoneration_company_name = $refFirstItem->exoneration_company_name;
+                    $item->exoneration_porcent = $refFirstItem->exoneration_porcent;
+                    $item->exoneration_amount = $item->iva_amount;
+                    $item->exoneration_total_amount = $item->subtotal;
+                    $item->exoneration_total_gravado = $item->subtotal;
+                }
+                $item->iva_type = $refFirstItem->iva_type;
+                $item->product_type = $refFirstItem->product_type;
+            }
             $exoneraciones = $exoneraciones + ($linea['exoneration_amount']);
             $item = InvoiceItem::updateOrCreate(
             [
                 'invoice_id' => $linea['invoice_id'],
                 'item_number' => $linea['item_number'],
             ], $linea);
+            
             $item->fixIvaType();
             $item->fixCategoria();
+            
         }
         $invoice->total = $invoice->subtotal + $invoice->iva_amount - $descuentos - $exoneraciones;
         
