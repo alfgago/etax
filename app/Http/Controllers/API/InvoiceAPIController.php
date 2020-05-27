@@ -105,9 +105,11 @@ class InvoiceAPIController extends Controller
                     if (!empty($invoiceData)) {
                         $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
                     }
+
                     if ($request->tipo_documento == '01') {
                         $company->last_invoice_ref_number = $invoice->reference_number;
                         $company->last_document = $invoice->document_number;
+                        $company->save();
 
                     } elseif ($request->tipo_documento == '08') {
                         $company->last_invoice_pur_ref_number = $invoice->reference_number;
@@ -123,6 +125,8 @@ class InvoiceAPIController extends Controller
 
                     $company->save();
                     clearInvoiceCache($invoice);
+                    Cache::forget("cache-api-company-".$request->emisor['identificacion']['numero']."-$user->id");
+                    Cache::forget("cache-has-company-".$request->emisor['identificacion']['numero']."-$user->id");
 
                     $response['clave_documento'] = $invoice->document_key;
 
@@ -209,6 +213,8 @@ class InvoiceAPIController extends Controller
                     $company->save();
 
                     clearInvoiceCache($invoice);
+                    Cache::forget("cache-api-company-".$request->emisor['identificacion']['numero']."-$user->id");
+                    Cache::forget("cache-has-company-".$request->emisor['identificacion']['numero']."-$user->id");
 
                     $response['clave_documento'] = $invoice->document_key;
 
