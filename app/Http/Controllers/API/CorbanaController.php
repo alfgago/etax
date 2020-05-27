@@ -854,18 +854,23 @@ class CorbanaController extends Controller
             $invoice->iva_amount = $invoice->iva_amount + $linea['iva_amount'];
             //$descuentos = $descuentos + $linea['discount'];
             
-            if($refFirstItem){
-                if( isset($refFirstItem->exoneration_company_name) && isset($refFirstItem->exoneration_document_number)){
-                    $item->exoneration_document_type = $refFirstItem->exoneration_document_type;
-                    $item->exoneration_document_number = $refFirstItem->exoneration_document_number;
-                    $item->exoneration_company_name = $refFirstItem->exoneration_company_name;
-                    $item->exoneration_porcent = $refFirstItem->exoneration_porcent;
-                    $item->exoneration_amount = $item->iva_amount;
-                    $item->exoneration_total_amount = $item->subtotal;
-                    $item->exoneration_total_gravado = $item->subtotal;
+            try{
+                if($refFirstItem){
+                    Log::debug( json_encode($refFirstItem) );
+                    if( isset($refFirstItem->exoneration_company_name) && isset($refFirstItem->exoneration_document_number)){
+                        $item->exoneration_document_type = $refFirstItem->exoneration_document_type;
+                        $item->exoneration_document_number = $refFirstItem->exoneration_document_number;
+                        $item->exoneration_company_name = $refFirstItem->exoneration_company_name;
+                        $item->exoneration_porcent = $refFirstItem->exoneration_porcent;
+                        $item->exoneration_amount = $item->iva_amount;
+                        $item->exoneration_total_amount = $item->subtotal;
+                        $item->exoneration_total_gravado = $item->subtotal;
+                    }
+                    $item->iva_type = $refFirstItem->iva_type;
+                    $item->product_type = $refFirstItem->product_type;
                 }
-                $item->iva_type = $refFirstItem->iva_type;
-                $item->product_type = $refFirstItem->product_type;
+            }catch(\Exception $e){
+                Log::error($e);
             }
             $exoneraciones = $exoneraciones + ($linea['exoneration_amount']);
             $item = InvoiceItem::updateOrCreate(
