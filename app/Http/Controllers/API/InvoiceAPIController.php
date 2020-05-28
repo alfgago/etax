@@ -187,7 +187,7 @@ class InvoiceAPIController extends Controller
                     $note->hacienda_status = '01';
                     $note->payment_status = "01";
                     $note->payment_receipt = "";
-                    $note->generation_method = "etax";
+                    $note->generation_method = "etax-api";
                     $note->reason = $request->razon ?? "Anular Factura";
                     $note->code_note = $request->codigo_nota ?? "01";
                     $note->reference_number = $company->last_note_ref_number + 1;
