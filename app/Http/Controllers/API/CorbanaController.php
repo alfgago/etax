@@ -241,7 +241,6 @@ class CorbanaController extends Controller
             $items = $request->lineas;
             $requestOtros = $request->otros ?? null;
             $metodoGeneracion = "etax-corbana";
-            $numDocuInterno = $factura['NO_DOCU'] ?? "";
             $ordenCompra = $factura['OC_CLIENTE'] ?? "";
 
             //Busca la cedula de la empresa
@@ -310,6 +309,8 @@ class CorbanaController extends Controller
                 $tipoDocumento = '04';
             }
             
+            
+            $numDocuInterno = $TIPO_DOC.($factura['NO_DOCU'] ?? "");
             $corbanaResponse = CorbanaResponse::firstOrCreate(
                 [
                     'num_interno' =>  $numDocuInterno
@@ -321,8 +322,8 @@ class CorbanaController extends Controller
             }
             Cache::put($cachekey, true, 30);
             
-            if( $corbanaResponse->invoice ){
-                Log::debug('Se encontro duplicada');
+            if( isset($corbanaResponse->invoice) ){
+                Log::debug('Se encontro duplicada ' . $corbanaResponse->invoice_id);
                 $invoice = $corbanaResponse->invoice;
                 $invoice->load('items');
                 $pdf = $invoiceUtils->streamPdf($invoice, $invoice->company);
@@ -344,6 +345,7 @@ class CorbanaController extends Controller
             $claveFactura = getDocumentKey($tipoDocumento, $company, $numeroReferencia);
             $company->setLastReference($tipoDocumento, $numeroReferencia, $consecutivoComprobante);
             sleep(2);
+            Log::debug('Corbana enviando: '.$consecutivoComprobante);
             
             $TIPO_SERV = $factura['TIPO_SERV'] ?? 'B';
             if( $tipoDocumento == '09' && $sistema == 'EXP' ){
@@ -461,8 +463,6 @@ class CorbanaController extends Controller
                     $categoriaHacienda = 23;
                 }
             }
-            
-            Log::debug("Codigo IVA puesto: $codigoEtax");
             
             //Datos de lineas
             $i = 0;
@@ -839,13 +839,19 @@ class CorbanaController extends Controller
         
         //Busca la referencia para asignar el mismo codigo eTax en las lineas
         $refFirstItem = false;
-        if($invoice->document_type == '03' || $invoice->document_type == '02'){
-            $ref = Invoice::where('document_key', $invoice->reference_document_key)
-                    ->with('items')
-                    ->first();
-            if( isset($ref) ){
-                $refFirstItem = $ref->items[0];
+        
+        try{
+            if($invoice->document_type == '03' || $invoice->document_type == '02'){
+                $ref = Invoice::where('company_id', $invoice->company_id)
+                        ->where('document_key', $invoice->reference_document_key)
+                        ->with('items')
+                        ->first();
+                if( isset($ref) ){
+                    $refFirstItem = $ref->items[0];
+                }
             }
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
         }
         
         foreach( $lineas as $linea ){
@@ -856,21 +862,20 @@ class CorbanaController extends Controller
             
             try{
                 if($refFirstItem){
-                    Log::debug( json_encode($refFirstItem) );
-                    if( isset($refFirstItem->exoneration_company_name) && isset($refFirstItem->exoneration_document_number)){
-                        $item->exoneration_document_type = $refFirstItem->exoneration_document_type;
-                        $item->exoneration_document_number = $refFirstItem->exoneration_document_number;
-                        $item->exoneration_company_name = $refFirstItem->exoneration_company_name;
-                        $item->exoneration_porcent = $refFirstItem->exoneration_porcent;
-                        $item->exoneration_amount = $item->iva_amount;
-                        $item->exoneration_total_amount = $item->subtotal;
-                        $item->exoneration_total_gravado = $item->subtotal;
+                    if( isset($refFirstItem['exoneration_company_name']) && isset($refFirstItem['exoneration_document_number'])){
+                        $linea['exoneration_document_type'] = $refFirstItem['exoneration_document_type'];
+                        $linea['exoneration_document_number'] = $refFirstItem['exoneration_document_number'];
+                        $linea['exoneration_company_name'] = $refFirstItem['exoneration_company_name'];
+                        $linea['exoneration_porcent'] = $refFirstItem['exoneration_porcent'];
+                        $linea['exoneration_amount'] = $linea['iva_amount'];
+                        $linea['exoneration_total_amount'] = $linea['subtotal'];
+                        $linea['exoneration_total_gravado'] = $linea['subtotal'];
                     }
-                    $item->iva_type = $refFirstItem->iva_type;
-                    $item->product_type = $refFirstItem->product_type;
+                    $linea['iva_type'] = $refFirstItem['iva_type'];
+                    $linea['product_type'] = $refFirstItem['product_type'];
                 }
             }catch(\Exception $e){
-                Log::error($e);
+                Log::error($e->getMessage());
             }
             $exoneraciones = $exoneraciones + ($linea['exoneration_amount']);
             $item = InvoiceItem::updateOrCreate(
@@ -935,11 +940,13 @@ class CorbanaController extends Controller
                 $note->other_reference = $invoice->reference_number;
                 $note->reference_number = $company->last_note_ref_number + 1;
                 $note->save();
+                
                 $noteData = $note->setNoteData($invoice, $invoice->items->toArray(), $note->document_type, $invoice, $company, true);
                 if (!empty($noteData)) {
                     $noteData->save();
                     $apiHacienda->createCreditNote($noteData, $tokenApi);
                 }
+                
                 $company->last_note_ref_number = $noteData->reference_number;
                 $company->last_document_note = $noteData->document_number;
                 $company->save();
@@ -966,58 +973,57 @@ class CorbanaController extends Controller
     }
     
     public function aceptarRechazar(Request $request) {
-        try{
-            $apiHacienda = new BridgeHaciendaApi();
-            $tokenApi = $apiHacienda->login(false);
-            if ($tokenApi !== false) {
-                $bill = Bill::where('id', $request->id)
-                            ->with('items')
-                            ->with('company')
-                            ->first();
-                $acceptStatus = $request->accept_status;
-                /*if($acceptStatus == 3){
-                    $acceptStatus = 2; //El 2 es la de rechazo. Parcial no se usa en Corbana
-                }*/
-                $actividad = $request->codigo_actividad;
-                $bill->activity_company_verification = $actividad;
-                $condicionAceptacion = $request->condicion_aceptacion ?? '04';
-                if( isset($bill) ){
-                    $company = $bill->company;
-                    $cedula = $company->id_number;
-                    if( $cedula != "3101018968" && $cedula != "3007791551" && $cedula != "3101011989" && $cedula != "3101166930" && $cedula != "3007684555" && $cedula != "3130052102" && $cedula != "3101702429" ){
-                        Log::warning("Error: ID de factura no le pertenece a Corbana");
-                        return response()->json([
-                            'mensaje' => 'Error: ID de factura no le pertenece a Corbana'
-                        ], 200);
-                    }
-                    $bill->is_authorized = true;
-                    $bill->accept_status = $acceptStatus;
-                    $bill->is_code_validated = true;
-                    $bill->hacienda_status = '01';
-                    foreach($bill->items as $item){
-                        $item->setIvaTypeCorbana($condicionAceptacion, $actividad);
-                        $item->calcularAcreditablePorLinea();
-                    }
-                    $bill->calculateAcceptFields($company);
-                    $bill->save();
-                    Log::debug('Corbana guardada ->' . json_encode($request));
-                    
-                    $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
-                    $company->save();
-                    $company->last_document_rec = getDocReference('05', $company, $company->last_rec_ref_number);
-                    $company->save();
-                    $apiHacienda->acceptInvoice($bill, $tokenApi);
-                    clearBillCache($bill);
-                    return response()->json([
-                        'mensaje' => 'Factura actualizada exitosamente'
-                    ], 200);  
-                }
+        
+        $bill = Bill::where('id', $request->id)
+                    ->with('items')
+                    ->with('company')
+                    ->first();
+        $acceptStatus = $request->accept_status;
+        /*if($acceptStatus == 3){
+            $acceptStatus = 2; //El 2 es la de rechazo. Parcial no se usa en Corbana
+        }*/
+        $actividad = $request->codigo_actividad;
+        $bill->activity_company_verification = $actividad;
+        $condicionAceptacion = $request->condicion_aceptacion ?? '04';
+        if( isset($bill) ){
+            $company = $bill->company;
+            $cedula = $company->id_number;
+            if( $cedula != "3101018968" && $cedula != "3007791551" && $cedula != "3101011989" && $cedula != "3101166930" && $cedula != "3007684555" && $cedula != "3130052102" && $cedula != "3101702429" ){
+                Log::warning("Error: ID de factura no le pertenece a Corbana");
+                return response()->json([
+                    'mensaje' => 'Error: ID de factura no le pertenece a Corbana'
+                ], 200);
             }
-        }catch(\Exception $e){
-            Log::error("Error en Corbana" . $e);
+            $bill->is_authorized = true;
+            $bill->accept_status = $acceptStatus;
+            $bill->is_code_validated = true;
+            $bill->hacienda_status = '01';
+            foreach($bill->items as $item){
+                $item->setIvaTypeCorbana($condicionAceptacion, $actividad);
+                $item->calcularAcreditablePorLinea();
+            }
+            $bill->calculateAcceptFields($company);
+            $bill->save();
+            Log::debug('Corbana guardada ->' . json_encode($request));
+            
+            $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
+            $company->save();
+            $company->last_document_rec = getDocReference('05', $company, $company->last_rec_ref_number);
+            $company->save();
+            
+            try{
+                $apiHacienda = new BridgeHaciendaApi();
+                $tokenApi = $apiHacienda->login(false);
+                $apiHacienda->acceptInvoice($bill, $tokenApi);
+            }catch(\Exception $e){
+                Log::error($e->getMessage());
+            }
+            
+            clearBillCache($bill);
+            
             return response()->json([
-                'mensaje' => 'Error ' . $e->getMessage()
-            ], 200);
+                'mensaje' => 'Factura actualizada exitosamente'
+            ], 200);  
         }
         
         //Nunca deberia llegar a este return.

@@ -16,7 +16,7 @@
 
 @if( !$data->trashed()  ) 
  
-  @if( @$data->accept_status != 2 )
+  @if( @$data->accept_status != 3 )
   
     <div class="btn-group" role="group">
       <div class="btn-group" role="group">

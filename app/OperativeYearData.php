@@ -53,18 +53,18 @@ class OperativeYearData extends Model
                 $data->book = $book;
               }
             }else {
-              $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $this->year, 0 );
-              $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $this->year, 0 );
-              $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $this->year, 0 );
-              $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $this->year, 0 );
-              $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $this->year, 0 );
-              $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $this->year, 0 );
-              $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $this->year, 0 );
-              $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $this->year, 0 );
-              $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $this->year, 0 );
-              $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $this->year, 0 );
-              $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $this->year, 0 );
-              $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $this->year, 0 );
+              $e = CalculatedTax::calcularFacturacionPorMesAno( 1, $this->year, 0, false, $currentCompany);
+              $f = CalculatedTax::calcularFacturacionPorMesAno( 2, $this->year, 0, false, $currentCompany);
+              $m = CalculatedTax::calcularFacturacionPorMesAno( 3, $this->year, 0, false, $currentCompany);
+              $a = CalculatedTax::calcularFacturacionPorMesAno( 4, $this->year, 0, false, $currentCompany);
+              $y = CalculatedTax::calcularFacturacionPorMesAno( 5, $this->year, 0, false, $currentCompany);
+              $j = CalculatedTax::calcularFacturacionPorMesAno( 6, $this->year, 0, false, $currentCompany);
+              $l = CalculatedTax::calcularFacturacionPorMesAno( 7, $this->year, 0, false, $currentCompany);
+              $g = CalculatedTax::calcularFacturacionPorMesAno( 8, $this->year, 0, false, $currentCompany);
+              $s = CalculatedTax::calcularFacturacionPorMesAno( 9, $this->year, 0, false, $currentCompany);
+              $c = CalculatedTax::calcularFacturacionPorMesAno( 10, $this->year, 0, false, $currentCompany);
+              $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $this->year, 0, false, $currentCompany);
+              $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $this->year, 0, false, $currentCompany);
               $data->resetVars();
               $data->calcularFacturacionAcumulado( $this->year, 1 );
               if( $data->count_invoices || $data->count_bills ) {

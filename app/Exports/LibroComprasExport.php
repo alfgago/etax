@@ -89,7 +89,7 @@ class LibroComprasExport implements WithHeadings, WithMapping, FromQuery, WithEv
         $estadoAceptacion = 'Sin Respuesta';
         if($map->bill->accept_status == 1){
             $estadoAceptacion = 'Aceptada';
-        }else if($map->bill->accept_status == 1){
+        }else if($map->bill->accept_status == 2){
             $estadoAceptacion = 'Aceptada parcialmente';
         }
         return [
