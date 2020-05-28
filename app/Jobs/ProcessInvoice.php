@@ -93,7 +93,7 @@ class ProcessInvoice implements ShouldQueue
                             'multipart' => $requestData,
                             'verify' => false,
                             'http_errors' => false,
-                            'connect_timeout' => 25
+                            'connect_timeout' => 20
                         ]);
                         $response = json_decode($result->getBody()->getContents(), true);
                         $date = Carbon::now();
@@ -106,11 +106,13 @@ class ProcessInvoice implements ShouldQueue
                         ]);
                         
                         Log::debug("RESPONSE -> " . json_encode($response));
+                        $save = 0;
+                        $path = null;
+                        $saveMH = 0;
+                        $pathMH = null;
                         if( isset($response['status']) ){
                             try{
                                 //Intenta guardar el original firmado siempre
-                                $save = 0;
-                                $path = null;
                                 if(isset($response['data']['xmlFirmado'])){
                                     $path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
                                     $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n') );
@@ -120,8 +122,6 @@ class ProcessInvoice implements ShouldQueue
                             }
                             try{ //Intenta guardar la respuesta siempre
                                 if(isset($response['data']['mensajeHacienda'])){
-                                    $saveMH = 0;
-                                    $pathMH = null;
                                     if ( ! (strpos($response['data']['response'],"ESTADO=procesando") !== false) ) {
                                         $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
                                         $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );

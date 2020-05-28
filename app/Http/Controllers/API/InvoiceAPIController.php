@@ -318,6 +318,7 @@ class InvoiceAPIController extends Controller
      */
     public function consultarHacienda(Request $request) {
         try {
+            return $this->createResponse('400', 'ERROR', 'Limite de consultas sobrepasado.');
             //revisar si el usuario tiene permisos sobre esa compania
             $user = auth()->user();
             Log::info("Consultando factura");
@@ -332,8 +333,17 @@ class InvoiceAPIController extends Controller
             $company = Cache::get("cache-api-company-$request->empresa-$user->id");
             $apiHacienda = new BridgeHaciendaApi();
             $tokenApi = $apiHacienda->login(false);
-            $invoice = Invoice::where('document_key', $request->clave)->first();
-
+            $invoice = Invoice::where('company_id', $company->id)
+                        ->where('document_key', $request->clave)
+                        ->first();
+                        
+            //La idea de esto es que no puedan enviar spam de requests            
+            $throttleKey = "api-consultar-throttle-$request->empresa-$user->id";
+            if ( Cache::has($throttleKey) ) {
+                return $this->createResponse('400', 'ERROR', 'Limite: No se permite enviar mas de una solicitud de consulta cada 5 segundos.');
+            }
+            Cache::put($throttleKey, true, 5);
+            
             if ($tokenApi !== false && !empty($invoice->xmlHacienda->xml) && !empty($invoice)) {
                 $result = $apiHacienda->queryHacienda($invoice, $tokenApi, $company, false);
                 if ($result == false) {

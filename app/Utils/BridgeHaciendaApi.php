@@ -299,7 +299,19 @@ class BridgeHaciendaApi
                 'verify' => false,
                 'http_errors' => false
             ]);
-
+            
+            /*
+            $queryUrl = "https://api.comprobanteselectronicos.go.cr/recepcion-sandbox/v1/recepcion/$key";
+            $result = $client->request('GET', $queryUrl, [
+                'headers' => [
+                    'Authorization' => "Bearer $token",
+                    'Cache-Control' => "no-cache"
+                ],
+                'verify' => false,
+                'http_errors' => false
+            ]);*/
+            
+            
             $response = json_decode($result->getBody()->getContents(), true);
             Log::info('QUERY HACIENDA RESPONSE: '. json_encode($response));
             if (isset($response['status']) && $response['status'] == 200) {
