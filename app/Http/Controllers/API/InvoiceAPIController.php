@@ -105,9 +105,11 @@ class InvoiceAPIController extends Controller
                     if (!empty($invoiceData)) {
                         $invoice = $apiHacienda->createInvoice($invoiceData, $tokenApi);
                     }
+
                     if ($request->tipo_documento == '01') {
                         $company->last_invoice_ref_number = $invoice->reference_number;
                         $company->last_document = $invoice->document_number;
+                        $company->save();
 
                     } elseif ($request->tipo_documento == '08') {
                         $company->last_invoice_pur_ref_number = $invoice->reference_number;
@@ -123,6 +125,8 @@ class InvoiceAPIController extends Controller
 
                     $company->save();
                     clearInvoiceCache($invoice);
+                    Cache::forget("cache-api-company-".$request->emisor['identificacion']['numero']."-$user->id");
+                    Cache::forget("cache-has-company-".$request->emisor['identificacion']['numero']."-$user->id");
 
                     $response['clave_documento'] = $invoice->document_key;
 
@@ -183,7 +187,7 @@ class InvoiceAPIController extends Controller
                     $note->hacienda_status = '01';
                     $note->payment_status = "01";
                     $note->payment_receipt = "";
-                    $note->generation_method = "etax";
+                    $note->generation_method = "etax-api";
                     $note->reason = $request->razon ?? "Anular Factura";
                     $note->code_note = $request->codigo_nota ?? "01";
                     $note->reference_number = $company->last_note_ref_number + 1;
@@ -209,6 +213,8 @@ class InvoiceAPIController extends Controller
                     $company->save();
 
                     clearInvoiceCache($invoice);
+                    Cache::forget("cache-api-company-".$request->emisor['identificacion']['numero']."-$user->id");
+                    Cache::forget("cache-has-company-".$request->emisor['identificacion']['numero']."-$user->id");
 
                     $response['clave_documento'] = $invoice->document_key;
 
@@ -312,6 +318,7 @@ class InvoiceAPIController extends Controller
      */
     public function consultarHacienda(Request $request) {
         try {
+            return $this->createResponse('400', 'ERROR', 'Limite de consultas sobrepasado.');
             //revisar si el usuario tiene permisos sobre esa compania
             $user = auth()->user();
             Log::info("Consultando factura");
@@ -326,8 +333,17 @@ class InvoiceAPIController extends Controller
             $company = Cache::get("cache-api-company-$request->empresa-$user->id");
             $apiHacienda = new BridgeHaciendaApi();
             $tokenApi = $apiHacienda->login(false);
-            $invoice = Invoice::where('document_key', $request->clave)->first();
-
+            $invoice = Invoice::where('company_id', $company->id)
+                        ->where('document_key', $request->clave)
+                        ->first();
+                        
+            //La idea de esto es que no puedan enviar spam de requests            
+            $throttleKey = "api-consultar-throttle-$request->empresa-$user->id";
+            if ( Cache::has($throttleKey) ) {
+                return $this->createResponse('400', 'ERROR', 'Limite: No se permite enviar mas de una solicitud de consulta cada 5 segundos.');
+            }
+            Cache::put($throttleKey, true, 5);
+            
             if ($tokenApi !== false && !empty($invoice->xmlHacienda->xml) && !empty($invoice)) {
                 $result = $apiHacienda->queryHacienda($invoice, $tokenApi, $company, false);
                 if ($result == false) {
