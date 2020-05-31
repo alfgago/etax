@@ -415,8 +415,9 @@ class BridgeHaciendaApi
             $newKey = substr_replace($documentKey, $shortDate, 3, 4);
             $invoice->document_key = $newKey;
             //El primero en devolver un archivo, lo devuelve
+            Log::debug('Intentando con nueva llave: '.$newKey);
             $retry = $this->queryHacienda($invoice, $token, $company, false);
-            if($retry){
+            if($retry && $invoice->hacienda_status == '03'){
                 return $retry;
             }
         }
