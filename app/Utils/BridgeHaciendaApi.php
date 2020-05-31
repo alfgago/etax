@@ -408,13 +408,23 @@ class BridgeHaciendaApi
                 ->where('invoice_id', $invoice->id)
                 ->orderBy('created_at','asc')->get();
         //Recorre las veces que ha intentado en SM
+        $documentKey = $invoice->document_key;
         foreach($apiResponses as $apiResponse){
             $apiResponseDate = $apiResponse->created_at;
             $shortDate = str_pad($apiResponseDate->day, 2, "0", STR_PAD_LEFT) . str_pad($apiResponseDate->month, 2, "0", STR_PAD_LEFT);
-            $documentKey = $invoice->document_key;
             $newKey = substr_replace($documentKey, $shortDate, 3, 4);
             $invoice->document_key = $newKey;
             //El primero en devolver un archivo, lo devuelve
+            Log::debug('Intentando con nueva llave: '.$newKey);
+            $retry = $this->queryHacienda($invoice, $token, $company, false);
+            if($retry && $invoice->hacienda_status == '03'){
+                return $retry;
+            }
+        }
+        $lista = ['1205','1305','1105','1405','0905','0805','1005','1505'];
+        foreach($lista as $rep){
+            $newKey = substr_replace($documentKey, $shortDate, 3, 4);
+            $invoice->document_key = $newKey;
             Log::debug('Intentando con nueva llave: '.$newKey);
             $retry = $this->queryHacienda($invoice, $token, $company, false);
             if($retry && $invoice->hacienda_status == '03'){
