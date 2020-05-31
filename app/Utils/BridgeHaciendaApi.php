@@ -423,7 +423,7 @@ class BridgeHaciendaApi
         }
         $lista = ['1205','1305','1105','1405','0905','0805','1005','1505'];
         foreach($lista as $rep){
-            $newKey = substr_replace($documentKey, $shortDate, 3, 4);
+            $newKey = substr_replace($documentKey, $rep, 3, 4);
             $invoice->document_key = $newKey;
             Log::debug('Intentando con nueva llave: '.$newKey);
             $retry = $this->queryHacienda($invoice, $token, $company, false);
