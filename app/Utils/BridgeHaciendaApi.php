@@ -421,7 +421,7 @@ class BridgeHaciendaApi
                 return $retry;
             }
         }
-        $lista = ['1205','1305','1105','1405','0905','0805','1005','1505'];
+        $lista = ['1205','1305','1105','1405','0905','0805','1005','1505','1605','1905','1805','1705','0705'];
         foreach($lista as $rep){
             $newKey = substr_replace($documentKey, $rep, 3, 4);
             $invoice->document_key = $newKey;
