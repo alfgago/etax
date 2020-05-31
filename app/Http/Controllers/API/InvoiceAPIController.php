@@ -318,7 +318,7 @@ class InvoiceAPIController extends Controller
      */
     public function consultarHacienda(Request $request) {
         try {
-            return $this->createResponse('400', 'ERROR', 'Limite de consultas sobrepasado.');
+            //return $this->createResponse('400', 'ERROR', 'Limite de consultas sobrepasado.');
             //revisar si el usuario tiene permisos sobre esa compania
             $user = auth()->user();
             Log::info("Consultando factura");
