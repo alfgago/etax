@@ -335,10 +335,12 @@ class BridgeHaciendaApi
 
                 if ($response['data']['response']['ind-estado'] == "rechazado") {
                     if($findKey){
+                        $retry = false;
                         if($invoice->company_id == '1110'){
                             $retry = $this->retryForSM($invoice, $token, $company);
-                        }else{
-                            $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                        }
+                        if(!$retry){
+                           $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false); 
                         }
                         if($retry){
                             return $retry;
@@ -361,10 +363,12 @@ class BridgeHaciendaApi
                 }
             } else {
                 if($findKey){
+                    $retry = false;
                     if($invoice->company_id == '1110'){
                         $retry = $this->retryForSM($invoice, $token, $company);
-                    }else{
-                        $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                    }
+                    if(!$retry){
+                       $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false); 
                     }
                     if($retry){
                         return $retry;
@@ -398,18 +402,29 @@ class BridgeHaciendaApi
                 ->where('invoice_id', $invoice->id)
                 ->orderBy('created_at','asc')->get();
         //Recorre las veces que ha intentado en SM
+        $documentKey = $invoice->document_key;
         foreach($apiResponses as $apiResponse){
             $apiResponseDate = $apiResponse->created_at;
             $shortDate = str_pad($apiResponseDate->day, 2, "0", STR_PAD_LEFT) . str_pad($apiResponseDate->month, 2, "0", STR_PAD_LEFT);
-            $documentKey = $invoice->document_key;
             $newKey = substr_replace($documentKey, $shortDate, 3, 4);
             $invoice->document_key = $newKey;
             //El primero en devolver un archivo, lo devuelve
+            Log::debug('Intentando con nueva llave: '.$newKey);
             $retry = $this->queryHacienda($invoice, $token, $company, false);
-            if($retry){
+            if($retry && $invoice->hacienda_status == '03'){
                 return $retry;
             }
         }
+        /*$lista = ['1205','1305','1105','1405','0905','0805','1005','1505','1605','1905','1805','1705','0705'];
+        foreach($lista as $rep){
+            $newKey = substr_replace($documentKey, $rep, 3, 4);
+            $invoice->document_key = $newKey;
+            Log::debug('Intentando con nueva llave: '.$newKey);
+            $retry = $this->queryHacienda($invoice, $token, $company, false);
+            if($retry && $invoice->hacienda_status == '03'){
+                return $retry;
+            }
+        }*/
         return false;
     }
 
