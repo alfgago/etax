@@ -44,69 +44,16 @@ class GoSocketSync extends Command
     public function handle()
     {
         $apiGoSocket = new BridgeGoSocketApi();
-        $users = IntegracionEmpresa::where('status', 1)->get();
-        $this->info('Usuarios con token '. $users->count());
+        $integracionesGS = IntegracionEmpresa::where('status', 1)->get();
+        $this->info('Usuarios con token '. $integracionesGS->count());
 
-        foreach ($users as $user) {
-            $token = $user->session_token;
-            $tipos_facturas = $apiGoSocket->getDocumentTypes($token);
-            $company = Company::find($user->company_id);
-            
-            if (is_array($tipos_facturas)) {
-                $this->info('Sincronizando documentos GS: '. $company->id_number);
-                foreach ($tipos_facturas as $tipo_factura) {
-
-                    $facturas = $apiGoSocket->getSentDocuments($token, $user->company_token, $tipo_factura, $user);
-
-                    $this->info('Sincronizando Enviados');
-                    foreach ($facturas as $factura) {
-                        $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
-                        $xml  = base64_decode($APIStatus);
-                        $xml = simplexml_load_string( $xml);
-                        $json = json_encode( $xml );
-                        $arr = json_decode( $json, TRUE );
-                        try {
-                            $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0 ;
-                        } catch(\Exception $e) {
-                            $identificacionReceptor = 0;
-                        };
-
-                        $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-                        $consecutivoComprobante = $arr['NumeroConsecutivo'];
-
-                        //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                        if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
-                            //Registra el XML. Si todo sale bien, lo guarda en S3.
-                            Invoice::saveInvoiceXML( $arr, 'GS' );
-                        }
-                        $company->save();
-                    }
-
-                    $facturas = $apiGoSocket->getReceivedDocuments($token, $user->company_token, $tipo_factura, $user);
-
-                    $this->info('Sincronizando Recibidos');
-                    foreach ($facturas as $factura) {
-                        $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
-                        $xml  = base64_decode($APIStatus);
-                        $xml = simplexml_load_string( $xml);
-                        $json = json_encode( $xml );
-                        $arr = json_decode( $json, TRUE );
-                        $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
-                        $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-                        $consecutivoComprobante = $arr['NumeroConsecutivo'];
-                        $clave = $arr['Clave'];
-                        //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                        if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
-                            //Registra el XML. Si todo sale bien, lo guarda en S3
-                            Bill::saveBillXML( $arr, 'GS' );
-                        }
-                        $company->save();
-                    }
-                }
-                $user->first_sync_gs = false;
-                $user->save();
+        foreach ($integracionesGS as $integracion) {
+            $queryDates = $apiGoSocket->getQueryDates($integracion);
+            foreach($queryDates as $q){
+                GoSocketInvoicesSync::dispatch($integracion, $integracion->company_id, $q)->onConnection(config('etax.queue_connections'))->onQueue('gosocket');
             }
-
+            $integracion->first_sync_gs = false;
+            $integracion->save();
         }
 
     }

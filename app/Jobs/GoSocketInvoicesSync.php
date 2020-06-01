@@ -17,16 +17,18 @@ class GoSocketInvoicesSync implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    private $user = '';
+    private $integracion = '';
     private $companyId = '';
+    private $queryDates = '';
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($user = '', $companyId = '') {
-        $this->user = $user;
+    public function __construct($integracion = '', $companyId = '', $queryDates = '') {
+        $this->integracion = $integracion;
         $this->companyId = $companyId;
+        $this->queryDates = $queryDates;
     }
 
     /**
@@ -36,24 +38,19 @@ class GoSocketInvoicesSync implements ShouldQueue
      */
     public function handle()
     {
-        $this->getInvoices($this->user, $this->companyId);
-        $this->getBills($this->user, $this->companyId);
-        $this->user->first_sync_gs = false;
-        $this->user->save();
+        $this->getInvoices($this->integracion, $this->companyId, $this->queryDates);
+        $this->getBills($this->integracion, $this->companyId, $this->queryDates);
     }
 
-     private function getInvoices($user, $companyId) {
+     private function getInvoices($integracion, $companyId, $queryDates) {
 
-        Log::info("getInvoices ");
-        Log::info($user);
-        Log::info($companyId);
         try{
-            $token = $user->session_token;
+            $token = $integracion->session_token;
             $apiGoSocket = new BridgeGoSocketApi();
-            $tipos_facturas = $apiGoSocket->getDocumentTypes($token);
-            if (is_array($tipos_facturas)) {
-                foreach ($tipos_facturas as $tipo_factura) {
-                    $facturas = $apiGoSocket->getSentDocuments($token, $user->company_token, $tipo_factura);
+            $tiposFacturas = $apiGoSocket->getDocumentTypes($token);
+            if (is_array($tiposFacturas)) {
+                foreach ($tiposFacturas as $tipoFactura) {
+                    $facturas = $apiGoSocket->getSentDocuments($token, $integracion->company_token, $tipoFactura, $queryDates);
                     foreach ($facturas as $factura) {
                         $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
                         $company = Company::find($companyId);
@@ -87,16 +84,15 @@ class GoSocketInvoicesSync implements ShouldQueue
     }
 
 
-    private function getBills($user, $companyId) {
+    private function getBills($integracion, $companyId, $queryDates) {
 
-        Log::info("getbills ");
         try{
-            $token = $user->session_token;
+            $token = $integracion->session_token;
             $apiGoSocket = new BridgeGoSocketApi();
-            $tipos_facturas = $apiGoSocket->getDocumentTypes($token);
-            if (is_array($tipos_facturas)) {
-                foreach ($tipos_facturas as $tipo_factura) {
-                    $facturas = $apiGoSocket->getReceivedDocuments($token, $user->company_token, $tipo_factura);
+            $tiposFacturas = $apiGoSocket->getDocumentTypes($token);
+            if (is_array($tiposFacturas)) {
+                foreach ($tiposFacturas as $tipoFactura) {
+                    $facturas = $apiGoSocket->getReceivedDocuments($token, $integracion->company_token, $tipoFactura, $queryDates);
 
                     foreach ($facturas as $factura) {
                         $APIStatus = $apiGoSocket->getXML($token, $factura['DocumentId']);
