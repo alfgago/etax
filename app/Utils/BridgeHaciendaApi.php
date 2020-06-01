@@ -345,10 +345,12 @@ class BridgeHaciendaApi
                 
                 if (strpos($response['data']['response'],"ESTADO=rechazado") !== false) {
                     if($findKey){
+                        $retry = false;
                         if($invoice->company_id == '1110'){
                             $retry = $this->retryForSM($invoice, $token, $company);
-                        }else{
-                            $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                        }
+                        if(!$retry){
+                           $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false); 
                         }
                         if($retry){
                             return $retry;
@@ -371,10 +373,12 @@ class BridgeHaciendaApi
                 }
             } else {
                 if($findKey){
+                    $retry = false;
                     if($invoice->company_id == '1110'){
                         $retry = $this->retryForSM($invoice, $token, $company);
-                    }else{
-                        $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false);
+                    }
+                    if(!$retry){
+                       $retry = $this->queryHacienda($this->setTempKey($invoice), $token, $company, false); 
                     }
                     if($retry){
                         return $retry;
@@ -421,7 +425,7 @@ class BridgeHaciendaApi
                 return $retry;
             }
         }
-        $lista = ['1205','1305','1105','1405','0905','0805','1005','1505','1605','1905','1805','1705','0705'];
+        /*$lista = ['1205','1305','1105','1405','0905','0805','1005','1505','1605','1905','1805','1705','0705'];
         foreach($lista as $rep){
             $newKey = substr_replace($documentKey, $rep, 3, 4);
             $invoice->document_key = $newKey;
@@ -430,7 +434,7 @@ class BridgeHaciendaApi
             if($retry && $invoice->hacienda_status == '03'){
                 return $retry;
             }
-        }
+        }*/
         return false;
     }
 
