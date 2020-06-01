@@ -308,13 +308,13 @@ class BridgeHaciendaApi
                     $pathMH = 'empresa-' . $company->id_number . "/notas_credito_ventas/$invoice->year/$invoice->month/MH-$key.xml";
                     $fileMH = Storage::put(
                         $pathMH,
-                        ltrim($response['data']['response']['mensajeHacienda'], '\n')
+                        ltrim($response['data']['mensajeHacienda'], '\n')
                     );
                 } else {
                     $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$invoice->year/$invoice->month/MH-$key.xml";
                     $fileMH = Storage::put(
                         $pathMH,
-                        ltrim($response['data']['response']['mensajeHacienda'], '\n')
+                        ltrim($response['data']['mensajeHacienda'], '\n')
                     );
                 }
                 
@@ -330,6 +330,8 @@ class BridgeHaciendaApi
                     );
                     $file = Storage::get($pathMH);
                 }
+
+                Log::info('Estado de hacienda --> '.$response['data']['response']['ind-estado']);
 
                 if ($response['data']['response']['ind-estado'] == "rechazado") {
                     if($findKey){
