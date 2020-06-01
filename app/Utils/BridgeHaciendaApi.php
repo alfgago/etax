@@ -287,7 +287,7 @@ class BridgeHaciendaApi
             $client = new Client();
             $file = null;
             $query = $this->setInvoiceInfo($key, $company);
-            $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice43/consult', [
+            $result = $client->request('POST', config('etax.api_hacienda_url') . '/index.php/invoice43/consultHacienda', [
                 'headers' => [
                     'Auth-Key'  => config('etax.api_hacienda_key'),
                     'Client-Service' => config('etax.api_hacienda_client'),
@@ -299,19 +299,7 @@ class BridgeHaciendaApi
                 'verify' => false,
                 'http_errors' => false
             ]);
-            
-            /*
-            $queryUrl = "https://api.comprobanteselectronicos.go.cr/recepcion-sandbox/v1/recepcion/$key";
-            $result = $client->request('GET', $queryUrl, [
-                'headers' => [
-                    'Authorization' => "Bearer $token",
-                    'Cache-Control' => "no-cache"
-                ],
-                'verify' => false,
-                'http_errors' => false
-            ]);*/
-            
-            
+
             $response = json_decode($result->getBody()->getContents(), true);
             Log::info('QUERY HACIENDA RESPONSE: '. json_encode($response));
             if (isset($response['status']) && $response['status'] == 200) {
@@ -342,8 +330,10 @@ class BridgeHaciendaApi
                     );
                     $file = Storage::get($pathMH);
                 }
-                
-                if (strpos($response['data']['response'],"ESTADO=rechazado") !== false) {
+
+                Log::info('Estado de hacienda --> '.$response['data']['response']['ind-estado']);
+
+                if ($response['data']['response']['ind-estado'] == "rechazado") {
                     if($findKey){
                         if($invoice->company_id == '1110'){
                             $retry = $this->retryForSM($invoice, $token, $company);
@@ -356,7 +346,7 @@ class BridgeHaciendaApi
                     }
                     $invoice->hacienda_status = '04';
                     $invoice->save();
-                } else if (strpos($response['data']['response'],"ESTADO=aceptado") !== false) {
+                } else if ($response['data']['response']['ind-estado'] == "aceptado") {
                     $invoice->hacienda_status = '03';
                     $invoice->save();
                     
@@ -364,7 +354,7 @@ class BridgeHaciendaApi
                         $path = $invoiceUtils->getXmlPath( $invoice, $company );
                         $invoiceUtils->sendInvoiceNotificationEmail( $invoice, $company, $path, $pathMH, true);
                     }
-                } else if (strpos($response['data']['response'],"ESTADO=procesando") !== false) {
+                } else if ($response['data']['response']['ind-estado'] == "procesando") {
                     $invoice->hacienda_status = '05';
                     $invoice->save();
                     return false;
