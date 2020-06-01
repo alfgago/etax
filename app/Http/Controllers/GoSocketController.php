@@ -156,9 +156,9 @@ class GoSocketController extends Controller
             if (!empty($token)) {
                 $apiGoSocket = new BridgeGoSocketApi();
                 $user_gs = $apiGoSocket->getUser($token);
-                $user = IntegracionEmpresa::where("user_token", $user_gs['UserId'])->where("company_token", $user_gs['CurrentAccountId'])->first();
+                $integracion = IntegracionEmpresa::where("user_token", $user_gs['UserId'])->where("company_token", $user_gs['CurrentAccountId'])->first();
 
-                if (is_null($user)) {
+                if (is_null($integracion)) {
                     Log::info("Creando usuario");
                     $company_gs = $apiGoSocket->getAccount($token, $user_gs['CurrentAccountId']);
                     $companyUtils = new CompanyUtils();
@@ -219,7 +219,7 @@ class GoSocketController extends Controller
                         ['permission_id' => 8
                         ]
                     );
-                    $user = IntegracionEmpresa::updateOrCreate(
+                    $integracion = IntegracionEmpresa::updateOrCreate(
                         ["user_token" => $user_gs['UserId'],
                             "company_token" => $user_gs['CurrentAccountId']
                         ],
@@ -233,18 +233,24 @@ class GoSocketController extends Controller
                         ]
                     );
                 }
-                if ($user !== null && Auth::loginUsingId($user->user_id)) {
+                if ($integracion !== null && Auth::loginUsingId($integracion->user_id)) {
 
-                    $user->session_token = $token;
-                    $user->save();
-                    $companyId = $user->company_id;
+                    $integracion->session_token = $token;
+                    $integracion->save();
+                    $companyId = $integracion->company_id;
                     $user_login = auth()->user();
                     $team = Team::where('company_id', $companyId)->first();
                     $user_login->switchTeam($team);
 
                     Cache::forget("cache-currentcompany-$user_login->id");
                     Log::info("El usuario existe y se inicio sesion enviando job del sync gosocket");
-                    GoSocketInvoicesSync::dispatch($user, $companyId)->onConnection(config('etax.queue_connections'))->onQueue('gosocket');
+                    
+                    $queryDates = $apiGoSocket->getQueryDates($integracion);
+                    foreach($queryDates as $q){
+                        GoSocketInvoicesSync::dispatch($integracion, $companyId, $q)->onConnection(config('etax.queue_connections'))->onQueue('gosocket');
+                    }
+                    $integracion->first_sync_gs = false;
+                    $integracion->save();
 
                     return redirect()->secure('gosocket/login?token=' . $token);
                 } else {
@@ -342,7 +348,7 @@ class GoSocketController extends Controller
                         ]
                     );
                     Log::info("Se crea integracion empresa");
-                    $user = IntegracionEmpresa::updateOrCreate(
+                    $integracion = IntegracionEmpresa::updateOrCreate(
                         ["user_token" => $user_gs['UserId'],
                             "company_token" => $user_gs['CurrentAccountId']
                         ],
@@ -355,18 +361,23 @@ class GoSocketController extends Controller
                             "first_sync_gs" => isset($intEmpresa->id) ? false : true
                         ]
                     );
-                    if ($user !== null && Auth::loginUsingId($user->user_id)) {
+                    if ($integracion !== null && Auth::loginUsingId($integracion->user_id)) {
                         Log::info("Request login");
-                        $user->session_token = $token;
-                        $user->save();
-                        $companyId = $user->company_id;
+                        $integracion->session_token = $token;
+                        $integracion->save();
+                        $companyId = $integracion->company_id;
                         $user_login = auth()->user();
                         $team = Team::where('company_id', $companyId)->first();
                         $user_login->switchTeam($team);
 
                         Cache::forget("cache-currentcompany-$user_login->id");
                         Log::info("El usuario existe y se inicio sesion enviando job del sync gosocket");
-                        GoSocketInvoicesSync::dispatch($user, $companyId)->onConnection(config('etax.queue_connections'))->onQueue('gosocket');
+                        $queryDates = $apiGoSocket->getQueryDates($integracion);
+                        foreach($queryDates as $q){
+                            GoSocketInvoicesSync::dispatch($integracion, $companyId, $q)->onConnection(config('etax.queue_connections'))->onQueue('gosocket');
+                        }
+                        $integracion->first_sync_gs = false;
+                        $integracion->save();
 
                         return redirect('/');
                     } else {
