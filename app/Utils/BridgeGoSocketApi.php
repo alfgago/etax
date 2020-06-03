@@ -129,7 +129,7 @@ class BridgeGoSocketApi
                 foreach($months as $m){
                     $dt = Carbon::create($y, $m, 1, 12, 0, 0);
                     $first_date = $dt->startOfMonth()->toDateString();
-                    $first_date = $dt->endOfMonth()->toDateString();
+                    $second_date = $dt->endOfMonth()->toDateString();
                     $queryDates[] = "fromDate=$first_date&toDate=$second_date";
                 }
             }
