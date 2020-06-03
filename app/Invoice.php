@@ -441,15 +441,15 @@ class Invoice extends Model
             );
 
             $client->first_name = trim($name[0]);
-            $client->last_name = trim($name[1]);
-            $client->last_name2 = trim($name[2]?? '');
+            $client->last_name = trim($name[1] ?? '');
+            $client->last_name2 = trim($name[2] ?? '');
             $client->fullname = trim($request->name);
             $client->emisor_receptor = 'ambos';
-            $client->country = $request->receptor['ubicacion']['pais'];
-            $client->state = $request->receptor['ubicacion']['provincia'];
-            $client->city = $request->receptor['ubicacion']['canton'];
-            $client->district = $request->receptor['ubicacion']['distrito'];
-            $client->neighborhood = trim($request->receptor['ubicacion']['barrio']);
+            $client->country = $request->receptor['ubicacion']['pais'] ?? '';
+            $client->state = $request->receptor['ubicacion']['provincia'] ?? '1';
+            $client->city = $request->receptor['ubicacion']['canton'] ?? '101';
+            $client->district = $request->receptor['ubicacion']['distrito'] ?? '10101';
+            $client->neighborhood = trim($request->receptor['ubicacion']['barrio'] ?? '');
             $client->zip = trim($request->receptor['ubicacion']['codigoPostal']) ?? $client->district;
             $client->address = trim($request->receptor['ubicacion']['otrasSenas']);
             $client->foreign_address = trim($request->receptor['ubicacion']['direccionExtranjero']);
@@ -592,6 +592,7 @@ class Invoice extends Model
             $this->iva_amount = $request->resumenFactura['totalImpuesto'] ?? 0;
 
             $this->total_comprobante = $request->resumenFactura['totalComprobante'] ?? 0;
+            $this->total = $request->resumenFactura['totalComprobante'] ?? 0;
 
             $this->save();
 
@@ -675,7 +676,7 @@ class Invoice extends Model
                         'item_count'   => $data['cantidad'] ?? 1,
                         'unit_price'   => $data['precioUnitario'] ?? 0,
                         'subtotal'     => $data['subTotal'] ?? 0,
-                        'total' => $data['montoTotal'] ?? 0,
+                        'total' => $data['montoTotal'] ?? ($data['montoTotalLinea'] ?? 0),
                         'discount_type' => $data['tipoDescuento'] ?? null,
                         'discount' => $data['descuento'] ?? 0,
                         'iva_type' => $data['codigoEtax'] ?? null,

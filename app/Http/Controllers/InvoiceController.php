@@ -2168,7 +2168,7 @@ class InvoiceController extends Controller
                         $options = $request->cantidad_dias;
                     }
                     $recurrencia->options = $options;
-                    $recurrencia->next_send = $recurrencia->proximo_envio($generatedDate);
+                    $recurrencia->next_send = $generatedDate; //$recurrencia->proximo_envio($generatedDate);
                     $recurrencia->save();   
                     
                     $invoice->recurring_id = $recurrencia->id;
