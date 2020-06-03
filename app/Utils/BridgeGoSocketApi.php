@@ -81,7 +81,7 @@ class BridgeGoSocketApi
 
         } catch (\Exception $e) {
             Log::info('Error al traer invoices GoSocket -->>'. $e->getMessage());
-            return false;
+            return [];
         }
     }
 
@@ -103,7 +103,7 @@ class BridgeGoSocketApi
 
         } catch (\Exception $e) {
             Log::info('Error al traer invoices GoSocket -->>'. $e->getMessage());
-            return false;
+            return [];
         }
     }
     
@@ -128,8 +128,8 @@ class BridgeGoSocketApi
             foreach($years as $y){
                 foreach($months as $m){
                     $dt = Carbon::create($y, $m, 1, 12, 0, 0);
-                    $first_date = $dt->startOfMonth->toDateString();
-                    $first_date = $dt->endOfMonth->toDateString();
+                    $first_date = $dt->startOfMonth()->toDateString();
+                    $first_date = $dt->endOfMonth()->toDateString();
                     $queryDates[] = "fromDate=$first_date&toDate=$second_date";
                 }
             }
@@ -180,7 +180,7 @@ class BridgeGoSocketApi
 
         } catch (\Exception $e) {
             Log::info('Error al traer invoices GoSocket -->>'. $e->getMessage());
-            return false;
+            return [];
         }
     }
 }
