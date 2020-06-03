@@ -406,6 +406,9 @@ class CalculatedTax extends Model
                             if ($ivaType == '200' || $ivaType == '201' || $ivaType == '240' || $ivaType == '250' || $ivaType == '245' ||
                                 $ivaType == 'B200' || $ivaType == 'B201' || $ivaType == 'B240' || $ivaType == 'B250' || $ivaType == 'B245' ||
                                 $ivaType == 'S200' || $ivaType == 'S201' || $ivaType == 'S240' || $ivaType == 'S250' || $ivaType == 'S245') {
+                                if( $ivaType == 'B245' || $ivaType == 'S245' ){ //Son exoneradas no acreditables
+                                    $invoiceIva = 0;
+                                }
                                 $subtotal = $subtotal + $invoiceIva;
                                 $invoiceIva = 0;
                                 $sumRepercutidoExentoSinCredito += $subtotal;
