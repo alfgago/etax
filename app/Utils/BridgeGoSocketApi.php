@@ -110,8 +110,8 @@ class BridgeGoSocketApi
     public function getQueryDates($dataIntegracion){
         $queryDates = [];
         $today = Carbon::parse(now('America/Costa_Rica'));
+        Log::info("Dates GS Empresa $dataIntegracion->company_id");
         if(isset($dataIntegracion->first_sync_gs) && $dataIntegracion->first_sync_gs == false) {
-            Log::info("Ya tiene primer sync de recibidos con gosocket, generando mes anterior ");
             $first_date = Carbon::createFromFormat('Y-m-d H:i:s',
                 $dataIntegracion->updated_at,
                 'America/Costa_Rica'
