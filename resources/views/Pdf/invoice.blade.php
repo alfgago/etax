@@ -268,6 +268,7 @@
                 @if( isset($numExoneracion) )
                     <b>Exoneración: </b> {{ $numExoneracion }}<br>
                 @endif
+                <b>Tipo de cambio: </b> <span>{{ $data_invoice->currency_rate }}</span>
             </td>
         </tr>
     </table>
@@ -361,7 +362,7 @@
     <table width="100%" class="total">
         <thead>
             <tr class="item">
-                <th class="obs">
+                <th class="obs"  style="text-align: left;">
                     Observaciones
                 </th>
                 <th class="box-total">
@@ -381,66 +382,66 @@
             </td>
             <td style="width: 50%;">
                 
-                <table class="resumen-totales">
+                <table style="width: 100%;" class="resumen-totales">
                     <tr>
                         <td style="padding-right: 30px;"><b>Total servicios gravados</b></td>
-                        <td><span>{{ number_format($totalServiciosGravados, 2) }}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalServiciosGravados, 2) }}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total servicios exentos</b></td>
-                        <td><span>{{ number_format($totalServiciosExentos, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalServiciosExentos, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total servicios exonerados</b></td>
-                        <td><span>{{ number_format($totalServiciosExonerados, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalServiciosExonerados, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total mercancías gravadas</b></td>
-                        <td><span>{{ number_format($totalMercaderiasGravadas, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalMercaderiasGravadas, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total mercancías exentas</b></td>
-                        <td><span>{{ number_format($totalMercaderiasExentas, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalMercaderiasExentas, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total mercancías exoneradas</b></td>
-                        <td><span>{{ number_format($totalMercaderiasExonerados, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalMercaderiasExonerados, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total gravado</b></td>
-                        <td><span>{{ number_format($totalGravado, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalGravado, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total exento</b></td>
-                        <td><span>{{ number_format($totalExento, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalExento, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total exonerado</b></td>
-                        <td><span>{{ number_format($totalExonerados, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalExonerados, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total venta</b></td>
-                        <td><span>{{ number_format($totalVenta, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalVenta, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total descuento</b></td>
-                        <td><span>{{ number_format($totalDescuentos, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalDescuentos, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total venta neta</b></td>
-                        <td><span>{{ number_format( ($totalNeta), 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format( ($totalNeta), 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total IVA</b></td>
-                        <td><span>{{ number_format($totalImpuestos, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalImpuestos, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total IVA Devuelto</b></td>
-                        <td><span>{{ number_format($totalIvaDevuelto, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalIvaDevuelto, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total comprobante</b></td>
-                        <td><span>{{ number_format( ($totalComprobante) , 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format( ($totalComprobante) , 2)}}</span></td>
                     </tr>
                 </table>
                 
@@ -450,7 +451,7 @@
     <table width="100%" class="footer">
         <tr class="item">
             <td class="currency total">
-                Emitida conforme lo establecido en la resolución de Facturación Electrónica, N° DGT‐R‐033‐2019 del 20 de junio del 2019 de la Dirección General de Tributación v.4.3 <br>
+                Emitida conforme lo establecido en la resolución de Facturación Electrónica, N° DGT-R033-2019 del 20 de junio del 2019 de la Dirección General de Tributación v.4.3 <br>
                 eTax - La herramienta para resolver el IVA. | Ofiplaza del Este. 200m al oeste de la Rotonda de la Bandera,
                 San Pedro de Montes de Oca, San José 6897-1000 Costa Rica +506 22802130
             </td>

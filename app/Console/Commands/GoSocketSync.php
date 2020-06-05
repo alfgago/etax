@@ -9,6 +9,7 @@ use App\Invoice;
 use App\Utils\BridgeGoSocketApi;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use App\Jobs\GoSocketInvoicesSync;
 
 class GoSocketSync extends Command
 {

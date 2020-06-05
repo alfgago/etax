@@ -81,7 +81,7 @@ class BridgeGoSocketApi
 
         } catch (\Exception $e) {
             Log::info('Error al traer invoices GoSocket -->>'. $e->getMessage());
-            return false;
+            return [];
         }
     }
 
@@ -103,15 +103,15 @@ class BridgeGoSocketApi
 
         } catch (\Exception $e) {
             Log::info('Error al traer invoices GoSocket -->>'. $e->getMessage());
-            return false;
+            return [];
         }
     }
     
     public function getQueryDates($dataIntegracion){
         $queryDates = [];
         $today = Carbon::parse(now('America/Costa_Rica'));
+        Log::info("Dates GS Empresa $dataIntegracion->company_id");
         if(isset($dataIntegracion->first_sync_gs) && $dataIntegracion->first_sync_gs == false) {
-            Log::info("Ya tiene primer sync de recibidos con gosocket, generando mes anterior ");
             $first_date = Carbon::createFromFormat('Y-m-d H:i:s',
                 $dataIntegracion->updated_at,
                 'America/Costa_Rica'
@@ -128,8 +128,8 @@ class BridgeGoSocketApi
             foreach($years as $y){
                 foreach($months as $m){
                     $dt = Carbon::create($y, $m, 1, 12, 0, 0);
-                    $first_date = $dt->startOfMonth->toDateString();
-                    $first_date = $dt->endOfMonth->toDateString();
+                    $first_date = $dt->startOfMonth()->toDateString();
+                    $second_date = $dt->endOfMonth()->toDateString();
                     $queryDates[] = "fromDate=$first_date&toDate=$second_date";
                 }
             }
@@ -180,7 +180,7 @@ class BridgeGoSocketApi
 
         } catch (\Exception $e) {
             Log::info('Error al traer invoices GoSocket -->>'. $e->getMessage());
-            return false;
+            return [];
         }
     }
 }
