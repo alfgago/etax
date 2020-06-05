@@ -126,7 +126,7 @@
                                                 <div class="col-xs-4 col-sm-4 col-md-4">
                                                     <div class="form-group {{ $errors->has('email') ? ' has-error' : '' }}">
                                                         <label>Correo electrónico *</label>
-                                                        <input type="text" name="email" class="form-control" placeholder="Correo electrónico" value="{{old('email')}}" required>                                                        
+                                                        <input type="text" name="email" class="form-control" placeholder="Correo electrónico" value="{{old('email')}}" required onkeyup="return forceLower(this);">                                                        
                                                     </div>
                                                 </div>
 
@@ -180,7 +180,10 @@ function confirmDelete( id ) {
   
 }
     
-    
+function forceLower(strInput) 
+{
+    strInput.value=strInput.value.toLowerCase();
+}   
 </script>
 
 @endsection
