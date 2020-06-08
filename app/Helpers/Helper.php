@@ -325,20 +325,6 @@ if (!function_exists('get_current_user_permissions')) {
 
 }
 
-/* Get current user active subscriptions */
-/*if (!function_exists('getCurrentUserSubscriptions')) {
-
-    function getCurrentUserSubscriptions() {
-
-        $user_id = auth()->user()->id;
-
-        $subscriptions = App\Sales::where('user_id', $user_id)->where('status', '1')->get();
-        
-        return $subscriptions;
-        
-    }
-
-}*/
 
 /* Get current user active subscriptions */
 if (!function_exists('getCurrentSubscription')) {
@@ -463,27 +449,6 @@ if (!function_exists('get_plan_status')) {
                 return '<label class="badge badge-danger">Cancelled</label>';
             }
         }
-
-        /*
-          $company_registered_on_plan = \App\Company::where(array('plan_no' => $plan_no))->count();
-          $plan = \App\Plan::find($user_subscription->plan_id);
-
-          $company_limit_allowed = $plan->no_of_companies;
-
-          if ($company_registered_on_plan >= $company_limit_allowed) {
-          return '<label class="badge badge-warning">Limit Reached</label>';
-          } else {
-          if (strtotime(date('Y-m-d')) > strtotime($user_subscription->expiry_date)) {
-          return '<label class="badge badge-danger">Expired</label>';
-          } else {
-          if ($user_subscription->status == '1') {
-          return '<label class="badge badge-success">Active</label>';
-          } else {
-          return '<label class="badge badge-danger">Cancelled</label>';
-          }
-          }
-          }
-         */
     }
 
 }
@@ -796,39 +761,6 @@ if (!function_exists('get_rates')) {
             $value = Cache::get($lastRateKey);
             return $value;
         }
-        
-        /*try {
-            $value = Cache::remember('usd_rate', '60000', function () {
-                $today = new Carbon();
-                $client = new \GuzzleHttp\Client();
-                $response = $client->get(config('etax.exchange_url'),
-                    ['query' => [
-                        'Indicador' => '318',
-                        'FechaInicio' => $today::now()->format('d/m/Y'),
-                        'FechaFinal' => $today::now()->format('d/m/Y'),
-                        'Nombre' => config('etax.namebccr'),
-                        'SubNiveles' => 'N',
-                        'CorreoElectronico' => config('etax.emailbccr'),
-                        'Token' => config('etax.tokenbccr')
-                    ]
-                    ]
-                );
-                $body = $response->getBody()->getContents();
-                $xml = new \SimpleXMLElement($body);
-                $xml->registerXPathNamespace('d', 'urn:schemas-microsoft-com:xml-diffgram-v1');
-                $tables = $xml->xpath('//INGC011_CAT_INDICADORECONOMIC[@d:id="INGC011_CAT_INDICADORECONOMIC1"]');
-                return json_decode($tables[0]->NUM_VALOR);
-            });
-
-            return $value;
-
-        } catch( \Exception $e) {
-            Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: ');
-        } catch (RequestException $e) {
-            Log::error('Error al consultar tipo de cambio: Code:'.$e->getCode().' Mensaje: '.
-                $e->getResponse()->getReasonPhrase());
-            return null;
-        }*/
 
     }
 }
@@ -914,5 +846,13 @@ if (!function_exists('userHasCompany')) {
         }
 
         return Illuminate\Support\Facades\Cache::get($cacheKey);
+    }
+}
+
+if (!function_exists('userHasCompany')) {
+    function getATVCert($companyId) {
+        $company = currentCompanyModel();
+        $atv = $company->atv;
+        return $atv;
     }
 }
