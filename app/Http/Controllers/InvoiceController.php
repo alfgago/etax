@@ -450,6 +450,10 @@ class InvoiceController extends Controller
             return redirect($errors['url'])->withError($errors['mensaje']);
         }
         
+        if($company->atv->isVencido()){
+            return back()->withError( 'Su certificado ATV se encuentra vencido.' );
+        }
+        
         $cuentasContables = null;
         $qb = \App\Quickbooks::where('company_id', $company->id)->with('company')->first();
         if( isset($qb) ){
@@ -956,6 +960,11 @@ class InvoiceController extends Controller
                 return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
             }
         }
+        if($company->atv->isVencido()){
+            return back()->withError( 'Su certificado ATV se encuentra vencido.' );
+        }
+        
+        
         if($company->last_debit_note_ref_number === null) {
             return redirect('/empresas/configuracion')->withErrors('No ha ingresado ultimo consecutivo de nota de debito');
         }
