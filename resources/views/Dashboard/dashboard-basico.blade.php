@@ -82,7 +82,7 @@
           <div class="dato-empresa">
             <b>Facturación electrónica:</b> Habilitada
           </div>
-          @if(!$company->atv_validation && $company->use_invoicing)
+          @if( $empresa->atv_validation && $empresa->use_invoicing )
           <div class="dato-empresa">
             <b>Vencimiento Certificado ATV:</b> <span style='color:{{ $atv->isVencido() ? "red" : "green" }}'>{{ $atv->getDueDate()->format('d/m/Y')  }}</span>
           </div>
