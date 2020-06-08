@@ -62,7 +62,11 @@
         <div class="card-title" id="empresa">Empresa</div>
 
         <div class="info-empresa">
-          <?php $empresa = currentCompanyModel(); $hide_tutorial = $user = auth()->user()->hide_tutorial;?>
+          <?php 
+              $empresa = currentCompanyModel(); 
+              $hide_tutorial = $user = auth()->user()->hide_tutorial;
+              $atv = $empresa->atv;
+          ?>
           <div class="dato-empresa">
             {{ $empresa->name.' '.$empresa->last_name.' '.$empresa->last_name2 }}
           </div>
@@ -77,6 +81,9 @@
           </div>
           <div class="dato-empresa">
             <b>Facturación electrónica:</b> Habilitada
+          </div>
+          <div class="dato-empresa">
+            <b>Vencimiento Certificado ATV:</b> <span style='color:{{ $atv->isVencido() ? "red" : "green" }}'>{{ $atv->getDueDate()->format('d/m/Y')  }}</span>
           </div>
           <div class="dato-empresa mt-3">
             <a class="btn btn-secondary btn-sm" href="/empresas/configuracion">Configurar datos</a>
