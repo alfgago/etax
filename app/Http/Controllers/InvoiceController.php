@@ -959,9 +959,9 @@ class InvoiceController extends Controller
             }else {
                 return redirect('/empresas/certificado')->withError( 'Hubo un error al validar su certificado digital. Verifique que lo haya ingresado correctamente. Si cree que está correcto, ' );
             }
-        }
-        if($company->atv->isVencido()){
-            return back()->withError( 'Su certificado ATV se encuentra vencido.' );
+            if($company->atv->isVencido()){
+                return back()->withError( 'Su certificado ATV se encuentra vencido.' );
+            }
         }
         
         
