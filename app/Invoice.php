@@ -692,7 +692,7 @@ class Invoice extends Model
                 }catch( \Exception $e ) {
                     $exonerationDate = null;
                 }
-                if( $exonerationDate && $data['impuesto']['exoneracion']['tipoDocumentoExoneracion'] && $data['impuesto']['exoneracion']['numeroDocumentoExoneracion'] ) {
+                if( $exonerationDate && $data['impuesto']['exoneracion']['tipoDocumento'] && $data['impuesto']['exoneracion']['numeroDocumento'] ) {
                     $item->exoneration_document_type = $data['impuesto']['exoneracion']['tipoDocumento'] ?? null;
                     $item->exoneration_document_number = $data['impuesto']['exoneracion']['numeroDocumento'] ?? null;
                     $item->exoneration_company_name = $data['impuesto']['exoneracion']['nombreInstitucion'] ?? null;
@@ -1727,6 +1727,7 @@ class Invoice extends Model
             $this->iva_amount = $request->resumenFactura['totalImpuesto'] ?? 0;
 
             $this->total_comprobante = $request->resumenFactura['totalComprobante'] ?? 0;
+            $this->total = $request->resumenFactura['totalComprobante'] ?? 0;
 
             $this->save();
 
