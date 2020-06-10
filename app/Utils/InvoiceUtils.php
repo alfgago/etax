@@ -222,7 +222,9 @@ class InvoiceUtils
     }
     
      public function sendInvoiceNotificationEmail($invoice, $company, $xmlPath, $xmlMH, $sendPdf = false ) {
-        
+        /*if ( !app()->environment('production') ) {
+            return false;    
+        }*/
         try{
             $cc = [];
             //Primero revisa si el invoice tiene un client_id
