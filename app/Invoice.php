@@ -1727,6 +1727,7 @@ class Invoice extends Model
             $this->iva_amount = $request->resumenFactura['totalImpuesto'] ?? 0;
 
             $this->total_comprobante = $request->resumenFactura['totalComprobante'] ?? 0;
+            $this->total = $request->resumenFactura['totalComprobante'] ?? 0;
 
             $this->save();
 
