@@ -58,11 +58,17 @@ class ProcessSendExcelSingleInvoice implements ShouldQueue
                 $invoice = Invoice::firstOrNew(
                   [
                       'company_id' => $fac->company_id,
+                      'year' => $fac->year,
+                      'month' => $fac->month,
+                      'client_id_number' => $fac->client_id_number,
                       'document_number' => $fac->document_number,
-                      'document_key' => $fac->document_key,
-                      'client_id_number' => $fac->client_id_number
+                      'document_key' => $fac->document_key
                   ], $fac->toArray()
                 );
+                if($invoice->in_queue > 0){
+                    return false;
+                    Log::warning("Ya habia entrado no debe volver a editarse.");
+                }
                 $invoice->hacienda_status = '01';
                 $invoice->generation_method = "etax-bulk";
                 
@@ -102,9 +108,13 @@ class ProcessSendExcelSingleInvoice implements ShouldQueue
                 }
           
                 $invoice->save();
-                Log::error("Registrando SM Invoice " . $invoice->id);
+                Log::debug("Registrando SM Invoice " . $invoice->id);
                 
-                $smInvoice = SMInvoice::where('descripcion', $invoice->description)->where('num_factura', $invoice->buy_order)->first();
+                $smInvoice = SMInvoice::where('descripcion', $invoice->description)
+                            ->where('num_factura', $invoice->buy_order)
+                            ->where('year', $invoice->year)
+                            ->where('month', $invoice->month)
+                            ->first();
                 $smInvoice->document_key = $invoice->document_key;
                 $smInvoice->invoice_id = $invoice->id;
                 $smInvoice->save();
