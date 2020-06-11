@@ -773,7 +773,7 @@ if (!function_exists('hasAvailableInvoices')) {
             $company = currentCompanyModel();
         }
         $availableInvoices = $company->getAvailableInvoices( $year, $month , $company);
-        Log::info("Facturas disponibles". $availableInvoices);
+        //Log::info("Facturas disponibles". $availableInvoices);
         $facturasDisponibles = $availableInvoices->monthly_quota + $company->additional_invoices - $availableInvoices->current_month_sent;
         if( $facturasDisponibles < $amountToCheck ){
             return false;

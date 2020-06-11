@@ -102,6 +102,7 @@ class ProcessSendExcelSingleInvoice implements ShouldQueue
                 }
           
                 $invoice->save();
+                Log::error("Registrando SM Invoice " . $invoice->id);
                 
                 $smInvoice = SMInvoice::where('descripcion', $invoice->description)->where('num_factura', $invoice->buy_order)->first();
                 $smInvoice->document_key = $invoice->document_key;

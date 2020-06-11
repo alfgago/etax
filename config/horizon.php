@@ -197,7 +197,7 @@ return [
             'imports-supervisor' => [
                 'connection' => 'redis',
                 'queue' => ['imports', 'gosocket'],
-                'balance' => 'auto',
+                'balance' => 'simple',
                 'processes' => 2,
                 'minProcesses' => 2,
                 'maxProcesses' => 2,
