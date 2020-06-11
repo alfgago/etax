@@ -63,6 +63,10 @@ class ProcessSendExcelSingleInvoice implements ShouldQueue
                       'client_id_number' => $fac->client_id_number
                   ], $fac->toArray()
                 );
+                if($invoice->in_queue > 0){
+                    return false;
+                    Log::warning("Ya habia entrado no debe volver a editarse.");
+                }
                 $invoice->hacienda_status = '01';
                 $invoice->generation_method = "etax-bulk";
                 
