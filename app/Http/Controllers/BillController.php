@@ -889,44 +889,42 @@ class BillController extends Controller
             $json = json_encode( $xml ); // convert the XML string to json
             $arr = json_decode( $json, TRUE );
             
-                $fechaEmision = explode("T", $arr['FechaEmision']);
-                $fechaEmision = explode("-", $fechaEmision[0]);
-                $fechaEmision = $fechaEmision[2]."/".$fechaEmision[1]."/".$fechaEmision[0];
+            $fechaEmision = explode("T", $arr['FechaEmision']);
+            $fechaEmision = explode("-", $fechaEmision[0]);
+            $fechaEmision = $fechaEmision[2]."/".$fechaEmision[1]."/".$fechaEmision[0];
 
-                if(CalculatedTax::validarMes($fechaEmision)){
-                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : $company->id_number;
-                    $identificacionEmisor = array_key_exists('Emisor', $arr) ? $arr['Emisor']['Identificacion']['Numero'] : 0;
-                    $consecutivoComprobante = $arr['NumeroConsecutivo'];
-                    $clave = $arr['Clave'];
-                    //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor )  || substr($arr['NumeroConsecutivo'],8,2) == "04" ) {
-                        //Registra el XML. Si todo sale bien, lo guarda en S3
-                        $bill = Bill::saveBillXML( $arr, 'XML' );
-                        if( $bill ) {
-                            Bill::storeXML( $bill, $file );
+            if(CalculatedTax::validarMes($fechaEmision)){
+                $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : $company->id_number;
+                $identificacionEmisor = array_key_exists('Emisor', $arr) ? $arr['Emisor']['Identificacion']['Numero'] : 0;
+                $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                $clave = $arr['Clave'];
+                //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor )  || substr($arr['NumeroConsecutivo'],8,2) == "04" ) {
+                    //Registra el XML. Si todo sale bien, lo guarda en S3
+                    $bill = Bill::saveBillXML( $arr, 'XML' );
+                    if( $bill ) {
+                        Bill::storeXML( $bill, $file );
 
-                            $user = auth()->user();
-                            Activity::dispatch(
-                                $user,
-                                $bill,
-                                [
-                                    'company_id' => $bill->company_id,
-                                    'id' => $bill->id,
-                                    'document_key' => $bill->document_key
-                                ],
-                                "Importar factura de compra por XML."
-                            )->onConnection(config('etax.queue_connections'))
-                            ->onQueue('log_queue');
-                        }
-                    }else{
-                        return Response()->json("El documento no le pertenece a su empresa actual.", 400);
+                        $user = auth()->user();
+                        Activity::dispatch(
+                            $user,
+                            $bill,
+                            [
+                                'company_id' => $bill->company_id,
+                                'id' => $bill->id,
+                                'document_key' => $bill->document_key
+                            ],
+                            "Importar factura de compra por XML."
+                        )->onConnection(config('etax.queue_connections'))
+                        ->onQueue('log_queue');
                     }
                 }else{
-                    return Response()->json('Error: El mes de la factura ya fue cerrado.', 400);
+                    return Response()->json("El documento no le pertenece a su empresa actual.", 400);
                 }
+            }else{
+                return Response()->json('Error: El mes de la factura ya fue cerrado.', 400);
+            }
             
-
-             
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;

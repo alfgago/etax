@@ -1593,49 +1593,47 @@ class InvoiceController extends Controller
                 return Response()->json("Usted ha sobrepasado el límite de facturas de su plan actual.", 400);
             }
                 
-                if(CalculatedTax::validarMes($fechaEmision)){
-                    //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                    try {
-                        $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0 ;
-                    }catch(\Exception $e){ $identificacionReceptor = 0; };
+            if(CalculatedTax::validarMes($fechaEmision)){
+                //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                try {
+                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0 ;
+                }catch(\Exception $e){ $identificacionReceptor = 0; };
 
-                    $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-                    $consecutivoComprobante = $arr['NumeroConsecutivo'];
-                    $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-                    $consecutivoComprobante = $arr['NumeroConsecutivo'];
-                    //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla.
-                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
-                        //Registra el XML. Si todo sale bien, lo guarda en S3.
-                        $invoice = Invoice::saveInvoiceXML( $arr, 'XML' );
+                $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+                $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+                $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla.
+                if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
+                    //Registra el XML. Si todo sale bien, lo guarda en S3.
+                    $invoice = Invoice::saveInvoiceXML( $arr, 'XML' );
 
-                        if( $invoice ) {
-                            $user = auth()->user();
-                            Activity::dispatch(
-                                $user,
-                                $invoice,
-                                [
-                                    'company_id' => $invoice->company_id,
-                                    'id' => $invoice->id,
-                                    'document_key' => $invoice->document_key
-                                ],
-                                "Factura de compra importada por xml."
-                            )->onConnection(config('etax.queue_connections'))
-                            ->onQueue('log_queue');
-                            Invoice::storeXML( $invoice, $file );
-                        }
-                    }else{
-                        return Response()->json("El documento $consecutivoComprobante no le pertenece a su empresa actual", 400);
+                    if( $invoice ) {
+                        $user = auth()->user();
+                        Activity::dispatch(
+                            $user,
+                            $invoice,
+                            [
+                                'company_id' => $invoice->company_id,
+                                'id' => $invoice->id,
+                                'document_key' => $invoice->document_key
+                            ],
+                            "Factura de compra importada por xml."
+                        )->onConnection(config('etax.queue_connections'))
+                        ->onQueue('log_queue');
+                        Invoice::storeXML( $invoice, $file );
                     }
                 }else{
-                    return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
-                    //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
+                    return Response()->json("El documento $consecutivoComprobante no le pertenece a su empresa actual", 400);
                 }
+            }else{
+                return Response()->json('Error: El mes de la factura ya fue cerrado', 400);
+                //return redirect('/facturas-emitidas/validaciones')->withError('Mes seleccionado ya fue cerrado');
+            }
                 
             $company->save();
             $time_end = getMicrotime();
             $time = $time_end - $time_start;
-
-
         }catch( \Exception $ex ){
             Log::error('Error importando con archivo inválido: ' . $ex);
             return Response()->json('Error importando con archivo inválido', 400);
