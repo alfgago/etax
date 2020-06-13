@@ -60,9 +60,8 @@ class ProcessSendExcelSingleInvoice implements ShouldQueue
                       'company_id' => $fac->company_id,
                       'year' => $fac->year,
                       'month' => $fac->month,
-                      'client_id_number' => $fac->client_id_number,
-                      'document_number' => $fac->document_number,
-                      'document_key' => $fac->document_key
+                      'description' => $fac->description,
+                      'buy_order' => $fac->buy_order
                   ], $fac->toArray()
                 );
                 if($invoice->in_queue > 0){

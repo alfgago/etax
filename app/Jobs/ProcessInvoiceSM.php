@@ -230,6 +230,10 @@ class ProcessInvoiceSM implements ShouldQueue
                 sleep(1);
                 $invoice->hacienda_status = '05';
                 $invoice->save();
+                if ( (strpos($response['data']['response'],"no se puede facturar") !== false) ) {
+                    $invoice->hacienda_status = '01';
+                    $invoice->save();
+                }
             }
             Log::info('Proceso de facturación finalizado con éxito.');
         }else {
