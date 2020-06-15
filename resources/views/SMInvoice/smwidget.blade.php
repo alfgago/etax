@@ -14,8 +14,9 @@
                 <th>IVA</th>
                 <th>Total</th>
                 <th>Aceptadas</th>
-                <th>Pendientes</th>
+                <th>Pendientes/Espera</th>
                 <th>Rechazadas</th>
+                <th>No generadas</th>
               </tr>
             </thead>
             <tbody>
@@ -28,6 +29,7 @@
                 <td> {{ $facturasExcel->aceptadas }}</td>
                 <td> {{ $facturasExcel->pendientes }}</td>
                 <td> {{ $facturasExcel->rechazadas }}</td>
+                <td> {{ $facNoEnviadas }}</td>
               </tr>
                 
               <tr>
@@ -38,6 +40,7 @@
                 <td> {{ $facturasEtax->aceptadas }}</td>
                 <td> {{ $facturasEtax->pendientes }}</td>
                 <td> {{ $facturasEtax->rechazadas }}</td>
+                <td> N/A</td>
               </tr>
                 
               <tr>
@@ -48,6 +51,7 @@
                 <td> {{ $notasExcel->aceptadas }}</td>
                 <td> {{ $notasExcel->pendientes }}</td>
                 <td> {{ $notasExcel->rechazadas }}</td>
+                <td> {{ $ncNoEnviadas }}</td>
               </tr>
                 
               <tr>
@@ -58,6 +62,7 @@
                 <td> {{ $notasEtax->aceptadas }}</td>
                 <td> {{ $notasEtax->pendientes }}</td>
                 <td> {{ $notasEtax->rechazadas }}</td>
+                <td> N/A</td>
               </tr>
                 
               <tr>
@@ -68,6 +73,7 @@
                 <td> {{ $facturas08Etax->aceptadas }}</td>
                 <td> {{ $facturas08Etax->pendientes }}</td>
                 <td> {{ $facturas08Etax->rechazadas }}</td>
+                <td> N/A</td>
               </tr>
               
               <tr>
@@ -78,6 +84,7 @@
                 <td> {{ $facturasExcel->aceptadas + $facturasEtax->aceptadas + $facturas08Etax->aceptadas + $notasExcel->aceptadas + $notasEtax->aceptadas }} </td>
                 <td> {{ $facturasExcel->pendientes + $facturasEtax->pendientes + $facturas08Etax->pendientes + $notasExcel->pendientes + $notasEtax->pendientes }} </td>
                 <td> {{ $facturasExcel->rechazadas + $facturasEtax->rechazadas + $facturas08Etax->rechazadas + $notasExcel->rechazadas + $notasEtax->rechazadas }} </td>
+                <td> {{ $facNoEnviadas+$ncNoEnviadas }}</td>
               </tr>
               
             </tbody>
