@@ -50,6 +50,12 @@ class Bill extends Model
     {
         return $this->hasOne(haciendaResponse::class);
     }
+
+    //Relación con facturas emitidas
+    public function otherCharges()
+    {
+        return $this->hasMany(OtherCharges::class);
+    }
     
     public function providerName() {
       if( isset($this->provider_first_name)) {
@@ -328,6 +334,36 @@ class Bill extends Model
       }
     }
     
+    public function addEditOtherCharges(array $data)
+    {
+        try {
+            if (isset($data['item_number'])) {
+                $item = OtherCharges::updateOrCreate([
+                    'item_number' => $data['item_number'],
+                    'bill_id' => $this->id
+                ],
+                [
+                    'company_id' => $this->company_id,
+                    'year'  => $this->year,
+                    'month' => $this->month,
+                    'document_type' => $data['document_type'] ?? '99',
+                    'provider_id_number' => isset($data['provider_id_number']) ? trim($data['provider_id_number']) : null,
+                    'provider_name'   => isset($data['provider_name']) ? trim($data['provider_name']) : null,
+                    'description'   => $data['description'] ? trim($data['description']) : null,
+                    'percentage'   => $data['percentage'] ?? 0,
+                    'amount'   => $data['amount'] ?? 0,
+                ]
+                );
+                return $item;
+            } else {
+                return false;
+            }
+        } catch ( \Exception $e) {
+            Log::error("Error en lineas de factura-->> $e");
+            return false;
+        }
+
+    }
     
     public static function saveBillXML( $arr, $metodoGeneracion, $emailRecibido = null ) {
         //Log::debug(json_encode($arr['ResumenFactura']['TotalOtrosCargos']));
@@ -656,6 +692,29 @@ class Bill extends Model
             if ($bill->payment_type == '02' && $item->product_type == 12) {
                 $totalIvaDevuelto += $item->iva_amount;
             }
+        }
+        
+        try{
+            $otrosCargos = [];
+            if( array_key_exists( 'OtrosCargos', $arr ) ) {
+                $otrosCargos = $arr['OtrosCargos'];
+            }
+            //Recorrer OtrosCargos
+            $i = 1;
+            foreach ($otrosCargos as $item) {
+              $item['item_number'] = $i;
+              $item['document_type'] = $item['TipoDocumento'];
+              $item['description'] = $item['Detalle'];
+              $item['percentage'] = $item['Porcentaje'];
+              $item['amount'] = $item['MontoCargo'];
+              $item['document_type'] = $item['TipoDocumento'];
+              $item['provider_id_number'] = $identificacionProveedor;
+              $item['provider_name'] = $nombreProveedor;
+              $cargo_modificado = $bill->addEditOtherCharges($item);
+              $i++;
+            }
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
         }
         
         $bill->total_iva_devuelto = $arr['ResumenFactura']['TotalIVADevuelto'] ?? 0;
