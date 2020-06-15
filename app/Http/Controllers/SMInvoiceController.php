@@ -194,7 +194,8 @@ class SMInvoiceController extends Controller
             $facturasExcel = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
             COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
             COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
-            COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
+            COUNT(IF(hacienda_status = '05', 1, NULL))+COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas,
+            COUNT(IF(hacienda_status = '05', 1, NULL)) as espera
             FROM invoices inv, invoice_items it
             WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
             AND it.year = $year AND it.month = $month AND document_type != '03'
@@ -210,7 +211,8 @@ class SMInvoiceController extends Controller
             $facturasEtax = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
             COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
             COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
-            COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
+            COUNT(IF(hacienda_status = '05', 1, NULL))+COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas,
+            COUNT(IF(hacienda_status = '05', 1, NULL)) as espera
             FROM invoices inv, invoice_items it
             WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
             AND it.year = $year AND it.month = $month AND document_type != '03' AND document_type != '08'
@@ -226,7 +228,8 @@ class SMInvoiceController extends Controller
             $facturas08Etax = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
             COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
             COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
-            COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
+            COUNT(IF(hacienda_status = '05', 1, NULL))+COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas,
+            COUNT(IF(hacienda_status = '05', 1, NULL)) as espera
             FROM invoices inv, invoice_items it
             WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
             AND it.year = $year AND it.month = $month AND document_type = '08'
@@ -242,7 +245,8 @@ class SMInvoiceController extends Controller
             $notasExcel = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
             COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
             COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
-            COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
+            COUNT(IF(hacienda_status = '05', 1, NULL))+COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas,
+            COUNT(IF(hacienda_status = '05', 1, NULL)) as espera
             FROM invoices inv, invoice_items it
             WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
             AND it.year = $year AND it.month = $month AND document_type = '03'
@@ -258,7 +262,8 @@ class SMInvoiceController extends Controller
             $notasEtax = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
             COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
             COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
-            COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas
+            COUNT(IF(hacienda_status = '05', 1, NULL))+COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas,
+            COUNT(IF(hacienda_status = '05', 1, NULL)) as espera
             FROM invoices inv, invoice_items it
             WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
             AND it.year = $year AND it.month = $month AND document_type = '03'
@@ -268,8 +273,11 @@ class SMInvoiceController extends Controller
         }else{
             $notasEtax = Cache::get($notasEtaxCache);
         }
-
-        return view('SMInvoice/smwidget', compact('facturasExcel', 'facturasEtax', 'notasExcel', 'notasEtax', 'facturas08Etax'));
+        
+        $facNoEnviadas = DB::select( DB::raw("SELECT count(id) as c FROM s_m_invoices WHERE invoice_id IS NULL AND month = $month AND year = $year AND document_type != '03'") )[0]->c;
+        $ncNoEnviadas = DB::select( DB::raw("SELECT count(id) as c FROM s_m_invoices WHERE invoice_id IS NULL AND month = $month AND year = $year AND document_type = '03'") )[0]->c;
+    
+        return view('SMInvoice/smwidget', compact('facturasExcel', 'facturasEtax', 'notasExcel', 'notasEtax', 'facturas08Etax', 'facNoEnviadas', 'ncNoEnviadas'));
     }
 
 
