@@ -22,7 +22,14 @@
 	
 	<style>
 	    
-	    html, body {
+	    /*
+* Prefixed by https://autoprefixer.github.io
+* PostCSS: v7.0.29,
+* Autoprefixer: v9.7.6
+* Browsers: last 4 version
+*/
+
+html, body {
 	        font-size: 13px !important;
 	    }
 			
@@ -245,11 +252,13 @@
 			    position:absolute;
 			    width: 11rem;
 			    top: 50%;
-			    transform: translateY(-50%);
+			    -webkit-transform: translateY(-50%);
+			        -ms-transform: translateY(-50%);
+			            transform: translateY(-50%);
 			    right: .4rem;
 			}
 			
-      table tr
+      		table tr
 			table tr td,
 			table tr th {
 				page-break-inside: avoid;
@@ -272,8 +281,8 @@
       
       @media print {
       		body {
-					    padding: 3rem .5rem;
-					}
+			    padding: 3rem .5rem;
+			}
       	
           .print-page {
               padding: 0;
@@ -298,10 +307,10 @@
           }
           
           table tr
-					table tr td,
-					table tr th {
-						page-break-inside: avoid;
-					}
+		table tr td,
+		table tr th {
+			page-break-inside: avoid;
+		}
       }
         
 	</style>
@@ -309,11 +318,41 @@
 </head>
 <body>
     
+    <script src="/assets/js/jspdf.js?v=2"></script>
+    <script type="text/javascript" src="https://html2canvas.hertzen.com/dist/html2canvas.js"></script>
+    <div id="editor"></div>
+    <script>
+		
+		function printAsPDF(){
+		    var HTML_Width = $(".print-content").width();
+		    var HTML_Height = $(".print-content").height();
+		    var top_left_margin = 15;
+		    var PDF_Width = HTML_Width + (top_left_margin * 2);
+		    var PDF_Height = (PDF_Width * 1.5) + (top_left_margin * 2);
+		    var canvas_image_width = HTML_Width;
+		    var canvas_image_height = HTML_Height;
+		
+		    var totalPDFPages = Math.ceil(HTML_Height / PDF_Height) - 1;
+		
+		    html2canvas($(".print-content")[0]).then(function (canvas) {
+		        var imgData = canvas.toDataURL("image/jpeg", 1.0);
+		        var pdf = new jsPDF('p', 'pt', [PDF_Width, PDF_Height]);
+		        pdf.addImage(imgData, 'JPG', top_left_margin, top_left_margin, canvas_image_width, canvas_image_height);
+		        for (var i = 1; i <= totalPDFPages; i++) { 
+		            pdf.addPage(PDF_Width, PDF_Height);
+		            pdf.addImage(imgData, 'JPG', top_left_margin, -(PDF_Height*i)+(top_left_margin*4),canvas_image_width,canvas_image_height);
+		        }
+		        pdf.save("declaracion-iva.pdf");
+		    });
+		}
+		
+    </script>
+    
     <div class='print-page'>
         
-        <a class='btn btn-imprimir' onclick='window.print();return false;'> <i class="fa fa-print" style="margin-top: -75px; margin-right: 10px;" aria-hidden="true"></i> Imprimir reporte</a>
+        <a class='btn btn-imprimir' onclick='printAsPDF();return false;'> <i class="fa fa-print" style="margin-top: -75px; margin-right: 10px;" aria-hidden="true"></i> Imprimir reporte</a>
         
-        <div class='print-content'  style="">
+        <div class='print-content'  id="print-content">
         	<div class="container-fluid" >
 						<div class="row">
 							<h1 class="card-title">Borrador de declaración de IVA {{ App\Variables::getMonthName($dataDeclaracion['mes']) }} {{ $dataDeclaracion['ano'] }} </h1>
@@ -365,6 +404,5 @@
     <script src="/assets/js/ubicacion.js"></script>
     <script src="/assets/js/vendor/tagging.min.js"></script>
     <script src="{{asset('assets/js/es5/script.js')}}"></script>
-    
 </body>
 </html>

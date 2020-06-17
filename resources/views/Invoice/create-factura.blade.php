@@ -67,7 +67,8 @@ $company = currentCompanyModel();
                           @endforeach
                         </select>
                       @else
-                        <select class="form-control select-search-many" name="client_id" id="client_id" placeholder="" required>
+                        <select class="form-control select-search-many" name="client_id" id="client_id" placeholder="" <?php if($document_type != "04"){ echo 'required'; } ?>>
+                          <option value='' selected>-- Seleccione un cliente --</option>
                         </select>
                         <script>
                         $(document).ready(function () {

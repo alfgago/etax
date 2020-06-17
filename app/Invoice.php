@@ -683,7 +683,7 @@ class Invoice extends Model
                         'iva_percentage' => $data['impuesto']['tarifa'] ?? 0,
                         'iva_amount' => $data['impuesto']['monto'] ?? 0,
                         'tariff_heading' => $data['impuesto']['exoneracion']['porcentajeExoneracion'] ?? 0,
-                        'is_exempt' => $data['impuesto']['exento'] ?? false,
+                        'is_exempt' => $data['impuesto']['exento'] ? true : false,
                     ]
                 );
 

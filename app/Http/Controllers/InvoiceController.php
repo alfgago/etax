@@ -408,6 +408,8 @@ class InvoiceController extends Controller
         $qb = \App\Quickbooks::where('company_id', $company->id)->with('company')->first();
         if( isset($qb) ){
             $cuentasContables = $qb->getAccounts($company, 'Income');
+            
+            $dataService = $qb->getAuthenticatedDS();
         }
         
         //Revisa límite de facturas emitidas en el mes actual1
@@ -543,7 +545,7 @@ class InvoiceController extends Controller
         $company = currentCompanyModel();
         $cachekey = "avoid-duplicate-$company->id_number";
         if ( Cache::has($cachekey) ) {
-            return redirect('/facturas-emitidas')->withMessage('Se detectó un problema de conexión, por favor verifique que se haya registrado correctamente su factura.');
+            //return redirect('/facturas-emitidas')->withMessage('Se detectó un problema de conexión, por favor verifique que se haya registrado correctamente su factura.');
         }
         Cache::put($cachekey, true, 12);
 
@@ -767,6 +769,11 @@ class InvoiceController extends Controller
                 if( !isset($invoice) ){
                     return back()->withError( 'Error en comunicación con Hacienda. Revise su llave criptográfica o reintente en unos minutos.' );
                 }
+                    
+                try{
+                    $accountRef = $request->cuenta_qb ?? null;
+                    \App\QuickbooksInvoice::saveEtaxaqb(null, $invoice, $accountRef);
+                }catch(\Throwable $e){}
 
                 $company->save();
                 clearInvoiceCache($invoice);

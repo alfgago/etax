@@ -192,9 +192,9 @@ class SMInvoiceController extends Controller
         $facturasExcelCache = "cachekey-smfacturasexcel-$year-$month";
         if ( !Cache::has($facturasExcelCache) ) {
             $facturasExcel = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
-            COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
+            COUNT(IF(hacienda_status = '05', 1, NULL))+COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
             COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
-            COUNT(IF(hacienda_status = '05', 1, NULL))+COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas,
+            COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas,
             COUNT(IF(hacienda_status = '05', 1, NULL)) as espera
             FROM invoices inv, invoice_items it
             WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
@@ -209,9 +209,9 @@ class SMInvoiceController extends Controller
         $facturasEtaxCache = "cachekey-smfacturasetax-$year-$month";
         if ( !Cache::has($facturasEtaxCache) ) {
             $facturasEtax = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
-            COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
+            COUNT(IF(hacienda_status = '05', 1, NULL))+COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
             COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
-            COUNT(IF(hacienda_status = '05', 1, NULL))+COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas,
+            COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas,
             COUNT(IF(hacienda_status = '05', 1, NULL)) as espera
             FROM invoices inv, invoice_items it
             WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
@@ -226,9 +226,9 @@ class SMInvoiceController extends Controller
         $facturas08EtaxCache = "cachekey-smfacturas08etax-$year-$month";
         if ( !Cache::has($facturas08EtaxCache) ) {
             $facturas08Etax = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
-            COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
+            COUNT(IF(hacienda_status = '05', 1, NULL))+COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
             COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
-            COUNT(IF(hacienda_status = '05', 1, NULL))+COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas,
+            COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas,
             COUNT(IF(hacienda_status = '05', 1, NULL)) as espera
             FROM invoices inv, invoice_items it
             WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
@@ -243,9 +243,9 @@ class SMInvoiceController extends Controller
         $notasExcelCache = "cachekey-smnotasexcel-$year-$month";
         if ( !Cache::has($notasExcelCache) ) {    
             $notasExcel = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
-            COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
+            COUNT(IF(hacienda_status = '05', 1, NULL))+COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
             COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
-            COUNT(IF(hacienda_status = '05', 1, NULL))+COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas,
+            COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas,
             COUNT(IF(hacienda_status = '05', 1, NULL)) as espera
             FROM invoices inv, invoice_items it
             WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
@@ -260,9 +260,9 @@ class SMInvoiceController extends Controller
         $notasEtaxCache = "cachekey-smnotasetax-$year-$month";
         if ( !Cache::has($notasEtaxCache) ) {    
             $notasEtax = DB::select( DB::raw("select sum(it.subtotal*currency_rate) as subtotal, sum(it.iva_amount*currency_rate) as iva, sum(it.total*currency_rate) as total,
-            COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
+            COUNT(IF(hacienda_status = '05', 1, NULL))+COUNT(IF(hacienda_status = '01', 1, NULL)) as pendientes,
             COUNT(IF(hacienda_status = '03', 1, NULL)) as aceptadas,
-            COUNT(IF(hacienda_status = '05', 1, NULL))+COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas,
+            COUNT(IF(hacienda_status = '04', 1, NULL)) as rechazadas,
             COUNT(IF(hacienda_status = '05', 1, NULL)) as espera
             FROM invoices inv, invoice_items it
             WHERE inv.company_id = 1110 AND inv.id = it.invoice_id
