@@ -168,16 +168,18 @@ class QuickbooksBill extends Model
                 return back()->withError( "Error al guardar proveedor ". $bill->provider_first_name ." en QuickBooks, por favor contacte a soporte o intente hacer la sincronización del proveedor. Mensaje: ".$qbVendor->getIntuitErrorMessage() );
             }
             
-            $taxRef = null;
+            $taxRef = false;
             foreach($qb->taxes_json['tipo_iva'] as $key => $value){
-                if( $key != 'default' ){
+                if( $key != 'default' && $key != 'CustomSalesTax' && !$taxRef){
                     if($taxCode == $value){
                         $taxRef = $key;
                     }
                 }
             }
+            if(!$taxRef){ $taxRef = "default";}
+            
             $TxnTaxDetail = [
-                "TxnTaxCodeRef" => 4
+                "TxnTaxCodeRef" => 'TAX'
             ];
             
             $params = [
@@ -210,6 +212,7 @@ class QuickbooksBill extends Model
             $qbBill = $dataService->Add($theResourceObj);
             $error = $dataService->getLastError();
             if ($error) {
+                dd($error,$theResourceObj);
                 Log::error("The Status code is: " . $error->getHttpStatusCode() . "\n".
                             "The Helper message is: " . $error->getOAuthHelperError() . "\n".
                             "The Response message is: " . $error->getResponseBody() . "\n");
