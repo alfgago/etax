@@ -338,16 +338,19 @@ form h3 {
     display: inline-block;
 }
 
+.referencia-factura-form .botones-editar,
 .otros-factura-form .botones-editar,
 .item-factura-form .botones-editar {
   display: none;
 }
 
+.referencia-factura-form.editando .botones-editar,
 .otros-factura-form.editando .botones-editar,
 .item-factura-form.editando .botones-editar {
   display: block;
 }
 
+.referencia-factura-form.editando .botones-agregar,
 .otros-factura-form.editando .botones-agregar,
 .item-factura-form.editando .botones-agregar {
   display: none;
