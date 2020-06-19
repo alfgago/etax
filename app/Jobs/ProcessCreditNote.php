@@ -64,7 +64,8 @@ class ProcessCreditNote implements ShouldQueue
 
                         if ($invoice->xml_schema == 43) {
                             $requestDetails = $invoiceUtils->setDetails43($invoice->items);
-                            $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails);
+                            $requestOtherCharges = $invoiceUtils->setOtherCharges($invoice->otherCharges);
+                            $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails, $requestOtherCharges);
                         } else {
                             $requestDetails = $this->setDetails($invoice->items);
                             $requestData = $this->setInvoiceData($invoice, $requestDetails);
@@ -105,10 +106,11 @@ class ProcessCreditNote implements ShouldQueue
                             ]);
                             Log::debug('Response Credit Note Api Hacienda '. json_encode($response));
                             $date = Carbon::now();
+                            $save = false;
+                            $saveMH = false;
                             if( isset($response['status']) ){
                                 try{
                                     //Intenta guardar el original firmado siempre
-                                    $save = false;
                                     if(isset($response['data']['xmlFirmado'])){
                                         $path = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/$invoice->document_key.xml";
                                         $save = Storage::put( $path, ltrim($response['data']['xmlFirmado'], '\n') );
@@ -117,7 +119,6 @@ class ProcessCreditNote implements ShouldQueue
                                 try{ //Intenta guardar la respuesta siempre
                                     if(isset($response['data']['mensajeHacienda'])){
                                         Log::debug($response['data']['response'] . "GUARDA: " . !(strpos($response['data']['response'],"ESTADO=procesando") !== false) );
-                                        $saveMH = false;
                                         if ( ! (strpos($response['data']['response'],"ESTADO=procesando") !== false) ) {
                                             $pathMH = 'empresa-' . $company->id_number . "/facturas_ventas/$date->year/$date->month/MH-$invoice->document_key.xml";
                                             $saveMH = Storage::put( $pathMH, ltrim($response['data']['mensajeHacienda'], '\n') );

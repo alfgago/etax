@@ -1232,103 +1232,260 @@ toastr.options = {
 
     window.agregarEditarOtros = function() {
 
-    //Si esta editando, usa lnum y item_id para identificar la fila.
-    var lnum = $('#otros-lnum').val() ? $('#otros-lnum').val() : '';
-    var otros_id = $('#otros_id').val() ? $('#otros_id').val() : '';
-
-    var numero = parseInt( $('.otros-tabla:last-of-type').attr('attr-num') ) + 1;
-    var index = parseInt( $('#current-index-otros').val() ) + 1;
-    var document_type = $('#otros-document_type').val();
-    var document_type_string = $('#otros-document_type :selected').text();
-    var provider_id_number = $('#otros-provider_id_number').val();
-    var provider_name = $('#otros-provider_name').val();
-    var description = $('#otros-description').val();
-    var percentage = $('#otros-percentage').val();
-    var amount = $('#otros-amount').val();
-
-    if( !provider_name || !provider_id_number || document_type != "04" ){
-      provider_id_number = "-";
-      provider_name = "N/A";
-    }
-
-    if( !percentage ) {
-      percentage = 10;
-      $('#otros-percentage').val(10);
-    }
-    if( !amount ) {
-      amount = 0;
-      $('#otros-amount').val(0);
-    }
-
-    //Se asegura de que los campos hayan sido llenados
-    if( amount && description ){
-
-      //Crear el ID de la fila.
-      var itemExistente = false;
-      if( lnum && lnum !== '' ){
-        numero = lnum;
-        itemExistente = $('#otros-tabla-' + numero);
-        index = itemExistente.attr('index');
-        itemExistente.html("");
+      //Si esta editando, usa lnum y item_id para identificar la fila.
+      var lnum = $('#otros-lnum').val() ? $('#otros-lnum').val() : '';
+      var otros_id = $('#otros_id').val() ? $('#otros_id').val() : '';
+  
+      var numero = parseInt( $('.otros-tabla:last-of-type').attr('attr-num') ) + 1;
+      var index = parseInt( $('#current-index-otros').val() ) + 1;
+      var document_type = $('#otros-document_type').val();
+      var document_type_string = $('#otros-document_type :selected').text();
+      var provider_id_number = $('#otros-provider_id_number').val();
+      var provider_name = $('#otros-provider_name').val();
+      var description = $('#otros-description').val();
+      var percentage = $('#otros-percentage').val();
+      var amount = $('#otros-amount').val();
+  
+      if( !provider_name || !provider_id_number || document_type != "04" ){
+        provider_id_number = "-";
+        provider_name = "N/A";
       }
-      var row_id  = "otros-tabla-"+numero;
-
-      var inputFields = "<div class='hidden'>" +
-                   "<input type='hidden' class='otros-item_number' name='otros["+index+"][item_number]' itemname='item_number' value='"+(numero+1)+"'>" +
-                   "<input type='hidden' class='otros_id'  name='otros["+index+"][id]' itemname='id' value='"+otros_id+"'>" +
-                   "<input type='hidden' class='otros-document_type' name='otros["+index+"][document_type]' itemname='document_type' value='"+document_type+"'>" +
-                   "<input type='hidden' class='otros-provider_id_number' name='otros["+index+"][provider_id_number]' itemname='provider_id_number' value='"+provider_id_number+"'>" +
-                   "<input type='hidden' class='otros-provider_name' name='otros["+index+"][provider_name]' itemname='provider_name' value='"+provider_name+"'>" +
-                   "<input type='hidden' class='otros-description' name='otros["+index+"][description]' itemname='description' value='"+description+"'>" +
-                   "<input type='hidden' class='otros-percentage' name='otros["+index+"][percentage]' itemname='percentage' value='"+percentage+"'>" +
-                   "<input type='hidden' class='otros-amount' name='otros["+index+"][amount]' itemname='amount' value='"+amount+"'>" +
-              "</div>";
-
-      //Crea la fila en la tabla
-      var htmlCols = "<td><span class='numero-fila'>"+(numero+1)+"</span> </td>";
-        htmlCols += "<td>"+document_type_string + inputFields + " </td>";
-        htmlCols += "<td>"+provider_id_number+" "+provider_name+" </td>";
-        htmlCols += "<td>"+description+" </td>";
-        htmlCols += "<td>"+ fixComas(amount) +" </td>";
-        htmlCols += "<td class='acciones'><span class='btn-editar-item text-success mr-2' title='Editar otros cargos' onclick='abrirPopup(\"otros-popup\");cargarFormOtros("+index+");'> <i class='fa fa-pencil' aria-hidden='true'></i> </span> <span title='Eliminar otros cargos' onclick='eliminarOtros("+index+");' class='btn-eliminar-item text-danger mr-2'> <i class='fa fa-trash-o' aria-hidden='true'></i> </span> </td>";
-
-      if( !itemExistente ) {
-        var htmlRow = "<tr class='otros-tabla otros-index-"+index+"' index='"+index+"' attr-num='"+numero+"' id='"+row_id+"' > " + htmlCols + "</tr>";
-        $('#tabla-otroscargos-factura tbody').append(htmlRow);
+  
+      if( !percentage ) {
+        percentage = 10;
+        $('#otros-percentage').val(10);
+      }
+      if( !amount ) {
+        amount = 0;
+        $('#otros-amount').val(0);
+      }
+  
+      //Se asegura de que los campos hayan sido llenados
+      if( amount && description ){
+  
+        //Crear el ID de la fila.
+        var itemExistente = false;
+        if( lnum && lnum !== '' ){
+          numero = lnum;
+          itemExistente = $('#otros-tabla-' + numero);
+          index = itemExistente.attr('index');
+          itemExistente.html("");
+        }
+        var row_id  = "otros-tabla-"+numero;
+  
+        var inputFields = "<div class='hidden'>" +
+                     "<input type='hidden' class='otros-item_number' name='otros["+index+"][item_number]' itemname='item_number' value='"+(numero+1)+"'>" +
+                     "<input type='hidden' class='otros_id'  name='otros["+index+"][id]' itemname='id' value='"+otros_id+"'>" +
+                     "<input type='hidden' class='otros-document_type' name='otros["+index+"][document_type]' itemname='document_type' value='"+document_type+"'>" +
+                     "<input type='hidden' class='otros-provider_id_number' name='otros["+index+"][provider_id_number]' itemname='provider_id_number' value='"+provider_id_number+"'>" +
+                     "<input type='hidden' class='otros-provider_name' name='otros["+index+"][provider_name]' itemname='provider_name' value='"+provider_name+"'>" +
+                     "<input type='hidden' class='otros-description' name='otros["+index+"][description]' itemname='description' value='"+description+"'>" +
+                     "<input type='hidden' class='otros-percentage' name='otros["+index+"][percentage]' itemname='percentage' value='"+percentage+"'>" +
+                     "<input type='hidden' class='otros-amount' name='otros["+index+"][amount]' itemname='amount' value='"+amount+"'>" +
+                "</div>";
+  
+        //Crea la fila en la tabla
+        var htmlCols = "<td><span class='numero-fila'>"+(numero+1)+"</span> </td>";
+          htmlCols += "<td>"+document_type_string + inputFields + " </td>";
+          htmlCols += "<td>"+provider_id_number+" "+provider_name+" </td>";
+          htmlCols += "<td>"+description+" </td>";
+          htmlCols += "<td>"+ fixComas(amount) +" </td>";
+          htmlCols += "<td class='acciones'><span class='btn-editar-item text-success mr-2' title='Editar otros cargos' onclick='abrirPopup(\"otros-popup\");cargarFormOtros("+index+");'> <i class='fa fa-pencil' aria-hidden='true'></i> </span> <span title='Eliminar otros cargos' onclick='eliminarOtros("+index+");' class='btn-eliminar-item text-danger mr-2'> <i class='fa fa-trash-o' aria-hidden='true'></i> </span> </td>";
+  
+        if( !itemExistente ) {
+          var htmlRow = "<tr class='otros-tabla otros-index-"+index+"' index='"+index+"' attr-num='"+numero+"' id='"+row_id+"' > " + htmlCols + "</tr>";
+          $('#tabla-otroscargos-factura tbody').append(htmlRow);
+        }else{
+          itemExistente.append(htmlCols);
+        }
+  
+        $('#tabla-otroscargos-factura').show();
+  
+        //Limpia los datos del formulario
+        limpiarFormItem();
+  
+        //Recalcula números para asegurar que no haya vacíos
+        recalcularNumerosItem();
+  
+        //Calcula total de factura
+        calcularTotalFactura();
+  
+        //Aumenta el indice de filas para evitar cualquier conflicto si hubo eliminados. El index nunca debe cambiar ni repetirse, los números pueden cambiar.
+        $('#current-index-otros').val(index);
+  
+        //Si estaba editando, quita la clase
+        $('.otros-factura-form').removeClass('editando');
+  
+        cerrarPopup('otros-popup');
+  
       }else{
-        itemExistente.append(htmlCols);
+          Swal.fire({
+              type: 'error',
+              title: 'Error',
+              text: 'Por favor, asegúrese que todos los datos sean válidos antes de continuar.'
+          })
+          return false;
       }
-
-      $('#tabla-otroscargos-factura').show();
-
-      //Limpia los datos del formulario
-      limpiarFormItem();
-
-      //Recalcula números para asegurar que no haya vacíos
-      recalcularNumerosItem();
-
-      //Calcula total de factura
-      calcularTotalFactura();
-
-      //Aumenta el indice de filas para evitar cualquier conflicto si hubo eliminados. El index nunca debe cambiar ni repetirse, los números pueden cambiar.
-      $('#current-index-otros').val(index);
-
-      //Si estaba editando, quita la clase
-      $('.otros-factura-form').removeClass('editando');
-
-      cerrarPopup('otros-popup');
-
-    }else{
-        Swal.fire({
-            type: 'error',
-            title: 'Error',
-            text: 'Por favor, asegúrese que todos los datos sean válidos antes de continuar.'
-        })
-        return false;
-    }
 
   }
 
+
+    window.toggleCamposExoneracion = function() {
+        /*var checkExoneracion = $('#checkExoneracion').prop('checked');
+        console.log(checkExoneracion);*/
+
+        var hasExoneracion = false;
+        var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184"];
+        var construccion = jQuery("#tipo_producto").val() == 43; //Servicios de construcción e ingenieria al 0% transitorio. Llevan exoneración
+
+        if( codigosConExoneracion.includes( $('#tipo_iva').val() ) || construccion ){
+          hasExoneracion = true;
+        }
+
+        if(hasExoneracion){
+            $(".exoneracion-cont").show();
+            $('#etiqTotal').text('');
+            $('#etiqTotal').text('Total sin exonerar');
+            $('#divTypeDocument').attr('hidden', false);
+            $('#divNumeroDocumento').attr('hidden', false);
+            $('#divNombreInstitucion').attr('hidden', false);
+            $('#divPorcentajeExoneracion').attr('hidden', false);
+            $('#divMontoExoneracion').attr('hidden', false);
+            $('#divMontoTotalLinea').attr('hidden', false);
+            $('#divImpuestoNeto').attr('hidden', false);
+            $('#exoneradalinea').val(1);
+            
+            $('.input-fecha').datetimepicker({
+              format: 'DD/MM/Y',
+              allowInputToggle: true,
+              icons : {
+                    time: 'fa fa-clock-o',
+                    date: 'fa fa-calendar',
+                    up: 'fa fa-chevron-up',
+                    down: 'fa fa-chevron-down',
+                    previous: 'fa fa-chevron-left',
+                    next: 'fa fa-chevron-right',
+                    today: 'fa fa-calendar-check-o',
+                    clear: 'fa fa-times',
+                    close: 'fa fa-calendar-times-o'
+              }
+            });
+        }else{
+            $(".exoneracion-cont").hide();
+            $('#etiqTotal').text('');
+            $('#etiqTotal').text('Monto Total Linea');
+            $('#divTypeDocument').attr('hidden', true);
+            $('#divNumeroDocumento').attr('hidden', true);
+            $('#divNombreInstitucion').attr('hidden', true);
+            $('#divPorcentajeExoneracion').attr('hidden', true);
+            $('#divMontoExoneracion').attr('hidden', true);
+            $('#divMontoTotalLinea').attr('hidden', true);
+            $('#divImpuestoNeto').attr('hidden', true);
+            $('#exoneradalinea').val(0);
+        }
+    }
+
+
+    window.agregarEditarReferencia = function() {
+
+      //Si esta editando, usa lnum y item_id para identificar la fila.
+      var lnum = $('#referencia-lnum').val() ? $('#referencia-lnum').val() : '';
+      var referencia_id = $('#referencia_id').val() ? $('#referencia_id').val() : '';
+  
+      var numero = parseInt( $('.referencia-tabla:last-of-type').attr('attr-num') ) + 1;
+      var index = parseInt( $('#current-index-referencia').val() ) + 1;
+      var docType = $('#referencia-docType :selected').val();
+      var number = $('#referencia-number').val();
+      var code = $('#referencia-code :selected').val();
+      
+      if(!numero){
+        numero = 1;
+      }
+      if(!index){
+        index = 1;
+      }
+      
+      var docTypeStr = $('#referencia-docType :selected').text();
+      var codeStr = $('#referencia-code :selected').text();
+  
+  
+      //Se asegura de que los campos hayan sido llenados
+      if( docType && number && code ){
+  
+        //Crear el ID de la fila.
+        var itemExistente = false;
+        if( lnum && lnum !== '' ){
+          numero = lnum;
+          itemExistente = $('#referencia-tabla-' + numero);
+          index = itemExistente.attr('index');
+          itemExistente.html("");
+        }
+        var row_id  = "referencia-tabla-"+numero;
+  
+        var inputFields = "<div class='hidden'>" +
+                     "<input type='hidden' class='referencia-item_number' name='referenceData["+index+"][item_number]' itemname='item_number' value='"+(numero+1)+"'>" +
+                     "<input type='hidden' class='referencia_id'  name='referenceData["+index+"][id]' itemname='id' value='"+referencia_id+"'>" +
+                     "<input type='hidden' class='referencia-docType' name='referenceData["+index+"][docType]' itemname='docType' value='"+docType+"'>" +
+                     "<input type='hidden' class='referencia-number' name='referenceData["+index+"][number]' itemname='number' value='"+number+"'>" +
+                     "<input type='hidden' class='referencia-code' name='referenceData["+index+"][code]' itemname='code' value='"+code+"'>" +
+                "</div>";
+  
+        //Crea la fila en la tabla
+        var htmlCols = "<td><span class='numero-fila'>"+(numero+1)+"</span> </td>";
+          htmlCols += "<td>"+docTypeStr + inputFields + " </td>";
+          htmlCols += "<td>"+codeStr+" </td>";
+          htmlCols += "<td>"+number+" </td>";
+          htmlCols += "<td class='acciones'><span class='btn-editar-item text-success mr-2' title='Editar referencia' onclick='abrirPopup(\"referencia-popup\");cargarFormReferencia("+index+");'> <i class='fa fa-pencil' aria-hidden='true'></i> </span> <span title='Eliminar referencia cargos' onclick='eliminarOtros("+index+");' class='btn-eliminar-item text-danger mr-2'> <i class='fa fa-trash-o' aria-hidden='true'></i> </span> </td>";
+  
+        if( !itemExistente ) {
+          var htmlRow = "<tr class='referencia-tabla referencia-index-"+index+"' index='"+index+"' attr-num='"+numero+"' id='"+row_id+"' > " + htmlCols + "</tr>";
+          $('#tabla-referencia-factura tbody').append(htmlRow);
+        }else{
+          itemExistente.append(htmlCols);
+        }
+  
+        $('#tabla-referencia-factura').show();
+  
+        //Aumenta el indice de filas para evitar cualquier conflicto si hubo eliminados. El index nunca debe cambiar ni repetirse, los números pueden cambiar.
+        $('#current-index-referencia').val(index);
+  
+        //Si estaba editando, quita la clase
+        $('.referencia-factura-form').removeClass('editando');
+  
+        cerrarPopup('referencia-popup');
+  
+      }else{
+          Swal.fire({
+              type: 'error',
+              title: 'Error',
+              text: 'Por favor, asegúrese que todos los datos sean válidos antes de continuar.'
+          })
+          return false;
+      }
+
+  }
+  
+  //Carga la referencia para ser editada
+  window.cargarFormReferencia = function( index ) {
+    $('.referencia-factura-form').addClass('editando');
+
+    var item = $('.referencia-index-'+index );
+    $('#referencia-lnum').val( item.attr('attr-num') );
+    $('#referencia').val( item.find('.item_id ').val() );
+    $('#referencia-docType').val( item.find('.referencia-docType ').val() );
+    $('#referencia-number').val( item.find('.referencia-number ').val() );
+    $('#referencia-code').val( item.find('.referencia-code ').val() );
+  }
+
+  //Acción para cancelar la edición
+  window.cancelarEdicionReferencia = function(){
+    $('.referencia-factura-form').removeClass('editando');
+  }
+
+  //Elimina la referencia
+  window.eliminarReferencia = function( index ){
+    $('.referencia-index-'+index ).remove();
+  }
 
 $( document ).ready(function() {
 
