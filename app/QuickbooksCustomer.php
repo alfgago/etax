@@ -151,7 +151,8 @@ class QuickbooksCustomer extends Model
     
     public static function saveEtaxaqb($dataService, $client, $update = null){   
         $fullname = ($client->first_name ?? '') . ' ' . ($client->last_name ?? '') . ' ' . ($client->last_name2 ?? '');
-        $fullname = trim($fullname);
+        $fullname = trim($fullname );
+        $displayName = trim($client->id_number. ' - '.$fullname);
         
         $resourceObjectArray = [
             "BillAddr" => [
@@ -165,7 +166,7 @@ class QuickbooksCustomer extends Model
             "FamilyName" => $client->last_name ?? '' . ' ' . $client->last_name2 ?? '',
             "FullyQualifiedName" => $fullname,
             "CompanyName" => $fullname,
-            "DisplayName" => $fullname,
+            "DisplayName" => $displayName,
             "PrintOnCheckName" => $client->toString(),
             "PrimaryPhone" => [
                 "FreeFormNumber" => $client->phone
@@ -190,10 +191,14 @@ class QuickbooksCustomer extends Model
         
         $error = $dataService->getLastError();
         if ($error) {
+            $customers = $dataService->Query("SELECT * FROM Customer");
             Log::error("The Status code is: " . $error->getHttpStatusCode() . "\n".
                         "The Helper message is: " . $error->getOAuthHelperError() . "\n".
                         "The Response message is: " . $error->getResponseBody() . "\n");
             $customers = $dataService->Query("SELECT * FROM Customer WHERE CompanyName = '$fullname'");
+            if(!$customers){
+                $customers = $dataService->Query("SELECT * FROM Customer WHERE DisplayName = '$displayName'");
+            }
             $customer = $customers[0] ?? null;
         }
         if( isset($customer) ){

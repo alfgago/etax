@@ -67,7 +67,8 @@ $company = currentCompanyModel();
                           @endforeach
                         </select>
                       @else
-                        <select class="form-control select-search-many" name="client_id" id="client_id" placeholder="" required>
+                        <select class="form-control select-search-many" name="client_id" id="client_id" placeholder="" <?php if($document_type != "04"){ echo 'required'; } ?>>
+                          <option value='' selected>-- Seleccione un cliente --</option>
                         </select>
                         <script>
                         $(document).ready(function () {
@@ -275,6 +276,7 @@ $company = currentCompanyModel();
                 <div class="form-group col-md-12">
                   <div onclick="agregarNuevaLinea();" class="btn btn-dark btn-agregar">Agregar línea</div>
                   <div onclick="abrirPopup('otros-popup');" class="btn btn-dark btn-agregar btn-otroscargos">Agregar otros cargos</div>
+                  <div onclick="abrirPopup('referencia-popup');" class="btn btn-dark btn-agregar btn-otroscargos">Agregar datos de referencia</div>
                 </div>
     
               </div>
@@ -661,8 +663,35 @@ $company = currentCompanyModel();
             </div>
           </div>
           
+          <div class="form-row" id="tabla-referencia-factura" style="display: none;">  
+
+            <div class="form-group col-md-12">
+              <h3>
+                Información de referencia
+              </h3>
+            </div>
+            
+            <div class="form-group col-md-12" >
+              <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
+                <thead class="thead-dark">
+                  <tr>
+                    <th>#</th>
+                    <th>Tipo</th>
+                    <th>Código</th>
+                    <th>Número</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
         @include( 'Invoice.form-otros-cargos' )
         @include('Invoice.form-linea')
+        @include('Invoice.form-reference-data')
         @if($document_type != "08")
           @include('Invoice.form-nuevo-cliente')
         @else

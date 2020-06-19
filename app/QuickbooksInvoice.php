@@ -156,14 +156,16 @@ class QuickbooksInvoice extends Model
             }
             
             //Define el tax reference para enviar de la factura.
-            $taxRef = null;
+            $taxRef = false;
             foreach($qb->taxes_json['tipo_iva'] as $key => $value){
-                if( $key != 'default' ){
+                if( $key != 'default' && $key != 'CustomSalesTax' && !$taxRef){
                     if($taxCode == $value){
                         $taxRef = $key;
                     }
                 }
             }
+            if(!$taxRef){ $taxRef = "default";}
+            
             $TxnTaxDetail = [
                 "TxnTaxCodeRef" => $taxRef
             ];
@@ -210,13 +212,13 @@ class QuickbooksInvoice extends Model
             $qbInvoice = $dataService->Add($theResourceObj);
             $error = $dataService->getLastError();
             if ($error) {
+                dd($error,$theResourceObj);
                 Log::error("The Status code is: " . $error->getHttpStatusCode() . "\n".
                             "The Helper message is: " . $error->getOAuthHelperError() . "\n".
                             "The Response message is: " . $error->getResponseBody() . "\n");
                 $qbInvoices = $dataService->Query("SELECT * FROM Invoice WHERE DocNumber = '$invoice->document_number'");
                 $qbInvoice = $qbInvoices[0] ?? null;
             }
-            
             if( isset($qbInvoice) ){
                 $date = Carbon::createFromFormat("Y-m-d", $qbInvoice->TxnDate);
                 $clientName = QuickbooksCustomer::getClientName($company, $qbInvoice->CustomerRef);
@@ -241,9 +243,8 @@ class QuickbooksInvoice extends Model
             }
             return $error;
         }catch(\Exception $e){
-            return back()->withError( "Error al sincronizar factura: $invoice->document_number. Por favor contacte a soporte." );
-            Log::error($e);
-            return $e;
+            Log::error($e->getMessage());
+            return back()->withError( "Error al sincronizar factura con QuickBooks: $invoice->document_number. Por favor contacte a soporte." );
         }
     }
     

@@ -386,6 +386,18 @@ class Invoice extends Model
             }catch(\Exception $e){
                 //Log::warning("Error al guardar otros cargos " . $e);
             }
+            
+            try{
+                $referenceData = $request->referenceData;
+                foreach($referenceData as $data) {
+                    $otherData = InvoiceReferenceData::addReference(
+                        $this,
+                        $data
+                    );
+                }
+            }catch(\Exception $e){
+                //Log::error($e->getMessage());
+            }
 
             //Guarda nuevamente el invoice
             $this->save();
@@ -683,7 +695,7 @@ class Invoice extends Model
                         'iva_percentage' => $data['impuesto']['tarifa'] ?? 0,
                         'iva_amount' => $data['impuesto']['monto'] ?? 0,
                         'tariff_heading' => $data['impuesto']['exoneracion']['porcentajeExoneracion'] ?? 0,
-                        'is_exempt' => $data['impuesto']['exento'] ?? false,
+                        'is_exempt' => $data['impuesto']['exento'] ? true : false,
                     ]
                 );
 
@@ -1561,6 +1573,20 @@ class Invoice extends Model
             }
             
             try{
+                $otherCharges = $invoiceReference->otherCharges;
+                $totalOtrosCargos = 0;
+                foreach ($otherCharges as $item) {
+                    $newItem = $item->replicate();
+                    $newItem->invoice_id = $this->id;
+                    $totalOtrosCargos += $newItem->amount;
+                    $newItem->save();
+                }
+                $this->total_otros_cargos = $totalOtrosCargos;
+            }catch(\Exception $e){
+                Log::error($e->getMessage());
+            }
+            
+            try{
                 $dataOthers = $invoiceReference->otherInvoiceData;
                 foreach($dataOthers as $ot) {
                     $newOther = $ot->replicate();
@@ -1568,7 +1594,7 @@ class Invoice extends Model
                     $newOther->save();
                 }
             }catch(\Exception $e){
-                Log::error($e);
+                Log::error($e->getMessage());
             }
             
             $totalIvaDevuelto = 0;
