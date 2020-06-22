@@ -607,6 +607,14 @@ class InvoiceUtils
                 $invoiceData['clave_factura'] = $data['reference_document_key'] ?? '';
             }
 
+            if ($data['document_type'] == '01' &&  $data['reference_document_key'] !== '' && $data['reference_document_key'] !== null) {
+                $invoiceData['referencia_doc_type'] = $data['reference_doc_type'];
+                $invoiceData['referencia_codigo'] = $data['code_note'] ?? "01";
+                $invoiceData['referencia_razon'] = $data['reason'] ?? 'Anular Factura';
+                $invoiceData['fecha_emision_factura'] = $data['reference_generated_date'];
+                $invoiceData['clave_factura'] = $data['reference_document_key'] ?? '';
+            }
+
             Log::info("Request Data from invoices id: $data->id  --> ".json_encode($invoiceData));
             if($company->atv){
                 $invoiceData['atvcertFile'] = Storage::get($company->atv->key_url);
