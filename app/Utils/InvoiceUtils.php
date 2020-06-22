@@ -373,10 +373,12 @@ class InvoiceUtils
                     'base_imponible' => 0,
                     'product_type' => $value['product_type'] ?? '',
                 );
+                
+                $details[$key] = $this->setExonerationPercentage($details[$key]);
             }
             return json_encode($details, true);
-        } catch (ClientException $error) {
-            Log::error('Error al iniciar session en API HACIENDA -->>'. $error);
+        } catch (\Exception $e) {
+            Log::error('Error en API HACIENDA -->>'. $e->getMessage());
             return false;
         }
     }
@@ -661,6 +663,26 @@ class InvoiceUtils
         return round($discount,5);
     }
     
-    
+    private function setExonerationPercentage($details){
+        if ( !app()->environment('production') ) {
+            
+            $ivaPerc = $details['impuesto_tarifa'];
+            $currentExonPerc = $details['exoneracion_porcentaje'];
+            $exonPerc = 13;
+            $ratioExonerado = 1;
+            //Si el porcentaje actual de IVA es mayor a 100
+            if($currentExonPerc > 13){
+                $exonPerc = $ivaPerc*($currentExonPerc/100);
+            }
+            $ratioExonerado = $exonPerc/$ivaPerc;
+            $totalExonerado = $details['subtotal'] * $ratioExonerado;
+            
+            $details['exoneracion_total_gravados'] = round($totalExonerado,5);
+            $details['exoneracion_porcentaje'] = round($exonPerc,5);
+            
+        }
+        return $details;
+        
+    }
     
 }

@@ -45,11 +45,11 @@ class QuickbooksBill extends Model
     public static function getMonthlyBills($dataService, $year, $month, $company) {
         $cachekey = "qb-bills-$company->id_number-$year-$month"; 
         //if ( !Cache::has($cachekey) ) {
-            $count = QuickbooksBill::where('company_id', $company->id)->count(); $count = 0;
+            $count = QuickbooksBill::where('company_id', $company->id)->count(); 
             if( $count > 0 ){
                 $dateFrom = Carbon::createFromDate($year, $month, 1)->firstOfMonth()->toAtomString();
                 $dateTo = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toAtomString();
-                $bills = $dataService->Query("SELECT * FROM Bill WHERE MetaData.LastUpdatedTime >= '$dateFrom' AND MetaData.LastUpdatedTime <= '$dateTo'");
+                $bills = $dataService->Query("SELECT * FROM Bill WHERE TxnDate >= '$dateFrom' AND TxnDate <= '$dateTo'");
             }else{
                 $bills = $dataService->Query("SELECT * FROM Bill");
             }
@@ -83,7 +83,6 @@ class QuickbooksBill extends Model
             $providerName = QuickbooksProvider::getProviderName($company, $qbBill->VendorRef);
             $qbAccount = $qbBill->APAccountRef ?? null;
             $qbAccount = QuickbooksBill::getLineAccountRef($qbBill->Line) ?? $qbAccount;
-            
             $qbBill = QuickBooksBill::updateOrCreate(
               [
                 "qb_id" => $qbBill->Id,
@@ -212,7 +211,6 @@ class QuickbooksBill extends Model
             $qbBill = $dataService->Add($theResourceObj);
             $error = $dataService->getLastError();
             if ($error) {
-                dd($error,$theResourceObj);
                 Log::error("The Status code is: " . $error->getHttpStatusCode() . "\n".
                             "The Helper message is: " . $error->getOAuthHelperError() . "\n".
                             "The Response message is: " . $error->getResponseBody() . "\n");
