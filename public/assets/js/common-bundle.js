@@ -1159,18 +1159,29 @@ toastr.options = {
       var construccion = jQuery("#tipo_producto").val() == 43; //Servicios de construcción e ingenieria al 0% transitorio. Llevan exoneración
 
       if( codigosConExoneracion.includes( $('#tipo_iva').val() ) || construccion ){
-        var porcentajeExonerado = $('#porcentajeExoneracion').val();
+        var porcentajeExonerado = parseFloat($('#porcentajeExoneracion').val());
+        
+        if(porcentajeExonerado <= 13){
+          var porcIva = parseFloat(jQuery("#porc_iva").val());
+          if( porcIva < porcentajeExonerado ){
+            $('#porcentajeExoneracion').val(porcIva)
+            porcentajeExonerado = porcIva;
+          }
+          porcentajeExonerado = (porcentajeExonerado/porcIva)*100;
+        }
+        
         if(porcentajeExonerado > 0) {
-            var monto_iva_detalle = $('#item_iva_amount').val();
+            var monto_iva_detalle = parseFloat($('#item_iva_amount').val());
             var monto = monto_iva_detalle * (porcentajeExonerado / 100);
             var impNeto = monto_iva_detalle - monto;
-            var subTotal = $('#item_subtotal').val();
+            var subTotal = parseFloat($('#item_subtotal').val());
             var montoTotal = parseFloat(subTotal) + parseFloat(impNeto);
 
-            $('#montoExoneracion').val(monto);
-            $('#impuestoNeto').val(impNeto);
-            $('#montoTotalLinea').val(montoTotal);
+            $('#montoExoneracion').val(monto.toFixed(5));
+            $('#impuestoNeto').val(impNeto.toFixed(5));
+            $('#montoTotalLinea').val(montoTotal.toFixed(5));
         }
+        
       }
     }
 

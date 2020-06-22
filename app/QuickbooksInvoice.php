@@ -49,7 +49,7 @@ class QuickbooksInvoice extends Model
             if( $count > 0 ){
                 $dateFrom = Carbon::createFromDate($year, $month, 1)->firstOfMonth()->toAtomString();
                 $dateTo = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toAtomString();
-                $invoices = $dataService->Query("SELECT * FROM Invoice WHERE MetaData.LastUpdatedTime >= '$dateFrom' AND MetaData.LastUpdatedTime <= '$dateTo'");
+                $invoices = $dataService->Query("SELECT * FROM Invoice WHERE TxnDate >= '$dateFrom' AND TxnDate <= '$dateTo'");
             }else{
                 $invoices = $dataService->Query("SELECT * FROM Invoice");
             }
@@ -212,7 +212,6 @@ class QuickbooksInvoice extends Model
             $qbInvoice = $dataService->Add($theResourceObj);
             $error = $dataService->getLastError();
             if ($error) {
-                dd($error,$theResourceObj);
                 Log::error("The Status code is: " . $error->getHttpStatusCode() . "\n".
                             "The Helper message is: " . $error->getOAuthHelperError() . "\n".
                             "The Response message is: " . $error->getResponseBody() . "\n");
