@@ -317,6 +317,20 @@ class Invoice extends Model
 
                 }
             }
+
+            if ($this->document_type == '01') {
+                //Set reference invoice
+                if (isset($request->ref_number)) {
+                    $this->code_note = $request->code_note ?? '04';
+                    $this->reason = $request->reason ?? 'Razon';
+                    $this->reference_generated_date = Carbon::createFromFormat('d/m/Y g:i A',
+                        $request->ref_date . ' ' . '12:00 AM');
+                    $this->reference_document_key = $request->ref_number;
+                    $this->reference_doc_type = $request->ref_doc_type;
+                }
+            }
+
+
             //Revisa si la factura es nueva. Si no tiene ID, es nueva y suma al contador.
             if (!$this->id) {
               $fecha = Carbon::createFromFormat('d/m/Y g:i A', $request->generated_date . ' ' . $request->hora);
