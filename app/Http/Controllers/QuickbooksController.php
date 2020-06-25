@@ -820,7 +820,7 @@ class QuickbooksController extends Controller
             ->addColumn('link', function($provider) use($providersEtax){
                 if( $provider->provider_id ){
                     if( empty($provider->provider->id_number) ){
-                        return "Datos faltantes - <a href='/providers/providers-update-view/$provider->provider_id'>Editar</a>";
+                        return "Datos faltantes - <a href='/proveedores/$provider->provider_id/edit'>Editar</a>";
                     }
                     return "<a href='/providers/providers-update-view/$provider->provider_id'>".$provider->provider->id_number."</a>";
                 }else{

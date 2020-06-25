@@ -357,7 +357,7 @@ class InvoiceUtils
                     'descuento' => $montoDescuento,
                     'impuesto_codigo' => '01',
                     'tipo_iva' => $value['iva_type'],
-                    'impuesto_codigo_tarifa' => Variables::getCodigoTarifaVentas($value['iva_type']),
+                    'impuesto_codigo_tarifa' => $cod->invoice_code ?? '08',
                     'impuesto_tarifa' => $value['iva_percentage'] ?? 0,
                     'impuesto_factor_IVA' => $value['iva_percentage'] / 100,
                     'impuesto_monto' => $iva_amount,
@@ -373,10 +373,11 @@ class InvoiceUtils
                     'base_imponible' => 0,
                     'product_type' => $value['product_type'] ?? '',
                 );
+                $details[$key] = $this->setExonerationPercentage($details[$key]);
             }
             return json_encode($details, true);
-        } catch (ClientException $error) {
-            Log::error('Error al iniciar session en API HACIENDA -->>'. $error);
+        } catch (\Exception $e) {
+            Log::error('Error en API HACIENDA -->>'. $e->getMessage());
             return false;
         }
     }
@@ -605,6 +606,14 @@ class InvoiceUtils
                 $invoiceData['clave_factura'] = $data['reference_document_key'] ?? '';
             }
 
+            if ($data['document_type'] == '01' &&  $data['reference_document_key'] !== '' && $data['reference_document_key'] !== null) {
+                $invoiceData['referencia_doc_type'] = $data['reference_doc_type'];
+                $invoiceData['referencia_codigo'] = $data['code_note'] ?? "01";
+                $invoiceData['referencia_razon'] = $data['reason'] ?? 'Anular Factura';
+                $invoiceData['fecha_emision_factura'] = $data['reference_generated_date'];
+                $invoiceData['clave_factura'] = $data['reference_document_key'] ?? '';
+            }
+
             Log::info("Request Data from invoices id: $data->id  --> ".json_encode($invoiceData));
             if($company->atv){
                 $invoiceData['atvcertFile'] = Storage::get($company->atv->key_url);
@@ -661,6 +670,29 @@ class InvoiceUtils
         return round($discount,5);
     }
     
-    
+    private function setExonerationPercentage($details){
+        if ( !app()->environment('production') ) {
+            
+            $ivaPerc = $details['impuesto_tarifa'];
+            $currentExonPerc = $details['exoneracion_porcentaje'];
+            $exonPerc = $currentExonPerc ?? 13;
+            
+            $ratioExonerado = 1;
+            //Si el porcentaje actual de IVA es mayor a 100
+            if($currentExonPerc > 13){
+                $exonPerc = $ivaPerc*($currentExonPerc/100);
+            }
+            $exonPerc = round($exonPerc,0);
+            
+            $ratioExonerado = $exonPerc/$ivaPerc;
+            $totalExonerado = $details['subtotal'] * $ratioExonerado;
+            
+            $details['exoneracion_total_gravados'] = round($totalExonerado,5);
+            $details['exoneracion_porcentaje'] = round($exonPerc,0);
+            
+        }
+        return $details;
+        
+    }
     
 }

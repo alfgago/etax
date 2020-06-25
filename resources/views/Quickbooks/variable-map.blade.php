@@ -148,7 +148,7 @@
                 <tr class="item-tabla item-index-0">
                   <td>Valor por defecto</td>
                   <td>
-                    <select class="form-control select-search tipo_iva" name="tipo_iva[default]" id="tipo_iva">
+                    <select class="form-control select-search iva_type" name="tipo_iva[default]" id="">
                       <?php
                         $selectedTipoIva = @$qbTipoIva['default'];
                         $selectedProdType = @$qbTipoProducto['default'];
@@ -172,7 +172,7 @@
                     </select>
                   </td>
                   <td>
-                    <select class="form-control" id="tipo_producto" name="tipo_producto[default]" >
+                    <select class="form-control product_type" id="" name="tipo_producto[default]" >
                       @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
                         <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" 
                         {{ $selectedProdType == $tipo['id'] ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
@@ -189,7 +189,7 @@
                       ?>
                     <td>{{ $tax->Name }}</td>
                     <td>
-                      <select class="form-control select-search tipo_iva" id="tipo_iva" name="tipo_iva[{{ $condId }}]">
+                      <select class="form-control select-search iva_type" id="" name="tipo_iva[{{ $condId }}]">
                         @if(@$company->repercutidos[0]->id)
                           @foreach ( \App\CodigoIvaRepercutido::where('hidden', false)->get() as $tipo )
                               <option value="{{ $tipo['code'] }}" porcentaje="{{ $tipo['percentage'] }}" class="tipo_iva_select"  
@@ -209,7 +209,7 @@
                       </select>
                     </td>
                     <td>
-                      <select class="form-control" id="tipo_producto" name="tipo_producto[{{$tax->Id}}]" >
+                      <select class="form-control product_type" id="" name="tipo_producto[{{$tax->Id}}]" >
                         @foreach ( \App\ProductCategory::whereNotNull('invoice_iva_code')->get() as $tipo )
                           <option value="{{ $tipo['id'] }}" codigo="{{ $tipo['invoice_iva_code'] }}" posibles="{{ $tipo['open_codes'] }}" 
                           {{ $selectedProdType == $tipo['id'] ? 'selected' : '' }} >{{ $tipo['name'] }}</option>
@@ -236,7 +236,7 @@
 @section('footer-scripts')
 <script>
     $( document ).ready(function() {
-      $('#tipo_iva').on('select2:selecting', function(e){
+      $('.iva_type').on('select2:selecting', function(e){
         var selectBox = document.getElementById("tipo_iva");
         if(e.params.args.data.id == 1){
            $.each($('.tipo_iva_select'), function (index, value) {
@@ -247,6 +247,27 @@
         }
 
       });
+      
+      $(".iva_type").change(function(){
+        var iva_type  = $(this).val(); 
+        var parent = $(this).parents('tr');
+        
+        parent.find('.product_type option').hide();
+        var tipoProducto = 0;
+        parent.find(".product_type option").each(function(){
+          var posibles = $(this).attr('posibles').split(",");
+          if(posibles.includes(iva_type)){
+            $(this).show();
+            if( !tipoProducto ){
+              tipoProducto = $(this).val();
+            }
+          }
+        });
+        parent.find('.product_type').val( tipoProducto ).change();
+      
+      });
+      
+      $(".iva_type").change();
 
     }); 
 </script>
