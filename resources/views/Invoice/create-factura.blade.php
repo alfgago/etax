@@ -198,48 +198,6 @@ $company = currentCompanyModel();
                         <option value="import">Importación de servicios</option>
                     </select>
                   </div>
-                  <div class="form-row">
-                    <div class="form-group col-md-12">
-                      <h3>
-                        Información de referencia
-                      </h3>
-                    </div>
-
-                    <div class="form-group col-md-6">
-                      <label for="ref_doc_type">Tipo</label>
-                      <select name="ref_doc_type" id="ref_doc_type" class="form-control" required>
-                        <option value="14" selected="">Comprobante aportado por contribuyente del Regimen Simplificado.</option>
-                        <option value="15">Sustituye una factura electrónica de compra.</option>
-                      </select>
-                    </div>
-
-                    <div class="form-group col-md-6">
-                      <label for="ref_number">Numero de documento</label>
-                      <input type="text" class="form-control" name="ref_number" id="ref_number" placeholder="">
-                    </div>
-
-                    <div class="form-group col-md-6">
-                      <label for="ref_date">Fecha de emision</label>
-                      <div class='input-group date inputs-fecha'>
-                        <input id="ref_date" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="ref_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->addDays(3)->format('d/m/Y') }}" maxlength="10">
-                        <span class="input-group-addon">
-                        <i class="icon-regular i-Calendar-4"></i>
-                      </span>
-                      </div>
-                    </div>
-
-                    <div class="form-group col-md-6">
-                      <label for="code_note">Codigo referencia</label>
-                      <select name="code_note" id="code_note" class="form-control" required>
-                        <option value="04" selected="">Referencia a otro documento.</option>
-                      </select>
-                    </div>
-
-                    <div class="form-group col-md-6">
-                      <label for="reason">Razón</label>
-                      <input type="text" class="form-control" name="reason" id="reason" placeholder="">
-                    </div>
-                  </div>
 
                 @endif
                 
@@ -276,7 +234,6 @@ $company = currentCompanyModel();
                 <div class="form-group col-md-12">
                   <div onclick="agregarNuevaLinea();" class="btn btn-dark btn-agregar">Agregar línea</div>
                   <div onclick="abrirPopup('otros-popup');" class="btn btn-dark btn-agregar btn-otroscargos">Agregar otros cargos</div>
-                  {{--<div onclick="abrirPopup('referencia-popup');" class="btn btn-dark btn-agregar btn-otroscargos">Agregar datos de referencia</div>--}}
                 </div>
     
               </div>
@@ -600,6 +557,13 @@ $company = currentCompanyModel();
                     <textarea class="form-control" name="notas" id="notas"  maxlength="190" placeholder="" rows="6" style="resize: none;"> {{ @currentCompanyModel()->default_invoice_notes }}  </textarea>
                   </div>
 
+                  @if( @$document_type == '01' )
+                  <div class="form-group col-md-12 not-required">
+                      <label class="switch pr-5 switch-success mr-3"><span>¿Desea incluir datos adicionales de referencia?</span>
+                          <input onchange="toggleDatosReferencia();" id="datos-referencia-adicionales" type="checkbox" ><span class="slider"></span>
+                      </label>
+                  </div>
+                  @endif
               </div>
               
             </div>
@@ -664,107 +628,79 @@ $company = currentCompanyModel();
             </div>
           </div>
 
-          @if( @$document_type == '01' )
+          @if( @$document_type == '01' || @$document_type == '08' )
 
-              {{--<div class="form-group col-md-12">--}}
-              {{--<label for="tipo_compra">Tipo de compra</label>--}}
-              {{--<select class="form-control" id="tipo_compra" name="tipo_compra">--}}
-              {{--<option value="local">Compra local</option>--}}
-              {{--<option value="import">Importación de servicios</option>--}}
-              {{--</select>--}}
-              {{--</div>--}}
-              <div class="form-row">
-                  <div class="form-group col-md-12">
-                      <h3>
-                          Información de referencia
-                      </h3>
-                  </div>
-
-                  <div class="form-group col-md-6">
-                      <label for="ref_doc_type">Tipo</label>
-                      <select name="ref_doc_type" id="ref_doc_type" class="form-control" required>
-                          <option value="01" selected="">Factura electrónica.</option>
-                          <option value="02">Nota de debito electrónica.</option>
-                          <option value="03">Nota de crédito electrónica.</option>
-                          <option value="04">Tiquete electrónico.</option>
-                          <option value="05">Nota de despacho.</option>
-                          <option value="06">Contrato.</option>
-                          <option value="07">Procedimiento.</option>
-                          <option value="08">Comprobante emitido en contigencia.</option>
-                          <option value="99">Otros.</option>
-                      </select>
-                  </div>
-
-                  <div class="form-group col-md-6">
-                      <label for="ref_number">Numero de documento</label>
-                      <input type="text" class="form-control" name="ref_number" id="ref_number" placeholder="">
-                  </div>
-
-                  <div class="form-group col-md-6">
-                      <label for="ref_date">Fecha de emision</label>
-                      <div class='input-group date inputs-fecha'>
-                          <input id="ref_date" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="ref_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->addDays(3)->format('d/m/Y') }}" maxlength="10">
-                          <span class="input-group-addon">
-                        <i class="icon-regular i-Calendar-4"></i>
-                      </span>
+              <div class="form-row referencia-doctype_{{$document_type}} {{ $document_type == '01' ? 'hidden' : '' }}">
+                
+                <div class="col-md-12">
+                  <div class="form-row">
+                      <div class="form-group col-md-12">
+                          <h3>
+                              Información de referencia
+                          </h3>
+                      </div>
+    
+                      <div class="form-group col-md-6">
+                          <label for="ref_doc_type">Tipo</label>
+                          <select name="ref_doc_type" id="ref_doc_type" class="form-control" required>
+                              <option value="01" selected="">Factura electrónica.</option>
+                              <option value="02">Nota de debito electrónica.</option>
+                              <option value="03">Nota de crédito electrónica.</option>
+                              <option value="04">Tiquete electrónico.</option>
+                              <option value="05">Nota de despacho.</option>
+                              <option value="06">Contrato.</option>
+                              <option value="07">Procedimiento.</option>
+                              <option value="08">Comprobante emitido en contigencia.</option>
+                              <option value="99">Otros.</option>
+                          </select>
+                      </div>
+    
+                      <div class="form-group col-md-6">
+                          <label for="ref_number">Numero de documento</label>
+                          <input type="text" class="form-control" name="ref_number" id="ref_number" placeholder="">
+                      </div>
+    
+                      <div class="form-group col-md-6">
+                          <label for="ref_date">Fecha de emision</label>
+                          <div class='input-group date inputs-fecha'>
+                              <input id="ref_date" class="form-control input-fecha" placeholder="dd/mm/yyyy" name="ref_date" required value="{{ \Carbon\Carbon::parse( now('America/Costa_Rica') )->addDays(3)->format('d/m/Y') }}" maxlength="10">
+                              <span class="input-group-addon">
+                            <i class="icon-regular i-Calendar-4"></i>
+                          </span>
+                          </div>
+                      </div>
+    
+                      <div class="form-group col-md-6">
+                          <label for="code_note">Codigo referencia</label>
+                          <select name="code_note" id="code_note" class="form-control" required>
+                              <option value="01" selected="">Anula documento de referencia.</option>
+                              <option value="02">Corrige texto de ocumento de referencia.</option>
+                              <option value="03">Corrige monto.</option>
+                              <option value="04">Referencia a otro documento.</option>
+                              <option value="05">Sustituye comprobante provisional por contigencia.</option>
+                              <option value="99">Otros.</option>
+    
+                          </select>
+                      </div>
+    
+                      <div class="form-group col-md-6">
+                          <label for="reason">Razón</label>
+                          <input type="text" class="form-control" name="reason" id="reason" placeholder="">
                       </div>
                   </div>
-
-                  <div class="form-group col-md-6">
-                      <label for="code_note">Codigo referencia</label>
-                      <select name="code_note" id="code_note" class="form-control" required>
-                          <option value="01" selected="">Anula documento de referencia.</option>
-                          <option value="02">Corrige texto de ocumento de referencia.</option>
-                          <option value="03">Corrige monto.</option>
-                          <option value="04">Referencia a otro documento.</option>
-                          <option value="05">Sustituye comprobante provisional por contigencia.</option>
-                          <option value="99">Otros.</option>
-
-                      </select>
-                  </div>
-
-                  <div class="form-group col-md-6">
-                      <label for="reason">Razón</label>
-                      <input type="text" class="form-control" name="reason" id="reason" placeholder="">
-                  </div>
+                </div>
               </div>
 
           @endif
           
-          <div class="form-row" id="tabla-referencia-factura" style="display: none;">  
-
-            <div class="form-group col-md-12">
-              <h3>
-                Información de referencia
-              </h3>
-            </div>
-            
-            <div class="form-group col-md-12" >
-              <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
-                <thead class="thead-dark">
-                  <tr>
-                    <th>#</th>
-                    <th>Tipo</th>
-                    <th>Código</th>
-                    <th>Número</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                
-                </tbody>
-              </table>
-            </div>
-          </div>
+          @include( 'Invoice.form-otros-cargos' )
+          @include('Invoice.form-linea')
           
-        @include( 'Invoice.form-otros-cargos' )
-        @include('Invoice.form-linea')
-        @include('Invoice.form-reference-data')
-        @if($document_type != "08")
-          @include('Invoice.form-nuevo-cliente')
-        @else
-          @include('Bill.form-nuevo-proveedor')
-        @endif
+          @if($document_type != "08")
+            @include('Invoice.form-nuevo-cliente')
+          @else
+            @include('Bill.form-nuevo-proveedor')
+          @endif
         
           <div class="btn-holder hidden">
            
@@ -835,6 +771,15 @@ function toggleRetencion() {
     $("#field-retencion").show();
   }else {
     $("#field-retencion").hide();
+  }
+}
+
+function toggleDatosReferencia(){
+  var toggled = $("#datos-referencia-adicionales:checked").length;
+  if(toggled){
+    $(".referencia-doctype_01").show();
+  }else{
+    $(".referencia-doctype_01").hide();
   }
 }
 

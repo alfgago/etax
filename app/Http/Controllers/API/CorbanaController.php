@@ -40,9 +40,13 @@ class CorbanaController extends Controller
             $pCia = $request->pCia;
             $pAct = $request->pAct;
             $cedulaEmpresa = $this->parseCorbanaIdToCedula($pCia, $pAct);
-            //$cedulaEmpresa = "3101702429";
             $company = Company::where('id_number', $cedulaEmpresa)->first();
-            
+            if( !isset($company) ){
+                return response()->json([
+                    'mensaje' => '0 facturas',
+                    'facturas' => []
+                ], 200);
+            }
             /* 
             * Status 03: En el sistema de ellos.
             * Status 01: Aún no ha sido ingresado al sistema.
@@ -441,8 +445,8 @@ class CorbanaController extends Controller
                 $codigoEtax = $prefijoCodigo.'260';
             }
             if( isset($documentoExoneracion) ){
-                $porcentajeIVA = !isset($porcentajeIVA) ? $porcentajeIVA : 13;
-                $porcentajeExoneracion = 100;
+                $porcentajeIVA = isset($porcentajeIVA) ? $porcentajeIVA : 13;
+                $porcentajeExoneracion = $porcentajeExoneracion ?? 100;
                 $codigoEtax = $prefijoCodigo.'183';
                 $categoriaHacienda = 39;
             }
@@ -531,6 +535,7 @@ class CorbanaController extends Controller
                     $subtotalLinea = $cantidad*$precioUnitario - $montoDescuento;
                     $montoIva = $subtotalLinea * ($porcentajeIVA/100);
                     $totalLinea = $subtotalLinea+$montoIva;
+                    
                     $montoExoneracion = isset($documentoExoneracion) ? $montoIva : 0;
                     $totalMontoExonerado = $cantidad*$precioUnitario;
                     $totalMontoLinea = $subtotalLinea + $montoIva - $montoExoneracion;
