@@ -366,8 +366,8 @@
                         $totalLinea = $item->total;
                         $ivaAmountLinea = $item->iva_amount;
                         if( isset($numExoneracion) ){
-                            $totalLinea = $item->total - $item->iva_amount;
-                            $ivaAmountLinea = 0;
+                            $totalLinea = $totalLinea - $item->exoneration_amount;
+                            $ivaAmountLinea = $ivaAmountLinea - $item->exoneration_amount;
                         }
                         ?>
                         <tr style="width: 100%;" class="item">
@@ -551,7 +551,7 @@
     <table width="100%" class="footer">
         <tr class="item">
             <td class="currency total">Autorizada mediante resolución 
-                Documento emitido conforme lo establecido en la resolución de Facturación Electrónica, N° DGT‐R‐033‐2019 del 20 de junio del 2019, de la Dirección General de Tributación v.4.3 <br><br>
+                Documento emitido conforme lo establecido en la resolución de Facturación Electrónica, N° DGT&#8211;R033&#8211;2019 del 20 de junio del 2019, de la Dirección General de Tributación v.4.3 <br><br>
                 eTax - La herramienta para resolver el IVA. | Ofiplaza del Este, 200m al oeste de la Rotonda de la Bandera,
                 San Pedro de Montes de Oca, San José 6897-1000 Costa Rica +506 22802130
             </td>
