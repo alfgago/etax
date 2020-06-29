@@ -74,10 +74,13 @@ class InvoiceExport implements WithHeadings, WithMapping, FromQuery, WithEvents
         $invoiceItems = InvoiceItem::query()
         ->with(['invoice', 'invoice.client'])
         ->where('year', $this->year)
-        ->where('month', $this->month)
         ->whereHas('invoice', function ($query) use ($current_company){
             $query->where('company_id', $current_company);
         });
+        
+        if($this->month > 0){
+            $invoiceItems->where('month', $this->month);
+        }
         
         return $invoiceItems;
     }

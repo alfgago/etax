@@ -54,7 +54,7 @@ class BridgeHaciendaApi
             $requestOtherCharges = $invoiceUtils->setOtherCharges($invoice->otherCharges);
             $requestData = $invoiceUtils->setInvoiceData43($invoice, $requestDetails, $requestOtherCharges);
             $company = $invoice->company;
-
+            
             if ($requestData !== false) {
                 $client = new Client();
                 Log::info("Enviando parametros  API HACIENDA -->> InvoiceID: $invoice->id, CompanyID: $company->id, CompanyName: $company->business_name" );

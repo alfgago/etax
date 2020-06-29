@@ -230,7 +230,7 @@ class ProcessInvoiceSM implements ShouldQueue
                 sleep(1);
                 $invoice->hacienda_status = '05';
                 $invoice->save();
-                if ( (strpos($response['data']['response'],"no se puede facturar") !== false) ) {
+                if ( (strpos(json_encode($response),"no se puede facturar") !== false) ) {
                     $invoice->hacienda_status = '01';
                     $invoice->save();
                 }

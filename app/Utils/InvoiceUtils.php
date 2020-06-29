@@ -357,7 +357,7 @@ class InvoiceUtils
                     'descuento' => $montoDescuento,
                     'impuesto_codigo' => '01',
                     'tipo_iva' => $value['iva_type'],
-                    'impuesto_codigo_tarifa' => Variables::getCodigoTarifaVentas($value['iva_type']),
+                    'impuesto_codigo_tarifa' => $cod->invoice_code ?? '08',
                     'impuesto_tarifa' => $value['iva_percentage'] ?? 0,
                     'impuesto_factor_IVA' => $value['iva_percentage'] / 100,
                     'impuesto_monto' => $iva_amount,
@@ -373,7 +373,6 @@ class InvoiceUtils
                     'base_imponible' => 0,
                     'product_type' => $value['product_type'] ?? '',
                 );
-                
                 $details[$key] = $this->setExonerationPercentage($details[$key]);
             }
             return json_encode($details, true);
@@ -676,17 +675,20 @@ class InvoiceUtils
             
             $ivaPerc = $details['impuesto_tarifa'];
             $currentExonPerc = $details['exoneracion_porcentaje'];
-            $exonPerc = 13;
+            $exonPerc = $currentExonPerc ?? 13;
+            
             $ratioExonerado = 1;
             //Si el porcentaje actual de IVA es mayor a 100
             if($currentExonPerc > 13){
                 $exonPerc = $ivaPerc*($currentExonPerc/100);
             }
+            $exonPerc = round($exonPerc,0);
+            
             $ratioExonerado = $exonPerc/$ivaPerc;
             $totalExonerado = $details['subtotal'] * $ratioExonerado;
             
             $details['exoneracion_total_gravados'] = round($totalExonerado,5);
-            $details['exoneracion_porcentaje'] = round($exonPerc,5);
+            $details['exoneracion_porcentaje'] = round($exonPerc,0);
             
         }
         return $details;

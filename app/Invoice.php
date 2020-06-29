@@ -1032,6 +1032,30 @@ class Invoice extends Model
       $porcentajeIva = $data['porcentajeIva'] ?? 13;
 
       $discount_reason = "";
+    
+      $porcentajeExoneracion = $data['porcentajeExoneracion'] ?? 0;
+      $documentoExoneracion = $data['documentoExoneracion'] ?? null;
+      $montoExoneracion = $data['montoExoneracion'] ?? 0;
+      $impuestoNeto= $data['impuestoNeto'] ?? 0;
+      $exoneracionTotalGravado = $subtotalLinea;
+      
+      if ( !app()->environment('production') ) {
+        //Aquí calcula el IVA Exonerado
+        if( isset($documentoExoneracion) ){
+            $ratioExonerado = 1;
+            //Si el porcentaje actual de IVA es mayor a 100
+            if($porcentajeExoneracion > 13){
+                $porcentajeExoneracion = $porcentajeIva*($porcentajeExoneracion/100);
+            }
+            $porcentajeExoneracion = round($porcentajeExoneracion,0);
+            
+            $ratioExonerado = $porcentajeExoneracion/$porcentajeIva;
+            
+            $montoExoneracion = round($montoIvaLinea*$ratioExonerado,5);
+            $exoneracionTotalGravado = round($subtotalLinea*$ratioExonerado, 5);
+            $impuestoNeto = $montoIvaLinea - $montoExoneracion;
+        }
+      }
 
       $item = [
           'company_id' => $company->id,
@@ -1053,13 +1077,13 @@ class Invoice extends Model
           'iva_amount' => $montoIvaLinea,
           'is_code_validated' => true,
           'exoneration_document_type' => $data['tipoDocumentoExoneracion'],
-          'exoneration_document_number' => $data['documentoExoneracion'],
+          'exoneration_document_number' => $documentoExoneracion,
           'exoneration_company_name' => $data['companiaExoneracion'],
-          'exoneration_porcent' => $data['porcentajeExoneracion'],
-          'exoneration_amount' => $data['montoExoneracion'],
+          'exoneration_porcent' => $porcentajeExoneracion,
+          'exoneration_amount' => $montoExoneracion,
           'exoneration_date' => $data['fechaExoneracion'] ?? null,
-          'exoneration_total_gravado' => $data['totalMontoExonerado'] ?? ($data['montoExoneracion'] ? $subtotalLinea : 0),
-          'impuesto_neto' => $data['impuestoNeto'],
+          'exoneration_total_gravado' => $exoneracionTotalGravado,
+          'impuesto_neto' => $impuestoNeto,
           'exoneration_total_amount' => $data['totalMontoLinea'],
           'tariff_heading' => ( isset($data['partidaArancelaria']) ? $data['partidaArancelaria'] : null )
       ];
