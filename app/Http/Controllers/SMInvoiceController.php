@@ -44,7 +44,9 @@ class SMInvoiceController extends Controller
             //return 404;
         }
         $batch = request()->get('batch');
-        $query = SMInvoice::where('batch', $batch)->with('invoice');
+        $query = SMInvoice::where('batch', $batch)
+                ->where('total', '>', 0)
+                ->with('invoice');
         
         return datatables()->eloquent( $query )
             ->orderColumn('created_date', '-created_date $1')
