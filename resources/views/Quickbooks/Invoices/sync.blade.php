@@ -114,7 +114,7 @@
         columns: [
           { data: 'link', name: 'link' },
           { data: 'qb_date', name: 'qb_date' },
-          { data: 'qb_doc_number', name: 'qb_doc_number' },
+          { data: 'document', name: 'qb_doc_number' },
           { data: 'qb_client', name: 'qb_client' },
           { data: 'qb_total', name: 'qb_total' },
           { data: 'actions', name: 'actions', orderable: false, searchable: false }

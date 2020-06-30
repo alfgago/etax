@@ -186,7 +186,7 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'B200 - Ventas de bienes sin derecho a crédito por exenciones objetivas', 'codigo'=>'B200', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>false],
           ['nombre'=>'B201 - Ventas de bienes sin derecho a crédito por exenciones objetivas con límite no sobrepasado', 'hide'=>true, 'codigo'=>'B201', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>false],
           ['nombre'=>'B240 - Autoconsumo de bienes sin derecho a crédito', 'codigo'=>'B240', 'porcentaje'=>'0', 'hidden2018'=>true, 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>false],
-          ['nombre'=>'B245 - Ventas locales de bienes con tarifa transitoria del 0% sin derecho a crédito', 'hide'=>true, 'codigo'=>'B245', 'porcentaje'=>'13', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>false], //*vigente del 1-07-2019 al 30-06-2020
+          ['nombre'=>'B245 - Ventas locales de bienes con tarifa transitoria del 0% sin derecho a crédito', 'hide'=>true, 'codigo'=>'B245', 'porcentaje'=>'13', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>true], //*vigente del 1-07-2019 al 30-06-2020
           ['nombre'=>'B250 - Ventas de bienes con IVA incluido en el precio', 'hide'=>true, 'codigo'=>'B250', 'porcentaje'=>'0', 'hide'=>true, 'hidden2018'=>true, 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>false],
           ['nombre'=>'B260 - Otras ventas de bienes no sujetos', 'codigo'=>'B260', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_bienes'=>true, 'is_gravado'=>false],
           
@@ -223,7 +223,7 @@ class CodigosSeeder extends Seeder
           ['nombre'=>'S200 - Ventas de servicios sin derecho a crédito por exenciones objetivas', 'codigo'=>'S200', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
           ['nombre'=>'S201 - Ventas de servicios sin derecho a crédito por exenciones objetivas con límite no sobrepasado', 'hide'=>true, 'codigo'=>'S201', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
           ['nombre'=>'S240 - Autoconsumo de servicios sin derecho a crédito', 'codigo'=>'S240', 'porcentaje'=>'0', 'hidden2018'=>true, 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
-          ['nombre'=>'S245 - Ventas locales de servicios con tarifa transitoria del 0% sin derecho a crédito', 'codigo'=>'S245', 'porcentaje'=>'13', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false], //*vigente del 1-07-2019 al 30-06-2020
+          ['nombre'=>'S245 - Ventas locales de servicios con tarifa transitoria del 0% sin derecho a crédito', 'codigo'=>'S245', 'porcentaje'=>'13', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>true], //*vigente del 1-07-2019 al 30-06-2020
           ['nombre'=>'S250 - Ventas de servicios con IVA incluido en el precio', 'codigo'=>'S250', 'porcentaje'=>'0', 'hide'=>true, 'hidden2018'=>true, 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
           ['nombre'=>'S260 - Otras ventas de servicios no sujetos', 'codigo'=>'S260', 'porcentaje'=>'0', 'codigo_tarifa' => '01', 'is_servicio'=>true, 'is_gravado'=>false],
         

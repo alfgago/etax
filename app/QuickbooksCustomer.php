@@ -93,6 +93,7 @@ class QuickbooksCustomer extends Model
                         ->where('qb_id', $customerRef)
                         ->with('client')
                         ->first();
+                        
             if( !isset($qbCustomer) ){
                 return false;
             }
