@@ -514,23 +514,25 @@ class CorbanaController extends Controller
                         Log::error('CORBANA: Error al poner el porcentajeExoneracion. ' . $e->getMessage());
                     }
                     
-                    //Busca si la palabra desechos existe en el detalle, en cuyo caso asigna el codigo 200  
-                    if( (strpos( strtolower($detalleProducto),"libro") !== false) || 
-                        (strpos( strtolower($detalleProducto),"diccionario") !== false) || 
-                        (strpos( strtolower($detalleProducto),"desecho") !== false) || 
-                        (strpos( strtolower($detalleProducto),"banano no exportable") !== false) ){
-                        $itemCodigoEtax = $prefijoCodigo.'200';
-                        $categoriaHacienda = 24;
-                        if($prefijoCodigo == 'S'){
-                            $categoriaHacienda = 25;
+                    if($porcentajeIVA == 0){
+                        //Busca si la palabra desechos existe en el detalle, en cuyo caso asigna el codigo 200  
+                        if( (strpos( strtolower($detalleProducto),"libro") !== false) || 
+                            (strpos( strtolower($detalleProducto),"diccionario") !== false) || 
+                            (strpos( strtolower($detalleProducto),"desecho") !== false) || 
+                            (strpos( strtolower($detalleProducto),"banano no exportable") !== false) ){
+                            $itemCodigoEtax = $prefijoCodigo.'200';
+                            $categoriaHacienda = 24;
+                            if($prefijoCodigo == 'S'){
+                                $categoriaHacienda = 25;
+                            }
                         }
-                    }
-                    //Busca si la palabra desechos existe en el detalle, en cuyo caso asigna el codigo 200  
-                    if( (strpos( strtolower($detalleProducto),"iglesia") !== false) || 
-                        (strpos( strtolower($detalleProducto),"casa") !== false)  
-                    ){
-                        $itemCodigoEtax = $prefijoCodigo.'200';
-                        $categoriaHacienda = 27;
+                        //Busca si la palabra iglesia o casa existe en el detalle, en cuyo caso asigna el codigo 200  
+                        if( (strpos( strtolower($detalleProducto),"iglesia") !== false) || 
+                            (strpos( strtolower($detalleProducto),"casa") !== false)  
+                        ){
+                            $itemCodigoEtax = $prefijoCodigo.'200';
+                            $categoriaHacienda = 27;
+                        }
                     }
                     
                     $subtotalLinea = $cantidad*$precioUnitario - $montoDescuento;
