@@ -320,4 +320,8 @@ class SubscriptionPlanController extends Controller
         return $key;
     }
     
+    public function exportSubscriptionsReport(){
+        return Excel::download(new SubscriptionsExport(), 'suscripciones.xlsx');
+    }
+    
 }
