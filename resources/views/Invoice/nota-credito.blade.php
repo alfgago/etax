@@ -376,6 +376,7 @@
             </div>
           </div>
 
+                @include( 'Invoice.form-otros-cargos' )
                 @include( 'Invoice.form-linea' )
                 <div class="btn-holder hidden">
 
