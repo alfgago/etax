@@ -339,7 +339,7 @@ class InvoiceUtils
                 if( $isGravado ) {
                     $iva_amount = $value['iva_amount'] ? round($value['iva_amount'], 5) : 0;
                 }else {
-                    $iva_amount = 'false';
+                    $iva_amount = 'false'; //El api lo va a necesitar asi en String
                 }
                 
                 $itemCount = $value['item_count'] ? round($value['item_count'], 5) : 1;

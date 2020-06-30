@@ -136,6 +136,7 @@ class QuickbooksController extends Controller
             $year = \Carbon\Carbon::now()->year;
             $month = \Carbon\Carbon::now()->month;
         }
+        
         return view('Quickbooks/Invoices/sync', compact(['year', 'month']));
     }
     
@@ -173,7 +174,7 @@ class QuickbooksController extends Controller
         $year = request()->year;
         $month = request()->month;
         
-        $query = QuickbooksInvoice::select(['id','qb_id','invoice_id','qb_date','qb_doc_number','qb_client','qb_total'])
+        $query = QuickbooksInvoice::select(['id','qb_id','invoice_id','qb_date','qb_doc_number','qb_client','qb_total','qb_doc_type'])
                         ->where('company_id', $company->id)
                         ->where('year', $year)
                         ->where('month', $month)
@@ -190,6 +191,9 @@ class QuickbooksController extends Controller
                 }else{
                     return "No asociado";
                 }
+            })
+            ->addColumn('document', function($invoice) {
+                return "$invoice->qb_doc_type - $invoice->qb_doc_number";
             })
             ->addColumn('actions', function($invoice) use($facturasEtax){
                 return view('Quickbooks.Invoices.select', [
@@ -268,7 +272,8 @@ class QuickbooksController extends Controller
                 return redirect('/quickbooks/configuracion')->withError('Usted no tiene Quickbooks configurado correctamente.');
             }
             $dataService = $qb->getAuthenticatedDS();
-            QuickbooksInvoice::syncMonthlyInvoices($dataService, $year, $month, $company);
+            QuickbooksInvoice::syncMonthlyInvoices($dataService, $year, $month, $company,'Invoice');
+            QuickbooksInvoice::syncMonthlyInvoices($dataService, $year, $month, $company,'CreditMemo');
         
             Cache::put($cachekey, true, 30); //Se usa cache para evitar que el usuario haga muchos requests al API de QB innecesariamente
         }
@@ -319,52 +324,6 @@ class QuickbooksController extends Controller
         
         return redirect("/quickbooks/emitidas/comparativo-etaxaqb/")->withMessage('La sincronización de facturas se ha guardado correctamente');
     }
-    
-    /**
-     * Config screen for quickbooks
-     *
-     * @return \Illuminate\Http\Response
-     */
-    /*public function invoiceSyncIndex()
-    {
-        $company = currentCompanyModel();
-        $year = request()->year;
-        $month = request()->month;
-        if( !$year || !$month ){
-            $year = \Carbon\Carbon::now()->year;
-            $month = \Carbon\Carbon::now()->month;
-        }
-        
-        $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
-        if( !isset($qb) ){
-            return redirect('/quickbooks/configuracion')->withError('Usted no tiene Quickbooks configurado correctamente.');
-        }
-        $dataService = $qb->getAuthenticatedDS();
-        $facturas = QuickBooksInvoice::syncMonthlyInvoices($dataService, $year, $month, $company);
-        
-        return view('Quickbooks/Invoices/sync', compact(['facturas', 'year', 'month']));
-    }
-    
-    public function loadMonthlyInvoices()
-    {
-        $company = currentCompanyModel();
-        $year = request()->year;
-        $month = request()->month;
-        
-        $cachekey = "qb-resync-$company->id_number-$year-$month"; 
-        if ( !Cache::has($cachekey) ) {
-            $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
-            if( !isset($qb) ){
-                return redirect('/quickbooks/configuracion')->withError('Usted no tiene Quickbooks configurado correctamente.');
-            }
-            $dataService = $qb->getAuthenticatedDS();
-            QuickbooksInvoice::loadQuickbooksInvoices($dataService, $year, $month, $company);
-        
-            Cache::put($cachekey, true, 15); //Se usa cache para evitar que el usuario haga muchos requests al API de QB innecesariamente
-        }
-        
-        return redirect("/emitidas//comparativo/$year/$month")->withMessage('Se re-sincronizaron las facturas correctamente');
-    }*/
     
     public function saveInvoiceFromQuickbooks(){
         $company = currentCompanyModel();

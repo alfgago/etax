@@ -14,6 +14,7 @@ use App\Quickbooks;
 use App\QuickbooksCustomer;
 use App\Company;
 use QuickBooksOnline\API\Facades\Invoice as qbInvoice;
+use QuickBooksOnline\API\Facades\CreditMemo as qbCreditMemo;
 
 class QuickbooksInvoice extends Model
 {
@@ -42,16 +43,16 @@ class QuickbooksInvoice extends Model
         return Carbon::parse($this->qb_date);
     }
     
-    public static function getMonthlyInvoices($dataService, $year, $month, $company) {
-        $cachekey = "qb-invoices-$company->id_number-$year-$month"; 
+    public static function getMonthlyInvoices($dataService, $year, $month, $company, $qbDocType = 'Invoice') {
+        $cachekey = "qb-$qbDocType-$company->id_number-$year-$month"; 
         if ( !Cache::has($cachekey) ) {
             $count = QuickbooksInvoice::where('company_id', $company->id)->count();
             if( $count > 0 ){
                 $dateFrom = Carbon::createFromDate($year, $month, 1)->firstOfMonth()->toAtomString();
                 $dateTo = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toAtomString();
-                $invoices = $dataService->Query("SELECT * FROM Invoice WHERE TxnDate >= '$dateFrom' AND TxnDate <= '$dateTo'");
+                $invoices = $dataService->Query("SELECT * FROM $qbDocType WHERE TxnDate >= '$dateFrom' AND TxnDate <= '$dateTo'");
             }else{
-                $invoices = $dataService->Query("SELECT * FROM Invoice");
+                $invoices = $dataService->Query("SELECT * FROM $qbDocType");
             }
             Cache::put($cachekey, $invoices, 30); //Cache por 15 segundos.
         }else{
@@ -60,9 +61,9 @@ class QuickbooksInvoice extends Model
         return $invoices;
     }
     
-    public static function syncMonthlyInvoices($dataService, $year, $month, $company){
+    public static function syncMonthlyInvoices($dataService, $year, $month, $company, $qbDocType = 'Invoice'){
         QuickbooksCustomer::syncMonthlyClients($dataService, $year, $month, $company);
-        $qbInvoices = QuickbooksInvoice::getMonthlyInvoices($dataService, $year, $month, $company);
+        $qbInvoices = QuickbooksInvoice::getMonthlyInvoices($dataService, $year, $month, $company, $qbDocType);
         $qbInvoices = $qbInvoices ?? [];
         $facturas = [];
 
@@ -80,7 +81,8 @@ class QuickbooksInvoice extends Model
                 "qb_total" => $qbInvoice->TotalAmt,
                 "qb_client" => $clientName,
                 "qb_data" => $qbInvoice,
-                "generated_at" => 'quickbooks',
+                "qb_doc_type" => $qbDocType,
+                "generated_at" => "quickbooks",
                 "month" => $date->month,
                 "year" => $date->year
               ]
@@ -94,6 +96,11 @@ class QuickbooksInvoice extends Model
             $qb = Quickbooks::where('company_id', $company->id)->with('company')->first();
             
             $dataService = $qb->getAuthenticatedDS();
+            
+            $qbDocType = "Invoice";
+            if($invoice->document_type == '03'){
+                $qbDocType = "CreditMemo";
+            }
             
             $lines = [];
             $taxCode = "S103"; //Por defecto usa este.
@@ -207,7 +214,11 @@ class QuickbooksInvoice extends Model
                 }
             }
             
-            $theResourceObj = qbInvoice::create($params);
+            if($qbDocType == "CreditMemo"){
+                $theResourceObj = qbCreditMemo::create($params);
+            }else{
+                $theResourceObj = qbInvoice::create($params);
+            }
 
             $qbInvoice = $dataService->Add($theResourceObj);
             $error = $dataService->getLastError();
@@ -215,7 +226,9 @@ class QuickbooksInvoice extends Model
                 Log::error("The Status code is: " . $error->getHttpStatusCode() . "\n".
                             "The Helper message is: " . $error->getOAuthHelperError() . "\n".
                             "The Response message is: " . $error->getResponseBody() . "\n");
-                $qbInvoices = $dataService->Query("SELECT * FROM Invoice WHERE DocNumber = '$invoice->document_number'");
+                            
+                            
+                $qbInvoices = $dataService->Query("SELECT * FROM $qbDocType WHERE DocNumber = '$invoice->document_number'");
                 $qbInvoice = $qbInvoices[0] ?? null;
             }
             if( isset($qbInvoice) ){
@@ -232,7 +245,8 @@ class QuickbooksInvoice extends Model
                     "qb_total" => $qbInvoice->TotalAmt,
                     "qb_client" => $clientName,
                     "qb_data" => $qbInvoice,
-                    "generated_at" => 'quickbooks',
+                    "qb_doc_type" => $qbDocType,
+                    "generated_at" => 'etaxaqb',
                     "month" => $invoice->month,
                     "year" => $invoice->year,
                     "invoice_id" => $invoice->id
@@ -255,18 +269,20 @@ class QuickbooksInvoice extends Model
             $invoiceData = $this->qb_data;
             $items = $invoiceData["Line"];
             
+            $qbDocType = $this->qb_doc_type;
+            
             $metodoGeneracion = "quickbooks";
             $xmlSchema = 43;
             $codigoActividad = $company->getActivities() ? $company->getActivities()[0]->codigo : '0';
-            
+
             try{
                 $customer = QuickbooksCustomer::getClientInfo($company, $invoiceData['CustomerRef']);
                 $cliente = $customer->client;
-            if( !$cliente ){
-                return back()->withError("No se encontró el cliente de la factura $this->qb_id. Verifique que el proveedor se encuentre correctamente sincronizado e indique el tipo de persona y código postal.");
-            }
+                if( !$cliente ){
+                    return back()->withError("No se encontró el cliente de la factura $this->qb_id. Verifique que el cliente se encuentre correctamente sincronizado e indique el tipo de persona y código postal.");
+                }
             }catch(\Exception $e){
-                return back()->withError("No se encontró el cliente de la factura $this->qb_id. Verifique que el proveedor se encuentre correctamente sincronizado e indique el tipo de persona y código postal.");
+                return back()->withError("No se encontró el cliente de la factura $this->qb_id. Verifique que el cliente se encuentre correctamente sincronizado e indique el tipo de persona y código postal.");
             }
             
             if( isset($data['BillAddr']) ){
@@ -306,6 +322,9 @@ class QuickbooksInvoice extends Model
             if( !$codDistrito || !$zip ){
                 $tipoDocumento = "04";
             }
+            if($qbDocType=="CreditMemo"){
+                $tipoDocumento = "03";
+            }
             
             $numeroReferencia = $invoiceData['DocNumber'];
             $consecutivoComprobante = $invoiceData['DocNumber'];
@@ -323,9 +342,9 @@ class QuickbooksInvoice extends Model
                     'mensaje' => 'Factura existente.'
                 ];
             }
-    
-            $fechaEmision = Carbon::createFromFormat("Y-m-d", $invoiceData['TxnDate']);
-            $fechaVencimiento = Carbon::createFromFormat("Y-m-d", $invoiceData['DueDate']);
+            
+            $fechaEmision = $invoiceData['TxnDate'] ? Carbon::createFromFormat("Y-m-d", $invoiceData['TxnDate']) : null;
+            $fechaVencimiento = $invoiceData['DueDate'] ? Carbon::createFromFormat("Y-m-d", $invoiceData['DueDate']) : null;
             
             $condicionVenta = "01";
             $metodoPago = '01';
@@ -358,6 +377,7 @@ class QuickbooksInvoice extends Model
             $i = 0;
             $totalDocumento = 0;
             $invoiceList = array();
+            
             foreach($items as $item){
                 $i++;
                 $detail = $item['SalesItemLineDetail'];   
@@ -414,7 +434,7 @@ class QuickbooksInvoice extends Model
                         'metodoPago' => $metodoPago,
                         'numeroLinea' => $numeroLinea,
                         'fechaEmision' => $fechaEmision->format('d/m/Y'),
-                        'fechaVencimiento' => $fechaVencimiento->format('d/m/Y'),
+                        'fechaVencimiento' => $fechaVencimiento ? $fechaVencimiento->format('d/m/Y') : $fechaEmision->format('d/m/Y'),
                         'moneda' => $idMoneda,
                         'tipoCambio' => $tipoCambio,
                         'totalDocumento' => $totalDocumento,
@@ -452,6 +472,7 @@ class QuickbooksInvoice extends Model
                 }
                 
             }
+            
             foreach($invoiceList as $fac){
                \App\Jobs\ProcessSingleInvoiceImport::dispatchNow($fac);
                $newInvoice = Invoice::where('company_id', $company->id)
@@ -465,7 +486,7 @@ class QuickbooksInvoice extends Model
                 }
             }
         }catch(\Exception $e){
-            Log::error($e);
+            Log::error($e->getMessage());
             return back()->withError( "Error al sincronizar factura QB a eTax. Por favor contacte a soporte. " . $e->getMessage() );
         }
     }

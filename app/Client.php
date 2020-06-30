@@ -35,7 +35,7 @@ class Client extends Model
 
   public function canInvoice( $tipoDoc = '01' ) {
     $allow = true;
-    if(empty($this->email)) {
+    if( !isset($this->email) || !isset($this->id_number) ) {
       $allow = false;
     }
     

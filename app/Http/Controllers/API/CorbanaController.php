@@ -472,6 +472,7 @@ class CorbanaController extends Controller
             $i = 0;
             $invoiceList = array();
             foreach($items as $item){
+                $itemCodigoEtax = $codigoEtax;
                 $i++;
                 $detalleProducto = $item['DESCRIPCION'];   
                 //Revisa que no sean las lineas de diferencial cambiario ni tarifa general
@@ -500,13 +501,13 @@ class CorbanaController extends Controller
                                 $porcentajeIVA = $item['PORCIV_EXO'] ?? $porcentajeIVA;
                             }
                             if($porcentajeIVA == 1){
-                                $codigoEtax = $prefijoCodigo.'181';
+                                $itemCodigoEtax = $prefijoCodigo.'181';
                             }
                             if($porcentajeIVA == 2){
-                                $codigoEtax = $prefijoCodigo.'182';
+                                $itemCodigoEtax = $prefijoCodigo.'182';
                             }
                             if($porcentajeIVA == 4){
-                                $codigoEtax = $prefijoCodigo.'184';
+                                $itemCodigoEtax = $prefijoCodigo.'184';
                             }
                         }
                     }catch(\Exception $e){
@@ -518,7 +519,7 @@ class CorbanaController extends Controller
                         (strpos( strtolower($detalleProducto),"diccionario") !== false) || 
                         (strpos( strtolower($detalleProducto),"desecho") !== false) || 
                         (strpos( strtolower($detalleProducto),"banano no exportable") !== false) ){
-                        $codigoEtax = $prefijoCodigo.'200';
+                        $itemCodigoEtax = $prefijoCodigo.'200';
                         $categoriaHacienda = 24;
                         if($prefijoCodigo == 'S'){
                             $categoriaHacienda = 25;
@@ -528,7 +529,7 @@ class CorbanaController extends Controller
                     if( (strpos( strtolower($detalleProducto),"iglesia") !== false) || 
                         (strpos( strtolower($detalleProducto),"casa") !== false)  
                     ){
-                        $codigoEtax = $prefijoCodigo.'200';
+                        $itemCodigoEtax = $prefijoCodigo.'200';
                         $categoriaHacienda = 27;
                     }
                     
@@ -582,7 +583,7 @@ class CorbanaController extends Controller
                         'porcentajeIva' => $porcentajeIVA,
                         'totalLinea' => $totalLinea,
                         'montoIva' => $montoIva,
-                        'codigoEtax' => $codigoEtax,
+                        'codigoEtax' => $itemCodigoEtax,
                         'tipoDescuento' => '02',
                         'montoDescuento' => $montoDescuento,
                         'subtotalLinea' => $subtotalLinea,
