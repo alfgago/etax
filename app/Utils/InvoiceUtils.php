@@ -671,7 +671,7 @@ class InvoiceUtils
     }
     
     private function setExonerationPercentage($details){
-        if ( !app()->environment('production') ) {
+        //if ( !app()->environment('production') ) {
             
             $ivaPerc = $details['impuesto_tarifa'];
             $currentExonPerc = $details['exoneracion_porcentaje'];
@@ -690,7 +690,7 @@ class InvoiceUtils
             $details['exoneracion_total_gravados'] = round($totalExonerado,5);
             $details['exoneracion_porcentaje'] = round($exonPerc,0);
             
-        }
+        //}
         return $details;
         
     }
