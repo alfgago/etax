@@ -42,6 +42,7 @@ class CorbanaController extends Controller
             $cedulaEmpresa = $this->parseCorbanaIdToCedula($pCia, $pAct);
             $company = Company::where('id_number', $cedulaEmpresa)->first();
             if( !isset($company) ){
+                Log::error("Corbana no encuentra empresa pCia: $pCia, pAct: $pAct, cedula: $cedulaEmpresa"); 
                 return response()->json([
                     'mensaje' => '0 facturas',
                     'facturas' => []
@@ -60,7 +61,7 @@ class CorbanaController extends Controller
                         })
                         ->orWhereIn('provider_id_number', ['4000042138', '3101000046', '4000042139'] );
                     })
-                    ->limit(10)
+                    ->limit(20)
                     ->with('items')->with('haciendaResponse')->get();
                     
             $billUtils = new \App\Utils\BillUtils();

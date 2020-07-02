@@ -44,15 +44,24 @@ class EmailController extends Controller
         
         $pdf = null;
         $count = intval($request->attachments);
-        
+        $email = "";
         try{
             $emailText = $request->to;
             $emailText = str_replace(array('<','>','"'), '',$emailText);
             $emailArray = explode(" ", $emailText);
             $email = implode( array_unique($emailArray) );
         }catch(\Exception $e){
-            $email = null;
         }
+        
+        try{
+            $emailTextCC = $request->cc;
+            $emailTextCC = str_replace(array('<','>','"'), '',$emailTextCC);
+            $emailArrayCC = explode(" ", $emailTextCC);
+            $email = $email.",".implode( array_unique($emailArrayCC) );
+        }catch(\Exception $e){
+        }
+        
+        Log::debug($email);
         
         //Recorre los archivos buscando el PDF o ZIP
         for ($i = 1; $i <= $count; $i++) {
