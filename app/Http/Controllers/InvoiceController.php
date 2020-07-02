@@ -827,8 +827,8 @@ class InvoiceController extends Controller
         if($today < $request->generated_date){
             $bill->hacienda_status = '99';
             $bill->generation_method = "etax-programada";
-            $bill->document_key = $bill->document_key."pr";
-            $bill->document_number = $bill->document_number."pr";
+            $bill->document_key = $bill->document_key."";
+            $bill->document_number = $bill->document_number."";
         }
         $bill->save();
         if($bill->hacienda_status = '99'){

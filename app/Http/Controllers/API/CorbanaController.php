@@ -551,6 +551,8 @@ class CorbanaController extends Controller
                     $totalLinea = round($totalLinea, 5);
                     $montoDescuento = round($montoDescuento, 5);
                     $totalMontoLinea = round($totalMontoLinea, 5);
+                    $montoExoneracion = round($montoExoneracion, 5);
+                    $totalMontoExonerado = round($totalMontoExonerado, 5);
                 
                     $arrayInsert = array(
                         'metodoGeneracion' => $metodoGeneracion,
