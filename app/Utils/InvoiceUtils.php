@@ -676,20 +676,20 @@ class InvoiceUtils
             $ivaPerc = $details['impuesto_tarifa'];
             $currentExonPerc = $details['exoneracion_porcentaje'];
             $exonPerc = $currentExonPerc ?? 13;
-            
-            $ratioExonerado = 1;
-            //Si el porcentaje actual de IVA es mayor a 100
-            if($currentExonPerc > 13){
-                $exonPerc = $ivaPerc*($currentExonPerc/100);
+            if($ivaPerc && $exonPerc){
+                $ratioExonerado = 1;
+                //Si el porcentaje actual de IVA es mayor a 100
+                if($currentExonPerc > 13){
+                    $exonPerc = $ivaPerc*($currentExonPerc/100);
+                }
+                $exonPerc = round($exonPerc,0);
+                
+                $ratioExonerado = $exonPerc/$ivaPerc;
+                $totalExonerado = $details['subtotal'] * $ratioExonerado;
+                
+                $details['exoneracion_total_gravados'] = round($totalExonerado,5);
+                $details['exoneracion_porcentaje'] = round($exonPerc,0);
             }
-            $exonPerc = round($exonPerc,0);
-            
-            $ratioExonerado = $exonPerc/$ivaPerc;
-            $totalExonerado = $details['subtotal'] * $ratioExonerado;
-            
-            $details['exoneracion_total_gravados'] = round($totalExonerado,5);
-            $details['exoneracion_porcentaje'] = round($exonPerc,0);
-            
         //}
         return $details;
         
