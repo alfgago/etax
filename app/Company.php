@@ -291,12 +291,14 @@ class Company extends Model {
             if( ! $available_invoices ) {
                 $subscription = getCurrentSubscription($companyId);
                 $subscriptionPlan = $subscription->plan;
-                $available_invoices = AvailableInvoices::create(
+                $available_invoices = AvailableInvoices::updateOrCreate(
                     [
                         'company_id' => $companyId,
-                        'monthly_quota' => $subscriptionPlan->num_invoices,
                         'month' => $month,
                         'year' => $year,
+                    ],
+                    [
+                        'monthly_quota' => $subscriptionPlan->num_invoices,
                         'current_month_sent' => 0
                     ]
                 );
@@ -335,15 +337,23 @@ class Company extends Model {
                                 ->where('year', $year)
                                 ->first();
                                 
+            $cachekey = "availableinvoices-$this->id-$year-#month";
+            if ( !Cache::has($cachekey) ) {
+                $available_invoices = false;
+            }
+            Cache::put($cachekey, true, 86400);
+                                
             // Si no encontró nada, tiene que crearla.
             if( ! $available_invoices ) {
                 $subscriptionPlan = getCurrentSubscription()->plan;
-                $available_invoices = AvailableInvoices::create(
+                $available_invoices = AvailableInvoices::updateOrCreate(
                     [
                         'company_id' => $this->id,
-                        'monthly_quota' => $subscriptionPlan->num_invoices,
                         'month' => $month,
                         'year' => $year,
+                    ],
+                    [
+                        'monthly_quota' => $subscriptionPlan->num_invoices,
                         'current_month_sent' => $count
                     ]
                 );

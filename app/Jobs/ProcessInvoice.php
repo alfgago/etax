@@ -173,6 +173,10 @@ class ProcessInvoice implements ShouldQueue
                             Log::warning("API Hacienda. Empresa: $company->id, Response: ". json_encode($response));
                             $invoice->hacienda_status = '04';
                             $invoice->save();
+                            if ( (strpos(json_encode($response),"no se puede facturar") !== false) ) {
+                                $invoice->hacienda_status = '01';
+                                $invoice->save();
+                            }
                         }
                         Log::info('Proceso de facturación finalizado con éxito.');
                     }

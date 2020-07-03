@@ -61,8 +61,6 @@ class EmailController extends Controller
         }catch(\Exception $e){
         }
         
-        Log::debug($email);
-        
         //Recorre los archivos buscando el PDF o ZIP
         for ($i = 1; $i <= $count; $i++) {
            try{
@@ -119,7 +117,9 @@ class EmailController extends Controller
                if( ".xml" == $ext ){
                    Bill::processMessageXML( $file );
                }
-           }catch(\Throwable $e){}
+           }catch(\Throwable $e){
+               Log::error( 'Error procesando mensaje de respuesta'. $e->getMessage() );
+           }
         }
         
         return response()->json([
