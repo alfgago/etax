@@ -1039,9 +1039,9 @@ class Invoice extends Model
       $impuestoNeto= $data['impuestoNeto'] ?? 0;
       $exoneracionTotalGravado = $subtotalLinea;
       
-      if ( !app()->environment('production') ) {
+      //if ( !app()->environment('production') ) {
         //Aquí calcula el IVA Exonerado
-        if( isset($documentoExoneracion) ){
+        if( isset($documentoExoneracion) && $porcentajeIva && $porcentajeExoneracion ){
             $ratioExonerado = 1;
             //Si el porcentaje actual de IVA es mayor a 100
             if($porcentajeExoneracion > 13){
@@ -1055,7 +1055,7 @@ class Invoice extends Model
             $exoneracionTotalGravado = round($subtotalLinea*$ratioExonerado, 5);
             $impuestoNeto = $montoIvaLinea - $montoExoneracion;
         }
-      }
+      //}
 
       $item = [
           'company_id' => $company->id,
