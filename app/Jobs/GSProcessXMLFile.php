@@ -19,6 +19,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 class GSProcessXMLFile implements ShouldQueue
 {
@@ -57,7 +58,16 @@ class GSProcessXMLFile implements ShouldQueue
             $type = $this->type;
             
             $apiGoSocket = new BridgeGoSocketApi();
+            
+            $cachekey = "avoid-duplicate-GS-$token-".$factura['DocumentId'];
+            if ( Cache::has($cachekey) ) {
+                Log::warning("Evita procesar el mismo XML dos veces en los mismos 14 dias: ".$factura['DocumentId']);
+                return false;
+            }
+            Cache::put($cachekey, true, 864000);
+            
             $gsResponse = $apiGoSocket->getXML($token, $factura['DocumentId']);
+            
             $company = Company::find($companyId);
             $xml  = base64_decode($gsResponse);
             $xml = simplexml_load_string( $xml);
