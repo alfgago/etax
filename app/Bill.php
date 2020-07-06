@@ -397,7 +397,7 @@ class Bill extends Model
         );
         
         if( $bill->id ) {
-          Log::warning( "XML: No se pudo guardar la factura de compra. Ya existe para la empresa." );
+          Log::warning( "XML: No se pudo guardar la factura de compra. Ya existe para la empresa. ID: $bill->id" );
           return false;
         }
         
