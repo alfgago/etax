@@ -377,11 +377,15 @@ class Bill extends Model
           $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : $company->id_number;
         }else{
           //Si es email, busca por ID del receptor para encontrar la compañia
-          $company = Company::where('id_number', $identificacionReceptor)->first();
+          
         }
         
         if( ! $company ) {
-          return false;
+            $company = Company::where('id_number', $identificacionReceptor)->first();
+            if( ! $company ) {
+                Log::error("No encontro empresa para subir XML, $identificacionReceptor");
+                return false;
+            }
         }
       
         $bill = Bill::firstOrNew(
@@ -393,7 +397,7 @@ class Bill extends Model
         );
         
         if( $bill->id ) {
-          //Log::warning( "XML: No se pudo guardar la factura de compra. Ya existe para la empresa." );
+          Log::warning( "XML: No se pudo guardar la factura de compra. Ya existe para la empresa." );
           return false;
         }
         
