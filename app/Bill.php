@@ -380,9 +380,9 @@ class Bill extends Model
           
         }
         
-        if( ! $company ) {
+        if( !isset($company) ) {
             $company = Company::where('id_number', $identificacionReceptor)->first();
-            if( ! $company ) {
+            if( !isset($company) ) {
                 Log::error("No encontro empresa para subir XML, $identificacionReceptor");
                 return false;
             }
