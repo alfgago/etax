@@ -61,7 +61,7 @@ class GSProcessXMLFile implements ShouldQueue
             
             $cachekey = "avoid-duplicate-GS-$token-".$factura['DocumentId'];
             if ( Cache::has($cachekey) ) {
-                Log::warning("Evita procesar el mismo XML dos veces en los mismos 14 dias: ".$factura['DocumentId']);
+                Log::warning("Evita procesar el mismo XML dos veces en los mismos 10 dias: ".$factura['DocumentId']);
                 return false;
             }
             Cache::put($cachekey, true, 864000);
