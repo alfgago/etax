@@ -713,7 +713,7 @@ class Invoice extends Model
                         'iva_amount' => $data['impuesto']['monto'] ?? 0,
                         'tariff_heading' => $data['impuesto']['exoneracion']['porcentajeExoneracion'] ?? 0,
                         'is_exempt' => $data['impuesto']['exento'] ? true : false,
-                        'is_code_validated' => $this->is_code_validated
+                        'is_code_validated' => $this->is_code_validated ?? true
                     ]
                 );
 

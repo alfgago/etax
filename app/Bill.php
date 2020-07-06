@@ -305,7 +305,7 @@ class Bill extends Model
                   'iva_percentage' => $data['iva_percentage'] ?? 0,
                   'iva_amount' => $data['iva_amount'] ?? 0,
                   'is_exempt' => $data['is_exempt'] ?? false,
-                  'is_code_validated' => $this->is_code_validated,
+                  'is_code_validated' => $this->is_code_validated  ?? true,
                   'porc_identificacion_plena' =>  $data['porc_identificacion_plena'] ?? 0
               ]
           );
