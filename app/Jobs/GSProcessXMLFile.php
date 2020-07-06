@@ -72,7 +72,7 @@ class GSProcessXMLFile implements ShouldQueue
             $consecutivoComprobante = $arr['NumeroConsecutivo'];
             $clave = $arr['Clave'];
             
-            Log::debug('GS XML: ' . $json);
+            //Log::debug('GS XML: ' . $json);
             if($type == "I"){
                 //Compara la cedula de Emisor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                 if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {

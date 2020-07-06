@@ -772,7 +772,7 @@ class Invoice extends Model
                     'iva_amount' => $data['iva_amount'] ?? 0,
                     'tariff_heading' => $data['tariff_heading'] ?? null,
                     'is_exempt' => $data['is_exempt'] ?? false,
-                    'is_code_validated' => $this->is_code_validated
+                    'is_code_validated' => $this->is_code_validated ?? true
                     ]
                 );
                 try {
