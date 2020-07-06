@@ -85,18 +85,14 @@ class GSProcessXMLFile implements ShouldQueue
             //Log::debug('GS XML: ' . $json);
             if($type == "I"){
                 //Compara la cedula de Emisor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                Log::debug("I $company->id_number, $identificacionEmisor");
                 if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                     //Registra el XML. Si todo sale bien, lo guarda en S3.
-                    Log::debug("I Entra");
                     Invoice::saveInvoiceXML( $arr, 'GS' );
                 }
             }else{
                 //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                Log::debug("B $company->id_number, $identificacionEmisor");
                 if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
                     //Registra el XML. Si todo sale bien, lo guarda en S3
-                    Log::debug("B Entra");
                     Bill::saveBillXML( $arr, 'GS' );
                 }
             }
