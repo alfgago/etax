@@ -12,7 +12,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\Jobs\ProcessXMLFile;
+use App\Jobs\GSProcessXMLFile;
 
 class GoSocketInvoicesSync implements ShouldQueue
 {
@@ -53,7 +53,7 @@ class GoSocketInvoicesSync implements ShouldQueue
                 foreach ($tiposFacturas as $tipoFactura) {
                     $facturas = $apiGoSocket->getSentDocuments($token, $integracion->company_token, $tipoFactura, $queryDates);
                     foreach ($facturas as $factura) {
-                        GoSocketInvoicesSync::dispatch($factura, $token, $companyId, 'I')->onQueue('bulk');
+                        GSProcessXMLFile::dispatch($factura, $token, $companyId, 'I')->onQueue('bulk');
                     }
                 }
             }
@@ -75,7 +75,7 @@ class GoSocketInvoicesSync implements ShouldQueue
                 foreach ($tiposFacturas as $tipoFactura) {
                     $facturas = $apiGoSocket->getReceivedDocuments($token, $integracion->company_token, $tipoFactura, $queryDates);
                     foreach ($facturas as $factura) {
-                        GoSocketInvoicesSync::dispatch($factura, $token, $companyId, 'B')->onQueue('bulk');
+                        GSProcessXMLFile::dispatch($factura, $token, $companyId, 'B')->onQueue('bulk');
                     }
                 }
             }

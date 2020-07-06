@@ -42,6 +42,7 @@ class CorbanaController extends Controller
             $cedulaEmpresa = $this->parseCorbanaIdToCedula($pCia, $pAct);
             $company = Company::where('id_number', $cedulaEmpresa)->first();
             if( !isset($company) ){
+                Log::error("Corbana no encuentra empresa pCia: $pCia, pAct: $pAct, cedula: $cedulaEmpresa"); 
                 return response()->json([
                     'mensaje' => '0 facturas',
                     'facturas' => []
@@ -60,7 +61,7 @@ class CorbanaController extends Controller
                         })
                         ->orWhereIn('provider_id_number', ['4000042138', '3101000046', '4000042139'] );
                     })
-                    ->limit(10)
+                    ->limit(20)
                     ->with('items')->with('haciendaResponse')->get();
                     
             $billUtils = new \App\Utils\BillUtils();
@@ -514,23 +515,25 @@ class CorbanaController extends Controller
                         Log::error('CORBANA: Error al poner el porcentajeExoneracion. ' . $e->getMessage());
                     }
                     
-                    //Busca si la palabra desechos existe en el detalle, en cuyo caso asigna el codigo 200  
-                    if( (strpos( strtolower($detalleProducto),"libro") !== false) || 
-                        (strpos( strtolower($detalleProducto),"diccionario") !== false) || 
-                        (strpos( strtolower($detalleProducto),"desecho") !== false) || 
-                        (strpos( strtolower($detalleProducto),"banano no exportable") !== false) ){
-                        $itemCodigoEtax = $prefijoCodigo.'200';
-                        $categoriaHacienda = 24;
-                        if($prefijoCodigo == 'S'){
-                            $categoriaHacienda = 25;
+                    if($porcentajeIVA == 0){
+                        //Busca si la palabra desechos existe en el detalle, en cuyo caso asigna el codigo 200  
+                        if( (strpos( strtolower($detalleProducto),"libro") !== false) || 
+                            (strpos( strtolower($detalleProducto),"diccionario") !== false) || 
+                            (strpos( strtolower($detalleProducto),"desecho") !== false) || 
+                            (strpos( strtolower($detalleProducto),"banano no exportable") !== false) ){
+                            $itemCodigoEtax = $prefijoCodigo.'200';
+                            $categoriaHacienda = 24;
+                            if($prefijoCodigo == 'S'){
+                                $categoriaHacienda = 25;
+                            }
                         }
-                    }
-                    //Busca si la palabra desechos existe en el detalle, en cuyo caso asigna el codigo 200  
-                    if( (strpos( strtolower($detalleProducto),"iglesia") !== false) || 
-                        (strpos( strtolower($detalleProducto),"casa") !== false)  
-                    ){
-                        $itemCodigoEtax = $prefijoCodigo.'200';
-                        $categoriaHacienda = 27;
+                        //Busca si la palabra iglesia o casa existe en el detalle, en cuyo caso asigna el codigo 200  
+                        if( (strpos( strtolower($detalleProducto),"iglesia") !== false) || 
+                            (strpos( strtolower($detalleProducto),"casa") !== false)  
+                        ){
+                            $itemCodigoEtax = $prefijoCodigo.'200';
+                            $categoriaHacienda = 27;
+                        }
                     }
                     
                     $subtotalLinea = $cantidad*$precioUnitario - $montoDescuento;
@@ -548,6 +551,8 @@ class CorbanaController extends Controller
                     $totalLinea = round($totalLinea, 5);
                     $montoDescuento = round($montoDescuento, 5);
                     $totalMontoLinea = round($totalMontoLinea, 5);
+                    $montoExoneracion = round($montoExoneracion, 5);
+                    $totalMontoExonerado = round($totalMontoExonerado, 5);
                 
                     $arrayInsert = array(
                         'metodoGeneracion' => $metodoGeneracion,

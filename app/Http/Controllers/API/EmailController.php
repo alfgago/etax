@@ -44,14 +44,21 @@ class EmailController extends Controller
         
         $pdf = null;
         $count = intval($request->attachments);
-        
+        $email = "";
         try{
             $emailText = $request->to;
             $emailText = str_replace(array('<','>','"'), '',$emailText);
             $emailArray = explode(" ", $emailText);
             $email = implode( array_unique($emailArray) );
         }catch(\Exception $e){
-            $email = null;
+        }
+        
+        try{
+            $emailTextCC = $request->cc;
+            $emailTextCC = str_replace(array('<','>','"'), '',$emailTextCC);
+            $emailArrayCC = explode(" ", $emailTextCC);
+            $email = $email.",".implode( array_unique($emailArrayCC) );
+        }catch(\Exception $e){
         }
         
         //Recorre los archivos buscando el PDF o ZIP
@@ -110,7 +117,8 @@ class EmailController extends Controller
                if( ".xml" == $ext ){
                    Bill::processMessageXML( $file );
                }
-           }catch(\Throwable $e){}
+           }catch(\Throwable $e){
+           }
         }
         
         return response()->json([

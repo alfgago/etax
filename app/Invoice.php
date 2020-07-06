@@ -1039,9 +1039,9 @@ class Invoice extends Model
       $impuestoNeto= $data['impuestoNeto'] ?? 0;
       $exoneracionTotalGravado = $subtotalLinea;
       
-      if ( !app()->environment('production') ) {
+      //if ( !app()->environment('production') ) {
         //Aquí calcula el IVA Exonerado
-        if( isset($documentoExoneracion) ){
+        if( isset($documentoExoneracion) && $porcentajeIva && $porcentajeExoneracion ){
             $ratioExonerado = 1;
             //Si el porcentaje actual de IVA es mayor a 100
             if($porcentajeExoneracion > 13){
@@ -1055,7 +1055,7 @@ class Invoice extends Model
             $exoneracionTotalGravado = round($subtotalLinea*$ratioExonerado, 5);
             $impuestoNeto = $montoIvaLinea - $montoExoneracion;
         }
-      }
+      //}
 
       $item = [
           'company_id' => $company->id,
@@ -1601,6 +1601,22 @@ class Invoice extends Model
                         $item->delete();
                     }
                 }
+                try{
+                    //Recorrer OtrosCargos
+                    $oids = array();
+                    $i = 1;
+                    $totalOtrosCargos = 0;
+                    foreach ($request->otros as $item) {
+                          $i++;
+                          $item['item_number'] = $i;
+                          $item['item_id'] = $item['id'] ? $item['id'] : 0;
+                          $cargo_modificado = $this->addEditOtherCharges($item);
+                          array_push( $oids, $cargo_modificado->id );
+                          $totalOtrosCargos += $cargo_modificado->amount;
+                      }
+                    $this->total_otros_cargos = $totalOtrosCargos;
+                }catch(\Exception $e){}
+                
             }else{
                 $dataItems = $invoiceReference->items;
                 foreach($dataItems as $item) {
@@ -1608,20 +1624,20 @@ class Invoice extends Model
                     $newItem->invoice_id = $this->id;
                     $newItem->save();
                 }
-            }
             
-            try{
-                $otherCharges = $invoiceReference->otherCharges;
-                $totalOtrosCargos = 0;
-                foreach ($otherCharges as $item) {
-                    $newItem = $item->replicate();
-                    $newItem->invoice_id = $this->id;
-                    $totalOtrosCargos += $newItem->amount;
-                    $newItem->save();
+                try{
+                    $otherCharges = $invoiceReference->otherCharges;
+                    $totalOtrosCargos = 0;
+                    foreach ($otherCharges as $item) {
+                        $newItem = $item->replicate();
+                        $newItem->invoice_id = $this->id;
+                        $totalOtrosCargos += $newItem->amount;
+                        $newItem->save();
+                    }
+                    $this->total_otros_cargos = $totalOtrosCargos;
+                }catch(\Exception $e){
+                    Log::error($e->getMessage());
                 }
-                $this->total_otros_cargos = $totalOtrosCargos;
-            }catch(\Exception $e){
-                Log::error($e->getMessage());
             }
             
             try{

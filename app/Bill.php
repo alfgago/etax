@@ -858,7 +858,7 @@ class Bill extends Model
           
           $consecutivoComprobante = $xmlData['NumeroConsecutivo'] ?? null; //La respuesta no debe contener el cambo de numero consecutivo
           $mensaje = $xmlData['Mensaje'] ?? null; //Asegura que existe el mensaje, si no no es un XML correcto de aceptacion
-
+          
           $path = "";
           if( !isset($consecutivoComprobante) && isset($mensaje) ){
             $clave = $xmlData['Clave'] ?? null;
@@ -1226,26 +1226,49 @@ class Bill extends Model
       $email = strtolower($email);
       //Log::debug("Regiones Corbana: $email");
       $this->sucursal = null;
+      $isCorbana = false;
       if($email == "facturaelectronica@corbana.co.cr" || strpos($email, "facturaelectronica@corbana.co.cr") !== false || strpos($email, "facturaelectronica2@corbana.co.cr") !== false){
         $this->sucursal = "01";
         $this->email_reception = "facturaelectronica@corbana.co.cr" ;
+        $isCorbana = true;
       }
       if($email == "cajachica@corbana.co.cr" || strpos($email, "cajachica@corbana.co.cr") !== false || strpos($email, "cajachica2@corbana.co.cr") !== false){
         $this->sucursal = "01";  
         $this->email_reception = "cajachica@corbana.co.cr";
+        $isCorbana = true;
       }
       if($email == "corbanaguapiles@corbana.co.cr" || strpos($email, "corbanaguapiles@corbana.co.cr") !== false || strpos($email, "corbanaguapiles2@corbana.co.cr") !== false){
         $this->sucursal = "02";  
         $this->email_reception = "corbanaguapiles@corbana.co.cr";
+        $isCorbana = true;
       }
       if($email == "fincasanpablo@corbana.co.cr" || strpos($email, "fincasanpablo@corbana.co.cr") !== false || strpos($email, "fincasanpablo2@corbana.co.cr") !== false){
         $this->sucursal = "04";  
         $this->email_reception = "fincasanpablo@corbana.co.cr";
+        $isCorbana = true;
       }
       if($email == "agroforestales@corbana.co.cr" || strpos($email, "agroforestales@corbana.co.cr") !== false || strpos($email, "agroforestales2@corbana.co.cr") !== false){
         $this->sucursal = "05";  
         $this->email_reception = "agroforestales@corbana.co.cr";
+        $isCorbana = true;
       }
+      
+      $cedula = $this->company->id_number;
+      if( 
+        $cedula == "3101018968" ||
+        $cedula == "3101011989" ||
+        $cedula == "3101166930" ||
+        $cedula == "3007684555" ||
+        $cedula == "3130052102" ||
+        $cedula == "3007791551" ||
+        $cedula == "31017024290" )
+      {
+        if( !$isCorbana ){
+          return false;
+        }
+      }     
+      
+      return true;
       
     }
     
