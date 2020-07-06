@@ -1108,11 +1108,15 @@ class Invoice extends Model
           $company = currentCompanyModel();
         }else{
           //Si es email, busca por ID del proveedor para encontrar la compañia
-          $company = Company::where('id_number', $identificacionProveedor)->first();
+          
         }
 
         if( ! $company ) {
-          return false;
+            $company = Company::where('id_number', $identificacionProveedor)->first();
+            if( ! $company ) {
+                Log::error("No encontro empresa para subir XML, $identificacionProveedor");
+                return false;
+            }
         }
 
         $invoice = Invoice::firstOrNew(
@@ -1124,7 +1128,7 @@ class Invoice extends Model
         );
 
         if( $invoice->id ) {
-          //Log::warning( "XML: No se pudo guardar la factura de venta. Ya existe para la empresa." );
+          Log::warning( "XML: No se pudo guardar la factura de venta. Ya existe para la empresa." );
           return false;
         }
 
