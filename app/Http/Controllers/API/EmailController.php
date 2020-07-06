@@ -115,11 +115,9 @@ class EmailController extends Controller
                $filename = $file->getClientOriginalName();
                $ext = mb_strtolower(substr($filename, -4));
                if( ".xml" == $ext ){
-                   Log::debug($filename);
                    Bill::processMessageXML( $file );
                }
            }catch(\Throwable $e){
-               Log::error( 'Error procesando mensaje de respuesta'. $e->getMessage() );
            }
         }
         
