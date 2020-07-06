@@ -490,7 +490,9 @@ class InvoiceUtils
             if ($data['document_type'] == '08') {
                 $isCompanyEmisor = false;
                 $provider = Provider::find($data['provider_id']);
-                if($provider->tipo_persona == 'J' || $provider->tipo_persona == '4'  || $provider->tipo_persona == '04'){
+                if( $provider->tipo_persona == 'J' || $provider->tipo_persona == '4'  || $provider->tipo_persona == '04' ||
+                    $provider->tipo_persona == 'O' || $provider->tipo_persona == '6'  || $provider->tipo_persona == '06' ||
+                    $provider->tipo_persona == 'E' || $provider->tipo_persona == '5'  || $provider->tipo_persona == '05' ){
                     $isCompanyEmisor = true;
                 }
             }

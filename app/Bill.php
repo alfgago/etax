@@ -858,7 +858,7 @@ class Bill extends Model
           
           $consecutivoComprobante = $xmlData['NumeroConsecutivo'] ?? null; //La respuesta no debe contener el cambo de numero consecutivo
           $mensaje = $xmlData['Mensaje'] ?? null; //Asegura que existe el mensaje, si no no es un XML correcto de aceptacion
-
+          
           $path = "";
           if( !isset($consecutivoComprobante) && isset($mensaje) ){
             $clave = $xmlData['Clave'] ?? null;
