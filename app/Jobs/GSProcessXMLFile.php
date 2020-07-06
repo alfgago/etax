@@ -44,7 +44,7 @@ class GSProcessXMLFile implements ShouldQueue
     }
 
     /**
-     * Execute the job.
+     * Este job se encarga de procesar las facturas de GS, una por una, usando el XML que sale de GS. Es llamado desde otro Job de GoSocketInvoicesSync.
      *
      * @return void
      */

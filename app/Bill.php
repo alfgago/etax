@@ -277,7 +277,9 @@ class Bill extends Model
       
     }
     
-
+    /**
+     * Se usa para agregar las lineas de factura. 
+     */
     public function addEditItem(array $data)
     {
 
