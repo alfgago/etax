@@ -156,6 +156,7 @@ class GoSocketController extends Controller
             if (!empty($token)) {
                 $apiGoSocket = new BridgeGoSocketApi();
                 $user_gs = $apiGoSocket->getUser($token);
+                Log::debug( "GS USER -> " . json_encode($user_gs) );
                 $integracion = IntegracionEmpresa::where("user_token", $user_gs['UserId'])->where("company_token", $user_gs['CurrentAccountId'])->first();
 
                 if (is_null($integracion)) {
@@ -252,7 +253,7 @@ class GoSocketController extends Controller
                     $integracion->first_sync_gs = false;
                     $integracion->save();
 
-                    return redirect()->secure('gosocket/login?token=' . $token);
+                    return redirect('/');
                 } else {
                     Log::info("El usuario Gosocket no se puedo loguear");
                     return redirect()->secure('gosocket/login?token=' . $token);
