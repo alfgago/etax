@@ -1111,9 +1111,9 @@ class Invoice extends Model
           
         }
 
-        if( ! $company ) {
+        if( !isset($company) ) {
             $company = Company::where('id_number', $identificacionProveedor)->first();
-            if( ! $company ) {
+            if( !isset($company) ) {
                 Log::error("No encontro empresa para subir XML, $identificacionProveedor");
                 return false;
             }
