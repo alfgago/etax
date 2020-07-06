@@ -416,7 +416,7 @@ class Bill extends Model
           //Si es Corbana, va a poner la sucursal a la que recibe la factura. Varia dependiendo del email de recepcion
           $bill->setRegionCorbana($emailRecibido);
         }catch(\Exception $e){
-          Log::warning( "Error al registrar correo receptor: " . $e );
+          //Log::warning( "Error al registrar correo receptor: " . $e );
         }
 
         if ( is_array($medioPago) ) {
@@ -685,7 +685,7 @@ class Bill extends Model
               $item_modificado = $bill->addEditItem($item);
               array_push( $lids, $item_modificado->id );
             }catch(\Throwable $e){
-              Log::error($e);
+              Log::error($e->getMessage() . " - - - " . json_encode($item));
             }
         }
         
@@ -845,7 +845,7 @@ class Bill extends Model
           }
           
         }catch( \Throwable $e ){
-          Log::error( 'Error al guardar el MENSAJE recibido: ' . $e );
+          Log::error( 'Error al guardar el MENSAJE recibido: ' . $e->getMessage() );
         }
         
         return $path;
@@ -916,7 +916,7 @@ class Bill extends Model
           }
           
         }catch( \Throwable $e ){
-          Log::error( 'Error al procesar el MENSAJE HACIENDA recibido: ' . $e );
+          Log::error( 'Error al procesar el MENSAJE HACIENDA recibido: ' . $e->getMessage() );
         }
         
         return $path;
