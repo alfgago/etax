@@ -276,8 +276,8 @@ class SMInvoiceController extends Controller
             $notasEtax = Cache::get($notasEtaxCache);
         }
         
-        $facNoEnviadas = DB::select( DB::raw("SELECT count(id) as c FROM s_m_invoices WHERE invoice_id IS NULL AND month = $month AND year = $year AND document_type != '03'") )[0]->c;
-        $ncNoEnviadas = DB::select( DB::raw("SELECT count(id) as c FROM s_m_invoices WHERE invoice_id IS NULL AND month = $month AND year = $year AND document_type = '03'") )[0]->c;
+        $facNoEnviadas = DB::select( DB::raw("SELECT count(id) as c FROM s_m_invoices WHERE invoice_id IS NULL AND total > 0 AND month = $month AND year = $year AND document_type != '03'") )[0]->c;
+        $ncNoEnviadas = DB::select( DB::raw("SELECT count(id) as c FROM s_m_invoices WHERE invoice_id IS NULL AND total > 0 AND month = $month AND year = $year AND document_type = '03'") )[0]->c;
     
         return view('SMInvoice/smwidget', compact('facturasExcel', 'facturasEtax', 'notasExcel', 'notasEtax', 'facturas08Etax', 'facNoEnviadas', 'ncNoEnviadas'));
     }
