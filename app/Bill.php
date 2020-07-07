@@ -263,10 +263,10 @@ class Bill extends Model
         $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
         $item['item_id'] = $item['id'] ? $item['id'] : 0;
         $item_modificado = $this->addEditItem($item);
-                
+        //Lo mete en un array, para saber cuantas tenia antes editar            
         array_push( $lids, $item_modificado->id );
       }
-      
+      //Recorre el array $lids, para eliminar lineas que ya no vienen en el request
       foreach ( $this->items as $item ) {
         if( !in_array( $item->id, $lids ) ) {
           $item->delete();
@@ -721,7 +721,7 @@ class Bill extends Model
               $i++;
             }
         }catch(\Exception $e){
-            Log::error($e->getMessage());
+            Log::warning("Error en otros cargos. " . $e->getMessage());
         }
         
         $bill->total_iva_devuelto = $arr['ResumenFactura']['TotalIVADevuelto'] ?? 0;
@@ -1020,7 +1020,7 @@ class Bill extends Model
 
           $bill->generation_method = $data['metodoGeneracion'];
           $bill->is_authorized = $data['isAuthorized'];
-
+          $bill->is_code_validated =  $data['codeValidated'] ?? true;
 
           $bill->provider_id_number = preg_replace("/[^0-9]/", "", $data['identificacionProveedor']);
           $bill->provider_first_name = $data['nombreProveedor'] ?? null;

@@ -565,7 +565,7 @@ class InvoiceController extends Controller
                 if ($request->document_type == '08' ) {
                     $this->storeBillFEC($request);
                     if( $request->tipo_compra == 'local' ){
-                        $invoice->is_void = true;
+                        $invoice->is_local_fec = true;
                         $invoice->save();
                     }
                 }
@@ -715,11 +715,12 @@ class InvoiceController extends Controller
                 if ($request->document_type == '08' ) {
                     $this->storeBillFEC($request);
                     if( $request->tipo_compra == 'local' ){
-                        $invoice->is_void = true;
+                        $invoice->is_local_fec = true;
                     }
                 }
                 
-                $invoice->save();                    
+                $invoice->save();    
+                
                 if($request->recurrencia != "0" ){
                     if($request->cantidad_dias == null || $request->cantidad_dias == ''){
                          $request->cantidad_dias = 0;
@@ -2156,7 +2157,7 @@ class InvoiceController extends Controller
                     if ($request->document_type == '08' ) {
                         $this->storeBillFEC($request);
                         if( $request->tipo_compra == 'local' ){
-                            $invoice->is_void = true;
+                            $invoice->is_local_fec = true;
                         }
                     }
                     
