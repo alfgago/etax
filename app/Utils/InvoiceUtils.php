@@ -345,6 +345,7 @@ class InvoiceUtils
                 $itemCount = $value['item_count'] ? round($value['item_count'], 5) : 1;
                 $montoSinIva = ($value['unit_price'] && $itemCount) ? round($itemCount * $value['unit_price'], 5) : 0;
                 $montoDescuento = $value['discount'] ? $this->discountCalculator($value['discount_type'], $value['discount'], $montoSinIva ) : 0;
+                $montoTotalLinea = round( $value['subtotal'] + ($value['iva_amount'] - $value['exoneration_amount']), 5);
 
                 $details[$key] = array(
                     'cantidad' => $itemCount,
@@ -353,7 +354,7 @@ class InvoiceUtils
                     'precioUnitario' => $value['unit_price'] ?? 0,
                     'subtotal' => $value['subtotal'] ?? 0,
                     'montoTotal' =>  $montoSinIva,
-                    'montoTotalLinea' => $value['subtotal'] + ($value['iva_amount'] - $value['exoneration_amount']) ?? 0,
+                    'montoTotalLinea' => $montoTotalLinea ?? 0,
                     'descuento' => $montoDescuento,
                     'impuesto_codigo' => '01',
                     'tipo_iva' => $value['iva_type'],
