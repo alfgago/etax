@@ -138,7 +138,11 @@ class Book extends Model
                            $ivaData->bS104 + $ivaData->bS124 + + $ivaData->bS114 + 
                            $ivaData->bB174;
       $this->cc_ventas_exp = $ivaData->bB150 + $ivaData->bS150;
-      $this->cc_ventas_estado = $ivaData->bB160 + $ivaData->bS160;
+      $this->cc_ventas_estado = $ivaData->bB160 + $ivaData->bS160 +
+                                $ivaData->bB161 + $ivaData->bS161 +
+                                $ivaData->bB162 + $ivaData->bS162 +
+                                $ivaData->bB163 + $ivaData->bS163 +
+                                $ivaData->bB164 + $ivaData->bS164;
       
       try{ //Hace un tryCatch porque hay cierres donde aun no existian los codigos 180s;
       $this->cc_ventas_exentas = $ivaData->bB170 + $ivaData->bS170 + 
