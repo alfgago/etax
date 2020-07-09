@@ -56,10 +56,10 @@ class GoSocketInvoicesSync implements ShouldQueue
                     GoSocketData::firstOrCreate(
                         [
                             'company_id' => $companyId,
-                            'dates' => $queryDates
+                            'dates' => $queryDates,
+                            'type' => "I-$tipoFactura",
                         ],
                         [
-                            'type' => "I-$tipoFactura",
                             'data' => json_encode($facturas)
                         ]
                     );
@@ -88,10 +88,10 @@ class GoSocketInvoicesSync implements ShouldQueue
                     GoSocketData::firstOrCreate(
                         [
                             'company_id' => $companyId,
+                            'type' => "B-$tipoFactura",
                             'dates' => $queryDates
                         ],
                         [
-                            'type' => "B-$tipoFactura",
                             'data' => json_encode($facturas)
                         ]
                     );
