@@ -53,7 +53,9 @@ class GoSocketInvoicesSync implements ShouldQueue
             if (is_array($tiposFacturas)) {
                 foreach ($tiposFacturas as $tipoFactura) {
                     $facturas = $apiGoSocket->getSentDocuments($token, $integracion->company_token, $tipoFactura, $queryDates);
-                    GoSocketData::firstOrCreate(
+                    Log::debug(json_encode($facturas));
+                    Log::debug( "Encontro: " . $facturas->count() . " facturas.");
+                    $gsData = GoSocketData::firstOrCreate(
                         [
                             'company_id' => $companyId,
                             'dates' => $queryDates,
@@ -63,6 +65,7 @@ class GoSocketInvoicesSync implements ShouldQueue
                             'data' => json_encode($facturas)
                         ]
                     );
+                    $gsData->save();
                     foreach ($facturas as $factura) {
                         GSProcessXMLFile::dispatch($factura, $token, $companyId, 'I')->onQueue('bulk');
                     }
@@ -85,16 +88,19 @@ class GoSocketInvoicesSync implements ShouldQueue
             if (is_array($tiposFacturas)) {
                 foreach ($tiposFacturas as $tipoFactura) {
                     $facturas = $apiGoSocket->getReceivedDocuments($token, $integracion->company_token, $tipoFactura, $queryDates);
-                    GoSocketData::firstOrCreate(
+                    Log::debug(json_encode($facturas));
+                    Log::debug( "Encontro: " . $facturas->count() . " facturas.");
+                    $gsData = GoSocketData::firstOrCreate(
                         [
                             'company_id' => $companyId,
+                            'dates' => $queryDates,
                             'type' => "B-$tipoFactura",
-                            'dates' => $queryDates
                         ],
                         [
                             'data' => json_encode($facturas)
                         ]
                     );
+                    $gsData->save();
                     foreach ($facturas as $factura) {
                         GSProcessXMLFile::dispatch($factura, $token, $companyId, 'B')->onQueue('bulk');
                     }
