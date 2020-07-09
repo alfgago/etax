@@ -56,7 +56,7 @@ class GoSocketInvoicesSync implements ShouldQueue
                     Log::debug($facturas);
                     Log::debug( "Encontro: " . sizeof($facturas) . " facturas.");
                     foreach ($facturas as $factura) {
-                        GSProcessXMLFile::dispatch($factura, $token, $companyId, 'I')->onQueue('bulk');
+                        GSProcessXMLFile::dispatch($factura, $token, $companyId, 'I')->onQueue('gosocket');
                     }
                 }
             }
@@ -80,7 +80,7 @@ class GoSocketInvoicesSync implements ShouldQueue
                     Log::debug($facturas);
                     Log::debug( "Encontro: " . sizeof($facturas) . " facturas.");
                     foreach ($facturas as $factura) {
-                        GSProcessXMLFile::dispatch($factura, $token, $companyId, 'B')->onQueue('bulk');
+                        GSProcessXMLFile::dispatch($factura, $token, $companyId, 'B')->onQueue('gosocket');
                     }
                 }
             }
