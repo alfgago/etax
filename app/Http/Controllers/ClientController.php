@@ -144,7 +144,7 @@ class ClientController extends Controller
         $cliente->save();
       
         $user = auth()->user();
-        Activity::dispatch(
+        /*Activity::dispatch(
             $user,
             $cliente,
             [
@@ -153,7 +153,7 @@ class ClientController extends Controller
             ],
             "Cliente creado."
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
         return redirect('/clientes')->withMessage('Cliente creado');
     }
 
@@ -237,7 +237,7 @@ class ClientController extends Controller
       
         $cliente->save();
         $user = auth()->user();
-        Activity::dispatch(
+        /*Activity::dispatch(
             $user,
             $cliente,
             [
@@ -246,7 +246,7 @@ class ClientController extends Controller
             ],
             "Cliente actualizado."
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
         return redirect('/clientes')->withMessage('Cliente actualizado');
     }
 
@@ -263,7 +263,7 @@ class ClientController extends Controller
         $cliente->delete();
         
       $user = auth()->user();
-        Activity::dispatch(
+        /*Activity::dispatch(
             $user,
             $cliente,
             [
@@ -272,7 +272,7 @@ class ClientController extends Controller
             ],
             "Cliente eliminado."
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
         return redirect('/clientes')->withMessage('Cliente eliminado');
     }
     
@@ -348,7 +348,7 @@ class ClientController extends Controller
             );
 
           $user = auth()->user();
-          Activity::dispatch(
+          /*Activity::dispatch(
               $user,
               $cliente,
               [
@@ -357,7 +357,7 @@ class ClientController extends Controller
               ],
               "Cliente creado por excel."
           )->onConnection(config('etax.queue_connections'))
-          ->onQueue('log_queue');
+          ->onQueue('log_queue');*/
               
         }
         $time_end = getMicrotime();
@@ -380,7 +380,7 @@ class ClientController extends Controller
         }
         $rest->restore();
         $user = auth()->user();
-          Activity::dispatch(
+          /*Activity::dispatch(
               $user,
               $rest,
               [
@@ -389,7 +389,7 @@ class ClientController extends Controller
               ],
               "El cliente ha sido restaurado satisfactoriamente."
           )->onConnection(config('etax.queue_connections'))
-          ->onQueue('log_queue');
+          ->onQueue('log_queue');*/
               
         return redirect('/clientes')->withMessage('El cliente ha sido restaurado satisfactoriamente.');
     }   

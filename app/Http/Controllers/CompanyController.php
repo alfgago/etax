@@ -144,7 +144,7 @@ class CompanyController extends Controller {
         auth()->user()->attachTeam($team);
         Cache::forget("cache-currentcompany-$userId");
         $user = auth()->user();
-          Activity::dispatch(
+          /*Activity::dispatch(
               $user,
               $company,
               [
@@ -152,7 +152,7 @@ class CompanyController extends Controller {
               ],
               "La compañía ha sido agregada con éxito."
           )->onConnection(config('etax.queue_connections'))
-          ->onQueue('log_queue');
+          ->onQueue('log_queue');*/
         return redirect()->route('User.companies')->withMessage('La compañía ha sido agregada con éxito');
     }
 
@@ -338,7 +338,7 @@ class CompanyController extends Controller {
         $company->save();
         
         $user = auth()->user();
-          Activity::dispatch(
+          /*Activity::dispatch(
               $user,
               $company,
               [
@@ -346,7 +346,7 @@ class CompanyController extends Controller {
               ],
               "La información de la empresa ha sido actualizada."
           )->onConnection(config('etax.queue_connections'))
-          ->onQueue('log_queue');
+          ->onQueue('log_queue');*/
         $userId = auth()->user()->id;
         Cache::forget("cache-currentcompany-$userId");
 
@@ -423,7 +423,7 @@ class CompanyController extends Controller {
         $userId = auth()->user()->id;
         Cache::forget("cache-currentcompany-$userId");
         $user = auth()->user();
-          Activity::dispatch(
+          /*Activity::dispatch(
               $user,
               $company,
               [
@@ -431,7 +431,7 @@ class CompanyController extends Controller {
               ],
               "La configuración de la empresa ha sido actualizada."
           )->onConnection(config('etax.queue_connections'))
-          ->onQueue('log_queue');
+          ->onQueue('log_queue');*/
         $userId = auth()->user()->id;
         return redirect()->route('Company.edit_config')->withMessage('La configuración de la empresa ha sido actualizada.');
     }
@@ -484,7 +484,7 @@ class CompanyController extends Controller {
         $cert->save();
         
         $user = auth()->user();
-          Activity::dispatch(
+          /*Activity::dispatch(
               $user,
               $company,
               [
@@ -492,7 +492,7 @@ class CompanyController extends Controller {
               ],
               "El certificado ATV ha sido actualizado exitosamente."
           )->onConnection(config('etax.queue_connections'))
-          ->onQueue('log_queue');
+          ->onQueue('log_queue');*/
         return redirect()->route('Company.edit_cert')->withMessage('El certificado ATV ha sido actualizado exitosamente.');
     }
 
@@ -518,7 +518,7 @@ class CompanyController extends Controller {
         
         Log::warning( 'El usuario '. $user->id .' eliminó la empresa #' . $currentCompany->id . ' - ' . $currentCompany->id_number );  
         $user = auth()->user();
-          Activity::dispatch(
+          /*Activity::dispatch(
               $user,
               $currentCompany,
               [
@@ -526,7 +526,7 @@ class CompanyController extends Controller {
               ],
               "La empresa ha sido eliminada satisfactoriamente."
           )->onConnection(config('etax.queue_connections'))
-          ->onQueue('log_queue');
+          ->onQueue('log_queue');*/
         $currentCompany->delete();
 
       
@@ -562,7 +562,7 @@ class CompanyController extends Controller {
         $company->save();
 
         $user = auth()->user();
-          Activity::dispatch(
+          /*Activity::dispatch(
               $user,
               $company,
               [
@@ -570,7 +570,7 @@ class CompanyController extends Controller {
               ],
               "Empiece calculando su prorrata 2018 ingresando todas sus facturas de dicho periodo."
           )->onConnection(config('etax.queue_connections'))
-          ->onQueue('log_queue');
+          ->onQueue('log_queue');*/
         return redirect('/facturas-emitidas')->with('success', 'Empiece calculando su prorrata 2018 ingresando todas sus facturas de dicho periodo.');
     }
 
@@ -624,7 +624,7 @@ class CompanyController extends Controller {
                         $company->save();
                         
                         $user = auth()->user();
-                          Activity::dispatch(
+                          /*Activity::dispatch(
                               $user,
                               $company,
                               [
@@ -632,7 +632,7 @@ class CompanyController extends Controller {
                               ],
                               "Company deactivated successfully."
                           )->onConnection(config('etax.queue_connections'))
-                          ->onQueue('log_queue');
+                          ->onQueue('log_queue');*/
                         $company->delete();
                         Team::where('company_id', $company->id)->delete();
                         session(['current_company' => '']);

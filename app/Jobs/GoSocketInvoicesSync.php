@@ -60,7 +60,7 @@ class GoSocketInvoicesSync implements ShouldQueue
                         ],
                         [
                             'type' => "I-$tipoFactura",
-                            'data' => $facturas
+                            'data' => json_encode($facturas)
                         ]
                     );
                     foreach ($facturas as $factura) {
@@ -92,7 +92,7 @@ class GoSocketInvoicesSync implements ShouldQueue
                         ],
                         [
                             'type' => "B-$tipoFactura",
-                            'data' => $facturas
+                            'data' => json_encode($facturas)
                         ]
                     );
                     foreach ($facturas as $factura) {

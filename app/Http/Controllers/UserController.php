@@ -114,7 +114,7 @@ class UserController extends Controller {
         $user->phone = $request->phone;
         $user->save();
         $usario = auth()->user();
-        Activity::dispatch(
+        /*Activity::dispatch(
             $usario,
             $user,
             [
@@ -123,7 +123,7 @@ class UserController extends Controller {
             ],
             "La información de su perfil ha sido actualizada."
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
         
         return redirect()->back()->withMessage('La información de su perfil ha sido actualizada');
         
@@ -169,7 +169,7 @@ class UserController extends Controller {
 
         $user->update($input);
         $usario = auth()->user();
-        Activity::dispatch(
+        /*Activity::dispatch(
             $usario,
             $user,
             [
@@ -177,7 +177,7 @@ class UserController extends Controller {
             ],
             "Profile password updated successfully."
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
         return redirect()->back()->withMessage('Profile password updated successfully');
     }
 
@@ -268,7 +268,7 @@ class UserController extends Controller {
         Auth::logout();
         
         $usario = auth()->user();
-        Activity::dispatch(
+        /*Activity::dispatch(
             $usario,
             $company,
             [
@@ -277,7 +277,7 @@ class UserController extends Controller {
             ],
             "Profile password updated successfully."
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
         return redirect('/')->with('success', 'Su cuenta ha sido eliminada. Tiene 15 días para solicitar una restauración antes de que sus datos sean eliminados permanentemente.');
     }
     
@@ -365,7 +365,7 @@ class UserController extends Controller {
         $user->save();
         
         $usuario = auth()->user();
-        Activity::dispatch(
+        /*Activity::dispatch(
             $usuario,
             $user,
             [
@@ -374,7 +374,7 @@ class UserController extends Controller {
             ],
             "La información del usuario $user->email ha sido actualizada."
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
         return redirect()->back()->withMessage('La información del usuario $user->email ha sido actualizada');
         
     }
@@ -430,7 +430,7 @@ class UserController extends Controller {
         Mail::to($company->email)->send(new \App\Mail\NotifyCancellation(auth()->user()->companies->first()));
         Auth::logout();
         $usuario = auth()->user();
-        Activity::dispatch(
+        /*Activity::dispatch(
             $usuario,
             $company,
             [
@@ -438,7 +438,7 @@ class UserController extends Controller {
             ],
             "La información del usuario ".$user->email." ha sido actualizada."
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
         return redirect("login")->withError('Su subscripción se ha cancelado');
     }
 
