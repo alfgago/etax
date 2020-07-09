@@ -17,11 +17,15 @@ class CreateGoSocketDataTable extends Migration
             $table->bigIncrements('id');
             
             $table->unsignedBigInteger('company_id')->default(0);
-            $table->string('type')->nullable(); 
-            $table->string('dates')->nullable(); 
-            $table->text('gs_data')->nullable(); 
+            $table->string('document_id')->nullable(); 
+            $table->unsignedBigInteger('invoice_id')->nullable(); 
+            $table->unsignedBigInteger('bill_id')->nullable(); 
+            $table->integer('attempts')->default(0);
+            $table->text('gs_xml')->nullable(); 
             
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+            $table->foreign('invoice_id')->references('id')->on('invoices')->onDelete('cascade');
+            $table->foreign('bill_id')->references('id')->on('bills')->onDelete('cascade');
             
             $table->timestamps();
 			$table->softDeletes();
