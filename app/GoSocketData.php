@@ -13,8 +13,5 @@ class GoSocketData extends Model
 {
     use SoftDeletes;
     protected $guarded = [];
-
-    protected $casts = [
-        'data' => 'array'
-    ];
+    
 }
