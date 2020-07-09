@@ -88,12 +88,16 @@ class GSProcessXMLFile implements ShouldQueue
                 if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                     //Registra el XML. Si todo sale bien, lo guarda en S3.
                     Invoice::saveInvoiceXML( $arr, 'GS' );
+                }else{
+                    Log::warning("GS factura no calza: $identificacionEmisor, company->id_number, ".$factura['DocumentId']);
                 }
             }else{
                 //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                 if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
                     //Registra el XML. Si todo sale bien, lo guarda en S3
                     Bill::saveBillXML( $arr, 'GS' );
+                }else{
+                    Log::warning("GS factura no calza: $identificacionReceptor, company->id_number, ".$factura['DocumentId']);
                 }
             }
             $company->save();

@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Bill;
 use App\Company;
 use App\Invoice;
+use App\GoSocketData;
 use Illuminate\Support\Facades\Log;
 use App\Utils\BridgeGoSocketApi;
 use Illuminate\Bus\Queueable;
@@ -52,6 +53,16 @@ class GoSocketInvoicesSync implements ShouldQueue
             if (is_array($tiposFacturas)) {
                 foreach ($tiposFacturas as $tipoFactura) {
                     $facturas = $apiGoSocket->getSentDocuments($token, $integracion->company_token, $tipoFactura, $queryDates);
+                    GoSocketData::firstOrCreate(
+                        [
+                            'company_id' => $companyId,
+                            'dates' => $queryDates
+                        ],
+                        [
+                            'type' => "I-$tipoFactura",
+                            'data' => $facturas
+                        ]
+                    );
                     foreach ($facturas as $factura) {
                         GSProcessXMLFile::dispatch($factura, $token, $companyId, 'I')->onQueue('bulk');
                     }
@@ -74,6 +85,16 @@ class GoSocketInvoicesSync implements ShouldQueue
             if (is_array($tiposFacturas)) {
                 foreach ($tiposFacturas as $tipoFactura) {
                     $facturas = $apiGoSocket->getReceivedDocuments($token, $integracion->company_token, $tipoFactura, $queryDates);
+                    GoSocketData::firstOrCreate(
+                        [
+                            'company_id' => $companyId,
+                            'dates' => $queryDates
+                        ],
+                        [
+                            'type' => "B-$tipoFactura",
+                            'data' => $facturas
+                        ]
+                    );
                     foreach ($facturas as $factura) {
                         GSProcessXMLFile::dispatch($factura, $token, $companyId, 'B')->onQueue('bulk');
                     }
