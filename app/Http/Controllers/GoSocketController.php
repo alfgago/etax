@@ -221,7 +221,7 @@ class GoSocketController extends Controller
                     
                     $queryDates = $apiGoSocket->getQueryDates($integracion);
                     foreach($queryDates as $q){
-                        GoSocketInvoicesSync::dispatchNow($integracion, $companyId, $q)->onConnection(config('etax.queue_connections'))->onQueue('gosocket');
+                        GoSocketInvoicesSync::dispatchNow($integracion, $companyId, $q);
                     }
                     $integracion->first_sync_gs = false;
                     $integracion->save();
@@ -348,7 +348,7 @@ class GoSocketController extends Controller
                         Log::info("El usuario existe y se inicio sesion enviando job del sync gosocket");
                         $queryDates = $apiGoSocket->getQueryDates($integracion);
                         foreach($queryDates as $q){
-                            GoSocketInvoicesSync::dispatchNow($integracion, $companyId, $q)->onConnection(config('etax.queue_connections'))->onQueue('gosocket');
+                            GoSocketInvoicesSync::dispatchNow($integracion, $companyId, $q);
                         }
                         $integracion->first_sync_gs = false;
                         $integracion->save();
