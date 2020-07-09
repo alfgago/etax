@@ -72,10 +72,10 @@ class GSProcessXMLFile implements ShouldQueue
                 //Revosa si ya tiene el gs_xml en base64. De no tenerlo, lo consulta a GS.
                 if( !isset($gsResponse->gs_xml) ){
                     $gsResponse = $apiGoSocket->getXML($token, $factura['DocumentId']);
-                    $gsData->gs_response = $gsResponse;
-                    $gsData->save();
+                    //$gsData->gs_response = $gsResponse;
+                    //$gsData->save();
                 }else{
-                    $gsResponse = $gsData->gs_xml;
+                    //$gsResponse = $gsData->gs_xml;
                 }
                 
                 $company = Company::find($companyId);
