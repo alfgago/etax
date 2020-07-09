@@ -369,15 +369,11 @@ class Bill extends Model
     }
     
     public static function saveBillXML( $arr, $metodoGeneracion, $emailRecibido = null ) {
-        //Log::debug(json_encode($arr['ResumenFactura']['TotalOtrosCargos']));
-        //dd($arr);
+      
         $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
         if($metodoGeneracion != "Email" && $metodoGeneracion != 'GS' ){
           $company = currentCompanyModel();
           $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : $company->id_number;
-        }else{
-          //Si es email, busca por ID del receptor para encontrar la compañia
-          
         }
         
         if( !isset($company) ) {
