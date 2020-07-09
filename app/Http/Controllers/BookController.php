@@ -89,7 +89,7 @@ class BookController extends Controller
           return redirect()->back()->with('error', "Debe cerrar los asientos anteriores antes de cerrar el $mes/$ano." );
         }
         $user = auth()->user();
-        Activity::dispatch(
+        /*Activity::dispatch(
             $user,
             $calc,
             [
@@ -98,7 +98,7 @@ class BookController extends Controller
             ],
             "Cierres de mes satisfactorio."
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
         $calc->is_closed = true;
         $calc->save();
         clearCierreCache($current_company, $mes, $ano);
@@ -190,7 +190,7 @@ class BookController extends Controller
             Cache::forever( $cacheKey, false );
         }
       $user = auth()->user();
-        Activity::dispatch(
+        /*Activity::dispatch(
             $user,
             $calc,
             [
@@ -199,7 +199,7 @@ class BookController extends Controller
             ],
             "Rectificación abierta."
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
         return redirect('/cierres')->withMessage('Rectificación abierta');
     }
 
@@ -262,7 +262,7 @@ class BookController extends Controller
         }
         
         $user = auth()->user();
-        Activity::dispatch(
+        /*Activity::dispatch(
             $user,
             $calc,
             [
@@ -271,7 +271,7 @@ class BookController extends Controller
             ],
             "Retención por tarjeta actualizada exitosamente."
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
         return redirect('/cierres')->withMessage('Retención por tarjeta actualizada exitosamente.');
     }
 

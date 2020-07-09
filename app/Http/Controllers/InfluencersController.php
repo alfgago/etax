@@ -104,15 +104,7 @@ class InfluencersController extends Controller
 				->get();
 			
 			$user = auth()->user();
-	          Activity::dispatch(
-	              $user,
-	              $data,
-	              [
-	                  'company_id' => $data[0]->company_id
-	              ],
-	              "Su retiro a sido solicitado."
-	          )->onConnection(config('etax.queue_connections'))
-	          ->onQueue('log_queue');
+			
 	      	Mail::to($data[0]->user_name)->send(new \App\Mail\RequestWallet($data[0]));
 	      	Mail::to($data[0]->email)->send(new \App\Mail\NotifyWallet($data[0]));
 		  	$retorno = 'Su retiro a sido solicitado';

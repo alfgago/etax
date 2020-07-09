@@ -99,42 +99,15 @@ class GoSocketController extends Controller
 
             if ($company->first_prorrata_type == 2) {
                 $user = auth()->user();
-                Activity::dispatch(
-                    $user,
-                    $company,
-                    [
-                        'company_id' => $company->id
-                    ],
-                    "La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior."
-                )->onConnection(config('etax.queue_connections'))
-                    ->onQueue('log_queue');
                 return redirect('/editar-totales-2018')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
 
             }
 
             if ($company->first_prorrata_type == 3) {
                 $user = auth()->user();
-                Activity::dispatch(
-                    $user,
-                    $company,
-                    [
-                        'company_id' => $company->id
-                    ],
-                    "La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior."
-                )->onConnection(config('etax.queue_connections'))
-                    ->onQueue('log_queue');
                 return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
             }
             $user = auth()->user();
-            Activity::dispatch(
-                $user,
-                $company,
-                [
-                    'company_id' => $company->id
-                ],
-                "La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento."
-            )->onConnection(config('etax.queue_connections'))
-                ->onQueue('log_queue');
 
             return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento.');
 

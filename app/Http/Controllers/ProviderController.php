@@ -121,7 +121,7 @@ class ProviderController extends Controller
         $provider->save();
       
         $user = auth()->user();
-        Activity::dispatch(
+        /*Activity::dispatch(
             $user,
             $provider,
             [
@@ -130,7 +130,7 @@ class ProviderController extends Controller
             ],
             "Proveedor creado satisfactoriamente."
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
 
         return redirect('/proveedores')->withMessage('Proveedor creado');
     }
@@ -199,8 +199,8 @@ class ProviderController extends Controller
         $provider->fullname = $provider->toString();
       
         $provider->save();
-       $user = auth()->user();
-        Activity::dispatch(
+        $user = auth()->user();
+        /*Activity::dispatch(
             $user,
             $provider,
             [
@@ -209,7 +209,7 @@ class ProviderController extends Controller
             ],
             "Proveedor editado satisfactoriamente."
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
         return redirect('/proveedores')->withMessage('Proveedor editado');
     }
 
@@ -292,7 +292,7 @@ class ProviderController extends Controller
                 ]
             );
             $user = auth()->user();
-            Activity::dispatch(
+            /*Activity::dispatch(
                 $user,
                 $provider,
                 [
@@ -301,7 +301,7 @@ class ProviderController extends Controller
                 ],
                 "Proveedor importado satisfactoriamente desde excel."
             )->onConnection(config('etax.queue_connections'))
-            ->onQueue('log_queue');
+            ->onQueue('log_queue');*/
             
         }
         $time_end = getMicrotime();
@@ -324,7 +324,7 @@ class ProviderController extends Controller
         }
         $rest->restore();
         $user = auth()->user();
-        Activity::dispatch(
+        /*Activity::dispatch(
             $user,
             $provider,
             [
@@ -333,7 +333,7 @@ class ProviderController extends Controller
             ],
             "'El proveedor ha sido restaurado satisfactoriamente."
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
         return redirect('/proveedores')->withMessage('El proveedor ha sido restaurado satisfactoriamente.');
     }    
     
