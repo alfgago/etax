@@ -63,7 +63,8 @@ class GSProcessXMLFile implements ShouldQueue
             //Busca o crea el GoSocketData 
             $gsResponse = GoSocketData::firstOrCreate([
               'company_id' => $companyId,  
-              'document_id' => $factura['DocumentId']
+              'document_id' => $factura['DocumentId'],
+              'type' => $type
             ]);
             
             //Revisa si el GSData ya tiene una factura asociada, de ser asi, termina
@@ -75,7 +76,7 @@ class GSProcessXMLFile implements ShouldQueue
                     $xml  = base64_decode($gsResponse);
                     $xml = simplexml_load_string( $xml);
                     $jsonXmlData = json_encode( $xml );
-                    $gsData->gs_response = $jsonXmlData;
+                    $gsData->gs_xml = $jsonXmlData;
                     $gsData->save();
                 }else{
                     $jsonXmlData = $gsData->gs_xml;
@@ -137,7 +138,7 @@ class GSProcessXMLFile implements ShouldQueue
             }
             return true;
         }catch(\Exception $e){
-            Log::error('Error en GS XML: ' . $e->getMessage());
+            Log::error('Error en GS XML: ' . $e);
         }
     }
 

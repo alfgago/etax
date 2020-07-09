@@ -18,6 +18,7 @@ class CreateGoSocketDataTable extends Migration
             
             $table->unsignedBigInteger('company_id')->default(0);
             $table->string('document_id')->nullable(); 
+            $table->string('type')->nullable(); 
             $table->unsignedBigInteger('invoice_id')->nullable(); 
             $table->unsignedBigInteger('bill_id')->nullable(); 
             $table->integer('attempts')->default(0);
