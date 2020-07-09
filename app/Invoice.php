@@ -683,6 +683,9 @@ class Invoice extends Model
         }
     }
 
+    /**
+     * Se usa para agregar las lineas de factura. 
+     */
     public function addEditItemApi(array $data)
     {
         try {
@@ -710,6 +713,7 @@ class Invoice extends Model
                         'iva_amount' => $data['impuesto']['monto'] ?? 0,
                         'tariff_heading' => $data['impuesto']['exoneracion']['porcentajeExoneracion'] ?? 0,
                         'is_exempt' => $data['impuesto']['exento'] ? true : false,
+                        'is_code_validated' => $this->is_code_validated ?? true
                     ]
                 );
 
@@ -768,7 +772,7 @@ class Invoice extends Model
                     'iva_amount' => $data['iva_amount'] ?? 0,
                     'tariff_heading' => $data['tariff_heading'] ?? null,
                     'is_exempt' => $data['is_exempt'] ?? false,
-                    'is_code_validated' => true,
+                    'is_code_validated' => $this->is_code_validated ?? true
                     ]
                 );
                 try {
@@ -1099,16 +1103,16 @@ class Invoice extends Model
     public static function saveInvoiceXML( $arr, $metodoGeneracion ) {
 
         $identificacionProveedor = $arr['Emisor']['Identificacion']['Numero'];
-        Log::info("Guardando Xml" . $identificacionProveedor);
         if( $metodoGeneracion != "Email" && $metodoGeneracion != 'GS' ){
           $company = currentCompanyModel();
-        }else{
-          //Si es email, busca por ID del proveedor para encontrar la compañia
-          $company = Company::where('id_number', $identificacionProveedor)->first();
         }
 
-        if( ! $company ) {
-          return false;
+        if( !isset($company) ) {
+            $company = Company::where('id_number', $identificacionProveedor)->first();
+            if( !isset($company) ) {
+                Log::error("No encontro empresa para subir XML, $identificacionProveedor");
+                return false;
+            }
         }
 
         $invoice = Invoice::firstOrNew(

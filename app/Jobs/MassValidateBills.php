@@ -86,7 +86,7 @@ class MassValidateBills implements ShouldQueue
                 }
                 
                 $user = auth()->user();
-                Activity::dispatch(
+                /*Activity::dispatch(
                     $user,
                     $bill,
                     [
@@ -96,7 +96,7 @@ class MassValidateBills implements ShouldQueue
                     ],
                     "La factura ". $bill->document_number . " ha sido validada."
                 )->onConnection(config('etax.queue_connections'))
-                ->onQueue('log_queue');
+                ->onQueue('log_queue');*/
                 
                 clearBillCache($bill);
             }catch(\Throwable $e){

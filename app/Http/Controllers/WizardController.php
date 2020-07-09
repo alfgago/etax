@@ -127,7 +127,7 @@ class WizardController extends Controller
         $user = auth()->user();
 	    Cache::forget("cache-currentcompany-$user->id");
         $user = auth()->user();
-        Activity::dispatch(
+        /*Activity::dispatch(
             $user,
             $company,
             [
@@ -135,7 +135,7 @@ class WizardController extends Controller
             ],
             "Su prorrata operativa 2018 es de: ". number_format( $operativeData->prorrata_operativa*100, 2) ."%"
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
         return redirect('/empresas/configuracion')->withMessage( 'Su prorrata operativa 2018 es de: '. number_format( $operativeData->prorrata_operativa*100, 2) . '%' );
     }
     
@@ -267,7 +267,7 @@ class WizardController extends Controller
 
         if ($operativeData->method == 2) {
             $user = auth()->user();
-            Activity::dispatch(
+            /*Activity::dispatch(
                 $user,
                 $company,
                 [
@@ -275,14 +275,14 @@ class WizardController extends Controller
                 ],
                 "La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior."
             )->onConnection(config('etax.queue_connections'))
-            ->onQueue('log_queue');
+            ->onQueue('log_queue');*/
             return redirect('/editar-totales-2018')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
 
         }
 
         if ($operativeData->method == 3) {
             $user = auth()->user();
-            Activity::dispatch(
+            /*Activity::dispatch(
                 $user,
                 $company,
                 [
@@ -290,11 +290,11 @@ class WizardController extends Controller
                 ],
                 "La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior."
             )->onConnection(config('etax.queue_connections'))
-            ->onQueue('log_queue');
+            ->onQueue('log_queue');*/
             return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
         }
             $user = auth()->user();
-            Activity::dispatch(
+            /*Activity::dispatch(
                 $user,
                 $company,
                 [
@@ -302,7 +302,7 @@ class WizardController extends Controller
                 ],
                 "La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento."
             )->onConnection(config('etax.queue_connections'))
-            ->onQueue('log_queue');
+            ->onQueue('log_queue');*/
 
         return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento.');
         
@@ -430,7 +430,7 @@ class WizardController extends Controller
 
             if ($operativeData->method == 2) {
                 $user = auth()->user();
-                Activity::dispatch(
+                /*Activity::dispatch(
                     $user,
                     $company,
                     [
@@ -438,13 +438,13 @@ class WizardController extends Controller
                     ],
                     "La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior."
                 )->onConnection(config('etax.queue_connections'))
-                ->onQueue('log_queue');
+                ->onQueue('log_queue');*/
                 return redirect('/editar-totales-2018')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
             }
 
             if ($operativeData->method == 3) {
                 $user = auth()->user();
-                Activity::dispatch(
+                /*Activity::dispatch(
                     $user,
                     $company,
                     [
@@ -452,11 +452,11 @@ class WizardController extends Controller
                     ],
                     "La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior."
                 )->onConnection(config('etax.queue_connections'))
-                ->onQueue('log_queue');
+                ->onQueue('log_queue');*/
                 return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
             }
                 $user = auth()->user();
-                Activity::dispatch(
+                /*Activity::dispatch(
                     $user,
                     $company,
                     [
@@ -464,7 +464,7 @@ class WizardController extends Controller
                     ],
                     "La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento."
                 )->onConnection(config('etax.queue_connections'))
-                ->onQueue('log_queue');
+                ->onQueue('log_queue');*/
             return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento.');
         } catch( \Exception $ex ) {
             Log::error('Error al crear compania: '. $ex);

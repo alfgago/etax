@@ -120,7 +120,7 @@ class PaymentController extends Controller
         $cliente->save();
 
         $user = auth()->user();
-        Activity::dispatch(
+        /*Activity::dispatch(
             $user,
             $cliente,
             [
@@ -129,7 +129,7 @@ class PaymentController extends Controller
             ],
             "Cliente creado exitosamente."
         )->onConnection(config('etax.queue_connections'))
-        ->onQueue('log_queue');
+        ->onQueue('log_queue');*/
         return $cliente;
     }
     /**

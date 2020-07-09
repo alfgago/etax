@@ -506,7 +506,9 @@ toastr.options = {
       precio_unitario = parseFloat(precio_unitario);
     var cantidad = parseFloat( $('#cantidad').val() );
       cantidad = parseFloat(cantidad);
-
+      /*cantidad = parseFloat(cantidad).toFixed(3);
+      $('#cantidad').val(cantidad);*/
+      
     var porc_iva = parseFloat( $('#porc_iva').val() );
       porc_iva = parseFloat(porc_iva);
     var monto_iva = parseFloat( $('#item_iva_amount').val() );

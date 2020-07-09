@@ -263,10 +263,10 @@ class Bill extends Model
         $item['item_number'] = "NaN" != $item['item_number'] ? $item['item_number'] : 1;
         $item['item_id'] = $item['id'] ? $item['id'] : 0;
         $item_modificado = $this->addEditItem($item);
-                
+        //Lo mete en un array, para saber cuantas tenia antes editar            
         array_push( $lids, $item_modificado->id );
       }
-      
+      //Recorre el array $lids, para eliminar lineas que ya no vienen en el request
       foreach ( $this->items as $item ) {
         if( !in_array( $item->id, $lids ) ) {
           $item->delete();
@@ -277,7 +277,9 @@ class Bill extends Model
       
     }
     
-
+    /**
+     * Se usa para agregar las lineas de factura. 
+     */
     public function addEditItem(array $data)
     {
 
@@ -303,6 +305,7 @@ class Bill extends Model
                   'iva_percentage' => $data['iva_percentage'] ?? 0,
                   'iva_amount' => $data['iva_amount'] ?? 0,
                   'is_exempt' => $data['is_exempt'] ?? false,
+                  'is_code_validated' => $this->is_code_validated  ?? true,
                   'porc_identificacion_plena' =>  $data['porc_identificacion_plena'] ?? 0
               ]
           );
@@ -366,19 +369,19 @@ class Bill extends Model
     }
     
     public static function saveBillXML( $arr, $metodoGeneracion, $emailRecibido = null ) {
-        //Log::debug(json_encode($arr['ResumenFactura']['TotalOtrosCargos']));
-        //dd($arr);
+      
         $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0;
         if($metodoGeneracion != "Email" && $metodoGeneracion != 'GS' ){
           $company = currentCompanyModel();
           $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : $company->id_number;
-        }else{
-          //Si es email, busca por ID del receptor para encontrar la compañia
-          $company = Company::where('id_number', $identificacionReceptor)->first();
         }
         
-        if( ! $company ) {
-          return false;
+        if( !isset($company) ) {
+            $company = Company::where('id_number', $identificacionReceptor)->first();
+            if( !isset($company) ) {
+                Log::error("No encontro empresa para subir XML, $identificacionReceptor");
+                return false;
+            }
         }
       
         $bill = Bill::firstOrNew(
@@ -390,7 +393,7 @@ class Bill extends Model
         );
         
         if( $bill->id ) {
-          //Log::warning( "XML: No se pudo guardar la factura de compra. Ya existe para la empresa." );
+          //Log::warning( "XML: No se pudo guardar la factura de compra. Ya existe para la empresa. ID: $bill->id" );
           return false;
         }
         
@@ -409,7 +412,7 @@ class Bill extends Model
           //Si es Corbana, va a poner la sucursal a la que recibe la factura. Varia dependiendo del email de recepcion
           $bill->setRegionCorbana($emailRecibido);
         }catch(\Exception $e){
-          Log::warning( "Error al registrar correo receptor: " . $e );
+          //Log::warning( "Error al registrar correo receptor: " . $e );
         }
 
         if ( is_array($medioPago) ) {
@@ -678,7 +681,7 @@ class Bill extends Model
               $item_modificado = $bill->addEditItem($item);
               array_push( $lids, $item_modificado->id );
             }catch(\Throwable $e){
-              Log::error($e);
+              Log::error($e->getMessage() . " - - - " . json_encode($item));
             }
         }
         
@@ -714,7 +717,7 @@ class Bill extends Model
               $i++;
             }
         }catch(\Exception $e){
-            Log::error($e->getMessage());
+            Log::warning("Error en otros cargos. " . $e->getMessage());
         }
         
         $bill->total_iva_devuelto = $arr['ResumenFactura']['TotalIVADevuelto'] ?? 0;
@@ -838,7 +841,7 @@ class Bill extends Model
           }
           
         }catch( \Throwable $e ){
-          Log::error( 'Error al guardar el MENSAJE recibido: ' . $e );
+          Log::error( 'Error al guardar el MENSAJE recibido: ' . $e->getMessage() );
         }
         
         return $path;
@@ -909,7 +912,7 @@ class Bill extends Model
           }
           
         }catch( \Throwable $e ){
-          Log::error( 'Error al procesar el MENSAJE HACIENDA recibido: ' . $e );
+          Log::error( 'Error al procesar el MENSAJE HACIENDA recibido: ' . $e->getMessage() );
         }
         
         return $path;
@@ -1013,7 +1016,7 @@ class Bill extends Model
 
           $bill->generation_method = $data['metodoGeneracion'];
           $bill->is_authorized = $data['isAuthorized'];
-
+          $bill->is_code_validated =  $data['codeValidated'] ?? true;
 
           $bill->provider_id_number = preg_replace("/[^0-9]/", "", $data['identificacionProveedor']);
           $bill->provider_first_name = $data['nombreProveedor'] ?? null;

@@ -13,6 +13,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Jobs\GSProcessXMLFile;
+use Illuminate\Support\Facades\Cache;
 
 class GoSocketInvoicesSync implements ShouldQueue
 {
@@ -39,6 +40,13 @@ class GoSocketInvoicesSync implements ShouldQueue
      */
     public function handle()
     {
+       /* $cachekey = "avoid-duplicate-GS-$this->companyId-$this->queryDates";
+        if ( Cache::has($cachekey) ) {
+            Log::debug( "Esta volviendo a entrar en los mismos 15mins");
+            return false;
+        }
+        Cache::put($cachekey, true, 900);*/
+        
         $this->getInvoices($this->integracion, $this->companyId, $this->queryDates);
         $this->getBills($this->integracion, $this->companyId, $this->queryDates);
     }
@@ -53,7 +61,7 @@ class GoSocketInvoicesSync implements ShouldQueue
                 foreach ($tiposFacturas as $tipoFactura) {
                     $facturas = $apiGoSocket->getSentDocuments($token, $integracion->company_token, $tipoFactura, $queryDates);
                     foreach ($facturas as $factura) {
-                        GSProcessXMLFile::dispatch($factura, $token, $companyId, 'I')->onQueue('bulk');
+                        GSProcessXMLFile::dispatch($factura, $token, $companyId, 'I')->onQueue('gosocket');
                     }
                 }
             }
@@ -72,12 +80,13 @@ class GoSocketInvoicesSync implements ShouldQueue
             $apiGoSocket = new BridgeGoSocketApi();
             $tiposFacturas = $apiGoSocket->getDocumentTypes($token);
             if (is_array($tiposFacturas)) {
-                foreach ($tiposFacturas as $tipoFactura) {
+                //foreach ($tiposFacturas as $tipoFactura) {
+                    $tipoFactura = $tiposFacturas[0];
                     $facturas = $apiGoSocket->getReceivedDocuments($token, $integracion->company_token, $tipoFactura, $queryDates);
                     foreach ($facturas as $factura) {
-                        GSProcessXMLFile::dispatch($factura, $token, $companyId, 'B')->onQueue('bulk');
+                        GSProcessXMLFile::dispatch($factura, $token, $companyId, 'B')->onQueue('gosocket');
                     }
-                }
+                //}
             }
         }catch( \Exception $ex ) {
             Log::error("Error en sincronizar bills gosocket ".$ex);

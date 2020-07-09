@@ -74,7 +74,7 @@ class ProcessAcceptHacienda implements ShouldQueue
 	            }
 	            clearBillCache($bill);
 
-	        Activity::dispatch(
+	        /*Activity::dispatch(
 	            $this->user,
 	            $bill,
 	            [
@@ -84,7 +84,7 @@ class ProcessAcceptHacienda implements ShouldQueue
 	            ],
 	            $mensaje
 	        )->onConnection(config('etax.queue_connections'))
-	        ->onQueue('log_queue');
+	        ->onQueue('log_queue');*/
 	        } else {
 	            //Notification
 	        }

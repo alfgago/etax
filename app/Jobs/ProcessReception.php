@@ -136,6 +136,9 @@ class ProcessReception implements ShouldQueue
                                             ' --> ' . json_encode($response). ' DATA: --> ' . json_encode($requestData));
                             }
                             Log::info('Proceso de Reception finalizado con éxito. Empresa '.$company->business_name.' Bill: '.$this->billId);
+                        }else{
+                            $bill->in_queue = false;
+                            $bill->save();
                         }
                     } else {
                         $bill->accept_status = 1;

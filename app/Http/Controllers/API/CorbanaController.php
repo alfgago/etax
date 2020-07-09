@@ -990,11 +990,7 @@ class CorbanaController extends Controller
                     ->with('company')
                     ->first();
         $acceptStatus = $request->accept_status;
-        /*if($acceptStatus == 3){
-            $acceptStatus = 2; //El 2 es la de rechazo. Parcial no se usa en Corbana
-        }*/
         $actividad = $request->codigo_actividad;
-        $bill->activity_company_verification = $actividad;
         $condicionAceptacion = $request->condicion_aceptacion ?? '04';
         if( isset($bill) ){
             $company = $bill->company;
@@ -1005,22 +1001,34 @@ class CorbanaController extends Controller
                     'mensaje' => 'Error: ID de factura no le pertenece a Corbana'
                 ], 200);
             }
-            $bill->is_authorized = true;
-            $bill->accept_status = $acceptStatus;
-            $bill->is_code_validated = true;
-            $bill->hacienda_status = '01';
-            foreach($bill->items as $item){
-                $item->setIvaTypeCorbana($condicionAceptacion, $actividad);
-                $item->calcularAcreditablePorLinea();
-            }
-            $bill->calculateAcceptFields($company);
-            $bill->save();
-            Log::debug('Corbana guardada ->' . json_encode($request));
             
-            $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
-            $company->save();
-            $company->last_document_rec = getDocReference('05', $company, $company->last_rec_ref_number);
-            $company->save();
+            if( $acceptStatus != 3 && $acceptStatus != "3" ){
+                $bill->activity_company_verification = $actividad;
+                $bill->is_authorized = true;
+                $bill->accept_status = $acceptStatus;
+                $bill->is_code_validated = true;
+                $bill->hacienda_status = '01';
+                foreach($bill->items as $item){
+                    $item->setIvaTypeCorbana($condicionAceptacion, $actividad);
+                    $item->calcularAcreditablePorLinea();
+                }
+                $bill->calculateAcceptFields($company);
+                $bill->save();
+                Log::debug('Corbana guardada ->' . json_encode($request));
+                
+                $company->last_rec_ref_number = $company->last_rec_ref_number + 1;
+                $company->save();
+                $company->last_document_rec = getDocReference('05', $company, $company->last_rec_ref_number);
+                $company->save();
+            }else{
+                $bill->activity_company_verification = 0;
+                $bill->is_authorized = true;
+                $bill->accept_status = 3;
+                $bill->is_code_validated = true;
+                $bill->hacienda_status = '01';
+                $bill->reason = $request->justificacion ?? null;
+                $bill->save();
+            }
             
             try{
                 $apiHacienda = new BridgeHaciendaApi();

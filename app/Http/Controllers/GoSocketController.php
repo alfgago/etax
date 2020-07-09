@@ -99,42 +99,15 @@ class GoSocketController extends Controller
 
             if ($company->first_prorrata_type == 2) {
                 $user = auth()->user();
-                Activity::dispatch(
-                    $user,
-                    $company,
-                    [
-                        'company_id' => $company->id
-                    ],
-                    "La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior."
-                )->onConnection(config('etax.queue_connections'))
-                    ->onQueue('log_queue');
                 return redirect('/editar-totales-2018')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
 
             }
 
             if ($company->first_prorrata_type == 3) {
                 $user = auth()->user();
-                Activity::dispatch(
-                    $user,
-                    $company,
-                    [
-                        'company_id' => $company->id
-                    ],
-                    "La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior."
-                )->onConnection(config('etax.queue_connections'))
-                    ->onQueue('log_queue');
                 return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, debe empezar ingresando sus facturas del periodo anterior.');
             }
             $user = auth()->user();
-            Activity::dispatch(
-                $user,
-                $company,
-                [
-                    'company_id' => $company->id
-                ],
-                "La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento."
-            )->onConnection(config('etax.queue_connections'))
-                ->onQueue('log_queue');
 
             return redirect('/')->withMessage('La configuración inicial ha sido realizada con éxito! Para empezar a calcular su IVA, solamente debe agregar sus facturas del periodo hasta el momento.');
 
@@ -156,6 +129,7 @@ class GoSocketController extends Controller
             if (!empty($token)) {
                 $apiGoSocket = new BridgeGoSocketApi();
                 $user_gs = $apiGoSocket->getUser($token);
+                Log::debug( "GS USER -> " . json_encode($user_gs) );
                 $integracion = IntegracionEmpresa::where("user_token", $user_gs['UserId'])->where("company_token", $user_gs['CurrentAccountId'])->first();
 
                 if (is_null($integracion)) {
@@ -247,12 +221,12 @@ class GoSocketController extends Controller
                     
                     $queryDates = $apiGoSocket->getQueryDates($integracion);
                     foreach($queryDates as $q){
-                        GoSocketInvoicesSync::dispatch($integracion, $companyId, $q)->onConnection(config('etax.queue_connections'))->onQueue('gosocket');
+                        GoSocketInvoicesSync::dispatch($integracion, $companyId, $q)->onQueue('bulk');
                     }
                     $integracion->first_sync_gs = false;
                     $integracion->save();
 
-                    return redirect()->secure('gosocket/login?token=' . $token);
+                    return redirect('/');
                 } else {
                     Log::info("El usuario Gosocket no se puedo loguear");
                     return redirect()->secure('gosocket/login?token=' . $token);
@@ -374,7 +348,7 @@ class GoSocketController extends Controller
                         Log::info("El usuario existe y se inicio sesion enviando job del sync gosocket");
                         $queryDates = $apiGoSocket->getQueryDates($integracion);
                         foreach($queryDates as $q){
-                            GoSocketInvoicesSync::dispatch($integracion, $companyId, $q)->onConnection(config('etax.queue_connections'))->onQueue('gosocket');
+                            GoSocketInvoicesSync::dispatch($integracion, $companyId, $q)->onQueue('bulk');
                         }
                         $integracion->first_sync_gs = false;
                         $integracion->save();

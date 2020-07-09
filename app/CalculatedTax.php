@@ -173,10 +173,7 @@ class CalculatedTax extends Model
         $currentCompanyId = $company->id;
         $prorrataOperativa = $company->getProrrataOperativa($year);
 
-        /*$cacheKey = "cache-taxes-$currentCompanyId-$month-$year";
-        if ( Cache::has($cacheKey) ) {
-          return Cache::get($cacheKey);
-        }*/
+        //$forceRecalc = true;
 
         //Busca el calculo del mes en Base de Datos.
         $data = CalculatedTax::firstOrNew(
@@ -353,7 +350,7 @@ class CalculatedTax extends Model
                     try {
                         $currInvoice = $invoiceItems[$i]->invoice;
                         
-                        if (!$currInvoice->is_void && $currInvoice->is_authorized && $currInvoice->is_code_validated
+                        if (!$currInvoice->is_void && !$currInvoice->is_local_fec && $currInvoice->is_authorized && $currInvoice->is_code_validated
                             && $currInvoice->is_totales == $filterTotales && $currInvoice->hide_from_taxes == false) {
                                 
                             if ($currInvoice->currency == 'CRC') {
