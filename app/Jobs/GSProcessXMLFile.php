@@ -72,17 +72,17 @@ class GSProcessXMLFile implements ShouldQueue
                 //Revosa si ya tiene el gs_xml en base64. De no tenerlo, lo consulta a GS.
                 if( !isset($gsResponse->gs_xml) ){
                     $gsResponse = $apiGoSocket->getXML($token, $factura['DocumentId']);
-                    //$gsData->gs_response = $gsResponse;
-                    //$gsData->save();
+                    $xml  = base64_decode($gsResponse);
+                    $xml = simplexml_load_string( $xml);
+                    $jsonXmlData = json_encode( $xml );
+                    $gsData->gs_response = $jsonXmlData;
+                    $gsData->save();
                 }else{
-                    //$gsResponse = $gsData->gs_xml;
+                    $jsonXmlData = $gsData->gs_xml;
                 }
                 
                 $company = Company::find($companyId);
-                $xml  = base64_decode($gsResponse);
-                $xml = simplexml_load_string( $xml);
-                $json = json_encode( $xml );
-                $arr = json_decode( $json, TRUE );
+                $arr = json_decode( $jsonXmlData, TRUE );
                             
                 try {
                     $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0 ;
@@ -98,7 +98,7 @@ class GSProcessXMLFile implements ShouldQueue
                     //Compara la cedula de Emisor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3.
-                        $invoice = Invoice::select('company_id, id, document_key')->where('company_id', $companyId)->where('document_key', $clave)->first();
+                        $invoice = Invoice::select(['company_id', 'id', 'document_key'])->where('company_id', $companyId)->where('document_key', $clave)->first();
                         if(!$invoice){
                             $invoice = Invoice::saveInvoiceXML( $arr, 'GS' );
                             if( $invoice ) {
@@ -117,7 +117,7 @@ class GSProcessXMLFile implements ShouldQueue
                     //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
                     if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
                         //Registra el XML. Si todo sale bien, lo guarda en S3
-                        $bill = Bill::select('company_id, id, document_key')->where('company_id', $companyId)->where('document_key', $clave)->first();
+                        $bill = Bill::select(['company_id', 'id', 'document_key'])->where('company_id', $companyId)->where('document_key', $clave)->first();
                         if(!$bill){
                             $bill = Bill::saveBillXML( $arr, 'GS' );
                             if( $bill ) {
