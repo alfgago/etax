@@ -74,15 +74,15 @@ class GSProcessXMLFile implements ShouldQueue
                 if( !isset($gsResponse->gs_xml) ){
                     $gsResponse = $apiGoSocket->getXML($token, $factura['DocumentId']);
                     $xml  = base64_decode($gsResponse);
-                    $xml = simplexml_load_string( $xml);
-                    $jsonXmlData = json_encode( $xml );
-                    $gsData->gs_xml = $jsonXmlData;
+                    $gsData->gs_xml = $xml;
                     $gsData->save();
                 }else{
                     $jsonXmlData = $gsData->gs_xml;
                 }
                 
                 $company = Company::find($companyId);
+                $xml = simplexml_load_string( $xml);
+                $jsonXmlData = json_encode( $xml );
                 $arr = json_decode( $jsonXmlData, TRUE );
                             
                 try {
