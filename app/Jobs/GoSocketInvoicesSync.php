@@ -13,6 +13,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Jobs\GSProcessXMLFile;
+use Illuminate\Support\Facades\Cache;
 
 class GoSocketInvoicesSync implements ShouldQueue
 {
@@ -39,6 +40,13 @@ class GoSocketInvoicesSync implements ShouldQueue
      */
     public function handle()
     {
+        $cachekey = "avoid-duplicate-GS-$this->companyId-$this->queryDates";
+        if ( Cache::has($cachekey) ) {
+            Log::debug( "Esta volviendo a entrar en los mismos 15mins");
+            return false;
+        }
+        Cache::put($cachekey, true, 900);
+        
         $this->getInvoices($this->integracion, $this->companyId, $this->queryDates);
         $this->getBills($this->integracion, $this->companyId, $this->queryDates);
     }
