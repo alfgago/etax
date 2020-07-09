@@ -8,6 +8,7 @@ use App\Invoice;
 use App\Bill;
 use App\XmlHacienda;
 use Carbon\Carbon;
+use App\GoSocketData;
 use App\Utils\BridgeGoSocketApi;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -59,48 +60,81 @@ class GSProcessXMLFile implements ShouldQueue
             
             $apiGoSocket = new BridgeGoSocketApi();
             
-            $cachekey = "avoid-duplicate-GS-$companyId-".$factura['DocumentId'];
-            if ( Cache::has($cachekey) ) {
-                Log::warning("Evita procesar el mismo XML dos veces en los mismos 10 dias: ".$factura['DocumentId']);
-                return false;
+            $gsData = GoSocketData::where( "company_id", $companyId )->where('document_id',$factura['DocumentId'])->first();
+            if( !isset($gsData) ){
+                $gsResponse = GoSocketData::create([
+                  'company_id' => $companyId,  
+                  'document_id' => $factura['DocumentId']
+                ]);
             }
-            Cache::put($cachekey, true, 864000);
             
-            $gsResponse = $apiGoSocket->getXML($token, $factura['DocumentId']);
+            if( !isset($gsResponse->bill_id) && !isset($gsResponse->invoice_id) ){
             
-            $company = Company::find($companyId);
-            $xml  = base64_decode($gsResponse);
-            $xml = simplexml_load_string( $xml);
-            $json = json_encode( $xml );
-            $arr = json_decode( $json, TRUE );
-            try {
-                $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0 ;
-            } catch(\Exception $e) {
-                $identificacionReceptor = 0;
-            };
-            $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
-            $consecutivoComprobante = $arr['NumeroConsecutivo'];
-            $clave = $arr['Clave'];
-            
-            //Log::debug('GS XML: ' . $json);
-            if($type == "I"){
-                //Compara la cedula de Emisor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
-                    //Registra el XML. Si todo sale bien, lo guarda en S3.
-                    Invoice::saveInvoiceXML( $arr, 'GS' );
+                if( !isset($gsResponse->gs_xml) ){
+                    $gsResponse = $apiGoSocket->getXML($token, $factura['DocumentId']);
+                    $gsData->gs_response = $gsResponse;
+                    $gsData->save();
                 }else{
-                    Log::warning("GS factura no calza: $identificacionEmisor, company->id_number, ".$factura['DocumentId']);
+                    $gsResponse = $gsResponse->gs_xml;
                 }
-            }else{
-                //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
-                if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
-                    //Registra el XML. Si todo sale bien, lo guarda en S3
-                    Bill::saveBillXML( $arr, 'GS' );
+                
+                $company = Company::find($companyId);
+                $xml  = base64_decode($gsResponse);
+                $xml = simplexml_load_string( $xml);
+                $json = json_encode( $xml );
+                $arr = json_decode( $json, TRUE );
+                            
+                try {
+                    $identificacionReceptor = array_key_exists('Receptor', $arr) ? $arr['Receptor']['Identificacion']['Numero'] : 0 ;
+                } catch(\Exception $e) {
+                    $identificacionReceptor = 0;
+                };
+                $identificacionEmisor = $arr['Emisor']['Identificacion']['Numero'];
+                $consecutivoComprobante = $arr['NumeroConsecutivo'];
+                $clave = $arr['Clave'];
+                
+                //Log::debug('GS XML: ' . $json);
+                if($type == "I"){
+                    //Compara la cedula de Emisor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionEmisor ) ) {
+                        //Registra el XML. Si todo sale bien, lo guarda en S3.
+                        $invoice = Invoice::select('company_id, id, document_key')->where('company_id', $companyId)->where('document_key', $clave)->first();
+                        if(!$invoice){
+                            $invoice = Invoice::saveInvoiceXML( $arr, 'GS' );
+                            if( $invoice ) {
+                                $gsData->invoice_id = $invoice->id;
+                                $gsData->save();
+                                Invoice::storeXML( $invoice, $xml );
+                            }
+                        }else{
+                            $gsData->invoice_id = $invoice->id;
+                            $gsData->save();
+                        }
+                    }else{
+                        Log::warning("GS factura no calza: $identificacionEmisor, company->id_number, ".$factura['DocumentId']);
+                    }
                 }else{
-                    Log::warning("GS factura no calza: $identificacionReceptor, company->id_number, ".$factura['DocumentId']);
+                    //Compara la cedula de Receptor con la cedula de la compañia actual. Tiene que ser igual para poder subirla
+                    if( preg_replace("/[^0-9]+/", "", $company->id_number) == preg_replace("/[^0-9]+/", "", $identificacionReceptor ) ) {
+                        //Registra el XML. Si todo sale bien, lo guarda en S3
+                        $bill = Bill::select('company_id, id, document_key')->where('company_id', $companyId)->where('document_key', $clave)->first();
+                        if(!$bill){
+                            $bill = Bill::saveBillXML( $arr, 'GS' );
+                            if( $bill ) {
+                                $gsData->bill_id = $bill->id;
+                                $gsData->save();
+                                Bill::storeXML( $bill, $xml );
+                            }
+                        }else{
+                            $gsData->bill_id = $bill->id;
+                            $gsData->save();
+                        }
+                    }else{
+                        Log::warning("GS factura no calza: $identificacionReceptor, company->id_number, ".$factura['DocumentId']);
+                    }
                 }
+                $company->save();
             }
-            $company->save();
         }catch(\Exception $e){
             Log::error('Error en GS XML: ' . $e->getMessage());
         }

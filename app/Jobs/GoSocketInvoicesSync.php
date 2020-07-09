@@ -5,7 +5,6 @@ namespace App\Jobs;
 use App\Bill;
 use App\Company;
 use App\Invoice;
-use App\GoSocketData;
 use Illuminate\Support\Facades\Log;
 use App\Utils\BridgeGoSocketApi;
 use Illuminate\Bus\Queueable;
