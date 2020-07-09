@@ -60,6 +60,7 @@ class GoSocketInvoicesSync implements ShouldQueue
             if (is_array($tiposFacturas)) {
                 foreach ($tiposFacturas as $tipoFactura) {
                     $facturas = $apiGoSocket->getSentDocuments($token, $integracion->company_token, $tipoFactura, $queryDates);
+                    Log::debug(json_encode($tipoFactura));
                     Log::debug( "Encontro: " . sizeof($facturas) . " facturas de tipo ".$tipoFactura['DocumentTypeId']);
                     foreach ($facturas as $factura) {
                         GSProcessXMLFile::dispatch($factura, $token, $companyId, 'I')->onQueue('gosocket');
