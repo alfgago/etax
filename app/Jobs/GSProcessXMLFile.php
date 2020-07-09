@@ -61,28 +61,28 @@ class GSProcessXMLFile implements ShouldQueue
             $apiGoSocket = new BridgeGoSocketApi();
             
             //Busca o crea el GoSocketData 
-            $gsResponse = GoSocketData::firstOrCreate([
+            $gsData = GoSocketData::firstOrCreate([
               'company_id' => $companyId,  
               'document_id' => $factura['DocumentId'],
               'type' => $type
             ]);
             
             //Revisa si el GSData ya tiene una factura asociada, de ser asi, termina
-            if( !isset($gsResponse->bill_id) && !isset($gsResponse->invoice_id) ){
+            if( !isset($gsData->bill_id) && !isset($gsData->invoice_id) ){
             
                 //Revosa si ya tiene el gs_xml en base64. De no tenerlo, lo consulta a GS.
-                if( !isset($gsResponse->gs_xml) ){
+                if( !isset($gsData->gs_xml) ){
                     $gsResponse = $apiGoSocket->getXML($token, $factura['DocumentId']);
                     $xml  = base64_decode($gsResponse);
-                    $gsData->gs_xml = $xml;
+                    $xml = simplexml_load_string( $xml);
+                    $jsonXmlData = json_encode( $xml );
+                    $gsData->gs_xml = $jsonXmlData;
                     $gsData->save();
                 }else{
                     $jsonXmlData = $gsData->gs_xml;
                 }
                 
                 $company = Company::find($companyId);
-                $xml = simplexml_load_string( $xml);
-                $jsonXmlData = json_encode( $xml );
                 $arr = json_decode( $jsonXmlData, TRUE );
                             
                 try {
