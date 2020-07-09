@@ -19,7 +19,7 @@ class CreateGoSocketDataTable extends Migration
             $table->unsignedBigInteger('company_id')->default(0);
             $table->string('type')->nullable(); 
             $table->string('dates')->nullable(); 
-            $table->text('data')->nullable(); 
+            $table->text('gs_data')->nullable(); 
             
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             

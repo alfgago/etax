@@ -59,7 +59,7 @@ class GSProcessXMLFile implements ShouldQueue
             
             $apiGoSocket = new BridgeGoSocketApi();
             
-            $cachekey = "avoid-duplicate-GS-$token-".$factura['DocumentId'];
+            $cachekey = "avoid-duplicate-GS-$companyId-".$factura['DocumentId'];
             if ( Cache::has($cachekey) ) {
                 Log::warning("Evita procesar el mismo XML dos veces en los mismos 10 dias: ".$factura['DocumentId']);
                 return false;
