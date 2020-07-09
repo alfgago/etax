@@ -54,7 +54,7 @@ class GoSocketInvoicesSync implements ShouldQueue
                 foreach ($tiposFacturas as $tipoFactura) {
                     $facturas = $apiGoSocket->getSentDocuments($token, $integracion->company_token, $tipoFactura, $queryDates);
                     Log::debug(json_encode($facturas));
-                    Log::debug( "Encontro: " . $facturas->count() . " facturas.");
+                    Log::debug( "Encontro: " . sizeof($facturas) . " facturas.");
                     $gsData = GoSocketData::firstOrCreate(
                         [
                             'company_id' => $companyId,
@@ -89,7 +89,7 @@ class GoSocketInvoicesSync implements ShouldQueue
                 foreach ($tiposFacturas as $tipoFactura) {
                     $facturas = $apiGoSocket->getReceivedDocuments($token, $integracion->company_token, $tipoFactura, $queryDates);
                     Log::debug(json_encode($facturas));
-                    Log::debug( "Encontro: " . $facturas->count() . " facturas.");
+                    Log::debug( "Encontro: " . sizeof($facturas) . " facturas.");
                     $gsData = GoSocketData::firstOrCreate(
                         [
                             'company_id' => $companyId,
