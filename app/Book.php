@@ -253,9 +253,10 @@ class Book extends Model
         $bases_bs3 = $ivaData->bB003 + $ivaData->bB023 +
                      $ivaData->bS003 + $ivaData->bS023;
         $bases_ppp3 = $ivaData->bB013 + $ivaData->bB033;
-        $bases_bs4 = $ivaData->bB004 + $ivaData->bB024 +
-                     $ivaData->bS004 + $ivaData->bS024;
+        /*$bases_bs4 = $ivaData->bB004 + $ivaData->bB024 +
+                     $ivaData->bS004 + $ivaData->bS024;*/
         $bases_ppp4 = $ivaData->bB014 + $ivaData->bB034;
+        $bases_bs4 = $calculos->bills_subtotal4 - $bases_ppp4; //Lo hace asi, porque el bills_subtotal4 ya tiene restadas las bases de IVA devuelto
         
         $this->cc_aj_ppp_1 = $ivaData->iB011 + $ivaData->iB031;
         $this->cc_aj_ppp_2 = $ivaData->iB012 + $ivaData->iB032;
@@ -288,7 +289,7 @@ class Book extends Model
         $acreditable_bs = 0 + $acreditable_bs2 + $acreditable_bs3 + $acreditable_bs4;
         $this->cc_ajuste_ppp =  - $acreditable_ppp + 0 + $this->cc_aj_ppp_2 + + $this->cc_aj_ppp_3 + + $this->cc_aj_ppp_4; 
         $this->cc_ajuste_bs =  - $acreditable_bs + 0 + $this->cc_aj_bs_2 + $this->cc_aj_bs_3 + $this->cc_aj_bs_4 - $deducibleS140;
-        
+       
         $this->cc_gasto_no_acreditable = $calculos->iva_no_acreditable_identificacion_plena;
         
         //Sumatoria de Haber
@@ -297,7 +298,8 @@ class Book extends Model
         //Sumatoria de Debe
         $this->cc_sum1 = $this->cc_iva_emitido_1 + $this->cc_iva_emitido_2 + $this->cc_iva_emitido_3 - $calculos->iva_devuelto
                          + $this->cc_iva_emitido_4 + $this->cc_ajuste_ppp + $this->cc_ajuste_bs + $this->cc_gasto_no_acreditable;
-            
+        
+    
         if( $this->cc_por_pagar > 0 ) {
             $this->cc_sum2 += $this->cc_por_pagar;
         }else {
