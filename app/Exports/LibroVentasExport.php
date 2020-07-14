@@ -10,6 +10,7 @@ use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Rap2hpoutre\FastExcel\FastExcel;
 
 class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEvents
 {
@@ -139,5 +140,51 @@ class LibroVentasExport implements WithHeadings, WithMapping, FromQuery, WithEve
         return $array;
     }
     
+    //Hace lo mismo que el map, solo que en este caso lo hace ya con el nombre de la columna
+    public function mapLight($map): array
+    {
+        $factor = $map->invoice->document_type != '03' ? 1 : -1;
+        $tipoCambio = $map->invoice->currency_rate;
+        if( $map->invoice->currency == 'CRC' ) {
+            $tipoCambio = 1;
+        }
+        $array = [
+            "Tipo Doc." => $map->invoice->documentTypeName(),
+            "Fecha" => $map->invoice->generatedDate()->format('d/m/Y'),
+            "Cliente" => $map->invoice->clientName(),
+            "Actividad" => $map->invoice->commercial_activity ?? 'No indica',
+            "Consecutivo" => $map->invoice->document_number,
+            "# Línea" => $map->item_number,
+            "Cód. Referencia" => $map->code ?? 'N/A',
+            "Producto" => $map->name,
+            "Tipo IVA" => $map->ivaType ? $map->ivaType->name : 'No indica',
+            "Cat. Declaración" => isset($map->productCategory) ? ($map->productCategory->id . " - " . $map->productCategory->name) : 'No indica categoria',
+            "Moneda" => $map->invoice->currency,
+            "Tipo Cambio" => $map->invoice->currency_rate ?? '',
+            "Tarifa IVA" => (isset($map->ivaType) ? $map->ivaType->percentage : $map->iva_percentage) . '%',
+            "Subtotal" => round( $map->subtotal * $factor, 2),
+            "Monto IVA" => round( $map->iva_amount * $factor, 2),
+            "Total" => round( $map->total * $factor , 2),
+            "Subtotal CRC" => round( $map->subtotal * $tipoCambio * $factor, 2),
+            "Monto IVA CRC" => round( $map->iva_amount * $tipoCambio * $factor, 2),
+            "Total CRC" => round( $map->total * $tipoCambio * $factor , 2),
+            
+        ];
+        return $array;
+    }	
     
+    //Descarga Excel usando un método mas liviano
+    public function getLightExcel(){
+        $items = $this->query()->get();
+        $res = [];
+        foreach($items as $item){
+            $res[] = $this->mapLight($item);
+        }
+        $res = collect($res);
+        
+        //Genera el archivo Excel usando FastExcel
+        $filename= "libro-ventas-$this->month-$this->year.xlsx";
+        $file = (new FastExcel( $res ))->download($filename);
+        return $file;
+    }
 }
