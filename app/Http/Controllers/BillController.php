@@ -642,6 +642,13 @@ class BillController extends Controller
         $company = currentCompanyModel();
         $companyId = $company->id;
         
+        //Agrega un control para que los usuarios no descarguen el libro muchas veces seguidas
+        $cachekey = "throttle-librocompras-$companyId";
+        if ( Cache::has($cachekey) ) {
+            return back()->withError('Debe esperar 10s entre descargas de Libro de Compras');
+        }
+        Cache::put($cachekey, true, 10);
+        
         $count = DB::select( DB::raw("
                 select count(i.id) as c from bill_items i, bills b
                 where i.year = $year
@@ -653,35 +660,39 @@ class BillController extends Controller
                 AND hide_from_taxes = 0
                 AND b.company_id = $companyId") )[0]->c;
         
-        if($count < 10000){
-            //Busca todos los que aun no tienen el IVA calculado, lo calcula y lo guarda
-            $query = BillItem::query()
-            ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
-            ->where('year', $year)
-            ->where('month', $month)
-            ->where('iva_amount', '>', 0)
-            ->where('iva_acreditable', 0)
-            ->where('iva_gasto', 0)
-            ->whereHas('bill', function ($query) use ($companyId){
-                $query->where('company_id', $companyId)
-                ->where('is_void', false)
-                ->where('is_authorized', true)
-                ->where('is_code_validated', true)
-                ->where('accept_status', '!=', 3)
-                ->where('hide_from_taxes', false);
-            });
-            $billItems = $query->get();
-            foreach($billItems as $item){
-                  $item->calcularAcreditablePorLinea();
-            }
-            if( $companyId == 1110 ){
-                return Excel::download(new LibroComprasExportSM($year, $month, $companyId), 'libro-compras.xlsx');
-            }
-            return Excel::download(new LibroComprasExport($year, $month, $companyId), 'libro-compras.xlsx');
+        //Busca todos los que aun no tienen el IVA calculado, lo calcula y lo guarda
+        $query = BillItem::query()
+        ->with(['bill', 'bill.provider', 'productCategory', 'ivaType'])
+        ->where('year', $year)
+        ->where('month', $month)
+        ->where('iva_amount', '>', 0)
+        ->where('iva_acreditable', 0)
+        ->where('iva_gasto', 0)
+        ->whereHas('bill', function ($query) use ($companyId){
+            $query->where('company_id', $companyId)
+            ->where('is_void', false)
+            ->where('is_authorized', true)
+            ->where('is_code_validated', true)
+            ->where('accept_status', '!=', 3)
+            ->where('hide_from_taxes', false);
+        });
+        $billItems = $query->get();
+        foreach($billItems as $item){
+              $item->calcularAcreditablePorLinea();
+        }
+        
+        if( $companyId == 1110 ){
+            $export = new LibroComprasExportSM($year, $month, $companyId);
         }else{
-            $user = auth()->user();
-            GenerateBookReport::dispatch('BILL', $user, $company, $year, $month)->onQueue('default');
-            return back()->withMessage('Su libro de compras es muy grande, en unos minutos será enviado a su correo electrónico: ' . $user->email );
+            $export = new LibroComprasExport($year, $month, $companyId);
+        }
+        
+        
+        if($count < 10000){
+            return Excel::download($export, 'libro-compras.xlsx');
+        }else{
+            $excelFile = $export->getLightExcel();
+            return $excelFile;
         }
     }
     

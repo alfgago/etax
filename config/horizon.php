@@ -171,9 +171,9 @@ return [
                 'connection' => 'redis',
                 'queue' => ['invoicing'],
                 'balance' => 'simple',
-                'processes' => 3,
-                'minProcesses' => 3,
-                'maxProcesses' => 3,
+                'processes' => 2,
+                'minProcesses' => 2,
+                'maxProcesses' => 2,
                 'tries' => 1,
             ],
             'sendbulk-supervisor' => [

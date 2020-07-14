@@ -1281,6 +1281,13 @@ class InvoiceController extends Controller
         $company = currentCompanyModel();
         $companyId = $company->id;
         
+        //Agrega un control para que los usuarios no descarguen el libro muchas veces seguidas
+        $cachekey = "throttle-libroventas-$companyId";
+        if ( Cache::has($cachekey) ) {
+            return back()->withError('Debe esperar 10s entre descargas de Libro de Ventas');
+        }
+        Cache::put($cachekey, true, 10);
+        
         $count = DB::select( DB::raw("
                 select count(i.id) as c from invoice_items i, invoices b
                 where i.year = $year
@@ -1291,16 +1298,18 @@ class InvoiceController extends Controller
                 AND b.is_code_validated = 1
                 AND hide_from_taxes = 0
                 AND b.company_id = $companyId") )[0]->c;
-
-        if($count < 25000){
-            if( $companyId == 1110 ){
-                return Excel::download(new LibroVentasExportSM($year, $month, $companyId), 'libro-ventas.xlsx');
-            }
-            return Excel::download(new LibroVentasExport($year, $month, $companyId), 'libro-ventas.xlsx');
+        
+        if( $companyId == 1110 ){
+            $export = new LibroVentasExportSM($year, $month, $companyId);
         }else{
-            $user = auth()->user();
-            GenerateBookReport::dispatch('INVOICE', $user, $company, $year, $month, $count);
-            return back()->withMessage('Su libro de ventas es muy grande, en unos minutos será enviado a su correo electrónico: ' . $user->email );
+            $export = new LibroVentasExport($year, $month, $companyId);
+        }
+        
+        if($count < 25000){
+            return Excel::download($export, 'libro-ventas.xlsx');
+        }else{
+            $excelFile = $export->getLightExcel();
+            return $excelFile;
         }
     }
 
