@@ -1605,14 +1605,13 @@ class CalculatedTax extends Model
             $determinacion['impuestoOperacionesGravadas'] = $this->total_invoice_iva;
             $determinacion['totalCreditosPeriodo'] = $this->iva_deducible_operativo;
             $determinacion['devolucionIva'] = $this->iva_devuelto;
+            
+            $balanceOperativoSinAnteriores = $this->balance_operativo < 0 ? ($this->balance_operativo + $this->saldo_favor_anterior) : ($this->balance_operativo + $this->saldo_favor_anterior);
+            //$this->iva_por_cobrar = $balanceOperativo < 0 ? abs($balanceOperativo) : 0;
+            //$this->iva_por_pagar = $balanceOperativo > 0 ? $balanceOperativo : 0;
 
-            //$balanceOperativo = $this->balance_operativo < 0 ? ($this->balance_operativo + $this->saldo_favor_anterior) : ($this->balance_operativo - $this->saldo_favor_anterior);
-            $balanceOperativo = $this->balance_operativo < 0 ? ($this->balance_operativo - $this->saldo_favor_anterior) : ($this->balance_operativo + $this->saldo_favor_anterior);
-            $this->iva_por_cobrar = $balanceOperativo < 0 ? abs($balanceOperativo) : 0;
-            $this->iva_por_pagar = $balanceOperativo > 0 ? $balanceOperativo : 0;
-
-            $determinacion['saldoFavorPeriodo'] = $this->iva_por_cobrar;
-            $determinacion['saldoDeudorPeriodo'] = $this->iva_por_pagar;
+            $determinacion['saldoFavorPeriodo'] = $balanceOperativoSinAnteriores < 0 ? abs($balanceOperativoSinAnteriores) : 0;;
+            $determinacion['saldoDeudorPeriodo'] = $balanceOperativoSinAnteriores > 0 ? $balanceOperativoSinAnteriores : 0;
 
             if ($this->month != 12) {
                 $saldoFavorFinal = $this->iva_por_cobrar;
