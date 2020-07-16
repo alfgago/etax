@@ -12,6 +12,12 @@
       {
         $allow = false; 
       }
+      
+      $mh = $bill->haciendaResponse;
+      $printMH = false;
+      if( isset($mh) ){
+        $printMH = $mh->mensaje == 1 ? "Aceptada" : "Rechazada";
+      }
 ?>
       @if($allow)
       
@@ -45,7 +51,7 @@
     <a href="/facturas-recibidas/download-pdf/{{ $bill->id }}" title="Descargar PDF"class="btn btn-primary btn-agregar m-0" style="background: #d28923; border-color: #d28923; font-size: 0.85em;" download > 
       <i class="fa fa-file-pdf-o" aria-hidden="true"></i> Descargar PDF
     </a>
-    
+
 @else
   <div style="font-size: 0.9rem;" class="descripcion mb-2">
     Aceptación no disponible.
@@ -55,9 +61,18 @@
       <i class="fa fa-file-pdf-o" aria-hidden="true"></i> Descargar PDF
     </a>
     <br>
-    <a href="/facturas-recibidas/download-mh/{{ $bill->id }}" title="Descargar MH"class="btn btn-primary btn-agregar m-0" style="background: #2379d2; border-color: #2379d2; font-size: 0.75em; margin-top: .25rem !important;"  > 
-      <i class="fa fa-file-text-o" aria-hidden="true"></i> Descargar Respuesta
+    <a href="/facturas-recibidas/download-xml/{{ $bill->id }}" title="Descargar XML"class="btn btn-success btn-agregar m-0" style="background: #2379d2; border-color: #2379d2; font-size: 0.75em; margin-top: .25rem !important;"  > 
+      <i class="fa fa-file-text-o" aria-hidden="true"></i> Descargar XML
     </a>
     
   </div>
+@endif
+
+<br>
+@if( $printMH )
+  <a href="/facturas-recibidas/download-mh/{{ $bill->id }}" title="Descargar MH"class="btn btn-primary btn-agregar m-0" style="background: #2379d2; border-color: #2379d2; font-size: 0.75em; margin-top: .25rem !important;"  > 
+    <i class="fa fa-file-text-o" aria-hidden="true"></i> Descargar Respuesta ({{ $printMH }})
+  </a>
+@else
+  MH no recibido
 @endif

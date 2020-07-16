@@ -99,6 +99,14 @@ class BillUtils
 	        }
         }
         
+        if( !$file ){
+            //Si no la encontró, la busca en ventas como si fuera una FEC
+            $path = 'empresa-' . $company->id_number . "/facturas_ventas/$bill->year/$bill->month/$bill->document_key.xml";
+	        if ( Storage::exists($path)) {
+	          $file = Storage::get($path);
+	        }
+        }
+        
         return $file;
     }
     
