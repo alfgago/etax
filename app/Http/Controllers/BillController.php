@@ -1160,7 +1160,8 @@ class BillController extends Controller
         ->where('is_void', false)
         ->where('is_authorized', false)
         ->where('is_totales', false)
-        ->with('provider');
+        ->with('provider')
+        ->with('haciendaResponse');
         
         return datatables()->eloquent( $query )
             ->orderColumn('reference_number', '-reference_number $1')

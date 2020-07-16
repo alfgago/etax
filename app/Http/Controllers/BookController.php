@@ -141,7 +141,7 @@ class BookController extends Controller
         }
         if($bloqueo > 0){
             $retorno = array(
-                "cierre" => $cierre,
+                "cierre" => $book,
                 "bloqueo" => $bloqueo,
                 "invoices" => $invoices,
                 "bills" => $bills,
