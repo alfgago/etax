@@ -5,6 +5,7 @@ namespace App\Utils;
 
 use App\Company;
 use App\Bill;
+use App\Invoice;
 use App\HaciendaResponse;
 use App\Variables;
 use Carbon\Carbon;
@@ -101,10 +102,11 @@ class BillUtils
         
         if( !$file ){
             //Si no la encontró, la busca en ventas como si fuera una FEC
-            $path = 'empresa-' . $company->id_number . "/facturas_ventas/$bill->year/$bill->month/$bill->document_key.xml";
-	        if ( Storage::exists($path)) {
-	          $file = Storage::get($path);
-	        }
+            $invoice = Invoice::where('company_id',$company->id_number)
+                        ->where('document_number',$bill->document_number)
+                        ->first();
+            $invoiceUtils = new InvoiceUtils();
+            $file = $invoiceUtils->downloadXml($invoice,$company);
         }
         
         return $file;
@@ -132,6 +134,15 @@ class BillUtils
 	        if ( Storage::exists($path)) {
 	          $file = Storage::get($path);
 	        }
+        }
+        
+        if( !$file ){
+            //Si no la encontró, la busca en ventas como si fuera una FEC
+            $invoice = Invoice::where('company_id',$company->id_number)
+                        ->where('document_number',$bill->document_number)
+                        ->first();
+            $invoiceUtils = new InvoiceUtils();
+            $file = $invoiceUtils->downloadXmlAceptacion($invoice,$company);
         }
         
         return $file;
