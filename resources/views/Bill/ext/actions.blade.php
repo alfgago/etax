@@ -68,8 +68,8 @@
               <i class="fa fa-file-text-o" aria-hidden="true"></i> <span class="toggle-item-text">Descargar XML</span>
             </a>
             
-            <a href="/facturas-recibidas/download-xml-a/{{ $data->id }}" title="Descargar XML Aceptación" class="text-info mr-2 dropdown-item"> 
-              <i class="fa fa-file-text-o" aria-hidden="true"></i> <span class="toggle-item-text">Descargar XML Aceptación</span>
+            <a href="/facturas-recibidas/download-mh/{{ $data->id }}" title="Descargar Respuesta Hacienda" class="text-info mr-2 dropdown-item"> 
+              <i class="fa fa-file-text-o" aria-hidden="true"></i> <span class="toggle-item-text">Descargar Respuesta Hacienda</span>
             </a>
         
             <form id="hidefromtaxes-form-{{  $data->id }}" class="block-form dropdown-item" method="POST" action="/facturas-recibidas/switch-ocultar/{{ $data->id }}" >

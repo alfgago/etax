@@ -1682,6 +1682,9 @@ class BillController extends Controller
         return redirect('/facturas-recibidas')->withMessage('La factura ha sido restaurada satisfactoriamente.');
     }  
     
+    /**
+     * Descarga XML original 
+     */
     public function downloadXml($id) {
         $bill = Bill::findOrFail($id);
         $this->authorize('update', $bill);
@@ -1705,7 +1708,38 @@ class BillController extends Controller
         ];
         return response($file, 200, $headers);
     }
+     
     
+    /**
+     * Descarga XML de aceptación 
+     */
+    public function downloadXmlAceptacion($id) {
+        $bill = Bill::findOrFail($id);
+        $this->authorize('update', $bill);
+
+        $billUtils = new BillUtils();
+        $file = $billUtils->downloadXmlAceptacion( $bill, currentCompanyModel() );
+        $filename = $bill->document_key . '.xml';
+        if( ! $bill->document_key ) {
+            $filename = $bill->document_number . '-' . $bill->provider_id . '.xml';
+        }
+
+        if(!$file) {
+            return redirect()->back()->withError('No se encontró el XML aceptación. Por favor contacte a soporte.');
+        }
+
+        $headers = [
+            'Content-Type' => 'application/xml',
+            'Content-Description' => 'File Transfer',
+            'Content-Disposition' => "attachment; filename={$filename}",
+            'filename'=> $filename
+        ];
+        return response($file, 200, $headers);
+    }
+    
+    /**
+     * Descarga XML de respuesta 
+     */
     public function downloadXmlRespuesta($id) {
         $bill = Bill::findOrFail($id);
         $this->authorize('update', $bill);
