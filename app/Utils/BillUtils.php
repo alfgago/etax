@@ -60,13 +60,22 @@ class BillUtils
     {
         if($isResponse){
             $response = HaciendaResponse::where('bill_id', $bill->id)->first();
-                if($response){
+            if($response){
                 $path = $response->s3url;
                 if ( Storage::exists($path)) {
     	          $file = Storage::get($path);
     	          return $file;
     	        }
             }else{
+                //Si no la encontró, la busca en ventas como si fuera una FEC
+                $invoice = Invoice::where('company_id',$company->id)
+                            ->where('document_number',$bill->document_number)
+                            ->first();
+                if($invoice){
+                    $invoiceUtils = new InvoiceUtils();
+                    $file = $invoiceUtils->downloadXml($invoice,$company);
+                    return $file;
+                }
                 return false;
             }
         }
