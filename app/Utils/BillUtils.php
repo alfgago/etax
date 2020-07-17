@@ -102,11 +102,13 @@ class BillUtils
         
         if( !$file ){
             //Si no la encontró, la busca en ventas como si fuera una FEC
-            $invoice = Invoice::where('company_id',$company->id_number)
+            $invoice = Invoice::where('company_id',$company->id)
                         ->where('document_number',$bill->document_number)
                         ->first();
-            $invoiceUtils = new InvoiceUtils();
-            $file = $invoiceUtils->downloadXml($invoice,$company);
+            if($invoice){
+                $invoiceUtils = new InvoiceUtils();
+                $file = $invoiceUtils->downloadXml($invoice,$company);
+            }
         }
         
         return $file;
@@ -138,11 +140,13 @@ class BillUtils
         
         if( !$file ){
             //Si no la encontró, la busca en ventas como si fuera una FEC
-            $invoice = Invoice::where('company_id',$company->id_number)
+            $invoice = Invoice::where('company_id',$company->id)
                         ->where('document_number',$bill->document_number)
                         ->first();
-            $invoiceUtils = new InvoiceUtils();
-            $file = $invoiceUtils->downloadXmlAceptacion($invoice,$company);
+            if($invoice){
+                $invoiceUtils = new InvoiceUtils();
+                $file = $invoiceUtils->downloadXmlAceptacion($invoice,$company);
+            }
         }
         
         return $file;
