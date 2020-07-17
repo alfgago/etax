@@ -273,91 +273,127 @@
         </tr>
     </table>
     <table width="100%" style="margin-top: 10px">
-    <tr class="heading">
-        <td class="tb-header">
-            Código
-        </td>
-
-        <td class="tb-header">
-            Cantidad
-        </td>
-        <td class="tb-header">
-            Unidad medida
-        </td>
-        <td class="tb-header">
-            Descripción producto/servicio
-        </td>
-        <td class="tb-header">
-            Precio unitario
-        </td>
-        <td class="tb-header">
-            Descuento
-        </td>
-        <td class="tb-header">
-            Subtotal
-        </td>
-        <td class="tb-header">
-            % IVA
-        </td>
-        <td class="tb-header">
-            Monto de impuesto
-        </td>
-
-    </tr>
-    <?php
-        $invoiceUtils = new \App\Utils\InvoiceUtils();
-        $requestDetails = $invoiceUtils->setDetails43($data_invoice->items);
-        $requestData = $invoiceUtils->setInvoiceData43($data_invoice, $requestDetails, false, false);
- 
-        $totalServiciosGravados = $requestData['servgravados'] ?? 0;
-        $totalServiciosExentos = $requestData['servexentos'] ?? 0;
-        $totalServiciosExonerados = $requestData['servexonerados'] ?? 0;
-        $totalMercaderiasGravadas = $requestData['mercgravados'] ?? 0;
-        $totalMercaderiasExentas = $requestData['mercexentos'] ?? 0;
-        $totalMercaderiasExonerados = $requestData['mercexonerados'] ?? 0;
-        $totalDescuentos = $requestData['totdescuentos'] ?? 0;
-        $totalImpuestos = $requestData['totimpuestos'] ?? 0;
-        $totalIvaDevuelto = $requestData['totalivadevuelto'] ?? 0;
-        $totalGravado = $requestData['totgravado'] ?? 0;
-        $totalExento = $requestData['totexento'] ?? 0;
-        $totalExonerados = $requestData['totexonerados'] ?? 0;
-        $totalVenta = $requestData['totventa'] ?? 0;
-        $totalNeta = $requestData['totventaneta'] ?? 0;
-        $totalComprobante = $requestData['totcomprobante'] ?? 0;
-    ?>
-    @foreach($data_invoice->items as $item)
-        <tr class="item">
-            <td>
-                {{$item->code ?? ''}}
+        <tr class="heading">
+            <td class="tb-header">
+                Código
             </td>
-
-            <td>
-                {{$item->item_count ?? ''}}
+    
+            <td class="tb-header">
+                Cantidad
             </td>
-            <td>
-                {{$item->measure_unit ?? ''}}
+            <td class="tb-header">
+                Unidad medida
             </td>
-            <td>
-                {{$item->name ?? ''}}
+            <td class="tb-header">
+                Descripción producto/servicio
             </td>
-            <td>
-                {{$item->unit_price ? number_format($item->unit_price, 2) : '0'}}
+            <td class="tb-header">
+                Precio unitario
             </td>
-            <td>
-                {{$item->discount ? number_format($item->discount, 0) : '0'}}{{isset($item->discount_type) ? $item->discount_type == '01' ? '%' : 'monto': ''}}
+            <td class="tb-header">
+                Descuento
             </td>
-            <td>
-                {{$item->subtotal ? number_format($item->subtotal, 2) : ''}}
+            <td class="tb-header">
+                Subtotal
             </td>
-            <td>
-                {{$item->iva_percentage}}%
+            <td class="tb-header">
+                % IVA
             </td>
-            <td>
-                {{$item->iva_amount ? number_format($item->iva_amount, 2) : '0'}}
+            <td class="tb-header">
+                Monto de impuesto
             </td>
+    
         </tr>
-    @endforeach
-</table>
+        <?php
+            $invoiceUtils = new \App\Utils\InvoiceUtils();
+            $requestDetails = $invoiceUtils->setDetails43($data_invoice->items);
+            $requestData = $invoiceUtils->setInvoiceData43($data_invoice, $requestDetails, false, false);
+     
+            $totalServiciosGravados = $requestData['servgravados'] ?? 0;
+            $totalServiciosExentos = $requestData['servexentos'] ?? 0;
+            $totalServiciosExonerados = $requestData['servexonerados'] ?? 0;
+            $totalMercaderiasGravadas = $requestData['mercgravados'] ?? 0;
+            $totalMercaderiasExentas = $requestData['mercexentos'] ?? 0;
+            $totalMercaderiasExonerados = $requestData['mercexonerados'] ?? 0;
+            $totalDescuentos = $requestData['totdescuentos'] ?? 0;
+            $totalImpuestos = $requestData['totimpuestos'] ?? 0;
+            $totalIvaDevuelto = $requestData['totalivadevuelto'] ?? 0;
+            $totalOtrosCargos = $requestData['totalotroscargos'] ?? 0;
+            $totalGravado = $requestData['totgravado'] ?? 0;
+            $totalExento = $requestData['totexento'] ?? 0;
+            $totalExonerados = $requestData['totexonerados'] ?? 0;
+            $totalVenta = $requestData['totventa'] ?? 0;
+            $totalNeta = $requestData['totventaneta'] ?? 0;
+            $totalComprobante = $requestData['totcomprobante'] ?? 0;
+        ?>
+        @foreach($data_invoice->items as $item)
+            <tr class="item">
+                <td>
+                    {{$item->code ?? ''}}
+                </td>
+    
+                <td>
+                    {{$item->item_count ?? ''}}
+                </td>
+                <td>
+                    {{$item->measure_unit ?? ''}}
+                </td>
+                <td>
+                    {{$item->name ?? ''}}
+                </td>
+                <td>
+                    {{$item->unit_price ? number_format($item->unit_price, 2) : '0'}}
+                </td>
+                <td>
+                    {{$item->discount ? number_format($item->discount, 0) : '0'}}{{isset($item->discount_type) ? $item->discount_type == '01' ? '%' : 'monto': ''}}
+                </td>
+                <td>
+                    {{$item->subtotal ? number_format($item->subtotal, 2) : ''}}
+                </td>
+                <td>
+                    {{$item->iva_percentage}}%
+                </td>
+                <td>
+                    {{$item->iva_amount ? number_format($item->iva_amount, 2) : '0'}}
+                </td>
+            </tr>
+        @endforeach
+    </table>
+    
+    @if($totalOtrosCargos > 0)
+        <div style="font-size: 12px; margin-bottom: 0; margin-top: 11px;">Otros Cargos:</div>
+        <table width="100%" style="margin-top: 10px">
+            <tr class="heading">
+                <td class="tb-header">
+                    #
+                </td>
+        
+                <td class="tb-header">
+                    Tipo
+                </td>
+                <td class="tb-header">
+                    Receptor
+                </td>
+                <td class="tb-header">
+                    Detalle
+                </td>
+                <td class="tb-header">
+                    Monto del cargo
+                </td>
+        
+            </tr>
+            @foreach ( $data_invoice->otherCharges as $item )
+               <tr class="item item-ot">
+                  <td><span class="numero-fila">{{ $loop->index+1 }}</span></td>
+                  <td>{{ $item->getTypeString() }}</td>
+                  <td>{{ $item->provider_id_number }} {{ $item->provider_name }}</td>
+                  <td>{{ $item->description }}</td>
+                  <td>{{ number_format($item->amount,2) }} </td>
+              </tr>
+            @endforeach
+        </table>
+    @endif
+    
     <hr class="barra" style="margin-top: 60px">
     <table width="100%" class="total">
         <thead>
@@ -438,6 +474,10 @@
                     <tr>
                         <td><b>Total IVA Devuelto</b></td>
                         <td style="text-align: right;"><span>{{ number_format($totalIvaDevuelto, 2)}}</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>Total Otros Cargos</b></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalOtrosCargos, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total comprobante</b></td>

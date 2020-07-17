@@ -73,7 +73,7 @@ class BillUtils
                             ->first();
                 if($invoice){
                     $invoiceUtils = new InvoiceUtils();
-                    $file = $invoiceUtils->downloadXml($invoice,$company);
+                    $file = $invoiceUtils->downloadXmlAceptacion($invoice,$company);
                     return $file;
                 }
                 return false;
