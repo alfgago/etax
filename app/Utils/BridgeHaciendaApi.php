@@ -414,17 +414,21 @@ class BridgeHaciendaApi
             if($retry && $invoice->hacienda_status == '03'){
                 return $retry;
             }
-        }
-        /*$lista = ['1205','1305','1105','1405','0905','0805','1005','1505','1605','1905','1805','1705','0705'];
-        foreach($lista as $rep){
-            $newKey = substr_replace($documentKey, $rep, 3, 4);
-            $invoice->document_key = $newKey;
-            Log::debug('Intentando con nueva llave: '.$newKey);
-            $retry = $this->queryHacienda($invoice, $token, $company, false);
-            if($retry && $invoice->hacienda_status == '03'){
-                return $retry;
+            
+            $lista = [-2,-1,1,2];
+            foreach($lista as $num){
+                $newDate = $apiResponseDate->copy()->addDays($num);
+                $shortDate = str_pad($newDate->day, 2, "0", STR_PAD_LEFT) . str_pad($newDate->month, 2, "0", STR_PAD_LEFT);
+                $newKey = substr_replace($documentKey, $shortDate, 3, 4);
+                $invoice->document_key = $newKey;
+                //El primero en devolver un archivo, lo devuelve
+                Log::debug('Intentando con nueva llave: '.$newKey);
+                $retry = $this->queryHacienda($invoice, $token, $company, false);
+                if($retry && $invoice->hacienda_status == '03'){
+                    return $retry;
+                }
             }
-        }*/
+        }
         return false;
     }
 

@@ -18,7 +18,5 @@ bk.env
 .phpunit.result.cache
 .DS_Store
 /docker/.DS_Store
-.c9/
-.c9/.*
 
 /storage/framework/*
