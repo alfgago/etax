@@ -340,9 +340,9 @@ class InvoiceAPIController extends Controller
             //La idea de esto es que no puedan enviar spam de requests            
             $throttleKey = "api-consultar-throttle-$request->empresa-$user->id";
             if ( Cache::has($throttleKey) ) {
-                return $this->createResponse('400', 'ERROR', 'Limite: No se permite enviar mas de una solicitud de consulta cada 5 segundos.');
+                return $this->createResponse('400', 'ERROR', 'Limite: No se permite enviar mas de una solicitud por segundo.');
             }
-            Cache::put($throttleKey, true, 5);
+            Cache::put($throttleKey, true, 1);
             
             if ($tokenApi !== false && !empty($invoice->xmlHacienda->xml) && !empty($invoice)) {
                 $result = $apiHacienda->queryHacienda($invoice, $tokenApi, $company, false);

@@ -12,6 +12,7 @@ use App\Bill;
 use App\Http\Controllers\CacheController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @group Controller - Libro contable
@@ -109,9 +110,9 @@ class BookController extends Controller
     }
     
     //validar si el mes puede ser cerrado.
-    public function validar($cierre){
-        $book = Book::join('calculated_taxes','calculated_taxes.id','books.calculated_tax_id')
-            ->where('books.id',$cierre)->first();
+    public function validar($id){
+        $book = CalculatedTax::findOrFail( $id );
+            
         $invoices = Invoice::where(function ($query) use($book) {
             $query->where(['company_id'=> $book->company_id,'month'=> $book->month,'year'=> $book->year,'is_authorized' => true])
                 ->where('commercial_activity', null);
@@ -140,7 +141,7 @@ class BookController extends Controller
         }
         if($bloqueo > 0){
             $retorno = array(
-                "cierre" => $cierre,
+                "cierre" => $book,
                 "bloqueo" => $bloqueo,
                 "invoices" => $invoices,
                 "bills" => $bills,

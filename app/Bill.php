@@ -557,6 +557,12 @@ class Bill extends Model
               $bill->provider_zip = $zipProveedor;
               $bill->provider_phone = $telefonoProveedor;
               
+              //Revisa si quiere recibir o no la factura. Se hizo especificamente para NW, que querian bloquear facturas de Spoon
+              if( !$bill->allowBillProvider() ){
+                Log::warning("Bloquea factura de proveedor. $bill->provider_id_number para empresa $bill->company_id");
+                return false;
+              }
+              
         //End DATOS PROVEEDOR
         
         //El subtotal y iva_amount inicia en 0, lo va sumando conforme recorre las lineas.
@@ -1275,6 +1281,15 @@ class Bill extends Model
       
     }
     
+    //Metodo para saber si permite facturas de un proveedor en especifico.
+    public function allowBillProvider(){
+      try{
+        if($this->company_id == 4055 && $this->provider_id_number == "3101038818"){
+          return false;
+        }
+      }catch(\Throwable $e){}
+      return true;
+    }
     
     
 }

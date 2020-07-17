@@ -887,13 +887,13 @@ toastr.options = {
       $('.item-factura-form input[type=checkbox]').prop('checked', false);
       $('.otros-factura-form input, .otros-factura-form select').val('');
       $('.otros-factura-form input[type=checkbox]').prop('checked', false);
-         $('#exoneradalinea').val(0);
+      $('#exoneradalinea').val(0);
       $('#typeDocument').val(typeDocument);
       $('#numeroDocumento').val(numeroDocumento);
       $('#exoneration_date').val(exoneration_date);
       $('#porcentajeExoneracion').val(porcentajeExoneracion);
-      $('#montoTotalLinea').val(montoTotalLinea);
       $('#nombreInstitucion').val(nombreInstitucion);
+      $('#montoTotalLinea').val(montoTotalLinea);
       
       var docType = $('#document_type').val();
       if( ($('#is-compra').length || docType == '08') && !$('#is-manual').length ){
@@ -1198,6 +1198,7 @@ toastr.options = {
         if( codigosConExoneracion.includes( $('#tipo_iva').val() ) || construccion ){
           hasExoneracion = true;
         }
+        $('#porcentajeExoneracion').val('13');
 
         if(hasExoneracion){
             $(".exoneracion-cont").show();
@@ -1239,6 +1240,10 @@ toastr.options = {
             $('#divMontoTotalLinea').attr('hidden', true);
             $('#divImpuestoNeto').attr('hidden', true);
             $('#exoneradalinea').val(0);
+            $('#typeDocument').val('');
+            $('#numeroDocumento').val('');
+            $('#montoExoneracion').val(0);
+            $('#nombreInstitucion').val('');
         }
     }
 
@@ -1354,6 +1359,7 @@ toastr.options = {
         if( codigosConExoneracion.includes( $('#tipo_iva').val() ) || construccion ){
           hasExoneracion = true;
         }
+        $('#porcentajeExoneracion').val('13');
 
         if(hasExoneracion){
             $(".exoneracion-cont").show();
@@ -1395,6 +1401,11 @@ toastr.options = {
             $('#divMontoTotalLinea').attr('hidden', true);
             $('#divImpuestoNeto').attr('hidden', true);
             $('#exoneradalinea').val(0);
+            
+            $('#typeDocument').val('');
+            $('#numeroDocumento').val('');
+            $('#montoExoneracion').val(0);
+            $('#nombreInstitucion').val('');
         }
     }
 

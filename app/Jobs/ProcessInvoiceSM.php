@@ -69,7 +69,7 @@ class ProcessInvoiceSM implements ShouldQueue
                     }
                     $invoice->save();
                     if ($company->atv_validation ) {
-                        sleep(4);
+                        sleep(7);
                         if ($invoice->hacienda_status == '01' && ($invoice->document_type == ('01' || '04' || '08' || '09')) && $invoice->resend_attempts < 6) {
                             if ($invoice->xml_schema == 43) {
                                 $requestDetails = $invoiceUtils->setDetails43($invoice->items);

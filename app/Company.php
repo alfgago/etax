@@ -213,12 +213,11 @@ class Company extends Model {
                               ->where('month', $month)
                               ->where('year', $year)
                               ->where('is_final', true)
-                              ->where('is_closed', true)
                               ->value('saldo_favor');
         //Si el saldo es mayor que nulo, lo pone en 0.                     
         $lastBalance = $lastBalance ? $lastBalance : 0;
       
-        if( $month == 6 ) {
+        if( $month == 6 && $year == 2019 ) {
             return $this->saldo_favor_2018;
         }
       }else{
