@@ -18,6 +18,8 @@
       if( isset($mh) ){
         $printMH = $mh->mensaje == 1 ? "Aceptada" : "Rechazada";
       }
+      
+      $user = auth()->user();
 ?>
       @if($allow)
       
@@ -39,11 +41,11 @@
       </a>
     </form>
 
-    <form id="delete-form-{{ $bill->id }}" class="inline-form" method="POST" action="/facturas-recibidas/confirmar-autorizacion/{{ $bill->id }}" >
+    <form id="reject-form-{{ $bill->id }}" class="inline-form" method="POST" action="/facturas-recibidas/confirmar-autorizacion/{{ $bill->id }}" >
       @csrf
       @method('patch')
       <input type="hidden" name="autorizar" value="0">
-      <a href="#" title="Rezachar" class="btn btn-primary btn-agregar m-0" style="background: #d22346; border-color: #d22346; font-size: 0.85em;" onclick="confirmDelete({{ $bill->id }});">
+      <a href="#" title="Rezachar" class="btn btn-primary btn-agregar m-0" style="background: #d22346; border-color: #d22346; font-size: 0.85em;" onclick="confirmReject({{ $bill->id }});">
         Rechazar
       </a>
     </form>
@@ -54,16 +56,26 @@
 
 @else
   <div style="font-size: 0.9rem;" class="descripcion mb-2">
-    Aceptación no disponible.
+    Correo: {{ $bill->email_reception ?? "No indica"  }}
     <br>
     
     <a href="/facturas-recibidas/download-pdf/{{ $bill->id }}" title="Descargar PDF"class="btn btn-primary btn-agregar m-0" style="background: #d28923; border-color: #d28923; font-size: 0.75em;margin-top: .25rem !important;" download > 
       <i class="fa fa-file-pdf-o" aria-hidden="true"></i> Descargar PDF
     </a>
-    <br>
+    
     <a href="/facturas-recibidas/download-xml/{{ $bill->id }}" title="Descargar XML"class="btn btn-success btn-agregar m-0" style="background: #2379d2; border-color: #2379d2; font-size: 0.75em; margin-top: .25rem !important;"  > 
       <i class="fa fa-file-text-o" aria-hidden="true"></i> Descargar XML
     </a>
+    
+    @if( $user->email=='darivera@corbana.co.cr' || $user->email=='corbana@etaxcr.com' )
+    <form id="delete-form-{{  $bill->id }}" class="inline-form" method="POST" action="/facturas-recibidas/{{  $bill->id }}" >
+      @csrf
+      @method('delete')
+      <a href="#" title="Eliminar" class="btn btn-primary btn-agregar m-0" style="background: #d22346; border-color: #d22346; font-size: 0.75em; margin-top: .25rem !important; color:#fff !important;" onclick="confirmDelete({{ $bill->id }});">
+        <i class="fa fa-trash-o" aria-hidden="true"></i> Eliminar factura
+      </a>
+    </form>
+    @endif
     
   </div>
 @endif

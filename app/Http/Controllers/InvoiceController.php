@@ -807,7 +807,7 @@ class InvoiceController extends Controller
         $bill = new Bill();
         $bill->company_id = $company->id;
         //Datos generales y para Hacienda
-        $bill->document_type = "01";
+        $bill->document_type = "08";
         $bill->hacienda_status = "03";
         $bill->status = "02";
         $bill->payment_status = "01";
@@ -816,6 +816,9 @@ class InvoiceController extends Controller
         $bill->reference_number = $company->last_bill_ref_number + 1;
 
         $bill->setBillData($request);
+        $bill->document_type = "08";
+        $bill->hacienda_status = "03";
+        $bill->status = "02";
 
         $bill->is_code_validated = 1;
         $bill->accept_status = 1;

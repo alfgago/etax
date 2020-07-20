@@ -81,11 +81,28 @@ function confirmAuthorize( id ) {
   
 }
   
-function confirmDelete( id ) {
-  var formId = "#delete-form-"+id;
+function confirmReject( id ) {
+  var formId = "#reject-form-"+id;
   Swal.fire({
     title: '¿Está seguro que desea eliminar la factura?',
     text: "Al rechazarla, la factura se eliminará de esta lista. Este proceso no es reversible",
+    type: 'warning',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero rechazarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
+
+function confirmDelete( id ) {
+  var formId = "#delete-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea eliminar la factura',
+    text: "Este proceso la eliminará a nivel de cálculo en eTax, sin embargo no hace anulaciones ni revierte aceptaciones ante Hacienda. Usted podrá volver a importar la factura via XML o ingreso manual.",
     type: 'warning',
     showCloseButton: true,
     showCancelButton: true,
@@ -97,6 +114,7 @@ function confirmDelete( id ) {
   })
   
 }
+
     
   
 </script>
