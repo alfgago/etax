@@ -1649,7 +1649,7 @@ class BillController extends Controller
                 ->onQueue('log_queue');*/
         $bill->delete();
         
-        return redirect('/facturas-recibidas')->withMessage('La factura ha sido eliminada satisfactoriamente.');
+        return redirect()->back()->withMessage('La factura ha sido eliminada satisfactoriamente.');
     } 
     
     /**

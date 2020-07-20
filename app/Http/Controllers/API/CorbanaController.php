@@ -55,6 +55,7 @@ class CorbanaController extends Controller
             $bills = Bill::where('company_id', $company->id)
                     ->where('is_void', false)
                     ->where('status', '01')
+                    ->where('document_type', '!=', '08')
                     ->where(function($query){
                         $query->whereHas('haciendaResponse', function($q){
                             $q->where('mensaje', '1');
