@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "01cb296345be3fbeea05cda5566ce17d",
+    "content-hash": "29a09c3c28f438419a8595762662bb6b",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -3093,6 +3093,53 @@
             ],
             "description": "Flysystem adapter for the AWS S3 SDK v3.x",
             "time": "2020-02-23T13:31:58+00:00"
+        },
+        {
+            "name": "league/flysystem-ziparchive",
+            "version": "1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thephpleague/flysystem-ziparchive.git",
+                "reference": "c6d7c7ea23a57ee802d533ab9eb9f19dd5c5fc45"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thephpleague/flysystem-ziparchive/zipball/c6d7c7ea23a57ee802d533ab9eb9f19dd5c5fc45",
+                "reference": "c6d7c7ea23a57ee802d533ab9eb9f19dd5c5fc45",
+                "shasum": ""
+            },
+            "require": {
+                "ext-zip": "*",
+                "league/flysystem": "~1.0",
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "0.9.*",
+                "phpunit/phpunit": "~4.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "League\\Flysystem\\ZipArchive\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Frank de Jonge",
+                    "email": "info@frenky.net"
+                }
+            ],
+            "description": "Flysystem adapter for ZipArchive's",
+            "time": "2016-12-20T08:36:16+00:00"
         },
         {
             "name": "league/oauth2-server",
@@ -10123,6 +10170,65 @@
                 "laravel-dump-server"
             ],
             "time": "2020-03-04T15:23:26+00:00"
+        },
+        {
+            "name": "zanysoft/laravel-zip",
+            "version": "1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zanysoft/laravel-zip.git",
+                "reference": "466663746c92154c48a2d490efc6724f9f6e9652"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zanysoft/laravel-zip/zipball/466663746c92154c48a2d490efc6724f9f6e9652",
+                "reference": "466663746c92154c48a2d490efc6724f9f6e9652",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.0|^5.0",
+                "scrutinizer/ocular": "^1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "ZanySoft\\Zip\\ZipServiceProvider"
+                    ],
+                    "aliases": {
+                        "Zip": "ZanySoft\\Zip\\ZipFacade"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ZanySoft\\Zip\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Zany Soft",
+                    "email": "info@zanysoft.co",
+                    "homepage": "http://www.zanysoft.co"
+                }
+            ],
+            "description": "ZipArchive toolbox",
+            "homepage": "http://www.zanysoft.co",
+            "keywords": [
+                "merge",
+                "multiple",
+                "unzip",
+                "zip",
+                "ziparchive"
+            ],
+            "time": "2017-10-10T03:22:41+00:00"
         }
     ],
     "aliases": [],
