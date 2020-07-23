@@ -106,6 +106,68 @@ class CorbanaController extends Controller
         
     }
     
+    public function queryBillById(Request $request) {
+        try{
+            $pCia = $request->pCia;
+            $pAct = $request->pAct;
+            $cedulaEmpresa = $this->parseCorbanaIdToCedula($pCia, $pAct);
+            $company = Company::where('id_number', $cedulaEmpresa)->first();
+            if( !isset($company) ){
+                Log::error("Corbana no encuentra empresa pCia: $pCia, pAct: $pAct, cedula: $cedulaEmpresa"); 
+                return response()->json([
+                    'mensaje' => '0 facturas',
+                    'facturas' => []
+                ], 200);
+            }
+            /* 
+            * Status 03: En el sistema de ellos.
+            * Status 01: Aún no ha sido ingresado al sistema.
+            */
+            $bills = Bill::where('company_id', $company->id)
+                    ->where('id', $request->id)
+                    ->with('items')->with('haciendaResponse')->get();
+                    
+            $billUtils = new \App\Utils\BillUtils();
+            foreach($bills as $bill){
+                $bill->status = '03'; 
+                $bill->save();
+                $pdf = $billUtils->streamPdf($bill, $company);
+                $bill->pdf64 = !empty($pdf) ? base64_encode($pdf) : null;
+                
+                $xml = $billUtils->downloadXml($bill, $company);
+                $bill->xml64 = !empty($xml) ? base64_encode($xml) : null;
+                
+                $xmlA = $billUtils->downloadXmlAceptacion($bill, $company);
+                $bill->xmlh64 = !empty($xmlA) ? base64_encode($xmlA) : null;
+                
+                $hasFiles = 0;
+                if( !empty($xml) && !empty($xmlA) && !empty($pdf) ){
+                    $hasFiles = 1;
+                }
+                $bill->has_files = $hasFiles;
+            }         
+            if(isset($bills)){
+                return response()->json([
+                    'mensaje' => $bills->count() . ' facturas',
+                    'facturas' => $bills
+                ], 200);
+            }
+        
+        }catch(\Exception $e){
+            Log::error("Error en Corbana" . $e);
+            return response()->json([
+                'mensaje' => 'Error ' . $e->getMessage(),
+                'facturas' => []
+            ], 200);
+        }
+        
+        return response()->json([
+            'mensaje' => '0 facturas',
+            'facturas' => []
+        ], 200);
+        
+    }
+    
     public function queryBillFiles(Request $request) {
         try{
             $billId = $request->pId;
