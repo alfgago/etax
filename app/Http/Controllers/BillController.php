@@ -1823,11 +1823,11 @@ class BillController extends Controller
         }
     }
     
-    public function downloadBillsZip($year) {
+    public function downloadBillsZip($year,$month) {
         $company = currentCompanyModel();
-        $path = "empresa-$company->id_number/facturas_compras/$year/";
+        $path = "empresa-$company->id_number/facturas_compras/$year/$month/";
         $fileNames = Storage::disk('s3')->allFiles($path);
-        $zipname = "xmls-compras-$company->id_number-$year.zip";
+        $zipname = "xmls-compras-$company->id_number-$year-$month.zip";
         $zip = new Filesystem(new ZipArchiveAdapter(public_path($zipname)));
         
         //Recorre los nombres de archivo dentro de AWS, y los va guardando en el zip
