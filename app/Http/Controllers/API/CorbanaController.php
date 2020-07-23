@@ -124,7 +124,7 @@ class CorbanaController extends Controller
             * Status 01: Aún no ha sido ingresado al sistema.
             */
             $bills = Bill::where('company_id', $company->id)
-                    ->where('id', $request->id)
+                    ->where('id', $request->pId)
                     ->with('items')->with('haciendaResponse')->get();
                     
             $billUtils = new \App\Utils\BillUtils();
