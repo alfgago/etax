@@ -635,6 +635,7 @@ class Bill extends Model
                   }
                 }
               }catch(\Exception $e){
+                Log::error($e);
                 if( is_array($linea['Impuesto'])){
                   $montoIva = 0;
                   $porcentajeIva = 0;

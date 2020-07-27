@@ -419,7 +419,8 @@ class InvoiceAPIController extends Controller
         return $this->createResponse('200', 'OK' , 'La factura '. $invoice->document_number . '.', new InvoiceResource($invoice));
     }
 
-    public function listInvoice(Request $request){
+    public function listInvoice(Request $request) {
+
         if(!userHasCompany($request->empresa)){
             return $this->createResponse('400', 'ERROR' , 'Empresa no autorizada.');
         }

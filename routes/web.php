@@ -175,6 +175,7 @@ Route::prefix('facturas-recibidas')->group(function() {
     Route::get('download-xml-a/{id}', 'BillController@downloadXmlAceptacion')->name('Bill.downloadXmlAceptacion');
     Route::get('download-mh/{id}', 'BillController@downloadXmlRespuesta')->name('Bill.downloadXmlRespuesta');
     Route::post('rechazar', 'BillController@reject')->name('Bill.rechazar');
+    Route::get('download-zip/{year}/{month}', 'BillController@downloadBillsZip')->name('Bill.downloadBillsZip');
 });
 
 // Rutas de Wizard

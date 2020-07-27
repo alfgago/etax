@@ -32,6 +32,8 @@ use App\Jobs\MassValidateBills;
 use App\Jobs\ProcessAcceptHacienda;
 use App\Jobs\GenerateBookReport;
 use DB;
+use League\Flysystem\Filesystem;
+use League\Flysystem\ZipArchive\ZipArchiveAdapter;
 
 /**
  * @group Controller - Facturas de compra
@@ -1649,7 +1651,7 @@ class BillController extends Controller
                 ->onQueue('log_queue');*/
         $bill->delete();
         
-        return redirect('/facturas-recibidas')->withMessage('La factura ha sido eliminada satisfactoriamente.');
+        return redirect()->back()->withMessage('La factura ha sido eliminada satisfactoriamente.');
     } 
     
     /**
@@ -1819,6 +1821,36 @@ class BillController extends Controller
             Log::error("Error consultado factura -->" .$e);
             return redirect()->back()->withErrors('Error al consultar comprobante en hacienda');
         }
+    }
+    
+    public function downloadBillsZip($year,$month) {
+        $company = currentCompanyModel();
+        $path = "empresa-$company->id_number/facturas_compras/$year/$month/";
+        $fileNames = Storage::disk('s3')->allFiles($path);
+        $zipname = "xmls-compras-$company->id_number-$year-$month.zip";
+        $zip = new Filesystem(new ZipArchiveAdapter(public_path($zipname)));
+        
+        //Recorre los nombres de archivo dentro de AWS, y los va guardando en el zip
+        foreach($fileNames as $filename){
+            $fileContent = Storage::disk('s3')->get($filename);
+            $zip->put($filename, $fileContent);
+        }
+        //Cierra el ZIP
+        $zip->getAdapter()->getArchive()->close();
+        //Lee y guarda el ZIP en S3
+        $zipFile = file_get_contents( public_path($zipname));
+        $s3zip = Storage::disk('s3')->put( "zips/".$zipname, $zipFile ); 
+        
+        //Borra el ZIP luego de guardarlo en S3
+        unlink(public_path($zipname));
+        
+        //Retorna el ZIP
+        $headers = [
+            'Content-Type' => 'application/zip',
+            'Content-Disposition' => "attachment; filename={$zipname}",
+            'filename'=> $zipname
+        ];
+        return response($zipFile, 200, $headers);
     }
     
 }

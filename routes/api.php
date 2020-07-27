@@ -52,7 +52,7 @@ Route::prefix('v1')->group(function() {
             Route::get('consultar', 'BillAPIController@getBill')->name('FacturaCompra.consultar'); // Consulta existencia de una factura por clave
             Route::get('descargar-xml/{clave}', 'BillAPIController@')->name('FacturaCompra.descargarXml'); // Descarga XML firmado. Si no existe, eTax devuelve mensaje indicando que fue emitida por otro sistema. Devuele URL temporal de S3 si nosotros lo guardamos
             Route::get('descargar-xml-respuesta/{clave}', 'BillAPIController@')->name('FacturaCompra.descargarXmlRespuesta'); // Descargar XML de respuesta. eTax lo consulta a Hacienda, si no existe indica el problema
-            Route::get('lista', 'BillAPIController@listBill')->name('FacturaCompra.lista'); // Retorna JSON paginado de 50 en 50. Con todas las facturas, sus lineas, pagina actual y cantidad total de paginas.
+            Route::post('lista', 'BillAPIController@listBill')->name('FacturaCompra.lista'); // Retorna JSON paginado de 50 en 50. Con todas las facturas, sus lineas, pagina actual y cantidad total de paginas.
             Route::get('lista-correo', 'BillAPIController@')->name('FacturaCompra.listaCorreo'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no autorizadas, sus lineas, pagina actual y cantidad total de paginas.
             Route::get('lista-no-validadas', 'BillAPIController@')->name('FacturaCompra.listaNoValidadas'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no validadas, sus lineas, pagina actual y cantidad total de paginas.
             Route::get('lista-no-aceptadas', 'BillAPIController@')->name('FacturaCompra.listaNoAceptadas'); // Retorna JSON paginado de 50 en 50. Con todas las facturas no aceptadas, sus lineas, pagina actual y cantidad total de paginas.
@@ -112,3 +112,5 @@ Route::get('corbana-query-bill-files/{pId}', 'CorbanaController@queryBillFiles')
 Route::get('corbana-query-invoice-files/{pId}', 'CorbanaController@queryInvoiceFiles');
 Route::get('corbana-usd', 'CorbanaController@getUSDRate');
 Route::get('prueba-zttp', 'CorbanaController@pruebaZttp');
+
+Route::get('corbana-getbyid/{pCia}/{pAct}/{pId}', 'CorbanaController@queryBillById');

@@ -373,7 +373,7 @@
                   @foreach ( $invoice->otherCharges as $item )
                    <tr class="otros-tabla otros-index-{{ $loop->index }}" index="{{ $loop->index }}" attr-num="{{ $loop->index }}" id="otros-tabla-{{ $loop->index }}">
                       <td><span class="numero-fila">{{ $loop->index+1 }}</span></td>
-                      <td>{{ $item->document_type }}</td>
+                      <td>{{ $item->getTypeString() }}</td>
                       <td>{{ $item->provider_id_number }} {{ $item->provider_name }}</td>
                       <td>{{ $item->description }}</td>
                       <td>{{ number_format($item->amount,2) }} </td>

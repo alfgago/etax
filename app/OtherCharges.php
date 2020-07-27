@@ -26,4 +26,27 @@ class OtherCharges extends Model
         return $this->belongsTo(Bill::class, 'bill_id');
     }
     
+    public function getTypeString()
+    {
+        $type = $this->document_type;
+        if($type == "01"){
+            return "Contribución parafiscal";
+        }else if($type == "02"){
+            return "Timbre de la Cruz Roja";
+        }else if($type == "03"){
+            return "Timbre de Benemérito Cuerpo de Bomberos de Costa Rica";
+        }else if($type == "04"){
+            return "Cobro de un tercero";
+        }else if($type == "05"){
+            return "Costos de Exportación";
+        }else if($type == "06"){
+            return "Impuesto de Servicio 10%";
+        }else if($type == "07"){
+            return "Timbre de Colegios Profesionales";
+        }else{
+            return "Otros Cargos";
+        }
+        
+    }
+    
 }

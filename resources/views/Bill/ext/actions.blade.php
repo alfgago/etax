@@ -116,14 +116,35 @@
   
   
   @else
-    <form id="accept-form-{{ $data->id }}" class="inline-form por-etax" method="POST" action="/facturas-recibidas/respuesta-aceptacion/{{ $data->id }}" >
-      @csrf
-      @method('patch')
-      <input type="hidden" name="respuesta" value="1">
-      <a href="#" title="Aceptar" class="btn btn-primary btn-agregar m-0" style="background: #15408E; font-size: 0.85em;" onclick="confirmAccept({{ $data->id }});">
-        Aceptar
-      </a>
-    </form>
+  <div class="btn-group" role="group">
+      <div class="btn-group" role="group">
+        <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Acciones
+        </button>
+        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+          <form id="accept-form-{{ $data->id }}" class=" por-etax block-form dropdown-item" method="POST" action="/facturas-recibidas/respuesta-aceptacion/{{ $data->id }}" >
+            @csrf
+            @method('patch')
+            <input type="hidden" name="respuesta" value="1">
+            <a href="#" title="Aceptar" class="text-success mr-2" onclick="confirmAccept({{ $data->id }});">
+              <i class="fa fa-check" aria-hidden="true"></i> <span class="toggle-item-text">Aceptar</span>
+            </a>
+          </form>
+                  
+          <a href="/facturas-recibidas/download-pdf/{{ $data->id }}" title="Descargar PDF" class="text-warning mr-2 dropdown-item" download > 
+            <i class="fa fa-file-pdf-o" aria-hidden="true"></i> <span class="toggle-item-text">Descargar PDF</span>
+          </a>
+          
+          <a href="/facturas-recibidas/download-xml/{{ $data->id }}" title="Descargar XML" class="text-info mr-2 dropdown-item"> 
+            <i class="fa fa-file-text-o" aria-hidden="true"></i> <span class="toggle-item-text">Descargar XML</span>
+          </a>
+          
+          <a href="/facturas-recibidas/download-mh/{{ $data->id }}" title="Descargar Respuesta Hacienda" class="text-info mr-2 dropdown-item"> 
+            <i class="fa fa-file-text-o" aria-hidden="true"></i> <span class="toggle-item-text">Descargar Respuesta Hacienda</span>
+          </a>
+        </div>
+      </div>
+    </div>
   @endif
 
 

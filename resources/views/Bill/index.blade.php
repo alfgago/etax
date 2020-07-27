@@ -195,6 +195,24 @@ function confirmEnvioAceptacion( id ) {
 
 
   
+function confirmAccept( id ) {
+  var formId = "#accept-form-"+id;
+  Swal.fire({
+    title: '¿Está seguro que desea aceptar la factura?',
+    text: "Al aceptar, se enviará el mensaje a Hacienda.",
+    type: 'info',
+    showCloseButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, quiero aceptarla'
+  }).then((result) => {
+    if (result.value) {
+      $(formId).submit();
+    }
+  })
+  
+}
+
+  
 function confirmAcceptHacienda( id ) {
   var formId = "#accepthacienda-form-"+id;
   Swal.fire({

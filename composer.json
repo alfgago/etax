@@ -26,6 +26,7 @@
         "laravel/ui": "^2.0",
         "laravelcollective/html": "^6.1",
         "league/flysystem-aws-s3-v3": "^1.0",
+        "league/flysystem-ziparchive": "^1.0",
         "lindelea/laravel-aws-elb-support": "^1.4",
         "maatwebsite/excel": "^3.1",
         "morrislaptop/laravel-queue-clear": "~1.0",

@@ -31,8 +31,8 @@ class CorbanaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles','queryInvoiceFiles','getUSDRate','pruebaZttp']] );
-        $this->middleware('CheckSubscription', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles','queryInvoiceFiles','getUSDRate','pruebaZttp']] );
+        $this->middleware('auth', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles','queryInvoiceFiles','getUSDRate','pruebaZttp','queryBillById']] );
+        $this->middleware('CheckSubscription', ['except' => ['sendInvoice','queryBills','queryInvoice','anularInvoice','aceptarRechazar','queryBillFiles','queryInvoiceFiles','getUSDRate','pruebaZttp','queryBillById']] );
     }
     
     public function queryBills(Request $request) {
@@ -55,6 +55,7 @@ class CorbanaController extends Controller
             $bills = Bill::where('company_id', $company->id)
                     ->where('is_void', false)
                     ->where('status', '01')
+                    ->where('document_type', '!=', '08')
                     ->where(function($query){
                         $query->whereHas('haciendaResponse', function($q){
                             $q->where('mensaje', '1');
@@ -62,6 +63,68 @@ class CorbanaController extends Controller
                         ->orWhereIn('provider_id_number', ['4000042138', '3101000046', '4000042139'] );
                     })
                     ->limit(20)
+                    ->with('items')->with('haciendaResponse')->get();
+                    
+            $billUtils = new \App\Utils\BillUtils();
+            foreach($bills as $bill){
+                $bill->status = '03'; 
+                $bill->save();
+                $pdf = $billUtils->streamPdf($bill, $company);
+                $bill->pdf64 = !empty($pdf) ? base64_encode($pdf) : null;
+                
+                $xml = $billUtils->downloadXml($bill, $company);
+                $bill->xml64 = !empty($xml) ? base64_encode($xml) : null;
+                
+                $xmlA = $billUtils->downloadXmlAceptacion($bill, $company);
+                $bill->xmlh64 = !empty($xmlA) ? base64_encode($xmlA) : null;
+                
+                $hasFiles = 0;
+                if( !empty($xml) && !empty($xmlA) && !empty($pdf) ){
+                    $hasFiles = 1;
+                }
+                $bill->has_files = $hasFiles;
+            }         
+            if(isset($bills)){
+                return response()->json([
+                    'mensaje' => $bills->count() . ' facturas',
+                    'facturas' => $bills
+                ], 200);
+            }
+        
+        }catch(\Exception $e){
+            Log::error("Error en Corbana" . $e);
+            return response()->json([
+                'mensaje' => 'Error ' . $e->getMessage(),
+                'facturas' => []
+            ], 200);
+        }
+        
+        return response()->json([
+            'mensaje' => '0 facturas',
+            'facturas' => []
+        ], 200);
+        
+    }
+    
+    public function queryBillById(Request $request) {
+        try{
+            $pCia = $request->pCia;
+            $pAct = $request->pAct;
+            $cedulaEmpresa = $this->parseCorbanaIdToCedula($pCia, $pAct);
+            $company = Company::where('id_number', $cedulaEmpresa)->first();
+            if( !isset($company) ){
+                Log::error("Corbana no encuentra empresa pCia: $pCia, pAct: $pAct, cedula: $cedulaEmpresa"); 
+                return response()->json([
+                    'mensaje' => '0 facturas',
+                    'facturas' => []
+                ], 200);
+            }
+            /* 
+            * Status 03: En el sistema de ellos.
+            * Status 01: Aún no ha sido ingresado al sistema.
+            */
+            $bills = Bill::where('company_id', $company->id)
+                    ->where('id', $request->pId)
                     ->with('items')->with('haciendaResponse')->get();
                     
             $billUtils = new \App\Utils\BillUtils();
