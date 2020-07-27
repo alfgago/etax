@@ -16,7 +16,8 @@ class BillFilter extends ModelFilter
     public function empresa($empresa)
     {
         $company = Cache::get("cache-api-company-".$empresa);
-        return $this->where('company_id', $company->id);
+        return $this->where('company_id', $company);
+
     }
 
     public function mes($mes)
@@ -42,6 +43,11 @@ class BillFilter extends ModelFilter
      public function validado($validado)
     {
         return $this->where('is_code_validated', $validado);
+    }
+
+    public function status($status)
+    {
+        return $this->where('hacienda_status', $status);
     }
     
 }
