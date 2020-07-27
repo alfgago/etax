@@ -37,4 +37,9 @@ class InvoiceFilter extends ModelFilter
     {
         return $this->where('accept_status', $aceptado);
     }
+
+    public function status($status)
+    {
+        return $this->where('hacienda_status', $status);
+    }
 }

@@ -365,15 +365,16 @@ class BillAPIController extends Controller
      * )
      */
     public function listBill(Request $request) {
-        $user = auth()->user();
+
         if(!userHasCompany($request->empresa)){
             return $this->createResponse('400', 'ERROR' , 'Empresa no autorizada.');
         }
-        $company = Cache::get("cache-api-company-".$request->empresa."-$user->id");
         $bill_filter = BillFilter::class;
         $bills = Bill::filter($request->all(), $bill_filter)->paginate($request->cantidad);
 
         return $this->createResponse('200', 'OK' , 'Todas las facturas.',BillResource::collection($bills),$bills);
+
     }
+
 
 }
