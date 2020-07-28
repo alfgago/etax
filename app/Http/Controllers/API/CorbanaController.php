@@ -509,7 +509,7 @@ class CorbanaController extends Controller
                 $codigoEtax = $prefijoCodigo.'260';
             }
             if( isset($documentoExoneracion) ){
-                $porcentajeIVA = isset($porcentajeIVA) ? $porcentajeIVA : 13;
+                $porcentajeIVA = $porcentajeIVA ?? 13;
                 $porcentajeExoneracion = $porcentajeExoneracion ?? 100;
                 $codigoEtax = $prefijoCodigo.'183';
                 $categoriaHacienda = 39;
@@ -572,6 +572,13 @@ class CorbanaController extends Controller
                             }
                             if($porcentajeIVA == 4){
                                 $itemCodigoEtax = $prefijoCodigo.'184';
+                            }
+                            if($porcentajeIVA == 13){
+                                $itemCodigoEtax = $prefijoCodigo.'183';
+                            }
+                            if($porcentajeIVA == 0){
+                                $porcentajeIVA = 13;
+                                $itemCodigoEtax = $prefijoCodigo.'183';
                             }
                         }
                     }catch(\Exception $e){

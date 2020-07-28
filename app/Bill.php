@@ -439,7 +439,7 @@ class Bill extends Model
         }
         if($idMoneda == 'CRC'){ $tipoCambio = 1; }
         $bill->currency = $idMoneda;
-        $bill->currency_rate = $tipoCambio;
+        $bill->currency_rate = trim($tipoCambio);
         
         $bill->description = 'XML Importado';
 
