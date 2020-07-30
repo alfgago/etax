@@ -237,126 +237,166 @@
         </tr>
     </table>
     <table width="100%" style="margin-top: 10px">
-    <tr class="heading">
-        <td class="tb-header">
-            Código
-        </td>
-
-        <td class="tb-header">
-            Cantidad
-        </td>
-        <td class="tb-header">
-            Unidad medida
-        </td>
-        <td class="tb-header">
-            Descripción producto/servicio
-        </td>
-        <td class="tb-header">
-            Precio unitario
-        </td>
-        <td class="tb-header">
-            Descuento
-        </td>
-        <td class="tb-header">
-            Tipo de descuento
-        </td>
-        <td class="tb-header">
-            Subtotal
-        </td>
-        <td class="tb-header">
-            Monto de impuesto
-        </td>
-
-    </tr>
-    <?php
-        $totalServiciosGravados = 0;
-        $totalServiciosExentos = 0;
-        $totalMercaderiasGravadas = 0;
-        $totalMercaderiasExentas = 0;
-        $totalDescuentos = 0;
-        $totalImpuestos = 0;
-        $totalIvaDevuelto = 0;
-        
-        foreach ($data_bill->items as $item){
-            $productType = $item->ivaType;
-            if( !isset($productType) ){
-                $item->fixIvaType();
-                $productType = $item->ivaType;
-            }
-            $isGravado = isset($productType) ? $productType->is_gravado : true;
-            $netaLinea = $item->item_count * $item->unit_price;
-            
-            if($item->measure_unit == 'Sp' || $item->measure_unit == 'Spe' || $item->measure_unit == 'St'
-                || $item->measure_unit == 'Al' || $item->measure_unit == 'Alc' || $item->measure_unit == 'Cm'
-                || $item->measure_unit == 'I' || $item->measure_unit == 'Os'){
-                if($item->iva_amount == 0 && !$isGravado ){
-                    $totalServiciosExentos += $netaLinea;
-                }else{
-                    $totalServiciosGravados += $netaLinea;
-                }
-
-            } else {
-                if($item->iva_amount == 0 && !$isGravado ){
-                    $totalMercaderiasExentas += $netaLinea;
-                }else{
-                    $totalMercaderiasGravadas += $netaLinea;
-                }
-            }
-            $discount = 0;
-            if( $item['discount'] ) {
-                if($item['discount_type'] == "01" && $item['discount'] > 0 ) {
-                     $discount = $netaLinea * ($item['discount'] / 100);
-                } else {
-                    $discount= $item['discount'];
-                }
-            }
-
-            if ($data_bill->payment_type == '02' && $item->product_type == 12) {
-                $totalIvaDevuelto += $item->iva_amount;
-            }
-            
-            $totalDescuentos += $discount;
-            $totalImpuestos += $item->iva_amount;
-        }
-        $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas;
-        $totalExento = $totalServiciosExentos + $totalMercaderiasExentas;
-        $totalVenta = $totalGravado + $totalExento;
-        $totalNeta = $totalVenta - $totalDescuentos;
-        $totalComprobante = $totalNeta + $totalImpuestos;
-    ?>
-    @foreach($data_bill->items as $item)
-        <tr class="item">
-            <td>
-                {{$item->code ?? ''}}
+        <tr class="heading">
+            <td class="tb-header">
+                Código
             </td>
-
-            <td>
-                {{$item->item_count ?? ''}}
+    
+            <td class="tb-header">
+                Cantidad
             </td>
-            <td>
-                {{$item->measure_unit ?? ''}}
+            <td class="tb-header">
+                Unidad medida
             </td>
-            <td>
-                {{$item->name ?? ''}}
+            <td class="tb-header">
+                Descripción producto/servicio
             </td>
-            <td>
-                {{$item->unit_price ? number_format($item->unit_price, 2) : '0'}}
+            <td class="tb-header">
+                Precio unitario
             </td>
-            <td>
-                {{$item->discount ? number_format($item->discount, 0) : '0'}}
+            <td class="tb-header">
+                Descuento
             </td>
-            <td>
-                {{isset($item->discount_type) ? $item->discount_type == '01' ? '%' : 'monto': ''}}
+            <td class="tb-header">
+                Tipo de descuento
             </td>
-            <td>
-                {{$item->subtotal ? number_format($item->subtotal, 2) : ''}}
+            <td class="tb-header">
+                Subtotal
             </td>
-            <td>
-                {{$item->iva_amount ? number_format($item->iva_amount, 2) : '0'}}
+            <td class="tb-header">
+                Monto de impuesto
             </td>
+    
         </tr>
-    @endforeach
-</table>
+        <?php
+            $totalServiciosGravados = 0;
+            $totalServiciosExentos = 0;
+            $totalMercaderiasGravadas = 0;
+            $totalMercaderiasExentas = 0;
+            $totalDescuentos = 0;
+            $totalImpuestos = 0;
+            $totalIvaDevuelto = 0;
+            $totalOtrosCargos = 0;
+            
+            foreach ($data_bill->items as $item){
+                $productType = $item->ivaType;
+                if( !isset($productType) ){
+                    $item->fixIvaType();
+                    $productType = $item->ivaType;
+                }
+                $isGravado = isset($productType) ? $productType->is_gravado : true;
+                $netaLinea = $item->item_count * $item->unit_price;
+                
+                if($item->measure_unit == 'Sp' || $item->measure_unit == 'Spe' || $item->measure_unit == 'St'
+                    || $item->measure_unit == 'Al' || $item->measure_unit == 'Alc' || $item->measure_unit == 'Cm'
+                    || $item->measure_unit == 'I' || $item->measure_unit == 'Os'){
+                    if($item->iva_amount == 0 && !$isGravado ){
+                        $totalServiciosExentos += $netaLinea;
+                    }else{
+                        $totalServiciosGravados += $netaLinea;
+                    }
+    
+                } else {
+                    if($item->iva_amount == 0 && !$isGravado ){
+                        $totalMercaderiasExentas += $netaLinea;
+                    }else{
+                        $totalMercaderiasGravadas += $netaLinea;
+                    }
+                }
+                $discount = 0;
+                if( $item['discount'] ) {
+                    if($item['discount_type'] == "01" && $item['discount'] > 0 ) {
+                         $discount = $netaLinea * ($item['discount'] / 100);
+                    } else {
+                        $discount= $item['discount'];
+                    }
+                }
+    
+                if ($data_bill->payment_type == '02' && $item->product_type == 12) {
+                    $totalIvaDevuelto += $item->iva_amount;
+                }
+                
+                $totalDescuentos += $discount;
+                $totalImpuestos += $item->iva_amount;
+            }
+            $totalGravado = $totalServiciosGravados + $totalMercaderiasGravadas;
+            $totalExento = $totalServiciosExentos + $totalMercaderiasExentas;
+            $totalVenta = $totalGravado + $totalExento;
+            $totalNeta = $totalVenta - $totalDescuentos;
+            $totalComprobante = $totalNeta + $totalImpuestos;
+            
+            foreach ( $data_bill->otherCharges as $ocItem ){
+                $totalOtrosCargos += $ocItem->amount;
+            }
+        ?>
+        @foreach($data_bill->items as $item)
+            <tr class="item">
+                <td>
+                    {{$item->code ?? ''}}
+                </td>
+    
+                <td>
+                    {{$item->item_count ?? ''}}
+                </td>
+                <td>
+                    {{$item->measure_unit ?? ''}}
+                </td>
+                <td>
+                    {{$item->name ?? ''}}
+                </td>
+                <td>
+                    {{$item->unit_price ? number_format($item->unit_price, 2) : '0'}}
+                </td>
+                <td>
+                    {{$item->discount ? number_format($item->discount, 0) : '0'}}
+                </td>
+                <td>
+                    {{isset($item->discount_type) ? $item->discount_type == '01' ? '%' : 'monto': ''}}
+                </td>
+                <td>
+                    {{$item->subtotal ? number_format($item->subtotal, 2) : ''}}
+                </td>
+                <td>
+                    {{$item->iva_amount ? number_format($item->iva_amount, 2) : '0'}}
+                </td>
+            </tr>
+        @endforeach
+    </table>
+    
+    @if($totalOtrosCargos > 0)
+        <div style="font-size: 12px; margin-bottom: 0; margin-top: 11px;">Otros Cargos:</div>
+        <table width="100%" style="margin-top: 10px">
+            <tr class="heading">
+                <td class="tb-header">
+                    #
+                </td>
+        
+                <td class="tb-header">
+                    Tipo
+                </td>
+                <td class="tb-header">
+                    Receptor
+                </td>
+                <td class="tb-header">
+                    Detalle
+                </td>
+                <td class="tb-header">
+                    Monto del cargo
+                </td>
+        
+            </tr>
+            @foreach ( $data_bill->otherCharges as $item )
+               <tr class="item item-ot">
+                  <td><span class="numero-fila">{{ $loop->index+1 }}</span></td>
+                  <td>{{ $item->getTypeString() }}</td>
+                  <td>{{ $item->provider_id_number }} {{ $item->provider_name }}</td>
+                  <td>{{ $item->description }}</td>
+                  <td>{{ number_format($item->amount,2) }} </td>
+              </tr>
+            @endforeach
+        </table>
+    @endif
+    
     <hr class="barra" style="margin-top: 60px">
     <table width="100%" class="total">
         <thead>
@@ -378,51 +418,55 @@
                 <table class="resumen-totales">
                     <tr>
                         <td style="padding-right: 30px;"><b>Total servicios gravados</b></td>
-                        <td><span>{{ number_format($totalServiciosGravados, 2) }}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalServiciosGravados, 2) }}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total servicios exentos</b></td>
-                        <td><span>{{ number_format($totalServiciosExentos, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalServiciosExentos, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total mercancías gravadas</b></td>
-                        <td><span>{{ number_format($totalMercaderiasGravadas, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalMercaderiasGravadas, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total mercancías exentas</b></td>
-                        <td><span>{{ number_format($totalMercaderiasExentas, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalMercaderiasExentas, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total gravado</b></td>
-                        <td><span>{{ number_format($totalGravado, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalGravado, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total exento</b></td>
-                        <td><span>{{ number_format($totalExento, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalExento, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total venta</b></td>
-                        <td><span>{{ number_format($totalVenta, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalVenta, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total descuento</b></td>
-                        <td><span>{{ number_format($totalDescuentos, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalDescuentos, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total venta neta</b></td>
-                        <td><span>{{ number_format( ($totalNeta), 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format( ($totalNeta), 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total IVA</b></td>
-                        <td><span>{{ number_format($totalImpuestos, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalImpuestos, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total IVA Devuelto</b></td>
-                        <td><span>{{ number_format($totalIvaDevuelto, 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalIvaDevuelto, 2)}}</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>Total Otros Cargos</b></td>
+                        <td style="text-align: right;"><span>{{ number_format($totalOtrosCargos, 2)}}</span></td>
                     </tr>
                     <tr>
                         <td><b>Total comprobante</b></td>
-                        <td><span>{{ number_format( ($totalComprobante - $totalIvaDevuelto) , 2)}}</span></td>
+                        <td style="text-align: right;"><span>{{ number_format( ($totalComprobante - $totalIvaDevuelto) , 2)}}</span></td>
                     </tr>
                 </table>
                 

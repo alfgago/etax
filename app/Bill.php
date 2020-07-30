@@ -709,15 +709,15 @@ class Bill extends Model
             if( array_key_exists( 'OtrosCargos', $arr ) ) {
                 $otrosCargos = $arr['OtrosCargos'];
             }
+            Log::warning( json_encode($otrosCargos) );
             //Recorrer OtrosCargos
             $i = 1;
             foreach ($otrosCargos as $item) {
               $item['item_number'] = $i;
               $item['document_type'] = $item['TipoDocumento'];
               $item['description'] = $item['Detalle'];
-              $item['percentage'] = $item['Porcentaje'];
+              $item['percentage'] = $item['Porcentaje'] ?? 0;
               $item['amount'] = $item['MontoCargo'];
-              $item['document_type'] = $item['TipoDocumento'];
               $item['provider_id_number'] = $identificacionProveedor;
               $item['provider_name'] = $nombreProveedor;
               $cargo_modificado = $bill->addEditOtherCharges($item);
