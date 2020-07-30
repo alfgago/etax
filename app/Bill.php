@@ -709,7 +709,6 @@ class Bill extends Model
             if( array_key_exists( 'OtrosCargos', $arr ) ) {
                 $otrosCargos = $arr['OtrosCargos'];
             }
-            Log::warning( json_encode($otrosCargos) );
             //Recorrer OtrosCargos
             $i = 1;
             foreach ($otrosCargos as $item) {
@@ -724,7 +723,8 @@ class Bill extends Model
               $i++;
             }
         }catch(\Exception $e){
-            Log::warning("Error en otros cargos. " . $e->getMessage());
+            Log::warning("Error en otros cargos");
+            Log::warning($e);
         }
         
         $bill->total_iva_devuelto = $arr['ResumenFactura']['TotalIVADevuelto'] ?? 0;

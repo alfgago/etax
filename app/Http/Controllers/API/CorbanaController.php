@@ -468,6 +468,7 @@ class CorbanaController extends Controller
             try{
                 $indExon = $factura['IND_EXONERA_IV'] ?? 'N';
                 $totalNeto = 0;
+                
                 if($indExon == 'S'){
                     $tipoDocumentoExoneracion = $factura['CODIGOTIPOEXO'] ?? null;
                     $documentoExoneracion = $factura['DOCUMENTO_EXO'] ?? null;
@@ -560,6 +561,7 @@ class CorbanaController extends Controller
                     }
                     
                     try{
+                        
                         if( isset($documentoExoneracion) ){
                             if( isset($item['PORCIV_EXO']) ){
                                 $porcentajeIVA = $item['PORCIV_EXO'] ?? $porcentajeIVA;
@@ -579,6 +581,13 @@ class CorbanaController extends Controller
                             if($porcentajeIVA == 0){
                                 $porcentajeIVA = 13;
                                 $itemCodigoEtax = $prefijoCodigo.'183';
+                            }
+                        }
+                        
+                        //Revisa si es una NC o ND exonerada, para aplicar el PORCIV_EXO
+                        if( $tipoDocumento == '03' || $tipoDocumento == '02' ){
+                            if( isset($item['PORCIV_EXO']) ){
+                                $porcentajeIVA = $item['PORCIV_EXO'] ?? $porcentajeIVA;
                             }
                         }
                     }catch(\Exception $e){
@@ -920,7 +929,6 @@ class CorbanaController extends Controller
         
         //Busca la referencia para asignar el mismo codigo eTax en las lineas
         $refFirstItem = false;
-        
         try{
             if($invoice->document_type == '03' || $invoice->document_type == '02'){
                 $ref = Invoice::where('company_id', $invoice->company_id)
