@@ -715,16 +715,16 @@ class Bill extends Model
               $item['item_number'] = $i;
               $item['document_type'] = $item['TipoDocumento'];
               $item['description'] = $item['Detalle'];
-              $item['percentage'] = $item['Porcentaje'];
+              $item['percentage'] = $item['Porcentaje'] ?? 0;
               $item['amount'] = $item['MontoCargo'];
-              $item['document_type'] = $item['TipoDocumento'];
               $item['provider_id_number'] = $identificacionProveedor;
               $item['provider_name'] = $nombreProveedor;
               $cargo_modificado = $bill->addEditOtherCharges($item);
               $i++;
             }
         }catch(\Exception $e){
-            Log::warning("Error en otros cargos. " . $e->getMessage());
+            Log::warning("Error en otros cargos");
+            Log::warning($e);
         }
         
         $bill->total_iva_devuelto = $arr['ResumenFactura']['TotalIVADevuelto'] ?? 0;

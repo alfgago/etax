@@ -1,5 +1,6 @@
 <?php namespace App\ModelFilters;
 
+use App\Company;
 use EloquentFilter\ModelFilter;
 use Illuminate\Support\Facades\Cache;
 
@@ -15,8 +16,8 @@ class BillFilter extends ModelFilter
 
     public function empresa($empresa)
     {
-        $company = Cache::get("cache-api-company-".$empresa);
-        return $this->where('company_id', $company);
+        $company = Company::where('id_number', $empresa)->first();
+        return $this->where('company_id', $company->id);
 
     }
 
