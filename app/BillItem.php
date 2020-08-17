@@ -119,6 +119,7 @@ class BillItem extends Model
             (strpos( strtolower($this->name),"gasolina") !== false) ||
             (strpos( strtolower($this->name),"plus 91") !== false) ||
             (strpos( strtolower($this->name),"plus91") !== false) ||
+            (strpos( strtolower($this->name),"super") !== false) ||
             (strpos( strtolower($this->name),"vehiculo") !== false)
         ){
           $this->product_type = 59;
