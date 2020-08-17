@@ -956,9 +956,10 @@ class CorbanaController extends Controller
                         $linea['exoneration_document_number'] = $refFirstItem['exoneration_document_number'];
                         $linea['exoneration_company_name'] = $refFirstItem['exoneration_company_name'];
                         $linea['exoneration_porcent'] = $refFirstItem['exoneration_porcent'];
-                        $linea['exoneration_amount'] = $linea['iva_amount'];
-                        $linea['exoneration_total_amount'] = $linea['subtotal'];
-                        $linea['exoneration_total_gravado'] = $linea['subtotal'];
+                        $linea['exoneration_date'] = $refFirstItem['exoneration_date'];
+                        $linea['exoneration_amount'] = $refFirstItem['exoneration_amount'];
+                        $linea['exoneration_total_amount'] = $refFirstItem['exoneration_total_amount'];
+                        $linea['exoneration_total_gravado'] = $refFirstItem['exoneration_total_gravado'];
                     }
                     $linea['iva_type'] = $refFirstItem['iva_type'];
                     $linea['product_type'] = $refFirstItem['product_type'];
