@@ -716,6 +716,8 @@ class InvoiceController extends Controller
                     $this->storeBillFEC($request);
                     if( $request->tipo_compra == 'local' ){
                         $invoice->is_local_fec = true;
+                        $invoice->is_void = true;
+
                     }
                 }
                 
