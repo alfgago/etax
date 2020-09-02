@@ -43,6 +43,31 @@ class CreditNoteNotificacion extends Mailable
             $customImg = "logo-$cedula.jpg";
             $sendFrom = "facturacion@triquimas.cr";
         }
+
+        if( $cedula == '3004045138' ) {
+            $customImg = "logo-$cedula.jpg";
+            $sendFrom = 'facturacontabilidad@coopealianza.fi.cr';
+        }
+
+        if( $cedula == '3101257551' ){
+            $customImg = "logo-$cedula.jpg";
+            $sendFrom = 'facturacontabilidad@coopealianza.fi.cr';
+        }
+
+        if( $cedula == '3004481707' ){
+            $customImg = "logo-$cedula.jpg";
+            $sendFrom = 'facturacontabilidad@coopealianza.fi.cr';
+        }
+
+        if( $cedula == '3101718553' ){
+            $customImg = "logo-$cedula.jpg";
+            $sendFrom = 'facturacontabilidad@coopealianza.fi.cr';
+        }
+
+        if( $cedula == '3101128398' ){
+            $customImg = "logo-$cedula.jpg";
+            $sendFrom = 'facturacontabilidad@coopealianza.fi.cr';
+        }
         
         $type = $this->content['data_invoice']->document_type == '03' ? 'Crédito': 'Débito';
         $fromEmail = $this->content['data_company']->email;
