@@ -292,8 +292,8 @@
 						    
 						    <div class="form-group col-md-12">
 						      <label for="payment_notes">Información de pago</label>
-						      <textarea class="form-control" name="payment_notes" id="payment_notes" rows="6"  maxlength="1024" >{{ @$company->payment_notes }}</textarea>
-						      <div class="description">Este campo aparecerá únicamente en el PDF de las facturas enviadas. Máximo de 1024 caracteres.</div>
+						      <textarea class="form-control" name="payment_notes" id="payment_notes" rows="6"  maxlength="2000" >{{ @$company->payment_notes }}</textarea>
+						      <div class="description">Este campo aparecerá únicamente en el PDF de las facturas enviadas. Máximo de 2000 caracteres.</div>
 						    </div>
 						    
 						    <button id="btn-submit" type="submit" class="hidden btn btn-primary">Guardar información</button>          
