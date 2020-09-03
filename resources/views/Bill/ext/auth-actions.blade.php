@@ -66,8 +66,9 @@
     <a href="/facturas-recibidas/download-xml/{{ $bill->id }}" title="Descargar XML"class="btn btn-success btn-agregar m-0" style="background: #2379d2; border-color: #2379d2; font-size: 0.75em; margin-top: .25rem !important;"  > 
       <i class="fa fa-file-text-o" aria-hidden="true"></i> Descargar XML
     </a>
-    
-    @if( $user->email=='darivera@corbana.co.cr' || $user->email=='corbana@etaxcr.com' )
+
+      @if( $user->email=='darivera@corbana.co.cr' || $user->email=='corbana@etaxcr.com' || $user->email=='johrojas@corbana.co.cr' || $user->email=='majimenez@corbana.co.cr'
+       || $user->email=='ysanchez@corbana.co.cr' || $user->email=='aorias@corbana.co.cr' || $user->email=='jsalazar@corbana.co.cr' || $user->email=='jmontero@corbana.co.cr')
     <form id="delete-form-{{  $bill->id }}" class="inline-form" method="POST" action="/facturas-recibidas/{{  $bill->id }}" >
       @csrf
       @method('delete')
