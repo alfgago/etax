@@ -139,9 +139,9 @@
                   <input type="text" class="form-control total" name="total_iva_devuelto" id="total_iva_devuelto" value="{{ $bill->total_iva_devuelto }}" placeholder="" readonly="true" required>
                 </div>
 
-                <div class="form-group col-md-4 hidden" id="total_iva_exonerado-cont">
-                  <label for="total">IVA Exonerado</label>
-                  <input type="text" class="form-control total" name="total_iva_exonerado" id="total_iva_exonerado" placeholder="" readonly="true" required>
+                <div class="form-group col-md-4 hidden" id="total_otros_cargos-cont">
+                  <label for="total">Otros cargos</label>
+                  <input type="text" class="form-control total" name="total_otros_cargos" id="total_otros_cargos" placeholder="" readonly="true" required>
                 </div>
       
                 <div class="form-group col-md-4">
@@ -390,21 +390,31 @@ $(document).ready(function(){
   var subtotal = 0;
   var monto_iva = 0;
   var total = 0;
+  var iva_exonerado = 0;
+  var otros_cargos = 0;
+
   $('.item-tabla').each(function(){
     var s = parseFloat($(this).find('.subtotal').val());
     var m = parseFloat($(this).find('.monto_iva').val());
     var t = parseFloat($(this).find('.total').val());
     subtotal += s;
     monto_iva += m;	
-    total += t;	
+    total += t;
   });
+
+    $('.otros-tabla').each(function(){
+        var ot = parseFloat($(this).find('.otros-amount').val());
+
+        if(!ot){ ot = 0; }
+        otros_cargos += ot;
+    });
 
   $('#subtotal').val( fixComas(subtotal) );
   $('#monto_iva').val( fixComas(monto_iva) );
   var devuelto = parseFloat( $('#total_iva_devuelto').val() );
-  total = total - devuelto;
+  total = total - devuelto + otros_cargos;
   $('#total').val( fixComas(total) );
-  
+    $('#total_otros_cargos').val(otros_cargos);
   toggleRetencion();
   
 });
