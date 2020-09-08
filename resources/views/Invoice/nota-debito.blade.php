@@ -104,6 +104,31 @@
 
                         </div>
 
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <h3>
+                                    Información de referencia
+                                </h3>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="subtotal">Tipo</label>
+                                <select name="code_note" id="code_note" class="form-control" required>
+                                    <option value="01" selected="">Anula documento de referencia</option>
+                                    <option value="02">Corrige texto de documento de referencia</option>
+                                    <option value="03">Corrige monto</option>
+                                    <option value="04">Referencia a otro documento</option>
+                                    <option value="05">Sustituye comprobante provisional por contigencia</option>
+                                    <option value="99">Otros</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="iva_amount">Razón</label>
+                                <input type="text" class="form-control" name="reason" id="reason" placeholder="" required>
+                            </div>
+                        </div>
+
                     </div>
 
 

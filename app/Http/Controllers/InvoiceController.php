@@ -1003,7 +1003,7 @@ class InvoiceController extends Controller
 
             if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){
                 $apiHacienda = new BridgeHaciendaApi();
-                $tokenApi = $apiHacienda->login();
+                $tokenApi = $apiHacienda->login(false);
                 if ($tokenApi !== false) {
                     $invoice = Invoice::findOrFail($id);
                     $note = new Invoice();
@@ -1488,7 +1488,7 @@ class InvoiceController extends Controller
 
             if(CalculatedTax::validarMes( $invoice->generatedDate()->format('d/m/y') )){
                 $apiHacienda = new BridgeHaciendaApi();
-                $tokenApi = $apiHacienda->login();
+                $tokenApi = $apiHacienda->login(false);
                 if ($tokenApi !== false) {
                     $invoice = Invoice::findOrFail($id);
                     $note = new Invoice();
