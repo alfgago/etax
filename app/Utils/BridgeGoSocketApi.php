@@ -115,7 +115,7 @@ class BridgeGoSocketApi
             $first_date = Carbon::createFromFormat('Y-m-d H:i:s',
                 $dataIntegracion->updated_at,
                 'America/Costa_Rica'
-            )->subDays(15)->toDateString();
+            )->subDays(30)->toDateString();
             $second_date = Carbon::createFromFormat('Y-m-d H:i:s',
                 $dataIntegracion->updated_at,
                 'America/Costa_Rica'
