@@ -59,7 +59,7 @@ class ProcessCreditNote implements ShouldQueue
                 if ($company->atv_validation) {
                     if ($invoice->hacienda_status == '01'
                         && $invoice->document_type == ('03' || '02')
-                        && $invoice->reference_doc_type == '04' ||  $invoice->reference_doc_type == '03' ? true : $invoiceUtils->validateZip($invoice)
+                        && $invoice->reference_doc_type == ('04' || '03') ? true : $invoiceUtils->validateZip($invoice)
                         && $invoice->resend_attempts < 6) {
 
                         if ($invoice->xml_schema == 43) {
