@@ -40,7 +40,7 @@ class BillUtils
 	
 	public function downloadPdf( $bill, $company )
     {
-        $path = "empresa-$company->id_number/facturas_compras/$bill->year/$bill->month/$bill->document_number.pdf";
+        $path = "empresa-$company->id_number/facturas_compras/$bill->year/$bill->month/$bill->document_key.pdf";
     	if ( Storage::exists($path)) {
           $pdf = Storage::get($path);
           if( isset($pdf) ){
