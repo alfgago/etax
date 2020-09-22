@@ -55,7 +55,7 @@ class BridgeGoSocketApi
                 ],
                 'verify' => false,
             ]);
-             return json_decode($APIStatus->getBody()->getContents(), true);
+            return json_decode($APIStatus->getBody()->getContents(), true);
 
         } catch ( \Exception $e) {
             Log::info('Error al traer cuenta GoSocket -->>'. $e->getMessage());
@@ -106,7 +106,7 @@ class BridgeGoSocketApi
             return [];
         }
     }
-    
+
     public function getQueryDates($dataIntegracion){
         $queryDates = [];
         $today = Carbon::parse(now('America/Costa_Rica'));
