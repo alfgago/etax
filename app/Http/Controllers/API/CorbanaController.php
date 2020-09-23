@@ -1181,7 +1181,7 @@ class CorbanaController extends Controller
                     ]
                 );
                 $json = json_decode($response->getBody()->getContents(), true);
-                Cache::put($cachekey, $json, 43200);
+                Cache::put($cachekey, $json, 7200);
             }else{
                 $json = Cache::get($cachekey);
             }

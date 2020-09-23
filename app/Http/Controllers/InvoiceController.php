@@ -792,7 +792,7 @@ class InvoiceController extends Controller
                 ->onQueue('log_queue');*/
                 return redirect('/facturas-emitidas')->withMessage('Factura registrada con éxito');
             } else {
-                return back()->withError( 'Ha ocurrido un error al enviar factura.' );
+                return back()->withError( 'Ha ocurrido un error con la fecha de la factura enviada. Valide si el mes está cerrado' );
             }
             
         } catch( \Exception $ex ) {
