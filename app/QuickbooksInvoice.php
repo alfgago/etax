@@ -277,12 +277,13 @@ class QuickbooksInvoice extends Model
 
             try{
                 $customer = QuickbooksCustomer::getClientInfo($company, $invoiceData['CustomerRef']);
+                $nombre = $customer->full_name ?? '';
                 $cliente = $customer->client;
                 if( !$cliente ){
-                    return back()->withError("No se encontró el cliente de la factura $this->qb_id. Verifique que el cliente se encuentre correctamente sincronizado e indique el tipo de persona y código postal.");
+                    return back()->withError("No se encontró el cliente de la factura, $nombre. Verifique que el cliente se encuentre correctamente sincronizado e indique el tipo de persona y código postal.");
                 }
             }catch(\Exception $e){
-                return back()->withError("No se encontró el cliente de la factura $this->qb_id. Verifique que el cliente se encuentre correctamente sincronizado e indique el tipo de persona y código postal.");
+                return back()->withError("No se encontró el cliente de la factura, $nombre. Verifique que el cliente se encuentre correctamente sincronizado e indique el tipo de persona y código postal.");
             }
             
             if( isset($data['BillAddr']) ){

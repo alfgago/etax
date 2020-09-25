@@ -1,7 +1,7 @@
 @extends('layouts/app')
 
 @section('title') 
-    Mapeo de Variables - QuickBooks
+    Configuración de Variables - QuickBooks
 @endsection
 
 @section('content') 
@@ -14,6 +14,7 @@
         if( isset($qb->taxes_json) ) {
           $qbTipoIva = $qb->taxes_json['tipo_iva'];
           $qbTipoProducto = $qb->taxes_json['tipo_producto'];
+          $qbTipoCompra= $qb->taxes_json['tipo_compra'] ?? [];
         }
       ?>
       <form method="POST" action="/quickbooks/guardar-variables/{{$qb->id}}">
@@ -131,7 +132,54 @@
           
           <div class="form-group col-md-12">
             <h3>
-              Códigos de impuesto
+              Códigos de impuesto en compras
+            </h3>
+          </div>
+          
+          <div class="form-group col-md-12">
+            <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
+              <thead class="thead-dark">
+                <tr>
+                  <th>eTax</th>
+                  <th>QuickBooks</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="item-tabla item-index-0">
+                  <td>Cuenta por defecto</td>
+                  <td>
+                    <select class="form-control select-search iva_type" name="tipo_compra[default]" id="">
+                      <?php
+                        $selectedTipoCompraDefault = @$qbTipoCompra['default'];
+                      ?>
+                      <option class="crear-nuevo" value='0'>-- Sin asignar --</option>
+                      @foreach ( $cuentasQb as $cuenta )
+                        <option {{ $selectedTipoCompraDefault == $cuenta->Id ? 'selected' : '' }} value="{{ $cuenta->Id }}" >{{ $cuenta->Classification }}: {{ $cuenta->FullyQualifiedName }}</option>
+                      @endforeach
+                    </select>
+                  </td>
+                </tr>
+                <tr class="item-tabla item-index-1">
+                  <td>Cuenta para linea de impuestos</td>
+                  <td>
+                    <select class="form-control select-search iva_type" name="tipo_compra[tax]" id="">
+                      <?php
+                        $selectedTipoCompraTax = @$qbTipoCompra['tax'];
+                      ?>
+                      <option class="crear-nuevo" value='0'>-- Sin asignar --</option>
+                      @foreach ( $cuentasQb as $cuenta )
+                        <option {{ $selectedTipoCompraTax == $cuenta->Id ? 'selected' : '' }} value="{{ $cuenta->Id }}" >{{ $cuenta->Classification }}: {{ $cuenta->FullyQualifiedName }}</option>
+                      @endforeach
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="form-group col-md-12">
+            <h3>
+              Códigos de impuesto en ventas
             </h3>
           </div>
           

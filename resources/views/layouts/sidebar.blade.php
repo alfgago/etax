@@ -46,7 +46,7 @@
                                 bottom: 0;
                                 top: auto;
                             ">
-                            <a href="/quickbooks/mapeo-variables">Mapeo de variables</a>
+                            <a href="/quickbooks/mapeo-variables">Configuración de variables</a>
                             <a href="/quickbooks/emitidas/comparativo-etaxaqb">Sincronización de ventas</a>
                             <a href="/quickbooks/recibidas/comparativo-etaxaqb">Sincronización de compras</a>
                             <a href="/quickbooks/clientes/comparativo-etaxaqb">Sincronización de clientes</a>

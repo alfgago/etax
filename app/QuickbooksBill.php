@@ -111,6 +111,15 @@ class QuickbooksBill extends Model
             
             $lines = [];
             $taxCode = "S003"; //Por defecto usa este.
+            $qbTipoCompra = $qb->taxes_json['tipo_compra'] ?? [];
+            $taxAccount = $qbTipoCompra['tax'] ?? null;
+            if(!$accountRef){
+                $accountRef = $qbTipoCompra['default'];
+            }
+            if(!$taxAccount){
+                $taxAccount = $accountRef;
+            }
+            
             foreach($bill->items as $item){
                 $itemRef = null;
                 $itemName = null;
@@ -145,7 +154,7 @@ class QuickbooksBill extends Model
 
                 $taxCode = $item->iva_type;
                 $lines[] = [
-                     "Amount" => $item->total,
+                     "Amount" => $item->subtotal,
                      "Description" => $item->name,
                      "DetailType" => "AccountBasedExpenseLineDetail",
                      "AccountBasedExpenseLineDetail" => [
@@ -157,6 +166,19 @@ class QuickbooksBill extends Model
                      ]
                 ];
             }
+            //Suma una linea para el impuesto
+            $lines[] = [
+                 "Amount" => $bill->iva_amount,
+                 "Description" => 'Impuestos',
+                 "DetailType" => "AccountBasedExpenseLineDetail",
+                 "AccountBasedExpenseLineDetail" => [
+                    "AccountRef" =>
+                    [
+                        "value" => "$taxAccount"
+                    ],
+                    "TaxCodeRef" => "TAX"
+                 ]
+            ];
             
             $qbVendor = QuickbooksProvider::where('company_id', $bill->company_id)
                                             ->where('provider_id', $bill->provider_id)->first();

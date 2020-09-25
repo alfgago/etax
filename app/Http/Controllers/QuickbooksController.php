@@ -91,11 +91,12 @@ class QuickbooksController extends Controller
         }
         $dataService = $qb->getAuthenticatedDS();
         
+        $cuentasQb = $qb->getAccounts($company, 'Expense');
         $taxRates = $dataService->Query("SELECT * FROM TaxCode");
         $paymentMethods = $dataService->Query("SELECT * FROM PaymentMethod");
         $terms = $dataService->Query("SELECT * FROM Term");
 
-        return view('Quickbooks/variable-map', compact(['qb', 'taxRates', 'paymentMethods', 'terms']));
+        return view('Quickbooks/variable-map', compact(['qb', 'taxRates', 'paymentMethods', 'terms', 'cuentasQb']));
     }
     
     /**
@@ -114,7 +115,8 @@ class QuickbooksController extends Controller
         $qb->payment_methods_json = $request->payment_type;
         $taxesJson = [
             'tipo_iva' => $request->tipo_iva,
-            'tipo_producto' => $request->tipo_producto
+            'tipo_producto' => $request->tipo_producto,
+            'tipo_compra' => $request->tipo_compra
         ];
         $qb->taxes_json = $taxesJson;
         $qb->save();
@@ -463,11 +465,15 @@ class QuickbooksController extends Controller
                 }else{
                     return "No asociado";
                 }
-            })->addColumn('accounts', function($bill) use($cuentasQb){
+            })->addColumn('accounts', function($bill) use($cuentasQb, $qb){
                 if( isset($bill->quickbooksBill) ){
                     $bill->accId = $bill->quickbooksBill->qb_account;
                 }else{
                     $bill->accId = 0;
+                    if( isset($qb->taxes_json) ) {
+                      $qbTipoCompra = $qb->taxes_json['tipo_compra'] ?? [];
+                      $bill->accId = $qbTipoCompra['default'];
+                    }
                 }
                 return view('Quickbooks.Bills.cuentas-contables', [
                     'cuentasQb' => $cuentasQb,
