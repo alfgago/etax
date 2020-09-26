@@ -20,6 +20,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
 use App\Exports\DeclaracionExport;
 
+use DB;
+
 /**
  * @group Controller - Reportes
  *
@@ -87,10 +89,9 @@ class ReportsController extends Controller
       
     }
     
-    public function reports() {
-      
+    public function reports()
+    {
       return view('/Reports/index');
-
     }
     
     public function reporteLibroVentas( Request $request ) {
@@ -404,6 +405,18 @@ class ReportsController extends Controller
       $n = CalculatedTax::calcularFacturacionPorMesAno( 11, $ano, 0, true );
       $d = CalculatedTax::calcularFacturacionPorMesAno( 12, $ano, 0, true );
       $acumulado = CalculatedTax::calcularFacturacionPorMesAno( 0, $ano, 0, true );
+    }
+
+    public function reporteCompanies(Request $request)
+    { 
+      $date = Carbon::now();
+      $mes3 = $date->monthName;
+      $mes2 = $date->subMonth(1)->monthName;
+      $mes1 = $date->subMonth(1)->monthName;
+
+      $companies = DB::select( DB::raw("SELECT id_number,business_name, IF(commercial_activities IS NULL, 0,commercial_activities) commercial_activities,SUM( CASE WHEN (b.generated_date >= (DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL -3 MONTH)) AND b.generated_date < (DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL -2 MONTH))) THEN 1 ELSE 0 END) AS MES1, SUM( CASE WHEN (b.generated_date >= (DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL -2 MONTH)) AND b.generated_date < (DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL -1 MONTH))) THEN 1 ELSE 0 END) AS MES2, SUM( CASE WHEN (b.generated_date >= (DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL -1 MONTH)) AND b.generated_date < CURRENT_TIMESTAMP()) THEN 1 ELSE 0 END) AS MES3 FROM companies c LEFT JOIN bills b ON c.id = company_id where id_number IS NOT NULL AND business_name IS NOT NULL GROUP BY id_number,business_name,commercial_activities ORDER BY `MES1` DESC, `MES2` DESC, `MES3` DESC, commercial_activities DESC"));
+
+      return view('/Reports/reporte-companies', compact("companies","mes1","mes2","mes3"));
     }
 
 }

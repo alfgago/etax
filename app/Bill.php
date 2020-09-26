@@ -711,16 +711,29 @@ class Bill extends Model
             }
             //Recorrer OtrosCargos
             $i = 1;
-            foreach ($otrosCargos as $item) {
-              $item['item_number'] = $i;
-              $item['document_type'] = $item['TipoDocumento'];
-              $item['description'] = $item['Detalle'];
-              $item['percentage'] = $item['Porcentaje'] ?? 0;
-              $item['amount'] = $item['MontoCargo'];
-              $item['provider_id_number'] = $identificacionProveedor;
-              $item['provider_name'] = $nombreProveedor;
-              $cargo_modificado = $bill->addEditOtherCharges($item);
-              $i++;
+            if(isset($otrosCargos[0])) {
+                foreach ($otrosCargos as $item) {
+                    $item['item_number'] = $i;
+                    $item['document_type'] = $item['TipoDocumento'];
+                    $item['description'] = $item['Detalle'];
+                    $item['percentage'] = $item['Porcentaje'] ?? 0;
+                    $item['amount'] = $item['MontoCargo'];
+                    $item['provider_id_number'] = $identificacionProveedor;
+                    $item['provider_name'] = $nombreProveedor;
+                    $cargo_modificado = $bill->addEditOtherCharges($item);
+                    $i++;
+                }
+            } else {
+                $dataOtherCarges = [];
+                $dataOtherCarges['item_number'] = $i;
+                $dataOtherCarges['document_type'] = $otrosCargos['TipoDocumento'];
+                $dataOtherCarges['description'] = $otrosCargos['Detalle'];
+                $dataOtherCarges['percentage'] = $otrosCargos['Porcentaje'] ?? 0;
+                $dataOtherCarges['amount'] = $otrosCargos['MontoCargo'];
+                $dataOtherCarges['provider_id_number'] = $identificacionProveedor;
+                $dataOtherCarges['provider_name'] = $nombreProveedor;
+                $cargo_modificado = $bill->addEditOtherCharges($dataOtherCarges);
+
             }
         }catch(\Exception $e){
             Log::warning("Error en otros cargos");
