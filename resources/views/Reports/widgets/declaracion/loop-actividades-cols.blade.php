@@ -49,8 +49,8 @@
 		@else
 			<tr class="desplegar-true">
 		  	<th colspan="4">{{ $info['name'] }}</th>
-			  <td colspan="2">
-			  	<input readonly value="{{ number_format( $info['monto0'], 0 ) }}"/>
+			  <td colspan="2"> 
+			  	<input readonly value="{{ number_format( ($info["monto0"]+$info["monto1"]+$info["monto2"]+$info["monto3"]+$info["monto4"]), 0 ) }}"/>
 			  </td>
 			</tr>
 		@endif

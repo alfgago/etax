@@ -75,6 +75,7 @@ Route::post('/reportes/libro-ventas', 'ReportsController@reporteLibroVentas');
 Route::post('/reportes/libro-compras', 'ReportsController@reporteLibroCompras');
 Route::get('/reportes/borrador-iva', 'ReportsController@reporteBorradorIVA');
 Route::get('/reportes/descargar-borrador', 'ReportsController@descargarDatosDeclaracion');
+Route::post('/reportes/companies', 'ReportsController@reporteCompanies');
 
 /*Exportar XML DEPRECADOS*/
 Route::post('/reportes/export-cuentas-contables', 'ReportsController@exportCuentasContables');

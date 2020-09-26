@@ -44,6 +44,9 @@
           <option value="/exportar-libro-ventas" type="download" hideClass=".opt-acumulado" >Libro de ventas</option>
           <option value="/reportes/resumen-ejecutivo" hideClass=".opt-acumulado" type="iframe" >Resumen ejecutivo</option>
           <option value="/reportes/borrador-iva" dlval="/reportes/descargar-borrador" hideClass=".opt-acumulado" type="iframe">Borrador de declaración de IVA</option>
+          @if( auth()->user()->current_team_id == 1 )
+            <option value="/reportes/companies" hideClass="#input-mes">Actividades Económicas y Facturas Emitidas</option>
+          @endif
         </select>
       </div>
       
