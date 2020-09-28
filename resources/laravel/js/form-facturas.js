@@ -655,7 +655,7 @@
 
    window.calcularMontoExoneracion = function() {
       var hasExoneracion = false;
-      var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184"];
+      var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184", "S114"];
       var construccion = jQuery("#tipo_producto").val() == 43; //Servicios de construcción e ingenieria al 0% transitorio. Llevan exoneración
 
       if( codigosConExoneracion.includes( $('#tipo_iva').val() ) || construccion ){
@@ -690,7 +690,7 @@
         console.log(checkExoneracion);*/
 
         var hasExoneracion = false;
-        var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184"];
+        var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184", "S114"];
         var construccion = jQuery("#tipo_producto").val() == 43; //Servicios de construcción e ingenieria al 0% transitorio. Llevan exoneración
 
         if( codigosConExoneracion.includes( $('#tipo_iva').val() ) || construccion ){
@@ -851,7 +851,7 @@
         console.log(checkExoneracion);*/
 
         var hasExoneracion = false;
-        var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184"];
+        var codigosConExoneracion = ["B181", "S181", "B182", "S182", "B183", "S183", "B184", "S184", "S114"];
         var construccion = jQuery("#tipo_producto").val() == 43; //Servicios de construcción e ingenieria al 0% transitorio. Llevan exoneración
 
         if( codigosConExoneracion.includes( $('#tipo_iva').val() ) || construccion ){
